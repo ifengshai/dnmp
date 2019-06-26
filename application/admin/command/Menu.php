@@ -88,7 +88,7 @@ class Menu extends Command
             }
             AuthRule::destroy($ids);
 
-            Cache::rm("__menu__");
+            Cache::rm('__menu__');
             $output->info("Delete Successed");
             return;
         }
@@ -123,7 +123,7 @@ class Menu extends Command
             // 扫描新的节点信息并导入
             $treelist = $this->import($this->scandir($controllerDir));
         }
-        Cache::rm("__menu__");
+        Cache::rm('__menu__');
         $output->info("Build Successed!");
     }
 
