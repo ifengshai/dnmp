@@ -10,7 +10,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     edit_url: 'purchase/purchase_order/edit',
                     del_url: 'purchase/purchase_order/del',
                     multi_url: 'purchase/purchase_order/multi',
-                    table: 'test',
+                    table: 'purchase_order',
                 }
             });
 
@@ -20,99 +20,42 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             table.bootstrapTable({
                 url: $.fn.bootstrapTable.defaults.extend.index_url,
                 pk: 'id',
-                sortName: 'weigh',
-                columns: [
-                    [
-                        {checkbox: true},
-                        {field: 'id', title: __('Id')},
-                        {field: 'admin_id', title: __('Admin_id')},
-                        {field: 'category_id', title: __('Category_id')},
-                        {field: 'category_ids', title: __('Category_ids')},
-                        {field: 'week', title: __('Week'), searchList: {"monday":__('Week monday'),"tuesday":__('Week tuesday'),"wednesday":__('Week wednesday')}, formatter: Table.api.formatter.normal},
-                        {field: 'flag', title: __('Flag'), searchList: {"hot":__('Flag hot'),"index":__('Flag index'),"recommend":__('Flag recommend')}, operate:'FIND_IN_SET', formatter: Table.api.formatter.label},
-                        {field: 'genderdata', title: __('Genderdata'), searchList: {"male":__('Genderdata male'),"female":__('Genderdata female')}, formatter: Table.api.formatter.normal},
-                        {field: 'hobbydata', title: __('Hobbydata'), searchList: {"music":__('Hobbydata music'),"reading":__('Hobbydata reading'),"swimming":__('Hobbydata swimming')}, operate:'FIND_IN_SET', formatter: Table.api.formatter.label},
-                        {field: 'title', title: __('Title')},
-                        {field: 'image', title: __('Image'), events: Table.api.events.image, formatter: Table.api.formatter.image},
-                        {field: 'images', title: __('Images'), events: Table.api.events.image, formatter: Table.api.formatter.images},
-                        {field: 'attachfile', title: __('Attachfile')},
-                        {field: 'keywords', title: __('Keywords')},
-                        {field: 'description', title: __('Description')},
-                        {field: 'city', title: __('City')},
-                        {field: 'price', title: __('Price'), operate:'BETWEEN'},
-                        {field: 'views', title: __('Views')},
-                        {field: 'startdate', title: __('Startdate'), operate:'RANGE', addclass:'datetimerange'},
-                        {field: 'activitytime', title: __('Activitytime'), operate:'RANGE', addclass:'datetimerange'},
-                        {field: 'year', title: __('Year')},
-                        {field: 'times', title: __('Times')},
-                        {field: 'refreshtime', title: __('Refreshtime'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime},
-                        {field: 'createtime', title: __('Createtime'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime},
-                        {field: 'updatetime', title: __('Updatetime'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime},
-                        {field: 'weigh', title: __('Weigh')},
-                        {field: 'switch', title: __('Switch'), searchList: {"1":__('Yes'),"0":__('No')}, formatter: Table.api.formatter.toggle},
-                        {field: 'status', title: __('Status'), searchList: {"normal":__('Normal'),"hidden":__('Hidden')}, formatter: Table.api.formatter.status},
-                        {field: 'state', title: __('State'), searchList: {"0":__('State 0'),"1":__('State 1'),"2":__('State 2')}, formatter: Table.api.formatter.normal},
-                        {field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate}
-                    ]
-                ]
-            });
-
-            // 为表格绑定事件
-            Table.api.bindevent(table);
-        },
-        recyclebin: function () {
-            // 初始化表格参数配置
-            Table.api.init({
-                extend: {
-                    'dragsort_url': ''
-                }
-            });
-
-            var table = $("#table");
-
-            // 初始化表格
-            table.bootstrapTable({
-                url: 'purchase/purchase_order/recyclebin' + location.search,
-                pk: 'id',
                 sortName: 'id',
                 columns: [
                     [
                         {checkbox: true},
                         {field: 'id', title: __('Id')},
-                        {field: 'title', title: __('Title'), align: 'left'},
-                        {
-                            field: 'deletetime',
-                            title: __('Deletetime'),
-                            operate: 'RANGE',
-                            addclass: 'datetimerange',
-                            formatter: Table.api.formatter.datetime
-                        },
-                        {
-                            field: 'operate',
-                            width: '130px',
-                            title: __('Operate'),
-                            table: table,
-                            events: Table.api.events.operate,
-                            buttons: [
-                                {
-                                    name: 'Restore',
-                                    text: __('Restore'),
-                                    classname: 'btn btn-xs btn-info btn-ajax btn-restoreit',
-                                    icon: 'fa fa-rotate-left',
-                                    url: 'purchase/purchase_order/restore',
-                                    refresh: true
-                                },
-                                {
-                                    name: 'Destroy',
-                                    text: __('Destroy'),
-                                    classname: 'btn btn-xs btn-danger btn-ajax btn-destroyit',
-                                    icon: 'fa fa-times',
-                                    url: 'purchase/purchase_order/destroy',
-                                    refresh: true
-                                }
-                            ],
-                            formatter: Table.api.formatter.operate
-                        }
+                        {field: 'purchase_number', title: __('Purchase_number')},
+                        {field: 'purchase_name', title: __('Purchase_name')},
+                        {field: 'purchase_remark', title: __('Purchase_remark')},
+                        {field: 'contract_id', title: __('Contract_id')},
+                        {field: 'supplier_id', title: __('Supplier_id')},
+                        {field: 'item_id', title: __('Item_id')},
+                        {field: 'create_person', title: __('Create_person')},
+                        {field: 'createtime', title: __('Createtime'), operate:'RANGE', addclass:'datetimerange'},
+                        {field: 'updatetime', title: __('Updatetime'), operate:'RANGE', addclass:'datetimerange'},
+                        {field: 'product_total', title: __('Product_total'), operate:'BETWEEN'},
+                        {field: 'purchase_freight', title: __('Purchase_freight'), operate:'BETWEEN'},
+                        {field: 'purchase_total', title: __('Purchase_total'), operate:'BETWEEN'},
+                        {field: 'settlement_method', title: __('Settlement_method')},
+                        {field: 'deposit_amount', title: __('Deposit_amount'), operate:'BETWEEN'},
+                        {field: 'final_amount', title: __('Final_amount'), operate:'BETWEEN'},
+                        {field: 'delivery_stime', title: __('Delivery_stime'), operate:'RANGE', addclass:'datetimerange'},
+                        {field: 'delivery_etime', title: __('Delivery_etime'), operate:'RANGE', addclass:'datetimerange'},
+                        {field: 'delivery_address', title: __('Delivery_address')},
+                        {field: 'purchase_status', title: __('Purchase_status')},
+                        {field: 'is_add_logistics', title: __('Is_add_logistics')},
+                        {field: 'is_new_product', title: __('Is_new_product')},
+                        {field: 'payment_status', title: __('Payment_status')},
+                        {field: 'payment_images', title: __('Payment_images'), events: Table.api.events.image, formatter: Table.api.formatter.images},
+                        {field: 'payment_money', title: __('Payment_money'), operate:'BETWEEN'},
+                        {field: 'payment_time', title: __('Payment_time'), operate:'RANGE', addclass:'datetimerange'},
+                        {field: 'payment_remark', title: __('Payment_remark')},
+                        {field: 'payment_person', title: __('Payment_person')},
+                        {field: 'check_status', title: __('Check_status')},
+                        {field: 'stock_status', title: __('Stock_status')},
+                        {field: 'return_status', title: __('Return_status')},
+                        {field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate}
                     ]
                 ]
             });

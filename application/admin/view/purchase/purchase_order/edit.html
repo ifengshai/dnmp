@@ -1,233 +1,179 @@
 <form id="edit-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
 
     <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Category_id')}:</label>
+        <label class="control-label col-xs-12 col-sm-2">{:__('Purchase_number')}:</label>
         <div class="col-xs-12 col-sm-8">
-            <input id="c-category_id" data-rule="required" data-source="category/selectpage" data-params='{"custom[type]":"test"}' class="form-control selectpage" name="row[category_id]" type="text" value="{$row.category_id|htmlentities}">
+            <input id="c-purchase_number" class="form-control" name="row[purchase_number]" type="text" value="{$row.purchase_number|htmlentities}">
         </div>
     </div>
     <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Category_ids')}:</label>
+        <label class="control-label col-xs-12 col-sm-2">{:__('Purchase_name')}:</label>
         <div class="col-xs-12 col-sm-8">
-            <input id="c-category_ids" data-rule="required" data-source="category/selectpage" data-params='{"custom[type]":"test"}' data-multiple="true" class="form-control selectpage" name="row[category_ids]" type="text" value="{$row.category_ids|htmlentities}">
+            <input id="c-purchase_name" class="form-control" name="row[purchase_name]" type="text" value="{$row.purchase_name|htmlentities}">
         </div>
     </div>
     <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Week')}:</label>
+        <label class="control-label col-xs-12 col-sm-2">{:__('Purchase_remark')}:</label>
         <div class="col-xs-12 col-sm-8">
-                        
-            <select  id="c-week" data-rule="required" class="form-control selectpicker" name="row[week]">
-                {foreach name="weekList" item="vo"}
-                    <option value="{$key}" {in name="key" value="$row.week"}selected{/in}>{$vo}</option>
-                {/foreach}
-            </select>
-
+            <input id="c-purchase_remark" class="form-control" name="row[purchase_remark]" type="text" value="{$row.purchase_remark|htmlentities}">
         </div>
     </div>
     <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Flag')}:</label>
+        <label class="control-label col-xs-12 col-sm-2">{:__('Contract_id')}:</label>
         <div class="col-xs-12 col-sm-8">
-                        
-            <select  id="c-flag" data-rule="required" class="form-control selectpicker" multiple="" name="row[flag][]">
-                {foreach name="flagList" item="vo"}
-                    <option value="{$key}" {in name="key" value="$row.flag"}selected{/in}>{$vo}</option>
-                {/foreach}
-            </select>
-
+            <input id="c-contract_id" data-rule="required" data-source="contract/index" class="form-control selectpage" name="row[contract_id]" type="text" value="{$row.contract_id|htmlentities}">
         </div>
     </div>
     <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Genderdata')}:</label>
+        <label class="control-label col-xs-12 col-sm-2">{:__('Supplier_id')}:</label>
         <div class="col-xs-12 col-sm-8">
-            
-            <div class="radio">
-            {foreach name="genderdataList" item="vo"}
-            <label for="row[genderdata]-{$key}"><input id="row[genderdata]-{$key}" name="row[genderdata]" type="radio" value="{$key}" {in name="key" value="$row.genderdata"}checked{/in} /> {$vo}</label> 
-            {/foreach}
-            </div>
-
+            <input id="c-supplier_id" data-rule="required" data-source="supplier/index" class="form-control selectpage" name="row[supplier_id]" type="text" value="{$row.supplier_id|htmlentities}">
         </div>
     </div>
     <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Hobbydata')}:</label>
+        <label class="control-label col-xs-12 col-sm-2">{:__('Item_id')}:</label>
         <div class="col-xs-12 col-sm-8">
-            
-            <div class="checkbox">
-            {foreach name="hobbydataList" item="vo"}
-            <label for="row[hobbydata][]-{$key}"><input id="row[hobbydata][]-{$key}" name="row[hobbydata][]" type="checkbox" value="{$key}" {in name="key" value="$row.hobbydata"}checked{/in} /> {$vo}</label> 
-            {/foreach}
-            </div>
-
+            <input id="c-item_id" data-rule="required" data-source="item/index" class="form-control selectpage" name="row[item_id]" type="text" value="{$row.item_id|htmlentities}">
         </div>
     </div>
     <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Title')}:</label>
+        <label class="control-label col-xs-12 col-sm-2">{:__('Create_person')}:</label>
         <div class="col-xs-12 col-sm-8">
-            <input id="c-title" data-rule="required" class="form-control" name="row[title]" type="text" value="{$row.title|htmlentities}">
+            <input id="c-create_person" class="form-control" name="row[create_person]" type="text" value="{$row.create_person|htmlentities}">
         </div>
     </div>
     <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Content')}:</label>
+        <label class="control-label col-xs-12 col-sm-2">{:__('Product_total')}:</label>
         <div class="col-xs-12 col-sm-8">
-            <textarea id="c-content" data-rule="required" class="form-control editor" rows="5" name="row[content]" cols="50">{$row.content|htmlentities}</textarea>
+            <input id="c-product_total" class="form-control" step="0.01" name="row[product_total]" type="number" value="{$row.product_total|htmlentities}">
         </div>
     </div>
     <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Image')}:</label>
+        <label class="control-label col-xs-12 col-sm-2">{:__('Purchase_freight')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-purchase_freight" class="form-control" step="0.01" name="row[purchase_freight]" type="number" value="{$row.purchase_freight|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Purchase_total')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-purchase_total" class="form-control" step="0.01" name="row[purchase_total]" type="number" value="{$row.purchase_total|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Settlement_method')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-settlement_method" class="form-control" name="row[settlement_method]" type="number" value="{$row.settlement_method|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Deposit_amount')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-deposit_amount" class="form-control" step="0.01" name="row[deposit_amount]" type="number" value="{$row.deposit_amount|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Final_amount')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-final_amount" class="form-control" step="0.01" name="row[final_amount]" type="number" value="{$row.final_amount|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Delivery_stime')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-delivery_stime" class="form-control datetimepicker" data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[delivery_stime]" type="text" value="{$row.delivery_stime}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Delivery_etime')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-delivery_etime" class="form-control datetimepicker" data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[delivery_etime]" type="text" value="{$row.delivery_etime}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Delivery_address')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-delivery_address" class="form-control" name="row[delivery_address]" type="text" value="{$row.delivery_address|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Purchase_status')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-purchase_status" data-rule="required" class="form-control" name="row[purchase_status]" type="number" value="{$row.purchase_status|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Is_add_logistics')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-is_add_logistics" data-rule="required" class="form-control" name="row[is_add_logistics]" type="number" value="{$row.is_add_logistics|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Is_new_product')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-is_new_product" data-rule="required" class="form-control" name="row[is_new_product]" type="number" value="{$row.is_new_product|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Payment_status')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-payment_status" data-rule="required" class="form-control" name="row[payment_status]" type="number" value="{$row.payment_status|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Payment_images')}:</label>
         <div class="col-xs-12 col-sm-8">
             <div class="input-group">
-                <input id="c-image" data-rule="required" class="form-control" size="50" name="row[image]" type="text" value="{$row.image|htmlentities}">
+                <input id="c-payment_images" class="form-control" size="50" name="row[payment_images]" type="text" value="{$row.payment_images|htmlentities}">
                 <div class="input-group-addon no-border no-padding">
-                    <span><button type="button" id="plupload-image" class="btn btn-danger plupload" data-input-id="c-image" data-mimetype="image/gif,image/jpeg,image/png,image/jpg,image/bmp" data-multiple="false" data-preview-id="p-image"><i class="fa fa-upload"></i> {:__('Upload')}</button></span>
-                    <span><button type="button" id="fachoose-image" class="btn btn-primary fachoose" data-input-id="c-image" data-mimetype="image/*" data-multiple="false"><i class="fa fa-list"></i> {:__('Choose')}</button></span>
+                    <span><button type="button" id="plupload-payment_images" class="btn btn-danger plupload" data-input-id="c-payment_images" data-mimetype="image/gif,image/jpeg,image/png,image/jpg,image/bmp" data-multiple="true" data-preview-id="p-payment_images"><i class="fa fa-upload"></i> {:__('Upload')}</button></span>
+                    <span><button type="button" id="fachoose-payment_images" class="btn btn-primary fachoose" data-input-id="c-payment_images" data-mimetype="image/*" data-multiple="true"><i class="fa fa-list"></i> {:__('Choose')}</button></span>
                 </div>
-                <span class="msg-box n-right" for="c-image"></span>
+                <span class="msg-box n-right" for="c-payment_images"></span>
             </div>
-            <ul class="row list-inline plupload-preview" id="p-image"></ul>
+            <ul class="row list-inline plupload-preview" id="p-payment_images"></ul>
         </div>
     </div>
     <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Images')}:</label>
+        <label class="control-label col-xs-12 col-sm-2">{:__('Payment_money')}:</label>
         <div class="col-xs-12 col-sm-8">
-            <div class="input-group">
-                <input id="c-images" data-rule="required" class="form-control" size="50" name="row[images]" type="text" value="{$row.images|htmlentities}">
-                <div class="input-group-addon no-border no-padding">
-                    <span><button type="button" id="plupload-images" class="btn btn-danger plupload" data-input-id="c-images" data-mimetype="image/gif,image/jpeg,image/png,image/jpg,image/bmp" data-multiple="true" data-preview-id="p-images"><i class="fa fa-upload"></i> {:__('Upload')}</button></span>
-                    <span><button type="button" id="fachoose-images" class="btn btn-primary fachoose" data-input-id="c-images" data-mimetype="image/*" data-multiple="true"><i class="fa fa-list"></i> {:__('Choose')}</button></span>
-                </div>
-                <span class="msg-box n-right" for="c-images"></span>
-            </div>
-            <ul class="row list-inline plupload-preview" id="p-images"></ul>
+            <input id="c-payment_money" class="form-control" step="0.01" name="row[payment_money]" type="number" value="{$row.payment_money|htmlentities}">
         </div>
     </div>
     <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Attachfile')}:</label>
+        <label class="control-label col-xs-12 col-sm-2">{:__('Payment_time')}:</label>
         <div class="col-xs-12 col-sm-8">
-            <div class="input-group">
-                <input id="c-attachfile" data-rule="required" class="form-control" size="50" name="row[attachfile]" type="text" value="{$row.attachfile|htmlentities}">
-                <div class="input-group-addon no-border no-padding">
-                    <span><button type="button" id="plupload-attachfile" class="btn btn-danger plupload" data-input-id="c-attachfile" data-multiple="false" data-preview-id="p-attachfile"><i class="fa fa-upload"></i> {:__('Upload')}</button></span>
-                    <span><button type="button" id="fachoose-attachfile" class="btn btn-primary fachoose" data-input-id="c-attachfile" data-multiple="false"><i class="fa fa-list"></i> {:__('Choose')}</button></span>
-                </div>
-                <span class="msg-box n-right" for="c-attachfile"></span>
-            </div>
-            <ul class="row list-inline plupload-preview" id="p-attachfile"></ul>
+            <input id="c-payment_time" class="form-control datetimepicker" data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[payment_time]" type="text" value="{$row.payment_time}">
         </div>
     </div>
     <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Keywords')}:</label>
+        <label class="control-label col-xs-12 col-sm-2">{:__('Payment_remark')}:</label>
         <div class="col-xs-12 col-sm-8">
-            <input id="c-keywords" data-rule="required" class="form-control" name="row[keywords]" type="text" value="{$row.keywords|htmlentities}">
+            <input id="c-payment_remark" class="form-control" name="row[payment_remark]" type="text" value="{$row.payment_remark|htmlentities}">
         </div>
     </div>
     <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Description')}:</label>
+        <label class="control-label col-xs-12 col-sm-2">{:__('Payment_person')}:</label>
         <div class="col-xs-12 col-sm-8">
-            <input id="c-description" data-rule="required" class="form-control" name="row[description]" type="text" value="{$row.description|htmlentities}">
+            <input id="c-payment_person" class="form-control" name="row[payment_person]" type="text" value="{$row.payment_person|htmlentities}">
         </div>
     </div>
     <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('City')}:</label>
+        <label class="control-label col-xs-12 col-sm-2">{:__('Check_status')}:</label>
         <div class="col-xs-12 col-sm-8">
-            <div class='control-relative'><input id="c-city" data-rule="required" class="form-control" data-toggle="city-picker" name="row[city]" type="text" value="{$row.city|htmlentities}"></div>
+            <input id="c-check_status" data-rule="required" class="form-control" name="row[check_status]" type="number" value="{$row.check_status|htmlentities}">
         </div>
     </div>
     <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Json')}:</label>
+        <label class="control-label col-xs-12 col-sm-2">{:__('Stock_status')}:</label>
         <div class="col-xs-12 col-sm-8">
-            
-            <dl class="fieldlist" data-name="row[json]">
-                <dd>
-                    <ins>{:__('Json key')}</ins>
-                    <ins>{:__('Json value')}</ins>
-                </dd>
-                <dd><a href="javascript:;" class="btn btn-sm btn-success btn-append"><i class="fa fa-plus"></i> {:__('Append')}</a></dd>
-                <textarea name="row[json]" class="form-control hide" cols="30" rows="5">{$row.json|htmlentities}</textarea>
-            </dl>
-
-
+            <input id="c-stock_status" data-rule="required" class="form-control" name="row[stock_status]" type="number" value="{$row.stock_status|htmlentities}">
         </div>
     </div>
     <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Price')}:</label>
+        <label class="control-label col-xs-12 col-sm-2">{:__('Return_status')}:</label>
         <div class="col-xs-12 col-sm-8">
-            <input id="c-price" data-rule="required" class="form-control" step="0.01" name="row[price]" type="number" value="{$row.price|htmlentities}">
-        </div>
-    </div>
-    <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Views')}:</label>
-        <div class="col-xs-12 col-sm-8">
-            <input id="c-views" data-rule="required" class="form-control" name="row[views]" type="number" value="{$row.views|htmlentities}">
-        </div>
-    </div>
-    <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Startdate')}:</label>
-        <div class="col-xs-12 col-sm-8">
-            <input id="c-startdate" class="form-control datetimepicker" data-date-format="YYYY-MM-DD" data-use-current="true" name="row[startdate]" type="text" value="{$row.startdate}">
-        </div>
-    </div>
-    <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Activitytime')}:</label>
-        <div class="col-xs-12 col-sm-8">
-            <input id="c-activitytime" class="form-control datetimepicker" data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[activitytime]" type="text" value="{$row.activitytime}">
-        </div>
-    </div>
-    <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Year')}:</label>
-        <div class="col-xs-12 col-sm-8">
-            <input id="c-year" class="form-control datetimepicker" data-date-format="YYYY" data-use-current="true" name="row[year]" type="text" value="{$row.year}">
-        </div>
-    </div>
-    <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Times')}:</label>
-        <div class="col-xs-12 col-sm-8">
-            <input id="c-times" class="form-control datetimepicker" data-date-format="HH:mm:ss" data-use-current="true" name="row[times]" type="text" value="{$row.times}">
-        </div>
-    </div>
-    <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Refreshtime')}:</label>
-        <div class="col-xs-12 col-sm-8">
-            <input id="c-refreshtime" class="form-control datetimepicker" data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[refreshtime]" type="text" value="{:$row.refreshtime?datetime($row.refreshtime):''}">
-        </div>
-    </div>
-    <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Weigh')}:</label>
-        <div class="col-xs-12 col-sm-8">
-            <input id="c-weigh" data-rule="required" class="form-control" name="row[weigh]" type="number" value="{$row.weigh|htmlentities}">
-        </div>
-    </div>
-    <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Switch')}:</label>
-        <div class="col-xs-12 col-sm-8">
-            
-            <input  id="c-switch" name="row[switch]" type="hidden" value="{$row.switch}">
-            <a href="javascript:;" data-toggle="switcher" class="btn-switcher" data-input-id="c-switch" data-yes="1" data-no="0" >
-                <i class="fa fa-toggle-on text-success {eq name="$row.switch" value="0"}fa-flip-horizontal text-gray{/eq} fa-2x"></i>
-            </a>
-        </div>
-    </div>
-    <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Status')}:</label>
-        <div class="col-xs-12 col-sm-8">
-            
-            <div class="radio">
-            {foreach name="statusList" item="vo"}
-            <label for="row[status]-{$key}"><input id="row[status]-{$key}" name="row[status]" type="radio" value="{$key}" {in name="key" value="$row.status"}checked{/in} /> {$vo}</label> 
-            {/foreach}
-            </div>
-
-        </div>
-    </div>
-    <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('State')}:</label>
-        <div class="col-xs-12 col-sm-8">
-            
-            <div class="radio">
-            {foreach name="stateList" item="vo"}
-            <label for="row[state]-{$key}"><input id="row[state]-{$key}" name="row[state]" type="radio" value="{$key}" {in name="key" value="$row.state"}checked{/in} /> {$vo}</label> 
-            {/foreach}
-            </div>
-
+            <input id="c-return_status" data-rule="required" class="form-control" name="row[return_status]" type="number" value="{$row.return_status|htmlentities}">
         </div>
     </div>
     <div class="form-group layer-footer">

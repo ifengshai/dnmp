@@ -190,6 +190,7 @@ class Crud extends Command
         $db = $input->getOption('db');
         //表名
         $table = $input->getOption('table') ?: '';
+        
         //自定义控制器
         $controller = $input->getOption('controller');
         //自定义模型

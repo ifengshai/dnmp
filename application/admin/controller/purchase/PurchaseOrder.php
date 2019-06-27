@@ -5,7 +5,7 @@ namespace app\admin\controller\purchase;
 use app\common\controller\Backend;
 
 /**
- * 测试管理
+ * 采购单管理
  *
  * @icon fa fa-circle-o
  */
@@ -22,12 +22,7 @@ class PurchaseOrder extends Backend
     {
         parent::_initialize();
         $this->model = new \app\admin\model\purchase\PurchaseOrder;
-        $this->view->assign("weekList", $this->model->getWeekList());
-        $this->view->assign("flagList", $this->model->getFlagList());
-        $this->view->assign("genderdataList", $this->model->getGenderdataList());
-        $this->view->assign("hobbydataList", $this->model->getHobbydataList());
-        $this->view->assign("statusList", $this->model->getStatusList());
-        $this->view->assign("stateList", $this->model->getStateList());
+
     }
     
     /**
