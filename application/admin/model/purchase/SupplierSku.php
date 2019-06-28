@@ -5,14 +5,14 @@ namespace app\admin\model\purchase;
 use think\Model;
 
 
-class Supplier extends Model
+class SupplierSku extends Model
 {
 
     //数据库
     protected $connection = 'database';
     // 表名
-    protected $name = 'supplier';
-    
+    protected $name = 'supplier_sku';
+
     // 自动写入时间戳字段
     protected $autoWriteTimestamp = 'int';
 
@@ -22,29 +22,12 @@ class Supplier extends Model
     protected $deleteTime = false;
 
     // 追加属性
-    protected $append = [
+    protected $append = [];
 
-    ];
-    
 
-    /**
-     * 获取供应商
-     */
-    public function getSupplierData() 
+    //关联模型
+    public function supplier()
     {
-        $data = $this->field('id,supplier_name')->select();
-        $arr = [];
-        foreach($data as $v) {
-            $arr[$v['id']] = $v['supplier_name'];
-        }
-        return $arr;
+        return $this->belongsTo('supplier', 'supplier_id')->setEagerlyType(0);;
     }
-    
-
-
-
-
-
-
-
 }

@@ -1,0 +1,119 @@
+
+<style>
+        .caigou {
+            /* border-width: 1px;
+            border-style: solid;
+            border-color: rgba(188, 188, 188, 1);
+            border-radius: 6px; */
+            padding: 10px;
+            width: 85%;
+            margin-left:20px;
+            margin-top: 40px;
+        }
+    
+        .caigou #caigou-table {
+            width: 100%;
+            height: 130px;
+            border-width: 1px;
+            border-style: solid;
+            border-color: rgba(188, 188, 188, 1);
+            border-radius: 6px;
+            text-align: center;
+        }
+    
+        .caigou #caigou-table tr {
+    
+            border-width: 1px;
+            border-style: solid;
+            border-color: rgba(188, 188, 188, 1);
+            border-radius: 6px;
+            line-height: 50px;
+        }
+    
+        .caigou #caigou-table tr th {
+    
+            border-width: 1px;
+            border-style: solid;
+            border-color: rgba(188, 188, 188, 1);
+            border-radius: 6px;
+            text-align: center;
+            font-size: 14px;
+        }
+    
+        .caigou #caigou-table tr td {
+    
+            border-width: 1px;
+            border-style: solid;
+            border-color: rgba(188, 188, 188, 1);
+            border-radius: 6px;
+        }
+    
+        .caigou #caigou-table tr td input {
+    
+            width: 150px;
+        }
+    </style>
+
+<form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
+
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Supplier_id')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            {:build_select('row[supplier_id]',$supplier)}
+        </div>
+    </div>
+
+    <div class='caigou'>
+        <p style="font-size: 16px;"><b>供应商SKU绑定关系</b></p>
+        <div>
+            <div id="toolbar" class="toolbar">
+                <a href="javascript:;" class="btn btn-success btn-add" title="增加"><i class="fa fa-plus"></i> 增加</a>
+            </div>
+            <table id="caigou-table">
+                <tr>
+                    <th>SKU</td>
+                    <th>供应商sku</td>
+                    <th>操作</td>
+                </tr>
+                <tr>
+                    <td>
+                        <input id="c-purchase_remark" class="form-control" name="skus[]" type="text">
+                    </td>
+                    <td><input id="c-purchase_remark" class="form-control" name="supplier_sku[]" type="text"></td>
+                    <td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>
+                            删除</a></td>
+                </tr>
+                <tr>
+                    <td>
+                        <input id="c-purchase_remark" class="form-control" name="skus[]" type="text">
+                    </td>
+                    <td><input id="c-purchase_remark" class="form-control" name="supplier_sku[]" type="text"></td>
+                   
+                    <td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>
+                            删除</a></td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+
+    <div class="form-group layer-footer">
+        <label class="control-label col-xs-12 col-sm-2"></label>
+        <div class="col-xs-12 col-sm-8">
+            <button type="submit" class="btn btn-success btn-embossed disabled">{:__('OK')}</button>
+            <button type="reset" class="btn btn-default btn-embossed">{:__('Reset')}</button>
+        </div>
+    </div>
+</form>
+
+<div id="table-content" style="display: none;">
+        <table>
+            <tr>
+                <td>
+                    <input id="c-purchase_remark" class="form-control" name="skus[]" type="text">
+                </td>
+                <td><input id="c-purchase_remark" class="form-control" name="supplier_sku[]" type="text"></td>
+                <td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i> 删除</a></td>
+            </tr>
+        </table>
+    </div>

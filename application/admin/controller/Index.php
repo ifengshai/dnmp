@@ -21,7 +21,7 @@ class Index extends Backend
 
     public function _initialize()
     {
-
+        //菜单切换功能
         $act = $this->request->get('act');
         $multiplenav = cookie('multiplenav');
         if ($act == 'switch-multiplenav-off') {

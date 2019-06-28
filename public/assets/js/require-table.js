@@ -454,7 +454,7 @@ define(['jquery', 'bootstrap', 'moment', 'moment/locale/zh-cn', 'bootstrap-table
                     return Table.api.formatter.normal.call(this, value, row, index);
                 },
                 normal: function (value, row, index) {
-                    var colorArr = ["primary", "success", "danger", "warning", "info", "gray", "red", "yellow", "aqua", "blue", "navy", "teal", "olive", "lime", "fuchsia", "purple", "maroon"];
+                    var colorArr = ["success", "danger", "primary","warning", "info", "gray", "red", "yellow", "aqua", "blue", "navy", "teal", "olive", "lime", "fuchsia", "purple", "maroon"];
                     var custom = {};
                     if (typeof this.custom !== 'undefined') {
                         custom = $.extend(custom, this.custom);
