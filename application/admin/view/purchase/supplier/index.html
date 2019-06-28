@@ -1,3 +1,4 @@
+
 <div class="panel panel-default panel-intro">
     {:build_heading()}
 
@@ -11,7 +12,7 @@
                         <a href="javascript:;" class="btn btn-success btn-edit btn-disabled disabled {:$auth->check('purchase/supplier/edit')?'':'hide'}" title="{:__('Edit')}" ><i class="fa fa-pencil"></i> {:__('Edit')}</a>
                         <a href="javascript:;" class="btn btn-danger btn-del btn-disabled disabled {:$auth->check('purchase/supplier/del')?'':'hide'}" title="{:__('Delete')}" ><i class="fa fa-trash"></i> {:__('Delete')}</a>
                         <a href="javascript:;" class="btn btn-danger btn-import {:$auth->check('purchase/supplier/import')?'':'hide'}" title="{:__('Import')}" id="btn-import-file" data-url="ajax/upload" data-mimetype="csv,xls,xlsx" data-multiple="false"><i class="fa fa-upload"></i> {:__('Import')}</a>
-
+                    
                         <div class="dropdown btn-group {:$auth->check('purchase/supplier/multi')?'':'hide'}">
                             <a class="btn btn-primary btn-more dropdown-toggle btn-disabled disabled" data-toggle="dropdown"><i class="fa fa-cog"></i> {:__('More')}</a>
                             <ul class="dropdown-menu text-left" role="menu">
@@ -33,3 +34,46 @@
         </div>
     </div>
 </div>
+
+
+
+<script id="customformtpl" type="text/html">
+    <!--form表单必须添加form-commsearch这个类-->
+    <form action="" class="form-commonsearch form-horizontal">
+        <div style="border-radius:2px;margin-bottom:10px;background:#f5f5f5;padding:20px;">
+            <div class="row">
+                
+              
+                <div class="col-xs-12 col-sm-6 col-md-3">
+                    <div class="form-group">
+                        <label class="control-label col-xs-4">旺旺</label>
+                        <div class="col-xs-8">
+                            <!--显式的operate操作符-->
+                            <input type="hidden" class="operate" data-name="wangwang" value="="/>
+                            <!--搜索关键字-->
+                            <input type="text" class="form-control" name="wangwang" value=""/>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xs-12 col-sm-6 col-md-3">
+                    <div class="form-group">
+                        <label class="control-label col-xs-4">状态</label>
+                        <div class="col-xs-8">
+                            <input type="hidden" class="operate" data-name="status" value="="/>
+                            {:build_select('status',[],0)}
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xs-12 col-sm-6 col-md-3">
+                    <div class="form-group">
+                        <div class="col-xs-8 col-xs-offset-4">
+                            <input type="submit" class="btn btn-success " value="搜索"/>
+                            <input type="reset" class="btn btn-primary"  value="重置"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</script>
+

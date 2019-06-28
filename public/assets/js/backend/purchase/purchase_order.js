@@ -65,6 +65,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
         },
         add: function () {
             Controller.api.bindevent();
+            $(document).on('click', '.btn-add', function () {
+                var content =  $('#table-content table tbody').html();
+                $('.caigou table tbody').append(content);
+             })
+ 
+             $(document).on('click', '.btn-del', function () {
+                 $(this).parent().parent().remove();
+              })
         },
         edit: function () {
             Controller.api.bindevent();
