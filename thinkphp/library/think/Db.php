@@ -126,6 +126,8 @@ class Db
         if (empty($config)) {
             $config = Config::get('database');
         } elseif (is_string($config) && false === strpos($config, '/')) {
+           if($config == 'db_config1'){
+           }
             $config = Config::get($config); // 支持读取配置参数
         }
 

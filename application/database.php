@@ -53,4 +53,35 @@ return [
     'datetime_format' => false,
     // 是否需要进行SQL性能分析
     'sql_explain'     => false,
+    'db_config1' => [
+        // 数据库类型
+        'type'        => Env::get('database1.type', 'mysql'),
+        // 服务器地址
+        'hostname'    => Env::get('database1.hostname', '127.0.0.1'),
+        // 数据库名
+        'database'    => Env::get('database1.database', 'fastadmin'),
+        // 数据库用户名
+        'username'    => Env::get('database1.username', 'root'),
+        // 密码
+        'password'    => Env::get('database1.password', 'root'),
+        // 数据库编码默认采用utf8
+        'charset'     => Env::get('database1.charset', 'utf8'),
+        'prefix'      => Env::get('database1.prefix', 'fa_'),
+    ],
+    //数据库配置2
+    'db_config2' => [
+        // 数据库类型
+        'type'        => Env::get('database2.type', 'mysql'),
+        // 服务器地址
+        'hostname'    => Env::get('database2.hostname', '127.0.0.1'),
+        // 数据库名
+        'database'    => Env::get('database2.database', 'fastadmin'),
+        // 数据库用户名
+        'username'    => Env::get('database2.username', 'root'),
+        // 密码
+        'password'    => Env::get('database2.password', 'root'),
+        // 数据库编码默认采用utf8
+        'charset'     => Env::get('database2.charset', 'utf8'),
+        'prefix'      => Env::get('database2.prefix', 'fa_'),
+    ],
 ];
