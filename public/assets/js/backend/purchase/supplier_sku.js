@@ -10,6 +10,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     edit_url: 'purchase/supplier_sku/edit',
                     del_url: 'purchase/supplier_sku/del',
                     multi_url: 'purchase/supplier_sku/multi',
+                    import_url: 'purchase/supplier_sku/import',
                     table: 'supplier_sku',
                 }
             });
@@ -24,13 +25,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 columns: [
                     [
                         { checkbox: true },
-                        { field: 'id', title: __('Id') },
+                        { field: 'id', title: __('Id'), operate: false },
                         { field: 'sku', title: __('Sku'), operate: 'like' },
                         { field: 'supplier_sku', title: __('Supplier_sku') },
                         { field: 'supplier.supplier_name', title: __('Supplier_id'), operate: 'like', },
                         { field: 'createtime', title: __('Createtime'), operate: 'RANGE', addclass: 'datetimerange' },
-                        { field: 'create_person', title: __('Create_person') },
-                        { field: 'status', title: __('Status'), searchList: {  1: '启用',2: '禁用' }, formatter: Table.api.formatter.status },
+                        { field: 'create_person', title: __('Create_person'),operate: false },
+                        { field: 'status', title: __('Status'), searchList: { 1: '启用', 2: '禁用' }, formatter: Table.api.formatter.status },
                         { field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate }
                     ]
                 ]
@@ -38,6 +39,28 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
 
             // 为表格绑定事件
             Table.api.bindevent(table);
+
+            //启用
+            $(document).on('click', '.btn-open', function () {
+                var ids = Table.api.selectedids(table);
+                Backend.api.ajax({
+                    url: '/admin/purchase/supplier_sku/setStatus',
+                    data: { ids: ids, status: 1 }
+                }, function (data, ret) {
+                    table.bootstrapTable('refresh');
+                });
+            })
+
+            //禁用
+            $(document).on('click', '.btn-close', function () {
+                var ids = Table.api.selectedids(table);
+                Backend.api.ajax({
+                    url: '/admin/purchase/supplier_sku/setStatus',
+                    data: { ids: ids, status: 2 }
+                }, function (data, ret) {
+                    table.bootstrapTable('refresh');
+                });
+            })
         },
         add: function () {
             Controller.api.bindevent();

@@ -1,0 +1,30 @@
+<?php
+
+return [
+    'Contract_number'        => '合同编号',
+    'Contract_name'          => '合同名称',
+    'Buyer_name'             => '买方名称',
+    'Buyer_address'          => '买方地址',
+    'Buyer_phone'            => '买方电话',
+    'Seller_name'            => '卖方名称',
+    'Seller_address'         => '卖方地址',
+    'Seller_phone'           => '卖方电话',
+    'Freight'                => '产品运费',
+    'Total'                  => '合计金额',
+    'Num'                    => '合计数量',
+    'Quality_standard'       => '质量要求及执行标准',
+    'Packaging_requirements' => '包装要求',
+    'Delivery_stime'         => '交货开始日期',
+    'Delivery_etime'         => '交货结束日期',
+    'Settlement_method'      => '结算方式',
+    'Deposit_amount'         => '定金金额',
+    'Final_amount'           => '尾款金额',
+    'Delivery_address'       => '交货地址',
+    'Contract_stime'         => '合同有效期开始时间',
+    'Contract_etime'         => '合同有效期结束时间',
+    'Contract_images'        => '合同扫描件',
+    'Createtime'             => '创建时间',
+    'Create_person'          => '创建人',
+    'Supplier_type'          => '供应商类型',
+    'Supplier_name'          => '供应商名称'
+];

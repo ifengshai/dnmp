@@ -13,27 +13,26 @@ use PhpOffice\PhpSpreadsheet\Reader\Csv;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 
 /**
- * 供应商sku管理
+ * 采购合同管理
  *
  * @icon fa fa-circle-o
  */
-class SupplierSku extends Backend
+class Contract extends Backend
 {
 
     /**
-     * SupplierSku模型对象
-     * @var \app\admin\model\purchase\SupplierSku
+     * Contract模型对象
+     * @var \app\admin\model\purchase\Contract
      */
     protected $model = null;
 
     protected $relationSearch = true;
 
-    protected $searchFields = 'id,sku,supplier_sku,create_person,supplier.supplier_name';
-
     public function _initialize()
     {
         parent::_initialize();
-        $this->model = new \app\admin\model\purchase\SupplierSku;
+        $this->model = new \app\admin\model\purchase\Contract;
+        $this->contract_item = new \app\admin\model\purchase\ContractItem;
     }
 
     /**
@@ -67,8 +66,8 @@ class SupplierSku extends Backend
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
-            $list = collection($list)->toArray();
 
+            $list = collection($list)->toArray();
             $result = array("total" => $total, "rows" => $list);
 
             return json($result);
@@ -99,22 +98,34 @@ class SupplierSku extends Backend
                         $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.add' : $name) : $this->modelValidate;
                         $this->model->validateFailException(true)->validate($validate);
                     }
-                    $skus = $this->request->post("skus/a");
-                    
-                    $supplier_skus = $this->request->post("supplier_sku/a");
-    
-                    $data = [];
-                    foreach ($skus as $k => $v) {
-                        //供应商sku  和产品sku 必须为真 否则自动过滤
-                        if ($v && $supplier_skus[$k]) {
+
+                    $params['create_person'] = session('admin.username');
+                    $params['createtime'] = date('Y-m-d H:i:s', time());
+                    $result = $this->model->allowField(true)->save($params);
+
+                    //添加合同产品
+                    if ($result !== false) {
+                        $sku = $this->request->post("sku/a");
+                        $product_name = $this->request->post("product_name/a");
+                        $supplier_sku = $this->request->post("supplier_sku/a");
+                        $num = $this->request->post("num/a");
+                        $price = $this->request->post("price/a");
+                        $total = $this->request->post("total/a");
+
+                        $data = [];
+                        foreach ($sku as $k => $v) {
                             $data[$k]['sku'] = $v;
-                            $data[$k]['supplier_sku'] = $supplier_skus[$k];
-                            $data[$k]['supplier_id'] = $params['supplier_id'];
-                            $data[$k]['create_person'] = session('admin.username');
-                            $data[$k]['createtime'] = date('Y-m-d H:i:s', time());
+                            $data[$k]['supplier_sku'] = $supplier_sku[$k];
+                            $data[$k]['product_name'] = $product_name[$k];
+                            $data[$k]['num'] = $num[$k];
+                            $data[$k]['price'] = $price[$k];
+                            $data[$k]['total'] = $total[$k];
+                            $data[$k]['contract_id'] = $this->model->id;
                         }
+                        //批量添加
+                        $this->contract_item->allowField(true)->saveAll($data);
                     }
-                    $result = $this->model->allowField(true)->saveAll($data);
+
                     Db::commit();
                 } catch (ValidateException $e) {
                     Db::rollback();
@@ -127,7 +138,7 @@ class SupplierSku extends Backend
                     $this->error($e->getMessage());
                 }
                 if ($result !== false) {
-                    $this->success();
+                    $this->success('添加成功！！', '', url('index'));
                 } else {
                     $this->error(__('No rows were inserted'));
                 }
@@ -137,10 +148,27 @@ class SupplierSku extends Backend
 
         //查询供应商
         $supplier = new \app\admin\model\purchase\Supplier;
-        $supplier = $supplier->getSupplierData();
-        $this->assign('supplier', $supplier);
+        $data = $supplier->getSupplierData();
+        $this->assign('supplier', $data);
+
+        //生成合同编号
+        $contract_number = 'CN' . date('YmdHis') . rand(100, 999) . rand(100, 999);
+        $this->assign('contract_number', $contract_number);
         return $this->view->fetch();
     }
+
+    /**
+     * 获取供应商数据
+     */
+    public function getSupplierData()
+    {
+        $id = input('id');
+        //查询供应商
+        $supplier = new \app\admin\model\purchase\Supplier;
+        $data = $supplier->get($id);
+        return json(['code' => 1, 'data' => $data]);
+    }
+
 
     /**
      * 编辑
@@ -151,6 +179,11 @@ class SupplierSku extends Backend
         if (!$row) {
             $this->error(__('No Results were found'));
         }
+        //判断状态是否为新建
+        if ($row['status'] > 0) {
+            $this->error('只有新建状态才能编辑！！');
+        }
+
         $adminIds = $this->getDataLimitAdminIds();
         if (is_array($adminIds)) {
             if (!in_array($row[$this->dataLimitField], $adminIds)) {
@@ -171,6 +204,34 @@ class SupplierSku extends Backend
                         $row->validateFailException(true)->validate($validate);
                     }
                     $result = $row->allowField(true)->save($params);
+
+                    //添加合同产品
+                    if ($result !== false) {
+                        $sku = $this->request->post("sku/a");
+                        $product_name = $this->request->post("product_name/a");
+                        $supplier_sku = $this->request->post("supplier_sku/a");
+                        $num = $this->request->post("num/a");
+                        $price = $this->request->post("price/a");
+                        $total = $this->request->post("total/a");
+                        $item_id = $this->request->post("item_id/a");
+                        
+                        $data = [];
+                        foreach ($sku as $k => $v) {
+                            $data[$k]['sku'] = $v;
+                            $data[$k]['supplier_sku'] = $supplier_sku[$k];
+                            $data[$k]['product_name'] = $product_name[$k];
+                            $data[$k]['num'] = $num[$k];
+                            $data[$k]['price'] = $price[$k];
+                            $data[$k]['total'] = $total[$k];
+                            if (@$item_id[$k]) {
+                                $data[$k]['id'] = $item_id[$k];
+                            } else {
+                                $data[$k]['contract_id'] = $ids;
+                            }
+                        }
+                        //批量添加
+                        $this->contract_item->allowField(true)->saveAll($data);
+                    }
                     Db::commit();
                 } catch (ValidateException $e) {
                     Db::rollback();
@@ -183,7 +244,7 @@ class SupplierSku extends Backend
                     $this->error($e->getMessage());
                 }
                 if ($result !== false) {
-                    $this->success();
+                    $this->success('添加成功！！', '', url('index'));
                 } else {
                     $this->error(__('No rows were updated'));
                 }
@@ -194,6 +255,12 @@ class SupplierSku extends Backend
         $supplier = new \app\admin\model\purchase\Supplier;
         $supplier = $supplier->getSupplierData();
         $this->assign('supplier', $supplier);
+
+        //查询产品信息
+        $map['contract_id'] = $ids;
+        $item = $this->contract_item->where($map)->select();
+        $this->assign('item', $item);
+
         $this->view->assign("row", $row);
         return $this->view->fetch();
     }
@@ -217,7 +284,7 @@ class SupplierSku extends Backend
         }
     }
 
-     /**
+    /**
      * 导入
      */
     public function import()
@@ -282,7 +349,7 @@ class SupplierSku extends Backend
         //查询供应商
         $supplier = new \app\admin\model\purchase\Supplier;
         $supplier = $supplier->getSupplierData();
-    
+
         try {
             if (!$PHPExcel = $reader->load($filePath)) {
                 $this->error(__('Unknown data format'));
@@ -312,7 +379,7 @@ class SupplierSku extends Backend
                         $row[$fieldArr[$k]] = $v;
                     }
                     if ($k == '供应商名称') {
-                        $row['supplier_id'] = array_search($v,$supplier);
+                        $row['supplier_id'] = array_search($v, $supplier);
                     }
                 }
                 if ($row) {
@@ -325,7 +392,7 @@ class SupplierSku extends Backend
         if (!$insert) {
             $this->error(__('No rows were updated'));
         }
-        
+
 
         try {
             //是否包含admin_id字段
@@ -364,5 +431,18 @@ class SupplierSku extends Backend
         }
 
         $this->success();
+    }
+
+
+    //删除合同里商品信息
+    public function deleteItem() 
+    {
+        $id = input('id');
+        $res = $this->contract_item->destroy($id);
+        if ($res) {
+            $this->success();
+        } else {
+            $this->error();
+        }
     }
 }

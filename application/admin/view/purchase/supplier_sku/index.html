@@ -12,13 +12,9 @@
                         <a href="javascript:;" class="btn btn-danger btn-del btn-disabled disabled {:$auth->check('purchase/supplier_sku/del')?'':'hide'}" title="{:__('Delete')}" ><i class="fa fa-trash"></i> {:__('Delete')}</a>
                         <a href="javascript:;" class="btn btn-danger btn-import {:$auth->check('purchase/supplier_sku/import')?'':'hide'}" title="{:__('Import')}" id="btn-import-file" data-url="ajax/upload" data-mimetype="csv,xls,xlsx" data-multiple="false"><i class="fa fa-upload"></i> {:__('Import')}</a>
 
-                        <div class="dropdown btn-group {:$auth->check('purchase/supplier_sku/multi')?'':'hide'}">
-                            <a class="btn btn-primary btn-more dropdown-toggle btn-disabled disabled" data-toggle="dropdown"><i class="fa fa-cog"></i> {:__('More')}</a>
-                            <ul class="dropdown-menu text-left" role="menu">
-                                <li><a class="btn btn-link btn-multi btn-disabled disabled" href="javascript:;" data-params="status=normal"><i class="fa fa-eye"></i> {:__('Set to normal')}</a></li>
-                                <li><a class="btn btn-link btn-multi btn-disabled disabled" href="javascript:;" data-params="status=hidden"><i class="fa fa-eye-slash"></i> {:__('Set to hidden')}</a></li>
-                            </ul>
-                        </div>
+                        <a href="/template/supplier_sku.xlsx" class="btn btn-primary" title="模板下载" >模板下载</a>
+                        <a href="javascript:;" class="btn btn-success btn-open btn-disabled disabled {:$auth->check('purchase/supplier/edit')?'':'hide'}" title="启用" >启用</a>
+                        <a href="javascript:;" class="btn btn-danger btn-close btn-disabled disabled {:$auth->check('purchase/supplier/del')?'':'hide'}" title="禁用" > 禁用</a>
 
                         
                     </div>

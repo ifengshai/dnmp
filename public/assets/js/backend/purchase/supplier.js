@@ -4,7 +4,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'fast'], function ($,
         index: function () {
             // 初始化表格参数配置
             Table.api.init({
-                // searchFormVisible: true,
+                searchFormVisible: true,
                 // searchFormTemplate: 'customformtpl',
                 extend: {
                     index_url: 'purchase/supplier/index' + location.search,
