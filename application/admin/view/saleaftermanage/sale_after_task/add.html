@@ -18,17 +18,17 @@
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">{:__('Order_status')}:</label>
         <div class="col-xs-12 col-sm-3">
+            <input id="c-order_status" data-rule="required" class="form-control" name="row[order_status]" readonly="readonly" type="text" value="" >
+        </div>
+        <label class="control-label col-xs-12 col-sm-2">{:__('Prty_id')}:</label>
+        <div class="col-xs-12 col-sm-3">
             <div class="radio">
-                <select  id="c-order_status" data-rule="required" class="form-control selectpicker" name="row[order_status]">
-                    {foreach name="orderStatusList" item="vo"}
+                <select  id="c-prty_id" data-rule="required" class="form-control selectpicker" name="row[prty_id]">
+                    {foreach name="prtyIdList" item="vo"}
                     <option value="{$key}" {in name="key" value="0"}selected{/in}>{$vo}</option>
                     {/foreach}
                 </select>
             </div>
-        </div>
-        <label class="control-label col-xs-12 col-sm-2">{:__('Task_number')}:</label>
-        <div class="col-xs-12 col-sm-3">
-            <input id="c-task_number" data-rule="required" class="form-control" name="row[task_number]" type="text" value="">
         </div>
     </div>
     <div class="form-group">
@@ -39,18 +39,6 @@
         <label class="control-label col-xs-12 col-sm-2">{:__('Rep_id')}:</label>
         <div class="col-xs-12 col-sm-3">
             <input id="c-rep_id" data-rule="required" data-source="rep/index" class="form-control selectpage" name="row[rep_id]" type="text" value="">
-        </div>
-    </div>
-    <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Prty_id')}:</label>
-        <div class="col-xs-12 col-sm-8">
-        <div class="radio">
-            <select  id="c-prty_id" data-rule="required" class="form-control selectpicker" name="row[prty_id]">
-                {foreach name="prtyIdList" item="vo"}
-                <option value="{$key}" {in name="key" value="0"}selected{/in}>{$vo}</option>
-                {/foreach}
-            </select>
-        </div>
         </div>
     </div>
     <div class="form-group">
@@ -106,53 +94,15 @@
             <hr/>
         </div>
     </div>
-    <div class="form-group">
+    <div class="form-group" id="customer_info">
         <label class="control-label col-xs-12 col-sm-2">{:__('Customer_name')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <input  id="c-customer_name" data-rule="required" class="form-control" name="row[customer_name]" type="text" value="">
+            <input  id="c-customer_name" data-rule="required" class="form-control" name="row[customer_name]" readonly="readonly" type="text" value="">
         </div>
         <label class="control-label col-xs-12 col-sm-2">{:__('Customer_email')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <input id="c-customer_email" data-rule="required" class="form-control" name="row[customer_email]" type="text" value="">
+            <input id="c-customer_email" data-rule="required" class="form-control" name="row[customer_email]" readonly="readonly" type="text" value="">
         </div>
-    </div>
-    <div class="card-view" height="261px;" >
-     <div class="form-group" style="float:left; display:inline" >
-        <label class="control-label col-xs-12 col-sm-2">{:__('Item_name')}:</label>
-        <div class="col-xs-12 col-sm-3">
-            <input  id="c-item_name" data-rule="required" class="form-control" name="row[customer_name]" type="text" value="">
-        </div>
-    </div>
-    <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Item_sku')}:</label>
-        <div class="col-xs-12 col-sm-3">
-            <input  id="c-item_sku" data-rule="required" class="form-control" name="row[customer_name]" type="text" value="">
-        </div>
-    </div>
-    <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Item_qty_ordered')}:</label>
-        <div class="col-xs-12 col-sm-3">
-            <input  id="c-item_qty_ordered" data-rule="required" class="form-control" name="row[customer_name]" type="text" value="">
-        </div>
-    </div>
-    <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Recipe_type')}:</label>
-        <div class="col-xs-12 col-sm-3">
-            <input  id="c-recipe_type" data-rule="required" class="form-control" name="row[customer_name]" type="text" value="">
-        </div>
-    </div>
-    <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Lens_type')}:</label>
-        <div class="col-xs-12 col-sm-3">
-            <input  id="c-lens_type" data-rule="required" class="form-control" name="row[customer_name]" type="text" value="">
-        </div>
-    </div>
-    <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Coating_film_type')}:</label>
-        <div class="col-xs-12 col-sm-3">
-            <input  id="c-coating_film_type" data-rule="required" class="form-control" name="row[customer_name]" type="text" value="">
-        </div>
-    </div>
     </div>
     <div  class="form-group layer-footer" style="clear:both;">
         <label class="control-label col-xs-12 col-sm-2"></label>

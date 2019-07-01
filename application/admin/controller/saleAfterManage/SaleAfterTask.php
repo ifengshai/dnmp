@@ -90,9 +90,7 @@ class SaleAfterTask extends Backend
     }
     public function ceshi2()
     {
-        $str = 'a:2:{s:15:"info_buyRequest";a:10:{s:7:"product";s:3:"255";s:4:"uenc";s:88:"aHR0cHM6Ly93d3cudm9vZ3VlbWUuY29tL2V5ZWdsYXNzZXMvZnAwMDQ1Lmh0bWw_X19fc3RvcmU9ZGVmYXVsdA,,";s:8:"form_key";s:16:"BsM6kOlmC7sGXd4p";s:15:"related_product";s:0:"";s:15:"validate_rating";N;s:3:"qty";i:0;s:7:"options";a:1:{i:151;s:3:"352";}s:7:"tmplens";a:30:{s:15:"super_attribute";N;s:13:"product_color";N;s:10:"frame_type";i:0;s:10:"glass_type";s:33:"eyeglasses, sunglasses, sunshades";s:19:"frame_regural_price";d:12.949999999999999;s:11:"frame_price";d:12.949999999999999;s:8:"lenskind";s:0:"";s:6:"usefor";s:0:"";s:11:"useforprice";s:0:"";s:5:"prism";s:0:"";s:10:"prismprice";s:0:"";s:5:"extra";s:0:"";s:10:"extraprice";s:0:"";s:12:"prescription";s:0:"";s:10:"index_type";s:0:"";s:11:"index_price";s:0:"";s:9:"lens_type";s:0:"";s:15:"lens_type_price";s:0:"";s:9:"lens_tint";s:0:"";s:14:"lens_coating_1";s:0:"";s:20:"lens_coating_1_price";s:0:"";s:14:"lens_coating_2";s:0:"";s:20:"lens_coating_2_price";s:0:"";s:14:"lens_coating_3";s:0:"";s:20:"lens_coating_3_price";s:0:"";s:14:"lens_coating_4";s:0:"";s:20:"lens_coating_4_price";s:0:"";s:3:"rid";s:1:"0";s:4:"lens";s:0:"";s:5:"total";d:12.949999999999999;}s:12:"original_qty";s:1:"1";s:13:"cart_currency";s:3:"USD";}s:7:"options";a:1:{i:0;a:6:{s:5:"label";s:5:"Color";s:5:"value";s:5:"Black";s:9:"option_id";s:3:"151";s:11:"option_type";s:9:"drop_down";s:12:"option_value";s:3:"352";s:11:"custom_view";b:0;}}}';
-        $arr = unserialize($str);
-        dump($arr);
+        echo THINK_VERSION;
     }
 
 
