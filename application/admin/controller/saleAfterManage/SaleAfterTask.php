@@ -87,6 +87,7 @@ class SaleAfterTask extends Backend
                         $this->model->validateFailException(true)->validate($validate);
                     }
                     $params['task_number'] = 'CO'.rand(100,999).rand(100,999);
+                    $params['create_person'] = session('admin.username'); //创建人
                     $result = $this->model->allowField(true)->save($params);
                     Db::commit();
                 } catch (ValidateException $e) {
@@ -158,99 +159,4 @@ class SaleAfterTask extends Backend
         $list = collection($list)->toArray();
         dump($list);
     }
-    public function getOrderInfo()
-    {
-        //$order_number   = 430016936;
-        $order_number = 100008922;
-        //$order_number = 400000041; //zeelool
-        $result = Db::connect('database.db_config1')->table('sales_flat_order')->where('increment_id','=',$order_number)->field('entity_id,status,increment_id,customer_email,customer_firstname,customer_lastname,total_item_count')->find();
-        if(!$result){
-            return false;
-        }
-        $item = Db::connect('database.db_config1')->table('sales_flat_order_item')->where('order_id','=',$result['entity_id'])->field('item_id,name,sku,qty_ordered,product_options')->select();
-        if(!$item){
-            return false;
-        }
-        $arr = [];
-        foreach($item as $key=> $val){
-            $arr[$key]['item_id'] = $val['item_id'];
-            $arr[$key]['name']    = $val['name'];
-            $arr[$key]['sku']     = $val['sku'];
-            $arr[$key]['qty_ordered']     = $val['qty_ordered'];
-            $tmp_product_options = unserialize($val['product_options']);
-            $arr[$key]['index_type'] = $tmp_product_options['info_buyRequest']['tmplens']['index_type'];
-            $arr[$key]['coatiing_name'] = isset($tmp_product_options['info_buyRequest']['tmplens']['coatiing_name']) ? $tmp_product_options['info_buyRequest']['tmplens']['coatiing_name'] : "";
-            $tmp_prescription_params = $tmp_product_options['info_buyRequest']['tmplens']['prescription'];
-            if(!empty($tmp_prescription_params)){
-                $tmp_prescription_params = explode("&", $tmp_prescription_params);
-                $tmp_lens_params = array();
-                foreach ($tmp_prescription_params as $tmp_key => $tmp_value) {
-                    $arr_value = explode("=", $tmp_value);
-                    $tmp_lens_params[$arr_value[0]] = $arr_value[1];
-                }
-                $arr[$key]['prescription_type'] = $tmp_lens_params['prescription_type'];
-                $arr[$key]['od_sph']   = $tmp_lens_params['od_sph'];
-                $arr[$key]['od_cyl']   = $tmp_lens_params['od_cyl'];
-                $arr[$key]['od_axis']   = $tmp_lens_params['od_axis'];
-                $arr[$key]['od_add']   = $tmp_lens_params['od_add'];
-                $arr[$key]['os_sph']   = $tmp_lens_params['os_sph'];
-                $arr[$key]['os_cyl']   = $tmp_lens_params['os_cyl'];
-                $arr[$key]['os_axis']   = $tmp_lens_params['os_axis'];
-                $arr[$key]['os_add']   = $tmp_lens_params['os_add'];
-                if(isset($tmp_lens_params['pdcheck']) && $tmp_lens_params['pdcheck'] == 'on'){  //双pd值
-                    $arr[$key]['pd_r'] = $tmp_lens_params['pd_r'];
-                    $arr[$key]['pd_l'] = $tmp_lens_params['pd_l'];
-                }else{
-                    $arr[$key]['pd_r'] = $tmp_lens_params['pd'];
-                    $arr[$key]['pd_r'] = $tmp_lens_params['pd'];
-                }
-                if(isset($tmp_lens_params['prismcheck']) && $tmp_lens_params['prismcheck'] == 'on'){ //存在斜视
-                    $arr[$key]['od_bd'] = $tmp_lens_params['od_bd'];
-                    $arr[$key]['od_pv'] = $tmp_lens_params['od_pv'];
-                    $arr[$key]['os_pv'] = $tmp_lens_params['os_pv'];
-                    $arr[$key]['os_bd'] = $tmp_lens_params['os_bd'];
-                    $arr[$key]['od_pv_r'] = $tmp_lens_params['od_pv_r'];
-                    $arr[$key]['od_bd_r'] = $tmp_lens_params['od_bd_r'];
-                    $arr[$key]['os_pv_r'] = $tmp_lens_params['os_pv_r'];
-                    $arr[$key]['os_bd_r'] = $tmp_lens_params['os_bd_r'];
-                }else{
-                    $arr[$key]['od_bd'] = "";
-                    $arr[$key]['od_pv'] = "";
-                    $arr[$key]['os_pv'] = "";
-                    $arr[$key]['os_bd'] = "";
-                    $arr[$key]['od_pv_r'] = "";
-                    $arr[$key]['od_bd_r'] = "";
-                    $arr[$key]['os_pv_r'] = "";
-                    $arr[$key]['os_bd_r'] = "";
-                }
-            }else{
-                $arr[$key]['prescription_type'] = "";
-                $arr[$key]['od_sph']   = "";
-                $arr[$key]['od_cyl']   = "";
-                $arr[$key]['od_axis']   = "";
-                $arr[$key]['od_add']   = "";
-                $arr[$key]['os_sph']   = "";
-                $arr[$key]['os_cyl']   = "";
-                $arr[$key]['os_axis']   = "";
-                $arr[$key]['os_add']   = "";
-                $arr[$key]['pd_r'] = "";
-                $arr[$key]['pd_r'] = "";
-                $arr[$key]['od_bd'] = "";
-                $arr[$key]['od_pv'] = "";
-                $arr[$key]['os_pv'] = "";
-                $arr[$key]['os_bd'] = "";
-                $arr[$key]['od_pv_r'] = "";
-                $arr[$key]['od_bd_r'] = "";
-                $arr[$key]['os_pv_r'] = "";
-                $arr[$key]['os_bd_r'] = "";
-            }
-            //$arr[$key]['product'] = $tmp_product_options;
-
-        }
-        $result['item'] = $arr;
-        dump($arr);
-    }
-
-
-
 }

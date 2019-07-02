@@ -4,6 +4,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
         index: function () {
             // 初始化表格参数配置
             Table.api.init({
+                searchFormVisible: true,
+                //searchFormTemplate: 'customformtpl',
                 extend: {
                     index_url: 'saleaftermanage/sale_after_task/index' + location.search,
                     add_url: 'saleaftermanage/sale_after_task/add',
@@ -15,7 +17,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             });
 
             var table = $("#table");
-
+            $(document).on('click',".problem_desc_info",function(){
+                var problem_desc = $(this).attr('name');
+                alert(problem_desc);
+                return false;
+            });
             // 初始化表格
             table.bootstrapTable({
                 url: $.fn.bootstrapTable.defaults.extend.index_url,
@@ -24,15 +30,20 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 columns: [
                     [
                         {checkbox: true},
-                        {field: 'id', title: __('Id')},
+                        {field: 'id', title: __('Id'),operate:false},
                         {field: 'task_number', title: __('Task_number')},
-                        {field: 'order_platform', title: __('Order_platform'),formatter: Controller.api.formatter.devicess},
+                        {field:'task_status',title:__('Task_status'),searchList:{0:'未处理',1:'处理中',2:'已完成'},formatter:Controller.api.formatter.task_status},
+                        {field: 'order_platform',searchList:{1:'zeelool',2:'voogueme',3:'nihao'}, title: __('Order_platform'),formatter: Controller.api.formatter.devicess},
                         {field: 'order_number', title: __('Order_number')},
+                        {field: 'customer_name',title:__('Customer_name'),operate:false},
+                        {field: 'customer_email',title:__('Customer_email'),operate:false},
                         {field: 'order_status', title: __('Order_status')},
-                        {field: 'dept_id', title: __('Dept_id')},
-                        {field: 'rep_id', title: __('Rep_id')},
-                        {field: 'prty_id', title: __('Prty_id'),formatter: Controller.api.formatter.device},
+                        {field: 'dept_id', title: __('Dept_id'),operate:false},
+                        {field: 'rep_id', title: __('Rep_id'),operate:false},
+                        {field: 'prty_id', title: __('Prty_id'),searchList: {1:'高级',2:'中级',3:'低级'},formatter: Controller.api.formatter.device},
                         {field: 'sale_after_issue.name', title: __('Problem_id')},
+                        {field: 'problem_desc', title: __('problem_desc'),formatter:Controller.api.formatter.getClear,operate:false},
+                        {field: 'create_person', title: __('Create_person')},
                         {field: 'createtime', title: __('Createtime'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime},
                         {field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate},
                         // {field:'Item_info',title:__('Item_info')},
@@ -60,18 +71,18 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
         },
         api: {
             formatter: {
-                device: function (value, row, index) {
+                device: function (value) {
                     var str = '';
                     if (value == 1) {
-                        str = '高级';
+                        str = '<span style = "color:red;">高级</span>';
                     } else if (value == 2) {
-                        str = '中级';
+                        str = '<span style = "color:blue;">中级</span>';
                     } else if(value == 3){
                         str = '低级';
                     }
                     return str;
                 },
-                devicess:function (value,row,index) {
+                devicess:function (value) {
                     var str2 = '';
                     if(value == 1){
                         str2= 'zeelool';
@@ -81,13 +92,45 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         str2 = 'nihao';
                     }
                     return str2;
-                }
+                },
+                task_status:function (value) {
+                    var task_status = '';
+                    if(value == 0){
+                        task_status = '<span style="color:red;">未处理</span>';
+                    }else if(value == 1){
+                        task_status = '<span style="color:blue;">处理中</span>';
+                    }else{
+                        task_status = '处理完成';
+                    }
+                    return task_status;
+                },
+                getClear:function(value){
+                    if (value == null || value == undefined) {
+                        return '';
+                    } else {
+                        var tem = value
+                            .replace(/&lt;/g, "<")
+                            .replace(/&gt;/g, ">")
+                            .replace(/&quot;/g, "\"")
+                            .replace(/&apos;/g, "'")
+                            .replace(/&amp;/g, "&")
+                            .replace(/&nbsp;/g, '').replace(/<\/?.+?\/?>/g, '').replace(/<[^>]+>/g, "")
+                        if(tem.length<=10){
+                            //console.log(row.id);
+                            return tem;
+                        }else{
+                            return tem.substr(0, 10)+'<span class="problem_desc_info" name = "'+tem+'" style="color:red;">...</span>';
+
+                        }
+                    }
+                },
 
             },
+            //$(document).on('click',"#problem_desc_info");
             bindevent: function () {
                 Form.api.bindevent($("form[role=form]"),function (data,ret) {
-                    console.log(ret);
-                    //location.href= ret.url;
+                    //console.log(ret);
+                    location.href= ret.url;
                 });
                 //查询订单详情并生成任务单号
                 $(document).on('blur','#c-order_number',function(){
