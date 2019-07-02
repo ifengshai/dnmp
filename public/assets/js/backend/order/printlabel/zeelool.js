@@ -26,7 +26,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 columns: [
                     [
                         {checkbox: true},
-                        {field: 'entity_id', title: __('Entity_id')},
+                        {field: 'entity_id', title: __('记录标识')},
                         {field: 'increment_id', title: __('订单号')},
                         {field: 'status', title: __('状态'),searchList: {"processing":__('processing'),"free_processing":__('free_processing')}},
                         {field: 'base_grand_total', title: __('订单金额'), operate:false , formatter: Controller.api.formatter.float_format},

@@ -51,6 +51,8 @@ class Zeelool extends Backend
            
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
+                ->where('custom_print_label', '0')
+                ->where('status', 'in' ,array('free_processing','processing'))                                
                 ->where($where)
                 ->order($sort, $order)
                 ->count();
@@ -61,6 +63,8 @@ class Zeelool extends Backend
                      custom_match_delivery_created_at,custom_print_label,custom_order_prescription,custom_print_label_created_at,custom_service_name';
             $list = $this->model
                 // ->field($field)
+                ->where('custom_print_label', '0')
+                ->where('status', 'in' ,array('free_processing','processing'))                
                 ->where($where)
                 ->order($sort, $order)
                 ->limit($offset, $limit)

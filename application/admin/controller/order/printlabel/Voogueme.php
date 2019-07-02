@@ -50,10 +50,10 @@ class Voogueme extends Backend
                 return $this->selectpage();
             }
 
-            $where = array('custom_print_label','0');
-
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
+                ->where('custom_print_label', '0')
+                ->where('status', 'in' ,array('free_processing','processing'))               
                 ->where($where)
                 ->order($sort, $order)
                 ->count();
@@ -63,6 +63,8 @@ class Voogueme extends Backend
                      custom_is_send_factory,custom_is_delivery,custom_match_frame_created_at,custom_match_lens_created_at,custom_match_factory_created_at,
                      custom_match_delivery_created_at,custom_print_label,custom_order_prescription,custom_print_label_created_at,custom_service_name';
             $list = $this->model
+                ->where('custom_print_label', '0')
+                ->where('status', 'in' ,array('free_processing','processing'))               
                 // ->field($field)
                 ->where($where)
                 ->order($sort, $order)
