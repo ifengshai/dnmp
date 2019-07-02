@@ -26,24 +26,24 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {checkbox: true},
                         {field: 'id', title: __('Id')},
                         {field: 'task_number', title: __('Task_number')},
-                        {field: 'order_platform', title: __('Order_platform')},
+                        {field: 'order_platform', title: __('Order_platform'),formatter: Controller.api.formatter.devicess},
                         {field: 'order_number', title: __('Order_number')},
                         {field: 'order_status', title: __('Order_status')},
                         {field: 'dept_id', title: __('Dept_id')},
                         {field: 'rep_id', title: __('Rep_id')},
-                        {field: 'prty_id', title: __('Prty_id')},
-                        {field: 'problem_id', title: __('Problem_id')},
+                        {field: 'prty_id', title: __('Prty_id'),formatter: Controller.api.formatter.device},
+                        {field: 'sale_after_issue.name', title: __('Problem_id')},
                         {field: 'createtime', title: __('Createtime'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime},
                         {field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate},
-                        {field:'Item_info',title:__('Item_info')},
-                        {field:'Customer_name',title:__('Customer_name')},
-                        {field:'Customer_email',title:__('Customer_email')},
-                        {field:'Item_name',title:__('Item_name')},
-                        {field:'Item_sku',title:__('Item_sku')},
-                        {field:'Item_qty_ordered',title:__('Item_qty_ordered')},
-                        {field:'Recipe_type',title:__('Recipe_type')},
-                        {field:'Lens_type',title:__('Lens_type')},
-                        {field:'Coating_film_type',title:__('Coating_film_type')},
+                        // {field:'Item_info',title:__('Item_info')},
+                        // {field:'Customer_name',title:__('Customer_name')},
+                        // {field:'Customer_email',title:__('Customer_email')},
+                        // {field:'Item_name',title:__('Item_name')},
+                        // {field:'Item_sku',title:__('Item_sku')},
+                        // {field:'Item_qty_ordered',title:__('Item_qty_ordered')},
+                        // {field:'Recipe_type',title:__('Recipe_type')},
+                        // {field:'Lens_type',title:__('Lens_type')},
+                        // {field:'Coating_film_type',title:__('Coating_film_type')},
                     ]
                 ]
             });
@@ -53,13 +53,42 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
         },
         add: function () {
             Controller.api.bindevent();
+
         },
         edit: function () {
             Controller.api.bindevent();
         },
         api: {
+            formatter: {
+                device: function (value, row, index) {
+                    var str = '';
+                    if (value == 1) {
+                        str = '高级';
+                    } else if (value == 2) {
+                        str = '中级';
+                    } else if(value == 3){
+                        str = '低级';
+                    }
+                    return str;
+                },
+                devicess:function (value,row,index) {
+                    var str2 = '';
+                    if(value == 1){
+                        str2= 'zeelool';
+                    }else if(value==2){
+                        str2= 'voogueme';
+                    }else if(value==3){
+                        str2 = 'nihao';
+                    }
+                    return str2;
+                }
+
+            },
             bindevent: function () {
-                Form.api.bindevent($("form[role=form]"));
+                Form.api.bindevent($("form[role=form]"),function (data,ret) {
+                    console.log(ret);
+                    //location.href= ret.url;
+                });
                 //查询订单详情并生成任务单号
                 $(document).on('blur','#c-order_number',function(){
                     var ordertype = $('#c-order_platform').val();
@@ -81,7 +110,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         $('#c-customer_email').val(ret.data.customer_email);
                         var item = ret.data.item;
                         for(var j = 0,len = item.length; j < len; j++){
-                            console.log(item[j]);
+                            //console.log(item[j]);
                             var newItem = item[j];
                             //console.log(newItem.name);
                             $('#customer_info').after(function(){
@@ -94,7 +123,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     '<div class="panel-title">'+
                                     '<label class="control-label col-xs-12 col-sm-3">商品名称:</label>'+
                                     '<div class="col-xs-12 col-sm-8">'+
-                                    '<input  id="c-item_name" data-rule="required" class="form-control" name="row[item_name]" type="text" value="'+ newItem.name+'">'+
+                                    '<input  id="c-item_name"  class="form-control"  type="text" value="'+ newItem.name+'">'+
                                     '</div>'+
                                     '</div>'+
                                     '</div>'+
@@ -102,7 +131,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     '<div class="panel-title">'+
                                     '<label class="control-label col-xs-12 col-sm-3">SKU:</label>'+
                                     '<div class="col-xs-12 col-sm-8">'+
-                                    '<input  id="c-item_sku" data-rule="required" class="form-control" name="row[item_sku]" type="text" value="'+newItem.sku+'">'+
+                                    '<input  id="c-item_sku" class="form-control"  type="text" value="'+newItem.sku+'">'+
                                     '</div>'+
                                     '</div>'+
                                     '</div>'+
@@ -110,7 +139,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     '<div class="panel-title">'+
                                     '<label class="control-label col-xs-12 col-sm-3">数量:</label>'+
                                     '<div class="col-xs-12 col-sm-8">'+
-                                    '<input  id="c-item_qty_ordered" data-rule="required" class="form-control" name="row[item_qty_ordered]" type="text" value="'+newItem.qty_ordered+'">'+
+                                    '<input  id="c-item_qty_ordered"  class="form-control"  type="text" value="'+newItem.qty_ordered+'">'+
                                     '</div>'+
                                     '</div>'+
                                     '</div>'+
@@ -118,7 +147,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     '<div class="panel-title">'+
                                     '<label class="control-label col-xs-12 col-sm-3">处方类型:</label>'+
                                     '<div class="col-xs-12 col-sm-8">'+
-                                    '<input  id="c-recipe_type" data-rule="required" class="form-control" name="row[recipe_type]" type="text" value="">'+
+                                    '<input  id="c-recipe_type"  class="form-control" type="text" value="'+newItem.prescription_type+'">'+
                                     '</div>'+
                                     '</div>'+
                                     '</div>'+
@@ -126,7 +155,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     '<div class="panel-title">'+
                                     '<label class="control-label col-xs-12 col-sm-3">镜片类型:</label>'+
                                     '<div class="col-xs-12 col-sm-8">'+
-                                    '<input  id="c-lens_type" data-rule="required" class="form-control" name="row[lens_type]" type="text" value="">'+
+                                    '<input  id="c-lens_type"  class="form-control"  type="text" value="'+newItem.index_type+'">'+
                                     '</div>'+
                                     '</div>'+
                                     '</div>'+
@@ -134,7 +163,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     '<div class="panel-title">'+
                                     '<label class="control-label col-xs-12 col-sm-3">镀膜类型:</label>'+
                                     '<div class="col-xs-12 col-sm-8">'+
-                                    '<input  id="c-coating_film_type" data-rule="required" class="form-control" name="row[coating_film_type]" type="text" value="">'+
+                                    '<input  id="c-coating_film_type"  class="form-control"  type="text" value="'+newItem.coatiing_name+'">'+
                                     '</div>'+
                                     '</div>'+
                                     '</div>'+
@@ -162,27 +191,27 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     '</tr>'+
                                     '<tr>'+
                                     '<td style="text-align: center">Right(OD)</td>'+
-                                    '<td><input id="c-right_SPH" class="form-control" name="row[purchase_remark]" type="text"></td>'+
-                                    '<td><input id="c-right_CYL" class="form-control" name="row[purchase_remark]" type="text"></td>'+
-                                    '<td><input id="c-right_AXI" class="form-control" name="row[purchase_remark]" type="text"></td>'+
-                                    '<td><input id="c-right_ADD" class="form-control" name="row[purchase_remark]" type="text"></td>'+
-                                    '<td><input id="c-right_PD" class="form-control" name="row[purchase_remark]" type="text"></td>'+
-                                    '<td><input id="c-right_Prism_Horizontal" class="form-control" name="row[purchase_remark]" type="text"></td>'+
-                                    '<td><input id="c-right_" class="form-control" name="row[purchase_remark]" type="text"></td>'+
-                                    '<td><input id="c-purchase_remark" class="form-control" name="row[purchase_remark]" type="text"></td>'+
-                                    '<td><input id="c-purchase_remark" class="form-control" name="row[purchase_remark]" type="text"></td>'+
+                                    '<td><input id="c-right_SPH" class="form-control"  type="text" value="'+newItem.od_sph+'"></td>'+
+                                    '<td><input id="c-right_CYL" class="form-control"  type="text" value="'+newItem.od_cyl+'"></td>'+
+                                    '<td><input id="c-right_AXI" class="form-control"  type="text" value="'+newItem.od_axis+'"></td>'+
+                                    '<td><input id="c-right_ADD" class="form-control"  type="text" value="'+newItem.od_add+'"></td>'+
+                                    '<td><input id="c-right_PD" class="form-control"  type="text" value="'+newItem.pd_r+'"></td>'+
+                                    '<td><input id="c-right_Prism_Horizontal" class="form-control"  type="text" value="'+newItem.od_pv+'"></td>'+
+                                    '<td><input id="c-right_" class="form-control"  type="text" value="'+newItem.od_bd+'"></td>'+
+                                    '<td><input id="c-purchase_remark" class="form-control"  type="text" value="'+newItem.od_pv_r+'"></td>'+
+                                    '<td><input id="c-purchase_remark" class="form-control"  type="text" value="'+newItem.od_bd_r+'"></td>'+
                                     '</tr>'+
                                     '<tr>'+
                                     '<td style="text-align: center">Left(OS)</td>'+
-                                    '<td><input id="c-purchase_remark" class="form-control" name="row[purchase_remark]" type="text"></td>'+
-                                    '<td><input id="c-purchase_remark" class="form-control" name="row[purchase_remark]" type="text"></td>'+
-                                    '<td><input id="c-purchase_remark" class="form-control" name="row[purchase_remark]" type="text"></td>'+
-                                    '<td><input id="c-purchase_remark" class="form-control" name="row[purchase_remark]" type="text"></td>'+
-                                    '<td><input id="c-purchase_remark" class="form-control" name="row[purchase_remark]" type="text"></td>'+
-                                    '<td><input id="c-purchase_remark" class="form-control" name="row[purchase_remark]" type="text"></td>'+
-                                    '<td><input id="c-purchase_remark" class="form-control" name="row[purchase_remark]" type="text"></td>'+
-                                    '<td><input id="c-purchase_remark" class="form-control" name="row[purchase_remark]" type="text"></td>'+
-                                    '<td><input id="c-purchase_remark" class="form-control" name="row[purchase_remark]" type="text"></td>'+
+                                    '<td><input id="c-left_SPH" class="form-control"  type="text" value="'+newItem.os_sph+'"></td>'+
+                                    '<td><input id="c-left_CYL" class="form-control"  type="text" value="'+newItem.os_cyl+'"></td>'+
+                                    '<td><input id="c-purchase_remark" class="form-control"  type="text" value="'+newItem.os_axis+'"></td>'+
+                                    '<td><input id="c-purchase_remark" class="form-control"  type="text" value="'+newItem.os_add+'"></td>'+
+                                    '<td><input id="c-purchase_remark" class="form-control"  type="text" value="'+newItem.pd_l+'"></td>'+
+                                    '<td><input id="c-purchase_remark" class="form-control"  type="text" value="'+newItem.os_pv+'"></td>'+
+                                    '<td><input id="c-purchase_remark" class="form-control"  type="text" value="'+newItem.os_bd+'"></td>'+
+                                    '<td><input id="c-purchase_remark" class="form-control"  type="text" value="'+newItem.os_pv_r+'"></td>'+
+                                    '<td><input id="c-purchase_remark" class="form-control"  type="text" value="'+newItem.os_bd_r+'"></td>'+
                                     '</tr>'+
                                     '</table>'+
                                     '</div>'+
@@ -192,7 +221,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     '</div>';
                             });
                         };
-                        console.log(ret);
+                        //console.log(ret);
                         //console.log($('#c-order_status').val());
                         return false;
                     }, function(data, ret){
