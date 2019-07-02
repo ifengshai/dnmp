@@ -56,8 +56,8 @@ class Nihao extends Backend
             // dump($where);
             // $base_shipping_amount = 6.95;
             $total = $this->model
-                // ->where('custom_print_label', '0')
-                // ->where('base_shipping_amount', $base_shipping_amount) 
+                ->where('custom_print_label', '0')
+                ->where('status', 'in' ,array('free_processing','processing'))                                
                 ->where($where)
                 ->order($sort, $order)
                 ->count();
@@ -69,8 +69,8 @@ class Nihao extends Backend
             $list = $this->model
                 // ->field($field)
                 ->where($where)
-                // ->where('custom_print_label', '0')
-                // ->where('base_shipping_amount', $base_shipping_amount)
+                ->where('custom_print_label', '0')
+                ->where('status', 'in' ,array('free_processing','processing'))                                
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
