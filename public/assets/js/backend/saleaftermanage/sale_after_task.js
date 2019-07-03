@@ -15,7 +15,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     table: 'sale_after_task',
                 }
             });
-
             var table = $("#table");
             $(document).on('click',".problem_desc_info",function(){
                 var problem_desc = $(this).attr('name');
@@ -33,15 +32,16 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {field: 'id', title: __('Id'),operate:false},
                         {field: 'task_number', title: __('Task_number')},
                         {field:'task_status',title:__('Task_status'),searchList:{0:'未处理',1:'处理中',2:'已完成'},formatter:Controller.api.formatter.task_status},
-                        {field: 'order_platform',searchList:{1:'zeelool',2:'voogueme',3:'nihao'}, title: __('Order_platform'),formatter: Controller.api.formatter.devicess},
+                        {field: 'order_platform',searchList:$.getJSON('saleaftermanage/sale_after_task/getAjaxOrderPlatformList'), title: __('Order_platform'),formatter: Controller.api.formatter.devicess},
+                        {field:'order_source',title:__('Order_source'),searchList:{1:'pc端',2:'web端'},visible: false},
                         {field: 'order_number', title: __('Order_number')},
                         {field: 'customer_name',title:__('Customer_name'),operate:false},
                         {field: 'customer_email',title:__('Customer_email'),operate:false},
-                        {field: 'order_status', title: __('Order_status')},
+                        {field: 'order_status', title: __('Order_status'),searchList:{'canceled':'canceled','closed':'closed','complete':'complete','creditcard_failed':'creditcard_failed','creditcard_pending':'creditcard_pending','free_processing':'free_processing','holded':'holded','payment_review':'payment_review','paypal_canceled_reversal':'paypal_canceled_reversal','paypal_reversed':'paypal_reversed','pending':'pending','processing':'processing'}},
                         {field: 'dept_id', title: __('Dept_id'),operate:false},
                         {field: 'rep_id', title: __('Rep_id'),operate:false},
                         {field: 'prty_id', title: __('Prty_id'),searchList: {1:'高级',2:'中级',3:'低级'},formatter: Controller.api.formatter.device},
-                        {field: 'sale_after_issue.name', title: __('Problem_id')},
+                        {field: 'sale_after_issue.name', title: __('Problem_id'),searchList:$.getJSON('saleaftermanage/sale_after_task/ajaxGetIssueList')},
                         {field: 'problem_desc', title: __('problem_desc'),formatter:Controller.api.formatter.getClear,operate:false},
                         {field: 'create_person', title: __('Create_person')},
                         {field: 'createtime', title: __('Createtime'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime},
@@ -151,6 +151,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         $('#c-order_status').val(ret.data.status);
                         $('#c-customer_name').val(ret.data.customer_firstname+" "+ ret.data.customer_lastname);
                         $('#c-customer_email').val(ret.data.customer_email);
+                        if(ret.data.store_id>=2){
+                            $('#c-order_source').val(2);
+                        }else{
+                            $('#c-order_source').val(1);
+                        }
                         var item = ret.data.item;
                         for(var j = 0,len = item.length; j < len; j++){
                             //console.log(item[j]);

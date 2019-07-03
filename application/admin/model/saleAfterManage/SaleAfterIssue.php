@@ -32,6 +32,13 @@ class SaleAfterIssue extends Model
         //return config('site.level');
         return [1=>'一级问题',2=>'二级问题',3=>'三级问题'];
     }
+
+    /***
+     * 获取问题列表以及当前任务的下级任务
+     * @param $level
+     * @param int $pid
+     * @return array|bool
+     */
     public function getIssueList($level,$pid=0)
     {
         if($level!=0){
@@ -67,8 +74,22 @@ class SaleAfterIssue extends Model
         }
 
     }
-    
 
+    /***
+     * 根据ajax任务获取列表
+     */
+    public function getAjaxIssueList()
+    {
+        $result = $this->field('id,name')->select();
+        if(!$result){
+            return [0=>'问题不存在请添加问题'];
+        }
+        $arr = [];
+        foreach($result as $key=>$val){
+            $arr[$val['id']] = $val['name'];
+        }
+        return $arr;
+    }
     
 
 

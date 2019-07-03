@@ -4,6 +4,7 @@ namespace app\admin\controller\saleAfterManage;
 
 use app\common\controller\Backend;
 use app\admin\model\saleAfterManage\SaleAfterIssue;
+use app\admin\model\platformManage\ManagtoPlatform;
 use think\Request;
 use think\Db;
 
@@ -25,7 +26,7 @@ class SaleAfterTask extends Backend
     {
         parent::_initialize();
         $this->model = new \app\admin\model\saleAfterManage\SaleAfterTask;
-        $this->view->assign("orderPlatformList", $this->model->getOrderPlatformList());
+        $this->view->assign("orderPlatformList", (new ManagtoPlatform())->getOrderPlatformList());
         $this->view->assign("orderStatusList", $this->model->getOrderStatusList());
         $this->view->assign('prtyIdList',$this->model->getPrtyIdList());
         $this->view->assign('issueList',(new SaleAfterIssue())->getIssueList(1,0));
@@ -146,17 +147,57 @@ class SaleAfterTask extends Backend
 
 
     }
+
+    /***
+     * 异步获取订单平台
+     * type 为 2 没有选择平台
+     */
+    public function getAjaxOrderPlatformList()
+    {
+        if($this->request->isAjax()){
+            $json = (new ManagtoPlatform())->getOrderPlatformList();
+            if(!$json){
+                $json = [0=>'请添加订单平台'];
+            }
+            $arrToObject = (object)($json);
+            return json($arrToObject);
+        }else{
+            $arr=[
+                12=>'a',34=>'b',57=>'c',84=>'d',
+            ];
+            $json = json_encode($arr);
+            return $this->success('ok','',$json);
+        }
+    }
+
+    /***
+     * 异步获取问题列表
+     */
+    public function ajaxGetIssueList()
+    {
+        if($this->request->isAjax()){
+            $json = (new SaleAfterIssue())->getAjaxIssueList();
+            if(!$json){
+                $json = [0=>'请先添加任务问题'];
+            }
+            $arrToObject = (object)($json);
+            return json($arrToObject);
+        }else{
+            $arr=[
+                12=>'a',34=>'b',57=>'c',84=>'d',
+            ];
+            $json = json_encode($arr);
+            return $this->success('ok','',$json);
+        }
+
+    }
     public function ceshi()
     {
-        $total = $this->model
-            ->with(['sale_after_issue'])
-            ->count();
 
-        $list = $this->model
-            ->with(['sale_after_issue'])
-            ->select();
-
-        $list = collection($list)->toArray();
-        dump($list);
+        $json = (new ManagtoPlatform())->getOrderPlatformList();
+//        $arr = (object)($json);
+//        dump(json_encode($arr));
+        dump($json);
+        dump(json_encode($json));
     }
 }

@@ -382,6 +382,7 @@ abstract class Connection
             if ($this->isBreak($e)) {
                 return $this->close()->query($sql, $bind, $master, $pdo);
             }
+            var_dump($this->getLastSql());
             throw new PDOException($e, $this->config, $this->getLastsql());
         } catch (\Throwable $e) {
             if ($this->isBreak($e)) {

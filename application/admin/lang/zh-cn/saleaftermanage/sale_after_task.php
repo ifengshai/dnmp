@@ -24,4 +24,5 @@ return [
     'Coating_film_type' => '镀膜类型',
     'Create_person' => '创建人',
     'Task_status'   => '任务状态',
+    'Order_source'  =>'订单来源'
 ];
