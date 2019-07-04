@@ -21,5 +21,8 @@ return [
     'Item_qty_ordered' => '数量',
     'Recipe_type'    => '处方类型',
     'Lens_type'      => '镜片类型',
-    'Coating_film_type' => '镀膜类型'
+    'Coating_film_type' => '镀膜类型',
+    'Create_person' => '创建人',
+    'Task_status'   => '任务状态',
+    'Order_source'  =>'订单来源'
 ];

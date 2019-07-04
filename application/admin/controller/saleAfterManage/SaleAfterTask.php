@@ -4,6 +4,7 @@ namespace app\admin\controller\saleAfterManage;
 
 use app\common\controller\Backend;
 use app\admin\model\saleAfterManage\SaleAfterIssue;
+use app\admin\model\platformManage\ManagtoPlatform;
 use think\Request;
 use think\Db;
 
@@ -20,18 +21,96 @@ class SaleAfterTask extends Backend
      * @var \app\admin\model\saleAfterManage\SaleAfterTask
      */
     protected $model = null;
-
+    protected $relationSearch = true;
     public function _initialize()
     {
         parent::_initialize();
         $this->model = new \app\admin\model\saleAfterManage\SaleAfterTask;
-        $this->view->assign("orderPlatformList", $this->model->getOrderPlatformList());
+        $this->view->assign("orderPlatformList", (new ManagtoPlatform())->getOrderPlatformList());
         $this->view->assign("orderStatusList", $this->model->getOrderStatusList());
         $this->view->assign('prtyIdList',$this->model->getPrtyIdList());
         $this->view->assign('issueList',(new SaleAfterIssue())->getIssueList(1,0));
 
     }
-    
+    /**
+     * 查看
+     */
+    public function index()
+    {
+        //设置过滤方法
+        $this->request->filter(['strip_tags']);
+        if ($this->request->isAjax()) {
+            //如果发送的来源是Selectpage，则转发到Selectpage
+            if ($this->request->request('keyField')) {
+                return $this->selectpage();
+            }
+            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            $total = $this->model
+               ->with(['saleAfterIssue'])
+                ->where($where)
+                ->order($sort, $order)
+                ->count();
+
+            $list = $this->model
+               ->with(['saleAfterIssue'])
+                ->where($where)
+                ->order($sort, $order)
+                ->limit($offset, $limit)
+                ->select();
+
+            $list = collection($list)->toArray();
+            $result = array("total" => $total, "rows" => $list);
+
+            return json($result);
+        }
+        return $this->view->fetch();
+    }
+    /**
+     * 添加
+     */
+    public function add()
+    {
+        if ($this->request->isPost()) {
+            $params = $this->request->post("row/a");
+            if ($params) {
+                $params = $this->preExcludeFields($params);
+
+                if ($this->dataLimit && $this->dataLimitFieldAutoFill) {
+                    $params[$this->dataLimitField] = $this->auth->id;
+                }
+                $result = false;
+                Db::startTrans();
+                try {
+                    //是否采用模型验证
+                    if ($this->modelValidate) {
+                        $name = str_replace("\\model\\", "\\validate\\", get_class($this->model));
+                        $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.add' : $name) : $this->modelValidate;
+                        $this->model->validateFailException(true)->validate($validate);
+                    }
+                    $params['task_number'] = 'CO'.rand(100,999).rand(100,999);
+                    $params['create_person'] = session('admin.username'); //创建人
+                    $result = $this->model->allowField(true)->save($params);
+                    Db::commit();
+                } catch (ValidateException $e) {
+                    Db::rollback();
+                    $this->error($e->getMessage());
+                } catch (PDOException $e) {
+                    Db::rollback();
+                    $this->error($e->getMessage());
+                } catch (Exception $e) {
+                    Db::rollback();
+                    $this->error($e->getMessage());
+                }
+                if ($result !== false) {
+                    $this->success('','/admin/saleaftermanage/sale_after_task/index');
+                } else {
+                    $this->error(__('No rows were inserted'));
+                }
+            }
+            $this->error(__('Parameter %s can not be empty', ''));
+        }
+        return $this->view->fetch();
+    }
     /**
      * 默认生成的控制器所继承的父类中有index/add/edit/del/multi五个基础方法、destroy/restore/recyclebin三个回收站方法
      * 因此在当前控制器中可不用编写增删改查的代码,除非需要自己控制这部分逻辑
@@ -68,31 +147,57 @@ class SaleAfterTask extends Backend
 
 
     }
+
+    /***
+     * 异步获取订单平台
+     * type 为 2 没有选择平台
+     */
+    public function getAjaxOrderPlatformList()
+    {
+        if($this->request->isAjax()){
+            $json = (new ManagtoPlatform())->getOrderPlatformList();
+            if(!$json){
+                $json = [0=>'请添加订单平台'];
+            }
+            $arrToObject = (object)($json);
+            return json($arrToObject);
+        }else{
+            $arr=[
+                12=>'a',34=>'b',57=>'c',84=>'d',
+            ];
+            $json = json_encode($arr);
+            return $this->success('ok','',$json);
+        }
+    }
+
+    /***
+     * 异步获取问题列表
+     */
+    public function ajaxGetIssueList()
+    {
+        if($this->request->isAjax()){
+            $json = (new SaleAfterIssue())->getAjaxIssueList();
+            if(!$json){
+                $json = [0=>'请先添加任务问题'];
+            }
+            $arrToObject = (object)($json);
+            return json($arrToObject);
+        }else{
+            $arr=[
+                12=>'a',34=>'b',57=>'c',84=>'d',
+            ];
+            $json = json_encode($arr);
+            return $this->success('ok','',$json);
+        }
+
+    }
     public function ceshi()
     {
-        $ordertype = 1;
-        $order_number = 12321;
-        if($ordertype<1 || $ordertype>5){ //不在平台之内
-            return  $this->error('选择平台错误，请重新选择','','error',0);
-        }
-        if(!$order_number){
-            return  $this->error('订单号不存在，请重新选择','','error',0);
-        }
-//        switch ($ordertype){
-//            case 1:
-//                $result = Db::connect('db_config1')->table('sales_flat_order')->where('increment_id','=',$order_number)->find();
-//                break;
-//            case 2:
-//                $result = Db::connect('db_config2')->table('sales_flat_order')->where('increment_id','=',$order_number)->find();
-//                break;
-//        }
-        dump(Db::connect('database.db_config1'));
+
+        $json = (new ManagtoPlatform())->getOrderPlatformList();
+//        $arr = (object)($json);
+//        dump(json_encode($arr));
+        dump($json);
+        dump(json_encode($json));
     }
-    public function ceshi2()
-    {
-        echo THINK_VERSION;
-    }
-
-
-
 }
