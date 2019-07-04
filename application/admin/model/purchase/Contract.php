@@ -31,4 +31,12 @@ class Contract extends Model
     {
         return $this->belongsTo('supplier', 'supplier_id')->setEagerlyType(0);;
     }
+
+    /**
+     * 获取合同数据
+     */
+    public function getContractData()
+    {
+        return $this->select();
+    }
 }

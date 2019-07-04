@@ -53,20 +53,20 @@ return [
     'datetime_format' => false,
     // 是否需要进行SQL性能分析
     'sql_explain'     => false,
-    'db_config1' => [
+    'db_zeelool_online' => [
         // 数据库类型
-        'type'        => Env::get('database1.type', 'mysql'),
+        'type'        => Env::get('db_zeelool_online.type', 'mysql'),
         // 服务器地址
-        'hostname'    => Env::get('database1.hostname', '127.0.0.1'),
+        'hostname'    => Env::get('db_zeelool_online.hostname', '127.0.0.1'),
         // 数据库名
-        'database'    => Env::get('database1.database', 'fastadmin'),
+        'database'    => Env::get('db_zeelool_online.database', 'fastadmin'),
         // 数据库用户名
-        'username'    => Env::get('database1.username', 'root'),
+        'username'    => Env::get('db_zeelool_online.username', 'root'),
         // 密码
-        'password'    => Env::get('database1.password', 'root'),
+        'password'    => Env::get('db_zeelool_online.password', 'root'),
         // 数据库编码默认采用utf8
-        'charset'     => Env::get('database1.charset', 'utf8'),
-        'prefix'      => Env::get('database1.prefix', 'fa_'),
+        'charset'     => Env::get('db_zeelool_online.charset', 'utf8'),
+        'prefix'      => Env::get('db_zeelool_online.prefix', 'fa_'),
     ],
     //数据库配置2
     'db_config2' => [

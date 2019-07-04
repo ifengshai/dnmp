@@ -265,8 +265,40 @@ class Contract extends Backend
         return $this->view->fetch();
     }
 
+
     /**
-     * 修改供应商sku状态
+     * 编辑
+     */
+    public function detail($ids = null)
+    {
+        $row = $this->model->get($ids);
+        if (!$row) {
+            $this->error(__('No Results were found'));
+        }
+        
+        $adminIds = $this->getDataLimitAdminIds();
+        if (is_array($adminIds)) {
+            if (!in_array($row[$this->dataLimitField], $adminIds)) {
+                $this->error(__('You have no permission'));
+            }
+        }
+        
+        //查询供应商
+        $supplier = new \app\admin\model\purchase\Supplier;
+        $supplier = $supplier->getSupplierData();
+        $this->assign('supplier', $supplier);
+
+        //查询产品信息
+        $map['contract_id'] = $ids;
+        $item = $this->contract_item->where($map)->select();
+        $this->assign('item', $item);
+
+        $this->view->assign("row", $row);
+        return $this->view->fetch();
+    }
+
+    /**
+     * 审核
      */
     public function setStatus()
     {
@@ -275,12 +307,42 @@ class Contract extends Backend
             $this->error('缺少参数！！');
         }
         $map['id'] = ['in', $ids];
+        $row = $this->model->where($map)->select();
+        foreach($row as $v) {
+            if ($v['status'] !== 1) {
+                $this->error('只有待审核状态才能操作！！');
+            }
+        }
+
         $data['status'] = input('status');
         $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
         if ($res) {
             $this->success();
         } else {
             $this->error('修改失败！！');
+        }
+    }
+
+    /**
+     * 取消
+     */
+    public function cancel()
+    {
+        $ids = $this->request->get("ids");
+        if (!$ids) {
+            $this->error('缺少参数！！');
+        }
+        $row = $this->model->get($ids);
+        if ($row['status'] !== 0) {
+            $this->error('只有新建状态才能取消！！');
+        }
+        $map['id'] = ['in', $ids];
+        $data['status'] = input('status');
+        $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
+        if ($res) {
+            $this->success();
+        } else {
+            $this->error('取消失败！！');
         }
     }
 
