@@ -24,5 +24,11 @@ return [
     'Coating_film_type' => '镀膜类型',
     'Create_person' => '创建人',
     'Task_status'   => '任务状态',
-    'Order_source'  =>'订单来源'
+    'Order_source'  =>'订单来源',
+    'Handle_scheme' => '解决方案',
+    'Handle_task'   =>'处理任务',
+    'Refund_money'  => '退款金额',
+    'Give_coupon'   => '赠送的优惠券',
+    'Tariff'        => '关税',
+    'Make_up_price_order' => '补差价订单号',
 ];

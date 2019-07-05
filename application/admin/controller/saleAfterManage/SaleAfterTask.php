@@ -30,6 +30,7 @@ class SaleAfterTask extends Backend
         $this->view->assign("orderStatusList", $this->model->getOrderStatusList());
         $this->view->assign('prtyIdList',$this->model->getPrtyIdList());
         $this->view->assign('issueList',(new SaleAfterIssue())->getIssueList(1,0));
+        $this->view->assign('getTabList',$this->model->getTabList());
 
     }
     /**
@@ -109,6 +110,63 @@ class SaleAfterTask extends Backend
             }
             $this->error(__('Parameter %s can not be empty', ''));
         }
+        return $this->view->fetch();
+    }
+    /**
+     * 编辑
+     */
+    public function edit($ids = null)
+    {
+        $row = $this->model->get($ids);
+        if (!$row) {
+            $this->error(__('No Results were found'));
+        }
+        echo $row['prty_id'];
+        if($row['task_status'] ==2){ //如果任务已经处理完成
+            $this->error('该任务已经处理完成，无需再次处理');
+        }
+        //dump($row);
+        $adminIds = $this->getDataLimitAdminIds();
+        if (is_array($adminIds)) {
+            if (!in_array($row[$this->dataLimitField], $adminIds)) {
+                $this->error(__('You have no permission'));
+            }
+        }
+        if ($this->request->isPost()) {
+            $params = $this->request->post("row/a");
+            if ($params) {
+                $params = $this->preExcludeFields($params);
+                $result = false;
+                Db::startTrans();
+                try {
+                    //是否采用模型验证
+                    if ($this->modelValidate) {
+                        $name = str_replace("\\model\\", "\\validate\\", get_class($this->model));
+                        $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.edit' : $name) : $this->modelValidate;
+                        $row->validateFailException(true)->validate($validate);
+                    }
+                    $result = $row->allowField(true)->save($params);
+                    Db::commit();
+                } catch (ValidateException $e) {
+                    Db::rollback();
+                    $this->error($e->getMessage());
+                } catch (PDOException $e) {
+                    Db::rollback();
+                    $this->error($e->getMessage());
+                } catch (Exception $e) {
+                    Db::rollback();
+                    $this->error($e->getMessage());
+                }
+                if ($result !== false) {
+                    $this->success();
+                } else {
+                    $this->error(__('No rows were updated'));
+                }
+            }
+            $this->error(__('Parameter %s can not be empty', ''));
+        }
+        $this->view->assign("row", $row);
+        $this->view->assign('SolveScheme',$this->model->getSolveScheme());
         return $this->view->fetch();
     }
     /**

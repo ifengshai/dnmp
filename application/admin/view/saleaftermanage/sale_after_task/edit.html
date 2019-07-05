@@ -2,62 +2,133 @@
 
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">{:__('Task_number')}:</label>
-        <div class="col-xs-12 col-sm-8">
-            <input id="c-task_number" data-rule="required" class="form-control" name="row[task_number]" type="text" value="{$row.task_number|htmlentities}">
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-task_number" data-rule="required" class="form-control" name="row[task_number]" type="text" value="{$row.task_number|htmlentities}" disabled="disabled">
         </div>
-    </div>
-    <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Order_platform')}:</label>
-        <div class="col-xs-12 col-sm-8">
-            <input id="c-order_platform" data-rule="required" class="form-control" name="row[order_platform]" type="number" value="{$row.order_platform|htmlentities}">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Task_status')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            {if $row.task_status eq 0}
+            <input id="c-task_status" data-rule="required" class="form-control" name="row[task_status]" type="text" value="未处理" disabled="disabled">
+            {elseif $row.task_status eq 1 /}
+            <input id="c-task_status" data-rule="required" class="form-control" name="row[task_status]" type="text" value="处理中" disabled="disabled">
+            {else/}
+            <input id="c-task_status" data-rule="required" class="form-control" name="row[task_status]" type="text" value="处理完成" disabled="disabled">
+            {/if}
         </div>
     </div>
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">{:__('Order_number')}:</label>
-        <div class="col-xs-12 col-sm-8">
-            <input id="c-order_number" data-rule="required" class="form-control" name="row[order_number]" type="text" value="{$row.order_number|htmlentities}">
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-order_number" data-rule="required" class="form-control" name="row[order_number]" type="text" value="{$row.order_number|htmlentities}" disabled="disabled">
         </div>
-    </div>
-    <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">{:__('Order_status')}:</label>
-        <div class="col-xs-12 col-sm-8">
-            <input id="c-order_status" data-rule="required" class="form-control" name="row[order_status]" type="number" value="{$row.order_status|htmlentities}">
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-order_status" data-rule="required" class="form-control" name="row[order_status]" type="text" value="{$row.order_status|htmlentities}" disabled="disabled">
         </div>
     </div>
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">{:__('Dept_id')}:</label>
-        <div class="col-xs-12 col-sm-8">
-            <input id="c-dept_id" data-rule="required" data-source="dept/index" class="form-control selectpage" name="row[dept_id]" type="text" value="{$row.dept_id|htmlentities}">
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-dept_id" data-rule="required" data-source="dept/index" class="form-control" name="row[dept_id]" type="text" value="{$row.dept_id|htmlentities}">
         </div>
-    </div>
-    <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">{:__('Rep_id')}:</label>
-        <div class="col-xs-12 col-sm-8">
-            <input id="c-rep_id" data-rule="required" data-source="rep/index" class="form-control selectpage" name="row[rep_id]" type="text" value="{$row.rep_id|htmlentities}">
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-rep_id" data-rule="required" data-source="rep/index" class="form-control" name="row[rep_id]" type="text" value="{$row.rep_id|htmlentities}">
         </div>
     </div>
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">{:__('Prty_id')}:</label>
-        <div class="col-xs-12 col-sm-8">
-            <input id="c-prty_id" data-rule="required" data-source="prty/index" class="form-control selectpage" name="row[prty_id]" type="text" value="{$row.prty_id|htmlentities}">
+        <div class="col-xs-12 col-sm-3">
+                <select  id="c-prty_id" data-rule="required" class="form-control selectpicker" name="row[prty_id]">
+                    {foreach name="prtyIdList" item="vo"}
+                    {if $row.prty_id eq $key}
+                    <option value="{$key}" {in name="key" value="0"}selected{/in}>{$key}</option>
+                    {else /}
+                    <option value="{$key}" {in name="key" value="0"}>{$vo}</option>
+                    {/if}
+                    {/foreach}
+                </select>
+            </div>
+        <label class="control-label col-xs-12 col-sm-2">{:__('Handle_scheme')}:</label>
+            <div class="col-xs-12 col-sm-3">
+                <select  id="c-handle_scheme" data-rule="required" class="form-control selectpicker" name="row[handle_scheme]">
+                    {foreach name="SolveScheme" item="vo"}
+                    <option value="{$key}" {in name="key" value="0"}selected{/in}>{$vo}</option>
+                    {/foreach}
+                </select>
         </div>
     </div>
     <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Problem_id')}:</label>
-        <div class="col-xs-12 col-sm-8">
-            <input id="c-problem_id" data-rule="required" data-source="problem/index" class="form-control selectpage" name="row[problem_id]" type="text" value="{$row.problem_id|htmlentities}">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Refund_money')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-refund_money" data-rule="required" data-source="refund_money/index" class="form-control" name="row[refund_money]" type="text" value="{$row.refund_money|htmlentities}">
         </div>
+        <label class="control-label col-xs-12 col-sm-2">{:__('Give_coupon')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-give_coupon" data-rule="required" data-source="give_coupon/index" class="form-control" name="row[give_coupon]" type="text" value="{$row.give_coupon|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Tariff')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-tariff" data-rule="required" class="form-control" name="row[tariff]" type="number" value="{$row.tariff|htmlentities}">
+        </div>
+        <label class="control-label col-xs-12 col-sm-2">{:__('Make_up_price_order')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-make_up_price_order" data-rule="required" data-source="problem/index" class="form-control" name="row[make_up_price_order]" type="text" value="{$row.make_up_price_order|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="form-group">
+            <label class="control-label col-xs-12 col-sm-2">问题分类:</label>
+        </div>
+        {foreach name="issueList" item="vo"}
+        <div class="form-group">
+            <label class="control-label col-xs-12 col-sm-2">{$vo.name}</label>
+            {if $vo.junior}
+            <div class="radio">
+                {foreach name="$vo.junior" item="issue"}
+                {if $issue.junior}
+                <label for="row[problem_id]-{$issue.id}"><input id="row[problem_id]-{$issue.id}" name="row[problem_id]" type="radio" value="{$issue.id}" {in name="key" value="$vo.junior"}checked{/in} /> <span style="color:green;" id="{$issue.id}" class="issueLevel">{$issue.name}<span></span></label>
+                {else/}
+                <label for="row[problem_id]-{$issue.id}"><input id="row[problem_id]-{$issue.id}" name="row[problem_id]" type="radio" value="{$issue.id}" {in name="key" value="$vo.junior"}checked{/in} /> {$issue.name}</label>
+                {/if}
+                {if $issue.junior}
+                <div class="radio" style="margin-left:20%;display:none;" id="display-{$issue.id}" >
+                    {foreach name="$issue.junior" item="finalIssue"}
+                    <label for="row[problem_id]-{$finalIssue.id}"><input id="row[problem_id]-{$finalIssue.id}" name="row[problem_id]" type="radio" value="{$finalIssue.id}" {in name="key" value="$issue.junior"}checked{/in} /> {$finalIssue.name}</label>
+                    {/foreach}
+                </div>
+                {/if}
+                {/foreach}
+            </div>
+            {/if}
+        </div>
+        {/foreach}
     </div>
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">{:__('Problem_desc')}:</label>
         <div class="col-xs-12 col-sm-8">
-            <textarea id="c-problem_desc" class="form-control " rows="5" name="row[problem_desc]" cols="50">{$row.problem_desc|htmlentities}</textarea>
+            <textarea id="c-problem_desc" class="form-control editor " rows="5" name="row[problem_desc]" cols="50">{$row.problem_desc|htmlentities}</textarea>
         </div>
     </div>
+    <!--<div class="form-group">-->
+        <!--<label class="control-label col-xs-12 col-sm-2">{:__('Upload_photos')}:</label>-->
+        <!--<div class="col-xs-12 col-sm-8">-->
+            <!--<textarea id="c-upload_photos" class="form-control " rows="5" name="row[upload_photos]" cols="50">{$row.upload_photos|htmlentities}</textarea>-->
+        <!--</div>-->
+    <!--</div>-->
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">{:__('Upload_photos')}:</label>
         <div class="col-xs-12 col-sm-8">
-            <textarea id="c-upload_photos" class="form-control " rows="5" name="row[upload_photos]" cols="50">{$row.upload_photos|htmlentities}</textarea>
+            <div class="input-group">
+                <input id="c-upload_photos" data-rule="required" class="form-control" size="50" name="row[upload_photos]" type="text" value="{$row.upload_photos}">
+                <div class="input-group-addon no-border no-padding">
+                    <span><button type="button" id="plupload-upload_photos"   class="btn btn-danger plupload" data-input-id="c-upload_photos" data-mimetype="image/gif,image/jpeg,image/png,image/jpg,image/bmp" data-url="ajax/upload" data-multiple="true" data-preview-id="p-upload_photos" data-maxsize="2M"><i class="fa fa-upload"></i> 上传</button></span>
+                </div>
+                <span class="msg-box n-right" for="c-upload_photos"></span>
+            </div>
+            <ul class="row list-inline plupload-preview" id="p-upload_photos"></ul>
         </div>
     </div>
     <div class="form-group layer-footer">

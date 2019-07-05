@@ -46,7 +46,29 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {field: 'problem_desc', title: __('problem_desc'),formatter:Controller.api.formatter.getClear,operate:false},
                         {field: 'create_person', title: __('Create_person')},
                         {field: 'createtime', title: __('Createtime'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime},
-                        {field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate},
+                        // {field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate,
+                        //     buttons:[{
+                        //         name:'detail',
+                        //     }]
+                        // },
+                        {field: 'buttons', width: "120px", title: __('操作'), table: table,formatter: Table.api.formatter.operate,
+                            buttons: [
+                                {
+                                    name: 'detail',
+                                    title: __('查看详情'),
+                                    classname: 'btn btn-xs btn-primary btn-dialog',
+                                    icon: 'fa fa-list',
+                                    url: 'example/bootstraptable/detail',
+                                    callback: function (data) {
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), {title: "回传数据"});
+                                    },
+                                    visible: function (row) {
+                                        //返回true时按钮显示,返回false隐藏
+                                        return true;
+                                    }
+                                },
+                            ]
+                        },
                         // {field:'Item_info',title:__('Item_info')},
                         // {field:'Customer_name',title:__('Customer_name')},
                         // {field:'Customer_email',title:__('Customer_email')},
@@ -59,7 +81,25 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     ]
                 ]
             });
-
+            $('.panel-heading a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+                var field = $(this).data("field");
+                var value = $(this).data("value");
+                // console.log(field);
+                // console.log(value);
+                // return false;
+                var options = table.bootstrapTable('getOptions');
+                options.pageNumber = 1;
+                options.queryParams = function (params) {
+                    var filter = {};
+                    if (value !== '') {
+                        filter[field] = value;
+                    }
+                    params.filter = JSON.stringify(filter);
+                    return params;
+                };
+                table.bootstrapTable('refresh', {});
+                return false;
+            });
             // 为表格绑定事件
             Table.api.bindevent(table);
         },
@@ -109,7 +149,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     if (value == null || value == undefined) {
                         return '';
                     } else {
-                        var tem = value
+                         var tem = value
                             .replace(/&lt;/g, "<")
                             .replace(/&gt;/g, ">")
                             .replace(/&quot;/g, "\"")
