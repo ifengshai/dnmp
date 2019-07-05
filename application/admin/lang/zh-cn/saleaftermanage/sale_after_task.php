@@ -32,5 +32,6 @@ return [
     'Tariff'        => '关税',
     'Make_up_price_order' => '补差价订单号',
     'Add_remark'    => '添加备注',
-    'Remark_record' => '备注记录'
+    'Remark_record' => '备注记录',
+    'Handle_complete'=> '处理完成'
 ];

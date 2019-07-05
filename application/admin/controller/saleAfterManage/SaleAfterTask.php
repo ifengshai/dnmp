@@ -260,6 +260,28 @@ class SaleAfterTask extends Backend
         }
 
     }
+
+    /***
+     * 异步更新任务状态
+     */
+    public function completeAjax(Request $request)
+    {
+        if($this->request->isAjax()){
+            $idss = $request->post('idss');
+            if(!$idss){
+              return   $this->$this->error('处理失败，请重新尝试');
+            }
+            $data = [];
+            $data['task_status'] = 2;
+            $data['handle_time'] = date("Y-m-d H:i:s",time());
+            $result = $this->model->where('id',$idss)->update($data);
+            if($result !== false){
+              return  $this->success('ok');
+            }
+        }else{
+            return $this->error('请求失败,请勿请求');
+        }
+    }
     public function ceshi()
     {
 

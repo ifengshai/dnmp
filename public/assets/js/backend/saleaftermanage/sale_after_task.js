@@ -84,9 +84,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             $('.panel-heading a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
                 var field = $(this).data("field");
                 var value = $(this).data("value");
-                // console.log(field);
-                // console.log(value);
-                // return false;
                 var options = table.bootstrapTable('getOptions');
                 options.pageNumber = 1;
                 options.queryParams = function (params) {
@@ -109,6 +106,27 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
         },
         edit: function () {
             Controller.api.bindevent();
+            //处理完成
+            $('#button_complete').click(function () {
+                var idss = $('#c-id').val();
+                Layer.confirm(
+                    __('确定要处理完成吗?'),
+                    {icon: 3, title: __('Warning'), offset: 0, shadeClose: true},
+                    function (index) {
+                        Layer.close(index);
+                        Backend.api.ajax({
+                            url:'saleaftermanage/sale_after_task/completeAjax',
+                            data:{idss:idss},
+                        }, function(data, ret){
+                            table.bootstrapTable('refresh');
+                        }, function(data, ret){
+                            console.log('失败的回调');
+                        });
+
+                    }
+                );
+
+            });
         },
         api: {
             formatter: {

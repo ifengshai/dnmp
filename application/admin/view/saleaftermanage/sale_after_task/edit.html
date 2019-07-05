@@ -1,6 +1,36 @@
 <style>
     #remark-table{
         margin-left: 17.5%;
+         border-width: 1px;
+         border-style: solid;
+         border-color: rgba(188, 188, 188, 1);
+         border-radius: 6px;
+    }
+    #remark-table tr {
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+        line-height: 50px;
+    }
+    #remark-table tr th {
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+        text-align: center;
+        font-size: 14px;
+    }
+    #remark-table tr td {
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+    }
+
+    .caigou #caigou-table tr td input {
+
+        width: 150px;
     }
 </style>
 <form id="edit-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
@@ -55,7 +85,7 @@
             <div class="col-xs-12 col-sm-3">
                 <select  id="c-handle_scheme" data-rule="required" class="form-control selectpicker" name="row[handle_scheme]">
                     {foreach name="SolveScheme" item="vo"}
-                    <option value="{$key}" {in name="key" value="0"}selected{/in}>{$vo}</option>
+                    <option value="{$key}" {in name="key" value="$row.handle_scheme"}selected{/in}>{$vo}</option>
                     {/foreach}
                 </select>
         </div>
@@ -130,19 +160,19 @@
     {if $row.task_remark}
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">{:__('Remark_record')}:</label>
-        <table id="remark-table">
+        <table id="remark-table" class="col-xs-12 col-sm-8">
             <tr>
-                <th>序号</td>
-                <th>备注详情</td>
-                <th>操作人</td>
-                <th>操作时间</td>
+                <th style="text-align: center; vertical-align: middle;">序号</td>
+                <th style="text-align: center; vertical-align: middle;">备注详情</td>
+                <th style="text-align: center; vertical-align: middle;">操作人</td>
+                <th style="text-align: center; vertical-align: middle;">操作时间</td>
             </tr>
             {foreach name="row.task_remark" item="vo"}
             <tr>
-                <td>{$vo.id}</td>
-                <td>{$vo.remark_record}</td>
-                <td>{$vo.create_person}</td>
-                <td>{$vo.create_time}</td>
+                <td style="text-align: center; vertical-align: middle;">{$vo.id}</td>
+                <td style="text-align: center; vertical-align: middle;">{$vo.remark_record}</td>
+                <td style="text-align: center; vertical-align: middle;">{$vo.create_person}</td>
+                <td style="text-align: center; vertical-align: middle;">{$vo.create_time}</td>
             </tr>
             {/foreach}
         </table>
@@ -159,6 +189,7 @@
         <div class="col-xs-12 col-sm-8">
             <button type="submit" class="btn btn-success btn-embossed disabled">{:__('OK')}</button>
             <button type="reset" class="btn btn-default btn-embossed">{:__('Reset')}</button>
+            <button type="button" id="button_complete" class="btn btn-success btn-embossed">{:__('Handle_complete')}</button>
         </div>
     </div>
 </form>
