@@ -10,3 +10,5 @@ composer.lock
 .svn
 .vscode
 tryon/*
+test.txt
+test123456.txt
