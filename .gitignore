@@ -9,3 +9,5 @@ composer.lock
 .env
 .svn
 .vscode
+tryon/*
+test.txt
