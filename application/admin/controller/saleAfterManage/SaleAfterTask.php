@@ -5,6 +5,7 @@ namespace app\admin\controller\saleAfterManage;
 use app\common\controller\Backend;
 use app\admin\model\saleAfterManage\SaleAfterIssue;
 use app\admin\model\platformManage\ManagtoPlatform;
+use app\admin\model\saleAfterManage\SaleAfterTaskRemark;
 use think\Request;
 use think\Db;
 
@@ -121,11 +122,9 @@ class SaleAfterTask extends Backend
         if (!$row) {
             $this->error(__('No Results were found'));
         }
-        echo $row['prty_id'];
         if($row['task_status'] ==2){ //如果任务已经处理完成
             $this->error('该任务已经处理完成，无需再次处理');
         }
-        //dump($row);
         $adminIds = $this->getDataLimitAdminIds();
         if (is_array($adminIds)) {
             if (!in_array($row[$this->dataLimitField], $adminIds)) {
@@ -134,6 +133,8 @@ class SaleAfterTask extends Backend
         }
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
+            $tid = $params['id'];
+            unset($params['id']);
             if ($params) {
                 $params = $this->preExcludeFields($params);
                 $result = false;
@@ -158,6 +159,14 @@ class SaleAfterTask extends Backend
                     $this->error($e->getMessage());
                 }
                 if ($result !== false) {
+                    $data = [];
+                    $data['tid'] = $tid;
+                    $data['remark_record'] = strip_tags($params['task_remark']);
+                    $data['create_person'] = session('admin.username');
+                    $data['create_time']   = date("Y-m-d H:i:s",time());
+                    if(!empty($data['remark_record'])){ //将操作记录写入数据库
+                        (new SaleAfterTaskRemark())->allowField(true)->save($data);
+                    }
                     $this->success();
                 } else {
                     $this->error(__('No rows were updated'));
@@ -165,6 +174,8 @@ class SaleAfterTask extends Backend
             }
             $this->error(__('Parameter %s can not be empty', ''));
         }
+        //求出本条记录相对应的售后备注记录
+        $row->task_remark = (new SaleAfterTaskRemark())->getRelevanceRecord($ids);
         $this->view->assign("row", $row);
         $this->view->assign('SolveScheme',$this->model->getSolveScheme());
         return $this->view->fetch();

@@ -23,7 +23,8 @@ class SaleAfterTask extends Model
     protected $createTime = 'createtime';
     protected $updateTime = false;
     protected $deleteTime = false;
-
+    //定义任务记录属性
+    protected $task_remark = '';
     // 追加属性
     protected $append = [
     ];
