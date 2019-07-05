@@ -10,3 +10,4 @@ composer.lock
 .svn
 .vscode
 123.php
+tryon/*
