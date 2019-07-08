@@ -260,7 +260,25 @@ class SaleAfterTask extends Backend
         }
 
     }
-
+    /***
+     * 查看任务详情
+     * $param id  任务ID
+     */
+    public function detail(Request $request)
+    {
+        $id = $request->param('ids');
+        if(!$id){
+            $this->error('参数错误，请重新尝试','/admin/saleaftermanage/sale_after_task/index');
+        }
+        $result = $this->model->getTaskDetail($id);
+        if(!$result){
+            $this->error('任务信息不存在，请重新尝试','/admin/saleaftermanage/sale_after_task/index');
+        }
+        //dump($result);
+        $this->view->assign('row',$result);
+        $this->view->assign('orderInfo',$this->model->getOrderInfo($result['order_platform'],$result['order_number']));
+        return $this->view->fetch();
+    }
     /***
      * 异步更新任务状态
      */

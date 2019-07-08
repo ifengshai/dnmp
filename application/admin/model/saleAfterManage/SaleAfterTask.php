@@ -4,6 +4,7 @@ namespace app\admin\model\saleAfterManage;
 
 use think\Model;
 use think\Db;
+use app\admin\model\saleAfterManage\SaleAfterTaskRemark;
 
 
 class SaleAfterTask extends Model
@@ -178,6 +179,24 @@ class SaleAfterTask extends Model
             }
         }
         $result['item'] = $arr;
+        return $result ? $result : false;
+    }
+
+    /***
+     * 任务详情信息
+     * @param id  任务id
+     */
+    public function getTaskDetail($id)
+    {
+        $result = $this->alias('t')->join(' sale_after_issue s','t.problem_id = s.id')->where('t.id','=',$id)->field('t.id,task_status,task_number,order_platform,
+        order_number,order_status,order_source,dept_id,rep_id,prty_id,problem_id,problem_desc,upload_photos,create_person,customer_name,handle_scheme,
+        customer_email,refund_money,give_coupon,tariff,make_up_price_order,t.createtime,s.name')->find();
+        if(!$result){
+            return false;
+        }
+        //$result['problem_desc'] = strip_tags($result['problem_desc']);
+        $result['task_remark'] = (new SaleAfterTaskRemark())->getRelevanceRecord($id);
+        //$result['orderInfo'] = $this->getOrderInfo($result['order_platform'],$result['order_number']);
         return $result ? $result : false;
     }
 

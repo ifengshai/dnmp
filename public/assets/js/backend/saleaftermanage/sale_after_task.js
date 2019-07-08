@@ -29,6 +29,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 columns: [
                     [
                         {checkbox: true},
+                        //{data:("area",["100%","100%"])},
                         {field: 'id', title: __('Id'),operate:false},
                         {field: 'task_number', title: __('Task_number')},
                         {field:'task_status',title:__('Task_status'),searchList:{0:'未处理',1:'处理中',2:'已完成'},formatter:Controller.api.formatter.task_status},
@@ -51,14 +52,16 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         //         name:'detail',
                         //     }]
                         // },
-                        {field: 'buttons', width: "120px", title: __('操作'), table: table,formatter: Table.api.formatter.operate,
+                        {field: 'operate', width: "120px", title: __('操作'), table: table,formatter: Table.api.formatter.operate,
                             buttons: [
                                 {
                                     name: 'detail',
+                                    text: '详情',
                                     title: __('查看详情'),
+                                    extend: 'data-area = \'["100%","100%"]\'',
                                     classname: 'btn btn-xs btn-primary btn-dialog',
                                     icon: 'fa fa-list',
-                                    url: 'example/bootstraptable/detail',
+                                    url: 'saleaftermanage/sale_after_task/detail',
                                     callback: function (data) {
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), {title: "回传数据"});
                                     },
@@ -349,6 +352,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     }
                 });
             }
+        },
+        detail:function(){
+            Form.api.bindevent($("form[role=form]"));
         }
     };
     return Controller;
