@@ -1,0 +1,130 @@
+<form id="edit-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
+
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Status')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-status" data-rule="required" class="form-control" name="row[status]" type="text" value="{$row.status|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Order_platform')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-order_platform" data-rule="required" class="form-control" name="row[order_platform]" type="number" value="{$row.order_platform|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Increment_id')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-increment_id" data-rule="required" data-source="increment/index" class="form-control selectpage" name="row[increment_id]" type="text" value="{$row.increment_id|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Customer_email')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-customer_email" data-rule="required" class="form-control" name="row[customer_email]" type="text" value="{$row.customer_email|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Customer_name')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-customer_name" data-rule="required" class="form-control" name="row[customer_name]" type="text" value="{$row.customer_name|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Return_shipping_number')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-return_shipping_number" data-rule="required" class="form-control" name="row[return_shipping_number]" type="text" value="{$row.return_shipping_number|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Return_remark')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <textarea id="c-return_remark" class="form-control " rows="5" name="row[return_remark]" cols="50">{$row.return_remark|htmlentities}</textarea>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Check_person')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-check_person" data-rule="required" class="form-control" name="row[check_person]" type="text" value="{$row.check_person|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Check_remark')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-check_remark" data-rule="required" class="form-control" name="row[check_remark]" type="text" value="{$row.check_remark|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Check_created_time')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-check_created_time" class="form-control datetimepicker" data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[check_created_time]" type="text" value="{$row.check_created_time}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Stock_person')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-stock_person" data-rule="required" class="form-control" name="row[stock_person]" type="text" value="{$row.stock_person|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Stock_created_time')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-stock_created_time" class="form-control datetimepicker" data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[stock_created_time]" type="text" value="{$row.stock_created_time}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Refund_amount')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-refund_amount" data-rule="required" class="form-control" step="0.01" name="row[refund_amount]" type="number" value="{$row.refund_amount|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Refund_person')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-refund_person" data-rule="required" class="form-control" name="row[refund_person]" type="text" value="{$row.refund_person|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Refund_created_time')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-refund_created_time" class="form-control datetimepicker" data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[refund_created_time]" type="text" value="{$row.refund_created_time}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Final_loss_amount')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-final_loss_amount" data-rule="required" class="form-control" step="0.01" name="row[final_loss_amount]" type="number" value="{$row.final_loss_amount|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Final_loss_remark')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <textarea id="c-final_loss_remark" class="form-control " rows="5" name="row[final_loss_remark]" cols="50">{$row.final_loss_remark|htmlentities}</textarea>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Is_visable')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-is_visable" data-rule="required" class="form-control" name="row[is_visable]" type="number" value="{$row.is_visable|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Created_person')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-created_person" data-rule="required" class="form-control" name="row[created_person]" type="text" value="{$row.created_person|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Created_time')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-created_time" class="form-control datetimepicker" data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[created_time]" type="text" value="{$row.created_time}">
+        </div>
+    </div>
+    <div class="form-group layer-footer">
+        <label class="control-label col-xs-12 col-sm-2"></label>
+        <div class="col-xs-12 col-sm-8">
+            <button type="submit" class="btn btn-success btn-embossed disabled">{:__('OK')}</button>
+            <button type="reset" class="btn btn-default btn-embossed">{:__('Reset')}</button>
+        </div>
+    </div>
+</form>
