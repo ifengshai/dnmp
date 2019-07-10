@@ -28,35 +28,139 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         { field: 'id', title: __('Id') },
                         { field: 'purchase_number', title: __('Purchase_number') },
                         { field: 'purchase_name', title: __('Purchase_name') },
-                        { field: 'purchase_remark', title: __('Purchase_remark') },
-                        { field: 'contract_id', title: __('Contract_id') },
-                        { field: 'supplier_id', title: __('Supplier_id') },
-                        { field: 'item_id', title: __('Item_id') },
-                        { field: 'create_person', title: __('Create_person') },
-                        { field: 'createtime', title: __('Createtime'), operate: 'RANGE', addclass: 'datetimerange' },
-                        { field: 'updatetime', title: __('Updatetime'), operate: 'RANGE', addclass: 'datetimerange' },
                         { field: 'product_total', title: __('Product_total'), operate: 'BETWEEN' },
                         { field: 'purchase_freight', title: __('Purchase_freight'), operate: 'BETWEEN' },
                         { field: 'purchase_total', title: __('Purchase_total'), operate: 'BETWEEN' },
-                        { field: 'settlement_method', title: __('Settlement_method') },
-                        { field: 'deposit_amount', title: __('Deposit_amount'), operate: 'BETWEEN' },
-                        { field: 'final_amount', title: __('Final_amount'), operate: 'BETWEEN' },
-                        { field: 'delivery_stime', title: __('Delivery_stime'), operate: 'RANGE', addclass: 'datetimerange' },
-                        { field: 'delivery_etime', title: __('Delivery_etime'), operate: 'RANGE', addclass: 'datetimerange' },
-                        { field: 'delivery_address', title: __('Delivery_address') },
-                        { field: 'purchase_status', title: __('Purchase_status') },
-                        { field: 'is_add_logistics', title: __('Is_add_logistics') },
-                        { field: 'is_new_product', title: __('Is_new_product') },
-                        { field: 'payment_status', title: __('Payment_status') },
-                        { field: 'payment_images', title: __('Payment_images'), events: Table.api.events.image, formatter: Table.api.formatter.images },
-                        { field: 'payment_money', title: __('Payment_money'), operate: 'BETWEEN' },
-                        { field: 'payment_time', title: __('Payment_time'), operate: 'RANGE', addclass: 'datetimerange' },
-                        { field: 'payment_remark', title: __('Payment_remark') },
-                        { field: 'payment_person', title: __('Payment_person') },
-                        { field: 'check_status', title: __('Check_status') },
-                        { field: 'stock_status', title: __('Stock_status') },
-                        { field: 'return_status', title: __('Return_status') },
-                        { field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate }
+                        {
+                            field: 'purchase_status', title: __('Purchase_status'),
+                            custom: { 0: 'success', 1: 'yellow', 2: 'blue', 3: 'danger', 4: 'gray' },
+                            searchList: { 0: '新建', 1: '待审核', 2: '已通过', 3: '已拒绝', 4: '已取消' },
+                            formatter: Table.api.formatter.status
+                        },
+                        {
+                            field: 'payment_status', title: __('Payment_status'),
+                            custom: { 1: 'danger', 2: 'blue', 3: 'success' },
+                            searchList: { 1: '未付款', 2: '部分付款', 3: '已付款' },
+                            formatter: Table.api.formatter.status
+                        },
+                        {
+                            field: 'check_status', title: __('Check_status'),
+                            custom: { 0: 'danger', 1: 'blue', 2: 'success' },
+                            searchList: { 0: '未质检', 1: '部分质检', 2: '已质检' },
+                            formatter: Table.api.formatter.status
+                        },
+                        {
+                            field: 'stock_status', title: __('Stock_status'),
+                            custom: { 0: 'danger', 1: 'blue', 2: 'success' },
+                            searchList: { 0: '未入库', 1: '部分入库', 2: '已入库' },
+                            formatter: Table.api.formatter.status
+                        },
+                        {
+                            field: 'return_status', title: __('Return_status'),
+                            custom: { 0: 'danger', 1: 'blue', 2: 'success' },
+                            searchList: { 0: '未退回', 1: '部分退回', 2: '已退回' },
+                            formatter: Table.api.formatter.status
+                        },
+                        {
+                            field: 'is_add_logistics', title: __('Is_add_logistics'),
+                            custom: { 0: 'danger', 1: 'success' },
+                            searchList: { 0: '否', 1: '是' },
+                            formatter: Table.api.formatter.status
+                        },
+                        {
+                            field: 'is_new_product', title: __('Is_new_product'),
+                            custom: { 0: 'danger', 1: 'success' },
+                            searchList: { 0: '否', 1: '是' },
+                            formatter: Table.api.formatter.status
+                        },
+                        { field: 'create_person', title: __('Create_person') },
+                        { field: 'createtime', title: __('Createtime'), operate: 'RANGE', addclass: 'datetimerange' },
+                        {
+                            field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [
+                                {
+                                    name: 'detail',
+                                    text: '详情',
+                                    title: __('Detail'),
+                                    classname: 'btn btn-xs  btn-primary  btn-dialog',
+                                    icon: 'fa fa-list',
+                                    url: 'purchase/purchase_order/detail',
+                                    extend: 'data-area = \'["100%","100%"]\'',
+                                    callback: function (data) {
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                    },
+                                    visible: function (row) {
+                                        //返回true时按钮显示,返回false隐藏
+                                        return true;
+                                    }
+                                },
+                                {
+                                    name: 'cancel',
+                                    text: '取消',
+                                    title: '取消',
+                                    classname: 'btn btn-xs btn-danger btn-cancel',
+                                    icon: 'fa fa-remove',
+                                    url: 'purchase/purchase_order/cancel',
+                                    callback: function (data) {
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                    },
+                                    visible: function (row) {
+                                        //返回true时按钮显示,返回false隐藏
+                                        return true;
+                                    }
+                                },
+                                {
+                                    name: 'detail',
+                                    text: '退销',
+                                    title: __('Detail'),
+                                    classname: 'btn btn-xs  btn-success  btn-dialog',
+                                    icon: 'fa fa-plus',
+                                    url: 'purchase/purchase_order/detail',
+                                    extend: 'data-area = \'["100%","100%"]\'',
+                                    callback: function (data) {
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                    },
+                                    visible: function (row) {
+                                        //返回true时按钮显示,返回false隐藏
+                                        return true;
+                                    }
+                                },
+                                {
+                                    name: 'detail',
+                                    text: '录入物流单号',
+                                    title: __('Detail'),
+                                    classname: 'btn btn-xs  btn-success  btn-dialog',
+                                    icon: 'fa fa-plus',
+                                    url: 'purchase/purchase_order/detail',
+                                    extend: 'data-area = \'["100%","100%"]\'',
+                                    callback: function (data) {
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                    },
+                                    visible: function (row) {
+                                        //返回true时按钮显示,返回false隐藏
+                                        return true;
+                                    }
+                                },
+                                {
+                                    name: 'edit',
+                                    text: '',
+                                    title: __('Edit'),
+                                    classname: 'btn btn-xs btn-success btn-dialog',
+                                    icon: 'fa fa-pencil',
+                                    url: 'purchase/purchase_order/edit',
+                                    extend: 'data-area = \'["100%","100%"]\'',
+                                    callback: function (data) {
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                    },
+                                    visible: function (row) {
+                                        //返回true时按钮显示,返回false隐藏
+                                        return true;
+                                    }
+                                }
+
+
+
+                            ], formatter: Table.api.formatter.operate
+                        }
                     ]
                 ]
             });
@@ -76,13 +180,43 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             })
 
 
-            //切换合同 异步获取合同数据
+           
+
+            //异步获取供应商的数据
+            $(document).on('change', '.supplier', function () {
+                var id = $(this).val();
+                Backend.api.ajax({
+                    url: '/admin/purchase/contract/getSupplierData',
+                    data: { id: id }
+                }, function (data, ret) {
+                    $('.supplier_address').val(data.address);
+                });
+            })
+        },
+        edit: function () {
+            Controller.api.bindevent();
+
+            //判断合同是否有默认值
+            var contract_id = $(this).val();
+            if (contract_id) {
+                
+            }
+
+        },
+        api: {
+            bindevent: function () { 
+                $(document).on('click', '.btn-status', function () {
+                    $('.status').val(1);
+                })
+                Form.api.bindevent($("form[role=form]"));
+
+                 //切换合同 异步获取合同数据
             $(document).on('change', '.contract_id', function () {
                 var id = $(this).val();
                 var url = '/admin/purchase/purchase_order/getContractData';
                 Backend.api.ajax({
                     url: url,
-                    data: {id:id}
+                    data: { id: id }
                 }, function (data, ret) {
                     $('.contract_name').val(data.contract_name);
                     $('.delivery_address').val(data.delivery_address);
@@ -107,20 +241,20 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     }
 
                     //总计
-                    var purchase_total = data.total *1 + data.freight*1;
+                    var purchase_total = data.total * 1 + data.freight * 1;
                     $('.purchase_total').val(purchase_total);
 
 
                     //循环展示商品信息
                     var shtml = ' <tr><th>SKU</td><th>产品名称</td><th>供应商sku</td><th>采购数量（个）</td><th>采购单价（元）</td><th>总价（元）</td><th>操作</td></tr>';
                     $('.caigou table tbody').html('');
-                    for(var i in data.item) {
-                        shtml += '<tr><td><input id="c-purchase_remark" class="form-control" name="sku[]" value="'+ data.item[i].sku +'" type="text"></td>'
-                        shtml += '<td><input id="c-purchase_remark" class="form-control" name="product_name[]" value="'+ data.item[i].product_name +'" type="text"></td>'
-                        shtml += '<td><input id="c-purchase_remark" class="form-control" name="supplier_sku[]" value="'+ data.item[i].supplier_sku +'" type="text"></td>'
-                        shtml += '<td><input id="c-purchase_remark" class="form-control" name="purchase_num[]" value="'+ data.item[i].num +'" type="text"></td>'
-                        shtml += '<td><input id="c-purchase_remark" class="form-control" name="purchase_price[]" value="'+ data.item[i].price +'" type="text"></td>'
-                        shtml += '<td><input id="c-purchase_remark" class="form-control" name="purchase_total[]" value="'+ data.item[i].total +'" type="text"></td>'
+                    for (var i in data.item) {
+                        shtml += '<tr><td><input id="c-purchase_remark" class="form-control" name="sku[]" value="' + data.item[i].sku + '" type="text"></td>'
+                        shtml += '<td><input id="c-purchase_remark" class="form-control" name="product_name[]" value="' + data.item[i].product_name + '" type="text"></td>'
+                        shtml += '<td><input id="c-purchase_remark" class="form-control" name="supplier_sku[]" value="' + data.item[i].supplier_sku + '" type="text"></td>'
+                        shtml += '<td><input id="c-purchase_remark" class="form-control" name="purchase_num[]" value="' + data.item[i].num + '" type="text"></td>'
+                        shtml += '<td><input id="c-purchase_remark" class="form-control" name="purchase_price[]" value="' + data.item[i].price + '" type="text"></td>'
+                        shtml += '<td><input id="c-purchase_remark" class="form-control" name="purchase_total[]" value="' + data.item[i].total + '" type="text"></td>'
                         shtml += '<td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i> 删除</a></td>'
                         shtml += '</tr>'
                     }
@@ -128,24 +262,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 });
             })
 
-
-            //异步获取供应商的数据
-            $(document).on('change', '.supplier', function () {
-                var id = $(this).val();
-                Backend.api.ajax({
-                    url: '/admin/purchase/contract/getSupplierData',
-                    data: { id: id }
-                }, function (data, ret) {
-                    $('.supplier_address').val(data.address);    
-                });
-            })
-        },
-        edit: function () {
-            Controller.api.bindevent();
-        },
-        api: {
-            bindevent: function () {
-                Form.api.bindevent($("form[role=form]"));
             }
         }
     };
