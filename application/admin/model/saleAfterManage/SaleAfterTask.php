@@ -4,6 +4,7 @@ namespace app\admin\model\saleAfterManage;
 
 use think\Model;
 use think\Db;
+use app\admin\model\saleAfterManage\SaleAfterTaskRemark;
 
 
 class SaleAfterTask extends Model
@@ -23,10 +24,10 @@ class SaleAfterTask extends Model
     protected $createTime = 'createtime';
     protected $updateTime = false;
     protected $deleteTime = false;
-
+    //定义任务记录属性
+    protected $task_remark = '';
     // 追加属性
     protected $append = [
-
     ];
     //关联模型
     public function saleAfterIssue()
@@ -49,7 +50,28 @@ class SaleAfterTask extends Model
     {
         return [1=>'高',2=>'中',3=>'低'];
     }
-
+    //获取选项卡列表
+    public function getTabList()
+    {
+        return [
+            ['name'=>'我创建的任务','field'=>'create_person','value'=>session('admin.username')],
+            ['name'=>'我的任务','field'=>'rep_id','value'=>session('admin.id')],
+        ];
+    }
+    //获取解决方案列表
+    public function getSolveScheme()
+    {
+      return  [
+          0=>"请选择",
+          1=>"部分退款",
+          2=>"退全款",
+          3=>"补发",
+          4=>"加钱补发",
+          5=>"退款+补发",
+          6=>"折扣买新",
+          7=>"退货"
+      ];
+    }
     /***
      * 根据订单平台和订单号获取订单和订单购买的商品信息
      * @param $ordertype
@@ -157,6 +179,24 @@ class SaleAfterTask extends Model
             }
         }
         $result['item'] = $arr;
+        return $result ? $result : false;
+    }
+
+    /***
+     * 任务详情信息
+     * @param id  任务id
+     */
+    public function getTaskDetail($id)
+    {
+        $result = $this->alias('t')->join(' sale_after_issue s','t.problem_id = s.id')->where('t.id','=',$id)->field('t.id,task_status,task_number,order_platform,
+        order_number,order_status,order_source,dept_id,rep_id,prty_id,problem_id,problem_desc,upload_photos,create_person,customer_name,handle_scheme,
+        customer_email,refund_money,give_coupon,tariff,make_up_price_order,t.createtime,s.name')->find();
+        if(!$result){
+            return false;
+        }
+        //$result['problem_desc'] = strip_tags($result['problem_desc']);
+        $result['task_remark'] = (new SaleAfterTaskRemark())->getRelevanceRecord($id);
+        //$result['orderInfo'] = $this->getOrderInfo($result['order_platform'],$result['order_number']);
         return $result ? $result : false;
     }
 

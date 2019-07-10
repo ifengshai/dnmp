@@ -29,6 +29,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 columns: [
                     [
                         {checkbox: true},
+                        //{data:("area",["100%","100%"])},
                         {field: 'id', title: __('Id'),operate:false},
                         {field: 'task_number', title: __('Task_number')},
                         {field:'task_status',title:__('Task_status'),searchList:{0:'未处理',1:'处理中',2:'已完成'},formatter:Controller.api.formatter.task_status},
@@ -46,7 +47,31 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {field: 'problem_desc', title: __('problem_desc'),formatter:Controller.api.formatter.getClear,operate:false},
                         {field: 'create_person', title: __('Create_person')},
                         {field: 'createtime', title: __('Createtime'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime},
-                        {field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate},
+                        // {field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate,
+                        //     buttons:[{
+                        //         name:'detail',
+                        //     }]
+                        // },
+                        {field: 'operate', width: "120px", title: __('操作'), table: table,formatter: Table.api.formatter.operate,
+                            buttons: [
+                                {
+                                    name: 'detail',
+                                    text: '详情',
+                                    title: __('查看详情'),
+                                    extend: 'data-area = \'["100%","100%"]\'',
+                                    classname: 'btn btn-xs btn-primary btn-dialog',
+                                    icon: 'fa fa-list',
+                                    url: 'saleaftermanage/sale_after_task/detail',
+                                    callback: function (data) {
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), {title: "回传数据"});
+                                    },
+                                    visible: function (row) {
+                                        //返回true时按钮显示,返回false隐藏
+                                        return true;
+                                    }
+                                },
+                            ]
+                        },
                         // {field:'Item_info',title:__('Item_info')},
                         // {field:'Customer_name',title:__('Customer_name')},
                         // {field:'Customer_email',title:__('Customer_email')},
@@ -59,7 +84,22 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     ]
                 ]
             });
-
+            $('.panel-heading a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+                var field = $(this).data("field");
+                var value = $(this).data("value");
+                var options = table.bootstrapTable('getOptions');
+                options.pageNumber = 1;
+                options.queryParams = function (params) {
+                    var filter = {};
+                    if (value !== '') {
+                        filter[field] = value;
+                    }
+                    params.filter = JSON.stringify(filter);
+                    return params;
+                };
+                table.bootstrapTable('refresh', {});
+                return false;
+            });
             // 为表格绑定事件
             Table.api.bindevent(table);
         },
@@ -69,6 +109,27 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
         },
         edit: function () {
             Controller.api.bindevent();
+            //处理完成
+            $('#button_complete').click(function () {
+                var idss = $('#c-id').val();
+                Layer.confirm(
+                    __('确定要处理完成吗?'),
+                    {icon: 3, title: __('Warning'), offset: 0, shadeClose: true},
+                    function (index) {
+                        Layer.close(index);
+                        Backend.api.ajax({
+                            url:'saleaftermanage/sale_after_task/completeAjax',
+                            data:{idss:idss},
+                        }, function(data, ret){
+                            table.bootstrapTable('refresh');
+                        }, function(data, ret){
+                            console.log('失败的回调');
+                        });
+
+                    }
+                );
+
+            });
         },
         api: {
             formatter: {
@@ -109,7 +170,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     if (value == null || value == undefined) {
                         return '';
                     } else {
-                        var tem = value
+                         var tem = value
                             .replace(/&lt;/g, "<")
                             .replace(/&gt;/g, ">")
                             .replace(/&quot;/g, "\"")
@@ -291,6 +352,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     }
                 });
             }
+        },
+        detail:function(){
+            Form.api.bindevent($("form[role=form]"));
         }
     };
     return Controller;

@@ -5,6 +5,7 @@ namespace app\admin\controller\saleAfterManage;
 use app\common\controller\Backend;
 use app\admin\model\saleAfterManage\SaleAfterIssue;
 use app\admin\model\platformManage\ManagtoPlatform;
+use app\admin\model\saleAfterManage\SaleAfterTaskRemark;
 use think\Request;
 use think\Db;
 
@@ -30,6 +31,7 @@ class SaleAfterTask extends Backend
         $this->view->assign("orderStatusList", $this->model->getOrderStatusList());
         $this->view->assign('prtyIdList',$this->model->getPrtyIdList());
         $this->view->assign('issueList',(new SaleAfterIssue())->getIssueList(1,0));
+        $this->view->assign('getTabList',$this->model->getTabList());
 
     }
     /**
@@ -112,6 +114,73 @@ class SaleAfterTask extends Backend
         return $this->view->fetch();
     }
     /**
+     * 编辑
+     */
+    public function edit($ids = null)
+    {
+        $row = $this->model->get($ids);
+        if (!$row) {
+            $this->error(__('No Results were found'));
+        }
+        if($row['task_status'] ==2){ //如果任务已经处理完成
+            $this->error('该任务已经处理完成，无需再次处理');
+        }
+        $adminIds = $this->getDataLimitAdminIds();
+        if (is_array($adminIds)) {
+            if (!in_array($row[$this->dataLimitField], $adminIds)) {
+                $this->error(__('You have no permission'));
+            }
+        }
+        if ($this->request->isPost()) {
+            $params = $this->request->post("row/a");
+            $tid = $params['id'];
+            unset($params['id']);
+            if ($params) {
+                $params = $this->preExcludeFields($params);
+                $result = false;
+                Db::startTrans();
+                try {
+                    //是否采用模型验证
+                    if ($this->modelValidate) {
+                        $name = str_replace("\\model\\", "\\validate\\", get_class($this->model));
+                        $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.edit' : $name) : $this->modelValidate;
+                        $row->validateFailException(true)->validate($validate);
+                    }
+                    $result = $row->allowField(true)->save($params);
+                    Db::commit();
+                } catch (ValidateException $e) {
+                    Db::rollback();
+                    $this->error($e->getMessage());
+                } catch (PDOException $e) {
+                    Db::rollback();
+                    $this->error($e->getMessage());
+                } catch (Exception $e) {
+                    Db::rollback();
+                    $this->error($e->getMessage());
+                }
+                if ($result !== false) {
+                    $data = [];
+                    $data['tid'] = $tid;
+                    $data['remark_record'] = strip_tags($params['task_remark']);
+                    $data['create_person'] = session('admin.username');
+                    $data['create_time']   = date("Y-m-d H:i:s",time());
+                    if(!empty($data['remark_record'])){ //将操作记录写入数据库
+                        (new SaleAfterTaskRemark())->allowField(true)->save($data);
+                    }
+                    $this->success();
+                } else {
+                    $this->error(__('No rows were updated'));
+                }
+            }
+            $this->error(__('Parameter %s can not be empty', ''));
+        }
+        //求出本条记录相对应的售后备注记录
+        $row->task_remark = (new SaleAfterTaskRemark())->getRelevanceRecord($ids);
+        $this->view->assign("row", $row);
+        $this->view->assign('SolveScheme',$this->model->getSolveScheme());
+        return $this->view->fetch();
+    }
+    /**
      * 默认生成的控制器所继承的父类中有index/add/edit/del/multi五个基础方法、destroy/restore/recyclebin三个回收站方法
      * 因此在当前控制器中可不用编写增删改查的代码,除非需要自己控制这部分逻辑
      * 需要将application/admin/library/traits/Backend.php中对应的方法复制到当前控制器,然后进行修改
@@ -190,6 +259,46 @@ class SaleAfterTask extends Backend
             return $this->success('ok','',$json);
         }
 
+    }
+    /***
+     * 查看任务详情
+     * $param id  任务ID
+     */
+    public function detail(Request $request)
+    {
+        $id = $request->param('ids');
+        if(!$id){
+            $this->error('参数错误，请重新尝试','/admin/saleaftermanage/sale_after_task/index');
+        }
+        $result = $this->model->getTaskDetail($id);
+        if(!$result){
+            $this->error('任务信息不存在，请重新尝试','/admin/saleaftermanage/sale_after_task/index');
+        }
+        //dump($result);
+        $this->view->assign('row',$result);
+        $this->view->assign('orderInfo',$this->model->getOrderInfo($result['order_platform'],$result['order_number']));
+        return $this->view->fetch();
+    }
+    /***
+     * 异步更新任务状态
+     */
+    public function completeAjax(Request $request)
+    {
+        if($this->request->isAjax()){
+            $idss = $request->post('idss');
+            if(!$idss){
+              return   $this->$this->error('处理失败，请重新尝试');
+            }
+            $data = [];
+            $data['task_status'] = 2;
+            $data['handle_time'] = date("Y-m-d H:i:s",time());
+            $result = $this->model->where('id',$idss)->update($data);
+            if($result !== false){
+              return  $this->success('ok');
+            }
+        }else{
+            return $this->error('请求失败,请勿请求');
+        }
     }
     public function ceshi()
     {

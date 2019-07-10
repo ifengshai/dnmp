@@ -1,0 +1,310 @@
+<style>
+    #remark-table{
+        margin-left: 17.5%;
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+    }
+    #remark-table tr {
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+        line-height: 50px;
+    }
+    #remark-table tr th {
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+        text-align: center;
+        font-size: 14px;
+    }
+    #remark-table tr td {
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+    }
+
+    .caigou #caigou-table tr td input {
+
+        width: 150px;
+    }
+</style>
+<form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
+
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Task_number')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-task_number" data-rule="required" class = "form-control" name="row[task_number]" value="{$row.task_number}" disabled="disabled" >
+        </div>
+        <label class="control-label col-xs-12 col-sm-2">{:__('Task_status')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            {if $row.task_status eq 0}
+            <input id="c-task_status" data-rule="required" class = "form-control" name="row[task_status]" value="未处理" disabled="disabled" >
+            {elseif $row.task_status eq 1 /}
+            <input id="c-task_status" data-rule="required" class = "form-control" name="row[task_status]" value="处理中" disabled="disabled" >
+            {else/}
+            <input id="c-task_status" data-rule="required" class = "form-control" name="row[task_status]" value="处理完成" disabled="disabled" >
+            {/if}
+
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Createtime')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-createtime" data-rule="required" class = "form-control" name="row[createtime]" value="{$row.createtime}" disabled="disabled" >
+        </div>
+        <label class="control-label col-xs-12 col-sm-2">{:__('Handle_scheme')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            {if $row.handle_scheme eq 1}
+            <input id="c-handle_scheme" data-rule="required" class = "form-control" name="row[handle_scheme]" value="部分退款" disabled="disabled" >
+            {elseif $row.handle_scheme eq 2 /}
+            <input id="c-handle_scheme" data-rule="required" class = "form-control" name="row[handle_scheme]" value="退全款" disabled="disabled" >
+            {elseif $row.handle_scheme eq 3 /}
+            <input id="c-handle_scheme" data-rule="required" class = "form-control" name="row[handle_scheme]" value="补发" disabled="disabled" >
+            {elseif $row.handle_scheme eq 4 /}
+            <input id="c-handle_scheme" data-rule="required" class = "form-control" name="row[handle_scheme]" value="加钱补发" disabled="disabled" >
+            {elseif $row.handle_scheme eq 5 /}
+            <input id="c-handle_scheme" data-rule="required" class = "form-control" name="row[handle_scheme]" value="退款+补发" disabled="disabled" >
+            {elseif $row.handle_scheme eq 6 /}
+            <input id="c-handle_scheme" data-rule="required" class = "form-control" name="row[handle_scheme]" value="折扣买新" disabled="disabled" >
+            {elseif $row.handle_scheme eq 7 /}
+            <input id="c-handle_scheme" data-rule="required" class = "form-control" name="row[handle_scheme]" value="退货" disabled="disabled" >
+            {else /}
+            <input id="c-handle_scheme" data-rule="required" class = "form-control" name="row[handle_scheme]" value="未选择" disabled="disabled" >
+            {/if}
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Order_number')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-order_number" data-rule="required"  class="form-control" name="row[order_number]" type="text" value="{$row.order_number}" disabled="disabled">
+        </div>
+        <label class="control-label col-xs-12 col-sm-2">{:__('Order_status')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-order_status" data-rule="required"  class="form-control" name="row[order_status]" type="text" value="{$row.order_status}" disabled="disabled">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">问题分类:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-problem_id" data-rule="required"  class="form-control" name="row[problem_id]" type="text" value="{$row.name}" disabled="disabled">
+        </div>
+        <label class="control-label col-xs-12 col-sm-2">{:__('Prty_id')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            {if $row.prty_id eq 1}
+            <input id="c-prty_id" data-rule="required"  class="form-control" name="row[prty_id]" type="text" value="高" disabled="disabled">
+            {elseif $row.prty_id eq 2}
+            <input id="c-prty_id" data-rule="required"  class="form-control" name="row[prty_id]" type="text" value="中" disabled="disabled">
+            {else/}
+            <input id="c-prty_id" data-rule="required"  class="form-control" name="row[prty_id]" type="text" value="低" disabled="disabled">
+            {/if}
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Dept_id')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-dept_id" data-rule="required"  class="form-control" name="row[dept_id]" type="text" value="{$row.dept_id}" disabled="disabled">
+        </div>
+        <label class="control-label col-xs-12 col-sm-2">{:__('Rep_id')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-Rep_id" data-rule="required"  class="form-control" name="row[Rep_id]" type="text" value="{$row.rep_id}" disabled="disabled">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Refund_money')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-refund_money" data-rule="required"  class="form-control" name="row[refund_money]" type="text" value="{$row.refund_money}" disabled="disabled">
+        </div>
+        <label class="control-label col-xs-12 col-sm-2">{:__('Tariff')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-tariff" data-rule="required"  class="form-control" name="row[tariff]" type="text" value="{$row.tariff}" disabled="disabled">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Give_coupon')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-give_coupon" data-rule="required"  class="form-control" name="row[give_coupon]" type="text" value="{$row.give_coupon}" disabled="disabled">
+        </div>
+        <label class="control-label col-xs-12 col-sm-2">{:__('Make_up_price_order')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-make_up_price_order" data-rule="required"  class="form-control" name="row[make_up_price_order]" type="text" value="{$row.make_up_price_order}" disabled="disabled">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Problem_desc')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <textarea id="c-problem_desc" class="form-control editor " rows="5" name="row[problem_desc]" cols="50">{$row.problem_desc|htmlentities}</textarea>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Upload_photos')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <div class="input-group">
+                <input id="c-upload_photos" data-rule="required" class="form-control" size="50" name="row[upload_photos]" type="text" value="{$row.upload_photos}">
+                <div class="input-group-addon no-border no-padding">
+                    <span><button type="button" id="plupload-upload_photos"   class="btn btn-danger plupload" data-input-id="c-upload_photos" data-mimetype="image/gif,image/jpeg,image/png,image/jpg,image/bmp" data-url="ajax/upload" data-multiple="true" data-preview-id="p-upload_photos" data-maxsize="2M"><i class="fa fa-upload"></i> 上传</button></span>
+                </div>
+                <span class="msg-box n-right" for="c-upload_photos"></span>
+            </div>
+            <ul class="row list-inline plupload-preview" id="p-upload_photos"></ul>
+        </div>
+    </div>
+    {if $row.task_remark}
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Remark_record')}:</label>
+        <table id="remark-table" class="col-xs-12 col-sm-8">
+            <tr>
+                <th style="text-align: center; vertical-align: middle;">序号</td>
+                <th style="text-align: center; vertical-align: middle;">备注详情</td>
+                <th style="text-align: center; vertical-align: middle;">操作人</td>
+                <th style="text-align: center; vertical-align: middle;">操作时间</td>
+            </tr>
+            {foreach name="row.task_remark" item="vo"}
+            <tr>
+                <td style="text-align: center; vertical-align: middle;">{$vo.id}</td>
+                <td style="text-align: center; vertical-align: middle;">{$vo.remark_record}</td>
+                <td style="text-align: center; vertical-align: middle;">{$vo.create_person}</td>
+                <td style="text-align: center; vertical-align: middle;">{$vo.create_time}</td>
+            </tr>
+            {/foreach}
+        </table>
+    </div>
+    {/if}
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Item_info')}:</label>
+        <div class="col-xs-12 col-sm-10">
+            <hr/>
+        </div>
+    </div>
+    <div class="form-group" id="customer_info">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Customer_name')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input  id="c-customer_name" data-rule="required" class="form-control" name="row[customer_name]" disabled="disabled" type="text" value="{$row.customer_name}">
+        </div>
+        <label class="control-label col-xs-12 col-sm-2">{:__('Customer_email')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-customer_email" data-rule="required" class="form-control" name="row[customer_email]" disabled="disabled" type="text" value="{$row.customer_email}">
+            <input id="c-order_source" data-rule="required"   class = "form-control" name="row[order_source]" type="hidden" value="">
+        </div>
+    </div>
+    {if $orderInfo}
+    {foreach name="orderInfo.item" item="vo"}
+    <div class="row item_info" style="margin-top:15px;margin-left:7.6666%;" >
+        <div class="col-lg-12">
+        </div>
+        <div class="col-xs-6 col-md-4">
+            <div class="panel bg-blue">
+                <div class="panel-body">
+                    <div class="panel-title">
+                        <label class="control-label col-xs-12 col-sm-3">商品名称:</label>
+                        <div class="col-xs-12 col-sm-8">
+                            <input  id="c-item_name"  class="form-control"  disabled="disabled" type="text" value="{$vo.name}">
+                        </div>
+                    </div>
+                </div>
+                <div class="panel-body">
+                    <div class="panel-title">
+                        <label class="control-label col-xs-12 col-sm-3">SKU:</label>
+                        <div class="col-xs-12 col-sm-8">
+                            <input  id="c-item_sku" class="form-control" disabled="disabled" type="text" value="{$vo.sku}">
+                        </div>
+                    </div>
+                </div>
+                <div class="panel-body">
+                    <div class="panel-title">
+                        <label class="control-label col-xs-12 col-sm-3">数量:</label>
+                        <div class="col-xs-12 col-sm-8">
+                            <input  id="c-item_qty_ordered"  class="form-control" disabled="disabled" type="text" value="{$vo.qty_ordered}">
+                        </div>
+                    </div>
+                </div>
+                <div class="panel-body">
+                    <div class="panel-title">
+                        <label class="control-label col-xs-12 col-sm-3">处方类型:</label>
+                        <div class="col-xs-12 col-sm-8">
+                            <input  id="c-recipe_type"  class="form-control" disabled="disabled" type="text" value="{$vo.prescription_type}">
+                        </div>
+                    </div>
+                </div>
+                <div class="panel-body">
+                    <div class="panel-title">
+                        <label class="control-label col-xs-12 col-sm-3">镜片类型:</label>
+                        <div class="col-xs-12 col-sm-8">
+                            <input  id="c-lens_type"  class="form-control"  disabled="disabled" type="text" value="{$vo.index_type}">
+                        </div>
+                    </div>
+                </div>
+                <div class="panel-body">
+                    <div class="panel-title">
+                        <label class="control-label col-xs-12 col-sm-3">镀膜类型:</label>
+                        <div class="col-xs-12 col-sm-8">
+                            <input  id="c-coating_film_type"  class="form-control"  disabled="disabled" type="text" value="{$vo.coatiing_name}">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-6 col-md-7">
+            <div class="panel bg-aqua-gradient">
+                <div class="panel-body">
+                    <div class="ibox-title">
+                        <table id="caigou-table">
+                            <tr>
+                                <td colspan="10" style="text-align: center">处方参数</td>
+                            </tr>
+                            <tr>
+                                <td style="text-align: center">参数</td>
+                                <td style="text-align: center">SPH</td>
+                                <td style="text-align: center">CYL</td>
+                                <td style="text-align: center">AXI</td>
+                                <td style="text-align: center">ADD</td>
+                                <td style="text-align: center">PD</td>
+                                <td style="text-align: center">Prism Horizontal</td>
+                                <td style="text-align: center">Base Direction</td>
+                                <td style="text-align: center">Prism Vertical</td>
+                                <td style="text-align: center">Base Direction</td>
+                            </tr>
+                            <tr>
+                                <td style="text-align: center">Right(OD)</td>
+                                <td><input id="c-right_SPH" class="form-control" disabled="disabled"  type="text" value="{$vo.od_sph}"></td>
+                                <td><input id="c-right_CYL" class="form-control" disabled="disabled"  type="text" value="{$vo.od_cyl}"></td>
+                                <td><input id="c-right_AXI" class="form-control" disabled="disabled"  type="text" value="{$vo.od_axis}"></td>
+                                <td><input id="c-right_ADD" class="form-control" disabled="disabled"  type="text" value="{$vo.od_add}"></td>
+                                <td><input id="c-right_PD" class="form-control"  disabled="disabled"  type="text" value="{$vo.pd_r}"></td>
+                                <td><input id="c-right_Prism_Horizontal" class="form-control" disabled="disabled"  type="text" value="{$vo.od_pv}"></td>
+                                <td><input id="c-right_" class="form-control" disabled="disabled"  type="text" value="{$vo.od_bd}"></td>
+                                <td><input id="c-purchase_remark" class="form-control"  disabled="disabled" type="text" value="{$vo.od_pv_r}"></td>
+                                <td><input id="c-purchase_remark" class="form-control"  disabled="disabled"  type="text" value="{$vo.od_bd_r}"></td>
+                            </tr>
+                            <tr>
+                                <td style="text-align: center">Left(OS)</td>
+                                <td><input id="c-left_SPH" class="form-control" disabled="disabled" type="text" value="{$vo.os_sph}"></td>
+                                <td><input id="c-left_CYL" class="form-control" disabled="disabled" type="text" value="{$vo.os_cyl}"></td>
+                                <td><input id="c-purchase_remark" class="form-control" disabled="disabled" type="text" value="{$vo.os_axis}"></td>
+                                <td><input id="c-purchase_remark" class="form-control" disabled="disabled" type="text" value="{$vo.os_add}"></td>
+                                <td><input id="c-purchase_remark" class="form-control" disabled="disabled" type="text" value="{$vo.pd_l}"></td>
+                                <td><input id="c-purchase_remark" class="form-control" disabled="disabled" type="text" value="{$vo.os_pv}"></td>
+                                <td><input id="c-purchase_remark" class="form-control" disabled="disabled" type="text" value="{$vo.os_bd}"></td>
+                                <td><input id="c-purchase_remark" class="form-control" disabled="disabled" type="text" value="{$vo.os_pv_r}"></td>
+                                <td><input id="c-purchase_remark" class="form-control" disabled="disabled" type="text" value="{$vo.os_bd_r}"></td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {/foreach}
+    {/if}
+    <!--<div  class="form-group layer-footer" style="clear:both;">-->
+        <!--<label class="control-label col-xs-12 col-sm-2"></label>-->
+        <!--<div class="col-xs-12 col-sm-8">-->
+            <!--<button type="submit" class="btn btn-success btn-embossed disabled">{:__('OK')}</button>-->
+            <!--<button type="reset" class="btn btn-default btn-embossed">{:__('Reset')}</button>-->
+        <!--</div>-->
+    <!--</div>-->
+</form>
