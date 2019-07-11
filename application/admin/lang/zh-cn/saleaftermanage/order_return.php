@@ -8,7 +8,7 @@ return [
     'Customer_email'         => '客户邮箱',
     'Customer_name'          => '客户姓名',
     'Return_shipping_number' => '退回快递号',
-    'Return_remark'          => '退货备注',
+    'Return_remark'          => '问题描述',
     'Check_person'           => '质检操作人',
     'Check_remark'           => '退款备注',
     'Check_created_time'     => '质检日期',
@@ -23,5 +23,7 @@ return [
     'Create_person'         => '记录创建人',
     'Create_time'           => '创建日期',
     'Issue_id'               =>'退货原因',
-    'Return_order_number'    =>'退货单号'
+    'Return_order_number'    =>'退货单号',
+    'Remark_record'         =>'备注记录',
+    'Add_remark'            =>'添加备注'
 ];

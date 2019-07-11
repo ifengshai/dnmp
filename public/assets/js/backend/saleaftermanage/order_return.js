@@ -16,6 +16,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             });
 
             var table = $("#table");
+            $(".btn-add").data("area", ["100%", "100%"]);
+            table.on('post-body.bs.table', function (e, settings, json, xhr) {
+                $(".btn-editone").data("area", ["100%", "100%"]);
+            });
             $(document).on('click',".problem_desc_info",function(){
                 var problem_desc = $(this).attr('name');
                 alert(problem_desc);
@@ -52,26 +56,42 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         // {field: 'final_loss_amount', title: __('Final_loss_amount'), operate:'BETWEEN'},
                         // {field: 'is_visable', title: __('Is_visable')},
                         //{field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate}
-                        {field: 'operate', width: "120px", title: __('操作'), table: table,formatter: Table.api.formatter.operate,
-                            buttons: [
-                                {
-                                    name: 'detail',
-                                    text: '详情',
-                                    title: __('查看详情'),
-                                    extend: 'data-area = \'["100%","100%"]\'',
-                                    classname: 'btn btn-xs btn-primary btn-dialog',
-                                    icon: 'fa fa-list',
-                                    url: 'saleaftermanage/sale_after_task/detail',
-                                    callback: function (data) {
-                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), {title: "回传数据"});
-                                    },
-                                    visible: function (row) {
-                                        //返回true时按钮显示,返回false隐藏
-                                        return true;
-                                    }
-                                },
-                            ]
-                        },
+                        {
+                            field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate,extend:'data-area = \'["100%","100%"]\'', buttons: [
+                            {
+                                name: 'detail',
+                                text: '详情',
+                                title: __('Detail'),
+                                classname: 'btn btn-xs  btn-primary  btn-dialog',
+                                icon: 'fa fa-list',
+                                url: 'saleaftermanage/order_return/detail',
+                                extend: 'data-area = \'["100%","100%"]\'',
+                                // callback: function (data) {
+                                //     Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                // },
+                                // visible: function (row) {
+                                //     //返回true时按钮显示,返回false隐藏
+                                //     return true;
+                                // }
+                            },
+                            // {
+                            //     name: 'edit',
+                            //     text: '',
+                            //     title: __('Edit'),
+                            //     classname: 'btn btn-xs btn-success btn-dialog',
+                            //     icon: 'fa fa-pencil',
+                            //     url: 'purchase/purchase_order/edit',
+                            //     extend: 'data-area = \'["100%","100%"]\'',
+                            //     callback: function (data) {
+                            //         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                            //     },
+                            //     visible: function (row) {
+                            //         //返回true时按钮显示,返回false隐藏
+                            //         return true;
+                            //     }
+                            // }
+                        ], formatter: Table.api.formatter.operate
+                        }
                     ]
                 ]
             });
@@ -202,6 +222,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     });
                 });
             }
+        },
+        detail:function(){
+            Form.api.bindevent($("form[role=form]"));
         }
     };
     return Controller;
