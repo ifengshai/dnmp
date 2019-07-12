@@ -1,0 +1,107 @@
+<form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Order_platform')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <select  id="c-order_platform" data-rule="required" class="form-control selectpicker" name="row[order_platform]">
+                <option value="0" selected>请选择</option>
+                {foreach name="orderPlatformList" item="vo"}
+                <option value="{$key}" {in name="key" value="0"}selected{/in}>{$vo}</option>
+                {/foreach}
+            </select>
+        </div>
+        <label class="control-label col-xs-12 col-sm-2">{:__('Synergy_order_number')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-synergy_order_number" data-rule="required" class="form-control" name="row[synergy_order_number]" type="text" value="">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Synergy_order_id')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <select id="c-synergy_order_id" data-rule="required"  class="form-control selectpicker" name="row[synergy_order_id]">
+                <option value="0" selected>请选择</option>
+                {foreach name="orderType" item="vo"}
+                <option value="{$key}">{$vo}</option>
+                {/foreach}
+            </select>
+        </div>
+        <label class="control-label col-xs-12 col-sm-2">{:__('Prty_id')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <select  id="c-prty_id" data-rule="required" class="form-control selectpicker" name="row[prty_id]">
+                <option value="0" selected>请选择</option>
+                {foreach name="prtyIdList" item="vo"}
+                <option value="{$key}" {in name="key" value="0"}selected{/in}>{$vo}</option>
+                {/foreach}
+            </select>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Dept_id')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            {:Form::selectpickers('row[dept_id][]', [$deptList],'1', ['data-rule'=>'required'])}
+        </div>
+        <label class="control-label col-xs-12 col-sm-2">{:__('Rep_id')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            {:Form::selectpickers('row[rep_id][]', [$repList],'1', ['data-rule'=>'required'])}
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="form-group">
+            <label class="control-label col-xs-12 col-sm-2">{:__('Synergy_task_id')}:</label>
+        </div>
+        {foreach name="categoryList" item="vo"}
+        <div class="form-group">
+            <label class="control-label col-xs-12 col-sm-2">{$vo.name}</label>
+            {if $vo.junior}
+            <div class="radio">
+                {foreach name="$vo.junior" item="issue"}
+                {if $issue.junior}
+                <label for="row[synergy_task_id]-{$issue.id}"><input id="row[synergy_task_id]-{$issue.id}" name="row[synergy_task_id]" type="radio" value="{$issue.id}" {in name="key" value="$vo.junior"}checked{/in} /> <span style="color:green;" id="{$issue.id}" class="issueLevel">{$issue.name}<span></span></label>
+                {else/}
+                <label for="row[synergy_task_id]-{$issue.id}"><input id="row[synergy_task_id]-{$issue.id}" name="row[synergy_task_id]" type="radio" value="{$issue.id}" {in name="key" value="$vo.junior"}checked{/in} /> {$issue.name}</label>
+                {/if}
+                {if $issue.junior}
+                <div class="radio" style="margin-left:20%;display:none;" id="display-{$issue.id}" >
+                    {foreach name="$issue.junior" item="finalIssue"}
+                    <label for="row[synergy_task_id]-{$finalIssue.id}"><input id="row[synergy_task_id]-{$finalIssue.id}" name="row[synergy_task_id]" type="radio" value="{$finalIssue.id}" {in name="key" value="$issue.junior"}checked{/in} />{$finalIssue.name}</label>
+                    {/foreach}
+                </div>
+                {/if}
+                {/foreach}
+            </div>
+            {/if}
+        </div>
+        {/foreach}
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Problem_desc')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <textarea id="c-problem_desc" class="form-control editor" rows="5" name="row[problem_desc]" cols="50"></textarea>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Upload_photos')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <div class="input-group">
+                <input id="c-upload_photos" data-rule="required" class="form-control" size="50" name="row[upload_photos]" type="text" value="">
+                <div class="input-group-addon no-border no-padding">
+                    <span><button type="button" id="plupload-upload_photos"   class="btn btn-danger plupload" data-input-id="c-upload_photos" data-mimetype="image/gif,image/jpeg,image/png,image/jpg,image/bmp" data-url="ajax/upload" data-multiple="true" data-preview-id="p-upload_photos" data-maxsize="2M"><i class="fa fa-upload"></i> 上传</button></span>
+                </div>
+                <span class="msg-box n-right" for="c-upload_photos"></span>
+            </div>
+            <ul class="row list-inline plupload-preview" id="p-upload_photos"></ul>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Create_time')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-create_time" class="form-control datetimepicker" data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[create_time]" type="text" value="{:date('Y-m-d H:i:s')}">
+        </div>
+    </div>
+    <div class="form-group layer-footer">
+        <label class="control-label col-xs-12 col-sm-2"></label>
+        <div class="col-xs-12 col-sm-8">
+            <button type="submit" class="btn btn-success btn-embossed disabled">{:__('OK')}</button>
+            <button type="reset" class="btn btn-default btn-embossed">{:__('Reset')}</button>
+        </div>
+    </div>
+</form>

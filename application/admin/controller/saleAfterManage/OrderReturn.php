@@ -218,8 +218,9 @@ class OrderReturn extends Backend
             return json($arrToObject);
         }else{
             $arr=[
-                12=>'a',34=>'b',57=>'c',84=>'d',
+                1,2,3
             ];
+            return $arr;
             $json = json_encode($arr);
             return $this->success('ok','',$json);
         }
