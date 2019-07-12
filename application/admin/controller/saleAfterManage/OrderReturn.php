@@ -245,9 +245,9 @@ class OrderReturn extends Backend
         return $this->view->fetch();
     }
     /***
-     * 新建退货单审核通过
+     * 新建退款
      */
-    public function checkPass()
+    public function refund()
     {
 
     }
