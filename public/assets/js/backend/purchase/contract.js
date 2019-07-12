@@ -114,7 +114,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 });
             })
 
-            //审核拒绝
+            //取消
             $(document).on('click', '.btn-cancel', function (e) {
                 e.preventDefault();
                 var url = $(this).attr('href');
