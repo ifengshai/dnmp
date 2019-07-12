@@ -1,0 +1,222 @@
+<form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Order_platform')}:</label>
+        <div class="col-xs-12 col-sm-2">
+            <input id="c-order_platform" data-rule="required" class="form-control" name="row[order_platform]" type="number" value="0">
+        </div>
+        <label class="control-label col-xs-12 col-sm-2">{:__('Original_increment_id')}:</label>
+        <div class="col-xs-12 col-sm-2">
+            <input id="c-original_increment_id" data-rule="required" data-source="original/increment/index" class="form-control selectpage" name="row[original_increment_id]" type="text" value="">
+        </div>
+        <label class="control-label col-xs-12 col-sm-2">{:__('Order_status')}:</label>
+        <div class="col-xs-12 col-sm-2">
+            <input id="c-order_status" data-rule="required"  class="form-control" name="row[order_status]" type="text" value="">
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="form-group">
+            <label class="control-label col-xs-12 col-sm-2">补发原因:</label>
+        </div>
+        {foreach name="issueList" item="vo"}
+        <div class="form-group">
+            <label class="control-label col-xs-12 col-sm-2">{$vo.name}</label>
+            {if $vo.junior}
+            <div class="radio">
+                {foreach name="$vo.junior" item="issue"}
+                {if $issue.junior}
+                <label for="row[problem_id]-{$issue.id}"><input id="row[problem_id]-{$issue.id}" name="row[problem_id]" type="radio" value="{$issue.id}" {in name="key" value="$vo.junior"}checked{/in} /> <span style="color:green;" id="{$issue.id}" class="issueLevel">{$issue.name}<span></span></label>
+                {else/}
+                <label for="row[problem_id]-{$issue.id}"><input id="row[problem_id]-{$issue.id}" name="row[problem_id]" type="radio" value="{$issue.id}" {in name="key" value="$vo.junior"}checked{/in} /> {$issue.name}</label>
+                {/if}
+                {if $issue.junior}
+                <div class="radio" style="margin-left:20%;display:none;" id="display-{$issue.id}" >
+                    {foreach name="$issue.junior" item="finalIssue"}
+                    <label for="row[problem_id]-{$finalIssue.id}"><input id="row[problem_id]-{$finalIssue.id}" name="row[problem_id]" type="radio" value="{$finalIssue.id}" {in name="key" value="$issue.junior"}checked{/in} /> {$finalIssue.name}</label>
+                    {/foreach}
+                </div>
+                {/if}
+                {/foreach}
+            </div>
+            {/if}
+        </div>
+        {/foreach}
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Reissue_type')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-reissue_type" data-rule="required" class="form-control" name="row[reissue_type]" type="number" value="0">
+        </div>
+        <label class="control-label col-xs-12 col-sm-2">{:__('Postage')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-postage" data-rule="required" class="form-control" name="row[postage]" type="number" value="0">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Remark')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <textarea id="c-remark" class="form-control editor" rows="5" name="row[remark]" cols="50"></textarea>
+        </div>
+    </div>
+    <!--<div class="form-group">-->
+        <!--<label class="control-label col-xs-12 col-sm-2">{:__('Final_loss_amount')}:</label>-->
+        <!--<div class="col-xs-12 col-sm-8">-->
+            <!--<input id="c-final_loss_amount" class="form-control" step="0.01" name="row[final_loss_amount]" type="number" value="0.00">-->
+        <!--</div>-->
+    <!--</div>-->
+    <!--<div class="form-group">-->
+        <!--<label class="control-label col-xs-12 col-sm-2">{:__('Final_loss_amount_created_time')}:</label>-->
+        <!--<div class="col-xs-12 col-sm-8">-->
+            <!--<input id="c-final_loss_amount_created_time" class="form-control datetimepicker" data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[final_loss_amount_created_time]" type="text" value="{:date('Y-m-d H:i:s')}">-->
+        <!--</div>-->
+    <!--</div>-->
+    <!--<div class="form-group">-->
+        <!--<label class="control-label col-xs-12 col-sm-2">{:__('Final_loss_remark')}:</label>-->
+        <!--<div class="col-xs-12 col-sm-8">-->
+            <!--<input id="c-final_loss_remark" class="form-control" name="row[final_loss_remark]" type="text" value="">-->
+        <!--</div>-->
+    <!--</div>-->
+    <!--<div class="form-group">-->
+        <!--<label class="control-label col-xs-12 col-sm-2">{:__('Custom_print_label')}:</label>-->
+        <!--<div class="col-xs-12 col-sm-8">-->
+            <!--<input id="c-custom_print_label" class="form-control" name="row[custom_print_label]" type="number" value="0">-->
+        <!--</div>-->
+    <!--</div>-->
+    <!--<div class="form-group">-->
+        <!--<label class="control-label col-xs-12 col-sm-2">{:__('Match_frame')}:</label>-->
+        <!--<div class="col-xs-12 col-sm-8">-->
+            <!--<input id="c-match_frame" class="form-control" name="row[match_frame]" type="number" value="0">-->
+        <!--</div>-->
+    <!--</div>-->
+    <!--<div class="form-group">-->
+        <!--<label class="control-label col-xs-12 col-sm-2">{:__('Match_frame_created_time')}:</label>-->
+        <!--<div class="col-xs-12 col-sm-8">-->
+            <!--<input id="c-match_frame_created_time" class="form-control datetimepicker" data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[match_frame_created_time]" type="text" value="{:date('Y-m-d H:i:s')}">-->
+        <!--</div>-->
+    <!--</div>-->
+    <!--<div class="form-group">-->
+        <!--<label class="control-label col-xs-12 col-sm-2">{:__('Match_lens')}:</label>-->
+        <!--<div class="col-xs-12 col-sm-8">-->
+            <!--<input id="c-match_lens" class="form-control" name="row[match_lens]" type="number" value="0">-->
+        <!--</div>-->
+    <!--</div>-->
+    <!--<div class="form-group">-->
+        <!--<label class="control-label col-xs-12 col-sm-2">{:__('Match_lens_created_at')}:</label>-->
+        <!--<div class="col-xs-12 col-sm-8">-->
+            <!--<input id="c-match_lens_created_at" class="form-control datetimepicker" data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[match_lens_created_at]" type="text" value="{:date('Y-m-d H:i:s')}">-->
+        <!--</div>-->
+    <!--</div>-->
+    <!--<div class="form-group">-->
+        <!--<label class="control-label col-xs-12 col-sm-2">{:__('Send_factory')}:</label>-->
+        <!--<div class="col-xs-12 col-sm-8">-->
+            <!--<input id="c-send_factory" class="form-control" name="row[send_factory]" type="number" value="0">-->
+        <!--</div>-->
+    <!--</div>-->
+    <!--<div class="form-group">-->
+        <!--<label class="control-label col-xs-12 col-sm-2">{:__('Send_factory_created_at')}:</label>-->
+        <!--<div class="col-xs-12 col-sm-8">-->
+            <!--<input id="c-send_factory_created_at" class="form-control datetimepicker" data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[send_factory_created_at]" type="text" value="{:date('Y-m-d H:i:s')}">-->
+        <!--</div>-->
+    <!--</div>-->
+    <!--<div class="form-group">-->
+        <!--<label class="control-label col-xs-12 col-sm-2">{:__('Delivery')}:</label>-->
+        <!--<div class="col-xs-12 col-sm-8">-->
+            <!--<input id="c-delivery" class="form-control" name="row[delivery]" type="number" value="0">-->
+        <!--</div>-->
+    <!--</div>-->
+    <!--<div class="form-group">-->
+        <!--<label class="control-label col-xs-12 col-sm-2">{:__('Delivery_created_at')}:</label>-->
+        <!--<div class="col-xs-12 col-sm-8">-->
+            <!--<input id="c-delivery_created_at" class="form-control datetimepicker" data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[delivery_created_at]" type="text" value="{:date('Y-m-d H:i:s')}">-->
+        <!--</div>-->
+    <!--</div>-->
+    <!--<div class="form-group">-->
+        <!--<label class="control-label col-xs-12 col-sm-2">{:__('Express_delivery')}:</label>-->
+        <!--<div class="col-xs-12 col-sm-8">-->
+            <!--<input id="c-express_delivery" class="form-control" name="row[express_delivery]" type="number" value="0">-->
+        <!--</div>-->
+    <!--</div>-->
+    <!--<div class="form-group">-->
+        <!--<label class="control-label col-xs-12 col-sm-2">{:__('Express_delivery_created_at')}:</label>-->
+        <!--<div class="col-xs-12 col-sm-8">-->
+            <!--<input id="c-express_delivery_created_at" class="form-control datetimepicker" data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[express_delivery_created_at]" type="text" value="{:date('Y-m-d H:i:s')}">-->
+        <!--</div>-->
+    <!--</div>-->
+    <!--<div class="form-group">-->
+        <!--<label class="control-label col-xs-12 col-sm-2">{:__('Is_visable')}:</label>-->
+        <!--<div class="col-xs-12 col-sm-8">-->
+            <!--<input id="c-is_visable" data-rule="required" class="form-control" name="row[is_visable]" type="number" value="1">-->
+        <!--</div>-->
+    <!--</div>-->
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Upload_photos')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <div class="input-group">
+                <input id="c-upload_photos" data-rule="required" class="form-control" size="50" name="row[upload_photos]" type="text" value="">
+                <div class="input-group-addon no-border no-padding">
+                    <span><button type="button" id="plupload-upload_photos"   class="btn btn-danger plupload" data-input-id="c-upload_photos" data-mimetype="image/gif,image/jpeg,image/png,image/jpg,image/bmp" data-url="ajax/upload" data-multiple="true" data-preview-id="p-upload_photos" data-maxsize="2M"><i class="fa fa-upload"></i> 上传</button></span>
+                </div>
+                <span class="msg-box n-right" for="c-upload_photos"></span>
+            </div>
+            <ul class="row list-inline plupload-preview" id="p-upload_photos"></ul>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Created_time')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-created_time" class="form-control datetimepicker" data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[created_time]" type="text" value="{:date('Y-m-d H:i:s')}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Customer_name')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-customer_name" class="form-control" name="row[customer_name]" type="text">
+        </div>
+        <label class="control-label col-xs-12 col-sm-2">{:__('Customer_email')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-customer_email" class="form-control" name="row[customer_email]" type="text">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Country')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-country" data-rule="required" class="form-control" name="row[country]" type="text">
+        </div>
+        <label class="control-label col-xs-12 col-sm-2">{:__('Region')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-region" class="form-control" name="row[region]" type="text">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('City')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <div class='control-relative'><input id="c-city" class="form-control"  name="row[city]" type="text"></div>
+        </div>
+        <label class="control-label col-xs-12 col-sm-2">{:__('Street')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-street" class="form-control" name="row[street]" type="text">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Telephone')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-telephone" class="form-control" name="row[telephone]" type="text">
+        </div>
+        <label class="control-label col-xs-12 col-sm-2">{:__('Postcode')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-postcode" class="form-control" name="row[postcode]" type="text">
+        </div>
+    </div>
+    <div class="form-group" id="customer_info">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Address_remark')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-address_remark" class="form-control" name="row[address_remark]" type="text">
+        </div>
+    </div>
+    <div class="form-group layer-footer">
+        <label class="control-label col-xs-12 col-sm-2"></label>
+        <div class="col-xs-12 col-sm-8">
+            <button type="submit" class="btn btn-success btn-embossed disabled">{:__('OK')}</button>
+            <button type="reset" class="btn btn-default btn-embossed">{:__('Reset')}</button>
+        </div>
+    </div>
+</form>
