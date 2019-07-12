@@ -11,8 +11,9 @@
                         <a href="javascript:;" data-area='["100%","100%"]' class="btn btn-success btn-add {:$auth->check('purchase/purchase_order/add')?'':'hide'}" title="{:__('Add')}" ><i class="fa fa-plus"></i> {:__('Add')}</a>
                         <a href="javascript:;" data-area='["100%","100%"]' class="btn btn-success btn-edit btn-disabled disabled {:$auth->check('purchase/purchase_order/edit')?'':'hide'}" title="{:__('Edit')}" ><i class="fa fa-pencil"></i> {:__('Edit')}</a>
                         <a href="javascript:;" class="btn btn-danger btn-del btn-disabled disabled {:$auth->check('purchase/purchase_order/del')?'':'hide'}" title="{:__('Delete')}" ><i class="fa fa-trash"></i> {:__('Delete')}</a>
-                        <a href="javascript:;" class="btn btn-danger btn-import {:$auth->check('purchase/purchase_order/import')?'':'hide'}" title="{:__('Import')}" id="btn-import-file" data-url="ajax/upload" data-mimetype="csv,xls,xlsx" data-multiple="false"><i class="fa fa-upload"></i> {:__('Import')}</a>
-                   
+                        <!-- <a href="javascript:;" class="btn btn-danger btn-import {:$auth->check('purchase/purchase_order/import')?'':'hide'}" title="{:__('Import')}" id="btn-import-file" data-url="ajax/upload" data-mimetype="csv,xls,xlsx" data-multiple="false"><i class="fa fa-upload"></i> {:__('Import')}</a> -->
+                        <a href="javascript:;" class="btn btn-success btn-open btn-disabled disabled {:$auth->check('purchase/purchase_order/setStatus') ?'':'hide'}" title="审核通过" >审核通过</a>
+                        <a href="javascript:;" class="btn btn-danger btn-close btn-disabled disabled {:$auth->check('purchase/purchase_order/setStatus')?'':'hide'}" title="审核拒绝" >审核拒绝</a>
                     </div>
                     <table id="table" class="table table-striped table-bordered table-hover table-nowrap"
                            data-operate-edit="{:$auth->check('purchase/purchase_order/edit')}" 

@@ -326,9 +326,8 @@ class Contract extends Backend
     /**
      * 取消
      */
-    public function cancel()
+    public function cancel($ids = null)
     {
-        $ids = $this->request->get("ids");
         if (!$ids) {
             $this->error('缺少参数！！');
         }

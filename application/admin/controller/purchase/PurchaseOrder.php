@@ -64,7 +64,7 @@ class PurchaseOrder extends Backend
                     $params['createtime'] = date('Y-m-d H:i:s', time());
                     $result = $this->model->allowField(true)->save($params);
 
-                    //添加合同产品
+                    //添加采购单商品信息
                     if ($result !== false) {
                         $sku = $this->request->post("sku/a");
                         $product_name = $this->request->post("product_name/a");
@@ -137,7 +137,9 @@ class PurchaseOrder extends Backend
         $contract_item = new \app\admin\model\purchase\ContractItem;
         $map['contract_id'] = $id;
         $item = $contract_item->where($map)->select();
-        $data->item = $item;
+        if ($item) {
+            $data->item = $item;
+        }
         if ($data) {
             $this->success('', '', $data);
         } else {
@@ -186,9 +188,9 @@ class PurchaseOrder extends Backend
                         $sku = $this->request->post("sku/a");
                         $product_name = $this->request->post("product_name/a");
                         $supplier_sku = $this->request->post("supplier_sku/a");
-                        $num = $this->request->post("num/a");
-                        $price = $this->request->post("price/a");
-                        $total = $this->request->post("total/a");
+                        $num = $this->request->post("purchase_num/a");
+                        $price = $this->request->post("purchase_price/a");
+                        $total = $this->request->post("purchase_total/a");
                         $item_id = $this->request->post("item_id/a");
                         
                         $data = [];
@@ -196,13 +198,13 @@ class PurchaseOrder extends Backend
                             $data[$k]['sku'] = $v;
                             $data[$k]['supplier_sku'] = $supplier_sku[$k];
                             $data[$k]['product_name'] = $product_name[$k];
-                            $data[$k]['num'] = $num[$k];
-                            $data[$k]['price'] = $price[$k];
-                            $data[$k]['total'] = $total[$k];
+                            $data[$k]['purchase_num'] = $num[$k];
+                            $data[$k]['purchase_price'] = $price[$k];
+                            $data[$k]['purchase_total'] = $total[$k];
                             if (@$item_id[$k]) {
                                 $data[$k]['id'] = $item_id[$k];
                             } else {
-                                $data[$k]['contract_id'] = $ids;
+                                $data[$k]['purchase_id'] = $ids;
                             }
                         }
                         //批量添加
@@ -270,11 +272,79 @@ class PurchaseOrder extends Backend
         $this->assign('supplier', $supplier);
 
         //查询产品信息
-        $map['contract_id'] = $ids;
-        $item = $this->contract_item->where($map)->select();
+        $map['purchase_id'] = $ids;
+        $item = $this->purchase_order_item->where($map)->select();
         $this->assign('item', $item);
+
+        //查询合同
+        $contract = new \app\admin\model\purchase\Contract;
+        $contract_data = $contract->getContractData();
+        $this->assign('contract_data', $contract_data);
 
         $this->view->assign("row", $row);
         return $this->view->fetch();
     }
+
+
+    //删除合同里商品信息
+    public function deleteItem() 
+    {
+        $id = input('id');
+        $res = $this->purchase_order_item->destroy($id);
+        if ($res) {
+            $this->success();
+        } else {
+            $this->error();
+        }
+    }
+
+
+    /**
+     * 审核
+     */
+    public function setStatus()
+    {
+        $ids = $this->request->post("ids/a");
+        if (!$ids) {
+            $this->error('缺少参数！！');
+        }
+        $map['id'] = ['in', $ids];
+        $row = $this->model->where($map)->select();
+        foreach($row as $v) {
+            if ($v['purchase_status'] !== 1) {
+                $this->error('只有待审核状态才能操作！！');
+            }
+        }
+
+        $data['purchase_status'] = input('status');
+        $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
+        if ($res) {
+            $this->success();
+        } else {
+            $this->error('修改失败！！');
+        }
+    }
+
+    /**
+     * 取消
+     */
+    public function cancel($ids = null)
+    {
+        if (!$ids) {
+            $this->error('缺少参数！！');
+        }
+        $row = $this->model->get($ids);
+        if ($row['purchase_status'] !== 0) {
+            $this->error('只有新建状态才能取消！！');
+        }
+        $map['id'] = ['in', $ids];
+        $data['purchase_status'] = input('status');
+        $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
+        if ($res) {
+            $this->success();
+        } else {
+            $this->error('取消失败！！');
+        }
+    }
+
 }
