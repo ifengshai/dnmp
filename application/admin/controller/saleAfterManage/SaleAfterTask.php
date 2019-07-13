@@ -89,8 +89,8 @@ class SaleAfterTask extends Backend
                         $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.add' : $name) : $this->modelValidate;
                         $this->model->validateFailException(true)->validate($validate);
                     }
-                    $params['task_number'] = 'CO'.rand(100,999).rand(100,999);
-                    $params['create_person'] = session('admin.username'); //创建人
+                    $params['task_number'] = 'CO'.date('YmdHis') . rand(100, 999) . rand(100, 999);
+                    $params['create_person'] = session('admin.nickname'); //创建人
                     $result = $this->model->allowField(true)->save($params);
                     Db::commit();
                 } catch (ValidateException $e) {

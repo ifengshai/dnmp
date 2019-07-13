@@ -18,7 +18,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             var table = $("#table");
             $(document).on('click',".problem_desc_info",function(){
                 var problem_desc = $(this).attr('name');
-                alert(problem_desc);
+                Layer.alert(problem_desc);
                 return false;
             });
             // 初始化表格
@@ -199,7 +199,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     var ordertype = $('#c-order_platform').val();
                     var order_number = $('#c-order_number').val();
                     if(ordertype<=0){
-                        alert('请选择正确的平台');
+                        Layer.alert('请选择正确的平台');
                         return false;
                     }
                     Backend.api.ajax({

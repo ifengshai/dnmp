@@ -87,8 +87,8 @@ class OrderReturn extends Backend
                         $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.add' : $name) : $this->modelValidate;
                         $this->model->validateFailException(true)->validate($validate);
                     }
-                    $params['return_order_number'] = 'WRB'.rand(100,999).rand(100,999);
-                    $params['create_person'] = session('admin.username');
+                    $params['return_order_number'] = 'WRB'.date('YmdHis') . rand(100, 999) . rand(100, 999);
+                    $params['create_person'] = session('admin.nickname');
                     $result = $this->model->allowField(true)->save($params);
                     Db::commit();
                 } catch (ValidateException $e) {
@@ -189,7 +189,7 @@ class OrderReturn extends Backend
                         $dataRemark = [];
                         $dataRemark['order_return_id'] = $tid;
                         $dataRemark['remark_record'] = strip_tags($params['task_remark']);
-                        $dataRemark['create_person'] = session('admin.username');
+                        $dataRemark['create_person'] = session('admin.nickname');
                         $dataRemark['create_time']   = date("Y-m-d H:i:s",time());
                         (new OrderReturnRemark())->allowField(true)->save($dataRemark);
                     }
