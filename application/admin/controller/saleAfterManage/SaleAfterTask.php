@@ -3,11 +3,13 @@
 namespace app\admin\controller\saleAfterManage;
 
 use app\common\controller\Backend;
+use app\admin\model\AuthGroup;
 use app\admin\model\saleAfterManage\SaleAfterIssue;
 use app\admin\model\platformManage\ManagtoPlatform;
 use app\admin\model\saleAfterManage\SaleAfterTaskRemark;
 use think\Request;
 use think\Db;
+use fast\Tree;
 
 /**
  * 
@@ -23,10 +25,32 @@ class SaleAfterTask extends Backend
      */
     protected $model = null;
     protected $relationSearch = true;
+    protected $groupdata = [];
     public function _initialize()
     {
         parent::_initialize();
         $this->model = new \app\admin\model\saleAfterManage\SaleAfterTask;
+        //新加内容
+        $this->childrenGroupIds = $this->auth->getChildrenGroupIds(true);
+
+        $groupList = collection(AuthGroup::where('id', 'in', $this->childrenGroupIds)->select())->toArray();
+        Tree::instance()->init($groupList);
+        $result = [];
+        if ($this->auth->isSuperAdmin()) {
+            $result = Tree::instance()->getTreeList(Tree::instance()->getTreeArray(0));
+        } else {
+            $groups = $this->auth->getGroups();
+            foreach ($groups as $m => $n) {
+                $result = array_merge($result, Tree::instance()->getTreeList(Tree::instance()->getTreeArray($n['pid'])));
+            }
+        }
+        $groupName = [];
+        foreach ($result as $k => $v) {
+            $groupName[$v['id']] = $v['name'];
+        }
+        $this->groupdata = $groupName;
+        $this->assignconfig("admin", ['id' => $this->auth->id, 'group_ids' => $this->auth->getGroupIds()]);
+        $this->view->assign('groupdata', $this->groupdata);
         $this->view->assign("orderPlatformList", (new ManagtoPlatform())->getOrderPlatformList());
         $this->view->assign("orderStatusList", $this->model->getOrderStatusList());
         $this->view->assign('prtyIdList',$this->model->getPrtyIdList());

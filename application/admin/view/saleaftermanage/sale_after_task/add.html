@@ -34,7 +34,8 @@
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">{:__('Dept_id')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <input id="c-dept_id" data-rule="required" data-source="dept/index" class="form-control" name="row[dept_id]" type="text" value="">
+            <!--<input id="c-dept_id" data-rule="required" data-source="dept/index" class="form-control" name="row[dept_id]" type="text" value="">-->
+            {:build_select('row[pid]', $groupdata, null, ['class'=>'form-control selectpicker', 'data-rule'=>'required'])}
         </div>
         <label class="control-label col-xs-12 col-sm-2">{:__('Rep_id')}:</label>
         <div class="col-xs-12 col-sm-3">
