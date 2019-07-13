@@ -15,13 +15,19 @@
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">{:__('Level')}:</label>
         <div class="col-xs-12 col-sm-8">
-            <select id="c-level" data-rule="required" class="form-control selectpicker" name="row[level]">
+            <select id="c-level" data-rule="required" class="form-control  selectpicker" data-multiple="true" name="row[level]">
             {foreach name="taskCategory" item="vo"}
             <option value="{$key}" {in name="key" value="1"}selected{/in}>{$vo}</option>
             {/foreach}
             </select>
         </div>
     </div>
+    <!--<div class="form-group">-->
+        <!--<label class="control-label col-xs-12 col-sm-2">{:__('Level')}:</label>-->
+        <!--<div class="col-xs-12 col-sm-8">-->
+            <!--{:Form::selectpickers('row[selectpickers]', [1=>'一级分类',2=>'二级分类',3=>'三级分类'],'1', ['data-rule'=>'required'])}-->
+        <!--</div>-->
+    <!--</div>-->
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">{:__('Create_time')}:</label>
         <div class="col-xs-12 col-sm-8">
