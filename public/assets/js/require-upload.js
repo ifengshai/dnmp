@@ -175,6 +175,7 @@ define(['jquery', 'bootstrap', 'plupload', 'template'], function ($, undefined, 
 
                         //填充ID
                         var input_id = $(that).data("input-id") ? $(that).data("input-id") : "";
+                        console.log(input_id);
                         //预览ID
                         var preview_id = $(that).data("preview-id") ? $(that).data("preview-id") : "";
 
@@ -277,6 +278,7 @@ define(['jquery', 'bootstrap', 'plupload', 'template'], function ($, undefined, 
                             });
                             $("#" + input_id).trigger("change");
                         }
+                        
                         if (preview_id) {
                             // 监听事件
                             $(document.body).on("fa.preview.change", "#" + preview_id, function () {
