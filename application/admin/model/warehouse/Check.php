@@ -8,13 +8,13 @@ use think\Model;
 class Check extends Model
 {
 
-    
+
 
     //数据库
     protected $connection = 'database';
     // 表名
     protected $name = 'check_order';
-    
+
     // 自动写入时间戳字段
     protected $autoWriteTimestamp = 'int';
 
@@ -24,17 +24,17 @@ class Check extends Model
     protected $deleteTime = false;
 
     // 追加属性
-    protected $append = [
+    protected $append = [];
 
-    ];
-    
+    //关联模型
+    public function purchaseOrder()
+    {
+        return $this->belongsTo('app\admin\model\purchase\PurchaseOrder', 'purchase_id')->setEagerlyType(0)->joinType('left');
+    }
 
-    
-
-
-
-
-
-
-
+    //关联模型
+    public function supplier()
+    {
+        return $this->belongsTo('app\admin\model\purchase\Supplier', 'supplier_id')->setEagerlyType(0)->joinType('left');
+    }
 }

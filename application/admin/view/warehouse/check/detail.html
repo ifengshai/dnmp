@@ -59,15 +59,15 @@
             <label class="control-label col-xs-12 col-sm-2">质检单号:</label>
             <div class="col-xs-12 col-sm-8">
                 <input id="c-check_order_number" class="form-control" name="row[check_order_number]"
-                    value="{$check_order_number}" readonly type="text">
+                    value="{$row.check_order_number}" readonly type="text">
             </div>
         </div>
         <div class="form-group">
             <label class="control-label col-xs-12 col-sm-2">质检类型:</label>
             <div class="col-xs-12 col-sm-8">
                 <select name="row[type]" class="form-control type">
-                    <option value="1">采购质检</option>
-                    <option value="2">退货质检</option>
+                    <option value="1" {:$row['type'] == 1 ? 'selected' : ''}>采购质检</option>
+                    <option value="2" {:$row['type'] == 2 ? 'selected' : ''}>退货质检</option>
                 </select>
             </div>
         </div>
@@ -77,7 +77,7 @@
                 <select name="row[purchase_id]" class="form-control purchase_id">
                     <option value="">请选择</option>
                     {foreach $purchase_data as $k => $v}
-                    <option value="{$k}">{$v}</option>
+                    <option value="{$k}" {:$row['purchase_id'] == $k ? 'selected' : ''}>{$v}</option>
                     {/foreach}
                 </select>
             </div>
@@ -88,7 +88,7 @@
                 <select name="row[supplier_id]" class="form-control supplier" required>
                     <option value="">请选择</option>
                     {foreach $supplier as $k => $v}
-                    <option value="{$k}">{$v}</option>
+                    <option value="{$k}" {:$row['supplier_id'] == $k ? 'selected' : ''}>{$v}</option>
                     {/foreach}
                 </select>
 
@@ -98,7 +98,7 @@
             <label class="control-label col-xs-12 col-sm-2">备注:</label>
             <div class="col-xs-12 col-sm-8">
                 <textarea id="c-quality_standard" class="form-control " rows="5" name="row[remark]"
-                    cols="50"></textarea>
+                    cols="50">{$row.remark}</textarea>
             </div>
         </div>
 
@@ -132,24 +132,25 @@
                     <th>上传图片</th>
                     <th>操作</td>
                 </tr>
+                {foreach $item as $k => $v}
                 <tr>
                     <td>
-                        <input id="c-purchase_remark" class="form-control" name="sku[]" type="text">
+                        <input id="c-purchase_remark" class="form-control" name="sku[]" type="text" value="{$v.sku}">
                     </td>
-                    <td><input id="c-purchase_remark" class="form-control" name="product_name[]" type="text"></td>
-                    <td><input id="c-purchase_remark" class="form-control" name="supplier_sku[]" type="text"></td>
-                    <td><input id="c-purchase_remark" class="form-control purchase_num" name="purchase_num[]" type="text"></td>
-                    <td><input id="c-purchase_remark" class="form-control check_num" name="check_num[]" type="text"></td>
-                    <td><input id="c-purchase_remark" class="form-control arrivals_num" name="arrivals_num[]" type="text"></td>
-                    <td><input id="c-purchase_remark" class="form-control quantity_num" name="quantity_num[]" type="text"></td>
-                    <td><input id="c-purchase_remark" class="form-control sample_num" name="sample_num[]" type="text"></td>
+                    <td><input id="c-purchase_remark" class="form-control" name="product_name[]" type="text" value="{$v.product_name}"></td>
+                    <td><input id="c-purchase_remark" class="form-control" name="supplier_sku[]" type="text" value="{$v.supplier_sku}"></td>
+                    <td><input id="c-purchase_remark" class="form-control purchase_num" name="purchase_num[]" type="text" value="{$v.purchase_num}"></td>
+                    <td><input id="c-purchase_remark" class="form-control check_num" name="check_num[]" type="text" value="{$v.check_num}"></td>
+                    <td><input id="c-purchase_remark" class="form-control arrivals_num" name="arrivals_num[]" type="text" value="{$v.arrivals_num}"></td>
+                    <td><input id="c-purchase_remark" class="form-control quantity_num" name="quantity_num[]" type="text" value="{$v.quantity_num}"></td>
+                    <td><input id="c-purchase_remark" class="form-control sample_num" name="sample_num[]" type="text" value="{$v.sample_num}"></td>
                     <td></td>
                     <td></td>
                     <td><input style="width: 260px;" id="c-purchase_remark" class="form-control remark" name="remark[]"
-                            type="text"></td>
+                            type="text" value="{$v.remark}"></td>
                     <td>
                         <input id="c-contract_images" style="width: 260px;" class="form-control unqualified_images"
-                            size="200" readonly name="unqualified_images[]" type="text">
+                            size="200" readonly name="unqualified_images[]" type="text" value="{$v.unqualified_images}">
 
                     </td>
 
@@ -165,6 +166,7 @@
                     </td>
 
                 </tr>
+                {/foreach}
 
             </table>
         </div>
@@ -173,13 +175,6 @@
 
 
 
-    <div class="form-group layer-footer">
-        <label class="control-label col-xs-12 col-sm-2"></label>
-        <div class="col-xs-12 col-sm-8">
-            <button type="submit" class="btn btn-success btn-embossed disabled">{:__('OK')}</button>
-            <button type="reset" class="btn btn-default btn-embossed">{:__('Reset')}</button>
-        </div>
-    </div>
 
 </form>
 
