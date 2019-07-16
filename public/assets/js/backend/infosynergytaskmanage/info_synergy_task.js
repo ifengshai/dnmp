@@ -4,6 +4,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
         index: function () {
             // 初始化表格参数配置
             Table.api.init({
+                searchFormVisible: true,
                 extend: {
                     index_url: 'infosynergytaskmanage/info_synergy_task/index' + location.search,
                     add_url: 'infosynergytaskmanage/info_synergy_task/add',
@@ -24,7 +25,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 columns: [
                     [
                         {checkbox: true},
-                        {field: 'id', title: __('Id')},
+                        {field: 'id', title: __('Id'),operate:false},
                         {field: 'synergy_number', title: __('Synergy_number')},
                         {field: 'synergy_order_id', title: __('Synergy_order_id'),searchList:$.getJSON('infosynergytaskmanage/info_synergy_task/getOrderType'),formatter:Controller.api.formatter.synergyOrderId},
                         // {field: 'synergy_order_id', title: __('哈哈'),searchList:{"1":"haha","2":"呵呵","3":"嘻嘻"},formatter: Table.api.formatter.status},
@@ -32,8 +33,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {field: 'order_platform', title: __('Order_platform'),searchList:$.getJSON('saleaftermanage/sale_after_task/getAjaxOrderPlatformList'),formatter: Controller.api.formatter.orderDevice},
                         {field: 'dept', title: __('Dept_id')},
                         {field: 'rep', title: __('Rep_id')},
-                        {field: 'prty_id', title: __('Prty_id'),searchList: {0:'未选择',1:'高级',2:'中级',3:'低级'},formatter: Controller.api.formatter.prtyDevice},
-                        {field: 'synergy_task_id', title: __('Synergy_task_id'),visible:false},
+                        {field: 'prty_id', title: __('Prty_id'),searchList: {0:'未选择',1:'高级',2:'中级',3:'低级'},formatter: Controller.api.formatter.prtyDevice,operate:false},
+                        {field: 'synergy_task_id', title: __('Synergy_task_id'),visible:false,operate:false},
                         {field: 'info_synergy_task_category.name', title: __('Synergy_task_id'),operate:false},
                         {field: 'create_person', title: __('Create_person')},
                         {field: 'create_time', title: __('Create_time'), operate:'RANGE', addclass:'datetimerange'},
