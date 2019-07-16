@@ -55,7 +55,6 @@ class Ajax extends Backend
         //判断是否已经存在附件
         $sha1 = $file->hash();
         $extparam = $this->request->post();
-
         $upload = Config::get('upload');
 
         preg_match('/(\d+)(\w+)/', $upload['maxsize'], $matches);
@@ -92,7 +91,10 @@ class Ajax extends Backend
             '{.suffix}'  => $suffix ? '.' . $suffix : '',
             '{filemd5}'  => md5_file($fileInfo['tmp_name']),
         ];
-        $savekey = $upload['savekey'];
+        $changeDir = $this->request->get('dir');
+//        dump($changeDir);
+//        //$savekey = $upload['savekey'];
+        $savekey = $changeDir ? "/uploads/{$changeDir}/{year}{mon}{day}/{filemd5}{.suffix}" : $upload['savekey'];
         $savekey = str_replace(array_keys($replaceArr), array_values($replaceArr), $savekey);
 
         $uploadDir = substr($savekey, 0, strripos($savekey, '/') + 1);
