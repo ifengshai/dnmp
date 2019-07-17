@@ -13,5 +13,6 @@ return [
     'Problem_desc'         => '问题描述',
     'Upload_photos'        => '上传的照片',
     'Create_person'        => '创建人',
-    'Create_time'          => '创建时间'
+    'Create_time'          => '创建时间',
+    'Add_remark'           => '添加备注'
 ];
