@@ -37,4 +37,9 @@ class Check extends Model
     {
         return $this->belongsTo('app\admin\model\purchase\Supplier', 'supplier_id')->setEagerlyType(0)->joinType('left');
     }
+
+    public function checkItem()
+    {
+        return $this->hasMany('CheckItem','check_id');
+    }
 }

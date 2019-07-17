@@ -29,6 +29,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         { field: 'check_order_number', title: __('Check_order_number') },
                         { field: 'type', title: __('Type'), custom: { 1: 'success', 2: 'success' }, searchList: { 1: '采购质检', 2: '退货质检' }, formatter: Table.api.formatter.status },
                         { field: 'purchase_order.purchase_number', title: __('Purchase_id') },
+                        { field: 'order_number', title: __('Order_number') },
                         { field: 'supplier.supplier_name', title: __('Supplier_id') },
                         { field: 'remark', title: __('Remark'), operate: false },
                         { field: 'createtime', title: __('Createtime'), operate: 'RANGE', addclass: 'datetimerange' },
@@ -104,6 +105,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             })
 
 
+
         },
         uploads: function () {
             Controller.api.bindevent(function (data, ret) {
@@ -130,9 +132,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 )
             })
 
-            $('.arrivals_num').blur();
-
-
             //删除商品数据
             $(document).on('click', '.btn-del', function () {
                 $(this).parent().parent().remove();
@@ -151,9 +150,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 $('.caigou table tbody').append(content);
             })
         },
-        detail:function(){
+        detail: function () {
             Controller.api.bindevent();
-            $('.arrivals_num').blur();
         },
         api: {
             bindevent: function (success, error) {
@@ -161,6 +159,20 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
 
                 Form.api.bindevent($("form[role=form]"), success, error);
 
+
+                //切换质检类型
+                $(document).on('change', '.type', function () {
+                    var type = $(this).val();
+                    if (type == 1) {
+                        $('.order_number').addClass('hidden');
+                        $('.purchase_id_number').removeClass('hidden');
+                        $('#c-order_number').val('');
+                    } else {
+                        $('.order_number').removeClass('hidden');
+                        $('.purchase_id_number').addClass('hidden');
+                        $('.purchase_id').val('');
+                    }
+                })
 
                 //计算不合格数量及合格率
                 $(document).on('blur', '.arrivals_num', function () {
@@ -170,8 +182,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     var sample_num = $(this).parent().next().next().find('.sample_num').val();
                     var not_quantity_num = arrivals_num * 1 - quantity_num * 1 - sample_num * 1;
 
-                    $(this).parent().next().next().next().text(not_quantity_num);
-                    $(this).parent().next().next().next().next().text(Math.round(quantity_num / check_num * 100, 2) + '%');
+                    $(this).parent().next().next().next().find('input').val(not_quantity_num);
+                    $(this).parent().next().next().next().next().find('input').val(Math.round(quantity_num / check_num * 100, 2));
                 })
 
                 //计算不合格数量及合格率
@@ -182,8 +194,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     var sample_num = $(this).parent().next().find('.sample_num').val();
                     var not_quantity_num = arrivals_num * 1 - quantity_num * 1 - sample_num * 1;
 
-                    $(this).parent().next().next().text(not_quantity_num);
-                    $(this).parent().next().next().next().text(Math.round(quantity_num / check_num * 100, 2) + '%');
+                    $(this).parent().next().next().find('input').val(not_quantity_num);
+                    $(this).parent().next().next().next().find('input').val(Math.round(quantity_num / check_num * 100, 2));
                 })
 
                 //计算不合格数量及合格率
@@ -194,8 +206,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     var sample_num = $(this).val();
                     var not_quantity_num = arrivals_num * 1 - quantity_num * 1 - sample_num * 1;
 
-                    $(this).parent().next().text(not_quantity_num);
-                    $(this).parent().next().next().text(Math.round(quantity_num / check_num * 100, 2) + '%');
+                    $(this).parent().next().find('input').val(not_quantity_num);
+                    $(this).parent().next().next().find('input').val(Math.round(quantity_num / check_num * 100, 2));
                 })
 
 
@@ -222,8 +234,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                 shtml += ' <td><input id="c-purchase_remark" class="form-control arrivals_num" name="arrivals_num[]" type="text"></td>'
                                 shtml += ' <td><input id="c-purchase_remark" class="form-control quantity_num" name="quantity_num[]" type="text"></td>'
                                 shtml += ' <td><input id="c-purchase_remark" class="form-control sample_num" name="sample_num[]" type="text"></td>'
-                                shtml += ' <td></td>'
-                                shtml += '  <td></td>'
+                                shtml += ' <td><input id="c-purchase_remark" class="form-control unqualified_num" name="unqualified_num[]" type="text"></td>'
+                                shtml += '  <td><input id="c-purchase_remark" class="form-control quantity_rate" name="quantity_rate[]" type="text">%</td>'
                                 shtml += ' <td><input style="width: 260px;" id="c-purchase_remark" class="form-control remark" name="remark[]" type="text"></td>'
                                 shtml += ' <td><input id="c-unqualified_images" style="width: 260px;" class="form-control unqualified_images" size="200" readonly name="unqualified_images[]" type="text"></td>'
 

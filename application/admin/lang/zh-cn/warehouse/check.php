@@ -7,5 +7,6 @@ return [
     'Supplier_id'        => '供应商',
     'Remark'             => '质检备注',
     'Createtime'         => '创建时间',
-    'Create_person'      => '创建人'
+    'Create_person'      => '创建人',
+    'Order_number'      => '关联订单号',
 ];

@@ -1,0 +1,116 @@
+define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefined, Backend, Table, Form) {
+
+    var Controller = {
+        index: function () {
+            // 初始化表格参数配置
+            Table.api.init({
+                searchFormVisible: true,
+                extend: {
+                    index_url: 'purchase/purchase_return/index' + location.search,
+                    add_url: 'purchase/purchase_return/add',
+                    edit_url: 'purchase/purchase_return/edit',
+                    del_url: 'purchase/purchase_return/del',
+                    multi_url: 'purchase/purchase_return/multi',
+                    table: 'purchase_return',
+                }
+            });
+
+            var table = $("#table");
+
+            // 初始化表格
+            table.bootstrapTable({
+                url: $.fn.bootstrapTable.defaults.extend.index_url,
+                pk: 'id',
+                sortName: 'id',
+                columns: [
+                    [
+                        { checkbox: true },
+                        { field: 'id', title: __('Id') },
+                        { field: 'return_number', title: __('Return_number') },
+                        { field: 'purchase_id', title: __('Purchase_id') },
+                        { field: 'supplier_id', title: __('Supplier_id') },
+                        { field: 'return_type', title: __('Return_type') },
+                        { field: 'return_money', title: __('Return_money'), operate: 'BETWEEN' },
+                        { field: 'purchase_total', title: __('Purchase_total'), operate: 'BETWEEN' },
+                        { field: 'supplier_linkname', title: __('Supplier_linkname') },
+                        { field: 'supplier_linkphone', title: __('Supplier_linkphone') },
+                        { field: 'supplier_address', title: __('Supplier_address') },
+                        { field: 'createtime', title: __('Createtime'), operate: 'RANGE', addclass: 'datetimerange' },
+                        { field: 'create_person', title: __('Create_person') },
+                        { field: 'status', title: __('Status') },
+                        { field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate }
+                    ]
+                ]
+            });
+
+            // 为表格绑定事件
+            Table.api.bindevent(table);
+        },
+        add: function () {
+            Controller.api.bindevent();
+            //移除
+            $(document).on('click', '.btn-del', function () {
+                $(this).parent().parent().remove();
+            })
+
+            $(document).on('blur', '.return_num', function () {
+                var all_price = 0;
+                $('.return_num').each(function () {
+                    var num = $(this).val();
+                    var price = $(this).data('price');
+                    all_price = all_price + num*1*price*1;
+                })
+                $('.return_money').val(all_price);
+            })
+        },
+        edit: function () {
+            Controller.api.bindevent();
+        },
+        api: {
+            bindevent: function () {
+                Form.api.bindevent($("form[role=form]"));
+
+                //切换合同 异步获取合同数据
+                $(document).on('change', '.purchase_id', function () {
+                    var id = $(this).val();
+                    if (id) {
+                        var url = '/admin/purchase/purchase_return/getPurchaseData';
+                        Backend.api.ajax({
+                            url: url,
+                            data: { id: id }
+                        }, function (data, ret) {
+
+                            $('.supplier').val(data.supplier_id);
+                            $('.purchase_total').val(data.purchase_total);
+                            //循环展示商品信息
+                            var shtml = ' <tr><th>SKU</th><th>产品名称</th><th>供应商SKU</th><th>采购数量</th><th>到货数量</th><th>未到数量</th><th>合格数量</th><th>不合格数量</th><th>合格率</th><th>已退数量</th><th>退销数量</th><th>操作</th></tr>';
+                            $('.caigou table tbody').html('');
+                            for (var i in data.item) {
+
+                                var num = data.item[i].purchase_num * 1 - data.item[i].arrivals_num * 1;
+                                shtml += ' <tr><td><input id="c-purchase_remark" class="form-control" name="sku[]" type="text" value="' + data.item[i].sku + '"></td>'
+                                shtml += ' <td><input id="c-purchase_remark" class="form-control" disabled  type="text" value="' + data.item[i].product_name + '"></td>'
+                                shtml += ' <td><input id="c-purchase_remark" class="form-control" disabled type="text" value="' + data.item[i].supplier_sku + '"></td>'
+                                shtml += ' <td><input id="c-purchase_remark" class="form-control purchase_num" disabled type="text" redeonly value="' + data.item[i].purchase_num + '"></td>'
+                                shtml += ' <td><input id="c-purchase_remark" class="form-control arrivals_num" disabled type="text" value="' + data.item[i].arrivals_num + '"></td>'
+                                shtml += ' <td><input id="c-purchase_remark" class="form-control arrivals_num" disabled  type="text" value="' + num + '"></td>'
+                                shtml += ' <td><input id="c-purchase_remark" class="form-control quantity_num" disabled type="text" value="' + data.item[i].quantity_num + '"></td>'
+                                shtml += ' <td><input id="c-purchase_remark" class="form-control unqualified_num" disabled  type="text" value="' + data.item[i].unqualified_num + '"></td>'
+                                shtml += ' <td><input id="c-purchase_remark" class="form-control sample_num" disabled  type="text" value="' + Math.round(data.item[i].quantity_num / data.item[i].arrivals_num * 100) + '%' + '"></td>'
+                                shtml += ' <td><input  id="c-purchase_remark" class="form-control" disabled  type="text" value="' + data.item[i].return_num + '"></td>'
+
+                                shtml += ' <td><input id="c-return_num"  class="form-control return_num" data-price="' + data.item[i].purchase_price + '" size="200"  name="return_num[]" type="text" ></td>'
+                                shtml += ' <td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>删除</a>'
+                                shtml += ' </td>'
+                                shtml += ' </tr>'
+                            }
+                            $('.caigou table tbody').append(shtml);
+                        });
+                    }
+
+                })
+            }
+        }
+    };
+    return Controller;
+});

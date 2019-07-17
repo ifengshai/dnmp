@@ -1,6 +1,6 @@
 <?php
 
-namespace app\admin\controller\warehouse;
+namespace app\admin\controller\purchase;
 
 use app\common\controller\Backend;
 use think\Db;
@@ -9,27 +9,24 @@ use think\exception\PDOException;
 use think\exception\ValidateException;
 
 /**
- * 质检单
+ * 退销单管理
  *
  * @icon fa fa-circle-o
  */
-class Check extends Backend
+class PurchaseReturn extends Backend
 {
 
     /**
-     * Check模型对象
-     * @var \app\admin\model\warehouse\Check
+     * PurchaseReturn模型对象
+     * @var \app\admin\model\purchase\PurchaseReturn
      */
     protected $model = null;
-
-    protected $relationSearch = true;
 
     public function _initialize()
     {
         parent::_initialize();
-        $this->model = new \app\admin\model\warehouse\Check;
-        $this->check_item = new \app\admin\model\warehouse\CheckItem;
-        $this->purchase = new \app\admin\model\purchase\PurchaseOrder;
+        $this->model = new \app\admin\model\purchase\PurchaseReturn;
+        $this->purchase_return_item = new \app\admin\model\purchase\PurchaseReturnItem;
     }
 
     /**
@@ -52,12 +49,10 @@ class Check extends Backend
             }
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
-                ->with(['purchaseOrder', 'supplier'])
                 ->where($where)
                 ->order($sort, $order)
                 ->count();
             $list = $this->model
-                ->with(['purchaseOrder', 'supplier'])
                 ->where($where)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
@@ -99,54 +94,18 @@ class Check extends Backend
                     $params['createtime'] = date('Y-m-d H:i:s', time());
                     $result = $this->model->allowField(true)->save($params);
 
-                    //添加合同产品
+                    //添加产品信息
                     if ($result !== false) {
                         $sku = $this->request->post("sku/a");
-                        $product_name = $this->request->post("product_name/a");
-                        $supplier_sku = $this->request->post("supplier_sku/a");
-                        $purchase_num = $this->request->post("purchase_num/a");
-                        $check_num = $this->request->post("check_num/a");
-                        $arrivals_num = $this->request->post("arrivals_num/a");
-                        $quantity_num = $this->request->post("quantity_num/a");
-                        $sample_num = $this->request->post("sample_num/a");
-                        $remark = $this->request->post("remark/a");
-                        $unqualified_images = $this->request->post("unqualified_images/a");
-                        $unqualified_num = $this->request->post("unqualified_num/a");
-                        $quantity_rate = $this->request->post("quantity_rate/a");
-
-                        //求和采购数量和质检数量
-                        if ($params['purchase_id']) {
-                            $all_purchase_num = array_sum($purchase_num);
-                            $all_check_num = array_sum($check_num);
-                            if ($all_check_num < $all_purchase_num) {
-                                $check_status = 1;
-                            } else {
-                                $check_status = 2;
-                            }
-                            //修改采购单质检状态
-                            $purchase_data['check_status'] = $check_status;
-                            $this->purchase->allowField(true)->save($purchase_data, ['id' => $params['purchase_id']]);
-                        }
-
-
+                        $return_num = $this->request->post("return_num/a");
                         $data = [];
                         foreach ($sku as $k => $v) {
                             $data[$k]['sku'] = $v;
-                            $data[$k]['supplier_sku'] = $supplier_sku[$k];
-                            $data[$k]['product_name'] = $product_name[$k];
-                            $data[$k]['purchase_num'] = $purchase_num[$k];
-                            $data[$k]['check_num'] = $check_num[$k];
-                            $data[$k]['arrivals_num'] = $arrivals_num[$k];
-                            $data[$k]['quantity_num'] = $quantity_num[$k];
-                            $data[$k]['sample_num'] = $sample_num[$k];
-                            $data[$k]['remark'] = $remark[$k];
-                            $data[$k]['unqualified_images'] = $unqualified_images[$k];
-                            $data[$k]['unqualified_num'] = $unqualified_num[$k];
-                            $data[$k]['quantity_rate'] = $quantity_rate[$k];
-                            $data[$k]['check_id'] = $this->model->id;
+                            $data[$k]['return_num'] = $return_num[$k];
+                            $data[$k]['return_id'] = $this->model->id;
                         }
                         //批量添加
-                        $this->check_item->allowField(true)->saveAll($data);
+                        $this->purchase_return_item->allowField(true)->saveAll($data);
                     }
 
                     Db::commit();
@@ -180,8 +139,8 @@ class Check extends Backend
         $this->assign('purchase_data', $purchase_data);
 
         //质检单
-        $check_order_number = 'QC' . date('YmdHis') . rand(100, 999) . rand(100, 999);
-        $this->assign('check_order_number', $check_order_number);
+        $return_number = 'RO' . date('YmdHis') . rand(100, 999) . rand(100, 999);
+        $this->assign('return_number', $return_number);
         return $this->view->fetch();
     }
 
@@ -309,7 +268,7 @@ class Check extends Backend
     }
 
     /**
-     * 编辑
+     * 详情
      */
     public function detail($ids = null)
     {
@@ -344,22 +303,7 @@ class Check extends Backend
     }
 
     /**
-     * 上传
-     */
-    public function uploads()
-    {
-
-        if ($this->request->isPost()) {
-            $params = $this->request->post("row/a");
-            $this->success('', '', $params);
-        }
-        $img_url = $this->request->get('img_url');
-        $this->assign('img_url', $img_url);
-        return $this->view->fetch();
-    }
-
-    /**
-     * 获取采购单商品信息
+     * 异步获取采购信息
      */
     public function getPurchaseData()
     {
@@ -371,22 +315,44 @@ class Check extends Backend
         $purchase_item = new \app\admin\model\purchase\PurchaseOrderItem;
         $map['purchase_id'] = $id;
         $item = $purchase_item->where($map)->select();
+
+        $skus = array_column($item, 'sku');
+
+        //查询质检信息
+        $check_map['purchase_id'] = $id;
+        $check_map['type'] = 1;
+        $check = new \app\admin\model\warehouse\Check;
+        $list = $check->hasWhere('checkItem', ['sku' => ['in', $skus]])
+            ->where($check_map)
+            ->field('sku,sum(arrivals_num) as arrivals_num,sum(quantity_num) as quantity_num,sum(unqualified_num) as unqualified_num')
+            ->group('sku')
+            ->select();
+        $list = collection($list)->toArray();
+        //重组数组
+        $check_item = [];
+        foreach ($list as $k => $v) {
+            $check_item[$v['sku']]['arrivals_num'] = $v['arrivals_num'];
+            $check_item[$v['sku']]['quantity_num'] = $v['quantity_num'];
+            $check_item[$v['sku']]['unqualified_num'] = $v['unqualified_num'];
+        }
+
+        //查询已退数量
+        $return_map['purchase_id'] = $id;
+        $return_item = $this->model->hasWhere('purchaseReturnItem', ['sku' => ['in', $skus]])
+            ->where($return_map)
+            ->group('sku')
+            ->column('sum(return_num) as return_num','sku');
+       
+        foreach ($item as $k => $v) {
+            $item[$k]['arrivals_num'] = $check_item[$v['sku']]['arrivals_num'];
+            $item[$k]['quantity_num'] = $check_item[$v['sku']]['quantity_num'];
+            $item[$k]['unqualified_num'] = $check_item[$v['sku']]['unqualified_num'];
+            $item[$k]['return_num'] = @$return_item[$v['sku']]['return_num'] ? @$return_item[$v['sku']]['return_num'] : 0;
+        }
+
         $data->item = $item;
         if ($data) {
             $this->success('', '', $data);
-        } else {
-            $this->error();
-        }
-    }
-
-
-    //删除合同里商品信息
-    public function deleteItem()
-    {
-        $id = input('id');
-        $res = $this->check_item->destroy($id);
-        if ($res) {
-            $this->success();
         } else {
             $this->error();
         }
