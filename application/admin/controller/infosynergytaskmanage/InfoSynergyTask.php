@@ -2,11 +2,14 @@
 
 namespace app\admin\controller\infosynergytaskmanage;
 
+use app\admin\model\Admin;
 use app\common\controller\Backend;
 use app\admin\model\infosynergytaskmanage\InfoSynergyTaskCategory;
 use app\admin\model\platformManage\ManagtoPlatform;
 use app\admin\model\saleAfterManage\SaleAfterTask;
+use app\admin\model\AuthGroup;
 use think\Db;
+use think\Request;
 /**
  * 协同任务管理
  *
@@ -25,6 +28,8 @@ class InfoSynergyTask extends Backend
     {
         parent::_initialize();
         $this->model = new \app\admin\model\infosynergytaskmanage\InfoSynergyTask;
+        $this->view->assign('allGroup',(new AuthGroup())->getAllGroup());
+        $this->view->assign('allAdmin',(new Admin())->getAllStaff());
 
     }
     
@@ -39,6 +44,8 @@ class InfoSynergyTask extends Backend
             $params = $this->request->post("row/a");
             if ($params) {
                 $params = $this->preExcludeFields($params);
+//                dump($params);
+//                exit;
                 //承接部门和承接人写入数据库
                 if(count($params['dept_id'])>1){
                     $params['dept_id'] = implode('+',$params['dept_id']);
@@ -99,6 +106,70 @@ class InfoSynergyTask extends Backend
         return $this->view->fetch();
     }
     /**
+     * 编辑
+     */
+    /**
+     * 编辑
+     */
+    public function edit($ids = null)
+    {
+        $row = $this->model->get($ids);
+        if (!$row) {
+            $this->error(__('No Results were found'));
+        }
+        $adminIds = $this->getDataLimitAdminIds();
+        if (is_array($adminIds)) {
+            if (!in_array($row[$this->dataLimitField], $adminIds)) {
+                $this->error(__('You have no permission'));
+            }
+        }
+        if ($this->request->isPost()) {
+            $params = $this->request->post("row/a");
+            if ($params) {
+                $params = $this->preExcludeFields($params);
+                $result = false;
+                Db::startTrans();
+                try {
+                    //是否采用模型验证
+                    if ($this->modelValidate) {
+                        $name = str_replace("\\model\\", "\\validate\\", get_class($this->model));
+                        $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.edit' : $name) : $this->modelValidate;
+                        $row->validateFailException(true)->validate($validate);
+                    }
+                    $result = $row->allowField(true)->save($params);
+                    Db::commit();
+                } catch (ValidateException $e) {
+                    Db::rollback();
+                    $this->error($e->getMessage());
+                } catch (PDOException $e) {
+                    Db::rollback();
+                    $this->error($e->getMessage());
+                } catch (Exception $e) {
+                    Db::rollback();
+                    $this->error($e->getMessage());
+                }
+                if ($result !== false) {
+                    $this->success();
+                } else {
+                    $this->error(__('No rows were updated'));
+                }
+            }
+            $this->error(__('Parameter %s can not be empty', ''));
+        }
+        $row['dept_id'] = explode('+',$row['dept_id']);
+        $row['rep_id']  = explode('+',$row['rep_id']);
+        $this->view->assign("row", $row);
+        //任务分类列表
+        $this->view->assign('categoryList',(new InfoSynergyTaskCategory())->getIssueList(1,0));
+        //订单平台列表
+        $this->view->assign("orderPlatformList", (new ManagtoPlatform())->getOrderPlatformList());
+        //关联单据类型列表
+        $this->view->assign('orderType',$this->model->orderType());
+        //任务级别
+        $this->view->assign('prtyIdList',(new SaleAfterTask())->getPrtyIdList());
+        return $this->view->fetch();
+    }
+    /**
      * 查看
      */
     public function index()
@@ -124,15 +195,15 @@ class InfoSynergyTask extends Backend
                 ->limit($offset, $limit)
                 ->select();
             $list = collection($list)->toArray();
-            $deptArr = $this->model->testDepId();
-            $repArr  = $this->model->testRepId();
-//            dump($deptArr);
-//            dump($repArr);
+            $deptArr = (new AuthGroup())->getAllGroup();
+            $repArr  = (new Admin())->getAllStaff();
             foreach ($list as $key => $val){
                 if($val['dept_id']){
                     $deptNumArr = explode('+',$val['dept_id']);
                     $list[$key]['dept'] = '';
                     foreach($deptNumArr as $values){
+//                        echo $values;
+//                        exit;
                         $list[$key]['dept'].= $deptArr[$values].' ';
                     }
                 }
@@ -171,6 +242,26 @@ class InfoSynergyTask extends Backend
 //        }
 //        $arrToObject = (object)($json);
 //        dump(json_encode($arrToObject));
+    }
+    /***
+     * 异步获取承接人信息
+     */
+    public function ajaxFindRecipient(Request $request)
+    {
+        if($this->request->isAjax()){
+            $strIds = $this->request->post('arrIds');
+            if(!$strIds){
+                return $this->error('没有选择承接部门,请重新尝试','','error',0);
+            }
+            $arrIds = explode('&',$strIds);
+            $result = (new Admin())->getStaffList($arrIds);
+            if(!$result){
+                return $this->error('选择这个部门没有承接的人','','error',0);
+            }
+            return $this->success('','',$result,0);
+        }else{
+            return $this->error('请求错误,请重新尝试','','error',0);
+        }
     }
 
 }

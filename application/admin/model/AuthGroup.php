@@ -17,5 +17,19 @@ class AuthGroup extends Model
     {
         return __($value);
     }
-
+    /***
+     * 获取所有的分组
+     */
+    public function getAllGroup()
+    {
+        $result = $this->where('status','=','normal')->field('id,name')->select();
+        if(!$result){
+            return false;
+        }
+        $resultArr = [];
+        foreach ($result as $key => $val){
+            $resultArr[$val['id']] =$val['name'];
+        }
+        return $result ? $resultArr : false;
+    }
 }

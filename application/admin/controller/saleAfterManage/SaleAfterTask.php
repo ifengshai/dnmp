@@ -7,6 +7,7 @@ use app\admin\model\AuthGroup;
 use app\admin\model\saleAfterManage\SaleAfterIssue;
 use app\admin\model\platformManage\ManagtoPlatform;
 use app\admin\model\saleAfterManage\SaleAfterTaskRemark;
+use app\admin\model\Admin;
 use think\Request;
 use think\Db;
 use fast\Tree;
@@ -44,12 +45,17 @@ class SaleAfterTask extends Backend
                 $result = array_merge($result, Tree::instance()->getTreeList(Tree::instance()->getTreeArray($n['pid'])));
             }
         }
+        //dump($result);
         $groupName = [];
         foreach ($result as $k => $v) {
+            //$groupName['group_id'][] = $v['id'];
             $groupName[$v['id']] = $v['name'];
         }
+        $staffArr = array_keys($groupName);
+        $staffList = (new Admin())->getStaffList($staffArr);
         $this->groupdata = $groupName;
         $this->assignconfig("admin", ['id' => $this->auth->id, 'group_ids' => $this->auth->getGroupIds()]);
+        $this->view->assign('staffList',$staffList);
         $this->view->assign('groupdata', $this->groupdata);
         $this->view->assign("orderPlatformList", (new ManagtoPlatform())->getOrderPlatformList());
         $this->view->assign("orderStatusList", $this->model->getOrderStatusList());
@@ -85,6 +91,17 @@ class SaleAfterTask extends Backend
                 ->select();
 
             $list = collection($list)->toArray();
+            $deptArr = (new AuthGroup())->getAllGroup();
+            $repArr  = (new Admin())->getAllStaff();
+            foreach ($list as $key => $val){
+                if($val['dept_id']){
+                    $list[$key]['dept_id']= $deptArr[$val['dept_id']];
+
+                }
+                if($val['rep_id']){
+                    $list[$key]['rep_id'] = $repArr[$val['rep_id']];
+                }
+            }
             $result = array("total" => $total, "rows" => $list);
 
             return json($result);

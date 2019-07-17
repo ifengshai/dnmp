@@ -31,4 +31,37 @@ class Admin extends Model
         return $encrypt($password . $salt);
     }
 
+    /***
+     * 根据部门id获取部门下面的人员
+     * @param $id
+     * @return array|bool
+     */
+    public function getStaffList($id)
+    {
+        $result = $this->alias('a')->join(' auth_group_access g','a.id = g.uid')->where('a.status','=','normal')->where('g.group_id','in',$id)->field('a.id,a.nickname
+        ')->select();
+        if(!$result){
+            return false;
+        }
+        $groupStaff = [];
+        foreach($result as $key=>$val){
+            $groupStaff[$val['id']] = $val['nickname'];
+        }
+        return $result ? $groupStaff : false;
+    }
+    /***
+     * 获取所有部门的人员
+     */
+    public function getAllStaff()
+    {
+        $result = $this->where('status','=','normal')->field('id,nickname')->select();
+        if(!$result){
+            return false;
+        }
+        $allStaff = [];
+        foreach ($result as $key=>$val){
+            $allStaff[$val['id']] = $val['nickname'];
+        }
+        return $result ? $allStaff : false;
+    }
 }

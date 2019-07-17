@@ -37,11 +37,19 @@
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">{:__('Dept_id')}:</label>
         <div class="col-xs-12 col-sm-3">
-            {:Form::selectpickers('row[dept_id][]', [$deptList],'1', ['data-rule'=>'required'])}
+            {:Form::selects('row[dept_id][]', $allGroup, null, ['class'=>'form-control selectpicker', 'data-rule'=>'required','data-live-search' => true,choose_rep_id])}
         </div>
-        <label class="control-label col-xs-12 col-sm-2">{:__('Rep_id')}:</label>
-        <div class="col-xs-12 col-sm-3">
-            {:Form::selectpickers('row[rep_id][]', [$repList],'1', ['data-rule'=>'required'])}
+        <label class="control-label col-xs-12 col-sm-2" >{:__('Rep_id')}:</label>
+        <div class="col-xs-12 col-sm-3" id="add_rep_id">
+            <select class="form-control selectpicker" data-live-search="1" id="choose_rep_id" multiple="multiple" name="row[rep_id][]" tabindex="-98">
+                <option value="1">超级管理组</option>
+                <option value="6">客服部</option>
+                <option value="7">采购部</option>
+                <option value="8">仓库部</option>
+                <option value="9">运营部</option>
+                <option value="10">客服部主管</option>
+                <option value="11">客服部人员</option>
+            </select>
         </div>
     </div>
     <div class="form-group">
