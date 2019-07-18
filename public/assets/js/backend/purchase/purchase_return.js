@@ -26,19 +26,52 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     [
                         { checkbox: true },
                         { field: 'id', title: __('Id') },
-                        { field: 'return_number', title: __('Return_number') },
-                        { field: 'purchase_id', title: __('Purchase_id') },
-                        { field: 'supplier_id', title: __('Supplier_id') },
-                        { field: 'return_type', title: __('Return_type') },
-                        { field: 'return_money', title: __('Return_money'), operate: 'BETWEEN' },
-                        { field: 'purchase_total', title: __('Purchase_total'), operate: 'BETWEEN' },
-                        { field: 'supplier_linkname', title: __('Supplier_linkname') },
-                        { field: 'supplier_linkphone', title: __('Supplier_linkphone') },
-                        { field: 'supplier_address', title: __('Supplier_address') },
+                        { field: 'return_number', title: __('Return_number'), operate: 'like' },
+                        { field: 'purchase_order.purchase_number', title: __('Purchase_id'), operate: 'like' },
+                        { field: 'supplier.supplier_name', title: __('Supplier_id'), operate: 'like' },
+                        { field: 'return_type', title: __('Return_type'), custom: { 1: 'success', 2: 'success', 3: 'success' }, searchList: { 1: '仅退款', 2: '退货退款', 3: '调换货' }, formatter: Table.api.formatter.status },
+                        { field: 'supplier_linkname', title: __('Supplier_linkname'), operate: 'like' },
+                        { field: 'supplier_linkphone', title: __('Supplier_linkphone'), operate: 'like' },
+                        { field: 'supplier_address', title: __('Supplier_address'), operate: 'like' },
                         { field: 'createtime', title: __('Createtime'), operate: 'RANGE', addclass: 'datetimerange' },
-                        { field: 'create_person', title: __('Create_person') },
-                        { field: 'status', title: __('Status') },
-                        { field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate }
+                        { field: 'create_person', title: __('Create_person'), operate: 'like' },
+                        {
+                            field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [
+                                {
+                                    name: 'detail',
+                                    text: '详情',
+                                    title: __('Detail'),
+                                    classname: 'btn btn-xs  btn-primary  btn-dialog',
+                                    icon: 'fa fa-list',
+                                    url: 'purchase/purchase_return/detail',
+                                    extend: 'data-area = \'["100%","100%"]\'',
+                                    callback: function (data) {
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                    },
+                                    visible: function (row) {
+                                        //返回true时按钮显示,返回false隐藏
+                                        return true;
+                                    }
+                                },
+                                {
+                                    name: 'edit',
+                                    text: '',
+                                    title: __('Edit'),
+                                    classname: 'btn btn-xs btn-success btn-dialog',
+                                    icon: 'fa fa-pencil',
+                                    url: 'purchase/purchase_return/edit',
+                                    extend: 'data-area = \'["100%","100%"]\'',
+                                    callback: function (data) {
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                    },
+                                    visible: function (row) {
+                                        //返回true时按钮显示,返回false隐藏
+                                        return true;
+                                    }
+                                }
+
+                            ], formatter: Table.api.formatter.operate
+                        }
                     ]
                 ]
             });
@@ -58,12 +91,27 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 $('.return_num').each(function () {
                     var num = $(this).val();
                     var price = $(this).data('price');
-                    all_price = all_price + num*1*price*1;
+                    all_price = all_price + num * 1 * price * 1;
                 })
                 $('.return_money').val(all_price);
             })
         },
         edit: function () {
+            Controller.api.bindevent();
+
+            //删除商品数据
+            $(document).on('click', '.btn-del', function () {
+                $(this).parent().parent().remove();
+                var id = $(this).parent().parent().find('.item_id').val();
+                if (id) {
+                    Backend.api.ajax({
+                        url: '/admin/purchase/purchase_return/deleteItem',
+                        data: { id: id }
+                    });
+                }
+            })
+        },
+        detail: function () {
             Controller.api.bindevent();
         },
         api: {
@@ -105,6 +153,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                 shtml += ' </tr>'
                             }
                             $('.caigou table tbody').append(shtml);
+                        }, function (data, ret) {
+                            $('.layer-footer').find('.btn-success').addClass('disabled');
                         });
                     }
 

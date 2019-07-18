@@ -22,6 +22,8 @@ class PurchaseReturn extends Backend
      */
     protected $model = null;
 
+    protected $relationSearch = true;
+
     public function _initialize()
     {
         parent::_initialize();
@@ -49,10 +51,12 @@ class PurchaseReturn extends Backend
             }
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
+                ->with(['purchaseOrder', 'supplier'])
                 ->where($where)
                 ->order($sort, $order)
                 ->count();
             $list = $this->model
+                ->with(['purchaseOrder', 'supplier'])
                 ->where($where)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
@@ -94,10 +98,41 @@ class PurchaseReturn extends Backend
                     $params['createtime'] = date('Y-m-d H:i:s', time());
                     $result = $this->model->allowField(true)->save($params);
 
+
+
                     //添加产品信息
                     if ($result !== false) {
+
                         $sku = $this->request->post("sku/a");
                         $return_num = $this->request->post("return_num/a");
+
+                        //求和采购数量和已质检数量+到货数量
+                        if ($params['purchase_id']) {
+                            //查询采购总数量
+                            $purchaseItem = new \app\admin\model\purchase\PurchaseOrderItem;
+                            $all_purchase_num = $purchaseItem->where('purchase_id', $params['purchase_id'])->sum('purchase_num');
+
+                            //查询退销总数量
+                            $return_map['purchase_id'] = $params['purchase_id'];
+                            $all_return_num = $this->model->hasWhere('purchaseReturnItem')
+                                ->where($return_map)
+                                ->sum('return_num');
+
+                            $all_return_num = $all_return_num + array_sum($return_num);
+                            //已质检数量+到货数量 小于 采购单采购数量 则为部分质检
+                            if ($all_return_num < $all_purchase_num) {
+                                $return_status = 1;
+                            } else {
+                                $return_status = 2;
+                            }
+                            //修改采购单质检状态
+                            $purchase_data['return_status'] = $return_status;
+                            //查询采购单
+                            $purchase = new \app\admin\model\purchase\PurchaseOrder;
+                            $purchase->allowField(true)->save($purchase_data, ['id' => $params['purchase_id']]);
+                        }
+
+
                         $data = [];
                         foreach ($sku as $k => $v) {
                             $data[$k]['sku'] = $v;
@@ -177,56 +212,48 @@ class PurchaseReturn extends Backend
                     //添加合同产品
                     if ($result !== false) {
                         $sku = $this->request->post("sku/a");
-                        $product_name = $this->request->post("product_name/a");
-                        $supplier_sku = $this->request->post("supplier_sku/a");
-                        $purchase_num = $this->request->post("purchase_num/a");
-                        $check_num = $this->request->post("check_num/a");
-                        $arrivals_num = $this->request->post("arrivals_num/a");
-                        $quantity_num = $this->request->post("quantity_num/a");
-                        $sample_num = $this->request->post("sample_num/a");
-                        $remark = $this->request->post("remark/a");
-                        $unqualified_images = $this->request->post("unqualified_images/a");
+                        $return_num = $this->request->post("return_num/a");
                         $item_id = $this->request->post("item_id/a");
-                        $unqualified_num = $this->request->post("unqualified_num/a");
-                        $quantity_rate = $this->request->post("quantity_rate/a");
 
-
-                        //求和采购数量和质检数量
+                        //求和采购数量和已质检数量+到货数量
                         if ($params['purchase_id']) {
-                            $all_purchase_num = array_sum($purchase_num);
-                            $all_check_num = array_sum($check_num);
-                            if ($all_check_num < $all_purchase_num) {
-                                $check_status = 1;
+                            //查询采购总数量
+                            $purchaseItem = new \app\admin\model\purchase\PurchaseOrderItem;
+                            $all_purchase_num = $purchaseItem->where('purchase_id', $params['purchase_id'])->sum('purchase_num');
+
+                            //查询退销总数量
+                            $return_map['purchase_id'] = $params['purchase_id'];
+                            $all_return_num = $this->model->hasWhere('purchaseReturnItem')
+                                ->where($return_map)
+                                ->sum('return_num');
+
+                            $all_return_num = $all_return_num + array_sum($return_num);
+                            //已质检数量+到货数量 小于 采购单采购数量 则为部分质检
+                            if ($all_return_num < $all_purchase_num) {
+                                $return_status = 1;
                             } else {
-                                $check_status = 2;
+                                $return_status = 2;
                             }
                             //修改采购单质检状态
-                            $purchase_data['check_status'] = $check_status;
-                            $this->purchase->allowField(true)->save($purchase_data, ['id' => $params['purchase_id']]);
+                            $purchase_data['return_status'] = $return_status;
+                            //查询采购单
+                            $purchase = new \app\admin\model\purchase\PurchaseOrder;
+                            $purchase->allowField(true)->save($purchase_data, ['id' => $params['purchase_id']]);
                         }
+
+
 
                         $data = [];
                         foreach ($sku as $k => $v) {
                             $data[$k]['sku'] = $v;
-                            $data[$k]['supplier_sku'] = $supplier_sku[$k];
-                            $data[$k]['product_name'] = $product_name[$k];
-                            $data[$k]['purchase_num'] = $purchase_num[$k];
-                            $data[$k]['check_num'] = $check_num[$k];
-                            $data[$k]['arrivals_num'] = $arrivals_num[$k];
-                            $data[$k]['quantity_num'] = $quantity_num[$k];
-                            $data[$k]['sample_num'] = $sample_num[$k];
-                            $data[$k]['remark'] = $remark[$k];
-                            $data[$k]['unqualified_images'] = $unqualified_images[$k];
-                            $data[$k]['unqualified_num'] = $unqualified_num[$k];
-                            $data[$k]['quantity_rate'] = $quantity_rate[$k];
+                            $data[$k]['return_num'] = $return_num[$k];
                             if (@$item_id[$k]) {
                                 $data[$k]['id'] = $item_id[$k];
-                            } else {
-                                $data[$k]['check_id'] = $ids;
                             }
                         }
+
                         //批量添加
-                        $this->check_item->allowField(true)->saveAll($data);
+                        $this->purchase_return_item->allowField(true)->saveAll($data);
                     }
                     Db::commit();
                 } catch (ValidateException $e) {
@@ -258,10 +285,53 @@ class PurchaseReturn extends Backend
         $purchase_data = $purchase->getPurchaseData();
         $this->assign('purchase_data', $purchase_data);
 
-        //查询质检单商品信息
-        $check_item = new \app\admin\model\warehouse\CheckItem;
-        $map['check_id'] = $ids;
-        $item = $check_item->where($map)->select();
+
+        /***********查询退销商品信息***************/
+        //查询退销单商品信息
+        $return_item_map['return_id'] = $ids;
+        $return_arr = $this->purchase_return_item->where($return_item_map)->column('return_num,id', 'sku');
+
+        //查询采购单商品信息
+        $purchase_item = new \app\admin\model\purchase\PurchaseOrderItem;
+        $map['purchase_id'] = $row['purchase_id'];
+        $map['sku'] = ['in', array_keys($return_arr)];
+        $item = $purchase_item->where($map)->select();
+
+        //查询质检信息
+        $check_map['purchase_id'] = $row['purchase_id'];
+        $check_map['type'] = 1;
+        $check = new \app\admin\model\warehouse\Check;
+        $list = $check->hasWhere('checkItem', ['sku' => ['in', array_keys($return_arr)]])
+            ->where($check_map)
+            ->field('sku,sum(arrivals_num) as arrivals_num,sum(quantity_num) as quantity_num,sum(unqualified_num) as unqualified_num')
+            ->group('sku')
+            ->select();
+        $list = collection($list)->toArray();
+        //重组数组
+        $check_item = [];
+        foreach ($list as $k => $v) {
+            $check_item[$v['sku']]['arrivals_num'] = $v['arrivals_num'];
+            $check_item[$v['sku']]['quantity_num'] = $v['quantity_num'];
+            $check_item[$v['sku']]['unqualified_num'] = $v['unqualified_num'];
+        }
+
+        //查询已退数量
+        $return_map['purchase_id'] = $row['purchase_id'];
+        $return_item = $this->model->hasWhere('purchaseReturnItem', ['sku' => ['in', array_keys($return_arr)]])
+            ->where($return_map)
+            ->group('sku')
+            ->column('sum(return_num) as return_all_num', 'sku');
+
+        foreach ($item as $k => $v) {
+            $item[$k]['arrivals_num'] = $check_item[$v['sku']]['arrivals_num'];
+            $item[$k]['quantity_num'] = $check_item[$v['sku']]['quantity_num'];
+            $item[$k]['unqualified_num'] = $check_item[$v['sku']]['unqualified_num'];
+            $item[$k]['return_all_num'] = @$return_item[$v['sku']] ? @$return_item[$v['sku']] : 0;
+            $item[$k]['return_num'] = $return_arr[$v['sku']]['return_num'];
+            $item[$k]['item_id'] = $return_arr[$v['sku']]['id'];
+        }
+
+        /***********end***************/
         $this->assign('item', $item);
         $this->view->assign("row", $row);
         return $this->view->fetch();
@@ -293,10 +363,53 @@ class PurchaseReturn extends Backend
         $purchase_data = $purchase->getPurchaseData();
         $this->assign('purchase_data', $purchase_data);
 
-        //查询质检单商品信息
-        $check_item = new \app\admin\model\warehouse\CheckItem;
-        $map['check_id'] = $ids;
-        $item = $check_item->where($map)->select();
+
+        /***********查询退销商品信息***************/
+        //查询退销单商品信息
+        $return_item_map['return_id'] = $ids;
+        $return_arr = $this->purchase_return_item->where($return_item_map)->column('return_num,id', 'sku');
+
+        //查询采购单商品信息
+        $purchase_item = new \app\admin\model\purchase\PurchaseOrderItem;
+        $map['purchase_id'] = $row['purchase_id'];
+        $map['sku'] = ['in', array_keys($return_arr)];
+        $item = $purchase_item->where($map)->select();
+
+        //查询质检信息
+        $check_map['purchase_id'] = $row['purchase_id'];
+        $check_map['type'] = 1;
+        $check = new \app\admin\model\warehouse\Check;
+        $list = $check->hasWhere('checkItem', ['sku' => ['in', array_keys($return_arr)]])
+            ->where($check_map)
+            ->field('sku,sum(arrivals_num) as arrivals_num,sum(quantity_num) as quantity_num,sum(unqualified_num) as unqualified_num')
+            ->group('sku')
+            ->select();
+        $list = collection($list)->toArray();
+        //重组数组
+        $check_item = [];
+        foreach ($list as $k => $v) {
+            $check_item[$v['sku']]['arrivals_num'] = $v['arrivals_num'];
+            $check_item[$v['sku']]['quantity_num'] = $v['quantity_num'];
+            $check_item[$v['sku']]['unqualified_num'] = $v['unqualified_num'];
+        }
+
+        //查询已退数量
+        $return_map['purchase_id'] = $row['purchase_id'];
+        $return_item = $this->model->hasWhere('purchaseReturnItem', ['sku' => ['in', array_keys($return_arr)]])
+            ->where($return_map)
+            ->group('sku')
+            ->column('sum(return_num) as return_all_num', 'sku');
+
+        foreach ($item as $k => $v) {
+            $item[$k]['arrivals_num'] = $check_item[$v['sku']]['arrivals_num'];
+            $item[$k]['quantity_num'] = $check_item[$v['sku']]['quantity_num'];
+            $item[$k]['unqualified_num'] = $check_item[$v['sku']]['unqualified_num'];
+            $item[$k]['return_all_num'] = @$return_item[$v['sku']] ? @$return_item[$v['sku']] : 0;
+            $item[$k]['return_num'] = $return_arr[$v['sku']]['return_num'];
+            $item[$k]['item_id'] = $return_arr[$v['sku']]['id'];
+        }
+
+        /***********end***************/
         $this->assign('item', $item);
         $this->view->assign("row", $row);
         return $this->view->fetch();
@@ -341,18 +454,36 @@ class PurchaseReturn extends Backend
         $return_item = $this->model->hasWhere('purchaseReturnItem', ['sku' => ['in', $skus]])
             ->where($return_map)
             ->group('sku')
-            ->column('sum(return_num) as return_num','sku');
-       
+            ->column('sum(return_num) as return_num', 'sku');
+
         foreach ($item as $k => $v) {
             $item[$k]['arrivals_num'] = $check_item[$v['sku']]['arrivals_num'];
             $item[$k]['quantity_num'] = $check_item[$v['sku']]['quantity_num'];
             $item[$k]['unqualified_num'] = $check_item[$v['sku']]['unqualified_num'];
-            $item[$k]['return_num'] = @$return_item[$v['sku']]['return_num'] ? @$return_item[$v['sku']]['return_num'] : 0;
+            $item[$k]['return_num'] = @$return_item[$v['sku']] ? @$return_item[$v['sku']] : 0;
+        }
+
+        $purchase_all_num = array_sum(array_column($item, 'purchase_num'));
+        $arrivals_all_num = array_sum(array_column($item, 'arrivals_num'));
+        if ($arrivals_all_num < $purchase_all_num) {
+            $this->error('产品未到齐！！不能退销');
         }
 
         $data->item = $item;
         if ($data) {
             $this->success('', '', $data);
+        } else {
+            $this->error();
+        }
+    }
+
+    //删除合同里商品信息
+    public function deleteItem()
+    {
+        $id = input('id');
+        $res = $this->purchase_return_item->destroy($id);
+        if ($res) {
+            $this->success();
         } else {
             $this->error();
         }

@@ -1,71 +1,222 @@
-<form id="edit-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
+<style>
+    .caigou {
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+        padding: 10px;
+        width: 70%;
+        margin-left: 10%;
+        margin-bottom: 10px;
+    }
 
-    <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Return_number')}:</label>
-        <div class="col-xs-12 col-sm-8">
-            <input id="c-return_number" class="form-control" name="row[return_number]" type="text" value="{$row.return_number|htmlentities}">
+    .caigou #caigou-table {
+        width: 100%;
+        height: 130px;
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+        text-align: center;
+    }
+
+    .caigou #caigou-table tr {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+        line-height: 50px;
+    }
+
+    .caigou #caigou-table tr th {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+        text-align: center;
+        font-size: 14px;
+    }
+
+    .caigou #caigou-table tr td {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+    }
+
+    .caigou #caigou-table tr td input {
+
+        width: 100px;
+    }
+</style>
+
+<form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
+    <div class='caigou'>
+        <div class="form-group">
+            <label class="control-label col-xs-12 col-sm-2">退销单号:</label>
+            <div class="col-xs-12 col-sm-8">
+                <input id="c-return_number" class="form-control" name="row[return_number]" value="{$row.return_number}"
+                    readonly type="text">
+            </div>
         </div>
-    </div>
-    <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Purchase_id')}:</label>
-        <div class="col-xs-12 col-sm-8">
-            <input id="c-purchase_id" data-rule="required" data-source="purchase/index" class="form-control selectpage" name="row[purchase_id]" type="text" value="{$row.purchase_id|htmlentities}">
+
+
+        <div class="form-group purchase_id_number">
+            <label class="control-label col-xs-12 col-sm-2">采购单:</label>
+            <div class="col-xs-12 col-sm-8">
+                <select name="row[purchase_id]" class="form-control" disabled>
+                    <option value="">请选择</option>
+                    {foreach $purchase_data as $k => $v}
+                    <option value="{$k}" {:$row['purchase_id']==$k ? 'selected' : '' }>{$v}</option>
+                    {/foreach}
+                </select>
+            </div>
         </div>
-    </div>
-    <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Supplier_id')}:</label>
-        <div class="col-xs-12 col-sm-8">
-            <input id="c-supplier_id" data-rule="required" data-source="supplier/index" class="form-control selectpage" name="row[supplier_id]" type="text" value="{$row.supplier_id|htmlentities}">
+        <div class="form-group">
+            <label class="control-label col-xs-12 col-sm-2">供应商:</label>
+            <div class="col-xs-12 col-sm-8">
+                <select name="row[supplier_id]" class="form-control supplier" required>
+                    <option value="">请选择</option>
+                    {foreach $supplier as $k => $v}
+                    <option value="{$k}" {:$row['supplier_id']==$k ? 'selected' : '' }>{$v}</option>
+                    {/foreach}
+                </select>
+
+            </div>
         </div>
+
+
     </div>
-    <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Return_type')}:</label>
-        <div class="col-xs-12 col-sm-8">
-            <input id="c-return_type" class="form-control" name="row[return_type]" type="number" value="{$row.return_type|htmlentities}">
+    <style>
+        .plupload-preview li {
+            width: 80px;
+        }
+    </style>
+
+    <hr>
+    <div class='caigou' style="margin-left:40px;width:90%;">
+        <p style="font-size: 16px;text-align: center;"><b>产品信息</b></p>
+        <div style="margin-bottom:20px;">
+
+            <table id="caigou-table">
+                <tr>
+                    <th>SKU</th>
+                    <th>产品名称</th>
+                    <th>供应商SKU</th>
+                    <th>采购数量</th>
+                    <th>到货数量</th>
+                    <th>未到数量</th>
+                    <th>合格数量</th>
+                    <th>不合格数量</th>
+                    <th>合格率</th>
+                    <th>已退数量</th>
+                    <th>退销数量</th>
+                    <th>操作</th>
+                </tr>
+                {foreach $item as $k => $v}
+                
+                <tr>
+                        <input id="c-purchase_remark" class="form-control item_id" name="item_id[]" type="hidden" value="{$v.item_id}">
+                    <td>
+                        <input id="c-purchase_remark" class="form-control" name="sku[]" type="text" value="{$v.sku}">
+                    </td>
+                    <td><input id="c-purchase_remark" class="form-control product_name" disabled type="text"
+                            value="{$v.product_name}"></td>
+                    <td><input id="c-purchase_remark" class="form-control supplier_sku" disabled type="text"
+                            value="{$v.supplier_sku}"></td>
+                    <td><input id="c-purchase_remark" class="form-control purchase_num" disabled type="text"
+                            value="{$v.purchase_num}"></td>
+                    <td><input id="c-purchase_remark" class="form-control arrivals_num" disabled type="text"
+                            value="{$v.arrivals_num}"></td>
+                    <td><input id="c-purchase_remark" class="form-control arrivals_num" disabled type="text"
+                            value="{:$v['purchase_num'] - $v['arrivals_num']}"></td>
+                    <td><input id="c-purchase_remark" class="form-control quantity_num" disabled type="text"
+                            value="{$v.quantity_num}"></td>
+                    <td><input id="c-purchase_remark" class="form-control unqualified_num" disabled type="text"
+                            value="{$v.unqualified_num}"></td>
+                    <td><input id="c-purchase_remark" class="form-control unqualified_num" disabled type="text"
+                            value="{:round($v['quantity_num']/$v['arrivals_num']*100)}">%</td>
+                    <td><input id="c-purchase_remark" class="form-control quantity_rate" disabled type="text"
+                            value="{$v.return_all_num}"></td>
+                    <td>
+                        <input id="c-contract_images" class="form-control return_num" size="200" name="return_num[]"
+                            value="{$v.return_num}" type="text">
+
+                    </td>
+
+                    <td>
+
+                        <a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>
+                            删除</a>
+                    </td>
+
+                </tr>
+                {/foreach}
+
+            </table>
         </div>
-    </div>
-    <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Return_money')}:</label>
-        <div class="col-xs-12 col-sm-8">
-            <input id="c-return_money" class="form-control" step="0.01" name="row[return_money]" type="number" value="{$row.return_money|htmlentities}">
+
+        <div class="form-group">
+            <label class="control-label col-xs-12 col-sm-2">退销类型:</label>
+            <div class="col-xs-12 col-sm-8">
+                <select name="row[return_type]" class="form-control">
+                    <option value="">请选择</option>
+                    <option value="1" {:$row['return_type'] == 1 ? 'selected' : ''}>仅退款</option>
+                    <option value="2" {:$row['return_type'] == 2 ? 'selected' : ''}>退货退款</option>
+                    <option value="3" {:$row['return_type'] == 3 ? 'selected' : ''}>调换货</option>
+
+                </select>
+            </div>
         </div>
-    </div>
-    <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Purchase_total')}:</label>
-        <div class="col-xs-12 col-sm-8">
-            <input id="c-purchase_total" class="form-control" step="0.01" name="row[purchase_total]" type="number" value="{$row.purchase_total|htmlentities}">
+        <div class="form-group">
+            <label class="control-label col-xs-12 col-sm-2">退销金额:</label>
+            <div class="col-xs-12 col-sm-8">
+                <input id="c-total" class="form-control return_money" step="0.01" name="row[return_money]" type="number"
+                    placeholder="单位：元" value="{$row.return_money}">
+            </div>
         </div>
-    </div>
-    <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Supplier_linkname')}:</label>
-        <div class="col-xs-12 col-sm-8">
-            <input id="c-supplier_linkname" class="form-control" name="row[supplier_linkname]" type="text" value="{$row.supplier_linkname|htmlentities}">
+        <div class="form-group">
+            <label class="control-label col-xs-12 col-sm-2">采购总金额:</label>
+            <div class="col-xs-12 col-sm-8">
+                <input id="c-num" class="form-control purchase_total" name="row[purchase_total]" type="number" 
+                    placeholder="单位：元" value="{$row.purchase_total}">
+            </div>
         </div>
+
     </div>
-    <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Supplier_linkphone')}:</label>
-        <div class="col-xs-12 col-sm-8">
-            <input id="c-supplier_linkphone" class="form-control" name="row[supplier_linkphone]" type="text" value="{$row.supplier_linkphone|htmlentities}">
+
+    <hr>
+    <div class='caigou'>
+        <p style="font-size: 16px;text-align: center;"><b>供应商收货地址</b></p>
+        <div class="form-group">
+            <label class="control-label col-xs-12 col-sm-2">联系人:</label>
+            <div class="col-xs-12 col-sm-8">
+                <input id="c-supplier_linkname" class="form-control" name="row[supplier_linkname]" value="{$row.supplier_linkname}" type="text">
+            </div>
         </div>
-    </div>
-    <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Supplier_address')}:</label>
-        <div class="col-xs-12 col-sm-8">
-            <input id="c-supplier_address" class="form-control" name="row[supplier_address]" type="text" value="{$row.supplier_address|htmlentities}">
+
+        <div class="form-group">
+            <label class="control-label col-xs-12 col-sm-2">联系电话:</label>
+            <div class="col-xs-12 col-sm-8">
+                <input id="c-supplier_linkphone" class="form-control" name="row[supplier_linkphone]" value="{$row.supplier_linkphone}"
+                    type="text">
+            </div>
         </div>
-    </div>
-    <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Create_person')}:</label>
-        <div class="col-xs-12 col-sm-8">
-            <input id="c-create_person" class="form-control" name="row[create_person]" type="text" value="{$row.create_person|htmlentities}">
+
+
+
+        <div class="form-group">
+            <label class="control-label col-xs-12 col-sm-2">收货地址:</label>
+            <div class="col-xs-12 col-sm-8">
+                <input id="c-supplier_address" class="form-control" name="row[supplier_address]" value="{$row.supplier_address}" type="text">
+            </div>
         </div>
+
     </div>
-    <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Status')}:</label>
-        <div class="col-xs-12 col-sm-8">
-            <input id="c-status" class="form-control" name="row[status]" type="number" value="{$row.status|htmlentities}">
-        </div>
-    </div>
+
     <div class="form-group layer-footer">
         <label class="control-label col-xs-12 col-sm-2"></label>
         <div class="col-xs-12 col-sm-8">
@@ -73,4 +224,5 @@
             <button type="reset" class="btn btn-default btn-embossed">{:__('Reset')}</button>
         </div>
     </div>
+
 </form>
