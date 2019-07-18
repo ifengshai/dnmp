@@ -114,10 +114,11 @@ class Check extends Backend
                         $unqualified_num = $this->request->post("unqualified_num/a");
                         $quantity_rate = $this->request->post("quantity_rate/a");
 
-                        //求和采购数量和质检数量
+                        //求和采购数量和已质检数量+到货数量
                         if ($params['purchase_id']) {
                             $all_purchase_num = array_sum($purchase_num);
-                            $all_check_num = array_sum($check_num);
+                            $all_check_num = array_sum($check_num) + array_sum($arrivals_num);
+                            //已质检数量+到货数量 小于 采购单采购数量 则为部分质检
                             if ($all_check_num < $all_purchase_num) {
                                 $check_status = 1;
                             } else {
@@ -232,10 +233,11 @@ class Check extends Backend
                         $quantity_rate = $this->request->post("quantity_rate/a");
 
 
-                        //求和采购数量和质检数量
+                        //求和采购数量和已质检数量+到货数量
                         if ($params['purchase_id']) {
                             $all_purchase_num = array_sum($purchase_num);
-                            $all_check_num = array_sum($check_num);
+                            $all_check_num = array_sum($check_num) + array_sum($arrivals_num);
+                            //已质检数量+到货数量 小于 采购单采购数量 则为部分质检
                             if ($all_check_num < $all_purchase_num) {
                                 $check_status = 1;
                             } else {
@@ -371,6 +373,29 @@ class Check extends Backend
         $purchase_item = new \app\admin\model\purchase\PurchaseOrderItem;
         $map['purchase_id'] = $id;
         $item = $purchase_item->where($map)->select();
+        //查询质检数量
+        $skus = array_column($item, 'sku');
+
+        //查询质检信息
+        $check_map['purchase_id'] = $id;
+        $check_map['type'] = 1;
+        $check = new \app\admin\model\warehouse\Check;
+        $list = $check->hasWhere('checkItem', ['sku' => ['in', $skus]])
+            ->where($check_map)
+            ->field('sku,sum(arrivals_num) as check_num')
+            ->group('sku')
+            ->select();
+        $list = collection($list)->toArray();
+        //重组数组
+        $check_item = [];
+        foreach ($list as $k => $v) {
+            $check_item[$v['sku']]['check_num'] = $v['check_num'];
+        }
+
+        foreach ($item as $k => $v) {
+            $item[$k]['check_num'] = $check_item[$v['sku']]['check_num'];
+        }
+
         $data->item = $item;
         if ($data) {
             $this->success('', '', $data);
