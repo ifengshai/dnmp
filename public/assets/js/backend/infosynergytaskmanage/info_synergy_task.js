@@ -55,6 +55,135 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
         api: {
             bindevent: function () {
                 Form.api.bindevent($("form[role=form]"));
+                //增加一行镜架数据
+                $(document).on('click', '.btn-add', function () {
+                    var rows =  document.getElementById("caigou-table").rows.length;
+                    var content = '<tr>'+
+                        '<td><input id="c-original_sku" class="form-control" name="row[item]['+rows+'][original_sku]" type="text"></td>'+
+                        '<td><input id="c-original_number" class="form-control" name="row[item]['+rows+'][original_number]" type="text"></td>'+
+                        '<td><input id="c-change_sku" class="form-control" name="row[item]['+rows+'][change_sku]" type="text"></td>'+
+                        '<td><input id="c-change_number" class="form-control" name="row[item]['+rows+'][change_number]" type="text"></td>'+
+                        '<td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i> 删除</a></td>'+
+                        '</tr>';
+                    $('.caigou table tbody').append(content);
+                });
+                //删除一行镜架数据
+                $(document).on('click', '.btn-del', function () {
+                    $(this).parent().parent().remove();
+                });
+                //增加一行镜片数据
+                $(document).on('click','.btn-add-lens',function(){
+                    var contents = '<div class="col-lg-12">' +
+                        '</div>' +
+                        '<div class="col-xs-6 col-md-4" style="margin-top:15px;margin-left:7.6666%;" >' +
+                        '<div class="panel bg-blue">' +
+                        '<div class="panel-body">' +
+                        '<div class="panel-title">' +
+                        '<label class="control-label col-xs-12 col-sm-3">商品名称:</label>' +
+                        '<div class="col-xs-12 col-sm-8">' +
+                        '<input  id="c-item_name"  class="form-control"  type="text" value="">' +
+                        '</div>' +
+                        '</div>' +
+                        '</div>' +
+                        '<div class="panel-body">' +
+                        '<div class="panel-title">' +
+                        '<label class="control-label col-xs-12 col-sm-3">SKU:</label>' +
+                        '<div class="col-xs-12 col-sm-8">' +
+                        '<input  id="c-item_sku" class="form-control"  type="text" value="">' +
+                        '</div>' +
+                        '</div>' +
+                        '</div>' +
+                        '<div class="panel-body">' +
+                        '<div class="panel-title">' +
+                        '<label class="control-label col-xs-12 col-sm-3">数量:</label>' +
+                        '<div class="col-xs-12 col-sm-8">' +
+                        '<input  id="c-item_qty_ordered"  class="form-control"  type="text" value="">' +
+                        '</div>' +
+                        '</div>' +
+                        '</div>' +
+                        '<div class="panel-body">' +
+                        '<div class="panel-title">' +
+                        '<label class="control-label col-xs-12 col-sm-3">处方类型:</label>' +
+                        '<div class="col-xs-12 col-sm-8">' +
+                        '<input  id="c-recipe_type"  class="form-control" type="text" value="">' +
+                        '</div>' +
+                        '</div>' +
+                        '</div>' +
+                        '<div class="panel-body">' +
+                        '<div class="panel-title">' +
+                        '<label class="control-label col-xs-12 col-sm-3">镜片类型:</label>' +
+                        '<div class="col-xs-12 col-sm-8">' +
+                        '<input  id="c-lens_type"  class="form-control"  type="text" value="">' +
+                        '</div>' +
+                        '</div>' +
+                        '</div>' +
+                        '<div class="panel-body">' +
+                        '<div class="panel-title">' +
+                        '<label class="control-label col-xs-12 col-sm-3">镀膜类型:</label>' +
+                        '<div class="col-xs-12 col-sm-8">' +
+                        '<input  id="c-coating_film_type"  class="form-control"  type="text" value="">' +
+                        '</div>' +
+                        '</div>' +
+                        '</div>' +
+                        '</div>' +
+                        '</div>' +
+                        '<div class="col-xs-6 col-md-7">' +
+                        '<div class="panel bg-aqua-gradient">' +
+                        '<div class="panel-body">' +
+                        '<div class="ibox-title">' +
+                        '<table id="caigou-table">' +
+                        '<tr>' +
+                        '<td colspan="10" style="text-align: center">处方参数</td>' +
+                        '</tr>' +
+                        '<tr>' +
+                        '<td style="text-align: center">参数</td>' +
+                        '<td style="text-align: center">SPH</td>' +
+                        '<td style="text-align: center">CYL</td>' +
+                        '<td style="text-align: center">AXI</td>' +
+                        '<td style="text-align: center">ADD</td>' +
+                        '<td style="text-align: center">PD</td>' +
+                        '<td style="text-align: center">Prism Horizontal</td>' +
+                        '<td style="text-align: center">Base Direction</td>' +
+                        '<td style="text-align: center">Prism Vertical</td>' +
+                        '<td style="text-align: center">Base Direction</td>' +
+                        '</tr>' +
+                        '<tr>' +
+                        '<td style="text-align: center">Right(OD)</td>' +
+                        '<td><input id="c-right_SPH" class="form-control"  type="text" value=""></td>' +
+                        '<td><input id="c-right_CYL" class="form-control"  type="text" value=""></td>' +
+                        '<td><input id="c-right_AXI" class="form-control"  type="text" value=""></td>' +
+                        '<td><input id="c-right_ADD" class="form-control"  type="text" value=""></td>' +
+                        '<td><input id="c-right_PD" class="form-control"  type="text" value=""></td>' +
+                        '<td><input id="c-right_Prism_Horizontal" class="form-control"  type="text" value=""></td>' +
+                        '<td><input id="c-right_" class="form-control"  type="text" value=""></td>' +
+                        '<td><input id="c-purchase_remark" class="form-control"  type="text" value=""></td>' +
+                        '<td><input id="c-purchase_remark" class="form-control"  type="text" value=""></td>' +
+                        '</tr>' +
+                        '<tr>' +
+                        '<td style="text-align: center">Left(OS)</td>' +
+                        '<td><input id="c-left_SPH" class="form-control"  type="text" value=""></td>' +
+                        '<td><input id="c-left_CYL" class="form-control"  type="text" value=""></td>' +
+                        '<td><input id="c-purchase_remark" class="form-control"  type="text" value=""></td>' +
+                        '<td><input id="c-purchase_remark" class="form-control"  type="text" value=""></td>' +
+                        '<td><input id="c-purchase_remark" class="form-control"  type="text" value=""></td>' +
+                        '<td><input id="c-purchase_remark" class="form-control"  type="text" value=""></td>' +
+                        '<td><input id="c-purchase_remark" class="form-control"  type="text" value=""></td>' +
+                        '<td><input id="c-purchase_remark" class="form-control"  type="text" value=""></td>' +
+                        '<td><input id="c-purchase_remark" class="form-control"  type="text" value=""></td>' +
+                        '</tr>' +
+                        '</table>' +
+                        '</div>' +
+                        '</div>' +
+                        '</div>' +
+                        '</div>';
+                     $('.item_info').append(contents);
+
+                });
+                //删除一行镜片数据
+                $(document).on('click', '.btn-del-lens', function () {
+                    $(this).parent().parent().remove();
+                });
+                //承接部门和承接人二级联动
                 $(document).on('change','#choose_dept_id',function(){
                     var arrIds = $(this).val();
                     if(arrIds == null){
@@ -85,6 +214,212 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         return false;
                     });
                     //console.log($(this).val());
+                });
+                //选中镜片和镜架事件
+                $("input[name='row[synergy_task_id]']").click(function(){
+                     var vals = $(this).val();
+                    var orderPlatform = $('#c-order_platform').val();
+                    var orderNumber   = $('#c-synergy_order_number').val();
+                    var synergyOrderId = $('#c-synergy_order_id').val();
+                     if( vals == 12){ //更改镜架
+                         if( synergyOrderId == 2){
+                             Backend.api.ajax({
+                                 url:'saleaftermanage/sale_after_task/ajax',
+                                 data:{ordertype:orderPlatform,order_number:orderNumber}
+                             }, function(data, ret){
+                                 //成功的回调
+                                 //alert(ret);
+                                 //清除html商品数据
+                                  $(".item_info").empty();
+                                 var item = ret.data.item;
+                                 console.log(item);
+                                 $('#customer_info').after(function(){
+                                     var Str = '';
+                                     Str+=  '<div class="caigou item_info" style="margin-top:15px;margin-left:10%;">'+
+                                         '<p style="font-size: 16px;"><b>更改镜架</b></p>'+
+                                         '<div>'+
+                                         '<div id="toolbar" class="toolbar">'+
+                                         '<a href="javascript:;" class="btn btn-success btn-add" title="增加"><i class="fa fa-plus"></i> 增加</a>'+
+                                         '</div>'+
+                                         '<table id="caigou-table">'+
+                                         '<tr>'+
+                                         '<th>原始SKU</th>'+
+                                         '<th>原始数量</th>'+
+                                         '<th>变更SKU</th>'+
+                                         '<th>变更数量</th>'+
+                                         '<th>操作</th>'+
+                                         '</tr>';
+                                     for(var j = 0,len = item.length; j <len; j++) {
+                                         var newItem = item[j];
+                                         var m = j+1;
+                                         Str +='<tr>';
+                                         Str +='<td><input id="c-original_sku" class="form-control" name="row[item]['+m+'][original_sku]" type="text" value="'+newItem.sku+'"></td>';
+                                         Str +='<td><input id="c-original_number" class="form-control" name="row[item]['+m+'][original_number]" type="text" value="'+newItem.qty_ordered+'"></td>';
+                                         Str +='<td><input id="c-change_sku" class="form-control" name="row[item]['+m+'][change_sku]" type="text"></td>';
+                                         Str +='<td><input id="c-change_number" class="form-control" name="row[item]['+m+'][change_number]" type="text"></td>';
+                                         Str +='<td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>删除</a></td>';
+                                         Str += '</tr>';
+                                     }
+                                     Str+='</table>'+
+                                         '</div>'+
+                                         '</div>'+
+                                         '</div>'+
+                                         '</div>'+
+                                         '</div>';
+                                     return Str;
+                                 });
+                              //    var item = ret.data.item;
+                              //    for(var j = 0,len = item.length; j < len; j++){
+                              //        //var newItem = item[j];
+                              //
+                              //        $('#customer_info').after(function(){
+                              //
+                              //        }
+                              //    return false;
+                              // }
+                             }, function(data, ret){
+                                 //失败的回调
+                                 alert(ret.msg);
+                                 console.log(ret);
+                                 return false;
+                             });
+                         }
+                     }else if(vals == 13){ //修改处方参数
+                         if( synergyOrderId == 2){
+                             Backend.api.ajax({
+                                 url:'saleaftermanage/sale_after_task/ajax',
+                                 data:{ordertype:orderPlatform,order_number:orderNumber}
+                             }, function(data, ret){
+                                 $(".item_info").empty();
+                                 var item = ret.data.item;
+
+                                     //console.log(newItem.name);
+                                     $('#customer_info').after(function(){
+                                         var str2 = '';
+                                          str2+= '<div class="row item_info" style="margin-top:15px;margin-left:7.6666%;">'+
+                                                 '<p style="font-size: 16px;"><b>更改镜片</b></p>'+
+                                                 '<div>'+
+                                                 '<div id="toolbar" class="toolbar">'+
+                                                 '<a href="javascript:;" class="btn btn-success btn-add-lens" title="增加"><i class="fa fa-plus"></i> 增加</a>'+
+                                                 '</div>';
+                                         for(var j = 0,len = item.length; j < len; j++) {
+                                             var newItem = item[j];
+                                             str2 += '<div class="col-lg-12">' +
+                                                 '</div>' +
+                                                 '<div class="col-xs-6 col-md-4" style="margin-top:15px;margin-left:7.6666%;" >' +
+                                                 '<div class="panel bg-blue">' +
+                                                 '<div class="panel-body">' +
+                                                 '<div class="panel-title">' +
+                                                 '<label class="control-label col-xs-12 col-sm-3">商品名称:</label>' +
+                                                 '<div class="col-xs-12 col-sm-8">' +
+                                                 '<input  id="c-item_name"  class="form-control"  type="text" value="' + newItem.name + '">' +
+                                                 '</div>' +
+                                                 '</div>' +
+                                                 '</div>' +
+                                                 '<div class="panel-body">' +
+                                                 '<div class="panel-title">' +
+                                                 '<label class="control-label col-xs-12 col-sm-3">SKU:</label>' +
+                                                 '<div class="col-xs-12 col-sm-8">' +
+                                                 '<input  id="c-item_sku" class="form-control"  type="text" value="' + newItem.sku + '">' +
+                                                 '</div>' +
+                                                 '</div>' +
+                                                 '</div>' +
+                                                 '<div class="panel-body">' +
+                                                 '<div class="panel-title">' +
+                                                 '<label class="control-label col-xs-12 col-sm-3">数量:</label>' +
+                                                 '<div class="col-xs-12 col-sm-8">' +
+                                                 '<input  id="c-item_qty_ordered"  class="form-control"  type="text" value="' + newItem.qty_ordered + '">' +
+                                                 '</div>' +
+                                                 '</div>' +
+                                                 '</div>' +
+                                                 '<div class="panel-body">' +
+                                                 '<div class="panel-title">' +
+                                                 '<label class="control-label col-xs-12 col-sm-3">处方类型:</label>' +
+                                                 '<div class="col-xs-12 col-sm-8">' +
+                                                 '<input  id="c-recipe_type"  class="form-control" type="text" value="' + newItem.prescription_type + '">' +
+                                                 '</div>' +
+                                                 '</div>' +
+                                                 '</div>' +
+                                                 '<div class="panel-body">' +
+                                                 '<div class="panel-title">' +
+                                                 '<label class="control-label col-xs-12 col-sm-3">镜片类型:</label>' +
+                                                 '<div class="col-xs-12 col-sm-8">' +
+                                                 '<input  id="c-lens_type"  class="form-control"  type="text" value="' + newItem.index_type + '">' +
+                                                 '</div>' +
+                                                 '</div>' +
+                                                 '</div>' +
+                                                 '<div class="panel-body">' +
+                                                 '<div class="panel-title">' +
+                                                 '<label class="control-label col-xs-12 col-sm-3">镀膜类型:</label>' +
+                                                 '<div class="col-xs-12 col-sm-8">' +
+                                                 '<input  id="c-coating_film_type"  class="form-control"  type="text" value="' + newItem.coatiing_name + '">' +
+                                                 '</div>' +
+                                                 '</div>' +
+                                                 '</div>' +
+                                                 '</div>' +
+                                                 '</div>' +
+                                                 '<div class="col-xs-6 col-md-7">' +
+                                                 '<div class="panel bg-aqua-gradient">' +
+                                                 '<div class="panel-body">' +
+                                                 '<div class="ibox-title">' +
+                                                 '<table id="caigou-table">' +
+                                                 '<tr>' +
+                                                 '<td colspan="10" style="text-align: center">处方参数</td>' +
+                                                 '</tr>' +
+                                                 '<tr>' +
+                                                 '<td style="text-align: center">参数</td>' +
+                                                 '<td style="text-align: center">SPH</td>' +
+                                                 '<td style="text-align: center">CYL</td>' +
+                                                 '<td style="text-align: center">AXI</td>' +
+                                                 '<td style="text-align: center">ADD</td>' +
+                                                 '<td style="text-align: center">PD</td>' +
+                                                 '<td style="text-align: center">Prism Horizontal</td>' +
+                                                 '<td style="text-align: center">Base Direction</td>' +
+                                                 '<td style="text-align: center">Prism Vertical</td>' +
+                                                 '<td style="text-align: center">Base Direction</td>' +
+                                                 '</tr>' +
+                                                 '<tr>' +
+                                                 '<td style="text-align: center">Right(OD)</td>' +
+                                                 '<td><input id="c-right_SPH" class="form-control"  type="text" value="' + newItem.od_sph + '"></td>' +
+                                                 '<td><input id="c-right_CYL" class="form-control"  type="text" value="' + newItem.od_cyl + '"></td>' +
+                                                 '<td><input id="c-right_AXI" class="form-control"  type="text" value="' + newItem.od_axis + '"></td>' +
+                                                 '<td><input id="c-right_ADD" class="form-control"  type="text" value="' + newItem.od_add + '"></td>' +
+                                                 '<td><input id="c-right_PD" class="form-control"  type="text" value="' + newItem.pd_r + '"></td>' +
+                                                 '<td><input id="c-right_Prism_Horizontal" class="form-control"  type="text" value="' + newItem.od_pv + '"></td>' +
+                                                 '<td><input id="c-right_" class="form-control"  type="text" value="' + newItem.od_bd + '"></td>' +
+                                                 '<td><input id="c-purchase_remark" class="form-control"  type="text" value="' + newItem.od_pv_r + '"></td>' +
+                                                 '<td><input id="c-purchase_remark" class="form-control"  type="text" value="' + newItem.od_bd_r + '"></td>' +
+                                                 '</tr>' +
+                                                 '<tr>' +
+                                                 '<td style="text-align: center">Left(OS)</td>' +
+                                                 '<td><input id="c-left_SPH" class="form-control"  type="text" value="' + newItem.os_sph + '"></td>' +
+                                                 '<td><input id="c-left_CYL" class="form-control"  type="text" value="' + newItem.os_cyl + '"></td>' +
+                                                 '<td><input id="c-purchase_remark" class="form-control"  type="text" value="' + newItem.os_axis + '"></td>' +
+                                                 '<td><input id="c-purchase_remark" class="form-control"  type="text" value="' + newItem.os_add + '"></td>' +
+                                                 '<td><input id="c-purchase_remark" class="form-control"  type="text" value="' + newItem.pd_l + '"></td>' +
+                                                 '<td><input id="c-purchase_remark" class="form-control"  type="text" value="' + newItem.os_pv + '"></td>' +
+                                                 '<td><input id="c-purchase_remark" class="form-control"  type="text" value="' + newItem.os_bd + '"></td>' +
+                                                 '<td><input id="c-purchase_remark" class="form-control"  type="text" value="' + newItem.os_pv_r + '"></td>' +
+                                                 '<td><input id="c-purchase_remark" class="form-control"  type="text" value="' + newItem.os_bd_r + '"></td>' +
+                                                 '</tr>' +
+                                                 '</table>' +
+                                                 '</div>' +
+                                                 '</div>' +
+                                                 '</div>' +
+                                                 '</div>';
+                                         }
+                                         str2+='</div>';
+                                         return str2;
+                                     });
+
+                             }, function(data, ret){
+                                 //失败的回调
+                                 alert(ret.msg);
+                                 console.log(ret);
+                                 return false;
+                             });
+                         }
+                    }
                 });
 
             },

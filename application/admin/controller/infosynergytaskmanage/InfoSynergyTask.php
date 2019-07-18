@@ -4,6 +4,7 @@ namespace app\admin\controller\infosynergytaskmanage;
 
 use app\admin\model\Admin;
 use app\common\controller\Backend;
+use app\admin\model\infosynergytaskmanage\InfoSynergyTaskChangeSku;
 use app\admin\model\infosynergytaskmanage\InfoSynergyTaskCategory;
 use app\admin\model\platformManage\ManagtoPlatform;
 use app\admin\model\saleAfterManage\SaleAfterTask;
@@ -42,10 +43,9 @@ class InfoSynergyTask extends Backend
     {
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
+            $item = $params['item'];
             if ($params) {
                 $params = $this->preExcludeFields($params);
-//                dump($params);
-//                exit;
                 //承接部门和承接人写入数据库
                 if(count($params['dept_id'])>1){
                     $params['dept_id'] = implode('+',$params['dept_id']);
@@ -84,6 +84,17 @@ class InfoSynergyTask extends Backend
                     $this->error($e->getMessage());
                 }
                 if ($result !== false) {
+                    foreach($item as $arr){
+                        $data=[];
+                        $data['tid'] = $this->model->id;
+                        $data['original_sku'] = !empty($arr['original_sku']) ? $arr['original_sku'] : '';
+                        $data['original_number'] = !empty($arr['original_number']) ? $arr['original_number'] : '';
+                        $data['change_sku'] = !empty($arr['change_sku']) ? $arr['change_sku'] : '';
+                        $data['change_number'] = !empty($arr['change_number']) ? $arr['change_number'] : '';
+                        $data['create_person'] = session('admin.nickname');
+                        $data['create_time']     = date("Y-m-d H:i:s",time());
+                        (new InfoSynergyTaskChangeSku())->allowField(true)->save($data);
+                    }
                     $this->success();
                 } else {
                     $this->error(__('No rows were inserted'));
