@@ -7,6 +7,8 @@ use think\Db;
 use think\Exception;
 use think\exception\PDOException;
 use think\exception\ValidateException;
+use think\Hook;
+
 
 /**
  * 采购单管理
@@ -192,7 +194,7 @@ class PurchaseOrder extends Backend
                         $price = $this->request->post("purchase_price/a");
                         $total = $this->request->post("purchase_total/a");
                         $item_id = $this->request->post("item_id/a");
-                        
+
                         $data = [];
                         foreach ($sku as $k => $v) {
                             $data[$k]['sku'] = $v;
@@ -258,14 +260,14 @@ class PurchaseOrder extends Backend
         if (!$row) {
             $this->error(__('No Results were found'));
         }
-        
+
         $adminIds = $this->getDataLimitAdminIds();
         if (is_array($adminIds)) {
             if (!in_array($row[$this->dataLimitField], $adminIds)) {
                 $this->error(__('You have no permission'));
             }
         }
-        
+
         //查询供应商
         $supplier = new \app\admin\model\purchase\Supplier;
         $supplier = $supplier->getSupplierData();
@@ -287,7 +289,7 @@ class PurchaseOrder extends Backend
 
 
     //删除合同里商品信息
-    public function deleteItem() 
+    public function deleteItem()
     {
         $id = input('id');
         $res = $this->purchase_order_item->destroy($id);
@@ -310,7 +312,7 @@ class PurchaseOrder extends Backend
         }
         $map['id'] = ['in', $ids];
         $row = $this->model->where($map)->select();
-        foreach($row as $v) {
+        foreach ($row as $v) {
             if ($v['purchase_status'] !== 1) {
                 $this->error('只有待审核状态才能操作！！');
             }
@@ -347,4 +349,20 @@ class PurchaseOrder extends Backend
         }
     }
 
+    public function demo()
+    {
+        try {
+            $param = ['express_id' => 'YT2002549806739'];
+            $retrun = Hook::listen('express_query', $param);
+        } catch (\Exception $e) {
+            $this->error($e->getMessage());
+        }
+    }
+
+    public function test()
+    {
+        vendor('alibaba.Example');
+        $alibaba = new \Example();
+       
+    }
 }

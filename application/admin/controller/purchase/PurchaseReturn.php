@@ -106,11 +106,15 @@ class PurchaseReturn extends Backend
                         $sku = $this->request->post("sku/a");
                         $return_num = $this->request->post("return_num/a");
 
-                        //求和采购数量和已质检数量+到货数量
+                        //求和不合格数量
                         if ($params['purchase_id']) {
-                            //查询采购总数量
-                            $purchaseItem = new \app\admin\model\purchase\PurchaseOrderItem;
-                            $all_purchase_num = $purchaseItem->where('purchase_id', $params['purchase_id'])->sum('purchase_num');
+                            //查询不合格数量
+                            $check_map['purchase_id'] = $params['purchase_id'];
+                            $check_map['type'] = 1;
+                            $check = new \app\admin\model\warehouse\Check;
+                            $all_unqualified_num = $check->hasWhere('checkItem')
+                                ->where($check_map)
+                                ->sum('unqualified_num');
 
                             //查询退销总数量
                             $return_map['purchase_id'] = $params['purchase_id'];
@@ -119,13 +123,13 @@ class PurchaseReturn extends Backend
                                 ->sum('return_num');
 
                             $all_return_num = $all_return_num + array_sum($return_num);
-                            //已质检数量+到货数量 小于 采购单采购数量 则为部分质检
-                            if ($all_return_num < $all_purchase_num) {
+                            //已退销数量+退销数量 小于 采购单不合格数量 则为部分退销
+                            if ($all_return_num < $all_unqualified_num) {
                                 $return_status = 1;
                             } else {
                                 $return_status = 2;
                             }
-                            //修改采购单质检状态
+                            //修改采购单退销状态
                             $purchase_data['return_status'] = $return_status;
                             //查询采购单
                             $purchase = new \app\admin\model\purchase\PurchaseOrder;
@@ -176,6 +180,9 @@ class PurchaseReturn extends Backend
         //质检单
         $return_number = 'RO' . date('YmdHis') . rand(100, 999) . rand(100, 999);
         $this->assign('return_number', $return_number);
+
+        $id = input('ids');
+        $this->assign('id', $id);
         return $this->view->fetch();
     }
 
@@ -215,11 +222,15 @@ class PurchaseReturn extends Backend
                         $return_num = $this->request->post("return_num/a");
                         $item_id = $this->request->post("item_id/a");
 
-                        //求和采购数量和已质检数量+到货数量
+                        //求和不合格数量
                         if ($params['purchase_id']) {
-                            //查询采购总数量
-                            $purchaseItem = new \app\admin\model\purchase\PurchaseOrderItem;
-                            $all_purchase_num = $purchaseItem->where('purchase_id', $params['purchase_id'])->sum('purchase_num');
+                            //查询不合格数量
+                            $check_map['purchase_id'] = $params['purchase_id'];
+                            $check_map['type'] = 1;
+                            $check = new \app\admin\model\warehouse\Check;
+                            $all_unqualified_num = $check->hasWhere('checkItem')
+                                ->where($check_map)
+                                ->sum('unqualified_num');
 
                             //查询退销总数量
                             $return_map['purchase_id'] = $params['purchase_id'];
@@ -228,13 +239,13 @@ class PurchaseReturn extends Backend
                                 ->sum('return_num');
 
                             $all_return_num = $all_return_num + array_sum($return_num);
-                            //已质检数量+到货数量 小于 采购单采购数量 则为部分质检
-                            if ($all_return_num < $all_purchase_num) {
+                            //已退销数量+退销数量 小于 采购单不合格数量 则为部分退销
+                            if ($all_return_num < $all_unqualified_num) {
                                 $return_status = 1;
                             } else {
                                 $return_status = 2;
                             }
-                            //修改采购单质检状态
+                            //修改采购单退销状态
                             $purchase_data['return_status'] = $return_status;
                             //查询采购单
                             $purchase = new \app\admin\model\purchase\PurchaseOrder;

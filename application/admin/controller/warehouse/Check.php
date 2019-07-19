@@ -216,7 +216,7 @@ class Check extends Backend
                     }
                     $result = $row->allowField(true)->save($params);
 
-                    //添加合同产品
+                    //添加产品
                     if ($result !== false) {
                         $sku = $this->request->post("sku/a");
                         $product_name = $this->request->post("product_name/a");

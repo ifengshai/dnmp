@@ -37,8 +37,8 @@ return array(
                 ),
             'value'   =>
                 array(
-                    'customer' => 'B977D9C85EDEC22FE**',
-                    'app_key'  => 'CRAeiE**',
+                    'customer' => '68FCE42E9F7926C98B26F35E4D87AD18',
+                    'app_key'  => 'IgOUTwjl9477',
                     'is_open'  => '1',
                 ),
             'rule'    => 'required',

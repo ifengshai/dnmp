@@ -26,7 +26,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     [
                         { checkbox: true },
                         { field: 'id', title: __('Id') },
-                        { field: 'purchase_number', title: __('Purchase_number') },
+                        { field: 'purchase_number', title: __('Purchase_number')},
                         { field: 'purchase_name', title: __('Purchase_name') },
                         { field: 'product_total', title: __('Product_total'), operate: 'BETWEEN' },
                         { field: 'purchase_freight', title: __('Purchase_freight'), operate: 'BETWEEN' },
@@ -109,19 +109,23 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     }
                                 },
                                 {
-                                    name: 'detail',
+                                    name: 'return',
                                     text: '退销',
-                                    title: __('Detail'),
+                                    title: '退销',
                                     classname: 'btn btn-xs  btn-success  btn-dialog',
                                     icon: 'fa fa-plus',
-                                    url: 'purchase/purchase_order/detail',
+                                    url: 'purchase/purchase_return/add',
                                     extend: 'data-area = \'["100%","100%"]\'',
                                     callback: function (data) {
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
                                     },
                                     visible: function (row) {
                                         //返回true时按钮显示,返回false隐藏
-                                        return true;
+                                        if (row.return_status == 2) {
+                                            return false;
+                                        } else {
+                                            return true;
+                                        }
                                     }
                                 },
                                 {
