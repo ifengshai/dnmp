@@ -29,8 +29,12 @@ class InfoSynergyTaskRemark extends Model
     ];
     
 
-    
-
+    /***
+     * 根据id获取关联的备注信息
+     */
+    public function getSynergyTaskRemarkById($id){
+        return $this->where('tid','=',$id)->select();
+    }
 
 
 

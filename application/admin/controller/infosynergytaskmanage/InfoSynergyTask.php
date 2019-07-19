@@ -8,6 +8,7 @@ use app\admin\model\infosynergytaskmanage\InfoSynergyTaskChangeSku;
 use app\admin\model\infosynergytaskmanage\InfoSynergyTaskCategory;
 use app\admin\model\platformManage\ManagtoPlatform;
 use app\admin\model\saleAfterManage\SaleAfterTask;
+use app\admin\model\infosynergytaskmanage\InfoSynergyTaskRemark;
 use app\admin\model\AuthGroup;
 use think\Db;
 use think\Request;
@@ -43,7 +44,10 @@ class InfoSynergyTask extends Backend
     {
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
-            $item = $params['item'];
+//            dump($params);
+//            //exit;
+            $item = isset($params['item']) ? $params['item']  : '';
+            $lens = isset($params['lens']) ? $params['lens']  : '';
             if ($params) {
                 $params = $this->preExcludeFields($params);
                 //承接部门和承接人写入数据库
@@ -84,16 +88,57 @@ class InfoSynergyTask extends Backend
                     $this->error($e->getMessage());
                 }
                 if ($result !== false) {
-                    foreach($item as $arr){
-                        $data=[];
-                        $data['tid'] = $this->model->id;
-                        $data['original_sku'] = !empty($arr['original_sku']) ? $arr['original_sku'] : '';
-                        $data['original_number'] = !empty($arr['original_number']) ? $arr['original_number'] : '';
-                        $data['change_sku'] = !empty($arr['change_sku']) ? $arr['change_sku'] : '';
-                        $data['change_number'] = !empty($arr['change_number']) ? $arr['change_number'] : '';
-                        $data['create_person'] = session('admin.nickname');
-                        $data['create_time']     = date("Y-m-d H:i:s",time());
-                        (new InfoSynergyTaskChangeSku())->allowField(true)->save($data);
+                    if($item){
+                        foreach($item as $arr){
+                            $data=[];
+                            $data['tid'] = $this->model->id;
+                            $data['original_sku'] = !empty($arr['original_sku']) ? $arr['original_sku'] : '';
+                            $data['original_number'] = !empty($arr['original_number']) ? $arr['original_number'] : '';
+                            $data['change_sku'] = !empty($arr['change_sku']) ? $arr['change_sku'] : '';
+                            $data['change_number'] = !empty($arr['change_number']) ? $arr['change_number'] : '';
+                            $data['create_person'] = session('admin.nickname');
+                            $data['create_time']     = date("Y-m-d H:i:s",time());
+                            (new InfoSynergyTaskChangeSku())->allowField(true)->save($data);
+                        }
+                    }
+                    if($lens){
+                        $dataLens = [];
+                        $recipeLens = [];
+                        foreach ($lens['original_sku'] as $k =>$v){
+                            //镜架数据
+                            $dataLens[$k]['tid'] = $this->model->id;
+                            $dataLens[$k]['original_name'] = $lens['original_name'][$k];
+                            $dataLens[$k]['original_sku'] = $lens['original_sku'][$k];
+                            $dataLens[$k]['original_number'] = $lens['original_number'][$k];
+                            $dataLens[$k]['change_type'] = 2;
+                            $dataLens[$k]['recipe_type'] = $lens['recipe_type'][$k];
+                            $dataLens[$k]['lens_type'] = $lens['lens_type'][$k];
+                            $dataLens[$k]['coating_type'] = $lens['coating_type'][$k];
+                            //镜片数据
+                            $recipeLens[$k]['od_sph'] = $lens['od_sph'][$k];
+                            $recipeLens[$k]['od_cyl'] = $lens['od_cyl'][$k];
+                            $recipeLens[$k]['od_axis'] = $lens['od_axis'][$k];
+                            $recipeLens[$k]['od_add'] = $lens['od_add'][$k];
+                            $recipeLens[$k]['pd_r'] = $lens['pd_r'][$k];
+                            $recipeLens[$k]['od_pv'] = $lens['od_pv'][$k];
+                            $recipeLens[$k]['od_bd'] = $lens['od_bd'][$k];
+                            $recipeLens[$k]['od_pv_r'] = $lens['od_pv_r'][$k];
+                            $recipeLens[$k]['od_bd_r'] = $lens['od_bd_r'][$k];
+                            $recipeLens[$k]['os_sph'] = $lens['os_sph'][$k];
+                            $recipeLens[$k]['os_cyl'] = $lens['os_cyl'][$k];
+                            $recipeLens[$k]['os_axis'] = $lens['os_axis'][$k];
+                            $recipeLens[$k]['os_add'] = $lens['os_add'][$k];
+                            $recipeLens[$k]['pd_l'] = $lens['pd_l'][$k];
+                            $recipeLens[$k]['os_pv'] = $lens['os_pv'][$k];
+                            $recipeLens[$k]['os_bd'] = $lens['os_bd'][$k];
+                            $recipeLens[$k]['os_pv_r'] = $lens['os_pv_r'][$k];
+                            $recipeLens[$k]['os_bd_r'] = $lens['os_bd_r'][$k];
+                            $dataLens[$k]['options'] = serialize($recipeLens[$k]);
+                            $dataLens[$k]['create_person'] = session('admin.nickname');
+                            $dataLens[$k]['create_time']   = date("Y-m-d H:i:s",time());
+
+                        }
+                        (new InfoSynergyTaskChangeSku())->allowField(true)->saveAll($dataLens);
                     }
                     $this->success();
                 } else {
@@ -136,6 +181,10 @@ class InfoSynergyTask extends Backend
         }
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
+            $tid    = $params['id'];
+            unset($params['id']);
+            $item = isset($params['item']) ? $params['item']  : '';
+            $lens = isset($params['lens']) ? $params['lens']  : '';
             if ($params) {
                 $params = $this->preExcludeFields($params);
                 $result = false;
@@ -160,6 +209,67 @@ class InfoSynergyTask extends Backend
                     $this->error($e->getMessage());
                 }
                 if ($result !== false) {
+                    if(!empty($params['remark_record'])){
+                        $dataRecord = [];
+                        $dataRecord['tid'] = $tid;
+                        $dataRecord['remark_record'] = strip_tags($params['remark_record']);
+                        $dataRecord['create_person'] = session('admin.username');
+                        $dataRecord['create_time']   = date("Y-m-d H:i:s",time());
+                        (new InfoSynergyTaskRemark())->allowField(true)->save($dataRecord);
+                    }
+                    if($item){
+                        foreach($item as $arr){
+                            $data=[];
+                            //$data['id'] = $arr['id'];
+                            $data['original_sku'] = !empty($arr['original_sku']) ? $arr['original_sku'] : '';
+                            $data['original_number'] = !empty($arr['original_number']) ? $arr['original_number'] : '';
+                            $data['change_sku'] = !empty($arr['change_sku']) ? $arr['change_sku'] : '';
+                            $data['change_number'] = !empty($arr['change_number']) ? $arr['change_number'] : '';
+                            $data['create_person'] = session('admin.nickname');
+                            $data['update_time']     = date("Y-m-d H:i:s",time());
+                            (new InfoSynergyTaskChangeSku())->allowField(true)->where('id',$arr['id'])->save($data,['id',$arr['id']]);
+                        }
+                    }
+                    if($lens){
+                        $dataLens = [];
+                        $recipeLens = [];
+                        foreach ($lens['id'] as $k =>$v){
+                            //镜架数据
+                            $dataLens[$k]['id'] = $v;
+                            $dataLens[$k]['original_name'] = $lens['original_name'][$k];
+                            $dataLens[$k]['original_sku'] = $lens['original_sku'][$k];
+                            $dataLens[$k]['original_number'] = $lens['original_number'][$k];
+                            $dataLens[$k]['change_type'] = 2;
+                            $dataLens[$k]['recipe_type'] = $lens['recipe_type'][$k];
+                            $dataLens[$k]['lens_type'] = $lens['lens_type'][$k];
+                            $dataLens[$k]['coating_type'] = $lens['coating_type'][$k];
+                            //镜片数据
+                            $recipeLens[$k]['od_sph'] = $lens['od_sph'][$k];
+                            $recipeLens[$k]['od_cyl'] = $lens['od_cyl'][$k];
+                            $recipeLens[$k]['od_axis'] = $lens['od_axis'][$k];
+                            $recipeLens[$k]['od_add'] = $lens['od_add'][$k];
+                            $recipeLens[$k]['pd_r'] = $lens['pd_r'][$k];
+                            $recipeLens[$k]['od_pv'] = $lens['od_pv'][$k];
+                            $recipeLens[$k]['od_bd'] = $lens['od_bd'][$k];
+                            $recipeLens[$k]['od_pv_r'] = $lens['od_pv_r'][$k];
+                            $recipeLens[$k]['od_bd_r'] = $lens['od_bd_r'][$k];
+                            $recipeLens[$k]['os_sph'] = $lens['os_sph'][$k];
+                            $recipeLens[$k]['os_cyl'] = $lens['os_cyl'][$k];
+                            $recipeLens[$k]['os_axis'] = $lens['os_axis'][$k];
+                            $recipeLens[$k]['os_add'] = $lens['os_add'][$k];
+                            $recipeLens[$k]['pd_l'] = $lens['pd_l'][$k];
+                            $recipeLens[$k]['os_pv'] = $lens['os_pv'][$k];
+                            $recipeLens[$k]['os_bd'] = $lens['os_bd'][$k];
+                            $recipeLens[$k]['os_pv_r'] = $lens['os_pv_r'][$k];
+                            $recipeLens[$k]['os_bd_r'] = $lens['os_bd_r'][$k];
+                            $dataLens[$k]['options'] = serialize($recipeLens[$k]);
+                            $dataLens[$k]['create_person'] = session('admin.nickname');
+                            $dataLens[$k]['update_time']   = date("Y-m-d H:i:s",time());
+                        }
+                        (new InfoSynergyTaskChangeSku())->allowField(true)->saveAll($dataLens);
+
+                    }
+
                     $this->success();
                 } else {
                     $this->error(__('No rows were updated'));
@@ -178,6 +288,10 @@ class InfoSynergyTask extends Backend
         $this->view->assign('orderType',$this->model->orderType());
         //任务级别
         $this->view->assign('prtyIdList',(new SaleAfterTask())->getPrtyIdList());
+        //信息协同任务SKU信息
+//        dump((new InfoSynergyTaskChangeSku())->getChangeSkuList($row['id']));
+//        exit;
+        $this->view->assign('taskChangeSku',(new InfoSynergyTaskChangeSku())->getChangeSkuList($row['id']));
         return $this->view->fetch();
     }
     /**
@@ -273,6 +387,31 @@ class InfoSynergyTask extends Backend
         }else{
             return $this->error('请求错误,请重新尝试','','error',0);
         }
+    }
+    public function detail(Request $request)
+    {
+        $id = $request->param('ids');
+        if(!$id){
+            $this->error('参数错误，请重新尝试','/admin/saleaftermanage/sale_after_task/index');
+        }
+        $result = $this->model->getInfoSynergyDetail($id);
+        if(!$result){
+            $this->error('任务信息不存在，请重新尝试','/admin/saleaftermanage/sale_after_task/index');
+        }
+        //dump($result);
+        $this->view->assign('row',$result);
+        $this->view->assign('categoryList',(new InfoSynergyTaskCategory())->getIssueList(1,0));
+        //订单平台列表
+        $this->view->assign("orderPlatformList", (new ManagtoPlatform())->getOrderPlatformList());
+        //关联单据类型列表
+        $this->view->assign('orderType',$this->model->orderType());
+        //任务级别
+        $this->view->assign('prtyIdList',(new SaleAfterTask())->getPrtyIdList());
+        $this->view->assign('taskChangeSku',(new InfoSynergyTaskChangeSku())->getChangeSkuList($result['id']));
+        //订单备注表
+        $this->view->assign('orderReturnRemark',(new InfoSynergyTaskRemark())->getSynergyTaskRemarkById($result['id']));
+//        $this->view->assign('orderInfo',$this->model->getOrderInfo($result['order_platform'],$result['order_number']));
+        return $this->view->fetch();
     }
 
 }

@@ -200,12 +200,12 @@ class SaleAfterTask extends Backend
                     $this->error($e->getMessage());
                 }
                 if ($result !== false) {
-                    $data = [];
-                    $data['tid'] = $tid;
-                    $data['remark_record'] = strip_tags($params['task_remark']);
-                    $data['create_person'] = session('admin.username');
-                    $data['create_time']   = date("Y-m-d H:i:s",time());
-                    if(!empty($data['remark_record'])){ //将操作记录写入数据库
+                    if(!empty($params['task_remark'])){
+                        $data = [];
+                        $data['tid'] = $tid;
+                        $data['remark_record'] = strip_tags($params['task_remark']);
+                        $data['create_person'] = session('admin.username');
+                        $data['create_time']   = date("Y-m-d H:i:s",time());
                         (new SaleAfterTaskRemark())->allowField(true)->save($data);
                     }
                     $this->success();
