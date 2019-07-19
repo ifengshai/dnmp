@@ -330,7 +330,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     '</div>'+
                                     '</div>';
                             });
-                        };
+                        }
                         //console.log(ret);
                         //console.log($('#c-order_status').val());
                         return false;
