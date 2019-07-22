@@ -27,7 +27,17 @@ class InfoSynergyTaskChangeSku extends Model
     protected $append = [
 
     ];
-    
+    public function getChangeSkuList($tid)
+    {
+        $result = $this->where('tid','=',$tid)->select();
+        if(!$result){
+            return false;
+        }
+          foreach ($result as $k =>$v){
+            $result[$k]['option'] = unserialize($v['options']);
+          }
+          return $result;
+    }
 
     
 

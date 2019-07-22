@@ -3,7 +3,8 @@
 namespace app\admin\model\infosynergytaskmanage;
 
 use think\Model;
-
+use app\admin\model\infosynergytaskmanage\InfoSynergyTaskRemark;
+use app\admin\model\infosynergytaskmanage\InfoSynergyTaskChangeSku;
 
 class InfoSynergyTask extends Model
 {
@@ -44,7 +45,22 @@ class InfoSynergyTask extends Model
             7=>'库存盘点单'
         ];
     }
-
+    /***
+     * 根据下标获取订单类型
+     */
+    public function getOrderType($id)
+    {
+        $arr = [
+            1=>'无',
+            2=>'订单',
+            3=>'采购单',
+            4=>'质检单',
+            5=>'入库单',
+            6=>'出库单',
+            7=>'库存盘点单'
+        ];
+        return $arr[$id];
+    }
     /***
      * 测试部门
      */
@@ -79,6 +95,18 @@ class InfoSynergyTask extends Model
         return $this->belongsTo('info_synergy_task_category', 'synergy_task_id')->setEagerlyType(0);
     }
 
-
+    /**
+     * 获取任务详情
+     */
+    public function getInfoSynergyDetail($id)
+    {
+        $result = $this->where('id','=',$id)->find();
+        if(!$result){
+            return false;
+        }
+//        $result['info_synergy_task_remark'] = (new InfoSynergyTaskRemark())->getSynergyTaskRemarkById($id);
+//        $result['info_synergy_task_change_sku'] = (new InfoSynergyTaskChangeSku())->getChangeSkuList($id);
+        return $result;
+    }
 
 }

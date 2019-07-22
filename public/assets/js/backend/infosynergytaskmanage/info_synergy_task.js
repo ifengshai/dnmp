@@ -38,7 +38,27 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {field: 'info_synergy_task_category.name', title: __('Synergy_task_id'),operate:false},
                         {field: 'create_person', title: __('Create_person')},
                         {field: 'create_time', title: __('Create_time'), operate:'RANGE', addclass:'datetimerange'},
-                        {field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate}
+                        //{field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate}
+                        {field: 'operate', width: "120px", title: __('操作'), table: table,formatter: Table.api.formatter.operate,
+                            buttons: [
+                                {
+                                    name: 'detail',
+                                    text: '详情',
+                                    title: __('查看详情'),
+                                    extend: 'data-area = \'["100%","100%"]\'',
+                                    classname: 'btn btn-xs btn-primary btn-dialog',
+                                    icon: 'fa fa-list',
+                                    url: 'infosynergytaskmanage/info_synergy_task/detail',
+                                    callback: function (data) {
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), {title: "回传数据"});
+                                    },
+                                    visible: function (row) {
+                                        //返回true时按钮显示,返回false隐藏
+                                        return true;
+                                    }
+                                },
+                            ]
+                        },
                     ]
                 ]
             });
@@ -57,7 +77,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 Form.api.bindevent($("form[role=form]"));
                 //增加一行镜架数据
                 $(document).on('click', '.btn-add', function () {
-                    var rows =  document.getElementById("caigou-table").rows.length;
+                    var rows =  document.getElementById("caigou-table-sku").rows.length;
                     var content = '<tr>'+
                         '<td><input id="c-original_sku" class="form-control" name="row[item]['+rows+'][original_sku]" type="text"></td>'+
                         '<td><input id="c-original_number" class="form-control" name="row[item]['+rows+'][original_number]" type="text"></td>'+
@@ -75,13 +95,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 $(document).on('click','.btn-add-lens',function(){
                     var contents = '<div class="col-lg-12">' +
                         '</div>' +
-                        '<div class="col-xs-6 col-md-4" style="margin-top:15px;margin-left:7.6666%;" >' +
+                        '<div class="col-xs-6 col-md-4" style="margin-top:15px;margin-left:5.6666%;" >' +
                         '<div class="panel bg-blue">' +
                         '<div class="panel-body">' +
                         '<div class="panel-title">' +
                         '<label class="control-label col-xs-12 col-sm-3">商品名称:</label>' +
                         '<div class="col-xs-12 col-sm-8">' +
-                        '<input  id="c-item_name"  class="form-control"  type="text" value="">' +
+                        '<input  id="c-item_name"  class="form-control" name="row[lens][original_name][]" type="text" value="">' +
                         '</div>' +
                         '</div>' +
                         '</div>' +
@@ -89,7 +109,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         '<div class="panel-title">' +
                         '<label class="control-label col-xs-12 col-sm-3">SKU:</label>' +
                         '<div class="col-xs-12 col-sm-8">' +
-                        '<input  id="c-item_sku" class="form-control"  type="text" value="">' +
+                        '<input  id="c-item_sku" class="form-control" name="row[lens][original_sku][]"  type="text" value="">' +
                         '</div>' +
                         '</div>' +
                         '</div>' +
@@ -97,7 +117,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         '<div class="panel-title">' +
                         '<label class="control-label col-xs-12 col-sm-3">数量:</label>' +
                         '<div class="col-xs-12 col-sm-8">' +
-                        '<input  id="c-item_qty_ordered"  class="form-control"  type="text" value="">' +
+                        '<input  id="c-item_qty_ordered"  class="form-control" name="row[lens][original_number][]"  type="text" value="">' +
                         '</div>' +
                         '</div>' +
                         '</div>' +
@@ -105,7 +125,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         '<div class="panel-title">' +
                         '<label class="control-label col-xs-12 col-sm-3">处方类型:</label>' +
                         '<div class="col-xs-12 col-sm-8">' +
-                        '<input  id="c-recipe_type"  class="form-control" type="text" value="">' +
+                        '<input  id="c-recipe_type"  class="form-control" type="text" name="row[lens][recipe_type][]" value="">' +
                         '</div>' +
                         '</div>' +
                         '</div>' +
@@ -113,7 +133,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         '<div class="panel-title">' +
                         '<label class="control-label col-xs-12 col-sm-3">镜片类型:</label>' +
                         '<div class="col-xs-12 col-sm-8">' +
-                        '<input  id="c-lens_type"  class="form-control"  type="text" value="">' +
+                        '<input  id="c-lens_type"  class="form-control" name="row[lens][lens_type][]" type="text" value="">' +
                         '</div>' +
                         '</div>' +
                         '</div>' +
@@ -121,7 +141,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         '<div class="panel-title">' +
                         '<label class="control-label col-xs-12 col-sm-3">镀膜类型:</label>' +
                         '<div class="col-xs-12 col-sm-8">' +
-                        '<input  id="c-coating_film_type"  class="form-control"  type="text" value="">' +
+                        '<input  id="c-coating_film_type"  class="form-control" name="row[lens][coating_type][]"  type="text" value="">' +
                         '</div>' +
                         '</div>' +
                         '</div>' +
@@ -131,7 +151,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         '<div class="panel bg-aqua-gradient">' +
                         '<div class="panel-body">' +
                         '<div class="ibox-title">' +
-                        '<table id="caigou-table">' +
+                        '<table id="caigou-table-lens">' +
                         '<tr>' +
                         '<td colspan="10" style="text-align: center">处方参数</td>' +
                         '</tr>' +
@@ -149,39 +169,44 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         '</tr>' +
                         '<tr>' +
                         '<td style="text-align: center">Right(OD)</td>' +
-                        '<td><input id="c-right_SPH" class="form-control"  type="text" value=""></td>' +
-                        '<td><input id="c-right_CYL" class="form-control"  type="text" value=""></td>' +
-                        '<td><input id="c-right_AXI" class="form-control"  type="text" value=""></td>' +
-                        '<td><input id="c-right_ADD" class="form-control"  type="text" value=""></td>' +
-                        '<td><input id="c-right_PD" class="form-control"  type="text" value=""></td>' +
-                        '<td><input id="c-right_Prism_Horizontal" class="form-control"  type="text" value=""></td>' +
-                        '<td><input id="c-right_" class="form-control"  type="text" value=""></td>' +
-                        '<td><input id="c-purchase_remark" class="form-control"  type="text" value=""></td>' +
-                        '<td><input id="c-purchase_remark" class="form-control"  type="text" value=""></td>' +
+                        '<td><input id="c-right_SPH" class="form-control" name="row[lens][od_sph][]"  type="text" value=""></td>' +
+                        '<td><input id="c-right_CYL" class="form-control" name="row[lens][od_cyl][]"  type="text" value=""></td>' +
+                        '<td><input id="c-right_AXI" class="form-control" name="row[lens][od_axis][]" type="text" value=""></td>' +
+                        '<td><input id="c-right_ADD" class="form-control" name="row[lens][od_add][]"  type="text" value=""></td>' +
+                        '<td><input id="c-right_PD" class="form-control"  name="row[lens][pd_r][]"    type="text" value=""></td>' +
+                        '<td><input id="c-right_Prism_Horizontal" class="form-control" name="row[lens][od_pv][]"  type="text" value=""></td>' +
+                        '<td><input id="c-right_bd" class="form-control"  type="text" name="row[lens][od_bd][]"  value=""></td>' +
+                        '<td><input id="c-purchase_remark" class="form-control"  type="text" name="row[lens][od_pv_r][]" value=""></td>' +
+                        '<td><input id="c-purchase_remark" class="form-control"  type="text" name="row[lens][od_bd_r][]" value=""></td>' +
                         '</tr>' +
                         '<tr>' +
                         '<td style="text-align: center">Left(OS)</td>' +
-                        '<td><input id="c-left_SPH" class="form-control"  type="text" value=""></td>' +
-                        '<td><input id="c-left_CYL" class="form-control"  type="text" value=""></td>' +
-                        '<td><input id="c-purchase_remark" class="form-control"  type="text" value=""></td>' +
-                        '<td><input id="c-purchase_remark" class="form-control"  type="text" value=""></td>' +
-                        '<td><input id="c-purchase_remark" class="form-control"  type="text" value=""></td>' +
-                        '<td><input id="c-purchase_remark" class="form-control"  type="text" value=""></td>' +
-                        '<td><input id="c-purchase_remark" class="form-control"  type="text" value=""></td>' +
-                        '<td><input id="c-purchase_remark" class="form-control"  type="text" value=""></td>' +
-                        '<td><input id="c-purchase_remark" class="form-control"  type="text" value=""></td>' +
+                        '<td><input id="c-left_SPH" class="form-control" name="row[lens][os_sph][]" type="text" value=""></td>' +
+                        '<td><input id="c-left_CYL" class="form-control" name="row[lens][os_cyl][]" type="text" value=""></td>' +
+                        '<td><input id="c-purchase_remark" class="form-control" name="row[lens][os_axis][]"  type="text" value=""></td>' +
+                        '<td><input id="c-purchase_remark" class="form-control" name="row[lens][os_add][]"   type="text" value=""></td>' +
+                        '<td><input id="c-purchase_remark" class="form-control" name="row[lens][pd_l][]"    type="text" value=""></td>' +
+                        '<td><input id="c-purchase_remark" class="form-control" name="row[lens][os_pv][]"   type="text" value=""></td>' +
+                        '<td><input id="c-purchase_remark" class="form-control" name="row[lens][os_bd][]" type="text" value=""></td>' +
+                        '<td><input id="c-purchase_remark" class="form-control" name="row[lens][os_pv_r][]" type="text" value=""></td>' +
+                        '<td><input id="c-purchase_remark" class="form-control" name="row[lens][os_bd_r][]" type="text" value=""></td>' +
                         '</tr>' +
                         '</table>' +
                         '</div>' +
                         '</div>' +
                         '</div>' +
+                        '<div>'+
+                        '<a href="javascript:;" class="btn btn-danger btn-del-lens" title="删除"><i class="fa fa-trash"></i>删除</a>'+
+                        '</div>'+
                         '</div>';
                      $('.item_info').append(contents);
 
                 });
                 //删除一行镜片数据
                 $(document).on('click', '.btn-del-lens', function () {
+                    $(this).parent().parent().prev().remove();
                     $(this).parent().parent().remove();
+
                 });
                 //承接部门和承接人二级联动
                 $(document).on('change','#choose_dept_id',function(){
@@ -232,7 +257,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                  //清除html商品数据
                                   $(".item_info").empty();
                                  var item = ret.data.item;
-                                 console.log(item);
                                  $('#customer_info').after(function(){
                                      var Str = '';
                                      Str+=  '<div class="caigou item_info" style="margin-top:15px;margin-left:10%;">'+
@@ -241,7 +265,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                          '<div id="toolbar" class="toolbar">'+
                                          '<a href="javascript:;" class="btn btn-success btn-add" title="增加"><i class="fa fa-plus"></i> 增加</a>'+
                                          '</div>'+
-                                         '<table id="caigou-table">'+
+                                         '<table id="caigou-table-sku">'+
                                          '<tr>'+
                                          '<th>原始SKU</th>'+
                                          '<th>原始数量</th>'+
@@ -261,9 +285,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                          Str += '</tr>';
                                      }
                                      Str+='</table>'+
-                                         '</div>'+
-                                         '</div>'+
-                                         '</div>'+
                                          '</div>'+
                                          '</div>';
                                      return Str;
@@ -306,13 +327,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                              var newItem = item[j];
                                              str2 += '<div class="col-lg-12">' +
                                                  '</div>' +
-                                                 '<div class="col-xs-6 col-md-4" style="margin-top:15px;margin-left:7.6666%;" >' +
+                                                 '<div class="col-xs-6 col-md-4" style="margin-top:15px;margin-left:5.6666%;" >' +
                                                  '<div class="panel bg-blue">' +
                                                  '<div class="panel-body">' +
                                                  '<div class="panel-title">' +
                                                  '<label class="control-label col-xs-12 col-sm-3">商品名称:</label>' +
                                                  '<div class="col-xs-12 col-sm-8">' +
-                                                 '<input  id="c-item_name"  class="form-control"  type="text" value="' + newItem.name + '">' +
+                                                 '<input  id="c-item_name"  class="form-control"  type="text" name="row[lens][original_name][]" value="' + newItem.name + '">' +
                                                  '</div>' +
                                                  '</div>' +
                                                  '</div>' +
@@ -320,7 +341,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                                  '<div class="panel-title">' +
                                                  '<label class="control-label col-xs-12 col-sm-3">SKU:</label>' +
                                                  '<div class="col-xs-12 col-sm-8">' +
-                                                 '<input  id="c-item_sku" class="form-control"  type="text" value="' + newItem.sku + '">' +
+                                                 '<input  id="c-item_sku" class="form-control"  type="text" name="row[lens][original_sku][]" value="' + newItem.sku + '">' +
                                                  '</div>' +
                                                  '</div>' +
                                                  '</div>' +
@@ -328,7 +349,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                                  '<div class="panel-title">' +
                                                  '<label class="control-label col-xs-12 col-sm-3">数量:</label>' +
                                                  '<div class="col-xs-12 col-sm-8">' +
-                                                 '<input  id="c-item_qty_ordered"  class="form-control"  type="text" value="' + newItem.qty_ordered + '">' +
+                                                 '<input  id="c-item_qty_ordered"  class="form-control"  type="text" name="row[lens][original_number][]" value="' + newItem.qty_ordered + '">' +
                                                  '</div>' +
                                                  '</div>' +
                                                  '</div>' +
@@ -336,7 +357,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                                  '<div class="panel-title">' +
                                                  '<label class="control-label col-xs-12 col-sm-3">处方类型:</label>' +
                                                  '<div class="col-xs-12 col-sm-8">' +
-                                                 '<input  id="c-recipe_type"  class="form-control" type="text" value="' + newItem.prescription_type + '">' +
+                                                 '<input  id="c-recipe_type"  class="form-control" type="text" name="row[lens][recipe_type][]" value="' + newItem.prescription_type + '">' +
                                                  '</div>' +
                                                  '</div>' +
                                                  '</div>' +
@@ -344,7 +365,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                                  '<div class="panel-title">' +
                                                  '<label class="control-label col-xs-12 col-sm-3">镜片类型:</label>' +
                                                  '<div class="col-xs-12 col-sm-8">' +
-                                                 '<input  id="c-lens_type"  class="form-control"  type="text" value="' + newItem.index_type + '">' +
+                                                 '<input  id="c-lens_type"  class="form-control"  type="text" name="row[lens][lens_type][]" value="' + newItem.index_type + '">' +
                                                  '</div>' +
                                                  '</div>' +
                                                  '</div>' +
@@ -352,7 +373,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                                  '<div class="panel-title">' +
                                                  '<label class="control-label col-xs-12 col-sm-3">镀膜类型:</label>' +
                                                  '<div class="col-xs-12 col-sm-8">' +
-                                                 '<input  id="c-coating_film_type"  class="form-control"  type="text" value="' + newItem.coatiing_name + '">' +
+                                                 '<input  id="c-coating_film_type"  class="form-control"  type="text" name="row[lens][coating_type][]" value="' + newItem.coatiing_name + '">' +
                                                  '</div>' +
                                                  '</div>' +
                                                  '</div>' +
@@ -362,7 +383,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                                  '<div class="panel bg-aqua-gradient">' +
                                                  '<div class="panel-body">' +
                                                  '<div class="ibox-title">' +
-                                                 '<table id="caigou-table">' +
+                                                 '<table id="caigou-table-lens">' +
                                                  '<tr>' +
                                                  '<td colspan="10" style="text-align: center">处方参数</td>' +
                                                  '</tr>' +
@@ -380,32 +401,35 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                                  '</tr>' +
                                                  '<tr>' +
                                                  '<td style="text-align: center">Right(OD)</td>' +
-                                                 '<td><input id="c-right_SPH" class="form-control"  type="text" value="' + newItem.od_sph + '"></td>' +
-                                                 '<td><input id="c-right_CYL" class="form-control"  type="text" value="' + newItem.od_cyl + '"></td>' +
-                                                 '<td><input id="c-right_AXI" class="form-control"  type="text" value="' + newItem.od_axis + '"></td>' +
-                                                 '<td><input id="c-right_ADD" class="form-control"  type="text" value="' + newItem.od_add + '"></td>' +
-                                                 '<td><input id="c-right_PD" class="form-control"  type="text" value="' + newItem.pd_r + '"></td>' +
-                                                 '<td><input id="c-right_Prism_Horizontal" class="form-control"  type="text" value="' + newItem.od_pv + '"></td>' +
-                                                 '<td><input id="c-right_" class="form-control"  type="text" value="' + newItem.od_bd + '"></td>' +
-                                                 '<td><input id="c-purchase_remark" class="form-control"  type="text" value="' + newItem.od_pv_r + '"></td>' +
-                                                 '<td><input id="c-purchase_remark" class="form-control"  type="text" value="' + newItem.od_bd_r + '"></td>' +
+                                                 '<td><input id="c-right_SPH" class="form-control"  type="text" name="row[lens][od_sph][]" value="' + newItem.od_sph + '"></td>' +
+                                                 '<td><input id="c-right_CYL" class="form-control"  type="text" name="row[lens][od_cyl][]" value="' + newItem.od_cyl + '"></td>' +
+                                                 '<td><input id="c-right_AXI" class="form-control"  type="text" name="row[lens][od_axis][]" value="' + newItem.od_axis + '"></td>' +
+                                                 '<td><input id="c-right_ADD" class="form-control"  type="text" name="row[lens][od_add][]" value="' + newItem.od_add + '"></td>' +
+                                                 '<td><input id="c-right_PD" class="form-control"  type="text"  name="row[lens][pd_r][]" value="' + newItem.pd_r + '"></td>' +
+                                                 '<td><input id="c-right_Prism_Horizontal" class="form-control" name="row[lens][od_pv][]" type="text" value="' + newItem.od_pv + '"></td>' +
+                                                 '<td><input id="c-right_" class="form-control"  type="text" name="row[lens][od_bd][]" value="' + newItem.od_bd + '"></td>' +
+                                                 '<td><input id="c-purchase_remark" class="form-control"  type="text" name="row[lens][od_pv_r][]" value="' + newItem.od_pv_r + '"></td>' +
+                                                 '<td><input id="c-purchase_remark" class="form-control"  type="text" name="row[lens][od_bd_r][]" value="' + newItem.od_bd_r + '"></td>' +
                                                  '</tr>' +
                                                  '<tr>' +
                                                  '<td style="text-align: center">Left(OS)</td>' +
-                                                 '<td><input id="c-left_SPH" class="form-control"  type="text" value="' + newItem.os_sph + '"></td>' +
-                                                 '<td><input id="c-left_CYL" class="form-control"  type="text" value="' + newItem.os_cyl + '"></td>' +
-                                                 '<td><input id="c-purchase_remark" class="form-control"  type="text" value="' + newItem.os_axis + '"></td>' +
-                                                 '<td><input id="c-purchase_remark" class="form-control"  type="text" value="' + newItem.os_add + '"></td>' +
-                                                 '<td><input id="c-purchase_remark" class="form-control"  type="text" value="' + newItem.pd_l + '"></td>' +
-                                                 '<td><input id="c-purchase_remark" class="form-control"  type="text" value="' + newItem.os_pv + '"></td>' +
-                                                 '<td><input id="c-purchase_remark" class="form-control"  type="text" value="' + newItem.os_bd + '"></td>' +
-                                                 '<td><input id="c-purchase_remark" class="form-control"  type="text" value="' + newItem.os_pv_r + '"></td>' +
-                                                 '<td><input id="c-purchase_remark" class="form-control"  type="text" value="' + newItem.os_bd_r + '"></td>' +
+                                                 '<td><input id="c-left_SPH" class="form-control"  type="text" name="row[lens][os_sph][]" value="' + newItem.os_sph + '"></td>' +
+                                                 '<td><input id="c-left_CYL" class="form-control"  type="text" name="row[lens][os_cyl][]" value="' + newItem.os_cyl + '"></td>' +
+                                                 '<td><input id="c-purchase_remark" class="form-control"  type="text" name="row[lens][os_axis][]" value="' + newItem.os_axis + '"></td>' +
+                                                 '<td><input id="c-purchase_remark" class="form-control"  type="text" name="row[lens][os_add][]" value="' + newItem.os_add + '"></td>' +
+                                                 '<td><input id="c-purchase_remark" class="form-control"  type="text" name="row[lens][pd_l][]" value="' + newItem.pd_l + '"></td>' +
+                                                 '<td><input id="c-purchase_remark" class="form-control"  type="text" name="row[lens][os_pv][]" value="' + newItem.os_pv + '"></td>' +
+                                                 '<td><input id="c-purchase_remark" class="form-control"  type="text" name="row[lens][os_bd][]" value="' + newItem.os_bd + '"></td>' +
+                                                 '<td><input id="c-purchase_remark" class="form-control"  type="text" name="row[lens][os_pv_r][]" value="' + newItem.os_pv_r + '"></td>' +
+                                                 '<td><input id="c-purchase_remark" class="form-control"  type="text" name="row[lens][os_bd_r][]" value="' + newItem.os_bd_r + '"></td>' +
                                                  '</tr>' +
                                                  '</table>' +
                                                  '</div>' +
                                                  '</div>' +
                                                  '</div>' +
+                                                 '<div>'+
+                                                 '<a href="javascript:;" class="btn btn-danger btn-del-lens" title="删除"><i class="fa fa-trash"></i>删除</a>'+
+                                                 '</div>'+
                                                  '</div>';
                                          }
                                          str2+='</div>';
@@ -474,6 +498,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     return synergyOrderIdStr;
                 },
             }
+        },
+        detail:function(){
+            Form.api.bindevent($("form[role=form]"));
         }
     };
     return Controller;
