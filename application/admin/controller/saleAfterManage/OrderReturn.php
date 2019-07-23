@@ -259,4 +259,11 @@ class OrderReturn extends Backend
     {
 
     }
+    /***
+     * 新建订单检索功能
+     */
+    public function search()
+    {
+        return $this->view->fetch();
+    }
 }
