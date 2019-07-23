@@ -8,6 +8,8 @@ use think\Exception;
 use think\exception\PDOException;
 use think\exception\ValidateException;
 use think\Hook;
+use fast\Http;
+use fast\Alibaba;
 
 
 /**
@@ -161,7 +163,7 @@ class PurchaseOrder extends Backend
         }
         //判断状态是否为新建
         if ($row['purchase_status'] > 0) {
-            $this->error('只有新建状态才能编辑！！');
+            $this->error('只有新建状态才能编辑！！', url('index'));
         }
 
         $adminIds = $this->getDataLimitAdminIds();
@@ -256,6 +258,7 @@ class PurchaseOrder extends Backend
      */
     public function detail($ids = null)
     {
+        $ids = $ids ? $ids : input('id');
         $row = $this->model->get($ids);
         if (!$row) {
             $this->error(__('No Results were found'));
@@ -283,6 +286,61 @@ class PurchaseOrder extends Backend
         $contract_data = $contract->getContractData();
         $this->assign('contract_data', $contract_data);
 
+        $getTabList = ['采购单信息', '质检信息', '物流信息', '付款信息'];
+        $this->assign('getTabList', $getTabList);
+
+        $this->view->assign("row", $row);
+        return $this->view->fetch();
+    }
+
+    public function logistics($ids = null)
+    {
+        $row = $this->model->get($ids);
+        if (!$row) {
+            $this->error(__('No Results were found'));
+        }
+
+        $adminIds = $this->getDataLimitAdminIds();
+        if (is_array($adminIds)) {
+            if (!in_array($row[$this->dataLimitField], $adminIds)) {
+                $this->error(__('You have no permission'));
+            }
+        }
+        if ($this->request->isPost()) {
+            $params = $this->request->post("row/a");
+            if ($params) {
+                $params = $this->preExcludeFields($params);
+                $result = false;
+                Db::startTrans();
+                try {
+                    //是否采用模型验证
+                    if ($this->modelValidate) {
+                        $name = str_replace("\\model\\", "\\validate\\", get_class($this->model));
+                        $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.edit' : $name) : $this->modelValidate;
+                        $row->validateFailException(true)->validate($validate);
+                    }
+                    $params['is_add_logistics'] = 1;
+                    $result = $row->allowField(true)->save($params);
+
+                    Db::commit();
+                } catch (ValidateException $e) {
+                    Db::rollback();
+                    $this->error($e->getMessage());
+                } catch (PDOException $e) {
+                    Db::rollback();
+                    $this->error($e->getMessage());
+                } catch (Exception $e) {
+                    Db::rollback();
+                    $this->error($e->getMessage());
+                }
+                if ($result !== false) {
+                    $this->success('添加成功！！', '', url('index'));
+                } else {
+                    $this->error(__('No rows were updated'));
+                }
+            }
+            $this->error(__('Parameter %s can not be empty', ''));
+        }
         $this->view->assign("row", $row);
         return $this->view->fetch();
     }
@@ -349,20 +407,120 @@ class PurchaseOrder extends Backend
         }
     }
 
-    public function demo()
+    //物流详情
+    public function logisticsDetail()
     {
-        try {
-            $param = ['express_id' => 'YT2002549806739'];
-            $retrun = Hook::listen('express_query', $param);
-        } catch (\Exception $e) {
-            $this->error($e->getMessage());
+        $id = input('id');
+        //采购单供应商物流信息
+        $row = $this->model->get($id);
+        if (!$row) {
+            $this->error(__('No Results were found'));
         }
+        $arr = explode(',',$row['logistics_number']);
+        $data = [];
+        foreach($arr as $k => $v) {
+            try {
+                $param = ['express_id' => trim($v)];
+                $data[$k] = Hook::listen('express_query', $param)[0];
+            } catch (\Exception $e) {
+                $this->error($e->getMessage());
+            }
+        }
+
+        //采购单退销物流信息
+        $purchaseReturn = new \app\admin\model\purchase\PurchaseReturn;
+        $res = $purchaseReturn->where('purchase_id',$id)->column('logistics_number');
+        $number = implode(',',$res);
+        $arr = array_filter(explode(',',$number));
+        $return_data = [];
+        foreach($arr as $k => $v) {
+            try {
+                $param = ['express_id' => trim($v)];
+                $return_data[$k] = Hook::listen('express_query', $param)[0];
+            } catch (\Exception $e) {
+                $this->error($e->getMessage());
+            }
+        }
+       
+        $this->assign('id', $id);
+        $this->assign('data', $data);
+        $this->assign('return_data', $return_data);
+        return $this->view->fetch();
     }
 
     public function test()
     {
-        vendor('alibaba.Example');
-        $alibaba = new \Example();
-       
+        // $orderId = '531349795862802669';
+        // $data = Alibaba::getOrderDetail($orderId);
+
+        //根据不同的状态取订单数据
+        $orderStatus = 'success';
+        $success_data = Alibaba::getOrderList($orderStatus, 1);
+
+        //转为数组
+        $success_data = collection($success_data)->toArray();
+
+        foreach ($success_data['result'] as $k => $v) {
+
+            $list = [];
+            $map['purchase_number'] = $v->baseInfo->idOfStr;
+            $res = $this->model->where($map)->find();
+            if ($res !== false) {
+                $list['online_status'] = $v->baseInfo->status;
+                $result = $this->model->allowField(true)->save($list, ['id' => $res['id']]);
+            } else {
+
+                $list['purchase_number'] = $v->baseInfo->idOfStr;
+                $list['create_person'] = $v->baseInfo->buyerContact->name;
+                $jsonDate = $v->baseInfo->createTime;
+                preg_match('/\d{14}/', $jsonDate, $matches);
+                $list['createtime'] = date('Y-m-d H:i:s', strtotime($matches[0]));
+
+                $list['product_total'] = ($v->baseInfo->totalAmount) * 1 - ($v->baseInfo->shippingFee) * 1;
+                $list['purchase_freight'] = $v->baseInfo->shippingFee;
+                $list['purchase_total'] = $v->baseInfo->totalAmount;
+                $jsonDate = $v->baseInfo->allDeliveredTime;
+                preg_match('/\d{14}/', $jsonDate, $matches);
+                $list['delivery_stime'] = date('Y-m-d H:i:s', strtotime($matches[0]));
+                $list['delivery_etime'] = date('Y-m-d H:i:s', strtotime($matches[0]));
+                $list['purchase_status'] = 2;
+                $list['delivery_address'] = $v->baseInfo->receiverInfo->toArea;
+                $list['online_status'] = $v->baseInfo->status;
+
+                $result = $this->model->allowField(true)->create($list);
+
+                $params = [];
+                foreach ($v->productItems as  $key => $val) {
+                    //添加商品数据
+                    $params[$key]['purchase_id'] = $result->id;
+                    $params[$key]['purchase_order_number'] = $v->baseInfo->idOfStr;
+                    $params[$key]['product_name'] = $val->name;
+                    $params[$key]['supplier_sku'] = @$val->cargoNumber;
+                    $params[$key]['purchase_num'] = $val->quantity;
+                    $params[$key]['purchase_price'] = $val->price;
+                    $params[$key]['purchase_total'] = $val->itemAmount;
+                }
+                $this->purchase_order_item->allowField(true)->saveAll($params);
+            }
+        }
+        set_time_limit(0);
+        $success_data = Alibaba::getOrderList($orderStatus, 2);
+        dump($success_data);
+        die;
+
+        $orderStatus = 'waitsellersend';
+        $waitsellersend_data = Alibaba::getOrderList($orderStatus);
+
+        $orderStatus = 'waitbuyerreceive';
+        $waitbuyerreceive_data = Alibaba::getOrderList($orderStatus);
+
+
+        $waitsellersend_data = collection($waitsellersend_data)->toArray();
+        $waitbuyerreceive_data = collection($waitbuyerreceive_data)->toArray();
+
+
+        $data = array_merge($success_data, $waitsellersend_data, $waitbuyerreceive_data);
+
+        die;
     }
 }

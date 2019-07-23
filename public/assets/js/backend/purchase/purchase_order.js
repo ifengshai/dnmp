@@ -34,7 +34,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {
                             field: 'purchase_status', title: __('Purchase_status'),
                             custom: { 0: 'success', 1: 'yellow', 2: 'blue', 3: 'danger', 4: 'gray' },
-                            searchList: { 0: '新建', 1: '待审核', 2: '已通过', 3: '已拒绝', 4: '已取消' },
+                            searchList: { 0: '新建', 1: '待审核', 2: '已审核', 3: '已拒绝', 4: '已取消' },
                             formatter: Table.api.formatter.status
                         },
                         {
@@ -81,10 +81,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     name: 'detail',
                                     text: '详情',
                                     title: __('Detail'),
-                                    classname: 'btn btn-xs  btn-primary  btn-dialog',
+                                    classname: 'btn btn-xs  btn-primary ',
                                     icon: 'fa fa-list',
                                     url: 'purchase/purchase_order/detail',
-                                    extend: 'data-area = \'["100%","100%"]\'',
+                                    
                                     callback: function (data) {
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
                                     },
@@ -131,11 +131,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                 {
                                     name: 'detail',
                                     text: '录入物流单号',
-                                    title: __('Detail'),
+                                    title: '录入物流单号',
                                     classname: 'btn btn-xs  btn-success  btn-dialog',
                                     icon: 'fa fa-plus',
-                                    url: 'purchase/purchase_order/detail',
-                                    extend: 'data-area = \'["100%","100%"]\'',
+                                    url: 'purchase/purchase_order/logistics',
+                                    extend: 'data-area = \'["50%","50%"]\'',
                                     callback: function (data) {
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
                                     },
@@ -266,6 +266,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 }
             })
 
+        },
+        logistics:function(){
+            Controller.api.bindevent();
+        },
+        logisticsDetail:function(){
+            Controller.api.bindevent();
         },
         detail: function () {
             Controller.api.bindevent();
