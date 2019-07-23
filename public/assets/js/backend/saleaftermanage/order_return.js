@@ -242,6 +242,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
         },
         detail:function(){
             Form.api.bindevent($("form[role=form]"));
+        },
+        search:function () {
+            Form.api.bindevent($("form[role=form]"));
         }
     };
     return Controller;

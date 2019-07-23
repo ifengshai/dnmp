@@ -344,6 +344,7 @@ class InfoSynergyTask extends Backend
 
             return json($result);
         }
+        $this->view->assign('getTabList',(new SaleAfterTask())->getTabList());
         return $this->view->fetch();
     }
     /**
