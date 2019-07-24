@@ -5,6 +5,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             // 初始化表格参数配置
             Table.api.init({
                 searchFormVisible: true,
+                pageSize: 50,
                 extend: {
                     index_url: 'purchase/purchase_order/index' + location.search,
                     add_url: 'purchase/purchase_order/add',
@@ -26,16 +27,24 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     [
                         { checkbox: true },
                         { field: 'id', title: __('Id') },
-                        { field: 'purchase_number', title: __('Purchase_number')},
+                        { field: 'purchase_number', title: __('Purchase_number') },
                         { field: 'purchase_name', title: __('Purchase_name') },
                         { field: 'product_total', title: __('Product_total'), operate: 'BETWEEN' },
                         { field: 'purchase_freight', title: __('Purchase_freight'), operate: 'BETWEEN' },
                         { field: 'purchase_total', title: __('Purchase_total'), operate: 'BETWEEN' },
                         {
                             field: 'purchase_status', title: __('Purchase_status'),
-                            custom: { 0: 'success', 1: 'yellow', 2: 'blue', 3: 'danger', 4: 'gray' },
-                            searchList: { 0: '新建', 1: '待审核', 2: '已审核', 3: '已拒绝', 4: '已取消' },
-                            formatter: Table.api.formatter.status
+                            custom: { 0: 'success', 1: 'yellow', 2: 'blue', 3: 'danger', 4: 'gray', 5: 'yellow', 6: 'yellow', 7: 'success' },
+                            searchList: { 0: '新建', 1: '待审核', 2: '已审核', 3: '已拒绝', 4: '已取消', 5: '待发货', 6: '待收货', 7: '已收货' },
+                            formatter: Table.api.formatter.status,
+                            visible: function (value, row) {
+                                //返回true时按钮显示,返回false隐藏
+                                if (row.purchase_type == 1) {
+                                    return true;
+                                } else {
+                                    return false;
+                                }
+                            }
                         },
                         {
                             field: 'payment_status', title: __('Payment_status'),
@@ -84,7 +93,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     classname: 'btn btn-xs  btn-primary ',
                                     icon: 'fa fa-list',
                                     url: 'purchase/purchase_order/detail',
-                                    
+
                                     callback: function (data) {
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
                                     },
@@ -160,8 +169,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                         return true;
                                     }
                                 }
-
-
 
                             ], formatter: Table.api.formatter.operate
                         }
@@ -267,10 +274,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             })
 
         },
-        logistics:function(){
+        logistics: function () {
             Controller.api.bindevent();
         },
-        logisticsDetail:function(){
+        logisticsDetail: function () {
             Controller.api.bindevent();
         },
         detail: function () {

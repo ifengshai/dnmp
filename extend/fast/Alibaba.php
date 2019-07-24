@@ -19,7 +19,7 @@ class Alibaba
      * @param string $apiInfo 获取签名的参数 格式为protocol/apiVersion/namespace/apiName/
      * @return array
      */
-    public static function getOrderList($orderStatus = 'success', $page = 1)
+    public static function getOrderList($page = 1, $addparams = [])
     {
         $apiInfo = 'param2/1/com.alibaba.trade/alibaba.trade.getBuyerOrderList/';
         $url = self::$url;
@@ -31,11 +31,11 @@ class Alibaba
         //配置参数，请用apiInfo对应的api参数进行替换
         $code_arr = array(
             'webSite' => '1688',
-            'orderStatus' => $orderStatus,
-            'pageSize' => 100,
+            'pageSize' => 50,
             'page' => $page,
             'access_token' => self::$access_token
         );
+        $code_arr = array_merge($code_arr, $addparams);
         $aliParams = array();
         foreach ($code_arr as $key => $val) {
             $aliParams[] = $key . $val;
@@ -48,12 +48,12 @@ class Alibaba
         $url =  $url . $apiInfo;
         $params = [
             'webSite' => '1688',
-            'orderStatus' => $orderStatus,
-            'pageSize' => 100,
+            'pageSize' => 50,
             'page' => $page,
             'access_token' => self::$access_token,
             '_aop_signature' => $code_sign
         ];
+        $params = array_merge($params, $addparams);
         //请求URL
         $res = Http::post($url, $params);
         return json_decode($res);
