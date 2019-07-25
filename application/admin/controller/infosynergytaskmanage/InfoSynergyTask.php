@@ -327,8 +327,6 @@ class InfoSynergyTask extends Backend
                     $deptNumArr = explode('+',$val['dept_id']);
                     $list[$key]['dept'] = '';
                     foreach($deptNumArr as $values){
-//                        echo $values;
-//                        exit;
                         $list[$key]['dept'].= $deptArr[$values].' ';
                     }
                 }

@@ -74,6 +74,20 @@ class InfoSynergyTaskCategory extends Model
 
     }
 
+    /***
+     * 获取信息协同任务分类列表
+     */
+    public function getSynergyTaskCategoryList()
+    {
+        $result = $this->field('id,name')->select();
+        if(!$result){
+            return [0=>'问题不存在请添加问题'];
+        }
+        foreach($result as $key=>$val){
+            $result[$val['id']] = $val['name'];
+        }
+        return $result;
+    }
 
 
 

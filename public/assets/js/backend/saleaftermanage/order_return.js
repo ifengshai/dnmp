@@ -244,7 +244,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             Form.api.bindevent($("form[role=form]"));
         },
         search:function () {
-            Form.api.bindevent($("form[role=form]"));
+            Form.api.bindevent($("form[role=form]"),function(data){
+                window.top.location.href = 'admin/saleaftermanage/order_return/search';
+            });
         }
     };
     return Controller;
