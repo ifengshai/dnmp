@@ -841,7 +841,7 @@ class Crud extends Command
             }
 
             $data = [
-                'databaseConfigName'      => $db,
+                'modelConnection'         => $db == 'database' ? '' : "protected \$connection = '{$db}';",
                 'controllerNamespace'     => $controllerNamespace,
                 'modelNamespace'          => $modelNamespace,
                 'validateNamespace'       => $validateNamespace,
