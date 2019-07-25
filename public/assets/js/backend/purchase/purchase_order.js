@@ -36,15 +36,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             field: 'purchase_status', title: __('Purchase_status'),
                             custom: { 0: 'success', 1: 'yellow', 2: 'blue', 3: 'danger', 4: 'gray', 5: 'yellow', 6: 'yellow', 7: 'success' },
                             searchList: { 0: '新建', 1: '待审核', 2: '已审核', 3: '已拒绝', 4: '已取消', 5: '待发货', 6: '待收货', 7: '已收货' },
-                            formatter: Table.api.formatter.status,
-                            visible: function (value, row) {
-                                //返回true时按钮显示,返回false隐藏
-                                if (row.purchase_type == 1) {
-                                    return true;
-                                } else {
-                                    return false;
-                                }
-                            }
+                            formatter: Table.api.formatter.status
                         },
                         {
                             field: 'payment_status', title: __('Payment_status'),
