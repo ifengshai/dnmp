@@ -35,4 +35,9 @@ class PurchaseOrder extends Model
 
         return $data;
     }
+
+    public function purchaseOrderItem()
+    {
+        return $this->hasMany('PurchaseOrderItem','purchase_id');
+    }
 }

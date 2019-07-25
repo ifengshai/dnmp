@@ -42,7 +42,7 @@ class PurchaseOrder extends Backend
     /**
      * 查看
      */
-    public function index123()
+    public function index()
     {
         //设置过滤方法
         $this->request->filter(['strip_tags']);
@@ -54,13 +54,11 @@ class PurchaseOrder extends Backend
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
                 ->where($where)
-                ->where('online_status', 'not in', ['success', 'cancel', 'waitbuyerpay'])
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->model
                 ->where($where)
-                ->where('online_status', 'not in', ['success', 'cancel', 'waitbuyerpay', 'confirm_goods_but_not_fund', 'send_goods_but_not_fund'])
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
@@ -449,29 +447,34 @@ class PurchaseOrder extends Backend
         if (!$row) {
             $this->error(__('No Results were found'));
         }
-        $arr = explode(',', $row['logistics_number']);
         $data = [];
-        foreach ($arr as $k => $v) {
-            try {
-                $param = ['express_id' => trim($v)];
-                $data[$k] = Hook::listen('express_query', $param)[0];
-            } catch (\Exception $e) {
-                $this->error($e->getMessage());
+        if ($row['logistics_number']) {
+            $arr = explode(',', $row['logistics_number']);
+            foreach ($arr as $k => $v) {
+                try {
+                    $param = ['express_id' => trim($v)];
+                    $data[$k] = Hook::listen('express_query', $param)[0];
+                } catch (\Exception $e) {
+                    $this->error($e->getMessage());
+                }
             }
         }
+
 
         //采购单退销物流信息
         $purchaseReturn = new \app\admin\model\purchase\PurchaseReturn;
         $res = $purchaseReturn->where('purchase_id', $id)->column('logistics_number');
-        $number = implode(',', $res);
-        $arr = array_filter(explode(',', $number));
         $return_data = [];
-        foreach ($arr as $k => $v) {
-            try {
-                $param = ['express_id' => trim($v)];
-                $return_data[$k] = Hook::listen('express_query', $param)[0];
-            } catch (\Exception $e) {
-                $this->error($e->getMessage());
+        if ($res) {
+            $number = implode(',', $res);
+            $arr = array_filter(explode(',', $number));
+            foreach ($arr as $k => $v) {
+                try {
+                    $param = ['express_id' => trim($v)];
+                    $return_data[$k] = Hook::listen('express_query', $param)[0];
+                } catch (\Exception $e) {
+                    $this->error($e->getMessage());
+                }
             }
         }
 
@@ -481,6 +484,122 @@ class PurchaseOrder extends Backend
         return $this->view->fetch();
     }
 
+    //质检信息
+    public function checkDetail()
+    {
+        $id = input('id');
+        //采购单信息
+        $row = $this->model->get($id);
+        if (!$row) {
+            $this->error(__('No Results were found'));
+        }
+
+        //查询产品信息
+        $map['purchase_id'] = $id;
+        $item = $this->purchase_order_item->where($map)->column('*', 'sku');
+        $this->assign('item', $item);
+
+
+        //查询质检信息
+        $check_map['purchase_id'] = $id;
+        $check = new \app\admin\model\warehouse\Check;
+        $list = $check->with(['checkItem'])
+            ->where($check_map)
+            ->select();
+        $list = collection($list)->toArray();
+        $this->assign('list', $list);
+        $this->assign('id', $id);
+
+        //查询入库信息
+        $instock_map['purchase_id'] = $id;
+        $Instock = new \app\admin\model\warehouse\Instock;
+        $instock_list = $Instock->with(['instockItem'])
+            ->where($instock_map)
+            ->select();
+        $instock_list = collection($instock_list)->toArray();
+        $this->assign('instock_list', $instock_list);
+
+        //查询退销信息
+        $PurchaseReturn_map['purchase_id'] = $id;
+        $PurchaseReturn = new \app\admin\model\purchase\PurchaseReturn;
+        $return_list = $PurchaseReturn->with(['purchaseReturnItem'])
+            ->where($PurchaseReturn_map)
+            ->select();
+        $return_list = collection($return_list)->toArray();
+        $this->assign('return_list', $return_list);
+
+
+        return $this->view->fetch();
+    }
+
+    //确认差异
+    public function confirmDiff()
+    {
+        $id = input('id');
+        //采购单信息
+        $row = $this->model->get($id);
+        if (!$row) {
+            $this->error(__('No Results were found'));
+        }
+
+        //查询实际采购信息
+        $purchase_map['purchase_id'] = $id;
+        $purchase = new \app\admin\model\purchase\PurchaseOrder;
+        $purchase_list = $purchase->hasWhere('purchaseOrderItem')
+            ->where($purchase_map)
+            ->field('sku,purchase_num')
+            ->column('*', 'sku');
+
+
+        //查询质检信息
+        $check_map['purchase_id'] = $id;
+        $check = new \app\admin\model\warehouse\Check;
+        $list = $check->hasWhere('checkItem')
+            ->where($check_map)
+            ->field('sku,sum(arrivals_num) as arrivals_num')
+            ->group('sku')
+            ->select();
+        $list = collection($list)->toArray();
+        $data = [];
+        $check_data = [];
+        foreach ($list as $k => $v) {
+            //到货数量小于采购数量 更新实际到货数量为采购数量
+            if ($v['arrivals_num'] < @$purchase_list[$v['sku']]['purchase_num']) {
+                $data[$k]['sku'] = $v['sku'];
+                $data[$k]['id'] = @$purchase_list[$v['sku']]['id'];
+                $data[$k]['purchase_num'] = $v['arrivals_num'];
+
+                $check_data[$k]['sku'] = $v['sku'];
+                $check_data[$k]['purchase_num'] = $v['arrivals_num'];
+                $check_data[$k]['check_id'] = $v['id'];
+            }
+        }
+        if ($data) {
+            //批量修改
+            $this->purchase_order_item->allowField(true)->saveAll($data);
+
+            //更改质检单商品信息采购数量
+            foreach ($check_data as $k => $v) {
+                $checkItem = new \app\admin\model\warehouse\CheckItem;
+                $where['sku'] = $v['sku'];
+                $where['check_id'] = $v['check_id'];
+                $checkItem->allowField(true)->save(['purchase_num' => $v['purchase_num']], $where);
+            }
+        }
+
+        //同时判断采购单下所有商品是否全部质检
+        $purchase_all_num =  array_sum(array_column($purchase_list, 'purchase_num'));
+
+        //到货数量
+        $arrivals_all_num = array_sum(array_column($list, 'arrivals_num'));
+        //到货数量 大于或等于采购数量 更改采购状态为全部质检
+        if ($arrivals_all_num >= $purchase_all_num) {
+            $this->model->allowField(true)->save(['check_status' => 2], ['id' => $id]);
+        }
+        $this->success();
+    }
+
+    //定时采集
     public function test()
     {
         // $orderId = '531349795862802669';
@@ -505,109 +624,29 @@ class PurchaseOrder extends Backend
         // waitselleract 等待卖家操作	 
         // waitbuyerconfirmaction 等待买家确认操作	 
         // waitsellerpush 等待卖家推进	
+        $params = [
+            'createStartTime' => date('YmdHis', time() - 7200) . '000+0800',
+            'createEndTime' => date('YmdHis') . '000+0800',
+        ];
 
-
-        //根据不同的状态取订单数据
-        $success_data = Alibaba::getOrderList(1);
-
-        //转为数组
-        $success_data = collection($success_data)->toArray();
-        set_time_limit(0);
-        $data = [];
-        for ($i = 1; $i <= round($success_data['totalRecord'] / 50); $i++) {
+        $data = cache('success_data');
+        if (!$data) {
             //根据不同的状态取订单数据
-            $data[] = Alibaba::getOrderList($i)->result;
-        }
-        //设置缓存
-        cache('success_data', $data, 86400);
-        dump($data);
-        die;
-
-        foreach ($success_data['result'] as $k => $v) {
-
-            $list = [];
-            $map['purchase_number'] = $v->baseInfo->idOfStr;
-            $res = $this->model->where($map)->find();
-            if ($res !== false) {
-                $list['online_status'] = $v->baseInfo->status;
-                $result = $this->model->allowField(true)->save($list, ['id' => $res['id']]);
-            } else {
-
-                $list['purchase_number'] = $v->baseInfo->idOfStr;
-                $list['create_person'] = $v->baseInfo->buyerContact->name;
-                $jsonDate = $v->baseInfo->createTime;
-                preg_match('/\d{14}/', $jsonDate, $matches);
-                $list['createtime'] = date('Y-m-d H:i:s', strtotime($matches[0]));
-
-                $list['product_total'] = ($v->baseInfo->totalAmount) * 1 - ($v->baseInfo->shippingFee) * 1;
-                $list['purchase_freight'] = $v->baseInfo->shippingFee;
-                $list['purchase_total'] = $v->baseInfo->totalAmount;
-                $jsonDate = $v->baseInfo->allDeliveredTime;
-                preg_match('/\d{14}/', $jsonDate, $matches);
-                $list['delivery_stime'] = date('Y-m-d H:i:s', strtotime($matches[0]));
-                $list['delivery_etime'] = date('Y-m-d H:i:s', strtotime($matches[0]));
-                $list['purchase_status'] = 2;
-                $list['delivery_address'] = $v->baseInfo->receiverInfo->toArea;
-                $list['online_status'] = $v->baseInfo->status;
-
-                $result = $this->model->allowField(true)->create($list);
-
-                $params = [];
-                foreach ($v->productItems as  $key => $val) {
-                    //添加商品数据
-                    $params[$key]['purchase_id'] = $result->id;
-                    $params[$key]['purchase_order_number'] = $v->baseInfo->idOfStr;
-                    $params[$key]['product_name'] = $val->name;
-                    $params[$key]['supplier_sku'] = @$val->cargoNumber;
-                    $params[$key]['purchase_num'] = $val->quantity;
-                    $params[$key]['purchase_price'] = $val->price;
-                    $params[$key]['purchase_total'] = $val->itemAmount;
-                }
-                $this->purchase_order_item->allowField(true)->saveAll($params);
+            $success_data = Alibaba::getOrderList(1);
+            //转为数组
+            $success_data = collection($success_data)->toArray();
+            set_time_limit(0);
+            $data = [];
+            for ($i = 1; $i <= round($success_data['totalRecord'] / 50); $i++) {
+                //根据不同的状态取订单数据
+                $data[] = Alibaba::getOrderList($i)->result;
             }
+            //设置缓存
+            cache('success_data', $data, 86400);
         }
-        
-        $success_data = Alibaba::getOrderList(2);
-        dump($success_data);
-        die;
 
-
-
-
-        die;
-    }
-
-
-    /**
-     * 查看
-     */
-    public function index()
-    {
-        //设置过滤方法
-        $this->request->filter(['strip_tags']);
-        if ($this->request->isAjax()) {
-            $offset = input('offset');
-            $page = ($offset + 50) / 50;
-
-            $params = [
-                'createStartTime' => date('YmdHis', time() - 7200) . '000+0800',
-                'createEndTime' => date('YmdHis') . '000+0800',
-            ];
-            //根据不同的状态取订单数据
-            $success_data = cache('success_data_' . $page . '_' . md5(serialize($params)));
-            dump($success_data);
-            die;
-            if (!$success_data) {
-                $success_data = Alibaba::getOrderList($page, $params);
-                //转为数组
-                $success_data = collection($success_data)->toArray();
-
-                //设置缓存
-                cache('success_data_' . $page . '_' . md5(serialize($params)), $success_data, 86400);
-            }
-
-            foreach ($success_data['result'] as $k => $v) {
-
+        foreach ($data as $key => $val) {
+            foreach ($val as $k => $v) {
                 $list = [];
                 $map['purchase_number'] = $v->baseInfo->idOfStr;
                 $res = $this->model->where($map)->find();
@@ -615,6 +654,11 @@ class PurchaseOrder extends Backend
                     $list['online_status'] = $v->baseInfo->status;
                     $result = $this->model->allowField(true)->save($list, ['id' => $res['id']]);
                 } else {
+                    //过滤待付款 和取消状态的订单
+                    if (in_array($v->baseInfo->status, ['waitbuyerpay', 'cancel'])) {
+                        continue;
+                    }
+
                     $list['purchase_number'] = $v->baseInfo->idOfStr;
                     $list['create_person'] = $v->baseInfo->buyerContact->name;
                     $jsonDate = $v->baseInfo->createTime;
@@ -624,16 +668,41 @@ class PurchaseOrder extends Backend
                     $list['product_total'] = ($v->baseInfo->totalAmount) * 1 - ($v->baseInfo->shippingFee) * 1;
                     $list['purchase_freight'] = $v->baseInfo->shippingFee;
                     $list['purchase_total'] = $v->baseInfo->totalAmount;
-                    $jsonDate = @$v->baseInfo->allDeliveredTime;
-                    if ($jsonDate) {
-                        preg_match('/\d{14}/', $jsonDate, $matches);
+                    $list['payment_money'] = $v->baseInfo->totalAmount;
+                    $list['payment_status'] = 3;
+                    $payTime = @$v->baseInfo->payTime;
+                    if ($payTime) {
+                        $matches = [];
+                        preg_match('/\d{14}/', $payTime, $matches);
+                        $list['payment_time'] = date('Y-m-d H:i:s', strtotime($matches[0]));
+                    }
+
+                    $allDeliveredTime = @$v->baseInfo->allDeliveredTime;
+                    if ($allDeliveredTime) {
+                        $matches = [];
+                        preg_match('/\d{14}/', $allDeliveredTime, $matches);
                         $list['delivery_stime'] = date('Y-m-d H:i:s', strtotime($matches[0]));
                         $list['delivery_etime'] = date('Y-m-d H:i:s', strtotime($matches[0]));
                     }
 
-                    $list['purchase_status'] = 2;
+                    //待发货
+                    if (in_array($v->baseInfo->status, ['waitsellersend', 'waitsellerconfirm', 'waitbuyerconfirm', 'waitselleract', 'waitsellerpush', 'waitbuyerconfirmaction'])) {
+                        $list['purchase_status'] = 5;
+                    } elseif (in_array($v->baseInfo->status, ['waitbuyerreceive', 'send_goods_but_not_fund', 'waitlogisticstakein', 'waitbuyersign', 'signinfailed'])) {
+                        $list['purchase_status'] = 6; //待收货
+                    } else {
+                        $list['purchase_status'] = 7; //已收货
+                    }
+
                     $list['delivery_address'] = $v->baseInfo->receiverInfo->toArea;
                     $list['online_status'] = $v->baseInfo->status;
+                    $receivingTime = @$v->baseInfo->receivingTime;
+                    if ($receivingTime) {
+                        $matches = [];
+                        preg_match('/\d{14}/', $receivingTime, $matches);
+                        $list['receiving_time'] = date('Y-m-d H:i:s', strtotime($matches[0]));
+                    }
+
                     $result = $this->model->allowField(true)->create($list);
 
                     $params = [];
@@ -649,27 +718,8 @@ class PurchaseOrder extends Backend
                     }
                     $this->purchase_order_item->allowField(true)->saveAll($params);
                 }
-
-                $data[$k]['id'] = $v->baseInfo->idOfStr;
-                $data[$k]['purchase_number'] = $v->baseInfo->idOfStr;
-                $data[$k]['purchase_name'] = $v->baseInfo->idOfStr;
-                $data[$k]['product_total'] = $v->baseInfo->idOfStr;
-                $data[$k]['purchase_freight'] = $v->baseInfo->idOfStr;
-                $data[$k]['purchase_total'] = $v->baseInfo->idOfStr;
-                $data[$k]['purchase_status'] = 1;
-                $data[$k]['payment_status'] = 1;
-                $data[$k]['check_status'] = 1;
-                $data[$k]['stock_status'] = 1;
-                $data[$k]['return_status'] = 1;
-                $data[$k]['is_add_logistics'] = 1;
-                $data[$k]['is_new_product'] = 1;
-                $data[$k]['create_person'] = $v->baseInfo->idOfStr;
-                $data[$k]['createtime'] = $v->baseInfo->idOfStr;
             }
-            $result = array("total" => $success_data['totalRecord'], "rows" => $data);
-
-            return json($result);
         }
-        return $this->view->fetch();
+        echo 'ok';
     }
 }

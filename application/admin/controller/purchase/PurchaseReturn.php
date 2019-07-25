@@ -252,8 +252,6 @@ class PurchaseReturn extends Backend
                             $purchase->allowField(true)->save($purchase_data, ['id' => $params['purchase_id']]);
                         }
 
-
-
                         $data = [];
                         foreach ($sku as $k => $v) {
                             $data[$k]['sku'] = $v;

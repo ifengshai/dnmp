@@ -272,6 +272,23 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
         logisticsDetail: function () {
             Controller.api.bindevent();
         },
+        checkdetail: function () {
+            Controller.api.bindevent();
+            //确认差异
+            $(document).on('click', '.btn-add', function () {
+                Layer.load();
+                var id = $(this).data('id');
+                if (id) {
+                    Backend.api.ajax({
+                        url: '/admin/purchase/purchase_order/confirmDiff',
+                        data: { id: id }
+                    }, function (data, ret) {
+                        location.reload();
+                    });
+                }
+            })
+
+        },
         detail: function () {
             Controller.api.bindevent();
             //判断合同是否有默认值
