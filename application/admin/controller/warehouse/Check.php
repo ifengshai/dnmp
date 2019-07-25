@@ -216,7 +216,7 @@ class Check extends Backend
                     }
                     $result = $row->allowField(true)->save($params);
 
-                    //添加合同产品
+                    //添加产品
                     if ($result !== false) {
                         $sku = $this->request->post("sku/a");
                         $product_name = $this->request->post("product_name/a");
@@ -375,7 +375,6 @@ class Check extends Backend
         $item = $purchase_item->where($map)->select();
         //查询质检数量
         $skus = array_column($item, 'sku');
-
         //查询质检信息
         $check_map['purchase_id'] = $id;
         $check_map['type'] = 1;

@@ -70,7 +70,7 @@
                 <select name="row[purchase_id]" class="form-control purchase_id">
                     <option value="">请选择</option>
                     {foreach $purchase_data as $k => $v}
-                    <option value="{$k}">{$v}</option>
+                    <option value="{$k}" {:$id == $k ? 'selected' : ''}>{$v}</option>
                     {/foreach}
                 </select>
             </div>

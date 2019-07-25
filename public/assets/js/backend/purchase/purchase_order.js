@@ -5,6 +5,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             // 初始化表格参数配置
             Table.api.init({
                 searchFormVisible: true,
+                pageSize: 50,
                 extend: {
                     index_url: 'purchase/purchase_order/index' + location.search,
                     add_url: 'purchase/purchase_order/add',
@@ -33,8 +34,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         { field: 'purchase_total', title: __('Purchase_total'), operate: 'BETWEEN' },
                         {
                             field: 'purchase_status', title: __('Purchase_status'),
-                            custom: { 0: 'success', 1: 'yellow', 2: 'blue', 3: 'danger', 4: 'gray' },
-                            searchList: { 0: '新建', 1: '待审核', 2: '已通过', 3: '已拒绝', 4: '已取消' },
+                            custom: { 0: 'success', 1: 'yellow', 2: 'blue', 3: 'danger', 4: 'gray', 5: 'yellow', 6: 'yellow', 7: 'success' },
+                            searchList: { 0: '新建', 1: '待审核', 2: '已审核', 3: '已拒绝', 4: '已取消', 5: '待发货', 6: '待收货', 7: '已收货' },
                             formatter: Table.api.formatter.status
                         },
                         {
@@ -81,10 +82,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     name: 'detail',
                                     text: '详情',
                                     title: __('Detail'),
-                                    classname: 'btn btn-xs  btn-primary  btn-dialog',
+                                    classname: 'btn btn-xs  btn-primary ',
                                     icon: 'fa fa-list',
                                     url: 'purchase/purchase_order/detail',
-                                    extend: 'data-area = \'["100%","100%"]\'',
+
                                     callback: function (data) {
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
                                     },
@@ -109,29 +110,33 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     }
                                 },
                                 {
-                                    name: 'detail',
+                                    name: 'return',
                                     text: '退销',
-                                    title: __('Detail'),
+                                    title: '退销',
                                     classname: 'btn btn-xs  btn-success  btn-dialog',
                                     icon: 'fa fa-plus',
-                                    url: 'purchase/purchase_order/detail',
+                                    url: 'purchase/purchase_return/add',
                                     extend: 'data-area = \'["100%","100%"]\'',
                                     callback: function (data) {
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
                                     },
                                     visible: function (row) {
                                         //返回true时按钮显示,返回false隐藏
-                                        return true;
+                                        if (row.return_status == 2) {
+                                            return false;
+                                        } else {
+                                            return true;
+                                        }
                                     }
                                 },
                                 {
                                     name: 'detail',
                                     text: '录入物流单号',
-                                    title: __('Detail'),
+                                    title: '录入物流单号',
                                     classname: 'btn btn-xs  btn-success  btn-dialog',
                                     icon: 'fa fa-plus',
-                                    url: 'purchase/purchase_order/detail',
-                                    extend: 'data-area = \'["100%","100%"]\'',
+                                    url: 'purchase/purchase_order/logistics',
+                                    extend: 'data-area = \'["50%","50%"]\'',
                                     callback: function (data) {
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
                                     },
@@ -156,8 +161,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                         return true;
                                     }
                                 }
-
-
 
                             ], formatter: Table.api.formatter.operate
                         }
@@ -258,6 +261,29 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     Backend.api.ajax({
                         url: '/admin/purchase/purchase_order/deleteItem',
                         data: { id: id }
+                    });
+                }
+            })
+
+        },
+        logistics: function () {
+            Controller.api.bindevent();
+        },
+        logisticsDetail: function () {
+            Controller.api.bindevent();
+        },
+        checkdetail: function () {
+            Controller.api.bindevent();
+            //确认差异
+            $(document).on('click', '.btn-add', function () {
+                Layer.load();
+                var id = $(this).data('id');
+                if (id) {
+                    Backend.api.ajax({
+                        url: '/admin/purchase/purchase_order/confirmDiff',
+                        data: { id: id }
+                    }, function (data, ret) {
+                        location.reload();
                     });
                 }
             })

@@ -3,6 +3,7 @@
 namespace addons\express\library\engine;
 
 use fast\Http;
+use think\Cache;
 
 /**
  * 快递100

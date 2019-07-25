@@ -95,6 +95,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 })
                 $('.return_money').val(all_price);
             })
+            if ($('.purchase_id').val()) {
+                $('.purchase_id').change();
+            }
         },
         edit: function () {
             Controller.api.bindevent();
