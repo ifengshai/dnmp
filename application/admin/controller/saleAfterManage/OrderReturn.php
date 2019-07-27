@@ -273,6 +273,8 @@ class OrderReturn extends Backend
         if($request->isPost()){
             //获取输入的订单号
             $increment_id = $request->post('increment_id');
+//            dump($increment_id);
+//            exit;
             //获取输入的平台
             $order_platform = $request->post('order_platform');
             //获取客户邮箱地址
@@ -393,17 +395,11 @@ class OrderReturn extends Backend
         $this->view->assign("orderPlatformList", (new ManagtoPlatform())->getOrderPlatformList());
         return $this->view->fetch();
     }
-    public function ceshi()
-    {
-        $result = Db::connect('database.db_voogueme')->table('sales_flat_order o')->join('sales_flat_shipment_track s','o.entity_id=s.order_id','left')->join('sales_flat_order_payment p','o.entity_id=p.parent_id','left')->join('sales_flat_order_address a','o.entity_id=a.parent_id')->where('o.customer_email','brendarobinson5383@gmail.com')
-            ->field('o.entity_id,o.status,o.coupon_code,o.store_id,o.increment_id,o.customer_email,o.customer_firstname,o.customer_lastname,o.order_currency_code,o.total_item_count,o.base_grand_total,o.total_paid,o.created_at,s.track_number,s.title,p.base_amount_paid,p.base_amount_ordered,p.base_shipping_amount,p.method,p.last_trans_id,p.additional_information,a.telephone,a.postcode,a.street,a.city,a.region,a.country_id')->select();
-    }
-    public function ceshi2()
-    {
-        $str = 'a:2:{s:15:"info_buyRequest";a:6:{s:7:"product";s:3:"641";s:8:"form_key";s:16:"r1L18dahcXb0TWxJ";s:3:"qty";i:1;s:7:"options";a:1:{i:534;s:3:"735";}s:13:"cart_currency";s:3:"USD";s:7:"tmplens";a:14:{s:19:"frame_regural_price";s:5:"27.82";s:11:"frame_price";s:5:"27.82";s:12:"prescription";s:320:"min_pd=54&max_pd=78&progressive_bifocal=62&customer_rx=0&prescription_type=Progressive&od_sph=-3.50&od_cyl=-0.75&od_axis=156&os_add=2.25&os_sph=-3.75&os_cyl=-1.00&os_axis=31&pd_r=33.5&pd_l=33.5&pdcheck=on&od_pv=0.00&od_bd=&od_pv_r=0.00&od_bd_r=&os_pv=0.00&os_bd=&os_pv_r=0.00&os_bd_r=&save=Brenda%27s+Rx&information=&pd=";s:16:"is_special_price";s:1:"1";s:10:"index_type";s:64:"1.61 Photochromic Digital Free Form Progressive Hoya® VI - Gray";s:11:"index_price";d:93.5;s:10:"index_name";s:4:"1.61";s:8:"index_id";s:13:"refractive_58";s:10:"coating_id";s:9:"coating_2";s:13:"coatiing_name";s:74:"Super Hydrophobic (water resistant, easy to clean) Anti-Reflective Coating";s:14:"coatiing_price";s:4:"8.95";s:3:"rid";s:1:"0";s:4:"lens";s:6:"102.45";s:5:"total";s:6:"130.27";}}s:7:"options";a:1:{i:0;a:7:{s:5:"label";s:5:"Color";s:5:"value";s:3:"Red";s:11:"print_value";s:3:"Red";s:9:"option_id";s:3:"534";s:11:"option_type";s:9:"drop_down";s:12:"option_value";s:3:"735";s:11:"custom_view";b:0;}}}';
-        $arr = unserialize($str);
-        dump($arr);
-    }
+
+    /***
+     * 异步查询模糊订单
+     * @param Request $request
+     */
     public function ajaxGetLikeOrder(Request $request)
     {
         if($this->request->isAjax()){
@@ -414,8 +410,25 @@ class OrderReturn extends Backend
                 return $this->error('订单不存在，请重新尝试');
             }
                 return $this->success('','',$result,0);
-            dump($orderType);
-            dump($order_number);
+        }else{
+            $this->error('404 not found');
+        }
+    }
+
+    /***
+     * 异步查询模糊邮箱
+     * @param Request $request
+     */
+    public function ajaxGetLikeEmail(Request $request)
+    {
+        if($this->request->isAjax()){
+            $orderType = $request->post('orderType');
+            $email = $request->post('email');
+            $result = (new SaleAfterTask())->getLikeEmail($orderType,$email);
+            if(!$result){
+                return $this->error('订单不存在，请重新尝试');
+            }
+            return $this->success('','',$result,0);
         }else{
             $this->error('404 not found');
         }

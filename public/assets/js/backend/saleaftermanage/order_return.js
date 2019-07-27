@@ -265,70 +265,139 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
             Form.api.bindevent($("form[role=form]"), function (data) {
                 window.top.location.href = 'admin/saleaftermanage/order_return/search';
             });
-            // var incrementId = $('#increment_id').val();
-            // var orderType = $('#c-order_platform').val();
-            var availableTags = [
-                'ActionScript',
-                'AppleScript',
-                'Asp',
-                'BASIC',
-                'C',
-                'C++',
-                'Clojure',
-                'COBOL',
-                'ColdFusion',
-                'Erlang',
-                'Fortran',
-                'Groovy',
-                'Haskell',
-                'Java',
-                'JavaScript',
-                'Lisp',
-                'Perl',
-                'PHP',
-                'Python',
-                'Ruby',
-                'Scala',
-                'Scheme'
-            ];
             $('#increment_id').autocomplete({
-                source: availableTags
+                source:function(request,response){
+                    var incrementId = $('#increment_id').val();
+                    var orderType = $('#c-order_platform').val();
+                    $.ajax({
+                        type:"POST",
+                        url:"saleaftermanage/order_return/ajaxGetLikeOrder",
+                        dataType : "json",
+                        cache : false,
+                        async : false,
+                        data : {
+                            orderType:orderType,order_number:incrementId
+                        },
+                        success : function(json) {
+                             var data = json.data;
+                            response($.map(data,function(item){
+                                return {
+                                    label:item,//下拉框显示值
+                                    value:item,//选中后，填充到input框的值
+                                    //id:item.bankCodeInfo//选中后，填充到id里面的值
+                                };
+                            }));
+                        }
+                    });
+                },
+                delay: 10,//延迟100ms便于输入
+                select : function(event, ui) {
+                    $("#bankUnionNo").val(ui.item.id);//取出在return里面放入到item中的属性
+                },
+                scroll:true,
+                pagingMore:true,
+                max:5000
             });
-           
-            
-
-            // var array_tags=['boat', 'bear', 'dog', 'drink', 'elephant', 'fruit'];
-            //     $("#increment_id").autocomplete({
-            //         serviceUrl: "${pageContext.request.contextPath}/numGroupInfo/getAllnumgroupInfoJson.do",
-            //         width: 150,//提示框的宽度
-            //         delimiter: /(,|;)\s*/,//分隔符
-            //         deferRequestBy: 0, //单位微秒
-            //         zIndex: 9999,
-            //         noCache: false,//是否启用缓存 默认是开启缓存的
-            //         onSelect: function (suggestions) {
-            //             array_tags;
-            //         }
-            //     });
-            // $(document).on('keypress','#increment_id',function(data){
-            //         var incrementId = $('#increment_id').val();
-            //         var orderType = $('#c-order_platform').val();
-            //     $("#increment_id").autocomplete(
-            //         {
-            //             source: function(request, response) {
-            //                 $.ajax({
-            //                     url: "saleaftermanage/order_return/ajaxGetLikeOrder",
-            //                     dataType: "json",
-            //                     data:{orderType:orderType,order_number:incrementId},
-            //                     success: function(data) {
-            //                         console.log(data);
-            //                         response(data);
-            //                     },
-            //                 });
-            //             }
-            //         }
-            //     );
-            // });
-            // $(document).on('keypress','#increment_id',function(){
+            $('#customer_email').autocomplete({
+                source:function(request,response){
+                    var customer_email = $('#customer_email').val();
+                    var orderType = $('#c-order_platform').val();
+                    $.ajax({
+                        type:"POST",
+                        url:"saleaftermanage/order_return/ajaxGetLikeEmail",
+                        dataType : "json",
+                        cache : false,
+                        async : false,
+                        data : {
+                            orderType:orderType,email:customer_email
+                        },
+                        success : function(json) {
+                            var data = json.data;
+                            response($.map(data,function(item){
+                                return {
+                                    label:item,//下拉框显示值
+                                    value:item,//选中后，填充到input框的值
+                                    //id:item.bankCodeInfo//选中后，填充到id里面的值
+                                };
+                            }));
+                        }
+                    });
+                },
+                delay: 10,//延迟100ms便于输入
+                select : function(event, ui) {
+                    $("#bankUnionNo").val(ui.item.id);//取出在return里面放入到item中的属性
+                },
+                scroll:true,
+                pagingMore:true,
+                max:5000
+            });
+            $('#customer_phone').autocomplete({
+                source:function(request,response){
+                    var customer_phone = $('#customer_phone').val();
+                    var orderType = $('#c-order_platform').val();
+                    $.ajax({
+                        type:"POST",
+                        url:"saleaftermanage/order_return/ajaxGetLikeEmail",
+                        dataType : "json",
+                        cache : false,
+                        async : false,
+                        data : {
+                            orderType:orderType,customer_phone:customer_phone
+                        },
+                        success : function(json) {
+                            var data = json.data;
+                            response($.map(data,function(item){
+                                return {
+                                    label:item,//下拉框显示值
+                                    value:item,//选中后，填充到input框的值
+                                    //id:item.bankCodeInfo//选中后，填充到id里面的值
+                                };
+                            }));
+                        }
+                    });
+                },
+                delay: 10,//延迟100ms便于输入
+                select : function(event, ui) {
+                    $("#bankUnionNo").val(ui.item.id);//取出在return里面放入到item中的属性
+                },
+                scroll:true,
+                pagingMore:true,
+                max:5000
+            });
+            $('#customer_email').autocomplete({
+                source:function(request,response){
+                    var customer_email = $('#customer_email').val();
+                    var orderType = $('#c-order_platform').val();
+                    $.ajax({
+                        type:"POST",
+                        url:"saleaftermanage/order_return/ajaxGetLikeEmail",
+                        dataType : "json",
+                        cache : false,
+                        async : false,
+                        data : {
+                            orderType:orderType,email:customer_email
+                        },
+                        success : function(json) {
+                            var data = json.data;
+                            response($.map(data,function(item){
+                                return {
+                                    label:item,//下拉框显示值
+                                    value:item,//选中后，填充到input框的值
+                                    //id:item.bankCodeInfo//选中后，填充到id里面的值
+                                };
+                            }));
+                        }
+                    });
+                },
+                delay: 10,//延迟100ms便于输入
+                select : function(event, ui) {
+                    $("#bankUnionNo").val(ui.item.id);//取出在return里面放入到item中的属性
+                },
+                scroll:true,
+                pagingMore:true,
+                max:5000
+            });
+            // $(document).on('change','#increment_id',function(){
             //     var incrementId = $('#increment_id').val();
             //     var orderType = $('#c-order_platform').val();
             //     console.log(orderType);
@@ -341,7 +410,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
             //             url:'saleaftermanage/order_return/ajaxGetLikeOrder',
             //             data:{orderType:orderType,order_number:incrementId}
             //         }, function(data, ret){
-            //
+            //             $('#increment_id').autocomplete({
+            //                 source: ret.data
+            //             });
             //             console.log(ret.data);
             //         }, function(data, ret){
             //             //失败的回调
