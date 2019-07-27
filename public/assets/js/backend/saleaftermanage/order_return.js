@@ -292,7 +292,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                 'Scheme'
             ];
             $('#increment_id').autocomplete({
-                hits: availableTags
+                source: availableTags
             });
            
             
