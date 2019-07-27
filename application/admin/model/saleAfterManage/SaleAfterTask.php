@@ -208,9 +208,9 @@ class SaleAfterTask extends Model
      * @param $order_platform
      * @param $increment_id
      */
-    public function getLikeOrderInfo($order_platform,$increment_id)
+    public function getLikeOrder($order_platform,$increment_id)
     {
-        switch ($order_platform){
+        switch ($order_platform) {
             case 1:
                 $db = 'database.db_zeelool';
                 break;
@@ -224,124 +224,15 @@ class SaleAfterTask extends Model
                 return false;
                 break;
         }
-        $result = Db::connect($db)->table('sales_flat_order')->where('increment_id','like',"%{$increment_id}%")->field('entity_id,status,store_id,increment_id,customer_email,customer_firstname,customer_lastname,order_currency_code,total_item_count,total_paid')->select();
-        if(!$result){
+        $result = Db::connect($db)->table('sales_flat_order')->where('increment_id', 'like', "%{$increment_id}%")->field('increment_id')->limit(10)->select();
+        if (!$result) {
             return false;
         }
-        //return $result;
-        foreach($result as $k => $v){
-            $result[$k]['item'] = Db::connect($db)->table('sales_flat_order_item')->where('order_id','=',$v['entity_id'])->field('item_id,name,sku,qty_ordered,product_options')->select();
+        $arr = [];
+        foreach($result as $k=>$v){
+            $arr[] = $v['increment_id'];
         }
-        //return $result;
-        //$arr = [];
-        foreach($result as $key=> $val){
-            $result[$key]['arr'] = [];
-            foreach ($val['item'] as $keys =>$vals){
-                $result[$key]['arr'][$keys]['item_id'] = $vals['item_id'];
-                $result[$key]['arr'][$keys]['name']    = $vals['name'];
-                $result[$key]['arr'][$keys]['sku']     = $vals['sku'];
-                $result[$key]['arr'][$keys]['qty_ordered']     = $vals['qty_ordered'];
-                $tmp_product_options = unserialize($vals['product_options']);
-                $result[$key]['arr'][$keys]['index_type'] = isset($tmp_product_options['info_buyRequest']['tmplens']['index_type']) ? $tmp_product_options['info_buyRequest']['tmplens']['index_type'] : '';
-                $result[$key]['arr'][$keys]['coatiing_name'] = isset($tmp_product_options['info_buyRequest']['tmplens']['coatiing_name']) ? $tmp_product_options['info_buyRequest']['tmplens']['coatiing_name'] : "";
-                $tmp_prescription_params = isset($tmp_product_options['info_buyRequest']['tmplens']['prescription']) ? $tmp_product_options['info_buyRequest']['tmplens']['prescription'] : '';
-                if(!empty($tmp_prescription_params)){
-                    $tmp_prescription_params = explode("&", $tmp_prescription_params);
-                    $tmp_lens_params = array();
-                    foreach ($tmp_prescription_params as $tmp_key => $tmp_value) {
-                        $arr_value = explode("=", $tmp_value);
-                        $tmp_lens_params[$arr_value[0]] = $arr_value[1];
-                    }
-                    $result[$key]['arr'][$keys]['prescription_type'] = $tmp_lens_params['prescription_type'];
-                    $result[$key]['arr'][$keys]['od_sph']   = isset($tmp_lens_params['od_sph']) ? $tmp_lens_params['od_sph'] : '';
-                    $result[$key]['arr'][$keys]['od_cyl']   = isset($tmp_lens_params['od_cyl']) ? $tmp_lens_params['od_cyl'] : '';
-                    $result[$key]['arr'][$keys]['od_axis']  = isset($tmp_lens_params['od_axis']) ? $tmp_lens_params['od_axis'] : '';
-                    if($order_platform<=2){
-                        $result[$key]['arr'][$keys]['od_add']   = isset($tmp_lens_params['os_add']) ? $tmp_lens_params['os_add'] : '';
-                        $result[$key]['arr'][$keys]['os_add']   = isset($tmp_lens_params['od_add']) ? $tmp_lens_params['od_add'] : '';
-                    }else{
-                        $result[$key]['arr'][$keys]['od_add']   = isset($tmp_lens_params['od_add']) ? $tmp_lens_params['od_add'] : '';
-                        $result[$key]['arr'][$keys]['os_add']   = isset($tmp_lens_params['os_add']) ? $tmp_lens_params['os_add'] : '';
-                    }
-
-                    $result[$key]['arr'][$keys]['os_sph']   = isset($tmp_lens_params['os_sph']) ? $tmp_lens_params['os_sph'] : '';
-                    $result[$key]['arr'][$keys]['os_cyl']   = isset($tmp_lens_params['os_cyl']) ? $tmp_lens_params['os_cyl'] : '';
-                    $result[$key]['arr'][$keys]['os_axis']  = isset($tmp_lens_params['os_axis']) ? $tmp_lens_params['os_axis'] : '';
-                    if(isset($tmp_lens_params['pdcheck']) && $tmp_lens_params['pdcheck'] == 'on'){  //双pd值
-                        $result[$key]['arr'][$keys]['pd_r'] = isset($tmp_lens_params['pd_r']) ? $tmp_lens_params['pd_r'] : '';
-                        $result[$key]['arr'][$keys]['pd_l'] = isset($tmp_lens_params['pd_l']) ? $tmp_lens_params['pd_l'] : '';
-                    }else{
-                        $result[$key]['arr'][$keys]['pd_r'] = $arr[$key]['pd_l'] = isset($tmp_lens_params['pd']) ? $tmp_lens_params['pd'] : '';
-                    }
-                    if(isset($tmp_lens_params['prismcheck']) && $tmp_lens_params['prismcheck'] == 'on'){ //存在斜视
-                        $result[$key]['arr'][$keys]['od_bd'] = isset($tmp_lens_params['od_bd']) ? $tmp_lens_params['od_bd'] : '';
-                        $result[$key]['arr'][$keys]['od_pv'] = isset($tmp_lens_params['od_pv']) ? $tmp_lens_params['od_pv'] : '';
-                        $result[$key]['arr'][$keys]['os_pv'] = isset($tmp_lens_params['os_pv']) ? $tmp_lens_params['os_pv'] : '';
-                        $result[$key]['arr'][$keys]['os_bd'] = isset($tmp_lens_params['os_bd']) ? $tmp_lens_params['os_bd'] : '';
-                        $result[$key]['arr'][$keys]['od_pv_r'] = isset($tmp_lens_params['od_pv_r']) ? $tmp_lens_params['od_pv_r'] : '';
-                        $result[$key]['arr'][$keys]['od_bd_r'] = isset($tmp_lens_params['od_bd_r']) ? $tmp_lens_params['od_bd_r'] : '';
-                        $result[$key]['arr'][$keys]['os_pv_r'] = isset($tmp_lens_params['os_pv_r']) ? $tmp_lens_params['os_pv_r'] : '';
-                        $result[$key]['arr'][$keys]['os_bd_r'] = isset($tmp_lens_params['os_bd_r']) ? $tmp_lens_params['os_bd_r'] : '';
-                    }else{
-                        $result[$key]['arr'][$keys]['od_bd'] = "";
-                        $result[$key]['arr'][$keys]['od_pv'] = "";
-                        $result[$key]['arr'][$keys]['os_pv'] = "";
-                        $result[$key]['arr'][$keys]['os_bd'] = "";
-                        $result[$key]['arr'][$keys]['od_pv_r'] = "";
-                        $result[$key]['arr'][$keys]['od_bd_r'] = "";
-                        $result[$key]['arr'][$keys]['os_pv_r'] = "";
-                        $result[$key]['arr'][$keys]['os_bd_r'] = "";
-                    }
-                }else{
-                    $result[$key]['arr'][$keys]['prescription_type'] = "";
-                    $result[$key]['arr'][$keys]['od_sph']   = "";
-                    $result[$key]['arr'][$keys]['od_cyl']   = "";
-                    $result[$key]['arr'][$keys]['od_axis']   = "";
-                    $result[$key]['arr'][$keys]['od_add']   = "";
-                    $result[$key]['arr'][$keys]['os_sph']   = "";
-                    $result[$key]['arr'][$keys]['os_cyl']   = "";
-                    $result[$key]['arr'][$keys]['os_axis']   = "";
-                    $result[$key]['arr'][$keys]['os_add']   = "";
-                    $result[$key]['arr'][$keys]['pd_r'] = "";
-                    $result[$key]['arr'][$keys]['pd_l'] = "";
-                    $result[$key]['arr'][$keys]['od_bd'] = "";
-                    $result[$key]['arr'][$keys]['od_pv'] = "";
-                    $result[$key]['arr'][$keys]['os_pv'] = "";
-                    $result[$key]['arr'][$keys]['os_bd'] = "";
-                    $result[$key]['arr'][$keys]['od_pv_r'] = "";
-                    $result[$key]['arr'][$keys]['od_bd_r'] = "";
-                    $result[$key]['arr'][$keys]['os_pv_r'] = "";
-                    $result[$key]['arr'][$keys]['os_bd_r'] = "";
-                }
-            }
-            unset($result[$key]['item']);
-        }
-        return $result ? $result : false;
-    }
-
-    /***
-     * return Array
-     * @param $order_platform 订单平台
-     * @param $increment_id   订单号
-     */
-    public function getOrderPayInfo($order_platform,$increment_id)
-    {
-        switch ($order_platform){
-            case 1:
-                $db = 'database.db_zeelool';
-                break;
-            case 2:
-                $db = 'database.db_voogueme';
-                break;
-            case 3:
-                $db = 'database.db_nihao';
-                break;
-            default:
-                return false;
-                break;
-        }
-        $result = Db::connect($db)->table('sales_flat_order as o')->join('left join sales_flat_order_payment p on o.entity_id=p.parent_id ')->where('o.increment_id',$increment_id)->field('o.increment_id,p.base_amount_paid,p.base_amount_ordered,p.base_shipping_amount,p.method,p.last_trans_id,p.additional_information')->select();
-        return $result ? $result : false;
+        return $arr;
     }
     public function getCustomerEmail($order_platform,$increment_id='',$customer_name=[],$customer_phone='',$track_number='',$email)
     {
@@ -407,7 +298,10 @@ class SaleAfterTask extends Model
             //求出所有的订单号
             $result['increment_id'][] = $val['increment_id'];
             $result[$key]['additional_information'] = unserialize($val['additional_information']);
-
+            $result[$key]['additional_information']['paypal_payer_email'] = isset($result[$key]['additional_information']['paypal_payer_email']) ? $result[$key]['additional_information']['paypal_payer_email']  : '';
+            $result[$key]['additional_information']['paypal_payer_id'] = isset($result[$key]['additional_information']['paypal_payer_id']) ? $result[$key]['additional_information']['paypal_payer_id']  : '';
+            $result[$key]['additional_information']['paypal_payer_status'] = isset($result[$key]['additional_information']['paypal_payer_status']) ? $result[$key]['additional_information']['paypal_payer_status']  : '';
+            $result[$key]['additional_information']['paypal_payment_status'] = isset($result[$key]['additional_information']['paypal_payment_status']) ? $result[$key]['additional_information']['paypal_payment_status']  : '';
             //求出订单下的商品信息
             $result[$key]['arr'] = [];
             foreach ($val['item'] as $keys =>$vals){
@@ -445,7 +339,7 @@ class SaleAfterTask extends Model
                         $result[$key]['arr'][$keys]['pd_r'] = isset($tmp_lens_params['pd_r']) ? $tmp_lens_params['pd_r'] : '';
                         $result[$key]['arr'][$keys]['pd_l'] = isset($tmp_lens_params['pd_l']) ? $tmp_lens_params['pd_l'] : '';
                     }else{
-                        $result[$key]['arr'][$keys]['pd_r'] = $arr[$key]['pd_l'] = isset($tmp_lens_params['pd']) ? $tmp_lens_params['pd'] : '';
+                        $result[$key]['arr'][$keys]['pd_r'] = $result[$key]['arr'][$keys]['pd_l'] = isset($tmp_lens_params['pd']) ? $tmp_lens_params['pd'] : '';
                     }
                     if(isset($tmp_lens_params['prismcheck']) && $tmp_lens_params['prismcheck'] == 'on'){ //存在斜视
                         $result[$key]['arr'][$keys]['od_bd'] = isset($tmp_lens_params['od_bd']) ? $tmp_lens_params['od_bd'] : '';

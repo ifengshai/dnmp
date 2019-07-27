@@ -290,6 +290,8 @@ class OrderReturn extends Backend
             }
             //求出用户的所有订单信息
             $customer = (new SaleAfterTask())->getCustomerEmail($order_platform,$increment_id,$customer_name,$customer_phone,$track_number,$customer_email);
+//            dump($customer);
+//            exit;
             if(!$customer){
                 $this->error('找不到订单信息，请重新尝试','/admin/saleaftermanage/order_return/search');
             }
@@ -401,5 +403,20 @@ class OrderReturn extends Backend
         $arr = unserialize($str);
         dump($arr);
     }
-
+    public function ajaxGetLikeOrder(Request $request)
+    {
+        if($this->request->isAjax()){
+            $orderType = $request->post('orderType');
+            $order_number = $request->post('order_number');
+            $result = (new SaleAfterTask())->getLikeOrder($orderType,$order_number);
+            if(!$result){
+                return $this->error('订单不存在，请重新尝试');
+            }
+                return $this->success('','',$result,0);
+            dump($orderType);
+            dump($order_number);
+        }else{
+            $this->error('404 not found');
+        }
+    }
 }
