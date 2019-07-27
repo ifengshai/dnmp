@@ -1,4 +1,4 @@
-define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefined, Backend, Table, Form) {
+define(['jquery', 'bootstrap', 'backend', 'table', 'form','autocomplete'], function ($, undefined, Backend, Table, Form,autocomplete) {
 
     var Controller = {
         index: function () {
@@ -244,7 +244,92 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             Form.api.bindevent($("form[role=form]"));
         },
         search:function () {
-            Form.api.bindevent($("form[role=form]"));
+            // Form.api.bindevent($("form[role=form]"),function(data){
+            //     window.top.location.href = 'admin/saleaftermanage/order_return/search';
+            // });
+            // var incrementId = $('#increment_id').val();
+            // var orderType = $('#c-order_platform').val();
+            var availableTags = [
+                'ActionScript',
+                'AppleScript',
+                'Asp',
+                'BASIC',
+                'C',
+                'C++',
+                'Clojure',
+                'COBOL',
+                'ColdFusion',
+                'Erlang',
+                'Fortran',
+                'Groovy',
+                'Haskell',
+                'Java',
+                'JavaScript',
+                'Lisp',
+                'Perl',
+                'PHP',
+                'Python',
+                'Ruby',
+                'Scala',
+                'Scheme'
+            ];
+            $('#increment_id').autocomplete('search',{
+                hits: availableTags
+            });
+                // var array_tags=['boat', 'bear', 'dog', 'drink', 'elephant', 'fruit'];
+                //     $("#increment_id").autocomplete({
+                //         serviceUrl: "${pageContext.request.contextPath}/numGroupInfo/getAllnumgroupInfoJson.do",
+                //         width: 150,//提示框的宽度
+                //         delimiter: /(,|;)\s*/,//分隔符
+                //         deferRequestBy: 0, //单位微秒
+                //         zIndex: 9999,
+                //         noCache: false,//是否启用缓存 默认是开启缓存的
+                //         onSelect: function (suggestions) {
+                //             array_tags;
+                //         }
+                //     });
+            // $(document).on('keypress','#increment_id',function(data){
+            //         var incrementId = $('#increment_id').val();
+            //         var orderType = $('#c-order_platform').val();
+            //     $("#increment_id").autocomplete(
+            //         {
+            //             source: function(request, response) {
+            //                 $.ajax({
+            //                     url: "saleaftermanage/order_return/ajaxGetLikeOrder",
+            //                     dataType: "json",
+            //                     data:{orderType:orderType,order_number:incrementId},
+            //                     success: function(data) {
+            //                         console.log(data);
+            //                         response(data);
+            //                     },
+            //                 });
+            //             }
+            //         }
+            //     );
+            // });
+            // $(document).on('keypress','#increment_id',function(){
+            //     var incrementId = $('#increment_id').val();
+            //     var orderType = $('#c-order_platform').val();
+            //     console.log(orderType);
+            //     if(orderType<=0){
+            //         Layer.alert('请选择正确的平台');
+            //         return false;
+            //     }
+            //     if(incrementId.length>=3){
+            //         Backend.api.ajax({
+            //             url:'saleaftermanage/order_return/ajaxGetLikeOrder',
+            //             data:{orderType:orderType,order_number:incrementId}
+            //         }, function(data, ret){
+            //
+            //             console.log(ret.data);
+            //         }, function(data, ret){
+            //             //失败的回调
+            //             alert(ret.msg);
+            //             console.log(ret);
+            //             return false;
+            //         });
+            //     }
+            // });
         }
     };
     return Controller;

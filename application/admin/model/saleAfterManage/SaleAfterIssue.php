@@ -90,11 +90,19 @@ class SaleAfterIssue extends Model
         }
         return $arr;
     }
-    
-
-
-
-
+    public function issueList()
+    {
+        $result = $this->field('id,pid,name')->select();
+        if(!$result){
+            return false;
+        }
+        $arr    = getTree($result);
+        $finalArr = [];
+        foreach ($arr as $k=>$v){
+            $finalArr[$v['id']] = $v['name'];
+        }
+        return $finalArr;
+    }
 
 
 

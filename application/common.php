@@ -362,3 +362,38 @@ if (!function_exists('hsv2rgb')) {
         ];
     }
 }
+if(!function_exists('getTree')){
+    function getTree($list,$pid=0,$itemprefix = '') {
+        static $icon = array('│', '├', '└');
+        static $nbsp = "&nbsp;";
+        static $arr = array();
+        $number = 1;
+        foreach($list as $row) {
+            if($row['pid'] == $pid) {
+                $brotherCount = 0;
+                //判断当前有多少个兄弟分类
+                foreach($list as $r) {
+                    if($row['pid'] == $r['pid']) {
+                        $brotherCount++;
+                    }
+                }
+                if($brotherCount >0) {
+                    $j = $k = '';
+                    if($number == $brotherCount) {
+                        $j .= $icon[2];
+                        $k = $itemprefix ? $nbsp : '';
+                    }else{
+                        $j .= $icon[1];
+                        $k = $itemprefix ? $icon[0] : '';
+                    }
+                    $spacer = $itemprefix ? $itemprefix . $j : '';
+                    $row['name'] = $spacer.$row['name'];
+                    $arr[] = $row;
+                    $number++;
+                   getTree($list,$row['id'],$itemprefix . $k . $nbsp);
+                }
+            }
+        }
+        return  $arr;
+    }
+}
