@@ -27,7 +27,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {field: 'id', title: __('Id')},
                         {field: 'pid', title: __('Pid')},
                         {field: 'name', title: __('Name')},
-                        {field: 'level', title: __('Level')},
+                        {field: 'level', title: __('Level'),
+                            custom: { 1: 'yellow', 2: 'blue', 3: 'danger'},
+                            searchList: { 1: '一级分类', 2: '二级分类', 3: '三级分类'},
+                            formatter: Table.api.formatter.status
+                        },
                         {field: 'create_time', title: __('Create_time'), operate:'RANGE', addclass:'datetimerange'},
                         {field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate}
                     ]

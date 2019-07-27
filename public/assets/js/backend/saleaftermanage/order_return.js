@@ -112,7 +112,22 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','autocomplete'], funct
                     ]
                 ]
             });
-
+            $('.panel-heading a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+                var field = $(this).data("field");
+                var value = $(this).data("value");
+                var options = table.bootstrapTable('getOptions');
+                options.pageNumber = 1;
+                options.queryParams = function (params) {
+                    var filter = {};
+                    if (value !== '') {
+                        filter[field] = value;
+                    }
+                    params.filter = JSON.stringify(filter);
+                    return params;
+                };
+                table.bootstrapTable('refresh', {});
+                return false;
+            });
             // 为表格绑定事件
             Table.api.bindevent(table);
         },
@@ -273,7 +288,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','autocomplete'], funct
                 'Scala',
                 'Scheme'
             ];
-            $('#increment_id').autocomplete('search',{
+            $('#increment_id').autocomplete({
                 hits: availableTags
             });
                 // var array_tags=['boat', 'bear', 'dog', 'drink', 'elephant', 'fruit'];
