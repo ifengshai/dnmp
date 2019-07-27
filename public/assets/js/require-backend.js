@@ -51,8 +51,7 @@ require.config({
         'selectpage': '../libs/fastadmin-selectpage/selectpage',
         'citypicker': '../libs/fastadmin-citypicker/dist/js/city-picker.min',
         'citypicker-data': '../libs/fastadmin-citypicker/dist/js/city-picker.data',
-        'autocomplete':'../libs/autocomplete/autocomplete',
-        'autoPrism':'../libs/autocomplete/prism',
+        'jqui':'../libs/jquery-ui/jquery-ui',
     },
     // shim依赖配置
     shim: {
@@ -101,13 +100,12 @@ require.config({
             deps: ['bootstrap', 'slimscroll'],
             exports: '$.AdminLTE'
         },
-        'autocomplete':{
+        'jqui':{
             deps:[
                 'jquery',
-                'autoPrism',
-                'css!../libs/autocomplete/autocomplete.css'
+                'css!../libs/jquery-ui/jquery-ui.css'
             ],
-            exports: '$.autocomplete'
+            exports: 'jqui'
         },
         'bootstrap-datetimepicker': [
             'moment/locale/zh-cn',

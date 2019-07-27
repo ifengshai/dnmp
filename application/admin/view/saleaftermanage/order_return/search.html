@@ -10,7 +10,7 @@
         <div id="myTabContent" class="tab-content">
             <div class="tab-pane fade active in" id="one">
                 <div class="widget-body no-padding" style="wight: 400px; overflow:scroll">
-                    <form action="{:url('/admin/saleaftermanage/order_return/search')}"  class="form-commonsearch form-horizontal" method="post">
+                    <form action="{:url('/admin/saleaftermanage/order_return/search')}"  role="form" class="form-commonsearch form-horizontal" method="post">
                         <div style="border-radius:2px;margin-bottom:10px;background:#f5f5f5;padding:20px;">
                             <div class="row">
                                 <div class="col-xs-12 col-sm-6 col-md-3">
@@ -29,8 +29,8 @@
                                     <div class="form-group">
                                         <label class="control-label col-xs-4">订单号</label>
                                         <div class="col-xs-8">
-                                            <input type="text" class="form-control" name="increment_id" value="" id="increment_id"/>
-                                            <div id="message">Selection</div>
+                                            <input id="increment_id" type="text" class="form-control" autocomplete="off" name="query" value="" />
+                                            <!-- <div id="message">Selection</div> -->
                                         </div>
                                     </div>
                                 </div>
