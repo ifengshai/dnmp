@@ -265,6 +265,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
             Form.api.bindevent($("form[role=form]"), function (data) {
                 window.top.location.href = 'admin/saleaftermanage/order_return/search';
             });
+            //模糊匹配订单
             $('#increment_id').autocomplete({
                 source:function(request,response){
                     var incrementId = $('#increment_id').val();
@@ -298,6 +299,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                 pagingMore:true,
                 max:5000
             });
+            //模糊匹配邮箱
             $('#customer_email').autocomplete({
                 source:function(request,response){
                     var customer_email = $('#customer_email').val();
@@ -331,13 +333,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                 pagingMore:true,
                 max:5000
             });
+            //模糊匹配电话
             $('#customer_phone').autocomplete({
                 source:function(request,response){
                     var customer_phone = $('#customer_phone').val();
                     var orderType = $('#c-order_platform').val();
                     $.ajax({
                         type:"POST",
-                        url:"saleaftermanage/order_return/ajaxGetLikeEmail",
+                        url:"saleaftermanage/order_return/ajaxGetLikePhone",
                         dataType : "json",
                         cache : false,
                         async : false,
@@ -364,18 +367,53 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                 pagingMore:true,
                 max:5000
             });
-            $('#customer_email').autocomplete({
+            //模糊匹配姓名
+            $('#customer_name').autocomplete({
                 source:function(request,response){
-                    var customer_email = $('#customer_email').val();
+                    var customer_name = $('#customer_name').val();
                     var orderType = $('#c-order_platform').val();
                     $.ajax({
                         type:"POST",
-                        url:"saleaftermanage/order_return/ajaxGetLikeEmail",
+                        url:"saleaftermanage/order_return/ajaxGetLikeName",
                         dataType : "json",
                         cache : false,
                         async : false,
                         data : {
-                            orderType:orderType,email:customer_email
+                            orderType:orderType,customer_name:customer_name
+                        },
+                        success : function(json) {
+                            var data = json.data;
+                            response($.map(data,function(item){
+                                return {
+                                    label:item,//下拉框显示值
+                                    value:item,//选中后，填充到input框的值
+                                    //id:item.bankCodeInfo//选中后，填充到id里面的值
+                                };
+                            }));
+                        }
+                    });
+                },
+                delay: 10,//延迟100ms便于输入
+                select : function(event, ui) {
+                    $("#bankUnionNo").val(ui.item.id);//取出在return里面放入到item中的属性
+                },
+                scroll:true,
+                pagingMore:true,
+                max:5000
+            });
+            //模糊匹配运单号
+            $('#track_number').autocomplete({
+                source:function(request,response){
+                    var track_number = $('#track_number').val();
+                    var orderType = $('#c-order_platform').val();
+                    $.ajax({
+                        type:"POST",
+                        url:"saleaftermanage/order_return/ajaxGetLikeTrackNumber",
+                        dataType : "json",
+                        cache : false,
+                        async : false,
+                        data : {
+                            orderType:orderType,track_number:track_number
                         },
                         success : function(json) {
                             var data = json.data;

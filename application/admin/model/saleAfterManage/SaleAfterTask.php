@@ -265,6 +265,100 @@ class SaleAfterTask extends Model
         }
         return $arr;
     }
+    /***
+     * @param $order_platform 订单平台
+     * @param $customer_phone  用户电话
+     */
+    public function getLikePhone($order_platform,$customer_phone)
+    {
+        switch ($order_platform) {
+            case 1:
+                $db = 'database.db_zeelool';
+                break;
+            case 2:
+                $db = 'database.db_voogueme';
+                break;
+            case 3:
+                $db = 'database.db_nihao';
+                break;
+            default:
+                return false;
+                break;
+        }
+        $result = Db::connect($db)->table('sales_flat_order_address')->where('telephone', 'like', "%{$customer_phone}%")->field('telephone')->limit(10)->select();
+        if (!$result) {
+            return false;
+        }
+        $arr = [];
+        foreach($result as $k=>$v){
+            $arr[] = $v['telephone'];
+        }
+        return $arr;
+    }
+
+    /***
+     * 模糊查询用户姓名
+     * @param $orderType
+     * @param $customer_name
+     */
+    public function getLikeName($order_platform,$customer_name)
+    {
+        switch ($order_platform) {
+            case 1:
+                $db = 'database.db_zeelool';
+                break;
+            case 2:
+                $db = 'database.db_voogueme';
+                break;
+            case 3:
+                $db = 'database.db_nihao';
+                break;
+            default:
+                return false;
+                break;
+        }
+        $result = Db::connect($db)->table('sales_flat_order')->where('customer_firstname', 'like', "%{$customer_name}%")->whereOr('customer_lastname','like',"%{$customer_name}%")->field('customer_firstname,customer_lastname')->limit(10)->select();
+        if (!$result) {
+            return false;
+        }
+        $arr = [];
+        foreach($result as $k=>$v){
+            $arr[] = $v['customer_firstname'].' '.$v['customer_lastname'];
+        }
+        return $arr;
+    }
+
+    /***
+     * 模糊查询运单号
+     * @param $orderType
+     * @param $track_number
+     */
+    public function getLikeTrackNumber($order_platform,$track_number)
+    {
+        switch ($order_platform) {
+            case 1:
+                $db = 'database.db_zeelool';
+                break;
+            case 2:
+                $db = 'database.db_voogueme';
+                break;
+            case 3:
+                $db = 'database.db_nihao';
+                break;
+            default:
+                return false;
+                break;
+        }
+        $result = Db::connect($db)->table('sales_flat_shipment_track')->where('track_number', 'like', "%{$track_number}%")->field('track_number')->limit(10)->select();
+        if (!$result) {
+            return false;
+        }
+        $arr = [];
+        foreach($result as $k=>$v){
+            $arr[] = $v['track_number'];
+        }
+        return $arr;
+    }
     /****
      * @param $order_platform  订单平台
      * @param string $increment_id  订单号

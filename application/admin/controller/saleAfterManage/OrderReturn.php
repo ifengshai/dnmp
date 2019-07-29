@@ -433,4 +433,61 @@ class OrderReturn extends Backend
             $this->error('404 not found');
         }
     }
+
+    /***
+     * 异步查询模糊电话
+     * @param Request $request
+     */
+    public function ajaxGetLikePhone(Request $request)
+    {
+        if($this->request->isAjax()){
+            $orderType = $request->post('orderType');
+            $customer_phone = $request->post('customer_phone');
+            $result = (new SaleAfterTask())->getLikePhone($orderType,$customer_phone);
+            if(!$result){
+                return $this->error('订单不存在，请重新尝试');
+            }
+            return $this->success('','',$result,0);
+        }else{
+            $this->error('404 not found');
+        }
+    }
+
+    /***
+     * 异步查询模糊姓名
+     * @param Request $request
+     */
+    public function ajaxGetLikeName(Request $request)
+    {
+        if($this->request->isAjax()){
+            $orderType = $request->post('orderType');
+            $customer_name = $request->post('customer_name');
+            $result = (new SaleAfterTask())->getLikeName($orderType,$customer_name);
+            if(!$result){
+                return $this->error('订单不存在，请重新尝试');
+            }
+                return $this->success('','',$result,0);
+        }else{
+            $this->error('404 not found');
+        }
+    }
+
+    /***
+     * 异步查询模糊运单号
+     * @param Request $request
+     */
+    public function ajaxGetLikeTrackNumber(Request $request)
+    {
+        if($this->request->isAjax()){
+            $orderType = $request->post('orderType');
+            $track_number = $request->post('track_number');
+            $result = (new SaleAfterTask())->getLikeTrackNumber($orderType,$track_number);
+            if(!$result){
+                return $this->error('运单号不存在，请重新尝试');
+            }
+                return $this->success('','',$result,0);
+        }else{
+            $this->error('404 not found');
+        }
+    }
 }
