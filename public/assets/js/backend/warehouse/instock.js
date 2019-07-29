@@ -27,14 +27,52 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         { checkbox: true },
                         { field: 'id', title: __('Id') },
                         { field: 'in_stock_number', title: __('In_stock_number') },
-                        { field: 'type_id', title: __('In_stock_type') },
-                        { field: 'purchase_id', title: __('Purchase_id') },
+                        { field: 'instocktype.name', title: __('In_stock_type') },
+                        { field: 'purchaseorder.purchase_number', title: __('Purchase_id') },
                         { field: 'order_number', title: __('Order_number') },
                         { field: 'remark', title: __('Remark') },
-                        { field: 'status', title: __('Status') },
+                        {
+                            field: 'status', title: __('Status'), custom: { 0: 'success', 1: 'yellow', 2: 'blue', 3: 'danger', 4: 'gray' },
+                            searchList: { 0: '新建', 1: '待审核', 2: '已审核', 3: '已拒绝', 4: '已取消' },
+                            formatter: Table.api.formatter.status
+                        },
                         { field: 'createtime', title: __('Createtime'), operate: 'RANGE', addclass: 'datetimerange' },
                         { field: 'create_person', title: __('Create_person') },
-                        { field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate }
+                        { field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [
+                            {
+                                name: 'detail',
+                                text: '详情',
+                                title: __('Detail'),
+                                classname: 'btn btn-xs  btn-primary  btn-dialog',
+                                icon: 'fa fa-list',
+                                url: 'warehouse/instock/detail',
+                                extend: 'data-area = \'["100%","100%"]\'',
+                                callback: function (data) {
+                                    Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                },
+                                visible: function (row) {
+                                    //返回true时按钮显示,返回false隐藏
+                                    return true;
+                                }
+                            },
+                            {
+                                name: 'edit',
+                                text: '',
+                                title: __('Edit'),
+                                classname: 'btn btn-xs btn-success btn-dialog',
+                                icon: 'fa fa-pencil',
+                                url: 'warehouse/instock/edit',
+                                extend: 'data-area = \'["100%","100%"]\'',
+                                callback: function (data) {
+                                    Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                },
+                                visible: function (row) {
+                                    //返回true时按钮显示,返回false隐藏
+                                    return true;
+                                }
+                            }
+
+                        ], formatter: Table.api.formatter.operate }
                     ]
                 ]
             });
@@ -57,11 +95,36 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
         },
         edit: function () {
             Controller.api.bindevent();
+
+            //删除商品数据
+            $(document).on('click', '.btn-del', function () {
+                $(this).parent().parent().remove();
+                var id = $(this).parent().parent().find('.item_id').val();
+                if (id) {
+                    Backend.api.ajax({
+                        url: '/admin/warehouse/instock/deleteItem',
+                        data: { id: id }
+                    });
+                }
+            })
+
+            //新增
+            $(document).on('click', '.btn-add', function () {
+                var content = $('#table-content table tbody').html();
+                $('.caigou table tbody').append(content);
+            })
+        },
+        detail: function () {
+            Controller.api.bindevent();
         },
         api: {
             bindevent: function () {
-                Form.api.bindevent($("form[role=form]"));
+                //提交审核
+                $(document).on('click', '.btn-status', function () {
+                    $('.status').val(1);
+                })
 
+                Form.api.bindevent($("form[role=form]"));
                 //切换质检类型
                 $(document).on('change', '.type', function () {
                     var type = $(this).val();

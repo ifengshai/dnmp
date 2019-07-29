@@ -59,7 +59,7 @@
             <label class="control-label col-xs-12 col-sm-2">入库单号:</label>
             <div class="col-xs-12 col-sm-8">
                 <input id="c-check_order_number" class="form-control" name="row[in_stock_number]"
-                    value="{$instock_number}" readonly type="text">
+                    value="{$row.in_stock_number}" readonly type="text">
             </div>
         </div>
         <div class="form-group">
@@ -68,25 +68,25 @@
                 <select name="row[type_id]" class="form-control type" required>
                     <option value="">请选择</option>
                     {foreach $type as $k => $v}
-                    <option value="{$v.id}">{$v.name}</option>
+                    <option value="{$v.id}" {:$row['type_id'] == $v['id'] ? 'selected' : ''}>{$v.name}</option>
                     {/foreach}
                 </select>
             </div>
         </div>
-        <div class="form-group hidden order_number">
+        <div class="form-group {:$row['type_id'] == 1 ? 'hidden' : ''} order_number">
             <label class="control-label col-xs-12 col-sm-2">关联订单:</label>
             <div class="col-xs-12 col-sm-8">
                 <input id="c-order_number" class="form-control" name="row[order_number]"
-                    value=""  type="text">
+                    value="{$row.order_number}"  type="text">
             </div>
         </div>
-        <div class="form-group purchase_id_number">
+        <div class="form-group {:$row['type_id'] == 1 ? '' : 'hidden'} purchase_id_number">
             <label class="control-label col-xs-12 col-sm-2">采购单:</label>
             <div class="col-xs-12 col-sm-8">
                 <select name="row[purchase_id]" class="form-control purchase_id">
                     <option value="">请选择</option>
                     {foreach $purchase_data as $k => $v}
-                    <option value="{$k}">{$v}</option>
+                    <option value="{$k}" {:$row['purchase_id'] == $k ? 'selected' : ''}>{$v}</option>
                     {/foreach}
                 </select>
             </div>
@@ -96,7 +96,7 @@
             <label class="control-label col-xs-12 col-sm-2">备注:</label>
             <div class="col-xs-12 col-sm-8">
                 <textarea id="c-quality_standard" class="form-control " rows="5" name="row[remark]"
-                    cols="50"></textarea>
+                    cols="50">{$row.remark}</textarea>
             </div>
         </div>
 
@@ -111,9 +111,7 @@
     <div class='caigou' style="margin-left:20px;width:98%;">
         <p style="font-size: 16px;text-align: center;"><b>产品信息</b></p>
         <div style="margin-bottom:20px;">
-            <div id="toolbar" class="toolbar">
-                <a href="javascript:;" class="btn btn-success btn-add" title="增加"><i class="fa fa-plus"></i> 增加</a>
-            </div>
+            
             <table id="caigou-table">
                 <tr>
                     <th>SKU</th>
@@ -125,66 +123,30 @@
                     <th>质检合格数量</th>
                     <th>留样数量</th>
                     <th>入库数量</th>
-                    <th>操作</td>
                 </tr>
+                {foreach $item as $v}
                 <tr>
+                    <input id="c-purchase_remark" class="form-control" name="item_id[]" type="hidden" value="{$v.item_id}">
                     <td>
-                        <input id="c-purchase_remark" class="form-control" name="sku[]" type="text">
+                        <input id="c-purchase_remark" class="form-control" name="sku[]" type="text" value="{$v.sku}">
                     </td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td><input id="c-purchase_remark" class="form-control in_stock_num" name="in_stock_num[]" type="text"></td>
+                    <td>{$v.product_name}</td>
+                    <td>{$v.supplier_sku}</td>
+                    <td>{$v.purchase_num}</td>
+                    <td>{$v['purchase_num'] - $v['arrivals_num']}</td>
+                    <td>{$v['arrivals_num']}</td>
+                    <td>{$v.quantity_num}</td>
+                    <td>{$v.sample_num}</td>
+                    <td><input id="c-purchase_remark" class="form-control in_stock_num" name="in_stock_num[]" type="text" value="{$v.in_stock_num}"></td>
                  
-                    <td>
-                        <a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>删除</a>
-                    </td>
-
                 </tr>
+                {/foreach}
 
             </table>
         </div>
 
     </div>
-
-
-
-    <input type='hidden' name="row[status]" class="status" value="0">
-    <div class="form-group layer-footer">
-        <label class="control-label col-xs-12 col-sm-2"></label>
-        <div class="col-xs-12 col-sm-8">
-            <button type="submit" class="btn btn-success btn-embossed disabled">{:__('OK')}</button>
-            <button type="submit" class="btn btn-success btn-status btn-embossed disabled">提交审核</button>
-            <button type="reset" class="btn btn-default btn-embossed">{:__('Reset')}</button>
-        </div>
-    </div>
+    
 
 </form>
 
-<div id="table-content" style="display: none;">
-    <table>
-        <tr>
-            <td>
-                <input id="c-purchase_remark" class="form-control" name="sku[]" type="text">
-            </td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td><input id="c-purchase_remark" class="form-control in_stock_num" name="in_stock_num[]" type="text"></td>
-         
-            <td>
-                <a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>删除</a>
-            </td>
-
-        </tr>
-
-    </table>
-</div>

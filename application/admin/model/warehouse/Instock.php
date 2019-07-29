@@ -32,6 +32,12 @@ class Instock extends Model
         return $this->belongsTo('app\admin\model\purchase\PurchaseOrder', 'purchase_id', 'id', [], 'LEFT')->setEagerlyType(0);
     }
 
+    //关联模型采购单
+    public function instocktype()
+    {
+        return $this->belongsTo('InstockType', 'type_id')->setEagerlyType(0);
+    }
+
     //关联模型 商品信息
     public function instockItem()
     {
