@@ -65,7 +65,7 @@
         <div class="form-group">
             <label class="control-label col-xs-12 col-sm-2">入库分类:</label>
             <div class="col-xs-12 col-sm-8">
-                <select name="row[type_id]" class="form-control type_id">
+                <select name="row[type_id]" class="form-control type">
                     <option value="">请选择</option>
                     {foreach $type as $k => $v}
                     <option value="{$v.id}">{$v.name}</option>
@@ -131,18 +131,13 @@
                     <td>
                         <input id="c-purchase_remark" class="form-control" name="sku[]" type="text">
                     </td>
-                    <td><input id="c-purchase_remark" class="form-control" name="product_name[]" type="text"></td>
-                    <td><input id="c-purchase_remark" class="form-control" name="supplier_sku[]" type="text"></td>
-                    <td><input id="c-purchase_remark" class="form-control purchase_num" name="purchase_num[]"
-                            type="text"></td>
-                    <td><input id="c-purchase_remark" class="form-control check_num" name="check_num[]" type="text">
-                    </td>
-                    <td><input id="c-purchase_remark" class="form-control arrivals_num" name="arrivals_num[]"
-                            type="text"></td>
-                    <td><input id="c-purchase_remark" class="form-control quantity_num" name="quantity_num[]"
-                            type="text"></td>
-                    <td><input id="c-purchase_remark" class="form-control sample_num" name="sample_num[]" type="text">
-                    </td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
                     <td><input id="c-purchase_remark" class="form-control unqualified_num" name="unqualified_num[]" type="text"></td>
                  
                     <td>
@@ -174,32 +169,17 @@
             <td>
                 <input id="c-purchase_remark" class="form-control" name="sku[]" type="text">
             </td>
-            <td><input id="c-purchase_remark" class="form-control" name="product_name[]" type="text"></td>
-            <td><input id="c-purchase_remark" class="form-control" name="supplier_sku[]" type="text"></td>
-            <td><input id="c-purchase_remark" class="form-control purchase_num" name="purchase_num[]" type="text"></td>
-            <td><input id="c-purchase_remark" class="form-control check_num" name="check_num[]" type="text"></td>
-            <td><input id="c-purchase_remark" class="form-control arrivals_num" name="arrivals_num[]" type="text"></td>
-            <td><input id="c-purchase_remark" class="form-control quantity_num" name="quantity_num[]" type="text"></td>
-            <td><input id="c-purchase_remark" class="form-control sample_num" name="sample_num[]" type="text"></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
             <td><input id="c-purchase_remark" class="form-control unqualified_num" name="unqualified_num[]" type="text"></td>
-            <td><input id="c-purchase_remark" class="form-control quantity_rate" name="quantity_rate[]" type="text">%</td>
-            <td><input style="width: 200px;" id="c-purchase_remark" class="form-control remark" name="remark[]"
-                    type="text"></td>
+         
             <td>
-                <input id="c-contract_images" style="width: 150px;" class="form-control unqualified_images" size="200"
-                    readonly name="unqualified_images[]" type="text">
-
-            </td>
-
-            <td>
-                <span><button type="button" id="plupload-unqualified_images" class="btn btn-danger pluploads"
-                        data-input-id="c-unqualified_images"
-                        data-mimetype="image/gif,image/jpeg,image/png,image/jpg,image/bmp" data-multiple="true"
-                        data-maxcount="3" data-preview-id="p-unqualified_images"><i class="fa fa-upload"></i>
-                        {:__('Upload')}</button></span>
-
-                <a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>
-                    删除</a>
+                <a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>删除</a>
             </td>
 
         </tr>

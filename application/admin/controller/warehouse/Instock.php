@@ -188,6 +188,55 @@ class Instock extends Backend
         return $this->view->fetch();
     }
 
+
+    /**
+     * 获取采购单商品信息
+     */
+    public function getPurchaseData()
+    {
+        $id = input('id');
+        $purchase = new \app\admin\model\purchase\PurchaseOrder;
+        $data = $purchase->get($id);
+
+        //查询采购单商品信息
+        $purchase_item = new \app\admin\model\purchase\PurchaseOrderItem;
+        $map['purchase_id'] = $id;
+        $item = $purchase_item->where($map)->select();
+        //查询质检数量
+        $skus = array_column($item, 'sku');
+        //查询质检信息
+        $check_map['purchase_id'] = $id;
+        $check_map['type'] = 1;
+        $check = new \app\admin\model\warehouse\Check;
+        $list = $check->hasWhere('checkItem', ['sku' => ['in', $skus]])
+            ->where($check_map)
+            ->field('sku,sum(arrivals_num) as arrivals_num,sum(quantity_num) as quantity_num,sum(unqualified_num) as unqualified_num,sum(sample_num) as sample_num')
+            ->group('sku')
+            ->select();
+        $list = collection($list)->toArray();
+        //重组数组
+        $check_item = [];
+        foreach ($list as $k => $v) {
+            $check_item[$v['sku']]['arrivals_num'] = $v['arrivals_num'];
+            $check_item[$v['sku']]['quantity_num'] = $v['quantity_num'];
+            $check_item[$v['sku']]['unqualified_num'] = $v['unqualified_num'];
+            $check_item[$v['sku']]['sample_num'] = $v['sample_num'];
+        }
+        foreach ($item as $k => $v) {
+            $item[$k]['arrivals_num'] = $check_item[$v['sku']]['arrivals_num'];
+            $item[$k]['quantity_num'] = $check_item[$v['sku']]['quantity_num'];
+            $item[$k]['unqualified_num'] = $check_item[$v['sku']]['unqualified_num'];
+            $item[$k]['sample_num'] = $check_item[$v['sku']]['sample_num'];
+        }
+
+        $data->item = $item;
+        if ($data) {
+            $this->success('', '', $data);
+        } else {
+            $this->error();
+        }
+    }
+
     /**
      * 编辑
      */
