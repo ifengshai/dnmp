@@ -99,7 +99,9 @@ class SaleAfterIssue extends Model
     {
         $result = $this->field('id,pid,name')->select();
         if(!$result){
-            return false;
+            $finalArr =[];
+            $finalArr[0] = '无';
+            return $finalArr;
         }
         $arr    = getTree($result);
         $finalArr = [];
