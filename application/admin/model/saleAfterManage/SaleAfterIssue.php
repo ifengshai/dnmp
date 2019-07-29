@@ -90,6 +90,11 @@ class SaleAfterIssue extends Model
         }
         return $arr;
     }
+
+    /***
+     * 问题列表
+     * @return array|bool
+     */
     public function issueList()
     {
         $result = $this->field('id,pid,name')->select();
@@ -99,9 +104,42 @@ class SaleAfterIssue extends Model
         $arr    = getTree($result);
         $finalArr = [];
         foreach ($arr as $k=>$v){
+            $finalArr[0] = '无';
             $finalArr[$v['id']] = $v['name'];
         }
         return $finalArr;
+    }
+
+    /***
+     * 获取下级问题id
+     * @param int $pid
+     * @return array|bool
+     */
+    public function getList($pid=0)
+    {
+        $rs = $this->where('pid','in',$pid)->field('id')->select();
+        if(!$rs){
+            return false;
+        }
+        static $arr = [];
+        foreach ($rs as $k =>$v){
+            $arr[] = $v['id'];
+            $this->getList($v['id']);
+        }
+        return $arr;
+    }
+    /***
+     * 获取下级的问题
+     */
+    public function getLowerIssue($id)
+    {
+        $ids = $this->getList($id);
+        if($ids){
+            $strIds = implode(',',$ids);
+        }else{
+            $strIds = '';
+        }
+        return $strIds;
     }
 
 

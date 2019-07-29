@@ -1,29 +1,30 @@
 <?php
 
-namespace app\admin\controller\infosynergytaskmanage;
+namespace app\admin\controller\itemmanage;
 
 use app\common\controller\Backend;
-
+use think\Db;
 /**
- * 信息协同任务分类
+ * 商品分类管理
  *
  * @icon fa fa-circle-o
  */
-class InfoSynergyTaskCategory extends Backend
+class ItemCategory extends Backend
 {
     
     /**
-     * InfoSynergyTaskCategory模型对象
-     * @var \app\admin\model\infosynergytaskmanage\InfoSynergyTaskCategory
+     * ItemCategory模型对象
+     * @var \app\admin\model\itemmanage\ItemCategory
      */
     protected $model = null;
 
     public function _initialize()
     {
         parent::_initialize();
-        $this->model = new \app\admin\model\infosynergytaskmanage\InfoSynergyTaskCategory;
-        $this->view->assign('taskCategory',$this->model->taskCategory());
-        $this->view->assign('taskList',$this->model->taskList());
+        $this->model = new \app\admin\model\itemmanage\ItemCategory;
+        $this->view->assign('PutAway',$this->model->isPutAway());
+        $this->view->assign('LevelList',$this->model->getLevelList());
+        $this->view->assign('CategoryList',$this->model->getCategoryList());
     }
     
     /**
@@ -45,22 +46,18 @@ class InfoSynergyTaskCategory extends Backend
                 ->where($where)
                 ->order($sort, $order)
                 ->count();
-            //求出所有的问题数据
-
 
             $list = $this->model
                 ->where($where)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
-            $rsAll = $this->model->getSynergyTaskCategoryList();
-
+            $rsAll = $this->model->getAjaxCategoryList();
             $list = collection($list)->toArray();
-            foreach ($list as $k =>$v ){
+            foreach ($list as $k =>$v){
                 if($v['pid']){
                     $list[$k]['pid'] = $rsAll[$v['pid']];
                 }
-
             }
             $result = array("total" => $total, "rows" => $list);
 
@@ -74,10 +71,12 @@ class InfoSynergyTaskCategory extends Backend
     public function del($ids = "")
     {
         if ($ids) {
-            $nextIds = $this->model->getLowerTaskCategory($ids);
+            $nextIds = $this->model->getLowerCategory($ids);
             if($nextIds){
                 $ids = $ids.','.$nextIds;
             }
+//            dump($ids);
+//            //exit;
             $pk = $this->model->getPk();
             $adminIds = $this->getDataLimitAdminIds();
             if (is_array($adminIds)) {
@@ -107,4 +106,5 @@ class InfoSynergyTaskCategory extends Backend
         }
         $this->error(__('Parameter %s can not be empty', 'ids'));
     }
+
 }
