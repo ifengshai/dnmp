@@ -30,6 +30,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     [
                         {checkbox: true},
                         //{data:("area",["100%","100%"])},
+                        {field:'numberId',title:'序号'},
                         {field: 'id', title: __('Id'),operate:false},
                         {field: 'task_number', title: __('Task_number')},
                         {field:'task_status',title:__('Task_status'),searchList:{0:'未处理',1:'处理中',2:'已完成'},formatter:Controller.api.formatter.task_status},
@@ -87,8 +88,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             $('.panel-heading a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
                 var field = $(this).data("field");
                 var value = $(this).data("value");
-                console.log(field);
-                console.log(value);
                 var options = table.bootstrapTable('getOptions');
                 options.pageNumber = 1;
                 options.queryParams = function (params) {
