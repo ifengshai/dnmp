@@ -88,7 +88,19 @@ class InfoSynergyTaskCategory extends Model
         }
         return $result;
     }
-
+    public function taskList()
+    {
+        $result = $this->field('id,pid,name')->select();
+        if(!$result){
+            return false;
+        }
+        $arr    = getTree($result);
+        $finalArr = [];
+        foreach ($arr as $k=>$v){
+            $finalArr[$v['id']] = $v['name'];
+        }
+        return $finalArr;
+    }
 
 
 

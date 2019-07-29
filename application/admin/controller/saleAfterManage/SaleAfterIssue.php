@@ -56,7 +56,12 @@ class SaleAfterIssue extends Backend
             $rsAll = $this->model->getAjaxIssueList();
 
             $list = collection($list)->toArray();
-            //foreach ($list as )
+            foreach ($list as $k =>$v ){
+                if($v['pid']){
+                    $list[$k]['pid'] = $rsAll[$v['pid']];
+                }
+
+            }
             $result = array("total" => $total, "rows" => $list);
 
             return json($result);
