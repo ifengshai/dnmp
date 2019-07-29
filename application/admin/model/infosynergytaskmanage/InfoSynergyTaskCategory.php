@@ -92,17 +92,41 @@ class InfoSynergyTaskCategory extends Model
     {
         $result = $this->field('id,pid,name')->select();
         if(!$result){
-            return false;
+            $finalArr =[];
+            $finalArr[0] = '无';
+            return $finalArr;
         }
         $arr    = getTree($result);
         $finalArr = [];
         foreach ($arr as $k=>$v){
+            $finalArr[0] = '无';
             $finalArr[$v['id']] = $v['name'];
         }
         return $finalArr;
     }
-
-
+    public function getList($pid)
+    {
+        $rs = $this->where('pid','in',$pid)->field('id')->select();
+        if(!$rs){
+            return false;
+        }
+        static $arr = [];
+        foreach ($rs as $k =>$v){
+            $arr[] = $v['id'];
+            $this->getList($v['id']);
+        }
+        return $arr;
+    }
+    public function getLowerTaskCategory($id)
+    {
+        $ids = $this->getList($id);
+        if($ids){
+            $strIds = implode(',',$ids);
+        }else{
+            $strIds = '';
+        }
+        return $strIds;
+    }
 
 
 }

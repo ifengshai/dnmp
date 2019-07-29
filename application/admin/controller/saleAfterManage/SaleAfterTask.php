@@ -94,6 +94,7 @@ class SaleAfterTask extends Backend
             $deptArr = (new AuthGroup())->getAllGroup();
             $repArr  = (new Admin())->getAllStaff();
             foreach ($list as $key => $val){
+                $list[$key]['numberId'] = $key+1;
                 if($val['dept_id']){
                     $list[$key]['dept_id']= $deptArr[$val['dept_id']];
 
