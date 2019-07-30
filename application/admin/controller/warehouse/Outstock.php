@@ -3,22 +3,18 @@
 namespace app\admin\controller\warehouse;
 
 use app\common\controller\Backend;
-use think\Db;
-use think\Exception;
-use think\exception\PDOException;
-use think\exception\ValidateException;
 
 /**
- * 入库单管理
+ * 出库单管理
  *
  * @icon fa fa-circle-o
  */
-class Instock extends Backend
+class Outstock extends Backend
 {
 
     /**
-     * Instock模型对象
-     * @var \app\admin\model\warehouse\Instock
+     * Outstock模型对象
+     * @var \app\admin\model\warehouse\Outstock
      */
     protected $model = null;
 
@@ -28,9 +24,9 @@ class Instock extends Backend
     public function _initialize()
     {
         parent::_initialize();
-        $this->model = new \app\admin\model\warehouse\Instock;
-        $this->type = new \app\admin\model\warehouse\InstockType;
-        $this->instockItem = new \app\admin\model\warehouse\InstockItem;
+        $this->model = new \app\admin\model\warehouse\Outstock;
+        $this->type = new \app\admin\model\warehouse\OutstockType;
+        $this->item = new \app\admin\model\warehouse\OutStockItem;
     }
 
     /**
@@ -54,13 +50,13 @@ class Instock extends Backend
             }
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
-                ->with(['purchaseorder', 'instocktype'])
+                ->with(['purchaseorder', 'outstocktype'])
                 ->where($where)
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->model
-                ->with(['purchaseorder', 'instocktype'])
+                ->with(['purchaseorder', 'outstocktype'])
                 ->where($where)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
@@ -72,7 +68,6 @@ class Instock extends Backend
         }
         return $this->view->fetch();
     }
-
 
     /**
      * 添加
@@ -144,8 +139,8 @@ class Instock extends Backend
         $this->assign('purchase_data', $purchase_data);
 
         //质检单
-        $instock_number = 'IN' . date('YmdHis') . rand(100, 999) . rand(100, 999);
-        $this->assign('instock_number', $instock_number);
+        $outstock_number = 'OUT' . date('YmdHis') . rand(100, 999) . rand(100, 999);
+        $this->assign('outstock_number', $outstock_number);
         return $this->view->fetch();
     }
 
@@ -207,12 +202,6 @@ class Instock extends Backend
         if (!$row) {
             $this->error(__('No Results were found'));
         }
-
-        //判断状态是否为新建
-        if ($row['status'] > 0) {
-            $this->error('只有新建状态才能编辑！！', url('index'));
-        }
-
         $adminIds = $this->getDataLimitAdminIds();
         if (is_array($adminIds)) {
             if (!in_array($row[$this->dataLimitField], $adminIds)) {
@@ -408,7 +397,6 @@ class Instock extends Backend
         }
     }
 
-
     /**
      * 审核
      */
@@ -456,5 +444,4 @@ class Instock extends Backend
             $this->error('取消失败！！');
         }
     }
-
 }

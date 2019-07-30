@@ -1,4 +1,4 @@
-define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefined, Backend, Table, Form) {
+define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echarts', 'echarts-theme'], function ($, undefined, Backend, Table, Form) {
 
     var Controller = {
         index: function () {
@@ -38,47 +38,99 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         },
                         { field: 'createtime', title: __('Createtime'), operate: 'RANGE', addclass: 'datetimerange' },
                         { field: 'create_person', title: __('Create_person') },
-                        { field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [
-                            {
-                                name: 'detail',
-                                text: '详情',
-                                title: __('Detail'),
-                                classname: 'btn btn-xs  btn-primary  btn-dialog',
-                                icon: 'fa fa-list',
-                                url: 'warehouse/instock/detail',
-                                extend: 'data-area = \'["100%","100%"]\'',
-                                callback: function (data) {
-                                    Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                        {
+                            field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [
+                                {
+                                    name: 'detail',
+                                    text: '详情',
+                                    title: __('Detail'),
+                                    classname: 'btn btn-xs  btn-primary  btn-dialog',
+                                    icon: 'fa fa-list',
+                                    url: 'warehouse/instock/detail',
+                                    extend: 'data-area = \'["100%","100%"]\'',
+                                    callback: function (data) {
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                    },
+                                    visible: function (row) {
+                                        //返回true时按钮显示,返回false隐藏
+                                        return true;
+                                    }
                                 },
-                                visible: function (row) {
-                                    //返回true时按钮显示,返回false隐藏
-                                    return true;
-                                }
-                            },
-                            {
-                                name: 'edit',
-                                text: '',
-                                title: __('Edit'),
-                                classname: 'btn btn-xs btn-success btn-dialog',
-                                icon: 'fa fa-pencil',
-                                url: 'warehouse/instock/edit',
-                                extend: 'data-area = \'["100%","100%"]\'',
-                                callback: function (data) {
-                                    Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                {
+                                    name: 'cancel',
+                                    text: '取消',
+                                    title: '取消',
+                                    classname: 'btn btn-xs btn-danger btn-cancel',
+                                    icon: 'fa fa-remove',
+                                    url: 'warehouse/instock/cancel',
+                                    callback: function (data) {
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                    },
+                                    visible: function (row) {
+                                        //返回true时按钮显示,返回false隐藏
+                                        return true;
+                                    }
                                 },
-                                visible: function (row) {
-                                    //返回true时按钮显示,返回false隐藏
-                                    return true;
+                                {
+                                    name: 'edit',
+                                    text: '',
+                                    title: __('Edit'),
+                                    classname: 'btn btn-xs btn-success btn-dialog',
+                                    icon: 'fa fa-pencil',
+                                    url: 'warehouse/instock/edit',
+                                    extend: 'data-area = \'["100%","100%"]\'',
+                                    callback: function (data) {
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                    },
+                                    visible: function (row) {
+                                        //返回true时按钮显示,返回false隐藏
+                                        return true;
+                                    }
                                 }
-                            }
 
-                        ], formatter: Table.api.formatter.operate }
+                            ], formatter: Table.api.formatter.operate
+                        }
                     ]
                 ]
             });
 
             // 为表格绑定事件
             Table.api.bindevent(table);
+
+            //审核通过
+            $(document).on('click', '.btn-open', function () {
+                var ids = Table.api.selectedids(table);
+                Backend.api.ajax({
+                    url: '/admin/warehouse/instock/setStatus',
+                    data: { ids: ids, status: 2 }
+                }, function (data, ret) {
+                    table.bootstrapTable('refresh');
+                });
+            })
+
+            //审核拒绝
+            $(document).on('click', '.btn-close', function () {
+                var ids = Table.api.selectedids(table);
+                Backend.api.ajax({
+                    url: '/admin/warehouse/instock/setStatus',
+                    data: { ids: ids, status: 3 }
+                }, function (data, ret) {
+                    table.bootstrapTable('refresh');
+                });
+            })
+
+            //审核拒绝
+            $(document).on('click', '.btn-cancel', function (e) {
+                e.preventDefault();
+                var url = $(this).attr('href');
+                Backend.api.ajax({
+                    url: url,
+                    data: { status: 4 }
+                }, function (data, ret) {
+                    table.bootstrapTable('refresh');
+                });
+            })
+
         },
         add: function () {
             Controller.api.bindevent();

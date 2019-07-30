@@ -1,4 +1,4 @@
-define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'echarts', 'echarts-theme', 'template'], function ($, undefined, Backend, Datatable, Table, Echarts, undefined, Template) {
+define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'echarts', 'echarts-theme',  'template'], function ($, undefined, Backend, Datatable, Table, Echarts, undefined, Template) {
 
     var Controller = {
         index: function () {
@@ -91,10 +91,10 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'echarts', 'echart
                         name: __('Sales'),
                         data: Orderdata.paydata
                     },
-                        {
-                            name: __('Orders'),
-                            data: Orderdata.createdata
-                        }]
+                    {
+                        name: __('Orders'),
+                        data: Orderdata.createdata
+                    }]
                 });
                 if ($("#echart").width() != $("#echart canvas").width() && $("#echart canvas").width() < $("#echart").width()) {
                     myChart.resize();
