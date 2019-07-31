@@ -27,7 +27,10 @@ class ItemBrand extends Model
     protected $append = [
 
     ];
-    
+    public function isPutAway()
+    {
+        return [1=>'启用',0=>'禁用'];
+    }
 
     
 
