@@ -205,7 +205,7 @@ class SaleAfterTask extends Backend
                         $data = [];
                         $data['tid'] = $tid;
                         $data['remark_record'] = strip_tags($params['task_remark']);
-                        $data['create_person'] = session('admin.username');
+                        $data['create_person'] = session('admin.nickname');
                         $data['create_time']   = date("Y-m-d H:i:s",time());
                         (new SaleAfterTaskRemark())->allowField(true)->save($data);
                     }

@@ -1,0 +1,79 @@
+<form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Name_cn')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-name_cn" data-rule="required" class="form-control" name="row[name_cn]" type="text" value="">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Name_en')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-name_en" data-rule="required" class="form-control" name="row[name_en]" type="text" value="">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Is_required')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <select  id="c-is_required" data-rule="required" class="form-control selectpicker" name="row[is_required]">
+                {foreach name="attProValIsRequired" item="vo"}
+                <option value="{$key}">{$vo}</option>
+                {/foreach}
+            </select>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Input_mode')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <select  id="c-input_mode" data-rule="required" class="form-control selectpicker" name="row[input_mode]">
+                {foreach name="attProValInputMode" item="vo"}
+                <option value="{$key}">{$vo}</option>
+                {/foreach}
+            </select>
+        </div>
+    </div>
+    <div class='caigou'>
+        <p style="font-size: 16px;text-align: center;"><b>产品信息</b></p>
+        <div style="margin-bottom:20px;">
+            <div id="toolbar" class="toolbar">
+                <a href="javascript:;" class="btn btn-success btn-add" title="增加"><i class="fa fa-plus"></i> 增加</a>
+            </div>
+            <table id="caigou-table">
+                <tr>
+                    <th>属性名称(中文)</th>
+                    <th>属性名称(英文)</th>
+                    <th>编码规则</th>
+                    <th>简单描述</th>
+                    <th>操作</th>
+                </tr>
+                <tr>
+                    <td><input id="c-name_value_cn" class="form-control" name="name_value_cn[]" type="text"></td>
+                    <td><input id="c-name_value_en" class="form-control" name="name_value_en[]" type="text"></td>
+                    <td><input id="c-code_rule" class="form-control num" name="code_rule[]" type="text"></td>
+                    <td><input id="c-descb" class="form-control price" name="descb[]" type="text"></td>
+                    <td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>
+                        删除</a></td>
+                </tr>
+
+            </table>
+        </div>
+    </div>
+    <div class="form-group layer-footer">
+        <label class="control-label col-xs-12 col-sm-2"></label>
+        <div class="col-xs-12 col-sm-8">
+            <button type="submit" class="btn btn-success btn-embossed disabled">{:__('OK')}</button>
+            <button type="reset" class="btn btn-default btn-embossed">{:__('Reset')}</button>
+        </div>
+    </div>
+</form>
+<div id="table-content" style="display: none;">
+    <table>
+        <tr>
+            <td><input id="c-name_value_cn" class="form-control" name="name_value_cn[]" type="text"></td>
+            <td><input id="c-name_value_en" class="form-control" name="name_value_en[]" type="text"></td>
+            <td><input id="c-code_rule" class="form-control num" name="code_rule[]" type="text"></td>
+            <td><input id="c-descb" class="form-control price" name="descb[]" type="text"></td>
+            <td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>
+                删除</a></td>
+        </tr>
+    </table>
+</div>
