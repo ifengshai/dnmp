@@ -8,5 +8,8 @@ return [
     'Input_mode'    => '属性项输入方式',
     'Create_person' => '属性项创建人',
     'Update_time'   => '编辑时间',
+    'Failed to add attribute' => '添加属性失败',
+    'The field already exists. Do not add it again'=>'字段已经存在，请勿重复添加',
+    '404 Not found' => '404 Not found',
     'Create_time'   => '属性项创建时间'
 ];

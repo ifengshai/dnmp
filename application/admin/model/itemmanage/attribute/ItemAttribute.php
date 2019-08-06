@@ -2,10 +2,11 @@
 
 namespace app\admin\model\itemmanage\attribute;
 
+use think\Db;
 use think\Model;
 
 
-class ItemAttributePropertyValue extends Model
+class ItemAttribute extends Model
 {
 
     
@@ -13,7 +14,7 @@ class ItemAttributePropertyValue extends Model
     
 
     // 表名
-    protected $name = 'item_attribute_property_value';
+    protected $name = 'item_attribute';
     
     // 自动写入时间戳字段
     protected $autoWriteTimestamp = false;
@@ -27,17 +28,6 @@ class ItemAttributePropertyValue extends Model
     protected $append = [
 
     ];
-
-    /***
-     * 获取商品属性值列表
-     * @param $id
-     */
-    public function getAttrPropertyValue($id)
-    {
-        $result = $this->where('property_id','=',$id)->select();
-        return $result ? $result : false;
-    }
-    
 
 
 
