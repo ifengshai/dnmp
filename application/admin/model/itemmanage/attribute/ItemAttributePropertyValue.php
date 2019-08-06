@@ -1,11 +1,11 @@
 <?php
 
-namespace app\admin\model\itemmanage;
+namespace app\admin\model\itemmanage\attribute;
 
 use think\Model;
 
 
-class ItemBrand extends Model
+class ItemAttributePropertyValue extends Model
 {
 
     
@@ -13,7 +13,7 @@ class ItemBrand extends Model
     
 
     // 表名
-    protected $name = 'item_brand';
+    protected $name = 'item_attribute_property_value';
     
     // 自动写入时间戳字段
     protected $autoWriteTimestamp = false;
@@ -27,10 +27,7 @@ class ItemBrand extends Model
     protected $append = [
 
     ];
-    public function isPutAway()
-    {
-        return [1=>'启用',0=>'禁用'];
-    }
+    
 
     
 

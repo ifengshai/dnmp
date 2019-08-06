@@ -4,14 +4,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
         index: function () {
             // 初始化表格参数配置
             Table.api.init({
-                searchFormVisible: true,
                 extend: {
-                    index_url: 'itemmanage/item_brand/index' + location.search,
-                    add_url: 'itemmanage/item_brand/add',
-                    edit_url: 'itemmanage/item_brand/edit',
-                    del_url: 'itemmanage/item_brand/del',
-                    multi_url: 'itemmanage/item_brand/multi',
-                    table: 'item_brand',
+                    index_url: 'itemmanage/attribute/item_attribute_property_value/index' + location.search,
+                    add_url: 'itemmanage/attribute/item_attribute_property_value/add',
+                    edit_url: 'itemmanage/attribute/item_attribute_property_value/edit',
+                    del_url: 'itemmanage/attribute/item_attribute_property_value/del',
+                    multi_url: 'itemmanage/attribute/item_attribute_property_value/multi',
+                    table: 'item_attribute_property_value',
                 }
             });
 
@@ -26,14 +25,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     [
                         {checkbox: true},
                         {field: 'id', title: __('Id')},
-                        {field: 'name_cn', title: __('Name_cn')},
-                        {field: 'name_en', title: __('Name_en')},
-                        {field: 'status', title: __('Status'),
-                            searchList: { 1: '启用', 0: '禁用' },
-                            custom: {  0: 'yellow', 1: 'blue' },
-                            formatter: Table.api.formatter.status
-                        },
-                        {field:'images',title:__('Images'),formatter:Table.api.formatter.images,operate:false},
+                        {field: 'property_id', title: __('Property_id')},
+                        {field: 'name_value_cn', title: __('Name_value_cn')},
+                        {field: 'name_value_en', title: __('Name_value_en')},
+                        {field: 'descb', title: __('Descb')},
+                        {field: 'code_rule', title: __('Code_rule')},
+                        {field: 'create_person', title: __('Create_person')},
+                        {field: 'update_time', title: __('Update_time'), operate:'RANGE', addclass:'datetimerange'},
                         {field: 'create_time', title: __('Create_time'), operate:'RANGE', addclass:'datetimerange'},
                         {field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate}
                     ]

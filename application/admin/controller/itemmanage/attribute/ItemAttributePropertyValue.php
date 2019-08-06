@@ -1,28 +1,27 @@
 <?php
 
-namespace app\admin\controller\itemmanage;
+namespace app\admin\controller\itemmanage\attribute;
 
 use app\common\controller\Backend;
 
 /**
- * 商品分类管理
+ * 商品属性项值对应列管理
  *
  * @icon fa fa-circle-o
  */
-class ItemBrand extends Backend
+class ItemAttributePropertyValue extends Backend
 {
     
     /**
-     * ItemBrand模型对象
-     * @var \app\admin\model\itemmanage\ItemBrand
+     * ItemAttributePropertyValue模型对象
+     * @var \app\admin\model\itemmanage\attribute\ItemAttributePropertyValue
      */
     protected $model = null;
 
     public function _initialize()
     {
         parent::_initialize();
-        $this->model = new \app\admin\model\itemmanage\ItemBrand;
-        $this->view->assign('PutAway',$this->model->isPutAway());
+        $this->model = new \app\admin\model\itemmanage\attribute\ItemAttributePropertyValue;
 
     }
     

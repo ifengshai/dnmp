@@ -4,14 +4,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
         index: function () {
             // 初始化表格参数配置
             Table.api.init({
-                searchFormVisible: true,
                 extend: {
-                    index_url: 'itemmanage/item_brand/index' + location.search,
-                    add_url: 'itemmanage/item_brand/add',
-                    edit_url: 'itemmanage/item_brand/edit',
-                    del_url: 'itemmanage/item_brand/del',
-                    multi_url: 'itemmanage/item_brand/multi',
-                    table: 'item_brand',
+                    index_url: 'itemmanage/attribute/item_attribute_property/index' + location.search,
+                    add_url: 'itemmanage/attribute/item_attribute_property/add',
+                    edit_url: 'itemmanage/attribute/item_attribute_property/edit',
+                    del_url: 'itemmanage/attribute/item_attribute_property/del',
+                    multi_url: 'itemmanage/attribute/item_attribute_property/multi',
+                    table: 'item_attribute_property',
                 }
             });
 
@@ -26,14 +25,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     [
                         {checkbox: true},
                         {field: 'id', title: __('Id')},
+                        {field: 'is_required', title: __('Is_required')},
                         {field: 'name_cn', title: __('Name_cn')},
                         {field: 'name_en', title: __('Name_en')},
-                        {field: 'status', title: __('Status'),
-                            searchList: { 1: '启用', 0: '禁用' },
-                            custom: {  0: 'yellow', 1: 'blue' },
-                            formatter: Table.api.formatter.status
-                        },
-                        {field:'images',title:__('Images'),formatter:Table.api.formatter.images,operate:false},
+                        {field: 'input_mode', title: __('Input_mode')},
+                        {field: 'create_person', title: __('Create_person')},
+                        {field: 'update_time', title: __('Update_time'), operate:'RANGE', addclass:'datetimerange'},
                         {field: 'create_time', title: __('Create_time'), operate:'RANGE', addclass:'datetimerange'},
                         {field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate}
                     ]
@@ -52,6 +49,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
         api: {
             bindevent: function () {
                 Form.api.bindevent($("form[role=form]"));
+                $(document).on('click', '.btn-add', function () {
+                    var content = $('#table-content table tbody').html();
+                    $('.caigou table tbody').append(content);
+                });
+                $(document).on('click', '.btn-del', function () {
+                    $(this).parent().parent().remove();
+                });
             }
         }
     };
