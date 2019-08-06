@@ -102,9 +102,7 @@
     <div class='caigou' style="margin-left:20px;width:98%;">
         <p style="font-size: 16px;text-align: center;"><b>产品信息</b></p>
         <div style="margin-bottom:20px;">
-            <div id="toolbar" class="toolbar">
-                <a href="javascript:;" class="btn btn-success btn-add" title="增加"><i class="fa fa-plus"></i> 增加</a>
-            </div>
+            
             <table id="caigou-table">
                 <tr>
                     <th>SKU</th>
@@ -113,7 +111,7 @@
                     <th>占用库存</th>
                     <th>可用库存</th>
                     <th>出库数量</th>
-                    <th>操作</td>
+                
                 </tr>
                 {foreach $item as $v}
                 <tr>
@@ -128,9 +126,7 @@
                   
                     <td><input id="c-purchase_remark" class="form-control out_stock_num" name="out_stock_num[]" value="{$v.out_stock_num}" type="text"></td>
                  
-                    <td>
-                        <a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>删除</a>
-                    </td>
+                   
 
                 </tr>
                 {/foreach}
@@ -142,36 +138,6 @@
 
 
 
-    <input type='hidden' name="row[status]" class="status" value="{$row.status}">
-    <div class="form-group layer-footer">
-        <label class="control-label col-xs-12 col-sm-2"></label>
-        <div class="col-xs-12 col-sm-8">
-            <button type="submit" class="btn btn-success btn-embossed disabled">{:__('OK')}</button>
-            <button type="submit" class="btn btn-success btn-status btn-embossed disabled">提交审核</button>
-            <button type="reset" class="btn btn-default btn-embossed">{:__('Reset')}</button>
-        </div>
-    </div>
-
+    
 </form>
 
-<div id="table-content" style="display: none;">
-    <table>
-        <tr>
-            <td>
-                <input  id="c-purchase_remark" class="form-control" name="sku[]" type="text">
-            </td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-          
-            <td><input id="c-purchase_remark" class="form-control out_stock_num" name="out_stock_num[]" type="text"></td>
-         
-            <td>
-                <a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>删除</a>
-            </td>
-
-        </tr>
-
-    </table>
-</div>

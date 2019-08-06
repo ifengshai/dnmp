@@ -109,6 +109,7 @@ class Instock extends Backend
                         foreach ($sku as $k => $v) {
                             $data[$k]['sku'] = $v;
                             $data[$k]['in_stock_num'] = $in_stock_num[$k];
+                            $data[$k]['no_stock_num'] = $in_stock_num[$k];
                             $data[$k]['in_stock_id'] = $this->model->id;
                         }
                         //批量添加
@@ -233,7 +234,7 @@ class Instock extends Backend
                         $row->validateFailException(true)->validate($validate);
                     }
                     $result = $row->allowField(true)->save($params);
-                
+
                     //修改产品
                     if ($result !== false) {
                         $sku = $this->request->post("sku/a");
@@ -243,6 +244,7 @@ class Instock extends Backend
                         foreach ($sku as $k => $v) {
                             $data[$k]['sku'] = $v;
                             $data[$k]['in_stock_num'] = $in_stock_num[$k];
+                            $data[$k]['no_stock_num'] = $in_stock_num[$k];
                             if (@$item_id[$k]) {
                                 $data[$k]['id'] = $item_id[$k];
                             } else {
@@ -427,8 +429,18 @@ class Instock extends Backend
         }
 
         $data['status'] = input('status');
+        if ($data['status'] == 2) {
+            $data['check_time'] = date('Y-m-d H:i:s', time());
+        }
+        $data['create_person'] = session('admin.username');
         $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
         if ($res) {
+            /**
+             * @todo 审核通过增加库存
+             */
+
+
+
             $this->success();
         } else {
             $this->error('修改失败！！');
@@ -456,5 +468,4 @@ class Instock extends Backend
             $this->error('取消失败！！');
         }
     }
-
 }
