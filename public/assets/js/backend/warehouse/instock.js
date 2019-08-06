@@ -191,7 +191,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echarts', 'echarts-t
                     }
                 })
 
-                //切换合同 异步获取合同数据
+                //切换采购单
                 $(document).on('change', '.purchase_id', function () {
                     var id = $(this).val();
                     if (id) {

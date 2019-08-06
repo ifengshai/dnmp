@@ -74,24 +74,14 @@
                 </select>
             </div>
         </div>
-        <div class="form-group hidden order_number">
+        <div class="form-group order_number">
             <label class="control-label col-xs-12 col-sm-2">关联订单:</label>
             <div class="col-xs-12 col-sm-8">
                 <input id="c-order_number" class="form-control" name="row[order_number]"
                     value=""  type="text">
             </div>
         </div>
-        <div class="form-group purchase_id_number">
-            <label class="control-label col-xs-12 col-sm-2">采购单:</label>
-            <div class="col-xs-12 col-sm-8">
-                <select name="row[purchase_id]" class="form-control purchase_id">
-                    <option value="">请选择</option>
-                    {foreach $purchase_data as $k => $v}
-                    <option value="{$k}">{$v}</option>
-                    {/foreach}
-                </select>
-            </div>
-        </div>
+        
        
         <div class="form-group">
             <label class="control-label col-xs-12 col-sm-2">备注:</label>
@@ -122,7 +112,7 @@
                     <th>实时库存</th>
                     <th>占用库存</th>
                     <th>可用库存</th>
-                    <th>入库数量</th>
+                    <th>出库数量</th>
                     <th>操作</td>
                 </tr>
                 <tr>

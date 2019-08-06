@@ -8,13 +8,13 @@ use think\Model;
 class Outstock extends Model
 {
 
-    
 
-    
+
+
 
     // 表名
     protected $name = 'out_stock';
-    
+
     // 自动写入时间戳字段
     protected $autoWriteTimestamp = 'int';
 
@@ -24,9 +24,7 @@ class Outstock extends Model
     protected $deleteTime = false;
 
     // 追加属性
-    protected $append = [
-
-    ];
+    protected $append = [];
     //关联模型采购单
     public function purchaseorder()
     {
@@ -38,9 +36,11 @@ class Outstock extends Model
     {
         return $this->belongsTo('OutstockType', 'type_id')->setEagerlyType(0);
     }
-    
+
     public function outstockitem()
     {
         return $this->belongsTo('OutStockItem', 'id', 'out_stock_id', [], 'LEFT')->setEagerlyType(0);
     }
+
+    
 }
