@@ -1,9 +1,9 @@
 <?php
 
 namespace app\admin\controller\itemmanage;
-
-use app\common\controller\Backend;
 use think\Db;
+use app\common\controller\Backend;
+use app\admin\model\itemmanage\attribute\ItemAttributePropertyGroup;
 /**
  * 商品分类管理
  *
@@ -25,6 +25,7 @@ class ItemCategory extends Backend
         $this->view->assign('PutAway',$this->model->isPutAway());
         $this->view->assign('LevelList',$this->model->getLevelList());
         $this->view->assign('CategoryList',$this->model->getCategoryList());
+        $this->view->assign('PropertyGroup',(new ItemAttributePropertyGroup())->propertyGroupList());
     }
     
     /**
@@ -54,10 +55,15 @@ class ItemCategory extends Backend
                 ->select();
             $rsAll = $this->model->getAjaxCategoryList();
             $list = collection($list)->toArray();
+            $propertyGroup = (new ItemAttributePropertyGroup())->propertyGroupList();
             foreach ($list as $k =>$v){
                 if($v['pid']){
                     $list[$k]['pid'] = $rsAll[$v['pid']];
                 }
+                if($v['property_group_id']){
+                    $list[$k]['property_group_id'] = $propertyGroup[$v['property_group_id']];
+                }
+
             }
             $result = array("total" => $total, "rows" => $list);
 

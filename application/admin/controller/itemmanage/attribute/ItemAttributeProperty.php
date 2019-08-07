@@ -92,11 +92,11 @@ class ItemAttributeProperty extends Backend
                         }
                         $str = rtrim($strArr,',');
                         $this->propertyValue->allowField(true)->saveAll($data);
-                        $rs = $this->model->appendField($params['input_mode'],$params['name_en'],$params['name_cn'],$str);
+                        $rs = $this->itemAttribute->appendField($params['input_mode'],$params['name_en'],$params['name_cn'],$str);
                         //批量添加
 
                     }else{
-                        $rs=$this->model->appendField($params['input_mode'],$params['name_en'],$params['name_cn']);
+                        $rs=$this->itemAttribute->appendField($params['input_mode'],$params['name_en'],$params['name_cn']);
                     }
                     if(!$rs){
                         $this->error(__('Failed to add attribute'));

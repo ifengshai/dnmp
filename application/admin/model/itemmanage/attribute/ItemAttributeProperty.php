@@ -4,7 +4,7 @@ namespace app\admin\model\itemmanage\attribute;
 
 use think\Model;
 use think\Db;
-//use app\admin\model\itemmanage\attribute\ItemAttributePropertyValue;
+use app\admin\model\itemmanage\attribute\ItemAttributePropertyValue;
 class ItemAttributeProperty extends Model
 {
 
@@ -37,31 +37,6 @@ class ItemAttributeProperty extends Model
     {
         return [1=>'单选',2=>'多选',3=>'输入'];
     }
-
-    //追加字段
-    /***
-     * @param $type 输入类型  1 单选 2 多选 3 输入
-     * @param $value 字段英文名称
-     * @param $comment 字段注释
-     * @param string $str 如果单选设定的enum类型
-     */
-    public function appendField($type,$value,$comment,$str='')
-    {
-        $rs = $this->where('name_en','=',$value)->field('id,name_en')->find();
-        if(!$rs){
-            if($type == 1){
-                $sql = "alter table fa_item_attribute add {$value} enum ({$str}) comment '{$comment}'";
-            }else{
-                $sql = "alter table fa_item_attribute add {$value} VARCHAR(100) NOT NULL DEFAULT '' comment '{$comment}'";
-            }
-            $result = Db::execute($sql);
-            return $result ? $result : false;
-        }else{
-            return 1;
-        }
-
-    }
-
     /***
      * @param $field 字段的英文名称
      */
@@ -82,5 +57,19 @@ class ItemAttributeProperty extends Model
         $result['value'] = (new ItemAttributePropertyValue())->getAttrPropertyValue($id);
         return $result;
     }
-
+    /***
+     *商品属性项列表
+     */
+    public function propertyList()
+    {
+        $result = $this->where('status','=',1)->field('id,name_cn')->select();
+        if(!$result){
+            return [0=>'商品属性不存在,请先添加属性'];
+        }
+        $arr = [];
+        foreach($result as $key=>$val){
+            $arr[$val['id']] = $val['name_cn'];
+        }
+        return $arr;
+    }
 }
