@@ -19,6 +19,7 @@ class Item extends Backend
      */
     protected $model = null;
     protected $category = null;
+//    protected $layout = '';
     public function _initialize()
     {
         parent::_initialize();
@@ -44,13 +45,17 @@ class Item extends Backend
             }
             $result = $this->category->categoryPropertyInfo($categoryId);
             if(!$result){
-                $this->error('对应分类不存在,请从新尝试');
+              return  $this->error('对应分类不存在,请从新尝试');
+            }elseif ($result == -1){
+              return $this->error('对应分类存在下级分类,请从新选择');
             }
-            echo '<pre>';
-            var_dump($result);
-            exit;
+            $this->view->engine->layout(false);
+            $this->assign('result',$result);
+            $data = $this->fetch('attribute');
+            return  $this->success('ok','',$data);
+
         }else{
-            $this->error(__('404 Not Found'));
+           return $this->error(__('404 Not Found'));
         }
     }
 }

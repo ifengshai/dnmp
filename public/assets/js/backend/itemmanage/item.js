@@ -55,7 +55,60 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         url:'itemmanage/item/ajaxCategoryInfo',
                         data:{categoryId:categoryId}
                     }, function(data, ret){
-
+                        var resultData = ret.data;
+                        console.log(resultData);
+                        $('#item-stock').after(function () {
+                            return resultData;
+                        });
+                        // $('#item-stock').after(function(){
+                        //     var resultData = ret.data;
+                        //     var Str = '';
+                        //     for(var j = 0,len = resultData.length; j < len; j++){
+                        //         Str+='<div class="form-group">';
+                        //         Str+='<label class="control-label col-xs-12 col-sm-2">'+resultData[j].name_cn+'</label>';
+                        //         Str+='<div class="col-xs-12 col-sm-3">';
+                        //         if(resultData[j].input_mode == 1){ //单选
+                        //             if(resultData[j].is_required ==1){ //是否必须
+                        //                 Str+='{:Form::select("row[dept_id][]",'+resultData[j].propertyValues+', null, ["class"=>"form-control selectpicker", "data-rule"=>"required","data-live-search" => true])}';
+                        //             }else{
+                        //                 Str+='{:Form::select("row[dept_id][]", '+resultData[j].propertyValues+', null, ["class"=>"form-control selectpicker","data-live-search" => true])}';
+                        //             }
+                        //         }else if(resultData[j].input_mode == 2){ //多选
+                        //             if(resultData[j].is_required == 1){
+                        //                 Str+='{:Form::selects("row[dept_id][]",'+resultData[j].propertyValues+', null,["class"=>"form-control selectpicker", "data-rule"=>"required","data-live-search" => true])}';
+                        //             }else{
+                        //                 Str+='{:Form::selects("row[dept_id][]",'+resultData[j].propertyValues+', null, ["class"=>"form-control selectpicker","data-live-search" => true])}';
+                        //             }
+                        //
+                        //         }else if(resultData[j].input_mode == 3){ //输入
+                        //             if(resultData[j].is_required ==1){ //必须
+                        //                 Str+='<input id="c-'+resultData[j].name_en+'" data-rule="required" class="form-control" name="row['+resultData[j].name_en+']" type="text" value="">';
+                        //             }else{ //不是必须
+                        //                 Str+='<input id="c-'+resultData[j].name_en+'"  class="form-control" name="row['+resultData[j].name_en+']" type="text" value="">';
+                        //             }
+                        //         }
+                        //         Str+='</div>';
+                        //
+                        //         // if()
+                        //         // console.log(resultData[j]);
+                        //         // console.log(resultData[j].id);
+                        //         // console.log(resultData[j].is_required);
+                        //         // console.log(resultData[j].name_cn);
+                        //         // console.log(resultData[j].name_en);
+                        //         // console.log(resultData[j].input_mode);
+                        //         // console.log(resultData[j].propertyValue);
+                        //         // var propertyValue = resultData[j].propertyValue;
+                        //         // for(var i = 0, lens = propertyValue.length; i<lens;i++){
+                        //         //     console.log(propertyValue[i].id);
+                        //         //     console.log(propertyValue[i].name_value_cn);
+                        //         //     console.log(propertyValue[i].name_value_en);
+                        //         //     console.log(propertyValue[i].code_rule);
+                        //         // }
+                        //     }
+                        //     Str+='</div>';
+                        //     return Str;
+                        //     //console.log(resultData);
+                        // });
                         return false;
                     }, function(data, ret){
                         //失败的回调
@@ -65,6 +118,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     });
                 });
             }
+        },
+        attribute:function () {
+            Controller.api.bindevent();
         }
     };
     return Controller;
