@@ -45,7 +45,11 @@ class ItemAttribute extends Model
                 $sql = "alter table fa_item_attribute add {$value} VARCHAR(100) NOT NULL DEFAULT '' comment '{$comment}'";
             }
             $result = Db::execute($sql);
-            return $result ? $result : false;
+            if($result !== false){
+                return true;
+            }else{
+                return false;
+            }
         }else{
             return 1;
         }

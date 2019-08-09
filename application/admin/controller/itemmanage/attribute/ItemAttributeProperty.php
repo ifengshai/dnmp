@@ -21,6 +21,8 @@ class ItemAttributeProperty extends Backend
     protected $model = null;
     protected $propertyValue = null;
     protected $itemAttribute = null;
+    protected $modelValidate = true;
+    protected $modelSceneValidate = true;
     public function _initialize()
     {
         parent::_initialize();
@@ -41,8 +43,6 @@ class ItemAttributeProperty extends Backend
     {
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
-//            dump($params);
-//            exit;
             if ($params) {
                 $params = $this->preExcludeFields($params);
 
@@ -62,7 +62,12 @@ class ItemAttributeProperty extends Backend
                     $params['create_time']   = date("Y-m-d H:i:s",time());
                     $result = $this->model->allowField(true)->save($params);
                     Db::commit();
-                } catch (ValidateException $e) {
+                }catch (\think\exception\ValidateException $e)
+                {
+                    Db::rollback();
+                    $this->error($e->getMessage());
+                }
+                catch (ValidateException $e) {
                     Db::rollback();
                     $this->error($e->getMessage());
                 } catch (PDOException $e) {
@@ -94,7 +99,6 @@ class ItemAttributeProperty extends Backend
                         $this->propertyValue->allowField(true)->saveAll($data);
                         $rs = $this->itemAttribute->appendField($params['input_mode'],$params['name_en'],$params['name_cn'],$str);
                         //批量添加
-
                     }else{
                         $rs=$this->itemAttribute->appendField($params['input_mode'],$params['name_en'],$params['name_cn']);
                     }

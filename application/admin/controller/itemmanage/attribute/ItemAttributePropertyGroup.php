@@ -27,7 +27,46 @@ class ItemAttributePropertyGroup extends Backend
         $this->assign('groupStatus',$this->model->groupStatus());
         $this->assign('propertyData',$this->itemAttrProperty->propertyList());
     }
-    
+    /**
+     * 查看
+     */
+    public function index()
+    {
+        //设置过滤方法
+        $this->request->filter(['strip_tags']);
+        if ($this->request->isAjax()) {
+            //如果发送的来源是Selectpage，则转发到Selectpage
+            if ($this->request->request('keyField')) {
+                return $this->selectpage();
+            }
+            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            $total = $this->model
+                ->where($where)
+                ->order($sort, $order)
+                ->count();
+
+            $list = $this->model
+                ->where($where)
+                ->order($sort, $order)
+                ->limit($offset, $limit)
+                ->select();
+            $propertyList = $this->itemAttrProperty->propertyList();
+            $list = collection($list)->toArray();
+            foreach ($list as $k=>$v){
+                if($v['property_id']){
+                    $propertyArr = explode('+',$v['property_id']);
+                    $list[$k]['property_id'] = '';
+                    foreach($propertyArr as $values){
+                        $list[$k]['property_id'].= $propertyList[$values].' ';
+                    }
+                }
+            }
+            $result = array("total" => $total, "rows" => $list);
+
+            return json($result);
+        }
+        return $this->view->fetch();
+    }
     /**
      * 默认生成的控制器所继承的父类中有index/add/edit/del/multi五个基础方法、destroy/restore/recyclebin三个回收站方法
      * 因此在当前控制器中可不用编写增删改查的代码,除非需要自己控制这部分逻辑
@@ -42,7 +81,7 @@ class ItemAttributePropertyGroup extends Backend
             $params = $this->request->post("row/a");
             if ($params) {
                 $params = $this->preExcludeFields($params);
-                $params['property_id'] = implode(',',$params['property_id']);
+                $params['property_id'] = implode('+',$params['property_id']);
 //                dump($params);
 //                exit;
                 if ($this->dataLimit && $this->dataLimitFieldAutoFill) {

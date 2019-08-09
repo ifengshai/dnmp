@@ -2,6 +2,7 @@
 
 namespace app\admin\model\itemmanage;
 
+use think\Db;
 use think\Model;
 
 
@@ -111,8 +112,49 @@ class ItemCategory extends Model
         return $strIds;
     }
 
-
-
-
-
+    /***
+     * 获取所有任务列表
+     */
+    public function categoryList()
+    {
+        $result = $this->field('id,pid,name')->select();
+        if(!$result){
+            $finalArr =[];
+            $finalArr[0] = '无';
+            return $finalArr;
+        }
+        $arr    = getTree($result);
+        $finalArr = [];
+        foreach ($arr as $k=>$v){
+            $finalArr[0] = '无';
+            $finalArr[$v['id']] = $v['name'];
+        }
+        return $finalArr;
+    }
+    /***
+     * 根据分类ID获取相关属性组信息
+     */
+    public function categoryPropertyInfo($categoryId)
+    {
+        //首先检查选择的分类有没有下级，如果有下级则需要重新选择分类
+        $result = $this->where('pid','=',$categoryId)->field('id,name')->find();
+        if($result){
+            return - 1;
+        }
+        $propertyGroup = $this->where('g.id','=',$categoryId)->where('p.status','=',1)->alias('g')
+            ->join('item_attribute_property_group p', ' g.property_group_id = p.id')->value('p.property_id');
+        if(!$propertyGroup){ //没有属性分组
+           return false;
+        }
+        $propertyArr = explode('+',$propertyGroup);
+        $itemAttrProperty = Db::name('item_attribute_property')->where('id','in',$propertyArr)
+            ->field('id,is_required,name_cn,name_en,input_mode')->select();
+        if(!$itemAttrProperty){ //没有属性项
+            return false;
+        }
+        foreach ($itemAttrProperty as $k =>$v){
+            $itemAttrProperty[$k]['propertyValue'] = Db::name('item_attribute_property_value')->where('property_id','=',$v['id'])->field('id,name_value_cn,name_value_en,code_rule')->select();
+        }
+        return $itemAttrProperty;
+    }
 }

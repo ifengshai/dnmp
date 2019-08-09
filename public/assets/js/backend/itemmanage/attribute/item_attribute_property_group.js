@@ -31,6 +31,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             custom: {  2: 'yellow', 1: 'blue' },
                             formatter: Table.api.formatter.status
                         },
+                        {field:'property_id',title:__('Property_id')},
                         {field:'create_person',title:__('Create_person')},
                         {field: 'create_time', title: __('Create_time'), operate:'RANGE', addclass:'datetimerange'},
                         {field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate}
