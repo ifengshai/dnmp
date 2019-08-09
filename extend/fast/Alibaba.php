@@ -3,9 +3,10 @@
 namespace fast;
 
 use fast\Http;
+use function GuzzleHttp\json_encode;
 
 /**
- * 字符串类
+ * alibaba类
  */
 class Alibaba
 {
@@ -61,7 +62,7 @@ class Alibaba
 
 
     /**
-     * 获取1688订单列表
+     * 获取1688订单详情
      * @param string $apiInfo 获取签名的参数 格式为protocol/apiVersion/namespace/apiName/
      * @return array
      */
@@ -93,6 +94,92 @@ class Alibaba
         $params = [
             'webSite' => '1688',
             'orderId' => $orderId,
+            'access_token' => self::$access_token,
+            '_aop_signature' => $code_sign
+        ];
+        //请求URL
+        $res = Http::post($url, $params);
+        return json_decode($res);
+    }
+
+
+    /**
+     * 获取1688商品详情
+     * @param string $apiInfo 获取签名的参数 格式为protocol/apiVersion/namespace/apiName/
+     * @return array
+     */
+    public static function getGoodsDetail($productId = '')
+    {
+        $url = self::$url;
+        $appKey = self::$appKey;
+        $appSecret = self::$appSecret;
+        $apiInfo = 'param2/1/com.alibaba.product/alibaba.cross.productInfo/';
+
+        /***************获取签名*********************/
+        $apiInfo = $apiInfo . $appKey; //此处请用具体api进行替换
+        //配置参数，请用apiInfo对应的api参数进行替换
+        $code_arr = array(
+            'webSite' => '1688',
+            'productId' => $productId,
+            'access_token' => self::$access_token
+        );
+        $aliParams = array();
+        foreach ($code_arr as $key => $val) {
+            $aliParams[] = $key . $val;
+        }
+        sort($aliParams);
+        $sign_str = join('', $aliParams);
+        $sign_str = $apiInfo . $sign_str;
+        $code_sign = strtoupper(bin2hex(hash_hmac("sha1", $sign_str, $appSecret, true)));
+        /********************END*************************/
+        $url =  $url . $apiInfo;
+        $params = [
+            'webSite' => '1688',
+            'productId' => $productId,
+            'access_token' => self::$access_token,
+            '_aop_signature' => $code_sign
+        ];
+        //请求URL
+        $res = Http::post($url, $params);
+        return json_decode($res);
+    }
+
+
+    /**
+     * 添加1688商品铺货
+     * @param string $apiInfo 获取签名的参数 格式为protocol/apiVersion/namespace/apiName/
+     * @return array
+     */
+    public static function getGoodsPush(array $productIdList = [])
+    {
+        //数组转成json再处理
+        $productIdList = json_encode($productIdList);
+        $url = self::$url;
+        $appKey = self::$appKey;
+        $appSecret = self::$appSecret;
+        $apiInfo = 'param2/1/com.alibaba.product.push/alibaba.cross.syncProductListPushed/';
+
+        /***************获取签名*********************/
+        $apiInfo = $apiInfo . $appKey; //此处请用具体api进行替换
+        //配置参数，请用apiInfo对应的api参数进行替换
+        $code_arr = array(
+            'webSite' => '1688',
+            'productIdList' => $productIdList,
+            'access_token' => self::$access_token
+        );
+        $aliParams = array();
+        foreach ($code_arr as $key => $val) {
+            $aliParams[] = $key . $val;
+        }
+        sort($aliParams);
+        $sign_str = join('', $aliParams);
+        $sign_str = $apiInfo . $sign_str;
+        $code_sign = strtoupper(bin2hex(hash_hmac("sha1", $sign_str, $appSecret, true)));
+        /********************END*************************/
+        $url =  $url . $apiInfo;
+        $params = [
+            'webSite' => '1688',
+            'productIdList' => $productIdList,
             'access_token' => self::$access_token,
             '_aop_signature' => $code_sign
         ];

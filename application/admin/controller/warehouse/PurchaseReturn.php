@@ -70,6 +70,85 @@ class PurchaseReturn extends Backend
         return $this->view->fetch();
     }
 
+    /**
+     * 详情
+     */
+    public function detail($ids = null)
+    {
+        $row = $this->model->get($ids);
+        if (!$row) {
+            $this->error(__('No Results were found'));
+        }
+        $adminIds = $this->getDataLimitAdminIds();
+        if (is_array($adminIds)) {
+            if (!in_array($row[$this->dataLimitField], $adminIds)) {
+                $this->error(__('You have no permission'));
+            }
+        }
+
+        //查询供应商
+        $supplier = new \app\admin\model\purchase\Supplier;
+        $data = $supplier->getSupplierData();
+        $this->assign('supplier', $data);
+
+        //查询采购单
+        $purchase = new \app\admin\model\purchase\PurchaseOrder;
+        $purchase_data = $purchase->getPurchaseData();
+        $this->assign('purchase_data', $purchase_data);
+
+
+        /***********查询退销商品信息***************/
+        //查询退销单商品信息
+        $return_item_map['return_id'] = $ids;
+        $return_arr = $this->purchase_return_item->where($return_item_map)->column('return_num,id', 'sku');
+
+        //查询采购单商品信息
+        $purchase_item = new \app\admin\model\purchase\PurchaseOrderItem;
+        $map['purchase_id'] = $row['purchase_id'];
+        $map['sku'] = ['in', array_keys($return_arr)];
+        $item = $purchase_item->where($map)->select();
+
+        //查询质检信息
+        $check_map['purchase_id'] = $row['purchase_id'];
+        $check_map['type'] = 1;
+        $check = new \app\admin\model\warehouse\Check;
+        $list = $check->hasWhere('checkItem', ['sku' => ['in', array_keys($return_arr)]])
+            ->where($check_map)
+            ->field('sku,sum(arrivals_num) as arrivals_num,sum(quantity_num) as quantity_num,sum(unqualified_num) as unqualified_num')
+            ->group('sku')
+            ->select();
+        $list = collection($list)->toArray();
+        //重组数组
+        $check_item = [];
+        foreach ($list as $k => $v) {
+            $check_item[$v['sku']]['arrivals_num'] = $v['arrivals_num'];
+            $check_item[$v['sku']]['quantity_num'] = $v['quantity_num'];
+            $check_item[$v['sku']]['unqualified_num'] = $v['unqualified_num'];
+        }
+
+        //查询已退数量
+        $return_map['purchase_id'] = $row['purchase_id'];
+        $return_item = $this->model->hasWhere('purchaseReturnItem', ['sku' => ['in', array_keys($return_arr)]])
+            ->where($return_map)
+            ->group('sku')
+            ->column('sum(return_num) as return_all_num', 'sku');
+
+        foreach ($item as $k => $v) {
+            $item[$k]['arrivals_num'] = $check_item[$v['sku']]['arrivals_num'];
+            $item[$k]['quantity_num'] = $check_item[$v['sku']]['quantity_num'];
+            $item[$k]['unqualified_num'] = $check_item[$v['sku']]['unqualified_num'];
+            $item[$k]['return_all_num'] = @$return_item[$v['sku']] ? @$return_item[$v['sku']] : 0;
+            $item[$k]['return_num'] = $return_arr[$v['sku']]['return_num'];
+            $item[$k]['item_id'] = $return_arr[$v['sku']]['id'];
+        }
+
+        /***********end***************/
+        $this->assign('item', $item);
+        $this->view->assign("row", $row);
+        return $this->view->fetch();
+    }
+
+    //添加物流单号
     public function logistics($ids = null)
     {
         $row = $this->model->get($ids);

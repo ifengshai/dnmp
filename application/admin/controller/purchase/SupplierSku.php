@@ -11,6 +11,8 @@ use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 use PhpOffice\PhpSpreadsheet\Reader\Xls;
 use PhpOffice\PhpSpreadsheet\Reader\Csv;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
+use fast\Alibaba;
+use think\Loader;
 
 /**
  * 供应商sku管理
@@ -100,15 +102,17 @@ class SupplierSku extends Backend
                         $this->model->validateFailException(true)->validate($validate);
                     }
                     $skus = $this->request->post("skus/a");
-                    
+
                     $supplier_skus = $this->request->post("supplier_sku/a");
-    
+                    $link = $this->request->post("link/a");
+
                     $data = [];
                     foreach ($skus as $k => $v) {
                         //供应商sku  和产品sku 必须为真 否则自动过滤
                         if ($v && $supplier_skus[$k]) {
                             $data[$k]['sku'] = $v;
                             $data[$k]['supplier_sku'] = $supplier_skus[$k];
+                            $data[$k]['link'] = $link[$k];
                             $data[$k]['supplier_id'] = $params['supplier_id'];
                             $data[$k]['create_person'] = session('admin.username');
                             $data[$k]['createtime'] = date('Y-m-d H:i:s', time());
@@ -217,7 +221,7 @@ class SupplierSku extends Backend
         }
     }
 
-     /**
+    /**
      * 导入
      */
     public function import()
@@ -282,7 +286,7 @@ class SupplierSku extends Backend
         //查询供应商
         $supplier = new \app\admin\model\purchase\Supplier;
         $supplier = $supplier->getSupplierData();
-    
+
         try {
             if (!$PHPExcel = $reader->load($filePath)) {
                 $this->error(__('Unknown data format'));
@@ -312,7 +316,7 @@ class SupplierSku extends Backend
                         $row[$fieldArr[$k]] = $v;
                     }
                     if ($k == '供应商名称') {
-                        $row['supplier_id'] = array_search($v,$supplier);
+                        $row['supplier_id'] = array_search($v, $supplier);
                     }
                 }
                 if ($row) {
@@ -325,7 +329,7 @@ class SupplierSku extends Backend
         if (!$insert) {
             $this->error(__('No rows were updated'));
         }
-        
+
 
         try {
             //是否包含admin_id字段
@@ -364,5 +368,53 @@ class SupplierSku extends Backend
         }
 
         $this->success();
+    }
+
+    //匹配1688 SKUid
+    public function matching($ids = null)
+    {
+        $row = $this->model->get($ids);
+        if (!$row) {
+            $this->error(__('No Results were found'));
+        }
+        if (!$row['link']) {
+            $this->error('请先补充1688对应商品链接！！');
+        }
+        if ($this->request->isAjax()) {
+            $ids = $this->request->get('ids');
+            $row = $this->model->get($ids);
+            //获取缓存名称
+            $controllername = Loader::parseName($this->request->controller());
+            $actionname = strtolower($this->request->action());
+            $path = str_replace('.', '1', $controllername) . '_' . $actionname . '_' . md5($row['link']);
+            //是否存在缓存
+            $result = session($path);
+            if ($row['link'] && !$result) {
+                //截取出商品id
+                $name = parse_url($row['link']);
+                preg_match('/\d+/', $name['path'], $goodsId);
+                //先添加到铺货列表
+                Alibaba::getGoodsPush([$goodsId[0]]);
+                //获取商品详情
+                $result = Alibaba::getGoodsDetail($goodsId[0]);
+                session($path, $result);
+            }
+            
+            $list = [];
+            foreach ($result->productInfo->skuInfos as $k => $v) {
+                $list[$k]['id'] = $k + 1;
+                $list[$k]['title'] = $result->productInfo->subject;
+                $list[$k]['color'] = $v->attributes[0]->attributeValue;
+                $list[$k]['cargoNumber'] = $v->cargoNumber;
+                $list[$k]['price'] = @$v->price ? @$v->price : @$v->consignPrice;
+                $list[$k]['skuId'] = $v->skuId;
+            }
+
+            $result = array("total" => count($list), "rows" => $list);
+
+            return json($result);
+        }
+        $this->assignconfig('ids', $ids);
+        return $this->view->fetch();
     }
 }

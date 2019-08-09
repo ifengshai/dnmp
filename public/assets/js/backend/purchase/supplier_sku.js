@@ -30,10 +30,31 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         { field: 'sku', title: __('Sku'), operate: 'like' },
                         { field: 'supplier_sku', title: __('Supplier_sku') },
                         { field: 'supplier.supplier_name', title: __('Supplier_id'), operate: 'like', },
+                        { field: 'link', title: '1688链接', operate: 'false', formatter: Table.api.formatter.url },
+                        { field: 'is_matching', title: '是否匹配', operate: 'false', custom: { 0: 'danger', 1: 'success' }, searchList: { 0: '否', 1: '是' }, formatter: Table.api.formatter.status },
                         { field: 'createtime', title: __('Createtime'), operate: 'RANGE', addclass: 'datetimerange' },
-                        { field: 'create_person', title: __('Create_person'),operate: false },
+                        { field: 'create_person', title: __('Create_person'), operate: false },
                         { field: 'status', title: __('Status'), searchList: { 1: '启用', 2: '禁用' }, formatter: Table.api.formatter.status },
-                        { field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate }
+                        {
+                            field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate, buttons: [
+                                {
+                                    name: 'detail',
+                                    text: '匹配sku',
+                                    title: '匹配sku',
+                                    classname: 'btn btn-xs  btn-primary  btn-dialog',
+                                    icon: 'fa fa-envira',
+                                    url: 'purchase/supplier_sku/matching',
+                                    extend: 'data-area = \'["80%","70%"]\'',
+                                    callback: function (data) {
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                    },
+                                    visible: function (row) {
+                                        //返回true时按钮显示,返回false隐藏
+                                        return true;
+                                    }
+                                },
+                            ]
+                        }
                     ]
                 ]
             });
@@ -76,6 +97,63 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
         },
         edit: function () {
             Controller.api.bindevent();
+        },
+        matching: function () {
+            // 初始化表格参数配置
+            Table.api.init({
+                commonSearch:false,
+                search: false,
+                showExport:false,
+                showColumns: false,
+                showToggle: false,
+                pagination:false,
+                extend: {
+                    index_url: 'purchase/supplier_sku/matching' + location.search + '&ids=' + Config.ids,
+                }
+            });
+
+            var table = $("#table");
+
+            // 初始化表格
+            table.bootstrapTable({
+                url: $.fn.bootstrapTable.defaults.extend.index_url,
+                pk: 'id',
+                sortName: 'id',
+                columns: [
+                    [
+                        { checkbox: true },
+                        { field: 'id', title: __('Id'), operate: false },
+                        { field: 'title', title: '标题', operate: false },
+                        { field: 'color', title: '颜色', operate: false },
+                        { field: 'cargoNumber', title: '供应商货号', operate: false },
+                        { field: 'price', title: '参考价格', operate: false},
+                        { field: 'skuId', title: 'skuId', operate: false },
+                        {
+                            field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate, buttons: [
+                                {
+                                    name: 'detail',
+                                    text: '选择',
+                                    title: '选择',
+                                    classname: 'btn btn-xs  btn-success  btn-dialog',
+                                    icon: 'fa fa-envira',
+                                    url: 'purchase/supplier_sku/matching',
+                                    extend: 'data-area = \'["100%","100%"]\'',
+                                    callback: function (data) {
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                    },
+                                    visible: function (row) {
+                                        //返回true时按钮显示,返回false隐藏
+                                        return true;
+                                    }
+                                },
+                            ]
+                        }
+                    ]
+                ]
+            });
+
+            // 为表格绑定事件
+            Table.api.bindevent(table);
         },
         api: {
             formatter: {
