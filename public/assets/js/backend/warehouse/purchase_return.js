@@ -39,7 +39,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     title: __('Detail'),
                                     classname: 'btn btn-xs  btn-primary  btn-dialog',
                                     icon: 'fa fa-list',
-                                    url: 'purchase/purchase_return/detail',
+                                    url: 'warehouse/purchase_return/detail',
                                     extend: 'data-area = \'["100%","100%"]\'',
                                     callback: function (data) {
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
@@ -111,6 +111,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             })
         },
         detail: function () {
+            Controller.api.bindevent();
+        },
+        logistics: function () {
             Controller.api.bindevent();
         },
         api: {
