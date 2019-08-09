@@ -46,8 +46,8 @@
                     <th>操作</th>
                 </tr>
                 <tr>
-                    <td><input id="c-name_value_cn" class="form-control" name="name_value_cn[]" type="text"></td>
-                    <td><input id="c-name_value_en" class="form-control" name="name_value_en[]" type="text"></td>
+                    <td><input id="c-name_value_cn" data-rule="required"  class="form-control" name="name_value_cn[]" type="text"></td>
+                    <td><input id="c-name_value_en" data-rule="required"  class="form-control" name="name_value_en[]" type="text"></td>
                     <td><input id="c-code_rule" class="form-control num" name="code_rule[]" type="text"></td>
                     <td><input id="c-descb" class="form-control price" name="descb[]" type="text"></td>
                     <td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>
@@ -60,7 +60,7 @@
     <div class="form-group layer-footer">
         <label class="control-label col-xs-12 col-sm-2"></label>
         <div class="col-xs-12 col-sm-8">
-            <button type="submit" class="btn btn-success btn-embossed disabled">{:__('OK')}</button>
+            <button id="submit" type="submit" class="btn btn-success btn-embossed disabled">{:__('OK')}</button>
             <button type="reset" class="btn btn-default btn-embossed">{:__('Reset')}</button>
         </div>
     </div>
@@ -68,8 +68,8 @@
 <div id="table-content" style="display: none;">
     <table>
         <tr>
-            <td><input id="c-name_value_cn" class="form-control" name="name_value_cn[]" type="text"></td>
-            <td><input id="c-name_value_en" class="form-control" name="name_value_en[]" type="text"></td>
+            <td><input id="c-name_value_cn" data-rule="required"  class="form-control" name="name_value_cn[]" type="text"></td>
+            <td><input id="c-name_value_en" data-rule="required" class="form-control" name="name_value_en[]" type="text"></td>
             <td><input id="c-code_rule" class="form-control num" name="code_rule[]" type="text"></td>
             <td><input id="c-descb" class="form-control price" name="descb[]" type="text"></td>
             <td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>

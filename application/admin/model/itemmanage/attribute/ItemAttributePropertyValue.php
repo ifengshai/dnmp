@@ -27,10 +27,16 @@ class ItemAttributePropertyValue extends Model
     protected $append = [
 
     ];
-    
 
-    
-
+    /***
+     * 获取指定属性的属性值列表
+     * @param $id  属性当中的ID
+     */
+    public function getAttrPropertyValue($id)
+    {
+        $result = $this->where('property_id','=',$id)->select();
+        return $result ? $result : false;
+    }
 
 
 
