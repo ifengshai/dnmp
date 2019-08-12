@@ -154,7 +154,20 @@ class ItemCategory extends Model
         }
         foreach ($itemAttrProperty as $k =>$v){
             $itemAttrProperty[$k]['propertyValue'] = Db::name('item_attribute_property_value')->where('property_id','=',$v['id'])->field('id,name_value_cn,name_value_en,code_rule')->select();
+            $itemAttrProperty[$k]['propertyValues'] = $this->getPropertyValue($v['id']);
         }
         return $itemAttrProperty;
+    }
+    public function getPropertyValue($id)
+    {
+        $result = Db::name('item_attribute_property_value')->where('property_id','=',$id)->field('id,name_value_cn')->select();
+        if(!$result){
+            return false;
+        }
+        $arr = [];
+        foreach ($result as $k =>$v){
+            $arr[$v['id']] = $v['name_value_cn'];
+        }
+        return $arr;
     }
 }
