@@ -1,0 +1,80 @@
+<style>
+    .website_linked {
+        color: #555555;
+        font-weight: bold;
+    }
+
+    .website_linked:hover {
+        color: #18bc9c;
+    }
+
+    .website_selected {
+        color: #fff;
+        background-color: #18bc9c;
+        padding: 5px 8px;
+        font-weight: bold;
+        border-radius: 3px;
+    }
+
+    .website_selected:hover {
+        color: #fff;
+        background-color: #18bc9c;
+        padding: 5px 8px;
+        font-weight: bold;
+        border-radius: 3px;
+    }
+</style>
+<div class="panel panel-default panel-intro">
+    {:build_heading()}
+
+    <div class="panel-body">
+        <div id="myTabContent" class="tab-content">
+            <div class="tab-pane fade active in" id="one">
+
+                <div class="row" style="margin-bottom:20px;">
+                    <div class="col-xs-12 col-sm-6 col-md-3">
+                        <div class="form-group">
+                            <label class="control-label col-xs-4">站点</label>
+                        </div>
+                    </div>
+                    <div class="col-xs-12 col-sm-6 col-md-3">
+                        <div class="form-group">
+                            <label class="control-label col-xs-4">
+                                <a href="{:url('/admin/order/index/index')}?label=1"
+                                    class="{:$label == 1 ? 'website_selected' : 'website_linked'}">ZEELOOL</a>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-xs-12 col-sm-6 col-md-3">
+                        <div class="form-group">
+                            <label class="control-label col-xs-4">
+                                <a href="{:url('/admin/order/index/index')}?label=2"
+                                    class="{:$label == 2 ? 'website_selected' : 'website_linked'}">VOOGUEME</a>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-xs-12 col-sm-6 col-md-3">
+                        <div class="form-group">
+                            <label class="control-label col-xs-4">
+                                <a href="{:url('/admin/order/index/index')}?label=3"
+                                    class="{:$label == 3 ? 'website_selected' : 'website_linked'}">NIHAO</a>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="widget-body no-padding">
+                    <div id="toolbar" class="toolbar">
+                        <a href="javascript:;" class="btn btn-primary btn-refresh" title="{:__('Refresh')}"><i
+                                class="fa fa-refresh"></i> </a>
+                    </div>
+
+                    <table id="table" class="table table-striped table-bordered table-hover table-nowrap"
+                        data-operate-edit="{:$auth->check('order/sales_flat_order/edit')}"
+                        data-operate-del="{:$auth->check('order/sales_flat_order/del')}" width="100%">
+                    </table>
+                </div>
+
+
+            </div>
+        </div>
+    </div>
