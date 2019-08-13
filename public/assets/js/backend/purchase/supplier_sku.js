@@ -32,6 +32,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         { field: 'supplier.supplier_name', title: __('Supplier_id'), operate: 'like', },
                         { field: 'link', title: '1688链接', operate: 'false', formatter: Table.api.formatter.url },
                         { field: 'is_matching', title: '是否匹配', operate: 'false', custom: { 0: 'danger', 1: 'success' }, searchList: { 0: '否', 1: '是' }, formatter: Table.api.formatter.status },
+                        { field: 'skuid', title: '匹配的skuId', operate: 'false' },
                         { field: 'createtime', title: __('Createtime'), operate: 'RANGE', addclass: 'datetimerange' },
                         { field: 'create_person', title: __('Create_person'), operate: false },
                         { field: 'status', title: __('Status'), searchList: { 1: '启用', 2: '禁用' }, formatter: Table.api.formatter.status },
@@ -101,12 +102,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
         matching: function () {
             // 初始化表格参数配置
             Table.api.init({
-                commonSearch:false,
+                commonSearch: false,
                 search: false,
-                showExport:false,
+                showExport: false,
                 showColumns: false,
                 showToggle: false,
-                pagination:false,
+                pagination: false,
                 extend: {
                     index_url: 'purchase/supplier_sku/matching' + location.search + '&ids=' + Config.ids,
                 }
@@ -126,24 +127,29 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         { field: 'title', title: '标题', operate: false },
                         { field: 'color', title: '颜色', operate: false },
                         { field: 'cargoNumber', title: '供应商货号', operate: false },
-                        { field: 'price', title: '参考价格', operate: false},
+                        { field: 'price', title: '参考价格', operate: false },
                         { field: 'skuId', title: 'skuId', operate: false },
+                        { field: 'parent_id', title: 'parent_id', operate: false, visible: false },
                         {
                             field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate, buttons: [
                                 {
-                                    name: 'detail',
+                                    name: 'ajax',
                                     text: '选择',
                                     title: '选择',
-                                    classname: 'btn btn-xs  btn-success  btn-dialog',
+                                    classname: 'btn btn-xs  btn-success  btn-magic  btn-ajax',
                                     icon: 'fa fa-envira',
-                                    url: 'purchase/supplier_sku/matching',
-                                    extend: 'data-area = \'["100%","100%"]\'',
-                                    callback: function (data) {
-                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                    url: 'purchase/supplier_sku/matchingSkuId?skuId={skuId}&parent_id={parent_id}',
+                                    confirm: '确认选择？',
+                                    success: function (data, ret) {
+                                        Layer.alert(ret.msg + ",返回数据：" + JSON.stringify(data));
+                                        parent.location.reload();
+                                        //如果需要阻止成功提示，则必须使用return false;
+                                        //return false;
                                     },
-                                    visible: function (row) {
-                                        //返回true时按钮显示,返回false隐藏
-                                        return true;
+                                    error: function (data, ret) {
+                                        console.log(data, ret);
+                                        Layer.alert(ret.msg);
+                                        return false;
                                     }
                                 },
                             ]

@@ -399,7 +399,7 @@ class SupplierSku extends Backend
                 $result = Alibaba::getGoodsDetail($goodsId[0]);
                 session($path, $result);
             }
-            
+
             $list = [];
             foreach ($result->productInfo->skuInfos as $k => $v) {
                 $list[$k]['id'] = $k + 1;
@@ -408,6 +408,7 @@ class SupplierSku extends Backend
                 $list[$k]['cargoNumber'] = $v->cargoNumber;
                 $list[$k]['price'] = @$v->price ? @$v->price : @$v->consignPrice;
                 $list[$k]['skuId'] = $v->skuId;
+                $list[$k]['parent_id'] = $ids;
             }
 
             $result = array("total" => count($list), "rows" => $list);
@@ -416,5 +417,18 @@ class SupplierSku extends Backend
         }
         $this->assignconfig('ids', $ids);
         return $this->view->fetch();
+    }
+
+    //绑定skuid
+    public function matchingSkuId()
+    {
+        $ids = $this->request->get('parent_id');
+        $skuId = $this->request->get('skuId');
+        $res = $this->model->save(['skuid' => $skuId, 'is_matching' => 1], ['id' => $ids]);
+        if ($res !== false) {
+            $this->success();
+        } else {
+            $this->error(__('No rows were updated'));
+        }
     }
 }
