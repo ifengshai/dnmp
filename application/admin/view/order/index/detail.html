@@ -1,0 +1,407 @@
+<style>
+    .list-div {
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+        padding: 10px;
+        width: 100%;
+        height: 400px;
+        margin-bottom: 10px;
+    }
+
+    .caigou {
+        width: 45%;
+        margin-bottom: 10px;
+        float: left;
+    }
+
+    #caigou-table {
+        width: 100%;
+        height: 130px;
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+        text-align: center;
+    }
+
+    #caigou-table tr {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+        line-height: 50px;
+    }
+
+    #caigou-table tr th {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+        text-align: center;
+        font-size: 14px;
+        line-height: 50px;
+    }
+
+    #caigou-table tr td {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+    }
+
+    #caigou-table tr td input {
+
+        width: 150px;
+    }
+
+    .nav-tabs>li {
+        float: left;
+        margin-bottom: -1px;
+    }
+
+    .nav>li {
+        position: relative;
+        display: block;
+    }
+
+    .nav-tabs>li>a {
+        margin-right: 4px;
+        color: #95a5a6;
+        background-color: #d8e0e6;
+        border: 1px solid #e8edf0;
+        border-bottom-color: transparent;
+    }
+
+    .panel-heading {
+        padding: 15px;
+        padding-bottom: 0;
+        background: #e8edf0;
+        border-color: #e8edf0;
+        position: relative;
+    }
+
+    .panel-heading .nav-tabs>li>a {
+        margin-right: 4px;
+        color: #95a5a6;
+        border: 1px solid #e8edf0;
+        border-bottom-color: transparent;
+    }
+
+    .caigou-table-lens tbody tr td input {
+        text-align: center;
+    }
+</style>
+<div class="panel-heading">
+    {:build_heading()}
+    <ul class="nav nav-tabs" style="margin-bottom: 20px;">
+        <li class="active"><a href="{:url('detail')}?id={$row.entity_id}">订单信息</a></li>
+        <li><a href="{:url('checkDetail')}?id={$row.entity_id}">订单执行信息</a></li>
+        <li><a href="{:url('logisticsDetail')}?id={$row.entity_id}">售后信息</a></li>
+    </ul>
+</div>
+
+<form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
+    <div style="width: 100%;" class="list-div">
+        <div class='caigou'>
+            <p style="font-size: 16px;text-align: center;"><b>订单基本信息</b></p>
+
+            <div class="form-group">
+                <label class="control-label col-xs-12 col-sm-2">订单编号:</label>
+                <div class="col-xs-12 col-sm-8">
+                    <input id="c-purchase_number" class="form-control" name="row[increment_id]"
+                        value="{$row.increment_id}" type="text" readonly>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label col-xs-12 col-sm-2">订单状态:</label>
+                <div class="col-xs-12 col-sm-8">
+                    <input id="c-purchase_name" class="form-control" name="row[purchase_name]" value="{$row.status}"
+                        type="text" readonly>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label col-xs-12 col-sm-2">创建时间:</label>
+                <div class="col-xs-12 col-sm-8">
+                    <input id="c-purchase_name" class="form-control" name="row[purchase_name]" value="{$row.created_at}"
+                        type="text" readonly>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label col-xs-12 col-sm-2">客户邮箱:</label>
+                <div class="col-xs-12 col-sm-8">
+                    <input id="c-purchase_name" class="form-control" name="row[purchase_name]" value="{$address.email}"
+                        type="text" readonly>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label col-xs-12 col-sm-2">订单来源:</label>
+                <div class="col-xs-12 col-sm-8">
+                    {if $row['store_id'] == 1}
+                    <input id="c-purchase_name" class="form-control" name="row[purchase_name]" value="PC端" type="text"
+                        readonly>
+                    {elseif $row['store_id'] == 4}
+                    <input id="c-purchase_name" class="form-control" name="row[purchase_name]" value="移动端" type="text"
+                        readonly>
+                    {/if}
+
+                </div>
+            </div>
+
+        </div>
+
+        <div class='caigou'>
+            <p style="font-size: 16px;text-align: center;"><b>收货信息</b></p>
+
+
+            <div class="form-group">
+                <label class="control-label col-xs-12 col-sm-2">收件人:</label>
+                <div class="col-xs-12 col-sm-8">
+                    <input id="c-purchase_freight" class="form-control contract_name" readonly name=""
+                        value="{$address.firstname} {$address.lastname}" type="text">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label col-xs-12 col-sm-2">国家:</label>
+                <div class="col-xs-12 col-sm-8">
+                    <input id="c-delivery_address" class="form-control delivery_address" readonly name="" type="text"
+                        value="{$address.country_id}">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label col-xs-12 col-sm-2">邮编:</label>
+                <div class="col-xs-12 col-sm-8">
+                    <input id="c-delivery_address" class="form-control delivery_address" readonly name="" type="text"
+                        value="{$address.postcode}">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label col-xs-12 col-sm-2">电话:</label>
+                <div class="col-xs-12 col-sm-8">
+                    <input id="c-delivery_address" class="form-control delivery_address" readonly name="" type="text"
+                        value="{$address.telephone}">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label col-xs-12 col-sm-2">地址:</label>
+                <div class="col-xs-12 col-sm-8">
+                    <input id="c-purchase_freight" class="form-control contract_name" readonly name="" type="text"
+                        value="{$address.street}">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label col-xs-12 col-sm-2">城市:</label>
+                <div class="col-xs-12 col-sm-8">
+                    <input id="c-delivery_address" class="form-control delivery_address" readonly name="" type="text"
+                        value="{$address.city}">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label col-xs-12 col-sm-2">省州:</label>
+                <div class="col-xs-12 col-sm-8">
+                    <input id="c-delivery_address" class="form-control delivery_address" readonly name="" type="text"
+                        value="{$address.region}">
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+    <div style="width: 100%;">
+        <p style="font-size: 16px;text-align: center;"><b>商品信息</b></p>
+        <div style="margin-bottom: 20px;">
+
+            <table id="caigou-table">
+                <tr>
+                    <th>序号</td>
+                    <th>SKU</td>
+                    <th>商品名称</td>
+                    <th>平台SKU</td>
+                    <th>数量</td>
+                    <th>分类</td>
+                    <th>颜色</td>
+                    <th>处方类型</td>
+                    <th>原价</td>
+                    <th>折扣金额</td>
+                    <th>支付单价</td>
+                </tr>
+                {foreach $goods as $k => $v}
+                <tr>
+                    <td>{:$k+1}</td>
+                    <td>{$v.sku}</td>
+                    <td>{$v.name}</td>
+                    <td></td>
+                    <td>{:round($v['qty_ordered'])}</td>
+                    <td></td>
+                    <td></td>
+                    <td>{$v.custom_prescription}</td>
+                    <td>{$v.price}</td>
+                    <td>{$v.discount_amount}</td>
+                    <td>{$v.price}</td>
+                </tr>
+                {/foreach}
+
+            </table>
+        </div>
+    </div>
+    <hr>
+    <div class="row item_info" style="margin-top:15px;">
+        <p style="font-size: 16px;text-align: center;"><b>处方信息</b></p>
+        {foreach name="goods" item="sku" key="kv"}
+        <div style="height: 400px;">
+            <div class="col-xs-6 col-md-4" >
+                <div class="panel bg-blue">
+                    <div class="panel-body">
+                        <div class="panel-title">
+                            <label class="control-label col-xs-12 col-sm-3">商品名称:</label>
+                            <div class="col-xs-12 col-sm-8">
+                                <input id="c-item_name" class="form-control" type="text" value="{$sku['name']}">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div class="panel-title">
+                            <label class="control-label col-xs-12 col-sm-3">SKU:</label>
+                            <div class="col-xs-12 col-sm-8">
+                                <input id="c-item_sku" class="form-control" type="text" value="{$sku['sku']}">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div class="panel-title">
+                            <label class="control-label col-xs-12 col-sm-3">数量:</label>
+                            <div class="col-xs-12 col-sm-8">
+                                <input id="c-item_qty_ordered" class="form-control" type="text"
+                                    value="{$sku['qty_ordered']}">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div class="panel-title">
+                            <label class="control-label col-xs-12 col-sm-3">处方类型:</label>
+                            <div class="col-xs-12 col-sm-8">
+                                <input id="c-recipe_type" class="form-control" type="text"
+                                    value="{$sku['custom_prescription']}">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div class="panel-title">
+                            <label class="control-label col-xs-12 col-sm-3">镜片类型:</label>
+                            <div class="col-xs-12 col-sm-8">
+                                <input id="c-lens_type" class="form-control" type="text" name="row[lens][lens_type][]"
+                                    value="{$sku['product_options']['tmplens']['index_type']}">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div class="panel-title">
+                            <label class="control-label col-xs-12 col-sm-3">镀膜类型:</label>
+                            <div class="col-xs-12 col-sm-8">
+                                <input id="c-coating_film_type" class="form-control" type="text"
+                                    value="{$sku['product_options']['tmplens']['coatiing_name']}">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-7 col-md-8">
+                <div class="panel bg-blue">
+                    <div class="panel-body">
+                        <div class="ibox-title">
+                            <table class="caigou-table-lens" style="text-align: center;">
+                                
+                                <tr>
+                                    <td style="text-align: center">参数</td>
+                                    <td style="text-align: center">SPH</td>
+                                    <td style="text-align: center">CYL</td>
+                                    <td style="text-align: center">AXI</td>
+                                    <td style="text-align: center">ADD</td>
+                                    <td style="text-align: center">PD</td>
+                                    <td style="text-align: center">Prism Horizontal</td>
+                                    <td style="text-align: center">Base Direction</td>
+                                    <td style="text-align: center">Prism Vertical</td>
+                                    <td style="text-align: center">Base Direction</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: center">Right(OD)</td>
+                                    <td><input id="c-right_SPH" class="form-control" type="text"
+                                            name="row[lens][od_sph][]" value="" readonly></td>
+                                    <td><input id="c-right_CYL" class="form-control" type="text"
+                                            name="row[lens][od_cyl][]"
+                                            value="{:$sku['product_options']['prescription']['od_cyl'] ?? ''}" readonly></td>
+                                    <td><input id="c-right_AXI" class="form-control" type="text"
+                                            name="row[lens][od_axis][]"
+                                            value="{:$sku['product_options']['prescription']['od_axis'] ?? ''}" readonly></td>
+                                    {if $sku['product_options']['prescription']['total_add']}
+                                    <td rowspan="2" style="background: #eeeeee;width: 80px;color: rgb(85, 85, 85);">{:$sku['product_options']['prescription']['total_add'] ?? ''}</td>
+                                    {else/}
+                                    <td><input id="c-right_ADD" class="form-control" type="text"
+                                            name="row[lens][od_add][]"
+                                            value="{:$sku['product_options']['prescription']['od_add'] ?? ''}" readonly></td>
+                                    {/if}
+                                    <td><input id="c-right_PD" class="form-control" type="text" name="row[lens][pd_r][]"
+                                            value="{:$sku['product_options']['prescription']['pd_r'] ?? ''}" readonly></td>
+                                    <td><input id="c-right_Prism_Horizontal" class="form-control"
+                                            name="row[lens][od_pv][]" type="text"
+                                            value="{:$sku['product_options']['prescription']['od_pv'] ?? ''}" readonly>
+                                    </td>
+                                    <td><input id="c-right_" class="form-control" type="text" name="row[lens][od_bd][]"
+                                            value="{:$sku['product_options']['prescription']['od_bd'] ?? ''}" readonly></td>
+                                    <td><input id="c-purchase_remark" class="form-control" type="text"
+                                            name="row[lens][od_pv_r][]"
+                                            value="{:$sku['product_options']['prescription']['od_pv_r'] ?? ''}" readonly></td>
+                                    <td><input id="c-purchase_remark" class="form-control" type="text"
+                                            name="row[lens][od_bd_r][]"
+                                            value="{:$sku['product_options']['prescription']['od_bd_r'] ?? ''}" readonly></td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: center">Left(OS)</td>
+                                    <td><input id="c-left_SPH" class="form-control" type="text"
+                                            name="row[lens][os_sph][]"
+                                            value="{:$sku['product_options']['prescription']['os_sph'] ?? ''}" readonly></td>
+                                    <td><input id="c-left_CYL" class="form-control" type="text"
+                                            name="row[lens][os_cyl][]"
+                                            value="{:$sku['product_options']['prescription']['os_cyl'] ?? ''}" readonly></td>
+                                    <td><input id="c-purchase_remark" class="form-control" type="text"
+                                            name="row[lens][os_axis][]"
+                                            value="{:$sku['product_options']['prescription']['os_axis'] ?? ''}" readonly></td>
+                                    {if !$sku['product_options']['prescription']['total_add']}
+                                    <td><input id="c-purchase_remark" class="form-control" type="text"
+                                            name="row[lens][os_add][]"
+                                            value="{:$sku['product_options']['prescription']['os_add'] ?? ''}" readonly></td>
+                                    {/if}
+                                    <td><input id="c-purchase_remark" class="form-control" type="text"
+                                            name="row[lens][pd_l][]"
+                                            value="{:$sku['product_options']['prescription']['pd_l'] ?? ''}" readonly></td>
+                                    <td><input id="c-purchase_remark" class="form-control" type="text"
+                                            name="row[lens][os_pv][]"
+                                            value="{:$sku['product_options']['prescription']['os_pv'] ?? ''}" readonly></td>
+                                    <td><input id="c-purchase_remark" class="form-control" type="text"
+                                            name="row[lens][os_bd][]"
+                                            value="{:$sku['product_options']['prescription']['os_bd'] ?? ''}" readonly></td>
+                                    <td><input id="c-purchase_remark" class="form-control" type="text"
+                                            name="row[lens][os_pv_r][]"
+                                            value="{:$sku['product_options']['prescription']['os_pv_r'] ?? ''}" readonly></td>
+                                    <td><input id="c-purchase_remark" class="form-control" type="text"
+                                            name="row[lens][os_bd_r][]"
+                                            value="{:$sku['product_options']['prescription']['os_bd_r'] ?? ''}" readonly></td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        {/foreach}
+    </div>
+
+</form>

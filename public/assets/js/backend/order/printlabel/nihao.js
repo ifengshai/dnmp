@@ -5,12 +5,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             // 初始化表格参数配置
             Table.api.init({
                 searchFormVisible: true,
-                searchFormTemplate: 'customformtpl',
+                pageList: [10, 25, 50, 100],
                 extend: {
                     index_url: 'order/printlabel/nihao/index' + location.search,
-                    add_url: 'order/printlabel/nihao/add',
-                    edit_url: 'order/printlabel/nihao/edit',
-                    del_url: 'order/printlabel/nihao/del',
                     multi_url: 'order/printlabel/nihao/multi',
                     table: 'sales_flat_order',
                 }
@@ -18,42 +15,53 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
 
             var table = $("#table");
 
-            // 初始化表格
+             // 初始化表格
             table.bootstrapTable({
                 url: $.fn.bootstrapTable.defaults.extend.index_url,
                 pk: 'entity_id',
                 sortName: 'entity_id',
                 columns: [
                     [
-                        {checkbox: true},
-                        {field: 'entity_id', title: __('记录标识')},
-                        {field: 'increment_id', title: __('订单号')},
-                        {field: 'status', title: __('状态'),searchList: {"processing":__('processing'),"free_processing":__('free_processing')}},
-                        {field: 'base_grand_total', title: __('订单金额'), operate:false , formatter: Controller.api.formatter.float_format},
-                        {field: 'base_shipping_amount', title: __('运费'), operate:false , formatter: Controller.api.formatter.float_format},
-                                                                       
-                        {field: 'total_qty_ordered', title: __('SKU数量'), operate:false , formatter: Controller.api.formatter.int_format},   
-                        {field: 'custom_print_label', title: __('打印标签') , operate:false ,formatter: Controller.api.formatter.printLabel},                        
-                        {field: 'custom_print_label_created_at', operate:false ,title: __('打印标签时间')},
+                        { checkbox: true },
+                        { field: 'entity_id', title: __('记录标识') ,operate: false},
+                        { field: 'increment_id', title: __('订单号') },
+                        { field: 'status', title: __('状态'), searchList: { "processing": __('processing'), "free_processing": __('free_processing'), "creditcard_proccessing": "creditcard_proccessing" } },
+                        { field: 'base_grand_total', title: __('订单金额'), operate: false, formatter: Controller.api.formatter.float_format },
+                        { field: 'base_shipping_amount', title: __('运费'), operate: false, formatter: Controller.api.formatter.float_format },
 
-                        // {field: 'coupon_code', title: __('Coupon_code')},
+                        { field: 'total_qty_ordered', title: __('SKU数量'), operate: false, formatter: Controller.api.formatter.int_format },
+                        { field: 'custom_print_label', title: __('打印标签'), operate: false, formatter: Controller.api.formatter.printLabel },
+                        { field: 'custom_is_match_frame', title: __('配镜架'), operate: false, formatter: Controller.api.formatter.printLabel },
+                        { field: 'custom_is_match_lens', title: __('配镜片'), operate: false, formatter: Controller.api.formatter.printLabel },
+                        { field: 'custom_is_send_factory', title: __('加工'), operate: false, formatter: Controller.api.formatter.printLabel },
+                        { field: 'custom_is_delivery', title: __('提货'), operate: false, formatter: Controller.api.formatter.printLabel },
+                        { field: 'custom_print_label', title: __('是否打印'), searchList: { 1: '是', 0: '否' }, formatter: Table.api.formatter.status, visible: false },
+                        { field: 'custom_is_match_frame', title: __('是否配镜架'), searchList: { 1: '是', 0: '否' }, formatter: Table.api.formatter.status, visible: false },
+                        { field: 'custom_is_match_lens', title: __('是否配镜片'), searchList: { 1: '是', 0: '否' }, formatter: Table.api.formatter.status, visible: false },
+                        { field: 'custom_is_send_factory', title: __('是否加工'), searchList: { 1: '是', 0: '否' }, formatter: Table.api.formatter.status, visible: false },
+                        { field: 'custom_is_delivery', title: __('是否提货'), searchList: { 1: '是', 0: '否' }, formatter: Table.api.formatter.status, visible: false },
+                        { field: 'created_at', title: __('创建时间'), operate: 'RANGE', addclass: 'datetimerange' },
+                        {
+                            field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [
+                                {
+                                    name: 'detail',
+                                    text: '镜片参数',
+                                    title: __('Detail'),
+                                    classname: 'btn btn-xs  btn-primary  btn-dialog',
+                                    icon: 'fa fa-list',
+                                    url: 'order/index/detail?label=' + Config.label,
+                                    extend: 'data-area = \'["50%","50%"]\'',
+                                    callback: function (data) {
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                    },
+                                    visible: function (row) {
+                                        //返回true时按钮显示,返回false隐藏
+                                        return true;
+                                    }
+                                }
 
-                        // {field: 'shipping_description', title: __('Shipping_description')},
-                        // {field: 'store_id', title: __('Store_id'), formatter: Controller.api.formatter.device},
-                        // {field: 'customer_id', title: __('Customer_id')},
-                        // {field: 'base_discount_amount', title: __('Base_discount_amount'), operate:'BETWEEN', formatter: Controller.api.formatter.float_format},                      
-                   
-                        // {field: 'quote_id', title: __('Quote_id')},
-                                          
-                        // {field: 'base_currency_code', title: __('Base_currency_code')},
-                        // {field: 'customer_email', title: __('Customer_email')},
-                        // {field: 'customer_firstname', title: __('Customer_firstname')},
-                        // {field: 'customer_lastname', title: __('Customer_lastname')},
-                     
-                        {field: 'custom_is_match_frame', title: __('配镜架'),operate:false ,formatter: Controller.api.formatter.printLabel},
-                        {field: 'custom_is_match_lens', title: __('配镜片'),operate:false ,formatter: Controller.api.formatter.printLabel},
-                        {field: 'custom_is_send_factory', title: __('加工'),operate:false ,formatter: Controller.api.formatter.printLabel},
-                        {field: 'custom_is_delivery', title: __('提货'),operate:false ,formatter: Controller.api.formatter.printLabel},
+                            ], formatter: Table.api.formatter.operate
+                        }
                     ]
                 ]
             });
@@ -98,44 +106,46 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             //批量标记已打印    
             $('.btn-tag-printed').click(function () {
                 var ids = Table.api.selectedids(table);
-                // console.log(ids);
-                var id_params = '';
-                $.each(table.bootstrapTable('getSelections'), function (index, row) {
-                    // console.log(row); 
-                    id_params += row['entity_id']+',';                       
-                });
-                console.log(id_params);
-
-                var ids = Table.api.selectedids(table);
                 Layer.confirm(
-                    __('确定要这%s条记录 标记为 【已打印标签】么?', ids.length),
-                    {icon: 3, title: __('Warning'), offset: 0, shadeClose: true},
+                    __('确定要这%s条记录 标记为 【已打印标签】吗?', ids.length),
+                    { icon: 3, title: __('Warning'), shadeClose: true },
                     function (index) {
-                            // Table.api.multi("del", ids, table, that);
-                            console.log('开始执行');
-                            Layer.close(index);
+                        Layer.close(index);
+                        Backend.api.ajax({
+                            url: '/admin/order/printlabel/nihao/tag_printed',
+                            data: { id_params: ids },
+                            type: 'post'
+                        }, function (data, ret) {
+                            if (data == 'success') {
+                                table.bootstrapTable('refresh');
+                            }
+                        });
 
-                            Backend.api.ajax({
-                                url:'/admin/order/printlabel/nihao/tag_printed',
-                                // url:"{:url('tag_printed')}",
-                                data:{id_params:id_params},
-                                type:'get'
-                            }, function(data, ret){
+                    }
+                );
+            })
 
-                                console.log(data);
-                                console.log(ret);
-                                if(data == 'success'){
-                                    console.log('成功的回调');
-                                    table.bootstrapTable('refresh');
-                                }
-                            }, function(data, ret){
+            //配镜架 配镜片 加工 质检通过 
+            $('.btn-set-status').click(function () {
+                var ids = Table.api.selectedids(table);
+                var status = $(this).data('status');
+                Layer.confirm(
+                    __('确定要修改这%s条记录配货状态吗?', ids.length),
+                    { icon: 3, title: __('Warning'), shadeClose: true },
+                    function (index) {
+                        Layer.close(index);
+                        Backend.api.ajax({
+                            url: '/admin/order/printlabel/nihao/setOrderStatus',
+                            data: { id_params: ids, status: status },
+                            type: 'post'
+                        }, function (data, ret) {
+                            if (data == 'success') {
+                                table.bootstrapTable('refresh');
+                            }
+                        });
 
-                                console.log('失败的回调');
-                            });
-
-                        }
-                    );     
-
+                    }
+                );
             })
         },
         add: function () {
