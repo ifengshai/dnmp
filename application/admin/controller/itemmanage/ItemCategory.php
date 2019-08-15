@@ -25,7 +25,8 @@ class ItemCategory extends Backend
         $this->view->assign('PutAway',$this->model->isPutAway());
         $this->view->assign('LevelList',$this->model->getLevelList());
         $this->view->assign('CategoryList',$this->model->getCategoryList());
-        $this->view->assign('PropertyGroup',(new ItemAttributePropertyGroup())->propertyGroupList());
+        //$this->view->assign('PropertyGroup',(new ItemAttributePropertyGroup())->propertyGroupList());
+        $this->view->assign('AttrGroup',$this->model->getAttrGroup());
     }
     
     /**
@@ -55,13 +56,14 @@ class ItemCategory extends Backend
                 ->select();
             $rsAll = $this->model->getAjaxCategoryList();
             $list = collection($list)->toArray();
-            $propertyGroup = (new ItemAttributePropertyGroup())->propertyGroupList();
+            //$propertyGroup = (new ItemAttributePropertyGroup())->propertyGroupList();
+            $attributeGroup = $this->model->getAttrGroup();
             foreach ($list as $k =>$v){
                 if($v['pid']){
                     $list[$k]['pid'] = $rsAll[$v['pid']];
                 }
-                if($v['property_group_id']){
-                    $list[$k]['property_group_id'] = $propertyGroup[$v['property_group_id']];
+                if($v['attribute_group_id']){
+                    $list[$k]['attribute_group_id'] = $attributeGroup[$v['attribute_group_id']];
                 }
 
             }

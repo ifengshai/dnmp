@@ -49,6 +49,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
         api: {
             bindevent: function () {
                 Form.api.bindevent($("form[role=form]"));
+                $(document).on('click', '.btn-add', function () {
+                    var content = $('#table-content table tbody').html();
+                    $('.caigou table tbody').append(content);
+                });
+                $(document).on('click', '.btn-del', function () {
+                    $(this).parent().parent().remove();
+                });
                 $(document).on('change','#choose_category_id',function(){
                     var categoryId = $('#choose_category_id').val();
                     Backend.api.ajax({
@@ -56,10 +63,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         data:{categoryId:categoryId}
                     }, function(data, ret){
                         var resultData = ret.data;
-                        console.log(resultData);
-                        $('#item-stock').after(function () {
-                            return resultData;
-                        });
+                        $('.ajax-add').empty();
+                        //console.log(resultData);
+                        $('#item-stock').after(resultData);
+                        $(".selectpicker").selectpicker('refresh');
+                        //$('#item_stock').after(resultData);
+                        // $('#item-stock').after(function () {
+                        //     return resultData;
+                        // });
                         // $('#item-stock').after(function(){
                         //     var resultData = ret.data;
                         //     var Str = '';
@@ -113,14 +124,15 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     }, function(data, ret){
                         //失败的回调
                         alert(ret.msg);
-                        console.log(ret);
                         return false;
                     });
                 });
             }
         },
-        attribute:function () {
+        ajaxCategoryInfo:function () {
             Controller.api.bindevent();
+            Form.api.bindevent($("form[role=form]"));
+            Form.events.datetimepicker($("form"));
         }
     };
     return Controller;

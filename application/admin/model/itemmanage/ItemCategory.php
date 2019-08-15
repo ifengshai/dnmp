@@ -42,7 +42,10 @@ class ItemCategory extends Model
         //return config('site.level');
         return [1=>'一级分类',2=>'二级分类',3=>'三级分类'];
     }
-
+    public function getAttrGroup()
+    {
+        return [1=>'镜框',2=>'镜片',3=>'饰品'];
+    }
     /***
      * 获取分类列表
      */
@@ -134,7 +137,7 @@ class ItemCategory extends Model
     /***
      * 根据分类ID获取相关属性组信息
      */
-    public function categoryPropertyInfo($categoryId)
+    public function categoryPropertyInfo($categoryId,$type=1)
     {
         //首先检查选择的分类有没有下级，如果有下级则需要重新选择分类
         $result = $this->where('pid','=',$categoryId)->field('id,name')->find();
@@ -152,12 +155,26 @@ class ItemCategory extends Model
         if(!$itemAttrProperty){ //没有属性项
             return false;
         }
-        foreach ($itemAttrProperty as $k =>$v){
-            $itemAttrProperty[$k]['propertyValue'] = Db::name('item_attribute_property_value')->where('property_id','=',$v['id'])->field('id,name_value_cn,name_value_en,code_rule')->select();
-            $itemAttrProperty[$k]['propertyValues'] = $this->getPropertyValue($v['id']);
+        if($type == 1){
+            foreach ($itemAttrProperty as $k =>$v){
+                $itemAttrProperty[$k]['rows'] = "row[{$v['name_en']}][]";
+                $itemAttrProperty[$k]['propertyValues'] = $this->getPropertyValue($v['id']);
+            }
+        }elseif($type == 2){
+            $arr = [];
+            foreach ($itemAttrProperty as $key =>$val){
+                $arr[] = $val['name_en'];
+            }
+            return $arr;
         }
         return $itemAttrProperty;
     }
+
+    /***
+     * 获取商品属性值对应的英文的值
+     * @param $id 属性值的id
+     * @return array|bool
+     */
     public function getPropertyValue($id)
     {
         $result = Db::name('item_attribute_property_value')->where('property_id','=',$id)->field('id,name_value_cn')->select();
@@ -169,5 +186,22 @@ class ItemCategory extends Model
             $arr[$v['id']] = $v['name_value_cn'];
         }
         return $arr;
+    }
+    /***
+     * 根据ID获取商品属性分类
+     */
+    public function getAttrCategoryById($id)
+    {
+        //首先检查选择的分类有没有下级，如果有下级则需要重新选择分类
+        $result = $this->where('pid','=',$id)->field('id,name')->find();
+        if($result){
+            return - 1;
+        }
+        $arr = $this->where('id','=',$id)->field('id,attribute_group_id')->find();
+        if(!$arr){
+            return false;
+        }
+        return $arr['attribute_group_id'] ? $arr['attribute_group_id'] : false;
+
     }
 }

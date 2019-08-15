@@ -1,19 +1,63 @@
+<style>
+    .caigou {
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+        padding: 10px;
+        width: 70%;
+        margin-left: 10%;
+        margin-bottom: 10px;
+    }
+
+    .caigou #caigou-table {
+        width: 100%;
+        height: 130px;
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+        text-align: center;
+    }
+
+    .caigou #caigou-table tr {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+        line-height: 50px;
+    }
+
+    .caigou #caigou-table tr th {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+        text-align: center;
+        font-size: 14px;
+    }
+
+    .caigou #caigou-table tr td {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+    }
+
+    .caigou #caigou-table tr td input {
+
+        width: 250px;
+    }
+</style>
 <form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
 
-    <div class="form-group">
+    <div class="form-group" id="item-stock">
         <label class="control-label col-xs-12 col-sm-2">{:__('Category_id')}:</label>
         <div class="col-xs-12 col-sm-3">
             {:Form::select('row[category_id]', $categoryList, null, ['class'=>'form-control selectpicker', 'data-rule'=>'required','data-live-search' => true,'id'=>'choose_category_id'])}
-        </div>
-        <label class="control-label col-xs-12 col-sm-2">{:__('Name')}:</label>
-        <div class="col-xs-12 col-sm-3">
-            <input id="c-name" data-rule="required" class="form-control" name="row[name]" type="text" value="">
-        </div>
-    </div>
-    <div class="form-group" id="item-stock">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Stock')}:</label>
-        <div class="col-xs-12 col-sm-3">
-            <input id="c-stock" data-rule="required" class="form-control" name="row[stock]" type="number" value="0">
         </div>
         <label class="control-label col-xs-12 col-sm-2">{:__('Weight')}:</label>
         <div class="col-xs-12 col-sm-3">
@@ -28,3 +72,13 @@
         </div>
     </div>
 </form>
+<div id="table-content" style="display: none;">
+    <table>
+        <tr>
+            <td><input id="c-name" data-rule="required"  class="form-control" name="row[name][]" type="text"></td>
+            <td><input id="c-color" data-rule="required" class="form-control" name="row[color][]" type="text"></td>
+            <td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>
+                删除</a></td>
+        </tr>
+    </table>
+</div>
