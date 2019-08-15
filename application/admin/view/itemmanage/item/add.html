@@ -53,21 +53,22 @@
     }
 </style>
 <form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
-
     <div class="form-group" id="item-stock">
         <label class="control-label col-xs-12 col-sm-2">{:__('Category_id')}:</label>
         <div class="col-xs-12 col-sm-3">
             {:Form::select('row[category_id]', $categoryList, null, ['class'=>'form-control selectpicker', 'data-rule'=>'required','data-live-search' => true,'id'=>'choose_category_id'])}
         </div>
-        <label class="control-label col-xs-12 col-sm-2">{:__('Weight')}:</label>
+        <label class="control-label col-xs-12 col-sm-2">{:__('ID')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <input id="c-weight" data-rule="required" class="form-control" step="0.01" name="row[weight]" type="number" value="0.00">
+            <input id="c-weight" data-rule="required" class="form-control"  name="row[origin_sku]" type="text" value="{$IdStr}" readonly>
         </div>
     </div>
+    <input type='hidden' name="row[item_status]" id="status" value="1">
     <div class="form-group layer-footer">
         <label class="control-label col-xs-12 col-sm-2"></label>
         <div class="col-xs-12 col-sm-8">
             <button type="submit" class="btn btn-success btn-embossed disabled">{:__('OK')}</button>
+            <button type="submit" class="btn btn-success btn-status btn-embossed disabled">{:__('Submit_audit')}</button>
             <button type="reset" class="btn btn-default btn-embossed">{:__('Reset')}</button>
         </div>
     </div>
@@ -76,9 +77,17 @@
     <table>
         <tr>
             <td><input id="c-name" data-rule="required"  class="form-control" name="row[name][]" type="text"></td>
-            <td><input id="c-color" data-rule="required" class="form-control" name="row[color][]" type="text"></td>
+            <td><div class="col-xs-12 col-sm-12">
+                    <select  id="c-color" data-rule="required" class="form-control " name="row[color][]">
+                        {foreach name="AllFrameColor" item="vo"}
+                        <option value="{$key}">{$vo}</option>
+                        {/foreach}
+                    </select>
+            </div>
+            </td>
             <td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>
                 删除</a></td>
         </tr>
     </table>
 </div>
+

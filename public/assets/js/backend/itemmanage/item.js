@@ -29,10 +29,29 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {field: 'category_id', title: __('Category_id')},
                         {field: 'attribute_id', title: __('Attribute_id')},
                         {field: 'stock', title: __('Stock')},
-                        {field: 'weight', title: __('Weight'), operate:'BETWEEN'},
                         {field: 'create_person', title: __('Create_person')},
                         {field: 'create_time', title: __('Create_time'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime},
-                        {field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate}
+                        {field: 'operate', width: "120px", title: __('操作'), table: table,formatter: Table.api.formatter.operate,
+                            buttons: [
+                                {
+                                    name: 'detail',
+                                    text: '详情',
+                                    title: __('查看详情'),
+                                    extend: 'data-area = \'["100%","100%"]\'',
+                                    classname: 'btn btn-xs btn-primary btn-dialog',
+                                    icon: 'fa fa-list',
+                                    url: 'saleaftermanage/sale_after_task/detail',
+                                    callback: function (data) {
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), {title: "回传数据"});
+                                    },
+                                    visible: function (row) {
+                                        //返回true时按钮显示,返回false隐藏
+                                        return true;
+                                    }
+                                },
+                            ]
+                        },
+                        //{field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate}
                     ]
                 ]
             });
@@ -42,6 +61,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
         },
         add: function () {
             Controller.api.bindevent();
+            $(document).on('click', '.btn-status', function () {
+                $('#status').val(2);
+            });
         },
         edit: function () {
             Controller.api.bindevent();
@@ -50,82 +72,96 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             bindevent: function () {
                 Form.api.bindevent($("form[role=form]"));
                 $(document).on('click', '.btn-add', function () {
+                    $(".selectpicker").selectpicker('refresh');
                     var content = $('#table-content table tbody').html();
+                    console.log(content);
                     $('.caigou table tbody').append(content);
+
+
+                    // Form.api.bindevent($("form[role=form]"));
+
+
                 });
                 $(document).on('click', '.btn-del', function () {
                     $(this).parent().parent().remove();
                 });
+                //根据分类请求不同属性页面
                 $(document).on('change','#choose_category_id',function(){
                     var categoryId = $('#choose_category_id').val();
                     Backend.api.ajax({
                         url:'itemmanage/item/ajaxCategoryInfo',
                         data:{categoryId:categoryId}
                     }, function(data, ret){
+
                         var resultData = ret.data;
-                        $('.ajax-add').empty();
+                        $('.ajax-add').remove();
                         //console.log(resultData);
                         $('#item-stock').after(resultData);
+                        Form.api.bindevent($("form[role=form]"));
                         $(".selectpicker").selectpicker('refresh');
-                        //$('#item_stock').after(resultData);
-                        // $('#item-stock').after(function () {
-                        //     return resultData;
-                        // });
-                        // $('#item-stock').after(function(){
-                        //     var resultData = ret.data;
-                        //     var Str = '';
-                        //     for(var j = 0,len = resultData.length; j < len; j++){
-                        //         Str+='<div class="form-group">';
-                        //         Str+='<label class="control-label col-xs-12 col-sm-2">'+resultData[j].name_cn+'</label>';
-                        //         Str+='<div class="col-xs-12 col-sm-3">';
-                        //         if(resultData[j].input_mode == 1){ //单选
-                        //             if(resultData[j].is_required ==1){ //是否必须
-                        //                 Str+='{:Form::select("row[dept_id][]",'+resultData[j].propertyValues+', null, ["class"=>"form-control selectpicker", "data-rule"=>"required","data-live-search" => true])}';
-                        //             }else{
-                        //                 Str+='{:Form::select("row[dept_id][]", '+resultData[j].propertyValues+', null, ["class"=>"form-control selectpicker","data-live-search" => true])}';
-                        //             }
-                        //         }else if(resultData[j].input_mode == 2){ //多选
-                        //             if(resultData[j].is_required == 1){
-                        //                 Str+='{:Form::selects("row[dept_id][]",'+resultData[j].propertyValues+', null,["class"=>"form-control selectpicker", "data-rule"=>"required","data-live-search" => true])}';
-                        //             }else{
-                        //                 Str+='{:Form::selects("row[dept_id][]",'+resultData[j].propertyValues+', null, ["class"=>"form-control selectpicker","data-live-search" => true])}';
-                        //             }
-                        //
-                        //         }else if(resultData[j].input_mode == 3){ //输入
-                        //             if(resultData[j].is_required ==1){ //必须
-                        //                 Str+='<input id="c-'+resultData[j].name_en+'" data-rule="required" class="form-control" name="row['+resultData[j].name_en+']" type="text" value="">';
-                        //             }else{ //不是必须
-                        //                 Str+='<input id="c-'+resultData[j].name_en+'"  class="form-control" name="row['+resultData[j].name_en+']" type="text" value="">';
-                        //             }
-                        //         }
-                        //         Str+='</div>';
-                        //
-                        //         // if()
-                        //         // console.log(resultData[j]);
-                        //         // console.log(resultData[j].id);
-                        //         // console.log(resultData[j].is_required);
-                        //         // console.log(resultData[j].name_cn);
-                        //         // console.log(resultData[j].name_en);
-                        //         // console.log(resultData[j].input_mode);
-                        //         // console.log(resultData[j].propertyValue);
-                        //         // var propertyValue = resultData[j].propertyValue;
-                        //         // for(var i = 0, lens = propertyValue.length; i<lens;i++){
-                        //         //     console.log(propertyValue[i].id);
-                        //         //     console.log(propertyValue[i].name_value_cn);
-                        //         //     console.log(propertyValue[i].name_value_en);
-                        //         //     console.log(propertyValue[i].code_rule);
-                        //         // }
-                        //     }
-                        //     Str+='</div>';
-                        //     return Str;
-                        //     //console.log(resultData);
-                        // });
+
                         return false;
                     }, function(data, ret){
                         //失败的回调
                         alert(ret.msg);
                         return false;
                     });
+                });
+                $(document).on('change','#c-procurement_type',function(){
+                    var arrIds = $(this).val();
+                    console.log(arrIds);
+                    if(arrIds == 0){
+                        Layer.alert('请选择采购类型');
+                        return false;
+                    }
+                    //线上采购
+                    if(arrIds == 1){
+                        $('#c-procurement_origin').html('');
+                        var str = '<option value="O">线上采购</option>';
+                        $('#c-procurement_origin').append(str);
+                        $("#c-procurement_origin").selectpicker('refresh');
+                    }else{
+                        Backend.api.ajax({
+                            url:'itemmanage/item/ajaxGetProOrigin',
+                        },function(data,ret){
+                            var rs = ret.data;
+                            var r;
+                            $('#c-procurement_origin').html('');
+                            var str = '';
+                            for(r in rs){
+                                str +='<option value="'+r+'">' + rs[r]+'</option>';
+                            }
+                            $('#c-procurement_origin').append(str);
+                            $("#c-procurement_origin").selectpicker('refresh');
+                        },function(data,ret){
+
+                        });
+                    }
+
+
+                    // var arrStr = arrIds.join("&");
+                    // //根据承接部门查找出承接人
+                    // Backend.api.ajax({
+                    //     url:'infosynergytaskmanage/info_synergy_task/ajaxFindRecipient',
+                    //     data:{arrIds:arrStr}
+                    // }, function(data, ret){
+                    //     // console.log(ret.data);
+                    //     var rs = ret.data;
+                    //     var x;
+                    //     $("#choose_rep_id").html('');
+                    //     var str = '';
+                    //     for( x in rs ){
+                    //         str +='<option value="'+x+'">' + rs[x]+'</option>';
+                    //     }
+                    //     $("#choose_rep_id").append(str);
+                    //     $("#choose_rep_id").selectpicker('refresh');
+                    //     return false;
+                    // }, function(data, ret){
+                    //     //失败的回调
+                    //     alert(ret.msg);
+                    //     console.log(ret);
+                    //     return false;
+                    // });
                 });
             }
         },

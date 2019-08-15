@@ -3,8 +3,7 @@
 namespace app\admin\model\itemmanage;
 
 use think\Model;
-
-
+use app\admin\model\itemmanage\attribute\ItemAttribute;
 class Item extends Model
 {
 
@@ -28,7 +27,10 @@ class Item extends Model
         'create_time_text'
     ];
     
-
+    public function itemAttribute()
+    {
+        return $this->hasOne('app\admin\model\itemmanage\attribute\ItemAttribute','item_id','id');
+    }
     
 
 
@@ -44,5 +46,11 @@ class Item extends Model
         return $value === '' ? null : ($value && !is_numeric($value) ? strtotime($value) : $value);
     }
 
-
+    /***
+     * 获取最后一条记录的ID
+     */
+    public function getLastID()
+    {
+        return  rand(0,99).rand(0,99).rand(0,99);
+    }
 }
