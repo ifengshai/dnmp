@@ -5,7 +5,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             // 初始化表格参数配置
             Table.api.init({
                 searchFormVisible: true,
-
+                pageList: [10, 25, 50, 100],
                 extend: {
                     index_url: 'order/index/index' + location.search + '&label=' + Config.label,
                     table: 'sales_flat_order',
@@ -41,7 +41,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     title: __('Detail'),
                                     classname: 'btn btn-xs  btn-primary  btn-dialog',
                                     icon: 'fa fa-list',
-                                    url: 'purchase/contract/detail',
+                                    url: 'order/index/detail?label=' + Config.label,
                                     extend: 'data-area = \'["100%","100%"]\'',
                                     callback: function (data) {
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
@@ -61,87 +61,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             // 为表格绑定事件
             Table.api.bindevent(table);
 
-            //批量打印标签    
-            $('.btn-batch-printed').click(function () {
-                console.log('id_params');
-                var ids = Table.api.selectedids(table);
-                // console.log(ids);
-                var id_params = '';
-                $.each(table.bootstrapTable('getSelections'), function (index, row) {
-                    // console.log(row); 
-                    id_params += row['entity_id'] + ',';
-                });
-                console.log(id_params);
-
-                // var ids = Table.api.selectedids(table);
-
-                window.open('/admin/order/printlabel/nihao/batch_print_label/id_params/' + id_params, '_blank');
-            });
-
-            //批量导出xls 
-            $('.btn-batch-export-xls').click(function () {
-                console.log('id_params');
-                var ids = Table.api.selectedids(table);
-                // console.log(ids);
-                var id_params = '';
-                $.each(table.bootstrapTable('getSelections'), function (index, row) {
-                    // console.log(row); 
-                    id_params += row['entity_id'] + ',';
-                });
-                console.log(id_params);
-
-                // var ids = Table.api.selectedids(table);
-
-                window.open('/admin/order/printlabel/nihao/batch_export_xls/id_params/' + id_params, '_blank');
-            });
-
-            //批量标记已打印    
-            $('.btn-tag-printed').click(function () {
-                var ids = Table.api.selectedids(table);
-                // console.log(ids);
-                var id_params = '';
-                $.each(table.bootstrapTable('getSelections'), function (index, row) {
-                    // console.log(row); 
-                    id_params += row['entity_id'] + ',';
-                });
-                console.log(id_params);
-
-                var ids = Table.api.selectedids(table);
-                Layer.confirm(
-                    __('确定要这%s条记录 标记为 【已打印标签】么?', ids.length),
-                    { icon: 3, title: __('Warning'), offset: 0, shadeClose: true },
-                    function (index) {
-                        // Table.api.multi("del", ids, table, that);
-                        console.log('开始执行');
-                        Layer.close(index);
-
-                        Backend.api.ajax({
-                            url: '/admin/order/printlabel/nihao/tag_printed',
-                            // url:"{:url('tag_printed')}",
-                            data: { id_params: id_params },
-                            type: 'get'
-                        }, function (data, ret) {
-
-                            console.log(data);
-                            console.log(ret);
-                            if (data == 'success') {
-                                console.log('成功的回调');
-                                table.bootstrapTable('refresh');
-                            }
-                        }, function (data, ret) {
-
-                            console.log('失败的回调');
-                        });
-
-                    }
-                );
-
-            })
         },
         add: function () {
             Controller.api.bindevent();
         },
         edit: function () {
+            Controller.api.bindevent();
+        },
+        detail: function () {
             Controller.api.bindevent();
         },
         api: {

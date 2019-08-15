@@ -1,67 +1,54 @@
 <style>
-    .website_linked {
-        color: #555555;
-        font-weight: bold;
-    }
+    
+    .nav-tabs>li {
+       float: left;
+       margin-bottom: -1px;
+   }
 
-    .website_linked:hover {
-        color: #18bc9c;
-    }
+   .nav>li {
+       position: relative;
+       display: block;
+   }
 
-    .website_selected {
-        color: #fff;
-        background-color: #18bc9c;
-        padding: 5px 8px;
-        font-weight: bold;
-        border-radius: 3px;
-    }
+   .nav-tabs>li>a {
+       margin-right: 4px;
+       color: #95a5a6;
+       background-color: #d8e0e6;
+       border: 1px solid #e8edf0;
+       border-bottom-color: transparent;
+   }
 
-    .website_selected:hover {
-        color: #fff;
-        background-color: #18bc9c;
-        padding: 5px 8px;
-        font-weight: bold;
-        border-radius: 3px;
-    }
+   .panel-heading {
+       padding: 15px;
+       padding-bottom: 0;
+       background: #e8edf0;
+       border-color: #e8edf0;
+       position: relative;
+   }
+
+   .panel-heading .nav-tabs>li>a {
+       margin-right: 4px;
+       color: #95a5a6;
+       border: 1px solid #e8edf0;
+       border-bottom-color: transparent;
+   }
 </style>
+
 <div class="panel panel-default panel-intro">
-    {:build_heading()}
+    <div class="panel-heading">
+        {:build_heading()}
+        <ul class="nav nav-tabs">
+            <li><a href="javascript:;">选择站点</a></li>
+            <li class="{:$label == 1 ? 'active' : ''}"><a href="{:url('/admin/order/index/index')}?label=1">Zeelool</a></li>
+            <li class="{:$label == 2 ? 'active' : ''}"><a href="{:url('/admin/order/index/index')}?label=2">Voogueme</a></li>
+            <li class="{:$label == 3 ? 'active' : ''}"><a href="{:url('/admin/order/index/index')}?label=3">Nihao</a></li>
+        </ul>
+    </div>
 
     <div class="panel-body">
         <div id="myTabContent" class="tab-content">
             <div class="tab-pane fade active in" id="one">
 
-                <div class="row" style="margin-bottom:20px;">
-                    <div class="col-xs-12 col-sm-6 col-md-3">
-                        <div class="form-group">
-                            <label class="control-label col-xs-4">站点</label>
-                        </div>
-                    </div>
-                    <div class="col-xs-12 col-sm-6 col-md-3">
-                        <div class="form-group">
-                            <label class="control-label col-xs-4">
-                                <a href="{:url('/admin/order/index/index')}?label=1"
-                                    class="{:$label == 1 ? 'website_selected' : 'website_linked'}">ZEELOOL</a>
-                            </label>
-                        </div>
-                    </div>
-                    <div class="col-xs-12 col-sm-6 col-md-3">
-                        <div class="form-group">
-                            <label class="control-label col-xs-4">
-                                <a href="{:url('/admin/order/index/index')}?label=2"
-                                    class="{:$label == 2 ? 'website_selected' : 'website_linked'}">VOOGUEME</a>
-                            </label>
-                        </div>
-                    </div>
-                    <div class="col-xs-12 col-sm-6 col-md-3">
-                        <div class="form-group">
-                            <label class="control-label col-xs-4">
-                                <a href="{:url('/admin/order/index/index')}?label=3"
-                                    class="{:$label == 3 ? 'website_selected' : 'website_linked'}">NIHAO</a>
-                            </label>
-                        </div>
-                    </div>
-                </div>
                 <div class="widget-body no-padding">
                     <div id="toolbar" class="toolbar">
                         <a href="javascript:;" class="btn btn-primary btn-refresh" title="{:__('Refresh')}"><i

@@ -52,7 +52,6 @@ class Voogueme extends Backend
 
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
-                ->where('custom_print_label', '0')
                 ->where('status', 'in' ,array('free_processing','processing'))               
                 ->where($where)
                 ->order($sort, $order)
@@ -63,7 +62,6 @@ class Voogueme extends Backend
                      custom_is_send_factory,custom_is_delivery,custom_match_frame_created_at,custom_match_lens_created_at,custom_match_factory_created_at,
                      custom_match_delivery_created_at,custom_print_label,custom_order_prescription,custom_print_label_created_at,custom_service_name';
             $list = $this->model
-                ->where('custom_print_label', '0')
                 ->where('status', 'in' ,array('free_processing','processing'))               
                 // ->field($field)
                 ->where($where)
@@ -79,18 +77,19 @@ class Voogueme extends Backend
     }
 
     //标记为已打印标签
-    public function tag_printed(){
+    public function tag_printed()
+    {
         // echo 'tag_printed';
-        $entity_ids = rtrim(input('id_params'),',');
-        if($entity_ids){
-
+        $entity_ids = input('id_params/a');
+        if ($entity_ids) {
             //多数据库
-            // Db::connect('db_config1')->table('user')->find();
-            $executeSql = "update sales_flat_order set custom_print_label=1,custom_print_label_created_at=now() where entity_id in($entity_ids)";
-            $connect = Db::connect('database.db_voogueme_online');
+            $map['entity_id'] = ['in', $entity_ids];
+            $data['custom_print_label'] = 1;
+            $data['custom_print_label_created_at'] = date('Y-m-d H:i:s', time());
+            $connect = Db::connect('database.db_voogueme_online')->table('sales_flat_order');
             $connect->startTrans();
             try {
-                $result = $connect->execute($executeSql);
+                $result = $connect->where($map)->update($data);
                 $connect->commit();
             } catch (PDOException $e) {
                 $connect->rollback();
@@ -99,14 +98,66 @@ class Voogueme extends Backend
                 $connect->rollback();
                 $this->error($e->getMessage());
             }
-
-            if($result){
-                return $this->success('标记成功!','','success',200);
-            }else{
-                return $this->error('失败','','error',0);
+            if ($result) {
+                return $this->success('标记成功!', '', 'success', 200);
+            } else {
+                return $this->error('失败', '', 'error', 0);
             }
         }
     }
+
+    //配镜架 配镜片 加工 质检通过
+    public function setOrderStatus()
+    {
+        $entity_ids = input('id_params/a');
+        $status = input('status');
+        if ($entity_ids) {
+            //多数据库
+            $map['entity_id'] = ['in', $entity_ids];
+
+            switch ($status) {
+                case 1:
+                    //配镜架
+                    $data['custom_is_match_frame'] = 1;
+                    $data['custom_match_frame_created_at'] = date('Y-m-d H:i:s', time());
+                    break;
+                case 2:
+                    //配镜片
+                    $data['custom_is_match_lens'] = 1;
+                    $data['custom_match_lens_created_at'] = date('Y-m-d H:i:s', time());
+                    break;
+                case 3:
+                    //移送加工时间
+                    $data['custom_is_send_factory'] = 1;
+                    $data['custom_match_factory_created_at'] = date('Y-m-d H:i:s', time());
+                    break;
+                case 4:
+                    //提货
+                    $data['custom_is_delivery'] = 1;
+                    $data['custom_match_delivery_created_at'] = date('Y-m-d H:i:s', time());
+                    break;
+                default:
+            }
+            $connect = Db::connect('database.db_voogueme_online')->table('sales_flat_order');
+            $connect->startTrans();
+            try {
+                $result = $connect->where($map)->update($data);
+                $connect->commit();
+            } catch (PDOException $e) {
+                $connect->rollback();
+                $this->error($e->getMessage());
+            } catch (Exception $e) {
+                $connect->rollback();
+                $this->error($e->getMessage());
+            }
+            if ($result) {
+                return $this->success('标记成功!', '', 'success', 200);
+            } else {
+                return $this->error('失败', '', 'error', 0);
+            }
+        }
+    }
+
 
     public function generate_barcode($text, $fileName){
         // 引用barcode文件夹对应的类
