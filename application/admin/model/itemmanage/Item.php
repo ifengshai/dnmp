@@ -47,10 +47,41 @@ class Item extends Model
     }
 
     /***
-     * 获取最后一条记录的ID
+     * 获取随机的SKU编码
      */
-    public function getLastID()
+    public function getOriginSku()
     {
         return  rand(0,99).rand(0,99).rand(0,99);
+    }
+
+    /***
+     * 模糊查询已经存在的源sku
+     */
+    public function likeOriginSku($value)
+    {
+        $result = $this->where('sku','like',"%{$value}%")->field('sku')->distinct(true)->limit(10)->select();
+        if(!$result){
+            return false;
+        }
+        $arr = [];
+        foreach ($result as $k=>$v){
+            $arr[] = $v['sku'];
+        }
+        return $arr;
+    }
+
+    /***
+     * 查询sku信息
+     * @param $sku
+     * @return bool
+     */
+    public function getItemInfo($sku){
+        $result = $this->alias('m')->where('sku','=',$sku)->join('item_attribute a','m.id=a.item_id')->find();
+        if(!$result){
+            return false;
+        }
+        $arr = $this->alias('m')->where('origin_sku','=',$result['origin_sku'])->join('item_attribute a','m.id=a.item_id')->field('m.name,a.frame_color')->select();
+        $result['itemArr'] = $arr;
+        return $result;
     }
 }

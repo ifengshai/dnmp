@@ -55,12 +55,16 @@
 <form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
     <div class="form-group" id="item-stock">
         <label class="control-label col-xs-12 col-sm-2">{:__('Category_id')}:</label>
-        <div class="col-xs-12 col-sm-3">
+        <div class="col-xs-12 col-sm-2">
             {:Form::select('row[category_id]', $categoryList, null, ['class'=>'form-control selectpicker', 'data-rule'=>'required','data-live-search' => true,'id'=>'choose_category_id'])}
         </div>
         <label class="control-label col-xs-12 col-sm-2">{:__('ID')}:</label>
-        <div class="col-xs-12 col-sm-3">
-            <input id="c-weight" data-rule="required" class="form-control"  name="row[origin_sku]" type="text" value="{$IdStr}" readonly>
+        <div class="col-xs-12 col-sm-2">
+            <input id="c-origin_sku" data-rule="required" class="form-control"  name="row[origin_sku]" type="text" value="{$IdStr}" readonly>
+        </div>
+        <label class="control-label col-xs-12 col-sm-2">{:__('Origin_sku')}:</label>
+        <div class="col-xs-12 col-sm-2">
+            <input id="c-origin_skus" data-rule="required" class="form-control"  name="row[origin_sku]" type="text" value="">
         </div>
     </div>
     <input type='hidden' name="row[item_status]" id="status" value="1">

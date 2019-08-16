@@ -17,13 +17,17 @@
     </div>
 </div>
 <div class="form-group ajax-add">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Frame_texture')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <select  id="c-frame_texture" data-rule="required" class="form-control selectpicker" name="row[frame_texture]">
+                {foreach name="AllTexture" item="vo"}
+                <option value="{$key}">{$vo}</option>
+                {/foreach}
+            </select>
+        </div>
     <label class="control-label col-xs-12 col-sm-2">{:__('Frame_bridge')}:</label>
     <div class="col-xs-12 col-sm-3">
         <input id="c-frame_bridge" data-rule="required" class="form-control" name="row[frame_bridge]" type="number" value="0.00">
-    </div>
-    <label class="control-label col-xs-12 col-sm-2">{:__('Mirror_width')}:</label>
-    <div class="col-xs-12 col-sm-3">
-        <input id="c-mirror_width" data-rule="required" class="form-control" name="row[mirror_width]" type="number" value="0.00">
     </div>
 </div>
 <div class="form-group ajax-add">
@@ -52,13 +56,9 @@
     <div class="col-xs-12 col-sm-3">
         <input id="c-weight" data-rule="required" class="form-control" name="row[weight]" type="number" value="0">
     </div>
-    <label class="control-label col-xs-12 col-sm-2">{:__('Glasses_type')}:</label>
+    <label class="control-label col-xs-12 col-sm-2">{:__('Mirror_width')}:</label>
     <div class="col-xs-12 col-sm-3">
-        <select  id="c-glasses_type" data-rule="required" class="form-control selectpicker" name="row[glasses_type]">
-            {foreach name="AllGlassesType" item="vo"}
-            <option value="{$key}">{$vo}</option>
-            {/foreach}
-        </select>
+        <input id="c-mirror_width" data-rule="required" class="form-control" name="row[mirror_width]" type="number" value="0.00">
     </div>
 </div>
 <div class="form-group ajax-add">
@@ -70,10 +70,10 @@
             {/foreach}
         </select>
     </div>
-    <label class="control-label col-xs-12 col-sm-2">{:__('Frame_texture')}:</label>
+    <label class="control-label col-xs-12 col-sm-2">{:__('Frame_type')}:</label>
     <div class="col-xs-12 col-sm-3">
-        <select  id="c-frame_texture" data-rule="required" class="form-control selectpicker" name="row[frame_texture]">
-            {foreach name="AllTexture" item="vo"}
+        <select  id="c-Frame_type" data-rule="required" class="form-control selectpicker" name="row[frame_type]">
+            {foreach name="AllFrameType" item="vo"}
             <option value="{$key}">{$vo}</option>
             {/foreach}
         </select>
@@ -106,26 +106,26 @@
             {/foreach}
         </select>
     </div>
-    <label class="control-label col-xs-12 col-sm-2">{:__('Frame_type')}:</label>
+    <label class="control-label col-xs-12 col-sm-2">{:__('Glasses_type')}:</label>
     <div class="col-xs-12 col-sm-3">
-        <select  id="c-Frame_type" data-rule="required" class="form-control selectpicker" name="row[frame_type]">
-            {foreach name="AllFrameType" item="vo"}
+        <select  id="c-glasses_type" data-rule="required" class="form-control selectpicker" name="row[glasses_type]">
+            {foreach name="AllGlassesType" item="vo"}
             <option value="{$key}">{$vo}</option>
             {/foreach}
         </select>
     </div>
 </div>
 <div class="form-group ajax-add">
-    <label class="control-label col-xs-12 col-sm-2">{:__('Frame_piece')}:</label>
+    <label class="control-label col-xs-12 col-sm-2">{:__('Frame_is_recipe')}:</label>
     <div class="col-xs-12 col-sm-3">
-        <select  id="c-frame_piece" data-rule="required" class="form-control selectpicker" name="row[frame_piece]">
+        <select  id="c-frame_is_recipe" data-rule="required" class="form-control selectpicker" name="row[frame_is_recipe]">
             <option value="1">是</option>
             <option value="2">否</option>
         </select>
     </div>
-    <label class="control-label col-xs-12 col-sm-2">{:__('Frame_is_advance')}:</label>
+    <label class="control-label col-xs-12 col-sm-2">{:__('Frame_piece')}:</label>
     <div class="col-xs-12 col-sm-3">
-        <select  id="c-frame_is_advance" data-rule="required" class="form-control selectpicker" name="row[frame_is_advance]">
+        <select  id="c-frame_piece" data-rule="required" class="form-control selectpicker" name="row[frame_piece]">
             <option value="1">是</option>
             <option value="2">否</option>
         </select>
@@ -148,9 +148,9 @@
     </div>
 </div>
 <div class="form-group ajax-add">
-    <label class="control-label col-xs-12 col-sm-2">{:__('Frame_is_recipe')}:</label>
+    <label class="control-label col-xs-12 col-sm-2">{:__('Frame_is_advance')}:</label>
     <div class="col-xs-12 col-sm-3">
-        <select  id="c-frame_is_recipe" data-rule="required" class="form-control selectpicker" name="row[frame_is_recipe]">
+        <select  id="c-frame_is_advance" data-rule="required" class="form-control selectpicker" name="row[frame_is_advance]">
             <option value="1">是</option>
             <option value="2">否</option>
         </select>

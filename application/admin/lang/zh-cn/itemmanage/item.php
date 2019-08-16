@@ -29,6 +29,7 @@ return [
     'Frame_is_adjust_nose_pad' => '是否可调节鼻托',
     'Frame_remark'=>'备注',
     'Submit_audit'=>'提交审核',
+    'Origin_sku'  =>'原始SKU编码',
     'Create_person' => '创建人',
     'Create_time'   => '创建时间'
 ];

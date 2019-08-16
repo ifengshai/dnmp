@@ -1,4 +1,4 @@
-define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefined, Backend, Table, Form) {
+define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui'], function ($, undefined, Backend, Table, Form) {
 
     var Controller = {
         index: function () {
@@ -71,21 +71,18 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
         api: {
             bindevent: function () {
                 Form.api.bindevent($("form[role=form]"));
+                //多项添加商品名称和颜色
                 $(document).on('click', '.btn-add', function () {
                     $(".selectpicker").selectpicker('refresh');
                     var content = $('#table-content table tbody').html();
                     console.log(content);
                     $('.caigou table tbody').append(content);
-
-
                     // Form.api.bindevent($("form[role=form]"));
-
-
                 });
                 $(document).on('click', '.btn-del', function () {
                     $(this).parent().parent().remove();
                 });
-                //根据分类请求不同属性页面
+                //根据商品分类的不同请求不同属性页面
                 $(document).on('change','#choose_category_id',function(){
                     var categoryId = $('#choose_category_id').val();
                     Backend.api.ajax({
@@ -107,6 +104,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         return false;
                     });
                 });
+                //采购类型和采购产地二级联动
                 $(document).on('change','#c-procurement_type',function(){
                     var arrIds = $(this).val();
                     console.log(arrIds);
@@ -137,33 +135,77 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
 
                         });
                     }
+                });
+                //模糊匹配原始sku
+                $('#c-origin_skus').autocomplete({
+                    source:function(request,response){
+                        var origin_sku = $('#origin_sku').val();
+                        $.ajax({
+                            type:"POST",
+                            url:"itemmanage/item/ajaxGetLikeOriginSku",
+                            dataType : "json",
+                            cache : false,
+                            async : false,
+                            data : {
+                                origin_sku:origin_sku
+                            },
+                            success : function(json) {
+                                var data = json.data;
+                                response($.map(data,function(item){
+                                    return {
+                                        label:item,//下拉框显示值
+                                        value:item,//选中后，填充到input框的值
+                                        //id:item.bankCodeInfo//选中后，填充到id里面的值
+                                    };
+                                }));
+                            }
+                        });
+                    },
+                    delay: 10,//延迟100ms便于输入
+                    select : function(event, ui) {
+                        $("#bankUnionNo").val(ui.item.id);//取出在return里面放入到item中的属性
+                    },
+                    scroll:true,
+                    pagingMore:true,
+                    max:5000
+                });
+                //根据选择的sku找出关于sku的商品
+                $(document).on('change','#c-origin_skus',function(){
+                    var categoryId = $('#choose_category_id').val();
+                    var sku        = $('#c-origin_skus').val();
+                    if(categoryId == 0){
+                        Layer.alert('请先选择商品分类');
+                        return false;
+                    }
+                    Backend.api.ajax({
+                        url:'itemmanage/item/ajaxItemInfo',
+                        data:{categoryId:categoryId,sku:sku}
+                    }, function(data, ret){
+                        Form.api.bindevent($("form[role=form]"));
+                        var resultData = ret.data;
+                       // console.log(resultData.procurement_type);
+                        // console.log(resultData);
+                        $('#c-procurement_type  option[value="线上采购"]').attr("selected",true);
+                        console.log($('#c-procurement_type').val());
+                        //$("#c-procurement_origin  option[value="+resultData.procurement_origin+"] ").attr("selected",true);
+                        // $('.ajax-add').remove();
+                        // //console.log(resultData);
+                        // $('#item-stock').after(resultData);
+                        // Form.api.bindevent($("form[role=form]"));
+                        // $(".selectpicker").selectpicker('refresh');
 
-
-                    // var arrStr = arrIds.join("&");
-                    // //根据承接部门查找出承接人
-                    // Backend.api.ajax({
-                    //     url:'infosynergytaskmanage/info_synergy_task/ajaxFindRecipient',
-                    //     data:{arrIds:arrStr}
-                    // }, function(data, ret){
-                    //     // console.log(ret.data);
-                    //     var rs = ret.data;
-                    //     var x;
-                    //     $("#choose_rep_id").html('');
-                    //     var str = '';
-                    //     for( x in rs ){
-                    //         str +='<option value="'+x+'">' + rs[x]+'</option>';
-                    //     }
-                    //     $("#choose_rep_id").append(str);
-                    //     $("#choose_rep_id").selectpicker('refresh');
-                    //     return false;
-                    // }, function(data, ret){
-                    //     //失败的回调
-                    //     alert(ret.msg);
-                    //     console.log(ret);
-                    //     return false;
-                    // });
+                        return false;
+                    }, function(data, ret){
+                        //失败的回调
+                        alert(ret.msg);
+                        return false;
+                    });
                 });
             }
+        },
+        frame:function () {
+            Controller.api.bindevent();
+            Form.api.bindevent($("form[role=form]"));
         },
         ajaxCategoryInfo:function () {
             Controller.api.bindevent();

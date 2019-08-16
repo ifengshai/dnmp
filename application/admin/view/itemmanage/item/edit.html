@@ -54,7 +54,7 @@
         width: 250px;
     }
 </style>
-<form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
+<form id="edit-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
     <div class="form-group" id="item-stock">
         <label class="control-label col-xs-12 col-sm-2">{:__('Category_id')}:</label>
         <div class="col-xs-12 col-sm-3">
@@ -62,7 +62,7 @@
         </div>
         <label class="control-label col-xs-12 col-sm-2">{:__('ID')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <input id="c-id" data-rule="required" class="form-control"  name="row[origin_sku]" type="text" value="{$row.origin_sku}" disabled='disabled'>
+            <input id="c-id" data-rule="required" class="form-control"  name="row[origin_sku]" type="text" value="{$row.sku}" disabled='disabled'>
         </div>
     </div>
     <div class="form-group ajax-add">
@@ -242,12 +242,12 @@
                     <th>操作</th>
                 </tr>
                 <tr>
-                    <td><input id="c-name" data-rule="required"  class="form-control" name="row[name][]" type="text"></td>
+                    <td><input id="c-name" data-rule="required"  class="form-control" name="row[name][]" type="text" value="{$row.name}"></td>
                     <td>
                         <div class="col-xs-12 col-sm-12">
                             <select  id="c-color" data-rule="required" class="form-control " name="row[color][]">
                                 {foreach name="AllFrameColor" item="vo"}
-                                <option value="{$key}">{$vo}</option>
+                                <option value="{$key}"{eq name="$row['itemAttribute']['frame_color']" value="$key"}selected{/eq}>{$vo}</option>
                                 {/foreach}
                             </select>
                         </div>

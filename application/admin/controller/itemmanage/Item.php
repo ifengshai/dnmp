@@ -28,7 +28,7 @@ class Item extends Backend
         $this->category = new \app\admin\model\itemmanage\ItemCategory;
         $this->view->assign('categoryList',$this->category->categoryList());
         $this->view->assign('AllFrameColor',$this->itemAttribute->getFrameColor());
-        $num = $this->model->getLastID();
+        $num = $this->model->getOriginSku();
         $idStr = sprintf("%06d", $num);
         $this->assign('IdStr',$idStr);
     }
@@ -281,6 +281,8 @@ class Item extends Backend
                 $this->assign('AllFrameShape',$allFrameShape);
                 $this->assign('AllShape',$allShape);
                 $this->assign('AllTexture',$allTexture);
+                //把选择的模板值传递给模板
+                $this->assign('Result',$result);
                 $data = $this->fetch('frame');
             }elseif($result ==2){ //商品是镜片类型
                 $data = $this->fetch('eyeglass');
@@ -306,6 +308,59 @@ class Item extends Backend
                 return $this->error('现在没有采购城市,请去添加','','error',0);
             }
                 return $this->success('','',$data,0);
+        }else{
+            return $this->error(__('404 Not Found'));
+        }
+    }
+    /***
+     * 异步获取原始的sku(origin_sku)
+     */
+    public function ajaxGetLikeOriginSku(Request $request)
+    {
+        if($this->request->isAjax()){
+            $origin_sku = $request->post('origin_sku');
+            $result = $this->model->likeOriginSku($origin_sku);
+            if(!$result){
+                return $this->error('订单不存在，请重新尝试');
+            }
+            return $this->success('','',$result,0);
+        }else{
+            $this->error('404 not found');
+        }
+    }
+    /***
+     * 根据商品分类和sku求出所有的商品
+     */
+    public function ajaxItemInfo()
+    {
+        if($this->request->isAjax()){
+            $categoryId = $this->request->post('categoryId');
+            $sku        = $this->request->post('sku');
+            if(!$categoryId ||!$sku){
+                $this->error('参数错误，请重新尝试');
+            }
+            $result = $this->category->getAttrCategoryById($categoryId);
+            if(!$result){
+                return  $this->error('对应分类不存在,请从新尝试');
+            }elseif ($result == -1){
+                return $this->error('对应分类存在下级分类,请从新选择');
+            }
+            if($result == 1){
+                $row = $this->model->getItemInfo($sku);
+                if(!$row){
+                    return false;
+                }
+                return  $this->success('ok','',$row);
+
+            }elseif($result ==2){ //商品是镜片类型
+                $data = $this->fetch('eyeglass');
+            }elseif($result ==3){ //商品是饰品类型
+                $data = $this->fetch('decoration');
+            }else{
+                $data = $this->fetch('attribute');
+            }
+
+
         }else{
             return $this->error(__('404 Not Found'));
         }
