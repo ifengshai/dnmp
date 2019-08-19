@@ -75,7 +75,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui'], function ($, 
                 $(document).on('click', '.btn-add', function () {
                     $(".selectpicker").selectpicker('refresh');
                     var content = $('#table-content table tbody').html();
-                    console.log(content);
+                    //console.log(content);
                     $('.caigou table tbody').append(content);
                     // Form.api.bindevent($("form[role=form]"));
                 });
@@ -89,7 +89,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui'], function ($, 
                         url:'itemmanage/item/ajaxCategoryInfo',
                         data:{categoryId:categoryId}
                     }, function(data, ret){
-
                         var resultData = ret.data;
                         $('.ajax-add').remove();
                         //console.log(resultData);
@@ -181,19 +180,68 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui'], function ($, 
                         url:'itemmanage/item/ajaxItemInfo',
                         data:{categoryId:categoryId,sku:sku}
                     }, function(data, ret){
-                        Form.api.bindevent($("form[role=form]"));
+                        //Form.api.bindevent($("form[role=form]"));
                         var resultData = ret.data;
-                       // console.log(resultData.procurement_type);
-                        // console.log(resultData);
-                        $('#c-procurement_type  option[value="线上采购"]').attr("selected",true);
-                        console.log($('#c-procurement_type').val());
-                        //$("#c-procurement_origin  option[value="+resultData.procurement_origin+"] ").attr("selected",true);
-                        // $('.ajax-add').remove();
-                        // //console.log(resultData);
-                        // $('#item-stock').after(resultData);
-                        // Form.api.bindevent($("form[role=form]"));
-                        // $(".selectpicker").selectpicker('refresh');
-
+                        // console.log(resultData.procurement_type);
+                         //console.log(resultData);
+                         $('.newAddition').empty();
+                        //$('#c-procurement_type').eq(2).attr("selected",true);
+                        $("#c-procurement_type").find("option[value="+resultData.procurement_type+"]").prop("selected",true);
+                        $("#c-procurement_origin").find("option[value="+resultData.procurement_origin+"]").prop("selected",true);
+                        $("#c-frame_texture").find("option[value="+resultData.frame_texture+"]").prop("selected",true);
+                        $("#c-shape").find("option[value="+resultData.shape+"]").prop("selected",true);
+                        $("#c-frame_type").find("option[value="+resultData.frame_type+"]").prop("selected",true);
+                        $("#c-frame_shape").find("option[value="+resultData.frame_shape+"]").prop("selected",true);
+                        $("#c-frame_gender").find("option[value="+resultData.frame_gender+"]").prop("selected",true);
+                        $("#c-frame_size").find("option[value="+resultData.frame_size+"]").prop("selected",true);
+                        $("#c-glasses_type").find("option[value="+resultData.glasses_type+"]").prop("selected",true);
+                        $("#c-frame_is_recipe").find("option[value="+resultData.frame_is_recipe+"]").prop("selected",true);
+                        $("#c-frame_piece").find("option[value="+resultData.frame_piece+"]").prop("selected",true); $("#c-frame_temple_is_spring").find("option[value="+resultData.frame_temple_is_spring+"]").prop("selected",true);
+                        $("#c-frame_is_adjust_nose_pad").find("option[value="+resultData.frame_is_adjust_nose_pad+"]").prop("selected",true);
+                        $("#c-frame_is_advance").find("option[value="+resultData.frame_is_advance+"]").prop("selected",true);
+                        $('#c-frame_bridge').val(resultData.frame_bridge);
+                        $('#c-frame_height').val(resultData.frame_height);
+                        $('#c-frame_width').val(resultData.frame_width);
+                        $('#c-frame_length').val(resultData.frame_length);
+                        $('#c-frame_temple_length').val(resultData.frame_temple_length);
+                        $('#c-weight').val(resultData.frame_weight);
+                        $('#c-mirror_width').val(resultData.mirror_width);
+                        $('#c-problem_desc').html(resultData.frame_remark);
+                        $('.note-editable').html(resultData.frame_remark);
+                        //$(".editor").textarea
+                        $(".addition").remove();
+                        $(".redact").after(function(){
+                            var Str = '';
+                            Str+=  '<div class="caigou ajax-add newAddition">'+
+                                '<p style="font-size: 16px;"><b>产品信息</b></p>'+
+                                '<div>'+
+                                '<div id="toolbar" class="toolbar">'+
+                                '<a href="javascript:;" class="btn btn-success btn-add" title="增加"><i class="fa fa-plus"></i> 增加</a>'+
+                                '</div>'+
+                                '<table id="caigou-table">'+
+                                '<tr>'+
+                                '<th>商品名称</th>'+
+                                '<th>商品颜色</th>'+
+                                '<th>操作</th>'+
+                                '</tr>';
+                            for(var j = 0,len = resultData.itemArr.length; j <len; j++) {
+                                var newItem = resultData.itemArr[j];
+                                Str +='<tr>';
+                                Str +='<td><input id="c-name" class="form-control" name="row[name][]" type="text" value="'+newItem.name+'" disabled="disabled"></td>';
+                                Str +='<td><div class="col-xs-12 col-sm-12">';
+                                Str +='<select  id="c-color" data-rule="required" class="form-control " name="row[color][]" disabled="disabled">';
+                                Str +='<option value="'+newItem.frame_color+'">'+newItem.frame_color_value+'</option>';
+                                Str +='</select></td>';
+                                Str +='<td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>删除</a></td>';
+                                Str += '</tr>';
+                            }
+                            Str+='</table>'+
+                                '</div>'+
+                                '</div>';
+                            return Str;
+                        });
+                        $(".selectpicker").selectpicker('refresh');
+                        //$(".btn-refresh").trigger("click");
                         return false;
                     }, function(data, ret){
                         //失败的回调

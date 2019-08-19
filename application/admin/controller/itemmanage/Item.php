@@ -37,10 +37,13 @@ class Item extends Backend
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
             if ($params) {
+//                echo '<pre>';
+//                var_dump($params);
+//                exit;
                 $params = $this->preExcludeFields($params);
                 $itemName = $params['name'];
                 $itemColor = $params['color'];
-                if(is_array($itemName)){
+                if(is_array($itemName) && !in_array("",$itemName)){
                     $data = $itemAttribute = [];
                     //求出材质对应的编码
                     if($params['frame_texture']){
@@ -84,6 +87,8 @@ class Item extends Backend
                             Db::name('item_attribute')->insert($itemAttribute);
                         }
                     }
+                }else{
+                    $this->error(__('Please add product name and color'));
                 }
                 if ($lastInsertId !== false) {
                     $this->success();
@@ -145,6 +150,9 @@ class Item extends Backend
         }
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
+            echo '<pre>';
+            var_dump($params);
+            exit;
             if ($params) {
                 $params = $this->preExcludeFields($params);
                 $result = false;

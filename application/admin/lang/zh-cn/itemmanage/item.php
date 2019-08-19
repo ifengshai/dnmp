@@ -9,6 +9,7 @@ return [
     'Weight'        => '商品重量',
     'Procurement_type' => '采购类型',
     'Procurement_origin'=> '采购产地',
+    'Please add product name and color'=>'请添加商品名称和颜色',
     'Glasses_type'  => '眼镜类型',
     'Frame_height'  => '框高(mm)',
     'Frame_width'   => '框宽(mm)',

@@ -72,7 +72,7 @@
     </div>
     <label class="control-label col-xs-12 col-sm-2">{:__('Frame_type')}:</label>
     <div class="col-xs-12 col-sm-3">
-        <select  id="c-Frame_type" data-rule="required" class="form-control selectpicker" name="row[frame_type]">
+        <select  id="c-frame_type" data-rule="required" class="form-control selectpicker" name="row[frame_type]">
             {foreach name="AllFrameType" item="vo"}
             <option value="{$key}">{$vo}</option>
             {/foreach}
@@ -156,13 +156,13 @@
         </select>
     </div>
 </div>
-<div class="form-group ajax-add">
+<div class="form-group ajax-add redact">
     <label class="control-label col-xs-12 col-sm-2">{:__('Frame_remark')}:</label>
     <div class="col-xs-12 col-sm-8">
         <textarea id="c-problem_desc" class="form-control editor" rows="5" name="row[frame_remark]" cols="50"></textarea>
     </div>
 </div>
-<div class='caigou ajax-add'>
+<div class='caigou ajax-add addition'>
     <p style="font-size: 16px;text-align: center;"><b>产品信息</b></p>
     <div style="margin-bottom:20px;">
         <div id="toolbar" class="toolbar">
