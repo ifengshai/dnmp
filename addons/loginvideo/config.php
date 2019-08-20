@@ -24,7 +24,7 @@ return array (
     'content' => 
     array (
     ),
-    'value' => 'https://cdn.fastadmin.net/uploads/cover/riverside.jpg',
+    'value' => '',
     'rule' => '',
     'msg' => '',
     'tip' => '',
@@ -39,7 +39,7 @@ return array (
     'content' => 
     array (
     ),
-    'value' => 'https://files.gitee.com/group1/M00/07/ED/PaAvDFzz86uAJuxgAJQ_4HPNV3Q371.mp4',
+    'value' => '',
     'rule' => '',
     'msg' => '',
     'tip' => '',

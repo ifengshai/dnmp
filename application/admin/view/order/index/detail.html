@@ -333,7 +333,7 @@
                                 <tr>
                                     <td style="text-align: center">Right(OD)</td>
                                     <td><input id="c-right_SPH" class="form-control" type="text"
-                                            name="row[lens][od_sph][]" value="" readonly></td>
+                                            name="row[lens][od_sph][]" value="{:$sku['product_options']['prescription']['od_sph'] ?? ''}" readonly></td>
                                     <td><input id="c-right_CYL" class="form-control" type="text"
                                             name="row[lens][od_cyl][]"
                                             value="{:$sku['product_options']['prescription']['od_cyl'] ?? ''}" readonly></td>

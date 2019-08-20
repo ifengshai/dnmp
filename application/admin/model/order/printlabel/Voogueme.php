@@ -3,21 +3,22 @@
 namespace app\admin\model\order\printlabel;
 
 use think\Model;
+use think\Db;
 
 
 class Voogueme extends Model
 {
 
-    
+
 
     //数据库
     // protected $connection = 'database';
     protected $connection = 'database.db_voogueme_online';
 
-    
+
     // 表名
     protected $table = 'sales_flat_order';
-    
+
     // 自动写入时间戳字段
     protected $autoWriteTimestamp = false;
 
@@ -27,17 +28,7 @@ class Voogueme extends Model
     protected $deleteTime = false;
 
     // 追加属性
-    protected $append = [
-
-    ];
-    
+    protected $append = [];
 
     
-
-
-
-
-
-
-
 }

@@ -74,6 +74,18 @@ class Zeelool extends Backend
         return $this->view->fetch();
     }
 
+    public function detail($ids = null)
+    {
+        $row = $this->model->get($ids);
+        if (!$row) {
+            $this->error(__('No Results were found'));
+        }
+        //查询订单详情
+        $result = $this->model->getOrderDetail(1, $ids);
+        $this->assign('result', $result);
+        return $this->view->fetch();
+    }
+
     //标记为已打印标签
     public function tag_printed()
     {
@@ -84,6 +96,7 @@ class Zeelool extends Backend
             $map['entity_id'] = ['in', $entity_ids];
             $data['custom_print_label'] = 1;
             $data['custom_print_label_created_at'] = date('Y-m-d H:i:s', time());
+            $data['custom_print_label_person'] =  session('admin.username');
             $connect = Db::connect('database.db_zeelool_online')->table('sales_flat_order');
             $connect->startTrans();
             try {
@@ -118,21 +131,25 @@ class Zeelool extends Backend
                     //配镜架
                     $data['custom_is_match_frame'] = 1;
                     $data['custom_match_frame_created_at'] = date('Y-m-d H:i:s', time());
+                    $data['custom_match_frame_person'] = session('admin.username');
                     break;
                 case 2:
                     //配镜片
                     $data['custom_is_match_lens'] = 1;
                     $data['custom_match_lens_created_at'] = date('Y-m-d H:i:s', time());
+                    $data['custom_match_lens_person'] = session('admin.username');
                     break;
                 case 3:
                     //移送加工时间
                     $data['custom_is_send_factory'] = 1;
                     $data['custom_match_factory_created_at'] = date('Y-m-d H:i:s', time());
+                    $data['custom_match_factory_person'] = session('admin.username');
                     break;
                 case 4:
                     //提货
                     $data['custom_is_delivery'] = 1;
                     $data['custom_match_delivery_created_at'] = date('Y-m-d H:i:s', time());
+                    $data['custom_match_delivery_person'] = session('admin.username');
                     break;
                 default:
             }
@@ -156,6 +173,55 @@ class Zeelool extends Backend
         }
     }
 
+    //操作记录
+    public function operational($ids = null)
+    {
+        $row = $this->model->get($ids);
+        if (!$row) {
+            $this->error(__('No Results were found'));
+        }
+        if ($this->request->isAjax()) {
+            $ids = $this->request->get('ids');
+            $row = $this->model->get($ids);
+            $list = [
+                [
+                    'id' => 1,
+                    'content' => '打标签',
+                    'createtime' => $row['custom_print_label_created_at'],
+                    'person' => $row['custom_print_label_person']
+                ],
+                [
+                    'id' => 2,
+                    'content' => '配镜架',
+                    'createtime' => $row['custom_match_frame_created_at'],
+                    'person' => $row['custom_match_frame_person']
+                ],
+                [
+                    'id' => 3,
+                    'content' => '配镜片',
+                    'createtime' => $row['custom_match_lens_created_at'],
+                    'person' => $row['custom_match_lens_person']
+                ],
+                [
+                    'id' => 4,
+                    'content' => '加工',
+                    'createtime' => $row['custom_match_factory_created_at'],
+                    'person' => $row['custom_match_factory_person']
+                ],
+                [
+                    'id' => 5,
+                    'content' => '提货',
+                    'createtime' => $row['custom_match_delivery_created_at'],
+                    'person' => $row['custom_match_delivery_person']
+                ],
+            ];
+            $total = count($list);
+            $result = array("total" => $total, "rows" => $list);
+            return json($result);
+        }
+        $this->assignconfig('ids', $ids);
+        return $this->view->fetch();
+    }
 
 
     //生成条形码

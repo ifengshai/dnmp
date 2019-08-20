@@ -22,7 +22,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 columns: [
                     [
                         { checkbox: true },
-                        { field: 'entity_id', title: __('记录标识') ,operate: false},
+                        { field: 'entity_id', title: __('记录标识'), operate: false },
                         { field: 'increment_id', title: __('订单号') },
                         { field: 'status', title: __('状态'), searchList: { "processing": __('processing'), "free_processing": __('free_processing'), "creditcard_proccessing": "creditcard_proccessing" } },
                         { field: 'base_grand_total', title: __('订单金额'), operate: false, formatter: Controller.api.formatter.float_format },
@@ -45,11 +45,27 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                 {
                                     name: 'detail',
                                     text: '镜片参数',
-                                    title: __('Detail'),
+                                    title: __('镜片参数'),
                                     classname: 'btn btn-xs  btn-primary  btn-dialog',
                                     icon: 'fa fa-list',
-                                    url: 'order/index/detail?label=' + Config.label,
-                                    extend: 'data-area = \'["50%","50%"]\'',
+                                    url: 'order/printlabel/zeelool/detail',
+                                    extend: 'data-area = \'["60%","60%"]\'',
+                                    callback: function (data) {
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                    },
+                                    visible: function (row) {
+                                        //返回true时按钮显示,返回false隐藏
+                                        return true;
+                                    }
+                                },
+                                {
+                                    name: 'detail',
+                                    text: '操作记录',
+                                    title: __('操作记录'),
+                                    classname: 'btn btn-xs  btn-primary  btn-dialog',
+                                    icon: 'fa fa-list',
+                                    url: 'order/printlabel/zeelool/operational',
+                                    extend: 'data-area = \'["60%","50%"]\'',
                                     callback: function (data) {
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
                                     },
@@ -140,6 +156,40 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
         },
         edit: function () {
             Controller.api.bindevent();
+        },
+        operational: function () {
+            // 初始化表格参数配置
+            Table.api.init({
+                commonSearch: false,
+                search: false,
+                showExport: false,
+                showColumns: false,
+                showToggle: false,
+                pagination: false,
+                extend: {
+                    index_url: 'order/printlabel/zeelool/operational' + location.search + '&ids=' + Config.ids,
+                }
+            });
+
+            var table = $("#table");
+
+            // 初始化表格
+            table.bootstrapTable({
+                url: $.fn.bootstrapTable.defaults.extend.index_url,
+                pk: 'id',
+                sortName: 'id',
+                columns: [
+                    [
+                        { field: 'id', title: __('序号'), operate: false },
+                        { field: 'content', title: __('操作内容') },
+                        { field: 'person', title: __('操作人') },
+                        { field: 'createtime', title: __('操作时间') }
+                    ]
+                ]
+            });
+
+            // 为表格绑定事件
+            Table.api.bindevent(table);
         },
         api: {
 
