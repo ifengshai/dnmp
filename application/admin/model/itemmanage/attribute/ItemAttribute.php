@@ -47,9 +47,16 @@ class ItemAttribute extends Model
      */
     public function getAllTexture()
     {
-        return [ 0=>'请选择',1 => '塑料', 2 =>'板材', 3 =>'TR90', 4 =>'金属', 5 =>'钛', 6 =>'尼龙', 7=>'木质'];
+        return [ 0=>'请选择',1 => '塑料', 2 =>'板材', 3 =>'TR90', 4 =>'金属', 5 =>'钛', 6 =>'尼龙', 7=>'木质',8=>'混合材质'];
     }
-
+    /***
+     * 获取材质对应的编码 和 getAllTexture下标对应
+     */
+    public function getTextureEncode($id)
+    {
+        $arr =[1=>'P',2=>'A',3=>'T',4=>'M',5=>'I',6=>'N',7=>'W',8=>'X'];
+        return $arr[$id];
+    }
     /***
      * 获取适合类型
      */
@@ -57,11 +64,45 @@ class ItemAttribute extends Model
     {
         return [0=>'请选择',1 =>'男', 2 =>'女', 3 =>'都适合'];
     }
+
+    /***
+     * 获取尺寸型号
+     * @return array
+     */
     public function getFrameSize(){
         //Z站尺寸型号
         return [0=>'请选择',1=>'N',2=>'M',3=>'W'];
         //V站尺寸型号
         //return [0=>'请选择',1=>'S',2=>'M',3=>'L'];
+    }
+
+    /***
+     * 获取镜架所有的颜色
+     */
+    public function getFrameColor()
+    {
+        return [0=>'请选择',1=>'红', 2=> '橙', 3=>'黄', 4=>'绿', 5=>'蓝', 6=>'紫', 7=>'黑', 8=>'白', 9=>'灰', 10=>'褐'];
+    }
+    /***
+     * 获取眼镜类型
+     */
+    public function getGlassesType()
+    {
+        return [0=>'请选择',1=>'处方镜',  2 =>'太阳镜', 3=>'老花镜'];
+    }
+    /***
+     * 获取所有线下采购产地
+     */
+    public function getOrigin()
+    {
+        return ['O'=>'线上采购','S'=>'深圳','W'=>'温州','T'=>'台州','X'=>'厦门','Y'=>'鹰潭','D'=>'丹阳','G'=>'广州','C'=>'重庆'];
+    }
+    /***
+     * 配镜类型
+     */
+    public function getFrameType()
+    {
+        return [0=>'请选择',1=>'单焦点',2=>'多焦点'];
     }
     //追加字段
     /***
