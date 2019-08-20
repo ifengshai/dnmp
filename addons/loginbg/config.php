@@ -12,7 +12,7 @@ return array (
       'random' => '每次随机',
       'daily' => '每日切换',
     ),
-    'value' => 'daily',
+    'value' => 'fixed',
     'rule' => 'required',
     'msg' => '',
     'tip' => '',
