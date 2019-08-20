@@ -19,6 +19,8 @@ class Item extends Backend
      */
     protected $model = null;
     protected $category = null;
+    protected $modelValidate = true;
+    protected $modelSceneValidate = true;
 //    protected $layout = '';
     public function _initialize()
     {
@@ -37,13 +39,10 @@ class Item extends Backend
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
             if ($params) {
-//                echo '<pre>';
-//                var_dump($params);
-//                exit;
                 $params = $this->preExcludeFields($params);
                 $itemName = $params['name'];
                 $itemColor = $params['color'];
-                if(is_array($itemName) && !in_array("",$itemName)){
+                if(is_array($itemName) && !in_array("",$itemName) ){
                     $data = $itemAttribute = [];
                     //求出材质对应的编码
                     if($params['frame_texture']){
@@ -51,16 +50,90 @@ class Item extends Backend
                     }else{
                         $textureEncode = 'O';
                     }
+                    //一对一关联写入有错误，后期研究
+                    //$attribute = $this->itemAttribute;
+//                    foreach ($itemName as $k =>$v) {
+//                        $data[$k]['name'] = $v;
+//                        $data[$k]['category_id'] = $params['category_id'];
+//                        $data[$k]['item_status'] = $params['item_status'];
+//                        $data[$k]['create_person'] = session('admin.nickname');
+//                        $data[$k]['create_time'] = date("Y-m-d H:i:s", time());
+//                        $data[$k]['origin_sku'] = $params['procurement_origin'] . $textureEncode . $params['origin_sku'];
+//                        $data[$k]['sku'] = $params['procurement_origin'] . $textureEncode . $params['origin_sku'] . '-' . sprintf("%02d", $k + 1);
+//                        $data[$k]['attribute_type'] = $params['attribute_type'];
+//                        $data[$k]['glasses_type'] = $params['glasses_type'];
+//                        $data[$k]['frame_height'] = $params['frame_height'];
+//                        $data[$k]['frame_width'] = $params['frame_width'];
+//                        $data[$k]['frame_color'] = $itemColor[$k];
+//                        $data[$k]['frame_weight'] = $params['weight'];
+//                        $data[$k]['frame_length'] = $params['frame_length'];
+//                        $data[$k]['frame_temple_length'] = $params['frame_temple_length'];
+//                        $data[$k]['shape'] = $params['shape'];
+//                        $data[$k]['frame_bridge'] = $params['frame_bridge'];
+//                        $data[$k]['mirror_width'] = $params['mirror_width'];
+//                        $data[$k]['frame_type'] = $params['frame_type'];
+//                        $data[$k]['frame_texture'] = $params['frame_texture'];
+//                        $data[$k]['frame_shape'] = $params['frame_shape'];
+//                        $data[$k]['frame_gender'] = $params['frame_gender'];
+//                        $data[$k]['frame_size'] = $params['frame_size'];
+//                        $data[$k]['frame_is_recipe'] = $params['frame_is_recipe'];
+//                        $data[$k]['frame_piece'] = $params['frame_piece'];
+//                        $data[$k]['frame_is_advance'] = $params['frame_is_advance'];
+//                        $data[$k]['frame_temple_is_spring'] = $params['frame_temple_is_spring'];
+//                        $data[$k]['frame_is_adjust_nose_pad'] = $params['frame_is_adjust_nose_pad'];
+//                        $data[$k]['frame_remark'] = $params['frame_remark'];
+//                        // $lastInsertId = Db::name('item')->insertGetId($data);
+//                        $attribute->attribute_type = $params['attribute_type'];
+//                        $attribute->glasses_type = $params['glasses_type'];
+//                        $attribute->frame_height = $params['frame_height'];
+//                        $attribute->frame_width = $params['frame_width'];
+//                        $attribute->frame_color = $itemColor[$k];
+//                        $attribute->frame_weight = $params['weight'];
+//                        $attribute->frame_length = $params['frame_length'];
+//                        $attribute->frame_temple_length = $params['frame_temple_length'];
+//                        $attribute->shape = $params['shape'];
+//                        $attribute->frame_bridge = $params['frame_bridge'];
+//                        $attribute->mirror_width = $params['mirror_width'];
+//                        $attribute->frame_type = $params['frame_type'];
+//                        $attribute->frame_texture = $params['frame_texture'];
+//                        $attribute->frame_shape = $params['frame_shape'];
+//                        $attribute->frame_gender = $params['frame_gender'];
+//                        $attribute->frame_size = $params['frame_size'];
+//                        $attribute->frame_is_recipe = $params['frame_is_recipe'];
+//                        $attribute->frame_piece = $params['frame_piece'];
+//                        $attribute->frame_is_advance = $params['frame_is_advance'];
+//                        $attribute->frame_temple_is_spring = $params['frame_temple_is_spring'];
+//                        $attribute->frame_is_adjust_nose_pad = $params['frame_is_adjust_nose_pad'];
+//                        $attribute->frame_remark = $params['frame_remark'];
+//                        $this->model->itemAttribute = $attribute;
+//                    }
+//                    $result = $this->model->together('itemAttribute')->saveAll($data);
+                    //如果是后来添加的
+                    if(!empty($params['origin_skus']) && $params['item-count']>=1){ //正常情况
+                        $count = $params['item-count'];
+                        $params['origin_sku'] = substr($params['origin_skus'],0,strpos($params['origin_skus'],'-'));
+                    }elseif(empty($params['origin_skus']) && $params['item-count']>=1){ //去掉原始sku情况
+                        $this->error(__('Make sure the original sku code exists'));
+                    }elseif(!empty($params['origin_skus']) && $params['item-count']<1){ //原始sku失败情况
+                        $this->error(__('Make sure the original sku code is the correct sku code'));
+                    }
                     foreach ($itemName as $k =>$v){
                         $data['name'] = $v;
                         $data['category_id'] = $params['category_id'];
                         $data['item_status'] = $params['item_status'];
                         $data['create_person'] = session('admin.nickname');
                         $data['create_time'] = date("Y-m-d H:i:s",time());
-                        $data['origin_sku'] = $params['procurement_origin'].$textureEncode.$params['origin_sku'];
-                        $data['sku'] = $params['procurement_origin'].$textureEncode.$params['origin_sku'].'-'.sprintf("%02d", $k+1);
+                        //后来添加的商品数据
+                        if(!empty($params['origin_skus'])){
+                            $data['origin_sku'] = $params['origin_sku'];
+                            $data['sku'] = $params['origin_sku'].'-'.sprintf("%02d",$count+1);
+                            ++$count;
+                        }else{
+                            $data['origin_sku'] = $params['procurement_origin'].$textureEncode.$params['origin_sku'];
+                            $data['sku'] = $params['procurement_origin'].$textureEncode.$params['origin_sku'].'-'.sprintf("%02d", $k+1);
+                        }
                         $lastInsertId = Db::name('item')->insertGetId($data);
-                        if($lastInsertId){
+                        if($lastInsertId !== false){
                             $itemAttribute['item_id'] = $lastInsertId;
                             $itemAttribute['attribute_type'] = $params['attribute_type'];
                             $itemAttribute['glasses_type'] = $params['glasses_type'];
@@ -68,6 +141,8 @@ class Item extends Backend
                             $itemAttribute['frame_width'] = $params['frame_width'];
                             $itemAttribute['frame_color'] = $itemColor[$k];
                             $itemAttribute['frame_weight'] = $params['weight'];
+                            $itemAttribute['procurement_type'] = $params['procurement_type'];
+                            $itemAttribute['procurement_origin'] = $params['procurement_origin'];
                             $itemAttribute['frame_length'] = $params['frame_length'];
                             $itemAttribute['frame_temple_length'] = $params['frame_temple_length'];
                             $itemAttribute['shape'] = $params['shape'];
@@ -142,6 +217,9 @@ class Item extends Backend
         if (!$row) {
             $this->error(__('No Results were found'));
         }
+        if($row['item_status'] ==2){
+            $this->error(__('The goods have been submitted for review and cannot be edited'));
+        }
         $adminIds = $this->getDataLimitAdminIds();
         if (is_array($adminIds)) {
             if (!in_array($row[$this->dataLimitField], $adminIds)) {
@@ -150,33 +228,47 @@ class Item extends Backend
         }
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
-            echo '<pre>';
-            var_dump($params);
-            exit;
             if ($params) {
                 $params = $this->preExcludeFields($params);
-                $result = false;
-                Db::startTrans();
-                try {
-                    //是否采用模型验证
-                    if ($this->modelValidate) {
-                        $name = str_replace("\\model\\", "\\validate\\", get_class($this->model));
-                        $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.edit' : $name) : $this->modelValidate;
-                        $row->validateFailException(true)->validate($validate);
+                $itemName = $params['name'];
+                $itemColor = $params['color'];
+                if(is_array($itemName) && !in_array("",$itemName) ){
+                    $data = $itemAttribute = [];
+                    foreach ($itemName as $k =>$v){
+                        $data['name'] = $v;
+                        $data['item_status'] = $params['item_status'];
+                        $data['create_person'] = session('admin.nickname');
+                        $data['create_time'] = date("Y-m-d H:i:s",time());
+                        $item=Db::name('item')->where('id','=',$row['id'])->update($data);
+                            $itemAttribute['attribute_type'] = $params['attribute_type'];
+                            $itemAttribute['glasses_type'] = $params['glasses_type'];
+                            $itemAttribute['frame_height'] = $params['frame_height'];
+                            $itemAttribute['frame_width'] = $params['frame_width'];
+                            $itemAttribute['frame_color'] = $itemColor[$k];
+                            $itemAttribute['frame_weight'] = $params['weight'];
+                            $itemAttribute['frame_length'] = $params['frame_length'];
+                            $itemAttribute['frame_temple_length'] = $params['frame_temple_length'];
+                            $itemAttribute['shape'] = $params['shape'];
+                            $itemAttribute['frame_bridge'] = $params['frame_bridge'];
+                            $itemAttribute['mirror_width'] = $params['mirror_width'];
+                            $itemAttribute['frame_type'] = $params['frame_type'];
+                            $itemAttribute['frame_texture'] = $params['frame_texture'];
+                            $itemAttribute['frame_shape'] = $params['frame_shape'];
+                            $itemAttribute['frame_gender'] = $params['frame_gender'];
+                            $itemAttribute['frame_size'] = $params['frame_size'];
+                            $itemAttribute['frame_is_recipe'] = $params['frame_is_recipe'];
+                            $itemAttribute['frame_piece'] = $params['frame_piece'];
+                            $itemAttribute['frame_is_advance'] = $params['frame_is_advance'];
+                            $itemAttribute['frame_temple_is_spring'] = $params['frame_temple_is_spring'];
+                            $itemAttribute['frame_is_adjust_nose_pad'] = $params['frame_is_adjust_nose_pad'];
+                            $itemAttribute['frame_remark'] = $params['frame_remark'];
+                           $itemAttr= Db::name('item_attribute')->where('item_id','=',$row['id'])->update($itemAttribute);
                     }
-                    $result = $row->allowField(true)->save($params);
-                    Db::commit();
-                } catch (ValidateException $e) {
-                    Db::rollback();
-                    $this->error($e->getMessage());
-                } catch (PDOException $e) {
-                    Db::rollback();
-                    $this->error($e->getMessage());
-                } catch (Exception $e) {
-                    Db::rollback();
-                    $this->error($e->getMessage());
+                }else{
+                    $this->error(__('Please add product name and color'));
                 }
-                if ($result !== false) {
+                $this->success();
+                if (($item !== false) && ($itemAttr !==false)) {
                     $this->success();
                 } else {
                     $this->error(__('No rows were updated'));
@@ -369,6 +461,26 @@ class Item extends Backend
             }
 
 
+        }else{
+            return $this->error(__('404 Not Found'));
+        }
+    }
+    /***
+     * ajax请求比对商品名称是否重复
+     */
+    public function ajaxGetInfoName()
+    {
+        if($this->request->isAjax()){
+            $name = $this->request->post('name');
+            if(!$name){
+                $this->error('参数错误，请重新尝试');
+            }
+            $result = $this->model->getInfoName($name);
+            if(!$result){
+                return  $this->success('可以添加');
+            }else{
+                return $this->error('商品名称已经存在,请重新添加');
+            }
         }else{
             return $this->error(__('404 Not Found'));
         }

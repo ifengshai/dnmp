@@ -175,10 +175,10 @@
                 <th>操作</th>
             </tr>
             <tr>
-                <td><input id="c-name" data-rule="required"  class="form-control" name="row[name][]" type="text"></td>
+                <td><input id="c-name" data-rule="required"  class="form-control c-name" name="row[name][]" type="text"></td>
                 <td>
                     <div class="col-xs-12 col-sm-12">
-                    <select  id="c-color" data-rule="required" class="form-control " name="row[color][]">
+                    <select  id="c-color" data-rule="required" class="form-control c-color" name="row[color][]">
                         {foreach name="AllFrameColor" item="vo"}
                         <option value="{$key}">{$vo}</option>
                         {/foreach}

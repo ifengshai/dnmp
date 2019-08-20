@@ -67,6 +67,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui'], function ($, 
         },
         edit: function () {
             Controller.api.bindevent();
+            $(document).on('click', '.btn-status', function () {
+                $('#status').val(2);
+            });
         },
         api: {
             bindevent: function () {
@@ -184,7 +187,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui'], function ($, 
                         var resultData = ret.data;
                         // console.log(resultData.procurement_type);
                          //console.log(resultData);
-                         $('.newAddition').empty();
+                         $('.newAddition').remove();
                         //$('#c-procurement_type').eq(2).attr("selected",true);
                         $("#c-procurement_type").find("option[value="+resultData.procurement_type+"]").prop("selected",true);
                         $("#c-procurement_origin").find("option[value="+resultData.procurement_origin+"]").prop("selected",true);
@@ -208,6 +211,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui'], function ($, 
                         $('#c-mirror_width').val(resultData.mirror_width);
                         $('#c-problem_desc').html(resultData.frame_remark);
                         $('.note-editable').html(resultData.frame_remark);
+                        $('#item-count').val(resultData.itemCount);
                         //$(".editor").textarea
                         $(".addition").remove();
                         $(".redact").after(function(){
@@ -241,13 +245,32 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui'], function ($, 
                             return Str;
                         });
                         $(".selectpicker").selectpicker('refresh');
-                        //$(".btn-refresh").trigger("click");
                         return false;
                     }, function(data, ret){
                         //失败的回调
                         alert(ret.msg);
                         return false;
                     });
+                });
+                //根据填写的商品名称找出商品是否重复
+                $(document).on('blur','.c-name',function(){
+                   var name = $(this).val();
+                   if(name.length>0){
+                       Backend.api.ajax({
+                           url:'itemmanage/item/ajaxGetInfoName',
+                           data:{name:name}
+                       }, function(data, ret){
+                           console.log(ret.data);
+                           $('.btn-success').removeClass('btn-disabled disabled');
+                           return false;
+                       }, function(data, ret){
+                           //失败的回调
+                           $('.btn-success').addClass('btn-disabled disabled');
+                           alert(ret.msg);
+                           return false;
+                       });
+                   }
+                   console.log(name);
                 });
             }
         },

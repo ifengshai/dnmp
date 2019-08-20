@@ -15,6 +15,7 @@ class ItemAttribute extends Model
 
     // 表名
     protected $name = 'item_attribute';
+    protected $pk = 'id';
     
     // 自动写入时间戳字段
     protected $autoWriteTimestamp = false;

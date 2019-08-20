@@ -13,6 +13,7 @@ class Item extends Model
 
     // 表名
     protected $name = 'item';
+    protected $pk = 'id';
     
     // 自动写入时间戳字段
     protected $autoWriteTimestamp = false;
@@ -88,6 +89,16 @@ class Item extends Model
             }
         }
         $result['itemArr'] = $arr;
+        $result['itemCount'] = $this->where('origin_sku','=',$result['origin_sku'])->count();
         return $result;
     }
+    /***
+     * 查询商品名称是否重复
+     */
+    public function getInfoName($name)
+    {
+        $result = $this->where('name','=',$name)->value('name');
+        return $result ? $result : false;
+    }
+
 }
