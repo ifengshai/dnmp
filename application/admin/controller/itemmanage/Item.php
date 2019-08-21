@@ -212,8 +212,6 @@ class Item extends Backend
     public function edit($ids = null)
     {
         $row = $this->model->get($ids,'itemAttribute');
-//        dump($row['itemAttribute']['procurement_origin']);
-//        exit;
         if (!$row) {
             $this->error(__('No Results were found'));
         }
@@ -484,5 +482,74 @@ class Item extends Backend
         }else{
             return $this->error(__('404 Not Found'));
         }
+    }
+    /***
+     * 商品详情表
+     */
+    public function detail($ids = null)
+    {
+        $row = $this->model->get($ids,'itemAttribute');
+        if (!$row) {
+            $this->error(__('No Results were found'));
+        }
+        $adminIds = $this->getDataLimitAdminIds();
+        if (is_array($adminIds)) {
+            if (!in_array($row[$this->dataLimitField], $adminIds)) {
+                $this->error(__('You have no permission'));
+            }
+        }
+        $allShape = $this->itemAttribute->getAllShape();
+        //获取所有材质
+        $allTexture = $this->itemAttribute->getAllTexture();
+        //获取所有镜架形状
+        $allFrameShape = $this->itemAttribute->getAllFrameShape();
+        //获取所有适合性别
+        $allFrameGender = $this->itemAttribute->getFrameGender();
+        //获取所有型号
+        $allFrameSize  = $this->itemAttribute->getFrameSize();
+        //获取所有眼镜类型
+        $allGlassesType = $this->itemAttribute->getGlassesType();
+        //获取所有采购产地
+        $allOrigin      = $this->itemAttribute->getOrigin();
+        //获取配镜类型
+        $allFrameType   = $this->itemAttribute->getFrameType();
+        $this->assign('AllFrameType',$allFrameType);
+        $this->assign('AllOrigin',$allOrigin);
+        $this->assign('AllGlassesType',$allGlassesType);
+        $this->assign('AllFrameSize',$allFrameSize);
+        $this->assign('AllFrameGender',$allFrameGender);
+        $this->assign('AllFrameShape',$allFrameShape);
+        $this->assign('AllShape',$allShape);
+        $this->assign('AllTexture',$allTexture);
+        $this->view->assign('template',$this->category->getAttrCategoryById($row['category_id']));
+        $this->view->assign("row", $row);
+        return $this->view->fetch();
+    }
+    /***
+     * 编辑商品的图片信息
+     */
+    public function images($id = null)
+    {
+        $row = $this->model->get($id);
+        if($this->request->isAjax()){
+            $params = $this->request->post("row/a");
+            $id = $params['id'];
+            $item_status = $params['item_status'];
+            $itemAttrData['frame_images'] = $params['frame_images'];
+            $itemAttrData['create_frame_images_time'] = date("Y-m-d H:i:s",time());
+            $itemAttrResult = Db::name('item_attribute')->where('item_id','=',$id)->update($itemAttrData);
+            if($item_status == 2){
+                $itemResult = Db::name('item')->where('id','=',$id)->update(['item_status'=>$item_status]);
+            }else{
+                $itemResult = true;
+            }
+            if(($itemAttrResult !== false) && ($itemResult !==false)){
+                $this->success();
+            }else{
+                $this->error(__('Failed to upload product picture, please try again'));
+            }
+        }
+        $this->view->assign("row",$row);
+        return $this->view->fetch();
     }
 }

@@ -26,6 +26,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui'], function ($, 
                         {checkbox: true},
                         {field: 'id', title: __('Id')},
                         {field: 'name', title: __('Name')},
+                        {field:'origin_sku',title:__('Origin_sku')},
+                        {field:'sku',title:__('Sku')},
                         {field: 'category_id', title: __('Category_id')},
                         {field: 'attribute_id', title: __('Attribute_id')},
                         {field: 'stock', title: __('Stock')},
@@ -40,7 +42,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui'], function ($, 
                                     extend: 'data-area = \'["100%","100%"]\'',
                                     classname: 'btn btn-xs btn-primary btn-dialog',
                                     icon: 'fa fa-list',
-                                    url: 'saleaftermanage/sale_after_task/detail',
+                                    url: '/admin/itemmanage/item/detail',
                                     callback: function (data) {
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), {title: "回传数据"});
                                     },
@@ -49,6 +51,22 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui'], function ($, 
                                         return true;
                                     }
                                 },
+                                {
+                                    name: 'edit',
+                                    text: '',
+                                    title: __('Edit'),
+                                    classname: 'btn btn-xs btn-success btn-dialog',
+                                    icon: 'fa fa-pencil',
+                                    url: '/admin/itemmanage/item/edit',
+                                    extend: 'data-area = \'["100%","100%"]\'',
+                                    callback: function (data) {
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                    },
+                                    visible: function (row) {
+                                        //返回true时按钮显示,返回false隐藏
+                                        return true;
+                                    }
+                                }
                             ]
                         },
                         //{field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate}
@@ -74,6 +92,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui'], function ($, 
         api: {
             bindevent: function () {
                 Form.api.bindevent($("form[role=form]"));
+                //通过审核
                 //多项添加商品名称和颜色
                 $(document).on('click', '.btn-add', function () {
                     $(".selectpicker").selectpicker('refresh');
@@ -282,6 +301,15 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui'], function ($, 
             Controller.api.bindevent();
             Form.api.bindevent($("form[role=form]"));
             Form.events.datetimepicker($("form"));
+        },
+        detail:function () {
+            Form.api.bindevent($("form[role=form]"));
+        },
+        images:function () {
+            Form.api.bindevent($("form[role=form]"));
+            $(document).on('click', '.btn-status', function () {
+                $('#status').val(2);
+            });
         }
     };
     return Controller;
