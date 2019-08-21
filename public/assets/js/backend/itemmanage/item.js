@@ -26,6 +26,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui'], function ($, 
                         {checkbox: true},
                         {field: 'id', title: __('Id')},
                         {field: 'name', title: __('Name')},
+                        {field:'origin_sku',title:__('Origin_sku')},
+                        {field:'sku',title:__('Sku')},
                         {field: 'category_id', title: __('Category_id')},
                         {field: 'attribute_id', title: __('Attribute_id')},
                         {field: 'stock', title: __('Stock')},
@@ -40,7 +42,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui'], function ($, 
                                     extend: 'data-area = \'["100%","100%"]\'',
                                     classname: 'btn btn-xs btn-primary btn-dialog',
                                     icon: 'fa fa-list',
-                                    url: 'saleaftermanage/sale_after_task/detail',
+                                    url: '/admin/itemmanage/item/detail',
                                     callback: function (data) {
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), {title: "回传数据"});
                                     },
@@ -49,6 +51,22 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui'], function ($, 
                                         return true;
                                     }
                                 },
+                                {
+                                    name: 'edit',
+                                    text: '',
+                                    title: __('Edit'),
+                                    classname: 'btn btn-xs btn-success btn-dialog',
+                                    icon: 'fa fa-pencil',
+                                    url: '/admin/itemmanage/item/edit',
+                                    extend: 'data-area = \'["100%","100%"]\'',
+                                    callback: function (data) {
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                    },
+                                    visible: function (row) {
+                                        //返回true时按钮显示,返回false隐藏
+                                        return true;
+                                    }
+                                }
                             ]
                         },
                         //{field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate}
@@ -67,10 +85,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui'], function ($, 
         },
         edit: function () {
             Controller.api.bindevent();
+            $(document).on('click', '.btn-status', function () {
+                $('#status').val(2);
+            });
         },
         api: {
             bindevent: function () {
                 Form.api.bindevent($("form[role=form]"));
+                //通过审核
                 //多项添加商品名称和颜色
                 $(document).on('click', '.btn-add', function () {
                     $(".selectpicker").selectpicker('refresh');
@@ -184,7 +206,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui'], function ($, 
                         var resultData = ret.data;
                         // console.log(resultData.procurement_type);
                          //console.log(resultData);
-                         $('.newAddition').empty();
+                         $('.newAddition').remove();
                         //$('#c-procurement_type').eq(2).attr("selected",true);
                         $("#c-procurement_type").find("option[value="+resultData.procurement_type+"]").prop("selected",true);
                         $("#c-procurement_origin").find("option[value="+resultData.procurement_origin+"]").prop("selected",true);
@@ -208,6 +230,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui'], function ($, 
                         $('#c-mirror_width').val(resultData.mirror_width);
                         $('#c-problem_desc').html(resultData.frame_remark);
                         $('.note-editable').html(resultData.frame_remark);
+                        $('#item-count').val(resultData.itemCount);
                         //$(".editor").textarea
                         $(".addition").remove();
                         $(".redact").after(function(){
@@ -241,13 +264,32 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui'], function ($, 
                             return Str;
                         });
                         $(".selectpicker").selectpicker('refresh');
-                        //$(".btn-refresh").trigger("click");
                         return false;
                     }, function(data, ret){
                         //失败的回调
                         alert(ret.msg);
                         return false;
                     });
+                });
+                //根据填写的商品名称找出商品是否重复
+                $(document).on('blur','.c-name',function(){
+                   var name = $(this).val();
+                   if(name.length>0){
+                       Backend.api.ajax({
+                           url:'itemmanage/item/ajaxGetInfoName',
+                           data:{name:name}
+                       }, function(data, ret){
+                           console.log(ret.data);
+                           $('.btn-success').removeClass('btn-disabled disabled');
+                           return false;
+                       }, function(data, ret){
+                           //失败的回调
+                           $('.btn-success').addClass('btn-disabled disabled');
+                           alert(ret.msg);
+                           return false;
+                       });
+                   }
+                   console.log(name);
                 });
             }
         },
@@ -259,6 +301,15 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui'], function ($, 
             Controller.api.bindevent();
             Form.api.bindevent($("form[role=form]"));
             Form.events.datetimepicker($("form"));
+        },
+        detail:function () {
+            Form.api.bindevent($("form[role=form]"));
+        },
+        images:function () {
+            Form.api.bindevent($("form[role=form]"));
+            $(document).on('click', '.btn-status', function () {
+                $('#status').val(2);
+            });
         }
     };
     return Controller;

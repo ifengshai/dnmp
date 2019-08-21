@@ -7,11 +7,6 @@ use app\admin\model\itemmanage\attribute\ItemAttribute;
 
 class Item extends Model
 {
-
-
-
-
-
     // 表名
     protected $name = 'item';
 
@@ -32,9 +27,6 @@ class Item extends Model
     {
         return $this->hasOne('app\admin\model\itemmanage\attribute\ItemAttribute', 'item_id', 'id');
     }
-
-
-
 
     public function getCreateTimeTextAttr($value, $data)
     {
@@ -90,9 +82,9 @@ class Item extends Model
             }
         }
         $result['itemArr'] = $arr;
+        $result['itemCount'] = $this->where('origin_sku', '=', $result['origin_sku'])->count();
         return $result;
     }
-
     /**
      * 获取商品表SKU数据
      * @return array
@@ -100,5 +92,14 @@ class Item extends Model
     public function getItemSkuInfo()
     {
         return $this->where('is_open', '=', 1)->column('sku', 'id');
+    }
+
+    /***
+     * 查询商品名称是否重复
+     */
+    public function getInfoName($name)
+    {
+        $result = $this->where('name', '=', $name)->value('name');
+        return $result ? $result : false;
     }
 }
