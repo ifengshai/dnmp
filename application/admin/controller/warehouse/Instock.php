@@ -432,18 +432,59 @@ class Instock extends Backend
         if ($data['status'] == 2) {
             $data['check_time'] = date('Y-m-d H:i:s', time());
         }
-        $data['create_person'] = session('admin.username');
-        $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
-        if ($res) {
+        $this->model->startTrans();
+        $item = new \app\admin\model\itemmanage\Item;
+        $item->startTrans();
+        $purchase = new \app\admin\model\purchase\PurchaseOrderItem;
+        $purchase->startTrans();
+        try {
+            $data['create_person'] = session('admin.username');
+            $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
             /**
-             * @todo 审核通过增加库存
+             * @todo 审核通过增加库存 并添加入库单入库数量
              */
 
+            //查询入库明细数据
+            $list = $this->model->hasWhere('instockItem', ['in_stock_id' => ['in', $ids]])->field('sku,in_stock_num')->select();
+            $list = collection($list)->toArray();
+            foreach ($list as $k => $v) {
+                //更新商品表商品总库存
+                //总库存
+                $item_map['sku'] = $v['sku'];
+                $item->where($item_map)->setInc('stock', $v['in_stock_num']);
+                //可用库存
+                $item->where($item_map)->setInc('available_stock', $v['in_stock_num']);
 
-
+                //更新采购商品表 入库数量
+                if ($v['purchase_id']) {
+                    $purchase_map['sku'] = $v['sku'];
+                    $purchase_map['purchase_id'] = $v['purchase_id'];
+                    $purchase->where($purchase_map)->setInc('instock_num', $v['in_stock_num']);
+                }
+            }
+            $this->model->commit();
+            $item->commit();
+            $purchase->commit();
+        } catch (ValidateException $e) {
+            $this->model->rollback();
+            $item->rollback();
+            $purchase->rollback();
+            $this->error($e->getMessage());
+        } catch (PDOException $e) {
+            $this->model->rollback();
+            $item->rollback();
+            $purchase->rollback();
+            $this->error($e->getMessage());
+        } catch (Exception $e) {
+            $this->model->rollback();
+            $item->rollback();
+            $purchase->rollback();
+            $this->error($e->getMessage());
+        }
+        if ($res !== false) {
             $this->success();
         } else {
-            $this->error('修改失败！！');
+            $this->error();
         }
     }
 

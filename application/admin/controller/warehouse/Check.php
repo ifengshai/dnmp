@@ -388,11 +388,11 @@ class Check extends Backend
         //重组数组
         $check_item = [];
         foreach ($list as $k => $v) {
-            $check_item[$v['sku']]['check_num'] = $v['check_num'];
+            @$check_item[$v['sku']]['check_num'] = $v['check_num'];
         }
 
         foreach ($item as $k => $v) {
-            $item[$k]['check_num'] = $check_item[$v['sku']]['check_num'];
+            $item[$k]['check_num'] = @$check_item[$v['sku']]['check_num'] ?? 0;
         }
 
         $data->item = $item;

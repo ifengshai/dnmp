@@ -36,6 +36,9 @@ class PurchaseOrder extends Model
         return $data;
     }
 
+    /**
+     * 采购单明细表
+     */
     public function purchaseOrderItem()
     {
         return $this->hasMany('PurchaseOrderItem','purchase_id');

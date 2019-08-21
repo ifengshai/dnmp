@@ -4,16 +4,17 @@ namespace app\admin\model\itemmanage;
 
 use think\Model;
 use app\admin\model\itemmanage\attribute\ItemAttribute;
+
 class Item extends Model
 {
 
-    
 
-    
+
+
 
     // 表名
     protected $name = 'item';
-    
+
     // 自动写入时间戳字段
     protected $autoWriteTimestamp = false;
 
@@ -26,12 +27,12 @@ class Item extends Model
     protected $append = [
         'create_time_text'
     ];
-    
+
     public function itemAttribute()
     {
-        return $this->hasOne('app\admin\model\itemmanage\attribute\ItemAttribute','item_id','id');
+        return $this->hasOne('app\admin\model\itemmanage\attribute\ItemAttribute', 'item_id', 'id');
     }
-    
+
 
 
 
@@ -51,7 +52,7 @@ class Item extends Model
      */
     public function getOriginSku()
     {
-        return  rand(0,99).rand(0,99).rand(0,99);
+        return  rand(0, 99) . rand(0, 99) . rand(0, 99);
     }
 
     /***
@@ -59,12 +60,12 @@ class Item extends Model
      */
     public function likeOriginSku($value)
     {
-        $result = $this->where('sku','like',"%{$value}%")->field('sku')->distinct(true)->limit(10)->select();
-        if(!$result){
+        $result = $this->where('sku', 'like', "%{$value}%")->field('sku')->distinct(true)->limit(10)->select();
+        if (!$result) {
             return false;
         }
         $arr = [];
-        foreach ($result as $k=>$v){
+        foreach ($result as $k => $v) {
             $arr[] = $v['sku'];
         }
         return $arr;
@@ -75,19 +76,29 @@ class Item extends Model
      * @param $sku
      * @return bool
      */
-    public function getItemInfo($sku){
-        $result = $this->alias('m')->where('sku','=',$sku)->join('item_attribute a','m.id=a.item_id')->find();
-        if(!$result){
+    public function getItemInfo($sku)
+    {
+        $result = $this->alias('m')->where('sku', '=', $sku)->join('item_attribute a', 'm.id=a.item_id')->find();
+        if (!$result) {
             return false;
         }
-        $colorArr =(new ItemAttribute())->getFrameColor();
-        $arr = $this->alias('m')->where('origin_sku','=',$result['origin_sku'])->join('item_attribute a','m.id=a.item_id')->field('m.name,a.frame_color')->select();
-        if(is_array($arr)){
-            foreach($arr as $k =>$v){
+        $colorArr = (new ItemAttribute())->getFrameColor();
+        $arr = $this->alias('m')->where('origin_sku', '=', $result['origin_sku'])->join('item_attribute a', 'm.id=a.item_id')->field('m.name,a.frame_color')->select();
+        if (is_array($arr)) {
+            foreach ($arr as $k => $v) {
                 $arr[$k]['frame_color_value'] = $colorArr[$v['frame_color']];
             }
         }
         $result['itemArr'] = $arr;
         return $result;
+    }
+
+    /**
+     * 获取商品表SKU数据
+     * @return array
+     */
+    public function getItemSkuInfo()
+    {
+        return $this->where('is_open', '=', 1)->column('sku', 'id');
     }
 }

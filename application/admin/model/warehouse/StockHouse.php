@@ -8,13 +8,10 @@ use think\Model;
 class StockHouse extends Model
 {
 
-    
-
-    
 
     // 表名
     protected $name = 'store_house';
-    
+
     // 自动写入时间戳字段
     protected $autoWriteTimestamp = 'int';
 
@@ -24,17 +21,14 @@ class StockHouse extends Model
     protected $deleteTime = false;
 
     // 追加属性
-    protected $append = [
+    protected $append = [];
 
-    ];
-    
-
-    
-
-
-
-
-
-
-
+    /**
+     * 获取所有库位
+     * @return array
+     */
+    public function getStockHouseData()
+    {
+        return $this->where('status', '=', 1)->column('coding', 'id');
+    }
 }

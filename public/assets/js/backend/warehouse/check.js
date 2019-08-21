@@ -183,7 +183,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     var not_quantity_num = arrivals_num * 1 - quantity_num * 1 - sample_num * 1;
 
                     $(this).parent().next().next().next().find('input').val(not_quantity_num);
-                    $(this).parent().next().next().next().next().find('input').val(Math.round(quantity_num / check_num * 100, 2));
+                    $(this).parent().next().next().next().next().find('input').val(Math.round(quantity_num / arrivals_num * 100, 2));
                 })
 
                 //计算不合格数量及合格率
@@ -193,9 +193,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     var quantity_num = $(this).val();
                     var sample_num = $(this).parent().next().find('.sample_num').val();
                     var not_quantity_num = arrivals_num * 1 - quantity_num * 1 - sample_num * 1;
-
+                   
                     $(this).parent().next().next().find('input').val(not_quantity_num);
-                    $(this).parent().next().next().next().find('input').val(Math.round(quantity_num / check_num * 100, 2));
+                    $(this).parent().next().next().next().find('input').val(Math.round(quantity_num / arrivals_num * 100, 2));
                 })
 
                 //计算不合格数量及合格率
@@ -207,7 +207,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     var not_quantity_num = arrivals_num * 1 - quantity_num * 1 - sample_num * 1;
 
                     $(this).parent().next().find('input').val(not_quantity_num);
-                    $(this).parent().next().next().find('input').val(Math.round(quantity_num / check_num * 100, 2));
+                    $(this).parent().next().next().find('input').val(Math.round(quantity_num / arrivals_num * 100, 2));
                 })
 
 

@@ -5,6 +5,7 @@ namespace app\admin\controller\itemmanage;
 use app\common\controller\Backend;
 use think\Request;
 use think\Db;
+
 /**
  * 商品管理
  *
@@ -12,55 +13,55 @@ use think\Db;
  */
 class Item extends Backend
 {
-    
+
     /**
      * Item模型对象
      * @var \app\admin\model\itemmanage\Item
      */
     protected $model = null;
     protected $category = null;
-//    protected $layout = '';
+    //    protected $layout = '';
     public function _initialize()
     {
         parent::_initialize();
         $this->model = new \app\admin\model\itemmanage\Item;
         $this->itemAttribute = new \app\admin\model\itemmanage\attribute\ItemAttribute;
         $this->category = new \app\admin\model\itemmanage\ItemCategory;
-        $this->view->assign('categoryList',$this->category->categoryList());
-        $this->view->assign('AllFrameColor',$this->itemAttribute->getFrameColor());
+        $this->view->assign('categoryList', $this->category->categoryList());
+        $this->view->assign('AllFrameColor', $this->itemAttribute->getFrameColor());
         $num = $this->model->getOriginSku();
         $idStr = sprintf("%06d", $num);
-        $this->assign('IdStr',$idStr);
+        $this->assign('IdStr', $idStr);
     }
     public function add()
     {
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
             if ($params) {
-//                echo '<pre>';
-//                var_dump($params);
-//                exit;
+                //                echo '<pre>';
+                //                var_dump($params);
+                //                exit;
                 $params = $this->preExcludeFields($params);
                 $itemName = $params['name'];
                 $itemColor = $params['color'];
-                if(is_array($itemName) && !in_array("",$itemName)){
+                if (is_array($itemName) && !in_array("", $itemName)) {
                     $data = $itemAttribute = [];
                     //求出材质对应的编码
-                    if($params['frame_texture']){
+                    if ($params['frame_texture']) {
                         $textureEncode = $this->itemAttribute->getTextureEncode($params['frame_texture']);
-                    }else{
+                    } else {
                         $textureEncode = 'O';
                     }
-                    foreach ($itemName as $k =>$v){
+                    foreach ($itemName as $k => $v) {
                         $data['name'] = $v;
                         $data['category_id'] = $params['category_id'];
                         $data['item_status'] = $params['item_status'];
                         $data['create_person'] = session('admin.nickname');
-                        $data['create_time'] = date("Y-m-d H:i:s",time());
-                        $data['origin_sku'] = $params['procurement_origin'].$textureEncode.$params['origin_sku'];
-                        $data['sku'] = $params['procurement_origin'].$textureEncode.$params['origin_sku'].'-'.sprintf("%02d", $k+1);
+                        $data['create_time'] = date("Y-m-d H:i:s", time());
+                        $data['origin_sku'] = $params['procurement_origin'] . $textureEncode . $params['origin_sku'];
+                        $data['sku'] = $params['procurement_origin'] . $textureEncode . $params['origin_sku'] . '-' . sprintf("%02d", $k + 1);
                         $lastInsertId = Db::name('item')->insertGetId($data);
-                        if($lastInsertId){
+                        if ($lastInsertId) {
                             $itemAttribute['item_id'] = $lastInsertId;
                             $itemAttribute['attribute_type'] = $params['attribute_type'];
                             $itemAttribute['glasses_type'] = $params['glasses_type'];
@@ -87,7 +88,7 @@ class Item extends Backend
                             Db::name('item_attribute')->insert($itemAttribute);
                         }
                     }
-                }else{
+                } else {
                     $this->error(__('Please add product name and color'));
                 }
                 if ($lastInsertId !== false) {
@@ -95,37 +96,37 @@ class Item extends Backend
                 } else {
                     $this->error(__('No rows were inserted'));
                 }
-//
-//                if ($this->dataLimit && $this->dataLimitFieldAutoFill) {
-//                    $params[$this->dataLimitField] = $this->auth->id;
-//                }
-//                $result = false;
-//                Db::startTrans();
-//                try {
-//                    //是否采用模型验证
-//                    if ($this->modelValidate) {
-//                        $name = str_replace("\\model\\", "\\validate\\", get_class($this->model));
-//                        $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.add' : $name) : $this->modelValidate;
-//                        $this->model->validateFailException(true)->validate($validate);
-//                    }
-//
-//                    $result = $this->model->allowField(true)->save($params);
-//                    Db::commit();
-//                } catch (ValidateException $e) {
-//                    Db::rollback();
-//                    $this->error($e->getMessage());
-//                } catch (PDOException $e) {
-//                    Db::rollback();
-//                    $this->error($e->getMessage());
-//                } catch (Exception $e) {
-//                    Db::rollback();
-//                    $this->error($e->getMessage());
-//                }
-//                if ($result !== false) {
-//                    $this->success();
-//                } else {
-//                    $this->error(__('No rows were inserted'));
-//                }
+                //
+                //                if ($this->dataLimit && $this->dataLimitFieldAutoFill) {
+                //                    $params[$this->dataLimitField] = $this->auth->id;
+                //                }
+                //                $result = false;
+                //                Db::startTrans();
+                //                try {
+                //                    //是否采用模型验证
+                //                    if ($this->modelValidate) {
+                //                        $name = str_replace("\\model\\", "\\validate\\", get_class($this->model));
+                //                        $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.add' : $name) : $this->modelValidate;
+                //                        $this->model->validateFailException(true)->validate($validate);
+                //                    }
+                //
+                //                    $result = $this->model->allowField(true)->save($params);
+                //                    Db::commit();
+                //                } catch (ValidateException $e) {
+                //                    Db::rollback();
+                //                    $this->error($e->getMessage());
+                //                } catch (PDOException $e) {
+                //                    Db::rollback();
+                //                    $this->error($e->getMessage());
+                //                } catch (Exception $e) {
+                //                    Db::rollback();
+                //                    $this->error($e->getMessage());
+                //                }
+                //                if ($result !== false) {
+                //                    $this->success();
+                //                } else {
+                //                    $this->error(__('No rows were inserted'));
+                //                }
             }
             $this->error(__('Parameter %s can not be empty', ''));
         }
@@ -136,9 +137,9 @@ class Item extends Backend
      */
     public function edit($ids = null)
     {
-        $row = $this->model->get($ids,'itemAttribute');
-//        dump($row['itemAttribute']['procurement_origin']);
-//        exit;
+        $row = $this->model->get($ids, 'itemAttribute');
+        //        dump($row['itemAttribute']['procurement_origin']);
+        //        exit;
         if (!$row) {
             $this->error(__('No Results were found'));
         }
@@ -199,15 +200,15 @@ class Item extends Backend
         $allOrigin      = $this->itemAttribute->getOrigin();
         //获取配镜类型
         $allFrameType   = $this->itemAttribute->getFrameType();
-        $this->assign('AllFrameType',$allFrameType);
-        $this->assign('AllOrigin',$allOrigin);
-        $this->assign('AllGlassesType',$allGlassesType);
-        $this->assign('AllFrameSize',$allFrameSize);
-        $this->assign('AllFrameGender',$allFrameGender);
-        $this->assign('AllFrameShape',$allFrameShape);
-        $this->assign('AllShape',$allShape);
-        $this->assign('AllTexture',$allTexture);
-        $this->view->assign('template',$this->category->getAttrCategoryById($row['category_id']));
+        $this->assign('AllFrameType', $allFrameType);
+        $this->assign('AllOrigin', $allOrigin);
+        $this->assign('AllGlassesType', $allGlassesType);
+        $this->assign('AllFrameSize', $allFrameSize);
+        $this->assign('AllFrameGender', $allFrameGender);
+        $this->assign('AllFrameShape', $allFrameShape);
+        $this->assign('AllShape', $allShape);
+        $this->assign('AllTexture', $allTexture);
+        $this->view->assign('template', $this->category->getAttrCategoryById($row['category_id']));
         $this->view->assign("row", $row);
         return $this->view->fetch();
     }
@@ -219,52 +220,52 @@ class Item extends Backend
     /***
      * 异步获取商品分类的信息（原先）
      */
-//    public function ajaxCategoryInfo(Request $request)
-//    {
-//        if($this->request->isAjax()){
-//            $categoryId = $this->request->post('categoryId');
-//            if(!$categoryId){
-//                $this->error('参数错误，请重新尝试');
-//            }
-//            //原先
-//            $result = $this->category->categoryPropertyInfo($categoryId);
-//            if(!$result){
-//              return  $this->error('对应分类不存在,请从新尝试');
-//            }elseif ($result == -1){
-//              return $this->error('对应分类存在下级分类,请从新选择');
-//            }
-//            $num = count($result)-1;
-//            $this->view->engine->layout(false);
-//            $this->assign('result',$result);
-//            //传递最后一个key值
-//            $this->assign('num',$num);
-//            $data = $this->fetch('attribute');
-//            return  $this->success('ok','',$data);
-//
-//        }else{
-//           return $this->error(__('404 Not Found'));
-//        }
-//    }
+    //    public function ajaxCategoryInfo(Request $request)
+    //    {
+    //        if($this->request->isAjax()){
+    //            $categoryId = $this->request->post('categoryId');
+    //            if(!$categoryId){
+    //                $this->error('参数错误，请重新尝试');
+    //            }
+    //            //原先
+    //            $result = $this->category->categoryPropertyInfo($categoryId);
+    //            if(!$result){
+    //              return  $this->error('对应分类不存在,请从新尝试');
+    //            }elseif ($result == -1){
+    //              return $this->error('对应分类存在下级分类,请从新选择');
+    //            }
+    //            $num = count($result)-1;
+    //            $this->view->engine->layout(false);
+    //            $this->assign('result',$result);
+    //            //传递最后一个key值
+    //            $this->assign('num',$num);
+    //            $data = $this->fetch('attribute');
+    //            return  $this->success('ok','',$data);
+    //
+    //        }else{
+    //           return $this->error(__('404 Not Found'));
+    //        }
+    //    }
 
     /***
      * 异步获取商品分类的信息之后（更改之后）
      */
     public function ajaxCategoryInfo()
     {
-        if($this->request->isAjax()){
+        if ($this->request->isAjax()) {
             $categoryId = $this->request->post('categoryId');
-            if(!$categoryId){
+            if (!$categoryId) {
                 $this->error('参数错误，请重新尝试');
             }
             $result = $this->category->getAttrCategoryById($categoryId);
-            if(!$result){
+            if (!$result) {
                 return  $this->error('对应分类不存在,请从新尝试');
-            }elseif ($result == -1){
+            } elseif ($result == -1) {
                 return $this->error('对应分类存在下级分类,请从新选择');
             }
             $this->view->engine->layout(false);
             //传递最后一个key值
-            if($result ==1){ //商品是镜架类型
+            if ($result == 1) { //商品是镜架类型
                 //获取所有框型
                 $allShape = $this->itemAttribute->getAllShape();
                 //获取所有材质
@@ -281,27 +282,26 @@ class Item extends Backend
                 $allOrigin      = $this->itemAttribute->getOrigin();
                 //获取配镜类型
                 $allFrameType   = $this->itemAttribute->getFrameType();
-                $this->assign('AllFrameType',$allFrameType);
-                $this->assign('AllOrigin',$allOrigin);
-                $this->assign('AllGlassesType',$allGlassesType);
-                $this->assign('AllFrameSize',$allFrameSize);
-                $this->assign('AllFrameGender',$allFrameGender);
-                $this->assign('AllFrameShape',$allFrameShape);
-                $this->assign('AllShape',$allShape);
-                $this->assign('AllTexture',$allTexture);
+                $this->assign('AllFrameType', $allFrameType);
+                $this->assign('AllOrigin', $allOrigin);
+                $this->assign('AllGlassesType', $allGlassesType);
+                $this->assign('AllFrameSize', $allFrameSize);
+                $this->assign('AllFrameGender', $allFrameGender);
+                $this->assign('AllFrameShape', $allFrameShape);
+                $this->assign('AllShape', $allShape);
+                $this->assign('AllTexture', $allTexture);
                 //把选择的模板值传递给模板
-                $this->assign('Result',$result);
+                $this->assign('Result', $result);
                 $data = $this->fetch('frame');
-            }elseif($result ==2){ //商品是镜片类型
+            } elseif ($result == 2) { //商品是镜片类型
                 $data = $this->fetch('eyeglass');
-            }elseif($result ==3){ //商品是饰品类型
+            } elseif ($result == 3) { //商品是饰品类型
                 $data = $this->fetch('decoration');
-            }else{
+            } else {
                 $data = $this->fetch('attribute');
             }
-            return  $this->success('ok','',$data);
-
-        }else{
+            return  $this->success('ok', '', $data);
+        } else {
             return $this->error(__('404 Not Found'));
         }
     }
@@ -310,13 +310,13 @@ class Item extends Backend
      */
     public function ajaxGetProOrigin()
     {
-        if($this->request->isAjax()){
+        if ($this->request->isAjax()) {
             $data = $this->itemAttribute->getOrigin();
-            if(!$data){
-                return $this->error('现在没有采购城市,请去添加','','error',0);
+            if (!$data) {
+                return $this->error('现在没有采购城市,请去添加', '', 'error', 0);
             }
-                return $this->success('','',$data,0);
-        }else{
+            return $this->success('', '', $data, 0);
+        } else {
             return $this->error(__('404 Not Found'));
         }
     }
@@ -325,14 +325,14 @@ class Item extends Backend
      */
     public function ajaxGetLikeOriginSku(Request $request)
     {
-        if($this->request->isAjax()){
+        if ($this->request->isAjax()) {
             $origin_sku = $request->post('origin_sku');
             $result = $this->model->likeOriginSku($origin_sku);
-            if(!$result){
+            if (!$result) {
                 return $this->error('订单不存在，请重新尝试');
             }
-            return $this->success('','',$result,0);
-        }else{
+            return $this->success('', '', $result, 0);
+        } else {
             $this->error('404 not found');
         }
     }
@@ -341,36 +341,81 @@ class Item extends Backend
      */
     public function ajaxItemInfo()
     {
-        if($this->request->isAjax()){
+        if ($this->request->isAjax()) {
             $categoryId = $this->request->post('categoryId');
             $sku        = $this->request->post('sku');
-            if(!$categoryId ||!$sku){
+            if (!$categoryId || !$sku) {
                 $this->error('参数错误，请重新尝试');
             }
             $result = $this->category->getAttrCategoryById($categoryId);
-            if(!$result){
+            if (!$result) {
                 return  $this->error('对应分类不存在,请从新尝试');
-            }elseif ($result == -1){
+            } elseif ($result == -1) {
                 return $this->error('对应分类存在下级分类,请从新选择');
             }
-            if($result == 1){
+            if ($result == 1) {
                 $row = $this->model->getItemInfo($sku);
-                if(!$row){
+                if (!$row) {
                     return false;
                 }
-                return  $this->success('ok','',$row);
-
-            }elseif($result ==2){ //商品是镜片类型
+                return  $this->success('ok', '', $row);
+            } elseif ($result == 2) { //商品是镜片类型
                 $data = $this->fetch('eyeglass');
-            }elseif($result ==3){ //商品是饰品类型
+            } elseif ($result == 3) { //商品是饰品类型
                 $data = $this->fetch('decoration');
-            }else{
+            } else {
                 $data = $this->fetch('attribute');
             }
-
-
-        }else{
+        } else {
             return $this->error(__('404 Not Found'));
         }
+    }
+
+    /**
+     * 商品库存列表
+     */
+    public function goodsStockList()
+    {
+        //设置过滤方法
+        $this->request->filter(['strip_tags']);
+        if ($this->request->isAjax()) {
+            //如果发送的来源是Selectpage，则转发到Selectpage
+            if ($this->request->request('keyField')) {
+                return $this->selectpage();
+            }
+            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            $total = $this->model
+                ->where($where)
+                ->order($sort, $order)
+                ->count();
+
+            $list = $this->model
+                ->where($where)
+                ->order($sort, $order)
+                ->limit($offset, $limit)
+                ->select();
+
+            $list = collection($list)->toArray();
+
+            $skus = array_column($list, 'sku');
+            //查询留样库存
+            //查询实际采购信息
+            $purchase_map['purchase_id'] = $id;
+            $purchase = new \app\admin\model\purchase\PurchaseOrder;
+            $hasWhere = ['sku', 'in', $skus];
+            $purchase_list = $purchase->hasWhere('purchaseOrderItem', $hasWhere)
+                ->where($purchase_map)
+                ->field('sku,purchase_num')
+                ->column('*', 'sku');
+
+            //查询在途库存
+
+
+
+            $result = array("total" => $total, "rows" => $list);
+
+            return json($result);
+        }
+        return $this->view->fetch();
     }
 }
