@@ -5,7 +5,7 @@ namespace app\admin\controller\itemmanage;
 use app\common\controller\Backend;
 use think\Request;
 use think\Db;
-
+use app\admin\model\itemmanage\ItemBrand;
 /**
  * 商品管理
  *
@@ -28,10 +28,51 @@ class Item extends Backend
         $this->itemAttribute = new \app\admin\model\itemmanage\attribute\ItemAttribute;
         $this->category = new \app\admin\model\itemmanage\ItemCategory;
         $this->view->assign('categoryList', $this->category->categoryList());
+        $this->view->assign('brandList',(new ItemBrand())->getBrandList());
         $this->view->assign('AllFrameColor', $this->itemAttribute->getFrameColor());
         $num = $this->model->getOriginSku();
         $idStr = sprintf("%06d", $num);
         $this->assign('IdStr', $idStr);
+    }
+    /**
+     * 查看
+     */
+    public function index()
+    {
+        //设置过滤方法
+        $this->request->filter(['strip_tags']);
+        if ($this->request->isAjax()) {
+            //如果发送的来源是Selectpage，则转发到Selectpage
+            if ($this->request->request('keyField')) {
+                return $this->selectpage();
+            }
+            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            $total = $this->model
+                ->where($where)
+                ->order($sort, $order)
+                ->count();
+
+            $list = $this->model
+                ->where($where)
+                ->order($sort, $order)
+                ->limit($offset, $limit)
+                ->select();
+            //求出分类列表
+            $categoryArr = $this->category->getItemCategoryList();
+            //求出品牌列表
+            $brandArr    = (new ItemBrand())->getBrandList();
+            $list = collection($list)->toArray();
+            foreach($list as $k =>$v){
+                if($v['category_id']){
+                    $list[$k]['category_id'] = $categoryArr[$v['category_id']];
+                }
+                $list[$k]['brand_id']  = $brandArr[$v['brand_id']];
+            }
+            $result = array("total" => $total, "rows" => $list);
+
+            return json($result);
+        }
+        return $this->view->fetch();
     }
     public function add()
     {
@@ -120,6 +161,7 @@ class Item extends Backend
                         $data['name'] = $v;
                         $data['category_id'] = $params['category_id'];
                         $data['item_status'] = $params['item_status'];
+                        $data['brand_id']    = $params['brand_id'];
                         $data['create_person'] = session('admin.nickname');
                         $data['create_time'] = date("Y-m-d H:i:s", time());
                         //后来添加的商品数据
@@ -596,5 +638,124 @@ class Item extends Backend
         }
         $this->view->assign("row", $row);
         return $this->view->fetch();
+    }
+    /***
+     *异步获取商品分类列表
+     */
+    public function ajaxGetItemCategoryList()
+    {
+        if($this->request->isAjax()){
+            $json = $this->category->getItemCategoryList();
+            if(!$json){
+                $json = [0=>'请添加商品分类'];
+            }
+            return json($json);
+        }else{
+            $this->error('404 Not found');
+        }
+    }
+    /***
+     * 异步获取品牌分类列表
+     */
+    public function ajaxGetItemBrandList()
+    {
+        if($this->request->isAjax()){
+            $json = (new ItemBrand())->getBrandList();
+            if(!$json){
+                $json = [0=>'请添加商品分类'];
+            }
+            return json($json);
+        }else{
+            $this->error('404 Not found');
+        }
+    }
+    /***
+     * 编辑之后提交审核
+     */
+    public function audit()
+    {
+        if($this->request->isAjax()){
+            $id = $this->request->param('ids');
+            $row = $this->model->get($id);
+            if($row['item_status']!=1){
+                $this->error('此商品状态不能提交审核');
+            }
+            $map['id'] = $id;
+            $data['item_status'] = 2;
+            $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
+            if ($res) {
+                $this->success('提交审核成功');
+            } else {
+                $this->error('提交审核失败');
+            }
+        }else{
+            $this->error('404 Not found');
+        }
+    }
+    /***
+     * 提交审核之后审核通过
+     */
+    public function passAudit()
+    {
+        if($this->request->isAjax()){
+            $id = $this->request->param('ids');
+            $row = $this->model->get($id);
+            if($row['item_status']!=2){
+                $this->error('此商品状态不能审核通过');
+            }
+            $map['id'] = $id;
+            $data['item_status'] = 3;
+            $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
+            if ($res) {
+                $this->success('审核通过成功');
+            } else {
+                $this->error('审核通过失败');
+            }
+        }else{
+            $this->error('404 Not found');
+        }
+    }
+    /***
+     * 提交审核之后审核拒绝
+     */
+    public function auditRefused()
+    {
+        if($this->request->isAjax()){
+            $id = $this->request->param('ids');
+            $row = $this->model->get($id);
+            if($row['item_status']!=2){
+                $this->error('此商品状态不能审核拒绝');
+            }
+            $map['id'] = $id;
+            $data['item_status'] = 4;
+            $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
+            if ($res) {
+                $this->success('审核拒绝成功');
+            } else {
+                $this->error('审核拒绝失败');
+            }
+        }else{
+            $this->error('404 Not found');
+        }
+    }
+
+    /***
+     * 取消商品
+     */
+    public function cancel()
+    {
+        if($this->request->isAjax()){
+            $id = $this->request->param('ids');
+            $map['id'] = $id;
+            $data['item_status'] = 5;
+            $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
+            if ($res) {
+                $this->success('取消成功');
+            } else {
+                $this->error('取消失败');
+            }
+        }else{
+            $this->error('404 Not found');
+        }
     }
 }

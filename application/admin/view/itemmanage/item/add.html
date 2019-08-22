@@ -53,20 +53,27 @@
     }
 </style>
 <form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
-    <div class="form-group" id="item-stock">
+    <div class="form-group" >
         <label class="control-label col-xs-12 col-sm-2">{:__('Category_id')}:</label>
-        <div class="col-xs-12 col-sm-2">
+        <div class="col-xs-12 col-sm-3">
             {:Form::select('row[category_id]', $categoryList, null, ['class'=>'form-control selectpicker', 'data-rule'=>'required','data-live-search' => true,'id'=>'choose_category_id'])}
         </div>
         <label class="control-label col-xs-12 col-sm-2">{:__('ID')}:</label>
-        <div class="col-xs-12 col-sm-2">
+        <div class="col-xs-12 col-sm-3">
             <input id="c-origin_sku" data-rule="required" class="form-control"  name="row[origin_sku]" type="text" value="{$IdStr}" readonly>
         </div>
+    </div>
+    <div class="form-group" id="item-stock">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Brand_id')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            {:Form::select('row[brand_id]', $brandList, null, ['class'=>'form-control selectpicker', 'data-rule'=>'required','data-live-search' => true])}
+        </div>
         <label class="control-label col-xs-12 col-sm-2">{:__('Origin_sku')}:</label>
-        <div class="col-xs-12 col-sm-2">
+        <div class="col-xs-12 col-sm-3">
             <input id="item-count" name="row[item-count]" type="hidden" value=""/>
             <input id="c-origin_skus" data-rule="required" class="form-control"  name="row[origin_skus]" type="text" value="">
         </div>
+
     </div>
     <input type='hidden' name="row[item_status]" id="status" value="1">
     <div class="form-group layer-footer">

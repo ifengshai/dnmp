@@ -32,6 +32,22 @@ class ItemBrand extends Model
         return [1=>'启用',0=>'禁用'];
     }
 
+    /***
+     * 得到商品品牌列表
+     */
+    public function getBrandList()
+    {
+        $result = $this->where('status','=',1)->field('id,name_cn')->select();
+        if(!$result){
+            return false;
+        }
+        $arr = [];
+        $arr[0] = '无';
+        foreach($result as $k=>$v){
+            $arr[$v['id']] = $v['name_cn'];
+        }
+        return $arr;
+    }
     
 
 
