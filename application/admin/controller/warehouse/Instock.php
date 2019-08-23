@@ -455,13 +455,19 @@ class Instock extends Backend
                 //可用库存
                 $item->where($item_map)->setInc('available_stock', $v['in_stock_num']);
 
-                //更新采购商品表 入库数量
+                //更新采购商品表 入库数量 如果为真则为采购入库
                 if ($v['purchase_id']) {
                     $purchase_map['sku'] = $v['sku'];
                     $purchase_map['purchase_id'] = $v['purchase_id'];
                     $purchase->where($purchase_map)->setInc('instock_num', $v['in_stock_num']);
                 }
             }
+            /**
+             * @todo:更新采购入库状态 已入库 部分入库
+             */
+            
+
+
             $this->model->commit();
             $item->commit();
             $purchase->commit();

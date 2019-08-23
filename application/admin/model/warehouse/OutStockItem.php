@@ -31,7 +31,7 @@ class OutStockItem extends Model
             $map['status'] = 2;
             //查询入库信息 以审核时间排序
             $res = (new Instock())->hasWhere('instockItem', $where)
-                ->field('no_stock_num,in_stock_num,in_stock_id,instockItem.id as item_id')
+                ->field('no_stock_num,in_stock_num,in_stock_id,instockItem.id as item_id,sku')
                 ->where($map)
                 ->order('check_time asc')
                 ->select();
@@ -50,6 +50,7 @@ class OutStockItem extends Model
 
                     //记录扣除的采购单id 以及对应的入库单
                     $data[$k]['purchase_id'] = $v['purchase_id'];
+                    $data[$k]['sku'] = $v['sku'];
                     $data[$k]['outstock_item_id'] = $value['id'];
                     $data[$k]['instock_item_id'] = $v['item_id'];
                     $data[$k]['out_stock_num'] = $v['no_stock_num'];
@@ -60,6 +61,7 @@ class OutStockItem extends Model
 
                     //记录扣除的采购单id 以及对应的入库单
                     $data[$k]['purchase_id'] = $v['purchase_id'];
+                    $data[$k]['sku'] = $v['sku'];
                     $data[$k]['outstock_item_id'] = $value['id'];
                     $data[$k]['instock_item_id'] = $v['item_id'];
                     $data[$k]['out_stock_num'] = $value['out_stock_num'];
