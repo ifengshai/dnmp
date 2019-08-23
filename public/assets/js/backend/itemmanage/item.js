@@ -4,6 +4,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
         index: function () {
             // 初始化表格参数配置
             Table.api.init({
+                searchFormVisible: true,
                 extend: {
                     index_url: 'itemmanage/item/index' + location.search,
                     add_url: 'itemmanage/item/add',
@@ -23,6 +24,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                 sortName: 'id',
                 columns: [
                     [
+<<<<<<< HEAD
                         { checkbox: true },
                         { field: 'id', title: __('Id') },
                         { field: 'name', title: __('Name') },
@@ -35,6 +37,52 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                         { field: 'create_time', title: __('Create_time'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime },
                         {
                             field: 'operate', width: "120px", title: __('操作'), table: table, formatter: Table.api.formatter.operate,
+=======
+                        {checkbox: true},
+                        {field: 'id', title: __('Id'),operate:false},
+                        {field: 'name', title: __('Name')},
+                        {field:'origin_sku',title:__('Origin_sku')},
+                        {field:'sku',title:__('Sku')},
+                        {
+                            field:'brand_id',
+                            title:__('Brand_id'),
+                            searchList:$.getJSON('itemmanage/item/ajaxGetItemBrandList'),
+                            formatter:Table.api.formatter.status
+                        },
+                        {field: 'category_id', title: __('Category_id'),
+                            searchList:$.getJSON('itemmanage/item/ajaxGetItemCategoryList'),
+                            formatter: Table.api.formatter.status
+                            //formatter: Controller.api.formatter.devicess
+                        },
+                        {field: 'item_status', title: __('Item_status'),
+                            searchList: { 1: '保存', 2 :'提交审核', 3: '审核通过', 4: '审核拒绝', 5: '取消' },
+                            custom: {  1: 'yellow', 2: 'blue',3: 'success',4: 'red',5: 'danger' },
+                            formatter: Table.api.formatter.status
+                        },
+                        {field: 'stock', title: __('Stock')},
+                        {field:'is_open',title:__('Is_open'),
+                            searchList:{1:'启用',2:'禁用'},
+                            custom:{1:'blue',2:'red'},
+                            formatter:Table.api.formatter.status
+                        },
+                        {
+                            field:'is_new',
+                            title:__('Is_new'),
+                            searchList:{1:'是',2:'不是'},
+                            custom:{1:'blue',2:'red'},
+                            formatter:Table.api.formatter.status
+                        },
+                        {
+                            field:'is_presell',
+                            title:__('Is_presell'),
+                            searchList:{1:'不是',2:'是'},
+                            custom:{1:'blue',2:'red'},
+                            formatter:Table.api.formatter.status
+                        },
+                        {field: 'create_person', title: __('Create_person')},
+                        {field: 'create_time', title: __('Create_time'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime},
+                        {field: 'operate', width: "120px", title: __('操作'), table: table,formatter: Table.api.formatter.operate,
+>>>>>>> c6432d6878a0be5f81d0eb15535f53ee45e9ef94
                             buttons: [
                                 {
                                     name: 'detail',
@@ -54,7 +102,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                                 },
                                 {
                                     name: 'edit',
-                                    text: '',
+                                    text: '编辑',
                                     title: __('Edit'),
                                     classname: 'btn btn-xs btn-success btn-dialog',
                                     icon: 'fa fa-pencil',
@@ -62,6 +110,115 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                                     extend: 'data-area = \'["100%","100%"]\'',
                                     callback: function (data) {
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                    },
+                                    visible: function (row) {
+                                        //返回true时按钮显示,返回false隐藏
+                                        console.log(row.item_status);
+                                        if(row.item_status ==1){
+                                            return true;
+                                        }else{
+                                            return false;
+                                        }
+                                    }
+                                },
+                                {
+                                    name: 'submitAudit',
+                                    text: '提交审核',
+                                    title: __('提交审核'),
+                                    classname: 'btn btn-xs btn-success btn-ajax',
+                                    icon: 'fa fa-pencil',
+                                    url: '/admin/itemmanage/item/audit',
+                                    confirm: '确认提交审核吗',
+                                    success: function (data, ret) {
+                                        Layer.alert(ret.msg);
+                                        $(".btn-refresh").trigger("click");
+                                        //如果需要阻止成功提示，则必须使用return false;
+                                        //return false;
+                                    },
+                                    error: function (data, ret) {
+                                        Layer.alert(ret.msg);
+                                        return false;
+                                    },
+                                    visible: function (row) {
+                                        //返回true时按钮显示,返回false隐藏
+                                        if(row.item_status == 1){
+                                            return true;
+                                        }else{
+                                            return false;
+                                        }
+                                    },
+                                },
+                                {
+                                    name: 'passAudit',
+                                    text: '审核通过',
+                                    title: __('审核通过'),
+                                    classname: 'btn btn-xs btn-success btn-ajax',
+                                    icon: 'fa fa-pencil',
+                                    url: '/admin/itemmanage/item/passAudit',
+                                    confirm:'确认审核通过吗',
+                                    success: function (data, ret) {
+                                        Layer.alert(ret.msg);
+                                        $(".btn-refresh").trigger("click");
+                                        //如果需要阻止成功提示，则必须使用return false;
+                                        //return false;
+                                    },
+                                    error: function (data, ret) {
+                                        Layer.alert(ret.msg);
+                                        return false;
+                                    },
+                                    visible: function (row) {
+                                        //返回true时按钮显示,返回false隐藏
+                                        if(row.item_status == 2){
+                                            return true;
+                                        }else{
+                                            return false;
+                                        }
+                                    }
+                                },
+                                {
+                                    name: 'auditRefused',
+                                    text: '审核拒绝',
+                                    title: __('审核拒绝'),
+                                    classname: 'btn btn-xs btn-danger btn-ajax',
+                                    icon: 'fa fa-pencil',
+                                    url: '/admin/itemmanage/item/auditRefused',
+                                    confirm:'确认审核拒绝吗',
+                                    success: function (data, ret) {
+                                        Layer.alert(ret.msg);
+                                        $(".btn-refresh").trigger("click");
+                                        //如果需要阻止成功提示，则必须使用return false;
+                                        //return false;
+                                    },
+                                    error: function (data, ret) {
+                                        Layer.alert(ret.msg);
+                                        return false;
+                                    },
+                                    visible: function (row) {
+                                        //返回true时按钮显示,返回false隐藏
+                                        if(row.item_status == 2){
+                                            return true;
+                                        }else{
+                                            return false;
+                                        }
+                                    }
+                                },
+                                {
+                                    name: 'auditRefused',
+                                    text: '取消',
+                                    title: __('取消'),
+                                    classname: 'btn btn-xs btn-danger btn-ajax',
+                                    icon: 'fa fa-pencil',
+                                    url: '/admin/itemmanage/item/cancel',
+                                    confirm:'确认取消吗',
+                                    success: function (data, ret) {
+                                        Layer.alert(ret.msg);
+                                        $(".btn-refresh").trigger("click");
+                                        //如果需要阻止成功提示，则必须使用return false;
+                                        //return false;
+                                    },
+                                    error: function (data, ret) {
+                                        Layer.alert(ret.msg);
+                                        return false;
                                     },
                                     visible: function (row) {
                                         //返回true时按钮显示,返回false隐藏

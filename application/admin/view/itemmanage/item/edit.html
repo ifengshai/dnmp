@@ -229,6 +229,10 @@
                 <option value="2"{eq name="$row['itemAttribute']['frame_is_recipe']" value="2"}selected{/eq}>否</option>
             </select>
         </div>
+        <label class="control-label col-xs-12 col-sm-2">{:__('Brand_id')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            {:Form::select('row[brand_id]', $brandList, $row.brand_id, ['class'=>'form-control selectpicker', 'data-rule'=>'required','data-live-search' => true,'disabled'=>'disabled'])}
+        </div>
     </div>
     <div class="form-group ajax-add">
         <label class="control-label col-xs-12 col-sm-2">{:__('Frame_remark')}:</label>

@@ -204,4 +204,16 @@ class ItemCategory extends Model
         return $arr['attribute_group_id'] ? $arr['attribute_group_id'] : false;
 
     }
+    public function getItemCategoryList()
+    {
+        $result = $this->where('is_putaway','=',1)->field('id,name')->select();
+        if(!$result){
+            return false;
+        }
+        $arr = [];
+        foreach($result as $k =>$v){
+            $arr[$v['id']] = $v['name'];
+        }
+        return $arr;
+    }
 }
