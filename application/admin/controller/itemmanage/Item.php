@@ -34,6 +34,7 @@ class Item extends Backend
         $idStr = sprintf("%06d", $num);
         $this->assign('IdStr', $idStr);
     }
+
     /**
      * 查看商品列表
      */
@@ -545,7 +546,7 @@ class Item extends Backend
     /**
      * 商品库存列表
      */
-    public function goodsStockList()
+    public function goods_stock_list()
     {
         //设置过滤方法
         $this->request->filter(['strip_tags']);
@@ -570,25 +571,30 @@ class Item extends Backend
 
             $skus = array_column($list, 'sku');
             //查询留样库存
-            //查询实际采购信息
-            $purchase_map['purchase_id'] = $id;
+            //查询实际采购信息 查询在途库存
+            $purchase_map['stock_status'] = ['in', [1, 2]];
             $purchase = new \app\admin\model\purchase\PurchaseOrder;
-            $hasWhere = ['sku', 'in', $skus];
+            $hasWhere['sku'] = ['in', $skus];
             $purchase_list = $purchase->hasWhere('purchaseOrderItem', $hasWhere)
                 ->where($purchase_map)
-                ->field('sku,purchase_num')
-                ->column('*', 'sku');
+                ->column('sku,purchase_num,instock_num', 'sku');
 
-            //查询在途库存
-
-
-
+            //查询样品数量
+            $check = new \app\admin\model\warehouse\CheckItem;
+            $check_list = $check->where($hasWhere)->column('sample_num', 'sku');
+            
+            foreach($list as &$v) {
+                $v['on_way_stock'] = @$purchase_list[$v['sku']]['purchase_num'] - @$purchase_list[$v['sku']]['instock_num'];
+                $v['sample_stock'] = @$check_list[$v['sku']]['sample_num'];
+            }
+            unset($v);
             $result = array("total" => $total, "rows" => $list);
 
             return json($result);
         }
         return $this->view->fetch();
     }
+
     /***
      * ajax请求比对商品名称是否重复
      */
