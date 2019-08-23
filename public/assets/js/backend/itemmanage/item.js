@@ -47,8 +47,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui'], function ($, 
                         },
                         {field: 'stock', title: __('Stock')},
                         {field:'is_open',title:__('Is_open'),
-                            searchList:{1:'启用',2:'禁用'},
-                            custom:{1:'blue',2:'red'},
+                            searchList:{1:'启用',2:'禁用',3:'回收站'},
+                            custom:{1:'blue',2:'yellow',3:'red'},
                             formatter:Table.api.formatter.status
                         },
                         {
@@ -98,7 +98,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui'], function ($, 
                                     },
                                     visible: function (row) {
                                         //返回true时按钮显示,返回false隐藏
-                                        console.log(row.item_status);
+                                        //console.log(row.item_status);
                                         if(row.item_status ==1){
                                             return true;
                                         }else{
@@ -219,6 +219,86 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui'], function ($, 
 
             // 为表格绑定事件
             Table.api.bindevent(table);
+            //商品审核通过
+            $(document).on('click', '.btn-pass', function () {
+                var ids = Table.api.selectedids(table);
+                Layer.confirm(
+                    __('确定要审核通过吗'),
+                    function (index) {
+                        Backend.api.ajax({
+                            url: "/admin/itemmanage/item/morePassAudit",
+                            data: {ids:ids}
+                        },function(data,ret){
+                            table.bootstrapTable('refresh');
+                            Layer.close(index);
+                        });
+                    }
+                );
+            });
+            //商品审核拒绝
+            $(document).on('click', '.btn-refused', function () {
+                var ids = Table.api.selectedids(table);
+                Layer.confirm(
+                    __('确定要审核拒绝吗'),
+                    function (index) {
+                        Backend.api.ajax({
+                            url: "/admin/itemmanage/item/moreAuditRefused",
+                            data: {ids:ids}
+                        },function(data,ret){
+                            table.bootstrapTable('refresh');
+                            Layer.close(index);
+                        });
+                    }
+                );
+            });
+            //商品启用
+            $(document).on('click', '.btn-start', function () {
+                var ids = Table.api.selectedids(table);
+                Layer.confirm(
+                    __('确定要启用商品吗'),
+                    function (index) {
+                        Backend.api.ajax({
+                            url: "/admin/itemmanage/item/startItem",
+                            data: {ids:ids}
+                        },function(data,ret){
+                            table.bootstrapTable('refresh');
+                            Layer.close(index);
+                        });
+                    }
+                );
+            });
+            //商品禁用
+            $(document).on('click', '.btn-forbidden', function () {
+                var ids = Table.api.selectedids(table);
+                Layer.confirm(
+                    __('确定要禁用商品吗'),
+                    function (index) {
+                        Backend.api.ajax({
+                           url:"/admin/itemmanage/item/forbiddenItem",
+                           data:{ids:ids}
+                        },function (data,ret) {
+                            table.bootstrapTable('refresh');
+                            Layer.close(index);
+                        });
+                    }
+                );
+            });
+            //商品移入回收站
+            $(document).on('click', '.btn-MoveRecycle', function () {
+                var ids = Table.api.selectedids(table);
+                Layer.confirm(
+                    __('确定要移入回收站吗'),
+                    function (index) {
+                        Backend.api.ajax({
+                            url:"/admin/itemmanage/item/moveRecycle",
+                            data:{ids:ids}
+                        },function (data,ret) {
+                            table.bootstrapTable('refresh');
+                            Layer.close(index);
+                        });
+                    }
+                );
+            });
         },
         add: function () {
             Controller.api.bindevent();
@@ -452,6 +532,177 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui'], function ($, 
             Form.api.bindevent($("form[role=form]"));
             $(document).on('click', '.btn-status', function () {
                 $('#status').val(2);
+            });
+        },
+        recycle: function () {
+            // 初始化表格参数配置
+            Table.api.init({
+                searchFormVisible: true,
+                extend: {
+                    index_url: 'itemmanage/item/recycle' + location.search,
+                    add_url: 'itemmanage/item/add',
+                    //edit_url: 'itemmanage/item/edit',
+                    del_url: 'itemmanage/item/del',
+                    multi_url: 'itemmanage/item/multi',
+                    table: 'item',
+                }
+            });
+
+            var table = $("#table");
+
+            // 初始化表格
+            table.bootstrapTable({
+                url: $.fn.bootstrapTable.defaults.extend.index_url,
+                pk: 'id',
+                sortName: 'id',
+                columns: [
+                    [
+                        {checkbox: true},
+                        {field: 'id', title: __('Id'),operate:false},
+                        {field: 'name', title: __('Name')},
+                        {field:'origin_sku',title:__('Origin_sku'),operate:false},
+                        {field:'sku',title:__('Sku')},
+                        {
+                            field:'brand_id',
+                            title:__('Brand_id'),
+                            searchList:$.getJSON('itemmanage/item/ajaxGetItemBrandList'),
+                            formatter:Table.api.formatter.status,
+                            operate:false
+                        },
+                        {field: 'category_id', title: __('Category_id'),
+                            searchList:$.getJSON('itemmanage/item/ajaxGetItemCategoryList'),
+                            formatter: Table.api.formatter.status,
+                            operate:false
+                            //formatter: Controller.api.formatter.devicess
+                        },
+                        {field: 'item_status', title: __('Item_status'),
+                            searchList: { 1: '保存', 2 :'提交审核', 3: '审核通过', 4: '审核拒绝', 5: '取消' },
+                            custom: {  1: 'yellow', 2: 'blue',3: 'success',4: 'red',5: 'danger' },
+                            formatter: Table.api.formatter.status,
+                            operate:false
+                        },
+                        {field: 'stock', title: __('Stock'),operate:false},
+                        {field:'is_open',title:__('Is_open'),
+                            searchList:{1:'启用',2:'禁用',3:'回收站'},
+                            custom:{1:'blue',2:'yellow',3:'red'},
+                            formatter:Table.api.formatter.status,
+                            operate:false
+                        },
+                        {
+                            field:'is_new',
+                            title:__('Is_new'),
+                            searchList:{1:'是',2:'不是'},
+                            custom:{1:'blue',2:'red'},
+                            formatter:Table.api.formatter.status,
+                            operate:false
+                        },
+                        {
+                            field:'is_presell',
+                            title:__('Is_presell'),
+                            searchList:{1:'不是',2:'是'},
+                            custom:{1:'blue',2:'red'},
+                            formatter:Table.api.formatter.status,
+                            operate:false
+                        },
+                        {field: 'create_person', title: __('Create_person'),operate:false},
+                        {field: 'create_time', title: __('Create_time'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime},
+                        {field: 'operate', width: "120px", title: __('操作'), table: table,formatter: Table.api.formatter.operate,
+                            buttons: [
+                                {
+                                    name: 'detail',
+                                    text: '详情',
+                                    title: __('查看详情'),
+                                    extend: 'data-area = \'["100%","100%"]\'',
+                                    classname: 'btn btn-xs btn-primary btn-dialog',
+                                    icon: 'fa fa-list',
+                                    url: '/admin/itemmanage/item/detail',
+                                    callback: function (data) {
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), {title: "回传数据"});
+                                    },
+                                    visible: function (row) {
+                                        //返回true时按钮显示,返回false隐藏
+                                        return true;
+                                    }
+                                },
+                                {
+                                    name: 'passAudit',
+                                    text: '还原',
+                                    title: __('还原'),
+                                    classname: 'btn btn-xs btn-success btn-ajax',
+                                    icon: 'fa fa-pencil',
+                                    url: '/admin/itemmanage/item/oneRestore',
+                                    confirm:'确认还原吗',
+                                    success: function (data, ret) {
+                                        Layer.alert(ret.msg);
+                                        $(".btn-refresh").trigger("click");
+                                        //如果需要阻止成功提示，则必须使用return false;
+                                        //return false;
+                                    },
+                                    error: function (data, ret) {
+                                        Layer.alert(ret.msg);
+                                        return false;
+                                    },
+                                    visible: function (row) {
+                                        //返回true时按钮显示,返回false隐藏
+                                            return true;
+                                    }
+                                }
+                            ]
+                        },
+                        //{field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate}
+                    ]
+                ]
+            });
+
+            // 为表格绑定事件
+            Table.api.bindevent(table);
+            //商品审核通过
+            $(document).on('click', '.btn-pass', function () {
+                var ids = Table.api.selectedids(table);
+                Layer.confirm(
+                    __('确定要审核通过吗'),
+                    function (index) {
+                        Backend.api.ajax({
+                            url: "/admin/itemmanage/item/morePassAudit",
+                            data: {ids:ids}
+                        },function(data,ret){
+                            table.bootstrapTable('refresh');
+                            Layer.close(index);
+                        });
+                    }
+                );
+            });
+            //商品还原
+            $(document).on('click', '.btn-restore', function () {
+                var ids = Table.api.selectedids(table);
+                Layer.confirm(
+                    __('确定要还原吗'),
+                    function (index) {
+                        Backend.api.ajax({
+                            url: "/admin/itemmanage/item/moreRestore",
+                            data: {ids:ids}
+                        },function(data,ret){
+                            table.bootstrapTable('refresh');
+                            Layer.close(index);
+                        });
+                    }
+                );
+            });
+            //商品移入回收站
+            $(document).on('click', '.btn-MoveRecycle', function () {
+                var ids = Table.api.selectedids(table);
+                Layer.confirm(
+                    __('确定要移入回收站吗'),
+                    function (index) {
+                        Backend.api.ajax({
+                            url:"/admin/itemmanage/item/moveRecycle",
+                            data:{ids:ids}
+                        },function (data,ret) {
+                            table.bootstrapTable('refresh');
+                            Layer.close(index);
+                        });
+                    }
+                );
             });
         }
     };

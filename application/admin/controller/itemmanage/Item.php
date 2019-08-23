@@ -35,7 +35,7 @@ class Item extends Backend
         $this->assign('IdStr', $idStr);
     }
     /**
-     * 查看
+     * 查看商品列表
      */
     public function index()
     {
@@ -47,12 +47,12 @@ class Item extends Backend
                 return $this->selectpage();
             }
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
-            $total = $this->model
+            $total = $this->model->where('is_open','<',3)
                 ->where($where)
                 ->order($sort, $order)
                 ->count();
 
-            $list = $this->model
+            $list = $this->model->where('is_open','<',3)
                 ->where($where)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
@@ -74,6 +74,45 @@ class Item extends Backend
         }
         return $this->view->fetch();
     }
+    //商品回收站
+    public function recycle()
+    {
+        //设置过滤方法
+        $this->request->filter(['strip_tags']);
+        if ($this->request->isAjax()) {
+            //如果发送的来源是Selectpage，则转发到Selectpage
+            if ($this->request->request('keyField')) {
+                return $this->selectpage();
+            }
+            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            $total = $this->model->where(['is_open'=>3])
+                ->where($where)
+                ->order($sort, $order)
+                ->count();
+
+            $list = $this->model->where(['is_open'=>3])
+                ->where($where)
+                ->order($sort, $order)
+                ->limit($offset, $limit)
+                ->select();
+            //求出分类列表
+            $categoryArr = $this->category->getItemCategoryList();
+            //求出品牌列表
+            $brandArr    = (new ItemBrand())->getBrandList();
+            $list = collection($list)->toArray();
+            foreach($list as $k =>$v){
+                if($v['category_id']){
+                    $list[$k]['category_id'] = $categoryArr[$v['category_id']];
+                }
+                $list[$k]['brand_id']  = $brandArr[$v['brand_id']];
+            }
+            $result = array("total" => $total, "rows" => $list);
+
+            return json($result);
+        }
+        return $this->view->fetch();
+    }
+    //新增商品
     public function add()
     {
         if ($this->request->isPost()) {
@@ -753,6 +792,135 @@ class Item extends Backend
                 $this->success('取消成功');
             } else {
                 $this->error('取消失败');
+            }
+        }else{
+            $this->error('404 Not found');
+        }
+    }
+    /***
+     * 启用商品
+     */
+    public function startItem($ids=null)
+    {
+        if($this->request->isAjax()){
+            $map['id'] = ['in',$ids];
+            $data['is_open'] = 1;
+            $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
+            if ($res !== false) {
+                $this->success('启动成功');
+            } else {
+                $this->error('启动失败');
+            }
+        }else{
+            $this->error('404 Not found');
+        }
+    }
+    /***
+     * 禁止商品
+     */
+    public function forbiddenItem($ids=null)
+    {
+        if($this->request->isAjax()){
+            $map['id'] = ['in',$ids];
+            $data['is_open'] = 2;
+            $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
+            if ($res !== false) {
+                $this->success('禁止成功');
+            } else {
+                $this->error('禁止失败');
+            }
+        }else{
+            $this->error('404 Not found');
+        }
+    }
+    /***
+     * 多个一起审核通过
+     */
+    public function morePassAudit($ids=null)
+    {
+        if($this->request->isAjax()){
+            $map['id'] = ['in',$ids];
+            $map['item_status'] = 2;
+            $data['item_status'] = 3;
+            $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
+            if ($res !== false) {
+                $this->success('审核成功');
+            } else {
+                $this->error('审核失败');
+            }
+        }else{
+            $this->error('404 Not found');
+        }
+    }
+    /***
+     * 多个一起审核拒绝
+     */
+    public function moreAuditRefused($ids=null)
+    {
+        if($this->request->isAjax()){
+            $map['id'] = ['in',$ids];
+            $map['item_status'] = 2;
+            $data['item_status'] = 4;
+            $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
+            if ($res !== false) {
+                $this->success('拒绝审核成功');
+            } else {
+                $this->error('拒绝审核失败');
+            }
+        }else{
+            $this->error('404 Not found');
+        }
+    }
+    /***
+     * 多个商品移入回收站
+     */
+    public function moveRecycle($ids=null)
+    {
+        if($this->request->isAjax()){
+            $map['id'] = ['in',$ids];
+            $data['is_open'] = 3;
+            $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
+            if ($res !== false) {
+                $this->success('移入回收站成功');
+            } else {
+                $this->error('移入回收站失败');
+            }
+        }else{
+            $this->error('404 Not found');
+        }
+    }
+    /***
+     * 一个还原
+     */
+    public function oneRestore()
+    {
+        if($this->request->isAjax()){
+            $id = $this->request->param('ids');
+            $map['id'] = $id;
+            $data['is_open'] = 1;
+            $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
+            if ($res) {
+                $this->success('还原成功');
+            } else {
+                $this->error('还原失败');
+            }
+        }else{
+            $this->error('404 Not found');
+        }
+    }
+    /***
+     * 多个还原
+     */
+    public function moreRestore($ids=null)
+    {
+        if($this->request->isAjax()){
+            $map['id'] = ['in',$ids];
+            $data['is_open'] = 1;
+            $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
+            if ($res !== false) {
+                $this->success('还原成功');
+            } else {
+                $this->error('还原失败');
             }
         }else{
             $this->error('404 Not found');

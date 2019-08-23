@@ -369,6 +369,12 @@ class Backend extends Controller
                     break;
             }
         }
+        if(!empty($this->model)){
+            $fieldArr = $this->model->getTableFields();
+            if(in_array('is_del',$fieldArr)){
+                $where[] = ['is_del','=',1];
+            }
+        }
         $where = function ($query) use ($where) {
             foreach ($where as $k => $v) {
                 if (is_array($v)) {
