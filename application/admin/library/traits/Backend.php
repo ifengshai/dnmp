@@ -198,38 +198,38 @@ trait Backend
     /**
      * 删除(原先)
      */
-//    public function del($ids = "")
-//    {
-//        if ($ids) {
-//            $pk = $this->model->getPk();
-//            $adminIds = $this->getDataLimitAdminIds();
-//            if (is_array($adminIds)) {
-//                $this->model->where($this->dataLimitField, 'in', $adminIds);
-//            }
-//            $list = $this->model->where($pk, 'in', $ids)->select();
-//
-//            $count = 0;
-//            Db::startTrans();
-//            try {
-//                foreach ($list as $k => $v) {
-//                    $count += $v->delete();
-//                }
-//                Db::commit();
-//            } catch (PDOException $e) {
-//                Db::rollback();
-//                $this->error($e->getMessage());
-//            } catch (Exception $e) {
-//                Db::rollback();
-//                $this->error($e->getMessage());
-//            }
-//            if ($count) {
-//                $this->success();
-//            } else {
-//                $this->error(__('No rows were deleted'));
-//            }
-//        }
-//        $this->error(__('Parameter %s can not be empty', 'ids'));
-//    }
+    //    public function del($ids = "")
+    //    {
+    //        if ($ids) {
+    //            $pk = $this->model->getPk();
+    //            $adminIds = $this->getDataLimitAdminIds();
+    //            if (is_array($adminIds)) {
+    //                $this->model->where($this->dataLimitField, 'in', $adminIds);
+    //            }
+    //            $list = $this->model->where($pk, 'in', $ids)->select();
+    //
+    //            $count = 0;
+    //            Db::startTrans();
+    //            try {
+    //                foreach ($list as $k => $v) {
+    //                    $count += $v->delete();
+    //                }
+    //                Db::commit();
+    //            } catch (PDOException $e) {
+    //                Db::rollback();
+    //                $this->error($e->getMessage());
+    //            } catch (Exception $e) {
+    //                Db::rollback();
+    //                $this->error($e->getMessage());
+    //            }
+    //            if ($count) {
+    //                $this->success();
+    //            } else {
+    //                $this->error(__('No rows were deleted'));
+    //            }
+    //        }
+    //        $this->error(__('Parameter %s can not be empty', 'ids'));
+    //    }
     //删除修改之后
     public function del($ids = "")
     {
@@ -244,20 +244,20 @@ trait Backend
             $count = 0;
             Db::startTrans();
             try {
-                if(!empty($this->model)){
+                if (!empty($this->model)) {
                     $fieldArr = $this->model->getTableFields();
-                    if(in_array('is_del',$fieldArr)){
-                        $this->model->where($pk, 'in', $ids)->update(['is_del'=>2]);
-                        $count=1;
-                    }else{
+                    if (in_array('is_del', $fieldArr)) {
+                        $this->model->where($pk, 'in', $ids)->update(['is_del' => 2]);
+                        $count = 1;
+                    } else {
                         foreach ($list as $k => $v) {
                             $count += $v->delete();
                         }
                     }
-                }else{
-                        foreach ($list as $k => $v) {
-                            $count += $v->delete();
-                        }
+                } else {
+                    foreach ($list as $k => $v) {
+                        $count += $v->delete();
+                    }
                 }
 
                 Db::commit();
