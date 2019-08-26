@@ -68,12 +68,27 @@ class ItemPlatformSku extends Model
 
 
     }
-    
-
-
-
-
-
-
-
+    /***
+     * 查找平台SKU
+     */
+    public function likePlatformSku($sku)
+    {
+        $result = $this->where('platform_sku','like',"%{$sku}%")->field('platform_sku')->limit(10)->select();
+        if (!$result) {
+            return false;
+        }
+        $arr = [];
+        foreach ($result as $k => $v) {
+            $arr[] = $v['platform_sku'];
+        }
+        return $arr;
+    }
+    /***
+     * 查看用户输入的sku是否存在
+     */
+    public function getPlatformSku($platform_sku)
+    {
+        $result = $this->where('platform_sku','eq',$platform_sku)->field('id,platform_sku')->find();
+        return $result ? $result : false;
+    }
 }

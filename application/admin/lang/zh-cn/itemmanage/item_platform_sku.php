@@ -12,8 +12,10 @@ return [
     'Presell_residue_num'   => '预售剩余数量',
     'Presell_start_time'    => '预售开始时间',
     'Presell_end_time'      => '预售结束时间',
-    'Presell_status'        => '预售状态 1 未开始 2 预售中 3 已结束',
+    'Presell_status'        => '预售状态',
     'Presell_create_person' => '预售创建人',
     'Create_person'         => '创建人',
-    'Create_time'           => '创建时间'
+    'Create_time'           => '创建时间',
+    'Platform sku cannot be empty' => '平台sku不能为空',
+    'SKU pre-order quantity cannot be empty' => 'SKU预售数量不能为空'
 ];

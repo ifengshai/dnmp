@@ -502,7 +502,7 @@ class Item extends Backend
             $origin_sku = $request->post('origin_sku');
             $result = $this->model->likeOriginSku($origin_sku);
             if (!$result) {
-                return $this->error('订单不存在，请重新尝试');
+                return $this->error('商品SKU不存在，请重新尝试');
             }
             return $this->success('', '', $result, 0);
         } else {
