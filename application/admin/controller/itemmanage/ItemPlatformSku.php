@@ -169,6 +169,12 @@ class ItemPlatformSku extends Backend
                 if(empty($params['presell_num'])){
                     $this->error(__('SKU pre-order quantity cannot be empty'));
                 }
+//                echo $params['presell_start_time'];
+//                echo '<br>';
+//                echo $params['presell_end_time'];
+//                echo '<br>';
+//                echo date("Y-m-d H:i:s", time());
+//                exit;
                 if ($this->dataLimit && $this->dataLimitFieldAutoFill) {
                     $params[$this->dataLimitField] = $this->auth->id;
                 }
@@ -182,7 +188,10 @@ class ItemPlatformSku extends Backend
                         $this->model->validateFailException(true)->validate($validate);
                     }
                     $params['presell_create_person'] = session('admin.nickname');
-                    $params['presell_create_time'] = date("Y-m-d H:i:s", time());
+                    $params['presell_create_time'] = $now_time =  date("Y-m-d H:i:s", time());
+                    if($now_time>=$params['presell_start_time']){ //如果当前时间大于开始时间
+                        $params['presell_status'] = 2;
+                    }
                     $result = $this->model->allowField(true)->save($params,['platform_sku'=>$params['platform_sku']]);
                     Db::commit();
                 } catch (ValidateException $e) {
@@ -204,6 +213,118 @@ class ItemPlatformSku extends Backend
             $this->error(__('Parameter %s can not be empty', ''));
         }
         return $this->view->fetch();
+    }
+    /***
+     * 编辑商品预售
+     */
+    public function editPresell($ids=null)
+    {
+        $row = $this->model->get($ids);
+        if (!$row) {
+            $this->error(__('No Results were found'));
+        }
+        $adminIds = $this->getDataLimitAdminIds();
+        if (is_array($adminIds)) {
+            if (!in_array($row[$this->dataLimitField], $adminIds)) {
+                $this->error(__('You have no permission'));
+            }
+        }
+        if ($this->request->isPost()) {
+            $params = $this->request->post("row/a");
+            if ($params) {
+                $params = $this->preExcludeFields($params);
+                if(empty($params['platform_sku'])){
+                    $this->error(__('Platform sku cannot be empty'));
+                }
+                if(empty($params['presell_num'])){
+                    $this->error(__('SKU pre-order quantity cannot be empty'));
+                }
+                $result = false;
+                Db::startTrans();
+                try {
+                    //是否采用模型验证
+                    if ($this->modelValidate) {
+                        $name = str_replace("\\model\\", "\\validate\\", get_class($this->model));
+                        $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.edit' : $name) : $this->modelValidate;
+                        $row->validateFailException(true)->validate($validate);
+                    }
+                    $params['presell_create_person'] = session('admin.nickname');
+                    $params['presell_create_time'] = $now_time =  date("Y-m-d H:i:s", time());
+                    if($now_time>=$params['presell_start_time']){ //如果当前时间大于开始时间
+                        $params['presell_status'] = 2;
+                    }
+                    $result = $row->allowField(true)->save($params,['platform_sku'=>$params['platform_sku']]);
+                    Db::commit();
+                } catch (ValidateException $e) {
+                    Db::rollback();
+                    $this->error($e->getMessage());
+                } catch (PDOException $e) {
+                    Db::rollback();
+                    $this->error($e->getMessage());
+                } catch (Exception $e) {
+                    Db::rollback();
+                    $this->error($e->getMessage());
+                }
+                if ($result !== false) {
+                    $this->success();
+                } else {
+                    $this->error(__('No rows were updated'));
+                }
+            }
+            $this->error(__('Parameter %s can not be empty', ''));
+        }
+        $this->view->assign("row", $row);
+        return $this->view->fetch();
+    }
+    /***
+     * 开启预售
+     */
+    public function openStart($ids = null)
+    {
+        if($this->request->isAjax()){
+            $row = $this->model->get($ids);
+            if($row['presell_status'] == 2){
+                $this->error(__('Pre-sale on, do not repeat on'));
+            }
+            $now_time = date('Y-m-d H:i:s',time());
+            if($row['presell_end_time']<$now_time){
+                $this->error(__('The closing time has expired, please select again'));
+            }
+            $map['id'] = $ids;
+            $data['presell_status'] = 2;
+            $data['presell_open_time'] =  date('Y-m-d H:i:s',time());
+            $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
+            if ($res) {
+                $this->success('预售开启成功');
+            } else {
+                $this->error('预售开启失败');
+            }
+        }else{
+            $this->error('404 Not found');
+        }
+    }
+    /***
+     * 关闭预售
+     */
+    public function openEnd($ids = null)
+    {
+        if($this->request->isAjax()){
+            $row = $this->model->get($ids);
+            if($row['presell_status'] == 3){
+                $this->error(__('Pre-sale on, do not repeat on'));
+            }
+            $map['id'] = $ids;
+            $data['presell_status'] = 3;
+            $data['presell_open_time'] =  date('Y-m-d H:i:s',time());
+            $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
+            if ($res) {
+                $this->success('关闭预售成功');
+            } else {
+                $this->error('关闭预售失败');
+            }
+        }else{
+            $this->error('404 Not found');
+        }
     }
     /***
      * 异步查询平台sku

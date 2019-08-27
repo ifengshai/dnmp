@@ -132,6 +132,103 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui'], function ($, 
         api: {
             bindevent: function () {
                 Form.api.bindevent($("form[role=form]"));
+                $('#c-platform_sku').autocomplete({
+                    source: function (request, response) {
+                        var origin_sku = $('#c-platform_sku').val();
+                        $.ajax({
+                            type: "POST",
+                            url: "itemmanage/item_platform_sku/ajaxGetLikePlatformSku",
+                            dataType: "json",
+                            cache: false,
+                            async: false,
+                            data: {
+                                origin_sku: origin_sku
+                            },
+                            success: function (json) {
+                                var data = json.data;
+                                response($.map(data, function (item) {
+                                    return {
+                                        label: item,//下拉框显示值
+                                        value: item,//选中后，填充到input框的值
+                                        //id:item.bankCodeInfo//选中后，填充到id里面的值
+                                    };
+                                }));
+                            }
+                        });
+                    },
+                    delay: 10,//延迟100ms便于输入
+                    select: function (event, ui) {
+                        $("#bankUnionNo").val(ui.item.id);//取出在return里面放入到item中的属性
+                    },
+                    scroll: true,
+                    pagingMore: true,
+                    max: 5000
+                });
+                //检查填写的平台sku数据库有没有
+                $(document).on('change','#c-platform_sku',function () {
+                    var platform_sku = $(this).val();
+                    Backend.api.ajax({
+                        url: 'itemmanage/item_platform_sku/ajaxGetPlatformSkuInfo',
+                        data: { platform_sku: platform_sku }
+                    }, function (data, ret) {
+                        console.log(ret.data);
+                        $('.btn-success').removeClass('btn-disabled disabled');
+                        return false;
+                    }, function (data, ret) {
+                        //失败的回调
+                        $('.btn-success').addClass('btn-disabled disabled');
+                        Layer.alert(ret.msg);
+                        return false;
+                    });
+                });
+                //选中的开始时间和现在的时间比较
+                $(document).on('dp.change','#c-presell_start_time',function () {
+                    var time_value = $(this).val();
+                    //console.log(time_value);
+                    function getNow(s) {
+                        return s < 10 ? '0' + s: s;
+                    }
+
+                    var myDate = new Date();
+
+                    var year=myDate.getFullYear();        //获取当前年
+                    var month=myDate.getMonth()+1;   //获取当前月
+                    var date=myDate.getDate();            //获取当前日
+                    var h=myDate.getHours();              //获取当前小时数(0-23)
+                    var m=myDate.getMinutes()-10;          //获取当前分钟数(0-59)
+                    var s=myDate.getSeconds();
+                    var now=year+'-'+getNow(month)+"-"+getNow(date)+" "+getNow(h)+':'+getNow(m)+":"+getNow(s);
+                    if(time_value>now){
+                        //console.log(1111);
+                    }else{
+                        Layer.alert('预售开始时间超过当前时间,如果添加则默认开始预售');
+                        //console.log(2222);
+                    }
+                    //console.log(now);
+                });
+                ////选中的结束时间和现在的时间比较
+                $(document).on('dp.change','#c-presell_end_time',function () {
+                    var time_end_value = $(this).val();
+                    console.log(time_end_value);
+                    function getNow(s) {
+                        return s < 10 ? '0' + s: s;
+                    }
+                    var myDate = new Date();
+                    var year=myDate.getFullYear();        //获取当前年
+                    var month=myDate.getMonth()+1;   //获取当前月
+                    var date=myDate.getDate();            //获取当前日
+                    var h=myDate.getHours();              //获取当前小时数(0-23)
+                    var m=myDate.getMinutes()-10;          //获取当前分钟数(0-59)
+                    var s=myDate.getSeconds();
+                    var now=year+'-'+getNow(month)+"-"+getNow(date)+" "+getNow(h)+':'+getNow(m)+":"+getNow(s);
+                    if(time_end_value>now){
+                        $('.btn-success').removeClass('btn-disabled disabled');
+                    }else{
+                        $('.btn-success').addClass('btn-disabled disabled');
+                        Layer.alert('当前时间大于预售结束时间无法添加,请重新选择');
+                        return false;
+                    }
+                });
             }
         },
         presell: function () {
@@ -140,7 +237,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui'], function ($, 
                 extend: {
                     index_url: 'itemmanage/item_platform_sku/presell' + location.search,
                     add_url: 'itemmanage/item_platform_sku/addPresell',
-                    //edit_url: 'itemmanage/item_platform_sku/edit',
+                    edit_url: 'itemmanage/item_platform_sku/editPresell',
                     //del_url: 'itemmanage/item_platform_sku/del',
                     multi_url: 'itemmanage/item_platform_sku/multi',
                     table: 'item_platform_sku',
@@ -271,6 +368,60 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui'], function ($, 
                                         // }
                                     },
                                 },
+                                {
+                                    name: 'openStart',
+                                    text: '开启预售',
+                                    title: __('开启预售'),
+                                    classname: 'btn btn-xs btn-danger btn-ajax',
+                                    url: '/admin/itemmanage/item_platform_sku/openStart',
+                                    confirm: '确定要开启预售吗',
+                                    success: function (data, ret) {
+                                        Layer.alert(ret.msg);
+                                        $(".btn-refresh").trigger("click");
+                                        //如果需要阻止成功提示，则必须使用return false;
+                                        //return false;
+                                    },
+                                    error: function (data, ret) {
+                                        Layer.alert(ret.msg);
+                                        return false;
+                                    },
+                                    visible: function (row) {
+                                        //返回true时按钮显示,返回false隐藏
+                                        return true;
+                                        // if (row.outer_sku_status == 2) {
+                                        //     return true;
+                                        // } else {
+                                        //     return false;
+                                        // }
+                                    },
+                                },
+                                {
+                                    name: 'openEnd',
+                                    text: '结束预售',
+                                    title: __('结束预售'),
+                                    classname: 'btn btn-xs btn-danger btn-ajax',
+                                    url: '/admin/itemmanage/item_platform_sku/openEnd',
+                                    confirm: '确定要结束预售吗',
+                                    success: function (data, ret) {
+                                        Layer.alert(ret.msg);
+                                        $(".btn-refresh").trigger("click");
+                                        //如果需要阻止成功提示，则必须使用return false;
+                                        //return false;
+                                    },
+                                    error: function (data, ret) {
+                                        Layer.alert(ret.msg);
+                                        return false;
+                                    },
+                                    visible: function (row) {
+                                        //返回true时按钮显示,返回false隐藏
+                                        return true;
+                                        // if (row.outer_sku_status == 2) {
+                                        //     return true;
+                                        // } else {
+                                        //     return false;
+                                        // }
+                                    },
+                                },
                             ]
                         },
 
@@ -284,104 +435,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui'], function ($, 
         addpresell:function () {
             Controller.api.bindevent();
             Form.api.bindevent($("form[role=form]"));
-            //模糊匹配平台sku
-            $('#c-platform_sku').autocomplete({
-                source: function (request, response) {
-                    var origin_sku = $('#c-platform_sku').val();
-                    $.ajax({
-                        type: "POST",
-                        url: "itemmanage/item_platform_sku/ajaxGetLikePlatformSku",
-                        dataType: "json",
-                        cache: false,
-                        async: false,
-                        data: {
-                            origin_sku: origin_sku
-                        },
-                        success: function (json) {
-                            var data = json.data;
-                            response($.map(data, function (item) {
-                                return {
-                                    label: item,//下拉框显示值
-                                    value: item,//选中后，填充到input框的值
-                                    //id:item.bankCodeInfo//选中后，填充到id里面的值
-                                };
-                            }));
-                        }
-                    });
-                },
-                delay: 10,//延迟100ms便于输入
-                select: function (event, ui) {
-                    $("#bankUnionNo").val(ui.item.id);//取出在return里面放入到item中的属性
-                },
-                scroll: true,
-                pagingMore: true,
-                max: 5000
-            });
-            //检查填写的平台sku数据库有没有
-            $(document).on('change','#c-platform_sku',function () {
-                var platform_sku = $(this).val();
-                Backend.api.ajax({
-                    url: 'itemmanage/item_platform_sku/ajaxGetPlatformSkuInfo',
-                    data: { platform_sku: platform_sku }
-                }, function (data, ret) {
-                    console.log(ret.data);
-                    $('.btn-success').removeClass('btn-disabled disabled');
-                    return false;
-                }, function (data, ret) {
-                    //失败的回调
-                    $('.btn-success').addClass('btn-disabled disabled');
-                    Layer.alert(ret.msg);
-                    return false;
-                });
-            });
-            //选中的开始时间和现在的时间比较
-            $(document).on('dp.change','#c-presell_start_time',function () {
-                var time_value = $(this).val();
-                //console.log(time_value);
-                function getNow(s) {
-                    return s < 10 ? '0' + s: s;
-                }
-
-                var myDate = new Date();
-
-                var year=myDate.getFullYear();        //获取当前年
-                var month=myDate.getMonth()+1;   //获取当前月
-                var date=myDate.getDate();            //获取当前日
-                var h=myDate.getHours();              //获取当前小时数(0-23)
-                var m=myDate.getMinutes()-10;          //获取当前分钟数(0-59)
-                var s=myDate.getSeconds();
-                var now=year+'-'+getNow(month)+"-"+getNow(date)+" "+getNow(h)+':'+getNow(m)+":"+getNow(s);
-                if(time_value>now){
-                    //console.log(1111);
-                }else{
-                    Layer.alert('预售开始时间超过当前时间,如果添加则默认开始预售');
-                    //console.log(2222);
-                }
-                //console.log(now);
-            });
-            ////选中的结束时间和现在的时间比较
-            $(document).on('dp.change','#c-presell_end_time',function () {
-                var time_end_value = $(this).val();
-                console.log(time_end_value);
-                function getNow(s) {
-                    return s < 10 ? '0' + s: s;
-                }
-                var myDate = new Date();
-                var year=myDate.getFullYear();        //获取当前年
-                var month=myDate.getMonth()+1;   //获取当前月
-                var date=myDate.getDate();            //获取当前日
-                var h=myDate.getHours();              //获取当前小时数(0-23)
-                var m=myDate.getMinutes()-10;          //获取当前分钟数(0-59)
-                var s=myDate.getSeconds();
-                var now=year+'-'+getNow(month)+"-"+getNow(date)+" "+getNow(h)+':'+getNow(m)+":"+getNow(s);
-                if(time_end_value>now){
-                    $('.btn-success').removeClass('btn-disabled disabled');
-                }else{
-                    $('.btn-success').addClass('btn-disabled disabled');
-                    Layer.alert('当前时间大于预售结束时间无法添加,请重新选择');
-                    return false;
-                }
-            });
+        },
+        editpresell:function () {
+            Controller.api.bindevent();
+            Form.api.bindevent($("form[role=form]"));
         }
     };
     return Controller;
