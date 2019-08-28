@@ -6,6 +6,7 @@ use app\common\controller\Backend;
 use think\Request;
 use think\Db;
 use app\admin\model\itemmanage\ItemBrand;
+use app\admin\model\itemmanage\ItemPlatformSku;
 /**
  * 商品管理
  *
@@ -501,7 +502,7 @@ class Item extends Backend
             $origin_sku = $request->post('origin_sku');
             $result = $this->model->likeOriginSku($origin_sku);
             if (!$result) {
-                return $this->error('订单不存在，请重新尝试');
+                return $this->error('商品SKU不存在，请重新尝试');
             }
             return $this->success('', '', $result, 0);
         } else {
@@ -752,6 +753,8 @@ class Item extends Backend
             $data['item_status'] = 3;
             $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
             if ($res) {
+                //添加到商品平台sku
+                (new ItemPlatformSku())->addPlatformSku($row);
                 $this->success('审核通过成功');
             } else {
                 $this->error('审核通过失败');
@@ -850,6 +853,12 @@ class Item extends Backend
             $data['item_status'] = 3;
             $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
             if ($res !== false) {
+                $row = $this->model->where('id','in',$ids)->field('sku,name')->select();
+                if($row){
+                    foreach ($row as $val){
+                        (new ItemPlatformSku())->addPlatformSku($val);
+                    }
+                }
                 $this->success('审核成功');
             } else {
                 $this->error('审核失败');
