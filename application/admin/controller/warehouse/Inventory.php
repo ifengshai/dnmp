@@ -37,7 +37,7 @@ class Inventory extends Backend
      * 需要将application/admin/library/traits/Backend.php中对应的方法复制到当前控制器,然后进行修改
      */
 
-     /**
+    /**
      * 查看
      */
     public function index()
@@ -62,6 +62,18 @@ class Inventory extends Backend
                 ->select();
 
             $list = collection($list)->toArray();
+            foreach ($list as &$v) {
+                $map['inventory_id'] = $v['id'];
+                //查询总数量
+                $allCount = $this->item->where($map)->count();
+                $smap['is_add'] = 1;
+                $smap['inventory_id'] = $v['id'];
+                //查询盘点数量
+                $count = $this->item->where($smap)->count();
+                $count = $count ?? '0';
+                $v['num'] = $count . '/' . $allCount;
+            }
+            unset($v);
             $result = array("total" => $total, "rows" => $list);
 
             return json($result);
@@ -340,6 +352,10 @@ class Inventory extends Backend
         if (!$row) {
             $this->error(__('No Results were found'));
         }
+        if ($row['status'] > 0) {
+            $this->error(__('此状态不能编辑！！'), '/admin/warehouse/Inventory/index');
+        }
+
         $adminIds = $this->getDataLimitAdminIds();
         if (is_array($adminIds)) {
             if (!in_array($row[$this->dataLimitField], $adminIds)) {
@@ -550,7 +566,7 @@ class Inventory extends Backend
                         $params['error_qty'] = $params['inventory_qty'] - $row['available_stock'];
                         $params['is_add'] = 1;
                     }
-                    
+
                     $result = $row->allowField(true)->save($params);
                     if ($result !== false) {
                         //修改状态为盘点中
@@ -574,6 +590,26 @@ class Inventory extends Backend
                 }
             }
             $this->error(__('Parameter %s can not be empty', ''));
+        }
+    }
+
+    /**
+     * 结束盘点
+     */
+    public function endInventory()
+    {
+        $ids = input('inventory_id/a');
+
+        if ($this->request->isPost()) {
+            //修改状态为盘点中
+            $res = $this->model->save(['status' => 2], ['id' => ['in', $ids]]);
+            if ($res !== false) {
+                //修改明细表
+                $this->item->save(['is_add' => 1], ['inventory_id' => ['in', $ids]]);
+                $this->success('操作成功！！');
+            } else {
+                $this->error('操作失败！！');
+            }
         }
     }
 }

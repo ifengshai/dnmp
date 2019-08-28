@@ -49,8 +49,9 @@ class Zeelool extends Backend
             }
 
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            $map['status'] = ['in', ['free_processing', 'processing']];
             $total = $this->model
-                ->where('status', 'in', array('free_processing', 'processing'))
+                ->where($map)
                 ->where($where)
                 ->order($sort, $order)
                 ->count();
@@ -61,7 +62,7 @@ class Zeelool extends Backend
                      custom_match_delivery_created_at,custom_print_label,custom_order_prescription,custom_print_label_created_at,custom_service_name';
             $list = $this->model
                 // ->field($field)
-                ->where('status', 'in', array('free_processing', 'processing'))
+                ->where($map)
                 ->where($where)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
@@ -72,6 +73,32 @@ class Zeelool extends Backend
             return json($result);
         }
         return $this->view->fetch();
+    }
+
+    /**
+     * 条形码扫码处理
+     */
+    public function _list()
+    {
+        //设置过滤方法
+        $this->request->filter(['strip_tags']);
+        if ($this->request->isAjax()) {
+            //订单号
+            $increment_id = $this->request->post('increment_id');
+            if ($increment_id) {
+                $map['increment_id'] = $increment_id;
+                $map['status'] = ['in', ['free_processing', 'processing']];
+                $list = $this->model
+                    // ->field($field)
+                    ->where($map)
+                    ->find();
+                $result = ['code' => 1, 'data' => $list];
+            } else {
+                $result = array("total" => 0, "rows" => []);
+            }
+            return json($result);
+        }
+        return $this->view->fetch('_list');
     }
 
     public function detail($ids = null)
@@ -91,6 +118,7 @@ class Zeelool extends Backend
     {
         // echo 'tag_printed';
         $entity_ids = input('id_params/a');
+        $label = input('label');
         if ($entity_ids) {
             //多数据库
             $map['entity_id'] = ['in', $entity_ids];
@@ -110,7 +138,18 @@ class Zeelool extends Backend
                 $this->error($e->getMessage());
             }
             if ($result) {
-                return $this->success('标记成功!', '', 'success', 200);
+                //用来判断是否从_list列表页进来
+                if ($label == 'list') {
+                    //订单号
+                    $map['entity_id'] = ['in', $entity_ids];
+                    $list = $this->model
+                        ->where($map)
+                        ->select();
+                    $list = collection($list)->toArray();
+                } else {
+                    $list = 'success';
+                }
+                return $this->success('标记成功!', '', $list, 200);
             } else {
                 return $this->error('失败', '', 'error', 0);
             }
@@ -122,6 +161,7 @@ class Zeelool extends Backend
     {
         $entity_ids = input('id_params/a');
         $status = input('status');
+        $label = input('label');
         if ($entity_ids) {
             //多数据库
             $map['entity_id'] = ['in', $entity_ids];
@@ -166,9 +206,20 @@ class Zeelool extends Backend
                 $this->error($e->getMessage());
             }
             if ($result) {
-                return $this->success('标记成功!', '', 'success', 200);
+                //用来判断是否从_list列表页进来
+                if ($label == 'list') {
+                    //订单号
+                    $map['entity_id'] = ['in', $entity_ids];
+                    $list = $this->model
+                        ->where($map)
+                        ->select();
+                    $list = collection($list)->toArray();
+                } else {
+                    $list = 'success';
+                }
+                return $this->success('操作成功!', '', $list, 200);
             } else {
-                return $this->error('失败', '', 'error', 0);
+                return $this->error('操作失败', '', 'error', 0);
             }
         }
     }

@@ -99,7 +99,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echarts', 'echarts-t
 
             //审核通过
             $(document).on('click', '.btn-open', function () {
-                var ids = Table.api.getrowdata(table);
+                var ids = Table.api.selectedids(table);
                 Backend.api.ajax({
                     url: '/admin/warehouse/instock/setStatus',
                     data: { ids: ids, status: 2 }

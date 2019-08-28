@@ -15,7 +15,7 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
  */
 class Voogueme extends Backend
 {
-    
+
     /**
      * Sales_flat_order模型对象
      * @var \app\admin\model\order\Sales_flat_order
@@ -27,16 +27,15 @@ class Voogueme extends Backend
         parent::_initialize();
         $this->model = new \app\admin\model\order\printlabel\Voogueme;
         $this->zeelool = new \app\admin\model\order\printlabel\Zeelool;
+    }
 
-    }    
-    
     /**
      * 默认生成的控制器所继承的父类中有index/add/edit/del/multi五个基础方法、destroy/restore/recyclebin三个回收站方法
      * 因此在当前控制器中可不用编写增删改查的代码,除非需要自己控制这部分逻辑
      * 需要将application/admin/library/traits/Backend.php中对应的方法复制到当前控制器,然后进行修改
      */
 
-     /**
+    /**
      * 查看
      */
     public function index()
@@ -45,7 +44,7 @@ class Voogueme extends Backend
         //设置过滤方法
         $this->request->filter(['strip_tags']);
         if ($this->request->isAjax()) {
-      
+
             //如果发送的来源是Selectpage，则转发到Selectpage
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
@@ -53,7 +52,7 @@ class Voogueme extends Backend
 
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
-                ->where('status', 'in' ,array('free_processing','processing'))               
+                ->where('status', 'in', array('free_processing', 'processing'))
                 ->where($where)
                 ->order($sort, $order)
                 ->count();
@@ -63,7 +62,7 @@ class Voogueme extends Backend
                      custom_is_send_factory,custom_is_delivery,custom_match_frame_created_at,custom_match_lens_created_at,custom_match_factory_created_at,
                      custom_match_delivery_created_at,custom_print_label,custom_order_prescription,custom_print_label_created_at,custom_service_name';
             $list = $this->model
-                ->where('status', 'in' ,array('free_processing','processing'))               
+                ->where('status', 'in', array('free_processing', 'processing'))
                 // ->field($field)
                 ->where($where)
                 ->order($sort, $order)
@@ -75,6 +74,32 @@ class Voogueme extends Backend
             return json($result);
         }
         return $this->view->fetch();
+    }
+
+    /**
+     * 条形码扫码处理
+     */
+    public function _list()
+    {
+        //设置过滤方法
+        $this->request->filter(['strip_tags']);
+        if ($this->request->isAjax()) {
+            //订单号
+            $increment_id = $this->request->post('increment_id');
+            if ($increment_id) {
+                $map['increment_id'] = $increment_id;
+                $map['status'] = ['in', ['free_processing', 'processing']];
+                $list = $this->model
+                    // ->field($field)
+                    ->where($map)
+                    ->find();
+                $result = ['code' => 1, 'data' => $list];
+            } else {
+                $result = array("total" => 0, "rows" => []);
+            }
+            return json($result);
+        }
+        return $this->view->fetch('_list');
     }
 
     //订单详情
@@ -145,6 +170,7 @@ class Voogueme extends Backend
     public function tag_printed()
     {
         $entity_ids = input('id_params/a');
+        $label = input('label');
         if ($entity_ids) {
             //多数据库
             $map['entity_id'] = ['in', $entity_ids];
@@ -164,7 +190,18 @@ class Voogueme extends Backend
                 $this->error($e->getMessage());
             }
             if ($result) {
-                return $this->success('标记成功!', '', 'success', 200);
+                //用来判断是否从_list列表页进来
+                if ($label == 'list') {
+                    //订单号
+                    $map['entity_id'] = ['in', $entity_ids];
+                    $list = $this->model
+                        ->where($map)
+                        ->select();
+                    $list = collection($list)->toArray();
+                } else {
+                    $list = 'success';
+                }
+                return $this->success('标记成功!', '', $list, 200);
             } else {
                 return $this->error('失败', '', 'error', 0);
             }
@@ -176,6 +213,7 @@ class Voogueme extends Backend
     {
         $entity_ids = input('id_params/a');
         $status = input('status');
+        $label = input('label');
         if ($entity_ids) {
             //多数据库
             $map['entity_id'] = ['in', $entity_ids];
@@ -220,32 +258,45 @@ class Voogueme extends Backend
                 $this->error($e->getMessage());
             }
             if ($result) {
-                return $this->success('标记成功!', '', 'success', 200);
+
+                //用来判断是否从_list列表页进来
+                if ($label == 'list') {
+                    //订单号
+                    $map['entity_id'] = ['in', $entity_ids];
+                    $list = $this->model
+                        ->where($map)
+                        ->select();
+                    $list = collection($list)->toArray();
+                } else {
+                    $list = 'success';
+                }
+
+                return $this->success('操作成功!', '', $list, 200);
             } else {
-                return $this->error('失败', '', 'error', 0);
+                return $this->error('操作失败', '', 'error', 0);
             }
         }
     }
 
 
-    public function generate_barcode($text, $fileName){
+    public function generate_barcode($text, $fileName)
+    {
         // 引用barcode文件夹对应的类
-        Loader::import('BCode.BCGFontFile',EXTEND_PATH);
+        Loader::import('BCode.BCGFontFile', EXTEND_PATH);
         //Loader::import('BCode.BCGColor',EXTEND_PATH);
-        Loader::import('BCode.BCGDrawing',EXTEND_PATH);
+        Loader::import('BCode.BCGDrawing', EXTEND_PATH);
         // 条形码的编码格式
         // Loader::import('BCode.BCGcode39',EXTEND_PATH,'.barcode.php');
-        Loader::import('BCode.BCGcode128',EXTEND_PATH,'.barcode.php');
+        Loader::import('BCode.BCGcode128', EXTEND_PATH, '.barcode.php');
 
         // $code = '';
         // 加载字体大小
-        $font = new \BCGFontFile(EXTEND_PATH.'/BCode/font/Arial.ttf', 18);
-       //颜色条形码
+        $font = new \BCGFontFile(EXTEND_PATH . '/BCode/font/Arial.ttf', 18);
+        //颜色条形码
         $color_black = new \BCGColor(0, 0, 0);
         $color_white = new \BCGColor(255, 255, 255);
         $drawException = null;
-        try
-        {
+        try {
             // $code = new \BCGcode39();
             $code = new \BCGcode128();
             $code->setScale(3);
@@ -254,33 +305,31 @@ class Voogueme extends Backend
             $code->setBackgroundColor($color_white); // 空白间隙颜色
             $code->setFont($font); //设置字体
             $code->parse($text); // 条形码需要的数据内容
-        }
-        catch(\Exception $exception)
-        {
+        } catch (\Exception $exception) {
             $drawException = $exception;
         }
         //根据以上条件绘制条形码
         $drawing = new \BCGDrawing('', $color_white);
-        if($drawException) {
+        if ($drawException) {
             $drawing->drawException($drawException);
-        }else{
+        } else {
             $drawing->setBarcode($code);
             if ($fileName) {
-            // echo 'setFilename<br>';
-            $drawing->setFilename($fileName);
-        }
+                // echo 'setFilename<br>';
+                $drawing->setFilename($fileName);
+            }
             $drawing->draw();
         }
         // 生成PNG格式的图片
         header('Content-Type: image/png');
-       // header('Content-Disposition:attachment; filename="barcode.png"'); //自动下载
+        // header('Content-Disposition:attachment; filename="barcode.png"'); //自动下载
         $drawing->finish(\BCGDrawing::IMG_FORMAT_PNG);
     }
 
     //获取镜架尺寸
     protected function get_frame_lens_width_height_bridge($product_id)
     {
-        if ($product_id) {            
+        if ($product_id) {
             $querySql = "select cpev.entity_type_id,cpev.attribute_id,cpev.`value`,cpev.entity_id
 from catalog_product_entity_varchar cpev
 LEFT JOIN catalog_product_entity cpe on cpe.entity_id=cpev.entity_id 
@@ -299,20 +348,20 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
                         $result['bridge'] = $value['value'];
                     }
                 }
-            }else{
+            } else {
                 $result['lens_width'] = '';
                 $result['lens_height'] = '';
                 $result['bridge'] = '';
             }
         }
         return $result;
-    }    
+    }
 
 
-     //批量导出xls
+    //批量导出xls
     public function batch_export_xls()
     {
-        $entity_ids = rtrim(input('id_params'),',');
+        $entity_ids = rtrim(input('id_params'), ',');
         // dump($entity_ids);        
         $processing_order_querySql = "select sfo.increment_id,sfoi.product_options,sfoi.order_id,sfo.`status`,sfoi.sku,sfoi.product_id,sfoi.qty_ordered,sfo.created_at
 from sales_flat_order_item sfoi
@@ -334,33 +383,33 @@ order by sfoi.order_id desc;";
             $finalResult[$key]['index_type'] = $tmp_product_options['info_buyRequest']['tmplens']['index_type'];
 
             $tmp_prescription_params = $tmp_product_options['info_buyRequest']['tmplens']['prescription'];
-            if(isset($tmp_prescription_params)){
-               $tmp_prescription_params = explode("&", $tmp_prescription_params);
-               $tmp_lens_params = array();
-               foreach ($tmp_prescription_params as $tmp_key => $tmp_value) {
+            if (isset($tmp_prescription_params)) {
+                $tmp_prescription_params = explode("&", $tmp_prescription_params);
+                $tmp_lens_params = array();
+                foreach ($tmp_prescription_params as $tmp_key => $tmp_value) {
                     // dump($value);
                     $arr_value = explode("=", $tmp_value);
-                    if(isset($arr_value[1])){
+                    if (isset($arr_value[1])) {
                         $tmp_lens_params[$arr_value[0]] = $arr_value[1];
-                    }                    
+                    }
                 }
             }
-                       
-            $finalResult[$key]['prescription_type'] = isset($tmp_lens_params['prescription_type']) ? $tmp_lens_params['prescription_type']:'';
+
+            $finalResult[$key]['prescription_type'] = isset($tmp_lens_params['prescription_type']) ? $tmp_lens_params['prescription_type'] : '';
             $finalResult[$key]['od_sph'] = isset($tmp_lens_params['od_sph']) ? $tmp_lens_params['od_sph'] : '';
-            $finalResult[$key]['od_cyl'] = isset($tmp_lens_params['od_cyl']) ? $tmp_lens_params['od_cyl']:'';
-            $finalResult[$key]['od_axis'] = isset($tmp_lens_params['od_axis']) ? $tmp_lens_params['od_axis']:'';
-            $finalResult[$key]['od_add'] = isset($tmp_lens_params['od_add']) ? $tmp_lens_params['od_add']:'';
+            $finalResult[$key]['od_cyl'] = isset($tmp_lens_params['od_cyl']) ? $tmp_lens_params['od_cyl'] : '';
+            $finalResult[$key]['od_axis'] = isset($tmp_lens_params['od_axis']) ? $tmp_lens_params['od_axis'] : '';
+            $finalResult[$key]['od_add'] = isset($tmp_lens_params['od_add']) ? $tmp_lens_params['od_add'] : '';
 
-            $finalResult[$key]['os_sph'] = isset($tmp_lens_params['os_sph']) ? $tmp_lens_params['os_sph']:'';
-            $finalResult[$key]['os_cyl'] = isset($tmp_lens_params['os_cyl']) ? $tmp_lens_params['os_cyl']:'';
-            $finalResult[$key]['os_axis'] = isset($tmp_lens_params['os_axis']) ? $tmp_lens_params['os_axis']:'';
-            $finalResult[$key]['os_add'] = isset($tmp_lens_params['os_add']) ? $tmp_lens_params['os_add']:'';
+            $finalResult[$key]['os_sph'] = isset($tmp_lens_params['os_sph']) ? $tmp_lens_params['os_sph'] : '';
+            $finalResult[$key]['os_cyl'] = isset($tmp_lens_params['os_cyl']) ? $tmp_lens_params['os_cyl'] : '';
+            $finalResult[$key]['os_axis'] = isset($tmp_lens_params['os_axis']) ? $tmp_lens_params['os_axis'] : '';
+            $finalResult[$key]['os_add'] = isset($tmp_lens_params['os_add']) ? $tmp_lens_params['os_add'] : '';
 
-            $finalResult[$key]['pd_r'] = isset($tmp_lens_params['pd_r']) ? $tmp_lens_params['pd_r']:'';
-            $finalResult[$key]['pd_l'] = isset($tmp_lens_params['pd_l']) ? $tmp_lens_params['pd_l']:'';
-            $finalResult[$key]['pd'] = isset($tmp_lens_params['pd']) ? $tmp_lens_params['pd']:'';
-            $finalResult[$key]['pdcheck'] = isset($tmp_lens_params['pdcheck']) ? $tmp_lens_params['pdcheck']:'';
+            $finalResult[$key]['pd_r'] = isset($tmp_lens_params['pd_r']) ? $tmp_lens_params['pd_r'] : '';
+            $finalResult[$key]['pd_l'] = isset($tmp_lens_params['pd_l']) ? $tmp_lens_params['pd_l'] : '';
+            $finalResult[$key]['pd'] = isset($tmp_lens_params['pd']) ? $tmp_lens_params['pd'] : '';
+            $finalResult[$key]['pdcheck'] = isset($tmp_lens_params['pdcheck']) ? $tmp_lens_params['pdcheck'] : '';
 
             //斜视值
             if (isset($tmp_lens_params['prismcheck']) && $tmp_lens_params['prismcheck'] == 'on') {
@@ -376,7 +425,7 @@ order by sfoi.order_id desc;";
             }
 
             //用户留言
-            $finalResult[$key]['information'] = isset($tmp_lens_params['information']) ? $tmp_lens_params['information'] :'';
+            $finalResult[$key]['information'] = isset($tmp_lens_params['information']) ? $tmp_lens_params['information'] : '';
 
             $tmp_bridge = $this->get_frame_lens_width_height_bridge($value['product_id']);
             $finalResult[$key]['lens_width'] = $tmp_bridge['lens_width'];
@@ -451,7 +500,7 @@ order by sfoi.order_id desc;";
 
             $value['prismcheck'] = isset($value['prismcheck']) ? $value['prismcheck'] : '';
 
-   
+
             $spreadsheet->getActiveSheet()->setCellValue("A" . ($key * 2 + 2), $value['created_at']);
             $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 2 + 2), $value['increment_id']);
             $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 2 + 2), $value['sku']);
@@ -462,7 +511,7 @@ order by sfoi.order_id desc;";
             $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 2 + 3), $value['os_sph'] > 0 ? ' +' . $value['os_sph'] : ' ' . $value['os_sph']);
 
             $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 2 + 2), $value['od_cyl'] > 0 ? ' +' . $value['od_cyl'] : ' ' . $value['od_cyl']);
-            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 2 + 3), $value['os_cyl'] > 0 ? ' +' . $value['os_cyl'] : ' ' . $value['os_cyl']);  
+            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 2 + 3), $value['os_cyl'] > 0 ? ' +' . $value['os_cyl'] : ' ' . $value['os_cyl']);
 
             $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 2 + 2), $value['od_axis'] > 0 ? ' +' . $value['od_axis'] : ' ' . $value['od_axis']);
             $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 2 + 3), $value['os_axis'] > 0 ? ' +' . $value['os_axis'] : ' ' . $value['os_axis']);
@@ -475,7 +524,7 @@ order by sfoi.order_id desc;";
                 //数值在上一行合并有效，数值在下一行合并后为空
                 $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 2 + 2), $value['os_add']);
                 $spreadsheet->getActiveSheet()->mergeCells("H" . ($key * 2 + 2) . ":H" . ($key * 2 + 3));
-            } 
+            }
 
             if ($value['pdcheck'] == 'on' && $value['pd_r'] && $value['pd_l']) {
                 $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 2), $value['pd_r']);
@@ -501,30 +550,29 @@ order by sfoi.order_id desc;";
                 $spreadsheet->getActiveSheet()->mergeCells("P" . ($key * 2 + 2) . ":P" . ($key * 2 + 3));
             }
 
-            $spreadsheet->getActiveSheet()->setCellValue("Q" . ($key * 2 + 2), isset($value['od_pv']) ? $value['od_pv'] : '' );
-            $spreadsheet->getActiveSheet()->setCellValue("Q" . ($key * 2 + 3), isset($value['os_pv']) ? $value['os_pv'] : '' );
+            $spreadsheet->getActiveSheet()->setCellValue("Q" . ($key * 2 + 2), isset($value['od_pv']) ? $value['od_pv'] : '');
+            $spreadsheet->getActiveSheet()->setCellValue("Q" . ($key * 2 + 3), isset($value['os_pv']) ? $value['os_pv'] : '');
 
-            $spreadsheet->getActiveSheet()->setCellValue("R" . ($key * 2 + 2), isset($value['od_bd']) ? $value['od_bd'] : '' );
-            $spreadsheet->getActiveSheet()->setCellValue("R" . ($key * 2 + 3), isset($value['os_bd']) ? $value['os_bd'] : '' );
+            $spreadsheet->getActiveSheet()->setCellValue("R" . ($key * 2 + 2), isset($value['od_bd']) ? $value['od_bd'] : '');
+            $spreadsheet->getActiveSheet()->setCellValue("R" . ($key * 2 + 3), isset($value['os_bd']) ? $value['os_bd'] : '');
 
-            $spreadsheet->getActiveSheet()->setCellValue("S" . ($key * 2 + 2), isset($value['od_pv_r']) ? $value['od_pv_r'] : '' );
-            $spreadsheet->getActiveSheet()->setCellValue("S" . ($key * 2 + 3), isset($value['os_pv_r']) ? $value['os_pv_r'] : '' );
+            $spreadsheet->getActiveSheet()->setCellValue("S" . ($key * 2 + 2), isset($value['od_pv_r']) ? $value['od_pv_r'] : '');
+            $spreadsheet->getActiveSheet()->setCellValue("S" . ($key * 2 + 3), isset($value['os_pv_r']) ? $value['os_pv_r'] : '');
 
-            $spreadsheet->getActiveSheet()->setCellValue("T" . ($key * 2 + 2), isset($value['od_bd_r']) ? $value['od_bd_r'] : '' );
-            $spreadsheet->getActiveSheet()->setCellValue("T" . ($key * 2 + 3), isset($value['os_bd_r']) ? $value['os_bd_r'] : '' );
+            $spreadsheet->getActiveSheet()->setCellValue("T" . ($key * 2 + 2), isset($value['od_bd_r']) ? $value['od_bd_r'] : '');
+            $spreadsheet->getActiveSheet()->setCellValue("T" . ($key * 2 + 3), isset($value['os_bd_r']) ? $value['os_bd_r'] : '');
 
             //合并单元格
             $spreadsheet->getActiveSheet()->mergeCells("A" . ($key * 2 + 2) . ":A" . ($key * 2 + 3));
-            $spreadsheet->getActiveSheet()->mergeCells("B" . ($key * 2 + 2) . ":B" . ($key * 2 + 3));    
-            $spreadsheet->getActiveSheet()->mergeCells("C" . ($key * 2 + 2) . ":C" . ($key * 2 + 3));                   
-            $spreadsheet->getActiveSheet()->mergeCells("K" . ($key * 2 + 2) . ":K" . ($key * 2 + 3));  
+            $spreadsheet->getActiveSheet()->mergeCells("B" . ($key * 2 + 2) . ":B" . ($key * 2 + 3));
+            $spreadsheet->getActiveSheet()->mergeCells("C" . ($key * 2 + 2) . ":C" . ($key * 2 + 3));
+            $spreadsheet->getActiveSheet()->mergeCells("K" . ($key * 2 + 2) . ":K" . ($key * 2 + 3));
 
-            $spreadsheet->getActiveSheet()->mergeCells("L" . ($key * 2 + 2) . ":L" . ($key * 2 + 3));  
-            $spreadsheet->getActiveSheet()->mergeCells("M" . ($key * 2 + 2) . ":M" . ($key * 2 + 3));  
-            $spreadsheet->getActiveSheet()->mergeCells("N" . ($key * 2 + 2) . ":N" . ($key * 2 + 3));  
-            $spreadsheet->getActiveSheet()->mergeCells("O" . ($key * 2 + 2) . ":O" . ($key * 2 + 3));  
-            $spreadsheet->getActiveSheet()->mergeCells("P" . ($key * 2 + 2) . ":P" . ($key * 2 + 3));                                  
-
+            $spreadsheet->getActiveSheet()->mergeCells("L" . ($key * 2 + 2) . ":L" . ($key * 2 + 3));
+            $spreadsheet->getActiveSheet()->mergeCells("M" . ($key * 2 + 2) . ":M" . ($key * 2 + 3));
+            $spreadsheet->getActiveSheet()->mergeCells("N" . ($key * 2 + 2) . ":N" . ($key * 2 + 3));
+            $spreadsheet->getActiveSheet()->mergeCells("O" . ($key * 2 + 2) . ":O" . ($key * 2 + 3));
+            $spreadsheet->getActiveSheet()->mergeCells("P" . ($key * 2 + 2) . ":P" . ($key * 2 + 3));
         }
 
         //设置宽度
@@ -550,19 +598,19 @@ order by sfoi.order_id desc;";
 
         //设置边框
         $border = [
-                'borders' => [
-                    'allBorders' => [
-                        'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, // 设置border样式
-                        'color'       => ['argb' => 'FF000000'], // 设置border颜色
-                    ],
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, // 设置border样式
+                    'color'       => ['argb' => 'FF000000'], // 设置border颜色
                 ],
-            ];
+            ],
+        ];
         $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
         $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
 
         // $spreadsheet->getActiveSheet()->getStyle('A1:Z'.$key)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-        $spreadsheet->getActiveSheet()->getStyle('A1:Z'.$spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-        $spreadsheet->getActiveSheet()->getStyle('A1:Z'.$spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+        $spreadsheet->getActiveSheet()->getStyle('A1:Z' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $spreadsheet->getActiveSheet()->getStyle('A1:Z' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
 
         //水平垂直居中   
         // $objSheet->getDefaultStyle()->getAlignment()->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
@@ -574,22 +622,22 @@ order by sfoi.order_id desc;";
         $spreadsheet->setActiveSheetIndex(0);
         // return exportExcel($spreadsheet, 'xls', '登陆日志');
         $format = 'xlsx';
-        $savename = '订单打印处方'. date("YmdHis", time());;
+        $savename = '订单打印处方' . date("YmdHis", time());;
         // dump($spreadsheet);
-        
+
         // if (!$spreadsheet) return false;
         if ($format == 'xls') {
-        //输出Excel03版本
-            header('Content-Type:application/vnd.ms-excel'); 
-            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xls";       
+            //输出Excel03版本
+            header('Content-Type:application/vnd.ms-excel');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xls";
         } elseif ($format == 'xlsx') {
-        //输出07Excel版本
+            //输出07Excel版本
             header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xlsx"; 
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xlsx";
         }
 
         //输出名称
-        header('Content-Disposition: attachment;filename="'.$savename.'.'.$format.'"'); 
+        header('Content-Disposition: attachment;filename="' . $savename . '.' . $format . '"');
         //禁止缓存
         header('Cache-Control: max-age=0');
         $writer = new $class($spreadsheet);
@@ -602,14 +650,15 @@ order by sfoi.order_id desc;";
         // readfile($filePath);
         // unlink($filePath);
     }
-    
+
     //批量打印标签
-    public function batch_print_label(){
+    public function batch_print_label()
+    {
         // echo 'batch_print_label';
 
-        $entity_ids = rtrim(input('id_params'),',');
+        $entity_ids = rtrim(input('id_params'), ',');
         // dump($entity_ids);
-        if($entity_ids){
+        if ($entity_ids) {
             $processing_order_querySql = "select sfo.increment_id,round(sfo.total_qty_ordered,0) NUM,sfoi.product_options,sfoi.order_id,sfo.`status`,sfoi.sku,sfoi.qty_ordered,sfo.created_at
 from sales_flat_order_item sfoi
 left join sales_flat_order sfo on  sfoi.order_id=sfo.entity_id 
@@ -631,132 +680,132 @@ table.addpro.re tbody td{ position:relative}
 </style>
 EOF;
 
-        //查询产品货位号
-        // $product = M('product', 'zeelool_', 'DB_STOCK')->field('magento_sku,cargo_location_number')->where('is_active=1')->select();
-        // //重组数组
-        // $cargo_number = [];
-        // foreach ($product as $k => $v) {
-        //     $cargo_number[$v['magento_sku']] = $v['cargo_location_number'];
-        // }
+            //查询产品货位号
+            // $product = M('product', 'zeelool_', 'DB_STOCK')->field('magento_sku,cargo_location_number')->where('is_active=1')->select();
+            // //重组数组
+            // $cargo_number = [];
+            // foreach ($product as $k => $v) {
+            //     $cargo_number[$v['magento_sku']] = $v['cargo_location_number'];
+            // }
 
-        $file_content = '';
-        $temp_increment_id = 0;
-        foreach ($processing_order_list as $processing_key => $processing_value) {
-            if ($temp_increment_id != $processing_value['increment_id']) {
-                $temp_increment_id = $processing_value['increment_id'];
+            $file_content = '';
+            $temp_increment_id = 0;
+            foreach ($processing_order_list as $processing_key => $processing_value) {
+                if ($temp_increment_id != $processing_value['increment_id']) {
+                    $temp_increment_id = $processing_value['increment_id'];
 
-                $date = substr($processing_value['created_at'], 0, strpos($processing_value['created_at'], " "));
-                $fileName = ROOT_PATH."public".DS."uploads".DS."printOrder".DS."voogueme".DS."$date".DS."$temp_increment_id.png";
-                // dump($fileName);
-                $dir = ROOT_PATH."public".DS."uploads".DS."printOrder".DS."voogueme".DS."$date";
-                if (!file_exists($dir)) {
-                    mkdir($dir, 0777, true);
-                    // echo '创建文件夹$dir成功';
-                } else {
-                    // echo '需创建的文件夹$dir已经存在';
-                }
-                $img_url = "/uploads/printOrder/voogueme/$date/$temp_increment_id.png";
-                //生成条形码
-                $this->generate_barcode($temp_increment_id, $fileName);
-                // echo '<br>需要打印'.$temp_increment_id;
-                $file_content .= "<div  class = 'single_box'>
+                    $date = substr($processing_value['created_at'], 0, strpos($processing_value['created_at'], " "));
+                    $fileName = ROOT_PATH . "public" . DS . "uploads" . DS . "printOrder" . DS . "voogueme" . DS . "$date" . DS . "$temp_increment_id.png";
+                    // dump($fileName);
+                    $dir = ROOT_PATH . "public" . DS . "uploads" . DS . "printOrder" . DS . "voogueme" . DS . "$date";
+                    if (!file_exists($dir)) {
+                        mkdir($dir, 0777, true);
+                        // echo '创建文件夹$dir成功';
+                    } else {
+                        // echo '需创建的文件夹$dir已经存在';
+                    }
+                    $img_url = "/uploads/printOrder/voogueme/$date/$temp_increment_id.png";
+                    //生成条形码
+                    $this->generate_barcode($temp_increment_id, $fileName);
+                    // echo '<br>需要打印'.$temp_increment_id;
+                    $file_content .= "<div  class = 'single_box'>
                 <table width='400mm' height='102px' border='0' cellspacing='0' cellpadding='0' class='addpro' style='margin:0px auto;margin-top:0px;padding:0px;'>
                 <tr><td rowspan='5' colspan='2' style='padding:2px;width:20%'>" . str_replace(" ", "<br>", $processing_value['created_at']) . "</td>
                 <td rowspan='5' colspan='3' style='padding:10px;'><img src='" . $img_url . "' height='80%'><br></td></tr>                
                 </table></div>";
-            }
- 
-            $final_print = array();
-            $product_options = unserialize($processing_value['product_options']);
-            // dump($product_options);
-            $final_print['coatiing_name'] = substr($product_options['info_buyRequest']['tmplens']['coatiing_name'], 0, 60);
-            // $final_print['index_type'] = substr($product_options['info_buyRequest']['tmplens']['index_type'],0,60);
-            $final_print['index_type'] = $product_options['info_buyRequest']['tmplens']['index_type'];
-
-            $prescription_params = $product_options['info_buyRequest']['tmplens']['prescription'];
-            if($prescription_params){
-               $prescription_params = explode("&", $prescription_params);
-               $lens_params = array();
-               foreach ($prescription_params as $key => $value) {
-                    // dump($value);
-                    $arr_value = explode("=", $value);
-                    $lens_params[$arr_value[0]] = $arr_value[1];
                 }
-                // dump($lens_params);
-                $final_print = array_merge($lens_params, $final_print);
-            }
-           
-            // dump($final_print);
 
-            $final_print['prescription_type'] = isset($final_print['prescription_type']) ? $final_print['prescription_type'] : '';
+                $final_print = array();
+                $product_options = unserialize($processing_value['product_options']);
+                // dump($product_options);
+                $final_print['coatiing_name'] = substr($product_options['info_buyRequest']['tmplens']['coatiing_name'], 0, 60);
+                // $final_print['index_type'] = substr($product_options['info_buyRequest']['tmplens']['index_type'],0,60);
+                $final_print['index_type'] = $product_options['info_buyRequest']['tmplens']['index_type'];
 
-            $final_print['od_sph'] = isset($final_print['od_sph']) ? $final_print['od_sph'] : '';
-            $final_print['os_sph'] = isset($final_print['os_sph']) ? $final_print['os_sph'] : '';
-            $final_print['od_cyl'] = isset($final_print['od_cyl']) ? $final_print['od_cyl'] : '';
-            $final_print['os_cyl'] = isset($final_print['os_cyl']) ? $final_print['os_cyl'] : '';
-            $final_print['od_axis'] = isset($final_print['od_axis']) ? $final_print['od_axis'] : '';
-            $final_print['os_axis'] = isset($final_print['os_axis']) ? $final_print['os_axis'] : '';
+                $prescription_params = $product_options['info_buyRequest']['tmplens']['prescription'];
+                if ($prescription_params) {
+                    $prescription_params = explode("&", $prescription_params);
+                    $lens_params = array();
+                    foreach ($prescription_params as $key => $value) {
+                        // dump($value);
+                        $arr_value = explode("=", $value);
+                        $lens_params[$arr_value[0]] = $arr_value[1];
+                    }
+                    // dump($lens_params);
+                    $final_print = array_merge($lens_params, $final_print);
+                }
 
-            $final_print['od_add'] = isset($final_print['od_add']) ? $final_print['od_add'] : '';
-            $final_print['os_add'] = isset($final_print['os_add']) ? $final_print['os_add'] : '';
+                // dump($final_print);
 
-            $final_print['pdcheck'] = isset($final_print['pdcheck']) ? $final_print['pdcheck'] : '';
-            $final_print['pd_r'] = isset($final_print['pd_r']) ? $final_print['pd_r'] : '';
-            $final_print['pd_l'] = isset($final_print['pd_l']) ? $final_print['pd_l'] : '';
-            $final_print['pd'] = isset($final_print['pd']) ? $final_print['pd'] : '';
+                $final_print['prescription_type'] = isset($final_print['prescription_type']) ? $final_print['prescription_type'] : '';
 
-            $final_print['prismcheck'] = isset($final_print['prismcheck']) ? $final_print['prismcheck'] : '';
+                $final_print['od_sph'] = isset($final_print['od_sph']) ? $final_print['od_sph'] : '';
+                $final_print['os_sph'] = isset($final_print['os_sph']) ? $final_print['os_sph'] : '';
+                $final_print['od_cyl'] = isset($final_print['od_cyl']) ? $final_print['od_cyl'] : '';
+                $final_print['os_cyl'] = isset($final_print['os_cyl']) ? $final_print['os_cyl'] : '';
+                $final_print['od_axis'] = isset($final_print['od_axis']) ? $final_print['od_axis'] : '';
+                $final_print['os_axis'] = isset($final_print['os_axis']) ? $final_print['os_axis'] : '';
+
+                $final_print['od_add'] = isset($final_print['od_add']) ? $final_print['od_add'] : '';
+                $final_print['os_add'] = isset($final_print['os_add']) ? $final_print['os_add'] : '';
+
+                $final_print['pdcheck'] = isset($final_print['pdcheck']) ? $final_print['pdcheck'] : '';
+                $final_print['pd_r'] = isset($final_print['pd_r']) ? $final_print['pd_r'] : '';
+                $final_print['pd_l'] = isset($final_print['pd_l']) ? $final_print['pd_l'] : '';
+                $final_print['pd'] = isset($final_print['pd']) ? $final_print['pd'] : '';
+
+                $final_print['prismcheck'] = isset($final_print['prismcheck']) ? $final_print['prismcheck'] : '';
 
 
-            //处理ADD  当ReadingGlasses时 是 双ADD值
-            if (strlen($final_print['os_add']) > 0 && strlen($final_print['od_add']) > 0) {
-                // echo '双ADD值';
-                $os_add = "<td>" . $final_print['od_add'] . "</td> ";
-                $od_add = "<td>" . $final_print['os_add'] . "</td> ";
-            } else {
-                // echo '单ADD值';
-                $od_add = "<td rowspan='2'>" . $final_print['os_add'] . "</td>";
-                $os_add = "";
-            }     
+                //处理ADD  当ReadingGlasses时 是 双ADD值
+                if (strlen($final_print['os_add']) > 0 && strlen($final_print['od_add']) > 0) {
+                    // echo '双ADD值';
+                    $os_add = "<td>" . $final_print['od_add'] . "</td> ";
+                    $od_add = "<td>" . $final_print['os_add'] . "</td> ";
+                } else {
+                    // echo '单ADD值';
+                    $od_add = "<td rowspan='2'>" . $final_print['os_add'] . "</td>";
+                    $os_add = "";
+                }
 
-            //处理PD值
-            if ($final_print['pdcheck'] && strlen($final_print['pd_r']) > 0 && strlen($final_print['pd_l']) > 0) {
-                // echo '双PD值';
-                $od_pd = "<td>" . $final_print['pd_r'] . "</td> ";
-                $os_pd = "<td>" . $final_print['pd_l'] . "</td> ";
-            } else {
-                // echo '单PD值';
-                $od_pd = "<td rowspan='2'>" . $final_print['pd'] . "</td>";
-                $os_pd = "";
-            }
+                //处理PD值
+                if ($final_print['pdcheck'] && strlen($final_print['pd_r']) > 0 && strlen($final_print['pd_l']) > 0) {
+                    // echo '双PD值';
+                    $od_pd = "<td>" . $final_print['pd_r'] . "</td> ";
+                    $os_pd = "<td>" . $final_print['pd_l'] . "</td> ";
+                } else {
+                    // echo '单PD值';
+                    $od_pd = "<td rowspan='2'>" . $final_print['pd'] . "</td>";
+                    $os_pd = "";
+                }
 
-            // dump($os_add);
-            // dump($od_add);
+                // dump($os_add);
+                // dump($od_add);
 
-            //处理斜视参数
-            if ($final_print['prismcheck'] == 'on') {
-                $prismcheck_title = "<td>Prism</td><td colspan=''>Direc</td><td>Prism</td><td colspan=''>Direc</td>";
-                $prismcheck_od_value = "<td>" . $final_print['od_pv'] . "</td><td colspan=''>" . $final_print['od_bd'] . "</td>" . "<td>" . $final_print['od_pv_r'] . "</td><td>" . $final_print['od_bd_r'] . "</td>";
-                $prismcheck_os_value = "<td>" . $final_print['os_pv'] . "</td><td colspan=''>" . $final_print['os_bd'] . "</td>" . "<td>" . $final_print['os_pv_r'] . "</td><td>" . $final_print['os_bd_r'] . "</td>";
-                $coatiing_name = '';
-            } else {
-                $prismcheck_title = '';
-                $prismcheck_od_value = '';
-                $prismcheck_os_value = '';
-                $coatiing_name = "<td colspan='4' rowspan='3' style='background-color:#fff;word-break: break-word;line-height: 12px;'>" . $final_print['coatiing_name'] . "</td>";
-            }
+                //处理斜视参数
+                if ($final_print['prismcheck'] == 'on') {
+                    $prismcheck_title = "<td>Prism</td><td colspan=''>Direc</td><td>Prism</td><td colspan=''>Direc</td>";
+                    $prismcheck_od_value = "<td>" . $final_print['od_pv'] . "</td><td colspan=''>" . $final_print['od_bd'] . "</td>" . "<td>" . $final_print['od_pv_r'] . "</td><td>" . $final_print['od_bd_r'] . "</td>";
+                    $prismcheck_os_value = "<td>" . $final_print['os_pv'] . "</td><td colspan=''>" . $final_print['os_bd'] . "</td>" . "<td>" . $final_print['os_pv_r'] . "</td><td>" . $final_print['os_bd_r'] . "</td>";
+                    $coatiing_name = '';
+                } else {
+                    $prismcheck_title = '';
+                    $prismcheck_od_value = '';
+                    $prismcheck_os_value = '';
+                    $coatiing_name = "<td colspan='4' rowspan='3' style='background-color:#fff;word-break: break-word;line-height: 12px;'>" . $final_print['coatiing_name'] . "</td>";
+                }
 
-            //处方字符串截取
-            $final_print['prescription_type'] = substr($final_print['prescription_type'], 0, 15);
+                //处方字符串截取
+                $final_print['prescription_type'] = substr($final_print['prescription_type'], 0, 15);
 
-            //判断货号是否存在
-            // if ($cargo_number[$processing_value['sku']]) {
-            //     $cargo_number_str = $cargo_number[$processing_value['sku']] . "<br>";
-            // } else {
-            //     $cargo_number_str = "";
-            // }
+                //判断货号是否存在
+                // if ($cargo_number[$processing_value['sku']]) {
+                //     $cargo_number_str = $cargo_number[$processing_value['sku']] . "<br>";
+                // } else {
+                //     $cargo_number_str = "";
+                // }
 
-            $file_content .= "<div  class = 'single_box'>
+                $file_content .= "<div  class = 'single_box'>
             <table width='400mm' height='102px' border='0' cellspacing='0' cellpadding='0' class='addpro' style='margin:0px auto;margin-top:0px;' >
             <tbody cellpadding='0'>
             <tr>
@@ -783,23 +832,21 @@ EOF;
             <td>" . $final_print['od_cyl'] . "</td>
             <td>" . $final_print['od_axis'] . "</td>    
             " . $prismcheck_od_value . $od_add . $od_pd .
-                "</tr>
+                    "</tr>
             <tr>
             <td>Left</td> 
             <td>" . $final_print['os_sph'] . "</td>    
             <td>" . $final_print['os_cyl'] . "</td>  
             <td>" . $final_print['os_axis'] . "</td> 
             " . $prismcheck_os_value . $os_add . $os_pd .
-                " </tr>
+                    " </tr>
             <tr>
             <td colspan='2'>" . $processing_value['sku'] . "</td>
             <td colspan='8' style=' text-align:center'>Lens：" . $final_print['index_type'] . "</td>
             </tr>  
             </tbody></table></div>";
+            }
+            echo $file_header . $file_content;
         }
-        echo $file_header . $file_content;
-        }
-
     }
-
 }
