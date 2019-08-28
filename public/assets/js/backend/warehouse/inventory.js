@@ -92,7 +92,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'editable'], function
                                     },
                                     visible: function (row) {
                                         //返回true时按钮显示,返回false隐藏
-                                        return true;
+                                        if (row.status == 0) {
+                                            return true;
+                                        }
+                                        return false;
                                     }
                                 }
 
@@ -104,6 +107,28 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'editable'], function
 
             // 为表格绑定事件
             Table.api.bindevent(table);
+
+            //审核通过
+            $(document).on('click', '.btn-endInventory', function () {
+                var ids = Table.api.selectedids(table);
+                Layer.confirm(
+                    __('确定结束盘点吗?'),
+                    {icon: 3, title: __('Warning'), shadeClose: true},
+                    function (index) {
+                        Backend.api.ajax({
+                            url: '/admin/warehouse/inventory/endInventory',
+                            data: { inventory_id: ids}
+                        }, function (data, ret) {
+                            Layer.close(index);
+                            table.bootstrapTable('refresh');
+                        });
+                    }
+                );
+                
+            })
+            
+            
+            
         },
         add: function () {
 
@@ -434,6 +459,30 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'editable'], function
 
             // 为表格绑定事件
             Table.api.bindevent(table);
+
+            table.bootstrapTable('getOptions').onEditableSave = function (field, row, oldValue, $el) {
+                var data = {};
+                data["row[" + field + "]"] = row[field];
+                Fast.api.ajax({
+                    url: this.extend.edit_url + "/ids/" + row[this.pk],
+                    data: data
+                }, function (data) {
+
+                    table.bootstrapTable('refresh');
+                })
+            }
+
+            //结束盘点
+            $(document).on('click', '.end', function () {
+                var inventory_id = Config.inventory_id;
+                Fast.api.ajax({
+                    url: 'warehouse/inventory/endInventory',
+                    data: { inventory_id: inventory_id }
+                }, function (data) {
+                    Layer.closeAll();
+                    parent.location.href = '/admin/warehouse/inventory/index';
+                })
+            })
         },
         api: {
             bindevent: function () {

@@ -26,6 +26,7 @@ class Nihao extends Backend
     {
         parent::_initialize();
         $this->model = new \app\admin\model\order\printlabel\Nihao;
+        $this->zeelool = new \app\admin\model\order\printlabel\Zeelool;
     }
 
     /**
@@ -39,7 +40,6 @@ class Nihao extends Backend
      */
     public function index()
     {
-
         //设置过滤方法
         $this->request->filter(['strip_tags']);
         if ($this->request->isAjax()) {
@@ -49,13 +49,10 @@ class Nihao extends Backend
                 return $this->selectpage();
             }
 
-            $where = array('custom_print_label', '1');
-
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
-            // dump($where);
-            // $base_shipping_amount = 6.95;
+            $map['status'] = ['in', ['free_processing', 'processing']];
             $total = $this->model
-                ->where('status', 'in', array('free_processing', 'processing'))
+                ->where($map)
                 ->where($where)
                 ->order($sort, $order)
                 ->count();
@@ -66,8 +63,8 @@ class Nihao extends Backend
                      custom_match_delivery_created_at,custom_print_label,custom_order_prescription,custom_print_label_created_at,custom_service_name';
             $list = $this->model
                 // ->field($field)
+                ->where($map)
                 ->where($where)
-                ->where('status', 'in', array('free_processing', 'processing'))
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
@@ -79,16 +76,44 @@ class Nihao extends Backend
         return $this->view->fetch();
     }
 
+    /**
+     * 条形码扫码处理
+     */
+    public function _list()
+    {
+        //设置过滤方法
+        $this->request->filter(['strip_tags']);
+        if ($this->request->isAjax()) {
+            //订单号
+            $increment_id = $this->request->post('increment_id');
+            if ($increment_id) {
+                $map['increment_id'] = $increment_id;
+                $map['status'] = ['in', ['free_processing', 'processing']];
+                $list = $this->model
+                    // ->field($field)
+                    ->where($map)
+                    ->find();
+                $result = ['code' => 1, 'data' => $list];
+            } else {
+                $result = array("total" => 0, "rows" => []);
+            }
+            return json($result);
+        }
+        return $this->view->fetch('_list');
+    }
+
     //标记为已打印标签
     public function tag_printed()
     {
         // echo 'tag_printed';
         $entity_ids = input('id_params/a');
+        $label = input('label');
         if ($entity_ids) {
             //多数据库
             $map['entity_id'] = ['in', $entity_ids];
             $data['custom_print_label'] = 1;
             $data['custom_print_label_created_at'] = date('Y-m-d H:i:s', time());
+            $data['custom_print_label_person'] =  session('admin.username');
             $connect = Db::connect('database.db_nihao_online')->table('sales_flat_order');
             $connect->startTrans();
             try {
@@ -102,7 +127,18 @@ class Nihao extends Backend
                 $this->error($e->getMessage());
             }
             if ($result) {
-                return $this->success('标记成功!', '', 'success', 200);
+                //用来判断是否从_list列表页进来
+                if ($label == 'list') {
+                    //订单号
+                    $map['entity_id'] = ['in', $entity_ids];
+                    $list = $this->model
+                        ->where($map)
+                        ->select();
+                    $list = collection($list)->toArray();
+                } else {
+                    $list = 'success';
+                }
+                return $this->success('标记成功!', '', $list, 200);
             } else {
                 return $this->error('失败', '', 'error', 0);
             }
@@ -114,6 +150,7 @@ class Nihao extends Backend
     {
         $entity_ids = input('id_params/a');
         $status = input('status');
+        $label = input('label');
         if ($entity_ids) {
             //多数据库
             $map['entity_id'] = ['in', $entity_ids];
@@ -123,21 +160,25 @@ class Nihao extends Backend
                     //配镜架
                     $data['custom_is_match_frame'] = 1;
                     $data['custom_match_frame_created_at'] = date('Y-m-d H:i:s', time());
+                    $data['custom_match_frame_person'] = session('admin.username');
                     break;
                 case 2:
                     //配镜片
                     $data['custom_is_match_lens'] = 1;
                     $data['custom_match_lens_created_at'] = date('Y-m-d H:i:s', time());
+                    $data['custom_match_lens_person'] = session('admin.username');
                     break;
                 case 3:
                     //移送加工时间
                     $data['custom_is_send_factory'] = 1;
                     $data['custom_match_factory_created_at'] = date('Y-m-d H:i:s', time());
+                    $data['custom_match_factory_person'] = session('admin.username');
                     break;
                 case 4:
                     //提货
                     $data['custom_is_delivery'] = 1;
                     $data['custom_match_delivery_created_at'] = date('Y-m-d H:i:s', time());
+                    $data['custom_match_delivery_person'] = session('admin.username');
                     break;
                 default:
             }
@@ -154,13 +195,35 @@ class Nihao extends Backend
                 $this->error($e->getMessage());
             }
             if ($result) {
-                return $this->success('标记成功!', '', 'success', 200);
+                //用来判断是否从_list列表页进来
+                if ($label == 'list') {
+                    //订单号
+                    $map['entity_id'] = ['in', $entity_ids];
+                    $list = $this->model
+                        ->where($map)
+                        ->select();
+                    $list = collection($list)->toArray();
+                } else {
+                    $list = 'success';
+                }
+                return $this->success('操作成功!', '', $list, 200);
             } else {
-                return $this->error('失败', '', 'error', 0);
+                return $this->error('操作失败', '', 'error', 0);
             }
         }
     }
 
+    public function detail($ids = null)
+    {
+        $row = $this->model->get($ids);
+        if (!$row) {
+            $this->error(__('No Results were found'));
+        }
+        //查询订单详情
+        $result = $this->model->getOrderDetail(3, $ids);
+        $this->assign('result', $result);
+        return $this->view->fetch();
+    }
 
     public function generate_barcode($text, $fileName)
     {

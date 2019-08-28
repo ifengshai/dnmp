@@ -33,7 +33,114 @@
         border-bottom-color: transparent;
     }
 
- 
+    .m-nPanel-pd20 {
+        padding: 20px;
+    }
+    .m-nPanel-white {
+        background-color: #fff;
+    }
+    .m-nPanel {
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+    .m-nPanel .controlsWrap:first-child {
+        margin-top: 0;
+    }
+
+    .m-nPanel .controlsWrap {
+        height: 45px;
+        font-size: 0;
+        vertical-align: top;
+    }
+    .m-nPanel .controlsWrap > * {
+        vertical-align: middle;
+    }
+
+    .m-search {
+        display: inline-block;
+        position: relative;
+        box-sizing: border-box;
+        font-size: 0;
+    }
+
+    .m-search .icn {
+        position: absolute;
+        left: 0;
+        top: 50%;
+        width: 40px;
+        height: 22px;
+        padding: 0 10px;
+        background-size: 22px auto;
+        background-position: center;
+        margin-top: -11px;
+        border-right: 1px solid #eee;
+    }
+
+    .icn-search {
+        background: url(/assets/img/ic_search.png) no-repeat;
+        background-size: 16px auto;
+    }
+    .m-search .input {
+        width: 609px;
+        box-sizing: border-box;
+        font-size: 12px;
+        padding: 12px 12px 12px 50px;
+        line-height: 16px;
+        border-right: none;
+    }
+
+    .m-search .input, .m-search .btn {
+        vertical-align: middle;
+    }
+    .s-input-white2 {
+        background-color: #fff;
+        border: 1px solid #eee;
+    }
+    .u-btn.u-btn-main {
+        color: #fff;
+        background-color: #00ced8;
+    }
+
+    .m-search .btn {
+        display: inline-block;
+        border-radius: 2px;
+        width: 68px;
+        height: 42px;
+    }
+    .m-search .input, .m-search .btn {
+        vertical-align: middle;
+    }
+    .u-btn {
+        display: block;
+        border: none;
+        outline: none;
+        color: #282a3c;
+        border-radius: 2px;
+        font-size: 14px;
+        text-align: center;
+        box-sizing: border-box;
+        cursor: pointer;
+    }
+    .m-nPanel .controlsWrap > .tip {
+        padding-left: 10px;
+        display: inline-block;
+        font-size: 14px;
+        line-height: 28px;
+        color: #666;
+    }
+
+    .m-nPanel .controlsWrap > * {
+        vertical-align: middle;
+    }
+    .m-nPanel .controlsWrap > .label {
+        display: inline-block;
+        width: 9em;
+        font-weight: normal;
+        color: #666;
+        font-size: 14px;
+        line-height: 28px;
+    }
        
 </style>
 
@@ -42,12 +149,24 @@
     <div class="panel-heading">
         {:build_heading()}
         <ul class="nav nav-tabs">
-            <li class="active"><a href="{:url('/admin/order/printlabel/zeelool/index')}">Zeelool</a></li>
-            <li><a href="{:url('/admin/order/printlabel/voogueme/index')}">Voogueme</a></li>
-            <li><a href="{:url('/admin/order/printlabel/nihao/index')}">Nihao</a></li>
+            <li><a href="{:url('/admin/order/printlabel/zeelool/_list')}">Zeelool</a></li>
+            <li class="active"><a href="{:url('/admin/order/printlabel/voogueme/_list')}">Voogueme</a></li>
+            <li><a href="{:url('/admin/order/printlabel/nihao/_list')}">Nihao</a></li>
         </ul>
     </div>
-   
+    <div class="form-horizontal">
+        <div class="m-nPanel m-nPanel-white m-nPanel-mb20 m-nPanel-pd20 f-cf ng-scope">
+            <div class="controlsWrap">
+                <div class="m-search ng-isolate-scope" q="q" placeholder="扫码枪扫码搜索">
+                    <span class="icn icn-search"></span>
+                    <input placeholder="扫码枪扫码搜索" type="text"  id="search_val" class="input s-input-white2 ng-pristine ng-untouched ng-valid">
+                    <span class="close-btn" title="清空"></span>
+                    <button type="button" class="btn u-btn u-btn-main search" ng-click="onSearchCb()">搜索</button>
+                </div>
+                <span class="tip">注意:此搜索仅适用于扫码枪扫码搜索</span>
+            </div>    
+        </div>
+    </div>
     <div class="panel-body">
         <div id="myTabContent" class="tab-content">
             <div class="tab-pane fade active in" id="one">
