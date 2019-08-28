@@ -22,6 +22,8 @@ class ManagtoPlatform extends Backend
     {
         parent::_initialize();
         $this->model = new \app\admin\model\platformManage\ManagtoPlatform;
+        $this->view->assign('platformStatus',$this->model->getPlatformStatus());
+        $this->view->assign('platformIsUpload',$this->model->getPlatformIsUpload());
 
     }
     

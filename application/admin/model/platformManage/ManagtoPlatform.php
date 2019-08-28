@@ -27,6 +27,24 @@ class ManagtoPlatform extends Model
     protected $append = [
 
     ];
+
+    /**
+     * 禁用还是启用的状态
+     */
+    public function getPlatformStatus()
+    {
+        return [1=>'启用',2=>'禁用'];
+    }
+    /***
+     * 是否需要上传商品信息到平台
+     */
+    public function getPlatformIsUpload()
+    {
+        return [1=>'上传',2=>'不上传'];
+    }
+    /***
+     * @return array
+     */
     public function getOrderPlatformList()
     {
         $result = $this->where('status','=',1)->field('id,name')->select();
@@ -40,7 +58,17 @@ class ManagtoPlatform extends Model
         return $arr;
     }
 
-
+    /**
+     * 求出所有的对接平台
+     */
+    public function managtoPlatformList()
+    {
+      $where['status'] = 1;
+      $where['is_del'] = 1;
+      $where['is_upload_item'] = 1;
+      $result = $this->where($where)->field('id,managto_account,managto_key,name')->select();
+      return $result ? $result : false;
+    }
 
 
 

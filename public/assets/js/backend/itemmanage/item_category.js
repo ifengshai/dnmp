@@ -46,6 +46,22 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
 
             // 为表格绑定事件
             Table.api.bindevent(table);
+            $(document).on('click', '.btn-upload', function () {
+                 var ids = Table.api.selectedids(table);
+                 var name = $(this).attr("id");
+                 Layer.confirm(
+                    __('确定要传至对应的平台吗'),
+                    function (index) {
+                        Backend.api.ajax({
+                            url: "/admin/itemmanage/item_category/uploadItemCategory",
+                            data: { ids: ids,name:name }
+                        }, function (data, ret) {
+                            table.bootstrapTable('refresh');
+                            Layer.close(index);
+                        });
+                    }
+                );
+            });
         },
         add: function () {
             Controller.api.bindevent();

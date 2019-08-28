@@ -17,16 +17,18 @@ class ItemCategory extends Backend
      * @var \app\admin\model\itemmanage\ItemCategory
      */
     protected $model = null;
-
+    protected $platform = null;
     public function _initialize()
     {
         parent::_initialize();
         $this->model = new \app\admin\model\itemmanage\ItemCategory;
+        $this->platform = new \app\admin\model\platformManage\ManagtoPlatform;
         $this->view->assign('PutAway',$this->model->isPutAway());
         $this->view->assign('LevelList',$this->model->getLevelList());
         $this->view->assign('CategoryList',$this->model->getCategoryList());
         //$this->view->assign('PropertyGroup',(new ItemAttributePropertyGroup())->propertyGroupList());
         $this->view->assign('AttrGroup',$this->model->getAttrGroup());
+        $this->view->assign('PlatformList',$this->platform->managtoPlatformList());
     }
     
     /**
@@ -72,6 +74,21 @@ class ItemCategory extends Backend
             return json($result);
         }
         return $this->view->fetch();
+    }
+
+    /***
+     * 将平台商品分类上传至mangento平台
+     */
+    public function uploadItemCategory($ids = null,$name=null)
+    {
+        if($this->request->isAjax()){
+
+            var_dump($ids);
+            var_dump($name);
+            exit;
+        }else{
+            $this->error('404 Not found');
+        }
     }
     /**
      * 删除

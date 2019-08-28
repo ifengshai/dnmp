@@ -25,8 +25,23 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     [
                         {checkbox: true},
                         {field: 'id', title: __('Id')},
-                        {field: 'status', title: __('Status')},
+                        {
+                            field: 'status',
+                            title: __('Status'),
+                            searchList:{1:'启用',2:'禁用'},
+                            custom:{1:'blue',2:'red'},
+                            formatter:Table.api.formatter.status,
+                        },
                         {field: 'name', title: __('Name')},
+                        {field:'managto_account',title:__('Managto_account')},
+                        {field:'managto_key',title:__('Managto_key')},
+                        {
+                            field:'is_upload_item',
+                            title:__('Is_upload_item'),
+                            searchList:{1:'上传',2:'不上传'},
+                            custom:{1:'blue',2:'green'},
+                            formatter:Table.api.formatter.status,
+                        },
                         {field: 'create_time', title: __('Create_time'), operate:'RANGE', addclass:'datetimerange'},
                         {field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate}
                     ]
