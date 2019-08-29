@@ -79,12 +79,59 @@ class ItemCategory extends Backend
     /***
      * 将平台商品分类上传至mangento平台
      */
-    public function uploadItemCategory($ids = null,$name=null)
+    public function uploadItemCategory($ids = null,$platformId=null)
     {
         if($this->request->isAjax()){
-
-            var_dump($ids);
-            var_dump($name);
+            if(!is_array($ids) || in_array("",$ids)){
+                $this->error(__('Error selecting category parameters. Please reselect or contact the developer'));
+            }
+            if(count($ids)>1){
+                $this->error(__('Multiple data updates are not currently supported, please update one at a time'));
+            }
+            if(!$platformId){
+                $this->error(__('Error selecting platform parameters. Please reselect or contact the developer'));
+            }
+            $platformRow = $this->platform->get($platformId);
+            if(!$platformRow){
+                $this->error(__('Platform information error, please try again or contact the developer'));
+            }
+            $managtoUrl = $platformRow->managto_url;
+            if(!$managtoUrl){
+                $this->error(__('The platform url does not exist. Please go to edit it and it cannot be empty'));
+            }
+            $categoryRow = $this->model->get($ids);
+//            echo $categoryRow->pid;
+//            echo '<br>';
+//            echo $categoryRow->name;
+//            exit;
+            $client = new \SoapClient($managtoUrl.'/api/soap/?wsdl');
+            //$session = $client->login($platformRow->managto_account,$platformRow->managto_key);
+            $session = $client->login($platformRow->managto_account,$platformRow->managto_key);
+            $result = $client->call($session, 'catalog_category.create', array(286, array(
+                'name' => '太阳镜',
+                'is_active' => 1,
+                'position' => 1,
+                //<!-- position parameter is deprecated, category anyway will be positioned in the end of list
+                //and you can not set position directly, use catalog_category.move instead -->
+                'available_sort_by' => 'position',
+                'custom_design' => null,
+                'custom_apply_to_products' => null,
+                'custom_design_from' => null,
+                'custom_design_to' => null,
+                'custom_layout_update' => null,
+                'default_sort_by' => 'position',
+                'description' => 'Category description',
+                'display_mode' => null,
+                'is_anchor' => 0,
+                'landing_page' => null,
+                'meta_description' => 'Category meta description',
+                'meta_keywords' => 'Category meta keywords',
+                'meta_title' => 'Category meta title',
+                'page_layout' => 'two_columns_left',
+                'url_key' => 'url-key',
+                'include_in_menu' => 1,
+            )));
+            var_dump ($result);
             exit;
         }else{
             $this->error('404 Not found');

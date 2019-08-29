@@ -42,6 +42,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             custom:{1:'blue',2:'green'},
                             formatter:Table.api.formatter.status,
                         },
+                        {field:'managto_url',title:__('Managto_url')},
                         {field: 'create_time', title: __('Create_time'), operate:'RANGE', addclass:'datetimerange'},
                         {field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate}
                     ]

@@ -38,6 +38,27 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                          formatter:Table.api.formatter.status
                         },
                         {field:'attribute_group_id',title:__('Attribute_group_id')},
+                        {
+                            field:'is_upload_zeelool',
+                            title:__('Is_upload_zeelool'),
+                            searchList:{1:'是',2:'否'},
+                            custom:{1:'blue',2:'yellow'},
+                            formatter:Table.api.formatter.status
+                        },
+                        {
+                            field:'is_upload_voogueme',
+                            title:__('Is_upload_voogueme'),
+                            searchList:{1:'是',2:'否'},
+                            custom:{1:'blue',2:'yellow'},
+                            formatter:Table.api.formatter.status
+                        },
+                        {
+                            field:'is_upload_nihao',
+                            title:__('is_upload_nihao'),
+                            searchList:{1:'是',2:'否'},
+                            custom:{1:'blue',2:'yellow'},
+                            formatter:Table.api.formatter.status
+                        },
                         {field: 'create_time', title: __('Create_time'), operate:'RANGE', addclass:'datetimerange'},
                         {field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate}
                     ]
@@ -48,13 +69,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             Table.api.bindevent(table);
             $(document).on('click', '.btn-upload', function () {
                  var ids = Table.api.selectedids(table);
-                 var name = $(this).attr("id");
+                 var platformId = $(this).attr("id");
                  Layer.confirm(
                     __('确定要传至对应的平台吗'),
                     function (index) {
                         Backend.api.ajax({
                             url: "/admin/itemmanage/item_category/uploadItemCategory",
-                            data: { ids: ids,name:name }
+                            data: { ids: ids,platformId:platformId }
                         }, function (data, ret) {
                             table.bootstrapTable('refresh');
                             Layer.close(index);

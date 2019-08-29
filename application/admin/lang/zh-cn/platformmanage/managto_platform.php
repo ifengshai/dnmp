@@ -7,5 +7,6 @@ return [
     'Create_time' => '创建时间',
     'Managto_account' => '账号名',
     'Managto_key' => '账号key',
-    'Is_upload_item' => '是否上传商品信息'
+    'Is_upload_item' => '是否上传商品信息',
+    'Managto_url' => '平台url'
 ];
