@@ -11,6 +11,7 @@ return [
     'Is_upload_nihao'   =>'是否已经上传到nihao',
     'Property_group_id' =>'商品属性组',
     'Attribute_group_id'=>'商品所属属性组',
+    'Update failed. Please try again' => '更新失败，请重新尝试',
     'Are you sure you want to delete the %s selected item?' => '如果有下级分类的话会把下级分类一并删除,确定删除选中的 %s 项?',
     'Are you sure you want to delete this item?' => '如果有下级分类的话会把下级分类一并删除,确定删除此项?',
     'The platform url does not exist. Please go to edit it and it cannot be empty'=>'平台url不存在,请前往编辑',

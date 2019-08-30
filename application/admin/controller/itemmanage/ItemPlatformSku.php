@@ -18,11 +18,12 @@ class ItemPlatformSku extends Backend
      * @var \app\admin\model\itemmanage\ItemPlatformSku
      */
     protected $model = null;
-
+    protected $platform = null;
     public function _initialize()
     {
         parent::_initialize();
         $this->model = new \app\admin\model\itemmanage\ItemPlatformSku;
+        $this->platform = new \app\admin\model\platformManage\ManagtoPlatform;
 
     }
     
@@ -67,6 +68,7 @@ class ItemPlatformSku extends Backend
 
             return json($result);
         }
+        $this->view->assign('PlatformList',$this->platform->managtoPlatformList());
         return $this->view->fetch();
     }
     //商品预售首页
@@ -358,4 +360,47 @@ class ItemPlatformSku extends Backend
             $this->error('404 not found');
         }
     }
+    /***
+     * 上传商品到magento平台
+     */
+    public function uploadItem($ids=null,$platformId=null)
+    {
+        if($this->request->isAjax()){
+            if(!is_array($ids) || in_array("",$ids)){
+                $this->error(__('Error selecting item parameters. Please reselect or contact the developer'));
+            }
+            if(count($ids)>1){
+                $this->error(__('Multiple data updates are not currently supported, please update one at a time'));
+            }
+            if(!$platformId){
+                $this->error(__('Error selecting platform parameters. Please reselect or contact the developer'));
+            }
+            $platformRow = $this->platform->get($platformId);
+            if(!$platformRow){
+                $this->error(__('Platform information error, please try again or contact the developer'));
+            }
+            $managtoUrl = $platformRow->managto_url;
+            if(!$managtoUrl){
+                $this->error(__('The platform url does not exist. Please go to edit it and it cannot be empty'));
+            }
+
+        }else{
+            $this->error('404 Not found');
+        }
+    }
+    /****
+     * 编辑后面的商品上传至对应平台
+     */
+    public function afterUploadItem($ids = null)
+    {
+        if($this->request->isAjax()){
+            $itemPlatformRow = $this->model->get($ids);
+            var_dump($itemPlatformRow->platform_type);
+            exit;
+
+        }else{
+            $this->error('404 Not found');
+        }
+    }
+
 }
