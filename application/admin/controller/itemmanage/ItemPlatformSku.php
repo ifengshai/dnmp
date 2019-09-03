@@ -5,6 +5,7 @@ use think\Db;
 use think\Request;
 use app\common\controller\Backend;
 use app\admin\model\platformManage\ManagtoPlatform;
+use app\admin\model\itemmanage\Item;
 /**
  * 平台SKU管理
  *
@@ -394,8 +395,74 @@ class ItemPlatformSku extends Backend
     public function afterUploadItem($ids = null)
     {
         if($this->request->isAjax()){
-            $itemPlatformRow = $this->model->get($ids);
-            var_dump($itemPlatformRow->platform_type);
+            if(count($ids)>1){ //一次只能上传一个商品
+                $this->error(__('Multiple data updates are not currently supported, please update one at a time'));
+            }
+            $itemPlatformRow = $this->model->findItemPlatform($ids);
+            if(!$itemPlatformRow){ //对应商品不正确或者平台不正确
+                $this->error(__('Incorrect product or incorrect platform'));
+            }
+            if($itemPlatformRow['is_upload_item'] == 2){ //控制不上传商品信息
+                $this->error(__('The corresponding platform does not need to upload product information, please do not upload'));
+            }
+            if(!$itemPlatformRow['managto_url']){
+                $this->error(__('The platform url does not exist. Please go to edit it and it cannot be empty'));
+            }
+            if($itemPlatformRow['is_upload'] == 1){ //商品已经上传，无需再次上传
+                $this->error(__('The product has been uploaded, there is no need to upload again'));
+            }
+            $itemRow = (new Item())->getItemRow($itemPlatformRow['sku']);
+            $managtoUrl = $itemPlatformRow['managto_url'];
+            try{
+                $client = new \SoapClient($managtoUrl.'/api/soap/?wsdl');
+                $session = $client->login($itemPlatformRow['managto_account'],$itemPlatformRow['managto_key']);
+                $attributeSets = $client->call($session, 'product_attribute_set.list');
+                $attributeSet = current($attributeSets);
+            }catch (\SoapFault $e){
+                $this->error(__('Platform account or key is incorrect, please go to the platform to edit'));
+            }catch (\Exception $e){
+                $this->error(__('An error has occurred. Please contact the developer'));
+            }
+            echo '<pre>';
+            var_dump($attributeSets);
+            exit;
+            if($itemPlatformRow['magento_id']>0){ //更新商品
+
+            }else{ //添加商品
+                try{
+                    $result = $client->call($session, 'catalog_product.create', array('simple', $attributeSet['set_id'], $itemRow['sku'], array(
+                        'categories' => array(2),
+                        'websites' => array(1),
+                        'name' => $itemRow['name'],
+                        'description' => 'Product description',
+                        'short_description' => 'Product short description',
+                        'weight' => $itemRow['frame_weight'],
+                        'status' => $itemRow['item_status'],
+                        'url_key' => $itemRow['sku'],
+                        'url_path' => $itemRow['sku'],
+                        'visibility' => '4',
+                        'price' => '100',
+                        'tax_class_id' => 1,
+                        'meta_title' => 'Product meta title',
+                        'meta_keyword' => 'Product meta keyword',
+                        'meta_description' => 'Product meta description'
+                    )));
+                    if($result){
+                        $where['id'] = $itemPlatformRow['id'];
+                        $data['magento_id'] = $result;
+                        $data['is_upload'] = 1;
+                        $categoryRowRs = $this->model->isUpdate(true, $where)->save($data);
+                        if($categoryRowRs){
+                            $this->success('上传成功');
+                        }else{
+                            $this->error('Update failed. Please try again');
+                        }
+                    }
+                }catch(\SoapFault $e){
+                    $this->error($e->getMessage());
+                }
+
+            }
             exit;
 
         }else{

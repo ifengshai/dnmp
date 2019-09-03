@@ -27,4 +27,9 @@ return [
     'Error selecting platform parameters. Please reselect or contact the developer'=>'选择平台参数错误，请重新选择或者联系开发者',
     'Platform information error, please try again or contact the developer'=>'平台信息错误，请重试或联系开发者',
     'Multiple data updates are not currently supported, please update one at a time'=>'暂不支持多条数据同时更新，请一次更新一条',
+    'Incorrect product or incorrect platform'=>'对应商品不正确或者平台不正确',
+    'The corresponding platform does not need to upload product information, please do not upload'=>'对应平台不需要上传商品信息，请勿上传',
+    'The product has been uploaded, there is no need to upload again' =>'商品已经上传，无需再次上传',
+    'Platform account or key is incorrect, please go to the platform to edit'=>'平台账号或者key不正确，请去平台编辑',
+    'An error has occurred. Please contact the developer'=>'出现错误，请联系开发者'
 ];

@@ -102,4 +102,77 @@ class Item extends Model
         $result = $this->where('name', '=', $name)->value('name');
         return $result ? $result : false;
     }
+
+    /***
+     * 得到一条商品的记录
+     */
+    public function getItemRow($sku)
+    {
+        $result = $this->alias('g')->where('sku','=',$sku)->join('item_attribute a','g.id=a.item_id')
+            ->field('g.*,a.item_id,a.glasses_type,a.procurement_type,a.procurement_origin,a.frame_type,a.frame_width,a.frame_height,
+            a.frame_length,a.frame_temple_length,a.frame_bridge,a.mirror_width,a.frame_color,a.frame_weight,a.frame_shape,a.shape,
+            a.frame_texture,a.frame_gender,a.frame_size,a.frame_is_recipe,a.frame_piece,a.frame_is_advance,
+            a.frame_temple_is_spring,a.frame_is_adjust_nose_pad')->find();
+        if(!$result){
+            return false;
+        }
+        //获取所有眼镜形状
+        $frameShape = (new ItemAttribute())->getAllFrameShape();
+        //获得所有框型
+        $shape      = (new ItemAttribute())->getAllShape();
+        //获取所有材质
+        $texture    = (new ItemAttribute())->getAllTexture();
+        //获取适合人群
+        $frameGender   = (new ItemAttribute())->getFrameGender();
+        //获取尺寸型号
+        $frameSize     = (new ItemAttribute())->getFrameSize();
+        //获取镜架所有的颜色
+        $frameColor    = (new ItemAttribute())->getFrameColor();
+        //获取眼镜类型
+        $glassesType   = (new ItemAttribute())->getGlassesType();
+        //获取所有线下采购产地
+        $origin        = (new ItemAttribute())->getOrigin();
+        //获取配镜类型
+        $frameType     = (new ItemAttribute())->getFrameType();
+        $result['glasses_type']       = $glassesType[$result['glasses_type']];
+        $result['procurement_origin'] = $origin[$result['procurement_origin']];
+        $result['frame_type']         = $frameType[$result['frame_type']];
+        $result['frame_color']        = $frameColor[$result['frame_color']];
+        $result['frame_shape']        = $frameShape[$result['frame_shape']];
+        $result['shape']              = $shape[$result['shape']];
+        $result['frame_texture']      = $texture[$result['frame_texture']];
+        $result['frame_gender']       = $frameGender[$result['frame_gender']];
+        $result['frame_size']         = $frameSize[$result['frame_size']];
+        if($result['is_open'] == 1){
+            $result['is_open'] = 'Enabled';
+        }elseif($result['is_open'] == 2){
+            $result['is_open'] = 'Disabled';
+        }
+        if($result['frame_is_recipe'] == 1){ //是否可处方
+            $result['frame_is_recipe'] = '可处方';
+        }else{
+            $result['frame_is_recipe'] = '不可处方';
+        }
+        if($result['frame_piece'] == 1){ //是否可夹片
+            $result['frame_piece'] = '可夹片';
+        }else{
+            $result['frame_piece'] = '不可夹片';
+        }
+        if($result['frame_is_advance'] == 1){ //是否渐进
+            $result['frame_is_advance'] = '渐进';
+        }else{
+            $result['frame_is_advance'] = '不渐进';
+        }
+        if($result['frame_temple_is_spring'] == 1){ //镜架是否弹簧腿
+            $result['frame_temple_is_spring'] = '镜架是弹簧腿';
+        }else{
+            $result['frame_temple_is_spring'] = '镜架不是弹簧腿';
+        }
+        if($result['frame_is_adjust_nose_pad'] == 1){ //是否可以调节鼻托
+            $result['frame_is_adjust_nose_pad'] = '可以调节鼻托';
+        }else{
+            $result['frame_is_adjust_nose_pad'] = '不可以调节鼻托';
+        }
+        return $result;
+    }
 }
