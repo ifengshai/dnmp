@@ -130,7 +130,7 @@ class ItemAttribute extends Model
 //    }
     public function getFrameType()
     {
-        return [0=>'请选择',1=>'单焦点',2=>'多焦点'];
+        return [0=>'请选择',1=>'Single vision',2=>'Progressive'];
     }
     //追加字段
     /***

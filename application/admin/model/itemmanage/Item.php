@@ -149,29 +149,29 @@ class Item extends Model
             $result['is_open'] = 'Disabled';
         }
         if($result['frame_is_recipe'] == 1){ //是否可处方
-            $result['frame_is_recipe'] = '可处方';
+            $result['frame_is_recipe'] = 'yes';
         }else{
-            $result['frame_is_recipe'] = '不可处方';
+            $result['frame_is_recipe'] = 'no';
         }
         if($result['frame_piece'] == 1){ //是否可夹片
-            $result['frame_piece'] = '可夹片';
+            $result['frame_piece'] = 'yes';
         }else{
-            $result['frame_piece'] = '不可夹片';
+            $result['frame_piece'] = 'no';
         }
         if($result['frame_is_advance'] == 1){ //是否渐进
-            $result['frame_is_advance'] = '渐进';
+            $result['frame_is_advance'] = 'yes';
         }else{
-            $result['frame_is_advance'] = '不渐进';
+            $result['frame_is_advance'] = 'no';
         }
         if($result['frame_temple_is_spring'] == 1){ //镜架是否弹簧腿
-            $result['frame_temple_is_spring'] = '镜架是弹簧腿';
+            $result['frame_temple_is_spring'] = 'yes';
         }else{
-            $result['frame_temple_is_spring'] = '镜架不是弹簧腿';
+            $result['frame_temple_is_spring'] = 'no';
         }
         if($result['frame_is_adjust_nose_pad'] == 1){ //是否可以调节鼻托
-            $result['frame_is_adjust_nose_pad'] = '可以调节鼻托';
+            $result['frame_is_adjust_nose_pad'] = 'yes';
         }else{
-            $result['frame_is_adjust_nose_pad'] = '不可以调节鼻托';
+            $result['frame_is_adjust_nose_pad'] = 'no';
         }
         return $result;
     }

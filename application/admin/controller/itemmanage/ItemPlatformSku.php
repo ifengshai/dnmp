@@ -434,6 +434,30 @@ class ItemPlatformSku extends Backend
                         $attributeSet['name'] = $v['name'];
                     }
                 }
+                $attributeList = $client->call( //求出商品属性列表
+                    $session,
+                    "product_attribute.list",
+                    array(
+                        $attributeSet['set_id']
+                    )
+                );
+                //如果存在属性列表的话求出属性对应的值
+//                if(is_array($attributeList) && count($attributeList)>1){
+//                    foreach ($attributeList as $k =>$v){
+//                        if(($v['required'] == 1 ) && ($v['scope'] == 'global') ){
+//                            $attributeList[$k]['value'] = $client->call(
+//                                $session,
+//                                "product_attribute.options",
+//                                array(
+//                                    $v['attribute_id']
+//                                )
+//                            );
+//                        }
+//                    }
+//                }
+                echo '<pre>';
+                dump($attributeList);
+                exit;
             }
             if($itemPlatformRow['magento_id']>0){ //更新商品
 
@@ -446,7 +470,7 @@ class ItemPlatformSku extends Backend
                         'description' => 'Product description',
                         'short_description' => 'Product short description',
                         'weight' => $itemRow['frame_weight'],
-                        'status' => $itemRow['item_status'],
+                        'status' => $itemRow['is_open'],
                         'url_key' => $itemRow['sku'],
                         'url_path' => $itemRow['sku'],
                         'visibility' => '4',
