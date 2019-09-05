@@ -31,5 +31,6 @@ return [
     'The corresponding platform does not need to upload product information, please do not upload'=>'对应平台不需要上传商品信息，请勿上传',
     'The product has been uploaded, there is no need to upload again' =>'商品已经上传，无需再次上传',
     'Platform account or key is incorrect, please go to the platform to edit'=>'平台账号或者key不正确，请去平台编辑',
-    'An error has occurred. Please contact the developer'=>'出现错误，请联系开发者'
+    'An error has occurred. Please contact the developer'=>'出现错误，请联系开发者',
+    'The product attributes or product types of the platform are not filled in'=>'平台的商品属性或者商品类型没有填写'
 ];

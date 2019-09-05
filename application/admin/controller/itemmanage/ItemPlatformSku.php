@@ -411,26 +411,35 @@ class ItemPlatformSku extends Backend
             if($itemPlatformRow['is_upload'] == 1){ //商品已经上传，无需再次上传
                 $this->error(__('The product has been uploaded, there is no need to upload again'));
             }
+            if(empty($itemPlatformRow['item_attr_name']) || empty($itemPlatformRow['item_type'])){ //平台商品类型和商品属性
+                $this->error(__('The product attributes or product types of the platform are not filled in'));
+            }
             $itemRow = (new Item())->getItemRow($itemPlatformRow['sku']);
             $managtoUrl = $itemPlatformRow['managto_url'];
             try{
                 $client = new \SoapClient($managtoUrl.'/api/soap/?wsdl');
                 $session = $client->login($itemPlatformRow['managto_account'],$itemPlatformRow['managto_key']);
                 $attributeSets = $client->call($session, 'product_attribute_set.list');
-                $attributeSet = current($attributeSets);
+               // $attributeSet = current($attributeSets);
             }catch (\SoapFault $e){
                 $this->error(__('Platform account or key is incorrect, please go to the platform to edit'));
             }catch (\Exception $e){
                 $this->error(__('An error has occurred. Please contact the developer'));
             }
-            echo '<pre>';
-            var_dump($attributeSets);
-            exit;
+            if(is_array($attributeSets)){
+                $attributeSet = [];
+                foreach ($attributeSets as $k =>$v){
+                    if($v['name'] == $itemPlatformRow['item_attr_name']){ //如果相等的话
+                        $attributeSet['set_id'] = $v['set_id'];
+                        $attributeSet['name'] = $v['name'];
+                    }
+                }
+            }
             if($itemPlatformRow['magento_id']>0){ //更新商品
 
             }else{ //添加商品
                 try{
-                    $result = $client->call($session, 'catalog_product.create', array('simple', $attributeSet['set_id'], $itemRow['sku'], array(
+                    $result = $client->call($session, 'catalog_product.create', array($itemPlatformRow['item_type'], $attributeSet['set_id'], $itemRow['sku'], array(
                         'categories' => array(2),
                         'websites' => array(1),
                         'name' => $itemRow['name'],
