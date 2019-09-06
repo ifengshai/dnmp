@@ -1,0 +1,106 @@
+<form id="edit-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
+
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Origin_sku')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-origin_sku" data-rule="required" class="form-control" name="row[origin_sku]" type="text" value="{$row.origin_sku|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Sku')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-sku" data-rule="required" class="form-control" name="row[sku]" type="text" value="{$row.sku|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Name')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-name" data-rule="required" class="form-control" name="row[name]" type="text" value="{$row.name|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Category_id')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-category_id" data-rule="required" data-source="category/selectpage" data-params='{"custom[type]":"new_product"}' class="form-control selectpage" name="row[category_id]" type="text" value="{$row.category_id|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Attribute_id')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-attribute_id" data-rule="required" data-source="attribute/index" class="form-control selectpage" name="row[attribute_id]" type="text" value="{$row.attribute_id|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Brand_id')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-brand_id" data-rule="required" data-source="brand/index" class="form-control selectpage" name="row[brand_id]" type="text" value="{$row.brand_id|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Stock')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-stock" data-rule="required" class="form-control" name="row[stock]" type="number" value="{$row.stock|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Item_status')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-item_status" data-rule="required" class="form-control" name="row[item_status]" type="number" value="{$row.item_status|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Create_person')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-create_person" data-rule="required" class="form-control" name="row[create_person]" type="text" value="{$row.create_person|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Create_time')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-create_time" data-rule="required" class="form-control datetimepicker" data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[create_time]" type="text" value="{$row.create_time}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Is_open')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-is_open" data-rule="required" class="form-control" name="row[is_open]" type="number" value="{$row.is_open|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Is_del')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-is_del" data-rule="required" class="form-control" name="row[is_del]" type="number" value="{$row.is_del|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Is_new')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-is_new" data-rule="required" class="form-control" name="row[is_new]" type="number" value="{$row.is_new|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Is_presell')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-is_presell" data-rule="required" class="form-control" name="row[is_presell]" type="number" value="{$row.is_presell|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Occupy_stock')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-occupy_stock" data-rule="required" class="form-control" name="row[occupy_stock]" type="number" value="{$row.occupy_stock|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Available_stock')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-available_stock" data-rule="required" class="form-control" name="row[available_stock]" type="number" value="{$row.available_stock|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group layer-footer">
+        <label class="control-label col-xs-12 col-sm-2"></label>
+        <div class="col-xs-12 col-sm-8">
+            <button type="submit" class="btn btn-success btn-embossed disabled">{:__('OK')}</button>
+            <button type="reset" class="btn btn-default btn-embossed">{:__('Reset')}</button>
+        </div>
+    </div>
+</form>

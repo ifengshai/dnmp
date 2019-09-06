@@ -616,6 +616,7 @@ class Item extends Backend
             return $this->error(__('404 Not Found'));
         }
     }
+    
     /***
      * 商品详情表
      */

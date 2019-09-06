@@ -1,0 +1,56 @@
+{present name="result"}
+{foreach name="result" item="vo" key="k"}
+{if $k%2 eq 0 }
+<div class="form-group ajax-add">
+    <label class="control-label col-xs-12 col-sm-2">{$vo.name_cn}</label>
+    <div class="col-xs-12 col-sm-3">
+        {if $vo.input_mode eq 1}
+        {if $vo.is_required eq 1}
+        {:Form::select($vo.rows,$vo.propertyValues, null, ['class'=>'form-control selectpicker','data-rule'=>'required','data-live-search' => true])}
+        {else/}
+        {:Form::select($vo.rows,$vo.propertyValues, null, ['class'=>'form-control selectpicker','data-live-search' => true])}
+        {/if}
+        {elseif $vo.input_mode eq 2/}
+        {if $vo.is_required eq 1}
+        {:Form::selects($vo.rows,$vo.propertyValues, null,['class'=>'form-control selectpicker', 'data-rule'=>'required','data-live-search' => true])}
+        {else/}
+        {:Form::selects($vo.rows,$vo.propertyValues, null,['class'=>'form-control selectpicker', 'data-live-search' => true])}
+        {/if}
+        {else/}
+        {if $vo.is_required eq 1}
+        <input id="c-{$vo.name_en}" data-rule="required" class="form-control" name="row[{$vo.name_en}]" type="text" value="">
+        {else/}
+        <input id="c-{$vo.name_en}" class="form-control" name="row[{$vo.name_en}]" type="text" value="">
+        {/if}
+        {/if}
+    </div>
+    {if $k eq $num}
+</div>
+    {/if}
+{else/}
+    <label class="control-label col-xs-12 col-sm-2">{$vo.name_cn}</label>
+    <div class="col-xs-12 col-sm-3">
+        {if $vo.input_mode eq 1}
+        {if $vo.is_required eq 1}
+        {:Form::select($vo.rows,$vo.propertyValues, null, ['class'=>'form-control selectpicker','data-rule'=>'required','data-live-search' => true])}
+        {else/}
+        {:Form::select($vo.rows,$vo.propertyValues, null, ['class'=>'form-control selectpicker','data-live-search' => true])}
+        {/if}
+        {elseif $vo.input_mode eq 2/}
+        {if $vo.is_required eq 1}
+        {:Form::selects($vo.rows,$vo.propertyValues, null,['class'=>'form-control selectpicker', 'data-rule'=>'required','data-live-search' => true])}
+        {else/}
+        {:Form::selects($vo.rows,$vo.propertyValues, null,['class'=>'form-control selectpicker', 'data-live-search' => true])}
+        {/if}
+        {else/}
+        {if $vo.is_required eq 1}
+        <input id="c-{$vo.name_en}" data-rule="required" class="form-control" name="row[{$vo.name_en}]" type="text" value="">
+        {else/}
+        <input id="c-{$vo.name_en}" class="form-control" name="row[{$vo.name_en}]" type="text" value="">
+        {/if}
+        {/if}
+    </div>
+</div>
+{/if}
+{/foreach}
+{/present}
