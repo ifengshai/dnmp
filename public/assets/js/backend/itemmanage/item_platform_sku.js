@@ -50,6 +50,20 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui'], function ($, 
                             custom: { 1: 'blue', 2: 'red' },
                             formatter: Table.api.formatter.status,
                         },
+                        {
+                            field:'is_upload',
+                            title:__('Is_upload_item'),
+                            searchList:{1:'已上传',2:'未上传'},
+                            custom:{1:'blue',2:'green'},
+                            formatter:Table.api.formatter.status,
+                        },
+                        {
+                            field:'is_upload_images',
+                            title:__('Is_upload_images'),
+                            searchList:{1:'已上传',2:'未上传'},
+                            custom:{1:'blue',2:'green'},
+                            formatter:Table.api.formatter.status,
+                        },
                         {field: 'create_person', title: __('Create_person')},
                         {field: 'create_time', title: __('Create_time'), operate:'RANGE', addclass:'datetimerange'},
                         {
@@ -113,6 +127,44 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui'], function ($, 
                                         // }
                                     },
                                 },
+                                {
+                                    name: 'uploadToPlatform',
+                                    text: '上传至对应平台',
+                                    title: __('上传至对应平台'),
+                                    classname: 'btn btn-xs btn-success btn-ajax',
+                                    url: '/admin/itemmanage/item_platform_sku/afterUploadItem',
+                                    confirm: '确定要上传到对应平台吗',
+                                    success: function (data, ret) {
+                                        Layer.alert(ret.msg);
+                                        $(".btn-refresh").trigger("click");
+                                    },
+                                    error: function (data, ret) {
+                                        Layer.alert(ret.msg);
+                                        return false;
+                                    },
+                                    visible: function (row) {
+                                        return true;
+                                    },
+                                },
+                                {
+                                    name: 'uploadImagesToPlatform',
+                                    text: '上传商品图片',
+                                    title: __('上传商品图片到平台'),
+                                    classname: 'btn btn-xs btn-success btn-ajax',
+                                    url: '/admin/itemmanage/item_platform_sku/uploadImagesToPlatform',
+                                    confirm: '确定要上传到对应平台吗',
+                                    success: function (data, ret) {
+                                        Layer.alert(ret.msg);
+                                        $(".btn-refresh").trigger("click");
+                                    },
+                                    error: function (data, ret) {
+                                        Layer.alert(ret.msg);
+                                        return false;
+                                    },
+                                    visible: function (row) {
+                                        return true;
+                                    },
+                                },
                             ]
                         },
 
@@ -122,6 +174,22 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui'], function ($, 
 
             // 为表格绑定事件
             Table.api.bindevent(table);
+            $(document).on('click', '.btn-upload', function () {
+                var ids = Table.api.selectedids(table);
+                var platformId = $(this).attr("id");
+                Layer.confirm(
+                    __('确定要传至对应的平台吗'),
+                    function (index) {
+                        Backend.api.ajax({
+                            url: "/admin/itemmanage/item_platform_sku/uploadItem",
+                            data: { ids: ids,platformId:platformId }
+                        }, function (data, ret) {
+                            table.bootstrapTable('refresh');
+                            Layer.close(index);
+                        });
+                    }
+                );
+            });
         },
         add: function () {
             Controller.api.bindevent();
