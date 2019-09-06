@@ -104,7 +104,7 @@ class Item extends Model
     }
 
     /***
-     * 得到一条商品的记录
+     * 得到一条商品的记录(属性)
      */
     public function getItemRow($sku)
     {
@@ -172,6 +172,18 @@ class Item extends Model
             $result['frame_is_adjust_nose_pad'] = 'yes';
         }else{
             $result['frame_is_adjust_nose_pad'] = 'no';
+        }
+        return $result;
+    }
+    /***
+     * 获取商品图片地址信息
+     */
+    public function getItemImagesRow($sku)
+    {
+        $result = $this->alias('g')->where('sku','=',$sku)->join('item_attribute a','g.id=a.item_id')
+            ->field('g.*,a.frame_images')->find();
+        if(!$result){
+            return false;
         }
         return $result;
     }

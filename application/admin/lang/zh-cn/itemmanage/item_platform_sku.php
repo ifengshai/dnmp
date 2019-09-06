@@ -17,6 +17,7 @@ return [
     'Create_person'         => '创建人',
     'Create_time'           => '创建时间',
     'Is_upload_item'        => '是否上传到对应平台',
+    'Is_upload_images'      => '是否上传照片',
     'Platform sku cannot be empty' => '平台sku不能为空',
     'SKU pre-order quantity cannot be empty' => 'SKU预售数量不能为空',
     'Pre-sale on, do not repeat on' =>'预售开启中，请勿重复开启',
@@ -32,5 +33,7 @@ return [
     'The product has been uploaded, there is no need to upload again' =>'商品已经上传，无需再次上传',
     'Platform account or key is incorrect, please go to the platform to edit'=>'平台账号或者key不正确，请去平台编辑',
     'An error has occurred. Please contact the developer'=>'出现错误，请联系开发者',
-    'The product attributes or product types of the platform are not filled in'=>'平台的商品属性或者商品类型没有填写'
+    'The product attributes or product types of the platform are not filled in'=>'平台的商品属性或者商品类型没有填写',
+    'No pictures of the goods have been uploaded. Please upload them'=>'没有上传商品图片，请去上传',
+    'The corresponding product Id does not exist, please upload the product to the platform first'=>'对应平台商品Id不存在，请先上传商品到平台'
 ];

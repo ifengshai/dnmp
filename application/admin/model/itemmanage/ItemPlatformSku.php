@@ -96,7 +96,7 @@ class ItemPlatformSku extends Model
     public function findItemPlatform($id)
     {
         $result = $this->alias('g')->where('g.id','=',$id)->join('managto_platform p','g.platform_type=p.id')
-                 ->field('g.id,g.sku,g.platform_sku,g.platform_type,g.magento_id,g.is_upload,p.status,p.managto_account,p.managto_key,p.managto_url,p.is_upload_item,p.is_del,p.name,p.item_attr_name,p.item_type')->find();
+                 ->field('g.id,g.sku,g.platform_sku,g.platform_type,g.magento_id,g.is_upload,g.is_upload_images,p.status,p.managto_account,p.managto_key,p.managto_url,p.is_upload_item,p.is_del,p.name,p.item_attr_name,p.item_type')->find();
         return $result ? $result : false;
     }
 

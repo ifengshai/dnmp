@@ -503,4 +503,78 @@ class ItemPlatformSku extends Backend
         }
     }
 
+    /***
+     * 上传商品图片到对应的平台
+     */
+    public function uploadImagesToPlatform($ids = null)
+    {
+        if($this->request->isAjax()){
+            if(count($ids)>1){ //一次只能上传一个商品
+                $this->error(__('Multiple data updates are not currently supported, please update one at a time'));
+            }
+            $itemPlatformRow = $this->model->findItemPlatform($ids);
+            if(!$itemPlatformRow){ //对应商品不正确或者平台不正确
+                $this->error(__('Incorrect product or incorrect platform'));
+            }
+            if($itemPlatformRow['is_upload_item'] == 2){ //控制不上传商品信息
+                $this->error(__('The corresponding platform does not need to upload product information, please do not upload'));
+            }
+            if(!$itemPlatformRow['managto_url']){
+                $this->error(__('The platform url does not exist. Please go to edit it and it cannot be empty'));
+            }
+            if(empty($itemPlatformRow['magento_id'])){
+                $this->error(__('The corresponding product Id does not exist, please upload the product to the platform first'));
+            }
+            if($itemPlatformRow['is_upload_images'] == 1){ //商品图片已经上传，无需再次上传
+                $this->error(__('The product has been uploaded, there is no need to upload again'));
+            }
+            if(empty($itemPlatformRow['item_attr_name']) || empty($itemPlatformRow['item_type'])){ //平台商品类型和商品属性
+                $this->error(__('The product attributes or product types of the platform are not filled in'));
+            }
+            $itemImagesRow = (new Item())->getItemImagesRow($itemPlatformRow['sku']);
+            if(empty($itemImagesRow['frame_images'])){
+                $this->error(__('No pictures of the goods have been uploaded. Please upload them'));
+            }
+            $itemImagesArr = explode(',',$itemImagesRow['frame_images']);
+            $managtoUrl = $itemPlatformRow['managto_url'];
+            try{
+                $client = new \SoapClient($managtoUrl.'/api/soap/?wsdl');
+                $session = $client->login($itemPlatformRow['managto_account'],$itemPlatformRow['managto_key']);
+                $file = array(
+                    'name'=>'123.jpg',
+                    'content' => base64_encode(file_get_contents('./'.$itemImagesArr[0])),
+                    'mime' => 'image/jpeg'
+                );
+                $result = $client->call(
+                    $session,
+                    'catalog_product_attribute_media.create',
+                    [
+                        $itemPlatformRow['magento_id'],
+                        ['file'=>$file, 'label'=>'Label', 'position'=>'100', 'types'=>['thumbnail'], 'exclude'=>0]
+                    ]
+                );
+                // $attributeSet = current($attributeSets);
+            }catch (\SoapFault $e){
+                $this->error($e->getMessage());
+                //$this->error(__('Platform account or key is incorrect, please go to the platform to edit'));
+            }catch (\Exception $e){
+                $this->error($e->getMessage());
+                //$this->error(__('An error has occurred. Please contact the developer'));
+            }
+            echo '<pre>';
+//            echo $_SERVER['SERVER_NAME'];
+//            var_dump($itemImagesArr);
+            var_dump($result);
+            exit;
+        }else{
+            $this->error('404 Not found');
+        }
+    }
+    public function ceshi()
+    {
+        //$result=base64_decode(file_get_contents('http://test.glass.com/uploads/itemmanage/item/20190906/7608fc22d801535c1a76c709dab094d5.jpg'));
+        echo $_SERVER['HTTP_HOST'];
+        //var_dump($result);
+    }
+
 }
