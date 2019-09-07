@@ -35,5 +35,7 @@ return [
     'An error has occurred. Please contact the developer'=>'出现错误，请联系开发者',
     'The product attributes or product types of the platform are not filled in'=>'平台的商品属性或者商品类型没有填写',
     'No pictures of the goods have been uploaded. Please upload them'=>'没有上传商品图片，请去上传',
-    'The corresponding product Id does not exist, please upload the product to the platform first'=>'对应平台商品Id不存在，请先上传商品到平台'
+    'The corresponding product Id does not exist, please upload the product to the platform first'=>'对应平台商品Id不存在，请先上传商品到平台',
+    'upload successful'=>'上传成功',
+    'upload error'     =>'上传失败'
 ];

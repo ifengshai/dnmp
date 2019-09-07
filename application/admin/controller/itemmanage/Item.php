@@ -663,7 +663,7 @@ class Item extends Backend
      */
     public function images($id = null)
     {
-        $row = $this->model->get($id);
+        $row = $this->model->get($id,'itemAttribute');
         if ($this->request->isAjax()) {
             $params = $this->request->post("row/a");
             $id = $params['id'];
