@@ -374,6 +374,40 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             })
 
         },
+        operational: function () {
+            // 初始化表格参数配置
+            Table.api.init({
+                commonSearch: false,
+                search: false,
+                showExport: false,
+                showColumns: false,
+                showToggle: false,
+                pagination: false,
+                extend: {
+                    index_url: 'order/printlabel/nihao/operational' + location.search + '&ids=' + Config.ids,
+                }
+            });
+
+            var table = $("#table");
+
+            // 初始化表格
+            table.bootstrapTable({
+                url: $.fn.bootstrapTable.defaults.extend.index_url,
+                pk: 'id',
+                sortName: 'id',
+                columns: [
+                    [
+                        { field: 'id', title: __('序号'), operate: false },
+                        { field: 'content', title: __('操作内容') },
+                        { field: 'person', title: __('操作人') },
+                        { field: 'createtime', title: __('操作时间') }
+                    ]
+                ]
+            });
+
+            // 为表格绑定事件
+            Table.api.bindevent(table);
+        },
         api: {
 
             formatter: {

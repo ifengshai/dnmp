@@ -225,6 +225,56 @@ class Nihao extends Backend
         return $this->view->fetch();
     }
 
+    //操作记录
+    public function operational($ids = null)
+    {
+        $row = $this->model->get($ids);
+        if (!$row) {
+            $this->error(__('No Results were found'));
+        }
+        if ($this->request->isAjax()) {
+            $ids = $this->request->get('ids');
+            $row = $this->model->get($ids);
+            $list = [
+                [
+                    'id' => 1,
+                    'content' => '打标签',
+                    'createtime' => $row['custom_print_label_created_at'],
+                    'person' => $row['custom_print_label_person']
+                ],
+                [
+                    'id' => 2,
+                    'content' => '配镜架',
+                    'createtime' => $row['custom_match_frame_created_at'],
+                    'person' => $row['custom_match_frame_person']
+                ],
+                [
+                    'id' => 3,
+                    'content' => '配镜片',
+                    'createtime' => $row['custom_match_lens_created_at'],
+                    'person' => $row['custom_match_lens_person']
+                ],
+                [
+                    'id' => 4,
+                    'content' => '加工',
+                    'createtime' => $row['custom_match_factory_created_at'],
+                    'person' => $row['custom_match_factory_person']
+                ],
+                [
+                    'id' => 5,
+                    'content' => '提货',
+                    'createtime' => $row['custom_match_delivery_created_at'],
+                    'person' => $row['custom_match_delivery_person']
+                ],
+            ];
+            $total = count($list);
+            $result = array("total" => $total, "rows" => $list);
+            return json($result);
+        }
+        $this->assignconfig('ids', $ids);
+        return $this->view->fetch();
+    }
+
     public function generate_barcode($text, $fileName)
     {
         // 引用barcode文件夹对应的类

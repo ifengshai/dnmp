@@ -36,7 +36,7 @@ class Item extends Model
 
     protected function setCreateTimeAttr($value)
     {
-        return $value === '' ? null : ($value && !is_numeric($value) ? strtotime($value) : $value);
+        return $value === '' ? null : ($value && !is_numeric($value) ? $value : $value);
     }
 
     /***

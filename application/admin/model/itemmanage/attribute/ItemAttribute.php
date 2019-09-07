@@ -9,14 +9,14 @@ use think\Model;
 class ItemAttribute extends Model
 {
 
-    
 
-    
+
+
 
     // 表名
     protected $name = 'item_attribute';
     protected $pk = 'id';
-    
+
     // 自动写入时间戳字段
     protected $autoWriteTimestamp = false;
 
@@ -26,9 +26,7 @@ class ItemAttribute extends Model
     protected $deleteTime = false;
 
     // 追加属性
-    protected $append = [
-
-    ];
+    protected $append = [];
     /***
      * 获取所有眼镜形状(原先)
      */
@@ -67,7 +65,7 @@ class ItemAttribute extends Model
      */
     public function getTextureEncode($id)
     {
-        $arr =[1=>'P',2=>'A',3=>'T',4=>'M',5=>'I',6=>'N',7=>'W',8=>'X'];
+        $arr = [1 => 'P', 2 => 'A', 3 => 'T', 4 => 'M', 5 => 'I', 6 => 'N', 7 => 'W', 8 => 'X'];
         return $arr[$id];
     }
     /***
@@ -85,9 +83,10 @@ class ItemAttribute extends Model
      * 获取尺寸型号
      * @return array
      */
-    public function getFrameSize(){
+    public function getFrameSize()
+    {
         //Z站尺寸型号
-        return [0=>'请选择',1=>'N',2=>'M',3=>'W'];
+        return [0 => '请选择', 1 => 'N', 2 => 'M', 3 => 'W'];
         //V站尺寸型号
         //return [0=>'请选择',1=>'S',2=>'M',3=>'L'];
     }
@@ -119,7 +118,7 @@ class ItemAttribute extends Model
      */
     public function getOrigin()
     {
-        return ['O'=>'线上采购','S'=>'深圳','W'=>'温州','T'=>'台州','X'=>'厦门','Y'=>'鹰潭','D'=>'丹阳','G'=>'广州','C'=>'重庆'];
+        return ['O' => '线上采购', 'S' => '深圳', 'W' => '温州', 'T' => '台州', 'X' => '厦门', 'Y' => '鹰潭', 'D' => '丹阳', 'G' => '广州', 'C' => '重庆'];
     }
     /***
      * 配镜类型(原先)
@@ -139,24 +138,23 @@ class ItemAttribute extends Model
      * @param $comment 字段注释
      * @param string $str 如果单选设定的enum类型
      */
-    public function appendField($type,$value,$comment,$str='')
+    public function appendField($type, $value, $comment, $str = '')
     {
         $attrArr = $this->getTableFields();
-        if(!in_array($value,$attrArr)){
-            if($type == 1){
+        if (!in_array($value, $attrArr)) {
+            if ($type == 1) {
                 $sql = "alter table fa_item_attribute add {$value} enum ({$str}) comment '{$comment}'";
-            }else{
+            } else {
                 $sql = "alter table fa_item_attribute add {$value} VARCHAR(100) NOT NULL DEFAULT '' comment '{$comment}'";
             }
             $result = Db::execute($sql);
-            if($result !== false){
+            if ($result !== false) {
                 return true;
-            }else{
+            } else {
                 return false;
             }
-        }else{
+        } else {
             return 1;
         }
-
     }
 }

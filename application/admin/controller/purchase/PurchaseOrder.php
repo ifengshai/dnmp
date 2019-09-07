@@ -10,6 +10,7 @@ use think\exception\ValidateException;
 use think\Hook;
 use fast\Http;
 use fast\Alibaba;
+use app\admin\model\NewProduct;
 
 
 /**
@@ -142,6 +143,23 @@ class PurchaseOrder extends Backend
             }
             $this->error(__('Parameter %s can not be empty', ''));
         }
+
+        //查询新品数据
+        $new_product_ids = $this->request->get('new_product_ids');
+        if ($new_product_ids) {
+            //查询所选择的数据
+            $where['new_product.id'] = ['in', $new_product_ids];
+            $row = (new NewProduct())->where($where)->with(['newproductattribute'])->select();
+            $row = collection($row)->toArray();
+
+            //提取供应商id
+            $supplier = array_unique(array_column($row, 'supplier_id'));
+            if (count($supplier) > 1) {
+                $this->error(__('必须选择相同的供应商！！', ''));
+            }
+            $this->assign('row', $row);
+        }
+
 
         //查询供应商
         $supplier = new \app\admin\model\purchase\Supplier;
