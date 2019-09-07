@@ -1,4 +1,4 @@
-define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($, undefined, Backend, Table, Form, undefined) {
+define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast'], function ($, undefined, Backend, Table, Form, undefined, Fast) {
 
     var Controller = {
         index: function () {
@@ -39,26 +39,182 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                         { field: 'supplier.supplier_name', title: __('供应商名称') },
                         { field: 'supplier_sku', title: __('供应商SKU') },
                         {
-                            field: 'item_status', title: __('选品状态'), 
-                            custom: { 0: 'success', 1: 'yellow', 2: 'blue', 3: 'danger', 4: 'gray' },
-                            searchList: { 0: '新建', 1: '待审核', 2: '已审核', 3: '已拒绝', 4: '已取消' },
+                            field: 'item_status', title: __('选品状态'),
+                            custom: { 1: 'success', 2: 'yellow', 3: 'blue', 4: 'danger', 5: 'gray' },
+                            searchList: { 1: '新建', 2: '待审核', 3: '审核通过', 4: '已拒绝', 5: '已取消' },
                             formatter: Table.api.formatter.status
                         },
                         { field: 'create_person', title: __('Create_person') },
                         { field: 'create_time', title: __('Create_time'), operate: 'RANGE', addclass: 'datetimerange' },
 
-                        { field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate }
+                        {
+                            field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [
+                                {
+                                    name: 'detail',
+                                    text: '详情',
+                                    title: __('查看详情'),
+                                    extend: 'data-area = \'["100%","100%"]\'',
+                                    classname: 'btn btn-xs btn-primary btn-dialog',
+                                    icon: 'fa fa-list',
+                                    url: '/admin/new_product/detail',
+                                    callback: function (data) {
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                    },
+                                    visible: function (row) {
+                                        //返回true时按钮显示,返回false隐藏
+                                        return true;
+                                    }
+                                },
+                                {
+                                    name: 'edit',
+                                    text: '编辑',
+                                    title: __('Edit'),
+                                    classname: 'btn btn-xs btn-success btn-dialog',
+                                    icon: 'fa fa-pencil',
+                                    url: '/admin/new_product/edit',
+                                    extend: 'data-area = \'["100%","100%"]\'',
+                                    callback: function (data) {
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                    },
+                                    visible: function (row) {
+                                        //返回true时按钮显示,返回false隐藏
+                                        //console.log(row.item_status);
+                                        if (row.item_status == 1) {
+                                            return true;
+                                        } else {
+                                            return false;
+                                        }
+                                    }
+                                },
+                                {
+                                    name: 'submitAudit',
+                                    text: '提交审核',
+                                    title: __('提交审核'),
+                                    classname: 'btn btn-xs btn-success btn-ajax',
+                                    icon: 'fa fa-leaf',
+                                    url: '/admin/new_product/audit',
+                                    confirm: '确认提交审核吗',
+                                    success: function (data, ret) {
+                                        Layer.alert(ret.msg);
+                                        $(".btn-refresh").trigger("click");
+                                        //如果需要阻止成功提示，则必须使用return false;
+                                        //return false;
+                                    },
+                                    error: function (data, ret) {
+                                        Layer.alert(ret.msg);
+                                        return false;
+                                    },
+                                    visible: function (row) {
+                                        //返回true时按钮显示,返回false隐藏
+                                        if (row.item_status == 1) {
+                                            return true;
+                                        } else {
+                                            return false;
+                                        }
+                                    },
+                                },
+                                {
+                                    name: 'auditRefused',
+                                    text: '取消',
+                                    title: __('取消'),
+                                    classname: 'btn btn-xs btn-danger btn-ajax',
+                                    icon: 'fa fa-remove',
+                                    url: '/admin/new_product/cancel',
+                                    confirm: '确认取消吗',
+                                    success: function (data, ret) {
+                                        Layer.alert(ret.msg);
+                                        $(".btn-refresh").trigger("click");
+                                        //如果需要阻止成功提示，则必须使用return false;
+                                        //return false;
+                                    },
+                                    error: function (data, ret) {
+                                        Layer.alert(ret.msg);
+                                        return false;
+                                    },
+                                    visible: function (row) {
+                                        //返回true时按钮显示,返回false隐藏
+                                        if (row.item_status == 1 || row.item_status == 2) {
+                                            return true;
+                                        } else {
+                                            return false;
+                                        }
+                                    }
+                                }
+                            ], formatter: Table.api.formatter.operate
+                        }
                     ]
                 ]
             });
 
             // 为表格绑定事件
             Table.api.bindevent(table);
+
+            //商品审核通过
+            $(document).on('click', '.btn-passAudit', function () {
+                var ids = Table.api.selectedids(table);
+                Layer.confirm(
+                    __('确定要审核通过吗'),
+                    function (index) {
+                        Backend.api.ajax({
+                            url: "/admin/new_product/passAudit",
+                            data: { ids: ids }
+                        }, function (data, ret) {
+                            table.bootstrapTable('refresh');
+                            Layer.close(index);
+                        });
+                    }
+                );
+            });
+            //商品审核拒绝
+            $(document).on('click', '.btn-auditRefused', function () {
+                var ids = Table.api.selectedids(table);
+                Layer.confirm(
+                    __('确定要审核拒绝吗'),
+                    function (index) {
+                        Backend.api.ajax({
+                            url: "/admin/new_product/auditRefused",
+                            data: { ids: ids }
+                        }, function (data, ret) {
+                            table.bootstrapTable('refresh');
+                            Layer.close(index);
+                        });
+                    }
+                );
+            });
+
+            //商品审核拒绝
+            $(document).on('click', '.btn-createPurchaseOrder', function () {
+                var ids = Table.api.selectedids(table);
+                Layer.confirm(
+                    __('确定要创建采购单吗'),
+                    function (index) { 
+                        Layer.closeAll();
+                        var options = {
+                            shadeClose: false,
+                            shade: [0.3, '#393D49'],
+                            area: ['100%', '100%'], //弹出层宽高
+                            callback: function (value) {
+
+                            }
+                        };
+                        Fast.api.open('purchase/purchase_order/add?new_product_ids=' + ids.join(','), '创建采购单', options);
+                    }
+                );
+            });
         },
         add: function () {
             Controller.api.bindevent();
+            $(document).on('click', '.btn-status', function () {
+                $('#status').val(2);
+            });
         },
         edit: function () {
+            Controller.api.bindevent();
+            $(document).on('click', '.btn-status', function () {
+                $('#status').val(2);
+            });
+        },
+        detail: function () {
             Controller.api.bindevent();
         },
         api: {
@@ -131,7 +287,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                 });
                 //模糊匹配原始sku
                 $('#c-origin_skus').autocomplete({
-                    
+
                     source: function (request, response) {
                         var origin_sku = $('#c-origin_skus').val();
                         $.ajax({

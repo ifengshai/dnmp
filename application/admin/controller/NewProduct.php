@@ -10,6 +10,7 @@ use think\exception\PDOException;
 use think\exception\ValidateException;
 use app\admin\model\itemmanage\ItemBrand;
 use app\admin\model\purchase\Supplier;
+use app\admin\model\itemmanage\ItemPlatformSku;
 
 /**
  * 商品管理
@@ -29,6 +30,7 @@ class NewProduct extends Backend
     {
         parent::_initialize();
         $this->model = new \app\admin\model\NewProduct;
+        $this->attribute = new \app\admin\model\NewProductAttribute;
         $this->itemAttribute = new \app\admin\model\itemmanage\attribute\ItemAttribute;
         $this->category = new \app\admin\model\itemmanage\ItemCategory;
         $this->view->assign('categoryList', $this->category->categoryList());
@@ -74,7 +76,7 @@ class NewProduct extends Backend
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
-               
+
 
             $list = collection($list)->toArray();
             $result = array("total" => $total, "rows" => $list);
@@ -206,12 +208,13 @@ class NewProduct extends Backend
         }
         return $this->view->fetch();
     }
+
     /**
      * 编辑
      */
     public function edit($ids = null)
     {
-        $row = $this->model->get($ids, 'itemAttribute');
+        $row = $this->model->get($ids, 'newproductattribute');
 
         if (!$row) {
             $this->error(__('No Results were found'));
@@ -229,50 +232,37 @@ class NewProduct extends Backend
             $params = $this->request->post("row/a");
             if ($params) {
                 $params = $this->preExcludeFields($params);
-                $itemName = $params['name'];
-                $itemColor = $params['color'];
-                if (is_array($itemName) && !in_array("", $itemName)) {
-                    $data = $itemAttribute = [];
-                    foreach ($itemName as $k => $v) {
-                        $data['name'] = $v;
-                        $data['item_status'] = $params['item_status'];
-                        $data['create_person'] = session('admin.nickname');
-                        $data['create_time'] = date("Y-m-d H:i:s", time());
-                        $item = Db::name('item')->where('id', '=', $row['id'])->update($data);
-                        $itemAttribute['attribute_type'] = $params['attribute_type'];
-                        $itemAttribute['glasses_type'] = $params['glasses_type'];
-                        $itemAttribute['frame_height'] = $params['frame_height'];
-                        $itemAttribute['frame_width'] = $params['frame_width'];
-                        $itemAttribute['frame_color'] = $itemColor[$k];
-                        $itemAttribute['frame_weight'] = $params['weight'];
-                        $itemAttribute['frame_length'] = $params['frame_length'];
-                        $itemAttribute['frame_temple_length'] = $params['frame_temple_length'];
-                        $itemAttribute['shape'] = $params['shape'];
-                        $itemAttribute['frame_bridge'] = $params['frame_bridge'];
-                        $itemAttribute['mirror_width'] = $params['mirror_width'];
-                        $itemAttribute['frame_type'] = $params['frame_type'];
-                        $itemAttribute['frame_texture'] = $params['frame_texture'];
-                        $itemAttribute['frame_shape'] = $params['frame_shape'];
-                        $itemAttribute['frame_gender'] = $params['frame_gender'];
-                        $itemAttribute['frame_size'] = $params['frame_size'];
-                        $itemAttribute['frame_is_recipe'] = $params['frame_is_recipe'];
-                        $itemAttribute['frame_piece'] = $params['frame_piece'];
-                        $itemAttribute['frame_is_advance'] = $params['frame_is_advance'];
-                        $itemAttribute['frame_temple_is_spring'] = $params['frame_temple_is_spring'];
-                        $itemAttribute['frame_is_adjust_nose_pad'] = $params['frame_is_adjust_nose_pad'];
-                        $itemAttribute['frame_remark'] = $params['frame_remark'];
-                        $itemAttr = Db::name('item_attribute')->where('item_id', '=', $row['id'])->update($itemAttribute);
+                $result = false;
+                Db::startTrans();
+                try {
+                    //是否采用模型验证
+                    if ($this->modelValidate) {
+                        $name = str_replace("\\model\\", "\\validate\\", get_class($this->model));
+                        $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.edit' : $name) : $this->modelValidate;
+                        $row->validateFailException(true)->validate($validate);
                     }
-                } else {
-                    $this->error(__('Please add product name and color'));
+                    $result = $row->allowField(true)->save($params);
+
+                    //属性表
+                    $this->attribute->allowField(true)->save($params, ['item_id' => $ids]);
+                    Db::commit();
+                } catch (ValidateException $e) {
+                    Db::rollback();
+                    $this->error($e->getMessage());
+                } catch (PDOException $e) {
+                    Db::rollback();
+                    $this->error($e->getMessage());
+                } catch (Exception $e) {
+                    Db::rollback();
+                    $this->error($e->getMessage());
                 }
-                $this->success();
-                if (($item !== false) && ($itemAttr !== false)) {
+                if ($result !== false) {
                     $this->success();
                 } else {
                     $this->error(__('No rows were updated'));
                 }
             }
+
             $this->error(__('Parameter %s can not be empty', ''));
         }
         $allShape = $this->itemAttribute->getAllShape();
@@ -290,6 +280,8 @@ class NewProduct extends Backend
         $allOrigin      = $this->itemAttribute->getOrigin();
         //获取配镜类型
         $allFrameType   = $this->itemAttribute->getFrameType();
+        //获取供应商
+        $allSupplier = (new Supplier())->getSupplierData();
         $this->assign('AllFrameType', $allFrameType);
         $this->assign('AllOrigin', $allOrigin);
         $this->assign('AllGlassesType', $allGlassesType);
@@ -298,6 +290,54 @@ class NewProduct extends Backend
         $this->assign('AllFrameShape', $allFrameShape);
         $this->assign('AllShape', $allShape);
         $this->assign('AllTexture', $allTexture);
+        $this->assign('AllSupplier', $allSupplier);
+        $this->view->assign('template', $this->category->getAttrCategoryById($row['category_id']));
+        $this->view->assign("row", $row);
+        return $this->view->fetch();
+    }
+
+    /**
+     * 详情
+     */
+    public function detail($ids = null)
+    {
+        $row = $this->model->get($ids, 'newproductattribute');
+
+        if (!$row) {
+            $this->error(__('No Results were found'));
+        }
+        $adminIds = $this->getDataLimitAdminIds();
+        if (is_array($adminIds)) {
+            if (!in_array($row[$this->dataLimitField], $adminIds)) {
+                $this->error(__('You have no permission'));
+            }
+        }
+        $allShape = $this->itemAttribute->getAllShape();
+        //获取所有材质
+        $allTexture = $this->itemAttribute->getAllTexture();
+        //获取所有镜架形状
+        $allFrameShape = $this->itemAttribute->getAllFrameShape();
+        //获取所有适合性别
+        $allFrameGender = $this->itemAttribute->getFrameGender();
+        //获取所有型号
+        $allFrameSize  = $this->itemAttribute->getFrameSize();
+        //获取所有眼镜类型
+        $allGlassesType = $this->itemAttribute->getGlassesType();
+        //获取所有采购产地
+        $allOrigin      = $this->itemAttribute->getOrigin();
+        //获取配镜类型
+        $allFrameType   = $this->itemAttribute->getFrameType();
+        //获取供应商
+        $allSupplier = (new Supplier())->getSupplierData();
+        $this->assign('AllFrameType', $allFrameType);
+        $this->assign('AllOrigin', $allOrigin);
+        $this->assign('AllGlassesType', $allGlassesType);
+        $this->assign('AllFrameSize', $allFrameSize);
+        $this->assign('AllFrameGender', $allFrameGender);
+        $this->assign('AllFrameShape', $allFrameShape);
+        $this->assign('AllShape', $allShape);
+        $this->assign('AllTexture', $allTexture);
+        $this->assign('AllSupplier', $allSupplier);
         $this->view->assign('template', $this->category->getAttrCategoryById($row['category_id']));
         $this->view->assign("row", $row);
         return $this->view->fetch();
@@ -482,4 +522,122 @@ class NewProduct extends Backend
             return $this->error(__('404 Not Found'));
         }
     }
+
+    /***
+     * 编辑之后提交审核
+     */
+    public function audit()
+    {
+        if ($this->request->isAjax()) {
+            $id = $this->request->param('ids');
+            $row = $this->model->get($id);
+            if ($row['item_status'] != 1) {
+                $this->error('此商品状态不能提交审核');
+            }
+            $map['id'] = $id;
+            $data['item_status'] = 2;
+            $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
+            if ($res) {
+                $this->success('提交审核成功');
+            } else {
+                $this->error('提交审核失败');
+            }
+        } else {
+            $this->error('404 Not found');
+        }
+    }
+
+    /***
+     * 审核通过
+     */
+    public function passAudit($ids = null)
+    {
+        if ($this->request->isAjax()) {
+            //查询所选择的数据
+            $where['new_product.id'] = ['in', $ids];
+            $where['new_product.item_status'] = 2;
+            $row = $this->model->where($where)->with(['newproductattribute'])->select();
+            $row = collection($row)->toArray();
+
+            $map['id'] = ['in', $ids];
+            $map['item_status'] = 2;
+            $data['item_status'] = 3;
+            $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
+            if ($res !== false) {
+                if ($row) {
+                    foreach ($row as $val) {
+                        $params = $val;
+                        $params['create_person'] = session('admin.nickname');
+                        $params['create_time'] = date('Y-m-d H:i:s', time());
+                        $params['item_status'] = 1;
+                        unset($params['id']);
+                        //查询商品表SKU是否存在
+                        $t_where['sku'] = $params['sku'];
+                        $t_where['is_del'] = 1;
+                        $count = $this->item->where($t_where)->count();
+                        //此SKU已存在 跳过
+                        if ($count > 0) {
+                            continue;
+                        }
+
+                        //添加商品主表信息
+                        $this->item->allowField(true)->isUpdate(false)->data($params, true)->save($params);
+                        $attributeParams = $val['newproductattribute'];
+                        unset($attributeParams['id']);
+                        $attributeParams['item_id'] = $this->item->id;
+                        //添加商品属性表信息
+                        $this->itemAttribute->allowField(true)->isUpdate(false)->data($attributeParams, true)->save();
+                    }
+                }
+                $this->success('审核成功');
+            } else {
+                $this->error('审核失败');
+            }
+        } else {
+            $this->error('404 Not found');
+        }
+    }
+    /***
+     * 多个一起审核拒绝
+     */
+    public function auditRefused($ids = null)
+    {
+        if ($this->request->isAjax()) {
+            $map['id'] = ['in', $ids];
+            $map['item_status'] = 2;
+            $data['item_status'] = 4;
+            $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
+            if ($res !== false) {
+                $this->success('拒绝审核成功');
+            } else {
+                $this->error('拒绝审核失败');
+            }
+        } else {
+            $this->error('404 Not found');
+        }
+    }
+
+
+
+    /***
+     * 取消商品
+     */
+    public function cancel()
+    {
+        if ($this->request->isAjax()) {
+            $id = $this->request->param('ids');
+            $map['id'] = $id;
+            $data['item_status'] = 5;
+            $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
+            if ($res) {
+                $this->success('取消成功');
+            } else {
+                $this->error('取消失败');
+            }
+        } else {
+            $this->error('404 Not found');
+        }
+    }
+
+    
 }
