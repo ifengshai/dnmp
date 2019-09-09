@@ -43,7 +43,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                         },
                         {
                             field: 'item_status', title: __('Item_status'),
-                            searchList: { 1: '保存', 2: '提交审核', 3: '审核通过', 4: '审核拒绝', 5: '取消' },
+                            searchList: { 1: '新建', 2: '提交审核', 3: '审核通过', 4: '审核拒绝', 5: '取消' },
                             custom: { 1: 'yellow', 2: 'blue', 3: 'success', 4: 'red', 5: 'danger' },
                             formatter: Table.api.formatter.status
                         },

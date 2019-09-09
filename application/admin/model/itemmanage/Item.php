@@ -3,6 +3,7 @@
 namespace app\admin\model\itemmanage;
 
 use think\Model;
+use think\Db;
 use app\admin\model\itemmanage\attribute\ItemAttribute;
 
 class Item extends Model
@@ -108,7 +109,7 @@ class Item extends Model
      */
     public function getItemRow($sku)
     {
-        $result = $this->alias('g')->where('sku','=',$sku)->join('item_attribute a','g.id=a.item_id')
+        $result = Db::name('item')->alias('g')->where('sku','=',$sku)->join('item_attribute a','g.id=a.item_id')
             ->field('g.*,a.item_id,a.glasses_type,a.procurement_type,a.procurement_origin,a.frame_type,a.frame_width,a.frame_height,
             a.frame_length,a.frame_temple_length,a.frame_bridge,a.mirror_width,a.frame_color,a.frame_weight,a.frame_shape,a.shape,
             a.frame_texture,a.frame_gender,a.frame_size,a.frame_is_recipe,a.frame_piece,a.frame_is_advance,
@@ -134,15 +135,40 @@ class Item extends Model
         $origin        = (new ItemAttribute())->getOrigin();
         //获取配镜类型
         $frameType     = (new ItemAttribute())->getFrameType();
-        $result['glasses_type']       = $glassesType[$result['glasses_type']];
+        //获取调节是否调节鼻托
+        $frameIsAdjustNosePad = (new ItemAttribute())->getAllNosePad();
+        //glasses_type多选字段
+        $glassesTypeArr = explode(',',$result['glasses_type']);
+        $frameShapeArr  = explode(',',$result['frame_shape']);
+        $frameSizeArr   = explode(',',$result['frame_size']);
+        $frameIsAdjustNosePadArr = explode(',',$result['frame_is_adjust_nose_pad']);
+        $result['glasses_type'] = $result['frame_shape'] = $result['frame_size'] = $result['frame_is_adjust_nose_pad'] ='';
+        foreach ($glassesTypeArr as $k => $v){
+            $result['glasses_type'] .= $glassesType[1].',';
+        }
+        $result['glasses_type'] = trim($result['glasses_type'],',');
+        foreach ($frameShapeArr as $k => $v){
+            $result['frame_shape'] .= $frameShape[$v].',';
+        }
+        $result['frame_shape'] = trim($result['frame_shape'],',');
+        foreach ($frameSizeArr as $k => $v){
+            $result['frame_size'] .= $frameSize[$v].',';
+        }
+        $result['frame_size'] = trim($result['frame_size'],',');
+        foreach ($frameIsAdjustNosePadArr as $k =>$v){
+            $result['frame_is_adjust_nose_pad'] .= $frameIsAdjustNosePad[$v].',';
+        }
+        $result['frame_is_adjust_nose_pad'] = trim($result['frame_is_adjust_nose_pad'],',');
+        //frame_shape多选字段
+        //$result['glasses_type']       = $glassesType[$result['glasses_type']];
         $result['procurement_origin'] = $origin[$result['procurement_origin']];
         $result['frame_type']         = $frameType[$result['frame_type']];
         $result['frame_color']        = $frameColor[$result['frame_color']];
-        $result['frame_shape']        = $frameShape[$result['frame_shape']];
+        //$result['frame_shape']        = $frameShape[$result['frame_shape']];
         $result['shape']              = $shape[$result['shape']];
         $result['frame_texture']      = $texture[$result['frame_texture']];
         $result['frame_gender']       = $frameGender[$result['frame_gender']];
-        $result['frame_size']         = $frameSize[$result['frame_size']];
+        //$result['frame_size']         = $frameSize[$result['frame_size']];
         if($result['is_open'] == 1){
             $result['is_open'] = 'Enabled';
         }elseif($result['is_open'] == 2){
@@ -168,11 +194,11 @@ class Item extends Model
         }else{
             $result['frame_temple_is_spring'] = 'no';
         }
-        if($result['frame_is_adjust_nose_pad'] == 1){ //是否可以调节鼻托
-            $result['frame_is_adjust_nose_pad'] = 'yes';
-        }else{
-            $result['frame_is_adjust_nose_pad'] = 'no';
-        }
+//        if($result['frame_is_adjust_nose_pad'] == 1){ //是否可以调节鼻托
+//            $result['frame_is_adjust_nose_pad'] = 'yes';
+//        }else{
+//            $result['frame_is_adjust_nose_pad'] = 'no';
+//        }
         return $result;
     }
     /***

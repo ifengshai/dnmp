@@ -131,6 +131,11 @@ class ItemAttribute extends Model
     {
         return [0=>'请选择',1=>'Single vision',2=>'Progressive'];
     }
+    //获取所有可调节鼻托类型
+    public function getAllNosePad()
+    {
+        return [1=>'nose_bridge',2=>'nose_pad',3=>'readers',4=>'sunglasses',5=>'progressive',6=>'spring_hinges',7=>'clip_on',8=>'ultra_light',9=>'mark'];
+    }
     //追加字段
     /***
      * @param $type 输入类型  1 单选 2 多选 3 输入
