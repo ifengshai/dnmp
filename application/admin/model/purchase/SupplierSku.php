@@ -30,4 +30,10 @@ class SupplierSku extends Model
     {
         return $this->belongsTo('supplier', 'supplier_id')->setEagerlyType(0);
     }
+
+    //根据SKUID 匹配sku
+    public function getSkuData($skuid)
+    {
+        return $this->where('skuid', '=', $skuid)->value('sku');
+    }
 }

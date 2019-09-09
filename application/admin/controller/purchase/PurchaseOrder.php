@@ -11,6 +11,7 @@ use think\Hook;
 use fast\Http;
 use fast\Alibaba;
 use app\admin\model\NewProduct;
+use app\admin\model\purchase\SupplierSku;
 
 
 /**
@@ -136,7 +137,7 @@ class PurchaseOrder extends Backend
                     $this->error($e->getMessage());
                 }
                 if ($result !== false) {
-                    $this->success('添加成功！！', '', url('index'));
+                    $this->success('添加成功！！',  url('PurchaseOrder/index'));
                 } else {
                     $this->error(__('No rows were inserted'));
                 }
@@ -155,7 +156,7 @@ class PurchaseOrder extends Backend
             //提取供应商id
             $supplier = array_unique(array_column($row, 'supplier_id'));
             if (count($supplier) > 1) {
-                $this->error(__('必须选择相同的供应商！！', ''));
+                $this->error(__('必须选择相同的供应商！！', url('admin/new_product/index')));
             }
             $this->assign('row', $row);
         }
@@ -427,7 +428,7 @@ class PurchaseOrder extends Backend
 
         $data['purchase_status'] = input('status');
         $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
-        if ($res) {
+        if ($res !== false) {
             $this->success();
         } else {
             $this->error('修改失败！！');
@@ -449,7 +450,7 @@ class PurchaseOrder extends Backend
         $map['id'] = ['in', $ids];
         $data['purchase_status'] = input('status');
         $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
-        if ($res) {
+        if ($res !== false) {
             $this->success();
         } else {
             $this->error('取消失败！！');
@@ -617,12 +618,27 @@ class PurchaseOrder extends Backend
         $this->success();
     }
 
+    /**
+     * 批量匹配sku
+     */
+    public function matching()
+    {
+        //查询SKU为空的采购单
+        $data = $this->purchase_order_item->where('sku', 'exp', 'is null')->select();
+        $data = collection($data)->toArray();
+        foreach($data as $k => $v) {
+            //匹配SKU
+            $params['sku'] = (new SupplierSku())->getSkuData($v['skuid']);
+            $this->purchase_order_item->allowField(true)->save($params,['id' => $v['id']]);
+        }
+        $this->success();
+    }
+
     //定时采集
     public function test()
     {
-        // $orderId = '531349795862802669';
-        // $data = Alibaba::getOrderDetail($orderId);
-
+        //$orderId = '551171682534802669';
+        //$data = Alibaba::getOrderDetail($orderId);
         // waitbuyerpay	等待买家付款	 
         // waitsellersend	等待卖家发货	 
         // waitbuyerreceive 等待买家确认收货	 
@@ -642,35 +658,49 @@ class PurchaseOrder extends Backend
         // waitselleract 等待卖家操作	 
         // waitbuyerconfirmaction 等待买家确认操作	 
         // waitsellerpush 等待卖家推进	
-        $params = [
-            'createStartTime' => date('YmdHis', time() - 7200) . '000+0800',
-            'createEndTime' => date('YmdHis') . '000+0800',
-        ];
-
-        $data = cache('success_data');
+        // $params = [
+        //     'createStartTime' => date('YmdHis', time() - 7200) . '000+0800',
+        //     'createEndTime' => date('YmdHis') . '000+0800',
+        // ];
+        set_time_limit(0);
+        $data = cache('success_data_msg');
         if (!$data) {
             //根据不同的状态取订单数据
             $success_data = Alibaba::getOrderList(1);
             //转为数组
             $success_data = collection($success_data)->toArray();
-            set_time_limit(0);
+
             $data = [];
             for ($i = 1; $i <= round($success_data['totalRecord'] / 50); $i++) {
+
                 //根据不同的状态取订单数据
-                $data[] = Alibaba::getOrderList($i)->result;
+                $data[$i] = Alibaba::getOrderList($i)->result;
             }
+
             //设置缓存
-            cache('success_data', $data, 86400);
+            cache('success_data_msg', $data, 86400);
         }
+
 
         foreach ($data as $key => $val) {
             foreach ($val as $k => $v) {
                 $list = [];
+
                 $map['purchase_number'] = $v->baseInfo->idOfStr;
                 $res = $this->model->where($map)->find();
+                //如果采购单已存在 则更新采购单状态
                 if ($res) {
+                    //待发货
+                    if (in_array($v->baseInfo->status, ['waitsellersend', 'waitsellerconfirm', 'waitbuyerconfirm', 'waitselleract', 'waitsellerpush', 'waitbuyerconfirmaction'])) {
+                        $list['purchase_status'] = 5;
+                    } elseif (in_array($v->baseInfo->status, ['waitbuyerreceive', 'send_goods_but_not_fund', 'waitlogisticstakein', 'waitbuyersign', 'signinfailed'])) {
+                        $list['purchase_status'] = 6; //待收货
+                    } else {
+                        $list['purchase_status'] = 7; //已收货
+                    }
                     $list['online_status'] = $v->baseInfo->status;
-                    $result = $this->model->allowField(true)->save($list, ['id' => $res['id']]);
+                    //更新采购单状态
+                    $result = $res->save($list);
                 } else {
                     //过滤待付款 和取消状态的订单
                     if (in_array($v->baseInfo->status, ['waitbuyerpay', 'cancel'])) {
@@ -733,6 +763,10 @@ class PurchaseOrder extends Backend
                         $params[$key]['purchase_num'] = $val->quantity;
                         $params[$key]['purchase_price'] = $val->price;
                         $params[$key]['purchase_total'] = $val->itemAmount;
+                        $params[$key]['skuid'] = $val->skuID;
+
+                        //匹配SKU
+                        $params[$key]['sku'] = (new SupplierSku())->getSkuData($val->skuID);
                     }
                     $this->purchase_order_item->allowField(true)->saveAll($params);
                 }

@@ -22,11 +22,20 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             table.bootstrapTable({
                 url: $.fn.bootstrapTable.defaults.extend.index_url,
                 pk: 'id',
-                sortName: 'id',
+                sortName: 'createtime',
+                sortOrder: 'desc',
                 columns: [
                     [
                         { checkbox: true },
-                        { field: 'id', title: __('Id') },
+                        {
+                            field: '', title: __('序号'), formatter: function (value, row, index) {
+                                var options = table.bootstrapTable('getOptions');
+                                var pageNumber = options.pageNumber;
+                                var pageSize = options.pageSize;
+                                return (pageNumber - 1) * pageSize + 1 + index;
+                            }, operate: false
+                        },
+                        { field: 'id', title: __('Id'), operate: false, visible: false },
                         { field: 'purchase_number', title: __('Purchase_number') },
                         { field: 'purchase_name', title: __('Purchase_name') },
                         { field: 'product_total', title: __('Product_total'), operate: 'BETWEEN' },
@@ -194,7 +203,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 });
             })
 
-            //审核拒绝
+            //审核取消
             $(document).on('click', '.btn-cancel', function (e) {
                 e.preventDefault();
                 var url = $(this).attr('href');
@@ -203,6 +212,20 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     data: { status: 4 }
                 }, function (data, ret) {
                     table.bootstrapTable('refresh');
+                });
+            })
+
+            //批量匹配SKU
+            $(document).on('click', '.btn-matching', function (e) {
+                e.preventDefault();
+                var url = '/admin/purchase/purchase_order/matching';
+                layer.load();
+                Backend.api.ajax({
+                    url: url,
+                    data: { }
+                }, function (data, ret) {
+                    layer.closeAll();
+                    //table.bootstrapTable('refresh');
                 });
             })
         },
@@ -219,7 +242,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
 
 
 
-
             //异步获取供应商的数据
             $(document).on('change', '.supplier', function () {
                 var id = $(this).val();
@@ -229,6 +251,57 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 }, function (data, ret) {
                     $('.supplier_address').val(data.address);
                 });
+            })
+
+            if ($('.supplier').val()) {
+                $('.supplier').change();
+            }
+
+            //计算金额
+            $('.purchase_num').blur(function () {
+                var purchase_num = $(this).val();
+                var purchase_price = $(this).parent().next().find('.purchase_price').val();
+                if (purchase_num * 1 > 0 && purchase_price * 1 > 0) {
+                    $(this).parent().next().next().find('.goods_total').val(purchase_num * 1 * purchase_price);
+                }
+                var total = 0;
+                $('.goods_total').each(function () {
+                    var purchase_total = $(this).val();
+                    total += purchase_total * 1;
+                })
+                //商品总价
+                $('.total').val(total);
+                //运费
+                var freight = $('.freight').val();
+                //总计
+                $('.purchase_total').val(total + freight * 1);
+            })
+
+            $('.purchase_price').blur(function () {
+                var purchase_num = $(this).parent().prev().find('.purchase_num').val();
+                var purchase_price = $(this).val();
+                if (purchase_num * 1 > 0 && purchase_price * 1 > 0) {
+                    $(this).parent().next().find('.goods_total').val(purchase_num * 1 * purchase_price);
+                }
+                var total = 0;
+                $('.goods_total').each(function () {
+                    var purchase_total = $(this).val();
+                    total += purchase_total * 1;
+                })
+                //商品总价
+                $('.total').val(total);
+                //运费
+                var freight = $('.freight').val();
+                //总计
+                $('.purchase_total').val(total + freight * 1);
+            })
+
+            //运费
+            $('.freight').blur(function () {
+                var total = $('.total').val();
+                var freight = $(this).val();
+                //总计
+                $('.purchase_total').val(total * 1 + freight * 1);
             })
         },
         edit: function () {
@@ -263,6 +336,53 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         data: { id: id }
                     });
                 }
+            })
+
+            //计算金额
+            $('.purchase_num').blur(function () {
+                var purchase_num = $(this).val();
+                var purchase_price = $(this).parent().next().find('.purchase_price').val();
+                if (purchase_num * 1 > 0 && purchase_price * 1 > 0) {
+                    $(this).parent().next().next().find('.goods_total').val(purchase_num * 1 * purchase_price);
+                }
+                var total = 0;
+                $('.goods_total').each(function () {
+                    var purchase_total = $(this).val();
+                    total += purchase_total * 1;
+                })
+                //商品总价
+                $('.total').val(total);
+                //运费
+                var freight = $('.freight').val();
+                //总计
+                $('.purchase_total').val(total + freight * 1);
+            })
+
+            $('.purchase_price').blur(function () {
+                var purchase_num = $(this).parent().prev().find('.purchase_num').val();
+                var purchase_price = $(this).val();
+                if (purchase_num * 1 > 0 && purchase_price * 1 > 0) {
+                    $(this).parent().next().find('.goods_total').val(purchase_num * 1 * purchase_price);
+                }
+                var total = 0;
+                $('.goods_total').each(function () {
+                    var purchase_total = $(this).val();
+                    total += purchase_total * 1;
+                })
+                //商品总价
+                $('.total').val(total);
+                //运费
+                var freight = $('.freight').val();
+                //总计
+                $('.purchase_total').val(total + freight * 1);
+            })
+
+            //运费
+            $('.freight').blur(function () {
+                var total = $('.total').val();
+                var freight = $(this).val();
+                //总计
+                $('.purchase_total').val(total * 1 + freight * 1);
             })
 
         },
