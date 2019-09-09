@@ -100,6 +100,7 @@ class Index extends Backend
                 $this->error(__('You have no permission'));
             }
         }
+       
 
         //获取收货信息
         $address = $this->zeelool->getOrderDetail($label, $ids);
