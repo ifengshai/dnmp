@@ -414,6 +414,11 @@ class ItemPlatformSku extends Backend
             if(empty($itemPlatformRow['item_attr_name']) || empty($itemPlatformRow['item_type'])){ //平台商品类型和商品属性
                 $this->error(__('The product attributes or product types of the platform are not filled in'));
             }
+            $uploadFields = $itemPlatformRow['upload_field'];
+            if(empty($uploadFields)){
+               $this->error(__('The upload field cannot be empty, please go to the platform to edit'));
+            }
+            $uploadFieldsArr = explode(',',$uploadFields);
             $itemRow = (new Item())->getItemRow($itemPlatformRow['sku']);
             $managtoUrl = $itemPlatformRow['managto_url'];
             try{
@@ -441,23 +446,30 @@ class ItemPlatformSku extends Backend
                         $attributeSet['set_id']
                     )
                 );
-                //如果存在属性列表的话求出属性对应的值
-//                if(is_array($attributeList) && count($attributeList)>1){
-//                    foreach ($attributeList as $k =>$v){
-//                        if(($v['required'] == 1 ) && ($v['scope'] == 'global') ){
-//                            $attributeList[$k]['value'] = $client->call(
-//                                $session,
-//                                "product_attribute.options",
-//                                array(
-//                                    $v['attribute_id']
-//                                )
-//                            );
-//                        }
-//                    }
+                //求出需要上传的属性和它们的值
+                if(is_array($attributeList)){
+                    $attributeListArr = [];
+                    foreach ($attributeList as $k =>$v){
+                        if(in_array($v['code'],$uploadFieldsArr)){
+                            if(($v['type'] == 'multiselect') ||($v['type'] == 'select')){
+                                $v['valueOptions'] = $client->call(
+                                    $session,
+                                    "product_attribute.options",
+                                    array(
+                                        $v['attribute_id']
+                                    )
+                                );
+                            }
+                            $attributeListArr [] = $v;
+                        }
+                    }
+                }
+//                foreach ($attributeListArr as $k=>$v){
+//                    if(in_array())
 //                }
-                echo '<pre>';
-                dump($attributeList);
-                exit;
+//                echo '<pre>';
+//                dump($attributeListArr);
+//                exit;
             }
             if($itemPlatformRow['magento_id']>0){ //更新商品
 
@@ -478,7 +490,9 @@ class ItemPlatformSku extends Backend
                         'tax_class_id' => 1,
                         'meta_title' => 'Product meta title',
                         'meta_keyword' => 'Product meta keyword',
-                        'meta_description' => 'Product meta description'
+                        'meta_description' => 'Product meta description',
+                        'frame_width' => $itemRow['frame_width'],
+                        'shape'       =>'24,25'
                     )));
                     if($result){
                         $where['id'] = $itemPlatformRow['id'];

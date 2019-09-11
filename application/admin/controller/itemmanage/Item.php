@@ -198,6 +198,22 @@ class Item extends Backend
                     } elseif (!empty($params['origin_skus']) && $params['item-count'] < 1) { //原始sku失败情况
                         $this->error(__('Make sure the original sku code is the correct sku code'));
                     }
+                    //多选的frame_shape
+                    if(is_array($params['frame_shape'])){
+                        $params['frame_shape'] = implode(',',$params['frame_shape']);
+                    }
+                    //多选的frame_size
+                    if(is_array($params['frame_size'])){
+                        $params['frame_size']  = implode(',',$params['frame_size']);
+                    }
+                    //多选的glasses_type
+                    if(is_array($params['glasses_type'])){
+                        $params['glasses_type'] = implode(',',$params['glasses_type']);
+                    }
+                    //多选的frame_is_adjust_nose_pad
+                    if(is_array($params['frame_is_adjust_nose_pad'])){
+                        $params['frame_is_adjust_nose_pad'] = implode(',',$params['frame_is_adjust_nose_pad']);
+                    }
                     foreach ($itemName as $k => $v) {
                         $data['name'] = $v;
                         $data['category_id'] = $params['category_id'];
@@ -296,6 +312,9 @@ class Item extends Backend
     {
         $row = $this->model->get($ids, 'itemAttribute');
 
+//        echo '<pre>';
+//        var_dump($row['itemAttribute']['frame_size']);
+//        exit;
         if (!$row) {
             $this->error(__('No Results were found'));
         }
@@ -316,6 +335,22 @@ class Item extends Backend
                 $itemColor = $params['color'];
                 if (is_array($itemName) && !in_array("", $itemName)) {
                     $data = $itemAttribute = [];
+                    //多选的frame_shape
+                    if(is_array($params['frame_shape'])){
+                        $params['frame_shape'] = implode(',',$params['frame_shape']);
+                    }
+                    //多选的frame_size
+                    if(is_array($params['frame_size'])){
+                        $params['frame_size']  = implode(',',$params['frame_size']);
+                    }
+                    //多选的glasses_type
+                    if(is_array($params['glasses_type'])){
+                        $params['glasses_type'] = implode(',',$params['glasses_type']);
+                    }
+                    //多选的frame_is_adjust_nose_pad
+                    if(is_array($params['frame_is_adjust_nose_pad'])){
+                        $params['frame_is_adjust_nose_pad'] = implode(',',$params['frame_is_adjust_nose_pad']);
+                    }
                     foreach ($itemName as $k => $v) {
                         $data['name'] = $v;
                         $data['item_status'] = $params['item_status'];
@@ -358,6 +393,10 @@ class Item extends Backend
             }
             $this->error(__('Parameter %s can not be empty', ''));
         }
+        $row['itemAttribute']['frame_size']     = explode(',',$row['itemAttribute']['frame_size']);
+        $row['itemAttribute']['frame_shape']    = explode(',',$row['itemAttribute']['frame_shape']);
+        $row['itemAttribute']['glasses_type']   = explode(',',$row['itemAttribute']['glasses_type']);
+        $row['itemAttribute']['frame_is_adjust_nose_pad'] = explode(',',$row['itemAttribute']['frame_is_adjust_nose_pad']);
         $allShape = $this->itemAttribute->getAllShape();
         //获取所有材质
         $allTexture = $this->itemAttribute->getAllTexture();
@@ -373,6 +412,8 @@ class Item extends Backend
         $allOrigin      = $this->itemAttribute->getOrigin();
         //获取配镜类型
         $allFrameType   = $this->itemAttribute->getFrameType();
+        //获取是否可调节鼻托类型
+        $allNosePad     = $this->itemAttribute->getAllNosePad();
         $this->assign('AllFrameType', $allFrameType);
         $this->assign('AllOrigin', $allOrigin);
         $this->assign('AllGlassesType', $allGlassesType);
@@ -381,6 +422,7 @@ class Item extends Backend
         $this->assign('AllFrameShape', $allFrameShape);
         $this->assign('AllShape', $allShape);
         $this->assign('AllTexture', $allTexture);
+        $this->assign('AllNosePad',$allNosePad);
         $this->view->assign('template', $this->category->getAttrCategoryById($row['category_id']));
         $this->view->assign("row", $row);
         return $this->view->fetch();
@@ -455,6 +497,8 @@ class Item extends Backend
                 $allOrigin      = $this->itemAttribute->getOrigin();
                 //获取配镜类型
                 $allFrameType   = $this->itemAttribute->getFrameType();
+                //获取是否可调节鼻托类型
+                $allNosePad     = $this->itemAttribute->getAllNosePad();
                 $this->assign('AllFrameType', $allFrameType);
                 $this->assign('AllOrigin', $allOrigin);
                 $this->assign('AllGlassesType', $allGlassesType);
@@ -463,6 +507,7 @@ class Item extends Backend
                 $this->assign('AllFrameShape', $allFrameShape);
                 $this->assign('AllShape', $allShape);
                 $this->assign('AllTexture', $allTexture);
+                $this->assign('AllNosePad',$allNosePad);
                 //把选择的模板值传递给模板
                 $this->assign('Result', $result);
                 $data = $this->fetch('frame');
