@@ -138,7 +138,45 @@ class Zeelool extends Model
             $v['product_options']['tmplens'] = $v['product_options']['info_buyRequest']['tmplens'];
         }
         unset($v);
+        
+        if (!$result) {
+            return false;
+        }
+        return $result;
+    }
 
+
+    /**
+     * 获取订单支付详情 多站公用方法
+     * @param $ordertype 站点
+     * @param $entity_id 订单id
+     * @return array
+     */
+    public function getPayDetail($ordertype, $entity_id)
+    {
+        switch ($ordertype) {
+            case 1:
+                $db = 'database.db_zeelool';
+                break;
+            case 2:
+                $db = 'database.db_voogueme';
+                break;
+            case 3:
+                $db = 'database.db_nihao';
+                break;
+            default:
+                return false;
+                break;
+        }
+        $map['parent_id'] = $entity_id;
+        $result = Db::connect($db)
+            ->table('sales_flat_order_payment')
+            ->field('additional_information,base_amount_paid,base_amount_ordered,base_shipping_amount,method,last_trans_id')
+            ->where($map)
+            ->find();
+    
+        $result['additional_information'] =  unserialize($result['additional_information']);
+        
         if (!$result) {
             return false;
         }
