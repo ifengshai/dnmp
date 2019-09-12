@@ -198,22 +198,22 @@ class Item extends Backend
                     } elseif (!empty($params['origin_skus']) && $params['item-count'] < 1) { //原始sku失败情况
                         $this->error(__('Make sure the original sku code is the correct sku code'));
                     }
-                    //多选的frame_shape
-                    if(is_array($params['frame_shape'])){
-                        $params['frame_shape'] = implode(',',$params['frame_shape']);
-                    }
-                    //多选的frame_size
-                    if(is_array($params['frame_size'])){
-                        $params['frame_size']  = implode(',',$params['frame_size']);
-                    }
-                    //多选的glasses_type
-                    if(is_array($params['glasses_type'])){
-                        $params['glasses_type'] = implode(',',$params['glasses_type']);
-                    }
-                    //多选的frame_is_adjust_nose_pad
-                    if(is_array($params['frame_is_adjust_nose_pad'])){
-                        $params['frame_is_adjust_nose_pad'] = implode(',',$params['frame_is_adjust_nose_pad']);
-                    }
+//                    //多选的frame_shape
+//                    if(is_array($params['frame_shape'])){
+//                        $params['frame_shape'] = implode(',',$params['frame_shape']);
+//                    }
+//                    //多选的frame_size
+//                    if(is_array($params['frame_size'])){
+//                        $params['frame_size']  = implode(',',$params['frame_size']);
+//                    }
+//                    //多选的glasses_type
+//                    if(is_array($params['glasses_type'])){
+//                        $params['glasses_type'] = implode(',',$params['glasses_type']);
+//                    }
+//                    //多选的frame_is_adjust_nose_pad
+//                    if(is_array($params['frame_is_adjust_nose_pad'])){
+//                        $params['frame_is_adjust_nose_pad'] = implode(',',$params['frame_is_adjust_nose_pad']);
+//                    }
                     foreach ($itemName as $k => $v) {
                         $data['name'] = $v;
                         $data['category_id'] = $params['category_id'];
@@ -319,7 +319,7 @@ class Item extends Backend
             $this->error(__('No Results were found'));
         }
         if ($row['item_status'] == 2) {
-            $this->error(__('The goods have been submitted for review and cannot be edited'));
+            $this->error(__('The goods have been submitted for review and cannot be edited'),'/admin/itemmanage/item');
         }
         $adminIds = $this->getDataLimitAdminIds();
         if (is_array($adminIds)) {
@@ -336,21 +336,21 @@ class Item extends Backend
                 if (is_array($itemName) && !in_array("", $itemName)) {
                     $data = $itemAttribute = [];
                     //多选的frame_shape
-                    if(is_array($params['frame_shape'])){
-                        $params['frame_shape'] = implode(',',$params['frame_shape']);
-                    }
-                    //多选的frame_size
-                    if(is_array($params['frame_size'])){
-                        $params['frame_size']  = implode(',',$params['frame_size']);
-                    }
-                    //多选的glasses_type
-                    if(is_array($params['glasses_type'])){
-                        $params['glasses_type'] = implode(',',$params['glasses_type']);
-                    }
-                    //多选的frame_is_adjust_nose_pad
-                    if(is_array($params['frame_is_adjust_nose_pad'])){
-                        $params['frame_is_adjust_nose_pad'] = implode(',',$params['frame_is_adjust_nose_pad']);
-                    }
+//                    if(is_array($params['frame_shape'])){
+//                        $params['frame_shape'] = implode(',',$params['frame_shape']);
+//                    }
+//                    //多选的frame_size
+//                    if(is_array($params['frame_size'])){
+//                        $params['frame_size']  = implode(',',$params['frame_size']);
+//                    }
+//                    //多选的glasses_type
+//                    if(is_array($params['glasses_type'])){
+//                        $params['glasses_type'] = implode(',',$params['glasses_type']);
+//                    }
+//                    //多选的frame_is_adjust_nose_pad
+//                    if(is_array($params['frame_is_adjust_nose_pad'])){
+//                        $params['frame_is_adjust_nose_pad'] = implode(',',$params['frame_is_adjust_nose_pad']);
+//                    }
                     foreach ($itemName as $k => $v) {
                         $data['name'] = $v;
                         $data['item_status'] = $params['item_status'];

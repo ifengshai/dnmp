@@ -75,7 +75,7 @@
     <div class="form-group ajax-add">
         <label class="control-label col-xs-12 col-sm-2">{:__('Procurement_type')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <select  id="c-procurement_type" data-rule="required" class="form-control selectpicker" name="row[procurement_type]"  disabled="disabled">
+            <select  id="c-procurement_type" data-rule="required" class="form-control selectpicker" name="row[procurement_type]">
                 <option value="0">请选择</option>
                 <option value="1"{eq name="$row['itemAttribute']['procurement_type']" value="1"}selected{/eq}>线上采购</option>
                 <option value="2"{eq name="$row['itemAttribute']['procurement_type']" value="2"}selected{/eq}>线下采购</option>
@@ -83,7 +83,7 @@
         </div>
         <label class="control-label col-xs-12 col-sm-2">{:__('Procurement_origin')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <select  id="c-procurement_origin" data-rule="required" class="form-control selectpicker" name="row[procurement_origin]" disabled="disabled">
+            <select  id="c-procurement_origin" data-rule="required" class="form-control selectpicker" name="row[procurement_origin]">
                 {foreach name="AllOrigin" item="vo"}
                 <option value="{$key}"{eq name="$row['itemAttribute']['procurement_origin']" value="$key"}selected{/eq}>{$vo}</option>
                 {/foreach}
@@ -128,12 +128,12 @@
         </div>
         <label class="control-label col-xs-12 col-sm-2">{:__('Glasses_type')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <!--<select  id="c-glasses_type" data-rule="required" class="form-control selectpicker" name="row[glasses_type]">-->
-                <!--{foreach name="AllGlassesType" item="vo"}-->
-                <!--<option value="{$key}"{eq name="$row['itemAttribute']['glasses_type']" value="$key"}selected{/eq}>{$vo}</option>-->
-                <!--{/foreach}-->
-            <!--</select>-->
-            {:Form::selects('row[glasses_type][]', $AllGlassesType, $row['itemAttribute']['glasses_type'], ['class'=>'form-control selectpicker', 'data-rule'=>'required','data-live-search' => true])}
+            <select  id="c-glasses_type" data-rule="required" class="form-control selectpicker" name="row[glasses_type]">
+                {foreach name="AllGlassesType" item="vo"}
+                <option value="{$key}"{eq name="$row['itemAttribute']['glasses_type']" value="$key"}selected{/eq}>{$vo}</option>
+                {/foreach}
+            </select>
+            <!--{:Form::selects('row[glasses_type][]', $AllGlassesType, $row['itemAttribute']['glasses_type'], ['class'=>'form-control selectpicker', 'data-rule'=>'required','data-live-search' => true])}-->
         </div>
     </div>
     <div class="form-group ajax-add">
@@ -157,12 +157,12 @@
     <div class="form-group ajax-add">
         <label class="control-label col-xs-12 col-sm-2">{:__('Frame_shape')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <!--<select  id="c-frame_shape" data-rule="required" class="form-control selectpicker" name="row[frame_shape]">-->
-                <!--{foreach name="AllFrameShape" item="vo"}-->
-                <!--<option value="{$key}"{eq name="$row['itemAttribute']['frame_shape']" value="$key"}selected{/eq}>{$vo}</option>-->
-                <!--{/foreach}-->
-            <!--</select>-->
-            {:Form::selects('row[frame_shape][]', $AllFrameShape, $row['itemAttribute']['frame_shape'], ['class'=>'form-control selectpicker', 'data-rule'=>'required','data-live-search' => true])}
+            <select  id="c-frame_shape" data-rule="required" class="form-control selectpicker" name="row[frame_shape]">
+                {foreach name="AllFrameShape" item="vo"}
+                <option value="{$key}"{eq name="$row['itemAttribute']['frame_shape']" value="$key"}selected{/eq}>{$vo}</option>
+                {/foreach}
+            </select>
+            <!--{:Form::selects('row[frame_shape][]', $AllFrameShape, $row['itemAttribute']['frame_shape'], ['class'=>'form-control selectpicker', 'data-rule'=>'required','data-live-search' => true])}-->
         </div>
         <label class="control-label col-xs-12 col-sm-2">{:__('Frame_gender')}:</label>
         <div class="col-xs-12 col-sm-3">
@@ -176,12 +176,12 @@
     <div class="form-group ajax-add">
         <label class="control-label col-xs-12 col-sm-2">{:__('Frame_size')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <!--<select  id="c-frame_size" data-rule="required" class="form-control selectpicker" name="row[frame_size]">-->
-                <!--{foreach name="AllFrameSize" item="vo"}-->
-                <!--<option value="{$key}" {eq name="$row['itemAttribute']['frame_size']" value="$key"}selected{/eq}>{$vo}</option>-->
-                <!--{/foreach}-->
-            <!--</select>-->
-            {:Form::selects('row[frame_size][]', $AllFrameSize, $row['itemAttribute']['frame_size'], ['class'=>'form-control selectpicker', 'data-rule'=>'required','data-live-search' => true])}
+            <select  id="c-frame_size" data-rule="required" class="form-control selectpicker" name="row[frame_size]">
+                {foreach name="AllFrameSize" item="vo"}
+                <option value="{$key}" {eq name="$row['itemAttribute']['frame_size']" value="$key"}selected{/eq}>{$vo}</option>
+                {/foreach}
+            </select>
+            <!--{:Form::selects('row[frame_size][]', $AllFrameSize, $row['itemAttribute']['frame_size'], ['class'=>'form-control selectpicker', 'data-rule'=>'required','data-live-search' => true])}-->
         </div>
         <label class="control-label col-xs-12 col-sm-2">{:__('Frame_type')}:</label>
         <div class="col-xs-12 col-sm-3">
@@ -218,11 +218,11 @@
         </div>
         <label class="control-label col-xs-12 col-sm-2">{:__('Frame_is_adjust_nose_pad')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <!--<select  id="c-frame_is_adjust_nose_pad" data-rule="required" class="form-control selectpicker" name="row[frame_is_adjust_nose_pad]">-->
-                <!--<option value="1"{eq name="$row['itemAttribute']['frame_is_adjust_nose_pad']" value="1"}selected{/eq}>是</option>-->
-                <!--<option value="2"{eq name="$row['itemAttribute']['frame_is_adjust_nose_pad']" value="2"}selected{/eq}>否</option>-->
-            <!--</select>-->
-            {:Form::selects('row[frame_is_adjust_nose_pad][]', $AllNosePad, $row['itemAttribute']['frame_is_adjust_nose_pad'], ['class'=>'form-control selectpicker', 'data-rule'=>'required','data-live-search' => true])}
+            <select  id="c-frame_is_adjust_nose_pad" data-rule="required" class="form-control selectpicker" name="row[frame_is_adjust_nose_pad]">
+                <option value="1"{eq name="$row['itemAttribute']['frame_is_adjust_nose_pad']" value="1"}selected{/eq}>是</option>
+                <option value="2"{eq name="$row['itemAttribute']['frame_is_adjust_nose_pad']" value="2"}selected{/eq}>否</option>
+            </select>
+            <!--{:Form::selects('row[frame_is_adjust_nose_pad][]', $AllNosePad, $row['itemAttribute']['frame_is_adjust_nose_pad'], ['class'=>'form-control selectpicker', 'data-rule'=>'required','data-live-search' => true])}-->
         </div>
     </div>
     <div class="form-group ajax-add">
@@ -235,7 +235,7 @@
         </div>
         <label class="control-label col-xs-12 col-sm-2">{:__('Brand_id')}:</label>
         <div class="col-xs-12 col-sm-3">
-            {:Form::select('row[brand_id]', $brandList, $row.brand_id, ['class'=>'form-control selectpicker', 'data-rule'=>'required','data-live-search' => true,'disabled'=>'disabled'])}
+            {:Form::select('row[brand_id]', $brandList, $row.brand_id, ['class'=>'form-control selectpicker', 'data-rule'=>'required','data-live-search' => true])}
         </div>
     </div>
     <div class="form-group ajax-add">

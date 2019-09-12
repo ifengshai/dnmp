@@ -136,69 +136,61 @@ class Item extends Model
         //获取配镜类型
         $frameType     = (new ItemAttribute())->getFrameType();
         //获取调节是否调节鼻托
-        $frameIsAdjustNosePad = (new ItemAttribute())->getAllNosePad();
+        //$frameIsAdjustNosePad = (new ItemAttribute())->getAllNosePad();
         //glasses_type多选字段
-        $glassesTypeArr = explode(',',$result['glasses_type']);
-        $frameShapeArr  = explode(',',$result['frame_shape']);
-        $frameSizeArr   = explode(',',$result['frame_size']);
-        $frameIsAdjustNosePadArr = explode(',',$result['frame_is_adjust_nose_pad']);
-        $result['glasses_type'] = $result['frame_shape'] = $result['frame_size'] = $result['frame_is_adjust_nose_pad'] ='';
-        foreach ($glassesTypeArr as $k => $v){
-            $result['glasses_type'] .= $glassesType[1].',';
-        }
-        $result['glasses_type'] = trim($result['glasses_type'],',');
-        foreach ($frameShapeArr as $k => $v){
-            $result['frame_shape'] .= $frameShape[$v].',';
-        }
-        $result['frame_shape'] = trim($result['frame_shape'],',');
-        foreach ($frameSizeArr as $k => $v){
-            $result['frame_size'] .= $frameSize[$v].',';
-        }
-        $result['frame_size'] = trim($result['frame_size'],',');
-        foreach ($frameIsAdjustNosePadArr as $k =>$v){
-            $result['frame_is_adjust_nose_pad'] .= $frameIsAdjustNosePad[$v].',';
-        }
-        $result['frame_is_adjust_nose_pad'] = trim($result['frame_is_adjust_nose_pad'],',');
+//        $glassesTypeArr = explode(',',$result['glasses_type']);
+//        $frameShapeArr  = explode(',',$result['frame_shape']);
+//        $frameSizeArr   = explode(',',$result['frame_size']);
+//        $result['glasses_type'] = $result['frame_shape'] = $result['frame_size'] =[];
+//        foreach ($glassesTypeArr as $k => $v){
+//            $result['glasses_type'][]= $glassesType[$v];
+//        }
+//        foreach ($frameShapeArr as $k => $v){
+//            $result['frame_shape'][]= $frameShape[$v];
+//        }
+//        foreach ($frameSizeArr as $k => $v){
+//            $result['frame_size'][]= $frameSize[$v];
+//        }
         //frame_shape多选字段
-        //$result['glasses_type']       = $glassesType[$result['glasses_type']];
+        $result['glasses_type']       = $glassesType[$result['glasses_type']];
         $result['procurement_origin'] = $origin[$result['procurement_origin']];
         $result['frame_type']         = $frameType[$result['frame_type']];
         $result['frame_color']        = $frameColor[$result['frame_color']];
-        //$result['frame_shape']        = $frameShape[$result['frame_shape']];
+        $result['frame_shape']        = $frameShape[$result['frame_shape']];
         $result['shape']              = $shape[$result['shape']];
         $result['frame_texture']      = $texture[$result['frame_texture']];
         $result['frame_gender']       = $frameGender[$result['frame_gender']];
-        //$result['frame_size']         = $frameSize[$result['frame_size']];
+        $result['frame_size']         = $frameSize[$result['frame_size']];
         if($result['is_open'] == 1){
             $result['is_open'] = 'Enabled';
         }elseif($result['is_open'] == 2){
             $result['is_open'] = 'Disabled';
         }
         if($result['frame_is_recipe'] == 1){ //是否可处方
-            $result['frame_is_recipe'] = 'yes';
+            $result['frame_is_recipe'] = 1;
         }else{
-            $result['frame_is_recipe'] = 'no';
+            $result['frame_is_recipe'] = 0;
         }
         if($result['frame_piece'] == 1){ //是否可夹片
-            $result['frame_piece'] = 'yes';
+            $result['frame_piece'] = 1;
         }else{
-            $result['frame_piece'] = 'no';
+            $result['frame_piece'] = 0;
         }
         if($result['frame_is_advance'] == 1){ //是否渐进
-            $result['frame_is_advance'] = 'yes';
+            $result['frame_is_advance'] = 1;
         }else{
-            $result['frame_is_advance'] = 'no';
+            $result['frame_is_advance'] = 0;
         }
         if($result['frame_temple_is_spring'] == 1){ //镜架是否弹簧腿
-            $result['frame_temple_is_spring'] = 'yes';
+            $result['frame_temple_is_spring'] = 1;
         }else{
-            $result['frame_temple_is_spring'] = 'no';
+            $result['frame_temple_is_spring'] = 0;
         }
-//        if($result['frame_is_adjust_nose_pad'] == 1){ //是否可以调节鼻托
-//            $result['frame_is_adjust_nose_pad'] = 'yes';
-//        }else{
-//            $result['frame_is_adjust_nose_pad'] = 'no';
-//        }
+        if($result['frame_is_adjust_nose_pad'] == 1){ //是否可以调节鼻托
+            $result['frame_is_adjust_nose_pad'] = 1;
+        }else{
+            $result['frame_is_adjust_nose_pad'] = 0;
+        }
         return $result;
     }
     /***
@@ -212,5 +204,17 @@ class Item extends Model
             return false;
         }
         return $result;
+    }
+    /***
+     * 获取商品状态信息
+     */
+    public function getItemStatus($sku)
+    {
+        $result = $this->where('sku','=',$sku)->field('sku as itemSku,item_status')->find();
+        if(!$result){
+            return false;
+        }
+        $arr = [];
+        return $arr[$result['itemSku']] = $result['item_status'];
     }
 }

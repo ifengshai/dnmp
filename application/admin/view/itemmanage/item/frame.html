@@ -86,12 +86,12 @@
 <div class="form-group ajax-add">
     <label class="control-label col-xs-12 col-sm-2">{:__('Frame_shape')}:</label>
     <div class="col-xs-12 col-sm-3">
-        <!--<select  id="c-frame_shape" data-rule="required" class="form-control selectpicker" name="row[frame_shape]">-->
-            <!--{foreach name="AllFrameShape" item="vo"}-->
-            <!--<option value="{$key}">{$vo}</option>-->
-            <!--{/foreach}-->
-        <!--</select>-->
-        {:Form::selects('row[frame_shape][]', $AllFrameShape, null, ['class'=>'form-control selectpicker', 'data-rule'=>'required','data-live-search' => true])}
+        <select  id="c-frame_shape" data-rule="required" class="form-control selectpicker" name="row[frame_shape]">
+            {foreach name="AllFrameShape" item="vo"}
+            <option value="{$key}">{$vo}</option>
+            {/foreach}
+        </select>
+        <!--{:Form::selects('row[frame_shape][]', $AllFrameShape, null, ['class'=>'form-control selectpicker', 'data-rule'=>'required','data-live-search' => true])}-->
     </div>
     <label class="control-label col-xs-12 col-sm-2">{:__('Frame_gender')}:</label>
     <div class="col-xs-12 col-sm-3">
@@ -105,21 +105,21 @@
 <div class="form-group ajax-add">
     <label class="control-label col-xs-12 col-sm-2">{:__('Frame_size')}:</label>
     <div class="col-xs-12 col-sm-3">
-        <!--<select  id="c-frame_size" data-rule="required" class="form-control selectpicker" name="row[frame_size]">-->
-            <!--{foreach name="AllFrameSize" item="vo"}-->
-            <!--<option value="{$key}">{$vo}</option>-->
-            <!--{/foreach}-->
-        <!--</select>-->
-        {:Form::selects('row[frame_size][]', $AllFrameSize, null, ['class'=>'form-control selectpicker', 'data-rule'=>'required','data-live-search' => true])}
+        <select  id="c-frame_size" data-rule="required" class="form-control selectpicker" name="row[frame_size]">
+            {foreach name="AllFrameSize" item="vo"}
+            <option value="{$key}">{$vo}</option>
+            {/foreach}
+        </select>
+        <!--{:Form::selects('row[frame_size][]', $AllFrameSize, null, ['class'=>'form-control selectpicker', 'data-rule'=>'required','data-live-search' => true])}-->
     </div>
     <label class="control-label col-xs-12 col-sm-2">{:__('Glasses_type')}:</label>
     <div class="col-xs-12 col-sm-3">
-        <!--<select  id="c-glasses_type" data-rule="required" class="form-control selectpicker" name="row[glasses_type]">-->
-            <!--{foreach name="AllGlassesType" item="vo"}-->
-            <!--<option value="{$key}">{$vo}</option>-->
-            <!--{/foreach}-->
-        <!--</select>-->
-        {:Form::selects('row[glasses_type][]', $AllGlassesType, null, ['class'=>'form-control selectpicker', 'data-rule'=>'required','data-live-search' => true])}
+        <select  id="c-glasses_type" data-rule="required" class="form-control selectpicker" name="row[glasses_type]">
+            {foreach name="AllGlassesType" item="vo"}
+            <option value="{$key}">{$vo}</option>
+            {/foreach}
+        </select>
+        <!--{:Form::selects('row[glasses_type][]', $AllGlassesType, null, ['class'=>'form-control selectpicker', 'data-rule'=>'required','data-live-search' => true])}-->
     </div>
 </div>
 <div class="form-group ajax-add">
@@ -148,11 +148,11 @@
     </div>
     <label class="control-label col-xs-12 col-sm-2">{:__('Frame_is_adjust_nose_pad')}:</label>
     <div class="col-xs-12 col-sm-3">
-        <!--<select  id="c-frame_is_adjust_nose_pad" data-rule="required" class="form-control selectpicker" name="row[frame_is_adjust_nose_pad]">-->
-            <!--<option value="1">是</option>-->
-            <!--<option value="2">否</option>-->
-        <!--</select>-->
-        {:Form::selects('row[frame_is_adjust_nose_pad][]', $AllNosePad, null, ['class'=>'form-control selectpicker', 'data-rule'=>'required','data-live-search' => true])}
+        <select  id="c-frame_is_adjust_nose_pad" data-rule="required" class="form-control selectpicker" name="row[frame_is_adjust_nose_pad]">
+            <option value="1">是</option>
+            <option value="2">否</option>
+        </select>
+        <!--{:Form::selects('row[frame_is_adjust_nose_pad][]', $AllNosePad, null, ['class'=>'form-control selectpicker', 'data-rule'=>'required','data-live-search' => true])}-->
     </div>
 </div>
 <div class="form-group ajax-add">
