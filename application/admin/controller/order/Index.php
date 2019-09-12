@@ -16,7 +16,7 @@ class Index extends Backend
     public function _initialize()
     {
         parent::_initialize();
-        // $this->nihao = new \app\admin\model\order\order\Nihao;
+        $this->nihao = new \app\admin\model\order\order\Nihao;
         $this->zeelool = new \app\admin\model\order\order\Zeelool;
         $this->voogueme = new \app\admin\model\order\order\Voogueme;
     }
@@ -74,7 +74,7 @@ class Index extends Backend
     }
 
     /**
-     * 编辑
+     * 详情
      */
     public function detail($ids = null)
     {
@@ -101,17 +101,19 @@ class Index extends Backend
             }
         }
        
-
         //获取收货信息
         $address = $this->zeelool->getOrderDetail($label, $ids);
 
         //获取订单商品信息
         $goods = $this->zeelool->getGoodsDetail($label, $ids);
 
-    
+        //获取支付信息
+        $pay = $this->zeelool->getPayDetail($label, $ids);
+
         $this->view->assign("row", $row);
         $this->view->assign("address", $address);
         $this->view->assign("goods", $goods);
+        $this->view->assign("pay", $pay);
         return $this->view->fetch();
     }
 }
