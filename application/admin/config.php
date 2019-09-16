@@ -5,4 +5,20 @@ return [
     'url_common_param'       => true,
     'url_html_suffix'        => '',
     'controller_auto_search' => true,
+
+
+    'kuaidi' => [
+        'yunda' => '韵达快递',
+        'youzhengguonei' => '邮政快递包裹',
+        'zhongtong' => '中通快递',
+        'yuantong' => '圆通速递',
+        'shentong' => '申通快递',
+        'huitongkuaidi' => '百世快递',
+        'shunfeng' => '顺丰速运',
+        'jd' => '京东物流',
+        'tiantian' => '天天快递',
+        'ems' => 'EMS',
+        'debangwuliu' => '德邦',
+        'debangkuaidi' => '德邦快递'
+    ]
 ];

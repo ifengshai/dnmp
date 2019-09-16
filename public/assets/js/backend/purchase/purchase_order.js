@@ -115,7 +115,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     },
                                     visible: function (row) {
                                         //返回true时按钮显示,返回false隐藏
-                                        return true;
+                                        if (row.purchase_status == 0) {
+                                            return true;
+                                        } else {
+                                            return false;
+                                        }
+                                        
                                     }
                                 },
                                 {
@@ -131,10 +136,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     },
                                     visible: function (row) {
                                         //返回true时按钮显示,返回false隐藏
-                                        if (row.return_status == 2) {
-                                            return false;
-                                        } else {
+                                        if (row.purchase_status == 7 && row.return_status != 2 && row.check_status != 0) {
                                             return true;
+                                        } else {
+                                            return false;
                                         }
                                     }
                                 },
@@ -145,7 +150,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     classname: 'btn btn-xs  btn-success  btn-dialog',
                                     icon: 'fa fa-plus',
                                     url: 'purchase/purchase_order/logistics',
-                                    extend: 'data-area = \'["50%","50%"]\'',
+                                    extend: 'data-area = \'["50%","60%"]\'',
                                     callback: function (data) {
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
                                     },

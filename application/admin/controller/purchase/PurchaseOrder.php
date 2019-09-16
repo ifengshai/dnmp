@@ -370,6 +370,7 @@ class PurchaseOrder extends Backend
                         $row->validateFailException(true)->validate($validate);
                     }
                     $params['is_add_logistics'] = 1;
+                    $params['purchase_status'] = 5;
                     $result = $row->allowField(true)->save($params);
 
                     Db::commit();
@@ -469,17 +470,20 @@ class PurchaseOrder extends Backend
         $data = [];
         if ($row['logistics_number']) {
             $arr = explode(',', $row['logistics_number']);
+            //物流公司编码
+            $company = explode(',', $row['logistics_company_no']);
+            
             foreach ($arr as $k => $v) {
                 try {
-                    $param = ['express_id' => trim($v)];
+                    $param['express_id'] = trim($v);
+                    $param['code'] = trim($company[$k]);
                     $data[$k] = Hook::listen('express_query', $param)[0];
                 } catch (\Exception $e) {
                     $this->error($e->getMessage());
                 }
             }
         }
-
-
+        
         //采购单退销物流信息
         $purchaseReturn = new \app\admin\model\purchase\PurchaseReturn;
         $res = $purchaseReturn->where('purchase_id', $id)->column('logistics_number');
@@ -750,7 +754,7 @@ class PurchaseOrder extends Backend
                         preg_match('/\d{14}/', $receivingTime, $matches);
                         $list['receiving_time'] = date('Y-m-d H:i:s', strtotime($matches[0]));
                     }
-
+                    $list['purchase_type'] = 2;
                     $result = $this->model->allowField(true)->create($list);
 
                     $params = [];

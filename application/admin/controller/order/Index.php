@@ -3,6 +3,7 @@
 namespace app\admin\controller\order;
 
 use app\common\controller\Backend;
+use think\Hook;
 
 
 /**
@@ -100,7 +101,7 @@ class Index extends Backend
                 $this->error(__('You have no permission'));
             }
         }
-       
+
         //获取收货信息
         $address = $this->zeelool->getOrderDetail($label, $ids);
 
@@ -114,6 +115,46 @@ class Index extends Backend
         $this->view->assign("address", $address);
         $this->view->assign("goods", $goods);
         $this->view->assign("pay", $pay);
+        return $this->view->fetch();
+    }
+
+    /**
+     * 订单执行信息
+     */
+    public function checkDetail($ids = null)
+    {
+        $ids = $ids ?? $this->request->get('id');
+        //根据传的标签切换对应站点数据库
+        $label = $this->request->get('label', 1);
+        if ($label == 1) {
+            $model = $this->zeelool;
+        } elseif ($label == 2) {
+            $model = $this->voogueme;
+        } elseif ($label == 3) {
+            $model = $this->nihao;
+        }
+
+        //查询订单详情
+        $row = $model->where('entity_id', '=', $ids)->find();
+        if (!$row) {
+            $this->error(__('No Results were found'));
+        }
+
+        $express = $this->zeelool->getExpressData($label, $ids);
+
+        if ($express) {
+            //查询物流信息
+            try {
+                $param = ['express_id' => trim($express['track_number'])];
+                $express_data = Hook::listen('express_query', $param)[0];
+            } catch (\Exception $e) {
+                $this->error($e->getMessage());
+            }
+            $this->view->assign("express_data", $express_data);
+        }
+
+        $this->view->assign("row", $row);
+        
         return $this->view->fetch();
     }
 }
