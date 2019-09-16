@@ -37,6 +37,8 @@ return [
     'No pictures of the goods have been uploaded. Please upload them'=>'没有上传商品图片，请去上传',
     'The corresponding product Id does not exist, please upload the product to the platform first'=>'对应平台商品Id不存在，请先上传商品到平台',
     'The upload field cannot be empty, please go to the platform to edit'=>'上传字段不能为空，请去平台编辑',
+    'This product has not been approved and cannot be uploaded' => '该商品没有审核通过，无法上传',
     'upload successful'=>'上传成功',
-    'upload error'     =>'上传失败'
+    'upload error'     =>'上传失败',
+    'Item_status'      =>'sku状态'
 ];

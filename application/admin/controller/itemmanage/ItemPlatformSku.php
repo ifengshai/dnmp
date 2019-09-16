@@ -4,8 +4,9 @@ namespace app\admin\controller\itemmanage;
 use think\Db;
 use think\Request;
 use app\common\controller\Backend;
-use app\admin\model\platformManage\ManagtoPlatform;
 use app\admin\model\itemmanage\Item;
+use app\admin\model\platformManage\ManagtoPlatform;
+use app\admin\model\platformManage\PlatformMap;
 /**
  * 平台SKU管理
  *
@@ -45,16 +46,17 @@ class ItemPlatformSku extends Backend
             }
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
+                ->with(['item'])
                 ->where($where)
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->model
+                ->with(['item'])
                 ->where($where)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
-
             $list = collection($list)->toArray();
             if(!empty($list) && is_array($list)){
                 $platform = (new ManagtoPlatform())->getOrderPlatformList();
@@ -62,6 +64,7 @@ class ItemPlatformSku extends Backend
                     if($v['platform_type']){
                         $list[$k]['platform_type'] = $platform[$v['platform_type']];
                     }
+
                 }
             }
 
@@ -414,24 +417,27 @@ class ItemPlatformSku extends Backend
             if(empty($itemPlatformRow['item_attr_name']) || empty($itemPlatformRow['item_type'])){ //平台商品类型和商品属性
                 $this->error(__('The product attributes or product types of the platform are not filled in'));
             }
-            $uploadFields = $itemPlatformRow['upload_field'];
-            if(empty($uploadFields)){
-               $this->error(__('The upload field cannot be empty, please go to the platform to edit'));
+            $uploadFieldsArr = (new PlatformMap())->getPlatformMap($itemPlatformRow['platform_id']);
+            if(empty($uploadFieldsArr)){
+                $this->error(__('The upload field cannot be empty, please go to the platform to edit'));
             }
-            $uploadFieldsArr = explode(',',$uploadFields);
             $itemRow = (new Item())->getItemRow($itemPlatformRow['sku']);
+            if($itemRow['item_status']!=3){ //该商品没有审核通过
+                $this->error(__('This product has not been approved and cannot be uploaded'));
+            }
             $managtoUrl = $itemPlatformRow['managto_url'];
             try{
                 $client = new \SoapClient($managtoUrl.'/api/soap/?wsdl');
                 $session = $client->login($itemPlatformRow['managto_account'],$itemPlatformRow['managto_key']);
                 $attributeSets = $client->call($session, 'product_attribute_set.list');
-               // $attributeSet = current($attributeSets);
             }catch (\SoapFault $e){
                 $this->error(__('Platform account or key is incorrect, please go to the platform to edit'));
             }catch (\Exception $e){
                 $this->error(__('An error has occurred. Please contact the developer'));
             }
-            if(is_array($attributeSets)){
+            if(!is_array($attributeSets)){
+                $this->error(__('An error has occurred. Please contact the developer'));
+            }
                 $attributeSet = [];
                 foreach ($attributeSets as $k =>$v){
                     if($v['name'] == $itemPlatformRow['item_attr_name']){ //如果相等的话
@@ -451,6 +457,11 @@ class ItemPlatformSku extends Backend
                     $attributeListArr = [];
                     foreach ($attributeList as $k =>$v){
                         if(in_array($v['code'],$uploadFieldsArr)){
+                            //找出键名
+                            $platformName =  array_search($v['code'],$uploadFieldsArr);
+                            if(!empty($platformName)){
+                                $v['platformValue'] = $itemRow[$platformName];
+                            }
                             if(($v['type'] == 'multiselect') ||($v['type'] == 'select')){
                                 $v['valueOptions'] = $client->call(
                                     $session,
@@ -464,36 +475,58 @@ class ItemPlatformSku extends Backend
                         }
                     }
                 }
-//                foreach ($attributeListArr as $k=>$v){
-//                    if(in_array())
-//                }
-//                echo '<pre>';
-//                dump($attributeListArr);
-//                exit;
-            }
+                $uploadItemArr = [];
+                foreach ($attributeListArr as $k=>$v){
+                    //如果是多选的话
+                    if(($v['type'] == 'multiselect')){
+                        foreach ($v['valueOptions'] as $key=>$val){
+                            if(in_array(strtolower($val['label']),$v['platformValue'])){
+                                $uploadItemArr[$v['code']] .= $val['value'].',';
+                            }
+                        }
+                        $uploadItemArr[$v['code']] = trim($uploadItemArr[$v['code']],',');
+                    }elseif($v['type'] == 'select'){ //如果是单选的话
+                        foreach ($v['valueOptions'] as $key =>$val){
+                            if(strtolower($val['label']) == $v['platformValue']){
+                                $uploadItemArr[$v['code']] = $val['value'];
+                            }
+                        }
+                    }else{
+                                $uploadItemArr[$v['code']] = $v['platformValue'];
+                    }
+                }
+            //添加上传商品的信息
+            $uploadItemArr['categories']            = array(2);
+            $uploadItemArr['websites']              = array(1);
+            $uploadItemArr['name']                  = $itemRow['name'];
+            $uploadItemArr['description']           = 'Product description';
+            $uploadItemArr['short_description']     = 'Product short description';
+            $uploadItemArr['url_key']               = $itemRow['sku'];
+            $uploadItemArr['url_path']              = $itemRow['sku'];
+            $uploadItemArr['status']                = '1';
+            $uploadItemArr['visibility']            = '4';
+            $uploadItemArr['meta_title']            = 'Product meta title';
+            $uploadItemArr['meta_keyword']          = 'Product meta keyword';
+            $uploadItemArr['meta_description']      = 'Product meta description';
             if($itemPlatformRow['magento_id']>0){ //更新商品
-
+                try{
+                    $result = $client->call($session, 'catalog_product.update', array($itemRow['sku'],$uploadItemArr));
+                    if($result){
+                        $where['id'] = $itemPlatformRow['id'];
+                        $data['is_upload'] = 1;
+                        $categoryRowRs = $this->model->isUpdate(true, $where)->save($data);
+                        if($categoryRowRs){
+                            $this->success('更改成功');
+                        }else{
+                            $this->error('Update failed. Please try again');
+                        }
+                    }
+                }catch(\SoapFault $e){
+                    $this->error($e->getMessage());
+                }
             }else{ //添加商品
                 try{
-                    $result = $client->call($session, 'catalog_product.create', array($itemPlatformRow['item_type'], $attributeSet['set_id'], $itemRow['sku'], array(
-                        'categories' => array(2),
-                        'websites' => array(1),
-                        'name' => $itemRow['name'],
-                        'description' => 'Product description',
-                        'short_description' => 'Product short description',
-                        'weight' => $itemRow['frame_weight'],
-                        'status' => $itemRow['is_open'],
-                        'url_key' => $itemRow['sku'],
-                        'url_path' => $itemRow['sku'],
-                        'visibility' => '4',
-                        'price' => '100',
-                        'tax_class_id' => 1,
-                        'meta_title' => 'Product meta title',
-                        'meta_keyword' => 'Product meta keyword',
-                        'meta_description' => 'Product meta description',
-                        'frame_width' => $itemRow['frame_width'],
-                        'shape'       =>'24,25'
-                    )));
+                    $result = $client->call($session, 'catalog_product.create', array($itemPlatformRow['item_type'], $attributeSet['set_id'], $itemRow['sku'],$uploadItemArr));
                     if($result){
                         $where['id'] = $itemPlatformRow['id'];
                         $data['magento_id'] = $result;
@@ -510,8 +543,6 @@ class ItemPlatformSku extends Backend
                 }
 
             }
-            exit;
-
         }else{
             $this->error('404 Not found');
         }
@@ -546,6 +577,9 @@ class ItemPlatformSku extends Backend
                 $this->error(__('The product attributes or product types of the platform are not filled in'));
             }
             $itemImagesRow = (new Item())->getItemImagesRow($itemPlatformRow['sku']);
+            if($itemImagesRow['item_status']!=3){ //该商品没有审核通过
+                $this->error(__('This product has not been approved and cannot be uploaded'));
+            }
             if(empty($itemImagesRow['frame_images'])){
                 $this->error(__('No pictures of the goods have been uploaded. Please upload them'));
             }
@@ -557,11 +591,13 @@ class ItemPlatformSku extends Backend
                     $client = new \SoapClient($managtoUrl.'/api/soap/?wsdl');
                     $session = $client->login($itemPlatformRow['managto_account'],$itemPlatformRow['managto_key']);
                     //如果存在需要删除的图片就删除magento平台上的照片
-                    if(!empty($itemImageDelArr)){
-                        //需要删除的图片
+                    if($itemPlatformRow['uploaded_images']){
                         $itemImageDelArr = explode(',',$itemPlatformRow['uploaded_images']);
-                        foreach ($itemImageDelArr as $kDel =>$vDel){
-                             $client->call($session, 'catalog_product_attribute_media.remove', array('product' =>$itemPlatformRow['magento_id'], 'file' => $vDel));
+                        if(!empty($itemImageDelArr)){
+                            //需要删除的图片
+                            foreach ($itemImageDelArr as $kDel =>$vDel){
+                                $client->call($session, 'catalog_product_attribute_media.remove', array('product' =>$itemPlatformRow['magento_id'], 'file' => $vDel));
+                            }
                         }
                     }
                     //添加图片到magento平台

@@ -86,7 +86,7 @@ class ItemAttribute extends Model
     public function getFrameSize()
     {
         //Z站尺寸型号
-        return [0 => '请选择', 1 => 'N', 2 => 'M', 3 => 'W'];
+        return [0 => '请选择', 1 => 'narrow', 2 => 'medium', 3 => 'wide'];
         //V站尺寸型号
         //return [0=>'请选择',1=>'S',2=>'M',3=>'L'];
     }

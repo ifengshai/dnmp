@@ -27,6 +27,11 @@ class ItemPlatformSku extends Model
     protected $append = [
 
     ];
+    //关联item
+    public function item()
+    {
+        return $this->belongsTo('app\admin\model\itemmanage\Item', 'sku', 'sku');
+    }
     //添加商品平台sku
     public function addPlatformSku($row)
     {
@@ -96,7 +101,7 @@ class ItemPlatformSku extends Model
     public function findItemPlatform($id)
     {
         $result = $this->alias('g')->where('g.id','=',$id)->join('managto_platform p','g.platform_type=p.id')
-                 ->field('g.id,g.sku,g.platform_sku,g.platform_type,g.magento_id,g.is_upload,g.is_upload_images,g.uploaded_images,p.status,p.managto_account,p.managto_key,p.managto_url,p.is_upload_item,p.is_del,p.name,p.item_attr_name,p.item_type,p.upload_field')->find();
+                 ->field('g.id,g.sku,g.platform_sku,g.platform_type,g.magento_id,g.is_upload,g.is_upload_images,g.uploaded_images,p.id as platform_id,p.status,p.managto_account,p.managto_key,p.managto_url,p.is_upload_item,p.is_del,p.name,p.item_attr_name,p.item_type,p.upload_field')->find();
         return $result ? $result : false;
     }
 
