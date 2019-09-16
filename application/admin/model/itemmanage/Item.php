@@ -177,9 +177,9 @@ class Item extends Model
             $result['frame_piece'] = 0;
         }
         if($result['frame_is_advance'] == 1){ //是否渐进
-            $result['frame_is_advance'] = 1;
+            $result['frame_is_advance'] = "yes";
         }else{
-            $result['frame_is_advance'] = 0;
+            $result['frame_is_advance'] = "no";
         }
         if($result['frame_temple_is_spring'] == 1){ //镜架是否弹簧腿
             $result['frame_temple_is_spring'] = 1;
