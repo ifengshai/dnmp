@@ -14,8 +14,8 @@ return array(
                 ),
             'value'   =>
                 array(
-                    'ebusiness_id' => '15263**',
-                    'app_key'      => '293a0c44-2d75-4930-83d9**',
+                    'ebusiness_id' => '1579963',
+                    'app_key'      => '5fa03817-4c17-49f4-80fe-351c22884978',
                     'is_open'      => '0',
                 ),
             'rule'    => 'required',
@@ -33,12 +33,12 @@ return array(
                 array(
                     'customer' => '',
                     'app_key'  => '',
-                    'is_open'  => '是否开启，1开启0关闭',
+                    'is_open'  => '0',
                 ),
             'value'   =>
                 array(
-                    'customer' => '68FCE42E9F7926C98B26F35E4D87AD18',
-                    'app_key'  => 'IgOUTwjl9477',
+                    'customer' => 'F0E82A3A750CCAB123E009B60B31264E',
+                    'app_key'  => 'FTwkeoNA1046',
                     'is_open'  => '1',
                 ),
             'rule'    => 'required',

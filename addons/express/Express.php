@@ -70,7 +70,7 @@ class Express extends Addons
             exception("没有启动查询接口");
         }
         $app = new Application($config);
-        $rs = $app->query($data['express_id'], '');
+        $rs = $app->query($data['express_id'], $data['code']);
         if ($rs) {
             return $rs;
         } else {

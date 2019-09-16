@@ -89,11 +89,33 @@
 
             <div class="form-group">
                 <label class="control-label col-xs-12 col-sm-2" >承运公司:</label>
-                <label class="control-label col-xs-12 col-sm-2" style="text-align: left;">{$vo.com}</label>
+                <label class="control-label col-xs-12 col-sm-2" style="text-align: left;">{:config('kuaidi')[$vo['com']]}</label>
             </div>
             <div class="form-group">
                 <label class="control-label col-xs-12 col-sm-2">物流单号:</label>
                 <label class="control-label col-xs-12 col-sm-2" style="text-align: left;">{$vo.nu}</label>
+            </div>
+            <div class="form-group">
+                <label class="control-label col-xs-12 col-sm-2">物流状态:</label>
+                <label class="control-label col-xs-12 col-sm-2" style="text-align: left;">
+                    {if $vo['state'] == 0}
+                    在途
+                    {elseif $vo['state'] == 1} 
+                    揽收
+                    {elseif $vo['state'] == 2}
+                    疑难
+                    {elseif $vo['state'] == 3}
+                    签收
+                    {elseif $vo['state'] == 4}
+                    退签
+                    {elseif $vo['state'] == 5}
+                    派件
+                    {elseif $vo['state'] == 6}
+                    退回
+                    {elseif $vo['state'] == 7}
+                    转投
+                    {/if}
+                </label>
             </div>
             <div class="form-group">
                 <label class="control-label col-xs-12 col-sm-2">物流信息:</label>
@@ -117,12 +139,35 @@
 
             <div class="form-group">
                 <label class="control-label col-xs-12 col-sm-2" >承运公司:</label>
-                <label class="control-label col-xs-12 col-sm-2" style="text-align: left;">{$vo.com}</label>
+                <label class="control-label col-xs-12 col-sm-2" style="text-align: left;">{:config('kuaidi')[$vo['com']]}</label>
             </div>
             <div class="form-group">
                 <label class="control-label col-xs-12 col-sm-2">物流单号:</label>
                 <label class="control-label col-xs-12 col-sm-2" style="text-align: left;">{$vo.nu}</label>
             </div>
+
+            <div class="form-group">
+                    <label class="control-label col-xs-12 col-sm-2">物流状态:</label>
+                    <label class="control-label col-xs-12 col-sm-2" style="text-align: left;">
+                        {if $vo['state'] == 0}
+                        在途
+                        {elseif $vo['state'] == 1} 
+                        揽收
+                        {elseif $vo['state'] == 2}
+                        疑难
+                        {elseif $vo['state'] == 3}
+                        签收
+                        {elseif $vo['state'] == 4}
+                        退签
+                        {elseif $vo['state'] == 5}
+                        派件
+                        {elseif $vo['state'] == 6}
+                        退回
+                        {elseif $vo['state'] == 7}
+                        转投
+                        {/if}
+                    </label>
+                </div>
             <div class="form-group">
                 <label class="control-label col-xs-12 col-sm-2">物流信息:</label>
                 <div class="col-xs-12 col-sm-8" style="width: 80%;">

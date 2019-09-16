@@ -182,4 +182,35 @@ class Zeelool extends Model
         }
         return $result;
     }
+
+    /**
+     * 获取物流单号
+     */
+    public function getExpressData($ordertype, $entity_id)
+    {
+        switch ($ordertype) {
+            case 1:
+                $db = 'database.db_zeelool';
+                break;
+            case 2:
+                $db = 'database.db_voogueme';
+                break;
+            case 3:
+                $db = 'database.db_nihao';
+                break;
+            default:
+                return false;
+                break;
+        }
+        $map['parent_id'] = $entity_id;
+        $result = Db::connect($db)
+            ->table('sales_flat_shipment_track')
+            ->field('track_number')
+            ->where($map)
+            ->find();
+        if (!$result) {
+            return false;
+        }
+        return $result;
+    }
 }

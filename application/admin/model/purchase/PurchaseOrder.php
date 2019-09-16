@@ -31,8 +31,9 @@ class PurchaseOrder extends Model
      */
     public function getPurchaseData()
     {
-        $data = $this->where('purchase_status', 2)->column('purchase_number', 'id');
-
+        $where['purchase_status'] = 7;
+        $where['check_status']  = ['in', [0, 1]];
+        $data = $this->where($where)->column('purchase_number', 'id');
         return $data;
     }
 
@@ -41,6 +42,6 @@ class PurchaseOrder extends Model
      */
     public function purchaseOrderItem()
     {
-        return $this->hasMany('PurchaseOrderItem','purchase_id');
+        return $this->hasMany('PurchaseOrderItem', 'purchase_id');
     }
 }

@@ -18,7 +18,8 @@ class Kuaidi100 extends Server
 
     //url
     private $reqURL = 'http://poll.kuaidi100.com/poll/query.do';
-    private $codeURL = 'http://m.kuaidi100.com/autonumber/auto?num=';
+
+    private $codeURL = 'http://www.kuaidi100.com/autonumber/auto?num=';
 
     /**
      * 构造方法
@@ -28,7 +29,6 @@ class Kuaidi100 extends Server
     public function __construct($config = array())
     {
         $this->config = $config;
-
     }
 
     /**
@@ -38,18 +38,18 @@ class Kuaidi100 extends Server
      */
     public function query($express_id, $shipper_code = "")
     {
-
         // 缓存索引
         $cacheIndex = 'express_kuaidi100_' . $express_id;
 
         if ($data = cache($cacheIndex)) {
             return $data;
         }
-
         if (!$shipper_code) {
 
-            $data = Http::get($this->codeURL . $express_id);
-            $data = json_decode($data);
+            $data = Http::get($this->codeURL . $express_id . '&key=' . $this->config['app_key']);
+
+            $data = json_decode($data, true);
+
             if (!isset($data[0]) || !isset($data[0]->comCode)) {
                 $this->error = "获取快递100物流代码错误";
                 return false;
@@ -80,6 +80,4 @@ class Kuaidi100 extends Server
         Cache::set($cacheIndex, $express, 300);
         return $express;
     }
-
-
 }

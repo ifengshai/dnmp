@@ -56,7 +56,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     classname: 'btn btn-xs  btn-success  btn-dialog',
                                     icon: 'fa fa-plus',
                                     url: 'warehouse/purchase_return/logistics',
-                                    extend: 'data-area = \'["50%","50%"]\'',
+                                    extend: 'data-area = \'["50%","60%"]\'',
                                     callback: function (data) {
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
                                     },

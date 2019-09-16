@@ -177,6 +177,7 @@ class PurchaseReturn extends Backend
         $purchase_data = $purchase->getPurchaseData();
         $this->assign('purchase_data', $purchase_data);
 
+
         //质检单
         $return_number = 'RO' . date('YmdHis') . rand(100, 999) . rand(100, 999);
         $this->assign('return_number', $return_number);
@@ -472,11 +473,11 @@ class PurchaseReturn extends Backend
             $item[$k]['return_num'] = @$return_item[$v['sku']] ? @$return_item[$v['sku']] : 0;
         }
 
-        $purchase_all_num = array_sum(array_column($item, 'purchase_num'));
-        $arrivals_all_num = array_sum(array_column($item, 'arrivals_num'));
-        if ($arrivals_all_num < $purchase_all_num) {
-            $this->error('产品未到齐！！不能退销');
-        }
+        // $purchase_all_num = array_sum(array_column($item, 'purchase_num'));
+        // $arrivals_all_num = array_sum(array_column($item, 'arrivals_num'));
+        // if ($arrivals_all_num < $purchase_all_num) {
+        //     $this->error('产品未到齐！！不能退销');
+        // }
 
         $data->item = $item;
         if ($data) {
