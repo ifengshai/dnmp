@@ -475,26 +475,45 @@ class ItemPlatformSku extends Backend
                         }
                     }
                 }
+                echo '<pre>';
+                var_dump($attributeListArr);
+                exit;
                 $uploadItemArr = [];
-                foreach ($attributeListArr as $k=>$v){
-                    //如果是多选的话
-                    if(($v['type'] == 'multiselect')){
-                        foreach ($v['valueOptions'] as $key=>$val){
-                            if(in_array(strtolower($val['label']),$v['platformValue'])){
-                                $uploadItemArr[$v['code']] .= $val['value'].',';
-                            }
+                  //原先有多选的话
+//                foreach ($attributeListArr as $k=>$v){
+//                    //如果是多选的话
+//                    if(($v['type'] == 'multiselect') || ($v['type'] == 'select')){
+//                        foreach ($v['valueOptions'] as $key=>$val){
+//                            if((strtolower($val['label']) == $v['platformValue'])){
+//                                $uploadItemArr[$v['code']] .= $val['value'].',';
+//                            }
+//                        }
+//                        $uploadItemArr[$v['code']] = trim($uploadItemArr[$v['code']],',');
+//                    }elseif($v['type'] == 'select'){ //如果是单选的话
+//                        foreach ($v['valueOptions'] as $key =>$val){
+//                            if(strtolower($val['label']) == $v['platformValue']){
+//                                $uploadItemArr[$v['code']] = $val['value'];
+//                            }
+//                        }
+//                    }else{
+//                                $uploadItemArr[$v['code']] = $v['platformValue'];
+//                    }
+//                }
+            foreach ($attributeListArr as $k=>$v){
+                //如果是多选的话
+                if(($v['type'] == 'select') || ($v['type'] == 'multiselect')) { //如果是单选的话
+                    foreach ($v['valueOptions'] as $key => $val) {
+                        if ((strtolower($val['label'])) == strtolower($v['platformValue'])) {
+                            $uploadItemArr[$v['code']] = $val['value'];
                         }
-                        $uploadItemArr[$v['code']] = trim($uploadItemArr[$v['code']],',');
-                    }elseif($v['type'] == 'select'){ //如果是单选的话
-                        foreach ($v['valueOptions'] as $key =>$val){
-                            if(strtolower($val['label']) == $v['platformValue']){
-                                $uploadItemArr[$v['code']] = $val['value'];
-                            }
-                        }
-                    }else{
-                                $uploadItemArr[$v['code']] = $v['platformValue'];
                     }
+                }else{
+                    $uploadItemArr[$v['code']] = $v['platformValue'];
                 }
+            }
+            echo '<pre>';
+            var_dump($uploadItemArr);
+            exit;
             //添加上传商品的信息
             $uploadItemArr['categories']            = array(2);
             $uploadItemArr['websites']              = array(1);
@@ -503,6 +522,7 @@ class ItemPlatformSku extends Backend
             $uploadItemArr['short_description']     = 'Product short description';
             $uploadItemArr['url_key']               = $itemRow['sku'];
             $uploadItemArr['url_path']              = $itemRow['sku'];
+            $uploadItemArr['true_sku']              = $itemPlatformRow['platform_sku'];
             $uploadItemArr['status']                = '1';
             $uploadItemArr['visibility']            = '4';
             $uploadItemArr['meta_title']            = 'Product meta title';

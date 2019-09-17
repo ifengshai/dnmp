@@ -36,7 +36,7 @@ class ItemAttribute extends Model
 //    }
     public function getAllFrameShape()
     {
-        return [0=>'请选择',1=>'rectangle', 2=>'square', 3 =>'cateye', 4 =>'oval', 5 =>'aviator', 6 =>'geometric', 7=>'蝴蝶款'];
+        return [0=>'请选择',1=>'rectangle', 2=>'square', 3 =>'cateye', 4 =>'oval', 5 =>'aviator', 6 =>'geometric', 7=>'round',8=>'browline',9=>'mark'];
     }
     /***
      * 获得所有框型(原先)
@@ -47,7 +47,7 @@ class ItemAttribute extends Model
 //    }
     public function getAllShape()
     {
-        return [0=>'请选择',1=>'full_rim',2=>'semi_rim',3=>'rimless'];
+        return [0=>'请选择',1=>'Rimless',2=>'Semi Rim',3=>'two_rim',4=>'Full Rim',5=>'mark'];
     }
     /***
      * 获取所有材质(原先)
@@ -58,7 +58,7 @@ class ItemAttribute extends Model
 //    }
     public function getAllTexture()
     {
-        return [ 0=>'请选择',1 => 'plastic', 2 =>'acetate', 3 =>'tr90', 4 =>'metal',5=>'titanium', 6 =>'尼龙', 7=>'木质',8=>'混合材质',9=>'alloy',10=>'other_material'];
+        return [ 0=>'请选择',1 => 'plastic', 2 =>'acetate', 3 =>'tr90', 4 =>'metal',5=>'titanium',6=>'titanium',7=>'other_material',8=>'mark'];
     }
     /***
      * 获取材质对应的编码 和 getAllTexture下标对应
@@ -100,7 +100,8 @@ class ItemAttribute extends Model
 //    }
     public function getFrameColor()
     {
-        return [0=>'请选择',1=>'red', 2=> 'orange', 3=>'yellow', 4=>'green', 5=>'blue', 6=>'purple', 7=>'black', 8=>'white', 9=>'gray', 10=>'brown'];
+        return [0=>'请选择',1=>'Black', 2=> 'Blue', 3=>'Brown', 4=>'Crystal', 5=>'Floral', 6=>'Gold', 7=>'Green',
+            8=>'Orange', 9=>'Pink', 10=>'Purple',11=>'Red',12=>'Silver',13=>'Tortoise',14=>'White',15=>'Yellow'];
     }
     /***
      * 获取眼镜类型(原先)
@@ -129,7 +130,7 @@ class ItemAttribute extends Model
 //    }
     public function getFrameType()
     {
-        return [0=>'请选择',1=>'Single vision',2=>'Progressive'];
+        return [0=>'请选择',1=>'No_prescription',2=>'Ordinary',3=>'Presbyopic'];
     }
     //获取所有可调节鼻托类型
     public function getAllNosePad()
