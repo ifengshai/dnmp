@@ -258,8 +258,8 @@ class Backend extends Controller
         $order = $this->request->get("order", "DESC");
         $offset = $this->request->get("offset", 0);
         $limit = $this->request->get("limit", 0);
-        $filter = (array)json_decode($filter, true);
-        $op = (array)json_decode($op, true);
+        $filter = (array) json_decode($filter, true);
+        $op = (array) json_decode($op, true);
         $filter = $filter ? $filter : [];
         $where = [];
         $tableName = '';
@@ -269,7 +269,7 @@ class Backend extends Controller
                 $tableName = $name . '.';
             }
             $sortArr = explode(',', $sort);
-            foreach ($sortArr as $index => & $item) {
+            foreach ($sortArr as $index => &$item) {
                 $item = stripos($item, ".") === false ? $tableName . trim($item) : $item;
             }
             unset($item);
@@ -297,7 +297,7 @@ class Backend extends Controller
             switch ($sym) {
                 case '=':
                 case '<>':
-                    $where[] = [$k, $sym, (string)$v];
+                    $where[] = [$k, $sym, (string) $v];
                     break;
                 case 'LIKE':
                 case 'NOT LIKE':
@@ -369,12 +369,15 @@ class Backend extends Controller
                     break;
             }
         }
-        if(!empty($this->model)){
+
+        //判断是否存在逻辑删除字段
+        if (!empty($this->model)) {
             $fieldArr = $this->model->getTableFields();
-            if(in_array('is_del',$fieldArr)){
-                $where[] = ['is_del','=',1];
+            if (in_array('is_del', $fieldArr)) {
+                $where[] = ['is_del', '=', 1];
             }
         }
+
         $where = function ($query) use ($where) {
             foreach ($where as $k => $v) {
                 if (is_array($v)) {
@@ -420,7 +423,7 @@ class Backend extends Controller
         $this->request->filter(['strip_tags', 'htmlspecialchars']);
 
         //搜索关键词,客户端输入以空格分开,这里接收为数组
-        $word = (array)$this->request->request("q_word/a");
+        $word = (array) $this->request->request("q_word/a");
         //当前页
         $page = $this->request->request("pageNumber");
         //分页大小
@@ -428,7 +431,7 @@ class Backend extends Controller
         //搜索条件
         $andor = $this->request->request("andOr", "and", "strtoupper");
         //排序方式
-        $orderby = (array)$this->request->request("orderBy/a");
+        $orderby = (array) $this->request->request("orderBy/a");
         //显示的字段
         $field = $this->request->request("showField");
         //主键
@@ -436,9 +439,9 @@ class Backend extends Controller
         //主键值
         $primaryvalue = $this->request->request("keyValue");
         //搜索字段
-        $searchfield = (array)$this->request->request("searchField/a");
+        $searchfield = (array) $this->request->request("searchField/a");
         //自定义搜索条件
-        $custom = (array)$this->request->request("custom/a");
+        $custom = (array) $this->request->request("custom/a");
         //是否返回树形结构
         $istree = $this->request->request("isTree", 0);
         $ishtml = $this->request->request("isHtml", 0);
