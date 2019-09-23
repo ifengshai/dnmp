@@ -6,15 +6,14 @@ use think\Model;
 use think\Db;
 
 
-class Voogueme extends Model
+class ProcessOrder extends Model
 {
     //数据库
-    // protected $connection = 'database';
-    protected $connection = 'database.db_voogueme_online';
+    protected $connection = '';
 
     
     // 表名
-    protected $table = 'sales_flat_order';
+    protected $table = 'fa_process_order';
     
     // 自动写入时间戳字段
     protected $autoWriteTimestamp = false;
@@ -29,12 +28,16 @@ class Voogueme extends Model
 
     ];
     
-     //名称获取器
-     public function getCustomerFirstnameAttr($value, $data)
-     {
-         return $data['customer_firstname'] . ' ' . $data['customer_lastname'];
-     }
-
+    /**
+     * 构造方法
+     * @access public
+     * @param array|object $data 数据
+     */
+    public function __construct($data = [])
+    {
+        $this->connection = $data['connection'];
+        parent::__construct();
+    }
     
 
 
