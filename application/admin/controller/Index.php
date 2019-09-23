@@ -21,7 +21,20 @@ class Index extends Backend
 
     public function _initialize()
     {
+        //菜单切换功能
+        $act = $this->request->get('act');
+        $multiplenav = cookie('multiplenav');
+        if ($act == 'switch-multiplenav-off') {
+            cookie('multiplenav', null);
+        } else if ($act == 'switch-multiplenav-on' || $multiplenav) {
+            if (!$multiplenav) {
+                cookie('multiplenav', true);
+            }
+            config('fastadmin.multiplenav', true);
+        }
+       
         parent::_initialize();
+       
     }
 
     /**
@@ -67,7 +80,7 @@ class Index extends Backend
             $rule = [
                 'username'  => 'require|length:3,30',
                 'password'  => 'require|length:3,30',
-                '__token__' => 'token',
+                '__token__' => 'require|token',
             ];
             $data = [
                 'username'  => $username,
@@ -116,5 +129,4 @@ class Index extends Backend
         Hook::listen("admin_logout_after", $this->request);
         $this->success(__('Logout successful'), 'index/login');
     }
-
 }

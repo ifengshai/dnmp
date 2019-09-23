@@ -1,0 +1,203 @@
+<div class='caigou ajax-add addition'>
+    
+    <div style="margin-bottom:20px;">
+        <div id="toolbar" class="toolbar">
+            <a href="javascript:;" class="btn btn-success btn-add" title="增加"><i class="fa fa-plus"></i> 增加</a>
+        </div>
+        <table id="caigou-table">
+            <tr>
+                <th>商品名称</th>
+                <th>商品颜色</th>
+                <th>供应商SKU</th>
+                <th>操作</th>
+            </tr>
+            <tr>
+                <td><input  data-rule="required"  class="form-control c-name" name="row[name][]" type="text"></td>
+                <td><input  data-rule="required"  class="form-control c-color" name="row[color][]" type="text"></td>
+                <td><input  data-rule="required"  class="form-control c-supplier_sku" name="row[supplier_sku][]" type="text"></td>
+                <td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>
+                    删除</a></td>
+            </tr>
+
+        </table>
+    </div>
+</div>
+
+<div class="form-group ajax-add redact">
+    <label class="control-label col-xs-12 col-sm-2">{:__('Procurement_type')}:</label>
+    <div class="col-xs-12 col-sm-3">
+        <select  id="c-procurement_type" data-rule="required" class="form-control selectpicker" name="row[procurement_type]">
+            <option value="0">请选择</option>
+            <option value="1">线上采购</option>
+            <option value="2">线下采购</option>
+        </select>
+    </div>
+    <label class="control-label col-xs-12 col-sm-2">{:__('Procurement_origin')}:</label>
+    <div class="col-xs-12 col-sm-3">
+        <select  id="c-procurement_origin" data-rule="required" class="form-control selectpicker" name="row[procurement_origin]">
+            {foreach name="AllOrigin" item="vo"}
+            <option value="{$key}">{$vo}</option>
+            {/foreach}
+        </select>
+    </div>
+</div>
+
+<div class="form-group ajax-add">
+    <label class="control-label col-xs-12 col-sm-2">{:__('供应商')}:</label>
+    <div class="col-xs-12 col-sm-3">
+        {:Form::select('row[supplier_id]', $AllSupplier, null, ['class'=>'form-control selectpicker', 'data-rule'=>'required','data-live-search' => true])}
+    </div>
+    <label class="control-label col-xs-12 col-sm-2">{:__('1688链接')}:</label>
+    <div class="col-xs-12 col-sm-3">
+        <input id="c-link" data-rule="required" class="form-control" name="row[link]" type="text" value="">
+    </div>
+</div>
+
+
+<div class="form-group ajax-add">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Frame_texture')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <select  id="c-frame_texture" data-rule="required" class="form-control selectpicker" name="row[frame_texture]">
+                {foreach name="AllTexture" item="vo"}
+                <option value="{$key}">{$vo}</option>
+                {/foreach}
+            </select>
+        </div>
+    <label class="control-label col-xs-12 col-sm-2">{:__('Frame_bridge')}:</label>
+    <div class="col-xs-12 col-sm-3">
+        <input id="c-frame_bridge" data-rule="required" class="form-control" name="row[frame_bridge]" type="number" value="0.00">
+    </div>
+</div>
+<div class="form-group ajax-add">
+    <label class="control-label col-xs-12 col-sm-2">{:__('Frame_height')}:</label>
+    <div class="col-xs-12 col-sm-3">
+        <input id="c-attribute-type" type="hidden" name="row[attribute_type]" value="1"/>
+        <input id="c-frame_height" data-rule="required" class="form-control" name="row[frame_height]" type="number" value="0">
+    </div>
+    <label class="control-label col-xs-12 col-sm-2">{:__('Frame_width')}:</label>
+    <div class="col-xs-12 col-sm-3">
+        <input id="c-frame_width" data-rule="required" class="form-control" step="0.01" name="row[frame_width]" type="number" value="0.00">
+    </div>
+</div>
+<div class="form-group ajax-add">
+    <label class="control-label col-xs-12 col-sm-2">{:__('Frame_length')}:</label>
+    <div class="col-xs-12 col-sm-3">
+        <input id="c-frame_length" data-rule="required" class="form-control" name="row[frame_length]" type="number" value="0">
+    </div>
+    <label class="control-label col-xs-12 col-sm-2">{:__('Frame_temple_length')}:</label>
+    <div class="col-xs-12 col-sm-3">
+        <input id="c-frame_temple_length" data-rule="required" class="form-control" step="0.01" name="row[frame_temple_length]" type="number" value="0.00">
+    </div>
+</div>
+<div class="form-group ajax-add">
+    <label class="control-label col-xs-12 col-sm-2">{:__('Weight')}:</label>
+    <div class="col-xs-12 col-sm-3">
+        <input id="c-weight" data-rule="required" class="form-control" name="row[weight]" type="number" value="0">
+    </div>
+    <label class="control-label col-xs-12 col-sm-2">{:__('Mirror_width')}:</label>
+    <div class="col-xs-12 col-sm-3">
+        <input id="c-mirror_width" data-rule="required" class="form-control" name="row[mirror_width]" type="number" value="0.00">
+    </div>
+</div>
+<div class="form-group ajax-add">
+    <label class="control-label col-xs-12 col-sm-2">{:__('Shape')}:</label>
+    <div class="col-xs-12 col-sm-3">
+        <select  id="c-shape" data-rule="required" class="form-control selectpicker" name="row[shape]">
+            {foreach name="AllShape" item="vo"}
+            <option value="{$key}">{$vo}</option>
+            {/foreach}
+        </select>
+    </div>
+    <label class="control-label col-xs-12 col-sm-2">{:__('Frame_type')}:</label>
+    <div class="col-xs-12 col-sm-3">
+        <select  id="c-frame_type" data-rule="required" class="form-control selectpicker" name="row[frame_type]">
+            {foreach name="AllFrameType" item="vo"}
+            <option value="{$key}">{$vo}</option>
+            {/foreach}
+        </select>
+    </div>
+</div>
+<div class="form-group ajax-add">
+    <label class="control-label col-xs-12 col-sm-2">{:__('Frame_shape')}:</label>
+    <div class="col-xs-12 col-sm-3">
+        <select  id="c-frame_shape" data-rule="required" class="form-control selectpicker" name="row[frame_shape]">
+            {foreach name="AllFrameShape" item="vo"}
+            <option value="{$key}">{$vo}</option>
+            {/foreach}
+        </select>
+    </div>
+    <label class="control-label col-xs-12 col-sm-2">{:__('Frame_gender')}:</label>
+    <div class="col-xs-12 col-sm-3">
+        <select  id="c-frame_gender" data-rule="required" class="form-control selectpicker" name="row[frame_gender]">
+            {foreach name="AllFrameGender" item="vo"}
+            <option value="{$key}">{$vo}</option>
+            {/foreach}
+        </select>
+    </div>
+</div>
+<div class="form-group ajax-add">
+    <label class="control-label col-xs-12 col-sm-2">{:__('Frame_size')}:</label>
+    <div class="col-xs-12 col-sm-3">
+        <select  id="c-frame_size" data-rule="required" class="form-control selectpicker" name="row[frame_size]">
+            {foreach name="AllFrameSize" item="vo"}
+            <option value="{$key}">{$vo}</option>
+            {/foreach}
+        </select>
+    </div>
+    <label class="control-label col-xs-12 col-sm-2">{:__('Glasses_type')}:</label>
+    <div class="col-xs-12 col-sm-3">
+        <select  id="c-glasses_type" data-rule="required" class="form-control selectpicker" name="row[glasses_type]">
+            {foreach name="AllGlassesType" item="vo"}
+            <option value="{$key}">{$vo}</option>
+            {/foreach}
+        </select>
+    </div>
+</div>
+<div class="form-group ajax-add">
+    <label class="control-label col-xs-12 col-sm-2">{:__('Frame_is_recipe')}:</label>
+    <div class="col-xs-12 col-sm-3">
+        <select  id="c-frame_is_recipe" data-rule="required" class="form-control selectpicker" name="row[frame_is_recipe]">
+            <option value="1">是</option>
+            <option value="2">否</option>
+        </select>
+    </div>
+    <label class="control-label col-xs-12 col-sm-2">{:__('Frame_piece')}:</label>
+    <div class="col-xs-12 col-sm-3">
+        <select  id="c-frame_piece" data-rule="required" class="form-control selectpicker" name="row[frame_piece]">
+            <option value="1">是</option>
+            <option value="2">否</option>
+        </select>
+    </div>
+</div>
+<div class="form-group ajax-add">
+    <label class="control-label col-xs-12 col-sm-2">{:__('Frame_temple_is_spring')}:</label>
+    <div class="col-xs-12 col-sm-3">
+        <select  id="c-frame_temple_is_spring" data-rule="required" class="form-control selectpicker" name="row[frame_temple_is_spring]">
+            <option value="1">是</option>
+            <option value="2">否</option>
+        </select>
+    </div>
+    <label class="control-label col-xs-12 col-sm-2">{:__('Frame_is_adjust_nose_pad')}:</label>
+    <div class="col-xs-12 col-sm-3">
+        <select  id="c-frame_is_adjust_nose_pad" data-rule="required" class="form-control selectpicker" name="row[frame_is_adjust_nose_pad]">
+            <option value="1">是</option>
+            <option value="2">否</option>
+        </select>
+    </div>
+</div>
+<div class="form-group ajax-add">
+    <label class="control-label col-xs-12 col-sm-2">{:__('Frame_is_advance')}:</label>
+    <div class="col-xs-12 col-sm-3">
+        <select  id="c-frame_is_advance" data-rule="required" class="form-control selectpicker" name="row[frame_is_advance]">
+            <option value="1">是</option>
+            <option value="2">否</option>
+        </select>
+    </div>
+</div>
+<div class="form-group ajax-add">
+    <label class="control-label col-xs-12 col-sm-2">{:__('Frame_remark')}:</label>
+    <div class="col-xs-12 col-sm-8">
+        <textarea id="c-problem_desc" class="form-control editor" rows="5" name="row[frame_remark]" cols="50"></textarea>
+    </div>
+</div>
+

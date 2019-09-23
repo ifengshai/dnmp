@@ -1,0 +1,220 @@
+<form id="edit-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
+
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Original_increment_id')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-original_increment_id" data-rule="required" data-source="original/increment/index" class="form-control selectpage" name="row[original_increment_id]" type="text" value="{$row.original_increment_id|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Order_platform')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-order_platform" data-rule="required" class="form-control" name="row[order_platform]" type="number" value="{$row.order_platform|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Issue_id')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-issue_id" data-rule="required" data-source="issue/index" class="form-control selectpage" name="row[issue_id]" type="text" value="{$row.issue_id|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Reissue_type')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-reissue_type" data-rule="required" class="form-control" name="row[reissue_type]" type="number" value="{$row.reissue_type|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Reissue_status')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-reissue_status" data-rule="required" class="form-control" name="row[reissue_status]" type="number" value="{$row.reissue_status|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Customer_email')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-customer_email" class="form-control" name="row[customer_email]" type="text" value="{$row.customer_email|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Customer_name')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-customer_name" class="form-control" name="row[customer_name]" type="text" value="{$row.customer_name|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Remark')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <textarea id="c-remark" class="form-control " rows="5" name="row[remark]" cols="50">{$row.remark|htmlentities}</textarea>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Final_loss_amount')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-final_loss_amount" class="form-control" step="0.01" name="row[final_loss_amount]" type="number" value="{$row.final_loss_amount|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Final_loss_amount_created_time')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-final_loss_amount_created_time" class="form-control datetimepicker" data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[final_loss_amount_created_time]" type="text" value="{$row.final_loss_amount_created_time}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Final_loss_remark')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-final_loss_remark" class="form-control" name="row[final_loss_remark]" type="text" value="{$row.final_loss_remark|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Custom_print_label')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-custom_print_label" class="form-control" name="row[custom_print_label]" type="number" value="{$row.custom_print_label|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Match_frame')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-match_frame" class="form-control" name="row[match_frame]" type="number" value="{$row.match_frame|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Match_frame_created_time')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-match_frame_created_time" class="form-control datetimepicker" data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[match_frame_created_time]" type="text" value="{$row.match_frame_created_time}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Match_lens')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-match_lens" class="form-control" name="row[match_lens]" type="number" value="{$row.match_lens|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Match_lens_created_at')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-match_lens_created_at" class="form-control datetimepicker" data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[match_lens_created_at]" type="text" value="{$row.match_lens_created_at}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Send_factory')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-send_factory" class="form-control" name="row[send_factory]" type="number" value="{$row.send_factory|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Send_factory_created_at')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-send_factory_created_at" class="form-control datetimepicker" data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[send_factory_created_at]" type="text" value="{$row.send_factory_created_at}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Delivery')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-delivery" class="form-control" name="row[delivery]" type="number" value="{$row.delivery|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Delivery_created_at')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-delivery_created_at" class="form-control datetimepicker" data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[delivery_created_at]" type="text" value="{$row.delivery_created_at}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Express_delivery')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-express_delivery" class="form-control" name="row[express_delivery]" type="number" value="{$row.express_delivery|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Express_delivery_created_at')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-express_delivery_created_at" class="form-control datetimepicker" data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[express_delivery_created_at]" type="text" value="{$row.express_delivery_created_at}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Is_visable')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-is_visable" data-rule="required" class="form-control" name="row[is_visable]" type="number" value="{$row.is_visable|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Created_person')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-created_person" class="form-control" name="row[created_person]" type="text" value="{$row.created_person|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Created_time')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-created_time" class="form-control datetimepicker" data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[created_time]" type="text" value="{$row.created_time}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Check_person_id')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-check_person_id" data-rule="required" data-source="check/person/index" class="form-control selectpage" name="row[check_person_id]" type="text" value="{$row.check_person_id|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Check_time')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-check_time" class="form-control datetimepicker" data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[check_time]" type="text" value="{$row.check_time}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Check_refuse_reason')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <textarea id="c-check_refuse_reason" class="form-control " rows="5" name="row[check_refuse_reason]" cols="50">{$row.check_refuse_reason|htmlentities}</textarea>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Country')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-country" data-rule="required" class="form-control" name="row[country]" type="text" value="{$row.country|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Region')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-region" class="form-control" name="row[region]" type="text" value="{$row.region|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('City')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <div class='control-relative'><input id="c-city" class="form-control" data-toggle="city-picker" name="row[city]" type="text" value="{$row.city|htmlentities}"></div>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Street')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-street" class="form-control" name="row[street]" type="text" value="{$row.street|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Telephone')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-telephone" class="form-control" name="row[telephone]" type="text" value="{$row.telephone|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Postcode')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-postcode" class="form-control" name="row[postcode]" type="text" value="{$row.postcode|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Address_remark')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-address_remark" class="form-control" name="row[address_remark]" type="text" value="{$row.address_remark|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group layer-footer">
+        <label class="control-label col-xs-12 col-sm-2"></label>
+        <div class="col-xs-12 col-sm-8">
+            <button type="submit" class="btn btn-success btn-embossed disabled">{:__('OK')}</button>
+            <button type="reset" class="btn btn-default btn-embossed">{:__('Reset')}</button>
+        </div>
+    </div>
+</form>

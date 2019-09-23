@@ -1,0 +1,366 @@
+<style>
+    .caigou {
+        /* border-width: 1px;
+            border-style: solid;
+            border-color: rgba(188, 188, 188, 1);
+            border-radius: 6px; */
+        padding: 10px;
+        width: 85%;
+        margin-left: 20px;
+        margin-top: 40px;
+    }
+
+    .caigou #caigou-table-sku {
+        width: 100%;
+        height: 130px;
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+        text-align: center;
+    }
+
+    .caigou #caigou-table-sku tr {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+        line-height: 50px;
+    }
+
+    .caigou #caigou-table-sku tr th {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+        text-align: center;
+        font-size: 14px;
+    }
+
+    .caigou #caigou-table-sku tr td {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+    }
+
+    .caigou #caigou-table-sku tr td input {
+
+        width: 150px;
+    }
+</style>
+<style>
+    #remark-table{
+        margin-left: 17.5%;
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+    }
+    #remark-table tr {
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+        line-height: 50px;
+    }
+    #remark-table tr th {
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+        text-align: center;
+        font-size: 14px;
+    }
+    #remark-table tr td {
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+    }
+
+    .caigou #caigou-table tr td input {
+
+        width: 150px;
+    }
+</style>
+<form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Synergy_number')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-id" type="hidden" name="row[id]" value="{$row.id}" readonly = "readonly"/>
+            <input id="c-synergy_number" data-rule="required" class="form-control" name="row[synergy_number]" type="text" value="{$row.synergy_number}" disabled="disabled">
+        </div>
+        <label class="control-label col-xs-12 col-sm-2">{:__('Synergy_order_id')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <select id="c-synergy_order_id" data-rule="required"  class="form-control selectpicker" name="row[synergy_order_id]">
+                <option value="0" selected>请选择</option>
+                {foreach name="orderType" item="vo"}
+                <option value="{$key}" {eq name="key" value="$row.synergy_order_id"}selected{/eq}>{$vo}</option>
+                {/foreach}
+            </select>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Order_platform')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <select  id="c-order_platform" data-rule="required" class="form-control selectpicker" name="row[order_platform]">
+                <option value="0" selected>请选择</option>
+                {foreach name="orderPlatformList" item="vo"}
+                <option value="{$key}" {eq name="key" value="$row.order_platform"}selected{/eq}>{$vo}</option>
+                {/foreach}
+            </select>
+        </div>
+        <label class="control-label col-xs-12 col-sm-2">{:__('Synergy_order_number')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-synergy_order_number" data-rule="required" class="form-control" name="row[synergy_order_number]" type="text" value="{$row.synergy_order_number}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Dept_id')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            {:build_select('row[dept_id][]', $allGroup, $row.dept_id,['class'=>'form-control selectpicker', 'data-rule'=>'required','data-live-search' => true,'multiple'=>'multiple','id'=>'choose_dept_id'])}
+        </div>
+        <label class="control-label col-xs-12 col-sm-2" >{:__('Rep_id')}:</label>
+        <div class="col-xs-12 col-sm-3" id="add_rep_id">
+            {:build_select('row[rep_id][]', $allAdmin, $row.rep_id,['class'=>'form-control selectpicker', 'data-rule'=>'required','data-live-search' => true,'multiple'=>'multiple','id'=>"choose_rep_id"])}
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Prty_id')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <select  id="c-prty_id" data-rule="required" class="form-control selectpicker" name="row[prty_id]">
+                <option value="0" selected>请选择</option>
+                {foreach name="prtyIdList" item="vo"}
+                <option value="{$key}" {eq name="key" value="$row.prty_id"}selected{/eq}>{$vo}</option>
+                {/foreach}
+            </select>
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="form-group">
+            <label class="control-label col-xs-12 col-sm-2">{:__('Synergy_task_id')}:</label>
+        </div>
+        {foreach name="categoryList" item="vo"}
+        <div class="form-group">
+            <label class="control-label col-xs-12 col-sm-2">{$vo.name}</label>
+            {if $vo.junior}
+            <div class="radio">
+                {foreach name="$vo.junior" item="issue"}
+                {if $issue.junior}
+                <label for="row[synergy_task_id]-{$issue.id}"><input id="row[synergy_task_id]-{$issue.id}" name="row[synergy_task_id]" type="radio" value="{$issue.id}" {eq name="$issue.id" value="$row.synergy_task_id"}checked{/eq} /> <span style="color:green;" id="{$issue.id}" class="issueLevel">{$issue.name}<span></span></label>
+                {else/}
+                <label for="row[synergy_task_id]-{$issue.id}"><input id="row[synergy_task_id]-{$issue.id}" name="row[synergy_task_id]" type="radio" value="{$issue.id}" {in name="$issue.id" value="$row.synergy_task_id"}checked{/in} /> {$issue.name}</label>
+                {/if}
+                {if $issue.junior}
+                <div class="radio" style="margin-left:20%;display:none;" id="display-{$issue.id}" >
+                    {foreach name="$issue.junior" item="finalIssue"}
+                    <label for="row[synergy_task_id]-{$finalIssue.id}"><input id="row[synergy_task_id]-{$finalIssue.id}" name="row[synergy_task_id]" type="radio" value="{$finalIssue.id}" {in name="$finalIssue.id" value="$row.synergy_task_id"}checked{/in} />{$finalIssue.name}</label>
+                    {/foreach}
+                </div>
+                {/if}
+                {/foreach}
+            </div>
+            {/if}
+        </div>
+        {/foreach}
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Problem_desc')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <textarea id="c-problem_desc" class="form-control editor" rows="5" name="row[problem_desc]" cols="50">{$row.problem_desc|htmlentities}</textarea>
+        </div>
+    </div>
+    <div class="form-group" >
+        <label class="control-label col-xs-12 col-sm-2">{:__('Upload_photos')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <div class="input-group">
+                <input id="c-upload_photos" data-rule="required" class="form-control" size="50" name="row[upload_photos]" type="text" value="{$row.upload_photos}">
+                <div class="input-group-addon no-border no-padding">
+                    <span><button type="button" id="plupload-upload_photos"   class="btn btn-danger plupload" data-input-id="c-upload_photos" data-mimetype="image/gif,image/jpeg,image/png,image/jpg,image/bmp" data-url="ajax/upload?dir=infoSynergyTaskManage/infoSynergyTask" data-multiple="true" data-preview-id="p-upload_photos" data-maxsize="2M"><i class="fa fa-upload"></i> 上传</button></span>
+                </div>
+                <span class="msg-box n-right" for="c-upload_photos"></span>
+            </div>
+            <ul class="row list-inline plupload-preview" id="p-upload_photos"></ul>
+        </div>
+    </div>
+    {present name="orderReturnRemark"}
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Remark_record')}:</label>
+        <table id="remark-table" class="col-xs-12 col-sm-8">
+            <tr>
+                <th style="text-align: center; vertical-align: middle;">序号</td>
+                <th style="text-align: center; vertical-align: middle;">备注详情</td>
+                <th style="text-align: center; vertical-align: middle;">操作人</td>
+                <th style="text-align: center; vertical-align: middle;">操作时间</td>
+            </tr>
+            {foreach name="orderReturnRemark" item="vo"}
+            <tr>
+                <td style="text-align: center; vertical-align: middle;">{$vo.id}</td>
+                <td style="text-align: center; vertical-align: middle;">{$vo.remark_record}</td>
+                <td style="text-align: center; vertical-align: middle;">{$vo.create_person}</td>
+                <td style="text-align: center; vertical-align: middle;">{$vo.create_time}</td>
+            </tr>
+            {/foreach}
+        </table>
+    </div>
+    {/present}
+    <div class="form-group" id="customer_info">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Add_remark')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <textarea id="c-task_remark" class="form-control editor " rows="5" name="row[remark_record]" cols="50"></textarea>
+        </div>
+    </div>
+    {present name="taskChangeSku"}
+    {if condition="$taskChangeSku[0]['change_type'] eq 1"/}
+    <div class="caigou item_info" style="margin-top:15px;margin-left:10%;">
+        <p style="font-size: 16px;"><b>更改镜架</b></p>
+        <div>
+            <div id="toolbar" class="toolbar">
+                <a href="javascript:;" class="btn btn-success btn-add" title="增加"><i class="fa fa-plus"></i> 增加</a>
+            </div>
+            <table id="caigou-table-sku">
+                <tr>
+                    <th>原始SKU</th>
+                    <th>原始数量</th>
+                    <th>变更SKU</th>
+                    <th>变更数量</th>
+                    <th>操作</th>
+                </tr>
+                {foreach name="taskChangeSku" item="sku" key="k"}
+                <tr>
+                    <td>
+                        <input class="form-control" name="row[item][{$k+1}][id]" type="hidden" value="{$sku.id}">
+                        <input id="c-original_sku" class="form-control" name="row[item][{$k+1}][original_sku]" type="text" value="{$sku.original_sku}">
+                    </td>
+                    <td><input id="c-original_number" class="form-control" name="row[item][{$k+1}][original_number]" type="text" value="{$sku.original_number}"></td>
+                    <td><input id="c-change_sku" class="form-control" name="row[item][{$k+1}][change_sku]" value="{$sku.change_sku}" type="text"></td>
+                    <td><input id="c-change_number" class="form-control" name="row[item][{$k+1}][change_number]" value="{$sku.change_number}" type="text"></td>
+                    <td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>删除</a></td>
+                </tr>
+                {/foreach}
+            </table>
+        </div>
+    </div>
+    {else/}
+    <div class="row item_info" style="margin-top:15px;margin-left:7.6666%;">
+        <p style="font-size: 16px;"><b>更改镜片</b></p>
+        <div>
+            <div id="toolbar" class="toolbar">
+                <a href="javascript:;" class="btn btn-success btn-add-lens" title="增加"><i class="fa fa-plus"></i> 增加</a>
+            </div>
+            {foreach name="taskChangeSku" item="sku" key="kv"}
+            <div class="col-lg-12">
+            </div>
+            <div class="col-xs-6 col-md-4" style="margin-top:15px;margin-left:5.6666%;" >
+                <div class="panel bg-blue">
+                    <div class="panel-body">
+                        <div class="panel-title">
+                            <label class="control-label col-xs-12 col-sm-3">商品名称:</label>
+                            <div class="col-xs-12 col-sm-8">
+                                <input type="hidden" name="row[lens][id][]" value="{$sku['id']}">
+                                <input  id="c-item_name"  class="form-control"  type="text" name="row[lens][original_name][]" value="{$sku['original_name']}">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div class="panel-title">
+                            <label class="control-label col-xs-12 col-sm-3">SKU:</label>
+                            <div class="col-xs-12 col-sm-8">
+                                <input  id="c-item_sku" class="form-control"  type="text" name="row[lens][original_sku][]" value="{$sku['original_sku']}">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div class="panel-title">
+                            <label class="control-label col-xs-12 col-sm-3">数量:</label>
+                            <div class="col-xs-12 col-sm-8">
+                                <input  id="c-item_qty_ordered"  class="form-control"  type="text" name="row[lens][original_number][]" value="{$sku['original_number']}">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div class="panel-title">
+                            <label class="control-label col-xs-12 col-sm-3">处方类型:</label>
+                            <div class="col-xs-12 col-sm-8">
+                                <input  id="c-recipe_type"  class="form-control" type="text" name="row[lens][recipe_type][]" value="{$sku['recipe_type']}">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div class="panel-title">
+                            <label class="control-label col-xs-12 col-sm-3">镜片类型:</label>
+                            <div class="col-xs-12 col-sm-8">
+                                <input  id="c-lens_type"  class="form-control"  type="text" name="row[lens][lens_type][]" value="{$sku['lens_type']}">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div class="panel-title">
+                            <label class="control-label col-xs-12 col-sm-3">镀膜类型:</label>
+                            <div class="col-xs-12 col-sm-8">
+                                <input  id="c-coating_film_type"  class="form-control"  type="text" name="row[lens][coating_type][]" value="{$sku['coating_type']}">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-6 col-md-7">
+                <div class="panel bg-aqua-gradient">
+                    <div class="panel-body">
+                        <div class="ibox-title">
+                            <table id="caigou-table-lens">
+                                <tr>
+                                    <td colspan="10" style="text-align: center">处方参数</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: center">参数</td>
+                                    <td style="text-align: center">SPH</td>
+                                    <td style="text-align: center">CYL</td>
+                                    <td style="text-align: center">AXI</td>
+                                    <td style="text-align: center">ADD</td>
+                                    <td style="text-align: center">PD</td>
+                                    <td style="text-align: center">Prism Horizontal</td>
+                                    <td style="text-align: center">Base Direction</td>
+                                    <td style="text-align: center">Prism Vertical</td>
+                                    <td style="text-align: center">Base Direction</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: center">Right(OD)</td>
+                                    <td><input id="c-right_SPH" class="form-control"  type="text" name="row[lens][od_sph][]" value="{$sku['option']['od_sph']}"></td>
+                                    <td><input id="c-right_CYL" class="form-control"  type="text" name="row[lens][od_cyl][]" value="{$sku['option']['od_cyl']}"></td>
+                                    <td><input id="c-right_AXI" class="form-control"  type="text" name="row[lens][od_axis][]" value="{$sku['option']['od_axis']}"></td>
+                                    <td><input id="c-right_ADD" class="form-control"  type="text" name="row[lens][od_add][]" value="{$sku['option']['od_add']}"></td>
+                                    <td><input id="c-right_PD" class="form-control"  type="text"  name="row[lens][pd_r][]" value="{$sku['option']['pd_r']}"></td>
+                                    <td><input id="c-right_Prism_Horizontal" class="form-control" name="row[lens][od_pv][]" type="text" value="{$sku['option']['od_pv']}"></td>
+                                    <td><input id="c-right_" class="form-control"  type="text" name="row[lens][od_bd][]" value="{$sku['option']['od_bd']}"></td>
+                                    <td><input id="c-purchase_remark" class="form-control"  type="text" name="row[lens][od_pv_r][]" value="{$sku['option']['od_pv_r']}"></td>
+                                    <td><input id="c-purchase_remark" class="form-control"  type="text" name="row[lens][od_bd_r][]" value="{$sku['option']['od_bd_r']}"></td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: center">Left(OS)</td>
+                                    <td><input id="c-left_SPH" class="form-control"  type="text" name="row[lens][os_sph][]" value="{$sku['option']['os_sph']}"></td>
+                                    <td><input id="c-left_CYL" class="form-control"  type="text" name="row[lens][os_cyl][]" value="{$sku['option']['os_cyl']}"></td>
+                                    <td><input id="c-purchase_remark" class="form-control"  type="text" name="row[lens][os_axis][]" value="{$sku['option']['os_axis']}"></td>
+                                    <td><input id="c-purchase_remark" class="form-control"  type="text" name="row[lens][os_add][]" value="{$sku['option']['os_add']}"></td>
+                                    <td><input id="c-purchase_remark" class="form-control"  type="text" name="row[lens][pd_l][]" value="{$sku['option']['pd_l']}"></td>
+                                    <td><input id="c-purchase_remark" class="form-control"  type="text" name="row[lens][os_pv][]" value="{$sku['option']['os_pv']}"></td>
+                                    <td><input id="c-purchase_remark" class="form-control"  type="text" name="row[lens][os_bd][]" value="{$sku['option']['os_bd']}"></td>
+                                    <td><input id="c-purchase_remark" class="form-control"  type="text" name="row[lens][os_pv_r][]" value="{$sku['option']['os_pv_r']}"></td>
+                                    <td><input id="c-purchase_remark" class="form-control"  type="text" name="row[lens][os_bd_r][]" value="{$sku['option']['os_bd_r']}"></td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <a href="javascript:;" class="btn btn-danger btn-del-lens" title="删除"><i class="fa fa-trash"></i>删除</a>
+                </div>
+            </div>
+            {/foreach}
+            {/if}
+            {/present}
+</form>

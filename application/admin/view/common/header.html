@@ -20,13 +20,20 @@
         <ul class="nav nav-tabs nav-addtabs disable-top-badge hidden-xs" role="tablist">
             {$navlist}
         </ul>
-
         <div class="navbar-custom-menu">
             <ul class="nav navbar-nav">
+                <li class="hidden-xs" data-toggle="tooltip" data-placement="right" title="{:$config.fastadmin.multiplenav?'切换为一级菜单模式':'切换为二级菜单模式'}">
+                    <a href="{:url('index')}?act=switch-multiplenav-{:$config.fastadmin.multiplenav?'off':'on'}"
+                        style="padding-top:14px;padding-bottom:14px;">
+                        <i class="fa fa-toggle-{:$config.fastadmin.multiplenav?'on':'off'}" style="font-size:20px;"></i>
+                    </a>
+                </li>
 
                 <li>
                     <a href="__PUBLIC__" target="_blank"><i class="fa fa-home" style="font-size:14px;"></i></a>
                 </li>
+
+
 
                 <!-- 账号信息下拉框 -->
                 <li class="hidden-xs">
@@ -52,7 +59,8 @@
                 <!-- 多语言列表 -->
                 {if $Think.config.lang_switch_on}
                 <li class="hidden-xs">
-                    <a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-language"></i></a>
+                    <a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown"><i
+                            class="fa fa-language"></i></a>
                     <ul class="dropdown-menu">
                         <li class="{$config['language']=='zh-cn'?'active':''}">
                             <a href="?ref=addtabs&lang=zh-cn">简体中文</a>
@@ -125,10 +133,16 @@
     <div id="secondnav">
         <ul class="nav nav-tabs nav-addtabs disable-top-badge" role="tablist">
             {if $fixedmenu}
-            <li role="presentation" id="tab_{$fixedmenu.id}" class="{:$referermenu?'':'active'}"><a href="#con_{$fixedmenu.id}" node-id="{$fixedmenu.id}" aria-controls="{$fixedmenu.id}" role="tab" data-toggle="tab"><i class="fa fa-dashboard fa-fw"></i> <span>{$fixedmenu.title}</span> <span class="pull-right-container"> </span></a></li>
+            <li role="presentation" id="tab_{$fixedmenu.id}" class="{:$referermenu?'':'active'}"><a
+                    href="#con_{$fixedmenu.id}" node-id="{$fixedmenu.id}" aria-controls="{$fixedmenu.id}" role="tab"
+                    data-toggle="tab"><i class="fa fa-dashboard fa-fw"></i> <span>{$fixedmenu.title}</span> <span
+                        class="pull-right-container"> </span></a></li>
             {/if}
             {if $referermenu}
-            <li role="presentation" id="tab_{$referermenu.id}" class="active"><a href="#con_{$referermenu.id}" node-id="{$referermenu.id}" aria-controls="{$referermenu.id}" role="tab" data-toggle="tab"><i class="fa fa-list fa-fw"></i> <span>{$referermenu.title}</span> <span class="pull-right-container"> </span></a> <i class="close-tab fa fa-remove"></i></li>
+            <li role="presentation" id="tab_{$referermenu.id}" class="active"><a href="#con_{$referermenu.id}"
+                    node-id="{$referermenu.id}" aria-controls="{$referermenu.id}" role="tab" data-toggle="tab"><i
+                        class="fa fa-list fa-fw"></i> <span>{$referermenu.title}</span> <span
+                        class="pull-right-container"> </span></a> <i class="close-tab fa fa-remove"></i></li>
             {/if}
         </ul>
     </div>

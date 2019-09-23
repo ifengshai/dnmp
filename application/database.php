@@ -53,4 +53,84 @@ return [
     'datetime_format' => false,
     // 是否需要进行SQL性能分析
     'sql_explain'     => false,
+    'db_zeelool' => [
+        // 数据库类型
+        'type'        => Env::get('db_zeelool.type'),
+        // 服务器地址
+        'hostname'    => Env::get('db_zeelool.hostname'),
+        // 数据库名
+        'database'    => Env::get('db_zeelool.database'),
+        // 数据库用户名
+        'username'    => Env::get('db_zeelool.username'),
+        // 密码
+        'password'    => Env::get('db_zeelool.password'),
+        // 数据库编码默认采用utf8
+        'charset'     => Env::get('db_zeelool.charset'),
+        'prefix'      => Env::get('db_zeelool.prefix'),
+    ],
+
+    'db_voogueme' => [
+        // 数据库类型
+        'type'        => Env::get('db_voogueme.type'),
+        // 服务器地址
+        'hostname'    => Env::get('db_voogueme.hostname'),
+        // 数据库名
+        'database'    => Env::get('db_voogueme.database'),
+        // 数据库用户名
+        'username'    => Env::get('db_voogueme.username'),
+        // 密码
+        'password'    => Env::get('db_voogueme.password'),
+        // 数据库编码默认采用utf8
+        'charset'     => Env::get('db_voogueme.charset'),
+        'prefix'      => Env::get('db_voogueme.prefix'),
+    ],
+
+    'db_zeelool_online' => [
+        // 数据库类型
+        'type'        => Env::get('db_zeelool_online.type'),
+        // 服务器地址
+        'hostname'    => Env::get('db_zeelool_online.hostname'),
+        // 数据库名
+        'database'    => Env::get('db_zeelool_online.database'),
+        // 数据库用户名
+        'username'    => Env::get('db_zeelool_online.username'),
+        // 密码
+        'password'    => Env::get('db_zeelool_online.password'),
+        // 数据库编码默认采用utf8
+        'charset'     => Env::get('db_zeelool_online.charset'),
+        'prefix'      => Env::get('db_zeelool_online.prefix'),
+    ],
+
+    'db_voogueme_online' => [
+        // 数据库类型
+        'type'        => Env::get('db_voogueme_online.type'),
+        // 服务器地址
+        'hostname'    => Env::get('db_voogueme_online.hostname'),
+        // 数据库名
+        'database'    => Env::get('db_voogueme_online.database'),
+        // 数据库用户名
+        'username'    => Env::get('db_voogueme_online.username'),
+        // 密码
+        'password'    => Env::get('db_voogueme_online.password'),
+        // 数据库编码默认采用utf8
+        'charset'     => Env::get('db_voogueme_online.charset'),
+        'prefix'      => Env::get('db_voogueme_online.prefix'),
+    ],
+
+    'db_nihao_online' => [
+        // 数据库类型
+        'type'        => Env::get('db_nihao_online.type'),
+        // 服务器地址
+        'hostname'    => Env::get('db_nihao_online.hostname'),
+        // 数据库名
+        'database'    => Env::get('db_nihao_online.database'),
+        // 数据库用户名
+        'username'    => Env::get('db_nihao_online.username'),
+        // 密码
+        'password'    => Env::get('db_nihao_online.password'),
+        // 数据库编码默认采用utf8
+        'charset'     => Env::get('db_nihao_online.charset'),
+        'prefix'      => Env::get('db_nihao_online.prefix'),
+    ],
+
 ];

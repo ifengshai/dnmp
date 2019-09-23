@@ -1,0 +1,261 @@
+<style>
+    .caigou {
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+        padding: 10px;
+        width: 100%;
+        margin-bottom: 30px;
+    }
+
+    .caigou #caigou-table {
+        width: 90%;
+        height: 130px;
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+        text-align: center;
+    }
+
+    .caigou #caigou-table tr {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+        line-height: 50px;
+    }
+
+    .caigou #caigou-table tr th {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+        text-align: center;
+        font-size: 14px;
+    }
+
+    .caigou #caigou-table tr td {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+    }
+
+    .caigou #caigou-table tr td input {
+
+        width: 150px;
+    }
+
+    #supplier-lab {
+        width: 50%;
+        float: left;
+        border-right: 1px solid rgba(188, 188, 188, 1);
+        margin-top: 20px;
+    }
+
+    #return-lab {
+        width: 48%;
+        float: right;
+        margin-top: 20px;
+    }
+
+
+
+    .nav-tabs>li {
+        float: left;
+        margin-bottom: -1px;
+    }
+
+    .nav>li {
+        position: relative;
+        display: block;
+    }
+
+    .nav-tabs>li>a {
+        margin-right: 4px;
+        color: #95a5a6;
+        background-color: #d8e0e6;
+        border: 1px solid #e8edf0;
+        border-bottom-color: transparent;
+    }
+
+    .nav-tabs>li>a {
+        margin-right: 2px;
+        line-height: 1.42857143;
+        border: 1px solid transparent;
+        border-radius: 3px 3px 0 0;
+    }
+
+    .nav>li>a {
+        position: relative;
+        display: block;
+        padding: 10px 15px;
+    }
+
+    .panel-heading {
+        padding: 15px;
+        padding-bottom: 0;
+        background: #e8edf0;
+        border-color: #e8edf0;
+        position: relative;
+    }
+
+    .panel-heading .nav-tabs>li>a {
+        margin-right: 4px;
+        color: #95a5a6;
+        border: 1px solid #e8edf0;
+        border-bottom-color: transparent;
+    }
+</style>
+
+<div class="panel-heading">
+    {:build_heading()}
+    <ul class="nav nav-tabs" style="margin-bottom: 20px;">
+        <li><a href="{:url('detail')}?id={$id}">采购单信息</a></li>
+        <li class="active"><a href="{:url('checkDetail')}?id={$id}">质检信息</a></li>
+        <li><a href="{:url('logisticsDetail')}?id={$id}">物流信息</a></li>
+        <li><a href="#">付款信息</a></li>
+    </ul>
+</div>
+
+<form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
+
+    <div class='caigou'>
+        <p style="font-size: 16px;text-align: center;"><b>质检信息</b></p>
+        <div style="margin-bottom: 20px;">
+            <div id="toolbar" class="toolbar">
+                <a href="javascript:;" class="btn btn-success btn-add" data-id="{$id}" title="确认差异">确认差异</a>
+            </div>
+            {foreach $list as $k => $v}
+            <p style="font-size: 14px;margin-top: 20px;"><span>质检单号：</span><span>{$v.check_order_number}</span><span
+                    style="margin-left: 20px;">质检时间：</span><span>{$v.createtime}</span><span
+                    style="margin-left: 20px;">质检人：</span><span>{$v.create_person}</span></p>
+            <table id="caigou-table">
+                <tr>
+                    <th>序号</th>
+                    <th>SKU</th>
+                    <th>产品名称</th>
+                    <th>供应商sku</th>
+                    <th>采购数量（个）</th>
+                    <th>到货数量（个）</th>
+                    <th>质检合格数量（个）</th>
+                    <th>留样数量（个）</th>
+                    <th>质检合格率</th>
+                </tr>
+                {foreach $v['check_item'] as $key => $val}
+                <tr>
+                    <td>{$key+1}</td>
+                    <td>{$val.sku}</td>
+                    <td>{$val.product_name}</td>
+                    <td>{$val.supplier_sku}</td>
+                    <td>{$val.purchase_num}</td>
+                    <td>{$val.arrivals_num}</td>
+                    <td>{$val.quantity_num}</td>
+                    <td>{$val.sample_num}</td>
+                    <td>{$val.quantity_rate}</td>
+
+                </tr>
+                {/foreach}
+
+            </table>
+            {/foreach}
+
+
+        </div>
+    </div>
+
+
+    <div class='caigou'>
+        <p style="font-size: 16px;text-align: center;"><b>入库信息</b></p>
+        <div style="margin-bottom: 20px;">
+            {foreach $instock_list as $k => $v}
+            <p style="font-size: 14px;margin-top: 20px;"><span>入库单号：</span><span>{$v.in_stock_number}</span><span
+                    style="margin-left: 20px;">入库时间：</span><span>{$v.createtime}</span><span
+                    style="margin-left: 20px;">操作人：</span><span>{$v.create_person}</span></p>
+            <table id="caigou-table">
+                <tr>
+                    <th>序号</th>
+                    <th>SKU</th>
+                    <th>产品名称</th>
+                    <th>采购数量</th>
+                    <th>供应商sku</th>
+                    <th>入库数量</th>
+
+                </tr>
+                {foreach $v['instock_item'] as $key => $val}
+                <tr>
+                    <td>{$key+1}</td>
+                    <td>{$val.sku}</td>
+                    <td>{$item[$val['sku']]['product_name']}</td>
+                    <td>{$item[$val['sku']]['purchase_num']}</td>
+                    <td>{$item[$val['sku']]['supplier_sku']}</td>
+                    <td>{$val.in_stock_num}</td>
+                </tr>
+                {/foreach}
+
+            </table>
+            {/foreach}
+
+
+        </div>
+    </div>
+
+
+
+    <div class='caigou'>
+        <p style="font-size: 16px;text-align: center;"><b>退销信息</b></p>
+        <div style="margin-bottom: 20px;">
+            {foreach $return_list as $k => $v}
+            <p style="font-size: 14px;margin-top: 20px;"><span>退销单号：</span><span>{$v.return_number}</span><span
+                    style="margin-left: 20px;">退销时间：</span><span>{$v.createtime}</span><span
+                    style="margin-left: 20px;">质检人：</span><span>{$v.create_person}</span></p>
+            <p style="font-size: 14px;margin-top: 20px;"><span>退销类型：</span>
+                <span>
+                    {if $v['return_type'] == 1}
+                    仅退款
+                    {elseif $v['return_type'] == 2} 
+                    退货退款
+                    {else/}
+                    调换货
+                    {/if}
+                </span>
+                <span style="margin-left: 20px;">退回物流单号：</span><span>{$v.logistics_number}</span></p>
+            <table id="caigou-table">
+                <tr>
+                    <th>序号</th>
+                    <th>SKU</th>
+                    <th>产品名称</th>
+                    <th>供应商sku</th>
+                    <th>采购数量（个）</th>
+                    <th>退销数量</th>
+                </tr>
+                {foreach $v['purchase_return_item'] as $key => $val}
+                <tr>
+                    <td>{$key+1}</td>
+                    <td>{$val.sku}</td>
+                    <td>{$item[$val['sku']]['product_name']}</td>
+                    <td>{$item[$val['sku']]['supplier_sku']}</td>
+                    <td>{$item[$val['sku']]['purchase_num']}</td>    
+                    <td>{$val.return_num}</td>
+
+                </tr>
+                {/foreach}
+
+            </table>
+            {/foreach}
+
+
+        </div>
+    </div>
+
+
+
+
+
+
+</form>

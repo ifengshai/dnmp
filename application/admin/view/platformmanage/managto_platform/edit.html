@@ -1,0 +1,79 @@
+<form id="edit-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
+
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Status')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <!--<input id="c-status" data-rule="required" class="form-control" name="row[status]" type="number" value="{$row.status|htmlentities}">-->
+            <select  id="c-status" data-rule="required" class="form-control selectpicker" name="row[status]">
+                {foreach name="platformStatus" item="vo"}
+                <option value="{$key}" {in name="key" value="$row.status"}selected{/in}>{$vo}</option>
+                {/foreach}
+            </select>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Name')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-name" data-rule="required" class="form-control" name="row[name]" type="text" value="{$row.name|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Item_attr_name')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-item_attr_name"  class="form-control" name="row[item_attr_name]" type="text" value="{$row.item_attr_name|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Item_type')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-item_type"  class="form-control" name="row[item_type]" type="text" value="{$row.item_type|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Managto_account')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-managto_account" class="form-control" name="row[managto_account]" type="text" value="{$row.managto_account}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Managto_key')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-managto_key"  class="form-control" name="row[managto_key]" type="text" value="{$row.managto_key}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Managto_url')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-managto_url"  class="form-control" name="row[managto_url]" type="text" value="{$row.managto_url}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Upload_field')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <textarea id="c-upload_field" rows="5"  class="form-control" name="row[upload_field]" type="text" value="">{$row.upload_field}</textarea>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Is_upload_item')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <select  id="c-is_upload_item" data-rule="required" class="form-control selectpicker" name="row[is_upload_item]">
+                {foreach name="platformIsUpload" item="vo"}
+                <option value="{$key}" {eq name="key" value="$row.is_upload_item"}selected{/eq}>{$vo}</option>
+                {/foreach}
+            </select>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Create_time')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-create_time" class="form-control datetimepicker" data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[create_time]" type="text" value="{$row.create_time}">
+        </div>
+    </div>
+    <div class="form-group layer-footer">
+        <label class="control-label col-xs-12 col-sm-2"></label>
+        <div class="col-xs-12 col-sm-8">
+            <button type="submit" class="btn btn-success btn-embossed disabled">{:__('OK')}</button>
+            <button type="reset" class="btn btn-default btn-embossed">{:__('Reset')}</button>
+        </div>
+    </div>
+</form>

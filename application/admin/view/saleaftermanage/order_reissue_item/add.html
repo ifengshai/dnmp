@@ -1,0 +1,184 @@
+<form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
+
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Reissue_order_id')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-reissue_order_id" data-rule="required" data-source="reissue/order/index" class="form-control selectpage" name="row[reissue_order_id]" type="text" value="">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Sku')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-sku" class="form-control" name="row[sku]" type="text">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Qty_ordered')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-qty_ordered" class="form-control" name="row[qty_ordered]" type="number">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Reissue_type')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-reissue_type" class="form-control" name="row[reissue_type]" type="text">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Index_type')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-index_type" class="form-control" name="row[index_type]" type="text">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Prescription_type')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-prescription_type" class="form-control" name="row[prescription_type]" type="text">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Coatiing_name')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-coatiing_name" class="form-control" name="row[coatiing_name]" type="text">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Od_sph')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-od_sph" data-rule="required" class="form-control" name="row[od_sph]" type="text" value="右眼近视">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Os_sph')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-os_sph" data-rule="required" class="form-control" name="row[os_sph]" type="text" value="左眼近视">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Od_cyl')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-od_cyl" data-rule="required" class="form-control" name="row[od_cyl]" type="text" value="右眼散光">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Os_cyl')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-os_cyl" data-rule="required" class="form-control" name="row[os_cyl]" type="text" value="左眼散光">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Od_axis')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-od_axis" data-rule="required" class="form-control" name="row[od_axis]" type="text" value="右眼散光度数">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Os_axis')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-os_axis" data-rule="required" class="form-control" name="row[os_axis]" type="text" value="左眼散光度数">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Pd_l')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-pd_l" data-rule="required" class="form-control" name="row[pd_l]" type="text" value="左眼瞳距">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Pd_r')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-pd_r" data-rule="required" class="form-control" name="row[pd_r]" type="text" value="右眼瞳距">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Pd')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-pd" data-rule="required" class="form-control" name="row[pd]" type="text" value="瞳距">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Os_add')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-os_add" data-rule="required" class="form-control" name="row[os_add]" type="text" value="左眼下加光">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Od_add')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-od_add" data-rule="required" class="form-control" name="row[od_add]" type="text" value="右眼下加光">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Total_add')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-total_add" data-rule="required" class="form-control" name="row[total_add]" type="text" value="总共下加光">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Is_visable')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-is_visable" data-rule="required" class="form-control" name="row[is_visable]" type="number" value="1">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Created_time')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-created_time" class="form-control datetimepicker" data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[created_time]" type="text" value="{:date('Y-m-d H:i:s')}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Od_pv')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-od_pv" data-rule="required" class="form-control" name="row[od_pv]" type="text" value="">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Od_bd')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-od_bd" data-rule="required" class="form-control" name="row[od_bd]" type="text" value="">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Od_pv_r')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-od_pv_r" data-rule="required" class="form-control" name="row[od_pv_r]" type="text" value="">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Od_bd_r')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-od_bd_r" data-rule="required" class="form-control" name="row[od_bd_r]" type="text" value="">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Os_pv')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-os_pv" data-rule="required" class="form-control" name="row[os_pv]" type="text" value="">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Os_bd')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-os_bd" data-rule="required" class="form-control" name="row[os_bd]" type="text" value="">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Os_pv_r')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-os_pv_r" data-rule="required" class="form-control" name="row[os_pv_r]" type="text" value="">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Os_bd_r')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-os_bd_r" data-rule="required" class="form-control" name="row[os_bd_r]" type="text" value="">
+        </div>
+    </div>
+    <div class="form-group layer-footer">
+        <label class="control-label col-xs-12 col-sm-2"></label>
+        <div class="col-xs-12 col-sm-8">
+            <button type="submit" class="btn btn-success btn-embossed disabled">{:__('OK')}</button>
+            <button type="reset" class="btn btn-default btn-embossed">{:__('Reset')}</button>
+        </div>
+    </div>
+</form>

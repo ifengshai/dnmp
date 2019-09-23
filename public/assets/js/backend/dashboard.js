@@ -20,8 +20,8 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'echarts', 'echart
                 toolbox: {
                     show: false,
                     feature: {
-                        magicType: {show: true, type: ['stack', 'tiled']},
-                        saveAsImage: {show: true}
+                        magicType: { show: true, type: ['stack', 'tiled'] },
+                        saveAsImage: { show: true }
                     }
                 },
                 xAxis: {
@@ -50,20 +50,20 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'echarts', 'echart
                     },
                     data: Orderdata.paydata
                 },
-                    {
-                        name: __('Orders'),
-                        type: 'line',
-                        smooth: true,
-                        areaStyle: {
-                            normal: {}
-                        },
-                        lineStyle: {
-                            normal: {
-                                width: 1.5
-                            }
-                        },
-                        data: Orderdata.createdata
-                    }]
+                {
+                    name: __('Orders'),
+                    type: 'line',
+                    smooth: true,
+                    areaStyle: {
+                        normal: {}
+                    },
+                    lineStyle: {
+                        normal: {
+                            width: 1.5
+                        }
+                    },
+                    data: Orderdata.createdata
+                }]
             };
 
             // 使用刚指定的配置项和数据显示图表。
@@ -91,10 +91,10 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'echarts', 'echart
                         name: __('Sales'),
                         data: Orderdata.paydata
                     },
-                        {
-                            name: __('Orders'),
-                            data: Orderdata.createdata
-                        }]
+                    {
+                        name: __('Orders'),
+                        data: Orderdata.createdata
+                    }]
                 });
                 if ($("#echart").width() != $("#echart canvas").width() && $("#echart canvas").width() < $("#echart").width()) {
                     myChart.resize();

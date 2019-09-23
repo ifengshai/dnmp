@@ -103,6 +103,9 @@ define(['jquery', 'bootstrap', 'moment', 'moment/locale/zh-cn', 'bootstrap-table
                         return __('Choose');
                     }
                 }, locales);
+                if (typeof defaults.exportTypes != 'undefined') {
+                    $.fn.bootstrapTable.defaults.exportTypes = defaults.exportTypes;
+                }
             },
             // 绑定事件
             bindevent: function (table) {
@@ -171,7 +174,7 @@ define(['jquery', 'bootstrap', 'moment', 'moment/locale/zh-cn', 'bootstrap-table
                     var field = $(this).closest("ul").data("field");
                     var value = $(this).data("value");
                     $("select[name='" + field + "'] option[value='" + value + "']", table.closest(".bootstrap-table").find(".commonsearch-table")).prop("selected", true);
-                    table.bootstrapTable('refresh', {pageNumber:1});
+                    table.bootstrapTable('refresh', {pageNumber: 1});
                     return false;
                 });
                 // 刷新按钮事件
@@ -454,7 +457,7 @@ define(['jquery', 'bootstrap', 'moment', 'moment/locale/zh-cn', 'bootstrap-table
                     return Table.api.formatter.normal.call(this, value, row, index);
                 },
                 normal: function (value, row, index) {
-                    var colorArr = ["primary", "success", "danger", "warning", "info", "gray", "red", "yellow", "aqua", "blue", "navy", "teal", "olive", "lime", "fuchsia", "purple", "maroon"];
+                    var colorArr = ["success", "danger", "primary","warning", "info", "gray", "red", "yellow", "aqua", "blue", "navy", "teal", "olive", "lime", "fuchsia", "purple", "maroon"];
                     var custom = {};
                     if (typeof this.custom !== 'undefined') {
                         custom = $.extend(custom, this.custom);
@@ -482,7 +485,11 @@ define(['jquery', 'bootstrap', 'moment', 'moment/locale/zh-cn', 'bootstrap-table
                     var yes = typeof this.yes !== 'undefined' ? this.yes : 1;
                     var no = typeof this.no !== 'undefined' ? this.no : 0;
                     var url = typeof this.url !== 'undefined' ? this.url : '';
-                    return "<a href='javascript:;' data-toggle='tooltip' title='" + __('Click to toggle') + "' class='btn-change' data-id='"
+                    var disable = false;
+                    if (typeof this.disable !== "undefined") {
+                        disable = typeof this.disable === "function" ? this.disable.call(this, value, row, index) : this.disable;
+                    }
+                    return "<a href='javascript:;' data-toggle='tooltip' title='" + __('Click to toggle') + "' class='btn-change " + (disable ? 'btn disabled' : '') + "' data-id='"
                         + row.id + "' " + (url ? "data-url='" + url + "'" : "") + " data-params='" + this.field + "=" + (value == yes ? no : yes) + "'><i class='fa fa-toggle-on " + (value == yes ? 'text-' + color : 'fa-flip-horizontal text-gray') + " fa-2x'></i></a>";
                 },
                 url: function (value, row, index) {
@@ -635,7 +642,8 @@ define(['jquery', 'bootstrap', 'moment', 'moment/locale/zh-cn', 'bootstrap-table
                         text = typeof j.text === 'function' ? j.text.call(table, row, j) : j.text ? j.text : '';
                         title = typeof j.title === 'function' ? j.title.call(table, row, j) : j.title ? j.title : text;
                         refresh = j.refresh ? 'data-refresh="' + j.refresh + '"' : '';
-                        confirm = j.confirm ? 'data-confirm="' + j.confirm + '"' : '';
+                        confirm = typeof j.confirm === 'function' ? j.confirm.call(table, row, j) : (typeof j.confirm !== 'undefined' ? j.confirm : false);
+                        confirm = confirm ? 'data-confirm="' + confirm + '"' : '';
                         extend = j.extend ? j.extend : '';
                         disable = typeof j.disable === 'function' ? j.disable.call(table, row, j) : (typeof j.disable !== 'undefined' ? j.disable : false);
                         if (disable) {

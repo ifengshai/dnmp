@@ -1,0 +1,117 @@
+<form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
+
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Order_platform')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <select  id="c-order_platform" data-rule="required" class="form-control selectpicker" name="row[order_platform]">
+                {foreach name="orderPlatformList" item="vo"}
+                <option value="{$key}" {in name="key" value="0"}selected{/in}>{$vo}</option>
+                {/foreach}
+            </select>
+        </div>
+        <label class="control-label col-xs-12 col-sm-2">{:__('Order_number')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-order_number" data-rule="required" class="form-control" name="row[order_number]" type="text" value="">
+        </div>
+
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Order_status')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-order_status" data-rule="required" class="form-control" name="row[order_status]" readonly="readonly" type="text" value="" >
+        </div>
+        <label class="control-label col-xs-12 col-sm-2">{:__('Prty_id')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <div class="radio">
+                <select  id="c-prty_id" data-rule="required" class="form-control selectpicker" name="row[prty_id]">
+                    {foreach name="prtyIdList" item="vo"}
+                    <option value="{$key}" {in name="key" value="0"}selected{/in}>{$vo}</option>
+                    {/foreach}
+                </select>
+            </div>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Dept_id')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <!--<input id="c-dept_id" data-rule="required" data-source="dept/index" class="form-control" name="row[dept_id]" type="text" value="">-->
+            {:build_select('row[dept_id]', $groupdata, null, ['class'=>'form-control selectpicker', 'data-rule'=>'required','data-live-search' => true])}
+        </div>
+        <label class="control-label col-xs-12 col-sm-2">{:__('Rep_id')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            {:build_select('row[rep_id]', $staffList, null, ['class'=>'form-control selectpicker', 'data-rule'=>'required','data-live-search' => true])}
+            <!--<input id="c-rep_id" data-rule="required" data-source="rep/index" class="form-control" name="row[rep_id]" type="text" value="">-->
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="form-group">
+            <label class="control-label col-xs-12 col-sm-2">问题分类:</label>
+        </div>
+        {foreach name="issueList" item="vo"}
+        <div class="form-group">
+            <label class="control-label col-xs-12 col-sm-2">{$vo.name}</label>
+            {if $vo.junior}
+            <div class="radio">
+                {foreach name="$vo.junior" item="issue"}
+                {if $issue.junior}
+                <label for="row[problem_id]-{$issue.id}"><input id="row[problem_id]-{$issue.id}" name="row[problem_id]" type="radio" value="{$issue.id}" {in name="key" value="$vo.junior"}checked{/in} /> <span style="color:green;" id="{$issue.id}" class="issueLevel">{$issue.name}<span></span></label>
+                {else/}
+                <label for="row[problem_id]-{$issue.id}"><input id="row[problem_id]-{$issue.id}" name="row[problem_id]" type="radio" value="{$issue.id}" {in name="key" value="$vo.junior"}checked{/in} /> {$issue.name}</label>
+                {/if}
+                {if $issue.junior}
+                <div class="radio" style="margin-left:20%;display:none;" id="display-{$issue.id}" >
+                    {foreach name="$issue.junior" item="finalIssue"}
+                    <label for="row[problem_id]-{$finalIssue.id}"><input id="row[problem_id]-{$finalIssue.id}" name="row[problem_id]" type="radio" value="{$finalIssue.id}" {in name="key" value="$issue.junior"}checked{/in} /> {$finalIssue.name}</label>
+                    {/foreach}
+                </div>
+                {/if}
+                {/foreach}
+            </div>
+            {/if}
+        </div>
+        {/foreach}
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Problem_desc')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <textarea id="c-problem_desc" class="form-control editor" rows="5" name="row[problem_desc]" cols="50"></textarea>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Upload_photos')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <div class="input-group">
+                <input id="c-upload_photos" data-rule="required" class="form-control" size="50" name="row[upload_photos]" type="text" value="">
+                <div class="input-group-addon no-border no-padding">
+                    <span><button type="button" id="plupload-upload_photos"   class="btn btn-danger plupload" data-input-id="c-upload_photos" data-mimetype="image/gif,image/jpeg,image/png,image/jpg,image/bmp" data-url="ajax/upload?dir=saleAfterManage/saleAfterTask" data-multiple="true" data-preview-id="p-upload_photos" data-maxsize="2M"><i class="fa fa-upload"></i> 上传</button></span>
+                </div>
+                <span class="msg-box n-right" for="c-upload_photos"></span>
+            </div>
+            <ul class="row list-inline plupload-preview" id="p-upload_photos"></ul>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Item_info')}:</label>
+        <div class="col-xs-12 col-sm-10">
+            <hr/>
+        </div>
+    </div>
+    <div class="form-group" id="customer_info">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Customer_name')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input  id="c-customer_name" data-rule="required" class="form-control" name="row[customer_name]" readonly="readonly" type="text" value="">
+        </div>
+        <label class="control-label col-xs-12 col-sm-2">{:__('Customer_email')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-customer_email" data-rule="required" class="form-control" name="row[customer_email]" readonly="readonly" type="text" value="">
+            <input id="c-order_source" data-rule="required"   class = "form-control" name="row[order_source]" type="hidden" value="">
+        </div>
+    </div>
+    <div  class="form-group layer-footer" style="clear:both;">
+        <label class="control-label col-xs-12 col-sm-2"></label>
+        <div class="col-xs-12 col-sm-8">
+            <button type="submit" class="btn btn-success btn-embossed disabled">{:__('OK')}</button>
+            <button type="reset" class="btn btn-default btn-embossed">{:__('Reset')}</button>
+        </div>
+    </div>
+</form>
