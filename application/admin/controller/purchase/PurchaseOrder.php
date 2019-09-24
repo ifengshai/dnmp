@@ -684,36 +684,42 @@ class PurchaseOrder extends Backend
         // waitselleract 等待卖家操作	 
         // waitbuyerconfirmaction 等待买家确认操作	 
         // waitsellerpush 等待卖家推进
-        
+
         /**
          * @todo 后面添加采集时间段
          */
-        // $params = [
-        //     'createStartTime' => date('YmdHis', time() - 7200) . '000+0800',
-        //     'createEndTime' => date('YmdHis') . '000+0800',
-        // ];
+        $params = [
+            'createStartTime' => date('YmdHis', strtotime("-30 day")) . '000+0800',
+            'createEndTime' => date('YmdHis') . '000+0800',
+        ];
+        //根据不同的状态取订单数据
+        $success_data = Alibaba::getOrderList(1, $params);
+
         set_time_limit(0);
-        $data = cache('Crontab_getAlibabaPurchaseOrder_' . date('Ymd'));
+        $data = cache('Crontab_getAlibabaPurchaseOrder_' . date('YmdH'));
         if (!$data) {
             //根据不同的状态取订单数据
-            $success_data = Alibaba::getOrderList(1);
+            $success_data = Alibaba::getOrderList(1, $params);
             //转为数组
             if ($success_data) {
                 $success_data = collection($success_data)->toArray();
             }
-            
+
             $data = [];
             for ($i = 1; $i <= round($success_data['totalRecord'] / 50); $i++) {
 
                 //根据不同的状态取订单数据
-                $data[$i] = Alibaba::getOrderList($i)->result;
+                $data[$i] = Alibaba::getOrderList($i, $params)->result;
             }
 
             //设置缓存
-            cache('Crontab_getAlibabaPurchaseOrder_' . date('Ymd'), $data, 86400);
+            cache('Crontab_getAlibabaPurchaseOrder_' . date('YmdH'), $data, 3600);
         }
 
         foreach ($data as $key => $val) {
+            if (!$val) {
+                continue;
+            }
             foreach ($val as $k => $v) {
                 $list = [];
                 $map['purchase_number'] = $v->baseInfo->idOfStr;
@@ -809,5 +815,105 @@ class PurchaseOrder extends Backend
             }
         }
         echo 'ok';
+    }
+
+    protected function addPurchaseOrder($data)
+    {
+        if ($data) {
+            foreach ($data as $key => $v) {
+                $list = [];
+                $map['purchase_number'] = $v->baseInfo->idOfStr;
+                $map['is_del'] = 1;
+                //根据采购单号查询采购单是否已存在
+                $res = $this->model->where($map)->find();
+                //如果采购单已存在 则更新采购单状态
+                if ($res) {
+                    //待发货
+                    if (in_array($v->baseInfo->status, ['waitsellersend', 'waitsellerconfirm', 'waitbuyerconfirm', 'waitselleract', 'waitsellerpush', 'waitbuyerconfirmaction'])) {
+                        $list['purchase_status'] = 5;
+                    } elseif (in_array($v->baseInfo->status, ['waitbuyerreceive', 'send_goods_but_not_fund', 'waitlogisticstakein', 'waitbuyersign', 'signinfailed'])) {
+                        $list['purchase_status'] = 6; //待收货
+                    } else {
+                        $list['purchase_status'] = 7; //已收货
+                        $jsonDate = $v->baseInfo->createTime;
+                        preg_match('/\d{14}/', $jsonDate, $matches);
+                        $list['receiving_time'] = date('Y-m-d H:i:s', strtotime($matches[0]));
+                    }
+                    $list['online_status'] = $v->baseInfo->status;
+                    //更新采购单状态
+                    $result = $res->save($list);
+                } else {
+                    //过滤待付款 和取消状态的订单
+                    if (in_array($v->baseInfo->status, ['waitbuyerpay', 'cancel'])) {
+                        continue;
+                    }
+
+                    $list['purchase_number'] = $v->baseInfo->idOfStr;
+                    $list['create_person'] = $v->baseInfo->buyerContact->name;
+                    $jsonDate = $v->baseInfo->createTime;
+                    preg_match('/\d{14}/', $jsonDate, $matches);
+                    $list['createtime'] = date('Y-m-d H:i:s', strtotime($matches[0]));
+
+                    $list['product_total'] = ($v->baseInfo->totalAmount) * 1 - ($v->baseInfo->shippingFee) * 1;
+                    $list['purchase_freight'] = $v->baseInfo->shippingFee;
+                    $list['purchase_total'] = $v->baseInfo->totalAmount;
+                    $list['payment_money'] = $v->baseInfo->totalAmount;
+                    $list['payment_status'] = 3;
+                    $payTime = @$v->baseInfo->payTime;
+                    if ($payTime) {
+                        $matches = [];
+                        preg_match('/\d{14}/', $payTime, $matches);
+                        $list['payment_time'] = date('Y-m-d H:i:s', strtotime($matches[0]));
+                    }
+
+                    $allDeliveredTime = @$v->baseInfo->allDeliveredTime;
+                    if ($allDeliveredTime) {
+                        $matches = [];
+                        preg_match('/\d{14}/', $allDeliveredTime, $matches);
+                        $list['delivery_stime'] = date('Y-m-d H:i:s', strtotime($matches[0]));
+                        $list['delivery_etime'] = date('Y-m-d H:i:s', strtotime($matches[0]));
+                    }
+
+                    //待发货
+                    if (in_array($v->baseInfo->status, ['waitsellersend', 'waitsellerconfirm', 'waitbuyerconfirm', 'waitselleract', 'waitsellerpush', 'waitbuyerconfirmaction'])) {
+                        $list['purchase_status'] = 5;
+                    } elseif (in_array($v->baseInfo->status, ['waitbuyerreceive', 'send_goods_but_not_fund', 'waitlogisticstakein', 'waitbuyersign', 'signinfailed'])) {
+                        $list['purchase_status'] = 6; //待收货
+                    } else {
+                        $list['purchase_status'] = 7; //已收货
+                    }
+
+                    $list['delivery_address'] = $v->baseInfo->receiverInfo->toArea;
+                    $list['online_status'] = $v->baseInfo->status;
+                    $receivingTime = @$v->baseInfo->receivingTime;
+                    if ($receivingTime) {
+                        $matches = [];
+                        preg_match('/\d{14}/', $receivingTime, $matches);
+                        $list['receiving_time'] = date('Y-m-d H:i:s', strtotime($matches[0]));
+                    }
+                    $list['purchase_type'] = 2;
+                    //添加采购单
+                    $result = $this->model->allowField(true)->create($list);
+
+                    $params = [];
+                    foreach ($v->productItems as  $key => $val) {
+                        //添加商品数据
+                        $params[$key]['purchase_id'] = $result->id;
+                        $params[$key]['purchase_order_number'] = $v->baseInfo->idOfStr;
+                        $params[$key]['product_name'] = $val->name;
+                        $params[$key]['supplier_sku'] = @$val->cargoNumber;
+                        $params[$key]['purchase_num'] = $val->quantity;
+                        $params[$key]['purchase_price'] = $val->price;
+                        $params[$key]['purchase_total'] = $val->itemAmount;
+                        $params[$key]['skuid'] = $val->skuID;
+
+                        //匹配SKU
+                        $params[$key]['sku'] = (new SupplierSku())->getSkuData($val->skuID);
+                    }
+                    $this->purchase_order_item->allowField(true)->saveAll($params);
+                }
+            }
+        }
+        return 'ok';
     }
 }
