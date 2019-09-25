@@ -198,7 +198,7 @@ class SaleAfterTask extends Model
             return false;
         }
         //$result['problem_desc'] = strip_tags($result['problem_desc']);
-        $result['task_remark'] = (new SaleAfterTaskRemark())->getRelevanceRecord($id);
+        $result['task_remark'] = (new saleAfterTaskRemark())->getRelevanceRecord($id);
         //$result['orderInfo'] = $this->getOrderInfo($result['order_platform'],$result['order_number']);
         return $result ? $result : false;
     }
