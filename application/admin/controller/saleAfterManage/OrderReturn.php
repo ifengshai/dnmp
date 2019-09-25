@@ -31,7 +31,7 @@ class OrderReturn extends Backend
     public function _initialize()
     {
         parent::_initialize();
-        $this->model = new \app\admin\model\saleaftermanage\OrderReturn;
+        $this->model = new \app\admin\model\saleAfterManage\OrderReturn;
 
     }
     
