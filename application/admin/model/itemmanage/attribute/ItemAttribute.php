@@ -45,9 +45,14 @@ class ItemAttribute extends Model
 //    {
 //        return [0=>'请选择',1=>'全框',2=>'半框',3=>'无框'];
 //    }
-    public function getAllShape()
+    public function getAllShape($type = 1)
     {
-        return [0=>'请选择',1=>'Rimless',2=>'Semi Rim',3=>'two_rim',4=>'Full Rim',5=>'mark'];
+        if($type == 1){
+            return [0=>'请选择',1=>'Rimless',2=>'Semi Rim',3=>'two_rim',4=>'Full Rim',5=>'mark'];
+        }elseif($type == 2){
+            return [0=>'请选择',1=>'rimless',2=>'semi_rim',3=>'two_rim',4=>'full_rim',5=>'mark'];
+        }
+
     }
     /***
      * 获取所有材质(原先)
@@ -83,10 +88,15 @@ class ItemAttribute extends Model
      * 获取尺寸型号
      * @return array
      */
-    public function getFrameSize()
+    public function getFrameSize($type = 1)
     {
         //Z站尺寸型号
-        return [0 => '请选择', 1 => 'narrow', 2 => 'medium', 3 => 'wide'];
+        if($type == 1){
+            return [0 => '请选择', 1 => 'narrow', 2 => 'medium', 3 => 'wide'];
+        }elseif($type == 2){
+            return [0 =>'请选择',  1 => 'S',2=>'M',3=>'L',4=>'XL'];
+        }
+
         //V站尺寸型号
         //return [0=>'请选择',1=>'S',2=>'M',3=>'L'];
     }

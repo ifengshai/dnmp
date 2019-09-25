@@ -387,7 +387,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                 //模糊匹配原始sku
                 $('#c-origin_skus').autocomplete({
                     source: function (request, response) {
-                        var origin_sku = $('#origin_sku').val();
+                        var origin_sku = $('#c-origin_skus').val();
                         $.ajax({
                             type: "POST",
                             url: "itemmanage/item/ajaxGetLikeOriginSku",

@@ -421,7 +421,7 @@ class ItemPlatformSku extends Backend
             if(empty($uploadFieldsArr)){
                 $this->error(__('The upload field cannot be empty, please go to the platform to edit'));
             }
-            $itemRow = (new Item())->getItemRow($itemPlatformRow['sku']);
+            $itemRow = (new Item())->getItemRow($itemPlatformRow['sku'],$itemPlatformRow['platform_type']);
             if($itemRow['item_status']!=3){ //该商品没有审核通过
                 $this->error(__('This product has not been approved and cannot be uploaded'));
             }
@@ -452,6 +452,9 @@ class ItemPlatformSku extends Backend
                         $attributeSet['set_id']
                     )
                 );
+//                echo '<pre>';
+//                var_dump($attributeList);
+//                exit;
                 //求出需要上传的属性和它们的值
                 if(is_array($attributeList)){
                     $attributeListArr = [];
@@ -475,9 +478,9 @@ class ItemPlatformSku extends Backend
                         }
                     }
                 }
-                echo '<pre>';
-                var_dump($attributeListArr);
-                exit;
+//                echo '<pre>';
+//                var_dump($attributeListArr);
+//                exit;
                 $uploadItemArr = [];
                   //原先有多选的话
 //                foreach ($attributeListArr as $k=>$v){
@@ -499,21 +502,26 @@ class ItemPlatformSku extends Backend
 //                                $uploadItemArr[$v['code']] = $v['platformValue'];
 //                    }
 //                }
-            foreach ($attributeListArr as $k=>$v){
+            foreach ($attributeListArr as $ks=>$vs){
                 //如果是多选的话
-                if(($v['type'] == 'select') || ($v['type'] == 'multiselect')) { //如果是单选的话
-                    foreach ($v['valueOptions'] as $key => $val) {
-                        if ((strtolower($val['label'])) == strtolower($v['platformValue'])) {
-                            $uploadItemArr[$v['code']] = $val['value'];
+                if(($vs['type'] == 'select') || ($vs['type'] == 'multiselect')) { //如果是单选的话
+                    foreach ($vs['valueOptions'] as $key => $val) {
+//                        if ((strtolower($val['label'])) == strtolower($v['platformValue'])) {
+//                            $uploadItemArr[$v['code']] = $val['value'];
+//                        }
+                        //比较属性值字符串是否相等
+                        if(strcasecmp($val['label'] ,$vs['platformValue']) == 0){
+                            $uploadItemArr[$vs['code']] = $val['value'];
+                            break;
                         }
                     }
                 }else{
-                    $uploadItemArr[$v['code']] = $v['platformValue'];
+                    $uploadItemArr[$vs['code']] = $vs['platformValue'];
                 }
             }
-            echo '<pre>';
-            var_dump($uploadItemArr);
-            exit;
+//            echo '<pre>';
+//            var_dump($uploadItemArr);
+//            exit;
             //添加上传商品的信息
             $uploadItemArr['categories']            = array(2);
             $uploadItemArr['websites']              = array(1);
@@ -649,7 +657,6 @@ class ItemPlatformSku extends Backend
                 $data['uploaded_images'] = implode(',',$result);
                 $updateRow = $this->model->isUpdate(true, $where)->save($data);
                 if($updateRow){
-
                     $this->success(__('upload successful'));
                 }else{
                     $this->error(__('upload error'));
@@ -660,5 +667,10 @@ class ItemPlatformSku extends Backend
         }else{
             $this->error('404 Not found');
         }
+    }
+    public function ceshi()
+    {
+       $result =  strcasecmp('Rimless' ,'rimless');
+       var_dump($result);
     }
 }

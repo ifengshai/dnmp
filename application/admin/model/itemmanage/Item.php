@@ -107,7 +107,7 @@ class Item extends Model
     /***
      * 得到一条商品的记录(属性)
      */
-    public function getItemRow($sku)
+    public function getItemRow($sku,$type=1)
     {
         $result = Db::name('item')->alias('g')->where('sku','=',$sku)->join('item_attribute a','g.id=a.item_id')
             ->field('g.*,a.item_id,a.glasses_type,a.procurement_type,a.procurement_origin,a.frame_type,a.frame_width,a.frame_height,
@@ -120,13 +120,21 @@ class Item extends Model
         //获取所有眼镜形状
         $frameShape = (new ItemAttribute())->getAllFrameShape();
         //获得所有框型
-        $shape      = (new ItemAttribute())->getAllShape();
+        if($type != 2){
+            $shape  = (new ItemAttribute())->getAllShape();
+        }else{
+            $shape  = (new ItemAttribute())->getAllShape(2);
+        }
         //获取所有材质
         $texture    = (new ItemAttribute())->getAllTexture();
         //获取适合人群
         $frameGender   = (new ItemAttribute())->getFrameGender();
         //获取尺寸型号
+     if($type != 2){
         $frameSize     = (new ItemAttribute())->getFrameSize();
+     }else{
+        $frameSize     = (new ItemAttribute())->getFrameSize(2);
+     }
         //获取镜架所有的颜色
         $frameColor    = (new ItemAttribute())->getFrameColor();
         //获取眼镜类型
@@ -176,20 +184,37 @@ class Item extends Model
         }else{
             $result['frame_piece'] = 0;
         }
-        if($result['frame_is_advance'] == 1){ //是否渐进
-            $result['frame_is_advance'] = "yes";
+        if($type !=3){
+            if($result['frame_is_advance'] == 1){ //是否渐进
+                $result['frame_is_advance'] = "yes";
+            }else{
+                $result['frame_is_advance'] = "no";
+            }
         }else{
-            $result['frame_is_advance'] = "no";
+            if($result['frame_is_advance'] == 1){
+                $result['frame_is_advance'] = 1;
+            }else{
+                $result['frame_is_advance'] = 0;
+            }
         }
+
         if($result['frame_temple_is_spring'] == 1){ //镜架是否弹簧腿
             $result['frame_temple_is_spring'] = 1;
         }else{
             $result['frame_temple_is_spring'] = 0;
         }
-        if($result['frame_is_adjust_nose_pad'] == 1){ //是否可以调节鼻托
-            $result['frame_is_adjust_nose_pad'] = 1;
+        if($type != 2){
+            if($result['frame_is_adjust_nose_pad'] == 1){ //是否可以调节鼻托
+                $result['frame_is_adjust_nose_pad'] = 1;
+            }else{
+                $result['frame_is_adjust_nose_pad'] = 0;
+            }
         }else{
-            $result['frame_is_adjust_nose_pad'] = 0;
+            if($result['frame_is_adjust_nose_pad'] == 1){
+                $result['frame_is_adjust_nose_pad'] = 'nose_bridge';
+            }else{
+                $result['frame_is_adjust_nose_pad'] = 'nose_pad';
+            }
         }
         return $result;
     }
