@@ -1,6 +1,6 @@
 <?php
 
-namespace app\admin\model\saleAfterManage;
+namespace app\admin\model\saleaftermanage;
 
 use think\Model;
 

@@ -1,10 +1,10 @@
 <?php
 
-namespace app\admin\model\saleAfterManage;
+namespace app\admin\model\saleaftermanage;
 
 use think\Model;
 use think\Db;
-use app\admin\model\saleAfterManage\SaleAfterTaskRemark;
+use app\admin\model\saleaftermanage\saleAfterTaskRemark;
 
 
 class SaleAfterTask extends Model
