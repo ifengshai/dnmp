@@ -21,7 +21,7 @@ class SaleAfterIssue extends Backend
     public function _initialize()
     {
         parent::_initialize();
-        $this->model = new \app\admin\model\saleAfterManage\SaleAfterIssue;
+        $this->model = new \app\admin\model\saleaftermanage\SaleAfterIssue;
         $this->view->assign("levelList", $this->model->getLevelList());
         $this->view->assign('issueList',$this->model->issueList());
     }

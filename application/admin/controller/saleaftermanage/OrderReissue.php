@@ -21,7 +21,7 @@ class OrderReissue extends Backend
     public function _initialize()
     {
         parent::_initialize();
-        $this->model = new \app\admin\model\saleAfterManage\OrderReissue;
+        $this->model = new \app\admin\model\saleaftermanage\OrderReissue;
 
     }
     /**

@@ -30,7 +30,7 @@ class SaleAfterTask extends Backend
     public function _initialize()
     {
         parent::_initialize();
-        $this->model = new \app\admin\model\saleAfterManage\SaleAfterTask;
+        $this->model = new \app\admin\model\saleaftermanage\SaleAfterTask;
         //新加内容
         $this->childrenGroupIds = $this->auth->getChildrenGroupIds(true);
 

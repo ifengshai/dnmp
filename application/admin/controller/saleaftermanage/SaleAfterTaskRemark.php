@@ -21,7 +21,7 @@ class SaleAfterTaskRemark extends Backend
     public function _initialize()
     {
         parent::_initialize();
-        $this->model = new \app\admin\model\saleAfterManage\SaleAfterTaskRemark;
+        $this->model = new \app\admin\model\saleaftermanage\SaleAfterTaskRemark;
 
     }
     
