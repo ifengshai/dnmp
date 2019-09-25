@@ -12,7 +12,7 @@ class Zeelool extends Model
 
     //数据库
     // protected $connection = 'database';
-    protected $connection = 'database.db_zeelool_online';
+    protected $connection = 'database.db_zeelool';
 
 
     // 表名

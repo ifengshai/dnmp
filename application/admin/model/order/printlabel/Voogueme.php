@@ -13,7 +13,7 @@ class Voogueme extends Model
 
     //数据库
     // protected $connection = 'database';
-    protected $connection = 'database.db_voogueme_online';
+    protected $connection = 'database.db_voogueme';
 
 
     // 表名

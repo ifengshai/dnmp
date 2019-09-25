@@ -13,7 +13,7 @@ class Nihao extends Model
 
     //数据库
     // protected $connection = 'database';
-    protected $connection = 'database.db_nihao_online';
+    protected $connection = 'database.db_nihao';
 
     
     // 表名
