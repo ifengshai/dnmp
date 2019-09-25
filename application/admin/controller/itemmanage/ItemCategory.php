@@ -25,7 +25,7 @@ class ItemCategory extends Backend
     {
         parent::_initialize();
         $this->model = new \app\admin\model\itemmanage\ItemCategory;
-        $this->platform = new \app\admin\model\platformManage\ManagtoPlatform;
+        $this->platform = new \app\admin\model\platformmanage\ManagtoPlatform;
         $this->view->assign('PutAway',$this->model->isPutAway());
         $this->view->assign('LevelList',$this->model->getLevelList());
         $this->view->assign('CategoryList',$this->model->getCategoryList());

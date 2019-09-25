@@ -5,8 +5,8 @@ use think\Db;
 use think\Request;
 use app\common\controller\Backend;
 use app\admin\model\itemmanage\Item;
-use app\admin\model\platformManage\ManagtoPlatform;
-use app\admin\model\platformManage\PlatformMap;
+use app\admin\model\platformmanage\ManagtoPlatform;
+use app\admin\model\platformmanage\PlatformMap;
 /**
  * 平台SKU管理
  *
@@ -25,7 +25,7 @@ class ItemPlatformSku extends Backend
     {
         parent::_initialize();
         $this->model = new \app\admin\model\itemmanage\ItemPlatformSku;
-        $this->platform = new \app\admin\model\platformManage\ManagtoPlatform;
+        $this->platform = new \app\admin\model\platformmanage\ManagtoPlatform;
 
     }
     
