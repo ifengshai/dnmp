@@ -1,6 +1,6 @@
 <?php
 
-namespace app\admin\controller\platformManage;
+namespace app\admin\controller\platformmanage;
 
 use app\common\controller\Backend;
 

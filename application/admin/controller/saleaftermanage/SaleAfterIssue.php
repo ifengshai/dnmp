@@ -1,6 +1,6 @@
 <?php
 
-namespace app\admin\controller\saleAfterManage;
+namespace app\admin\controller\saleaftermanage;
 
 use app\common\controller\Backend;
 use think\Db;

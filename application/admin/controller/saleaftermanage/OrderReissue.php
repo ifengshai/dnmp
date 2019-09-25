@@ -1,9 +1,9 @@
 <?php
 
-namespace app\admin\controller\saleAfterManage;
+namespace app\admin\controller\saleaftermanage;
 
 use app\common\controller\Backend;
-use app\admin\model\saleAfterManage\SaleAfterIssue;
+use app\admin\model\saleaftermanage\SaleAfterIssue;
 /**
  * 补发订单
  *

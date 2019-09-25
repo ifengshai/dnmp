@@ -7,11 +7,11 @@ use think\Db;
 use app\common\controller\Backend;
 use app\admin\model\Admin;
 use app\admin\model\AuthGroup;
-use app\admin\model\platformManage\ManagtoPlatform;
-use app\admin\model\saleAfterManage\SaleAfterIssue;
-use app\admin\model\saleAfterManage\SaleAfterTask;
-use app\admin\model\saleAfterManage\OrderReturnItem;
-use app\admin\model\saleAfterManage\OrderReturnRemark;
+use app\admin\model\platformmanage\ManagtoPlatform;
+use app\admin\model\saleaftermanage\SaleAfterIssue;
+use app\admin\model\saleaftermanage\SaleAfterTask;
+use app\admin\model\saleaftermanage\OrderReturnItem;
+use app\admin\model\saleaftermanage\OrderReturnRemark;
 use think\Request;
 
 /**

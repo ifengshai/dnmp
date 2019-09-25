@@ -1,12 +1,12 @@
 <?php
 
-namespace app\admin\controller\saleAfterManage;
+namespace app\admin\controller\saleaftermanage;
 
 use app\common\controller\Backend;
 use app\admin\model\AuthGroup;
-use app\admin\model\saleAfterManage\SaleAfterIssue;
-use app\admin\model\platformManage\ManagtoPlatform;
-use app\admin\model\saleAfterManage\SaleAfterTaskRemark;
+use app\admin\model\saleaftermanage\SaleAfterIssue;
+use app\admin\model\platformmanage\ManagtoPlatform;
+use app\admin\model\saleaftermanage\SaleAfterTaskRemark;
 use app\admin\model\Admin;
 use think\Request;
 use think\Db;
