@@ -12,6 +12,7 @@ use fast\Http;
 use fast\Alibaba;
 use app\admin\model\NewProduct;
 use app\admin\model\purchase\SupplierSku;
+use think\Cache;
 
 
 /**
@@ -27,6 +28,12 @@ class PurchaseOrder extends Backend
      * @var \app\admin\model\purchase\PurchaseOrder
      */
     protected $model = null;
+
+    /**
+     * 无需登录的方法,同时也就不需要鉴权了
+     * @var array
+     */
+    protected $noNeedLogin = ['getAlibabaPurchaseOrder'];
 
     public function _initialize()
     {
@@ -343,6 +350,9 @@ class PurchaseOrder extends Backend
         return $this->view->fetch();
     }
 
+    /**
+     * 录入物流单号
+     */
     public function logistics($ids = null)
     {
         $row = $this->model->get($ids);
@@ -397,7 +407,9 @@ class PurchaseOrder extends Backend
     }
 
 
-    //删除合同里商品信息
+    /**
+     * 删除合同里商品信息
+     */
     public function deleteItem()
     {
         $id = input('id');
@@ -458,7 +470,9 @@ class PurchaseOrder extends Backend
         }
     }
 
-    //物流详情
+    /**
+     * 物流详情
+     */
     public function logisticsDetail()
     {
         $id = input('id');
@@ -468,22 +482,33 @@ class PurchaseOrder extends Backend
             $this->error(__('No Results were found'));
         }
         $data = [];
-        if ($row['logistics_number']) {
-            $arr = explode(',', $row['logistics_number']);
-            //物流公司编码
-            $company = explode(',', $row['logistics_company_no']);
-            
-            foreach ($arr as $k => $v) {
-                try {
-                    $param['express_id'] = trim($v);
-                    $param['code'] = trim($company[$k]);
-                    $data[$k] = Hook::listen('express_query', $param)[0];
-                } catch (\Exception $e) {
-                    $this->error($e->getMessage());
+        //判断采购单类型是否为线上采购单 1线下采购单=> 快递100api 2线上采购单 1688api
+        if ($row['purchase_type'] == 2) {
+            $cacheIndex = 'logisticsDetail_' . $row['purchase_number'];
+            $data = Cache::get($cacheIndex);
+            if (!$data) {
+                $data = Alibaba::getLogisticsMsg($row['purchase_number']);
+                // 记录缓存, 时效10分钟
+                Cache::set($cacheIndex, $data, 3600);
+            }
+            $data = $data->logisticsTrace[0];
+        } else {
+            if ($row['logistics_number']) {
+                $arr = explode(',', $row['logistics_number']);
+                //物流公司编码
+                $company = explode(',', $row['logistics_company_no']);
+                foreach ($arr as $k => $v) {
+                    try {
+                        $param['express_id'] = trim($v);
+                        $param['code'] = trim($company[$k]);
+                        $data[$k] = Hook::listen('express_query', $param)[0];
+                    } catch (\Exception $e) {
+                        $this->error($e->getMessage());
+                    }
                 }
             }
         }
-        
+
         //采购单退销物流信息
         $purchaseReturn = new \app\admin\model\purchase\PurchaseReturn;
         $res = $purchaseReturn->where('purchase_id', $id)->column('logistics_number');
@@ -504,6 +529,7 @@ class PurchaseOrder extends Backend
         $this->assign('id', $id);
         $this->assign('data', $data);
         $this->assign('return_data', $return_data);
+        $this->assign('row', $row);
         return $this->view->fetch();
     }
 
@@ -630,16 +656,18 @@ class PurchaseOrder extends Backend
         //查询SKU为空的采购单
         $data = $this->purchase_order_item->where('sku', 'exp', 'is null')->select();
         $data = collection($data)->toArray();
-        foreach($data as $k => $v) {
+        foreach ($data as $k => $v) {
             //匹配SKU
             $params['sku'] = (new SupplierSku())->getSkuData($v['skuid']);
-            $this->purchase_order_item->allowField(true)->save($params,['id' => $v['id']]);
+            $this->purchase_order_item->allowField(true)->save($params, ['id' => $v['id']]);
         }
         $this->success();
     }
 
-    //定时采集
-    public function test()
+    /**
+     * 定时获取1688采购单 每天9点更新一次
+     */
+    public function getAlibabaPurchaseOrder()
     {
         //$orderId = '551171682534802669';
         //$data = Alibaba::getOrderDetail($orderId);
@@ -661,36 +689,48 @@ class PurchaseOrder extends Backend
         // signinfailed 签收失败	 
         // waitselleract 等待卖家操作	 
         // waitbuyerconfirmaction 等待买家确认操作	 
-        // waitsellerpush 等待卖家推进	
-        // $params = [
-        //     'createStartTime' => date('YmdHis', time() - 7200) . '000+0800',
-        //     'createEndTime' => date('YmdHis') . '000+0800',
-        // ];
+        // waitsellerpush 等待卖家推进
+
+        /**
+         * @todo 后面添加采集时间段
+         */
+        $params = [
+            'createStartTime' => date('YmdHis', strtotime("-30 day")) . '000+0800',
+            'createEndTime' => date('YmdHis') . '000+0800',
+        ];
+        //根据不同的状态取订单数据
+        $success_data = Alibaba::getOrderList(1, $params);
+
         set_time_limit(0);
-        $data = cache('success_data_msg');
+        $data = cache('Crontab_getAlibabaPurchaseOrder_' . date('YmdH'));
         if (!$data) {
             //根据不同的状态取订单数据
-            $success_data = Alibaba::getOrderList(1);
+            $success_data = Alibaba::getOrderList(1, $params);
             //转为数组
-            $success_data = collection($success_data)->toArray();
+            if ($success_data) {
+                $success_data = collection($success_data)->toArray();
+            }
 
             $data = [];
             for ($i = 1; $i <= round($success_data['totalRecord'] / 50); $i++) {
 
                 //根据不同的状态取订单数据
-                $data[$i] = Alibaba::getOrderList($i)->result;
+                $data[$i] = Alibaba::getOrderList($i, $params)->result;
             }
 
             //设置缓存
-            cache('success_data_msg', $data, 86400);
+            cache('Crontab_getAlibabaPurchaseOrder_' . date('YmdH'), $data, 3600);
         }
 
-
         foreach ($data as $key => $val) {
+            if (!$val) {
+                continue;
+            }
             foreach ($val as $k => $v) {
                 $list = [];
-
                 $map['purchase_number'] = $v->baseInfo->idOfStr;
+                $map['is_del'] = 1;
+                //根据采购单号查询采购单是否已存在
                 $res = $this->model->where($map)->find();
                 //如果采购单已存在 则更新采购单状态
                 if ($res) {
@@ -701,6 +741,9 @@ class PurchaseOrder extends Backend
                         $list['purchase_status'] = 6; //待收货
                     } else {
                         $list['purchase_status'] = 7; //已收货
+                        $jsonDate = $v->baseInfo->createTime;
+                        preg_match('/\d{14}/', $jsonDate, $matches);
+                        $list['receiving_time'] = date('Y-m-d H:i:s', strtotime($matches[0]));
                     }
                     $list['online_status'] = $v->baseInfo->status;
                     //更新采购单状态
@@ -755,6 +798,7 @@ class PurchaseOrder extends Backend
                         $list['receiving_time'] = date('Y-m-d H:i:s', strtotime($matches[0]));
                     }
                     $list['purchase_type'] = 2;
+                    //添加采购单
                     $result = $this->model->allowField(true)->create($list);
 
                     $params = [];
@@ -778,4 +822,5 @@ class PurchaseOrder extends Backend
         }
         echo 'ok';
     }
+
 }

@@ -4,7 +4,6 @@ namespace app\admin\model\purchase;
 
 use think\Model;
 
-
 class PurchaseOrder extends Model
 {
 

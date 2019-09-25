@@ -210,7 +210,7 @@ abstract class Model implements \JsonSerializable, \ArrayAccess
         } else {
             $connection = [];
         }
-
+        
         $con = Db::connect($connection);
         // 设置当前模型 确保查询返回模型对象
         $queryClass = $this->query ?: $con->getConfig('query');

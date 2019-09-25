@@ -185,10 +185,10 @@ class Instock extends Backend
             $check_item[$v['sku']]['sample_num'] = $v['sample_num'];
         }
         foreach ($item as $k => $v) {
-            $item[$k]['arrivals_num'] = $check_item[$v['sku']]['arrivals_num'];
-            $item[$k]['quantity_num'] = $check_item[$v['sku']]['quantity_num'];
-            $item[$k]['unqualified_num'] = $check_item[$v['sku']]['unqualified_num'];
-            $item[$k]['sample_num'] = $check_item[$v['sku']]['sample_num'];
+            $item[$k]['arrivals_num'] = $check_item[$v['sku']]['arrivals_num'] ?? 0;
+            $item[$k]['quantity_num'] = $check_item[$v['sku']]['quantity_num'] ?? 0;
+            $item[$k]['unqualified_num'] = $check_item[$v['sku']]['unqualified_num'] ?? 0;
+            $item[$k]['sample_num'] = $check_item[$v['sku']]['sample_num'] ?? 0;
         }
 
         $data->item = $item;

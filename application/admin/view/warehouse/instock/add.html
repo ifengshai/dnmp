@@ -83,7 +83,7 @@
         <div class="form-group purchase_id_number">
             <label class="control-label col-xs-12 col-sm-2">采购单:</label>
             <div class="col-xs-12 col-sm-8">
-                <select name="row[purchase_id]" class="form-control purchase_id">
+                <select name="row[purchase_id]" class="form-control purchase_id selectpicker" data-live-search='true'>
                     <option value="">请选择</option>
                     {foreach $purchase_data as $k => $v}
                     <option value="{$k}">{$v}</option>

@@ -16,7 +16,7 @@ class PurchaseOrderItem extends Model
     protected $name = 'purchase_order_item';
     
     // 自动写入时间戳字段
-    protected $autoWriteTimestamp = 'int';
+    protected $autoWriteTimestamp = false;
 
     // 定义时间戳字段名
     protected $createTime = 'createtime';

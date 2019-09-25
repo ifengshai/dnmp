@@ -64,6 +64,9 @@
                     value="{$purchase_number}" type="text">
             </div>
         </div>
+        {if $row}
+        <input  class="form-control" name="row[is_new_product]" value="1" type="hidden">
+        {/if}
         <div class="form-group">
             <label class="control-label col-xs-12 col-sm-2">采购单名称:</label>
             <div class="col-xs-12 col-sm-8">
@@ -166,7 +169,7 @@
             <label class="control-label col-xs-12 col-sm-2">供应商名称:</label>
             <div class="col-xs-12 col-sm-8">
 
-                <select name="row[supplier_id]" class="form-control supplier" required>
+                <select name="row[supplier_id]" class="form-control supplier selectpicker" required data-live-search='true'>
                     <option value="">请选择</option>
                     {foreach $supplier as $k => $v}
                     <option value="{$k}" {:$row[0]['supplier_id'] == $k ? 'selected' : ''}>{$v}</option>
