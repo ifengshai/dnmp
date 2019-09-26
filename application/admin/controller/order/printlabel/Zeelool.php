@@ -7,6 +7,7 @@ use app\common\controller\Backend;
 use think\Db;
 use think\Loader;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use app\admin\model\infosynergytaskmanage\InfoSynergyTask;
 
 /**
  * Sales Flat Order
@@ -56,12 +57,12 @@ class Zeelool extends Backend
                 ->order($sort, $order)
                 ->count();
             // var_dump($total);die;                                                                            
-            $field = 'entity_id,status,increment_id,coupon_code,shipping_description,store_id,customer_id,base_discount_amount,base_grand_total,
+            $field = 'entity_id,status,increment_id,coupon_code,base_shipping_amount,store_id,customer_id,base_discount_amount,base_grand_total,
                      total_qty_ordered,quote_id,base_currency_code,customer_email,customer_firstname,customer_lastname,custom_is_match_frame,custom_is_match_lens,
                      custom_is_send_factory,custom_is_delivery,custom_match_frame_created_at,custom_match_lens_created_at,custom_match_factory_created_at,
-                     custom_match_delivery_created_at,custom_print_label,custom_order_prescription,custom_print_label_created_at,custom_service_name';
+                     custom_match_delivery_created_at,custom_print_label,custom_order_prescription,custom_print_label_created_at,custom_service_name,created_at';
             $list = $this->model
-                // ->field($field)
+                ->field($field)
                 ->where($map)
                 ->where($where)
                 ->order($sort, $order)
@@ -69,6 +70,22 @@ class Zeelool extends Backend
                 ->select();
 
             $list = collection($list)->toArray();
+
+            //查询所在订单是否存在协同任务
+            $order_ids = array_column($list, 'increment_id');
+
+            //查询协同任务表关联订单
+            $info_map['synergy_order_number'] = ['in', $order_ids];
+            $arr = (new InfoSynergyTask())->where($info_map)->column('synergy_order_number');
+            foreach ($list as &$v) {
+                if (in_array($v['increment_id'], $arr)) {
+                    $v['task'] = 1;
+                } else {
+                    $v['task'] = 0;
+                }
+            }
+        
+            unset($v);
             $result = array("total" => $total, "rows" => $list);
             return json($result);
         }

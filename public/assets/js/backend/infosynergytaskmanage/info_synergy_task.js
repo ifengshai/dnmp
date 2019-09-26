@@ -6,7 +6,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             Table.api.init({
                 searchFormVisible: true,
                 extend: {
-                    index_url: 'infosynergytaskmanage/info_synergy_task/index' + location.search,
+                    index_url: 'infosynergytaskmanage/info_synergy_task/index' + location.search + '&synergy_order_number=' + Config.synergy_order_number,
                     add_url: 'infosynergytaskmanage/info_synergy_task/add',
                     edit_url: 'infosynergytaskmanage/info_synergy_task/edit',
                     del_url: 'infosynergytaskmanage/info_synergy_task/del',
