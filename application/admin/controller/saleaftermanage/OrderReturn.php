@@ -293,8 +293,8 @@ class OrderReturn extends Backend
             }
             //求出用户的所有订单信息
             $customer = (new SaleAfterTask())->getCustomerEmail($order_platform,$increment_id,$customer_name,$customer_phone,$track_number,$customer_email);
-            dump($customer);
-            exit;
+//            dump($customer);
+//            exit;
             if(!$customer){
                 $this->error('找不到订单信息，请重新尝试','/admin/saleaftermanage/order_return/search?ref=addtabs');
             }
