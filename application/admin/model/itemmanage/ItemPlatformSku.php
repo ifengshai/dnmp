@@ -3,7 +3,7 @@
 namespace app\admin\model\itemmanage;
 
 use think\Model;
-use app\admin\model\platformManage\ManagtoPlatform;
+use app\admin\model\platformmanage\ManagtoPlatform;
 
 class ItemPlatformSku extends Model
 {
