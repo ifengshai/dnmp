@@ -691,6 +691,8 @@ class PurchaseOrder extends Backend
         // waitbuyerconfirmaction 等待买家确认操作	 
         // waitsellerpush 等待卖家推进
 
+        //refundStatus = refundsuccess 退款成功
+
         /**
          * @todo 后面添加采集时间段
          */
@@ -745,6 +747,12 @@ class PurchaseOrder extends Backend
                         preg_match('/\d{14}/', $jsonDate, $matches);
                         $list['receiving_time'] = date('Y-m-d H:i:s', strtotime($matches[0]));
                     }
+
+                    //售中退款
+                    if (@$v->baseInfo->refundStatus == 'refundsuccess') {
+                        $list['purchase_status'] = 8; //已退款
+                    }
+                    
                     $list['online_status'] = $v->baseInfo->status;
                     //更新采购单状态
                     $result = $res->save($list);
