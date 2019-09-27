@@ -182,7 +182,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast'], func
                 );
             });
 
-            //商品审核拒绝
+            //创建采购单
             $(document).on('click', '.btn-createPurchaseOrder', function () {
                 var ids = Table.api.selectedids(table);
                 Layer.confirm(

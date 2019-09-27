@@ -185,6 +185,30 @@ class PurchaseOrder extends Backend
         return $this->view->fetch();
     }
 
+    /***
+     * 编辑之后提交审核
+     */
+    public function audit()
+    {
+        if ($this->request->isAjax()) {
+            $id = $this->request->param('ids');
+            $row = $this->model->get($id);
+            if ($row['purchase_status'] != 0) {
+                $this->error('此商品状态不能提交审核');
+            }
+            $map['id'] = $id;
+            $data['purchase_status'] = 1;
+            $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
+            if ($res) {
+                $this->success('提交审核成功');
+            } else {
+                $this->error('提交审核失败');
+            }
+        } else {
+            $this->error('404 Not found');
+        }
+    }
+
     /**
      * 异步获取合同数据
      */
@@ -691,6 +715,8 @@ class PurchaseOrder extends Backend
         // waitbuyerconfirmaction 等待买家确认操作	 
         // waitsellerpush 等待卖家推进
 
+        //refundStatus = refundsuccess 退款成功
+
         /**
          * @todo 后面添加采集时间段
          */
@@ -745,6 +771,12 @@ class PurchaseOrder extends Backend
                         preg_match('/\d{14}/', $jsonDate, $matches);
                         $list['receiving_time'] = date('Y-m-d H:i:s', strtotime($matches[0]));
                     }
+
+                    //售中退款
+                    if (@$v->baseInfo->refundStatus == 'refundsuccess') {
+                        $list['purchase_status'] = 8; //已退款
+                    }
+
                     $list['online_status'] = $v->baseInfo->status;
                     //更新采购单状态
                     $result = $res->save($list);
