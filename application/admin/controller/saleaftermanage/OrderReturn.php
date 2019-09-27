@@ -273,8 +273,8 @@ class OrderReturn extends Backend
         if($request->isPost()){
             //获取输入的订单号
             $increment_id = $request->post('increment_id');
-            dump($increment_id);
-            exit;
+//            dump($increment_id);
+//            exit;
             //获取输入的平台
             $order_platform = $request->post('order_platform');
             //获取客户邮箱地址

@@ -406,6 +406,7 @@ class SaleAfterTask extends Model
             $customer_email = $email;
             //$result = Db::connect($db)->table('sales_flat_order')->where('customer_email',$customer_email)->field('entity_id,status,store_id,increment_id,customer_email,customer_firstname,customer_lastname,order_currency_code,total_item_count,total_paid')->select();
         }
+        return $customer_email;
         if(!empty($customer_email)){
             // return $customer_email;
             $result = Db::connect($db)->table('sales_flat_order o')->join('sales_flat_shipment_track s','o.entity_id=s.order_id','left')->join('sales_flat_order_payment p','o.entity_id=p.parent_id','left')->join('sales_flat_order_address a','o.entity_id=a.parent_id')->where('customer_email',$customer_email)->where('a.address_type','shipping')
