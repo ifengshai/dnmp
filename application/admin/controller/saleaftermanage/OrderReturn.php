@@ -296,7 +296,7 @@ class OrderReturn extends Backend
 //            dump($customer);
 //            exit;
             if(!$customer){
-                $this->error('找不到订单信息，请重新尝试','/admin/saleaftermanage/order_return/search');
+                $this->error('找不到订单信息，请重新尝试','/admin/saleaftermanage/order_return/search?ref=addtabs');
             }
             //求出所有的订单号
             $allIncrementOrder = $customer['increment_id'];
