@@ -41,6 +41,17 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         { field: 'custom_is_delivery', title: __('是否提货'), searchList: { 1: '是', 0: '否' }, formatter: Table.api.formatter.status, visible: false },
                         { field: 'created_at', title: __('创建时间'), operate: 'RANGE', addclass: 'datetimerange' },
                         {
+                            field: '', title: __('协同任务'), operate: false, addclass: 'datetimerange', formatter: function (data,row) {
+                                console.log(row);
+                                if (row.task == 1) {
+                                    //return "<a href='/infosynergytaskmanage/info_synergy_task?synergy_order_number=" + row.increment_id + "'><span class='red'>问</span></a>";
+                                    return '<a href="/admin/infosynergytaskmanage/info_synergy_task?synergy_order_number='+ row.increment_id +'" class="btn btn-xs btn-warning btn-addtabs" title="查看协同任务" data-table-id="table" data-field-index="11" data-row-index="0" data-button-index="3"><i class="fa fa-folder-o"></i> 协同任务</a>';
+                                } else {
+                                    return '';
+                                }
+                            }
+                        },
+                        {
                             field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [
                                 {
                                     name: 'detail',

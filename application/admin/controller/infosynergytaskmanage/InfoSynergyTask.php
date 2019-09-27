@@ -40,6 +40,10 @@ class InfoSynergyTask extends Backend
      * 因此在当前控制器中可不用编写增删改查的代码,除非需要自己控制这部分逻辑
      * 需要将application/admin/library/traits/Backend.php中对应的方法复制到当前控制器,然后进行修改
      */
+
+
+
+
     public function add()
     {
         if ($this->request->isPost()) {
@@ -160,9 +164,7 @@ class InfoSynergyTask extends Backend
         $this->view->assign('repList', $this->model->testRepId());
         return $this->view->fetch();
     }
-    /**
-     * 编辑
-     */
+
     /**
      * 编辑
      */
@@ -297,6 +299,9 @@ class InfoSynergyTask extends Backend
      */
     public function index()
     {
+        //关联订单号 订单列表传递
+        $synergy_order_number = input('synergy_order_number');
+
         //设置过滤方法
         $this->request->filter(['strip_tags']);
         if ($this->request->isAjax()) {
@@ -341,6 +346,7 @@ class InfoSynergyTask extends Backend
             return json($result);
         }
         $this->view->assign('getTabList', (new SaleAfterTask())->getTabList());
+        $this->assignconfig('synergy_order_number', $synergy_order_number);
         return $this->view->fetch();
     }
     /**
