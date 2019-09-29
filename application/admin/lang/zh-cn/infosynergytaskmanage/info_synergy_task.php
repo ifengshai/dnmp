@@ -14,5 +14,6 @@ return [
     'Upload_photos'        => '上传的照片',
     'Create_person'        => '创建人',
     'Create_time'          => '创建时间',
-    'Add_remark'           => '添加备注'
+    'Add_remark'           => '添加备注',
+    'Handle'               => '处理'
 ];
