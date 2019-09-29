@@ -44,7 +44,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {
                             field: 'purchase_status', title: __('Purchase_status'),
                             custom: { 0: 'success', 1: 'yellow', 2: 'blue', 3: 'danger', 4: 'gray', 5: 'yellow', 6: 'yellow', 7: 'success' },
-                            searchList: { 0: '新建', 1: '待审核', 2: '已审核', 3: '已拒绝', 4: '已取消', 5: '待发货', 6: '待收货', 7: '已收货' },
+                            searchList: { 0: '新建', 1: '待审核', 2: '已审核', 3: '已拒绝', 4: '已取消', 5: '待发货', 6: '待收货', 7: '已收货', 8: '已退款' },
                             formatter: Table.api.formatter.status
                         },
                         {
@@ -88,6 +88,33 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {
                             field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [
                                 {
+                                    name: 'submitAudit',
+                                    text: '提交审核',
+                                    title: __('提交审核'),
+                                    classname: 'btn btn-xs btn-success btn-ajax',
+                                    icon: 'fa fa-leaf',
+                                    url: 'purchase/purchase_order/audit',
+                                    confirm: '确认提交审核吗',
+                                    success: function (data, ret) {
+                                        Layer.alert(ret.msg);
+                                        $(".btn-refresh").trigger("click");
+                                        //如果需要阻止成功提示，则必须使用return false;
+                                        //return false;
+                                    },
+                                    error: function (data, ret) {
+                                        Layer.alert(ret.msg);
+                                        return false;
+                                    },
+                                    visible: function (row) {
+                                        //返回true时按钮显示,返回false隐藏
+                                        if (row.purchase_status == 0) {
+                                            return true;
+                                        } else {
+                                            return false;
+                                        }
+                                    },
+                                }, 
+                                {
                                     name: 'detail',
                                     text: '详情',
                                     title: __('Detail'),
@@ -120,7 +147,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                         } else {
                                             return false;
                                         }
-                                        
+
                                     }
                                 },
                                 {
@@ -230,7 +257,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 layer.load();
                 Backend.api.ajax({
                     url: url,
-                    data: { }
+                    data: {}
                 }, function (data, ret) {
                     layer.closeAll();
                     //table.bootstrapTable('refresh');
