@@ -141,7 +141,7 @@ class Index extends Backend
             $this->error(__('No Results were found'));
         }
         $track = new Trackingmore();
-        $track = $track->getRealtimeTrackingResults('China Post', 'LW692872498CN');  
+        $track = $track->getRealtimeTrackingResults('China-Post', 'LW692872498CN');  
         dump($track);
 
         die;
