@@ -208,6 +208,8 @@ class Zeelool extends Model
             ->field('track_number,title')
             ->where($map)
             ->find();
+        echo  Db::connect($db)
+        ->table('sales_flat_shipment_track')->getLastSql();die;
         if (!$result) {
             return false;
         }
