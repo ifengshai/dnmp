@@ -149,6 +149,7 @@ class Index extends Backend
                 $title = str_replace(' ', '-', $express['title']);
                 $track = new Trackingmore();
                 $track = $track->getRealtimeTrackingResults($title, $express['track_number']);
+                dump($track);die;
             } catch (\Exception $e) {
                 $this->error($e->getMessage());
             }
