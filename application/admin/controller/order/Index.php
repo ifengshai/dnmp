@@ -140,20 +140,17 @@ class Index extends Backend
         if (!$row) {
             $this->error(__('No Results were found'));
         }
-        $track = new Trackingmore();
-        $track = $track->getRealtimeTrackingResults('China-Post', 'LW692872498CN');  
-        dump($track);
 
-        die;
         $express = $this->zeelool->getExpressData($label, $ids);
 
-        dump($express);
-        die;
         if ($express) {
-            //查询物流信息
             try {
-                $param = ['express_id' => trim($express['track_number'])];
-                $express_data = Hook::listen('express_query', $param)[0];
+                //查询物流信息
+                $title = str_replace(' ', '-', $express['title']);
+                $track = new Trackingmore();
+                $track = $track->getRealtimeTrackingResults($title, $express['track_number']);
+                dump($express);
+                die;
             } catch (\Exception $e) {
                 $this->error($e->getMessage());
             }
