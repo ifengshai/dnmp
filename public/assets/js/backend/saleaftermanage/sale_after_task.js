@@ -106,12 +106,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui'], function ($, 
             //处理任务完成
             $(document).on('click', '.btn-handle-complete', function () {
                 var ids = Table.api.selectedids(table);
-                console.log(ids);
                 Layer.confirm(
                     __('确定要处理完成吗'),
                     function (index) {
                         Backend.api.ajax({
-                            url: "saleaftermanage/sale_after_task/completeAjax",
+                            url: "saleaftermanage/sale_after_task/completeAjaxAll",
                             data: { ids: ids }
                         }, function (data, ret) {
                             table.bootstrapTable('refresh');

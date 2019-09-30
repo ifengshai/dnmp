@@ -351,13 +351,26 @@ class SaleAfterTask extends Backend
             if(!$ids){
               return   $this->error('处理失败，请重新尝试');
             }
-            $data = [];
-            $data['task_status'] = 2;
-            $data['handle_time'] = date("Y-m-d H:i:s",time());
-            $result = $this->model->where('id',$ids)->update($data);
-            if($result !== false){
-              return  $this->success('ok');
+            $map['id'] = ['in',$ids];
+            $list = $this->model->where($map)->field('id,task_status')->select();
+            $arr = [];
+            foreach($list as $val){
+                if($val['task_status'] ==1){
+                    $arr[] = $val['id'];    
+                }
             }
+            if(!empty($arr)){
+                $data = [];
+                $data['task_status'] = 2;
+                $data['handle_time'] = date("Y-m-d H:i:s",time());
+                $result = $this->model->where('id','in',$arr)->update($data);
+                if($result !== false){
+                  return  $this->success('操作成功');
+                }
+            }else{
+                return $this->error(__('Select the updated record does not meet the requirements, please re-select'));
+            }
+
         }else{
             return $this->error('请求失败,请勿请求');
         }
