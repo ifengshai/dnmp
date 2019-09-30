@@ -140,20 +140,26 @@ class Index extends Backend
         if (!$row) {
             $this->error(__('No Results were found'));
         }
-
+        //查询订单快递单号
         $express = $this->zeelool->getExpressData($label, $ids);
 
         if ($express) {
-            try {
-                //查询物流信息
-                $title = str_replace(' ', '-', $express['title']);
-                $track = new Trackingmore();
-                $track = $track->getRealtimeTrackingResults($title, $express['track_number']);
-                dump($track);die;
-            } catch (\Exception $e) {
-                $this->error($e->getMessage());
+            //缓存一个小时
+            $express_data = session('order_checkDetail_' . $express['track_number'] . '_' . date('YmdH'));
+            if (!$express_data) {
+                try {
+                    //查询物流信息
+                    $title = str_replace(' ', '-', $express['title']);
+                    $track = new Trackingmore();
+                    $track = $track->getRealtimeTrackingResults($title, $express['track_number']);
+                    $express_data = $track['data']['items'][0];
+                    session('order_checkDetail_' . $express['track_number'] . '_' . date('YmdH'), $express_data);
+                } catch (\Exception $e) {
+                    $this->error($e->getMessage());
+                }
             }
-            $this->view->assign("express_data", $track['data']['items'][0]);
+
+            $this->view->assign("express_data", $express_data);
         }
 
         $this->view->assign("row", $row);
