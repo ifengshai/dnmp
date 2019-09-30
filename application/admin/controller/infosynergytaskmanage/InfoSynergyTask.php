@@ -174,6 +174,9 @@ class InfoSynergyTask extends Backend
         if (!$row) {
             $this->error(__('No Results were found'));
         }
+        if(2 == $row['synergy_status']){
+            $this->error(__('The collaborative task information has been completed and cannot be processed'),'/admin/infosynergytaskmanage/info_synergy_task');
+        }
         $adminIds = $this->getDataLimitAdminIds();
         if (is_array($adminIds)) {
             if (!in_array($row[$this->dataLimitField], $adminIds)) {
@@ -197,6 +200,7 @@ class InfoSynergyTask extends Backend
                         $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.edit' : $name) : $this->modelValidate;
                         $row->validateFailException(true)->validate($validate);
                     }
+                    $params['synergy_status'] =1;
                     $result = $row->allowField(true)->save($params);
                     Db::commit();
                 } catch (ValidateException $e) {
@@ -415,5 +419,23 @@ class InfoSynergyTask extends Backend
         $this->view->assign('orderReturnRemark', (new InfoSynergyTaskRemark())->getSynergyTaskRemarkById($result['id']));
         //        $this->view->assign('orderInfo',$this->model->getOrderInfo($result['order_platform'],$result['order_number']));
         return $this->view->fetch();
+    }
+    /**
+     * 处理完成
+     */
+    public function handleComplete($ids=null)
+    {
+        if($this->request->isAjax()){
+             $map['id'] = ['in',$ids];
+             $data['synergy_status'] = 2;
+             $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
+             if ($res !== false) {
+                $this->success('操作成功');
+            } else {
+                $this->error('操作失败,请重新尝试');
+            }
+        }else{
+            $this->error('404 Not found');
+        }
     }
 }

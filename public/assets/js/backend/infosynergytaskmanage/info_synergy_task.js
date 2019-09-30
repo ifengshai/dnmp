@@ -31,6 +31,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         // {field: 'synergy_order_id', title: __('哈哈'),searchList:{"1":"haha","2":"呵呵","3":"嘻嘻"},formatter: Table.api.formatter.status},
                         {field: 'synergy_order_number', title: __('Synergy_order_number')},
                         {field: 'order_platform', title: __('Order_platform'),searchList:$.getJSON('saleaftermanage/sale_after_task/getAjaxOrderPlatformList'),formatter: Controller.api.formatter.orderDevice},
+                        {
+                            field: 'synergy_status',
+                            title:__('Synergy_status'),
+                            searchList: { 0: '新建', 1: '处理中', 2: '处理完成' },
+                            custom: { 0: 'blue', 2: 'yellow', 3: 'success'},
+                            formatter: Table.api.formatter.status
+                        },
                         {field: 'dept', title: __('Dept_id')},
                         {field: 'rep', title: __('Rep_id')},
                         {field: 'prty_id', title: __('Prty_id'),searchList: {0:'未选择',1:'高级',2:'中级',3:'低级'},formatter: Controller.api.formatter.prtyDevice,operate:false},
@@ -55,6 +62,48 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     visible: function (row) {
                                         //返回true时按钮显示,返回false隐藏
                                         return true;
+                                    }
+                                },
+                                {
+                                    name: 'edit',
+                                    text: '处理',
+                                    title: __('处理任务'),
+                                    classname: 'btn btn-xs btn-success btn-dialog',
+                                    icon: 'fa fa-pencil',
+                                    url: '/admin/infosynergytaskmanage/info_synergy_task/edit',
+                                    extend: 'data-area = \'["100%","100%"]\'',
+                                    callback: function (data) {
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                    },
+                                    visible: function (row) {
+                                        return true;
+                                    }
+                                },
+                                {
+                                    name: 'handleComplete',
+                                    text: '处理完成',
+                                    title: __('处理完成'),
+                                    classname: 'btn btn-xs btn-success btn-ajax',
+                                    icon: 'fa fa-pencil',
+                                    url: '/admin/infosynergytaskmanage/info_synergy_task/handleComplete',
+                                    confirm: '确认要处理完成吗',
+                                    success: function (data, ret) {
+                                        Layer.alert(ret.msg);
+                                        $(".btn-refresh").trigger("click");
+                                        //如果需要阻止成功提示，则必须使用return false;
+                                        //return false;
+                                    },
+                                    error: function (data, ret) {
+                                        Layer.alert(ret.msg);
+                                        return false;
+                                    },
+                                    visible: function (row) {
+                                        //返回true时按钮显示,返回false隐藏
+                                        if (row.synergy_status != 2) {
+                                            return true;
+                                        } else {
+                                            return false;
+                                        }
                                     }
                                 },
                             ]

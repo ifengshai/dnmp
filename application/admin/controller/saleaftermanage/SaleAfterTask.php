@@ -322,7 +322,7 @@ class SaleAfterTask extends Backend
         return $this->view->fetch();
     }
     /***
-     * 异步更新任务状态
+     * 异步更新任务状态(单个)
      */
     public function completeAjax(Request $request)
     {
@@ -342,13 +342,25 @@ class SaleAfterTask extends Backend
             return $this->error('请求失败,请勿请求');
         }
     }
-    public function ceshi()
+    /***
+     * 异步更新任务状态(多个)
+     */
+    public function completeAjaxAll($ids=null)
     {
-
-        $json = (new ManagtoPlatform())->getOrderPlatformList();
-//        $arr = (object)($json);
-//        dump(json_encode($arr));
-        dump($json);
-        dump(json_encode($json));
+        if($this->request->isAjax()){
+            if(!$ids){
+              return   $this->error('处理失败，请重新尝试');
+            }
+            $data = [];
+            $data['task_status'] = 2;
+            $data['handle_time'] = date("Y-m-d H:i:s",time());
+            $result = $this->model->where('id',$ids)->update($data);
+            if($result !== false){
+              return  $this->success('ok');
+            }
+        }else{
+            return $this->error('请求失败,请勿请求');
+        }
     }
+
 }

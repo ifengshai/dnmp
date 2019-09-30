@@ -270,26 +270,28 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                 source:function(request,response){
                     var incrementId = $('#increment_id').val();
                     var orderType = $('#c-order_platform').val();
-                    $.ajax({
-                        type:"POST",
-                        url:"saleaftermanage/order_return/ajaxGetLikeOrder",
-                        dataType : "json",
-                        cache : false,
-                        async : false,
-                        data : {
-                            orderType:orderType,order_number:incrementId
-                        },
-                        success : function(json) {
-                             var data = json.data;
-                            response($.map(data,function(item){
-                                return {
-                                    label:item,//下拉框显示值
-                                    value:item,//选中后，填充到input框的值
-                                    //id:item.bankCodeInfo//选中后，填充到id里面的值
-                                };
-                            }));
-                        }
-                    });
+                    if(incrementId.length>2){
+                        $.ajax({
+                            type:"POST",
+                            url:"saleaftermanage/order_return/ajaxGetLikeOrder",
+                            dataType : "json",
+                            cache : false,
+                            async : false,
+                            data : {
+                                orderType:orderType,order_number:incrementId
+                            },
+                            success : function(json) {
+                                 var data = json.data;
+                                response($.map(data,function(item){
+                                    return {
+                                        label:item,//下拉框显示值
+                                        value:item,//选中后，填充到input框的值
+                                        //id:item.bankCodeInfo//选中后，填充到id里面的值
+                                    };
+                                }));
+                            }
+                        });
+                    }
                 },
                 delay: 10,//延迟100ms便于输入
                 select : function(event, ui) {
@@ -304,26 +306,28 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                 source:function(request,response){
                     var customer_email = $('#customer_email').val();
                     var orderType = $('#c-order_platform').val();
-                    $.ajax({
-                        type:"POST",
-                        url:"saleaftermanage/order_return/ajaxGetLikeEmail",
-                        dataType : "json",
-                        cache : false,
-                        async : false,
-                        data : {
-                            orderType:orderType,email:customer_email
-                        },
-                        success : function(json) {
-                            var data = json.data;
-                            response($.map(data,function(item){
-                                return {
-                                    label:item,//下拉框显示值
-                                    value:item,//选中后，填充到input框的值
-                                    //id:item.bankCodeInfo//选中后，填充到id里面的值
-                                };
-                            }));
-                        }
-                    });
+                    if(customer_email.length>2){
+                        $.ajax({
+                            type:"POST",
+                            url:"saleaftermanage/order_return/ajaxGetLikeEmail",
+                            dataType : "json",
+                            cache : false,
+                            async : false,
+                            data : {
+                                orderType:orderType,email:customer_email
+                            },
+                            success : function(json) {
+                                var data = json.data;
+                                response($.map(data,function(item){
+                                    return {
+                                        label:item,//下拉框显示值
+                                        value:item,//选中后，填充到input框的值
+                                        //id:item.bankCodeInfo//选中后，填充到id里面的值
+                                    };
+                                }));
+                            }
+                        });
+                    }
                 },
                 delay: 10,//延迟100ms便于输入
                 select : function(event, ui) {
@@ -338,26 +342,28 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                 source:function(request,response){
                     var customer_phone = $('#customer_phone').val();
                     var orderType = $('#c-order_platform').val();
-                    $.ajax({
-                        type:"POST",
-                        url:"saleaftermanage/order_return/ajaxGetLikePhone",
-                        dataType : "json",
-                        cache : false,
-                        async : false,
-                        data : {
-                            orderType:orderType,customer_phone:customer_phone
-                        },
-                        success : function(json) {
-                            var data = json.data;
-                            response($.map(data,function(item){
-                                return {
-                                    label:item,//下拉框显示值
-                                    value:item,//选中后，填充到input框的值
-                                    //id:item.bankCodeInfo//选中后，填充到id里面的值
-                                };
-                            }));
-                        }
-                    });
+                    if(customer_phone.length>2){
+                        $.ajax({
+                            type:"POST",
+                            url:"saleaftermanage/order_return/ajaxGetLikePhone",
+                            dataType : "json",
+                            cache : false,
+                            async : false,
+                            data : {
+                                orderType:orderType,customer_phone:customer_phone
+                            },
+                            success : function(json) {
+                                var data = json.data;
+                                response($.map(data,function(item){
+                                    return {
+                                        label:item,//下拉框显示值
+                                        value:item,//选中后，填充到input框的值
+                                        //id:item.bankCodeInfo//选中后，填充到id里面的值
+                                    };
+                                }));
+                            }
+                        });
+                    }
                 },
                 delay: 10,//延迟100ms便于输入
                 select : function(event, ui) {
@@ -372,26 +378,28 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                 source:function(request,response){
                     var customer_name = $('#customer_name').val();
                     var orderType = $('#c-order_platform').val();
-                    $.ajax({
-                        type:"POST",
-                        url:"saleaftermanage/order_return/ajaxGetLikeName",
-                        dataType : "json",
-                        cache : false,
-                        async : false,
-                        data : {
-                            orderType:orderType,customer_name:customer_name
-                        },
-                        success : function(json) {
-                            var data = json.data;
-                            response($.map(data,function(item){
-                                return {
-                                    label:item,//下拉框显示值
-                                    value:item,//选中后，填充到input框的值
-                                    //id:item.bankCodeInfo//选中后，填充到id里面的值
-                                };
-                            }));
-                        }
-                    });
+                    if(customer_name.length>2){
+                        $.ajax({
+                            type:"POST",
+                            url:"saleaftermanage/order_return/ajaxGetLikeName",
+                            dataType : "json",
+                            cache : false,
+                            async : false,
+                            data : {
+                                orderType:orderType,customer_name:customer_name
+                            },
+                            success : function(json) {
+                                var data = json.data;
+                                response($.map(data,function(item){
+                                    return {
+                                        label:item,//下拉框显示值
+                                        value:item,//选中后，填充到input框的值
+                                        //id:item.bankCodeInfo//选中后，填充到id里面的值
+                                    };
+                                }));
+                            }
+                        });
+                    }
                 },
                 delay: 10,//延迟100ms便于输入
                 select : function(event, ui) {
@@ -406,26 +414,28 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                 source:function(request,response){
                     var track_number = $('#track_number').val();
                     var orderType = $('#c-order_platform').val();
-                    $.ajax({
-                        type:"POST",
-                        url:"saleaftermanage/order_return/ajaxGetLikeTrackNumber",
-                        dataType : "json",
-                        cache : false,
-                        async : false,
-                        data : {
-                            orderType:orderType,track_number:track_number
-                        },
-                        success : function(json) {
-                            var data = json.data;
-                            response($.map(data,function(item){
-                                return {
-                                    label:item,//下拉框显示值
-                                    value:item,//选中后，填充到input框的值
-                                    //id:item.bankCodeInfo//选中后，填充到id里面的值
-                                };
-                            }));
-                        }
-                    });
+                    if(track_number.length>2){
+                        $.ajax({
+                            type:"POST",
+                            url:"saleaftermanage/order_return/ajaxGetLikeTrackNumber",
+                            dataType : "json",
+                            cache : false,
+                            async : false,
+                            data : {
+                                orderType:orderType,track_number:track_number
+                            },
+                            success : function(json) {
+                                var data = json.data;
+                                response($.map(data,function(item){
+                                    return {
+                                        label:item,//下拉框显示值
+                                        value:item,//选中后，填充到input框的值
+                                        //id:item.bankCodeInfo//选中后，填充到id里面的值
+                                    };
+                                }));
+                            }
+                        });
+                    }
                 },
                 delay: 10,//延迟100ms便于输入
                 select : function(event, ui) {

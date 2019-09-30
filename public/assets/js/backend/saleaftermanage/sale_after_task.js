@@ -1,4 +1,4 @@
-define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefined, Backend, Table, Form) {
+define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui'], function ($, undefined, Backend, Table, Form) {
 
     var Controller = {
         index: function () {
@@ -103,6 +103,23 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             });
             // 为表格绑定事件
             Table.api.bindevent(table);
+            //处理任务完成
+            $(document).on('click', '.btn-handle-complete', function () {
+                var ids = Table.api.selectedids(table);
+                console.log(ids);
+                Layer.confirm(
+                    __('确定要处理完成吗'),
+                    function (index) {
+                        Backend.api.ajax({
+                            url: "saleaftermanage/sale_after_task/completeAjax",
+                            data: { ids: ids }
+                        }, function (data, ret) {
+                            table.bootstrapTable('refresh');
+                            Layer.close(index);
+                        });
+                    }
+                );
+            });
         },
         add: function () {
             Controller.api.bindevent();
@@ -194,6 +211,42 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 Form.api.bindevent($("form[role=form]"),function (data,ret) {
                     //console.log(ret);
                     location.href= ret.url;
+                });
+                //模糊匹配订单号
+                $('#c-order_number').autocomplete({
+                    source:function(request,response){
+                        var incrementId = $('#c-order_number').val();
+                        var orderType = $('#c-order_platform').val();
+                        if(incrementId.length>2){
+                            $.ajax({
+                                type:"POST",
+                                url:"saleaftermanage/order_return/ajaxGetLikeOrder",
+                                dataType : "json",
+                                cache : false,
+                                async : false,
+                                data : {
+                                    orderType:orderType,order_number:incrementId
+                                },
+                                success : function(json) {
+                                     var data = json.data;
+                                    response($.map(data,function(item){
+                                        return {
+                                            label:item,//下拉框显示值
+                                            value:item,//选中后，填充到input框的值
+                                            //id:item.bankCodeInfo//选中后，填充到id里面的值
+                                        };
+                                    }));
+                                }
+                            });
+                        }
+                    },
+                    delay: 10,//延迟100ms便于输入
+                    select : function(event, ui) {
+                        $("#bankUnionNo").val(ui.item.id);//取出在return里面放入到item中的属性
+                    },
+                    scroll:true,
+                    pagingMore:true,
+                    max:5000
                 });
                 //查询订单详情并生成任务单号
                 $(document).on('blur','#c-order_number',function(){

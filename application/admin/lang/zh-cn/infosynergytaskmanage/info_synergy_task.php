@@ -15,5 +15,8 @@ return [
     'Create_person'        => '创建人',
     'Create_time'          => '创建时间',
     'Add_remark'           => '添加备注',
-    'Handle'               => '处理'
+    'Synergy_status'       => '任务状态',
+    'Handle'               => '处理',
+    'Remark_record'        => '处理记录', 
+    'The collaborative task information has been completed and cannot be processed' => '协同任务信息已经完成，无法处理',
 ];
