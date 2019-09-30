@@ -141,7 +141,7 @@ class Index extends Backend
             $this->error(__('No Results were found'));
         }
         $track = new Trackingmore();
-        $track = $track->getRealtimeTrackingResults('dhl', '3735157241');  
+        $track = $track->getRealtimeTrackingResults('DHL', '3735157241');  
         dump($track);
 
         die;
