@@ -4,6 +4,7 @@ namespace app\admin\controller\order;
 
 use app\common\controller\Backend;
 use think\Hook;
+use fast\Trackingmore;
 
 
 /**
@@ -139,9 +140,15 @@ class Index extends Backend
         if (!$row) {
             $this->error(__('No Results were found'));
         }
+        $track = new Trackingmore();
+        $track = $track->getRealtimeTrackingResults('dhl', '3735157241');  
+        dump($track);
 
+        die;
         $express = $this->zeelool->getExpressData($label, $ids);
 
+        dump($express);
+        die;
         if ($express) {
             //查询物流信息
             try {
@@ -154,7 +161,7 @@ class Index extends Backend
         }
 
         $this->view->assign("row", $row);
-        
+
         return $this->view->fetch();
     }
 }
