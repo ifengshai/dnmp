@@ -5,8 +5,8 @@
         border-color: rgba(188, 188, 188, 1);
         border-radius: 6px;
         padding: 10px;
-        width: 50%;
-        margin-left: 20%;
+        width: 71%;
+        margin-left: 12%;
         margin-bottom: 10px;
     }
 
@@ -51,27 +51,44 @@
 
         width: 150px;
     }
+
+    .caigou #caigou-table tr td  .c-name{
+        width: 220px;
+    }
 </style>
 <form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
-    <div class="form-group" >
+    <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">{:__('Category_id')}:</label>
         <div class="col-xs-12 col-sm-3">
-            {:Form::select('row[category_id]', $categoryList, null, ['class'=>'form-control selectpicker', 'data-rule'=>'required','data-live-search' => true,'id'=>'choose_category_id'])}
+            <select id="choose_category_id" data-rule="required" class="form-control selectpicker"
+                data-live-search='true' name="row[category_id]">
+                {foreach name="categoryList" item="vo"}
+                <option value="{$key}">{$vo}</option>
+                {/foreach}
+            </select>
+
         </div>
         <label class="control-label col-xs-12 col-sm-2">{:__('ID')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <input id="c-origin_sku" data-rule="required" class="form-control"  name="row[origin_sku]" type="text" value="{$IdStr}" readonly>
+            <input id="c-origin_sku" data-rule="required" class="form-control" name="row[origin_sku]" type="text"
+                value="{$IdStr}" readonly>
         </div>
     </div>
     <div class="form-group" id="item-stock">
         <label class="control-label col-xs-12 col-sm-2">{:__('Brand_id')}:</label>
         <div class="col-xs-12 col-sm-3">
-            {:Form::select('row[brand_id]', $brandList, null, ['class'=>'form-control selectpicker', 'data-rule'=>'required','data-live-search' => true])}
+            <select id="brand_id" data-rule="required" class="form-control selectpicker" data-live-search='true'
+                name="row[brand_id]">
+                {foreach name="brandList" item="vo"}
+                <option value="{$key}">{$vo}</option>
+                {/foreach}
+            </select>
         </div>
         <label class="control-label col-xs-12 col-sm-2">{:__('Origin_sku')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <input id="item-count" name="row[item-count]" type="hidden" value=""/>
-            <input id="c-origin_skus" data-rule="required" class="form-control"  name="row[origin_skus]" type="text" value="">
+            <input id="item-count" name="row[item-count]" type="hidden" value="" />
+            <input id="c-origin_skus" data-rule="required" class="form-control" name="row[origin_skus]" type="text"
+                value="">
         </div>
 
     </div>
@@ -80,7 +97,8 @@
         <label class="control-label col-xs-12 col-sm-2"></label>
         <div class="col-xs-12 col-sm-8">
             <button type="submit" class="btn btn-success btn-embossed disabled">{:__('OK')}</button>
-            <button type="submit" class="btn btn-success btn-status btn-embossed disabled">{:__('Submit_audit')}</button>
+            <button type="submit"
+                class="btn btn-success btn-status btn-embossed disabled">{:__('Submit_audit')}</button>
             <button type="reset" class="btn btn-default btn-embossed">{:__('Reset')}</button>
         </div>
     </div>
@@ -88,12 +106,13 @@
 <div id="table-content" style="display: none;">
     <table>
         <tr>
-            <td><input  data-rule="required"  class="form-control c-name" name="row[name][]" type="text"></td>
-            <td><input  data-rule="required"  class="form-control c-color" name="row[color][]" type="text"></td>
-            <td><input  data-rule="required"  class="form-control c-supplier_sku" name="row[supplier_sku][]" type="text"></td>
+            <td><input data-rule="required" class="form-control c-name" name="row[name][]" type="text"></td>
+            <td><input data-rule="required" class="form-control c-color" name="row[color][]" type="text"></td>
+            <td><input data-rule="required" class="form-control c-supplier_sku" name="row[supplier_sku][]" type="text">
+            </td>
+            <td><input data-rule="required" class="form-control c-price" name="row[price][]" type="text"></td>
             <td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>
-                删除</a></td>
+                    删除</a></td>
         </tr>
     </table>
 </div>
-

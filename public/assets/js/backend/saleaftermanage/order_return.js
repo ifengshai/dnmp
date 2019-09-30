@@ -138,8 +138,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
             Controller.api.bindevent();
         },
 
-
-
         api: {
             formatter: {
                 devicess: function (value) {

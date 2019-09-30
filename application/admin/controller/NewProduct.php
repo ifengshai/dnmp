@@ -11,6 +11,8 @@ use think\exception\ValidateException;
 use app\admin\model\itemmanage\ItemBrand;
 use app\admin\model\purchase\Supplier;
 use app\admin\model\itemmanage\ItemPlatformSku;
+use think\Loader;
+use fast\Alibaba;
 
 /**
  * 商品管理
@@ -97,6 +99,8 @@ class NewProduct extends Backend
                 $itemName = $params['name'];
                 $itemColor = $params['color'];
                 $supplierSku = $params['supplier_sku'];
+                $skuId = $params['skuid'];
+                $price = $params['price'];
                 $data = $itemAttribute = [];
                 //求出材质对应的编码
                 if ($params['frame_texture']) {
@@ -119,7 +123,7 @@ class NewProduct extends Backend
                 try {
 
                     if (!array_filter($itemName)) {
-                        throw new Exception('缺少参数！！');
+                        throw new Exception('商品名称不能为空！！');
                     }
 
                     foreach (array_filter($itemName) as $k => $v) {
@@ -130,6 +134,7 @@ class NewProduct extends Backend
                         $data['supplier_id']    = $params['supplier_id'];
                         $data['supplier_sku']    = $supplierSku[$k];
                         $data['link']    = $params['link'];
+                        $data['price']    = $price[$k];
                         $data['supplier_id']    = $params['supplier_id'];
                         $data['create_person'] = session('admin.nickname');
                         $data['create_time'] = date("Y-m-d H:i:s", time());
@@ -178,10 +183,12 @@ class NewProduct extends Backend
                             //绑定供应商SKU关系
                             $supplier_data['sku'] = $data['sku'];
                             $supplier_data['supplier_sku'] = $supplierSku[$k];
+                            $supplier_data['skuid'] = $skuId[$k];
                             $supplier_data['supplier_id'] = $data['supplier_id'];
                             $supplier_data['createtime'] = date("Y-m-d H:i:s", time());
                             $supplier_data['create_person'] = session('admin.username');
                             $supplier_data['link'] = $data['link'];
+                            $supplier_data['is_matching'] = 1;
                             Db::name('supplier_sku')->insert($supplier_data);
                         } else {
                             throw new Exception('添加失败！！');
@@ -597,6 +604,7 @@ class NewProduct extends Backend
             $this->error('404 Not found');
         }
     }
+
     /***
      * 多个一起审核拒绝
      */
@@ -639,5 +647,46 @@ class NewProduct extends Backend
         }
     }
 
-    
+
+    /**
+     * 采集1688商品信息
+     */
+    public function ajaxCollectionGoodsDetail()
+    {
+        $row['link'] = input('link');
+        if (!$row['link']) {
+            $this->error('商品链接不能为空！！');
+        }
+        //获取缓存名称
+        $controllername = Loader::parseName($this->request->controller());
+        $actionname = strtolower($this->request->action());
+        $path = str_replace('.', '1', $controllername) . '_' . $actionname . '_' . md5($row['link']);
+        //是否存在缓存
+        $result = session($path);
+        if (!$result) {
+            //截取出商品id
+            $name = parse_url($row['link']);
+            preg_match('/\d+/', $name['path'], $goodsId);
+            //先添加到铺货列表
+            Alibaba::getGoodsPush([$goodsId[0]]);
+            //获取商品详情
+            $result = Alibaba::getGoodsDetail($goodsId[0]);
+            session($path, $result);
+        }
+
+        $list = [];
+        foreach ($result->productInfo->skuInfos as $k => $v) {
+            $list[$k]['id'] = $k + 1;
+            $list[$k]['title'] = $result->productInfo->subject;
+            $list[$k]['color'] = $v->attributes[0]->attributeValue;
+            $list[$k]['cargoNumber'] = $v->cargoNumber;
+            $list[$k]['price'] = @$v->price ? @$v->price : @$v->consignPrice;
+            $list[$k]['skuId'] = $v->skuId;
+        }
+        if ($list) {
+            $this->success('采集成功！！', '', $list);
+        } else {
+            $this->error('未采集到数据！！', '', $list);
+        }
+    }
 }

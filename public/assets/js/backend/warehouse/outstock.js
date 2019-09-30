@@ -1,4 +1,4 @@
-define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefined, Backend, Table, Form) {
+define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($, undefined, Backend, Table, Form) {
 
     var Controller = {
         index: function () {
@@ -137,19 +137,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             $(document).on('click', '.btn-del', function () {
                 $(this).parent().parent().remove();
             })
-            //添加
-            $(document).on('click', '.btn-add', function () {
-                var content = $('#table-content table tbody').html();
-                $('.caigou table tbody').append(content);
-            })
+
         },
         edit: function () {
             Controller.api.bindevent();
-            //新增
-            $(document).on('click', '.btn-add', function () {
-                var content = $('#table-content table tbody').html();
-                $('.caigou table tbody').append(content);
-            })
 
             //删除商品数据
             $(document).on('click', '.btn-del', function () {
@@ -163,7 +154,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 }
             })
         },
-        detail:function(){
+        detail: function () {
             Controller.api.bindevent();
         },
         api: {
@@ -173,6 +164,97 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     $('.status').val(1);
                 })
                 Form.api.bindevent($("form[role=form]"));
+
+
+                //模糊匹配订单
+                $('.sku').autocomplete({
+                    source: function (request, response) {
+                        $.ajax({
+                            type: "POST",
+                            url: "/admin/itemmanage/item/ajaxGetLikeOriginSku",
+                            dataType: "json",
+                            cache: false,
+                            async: false,
+                            data: {
+                                origin_sku: request.term
+                            },
+                            success: function (json) {
+                                var data = json.data;
+                                response($.map(data, function (item) {
+                                    return {
+                                        label: item,//下拉框显示值
+                                        value: item,//选中后，填充到input框的值
+                                        //id:item.bankCodeInfo//选中后，填充到id里面的值
+                                    };
+                                }));
+                            }
+                        });
+                    },
+                    delay: 10,//延迟100ms便于输入
+                    select: function (event, ui) {
+                        $("#bankUnionNo").val(ui.item.id);//取出在return里面放入到item中的属性
+                    },
+                    scroll: true,
+                    pagingMore: true,
+                    max: 5000
+                });
+
+
+                //添加
+                $(document).on('click', '.btn-add', function () {
+                    var content = $('#table-content table tbody').html();
+                    $('.caigou table tbody').append(content);
+
+                    //模糊匹配订单
+                    $('.sku').autocomplete({
+                        source: function (request, response) {
+                            $.ajax({
+                                type: "POST",
+                                url: "/admin/itemmanage/item/ajaxGetLikeOriginSku",
+                                dataType: "json",
+                                cache: false,
+                                async: false,
+                                data: {
+                                    origin_sku: request.term
+                                },
+                                success: function (json) {
+                                    var data = json.data;
+                                    response($.map(data, function (item) {
+                                        return {
+                                            label: item,//下拉框显示值
+                                            value: item,//选中后，填充到input框的值
+                                            //id:item.bankCodeInfo//选中后，填充到id里面的值
+                                        };
+                                    }));
+                                }
+                            });
+                        },
+                        delay: 10,//延迟100ms便于输入
+                        select: function (event, ui) {
+                            $("#bankUnionNo").val(ui.item.id);//取出在return里面放入到item中的属性
+                        },
+                        scroll: true,
+                        pagingMore: true,
+                        max: 5000
+                    });
+                })
+
+                //根据sku异步查询商品信息
+                $(document).on('blur', '.sku', function () {
+                    var _this = $(this);
+                    var sku = _this.val();
+                    Backend.api.ajax({
+                        url: '/admin/itemmanage/item/ajaxGoodsInfo',
+                        data: { sku: sku }
+                    }, function (res) {
+                        if (res) {
+                            _this.parent().next().text(res.name);
+                            _this.parent().next().next().text(res.stock);
+                            _this.parent().next().next().next().text(res.occupy_stock);
+                            _this.parent().next().next().next().next().text(res.available_stock);
+                        } 
+                    });
+                })
             }
         }
     };

@@ -1,3 +1,20 @@
+<div class="form-group ajax-add">
+    <label class="control-label col-xs-12 col-sm-2">{:__('供应商')}:</label>
+    <div class="col-xs-12 col-sm-3">
+        <select  id="supplier_id" data-rule="required" class="form-control selectpicker" data-live-search='true' name="row[supplier_id]">
+            <option value="">请选择</option>
+            {foreach name="AllSupplier" item="vo"}
+            <option value="{$key}">{$vo}</option>
+            {/foreach}
+        </select>
+    </div>
+    <label class="control-label col-xs-12 col-sm-2">{:__('1688商品链接')}:</label>
+    <div class="col-xs-12 col-sm-3">
+        <input id="c-link" data-rule="required" class="form-control" name="row[link]" type="text" value="">
+    </div>
+    <button type="button" class="btn btn-success btn-embossed btn-caiji">{:__('采集')}</button>
+</div>
+
 <div class='caigou ajax-add addition'>
     
     <div style="margin-bottom:20px;">
@@ -9,12 +26,14 @@
                 <th>商品名称</th>
                 <th>商品颜色</th>
                 <th>供应商SKU</th>
+                <th>单价</th>
                 <th>操作</th>
             </tr>
             <tr>
                 <td><input  data-rule="required"  class="form-control c-name" name="row[name][]" type="text"></td>
                 <td><input  data-rule="required"  class="form-control c-color" name="row[color][]" type="text"></td>
                 <td><input  data-rule="required"  class="form-control c-supplier_sku" name="row[supplier_sku][]" type="text"></td>
+                <td><input  data-rule="required"  class="form-control c-price" name="row[price][]" type="text"></td>
                 <td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>
                     删除</a></td>
             </tr>
@@ -42,16 +61,7 @@
     </div>
 </div>
 
-<div class="form-group ajax-add">
-    <label class="control-label col-xs-12 col-sm-2">{:__('供应商')}:</label>
-    <div class="col-xs-12 col-sm-3">
-        {:Form::select('row[supplier_id]', $AllSupplier, null, ['class'=>'form-control selectpicker', 'data-rule'=>'required','data-live-search' => true])}
-    </div>
-    <label class="control-label col-xs-12 col-sm-2">{:__('1688链接')}:</label>
-    <div class="col-xs-12 col-sm-3">
-        <input id="c-link" data-rule="required" class="form-control" name="row[link]" type="text" value="">
-    </div>
-</div>
+
 
 
 <div class="form-group ajax-add">
@@ -157,6 +167,7 @@
     <label class="control-label col-xs-12 col-sm-2">{:__('Frame_is_recipe')}:</label>
     <div class="col-xs-12 col-sm-3">
         <select  id="c-frame_is_recipe" data-rule="required" class="form-control selectpicker" name="row[frame_is_recipe]">
+            <option value="">请选择</option>
             <option value="1">是</option>
             <option value="2">否</option>
         </select>
@@ -164,6 +175,7 @@
     <label class="control-label col-xs-12 col-sm-2">{:__('Frame_piece')}:</label>
     <div class="col-xs-12 col-sm-3">
         <select  id="c-frame_piece" data-rule="required" class="form-control selectpicker" name="row[frame_piece]">
+            <option value="">请选择</option>
             <option value="1">是</option>
             <option value="2">否</option>
         </select>
@@ -173,6 +185,7 @@
     <label class="control-label col-xs-12 col-sm-2">{:__('Frame_temple_is_spring')}:</label>
     <div class="col-xs-12 col-sm-3">
         <select  id="c-frame_temple_is_spring" data-rule="required" class="form-control selectpicker" name="row[frame_temple_is_spring]">
+            <option value="">请选择</option>
             <option value="1">是</option>
             <option value="2">否</option>
         </select>
@@ -180,6 +193,7 @@
     <label class="control-label col-xs-12 col-sm-2">{:__('Frame_is_adjust_nose_pad')}:</label>
     <div class="col-xs-12 col-sm-3">
         <select  id="c-frame_is_adjust_nose_pad" data-rule="required" class="form-control selectpicker" name="row[frame_is_adjust_nose_pad]">
+            <option value="">请选择</option>
             <option value="1">是</option>
             <option value="2">否</option>
         </select>
@@ -189,6 +203,7 @@
     <label class="control-label col-xs-12 col-sm-2">{:__('Frame_is_advance')}:</label>
     <div class="col-xs-12 col-sm-3">
         <select  id="c-frame_is_advance" data-rule="required" class="form-control selectpicker" name="row[frame_is_advance]">
+            <option value="">请选择</option>
             <option value="1">是</option>
             <option value="2">否</option>
         </select>

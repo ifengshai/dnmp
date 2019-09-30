@@ -85,6 +85,8 @@
         </div>
     </div>
 
+    
+
     <div class="form-group ajax-add">
         <label class="control-label col-xs-12 col-sm-2">{:__('SKU')}:</label>
         <div class="col-xs-12 col-sm-3">
@@ -96,6 +98,21 @@
         </div>
         
     </div>
+
+    <div class="form-group ajax-add">
+        
+        <label class="control-label col-xs-12 col-sm-2">{:__('Brand_id')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            {:Form::select('row[brand_id]', $brandList, $row.brand_id, ['class'=>'form-control selectpicker', 'data-rule'=>'required','data-live-search' => true,'disabled'=>'disabled'])}
+        </div>
+
+        <label class="control-label col-xs-12 col-sm-2">{:__('单价')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-price" data-rule="required" class="form-control" name="row[price]" type="text" value="{$row['price']}">
+        </div>
+    </div>
+
+
     <div class="form-group ajax-add">
         
         <label class="control-label col-xs-12 col-sm-2">{:__('商品颜色')}:</label>
@@ -259,10 +276,7 @@
                 <option value="2"{eq name="$row['newproductattribute']['frame_is_recipe']" value="2"}selected{/eq}>否</option>
             </select>
         </div>
-        <label class="control-label col-xs-12 col-sm-2">{:__('Brand_id')}:</label>
-        <div class="col-xs-12 col-sm-3">
-            {:Form::select('row[brand_id]', $brandList, $row.brand_id, ['class'=>'form-control selectpicker', 'data-rule'=>'required','data-live-search' => true,'disabled'=>'disabled'])}
-        </div>
+        
     </div>
     <div class="form-group ajax-add">
         <label class="control-label col-xs-12 col-sm-2">{:__('Frame_remark')}:</label>
