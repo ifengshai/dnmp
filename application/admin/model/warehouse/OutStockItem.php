@@ -6,6 +6,7 @@ use think\Model;
 use app\admin\model\warehouse\Instock;
 use app\admin\model\warehouse\InstockItem;
 use app\admin\model\warehouse\OutStockLog;
+use app\admin\model\itemmanage\Item;
 
 class OutStockItem extends Model
 {
@@ -40,7 +41,7 @@ class OutStockItem extends Model
             $data = [];
             /**
              * 判断出库单出库数量大于入库单中未出库数量
-             * 则未出库数量扣除未0 进入下一次循环直到出库单出库数量扣除完为止
+             * 则未出库数量扣除为0 进入下一次循环直到出库单出库数量扣除完为止
              * 记录所扣除的采购单id
              */
             foreach ($res as $k => $v) {
@@ -54,7 +55,7 @@ class OutStockItem extends Model
                     $data[$k]['outstock_item_id'] = $value['id'];
                     $data[$k]['instock_item_id'] = $v['item_id'];
                     $data[$k]['out_stock_num'] = $v['no_stock_num'];
-                    $data[$k]['createtime'] = date('Y-m-d H:i:s',time());
+                    $data[$k]['createtime'] = date('Y-m-d H:i:s', time());
                 } else {
                     $list[$k]['id'] = $v['item_id'];
                     $list[$k]['no_stock_num'] = $v['no_stock_num'] - $value['out_stock_num'];
@@ -65,7 +66,7 @@ class OutStockItem extends Model
                     $data[$k]['outstock_item_id'] = $value['id'];
                     $data[$k]['instock_item_id'] = $v['item_id'];
                     $data[$k]['out_stock_num'] = $value['out_stock_num'];
-                    $data[$k]['createtime'] = date('Y-m-d H:i:s',time());
+                    $data[$k]['createtime'] = date('Y-m-d H:i:s', time());
                     break;
                 }
             }

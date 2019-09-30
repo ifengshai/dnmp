@@ -443,7 +443,6 @@ class Instock extends Backend
             /**
              * @todo 审核通过增加库存 并添加入库单入库数量
              */
-
             //查询入库明细数据
             $list = $this->model->hasWhere('instockItem', ['in_stock_id' => ['in', $ids]])->field('sku,in_stock_num')->select();
             $list = collection($list)->toArray();

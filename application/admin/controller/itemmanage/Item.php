@@ -7,6 +7,7 @@ use think\Request;
 use think\Db;
 use app\admin\model\itemmanage\ItemBrand;
 use app\admin\model\itemmanage\ItemPlatformSku;
+
 /**
  * 商品管理
  *
@@ -29,7 +30,7 @@ class Item extends Backend
         $this->itemAttribute = new \app\admin\model\itemmanage\attribute\ItemAttribute;
         $this->category = new \app\admin\model\itemmanage\ItemCategory;
         $this->view->assign('categoryList', $this->category->categoryList());
-        $this->view->assign('brandList',(new ItemBrand())->getBrandList());
+        $this->view->assign('brandList', (new ItemBrand())->getBrandList());
         $this->view->assign('AllFrameColor', $this->itemAttribute->getFrameColor());
         $num = $this->model->getOriginSku();
         $idStr = sprintf("%06d", $num);
@@ -49,12 +50,12 @@ class Item extends Backend
                 return $this->selectpage();
             }
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
-            $total = $this->model->where('is_open','<',3)
+            $total = $this->model->where('is_open', '<', 3)
                 ->where($where)
                 ->order($sort, $order)
                 ->count();
 
-            $list = $this->model->where('is_open','<',3)
+            $list = $this->model->where('is_open', '<', 3)
                 ->where($where)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
@@ -64,8 +65,8 @@ class Item extends Backend
             //求出品牌列表
             $brandArr    = (new ItemBrand())->getBrandList();
             $list = collection($list)->toArray();
-            foreach($list as $k =>$v){
-                if($v['category_id']){
+            foreach ($list as $k => $v) {
+                if ($v['category_id']) {
                     $list[$k]['category_id'] = $categoryArr[$v['category_id']];
                 }
                 $list[$k]['brand_id']  = $brandArr[$v['brand_id']];
@@ -87,12 +88,12 @@ class Item extends Backend
                 return $this->selectpage();
             }
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
-            $total = $this->model->where(['is_open'=>3])
+            $total = $this->model->where(['is_open' => 3])
                 ->where($where)
                 ->order($sort, $order)
                 ->count();
 
-            $list = $this->model->where(['is_open'=>3])
+            $list = $this->model->where(['is_open' => 3])
                 ->where($where)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
@@ -102,8 +103,8 @@ class Item extends Backend
             //求出品牌列表
             $brandArr    = (new ItemBrand())->getBrandList();
             $list = collection($list)->toArray();
-            foreach($list as $k =>$v){
-                if($v['category_id']){
+            foreach ($list as $k => $v) {
+                if ($v['category_id']) {
                     $list[$k]['category_id'] = $categoryArr[$v['category_id']];
                 }
                 $list[$k]['brand_id']  = $brandArr[$v['brand_id']];
@@ -198,22 +199,22 @@ class Item extends Backend
                     } elseif (!empty($params['origin_skus']) && $params['item-count'] < 1) { //原始sku失败情况
                         $this->error(__('Make sure the original sku code is the correct sku code'));
                     }
-//                    //多选的frame_shape
-//                    if(is_array($params['frame_shape'])){
-//                        $params['frame_shape'] = implode(',',$params['frame_shape']);
-//                    }
-//                    //多选的frame_size
-//                    if(is_array($params['frame_size'])){
-//                        $params['frame_size']  = implode(',',$params['frame_size']);
-//                    }
-//                    //多选的glasses_type
-//                    if(is_array($params['glasses_type'])){
-//                        $params['glasses_type'] = implode(',',$params['glasses_type']);
-//                    }
-//                    //多选的frame_is_adjust_nose_pad
-//                    if(is_array($params['frame_is_adjust_nose_pad'])){
-//                        $params['frame_is_adjust_nose_pad'] = implode(',',$params['frame_is_adjust_nose_pad']);
-//                    }
+                    //                    //多选的frame_shape
+                    //                    if(is_array($params['frame_shape'])){
+                    //                        $params['frame_shape'] = implode(',',$params['frame_shape']);
+                    //                    }
+                    //                    //多选的frame_size
+                    //                    if(is_array($params['frame_size'])){
+                    //                        $params['frame_size']  = implode(',',$params['frame_size']);
+                    //                    }
+                    //                    //多选的glasses_type
+                    //                    if(is_array($params['glasses_type'])){
+                    //                        $params['glasses_type'] = implode(',',$params['glasses_type']);
+                    //                    }
+                    //                    //多选的frame_is_adjust_nose_pad
+                    //                    if(is_array($params['frame_is_adjust_nose_pad'])){
+                    //                        $params['frame_is_adjust_nose_pad'] = implode(',',$params['frame_is_adjust_nose_pad']);
+                    //                    }
                     foreach ($itemName as $k => $v) {
                         $data['name'] = $v;
                         $data['category_id'] = $params['category_id'];
@@ -312,14 +313,14 @@ class Item extends Backend
     {
         $row = $this->model->get($ids, 'itemAttribute');
 
-//        echo '<pre>';
-//        var_dump($row['itemAttribute']['frame_size']);
-//        exit;
+        //        echo '<pre>';
+        //        var_dump($row['itemAttribute']['frame_size']);
+        //        exit;
         if (!$row) {
             $this->error(__('No Results were found'));
         }
         if ($row['item_status'] == 2) {
-            $this->error(__('The goods have been submitted for review and cannot be edited'),'/admin/itemmanage/item');
+            $this->error(__('The goods have been submitted for review and cannot be edited'), '/admin/itemmanage/item');
         }
         $adminIds = $this->getDataLimitAdminIds();
         if (is_array($adminIds)) {
@@ -336,21 +337,21 @@ class Item extends Backend
                 if (is_array($itemName) && !in_array("", $itemName)) {
                     $data = $itemAttribute = [];
                     //多选的frame_shape
-//                    if(is_array($params['frame_shape'])){
-//                        $params['frame_shape'] = implode(',',$params['frame_shape']);
-//                    }
-//                    //多选的frame_size
-//                    if(is_array($params['frame_size'])){
-//                        $params['frame_size']  = implode(',',$params['frame_size']);
-//                    }
-//                    //多选的glasses_type
-//                    if(is_array($params['glasses_type'])){
-//                        $params['glasses_type'] = implode(',',$params['glasses_type']);
-//                    }
-//                    //多选的frame_is_adjust_nose_pad
-//                    if(is_array($params['frame_is_adjust_nose_pad'])){
-//                        $params['frame_is_adjust_nose_pad'] = implode(',',$params['frame_is_adjust_nose_pad']);
-//                    }
+                    //                    if(is_array($params['frame_shape'])){
+                    //                        $params['frame_shape'] = implode(',',$params['frame_shape']);
+                    //                    }
+                    //                    //多选的frame_size
+                    //                    if(is_array($params['frame_size'])){
+                    //                        $params['frame_size']  = implode(',',$params['frame_size']);
+                    //                    }
+                    //                    //多选的glasses_type
+                    //                    if(is_array($params['glasses_type'])){
+                    //                        $params['glasses_type'] = implode(',',$params['glasses_type']);
+                    //                    }
+                    //                    //多选的frame_is_adjust_nose_pad
+                    //                    if(is_array($params['frame_is_adjust_nose_pad'])){
+                    //                        $params['frame_is_adjust_nose_pad'] = implode(',',$params['frame_is_adjust_nose_pad']);
+                    //                    }
                     foreach ($itemName as $k => $v) {
                         $data['name'] = $v;
                         $data['item_status'] = $params['item_status'];
@@ -393,10 +394,10 @@ class Item extends Backend
             }
             $this->error(__('Parameter %s can not be empty', ''));
         }
-        $row['itemAttribute']['frame_size']     = explode(',',$row['itemAttribute']['frame_size']);
-        $row['itemAttribute']['frame_shape']    = explode(',',$row['itemAttribute']['frame_shape']);
-        $row['itemAttribute']['glasses_type']   = explode(',',$row['itemAttribute']['glasses_type']);
-        $row['itemAttribute']['frame_is_adjust_nose_pad'] = explode(',',$row['itemAttribute']['frame_is_adjust_nose_pad']);
+        $row['itemAttribute']['frame_size']     = explode(',', $row['itemAttribute']['frame_size']);
+        $row['itemAttribute']['frame_shape']    = explode(',', $row['itemAttribute']['frame_shape']);
+        $row['itemAttribute']['glasses_type']   = explode(',', $row['itemAttribute']['glasses_type']);
+        $row['itemAttribute']['frame_is_adjust_nose_pad'] = explode(',', $row['itemAttribute']['frame_is_adjust_nose_pad']);
         $allShape = $this->itemAttribute->getAllShape();
         //获取所有材质
         $allTexture = $this->itemAttribute->getAllTexture();
@@ -422,7 +423,7 @@ class Item extends Backend
         $this->assign('AllFrameShape', $allFrameShape);
         $this->assign('AllShape', $allShape);
         $this->assign('AllTexture', $allTexture);
-        $this->assign('AllNosePad',$allNosePad);
+        $this->assign('AllNosePad', $allNosePad);
         $this->view->assign('template', $this->category->getAttrCategoryById($row['category_id']));
         $this->view->assign("row", $row);
         return $this->view->fetch();
@@ -507,7 +508,7 @@ class Item extends Backend
                 $this->assign('AllFrameShape', $allFrameShape);
                 $this->assign('AllShape', $allShape);
                 $this->assign('AllTexture', $allTexture);
-                $this->assign('AllNosePad',$allNosePad);
+                $this->assign('AllNosePad', $allNosePad);
                 //把选择的模板值传递给模板
                 $this->assign('Result', $result);
                 $data = $this->fetch('frame');
@@ -628,8 +629,8 @@ class Item extends Backend
             //查询样品数量
             $check = new \app\admin\model\warehouse\CheckItem;
             $check_list = $check->where($hasWhere)->column('sample_num', 'sku');
-            
-            foreach($list as &$v) {
+
+            foreach ($list as &$v) {
                 $v['on_way_stock'] = @$purchase_list[$v['sku']]['purchase_num'] - @$purchase_list[$v['sku']]['instock_num'];
                 $v['sample_stock'] = @$check_list[$v['sku']]['sample_num'];
             }
@@ -661,7 +662,7 @@ class Item extends Backend
             return $this->error(__('404 Not Found'));
         }
     }
-    
+
     /***
      * 商品详情表
      */
@@ -709,7 +710,7 @@ class Item extends Backend
      */
     public function images($id = null)
     {
-        $row = $this->model->get($id,'itemAttribute');
+        $row = $this->model->get($id, 'itemAttribute');
         if ($this->request->isAjax()) {
             $params = $this->request->post("row/a");
             $id = $params['id'];
@@ -736,13 +737,13 @@ class Item extends Backend
      */
     public function ajaxGetItemCategoryList()
     {
-        if($this->request->isAjax()){
+        if ($this->request->isAjax()) {
             $json = $this->category->getItemCategoryList();
-            if(!$json){
-                $json = [0=>'请添加商品分类'];
+            if (!$json) {
+                $json = [0 => '请添加商品分类'];
             }
             return json($json);
-        }else{
+        } else {
             $this->error('404 Not found');
         }
     }
@@ -751,25 +752,26 @@ class Item extends Backend
      */
     public function ajaxGetItemBrandList()
     {
-        if($this->request->isAjax()){
+        if ($this->request->isAjax()) {
             $json = (new ItemBrand())->getBrandList();
-            if(!$json){
-                $json = [0=>'请添加商品分类'];
+            if (!$json) {
+                $json = [0 => '请添加商品分类'];
             }
             return json($json);
-        }else{
+        } else {
             $this->error('404 Not found');
         }
     }
+
     /***
      * 编辑之后提交审核
      */
     public function audit()
     {
-        if($this->request->isAjax()){
+        if ($this->request->isAjax()) {
             $id = $this->request->param('ids');
             $row = $this->model->get($id);
-            if($row['item_status']!=1){
+            if ($row['item_status'] != 1) {
                 $this->error('此商品状态不能提交审核');
             }
             $map['id'] = $id;
@@ -780,7 +782,7 @@ class Item extends Backend
             } else {
                 $this->error('提交审核失败');
             }
-        }else{
+        } else {
             $this->error('404 Not found');
         }
     }
@@ -789,10 +791,10 @@ class Item extends Backend
      */
     public function passAudit()
     {
-        if($this->request->isAjax()){
+        if ($this->request->isAjax()) {
             $id = $this->request->param('ids');
             $row = $this->model->get($id);
-            if($row['item_status']!=2){
+            if ($row['item_status'] != 2) {
                 $this->error('此商品状态不能审核通过');
             }
             $map['id'] = $id;
@@ -805,7 +807,7 @@ class Item extends Backend
             } else {
                 $this->error('审核通过失败');
             }
-        }else{
+        } else {
             $this->error('404 Not found');
         }
     }
@@ -814,10 +816,10 @@ class Item extends Backend
      */
     public function auditRefused()
     {
-        if($this->request->isAjax()){
+        if ($this->request->isAjax()) {
             $id = $this->request->param('ids');
             $row = $this->model->get($id);
-            if($row['item_status']!=2){
+            if ($row['item_status'] != 2) {
                 $this->error('此商品状态不能审核拒绝');
             }
             $map['id'] = $id;
@@ -828,7 +830,7 @@ class Item extends Backend
             } else {
                 $this->error('审核拒绝失败');
             }
-        }else{
+        } else {
             $this->error('404 Not found');
         }
     }
@@ -838,7 +840,7 @@ class Item extends Backend
      */
     public function cancel()
     {
-        if($this->request->isAjax()){
+        if ($this->request->isAjax()) {
             $id = $this->request->param('ids');
             $map['id'] = $id;
             $data['item_status'] = 5;
@@ -848,17 +850,17 @@ class Item extends Backend
             } else {
                 $this->error('取消失败');
             }
-        }else{
+        } else {
             $this->error('404 Not found');
         }
     }
     /***
      * 启用商品
      */
-    public function startItem($ids=null)
+    public function startItem($ids = null)
     {
-        if($this->request->isAjax()){
-            $map['id'] = ['in',$ids];
+        if ($this->request->isAjax()) {
+            $map['id'] = ['in', $ids];
             $data['is_open'] = 1;
             $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
             if ($res !== false) {
@@ -866,17 +868,17 @@ class Item extends Backend
             } else {
                 $this->error('启动失败');
             }
-        }else{
+        } else {
             $this->error('404 Not found');
         }
     }
     /***
      * 禁止商品
      */
-    public function forbiddenItem($ids=null)
+    public function forbiddenItem($ids = null)
     {
-        if($this->request->isAjax()){
-            $map['id'] = ['in',$ids];
+        if ($this->request->isAjax()) {
+            $map['id'] = ['in', $ids];
             $data['is_open'] = 2;
             $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
             if ($res !== false) {
@@ -884,24 +886,24 @@ class Item extends Backend
             } else {
                 $this->error('禁止失败');
             }
-        }else{
+        } else {
             $this->error('404 Not found');
         }
     }
     /***
      * 多个一起审核通过
      */
-    public function morePassAudit($ids=null)
+    public function morePassAudit($ids = null)
     {
-        if($this->request->isAjax()){
-            $map['id'] = ['in',$ids];
+        if ($this->request->isAjax()) {
+            $map['id'] = ['in', $ids];
             $map['item_status'] = 2;
             $data['item_status'] = 3;
             $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
             if ($res !== false) {
-                $row = $this->model->where('id','in',$ids)->field('sku,name')->select();
-                if($row){
-                    foreach ($row as $val){
+                $row = $this->model->where('id', 'in', $ids)->field('sku,name')->select();
+                if ($row) {
+                    foreach ($row as $val) {
                         (new ItemPlatformSku())->addPlatformSku($val);
                     }
                 }
@@ -909,17 +911,17 @@ class Item extends Backend
             } else {
                 $this->error('审核失败');
             }
-        }else{
+        } else {
             $this->error('404 Not found');
         }
     }
     /***
      * 多个一起审核拒绝
      */
-    public function moreAuditRefused($ids=null)
+    public function moreAuditRefused($ids = null)
     {
-        if($this->request->isAjax()){
-            $map['id'] = ['in',$ids];
+        if ($this->request->isAjax()) {
+            $map['id'] = ['in', $ids];
             $map['item_status'] = 2;
             $data['item_status'] = 4;
             $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
@@ -928,17 +930,17 @@ class Item extends Backend
             } else {
                 $this->error('拒绝审核失败');
             }
-        }else{
+        } else {
             $this->error('404 Not found');
         }
     }
     /***
      * 多个商品移入回收站
      */
-    public function moveRecycle($ids=null)
+    public function moveRecycle($ids = null)
     {
-        if($this->request->isAjax()){
-            $map['id'] = ['in',$ids];
+        if ($this->request->isAjax()) {
+            $map['id'] = ['in', $ids];
             $data['is_open'] = 3;
             $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
             if ($res !== false) {
@@ -946,7 +948,7 @@ class Item extends Backend
             } else {
                 $this->error('移入回收站失败');
             }
-        }else{
+        } else {
             $this->error('404 Not found');
         }
     }
@@ -955,7 +957,7 @@ class Item extends Backend
      */
     public function oneRestore()
     {
-        if($this->request->isAjax()){
+        if ($this->request->isAjax()) {
             $id = $this->request->param('ids');
             $map['id'] = $id;
             $data['is_open'] = 1;
@@ -965,17 +967,17 @@ class Item extends Backend
             } else {
                 $this->error('还原失败');
             }
-        }else{
+        } else {
             $this->error('404 Not found');
         }
     }
     /***
      * 多个还原
      */
-    public function moreRestore($ids=null)
+    public function moreRestore($ids = null)
     {
-        if($this->request->isAjax()){
-            $map['id'] = ['in',$ids];
+        if ($this->request->isAjax()) {
+            $map['id'] = ['in', $ids];
             $data['is_open'] = 1;
             $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
             if ($res !== false) {
@@ -983,8 +985,24 @@ class Item extends Backend
             } else {
                 $this->error('还原失败');
             }
-        }else{
+        } else {
             $this->error('404 Not found');
+        }
+    }
+
+    /**
+     * 异步获取商品库存信息
+     */
+    public function ajaxGoodsInfo()
+    {
+        if ($this->request->isAjax()) {
+            $sku = input('sku');
+            $res = $this->model->getGoodsInfo($sku);
+            if ($res) {
+                $this->success('', '', $res);
+            } else {
+                $this->error('未找到数据！！');
+            }
         }
     }
 }
