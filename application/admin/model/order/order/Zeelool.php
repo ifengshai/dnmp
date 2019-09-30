@@ -205,7 +205,7 @@ class Zeelool extends Model
         $map['parent_id'] = $entity_id;
         $result = Db::connect($db)
             ->table('sales_flat_shipment_track')
-            ->field('track_number')
+            ->field('track_number,title')
             ->where($map)
             ->find();
         if (!$result) {
