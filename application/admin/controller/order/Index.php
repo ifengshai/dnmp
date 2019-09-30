@@ -158,7 +158,6 @@ class Index extends Backend
                     $this->error($e->getMessage());
                 }
             }
-            dump($express_data);die;
 
             $this->view->assign("express_data", $express_data);
         }
