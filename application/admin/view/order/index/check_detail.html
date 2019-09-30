@@ -194,27 +194,25 @@
     <div class="row item_info" style="margin-top:15px;width: 50%;float: right;">
         <p style="font-size: 16px;text-align: center;"><b>物流信息</b></p>
 
-        {foreach name='data' item='vo'}
         <div class='caigou'>
 
             <div class="form-group">
                 <label class="control-label col-xs-12 col-sm-2" >承运公司:</label>
-                <label class="control-label col-xs-12 col-sm-2" style="text-align: left;">{$vo.com}</label>
+                <label class="control-label col-xs-12 col-sm-2" style="text-align: left;">{$express_data.carrier_code}</label>
             </div>
             <div class="form-group">
                 <label class="control-label col-xs-12 col-sm-2">物流单号:</label>
-                <label class="control-label col-xs-12 col-sm-2" style="text-align: left;">{$vo.nu}</label>
+                <label class="control-label col-xs-12 col-sm-2" style="text-align: left;">{$express_data.tracking_number}</label>
             </div>
             <div class="form-group">
                 <label class="control-label col-xs-12 col-sm-2">物流信息:</label>
                 <div class="col-xs-12 col-sm-8" style="width: 80%;">
-                    {foreach name="vo.data" item="vi"}
-                        <p>{$vi.ftime} {$vi.context}</p>
+                    {foreach name="express_data.origin_info.trackinfo" item="vi"}
+                        <p>{$vi.Date} {$vi.StatusDescription}  {$vi.checkpoint_status}</p>
                     {/foreach}
                 </div>
             </div>
         </div>
-        {/foreach}
     </div>
 
 
