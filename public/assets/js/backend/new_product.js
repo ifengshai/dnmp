@@ -187,7 +187,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast'], func
                 var ids = Table.api.selectedids(table);
                 Layer.confirm(
                     __('确定要创建采购单吗'),
-                    function (index) { 
+                    function (index) {
                         Layer.closeAll();
                         var options = {
                             shadeClose: false,
@@ -207,6 +207,40 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast'], func
             $(document).on('click', '.btn-status', function () {
                 $('#status').val(2);
             });
+
+            //采集1688商品信息
+            $(document).on('click', '.btn-caiji', function () {
+                var link = $('#c-link').val();
+                if (!link) {
+                    Layer.alert('请先填写商品链接！！');
+                    return false;
+                }
+                Layer.load();
+                Backend.api.ajax({
+                    url: 'new_product/ajaxCollectionGoodsDetail',
+                    data: { link: link }
+                }, function (data, ret) {
+                    Layer.closeAll();
+                    //循环展示商品信息
+                    var shtml = ' <tr><th>商品名称</th><th>商品颜色</th><th>供应商SKU</th><th>单价</th><th>操作</th></tr>';
+                    $('.caigou table tbody').html('');
+                    for (var i in data) {
+                        shtml += '<tr><td><input id="c-name" class="form-control c-name" name="row[name][]" value="' + data[i].title + '" type="text"></td>'
+                        shtml += '<td><input id="c-color" class="form-control" name="row[color][]" value="' + data[i].color + '" type="text"></td>'
+                        shtml += '<td><input id="c-supplier_sku" class="form-control" name="row[supplier_sku][]" value="' + data[i].cargoNumber + '" type="text"></td>'
+                        shtml += '<td><input id="c-price" class="form-control" name="row[price][]" value="' + data[i].price + '" type="text"></td>'
+                        shtml += '<td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i> 删除</a></td>'
+                        shtml += '<input  class="form-control" name="row[skuid][]" value="' + data[i].skuId + '" type="hidden">'
+                        shtml += '</tr>'
+                    }
+                    $('.caigou table tbody').append(shtml);
+
+                }, function (data, ret) {
+                    //失败的回调
+                    Layer.closeAll();
+                    return false;
+                });
+            })
         },
         edit: function () {
             Controller.api.bindevent();
