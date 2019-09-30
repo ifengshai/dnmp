@@ -142,8 +142,7 @@ class Index extends Backend
         }
         //查询订单快递单号
         $express = $this->zeelool->getExpressData($label, $ids);
-        dump($express);die;
-
+    
         if ($express) {
             //缓存一个小时
             $express_data = session('order_checkDetail_' . $express['track_number'] . '_' . date('YmdH'));
