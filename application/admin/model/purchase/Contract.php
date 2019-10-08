@@ -37,6 +37,6 @@ class Contract extends Model
      */
     public function getContractData()
     {
-        return $this->select();
+        return $this->where('')->select();
     }
 }

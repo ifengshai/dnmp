@@ -178,6 +178,16 @@ class PurchaseReturn extends Backend
                     $params['status'] = 2;
                     $result = $row->allowField(true)->save($params);
 
+                    if ($params['logistics_number']) {
+                        //添加物流汇总表
+                        $logistics = new \app\admin\model\LogisticsInfo();
+                        $list['logistics_number'] = $params['logistics_number'];
+                        $list['type'] = 2;
+                        $list['order_number'] = $row['return_number'];
+                        $logistics->addLogisticsInfo($list);
+                    }
+
+
                     Db::commit();
                 } catch (ValidateException $e) {
                     Db::rollback();
