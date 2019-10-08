@@ -252,13 +252,6 @@ class OrderReturn extends Backend
         return $this->view->fetch();
     }
     /***
-     * 新建退款
-     */
-    public function refund()
-    {
-
-    }
-    /***
      * 新建退货单审核不通过
      */
     public function checkNoPass()
@@ -488,6 +481,107 @@ class OrderReturn extends Backend
                 return $this->success('','',$result,0);
         }else{
             $this->error('404 not found');
+        }
+    }
+    /***
+     * 改变退货订单状态,从新建变成收到退货
+     */
+    public function receive($ids=null)
+    {
+        if($this->request->isAjax()){
+            $row = $this->model->get($ids);
+            if($row['order_status'] !=1){
+             return   $this->error('退货单不是新建状态,无法变成收到退货状态');
+            }
+            $map['id'] = ['in', $ids];
+            $data['order_status'] = 2;
+            $result = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
+            if(false !== $result){
+               return $this->success('确认成功');
+            }else{
+               return $this->error('确认失败');     
+            }
+        }else{
+               return $this->error('404 Not Found');
+        }
+    }
+    /**
+     * 改变订单状态,从收到退货变成退货质检
+     */
+    public function quality($ids=null)
+    {
+        if($this->request->isAjax()){
+            $row = $this->model->get($ids);
+            if(2 != $row['order_status']){
+             return   $this->error('退货单不是退货收到状态,无法变成退货质检状态');
+            }
+            $map['id'] = ['in', $ids];
+            $data['order_status'] = 3;
+            $result = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
+            if(false !== $result){
+               return $this->success('确认成功');
+            }else{
+               return $this->error('确认失败');     
+            }
+        }else{
+               return $this->error('404 Not Found');
+        }
+    }
+    /***
+     * 改变订单状态,从退货质检到同步库存
+     */
+    public function syncStock($ids=null){
+        if($this->request->isAjax()){
+            $row = $this->model->get($ids);
+            if(3 != $row['order_status']){
+             return   $this->error('退货单不是退货质检状态,无法变成同步库存状态');
+            }
+            $map['id'] = ['in', $ids];
+            $data['order_status'] = 4;
+            $result = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
+            if(false !== $result){
+               return $this->success('确认成功');
+            }else{
+               return $this->error('确认失败');     
+            }
+        }else{
+               return $this->error('404 Not Found');
+        }
+    }
+    /***
+     * 改变订单状态,从同步库存到退款状态
+     */
+    public function refund($ids=null)
+    {
+        if($this->request->isAjax()){
+            $row = $this->model->get($ids);
+            if(4 != $row['order_status']){
+             return   $this->error('退货单不是退货质检状态,无法变成同步库存状态');
+            }
+            $map['id'] = ['in', $ids];
+            $data['order_status'] = 5;
+            $result = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
+            if(false !== $result){
+               return $this->success('确认成功');
+            }else{
+               return $this->error('确认失败');     
+            }
+        }else{
+               return $this->error('404 Not Found');
+        }
+    }
+    public function closed($ids=null){
+        if($this->request->isAjax()){
+            $map['id'] = ['in', $ids];
+            $data['order_status'] = 6;
+            $result = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
+            if(false !== $result){
+               return $this->success('确认成功');
+            }else{
+               return $this->error('确认失败');     
+            }
+        }else{
+               return $this->error('404 Not Found');
         }
     }
 }

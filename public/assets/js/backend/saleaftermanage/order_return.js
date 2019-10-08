@@ -45,7 +45,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                             field: 'order_status', 
                             title: __('Order_status'), 
                             searchList: { 1: '新建', 2: '退货收到', 3: '退货质检', 4: '同步库存', 5: '已退款',6:'关闭' },
-                            custom: { 1: 'yellow', 2: 'blue', 3: 'success', 4: 'red', 5: 'danger',6:'closed' },
+                            custom: { 1: 'yellow', 2: 'blue', 3: 'success', 4: 'red', 5: 'green',6:'closed' },
                             formatter: Table.api.formatter.status
                         },
                         { field: 'create_person', title: __('Create_person') },
@@ -69,7 +69,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                                     name: 'detail',
                                     text: '详情',
                                     title: __('Detail'),
-                                    classname: 'btn btn-xs  btn-primary  btn-dialog',
+                                    classname: 'btn btn-xs btn-primary btn-ajax',
                                     icon: 'fa fa-list',
                                     url: 'saleaftermanage/order_return/detail',
                                     extend: 'data-area = \'["100%","100%"]\'',
@@ -82,15 +82,22 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                                     // }
                                 },
                                 {
-                                    name: 'refund',
-                                    text: '退款',
-                                    title: __('Refund'),
-                                    classname: 'btn btn-xs btn-primary btn-ajax',
-                                    icon: 'fa fa-money',
-                                    confirm: '确定要退款吗',
-                                    url: 'saleaftermanage/order_return/refund',
-                                    callback: function (data) {
-                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                    name: 'receive',
+                                    text: '退货收到',
+                                    title: __('退货收到'),
+                                    classname: 'btn btn-xs btn-success btn-ajax',
+                                    icon: 'fa fa-pencil',
+                                    confirm: '确定要收到退货吗',
+                                    url: 'saleaftermanage/order_return/receive',
+                                    success: function (data, ret) {
+                                        Layer.alert(ret.msg);
+                                        $(".btn-refresh").trigger("click");
+                                        //如果需要阻止成功提示，则必须使用return false;
+                                        //return false;
+                                    },
+                                    error: function (data, ret) {
+                                        Layer.alert(ret.msg);
+                                        return false;
                                     },
                                     visible: function (row) {
                                         //返回true时按钮显示,返回false隐藏
@@ -98,22 +105,102 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                                     }
 
                                 },
-                                // {
-                                //     name: 'edit',
-                                //     text: '',
-                                //     title: __('Edit'),
-                                //     classname: 'btn btn-xs btn-success btn-dialog',
-                                //     icon: 'fa fa-pencil',
-                                //     url: 'purchase/purchase_order/edit',
-                                //     extend: 'data-area = \'["100%","100%"]\'',
-                                //     callback: function (data) {
-                                //         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
-                                //     },
-                                //     visible: function (row) {
-                                //         //返回true时按钮显示,返回false隐藏
-                                //         return true;
-                                //     }
-                                // }
+                                {
+                                    name: 'quality',
+                                    text: '退货质检',
+                                    title: __('quality'),
+                                    classname: 'btn btn-xs btn-success btn-ajax',
+                                    icon: 'fa fa-pencil',
+                                    confirm: '确定已经质检了吗',
+                                    url: 'saleaftermanage/order_return/quality',
+                                    success: function (data, ret) {
+                                        Layer.alert(ret.msg);
+                                        $(".btn-refresh").trigger("click");
+                                        //如果需要阻止成功提示，则必须使用return false;
+                                        //return false;
+                                    },
+                                    error: function (data, ret) {
+                                        Layer.alert(ret.msg);
+                                        return false;
+                                    },
+                                    visible: function (row) {
+                                        //返回true时按钮显示,返回false隐藏
+                                        return true;
+                                    }
+
+                                },
+                                {
+                                    name: 'syncStock',
+                                    text: '同步库存',
+                                    title: __('syncStock'),
+                                    classname: 'btn-xs btn-success btn-ajax',
+                                    icon: 'fa fa-pencil',
+                                    confirm: '确定要同步库存吗',
+                                    url: 'saleaftermanage/order_return/syncStock',
+                                    success: function (data, ret) {
+                                        Layer.alert(ret.msg);
+                                        $(".btn-refresh").trigger("click");
+                                        //如果需要阻止成功提示，则必须使用return false;
+                                        //return false;
+                                    },
+                                    error: function (data, ret) {
+                                        Layer.alert(ret.msg);
+                                        return false;
+                                    },
+                                    visible: function (row) {
+                                        //返回true时按钮显示,返回false隐藏
+                                        return true;
+                                    }
+
+                                },
+                                {
+                                    name: 'refund',
+                                    text: '退款',
+                                    title: __('Refund'),
+                                    classname: 'btn btn-xs btn-success btn-ajax',
+                                    icon: 'fa fa-pencil',
+                                    confirm: '确定要退款吗',
+                                    url: 'saleaftermanage/order_return/refund',
+                                    success: function (data, ret) {
+                                        Layer.alert(ret.msg);
+                                        $(".btn-refresh").trigger("click");
+                                        //如果需要阻止成功提示，则必须使用return false;
+                                        //return false;
+                                    },
+                                    error: function (data, ret) {
+                                        Layer.alert(ret.msg);
+                                        return false;
+                                    },
+                                    visible: function (row) {
+                                        //返回true时按钮显示,返回false隐藏
+                                        return true;
+                                    }
+
+                                },
+                                {
+                                    name: 'closed',
+                                    text: '关闭',
+                                    title: __('Closed'),
+                                    classname: 'btn btn-xs btn-success btn-ajax',
+                                    icon: 'fa fa-money',
+                                    confirm: '确定要关闭吗',
+                                    url: 'saleaftermanage/order_return/closed',
+                                    success: function (data, ret) {
+                                        Layer.alert(ret.msg);
+                                        $(".btn-refresh").trigger("click");
+                                        //如果需要阻止成功提示，则必须使用return false;
+                                        //return false;
+                                    },
+                                    error: function (data, ret) {
+                                        Layer.alert(ret.msg);
+                                        return false;
+                                    },
+                                    visible: function (row) {
+                                        //返回true时按钮显示,返回false隐藏
+                                        return true;
+                                    }
+
+                                }
                             ], formatter: Table.api.formatter.operate
                         }
                     ]
