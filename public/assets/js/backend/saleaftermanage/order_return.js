@@ -45,7 +45,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                             field: 'order_status', 
                             title: __('Order_status'), 
                             searchList: { 1: '新建', 2: '退货收到', 3: '退货质检', 4: '同步库存', 5: '已退款',6:'关闭' },
-                            custom: { 1: 'yellow', 2: 'blue', 3: 'success', 4: 'red', 5: 'green',6:'closed' },
+                            custom: { 1: 'yellow', 2: 'blue', 3: 'success', 4: 'red', 5: 'danger',6:'closed' },
                             formatter: Table.api.formatter.status
                         },
                         { field: 'create_person', title: __('Create_person') },
@@ -69,7 +69,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                                     name: 'detail',
                                     text: '详情',
                                     title: __('Detail'),
-                                    classname: 'btn btn-xs btn-primary btn-ajax',
+                                    classname: 'btn btn-xs  btn-primary  btn-dialog',
                                     icon: 'fa fa-list',
                                     url: 'saleaftermanage/order_return/detail',
                                     extend: 'data-area = \'["100%","100%"]\'',
@@ -201,6 +201,22 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                                     }
 
                                 }
+                                // {
+                                //     name: 'edit',
+                                //     text: '',
+                                //     title: __('Edit'),
+                                //     classname: 'btn btn-xs btn-success btn-dialog',
+                                //     icon: 'fa fa-pencil',
+                                //     url: 'purchase/purchase_order/edit',
+                                //     extend: 'data-area = \'["100%","100%"]\'',
+                                //     callback: function (data) {
+                                //         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                //     },
+                                //     visible: function (row) {
+                                //         //返回true时按钮显示,返回false隐藏
+                                //         return true;
+                                //     }
+                                // }
                             ], formatter: Table.api.formatter.operate
                         }
                     ]
