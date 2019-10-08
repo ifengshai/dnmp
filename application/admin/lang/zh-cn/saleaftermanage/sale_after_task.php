@@ -33,5 +33,6 @@ return [
     'Make_up_price_order' => '补差价订单号',
     'Add_remark'    => '添加备注',
     'Remark_record' => '备注记录',
-    'Handle_complete'=> '处理完成'
+    'Handle_complete'=> '处理完成',
+    'Select the updated record does not meet the requirements, please re-select'=>'选择更新的记录不符合要求，请您重新选择'
 ];
