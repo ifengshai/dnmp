@@ -31,6 +31,7 @@ class Instock extends Backend
         $this->model = new \app\admin\model\warehouse\Instock;
         $this->type = new \app\admin\model\warehouse\InstockType;
         $this->instockItem = new \app\admin\model\warehouse\InstockItem;
+        $this->purchase = new \app\admin\model\purchase\PurchaseOrder;
     }
 
     /**
@@ -438,7 +439,7 @@ class Instock extends Backend
         $purchase = new \app\admin\model\purchase\PurchaseOrderItem;
         $purchase->startTrans();
         try {
-            $data['create_person'] = session('admin.username');
+            $data['create_person'] = session('admin.nickname');
             $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
             /**
              * @todo 审核通过增加库存 并添加入库单入库数量
@@ -459,14 +460,24 @@ class Instock extends Backend
                     $purchase_map['sku'] = $v['sku'];
                     $purchase_map['purchase_id'] = $v['purchase_id'];
                     $purchase->where($purchase_map)->setInc('instock_num', $v['in_stock_num']);
+
+
+                    //更新采购单状态 已入库 或 部分入库
+                    //查询采购单商品总入库数量 以及采购数量
+                    $all_stock_num = $purchase->where('purchase_id', $v['purchase_id'])->sum('in_stock_num');
+                    $all_purchase_num = $purchase->where('purchase_id', $v['purchase_id'])->sum('purchase_num');
+                    //总入库数量 小于 采购单采购数量 则为部分入库 
+                    if ($all_stock_num < $all_purchase_num) {
+                        $stock_status = 1;
+                    } else {
+                        $stock_status = 2;
+                    }
+                    //修改采购单质检状态
+                    $purchase_data['stock_status'] = $stock_status;
+                    $this->purchase->allowField(true)->save($purchase_data, ['id' => $v['purchase_id']]);
                 }
             }
-            /**
-             * @todo:更新采购入库状态 已入库 部分入库
-             */
-            
-
-
+           
             $this->model->commit();
             $item->commit();
             $purchase->commit();
