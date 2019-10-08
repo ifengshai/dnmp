@@ -2,8 +2,9 @@
 
 return [
     'Id'                     => '序号',
-    'Status'                 => '退件状态',
+    'Status'                 => '退货状态',
     'Order_platform'         => '订单平台',
+    'Order_status'           => '退货状态',
     'Increment_id'           => '订单号',
     'Customer_email'         => '客户邮箱',
     'Customer_name'          => '客户姓名',
@@ -20,10 +21,10 @@ return [
     'Final_loss_amount'      => '最终损失金额',
     'Final_loss_remark'      => '退款备注',
     'Is_visable'             => '是否可见',
-    'Create_person'         => '记录创建人',
-    'Create_time'           => '创建日期',
-    'Issue_id'               =>'退货原因',
-    'Return_order_number'    =>'退货单号',
-    'Remark_record'         =>'备注记录',
-    'Add_remark'            =>'添加备注'
+    'Create_person'          => '记录创建人',
+    'Create_time'            => '创建日期',
+    'Issue_id'               => '退货原因',
+    'Return_order_number'    => '退货单号',
+    'Remark_record'          => '备注记录',
+    'Add_remark'             => '添加备注'
 ];
