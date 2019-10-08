@@ -50,9 +50,9 @@ class Zeelool extends Backend
             }
 
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
-            $map['status'] = ['in', ['free_processing', 'processing']];
+            // $map['status'] = ['in', ['free_processing', 'processing']];
             $total = $this->model
-                ->where($map)
+                // ->where($map)
                 ->where($where)
                 ->order($sort, $order)
                 ->count();
@@ -63,7 +63,7 @@ class Zeelool extends Backend
                      custom_match_delivery_created_at,custom_print_label,custom_order_prescription,custom_print_label_created_at,custom_service_name,created_at';
             $list = $this->model
                 ->field($field)
-                ->where($map)
+                // ->where($map)
                 ->where($where)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
@@ -104,7 +104,7 @@ class Zeelool extends Backend
             $increment_id = $this->request->post('increment_id');
             if ($increment_id) {
                 $map['increment_id'] = $increment_id;
-                $map['status'] = ['in', ['free_processing', 'processing']];
+                // $map['status'] = ['in', ['free_processing', 'processing']];
                 $list = $this->model
                     // ->field($field)
                     ->where($map)
