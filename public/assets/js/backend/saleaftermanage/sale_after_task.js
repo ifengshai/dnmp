@@ -119,6 +119,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui'], function ($, 
                     }
                 );
             });
+
         },
         add: function () {
             Controller.api.bindevent();
@@ -138,7 +139,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui'], function ($, 
                             url:'saleaftermanage/sale_after_task/completeAjax',
                             data:{idss:idss},
                         }, function(data, ret){
-                            table.bootstrapTable('refresh');
+                            location.href='/admin/saleaftermanage/sale_after_task';
+                            //$(".btn-refresh").trigger("click");
+                            //table.bootstrapTable('refresh');
                         }, function(data, ret){
                             console.log('失败的回调');
                         });

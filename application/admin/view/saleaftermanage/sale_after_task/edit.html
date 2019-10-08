@@ -1,3 +1,38 @@
+<style>
+    #remark-table{
+        margin-left: 17.5%;
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+    }
+    #remark-table tr {
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+        line-height: 50px;
+    }
+    #remark-table tr th {
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+        text-align: center;
+        font-size: 14px;
+    }
+    #remark-table tr td {
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+    }
+
+    .caigou #caigou-table tr td input {
+
+        width: 150px;
+    }
+</style>
 <form id="edit-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
 
     <div class="form-group">
@@ -60,21 +95,21 @@
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">{:__('Refund_money')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <input id="c-refund_money" data-rule="required" data-source="refund_money/index" class="form-control" name="row[refund_money]" type="text" value="{$row.refund_money|htmlentities}">
+            <input id="c-refund_money"  data-source="refund_money/index" class="form-control" name="row[refund_money]" type="text" value="{$row.refund_money|htmlentities}">
         </div>
         <label class="control-label col-xs-12 col-sm-2">{:__('Give_coupon')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <input id="c-give_coupon" data-rule="required" data-source="give_coupon/index" class="form-control" name="row[give_coupon]" type="text" value="{$row.give_coupon|htmlentities}">
+            <input id="c-give_coupon"  data-source="give_coupon/index" class="form-control" name="row[give_coupon]" type="text" value="{$row.give_coupon|htmlentities}">
         </div>
     </div>
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">{:__('Tariff')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <input id="c-tariff" data-rule="required" class="form-control" name="row[tariff]" type="number" value="{$row.tariff|htmlentities}">
+            <input id="c-tariff"  class="form-control" name="row[tariff]" type="number" value="{$row.tariff|htmlentities}">
         </div>
         <label class="control-label col-xs-12 col-sm-2">{:__('Make_up_price_order')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <input id="c-make_up_price_order" data-rule="required" data-source="problem/index" class="form-control" name="row[make_up_price_order]" type="text" value="{$row.make_up_price_order|htmlentities}">
+            <input id="c-make_up_price_order"  data-source="problem/index" class="form-control" name="row[make_up_price_order]" type="text" value="{$row.make_up_price_order|htmlentities}">
         </div>
     </div>
     <div class="form-group">

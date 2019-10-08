@@ -22,7 +22,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
             });
             $(document).on('click', ".problem_desc_info", function () {
                 var problem_desc = $(this).attr('name');
-                alert(problem_desc);
+                Layer.alert(problem_desc);
                 return false;
             });
             // 初始化表格
@@ -40,7 +40,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                         { field: 'customer_email', title: __('Customer_email') },
                         { field: 'sale_after_issue.name', title: __('Issue_id'), operate: false },
                         { field: 'return_remark', title: __('Return_remark'), formatter: Controller.api.formatter.getClear, operate: false },
-                        { field: 'status', title: __('Status'), searchList: { 'new': 'new', 'arrival': 'arrival', 'check': 'check', 'stock': 'stock', 'refund': 'refund', 'closed': 'closed' } },
+                        //{ field: 'status', title: __('Status'), searchList: { 'new': 'new', 'arrival': 'arrival', 'check': 'check', 'stock': 'stock', 'refund': 'refund', 'closed': 'closed' } },
+                        { 
+                            field: 'order_status', 
+                            title: __('Order_status'), 
+                            searchList: { 1: '新建', 2: '退货收到', 3: '退货质检', 4: '同步库存', 5: '已退款',6:'关闭' },
+                            custom: { 1: 'yellow', 2: 'blue', 3: 'success', 4: 'red', 5: 'danger',6:'closed' },
+                            formatter: Table.api.formatter.status
+                        },
                         { field: 'create_person', title: __('Create_person') },
                         { field: 'create_time', title: __('Create_time'), operate: 'RANGE', addclass: 'datetimerange' },
                         // {field: 'customer_name', title: __('Customer_name')},
