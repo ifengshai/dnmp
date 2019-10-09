@@ -18,6 +18,7 @@ return [
     'Make sure the original sku code is the correct sku code'=>'请确保原始sku编码是正确的sku编码',
     'The goods have been submitted for review and cannot be edited'=>'商品已经提交审核，无法编辑',
     'Failed to upload product picture, please try again'=>'上传商品图片失败，请重新尝试',
+    'The commodity sku code already exists, please add the commodity again or contact the developer'=>'商品sku编码已经存在,请重新添加商品或者联系开发者',
     'Glasses_type'  => '眼镜类型',
     'Frame_height'  => '框高(mm)',
     'Frame_width'   => '框宽(mm)',

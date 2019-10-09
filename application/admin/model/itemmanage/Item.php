@@ -257,5 +257,15 @@ class Item extends Model
         $result = $this->where($map)->field('name,stock,occupy_stock,available_stock')->find();
         return $result;
     }
+    /***
+     * 检测origin_sku是否存在
+     */
+    public function checkIsExistOriginSku($origin_sku)
+    {
+        $map['origin_sku'] = $origin_sku;
+        $result = $this->where($map)->field('id,origin_sku')->find();
+        return $result ? $result : false;
+
+    }
 
 }

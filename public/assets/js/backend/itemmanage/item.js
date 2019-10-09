@@ -344,7 +344,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                         $('#item-stock').after(resultData);
                         Form.api.bindevent($("form[role=form]"));
                         $(".selectpicker").selectpicker('refresh');
-
                         return false;
                     }, function (data, ret) {
                         //失败的回调
@@ -355,7 +354,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                 //采购类型和采购产地二级联动
                 $(document).on('change', '#c-procurement_type', function () {
                     var arrIds = $(this).val();
-                    console.log(arrIds);
                     if (arrIds == 0) {
                         Layer.alert('请选择采购类型');
                         return false;
@@ -383,6 +381,24 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
 
                         });
                     }
+                });
+                //根据随机数、采购类型、采购产地异步判断origin_sku是否存在
+                $(document).on('change', '#c-frame_texture', function () {
+                    var frame_texture       = $(this).val();
+                    var procurement_origin  = $('#c-procurement_origin').val();
+                    var origin_sku          = $('#c-origin_sku').val();
+                    Backend.api.ajax({
+                        url: 'itemmanage/item/checkOriginIsExist',
+                        data: { frame_texture:frame_texture, procurement_origin:procurement_origin,origin_sku:origin_sku}
+                    }, function (data, ret) {
+                        $('.btn-success').removeClass('btn-disabled disabled');
+                        return false;
+                    }, function (data, ret) {
+                        //失败的回调
+                        $('.btn-success').addClass('btn-disabled disabled');
+                        alert(ret.msg);
+                        return false;
+                    });
                 });
                 //模糊匹配原始sku
                 $('#c-origin_skus').autocomplete({
@@ -516,7 +532,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                             return false;
                         });
                     }
-                    console.log(name);
                 });
             }
         },
