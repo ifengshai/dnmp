@@ -90,8 +90,8 @@
         </div>
         <div class="form-group">
             <label class="control-label col-xs-12 col-sm-2">供应商:</label>
-            <div class="col-xs-12 col-sm-8">
-                <select name="row[supplier_id]" class="form-control supplier" required>
+            <div class="col-xs-12 col-sm-8"> 
+                <select name="row[supplier_id]" class="form-control supplier selectpicker" data-live-search='true' required>
                     <option value="">请选择</option>
                     {foreach $supplier as $k => $v}
                     <option value="{$k}">{$v}</option>
@@ -154,9 +154,9 @@
                             type="text"></td>
                     <td><input id="c-purchase_remark" class="form-control sample_num" name="sample_num[]" type="text">
                     </td>
-                    <td><input id="c-purchase_remark" class="form-control unqualified_num" name="unqualified_num[]"
+                    <td><input id="c-purchase_remark" class="form-control unqualified_num" readonly name="unqualified_num[]"
                             type="text"></td>
-                    <td><input id="c-purchase_remark" class="form-control quantity_rate" name="quantity_rate[]"
+                    <td><input id="c-purchase_remark" class="form-control quantity_rate" readonly name="quantity_rate[]"
                             type="text">%</td>
                     <td><input style="width: 200px;" id="c-purchase_remark" class="form-control remark" name="remark[]"
                             type="text"></td>

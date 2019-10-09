@@ -2,6 +2,7 @@
 
 namespace app\admin\controller\purchase;
 
+use app\admin\model\LogisticsInfo;
 use app\common\controller\Backend;
 use think\Db;
 use think\Exception;
@@ -404,8 +405,16 @@ class PurchaseOrder extends Backend
                         $row->validateFailException(true)->validate($validate);
                     }
                     $params['is_add_logistics'] = 1;
-                    $params['purchase_status'] = 5;
+                    $params['purchase_status'] = 6; //待收货
                     $result = $row->allowField(true)->save($params);
+
+                    //添加物流汇总表
+                    $logistics = new \app\admin\model\LogisticsInfo();
+                    $list['logistics_number'] = $params['logistics_number'];
+                    $list['type'] = 1;
+                    $list['order_number'] = $row['purchase_number'];
+                    $list['purchase_id'] = $ids;
+                    $logistics->addLogisticsInfo($list);
 
                     Db::commit();
                 } catch (ValidateException $e) {
@@ -854,5 +863,4 @@ class PurchaseOrder extends Backend
         }
         echo 'ok';
     }
-
 }

@@ -5,8 +5,7 @@
         border-color: rgba(188, 188, 188, 1);
         border-radius: 6px;
         padding: 10px;
-        width: 70%;
-        margin-left: 10%;
+        width: 100%;
         margin-bottom: 10px;
     }
 
@@ -84,7 +83,7 @@
         <div class="form-group purchase_id_number {:$row['purchase_id'] ? '' : 'hidden'}">
             <label class="control-label col-xs-12 col-sm-2">采购单:</label>
             <div class="col-xs-12 col-sm-8">
-                <select name="row[purchase_id]" class="form-control purchase_id">
+                <select name="row[purchase_id]" class="form-control purchase_id selectpicker" data-live-search='true'>
                     <option value="">请选择</option>
                     {foreach $purchase_data as $k => $v}
                     <option value="{$k}" {:$row['purchase_id']==$k ? 'selected' : '' }>{$v}</option>
@@ -96,7 +95,7 @@
         <div class="form-group">
             <label class="control-label col-xs-12 col-sm-2">供应商:</label>
             <div class="col-xs-12 col-sm-8">
-                <select name="row[supplier_id]" class="form-control supplier" required>
+                <select name="row[supplier_id]" class="form-control supplier selectpicker" data-live-search='true' required>
                     <option value="">请选择</option>
                     {foreach $supplier as $k => $v}
                     <option value="{$k}" {:$row['supplier_id']==$k ? 'selected' : '' }>{$v}</option>
@@ -121,7 +120,7 @@
     </style>
 
     <hr>
-    <div class='caigou' style="margin-left:20px;width:98%;">
+    <div class='caigou'>
         <p style="font-size: 16px;text-align: center;"><b>产品信息</b></p>
         <div style="margin-bottom:20px;">
             <div id="toolbar" class="toolbar">
