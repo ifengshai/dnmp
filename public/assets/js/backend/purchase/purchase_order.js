@@ -10,7 +10,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     index_url: 'purchase/purchase_order/index' + location.search,
                     add_url: 'purchase/purchase_order/add',
                     edit_url: 'purchase/purchase_order/edit',
-                    del_url: 'purchase/purchase_order/del',
+                    // del_url: 'purchase/purchase_order/del',
                     multi_url: 'purchase/purchase_order/multi',
                     table: 'purchase_order',
                 }

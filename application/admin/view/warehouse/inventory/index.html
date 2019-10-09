@@ -21,7 +21,7 @@
                         <a href="javascript:;" data-area='["100%","100%"]' class="btn btn-success btn-edit btn-disabled disabled {:$auth->check('warehouse/inventory/edit')?'':'hide'}" title="{:__('Edit')}" ><i class="fa fa-pencil"></i> {:__('Edit')}</a>
                         <a href="javascript:;" class="btn btn-danger btn-del btn-disabled disabled {:$auth->check('warehouse/inventory/del')?'':'hide'}" title="{:__('Delete')}" ><i class="fa fa-trash"></i> {:__('Delete')}</a>
                         <!-- <a href="javascript:;" class="btn btn-danger btn-import {:$auth->check('warehouse/inventory/import')?'':'hide'}" title="{:__('Import')}" id="btn-import-file" data-url="ajax/upload" data-mimetype="csv,xls,xlsx" data-multiple="false"><i class="fa fa-upload"></i> {:__('Import')}</a> -->
-                        <a href="javascript:;" class="btn btn-danger btn-del btn-disabled disabled btn-endInventory {:$auth->check('warehouse/inventory/endInventory')?'':'hide'}" title="{:__('结束盘点')}" ><i class="fa fa-trash"></i> {:__('结束盘点')}</a>
+                        <a href="javascript:;" class="btn btn-danger btn-del btn-disabled disabled btn-endInventory {:$auth->check('warehouse/inventory/endInventory')?'':'hide'}" title="{:__('结束盘点')}" ><i class="fa fa-stop"></i> {:__('结束盘点')}</a>
                         
                         
                     </div>

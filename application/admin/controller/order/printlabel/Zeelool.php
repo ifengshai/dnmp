@@ -118,6 +118,9 @@ class Zeelool extends Backend
         return $this->view->fetch('_list');
     }
 
+    /**
+     * 镜片参数
+     */
     public function detail($ids = null)
     {
         $row = $this->model->get($ids);
@@ -126,6 +129,7 @@ class Zeelool extends Backend
         }
         //查询订单详情
         $result = $this->model->getOrderDetail(1, $ids);
+        
         $this->assign('result', $result);
         return $this->view->fetch();
     }
