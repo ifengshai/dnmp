@@ -114,7 +114,7 @@
                         htmlForm.push(sprintf('<div class="col-xs-6"><input type="%s" class="%s" name="%s" value="%s" placeholder="%s" id="%s" data-index="%s" %s %s></div>', type, addClass, vObjCol.field, defaultValueArr[1], placeholderArr[1], vObjCol.field, i, style, extend));
                         htmlForm.push('</div>');
                     } else {
-                        htmlForm.push(sprintf('<input type="%s" class="%s" name="%s" value="%s" placeholder="%s" id="%s" data-index="%s" %s %s>', type, addClass, vObjCol.field, defaultValue, placeholder, vObjCol.field, i, style, extend));
+                        htmlForm.push(sprintf('<input type="%s" autocomplete="off" class="%s" name="%s" value="%s" placeholder="%s" id="%s" data-index="%s" %s %s>', type, addClass, vObjCol.field, defaultValue, placeholder, vObjCol.field, i, style, extend));
                     }
                 }
 
