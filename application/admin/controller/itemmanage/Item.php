@@ -115,8 +115,8 @@ class Item extends Backend
         }
         return $this->view->fetch();
     }
-    //新增商品
-    public function add()
+    //新增商品原先代码
+    public function add_yuan()
     {
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
@@ -306,6 +306,113 @@ class Item extends Backend
         }
         return $this->view->fetch();
     }
+        //新增商品
+    public function add()
+    {
+            if ($this->request->isPost()) {
+                $params = $this->request->post("row/a");
+                if ($params) {
+                    $params = $this->preExcludeFields($params);
+                    $itemName = $params['name'];
+                    $itemColor = $params['color'];
+                    if (is_array($itemName) && !in_array("", $itemName)) {
+                        $data = $itemAttribute = [];
+                        //求出材质对应的编码
+                        if ($params['frame_texture']) {
+                            $textureEncode = $this->itemAttribute->getTextureEncode($params['frame_texture']);
+                        } else {
+                            $textureEncode = 'O';
+                        }
+                        //如果是后来添加的
+                        if (!empty($params['origin_skus']) && $params['item-count'] >= 1) { //正常情况
+                            $count = $params['item-count'];
+                            $params['origin_sku'] = substr($params['origin_skus'], 0, strpos($params['origin_skus'], '-'));
+                        } elseif (empty($params['origin_skus']) && $params['item-count'] >= 1) { //去掉原始sku情况
+                            $this->error(__('Make sure the original sku code exists'));
+                        } elseif (!empty($params['origin_skus']) && $params['item-count'] < 1) { //原始sku失败情况
+                            $this->error(__('Make sure the original sku code is the correct sku code'));
+                        }
+                        if (!empty($params['origin_skus'])) {
+                            $data['origin_sku'] = $params['origin_sku'];
+
+                        } else {
+                            $data['origin_sku'] = $params['procurement_origin'] . $textureEncode . $params['origin_sku'];
+                            $checkOriginSku     = $this->model->checkIsExistOriginSku($data['origin_sku']);
+                            if($checkOriginSku){
+                                $this->error(__('The commodity sku code already exists, please add the commodity again or contact the developer'));
+                            }
+
+                        }
+                        Db::startTrans();
+                        try{
+                            foreach ($itemName as $k => $v) {
+                                $data['name'] = $v;
+                                $data['category_id'] = $params['category_id'];
+                                $data['item_status'] = $params['item_status'];
+                                $data['brand_id']    = $params['brand_id'];
+                                $data['create_person'] = session('admin.nickname');
+                                $data['create_time'] = date("Y-m-d H:i:s", time());
+                                //后来添加的商品数据
+                                if(!empty($params['origin_skus'])){
+                                    $data['sku'] = $params['origin_sku'] . '-' . sprintf("%02d", $count + 1);
+                                    ++$count;   
+                                }else{
+                                    $data['sku'] = $params['procurement_origin'] . $textureEncode . $params['origin_sku'] . '-' . sprintf("%02d", $k + 1);
+                                }
+                                $lastInsertId = Db::name('item')->insertGetId($data);
+                                if ($lastInsertId !== false) {
+                                    $itemAttribute['item_id'] = $lastInsertId;
+                                    $itemAttribute['attribute_type'] = $params['attribute_type'];
+                                    $itemAttribute['glasses_type'] = $params['glasses_type'];
+                                    $itemAttribute['frame_height'] = $params['frame_height'];
+                                    $itemAttribute['frame_width'] = $params['frame_width'];
+                                    $itemAttribute['frame_color'] = $itemColor[$k];
+                                    $itemAttribute['frame_weight'] = $params['weight'];
+                                    $itemAttribute['procurement_type'] = $params['procurement_type'];
+                                    $itemAttribute['procurement_origin'] = $params['procurement_origin'];
+                                    $itemAttribute['frame_length'] = $params['frame_length'];
+                                    $itemAttribute['frame_temple_length'] = $params['frame_temple_length'];
+                                    $itemAttribute['shape'] = $params['shape'];
+                                    $itemAttribute['frame_bridge'] = $params['frame_bridge'];
+                                    $itemAttribute['mirror_width'] = $params['mirror_width'];
+                                    $itemAttribute['frame_type'] = $params['frame_type'];
+                                    $itemAttribute['frame_texture'] = $params['frame_texture'];
+                                    $itemAttribute['frame_shape'] = $params['frame_shape'];
+                                    $itemAttribute['frame_gender'] = $params['frame_gender'];
+                                    $itemAttribute['frame_size'] = $params['frame_size'];
+                                    $itemAttribute['frame_is_recipe'] = $params['frame_is_recipe'];
+                                    $itemAttribute['frame_piece'] = $params['frame_piece'];
+                                    $itemAttribute['frame_is_advance'] = $params['frame_is_advance'];
+                                    $itemAttribute['frame_temple_is_spring'] = $params['frame_temple_is_spring'];
+                                    $itemAttribute['frame_is_adjust_nose_pad'] = $params['frame_is_adjust_nose_pad'];
+                                    $itemAttribute['frame_remark'] = $params['frame_remark'];
+                                    Db::name('item_attribute')->insert($itemAttribute);
+                                }
+                            }
+                            Db::commit();    
+                        }catch (ValidateException $e) {
+                            Db::rollback();
+                            $this->error($e->getMessage());
+                        } catch (PDOException $e) {
+                            Db::rollback();
+                            $this->error($e->getMessage());
+                        } catch (Exception $e) {
+                            Db::rollback();
+                            $this->error($e->getMessage());
+                        }
+                    } else {
+                            $this->error(__('Please add product name and color'));
+                    }
+                    if ($lastInsertId !== false) {
+                            $this->success();
+                    } else {
+                            $this->error(__('No rows were inserted'));
+                    }
+                }
+                $this->error(__('Parameter %s can not be empty', ''));
+            }
+                return $this->view->fetch();
+    }
     /**
      * 编辑
      */
@@ -336,22 +443,6 @@ class Item extends Backend
                 $itemColor = $params['color'];
                 if (is_array($itemName) && !in_array("", $itemName)) {
                     $data = $itemAttribute = [];
-                    //多选的frame_shape
-                    //                    if(is_array($params['frame_shape'])){
-                    //                        $params['frame_shape'] = implode(',',$params['frame_shape']);
-                    //                    }
-                    //                    //多选的frame_size
-                    //                    if(is_array($params['frame_size'])){
-                    //                        $params['frame_size']  = implode(',',$params['frame_size']);
-                    //                    }
-                    //                    //多选的glasses_type
-                    //                    if(is_array($params['glasses_type'])){
-                    //                        $params['glasses_type'] = implode(',',$params['glasses_type']);
-                    //                    }
-                    //                    //多选的frame_is_adjust_nose_pad
-                    //                    if(is_array($params['frame_is_adjust_nose_pad'])){
-                    //                        $params['frame_is_adjust_nose_pad'] = implode(',',$params['frame_is_adjust_nose_pad']);
-                    //                    }
                     foreach ($itemName as $k => $v) {
                         $data['name'] = $v;
                         $data['item_status'] = $params['item_status'];
@@ -1003,6 +1094,32 @@ class Item extends Backend
             } else {
                 $this->error('未找到数据！！');
             }
+        }
+    }
+    /***
+     * 异步检测sku是否存在
+     */
+    public function checkOriginIsExist()
+    {
+        if($this->request->isAjax()){
+            $frame_texture     = $this->request->param('frame_texture');
+            $procurment_origin = $this->request->param('procurement_origin');
+            $origin_sku        = $this->request->param('origin_sku');
+            if ($frame_texture) {
+                $textureEncode = $this->itemAttribute->getTextureEncode($frame_texture);
+            } else {
+                $textureEncode = 'O';
+            }
+            $final_sku = $procurment_origin . $textureEncode . $origin_sku;
+            $checkOriginSku     = $this->model->checkIsExistOriginSku($final_sku);
+            if($checkOriginSku){
+                return  $this->error(__('The commodity sku code already exists, please add the commodity again or contact the developer'));
+            }else{
+                return $this->success('可以使用这个sku');
+            }
+
+        }else{
+            $this->error('404 Not Found');
         }
     }
 }
