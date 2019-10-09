@@ -343,65 +343,75 @@ class Item extends Backend
                             }
 
                         }
-                        dump($data['origin_sku']);
-                        exit;
-                        foreach ($itemName as $k => $v) {
-                            $data['name'] = $v;
-                            $data['category_id'] = $params['category_id'];
-                            $data['item_status'] = $params['item_status'];
-                            $data['brand_id']    = $params['brand_id'];
-                            $data['create_person'] = session('admin.nickname');
-                            $data['create_time'] = date("Y-m-d H:i:s", time());
-                            //后来添加的商品数据
-                            if(!empty($params['origin_skus'])){
-                                $data['sku'] = $params['origin_sku'] . '-' . sprintf("%02d", $count + 1);
-                                ++$count;   
-                            }else{
-                                $data['sku'] = $params['procurement_origin'] . $textureEncode . $params['origin_sku'] . '-' . sprintf("%02d", $k + 1);
+                        Db::startTrans();
+                        try{
+                            foreach ($itemName as $k => $v) {
+                                $data['name'] = $v;
+                                $data['category_id'] = $params['category_id'];
+                                $data['item_status'] = $params['item_status'];
+                                $data['brand_id']    = $params['brand_id'];
+                                $data['create_person'] = session('admin.nickname');
+                                $data['create_time'] = date("Y-m-d H:i:s", time());
+                                //后来添加的商品数据
+                                if(!empty($params['origin_skus'])){
+                                    $data['sku'] = $params['origin_sku'] . '-' . sprintf("%02d", $count + 1);
+                                    ++$count;   
+                                }else{
+                                    $data['sku'] = $params['procurement_origin'] . $textureEncode . $params['origin_sku'] . '-' . sprintf("%02d", $k + 1);
+                                }
+                                $lastInsertId = Db::name('item')->insertGetId($data);
+                                if ($lastInsertId !== false) {
+                                    $itemAttribute['item_id'] = $lastInsertId;
+                                    $itemAttribute['attribute_type'] = $params['attribute_type'];
+                                    $itemAttribute['glasses_type'] = $params['glasses_type'];
+                                    $itemAttribute['frame_height'] = $params['frame_height'];
+                                    $itemAttribute['frame_width'] = $params['frame_width'];
+                                    $itemAttribute['frame_color'] = $itemColor[$k];
+                                    $itemAttribute['frame_weight'] = $params['weight'];
+                                    $itemAttribute['procurement_type'] = $params['procurement_type'];
+                                    $itemAttribute['procurement_origin'] = $params['procurement_origin'];
+                                    $itemAttribute['frame_length'] = $params['frame_length'];
+                                    $itemAttribute['frame_temple_length'] = $params['frame_temple_length'];
+                                    $itemAttribute['shape'] = $params['shape'];
+                                    $itemAttribute['frame_bridge'] = $params['frame_bridge'];
+                                    $itemAttribute['mirror_width'] = $params['mirror_width'];
+                                    $itemAttribute['frame_type'] = $params['frame_type'];
+                                    $itemAttribute['frame_texture'] = $params['frame_texture'];
+                                    $itemAttribute['frame_shape'] = $params['frame_shape'];
+                                    $itemAttribute['frame_gender'] = $params['frame_gender'];
+                                    $itemAttribute['frame_size'] = $params['frame_size'];
+                                    $itemAttribute['frame_is_recipe'] = $params['frame_is_recipe'];
+                                    $itemAttribute['frame_piece'] = $params['frame_piece'];
+                                    $itemAttribute['frame_is_advance'] = $params['frame_is_advance'];
+                                    $itemAttribute['frame_temple_is_spring'] = $params['frame_temple_is_spring'];
+                                    $itemAttribute['frame_is_adjust_nose_pad'] = $params['frame_is_adjust_nose_pad'];
+                                    $itemAttribute['frame_remark'] = $params['frame_remark'];
+                                    Db::name('item_attribute')->insert($itemAttribute);
+                                }
                             }
-                            $lastInsertId = Db::name('item')->insertGetId($data);
-                            if ($lastInsertId !== false) {
-    
-                                $itemAttribute['item_id'] = $lastInsertId;
-                                $itemAttribute['attribute_type'] = $params['attribute_type'];
-                                $itemAttribute['glasses_type'] = $params['glasses_type'];
-                                $itemAttribute['frame_height'] = $params['frame_height'];
-                                $itemAttribute['frame_width'] = $params['frame_width'];
-                                $itemAttribute['frame_color'] = $itemColor[$k];
-                                $itemAttribute['frame_weight'] = $params['weight'];
-                                $itemAttribute['procurement_type'] = $params['procurement_type'];
-                                $itemAttribute['procurement_origin'] = $params['procurement_origin'];
-                                $itemAttribute['frame_length'] = $params['frame_length'];
-                                $itemAttribute['frame_temple_length'] = $params['frame_temple_length'];
-                                $itemAttribute['shape'] = $params['shape'];
-                                $itemAttribute['frame_bridge'] = $params['frame_bridge'];
-                                $itemAttribute['mirror_width'] = $params['mirror_width'];
-                                $itemAttribute['frame_type'] = $params['frame_type'];
-                                $itemAttribute['frame_texture'] = $params['frame_texture'];
-                                $itemAttribute['frame_shape'] = $params['frame_shape'];
-                                $itemAttribute['frame_gender'] = $params['frame_gender'];
-                                $itemAttribute['frame_size'] = $params['frame_size'];
-                                $itemAttribute['frame_is_recipe'] = $params['frame_is_recipe'];
-                                $itemAttribute['frame_piece'] = $params['frame_piece'];
-                                $itemAttribute['frame_is_advance'] = $params['frame_is_advance'];
-                                $itemAttribute['frame_temple_is_spring'] = $params['frame_temple_is_spring'];
-                                $itemAttribute['frame_is_adjust_nose_pad'] = $params['frame_is_adjust_nose_pad'];
-                                $itemAttribute['frame_remark'] = $params['frame_remark'];
-                                Db::name('item_attribute')->insert($itemAttribute);
-                            }
+                            Db::commit();    
+                        }catch (ValidateException $e) {
+                            Db::rollback();
+                            $this->error($e->getMessage());
+                        } catch (PDOException $e) {
+                            Db::rollback();
+                            $this->error($e->getMessage());
+                        } catch (Exception $e) {
+                            Db::rollback();
+                            $this->error($e->getMessage());
                         }
                     } else {
-                        $this->error(__('Please add product name and color'));
+                            $this->error(__('Please add product name and color'));
                     }
                     if ($lastInsertId !== false) {
-                        $this->success();
+                            $this->success();
                     } else {
-                        $this->error(__('No rows were inserted'));
+                            $this->error(__('No rows were inserted'));
                     }
                 }
                 $this->error(__('Parameter %s can not be empty', ''));
             }
-            return $this->view->fetch();
+                return $this->view->fetch();
     }
     /**
      * 编辑
