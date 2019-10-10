@@ -252,11 +252,7 @@ class SaleAfterTask extends Backend
             }
             return $this->success('','',$result,0);
         }else{
-            $arr=[
-                12=>'a',34=>'b',57=>'c',84=>'d',
-            ];
-            $json = json_encode($arr);
-            return $this->success('ok','',$json);
+            return $this->error('404 Not Found');
         }
 
 
@@ -276,11 +272,7 @@ class SaleAfterTask extends Backend
             $arrToObject = (object)($json);
             return json($arrToObject);
         }else{
-            $arr=[
-                12=>'a',34=>'b',57=>'c',84=>'d',
-            ];
-            $json = json_encode($arr);
-            return $this->success('ok','',$json);
+            return $this->error('404 Not Found');
         }
     }
 
@@ -297,11 +289,7 @@ class SaleAfterTask extends Backend
             $arrToObject = (object)($json);
             return json($arrToObject);
         }else{
-            $arr=[
-                12=>'a',34=>'b',57=>'c',84=>'d',
-            ];
-            $json = json_encode($arr);
-            return $this->success('ok','',$json);
+            return $this->error('404 Not Found');    
         }
 
     }
@@ -378,5 +366,40 @@ class SaleAfterTask extends Backend
             return $this->error('请求失败,请勿请求');
         }
     }
+    /***
+     * 测试订单信息
+     */
+    public function ceshi(){
+        $ordertype = 3;
+        $order_number = '600070496';
+        $result = $this->model->getOrderInfo($ordertype,$order_number);
+        echo '<pre>';
+        var_dump($result);
 
+    }
+    public function nihao()
+    {
+        $str = 'a:2:{s:15:"info_buyRequest";a:6:{s:7:"product";s:3:"405";s:8:"form_key";s:16:"XkbLBBEaNUn4Vddj";s:3:"qty";i:1;s:7:"options";a:1:{i:399;s:3:"759";}s:13:"cart_currency";s:3:"USD";s:7:"tmplens";a:17:{s:13:"is_frame_only";s:1:"1";s:12:"prescription";s:335:"{"customer_rx":"0","prescription_type":"Progressive","od_sph":"0.25","od_cyl":"0.00","od_axis":"None","os_sph":"0.50","os_cyl":"0.00","os_axis":"None","od_add":"1.50","os_add":"0.00","pd":"62","od_pv":"0.00","od_bd":"","od_pv_r":"0.00","od_bd_r":"","os_pv":"0.00","os_bd":"","os_pv_r":"0.00","os_bd_r":"","year":"Year","month":"Month"}";s:17:"prescription_type";s:11:"Progressive";s:11:"frame_price";d:22.949999999999999;s:19:"frame_regural_price";d:22.949999999999999;s:9:"second_id";s:6:"base-3";s:11:"second_name";s:12:"Resin Lenses";s:12:"second_price";i:0;s:8:"third_id";s:6:"lens-8";s:10:"third_name";s:7:"Classic";s:11:"third_price";d:55;s:7:"four_id";s:10:"coatings-9";s:9:"four_name";s:26:"Oleophobic Anti-Reflective";s:10:"four_price";d:9.9499999999999993;s:10:"lens_price";d:64.950000000000003;s:3:"zsl";s:4:"1.57";s:5:"total";d:87.900000000000006;}}s:7:"options";a:1:{i:0;a:7:{s:5:"label";s:5:"Color";s:5:"value";s:7:"Crystal";s:11:"print_value";s:7:"Crystal";s:9:"option_id";s:3:"399";s:11:"option_type";s:9:"drop_down";s:12:"option_value";s:3:"759";s:11:"custom_view";b:0;}}}';
+        $arr =  unserialize($str);
+        $resultArr = $arr['info_buyRequest']['tmplens']['prescription'];
+        $resultJson = json_decode($resultArr,true);
+        echo '<pre>';
+        var_dump($resultJson);
+
+    }
+    public function ceshi3()
+    {
+        $ordertype = 1;
+        $order_number = '400026721';
+        $result = $this->model->getOrderInfo($ordertype,$order_number);
+        echo '<pre>';
+        var_dump($result);
+    }
+    public function zeelool()
+    {
+        $str = 'a:2:{s:15:"info_buyRequest";a:9:{s:7:"product";s:3:"125";s:4:"uenc";s:80:"aHR0cHM6Ly9tLnplZWxvb2wuY29tL2xlbnMvaW5kZXgvaW5kZXgvbGVucy8yMDZfMzEwX29ub29mbA,,";s:8:"form_key";s:16:"Dx7ybRVskcXkwlCx";s:15:"related_product";s:0:"";s:15:"validate_rating";s:0:"";s:3:"qty";i:1;s:7:"options";a:1:{i:24;s:2:"71";}s:7:"tmplens";a:31:{s:10:"frame_type";s:0:"";s:10:"glass_type";s:10:"eyeglasses";s:19:"frame_regural_price";s:5:"17.95";s:11:"frame_price";s:5:"17.95";s:8:"lenskind";N;s:5:"prism";s:0:"";s:10:"prismprice";s:4:"0.00";s:5:"extra";s:0:"";s:10:"extraprice";s:4:"0.00";s:12:"prescription";s:276:"min_pd=54&max_pd=74&customer_rx=0&prescription_type=SingleVision&od_sph=-1.25&od_cyl=-0.75&od_axis=70&os_sph=-2.25&os_cyl=-0.25&os_axis=126&pd=0&pd_r=30.5&pd_l=30.5&pdcheck=on&od_pv=0.00&od_bd=&od_pv_r=0.00&od_bd_r=&os_pv=0.00&os_bd=&os_pv_r=0.00&os_bd_r=&save=Em&information=";s:10:"lens_title";s:24:"Standard Eyeglass Lenses";s:10:"index_type";s:14:"1.57 Mid-Index";s:11:"index_price";s:4:"0.00";s:10:"index_name";s:4:"1.57";s:10:"coating_id";s:9:"coating_3";s:13:"coatiing_name";s:15:"Premium Coating";s:14:"coatiing_price";s:4:"9.95";s:9:"lens_type";s:0:"";s:15:"lens_type_price";s:4:"0.00";s:9:"lens_tint";s:0:"";s:14:"lens_coating_1";s:0:"";s:20:"lens_coating_1_price";s:1:"0";s:14:"lens_coating_2";s:0:"";s:20:"lens_coating_2_price";s:1:"0";s:14:"lens_coating_3";s:15:"Premium Coating";s:20:"lens_coating_3_price";s:4:"9.95";s:14:"lens_coating_4";s:0:"";s:20:"lens_coating_4_price";s:1:"0";s:3:"rid";s:1:"0";s:4:"lens";s:4:"9.95";s:5:"total";s:5:"27.90";}s:11:"reset_count";b:1;}s:7:"options";a:1:{i:0;a:7:{s:5:"label";s:5:"Color";s:5:"value";s:11:"Bright pink";s:11:"print_value";s:11:"Bright pink";s:9:"option_id";s:2:"24";s:11:"option_type";s:9:"drop_down";s:12:"option_value";s:2:"71";s:11:"custom_view";b:0;}}}';
+        $arr = unserialize($str);
+        echo '<pre>';
+        var_dump($arr);
+    }
 }
