@@ -40,29 +40,16 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                         { field: 'customer_email', title: __('Customer_email') },
                         { field: 'sale_after_issue.name', title: __('Issue_id'), operate: false },
                         { field: 'return_remark', title: __('Return_remark'), formatter: Controller.api.formatter.getClear, operate: false },
-                        //{ field: 'status', title: __('Status'), searchList: { 'new': 'new', 'arrival': 'arrival', 'check': 'check', 'stock': 'stock', 'refund': 'refund', 'closed': 'closed' } },
-                        { 
-                            field: 'order_status', 
-                            title: __('Order_status'), 
-                            searchList: { 1: '新建', 2: '退货收到', 3: '退货质检', 4: '同步库存', 5: '已退款',6:'关闭' },
-                            custom: { 1: 'yellow', 2: 'blue', 3: 'success', 4: 'red', 5: 'danger',6:'closed' },
+                        {
+                            field: 'order_status',
+                            title: __('Order_status'),
+                            searchList: { 1: '新建', 2: '退货收到', 3: '退货质检', 4: '同步库存', 5: '已退款', 6: '关闭' },
+                            custom: { 1: 'yellow', 2: 'blue', 3: 'success', 4: 'red', 5: 'danger', 6: 'closed' },
                             formatter: Table.api.formatter.status
                         },
                         { field: 'create_person', title: __('Create_person') },
                         { field: 'create_time', title: __('Create_time'), operate: 'RANGE', addclass: 'datetimerange' },
-                        // {field: 'customer_name', title: __('Customer_name')},
-                        // {field: 'return_shipping_number', title: __('Return_shipping_number')},
-                        // {field: 'check_person', title: __('Check_person')},
-                        // {field: 'check_remark', title: __('Check_remark')},
-                        // {field: 'check_created_time', title: __('Check_created_time'), operate:'RANGE', addclass:'datetimerange'},
-                        // {field: 'stock_person', title: __('Stock_person')},
-                        // {field: 'stock_created_time', title: __('Stock_created_time'), operate:'RANGE', addclass:'datetimerange'},
-                        // {field: 'refund_amount', title: __('Refund_amount'), operate:'BETWEEN'},
-                        // {field: 'refund_person', title: __('Refund_person')},
-                        // {field: 'refund_created_time', title: __('Refund_created_time'), operate:'RANGE', addclass:'datetimerange'},
-                        // {field: 'final_loss_amount', title: __('Final_loss_amount'), operate:'BETWEEN'},
-                        // {field: 'is_visable', title: __('Is_visable')},
-                        //{field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate}
+                      
                         {
                             field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, extend: 'data-area = \'["100%","100%"]\'', buttons: [
                                 {
@@ -375,25 +362,25 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
             });
             //模糊匹配订单
             $('#increment_id').autocomplete({
-                source:function(request,response){
+                source: function (request, response) {
                     var incrementId = $('#increment_id').val();
                     var orderType = $('#c-order_platform').val();
-                    if(incrementId.length>2){
+                    if (incrementId.length > 2) {
                         $.ajax({
-                            type:"POST",
-                            url:"saleaftermanage/order_return/ajaxGetLikeOrder",
-                            dataType : "json",
-                            cache : false,
-                            async : false,
-                            data : {
-                                orderType:orderType,order_number:incrementId
+                            type: "POST",
+                            url: "saleaftermanage/order_return/ajaxGetLikeOrder",
+                            dataType: "json",
+                            cache: false,
+                            async: false,
+                            data: {
+                                orderType: orderType, order_number: incrementId
                             },
-                            success : function(json) {
-                                 var data = json.data;
-                                response($.map(data,function(item){
+                            success: function (json) {
+                                var data = json.data;
+                                response($.map(data, function (item) {
                                     return {
-                                        label:item,//下拉框显示值
-                                        value:item,//选中后，填充到input框的值
+                                        label: item,//下拉框显示值
+                                        value: item,//选中后，填充到input框的值
                                         //id:item.bankCodeInfo//选中后，填充到id里面的值
                                     };
                                 }));
@@ -402,34 +389,34 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                     }
                 },
                 delay: 10,//延迟100ms便于输入
-                select : function(event, ui) {
+                select: function (event, ui) {
                     $("#bankUnionNo").val(ui.item.id);//取出在return里面放入到item中的属性
                 },
-                scroll:true,
-                pagingMore:true,
-                max:5000
+                scroll: true,
+                pagingMore: true,
+                max: 5000
             });
             //模糊匹配邮箱
             $('#customer_email').autocomplete({
-                source:function(request,response){
+                source: function (request, response) {
                     var customer_email = $('#customer_email').val();
                     var orderType = $('#c-order_platform').val();
-                    if(customer_email.length>2){
+                    if (customer_email.length > 2) {
                         $.ajax({
-                            type:"POST",
-                            url:"saleaftermanage/order_return/ajaxGetLikeEmail",
-                            dataType : "json",
-                            cache : false,
-                            async : false,
-                            data : {
-                                orderType:orderType,email:customer_email
+                            type: "POST",
+                            url: "saleaftermanage/order_return/ajaxGetLikeEmail",
+                            dataType: "json",
+                            cache: false,
+                            async: false,
+                            data: {
+                                orderType: orderType, email: customer_email
                             },
-                            success : function(json) {
+                            success: function (json) {
                                 var data = json.data;
-                                response($.map(data,function(item){
+                                response($.map(data, function (item) {
                                     return {
-                                        label:item,//下拉框显示值
-                                        value:item,//选中后，填充到input框的值
+                                        label: item,//下拉框显示值
+                                        value: item,//选中后，填充到input框的值
                                         //id:item.bankCodeInfo//选中后，填充到id里面的值
                                     };
                                 }));
@@ -438,34 +425,34 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                     }
                 },
                 delay: 10,//延迟100ms便于输入
-                select : function(event, ui) {
+                select: function (event, ui) {
                     $("#bankUnionNo").val(ui.item.id);//取出在return里面放入到item中的属性
                 },
-                scroll:true,
-                pagingMore:true,
-                max:5000
+                scroll: true,
+                pagingMore: true,
+                max: 5000
             });
             //模糊匹配电话
             $('#customer_phone').autocomplete({
-                source:function(request,response){
+                source: function (request, response) {
                     var customer_phone = $('#customer_phone').val();
                     var orderType = $('#c-order_platform').val();
-                    if(customer_phone.length>2){
+                    if (customer_phone.length > 2) {
                         $.ajax({
-                            type:"POST",
-                            url:"saleaftermanage/order_return/ajaxGetLikePhone",
-                            dataType : "json",
-                            cache : false,
-                            async : false,
-                            data : {
-                                orderType:orderType,customer_phone:customer_phone
+                            type: "POST",
+                            url: "saleaftermanage/order_return/ajaxGetLikePhone",
+                            dataType: "json",
+                            cache: false,
+                            async: false,
+                            data: {
+                                orderType: orderType, customer_phone: customer_phone
                             },
-                            success : function(json) {
+                            success: function (json) {
                                 var data = json.data;
-                                response($.map(data,function(item){
+                                response($.map(data, function (item) {
                                     return {
-                                        label:item,//下拉框显示值
-                                        value:item,//选中后，填充到input框的值
+                                        label: item,//下拉框显示值
+                                        value: item,//选中后，填充到input框的值
                                         //id:item.bankCodeInfo//选中后，填充到id里面的值
                                     };
                                 }));
@@ -474,34 +461,34 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                     }
                 },
                 delay: 10,//延迟100ms便于输入
-                select : function(event, ui) {
+                select: function (event, ui) {
                     $("#bankUnionNo").val(ui.item.id);//取出在return里面放入到item中的属性
                 },
-                scroll:true,
-                pagingMore:true,
-                max:5000
+                scroll: true,
+                pagingMore: true,
+                max: 5000
             });
             //模糊匹配姓名
             $('#customer_name').autocomplete({
-                source:function(request,response){
+                source: function (request, response) {
                     var customer_name = $('#customer_name').val();
                     var orderType = $('#c-order_platform').val();
-                    if(customer_name.length>2){
+                    if (customer_name.length > 2) {
                         $.ajax({
-                            type:"POST",
-                            url:"saleaftermanage/order_return/ajaxGetLikeName",
-                            dataType : "json",
-                            cache : false,
-                            async : false,
-                            data : {
-                                orderType:orderType,customer_name:customer_name
+                            type: "POST",
+                            url: "saleaftermanage/order_return/ajaxGetLikeName",
+                            dataType: "json",
+                            cache: false,
+                            async: false,
+                            data: {
+                                orderType: orderType, customer_name: customer_name
                             },
-                            success : function(json) {
+                            success: function (json) {
                                 var data = json.data;
-                                response($.map(data,function(item){
+                                response($.map(data, function (item) {
                                     return {
-                                        label:item,//下拉框显示值
-                                        value:item,//选中后，填充到input框的值
+                                        label: item,//下拉框显示值
+                                        value: item,//选中后，填充到input框的值
                                         //id:item.bankCodeInfo//选中后，填充到id里面的值
                                     };
                                 }));
@@ -510,34 +497,34 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                     }
                 },
                 delay: 10,//延迟100ms便于输入
-                select : function(event, ui) {
+                select: function (event, ui) {
                     $("#bankUnionNo").val(ui.item.id);//取出在return里面放入到item中的属性
                 },
-                scroll:true,
-                pagingMore:true,
-                max:5000
+                scroll: true,
+                pagingMore: true,
+                max: 5000
             });
             //模糊匹配运单号
             $('#track_number').autocomplete({
-                source:function(request,response){
+                source: function (request, response) {
                     var track_number = $('#track_number').val();
                     var orderType = $('#c-order_platform').val();
-                    if(track_number.length>2){
+                    if (track_number.length > 2) {
                         $.ajax({
-                            type:"POST",
-                            url:"saleaftermanage/order_return/ajaxGetLikeTrackNumber",
-                            dataType : "json",
-                            cache : false,
-                            async : false,
-                            data : {
-                                orderType:orderType,track_number:track_number
+                            type: "POST",
+                            url: "saleaftermanage/order_return/ajaxGetLikeTrackNumber",
+                            dataType: "json",
+                            cache: false,
+                            async: false,
+                            data: {
+                                orderType: orderType, track_number: track_number
                             },
-                            success : function(json) {
+                            success: function (json) {
                                 var data = json.data;
-                                response($.map(data,function(item){
+                                response($.map(data, function (item) {
                                     return {
-                                        label:item,//下拉框显示值
-                                        value:item,//选中后，填充到input框的值
+                                        label: item,//下拉框显示值
+                                        value: item,//选中后，填充到input框的值
                                         //id:item.bankCodeInfo//选中后，填充到id里面的值
                                     };
                                 }));
@@ -546,12 +533,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                     }
                 },
                 delay: 10,//延迟100ms便于输入
-                select : function(event, ui) {
+                select: function (event, ui) {
                     $("#bankUnionNo").val(ui.item.id);//取出在return里面放入到item中的属性
                 },
-                scroll:true,
-                pagingMore:true,
-                max:5000
+                scroll: true,
+                pagingMore: true,
+                max: 5000
             });
             // $(document).on('change','#increment_id',function(){
             //     var incrementId = $('#increment_id').val();

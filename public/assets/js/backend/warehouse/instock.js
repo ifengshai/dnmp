@@ -193,11 +193,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                             data: { id: id }
                         }, function (data, ret) {
                             //循环展示商品信息
-                            var shtml = ' <tr><th>SKU</th><th>产品名称</th><th>供应商SKU</th><th>采购数量</th><th>在途数量</th><th>到货数量</th><th>质检合格数量</th><th>留样数量</th><th>入库数量</th><th>操作</th></tr>';
+                            var shtml = ' <tr><th>SKU</th><th>供应商SKU</th><th>采购数量</th><th>在途数量</th><th>到货数量</th><th>质检合格数量</th><th>留样数量</th><th>入库数量</th><th>操作</th></tr>';
                             $('.caigou table tbody').html('');
                             for (var i in data.item) {
                                 shtml += ' <tr><td><input id="c-purchase_remark" class="form-control" name="sku[]" type="text" value="' + data.item[i].sku + '"></td>'
-                                shtml += ' <td>' + data.item[i].product_name + '</td>'
                                 shtml += ' <td>' + data.item[i].supplier_sku + '</td>'
                                 shtml += ' <td>' + data.item[i].purchase_num + '</td>'
                                 shtml += ' <td>' + (data.item[i].purchase_num - data.item[i].arrivals_num) + '</td>'
