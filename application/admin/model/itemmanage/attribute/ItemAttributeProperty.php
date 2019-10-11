@@ -8,10 +8,8 @@ use app\admin\model\itemmanage\attribute\ItemAttributePropertyValue;
 class ItemAttributeProperty extends Model
 {
 
-    
-
-    
-
+    //制定数据库连接
+    protected $connection = 'database.db_stock';
     // 表名
     protected $name = 'item_attribute_property';
     

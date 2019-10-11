@@ -8,6 +8,8 @@ use app\admin\model\itemmanage\attribute\ItemAttribute;
 
 class Item extends Model
 {
+    //制定数据库连接
+    protected $connection = 'database.db_stock';
     // 表名
     protected $name = 'item';
 
@@ -113,7 +115,7 @@ class Item extends Model
      */
     public function getItemRow($sku, $type = 1)
     {
-        $result = Db::name('item')->alias('g')->where('sku', '=', $sku)->join('item_attribute a', 'g.id=a.item_id')
+        $result = $this->alias('g')->where('sku', '=', $sku)->join('item_attribute a', 'g.id=a.item_id')
             ->field('g.*,a.item_id,a.glasses_type,a.procurement_type,a.procurement_origin,a.frame_type,a.frame_width,a.frame_height,
             a.frame_length,a.frame_temple_length,a.frame_bridge,a.mirror_width,a.frame_color,a.frame_weight,a.frame_shape,a.shape,
             a.frame_texture,a.frame_gender,a.frame_size,a.frame_is_recipe,a.frame_piece,a.frame_is_advance,

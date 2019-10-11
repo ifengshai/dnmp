@@ -93,6 +93,20 @@ class SaleAfterTask extends Model
                 return false;
                 break;
         }
+        // switch ($ordertype) {
+        //     case 1:
+        //         $db = 'database.db_zeelool_online';
+        //         break;
+        //     case 2:
+        //         $db = 'database.db_voogueme_online';
+        //         break;
+        //     case 3:
+        //         $db = 'database.db_nihao_online';
+        //         break;
+        //     default:
+        //         return false;
+        //         break;
+        // }
         $result = Db::connect($db)->table('sales_flat_order')->where('increment_id','=',$order_number)->field('entity_id,status,store_id,increment_id,customer_email,customer_firstname,customer_lastname,total_item_count')->find();
         if(!$result){
             return false;
@@ -112,12 +126,17 @@ class SaleAfterTask extends Model
             $arr[$key]['coatiing_name'] = isset($tmp_product_options['info_buyRequest']['tmplens']['coatiing_name']) ? $tmp_product_options['info_buyRequest']['tmplens']['coatiing_name'] : "";
             $tmp_prescription_params = isset($tmp_product_options['info_buyRequest']['tmplens']['prescription']) ? $tmp_product_options['info_buyRequest']['tmplens']['prescription']: '';
             if(!empty($tmp_prescription_params)){
-                $tmp_prescription_params = explode("&", $tmp_prescription_params);
-                $tmp_lens_params = array();
-                foreach ($tmp_prescription_params as $tmp_key => $tmp_value) {
-                    $arr_value = explode("=", $tmp_value);
-                    $tmp_lens_params[$arr_value[0]] = $arr_value[1];
+                if($ordertype<=2){
+                    $tmp_prescription_params = explode("&", $tmp_prescription_params);
+                    $tmp_lens_params = array();
+                    foreach ($tmp_prescription_params as $tmp_key => $tmp_value) {
+                        $arr_value = explode("=", $tmp_value);
+                        $tmp_lens_params[$arr_value[0]] = $arr_value[1];
+                    }
+                }elseif($ordertype == 3){
+                    $tmp_lens_params = json_decode($tmp_prescription_params,true);
                 }
+
                 $arr[$key]['prescription_type'] = $tmp_lens_params['prescription_type'];
                 $arr[$key]['od_sph']   = isset($tmp_lens_params['od_sph']) ? $tmp_lens_params['od_sph'] : '';
                 $arr[$key]['od_cyl']   = isset($tmp_lens_params['od_cyl']) ? $tmp_lens_params['od_cyl'] : '';
