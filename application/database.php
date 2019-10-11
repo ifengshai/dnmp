@@ -148,5 +148,19 @@ return [
         'charset'     => Env::get('db_nihao_online.charset'),
         'prefix'      => Env::get('db_nihao_online.prefix'),
     ],
-
+    'db_stock' => [
+        // 数据库类型
+        'type'        => Env::get('db_stock.type'),
+        // 服务器地址
+        'hostname'    => Env::get('db_stock.hostname'),
+        // 数据库名
+        'database'    => Env::get('db_stock.database'),
+        // 数据库用户名
+        'username'    => Env::get('db_stock.username'),
+        // 密码
+        'password'    => Env::get('db_stock.password'),
+        // 数据库编码默认采用utf8
+        'charset'     => Env::get('db_stock.charset'),
+        'prefix'      => Env::get('db_stock.prefix'),
+    ],
 ];

@@ -7,11 +7,8 @@ use think\Model;
 
 class ItemAttributePropertyGroup extends Model
 {
-
-    
-
-    
-
+    //制定数据库连接
+    protected $connection = 'database.db_stock';
     // 表名
     protected $name = 'item_attribute_property_group';
     

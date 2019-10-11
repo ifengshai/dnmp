@@ -398,9 +398,10 @@ class ItemPlatformSku extends Backend
     public function afterUploadItem($ids = null)
     {
         if($this->request->isAjax()){
-            if(count($ids)>1){ //一次只能上传一个商品
-                $this->error(__('Multiple data updates are not currently supported, please update one at a time'));
-            }
+            //一次只能上传一个商品
+            // if(count($ids)>1){ 
+            //     $this->error(__('Multiple data updates are not currently supported, please update one at a time'));
+            // }
             $itemPlatformRow = $this->model->findItemPlatform($ids);
             if(!$itemPlatformRow){ //对应商品不正确或者平台不正确
                 $this->error(__('Incorrect product or incorrect platform'));
@@ -582,9 +583,9 @@ class ItemPlatformSku extends Backend
     public function uploadImagesToPlatform($ids = null)
     {
         if($this->request->isAjax()){
-            if(count($ids)>1){ //一次只能上传一个商品
-                $this->error(__('Multiple data updates are not currently supported, please update one at a time'));
-            }
+            // if(count($ids)>1){ //一次只能上传一个商品
+            //     $this->error(__('Multiple data updates are not currently supported, please update one at a time'));
+            // }
             $itemPlatformRow = $this->model->findItemPlatform($ids);
             if(!$itemPlatformRow){ //对应商品不正确或者平台不正确
                 $this->error(__('Incorrect product or incorrect platform'));
@@ -667,10 +668,5 @@ class ItemPlatformSku extends Backend
         }else{
             $this->error('404 Not found');
         }
-    }
-    public function ceshi()
-    {
-       $result =  strcasecmp('Rimless' ,'rimless');
-       var_dump($result);
     }
 }

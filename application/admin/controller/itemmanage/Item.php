@@ -359,7 +359,8 @@ class Item extends Backend
                                 }else{
                                     $data['sku'] = $params['procurement_origin'] . $textureEncode . $params['origin_sku'] . '-' . sprintf("%02d", $k + 1);
                                 }
-                                $lastInsertId = Db::name('item')->insertGetId($data);
+                               // $lastInsertId = Db::name('item')->insertGetId($data);
+                                $lastInsertId = Db::connect('database.db_stock')->name('item')->insertGetId($data);
                                 if ($lastInsertId !== false) {
                                     $itemAttribute['item_id'] = $lastInsertId;
                                     $itemAttribute['attribute_type'] = $params['attribute_type'];
@@ -386,7 +387,8 @@ class Item extends Backend
                                     $itemAttribute['frame_temple_is_spring'] = $params['frame_temple_is_spring'];
                                     $itemAttribute['frame_is_adjust_nose_pad'] = $params['frame_is_adjust_nose_pad'];
                                     $itemAttribute['frame_remark'] = $params['frame_remark'];
-                                    Db::name('item_attribute')->insert($itemAttribute);
+                                    //Db::name('item_attribute')->insert($itemAttribute);
+                                    Db::connect('database.db_stock')->name('item_attribute')->insert($itemAttribute);
                                 }
                             }
                             Db::commit();    
@@ -414,9 +416,9 @@ class Item extends Backend
                 return $this->view->fetch();
     }
     /**
-     * 编辑
+     * 编辑商品原先
      */
-    public function edit($ids = null)
+    public function edit_yuan($ids = null)
     {
         $row = $this->model->get($ids, 'itemAttribute');
 
@@ -473,6 +475,122 @@ class Item extends Backend
                         $itemAttribute['frame_remark'] = $params['frame_remark'];
                         $itemAttr = Db::name('item_attribute')->where('item_id', '=', $row['id'])->update($itemAttribute);
                     }
+                } else {
+                    $this->error(__('Please add product name and color'));
+                }
+                $this->success();
+                if (($item !== false) && ($itemAttr !== false)) {
+                    $this->success();
+                } else {
+                    $this->error(__('No rows were updated'));
+                }
+            }
+            $this->error(__('Parameter %s can not be empty', ''));
+        }
+        $row['itemAttribute']['frame_size']     = explode(',', $row['itemAttribute']['frame_size']);
+        $row['itemAttribute']['frame_shape']    = explode(',', $row['itemAttribute']['frame_shape']);
+        $row['itemAttribute']['glasses_type']   = explode(',', $row['itemAttribute']['glasses_type']);
+        $row['itemAttribute']['frame_is_adjust_nose_pad'] = explode(',', $row['itemAttribute']['frame_is_adjust_nose_pad']);
+        $allShape = $this->itemAttribute->getAllShape();
+        //获取所有材质
+        $allTexture = $this->itemAttribute->getAllTexture();
+        //获取所有镜架形状
+        $allFrameShape = $this->itemAttribute->getAllFrameShape();
+        //获取所有适合性别
+        $allFrameGender = $this->itemAttribute->getFrameGender();
+        //获取所有型号
+        $allFrameSize  = $this->itemAttribute->getFrameSize();
+        //获取所有眼镜类型
+        $allGlassesType = $this->itemAttribute->getGlassesType();
+        //获取所有采购产地
+        $allOrigin      = $this->itemAttribute->getOrigin();
+        //获取配镜类型
+        $allFrameType   = $this->itemAttribute->getFrameType();
+        //获取是否可调节鼻托类型
+        $allNosePad     = $this->itemAttribute->getAllNosePad();
+        $this->assign('AllFrameType', $allFrameType);
+        $this->assign('AllOrigin', $allOrigin);
+        $this->assign('AllGlassesType', $allGlassesType);
+        $this->assign('AllFrameSize', $allFrameSize);
+        $this->assign('AllFrameGender', $allFrameGender);
+        $this->assign('AllFrameShape', $allFrameShape);
+        $this->assign('AllShape', $allShape);
+        $this->assign('AllTexture', $allTexture);
+        $this->assign('AllNosePad', $allNosePad);
+        $this->view->assign('template', $this->category->getAttrCategoryById($row['category_id']));
+        $this->view->assign("row", $row);
+        return $this->view->fetch();
+    }
+    /***
+     * 后来修改编辑商品
+     */
+    public function edit($ids = null)
+    {
+        $row = $this->model->get($ids, 'itemAttribute');
+        if (!$row) {
+            $this->error(__('No Results were found'));
+        }
+        if ($row['item_status'] == 2) {
+            $this->error(__('The goods have been submitted for review and cannot be edited'), '/admin/itemmanage/item');
+        }
+        $adminIds = $this->getDataLimitAdminIds();
+        if (is_array($adminIds)) {
+            if (!in_array($row[$this->dataLimitField], $adminIds)) {
+                $this->error(__('You have no permission'));
+            }
+        }
+        if ($this->request->isPost()) {
+            $params = $this->request->post("row/a");
+            if ($params) {
+                $params = $this->preExcludeFields($params);
+                $itemName = $params['name'];
+                $itemColor = $params['color'];
+                if (is_array($itemName) && !in_array("", $itemName)) {
+                    $data = $itemAttribute = [];
+                    Db::startTrans();
+                    try{
+                        foreach ($itemName as $k => $v) {
+                            $data['name'] = $v;
+                            $data['item_status'] = $params['item_status'];
+                            $data['create_person'] = session('admin.nickname');
+                            $data['create_time'] = date("Y-m-d H:i:s", time());
+                            $item = Db::connect('database.db_stock')->name('item')->where('id', '=', $row['id'])->update($data);
+                            $itemAttribute['attribute_type'] = $params['attribute_type'];
+                            $itemAttribute['glasses_type'] = $params['glasses_type'];
+                            $itemAttribute['frame_height'] = $params['frame_height'];
+                            $itemAttribute['frame_width'] = $params['frame_width'];
+                            $itemAttribute['frame_color'] = $itemColor[$k];
+                            $itemAttribute['frame_weight'] = $params['weight'];
+                            $itemAttribute['frame_length'] = $params['frame_length'];
+                            $itemAttribute['frame_temple_length'] = $params['frame_temple_length'];
+                            $itemAttribute['shape'] = $params['shape'];
+                            $itemAttribute['frame_bridge'] = $params['frame_bridge'];
+                            $itemAttribute['mirror_width'] = $params['mirror_width'];
+                            $itemAttribute['frame_type'] = $params['frame_type'];
+                            $itemAttribute['frame_texture'] = $params['frame_texture'];
+                            $itemAttribute['frame_shape'] = $params['frame_shape'];
+                            $itemAttribute['frame_gender'] = $params['frame_gender'];
+                            $itemAttribute['frame_size'] = $params['frame_size'];
+                            $itemAttribute['frame_is_recipe'] = $params['frame_is_recipe'];
+                            $itemAttribute['frame_piece'] = $params['frame_piece'];
+                            $itemAttribute['frame_is_advance'] = $params['frame_is_advance'];
+                            $itemAttribute['frame_temple_is_spring'] = $params['frame_temple_is_spring'];
+                            $itemAttribute['frame_is_adjust_nose_pad'] = $params['frame_is_adjust_nose_pad'];
+                            $itemAttribute['frame_remark'] = $params['frame_remark'];
+                            $itemAttr = Db::connect('database.db_stock')->name('item_attribute')->where('item_id', '=', $row['id'])->update($itemAttribute);
+                        }
+                        Db::commit();  
+                    }catch (ValidateException $e) {
+                        Db::rollback();
+                        $this->error($e->getMessage());
+                    } catch (PDOException $e) {
+                        Db::rollback();
+                        $this->error($e->getMessage());
+                    } catch (Exception $e) {
+                        Db::rollback();
+                        $this->error($e->getMessage());
+                    }
+
                 } else {
                     $this->error(__('Please add product name and color'));
                 }
@@ -808,9 +926,9 @@ class Item extends Backend
             $item_status = $params['item_status'];
             $itemAttrData['frame_images'] = $params['frame_images'];
             $itemAttrData['create_frame_images_time'] = date("Y-m-d H:i:s", time());
-            $itemAttrResult = Db::name('item_attribute')->where('item_id', '=', $id)->update($itemAttrData);
+            $itemAttrResult = Db::connect('database.db_stock')->name('item_attribute')->where('item_id', '=', $id)->update($itemAttrData);
             if ($item_status == 2) {
-                $itemResult = Db::name('item')->where('id', '=', $id)->update(['item_status' => $item_status]);
+                $itemResult = Db::connect('database.db_stock')->name('item')->where('id', '=', $id)->update(['item_status' => $item_status]);
             } else {
                 $itemResult = true;
             }

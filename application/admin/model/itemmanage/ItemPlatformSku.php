@@ -1,17 +1,15 @@
 <?php
 
 namespace app\admin\model\itemmanage;
-
+use think\Db;
 use think\Model;
 use app\admin\model\platformmanage\ManagtoPlatform;
 
 class ItemPlatformSku extends Model
 {
 
-    
-
-    
-
+    //制定数据库连接
+    protected $connection = 'database.db_stock';
     // 表名
     protected $name = 'item_platform_sku';
     
@@ -96,13 +94,39 @@ class ItemPlatformSku extends Model
         return $result ? $result : false;
     }
     /***
-     * 查看平台sku对应的平台信息
+     * 查看平台sku对应的平台信息(原先，没有分库之前)
      */
-    public function findItemPlatform($id)
+    public function findItemPlatform_yuan($id)
     {
         $result = $this->alias('g')->where('g.id','=',$id)->join('managto_platform p','g.platform_type=p.id')
                  ->field('g.id,g.sku,g.platform_sku,g.platform_type,g.magento_id,g.is_upload,g.is_upload_images,g.uploaded_images,p.id as platform_id,p.status,p.managto_account,p.managto_key,p.managto_url,p.is_upload_item,p.is_del,p.name,p.item_attr_name,p.item_type,p.upload_field')->find();
         return $result ? $result : false;
+    }
+    /***
+     * 查看平台sku对应的平台信息(分库之后)
+     */
+    public function findItemPlatform($id)
+    {
+        $resultItem = $this->where('id','=',$id)->field('id,sku,platform_sku,platform_type,magento_id,is_upload,is_upload_images,uploaded_images')->find();
+        if(!$resultItem){
+            return false;
+        }
+        $resultPlatform = Db::name('managto_platform')->where('id','=',$resultItem['platform_type'])->field('id as platform_id,status,managto_account,managto_key,managto_url,is_upload_item,is_del,name,item_attr_name,item_type,upload_field')->find();
+        if(!$resultPlatform){
+            return $resultItem;
+        }
+        $resultItem['platform_id']      = $resultPlatform['platform_id'];
+        $resultItem['status']           = $resultPlatform['status'];
+        $resultItem['managto_account']  = $resultPlatform['managto_account'];
+        $resultItem['managto_key']      = $resultPlatform['managto_key'];
+        $resultItem['managto_url']      = $resultPlatform['managto_url'];
+        $resultItem['is_upload_item']   = $resultPlatform['is_upload_item'];
+        $resultItem['is_del']           = $resultPlatform['is_del'];
+        $resultItem['name']             = $resultPlatform['name'];
+        $resultItem['item_attr_name']   = $resultPlatform['item_attr_name'];
+        $resultItem['item_type']        = $resultPlatform['item_type'];
+        $resultItem['upload_field']     = $resultPlatform['upload_field'];
+        return $resultItem;
     }
 
 }

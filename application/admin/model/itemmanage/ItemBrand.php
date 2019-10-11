@@ -7,11 +7,9 @@ use think\Model;
 
 class ItemBrand extends Model
 {
-
-    
-
-    
-
+ 
+    //制定数据库连接
+    protected $connection = 'database.db_stock';
     // 表名
     protected $name = 'item_brand';
     
