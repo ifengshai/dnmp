@@ -33,6 +33,12 @@ class Instock extends Model
     }
 
     //关联模型采购单
+    public function checkorder()
+    {
+        return $this->belongsTo('app\admin\model\warehouse\Check', 'check_id', 'id', [], 'LEFT')->setEagerlyType(0);
+    }
+
+    //关联模型采购单
     public function instocktype()
     {
         return $this->belongsTo('InstockType', 'type_id')->setEagerlyType(0);

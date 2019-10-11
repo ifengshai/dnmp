@@ -55,13 +55,13 @@ class Instock extends Backend
             }
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
-                ->with(['purchaseorder', 'instocktype'])
+                ->with(['checkorder', 'instocktype'])
                 ->where($where)
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->model
-                ->with(['purchaseorder', 'instocktype'])
+                ->with(['checkorder', 'instocktype'])
                 ->where($where)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
@@ -140,9 +140,9 @@ class Instock extends Backend
         $type = $this->type->select();
         $this->assign('type', $type);
 
-        //查询采购单
-        $purchase = new \app\admin\model\purchase\PurchaseOrder;
-        $purchase_data = $purchase->getPurchaseData();
+        //查询质检单
+        $check = new \app\admin\model\warehouse\Check;
+        $purchase_data = $check->where('status', 0)->column('check_order_number', 'id');
         $this->assign('purchase_data', $purchase_data);
 
         //质检单
@@ -153,52 +153,29 @@ class Instock extends Backend
 
 
     /**
-     * 获取采购单商品信息
+     * 获取质检单商品信息
      */
-    public function getPurchaseData()
+    public function getCheckData()
     {
         $id = input('id');
-        $purchase = new \app\admin\model\purchase\PurchaseOrder;
-        $data = $purchase->get($id);
-
-        //查询采购单商品信息
-        $purchase_item = new \app\admin\model\purchase\PurchaseOrderItem;
-        $map['purchase_id'] = $id;
-        $item = $purchase_item->where($map)->select();
-        //查询质检数量
-        $skus = array_column($item, 'sku');
         //查询质检信息
-        $check_map['purchase_id'] = $id;
-        $check_map['type'] = 1;
+        $check_map['check.id'] = $id;
         $check = new \app\admin\model\warehouse\Check;
-        $list = $check->hasWhere('checkItem', ['sku' => ['in', $skus]])
+        $list = $check->hasWhere('checkItem')
             ->where($check_map)
-            ->field('sku,sum(arrivals_num) as arrivals_num,sum(quantity_num) as quantity_num,sum(unqualified_num) as unqualified_num,sum(sample_num) as sample_num')
+            ->field('sku,supplier_sku,purchase_num,check_num,arrivals_num,quantity_num,sample_num')
             ->group('sku')
             ->select();
         $list = collection($list)->toArray();
-        //重组数组
-        $check_item = [];
-        foreach ($list as $k => $v) {
-            $check_item[$v['sku']]['arrivals_num'] = $v['arrivals_num'];
-            $check_item[$v['sku']]['quantity_num'] = $v['quantity_num'];
-            $check_item[$v['sku']]['unqualified_num'] = $v['unqualified_num'];
-            $check_item[$v['sku']]['sample_num'] = $v['sample_num'];
-        }
-        foreach ($item as $k => $v) {
-            $item[$k]['arrivals_num'] = $check_item[$v['sku']]['arrivals_num'] ?? 0;
-            $item[$k]['quantity_num'] = $check_item[$v['sku']]['quantity_num'] ?? 0;
-            $item[$k]['unqualified_num'] = $check_item[$v['sku']]['unqualified_num'] ?? 0;
-            $item[$k]['sample_num'] = $check_item[$v['sku']]['sample_num'] ?? 0;
-        }
 
-        $data->item = $item;
-        if ($data) {
-            $this->success('', '', $data);
+        if ($list) {
+            $this->success('', '', $list);
         } else {
             $this->error();
         }
     }
+
+
 
     /**
      * 编辑
@@ -279,52 +256,23 @@ class Instock extends Backend
         $type = $this->type->select();
         $this->assign('type', $type);
 
-        //查询采购单
-        $purchase = new \app\admin\model\purchase\PurchaseOrder;
-        $purchase_data = $purchase->getPurchaseData();
+        //查询质检单
+        $check = new \app\admin\model\warehouse\Check;
+        $purchase_data = $check->where('status', 0)->column('check_order_number', 'id');
         $this->assign('purchase_data', $purchase_data);
 
 
         /***********查询入库商品信息***************/
         //查询入库单商品信息
         $item_map['in_stock_id'] = $ids;
-        $return_arr = $this->instockItem->where($item_map)->column('in_stock_num,id', 'sku');
+        $item = $this->instockItem->where($item_map)->select();
 
-        //查询采购单商品信息
-        $purchase_item = new \app\admin\model\purchase\PurchaseOrderItem;
-        $map['purchase_id'] = $row['purchase_id'];
-        $map['sku'] = ['in', array_keys($return_arr)];
-        $item = $purchase_item->where($map)->select();
-
-        //查询质检信息
-        $check_map['purchase_id'] = $row['purchase_id'];
-        $check_map['type'] = 1;
-        $check = new \app\admin\model\warehouse\Check;
-        $list = $check->hasWhere('checkItem', ['sku' => ['in', array_keys($return_arr)]])
-            ->where($check_map)
-            ->field('sku,sum(arrivals_num) as arrivals_num,sum(quantity_num) as quantity_num,sum(unqualified_num) as unqualified_num,sum(sample_num) as sample_num')
-            ->group('sku')
-            ->select();
-        $list = collection($list)->toArray();
-        //重组数组
-        $check_item = [];
-        foreach ($list as $k => $v) {
-            $check_item[$v['sku']]['arrivals_num'] = $v['arrivals_num'];
-            $check_item[$v['sku']]['quantity_num'] = $v['quantity_num'];
-            $check_item[$v['sku']]['unqualified_num'] = $v['unqualified_num'];
-            $check_item[$v['sku']]['sample_num'] = $v['sample_num'];
-        }
-
-        foreach ($item as $k => $v) {
-            $item[$k]['arrivals_num'] = $check_item[$v['sku']]['arrivals_num'];
-            $item[$k]['quantity_num'] = $check_item[$v['sku']]['quantity_num'];
-            $item[$k]['unqualified_num'] = $check_item[$v['sku']]['unqualified_num'];
-            $item[$k]['sample_num'] = $check_item[$v['sku']]['sample_num'];
-            $item[$k]['in_stock_num'] = $return_arr[$v['sku']]['in_stock_num'];
-            $item[$k]['item_id'] = $return_arr[$v['sku']]['id'];
-        }
+        //查询对应质检数据
+        $checkItem = new \app\admin\model\warehouse\CheckItem;
+        $check_data = $checkItem->where('check_id', $row['check_id'])->column('*', 'sku');
         /***********end***************/
         $this->assign('item', $item);
+        $this->assign('check_data', $check_data);
         $this->view->assign("row", $row);
         return $this->view->fetch();
     }
@@ -349,52 +297,23 @@ class Instock extends Backend
         $type = $this->type->select();
         $this->assign('type', $type);
 
-        //查询采购单
-        $purchase = new \app\admin\model\purchase\PurchaseOrder;
-        $purchase_data = $purchase->getPurchaseData();
+        //查询质检单
+        $check = new \app\admin\model\warehouse\Check;
+        $purchase_data = $check->where('status', 0)->column('check_order_number', 'id');
         $this->assign('purchase_data', $purchase_data);
 
 
         /***********查询入库商品信息***************/
         //查询入库单商品信息
         $item_map['in_stock_id'] = $ids;
-        $return_arr = $this->instockItem->where($item_map)->column('in_stock_num,id', 'sku');
+        $item = $this->instockItem->where($item_map)->select();
 
-        //查询采购单商品信息
-        $purchase_item = new \app\admin\model\purchase\PurchaseOrderItem;
-        $map['purchase_id'] = $row['purchase_id'];
-        $map['sku'] = ['in', array_keys($return_arr)];
-        $item = $purchase_item->where($map)->select();
-
-        //查询质检信息
-        $check_map['purchase_id'] = $row['purchase_id'];
-        $check_map['type'] = 1;
-        $check = new \app\admin\model\warehouse\Check;
-        $list = $check->hasWhere('checkItem', ['sku' => ['in', array_keys($return_arr)]])
-            ->where($check_map)
-            ->field('sku,sum(arrivals_num) as arrivals_num,sum(quantity_num) as quantity_num,sum(unqualified_num) as unqualified_num,sum(sample_num) as sample_num')
-            ->group('sku')
-            ->select();
-        $list = collection($list)->toArray();
-        //重组数组
-        $check_item = [];
-        foreach ($list as $k => $v) {
-            $check_item[$v['sku']]['arrivals_num'] = $v['arrivals_num'];
-            $check_item[$v['sku']]['quantity_num'] = $v['quantity_num'];
-            $check_item[$v['sku']]['unqualified_num'] = $v['unqualified_num'];
-            $check_item[$v['sku']]['sample_num'] = $v['sample_num'];
-        }
-
-        foreach ($item as $k => $v) {
-            $item[$k]['arrivals_num'] = $check_item[$v['sku']]['arrivals_num'];
-            $item[$k]['quantity_num'] = $check_item[$v['sku']]['quantity_num'];
-            $item[$k]['unqualified_num'] = $check_item[$v['sku']]['unqualified_num'];
-            $item[$k]['sample_num'] = $check_item[$v['sku']]['sample_num'];
-            $item[$k]['in_stock_num'] = $return_arr[$v['sku']]['in_stock_num'];
-            $item[$k]['item_id'] = $return_arr[$v['sku']]['id'];
-        }
+        //查询对应质检数据
+        $checkItem = new \app\admin\model\warehouse\CheckItem;
+        $check_data = $checkItem->where('check_id', $row['check_id'])->column('*', 'sku');
         /***********end***************/
         $this->assign('item', $item);
+        $this->assign('check_data', $check_data);
         $this->view->assign("row", $row);
         return $this->view->fetch();
     }
@@ -438,6 +357,7 @@ class Instock extends Backend
         $item->startTrans();
         $purchase = new \app\admin\model\purchase\PurchaseOrderItem;
         $purchase->startTrans();
+        $this->purchase->startTrans();
         try {
             $data['create_person'] = session('admin.nickname');
             $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
@@ -447,6 +367,7 @@ class Instock extends Backend
             //查询入库明细数据
             $list = $this->model->hasWhere('instockItem', ['in_stock_id' => ['in', $ids]])->field('sku,in_stock_num')->select();
             $list = collection($list)->toArray();
+           
             foreach ($list as $k => $v) {
                 //更新商品表商品总库存
                 //总库存
@@ -455,17 +376,19 @@ class Instock extends Backend
                 //可用库存
                 $item->where($item_map)->setInc('available_stock', $v['in_stock_num']);
 
+                //根据质检id 查询采购单id 
+                $check = new \app\admin\model\warehouse\Check;
+                $purchase_id = $check->where('id',$v['check_id'])->value('purchase_id');
                 //更新采购商品表 入库数量 如果为真则为采购入库
-                if ($v['purchase_id']) {
+                if ($purchase_id) {
                     $purchase_map['sku'] = $v['sku'];
-                    $purchase_map['purchase_id'] = $v['purchase_id'];
+                    $purchase_map['purchase_id'] = $purchase_id;
                     $purchase->where($purchase_map)->setInc('instock_num', $v['in_stock_num']);
-
-
+                    
                     //更新采购单状态 已入库 或 部分入库
                     //查询采购单商品总入库数量 以及采购数量
-                    $all_stock_num = $purchase->where('purchase_id', $v['purchase_id'])->sum('in_stock_num');
-                    $all_purchase_num = $purchase->where('purchase_id', $v['purchase_id'])->sum('purchase_num');
+                    $all_stock_num = $purchase->where('purchase_id', $purchase_id)->sum('instock_num');
+                    $all_purchase_num = $purchase->where('purchase_id', $purchase_id)->sum('purchase_num');
                     //总入库数量 小于 采购单采购数量 则为部分入库 
                     if ($all_stock_num < $all_purchase_num) {
                         $stock_status = 1;
@@ -474,27 +397,31 @@ class Instock extends Backend
                     }
                     //修改采购单质检状态
                     $purchase_data['stock_status'] = $stock_status;
-                    $this->purchase->allowField(true)->save($purchase_data, ['id' => $v['purchase_id']]);
+                    $this->purchase->allowField(true)->save($purchase_data, ['id' => $purchase_id]);
                 }
             }
-           
+
             $this->model->commit();
             $item->commit();
             $purchase->commit();
+            $this->purchase->commit();
         } catch (ValidateException $e) {
             $this->model->rollback();
             $item->rollback();
             $purchase->rollback();
+            $this->purchase->rollback();
             $this->error($e->getMessage());
         } catch (PDOException $e) {
             $this->model->rollback();
             $item->rollback();
             $purchase->rollback();
+            $this->purchase->rollback();
             $this->error($e->getMessage());
         } catch (Exception $e) {
             $this->model->rollback();
             $item->rollback();
             $purchase->rollback();
+            $this->purchase->rollback();
             $this->error($e->getMessage());
         }
         if ($res !== false) {
@@ -523,6 +450,31 @@ class Instock extends Backend
             $this->success();
         } else {
             $this->error('取消失败！！');
+        }
+    }
+
+
+    /***
+     * 编辑之后提交审核
+     */
+    public function audit()
+    {
+        if ($this->request->isAjax()) {
+            $id = $this->request->param('ids');
+            $row = $this->model->get($id);
+            if ($row['status'] != 0) {
+                $this->error('此商品状态不能提交审核');
+            }
+            $map['id'] = $id;
+            $data['status'] = 1;
+            $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
+            if ($res) {
+                $this->success('提交审核成功');
+            } else {
+                $this->error('提交审核失败');
+            }
+        } else {
+            $this->error('404 Not found');
         }
     }
 }
