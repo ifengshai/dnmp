@@ -673,7 +673,7 @@ class Inventory extends Backend
                 }
                 if ($info) {
                     $params['instock_number'] = 'IN' . date('YmdHis') . rand(100, 999) . rand(100, 999);
-                    $params['create_person'] = session('admin.username');
+                    $params['create_person'] = session('admin.nickname');
                     $params['createtime'] = date('Y-m-d H:i:s', time());
                     $result = $this->model->allowField(true)->save($params);
 
