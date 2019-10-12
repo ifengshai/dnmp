@@ -602,7 +602,7 @@ class Inventory extends Backend
 
         if ($this->request->isPost()) {
             //修改状态为盘点中
-            $res = $this->model->save(['status' => 2], ['id' => ['in', $ids]]);
+            $res = $this->model->save(['status' => 2, 'end_time' => date('Y-m-d H:i:s', time())], ['id' => ['in', $ids]]);
             if ($res !== false) {
                 //修改明细表
                 $this->item->save(['is_add' => 1], ['inventory_id' => ['in', $ids]]);
@@ -610,6 +610,115 @@ class Inventory extends Backend
             } else {
                 $this->error('操作失败！！');
             }
+        }
+    }
+
+
+    /**
+     * 审核
+     */
+    public function setStatus()
+    {
+        $ids = $this->request->post("ids/a");
+        if (!$ids) {
+            $this->error('缺少参数！！');
+        }
+        $map['id'] = ['in', $ids];
+        $row = $this->model->where($map)->select();
+        foreach ($row as $v) {
+            if ($v['check_status'] !== 1) {
+                $this->error('只有待审核状态才能操作！！');
+            }
+        }
+        $data['check_status'] = input('status');
+        $data['check_time'] = date('Y-m-d H:i:s', time());
+        $data['check_person'] = session('admin.nickname');
+
+
+
+        model()->startTrans();
+        try {
+            $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
+
+            $inventory = new \app\admin\model\warehouse\Inventory;
+            $list = $inventory->hasWhere('InventoryItem')
+                ->where($check_map)
+                ->field('sku,sum(arrivals_num) as check_num')
+                ->group('sku')
+                ->select();
+            $list = collection($list)->toArray();
+
+            //生成入库单 并同步库存
+            foreach ($row as $v) { }
+
+
+            model()->commit();
+        } catch (ValidateException $e) {
+            model()->rollback();
+            $this->error($e->getMessage());
+        } catch (PDOException $e) {
+            model()->rollback();
+            $this->error($e->getMessage());
+        } catch (Exception $e) {
+            model()->rollback();
+            $this->error($e->getMessage());
+        }
+
+        if ($res) {
+
+
+            $this->success();
+        } else {
+            $this->error('修改失败！！');
+        }
+    }
+
+    /**
+     * 取消
+     */
+    public function cancel($ids = null)
+    {
+        if (!$ids) {
+            $this->error('缺少参数！！');
+        }
+        $row = $this->model->get($ids);
+        if ($row['check_status'] !== 0 && $row['status'] == 2) {
+            $this->error('只有未提交状态才能取消！！');
+        }
+        $map['id'] = ['in', $ids];
+        $data['check_status'] = input('status');
+        $data['check_time'] = date('Y-m-d H:i:s', time());
+        $data['check_person'] = session('admin.nickname');
+        $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
+        if ($res) {
+            $this->success();
+        } else {
+            $this->error('取消失败！！');
+        }
+    }
+
+
+    /***
+     * 编辑之后提交审核
+     */
+    public function audit()
+    {
+        if ($this->request->isAjax()) {
+            $id = $this->request->param('ids');
+            $row = $this->model->get($id);
+            if ($row['check_status'] != 0 && $row['status'] == 2) {
+                $this->error('盘点单状态必须为已完成并且未提交状态！！');
+            }
+            $map['id'] = $id;
+            $data['check_status'] = 1;
+            $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
+            if ($res) {
+                $this->success('提交审核成功');
+            } else {
+                $this->error('提交审核失败');
+            }
+        } else {
+            $this->error('404 Not found');
         }
     }
 }

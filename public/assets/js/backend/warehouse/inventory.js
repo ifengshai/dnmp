@@ -9,7 +9,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'editable'], function
                     index_url: 'warehouse/inventory/index' + location.search,
                     add_url: 'warehouse/inventory/add',
                     edit_url: 'warehouse/inventory/edit',
-                    del_url: 'warehouse/inventory/del',
+                    // del_url: 'warehouse/inventory/del',
                     multi_url: 'warehouse/inventory/multi',
                     table: 'inventory_list',
                 }
@@ -39,6 +39,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'editable'], function
                         { field: 'createtime', title: __('Createtime'), operate: 'RANGE', addclass: 'datetimerange' },
                         { field: 'create_person', title: __('Create_person') },
                         { field: 'status', title: __('Status'), searchList: { "0": __('待盘点'), "1": __('盘点中'), "2": __('已完成') }, formatter: Table.api.formatter.status },
+                        {
+                            field: 'check_status', title: __('审核状态'), custom: { 0: 'success', 1: 'yellow', 2: 'blue', 3: 'danger', 4: 'gray' },
+                            searchList: { 0: '未提交', 1: '待审核', 2: '已审核', 3: '已拒绝', 4: '已取消' },
+                            formatter: Table.api.formatter.status
+                        },
                         {
                             field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [
                                 {
@@ -96,6 +101,52 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'editable'], function
                                             return true;
                                         }
                                         return false;
+                                    }
+                                },
+                                {
+                                    name: 'submitAudit',
+                                    text: '提交审核',
+                                    title: __('提交审核'),
+                                    classname: 'btn btn-xs btn-success btn-ajax',
+                                    icon: 'fa fa-leaf',
+                                    url: 'warehouse/inventory/audit',
+                                    confirm: '确认提交审核吗',
+                                    success: function (data, ret) {
+                                        Layer.alert(ret.msg);
+                                        $(".btn-refresh").trigger("click");
+                                        //如果需要阻止成功提示，则必须使用return false;
+                                        //return false;
+                                    },
+                                    error: function (data, ret) {
+                                        Layer.alert(ret.msg);
+                                        return false;
+                                    },
+                                    visible: function (row) {
+                                        //返回true时按钮显示,返回false隐藏
+                                        if (row.check_status == 0 && row.status == 2) {
+                                            return true;
+                                        } else {
+                                            return false;
+                                        }
+                                    },
+                                },
+                                {
+                                    name: 'cancel',
+                                    text: '取消',
+                                    title: '取消',
+                                    classname: 'btn btn-xs btn-danger btn-cancel',
+                                    icon: 'fa fa-remove',
+                                    url: 'warehouse/inventory/cancel',
+                                    callback: function (data) {
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                    },
+                                    visible: function (row) {
+                                        //返回true时按钮显示,返回false隐藏
+                                        if (row.check_status == 0 && row.status == 2) {
+                                            return true;
+                                        } else {
+                                            return false;
+                                        }
                                     }
                                 }
 
