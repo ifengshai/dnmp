@@ -352,6 +352,13 @@ class Instock extends Backend
         if ($data['status'] == 2) {
             $data['check_time'] = date('Y-m-d H:i:s', time());
         }
+
+        //查询入库明细数据
+        $list = $this->model->hasWhere('instockItem', ['in_stock_id' => ['in', $ids]])->field('sku,in_stock_num')->select();
+        $list = collection($list)->toArray();
+
+
+
         $this->model->startTrans();
         $item = new \app\admin\model\itemmanage\Item;
         $item->startTrans();
@@ -364,27 +371,28 @@ class Instock extends Backend
             /**
              * @todo 审核通过增加库存 并添加入库单入库数量
              */
-            //查询入库明细数据
-            $list = $this->model->hasWhere('instockItem', ['in_stock_id' => ['in', $ids]])->field('sku,in_stock_num')->select();
-            $list = collection($list)->toArray();
-           
+            
             foreach ($list as $k => $v) {
                 //更新商品表商品总库存
                 //总库存
                 $item_map['sku'] = $v['sku'];
-                $item->where($item_map)->setInc('stock', $v['in_stock_num']);
-                //可用库存
-                $item->where($item_map)->setInc('available_stock', $v['in_stock_num']);
+                $item_map['is_del'] = 1;
+                if ($v['sku']) {
+                    $item->where($item_map)->setInc('stock', $v['in_stock_num']);
+                    //可用库存
+                    $item->where($item_map)->setInc('available_stock', $v['in_stock_num']);
+                }
+
 
                 //根据质检id 查询采购单id 
                 $check = new \app\admin\model\warehouse\Check;
-                $purchase_id = $check->where('id',$v['check_id'])->value('purchase_id');
+                $purchase_id = $check->where('id', $v['check_id'])->value('purchase_id');
                 //更新采购商品表 入库数量 如果为真则为采购入库
                 if ($purchase_id) {
                     $purchase_map['sku'] = $v['sku'];
                     $purchase_map['purchase_id'] = $purchase_id;
                     $purchase->where($purchase_map)->setInc('instock_num', $v['in_stock_num']);
-                    
+
                     //更新采购单状态 已入库 或 部分入库
                     //查询采购单商品总入库数量 以及采购数量
                     $all_stock_num = $purchase->where('purchase_id', $purchase_id)->sum('instock_num');

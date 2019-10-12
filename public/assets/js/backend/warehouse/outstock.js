@@ -9,7 +9,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                     index_url: 'warehouse/outstock/index' + location.search,
                     add_url: 'warehouse/outstock/add',
                     edit_url: 'warehouse/outstock/edit',
-                    del_url: 'warehouse/outstock/del',
+                    // del_url: 'warehouse/outstock/del',
                     multi_url: 'warehouse/outstock/multi',
                     table: 'out_stock',
                 }
@@ -67,7 +67,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                                     },
                                     visible: function (row) {
                                         //返回true时按钮显示,返回false隐藏
-                                        return true;
+                                        if (row.status == 0) {
+                                            return true;
+                                        } else {
+                                            return false;
+                                        }
                                     }
                                 },
                                 {
@@ -83,7 +87,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                                     },
                                     visible: function (row) {
                                         //返回true时按钮显示,返回false隐藏
-                                        return true;
+                                        if (row.status == 0) {
+                                            return true;
+                                        } else {
+                                            return false;
+                                        }
                                     }
                                 }
 

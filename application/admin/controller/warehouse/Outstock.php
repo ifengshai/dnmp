@@ -285,14 +285,6 @@ class Outstock extends Backend
             if ($v['status'] !== 1) {
                 $this->error('只有待审核状态才能操作！！');
             }
-
-            //扣除商品表商品总库存
-            //总库存
-            $item = new Item();
-            $item_map['sku'] = $v['sku'];
-            $item->where($item_map)->setDec('stock', $v['out_stock_num']);
-            //可用库存
-            $item->where($item_map)->setDec('available_stock', $v['out_stock_num']);
         }
 
         $data['status'] = input('status');

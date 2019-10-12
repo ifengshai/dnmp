@@ -9,7 +9,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast'], func
                     index_url: 'new_product/index' + location.search,
                     add_url: 'new_product/add',
                     edit_url: 'new_product/edit',
-                    del_url: 'new_product/del',
+                    // del_url: 'new_product/del',
                     multi_url: 'new_product/multi',
                     table: 'new_product',
                 }
@@ -40,8 +40,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast'], func
                         { field: 'supplier_sku', title: __('供应商SKU') },
                         {
                             field: 'item_status', title: __('选品状态'),
-                            custom: { 1: 'success', 2: 'yellow', 3: 'blue', 4: 'danger', 5: 'gray' },
-                            searchList: { 1: '新建', 2: '待审核', 3: '审核通过', 4: '已拒绝', 5: '已取消' },
+                            custom: { 1: 'success', 2: 'blue', 3: 'danger', 4: 'gray' },
+                            searchList: { 1: '待选品', 2: '选品通过', 3: '选品拒绝', 4: '已取消' },
                             formatter: Table.api.formatter.status
                         },
                         { field: 'create_person', title: __('Create_person') },
@@ -86,33 +86,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast'], func
                                         }
                                     }
                                 },
-                                {
-                                    name: 'submitAudit',
-                                    text: '提交审核',
-                                    title: __('提交审核'),
-                                    classname: 'btn btn-xs btn-success btn-ajax',
-                                    icon: 'fa fa-leaf',
-                                    url: '/admin/new_product/audit',
-                                    confirm: '确认提交审核吗',
-                                    success: function (data, ret) {
-                                        Layer.alert(ret.msg);
-                                        $(".btn-refresh").trigger("click");
-                                        //如果需要阻止成功提示，则必须使用return false;
-                                        //return false;
-                                    },
-                                    error: function (data, ret) {
-                                        Layer.alert(ret.msg);
-                                        return false;
-                                    },
-                                    visible: function (row) {
-                                        //返回true时按钮显示,返回false隐藏
-                                        if (row.item_status == 1) {
-                                            return true;
-                                        } else {
-                                            return false;
-                                        }
-                                    },
-                                },
+                                
                                 {
                                     name: 'auditRefused',
                                     text: '取消',
@@ -204,9 +178,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast'], func
         },
         add: function () {
             Controller.api.bindevent();
-            $(document).on('click', '.btn-status', function () {
-                $('#status').val(2);
-            });
+           
 
             //采集1688商品信息
             $(document).on('click', '.btn-caiji', function () {
@@ -244,9 +216,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast'], func
         },
         edit: function () {
             Controller.api.bindevent();
-            $(document).on('click', '.btn-status', function () {
-                $('#status').val(2);
-            });
+           
         },
         detail: function () {
             Controller.api.bindevent();
