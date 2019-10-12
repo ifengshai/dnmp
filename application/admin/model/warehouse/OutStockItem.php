@@ -16,14 +16,8 @@ class OutStockItem extends Model
     /**
      * 先入先出逻辑
      */
-    public function setPurchaseOrder($ids)
+    public function setPurchaseOrder($rows)
     {
-        $map['out_stock_id'] = ['in', $ids];
-        $rows = $this
-            ->where($map)
-            ->select();
-        $rows = collection($rows)->toArray();
-
         foreach ($rows as $key => &$value) {
             $map = [];
             //查询此sku

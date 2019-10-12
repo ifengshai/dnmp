@@ -287,16 +287,20 @@ class Outstock extends Backend
             }
         }
 
-        $data['status'] = input('status');
+        $data['status'] = 2;
         $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
-        if ($res) {
+
+        if ($res != false) {
             /**
              * @todo 审核通过扣减库存逻辑 
              */
-            if ($data['status'] == 2) {
 
+            if ($data['status'] == 2) {
+                //查询入库单商品信息
+                $where['out_stock_id'] = ['in', $ids];
+                $list = $this->item->where($where)->select();
                 //出库扣减库存
-                foreach ($row as $v) {
+                foreach ($list as $v) {
                     //扣除商品表商品总库存
                     //总库存
                     $item = new \app\admin\model\itemmanage\Item;
@@ -307,7 +311,7 @@ class Outstock extends Backend
                 }
 
                 //先入先出逻辑
-                $this->item->setPurchaseOrder($ids);
+                $this->item->setPurchaseOrder($list);
             }
 
             $this->success();
