@@ -633,25 +633,67 @@ class Inventory extends Backend
         $data['check_status'] = input('status');
         $data['check_time'] = date('Y-m-d H:i:s', time());
         $data['check_person'] = session('admin.nickname');
-
-
-
+        $item = new \app\admin\model\itemmanage\Item;
+        $instock = new \app\admin\model\warehouse\Instock;
+        $instockItem = new \app\admin\model\warehouse\InstockItem;
         model()->startTrans();
         try {
             $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
+            //审核通过 生成入库单 并同步库存
+            if ($data['check_status'] == 2) {
+                $inventory_map['Inventory.id'] = ['in', $ids];
+                $inventory = new \app\admin\model\warehouse\Inventory;
+                $list = $inventory->hasWhere('InventoryItem')
+                    ->where($inventory_map)
+                    ->select();
+                $list = collection($list)->toArray();
+                foreach ($list as $k => $v) {
+                    //同步对应SKU库存
+                    //更新商品表商品总库存
+                    //总库存
+                    $item_map['sku'] = $v['sku'];
+                    $item_map['is_del'] = 1;
+                    if ($v['sku']) {
+                        $result = $item->where($item_map)->setInc('stock', $v['error_qty']);
+                        //可用库存
+                        $item->where($item_map)->setInc('available_stock', $v['error_qty']);
+                    }
+                    //修改库存结果为真
+                    if ($result) {
+                        if ($v['error_qty'] > 0) {
+                            //生成入库单
+                            $info[$k]['sku'] = $v['sku'];
+                            $info[$k]['in_stock_num'] = abs($v['error_qty']);
+                            $info[$k]['no_stock_num'] = abs($v['error_qty']);
+                        } else {
+                            $list[$k]['sku'] = $v['sku'];
+                            $list[$k]['out_stock_num'] = abs($v['error_qty']);
+                        }
+                    } 
+                }
+                if ($info) {
+                    $params['instock_number'] = 'IN' . date('YmdHis') . rand(100, 999) . rand(100, 999);
+                    $params['create_person'] = session('admin.username');
+                    $params['createtime'] = date('Y-m-d H:i:s', time());
+                    $result = $this->model->allowField(true)->save($params);
 
-            $inventory = new \app\admin\model\warehouse\Inventory;
-            $list = $inventory->hasWhere('InventoryItem')
-                ->where($check_map)
-                ->field('sku,sum(arrivals_num) as check_num')
-                ->group('sku')
-                ->select();
-            $list = collection($list)->toArray();
+                    //添加入库信息
+                    if ($result !== false) {
+                        $sku = $this->request->post("sku/a");
+                        $in_stock_num = $this->request->post("in_stock_num/a");
+                        $data = [];
+                        foreach ($sku as $k => $v) {
+                            $data[$k]['sku'] = $v;
+                            $data[$k]['in_stock_num'] = $in_stock_num[$k];
+                            $data[$k]['no_stock_num'] = $in_stock_num[$k];
+                            $data[$k]['in_stock_id'] = $this->model->id;
+                        }
+                        //批量添加
+                        $this->instockItem->allowField(true)->saveAll($data);
+                    }
+                }
 
-            //生成入库单 并同步库存
-            foreach ($row as $v) { }
-
-
+            }
             model()->commit();
         } catch (ValidateException $e) {
             model()->rollback();
@@ -665,11 +707,9 @@ class Inventory extends Backend
         }
 
         if ($res) {
-
-
             $this->success();
         } else {
-            $this->error('修改失败！！');
+            $this->error();
         }
     }
 

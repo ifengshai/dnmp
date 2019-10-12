@@ -358,8 +358,6 @@ class Instock extends Backend
         $list = $this->model->hasWhere('instockItem', ['in_stock_id' => ['in', $ids]])->field('sku,in_stock_num')->select();
         $list = collection($list)->toArray();
 
-
-
         $this->model->startTrans();
         $item = new \app\admin\model\itemmanage\Item;
         $item->startTrans();
