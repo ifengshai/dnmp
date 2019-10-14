@@ -52,5 +52,5 @@ class Dashboard extends Backend
 
         return $this->view->fetch();
     }
-
+    
 }

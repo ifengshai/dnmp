@@ -22,6 +22,10 @@ class Item extends Backend
      */
     protected $model = null;
     protected $category = null;
+    /**
+     * 不需要登陆
+     */
+    protected $noNeedLogin = ['pullMagentoProductInfo','ceshi'];
 
     public function _initialize()
     {
@@ -1240,4 +1244,64 @@ class Item extends Backend
             $this->error('404 Not Found');
         }
     }
+    /***
+     * 原先的crm平台商品的sku和库存变更到最新平台的库存表里面
+     */
+    public function changeSku()
+    {
+        $result = Db::connect('database.db_stock')->table('zeelool_product')->field('magento_sku as sku,true_qty as stock,remark')->select();
+        if(!$result){
+            return false;
+        }
+        $info   = Db::connect('database.db_stock')->name('item')->insertAll($result);
+    }
+    /***
+     * 获取magento平台的商品信息
+     */
+    public function pullMagentoProductInfo()
+    {
+        //求出网站sku,分别对应的zeelool_sku,voogueme_sku,nihao_sku
+        $sku_map = Db::connect('database.db_stock')->table('sku_map')->field('sku,zeelool_sku,voogueme_sku,nihao_sku')->order('id desc')->limit(3)->select();
+        $magentoPlatform = Db::name('managto_platform')->field('id,managto_account,managto_key,managto_url')->select();
+        $arr = $productInfo = [];
+        foreach($sku_map as $k =>$v){
+            if(!empty($v['zeelool_sku'])){
+                $arr = $magentoPlatform[0];
+                $magento_sku = $v['zeelool_sku'];    
+            }elseif(!empty($v['voogueme_sku'])){
+                $arr = $magentoPlatform[1];
+                $magento_sku = $v['voogueme_sku'];
+            }elseif(!empty($v['nihao_sku'])){
+                $arr = $magentoPlatform[2];
+                $magento_sku = $v['nihao_sku'];
+            }else{
+                continue;
+            }
+            try{
+                $client = new \SoapClient($arr['managto_url'].'/api/soap/?wsdl');
+                $session = $client->login($arr['managto_account'],$arr['managto_key']);
+                $result = $client->call($session, 'catalog_product.info', $magento_sku);
+                $client->endSession($session);
+            }catch (\SoapFault $e){
+                $this->error($e->getMessage());
+            }catch (\Exception $e){
+                $this->error($e->getMessage());
+            }
+            $productInfo[] = $result;
+        }
+            echo '<pre>';
+            var_dump($productInfo);
+    }
+    public function ceshi()
+    {
+        $magentoPlatform = Db::name('managto_platform')->where(['id'=>1])->field('id,managto_account,managto_key,managto_url')->find();
+        $client = new \SoapClient($magentoPlatform['managto_url'].'/api/soap/?wsdl');
+        $session = $client->login($magentoPlatform['managto_account'],$magentoPlatform['managto_key']);
+        $result = $client->call($session, 'product_attribute.info', '459');
+        dump($result);
+        exit;
+        
+
+    }
+    
 }
