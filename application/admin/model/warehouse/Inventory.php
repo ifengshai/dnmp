@@ -8,13 +8,13 @@ use think\Model;
 class Inventory extends Model
 {
 
-    
 
-    
+
+
 
     // 表名
     protected $name = 'inventory_list';
-    
+
     // 自动写入时间戳字段
     protected $autoWriteTimestamp = 'int';
 
@@ -27,9 +27,9 @@ class Inventory extends Model
     protected $append = [
         'status_text'
     ];
-    
 
-    
+
+
     public function getStatusList()
     {
         return ['0' => __('待盘点'), '1' => __('盘点中'), '2' => __('已完成')];
@@ -43,7 +43,8 @@ class Inventory extends Model
         return isset($list[$value]) ? $list[$value] : '';
     }
 
-
-
-
+    public function InventoryItem()
+    {
+        return $this->hasMany('InventoryItem', 'inventory_id');
+    }
 }

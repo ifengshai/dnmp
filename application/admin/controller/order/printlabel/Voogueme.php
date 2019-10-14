@@ -8,6 +8,9 @@ use think\Db;
 use think\Loader;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 
+use Util\VooguemePrescriptionDetailHelper;
+
+
 /**
  * Sales Flat Order
  *
@@ -26,7 +29,14 @@ class Voogueme extends Backend
     {
         parent::_initialize();
         $this->model = new \app\admin\model\order\printlabel\Voogueme;
-        $this->zeelool = new \app\admin\model\order\printlabel\Zeelool;
+    }
+
+    public function test(){
+        // echo '123456';
+        $entity_id = 82712;
+        dump(VooguemePrescriptionDetailHelper::get_one_by_entity_id($entity_id));
+        // $increment_id = '130023358';
+        // dump(VooguemePrescriptionDetailHelper::get_one_by_increment_id($increment_id));
     }
 
     /**
@@ -50,9 +60,18 @@ class Voogueme extends Backend
                 return $this->selectpage();
             }
 
-            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            list($where, $sort, $order, $offset, $limit) = $this->buildparams(); 
+
+            $filter = $this->request->post('filter');
+            // dump($filter);
+            if ($filter.increment_id) {
+                $map['status'] = ['in', ['free_processing', 'processing','complete']];
+            }else{
+                $map['status'] = ['in', ['free_processing', 'processing']];
+            }
+
             $total = $this->model
-                ->where('status', 'in', array('free_processing', 'processing'))
+                ->where($map)
                 ->where($where)
                 ->order($sort, $order)
                 ->count();
@@ -62,7 +81,7 @@ class Voogueme extends Backend
                      custom_is_send_factory,custom_is_delivery,custom_match_frame_created_at,custom_match_lens_created_at,custom_match_factory_created_at,
                      custom_match_delivery_created_at,custom_print_label,custom_order_prescription,custom_print_label_created_at,custom_service_name';
             $list = $this->model
-                ->where('status', 'in', array('free_processing', 'processing'))
+                ->where($map)
                 // ->field($field)
                 ->where($where)
                 ->order($sort, $order)
@@ -110,7 +129,9 @@ class Voogueme extends Backend
             $this->error(__('No Results were found'));
         }
         //查询订单详情
-        $result = $this->zeelool->getOrderDetail(2, $ids);
+        // $result = $this->zeelool->getOrderDetail(2, $ids);
+        $result = VooguemePrescriptionDetailHelper::get_one_by_entity_id($ids);
+        // dump($result);
         $this->assign('result', $result);
         return $this->view->fetch();
     }
@@ -177,7 +198,7 @@ class Voogueme extends Backend
             $data['custom_print_label'] = 1;
             $data['custom_print_label_created_at'] = date('Y-m-d H:i:s', time());
             $data['custom_print_label_person'] =  session('admin.username');
-            $connect = Db::connect('database.db_voogueme_online')->table('sales_flat_order');
+            $connect = Db::connect('database.db_voogueme')->table('sales_flat_order');
             $connect->startTrans();
             try {
                 $result = $connect->where($map)->update($data);
@@ -245,7 +266,7 @@ class Voogueme extends Backend
                     break;
                 default:
             }
-            $connect = Db::connect('database.db_voogueme_online')->table('sales_flat_order');
+            $connect = Db::connect('database.db_voogueme')->table('sales_flat_order');
             $connect->startTrans();
             try {
                 $result = $connect->where($map)->update($data);
@@ -368,7 +389,7 @@ from sales_flat_order_item sfoi
 left join sales_flat_order sfo on  sfoi.order_id=sfo.entity_id 
 where sfo.`status` in ('processing','creditcard_proccessing','free_processing','paypal_reversed','complete') and sfo.entity_id in($entity_ids)
 order by sfoi.order_id desc;";
-        $resultList = Db::connect('database.db_voogueme_online')->query($processing_order_querySql);
+        $resultList = Db::connect('database.db_voogueme')->query($processing_order_querySql);
         // dump($resultList);
 
         $finalResult = array();
@@ -664,7 +685,7 @@ from sales_flat_order_item sfoi
 left join sales_flat_order sfo on  sfoi.order_id=sfo.entity_id 
 where sfo.`status` in ('processing','creditcard_proccessing','free_processing','complete','paypal_reversed','paypal_canceled_reversal') and sfo.entity_id in($entity_ids)
 order by sfoi.order_id desc;";
-            $processing_order_list = Db::connect('database.db_voogueme_online')->query($processing_order_querySql);
+            $processing_order_list = Db::connect('database.db_voogueme')->query($processing_order_querySql);
             // dump($processing_order_list);
 
             $file_header = <<<EOF

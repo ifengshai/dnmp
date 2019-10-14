@@ -81,9 +81,9 @@
             </div>
         </div>
         <div class="form-group purchase_id_number">
-            <label class="control-label col-xs-12 col-sm-2">采购单:</label>
+            <label class="control-label col-xs-12 col-sm-2">质检单:</label>
             <div class="col-xs-12 col-sm-8">
-                <select name="row[purchase_id]" class="form-control purchase_id selectpicker" data-live-search='true'>
+                <select name="row[check_id]" class="form-control check_id selectpicker" data-live-search='true'>
                     <option value="">请选择</option>
                     {foreach $purchase_data as $k => $v}
                     <option value="{$k}">{$v}</option>
@@ -119,7 +119,6 @@
                     <th>SKU</th>
                     <th>供应商SKU</th>
                     <th>采购数量</th>
-                    <th>在途数量</th>
                     <th>到货数量</th>
                     <th>质检合格数量</th>
                     <th>留样数量</th>
@@ -130,7 +129,6 @@
                     <td>
                         <input id="c-purchase_remark" class="form-control sku" name="sku[]" type="text">
                     </td>
-                    <td></td>
                     <td></td>
                     <td></td>
                     <td></td>
@@ -169,7 +167,6 @@
             <td>
                 <input id="c-purchase_remark" class="form-control sku" name="sku[]" type="text">
             </td>
-            <td></td>
             <td></td>
             <td></td>
             <td></td>

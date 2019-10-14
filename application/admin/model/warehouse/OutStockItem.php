@@ -16,14 +16,8 @@ class OutStockItem extends Model
     /**
      * 先入先出逻辑
      */
-    public function setPurchaseOrder($ids)
+    public function setPurchaseOrder($rows)
     {
-        $map['out_stock_id'] = ['in', $ids];
-        $rows = $this
-            ->where($map)
-            ->select();
-        $rows = collection($rows)->toArray();
-
         foreach ($rows as $key => &$value) {
             $map = [];
             //查询此sku
@@ -32,7 +26,7 @@ class OutStockItem extends Model
             $map['status'] = 2;
             //查询入库信息 以审核时间排序
             $res = (new Instock())->hasWhere('instockItem', $where)
-                ->field('no_stock_num,in_stock_num,in_stock_id,instockItem.id as item_id,sku')
+                ->field('no_stock_num,in_stock_num,in_stock_id,InstockItem.id as item_id,sku')
                 ->where($map)
                 ->order('check_time asc')
                 ->select();

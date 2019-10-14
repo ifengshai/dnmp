@@ -9,7 +9,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'editable'], function
                     index_url: 'warehouse/inventory/index' + location.search,
                     add_url: 'warehouse/inventory/add',
                     edit_url: 'warehouse/inventory/edit',
-                    del_url: 'warehouse/inventory/del',
+                    // del_url: 'warehouse/inventory/del',
                     multi_url: 'warehouse/inventory/multi',
                     table: 'inventory_list',
                 }
@@ -39,6 +39,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'editable'], function
                         { field: 'createtime', title: __('Createtime'), operate: 'RANGE', addclass: 'datetimerange' },
                         { field: 'create_person', title: __('Create_person') },
                         { field: 'status', title: __('Status'), searchList: { "0": __('待盘点'), "1": __('盘点中'), "2": __('已完成') }, formatter: Table.api.formatter.status },
+                        {
+                            field: 'check_status', title: __('审核状态'), custom: { 0: 'success', 1: 'yellow', 2: 'blue', 3: 'danger', 4: 'gray' },
+                            searchList: { 0: '未提交', 1: '待审核', 2: '已审核', 3: '已拒绝', 4: '已取消' },
+                            formatter: Table.api.formatter.status
+                        },
                         {
                             field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [
                                 {
@@ -97,6 +102,72 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'editable'], function
                                         }
                                         return false;
                                     }
+                                },
+                                {
+                                    name: 'submitAudit',
+                                    text: '提交审核',
+                                    title: __('提交审核'),
+                                    classname: 'btn btn-xs btn-success btn-ajax',
+                                    icon: 'fa fa-leaf',
+                                    url: 'warehouse/inventory/audit',
+                                    confirm: '确认提交审核吗',
+                                    success: function (data, ret) {
+                                        Layer.alert(ret.msg);
+                                        $(".btn-refresh").trigger("click");
+                                        //如果需要阻止成功提示，则必须使用return false;
+                                        //return false;
+                                    },
+                                    error: function (data, ret) {
+                                        Layer.alert(ret.msg);
+                                        return false;
+                                    },
+                                    visible: function (row) {
+                                        //返回true时按钮显示,返回false隐藏
+                                        if (row.check_status == 0 && row.status == 2) {
+                                            return true;
+                                        } else {
+                                            return false;
+                                        }
+                                    },
+                                },
+                                {
+                                    name: 'cancel',
+                                    text: '取消',
+                                    title: '取消',
+                                    classname: 'btn btn-xs btn-danger btn-cancel',
+                                    icon: 'fa fa-remove',
+                                    url: 'warehouse/inventory/cancel',
+                                    callback: function (data) {
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                    },
+                                    visible: function (row) {
+                                        //返回true时按钮显示,返回false隐藏
+                                        if (row.check_status == 0 && row.status == 2) {
+                                            return true;
+                                        } else {
+                                            return false;
+                                        }
+                                    }
+                                },
+                                {
+                                    name: 'detail',
+                                    text: '详情',
+                                    title: '详情',
+                                    classname: 'btn btn-xs btn-primary btn-dialog',
+                                    icon: 'fa fa-list',
+                                    url: 'warehouse/inventory/detail',
+                                    extend: 'data-area = \'["100%","100%"]\'',
+                                    callback: function (data) {
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                    },
+                                    visible: function (row) {
+                                        //返回true时按钮显示,返回false隐藏
+                                        if (row.status == 2) {
+                                            return true;
+                                        } else {
+                                            return false;
+                                        }
+                                    }
                                 }
 
                             ], formatter: Table.api.formatter.operate
@@ -113,22 +184,57 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'editable'], function
                 var ids = Table.api.selectedids(table);
                 Layer.confirm(
                     __('确定结束盘点吗?'),
-                    {icon: 3, title: __('Warning'), shadeClose: true},
+                    { icon: 3, title: __('Warning'), shadeClose: true },
                     function (index) {
                         Backend.api.ajax({
                             url: '/admin/warehouse/inventory/endInventory',
-                            data: { inventory_id: ids}
+                            data: { inventory_id: ids }
                         }, function (data, ret) {
                             Layer.close(index);
                             table.bootstrapTable('refresh');
                         });
                     }
                 );
-                
+
             })
-            
-            
-            
+
+
+            //审核通过
+            $(document).on('click', '.btn-open', function () {
+                var ids = Table.api.selectedids(table);
+                Backend.api.ajax({
+                    url: '/admin/warehouse/inventory/setStatus',
+                    data: { ids: ids, status: 2 }
+                }, function (data, ret) {
+                    table.bootstrapTable('refresh');
+                });
+            })
+
+            //审核拒绝
+            $(document).on('click', '.btn-close', function () {
+                var ids = Table.api.selectedids(table);
+                Backend.api.ajax({
+                    url: '/admin/warehouse/inventory/setStatus',
+                    data: { ids: ids, status: 3 }
+                }, function (data, ret) {
+                    table.bootstrapTable('refresh');
+                });
+            })
+
+            //审核取消
+            $(document).on('click', '.btn-cancel', function (e) {
+                e.preventDefault();
+                var url = $(this).attr('href');
+                Backend.api.ajax({
+                    url: url,
+                    data: { status: 4 }
+                }, function (data, ret) {
+                    table.bootstrapTable('refresh');
+                });
+            })
+
+
+
         },
         add: function () {
 
@@ -483,6 +589,55 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'editable'], function
                     parent.location.href = '/admin/warehouse/inventory/index';
                 })
             })
+        },
+        detail: function () {
+            // 初始化表格参数配置
+            Table.api.init({
+                searchFormVisible: true,
+                extend: {
+                    index_url: 'warehouse/inventory/detail' + location.search + '&inventory_id=' + Config.inventory_id,
+                    table: 'inventory_item',
+                }
+            });
+
+            var table = $("#table");
+
+            // 初始化表格
+            table.bootstrapTable({
+                url: $.fn.bootstrapTable.defaults.extend.index_url,
+                pk: 'id',
+                sortName: 'id',
+                columns: [
+                    [
+                        { checkbox: true },
+                        {
+                            field: '', title: __('序号'), formatter: function (value, row, index) {
+                                var options = table.bootstrapTable('getOptions');
+                                var pageNumber = options.pageNumber;
+                                var pageSize = options.pageSize;
+                                return (pageNumber - 1) * pageSize + 1 + index;
+                            }, operate: false
+                        },
+                        { field: 'id', title: __('Id'), visible: false, operate: false },
+                        { field: 'sku', title: __('Sku'), operate: 'like' },
+                        { field: 'name', title: __('Name'), operate: false },
+                        { field: 'real_time_qty', title: __('实时库存'), operate: false },
+                        { field: 'available_stock', title: __('可用库存'), operate: false },
+                        { field: 'occupy_stock', title: __('占用库存'), operate: false },
+                        {
+                            field: 'inventory_qty', title: __('盘点数量'), operate: false
+                        },
+                        { field: 'error_qty', title: __('误差数量'), operate: false },
+                        {
+                            field: 'remark', title: __('备注'), operate: false
+                        },
+
+                    ]
+                ]
+            });
+
+            // 为表格绑定事件
+            Table.api.bindevent(table);
         },
         api: {
             bindevent: function () {

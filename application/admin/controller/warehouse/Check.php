@@ -415,4 +415,75 @@ class Check extends Backend
             $this->error();
         }
     }
+
+    /**
+     * 审核
+     */
+    public function setStatus()
+    {
+        $ids = $this->request->post("ids/a");
+        if (!$ids) {
+            $this->error('缺少参数！！');
+        }
+        $map['id'] = ['in', $ids];
+        $row = $this->model->where($map)->select();
+        foreach ($row as $v) {
+            if ($v['status'] !== 1) {
+                $this->error('只有待审核状态才能操作！！');
+            }
+        }
+        $data['status'] = input('status');
+        $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
+        if ($res) {
+            $this->success();
+        } else {
+            $this->error('修改失败！！');
+        }
+    }
+
+    /**
+     * 取消
+     */
+    public function cancel($ids = null)
+    {
+        if (!$ids) {
+            $this->error('缺少参数！！');
+        }
+        $row = $this->model->get($ids);
+        if ($row['status'] !== 0) {
+            $this->error('只有新建状态才能取消！！');
+        }
+        $map['id'] = ['in', $ids];
+        $data['status'] = input('status');
+        $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
+        if ($res) {
+            $this->success();
+        } else {
+            $this->error('取消失败！！');
+        }
+    }
+
+     /***
+     * 编辑之后提交审核
+     */
+    public function audit()
+    {
+        if ($this->request->isAjax()) {
+            $id = $this->request->param('ids');
+            $row = $this->model->get($id);
+            if ($row['status'] != 0) {
+                $this->error('此商品状态不能提交审核');
+            }
+            $map['id'] = $id;
+            $data['status'] = 1;
+            $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
+            if ($res) {
+                $this->success('提交审核成功');
+            } else {
+                $this->error('提交审核失败');
+            }
+        } else {
+            $this->error('404 Not found');
+        }
+    }
 }

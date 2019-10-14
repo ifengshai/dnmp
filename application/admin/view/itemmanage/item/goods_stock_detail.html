@@ -1,0 +1,236 @@
+<style>
+    .list-div {
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+        padding: 10px;
+        width: 100%;
+        height: 400px;
+        margin-bottom: 10px;
+    }
+
+    .caigou {
+        width: 45%;
+        margin-bottom: 10px;
+        float: left;
+    }
+
+    #caigou-table {
+        width: 100%;
+        height: 130px;
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+        text-align: center;
+    }
+
+    #caigou-table tr {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+        line-height: 50px;
+    }
+
+    #caigou-table tr th {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+        text-align: center;
+        font-size: 14px;
+        line-height: 50px;
+    }
+
+    #caigou-table tr td {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+    }
+
+    #caigou-table tr td input {
+
+        width: 150px;
+    }
+
+    .nav-tabs>li {
+        float: left;
+        margin-bottom: -1px;
+    }
+
+    .nav>li {
+        position: relative;
+        display: block;
+    }
+
+    .nav-tabs>li>a {
+        margin-right: 4px;
+        color: #95a5a6;
+        background-color: #d8e0e6;
+        border: 1px solid #e8edf0;
+        border-bottom-color: transparent;
+    }
+
+    .panel-heading {
+        padding: 15px;
+        padding-bottom: 0;
+        background: #e8edf0;
+        border-color: #e8edf0;
+        position: relative;
+    }
+
+    .panel-heading .nav-tabs>li>a {
+        margin-right: 4px;
+        color: #95a5a6;
+        border: 1px solid #e8edf0;
+        border-bottom-color: transparent;
+    }
+
+    .caigou-table-lens tbody tr td input {
+        text-align: center;
+    }
+</style>
+
+
+<form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
+    <div style="width: 100%;" class="list-div">
+        <div class='caigou'>
+            <p style="font-size: 16px;text-align: center;"><b>订单基本信息</b></p>
+
+            <div class="form-group">
+                <label class="control-label col-xs-12 col-sm-2">订单编号:</label>
+                <div class="col-xs-12 col-sm-8">
+                    <input id="c-purchase_number" class="form-control" name="row[increment_id]"
+                        value="{$row.increment_id}" type="text" readonly>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label col-xs-12 col-sm-2">订单状态:</label>
+                <div class="col-xs-12 col-sm-8">
+                    <input id="c-purchase_name" class="form-control" name="row[purchase_name]" value="{$row.status}"
+                        type="text" readonly>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label col-xs-12 col-sm-2">创建时间:</label>
+                <div class="col-xs-12 col-sm-8">
+                    <input id="c-purchase_name" class="form-control" name="row[purchase_name]" value="{$row.created_at}"
+                        type="text" readonly>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label col-xs-12 col-sm-2">客户邮箱:</label>
+                <div class="col-xs-12 col-sm-8">
+                    <input id="c-purchase_name" class="form-control" name="row[purchase_name]" value="{$address.email}"
+                        type="text" readonly>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label col-xs-12 col-sm-2">订单来源:</label>
+                <div class="col-xs-12 col-sm-8">
+                    {if $row['store_id'] == 1}
+                    <input id="c-purchase_name" class="form-control" name="row[purchase_name]" value="PC端" type="text"
+                        readonly>
+                    {elseif $row['store_id'] == 4}
+                    <input id="c-purchase_name" class="form-control" name="row[purchase_name]" value="移动端" type="text"
+                        readonly>
+                    {/if}
+
+                </div>
+            </div>
+
+        </div>
+
+        
+
+    </div>
+    <div style="width: 100%;">
+        <p style="font-size: 16px;text-align: center;"><b>订单项列表</b></p>
+        <div style="margin-bottom: 20px;">
+
+            <table id="caigou-table">
+                <tr>
+                    <th>序号</td>
+                    <th>SKU</td>
+                    <th>商品名称</td>
+                    <th>平台SKU</td>
+                    <th>数量</td>
+                    <th>颜色</td>
+                    <th>镀膜类型</td>
+                    <th>镀膜价格</td>
+                    <th>镜片类型</td>
+                    <th>镜片价格</td>
+                    <th>镜框价格</td>
+                    <th>币种</td>
+                    <th>折扣金额</td>
+                </tr>
+                {foreach $goods as $k => $v}
+                <tr>
+                    <td>{:$k+1}</td>
+                    <td>{$v.sku}</td>
+                    <td>{$v.name}</td>
+                    <td>{$v.sku}</td>
+                    <td>{:round($v['qty_ordered'])}</td>
+                    <td>{$v.product_options.options.0.value}</td>
+                    <td>{$v.product_options.tmplens.coatiing_name}</td>
+                    <td>{$v.product_options.tmplens.coatiing_price}</td>
+                    <td>{$v.product_options.tmplens.index_type}</td>
+                    <td>{$v.product_options.tmplens.index_price}</td>
+                    <td>{$v.product_options.tmplens.frame_price}</td>
+                    <td>{$v.product_options.info_buyRequest.cart_currency}</td>
+                    <td>{$v.discount_amount}</td>
+                </tr>
+                {/foreach}
+
+            </table>
+        </div>
+    </div>
+
+    <div style="width: 100%;">
+        <p style="font-size: 16px;text-align: center;"><b>订单支付列表</b></p>
+        <div style="margin-bottom: 20px;">
+
+            <table id="caigou-table">
+                <tr>
+                    <th>订单号</th>
+                    <th>支付金额</th>
+                    <th>订单金额</th>
+                    <th>积分</th>
+                    <th>抵扣金额</th>
+                    <th>运费</th>
+                    <th>支付方式</th>
+                    <th>last_trans_id</th>
+                    <th>paypal_payer_email</th>
+                    <th>paypal_payer_id</th>
+                    <th>paypal_payer_status</th>
+                    <th>paypal_payment_status</th>
+                </tr>
+                <tr>
+                    <td>{$row.increment_id} </td>
+                    <td>{$row.base_total_paid|sprintf='%.2f',###}</td>
+                    <td>{$row.base_grand_total|sprintf='%.2f',###} </td>
+                    <td>{$row.mw_rewardpoint} </td>
+                    <td>{$row.mw_rewardpoint_discount_show|sprintf='%.2f',###} </td>
+                    <td>{$pay.base_shipping_amount|sprintf='%.2f',###} </td>
+                    <td>{$pay.method} </td>
+                    <td>{$pay.last_trans_id}</td>
+                    <td>{$pay.additional_information.paypal_payer_email}</td>
+                    <td>{$pay.additional_information.paypal_payer_id}</td>
+                    <td>{$pay.additional_information.paypal_payer_status}</td>
+                    <td>{$pay.additional_information.paypal_payment_status}</td>
+                </tr>
+
+            </table>
+        </div>
+    </div>
+    
+
+</form>

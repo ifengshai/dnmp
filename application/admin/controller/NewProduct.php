@@ -567,8 +567,8 @@ class NewProduct extends Backend
             $row = collection($row)->toArray();
 
             $map['id'] = ['in', $ids];
-            $map['item_status'] = 2;
-            $data['item_status'] = 3;
+            $map['item_status'] = 1;
+            $data['item_status'] = 2;
             $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
             if ($res !== false) {
                 if ($row) {

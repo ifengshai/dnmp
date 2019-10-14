@@ -81,12 +81,12 @@
             </div>
         </div>
         <div class="form-group {:$row['type_id'] == 1 ? '' : 'hidden'} purchase_id_number">
-            <label class="control-label col-xs-12 col-sm-2">采购单:</label>
+            <label class="control-label col-xs-12 col-sm-2">质检单:</label>
             <div class="col-xs-12 col-sm-8">
-                <select name="row[purchase_id]" class="form-control purchase_id">
+                <select name="row[check_id]" class="form-control check_id selectpicker" data-live-search='true'>
                     <option value="">请选择</option>
                     {foreach $purchase_data as $k => $v}
-                    <option value="{$k}" {:$row['purchase_id'] == $k ? 'selected' : ''}>{$v}</option>
+                    <option value="{$k}" {:$row['check_id'] == $k ? 'selected' : ''}>{$v}</option>
                     {/foreach}
                 </select>
             </div>
@@ -117,7 +117,6 @@
                     <th>SKU</th>
                     <th>供应商SKU</th>
                     <th>采购数量</th>
-                    <th>在途数量</th>
                     <th>到货数量</th>
                     <th>质检合格数量</th>
                     <th>留样数量</th>
@@ -125,16 +124,15 @@
                 </tr>
                 {foreach $item as $v}
                 <tr>
-                    <input id="c-purchase_remark" class="form-control" name="item_id[]" type="hidden" value="{$v.item_id}">
+                    <input id="c-purchase_remark" class="form-control" name="item_id[]" type="hidden" value="{$v.id}">
                     <td>
                         <input id="c-purchase_remark" class="form-control" name="sku[]" type="text" value="{$v.sku}">
                     </td>
-                    <td>{$v.supplier_sku}</td>
-                    <td>{$v.purchase_num}</td>
-                    <td>{$v['purchase_num'] - $v['arrivals_num']}</td>
-                    <td>{$v['arrivals_num']}</td>
-                    <td>{$v.quantity_num}</td>
-                    <td>{$v.sample_num}</td>
+                    <td>{$check_data[$v['sku']]['supplier_sku']}</td>
+                    <td>{$check_data[$v['sku']]['purchase_num']}</td>
+                    <td>{$check_data[$v['sku']]['arrivals_num']}</td>
+                    <td>{$check_data[$v['sku']]['quantity_num']}</td>
+                    <td>{$check_data[$v['sku']]['sample_num']}</td>
                     <td><input id="c-purchase_remark" class="form-control in_stock_num" name="in_stock_num[]" type="text" value="{$v.in_stock_num}"></td>
                  
                 </tr>

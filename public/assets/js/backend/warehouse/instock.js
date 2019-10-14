@@ -9,7 +9,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                     index_url: 'warehouse/instock/index' + location.search,
                     add_url: 'warehouse/instock/add',
                     edit_url: 'warehouse/instock/edit',
-                    del_url: 'warehouse/instock/del',
+                    // del_url: 'warehouse/instock/del',
                     multi_url: 'warehouse/instock/multi',
                     table: 'in_stock',
                 }
@@ -28,7 +28,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                         { field: 'id', title: __('Id') },
                         { field: 'in_stock_number', title: __('In_stock_number') },
                         { field: 'instocktype.name', title: __('In_stock_type') },
-                        { field: 'purchaseorder.purchase_number', title: __('Purchase_id') },
+                        { field: 'checkorder.check_order_number', title: __('质检单号') },
                         { field: 'order_number', title: __('Order_number') },
                         { field: 'remark', title: __('Remark') },
                         {
@@ -40,6 +40,33 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                         { field: 'create_person', title: __('Create_person') },
                         {
                             field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [
+                                {
+                                    name: 'submitAudit',
+                                    text: '提交审核',
+                                    title: __('提交审核'),
+                                    classname: 'btn btn-xs btn-success btn-ajax',
+                                    icon: 'fa fa-leaf',
+                                    url: 'warehouse/instock/audit',
+                                    confirm: '确认提交审核吗',
+                                    success: function (data, ret) {
+                                        Layer.alert(ret.msg);
+                                        $(".btn-refresh").trigger("click");
+                                        //如果需要阻止成功提示，则必须使用return false;
+                                        //return false;
+                                    },
+                                    error: function (data, ret) {
+                                        Layer.alert(ret.msg);
+                                        return false;
+                                    },
+                                    visible: function (row) {
+                                        //返回true时按钮显示,返回false隐藏
+                                        if (row.status == 0) {
+                                            return true;
+                                        } else {
+                                            return false;
+                                        }
+                                    },
+                                }, 
                                 {
                                     name: 'detail',
                                     text: '详情',
@@ -68,7 +95,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                                     },
                                     visible: function (row) {
                                         //返回true时按钮显示,返回false隐藏
-                                        return true;
+                                        if (row.status == 0 ) {
+                                            return true;
+                                        } else {
+                                            return false;
+                                        }
                                     }
                                 },
                                 {
@@ -84,7 +115,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                                     },
                                     visible: function (row) {
                                         //返回true时按钮显示,返回false隐藏
-                                        return true;
+                                        if (row.status == 0) {
+                                            return true;
+                                        } else {
+                                            return false;
+                                        }
                                     }
                                 }
 
@@ -184,26 +219,25 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                 })
 
                 //切换采购单
-                $(document).on('change', '.purchase_id', function () {
+                $(document).on('change', '.check_id', function () {
                     var id = $(this).val();
                     if (id) {
-                        var url = '/admin/warehouse/instock/getPurchaseData';
+                        var url = '/admin/warehouse/instock/getCheckData';
                         Backend.api.ajax({
                             url: url,
                             data: { id: id }
                         }, function (data, ret) {
                             //循环展示商品信息
-                            var shtml = ' <tr><th>SKU</th><th>供应商SKU</th><th>采购数量</th><th>在途数量</th><th>到货数量</th><th>质检合格数量</th><th>留样数量</th><th>入库数量</th><th>操作</th></tr>';
+                            var shtml = ' <tr><th>SKU</th><th>供应商SKU</th><th>采购数量</th>><th>到货数量</th><th>质检合格数量</th><th>留样数量</th><th>入库数量</th><th>操作</th></tr>';
                             $('.caigou table tbody').html('');
-                            for (var i in data.item) {
-                                shtml += ' <tr><td><input id="c-purchase_remark" class="form-control" name="sku[]" type="text" value="' + data.item[i].sku + '"></td>'
-                                shtml += ' <td>' + data.item[i].supplier_sku + '</td>'
-                                shtml += ' <td>' + data.item[i].purchase_num + '</td>'
-                                shtml += ' <td>' + (data.item[i].purchase_num - data.item[i].arrivals_num) + '</td>'
-                                shtml += ' <td>' + data.item[i].arrivals_num + '</td>'
-                                shtml += ' <td>' + data.item[i].quantity_num + '</td>'
-                                shtml += ' <td>' + data.item[i].sample_num + '</td>'
-                                shtml += ' <td><input id="c-in_stock_num" class="form-control" name="in_stock_num[]" type="text"></td>'
+                            for (var i in data) {
+                                shtml += ' <tr><td><input id="c-purchase_remark" class="form-control" name="sku[]" type="text" value="' + data[i].sku + '"></td>'
+                                shtml += ' <td>' + data[i].supplier_sku + '</td>'
+                                shtml += ' <td>' + data[i].purchase_num + '</td>'
+                                shtml += ' <td>' + data[i].arrivals_num + '</td>'
+                                shtml += ' <td>' + data[i].quantity_num + '</td>'
+                                shtml += ' <td>' + data[i].sample_num + '</td>'
+                                shtml += ' <td><input id="c-in_stock_num" class="form-control" name="in_stock_num[]" value="' + data[i].quantity_num + '" type="text"></td>'
                                 shtml += ' <td>'
                                 shtml += ' <a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>删除</a>'
                                 shtml += ' </td>'

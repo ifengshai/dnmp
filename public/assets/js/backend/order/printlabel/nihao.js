@@ -34,12 +34,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         { field: 'custom_is_match_frame', title: __('配镜架'), operate: false, formatter: Controller.api.formatter.printLabel },
                         { field: 'custom_is_match_lens', title: __('配镜片'), operate: false, formatter: Controller.api.formatter.printLabel },
                         { field: 'custom_is_send_factory', title: __('加工'), operate: false, formatter: Controller.api.formatter.printLabel },
-                        { field: 'custom_is_delivery', title: __('提货'), operate: false, formatter: Controller.api.formatter.printLabel },
+                        { field: 'custom_is_delivery', title: __('质检'), operate: false, formatter: Controller.api.formatter.printLabel },
                         { field: 'custom_print_label', title: __('是否打印'), searchList: { 1: '是', 0: '否' }, formatter: Table.api.formatter.status, visible: false },
                         { field: 'custom_is_match_frame', title: __('是否配镜架'), searchList: { 1: '是', 0: '否' }, formatter: Table.api.formatter.status, visible: false },
                         { field: 'custom_is_match_lens', title: __('是否配镜片'), searchList: { 1: '是', 0: '否' }, formatter: Table.api.formatter.status, visible: false },
                         { field: 'custom_is_send_factory', title: __('是否加工'), searchList: { 1: '是', 0: '否' }, formatter: Table.api.formatter.status, visible: false },
-                        { field: 'custom_is_delivery', title: __('是否提货'), searchList: { 1: '是', 0: '否' }, formatter: Table.api.formatter.status, visible: false },
+                        { field: 'custom_is_delivery', title: __('是否质检'), searchList: { 1: '是', 0: '否' }, formatter: Table.api.formatter.status, visible: false },
                         { field: 'created_at', title: __('创建时间'), operate: 'RANGE', addclass: 'datetimerange' },
                         {
                             field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [
@@ -206,12 +206,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         { field: 'custom_is_match_frame', title: __('配镜架'), operate: false, formatter: Controller.api.formatter.printLabel },
                         { field: 'custom_is_match_lens', title: __('配镜片'), operate: false, formatter: Controller.api.formatter.printLabel },
                         { field: 'custom_is_send_factory', title: __('加工'), operate: false, formatter: Controller.api.formatter.printLabel },
-                        { field: 'custom_is_delivery', title: __('提货'), operate: false, formatter: Controller.api.formatter.printLabel },
+                        { field: 'custom_is_delivery', title: __('质检'), operate: false, formatter: Controller.api.formatter.printLabel },
                         { field: 'custom_print_label', title: __('是否打印'), searchList: { 1: '是', 0: '否' }, formatter: Table.api.formatter.status, visible: false },
                         { field: 'custom_is_match_frame', title: __('是否配镜架'), searchList: { 1: '是', 0: '否' }, formatter: Table.api.formatter.status, visible: false },
                         { field: 'custom_is_match_lens', title: __('是否配镜片'), searchList: { 1: '是', 0: '否' }, formatter: Table.api.formatter.status, visible: false },
                         { field: 'custom_is_send_factory', title: __('是否加工'), searchList: { 1: '是', 0: '否' }, formatter: Table.api.formatter.status, visible: false },
-                        { field: 'custom_is_delivery', title: __('是否提货'), searchList: { 1: '是', 0: '否' }, formatter: Table.api.formatter.status, visible: false },
+                        { field: 'custom_is_delivery', title: __('是否质检'), searchList: { 1: '是', 0: '否' }, formatter: Table.api.formatter.status, visible: false },
                         { field: 'created_at', title: __('创建时间'), operate: 'RANGE', addclass: 'datetimerange' },
                         {
                             field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [
