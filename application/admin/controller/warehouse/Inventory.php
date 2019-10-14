@@ -146,14 +146,14 @@ class Inventory extends Backend
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
-            $this->temp = new \app\admin\model\warehouse\TempProduct;
+            $this->model = new \app\admin\model\warehouse\TempProduct;
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
-            $total = $this->temp
+            $total = $this->model
                 ->where($where)
                 ->order($sort, $order)
                 ->count();
 
-            $list = $this->temp
+            $list = $this->model
                 ->where($where)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
@@ -509,14 +509,15 @@ class Inventory extends Backend
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
+            $this->model = new \app\admin\model\warehouse\InventoryItem;
             $map['inventory_id'] = input('inventory_id');
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
-            $total = $this->item
+            $total = $this->model
                 ->where($where)
                 ->where($map)
                 ->order($sort, $order)
                 ->count();
-            $list = $this->item
+            $list = $this->model
                 ->where($where)
                 ->where($map)
                 ->order($sort, $order)
@@ -615,7 +616,7 @@ class Inventory extends Backend
 
 
     /**
-     * 审核
+     * 审核 冲减库存生成入库单 出库单
      */
     public function setStatus()
     {
@@ -636,80 +637,117 @@ class Inventory extends Backend
         $item = new \app\admin\model\itemmanage\Item;
         $instock = new \app\admin\model\warehouse\Instock;
         $instockItem = new \app\admin\model\warehouse\InstockItem;
-        model()->startTrans();
+        $outstock = new \app\admin\model\warehouse\Outstock;
+        $outstockItem = new \app\admin\model\warehouse\OutStockItem;
+
+        //回滚
+        Db::startTrans();
         try {
             $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
             //审核通过 生成入库单 并同步库存
             if ($data['check_status'] == 2) {
-                $inventory_map['Inventory.id'] = ['in', $ids];
-                $inventory = new \app\admin\model\warehouse\Inventory;
-                $list = $inventory->hasWhere('InventoryItem')
-                    ->where($inventory_map)
+                $infos = $this->model->hasWhere('InventoryItem', ['inventory_id' => ['in', $ids]])
+                    ->field('sku,error_qty')
+                    ->group('sku')
                     ->select();
-                $list = collection($list)->toArray();
-                foreach ($list as $k => $v) {
+                $infos = collection($infos)->toArray();
+                foreach ($infos as $k => $v) {
+                    //如果误差为0则跳过
+                    if ($v['error_qty'] == 0) {
+                        continue;
+                    }
                     //同步对应SKU库存
                     //更新商品表商品总库存
                     //总库存
                     $item_map['sku'] = $v['sku'];
                     $item_map['is_del'] = 1;
                     if ($v['sku']) {
-                        $result = $item->where($item_map)->setInc('stock', $v['error_qty']);
+                        $stock = $item->where($item_map)->setInc('stock', $v['error_qty']);
                         //可用库存
-                        $item->where($item_map)->setInc('available_stock', $v['error_qty']);
+                        $available_stock = $item->where($item_map)->setInc('available_stock', $v['error_qty']);
                     }
+
                     //修改库存结果为真
-                    if ($result) {
-                        if ($v['error_qty'] > 0) {
-                            //生成入库单
-                            $info[$k]['sku'] = $v['sku'];
-                            $info[$k]['in_stock_num'] = abs($v['error_qty']);
-                            $info[$k]['no_stock_num'] = abs($v['error_qty']);
-                        } else {
-                            $list[$k]['sku'] = $v['sku'];
-                            $list[$k]['out_stock_num'] = abs($v['error_qty']);
-                        }
-                    } 
+                    if ($stock === false || $available_stock === false) {
+                        throw new Exception('同步库存失败,请检查SKU=>' . $v['sku']);
+                        break;
+                    }
+
+                    if ($v['error_qty'] > 0) {
+                        //生成入库单
+                        $info[$k]['sku'] = $v['sku'];
+                        $info[$k]['in_stock_num'] = abs($v['error_qty']);
+                        $info[$k]['no_stock_num'] = abs($v['error_qty']);
+                    } else {
+                        $list[$k]['sku'] = $v['sku'];
+                        $list[$k]['out_stock_num'] = abs($v['error_qty']);
+                    }
                 }
+                //入库记录
                 if ($info) {
-                    $params['instock_number'] = 'IN' . date('YmdHis') . rand(100, 999) . rand(100, 999);
+                    $params['in_stock_number'] = 'IN' . date('YmdHis') . rand(100, 999) . rand(100, 999);
                     $params['create_person'] = session('admin.nickname');
                     $params['createtime'] = date('Y-m-d H:i:s', time());
-                    $result = $this->model->allowField(true)->save($params);
+                    $params['type_id'] = 2;
+                    $params['status'] = 2;
+                    $params['remark'] = '盘盈入库';
+                    $params['check_time'] = date('Y-m-d H:i:s', time());
+                    $params['check_person'] = session('admin.nickname');
+                    $instorck_res = $instock->allowField(true)->save($params);
 
                     //添加入库信息
-                    if ($result !== false) {
-                        $sku = $this->request->post("sku/a");
-                        $in_stock_num = $this->request->post("in_stock_num/a");
-                        $data = [];
-                        foreach ($sku as $k => $v) {
-                            $data[$k]['sku'] = $v;
-                            $data[$k]['in_stock_num'] = $in_stock_num[$k];
-                            $data[$k]['no_stock_num'] = $in_stock_num[$k];
-                            $data[$k]['in_stock_id'] = $this->model->id;
+                    if ($instorck_res !== false) {
+                        $instockItemList = array_values($info);
+                        unset($info);
+                        foreach ($instockItemList as &$v) {
+                            $v['in_stock_id'] = $instock->id;
                         }
+                        unset($v);
                         //批量添加
-                        $this->instockItem->allowField(true)->saveAll($data);
+                        $instockItem->allowField(true)->saveAll($instockItemList);
                     }
                 }
 
+                //出库记录
+                if ($list) {
+                    $params = [];
+                    $params['out_stock_number'] = 'OUT' . date('YmdHis') . rand(100, 999) . rand(100, 999);
+                    $params['create_person'] = session('admin.nickname');
+                    $params['createtime'] = date('Y-m-d H:i:s', time());
+                    $params['type_id'] = 8;
+                    $params['status'] = 2;
+                    $params['remark'] = '盘亏出库';
+                    $params['check_time'] = date('Y-m-d H:i:s', time());
+                    $params['check_person'] = session('admin.nickname');
+                    $outstock_res = $outstock->allowField(true)->save($params);
+
+                    //添加入库信息
+                    if ($outstock_res !== false) {
+                        $outstockItemList = array_values($list);
+                        foreach ($outstockItemList as $k => $v) {
+                            $outstockItemList[$k]['out_stock_id'] = $outstock->id;
+                        }
+                        //批量添加
+                        $outstockItem->allowField(true)->saveAll($outstockItemList);
+                    }
+                }
             }
-            model()->commit();
+            Db::commit();
         } catch (ValidateException $e) {
-            model()->rollback();
+            Db::rollback();
             $this->error($e->getMessage());
         } catch (PDOException $e) {
-            model()->rollback();
+            Db::rollback();
             $this->error($e->getMessage());
         } catch (Exception $e) {
-            model()->rollback();
+            Db::rollback();
             $this->error($e->getMessage());
         }
 
-        if ($res) {
-            $this->success();
+        if ($res !== false) {
+            $this->success('操作成功！！');
         } else {
-            $this->error();
+            $this->error('操作失败！！');
         }
     }
 
@@ -760,5 +798,42 @@ class Inventory extends Backend
         } else {
             $this->error('404 Not found');
         }
+    }
+
+
+    /**
+     * 详情页面
+     */
+    public function detail($ids = null)
+    {
+        //设置过滤方法
+        $this->request->filter(['strip_tags']);
+        if ($this->request->isAjax()) {
+            //如果发送的来源是Selectpage，则转发到Selectpage
+            if ($this->request->request('keyField')) {
+                return $this->selectpage();
+            }
+            $this->model = new \app\admin\model\warehouse\InventoryItem;
+            $map['inventory_id'] = input('inventory_id');
+            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            $total = $this->model
+                ->where($where)
+                ->where($map)
+                ->order($sort, $order)
+                ->count();
+            $list = $this->model
+                ->where($where)
+                ->where($map)
+                ->order($sort, $order)
+                ->limit($offset, $limit)
+                ->select();
+
+            $list = collection($list)->toArray();
+            $result = array("total" => $total, "rows" => $list);
+
+            return json($result);
+        }
+        $this->assignconfig('inventory_id', $ids);
+        return $this->view->fetch();
     }
 }

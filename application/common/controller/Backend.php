@@ -371,6 +371,7 @@ class Backend extends Controller
         }
 
         //判断是否存在逻辑删除字段
+        
         if (!empty($this->model)) {
             $fieldArr = $this->model->getTableFields();
             if (in_array('is_del', $fieldArr)) {

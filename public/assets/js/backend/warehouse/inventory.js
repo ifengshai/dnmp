@@ -148,6 +148,26 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'editable'], function
                                             return false;
                                         }
                                     }
+                                },
+                                {
+                                    name: 'detail',
+                                    text: '详情',
+                                    title: '详情',
+                                    classname: 'btn btn-xs btn-primary btn-dialog',
+                                    icon: 'fa fa-list',
+                                    url: 'warehouse/inventory/detail',
+                                    extend: 'data-area = \'["100%","100%"]\'',
+                                    callback: function (data) {
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                    },
+                                    visible: function (row) {
+                                        //返回true时按钮显示,返回false隐藏
+                                        if (row.status == 2) {
+                                            return true;
+                                        } else {
+                                            return false;
+                                        }
+                                    }
                                 }
 
                             ], formatter: Table.api.formatter.operate
@@ -164,22 +184,57 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'editable'], function
                 var ids = Table.api.selectedids(table);
                 Layer.confirm(
                     __('确定结束盘点吗?'),
-                    {icon: 3, title: __('Warning'), shadeClose: true},
+                    { icon: 3, title: __('Warning'), shadeClose: true },
                     function (index) {
                         Backend.api.ajax({
                             url: '/admin/warehouse/inventory/endInventory',
-                            data: { inventory_id: ids}
+                            data: { inventory_id: ids }
                         }, function (data, ret) {
                             Layer.close(index);
                             table.bootstrapTable('refresh');
                         });
                     }
                 );
-                
+
             })
-            
-            
-            
+
+
+            //审核通过
+            $(document).on('click', '.btn-open', function () {
+                var ids = Table.api.selectedids(table);
+                Backend.api.ajax({
+                    url: '/admin/warehouse/inventory/setStatus',
+                    data: { ids: ids, status: 2 }
+                }, function (data, ret) {
+                    table.bootstrapTable('refresh');
+                });
+            })
+
+            //审核拒绝
+            $(document).on('click', '.btn-close', function () {
+                var ids = Table.api.selectedids(table);
+                Backend.api.ajax({
+                    url: '/admin/warehouse/inventory/setStatus',
+                    data: { ids: ids, status: 3 }
+                }, function (data, ret) {
+                    table.bootstrapTable('refresh');
+                });
+            })
+
+            //审核取消
+            $(document).on('click', '.btn-cancel', function (e) {
+                e.preventDefault();
+                var url = $(this).attr('href');
+                Backend.api.ajax({
+                    url: url,
+                    data: { status: 4 }
+                }, function (data, ret) {
+                    table.bootstrapTable('refresh');
+                });
+            })
+
+
+
         },
         add: function () {
 
@@ -534,6 +589,55 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'editable'], function
                     parent.location.href = '/admin/warehouse/inventory/index';
                 })
             })
+        },
+        detail: function () {
+            // 初始化表格参数配置
+            Table.api.init({
+                searchFormVisible: true,
+                extend: {
+                    index_url: 'warehouse/inventory/detail' + location.search + '&inventory_id=' + Config.inventory_id,
+                    table: 'inventory_item',
+                }
+            });
+
+            var table = $("#table");
+
+            // 初始化表格
+            table.bootstrapTable({
+                url: $.fn.bootstrapTable.defaults.extend.index_url,
+                pk: 'id',
+                sortName: 'id',
+                columns: [
+                    [
+                        { checkbox: true },
+                        {
+                            field: '', title: __('序号'), formatter: function (value, row, index) {
+                                var options = table.bootstrapTable('getOptions');
+                                var pageNumber = options.pageNumber;
+                                var pageSize = options.pageSize;
+                                return (pageNumber - 1) * pageSize + 1 + index;
+                            }, operate: false
+                        },
+                        { field: 'id', title: __('Id'), visible: false, operate: false },
+                        { field: 'sku', title: __('Sku'), operate: 'like' },
+                        { field: 'name', title: __('Name'), operate: false },
+                        { field: 'real_time_qty', title: __('实时库存'), operate: false },
+                        { field: 'available_stock', title: __('可用库存'), operate: false },
+                        { field: 'occupy_stock', title: __('占用库存'), operate: false },
+                        {
+                            field: 'inventory_qty', title: __('盘点数量'), operate: false
+                        },
+                        { field: 'error_qty', title: __('误差数量'), operate: false },
+                        {
+                            field: 'remark', title: __('备注'), operate: false
+                        },
+
+                    ]
+                ]
+            });
+
+            // 为表格绑定事件
+            Table.api.bindevent(table);
         },
         api: {
             bindevent: function () {
