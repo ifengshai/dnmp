@@ -117,20 +117,29 @@
 
             table.altrowstable th {
                 border-width: 1px;
-                padding: 8px;
+                padding: 5px;
                 font-size: 14px;
                 border-style: solid;
-                border-color: #a9c6c9;
+                border-color: #d2d6de;
             }
 
             table.altrowstable td {
                 border-width: 1px;
-                padding: 8px;
+                padding: 5px;
                 text-align: center;
                 font-size: 14px;
                 border-style: solid;
-                border-color: #a9c6c9;
+                border-color: #d2d6de;
             }
+            table.altrowstable tr:nth-child(odd){
+                background:#E9F1F4;
+                background: #F5F5F5;
+                background: #F1F1F1;
+            }
+            table.altrowstable tr:nth-child(even){
+                background: #F5FAFA;
+                background: #eee;
+            }            
         </style>
         <table class="altrowstable" style="border:#0f0 solid 1px;margin:0px auto;margin-bottom:10px;width:90%;">
             <tbody>
@@ -155,23 +164,20 @@
                                 </tr>
                                 <tr>
                                     <td>处方类型：</td>
-                                    <td>{$sku.custom_prescription}</td>
+                                    <td>{$sku.prescription_type}</td>
                                 </tr>
-                                <!-- <tr>
-                                    <td>基片类型：</td>
-                                    <td></td>
-                                </tr> -->
                                 <tr>
                                     <td>镜片类型：</td>
-                                    <td>{$sku['product_options']['tmplens']['index_type']}</td>
+                                    <td>{$sku['index_type']}</td>
                                 </tr>
-                                <!-- <tr>
-                                    <td>折射率：</td>
-                                    <td></td>
-                                </tr> -->
+
                                 <tr>
                                     <td>镀膜类型：</td>
-                                    <td>{$sku['product_options']['tmplens']['coatiing_name']}</td>
+                                    <td>{$sku['coatiing_name']}</td>
+                                </tr>
+                                <tr>
+                                    <td>用户留言：</td>
+                                    <td>{$sku['information']}</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -193,35 +199,65 @@
                                 </tr>
                                 <tr>
                                     <td>Right(OD)</td>
-                                    <td>{:$sku['product_options']['prescription']['od_sph'] ?? ''}</td>
-                                    <td>{:$sku['product_options']['prescription']['od_cyl'] ?? ''}</td>
-                                    <td>{:$sku['product_options']['prescription']['od_axis'] ?? ''}</td>
-                                    {if $sku['product_options']['prescription']['total_add']}
-                                    <td rowspan="2">{:$sku['product_options']['prescription']['total_add'] ?? ''}</td>
+                                    <td>{:$sku['od_sph'] ?? ''}</td>
+                                    <td>{:$sku['od_cyl'] ?? ''}</td>
+                                    <td>{:$sku['od_axis'] ?? ''}</td>
+                                    {if $sku['total_add']}
+                                    <td rowspan="2">{:$sku['total_add'] ?? ''}</td>
                                     {else/}
-                                    <td>{:$sku['product_options']['prescription']['od_add'] ?? ''}</td>
+                                    <td>{:$sku['od_add'] ?? ''}</td>
                                     {/if}
-                                    {if @$sku['product_options']['prescription']['pd_r'] && @$sku['product_options']['prescription']['pd_l']} 
-                                    <td>{:$sku['product_options']['prescription']['pd_r'] ?? ''}</td>
+                                    {if @$sku['pd_r'] && @$sku['pd_l']} 
+                                    <td>{:$sku['pd_r'] ?? ''}</td>
                                     {else/}
-                                    <td rowspan="2">{:$sku['product_options']['prescription']['pd'] ?? ''}</td>
+                                    <td rowspan="2">{:$sku['pd'] ?? ''}</td>
                                     {/if}
                                 </tr>
                                 <tr>
                                     <td>Left(OS)</td>
-                                    <td>{:$sku['product_options']['prescription']['os_sph'] ?? ''}</td>
-                                    <td>{:$sku['product_options']['prescription']['os_cyl'] ?? ''}</td>
-                                    <td>{:$sku['product_options']['prescription']['os_axis'] ?? ''}</td>
-                                    {if !$sku['product_options']['prescription']['total_add']}
-                                    <td>{:$sku['product_options']['prescription']['os_add'] ?? ''}</td>
+                                    <td>{:$sku['os_sph'] ?? ''}</td>
+                                    <td>{:$sku['os_cyl'] ?? ''}</td>
+                                    <td>{:$sku['os_axis'] ?? ''}</td>
+                                    {if !$sku['total_add']}
+                                    <td>{:$sku['os_add'] ?? ''}</td>
                                     {/if}
-                                    {if @$sku['product_options']['prescription']['pd_r'] && @$sku['product_options']['prescription']['pd_l']} 
-                                    <td>{:$sku['product_options']['prescription']['pd_l'] ?? ''}</td>
-                                    {/if}
-                                    
+                                    {if @$sku['pd_r'] && @$sku['pd_l']} 
+                                    <td>{:$sku['pd_l'] ?? ''}</td>
+                                    {/if}                                    
                                 </tr>
                             </tbody>
                         </table>
+                        {if $sku['prismcheck']}
+                        <table class="altrowstable" border="0" cellspacing="0" cellpadding="0"
+                            style="margin:0 auto;margin-top:18px;width:90%;">
+                            <tbody cellpadding="0">
+                                <tr class="title">
+                                    <td colspan="6">斜视</td>
+                                </tr>
+                                <tr class="title">
+                                    <td></td>
+                                    <td>Prism(out/in)</td>
+                                    <td>Direction(out/in)</td>
+                                    <td>Prism(up/down)</td>
+                                    <td>Direction(up/down)</td>                                    
+                                </tr>
+                                <tr>
+                                    <td>Right(OD)</td>
+                                    <td>{:$sku['od_pv'] ?? ''}</td>
+                                    <td>{:$sku['od_bd'] ?? ''}</td>
+                                    <td>{:$sku['od_pv_r'] ?? ''}</td>
+                                    <td>{:$sku['od_bd_r'] ?? ''}</td>                                   
+                                </tr>
+                                <tr>
+                                    <td>Left(OS)</td>
+                                    <td>{:$sku['os_pv'] ?? ''}</td>
+                                    <td>{:$sku['os_bd'] ?? ''}</td>
+                                    <td>{:$sku['os_pv_r'] ?? ''}</td>
+                                    <td>{:$sku['os_bd_r'] ?? ''}</td>                                                                  
+                                </tr>
+                            </tbody>
+                        </table>
+                        {/if}      
                     </td>
                 </tr>
                 {/foreach}

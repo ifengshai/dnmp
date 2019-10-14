@@ -32,6 +32,16 @@
        border: 1px solid #e8edf0;
        border-bottom-color: transparent;
    }
+
+   body {
+      background: #f1f4f6;
+      font-size: 16px;
+   }
+
+   .form-control {
+      font-size: 16px;   
+      padding: 3px 12px; 
+    }
 </style>
 
 
@@ -80,9 +90,9 @@
                            class="btn btn-success btn-set-status btn-disabled disabled {:$auth->check('sales_flat_order/tag_printed')?'':'hide'}"
                            title="{:__('质检通过')}"> {:__('质检通过')}</a>
 
-                       <a href="javascript:;"
+                      <!--  <a href="javascript:;"
                            class="btn btn-danger btn-set-status btn-disabled disabled {:$auth->check('sales_flat_order/tag_printed')?'':'hide'}"
-                           title="{:__('质检返工')}"> {:__('质检返工')}</a>
+                           title="{:__('质检返工')}"> {:__('质检返工')}</a> -->
 
 
                    </div>
