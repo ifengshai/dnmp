@@ -31,13 +31,13 @@ class Voogueme extends Backend
         $this->model = new \app\admin\model\order\printlabel\Voogueme;
     }
 
-    public function test(){
-        // echo '123456';
-        $entity_id = 82712;
-        dump(VooguemePrescriptionDetailHelper::get_one_by_entity_id($entity_id));
-        // $increment_id = '130023358';
-        // dump(VooguemePrescriptionDetailHelper::get_one_by_increment_id($increment_id));
-    }
+    // public function test(){
+    //     // echo '123456';
+    //     $entity_id = 82712;
+    //     dump(VooguemePrescriptionDetailHelper::get_one_by_entity_id($entity_id));
+    //     // $increment_id = '130023358';
+    //     // dump(VooguemePrescriptionDetailHelper::get_one_by_increment_id($increment_id));
+    // }
 
     /**
      * 默认生成的控制器所继承的父类中有index/add/edit/del/multi五个基础方法、destroy/restore/recyclebin三个回收站方法
@@ -62,12 +62,16 @@ class Voogueme extends Backend
 
             list($where, $sort, $order, $offset, $limit) = $this->buildparams(); 
 
-            $filter = $this->request->post('filter');
-            // dump($filter);
-            if ($filter.increment_id) {
+            $filter = json_decode($this->request->get('filter'),true);
+
+            if ($filter['increment_id']) {
                 $map['status'] = ['in', ['free_processing', 'processing','complete']];
-            }else{
+            }else if($filter['custom_print_label'] == 1){
                 $map['status'] = ['in', ['free_processing', 'processing']];
+                $map['custom_print_label'] = ['eq', 1];
+            }else{                
+                $map['status'] = ['in', ['free_processing', 'processing']];
+                $map['custom_print_label'] = ['eq', 0];
             }
 
             $total = $this->model

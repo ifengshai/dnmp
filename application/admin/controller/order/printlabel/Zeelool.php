@@ -60,13 +60,18 @@ class Zeelool extends Backend
 
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
 
-            $filter = $this->request->post('filter');
-            if ($filter.increment_id) {
+            $filter = json_decode($this->request->get('filter'),true);
+
+            if ($filter['increment_id']) {
                 $map['status'] = ['in', ['free_processing', 'processing','complete']];
-            }else{
+            }else if($filter['custom_print_label'] == 1){
                 $map['status'] = ['in', ['free_processing', 'processing']];
+                $map['custom_print_label'] = ['eq', 1];
+            }else{                
+                $map['status'] = ['in', ['free_processing', 'processing']];
+                $map['custom_print_label'] = ['eq', 0];
             }
-            
+
             $total = $this->model
                 ->where($map)
                 ->where($where)

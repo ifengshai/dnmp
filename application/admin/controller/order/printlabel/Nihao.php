@@ -61,11 +61,13 @@ class Nihao extends Backend
 
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
 
-            $filter = $this->request->post('filter');
-            if ($filter.increment_id) {
+            $filter = json_decode($this->request->get('filter'),true);
+
+            if ($filter) {
                 $map['status'] = ['in', ['free_processing', 'processing','complete']];
-            }else{
+            }else{                
                 $map['status'] = ['in', ['free_processing', 'processing']];
+                $map['custom_print_label'] = ['eq', 0];
             }
 
             $total = $this->model
