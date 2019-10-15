@@ -116,7 +116,8 @@ class Voogueme extends Backend
                     // ->field($field)
                     ->where($map)
                     ->find();
-                $result = ['code' => 1, 'data' => $list];
+
+                $result = ['code' => 1, 'data' => $list ?? []];
             } else {
                 $result = array("total" => 0, "rows" => []);
             }
