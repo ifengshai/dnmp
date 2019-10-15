@@ -9,7 +9,7 @@ use think\Loader;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 
 use Util\VooguemePrescriptionDetailHelper;
-
+use Util\SKUHelper;
 
 /**
  * Sales Flat Order
@@ -862,7 +862,7 @@ EOF;
             " . $prismcheck_os_value . $os_add . $os_pd .
                     " </tr>
             <tr>
-            <td colspan='2'>" . $processing_value['sku'] . "</td>
+            <td colspan='2'>" . SKUHelper::sku_filter($processing_value['sku']) . "</td>
             <td colspan='8' style=' text-align:center'>Lens：" . $final_print['index_type'] . "</td>
             </tr>  
             </tbody></table></div>";
