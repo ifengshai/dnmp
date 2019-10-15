@@ -117,20 +117,30 @@
 
             table.altrowstable th {
                 border-width: 1px;
-                padding: 8px;
+                padding: 5px;
                 font-size: 14px;
                 border-style: solid;
-                border-color: #a9c6c9;
+                border-color: #d2d6de;
             }
 
             table.altrowstable td {
                 border-width: 1px;
-                padding: 8px;
+                padding: 5px;
                 text-align: center;
                 font-size: 14px;
                 border-style: solid;
-                border-color: #a9c6c9;
+                border-color: #d2d6de;
             }
+
+            table.altrowstable tr:nth-child(odd){
+                background:#E9F1F4;
+                background: #F5F5F5;
+                background: #F1F1F1;
+            }
+            table.altrowstable tr:nth-child(even){
+                background: #F5FAFA;
+                background: #eee;
+            }                  
         </style>
         <table class="altrowstable" style="border:#0f0 solid 1px;margin:0px auto;margin-bottom:10px;width:90%;">
             <tbody>
@@ -155,24 +165,28 @@
                                 </tr>
                                 <tr>
                                     <td>处方类型：</td>
-                                    <td>{$sku.custom_prescription}</td>
+                                    <td>{$sku.prescription_type}</td>
                                 </tr>
                                 <tr>
                                     <td>基片类型：</td>
-                                    <td>{$sku.prescription.second_name}</td>
+                                    <td>{$sku.second_name}</td>
                                 </tr>
                                 <tr>
                                     <td>镜片类型：</td>
-                                    <td>{$sku.prescription.third_name}</td>
+                                    <td>{$sku.third_name}</td>
                                 </tr>
                                 <tr>
                                     <td>折射率：</td>
-                                    <td>{$sku.prescription.zsl}</td>
+                                    <td>{$sku.zsl}</td>
                                 </tr>
                                 <tr>
                                     <td>镀膜类型：</td>
-                                    <td>{$sku.prescription.four_name}</td>
+                                    <td>{$sku.four_name}</td>
                                 </tr>
+                                <tr>
+                                    <td>用户留言：</td>
+                                    <td>{$sku['information']}</td>
+                                </tr>                                
                             </tbody>
                         </table>
                     </td>
@@ -193,34 +207,63 @@
                                 </tr>
                                 <tr>
                                     <td>Right(OD)</td>
-                                    <td>{:$sku.prescription.od_sph ?? ''}</td>
-                                    <td>{:$sku.prescription.od_cyl ?? ''}</td>
-                                    <td>{:$sku.prescription.od_axis ?? ''}</td>
+                                    <td>{:$sku.od_sph ?? ''}</td>
+                                    <td>{:$sku.od_cyl ?? ''}</td>
+                                    <td>{:$sku.od_axis ?? ''}</td>
 
-                                    {if $sku['prescription']['prescription_type'] == 'Reading Glasses' && strlen($sku['prescription']['os_add']) > 0 && strlen($sku['prescription']['od_add']) > 0}
-                                        <td>{:$sku.prescription.od_add ?? ''}</td>
+                                    {if $sku['prescription_type'] == 'Reading Glasses' && strlen($sku['os_add']) > 0 && strlen($sku['od_add']) > 0}
+                                        <td>{:$sku.od_add ?? ''}</td>
                                     {else/}
-                                        <td rowspan="2">{:$sku['prescription']['od_add'] ?? ''}</td>
+                                        <td rowspan="2">{:$sku['od_add'] ?? ''}</td>
                                     {/if}
 
-                                    <td>{:$sku['prescription']['pd_r'] ?? ''}</td>
+                                    <td>{:$sku['pd_r'] ?? ''}</td>
                                 </tr>
                                 <tr>
                                     <td>Left(OS)</td>
-                                    <td>{:$sku['prescription']['os_sph'] ?? ''}</td>
-                                    <td>{:$sku['prescription']['os_cyl'] ?? ''}</td>
-                                    <td>{:$sku['prescription']['os_axis'] ?? ''}</td>
+                                    <td>{:$sku['os_sph'] ?? ''}</td>
+                                    <td>{:$sku['os_cyl'] ?? ''}</td>
+                                    <td>{:$sku['os_axis'] ?? ''}</td>
 
-                                    {if $sku['prescription']['prescription_type'] == 'Reading Glasses' && strlen($sku['prescription']['os_add']) > 0 && strlen($sku['prescription']['od_add']) > 0}
-                                        <td>{:$sku.prescription.os_add ?? ''}</td>
+                                    {if $sku['prescription_type'] == 'Reading Glasses' && strlen($sku['os_add']) > 0 && strlen($sku['od_add']) > 0}
+                                        <td>{:$sku.os_add ?? ''}</td>
                                     {/if}
                                    
-                                    <td>{:$sku['prescription']['pd_l'] ?? ''}</td>
-                                   
-                                    
+                                    <td>{:$sku['pd_l'] ?? ''}</td>                                                                       
                                 </tr>
                             </tbody>
                         </table>
+                        {if $sku['prismcheck']}
+                        <table class="altrowstable" border="0" cellspacing="0" cellpadding="0"
+                            style="margin:0 auto;margin-top:18px;width:90%;">
+                            <tbody cellpadding="0">
+                                <tr class="title">
+                                    <td colspan="6">斜视</td>
+                                </tr>
+                                <tr class="title">
+                                    <td></td>
+                                    <td>Prism(out/in)</td>
+                                    <td>Direction(out/in)</td>
+                                    <td>Prism(up/down)</td>
+                                    <td>Direction(up/down)</td>                                    
+                                </tr>
+                                <tr>
+                                    <td>Right(OD)</td>
+                                    <td>{:$sku['od_pv'] ?? ''}</td>
+                                    <td>{:$sku['od_bd'] ?? ''}</td>
+                                    <td>{:$sku['od_pv_r'] ?? ''}</td>
+                                    <td>{:$sku['od_bd_r'] ?? ''}</td>                                   
+                                </tr>
+                                <tr>
+                                    <td>Left(OS)</td>
+                                    <td>{:$sku['os_pv'] ?? ''}</td>
+                                    <td>{:$sku['os_bd'] ?? ''}</td>
+                                    <td>{:$sku['os_pv_r'] ?? ''}</td>
+                                    <td>{:$sku['os_bd_r'] ?? ''}</td>                                                                  
+                                </tr>
+                            </tbody>
+                        </table>
+                        {/if}      
                     </td>
                 </tr>
                 {/foreach}

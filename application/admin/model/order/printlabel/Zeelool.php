@@ -8,12 +8,9 @@ use think\Db;
 class Zeelool extends Model
 {
 
-
-
     //数据库
-    // protected $connection = 'database';
+    // protected $connection = 'database.db_zeelool_online';
     protected $connection = 'database.db_zeelool';
-
 
     // 表名
     protected $table = 'sales_flat_order';
@@ -39,13 +36,13 @@ class Zeelool extends Model
     {
         switch ($ordertype) {
             case 1:
-                $db = 'database.db_zeelool';
+                $db = 'database.db_zeelool_online';
                 break;
             case 2:
-                $db = 'database.db_voogueme';
+                $db = 'database.db_voogueme_online';
                 break;
             case 3:
-                $db = 'database.db_nihao';
+                $db = 'database.db_nihao_online';
                 break;
             default:
                 return false;
@@ -53,11 +50,10 @@ class Zeelool extends Model
         }
         $map['order_id'] = $entity_id;
         $result = Db::connect($db)
-            ->table('sales_flat_order_item')
             ->field('sku,name,qty_ordered,custom_prescription,original_price,price,discount_amount,product_options')
+            ->table('sales_flat_order_item')
             ->where($map)
             ->select();
-      
         foreach ($result as $k => &$v) {
             $v['product_options'] = unserialize($v['product_options']);
             $prescription_params = $v['product_options']['info_buyRequest']['tmplens']['prescription'];
@@ -68,6 +64,8 @@ class Zeelool extends Model
                 if ($arr_value[0]) {
                     $lens_params[$arr_value[0]] = $arr_value[1];
                 }
+
+
                 //处理ADD转换    
                 if (@$lens_params['os_add'] && @$lens_params['od_add']) {
                     $lens_params['total_add'] = '';
