@@ -109,7 +109,7 @@ class Zeelool extends Backend
             $increment_id = $this->request->post('increment_id');
             if ($increment_id) {
                 $map['increment_id'] = $increment_id;
-                $map['status'] = ['in', ['free_processing', 'processing']];
+                $map['status'] = ['in', ['free_processing', 'processing','complete']];
                 $list = $this->model
                     // ->field($field)
                     ->where($map)
