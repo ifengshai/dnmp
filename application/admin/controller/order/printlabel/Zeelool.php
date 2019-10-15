@@ -10,6 +10,7 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
 
 use Util\ZeeloolPrescriptionDetailHelper;
 use Util\SKUHelper;
+
 /**
  * Sales Flat Order
  *
@@ -60,13 +61,15 @@ class Zeelool extends Backend
 
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
 
-            $filter = $this->request->post('filter');
-            if ($filter.increment_id) {
-                $map['status'] = ['in', ['free_processing', 'processing','complete']];
-            }else{
+            $filter = $this->request->get('filter');
+            //转成数组
+            $filter = json_decode($filter, true);
+            if ($filter['increment_id']) {
+                $map['status'] = ['in', ['free_processing', 'processing', 'complete']];
+            } else {
                 $map['status'] = ['in', ['free_processing', 'processing']];
             }
-            
+
             $total = $this->model
                 ->where($map)
                 ->where($where)
@@ -109,7 +112,7 @@ class Zeelool extends Backend
                     // ->field($field)
                     ->where($map)
                     ->find();
-                $result = ['code' => 1, 'data' => $list];
+                $result = ['code' => 1, 'data' => $list ?? []];
             } else {
                 $result = array("total" => 0, "rows" => []);
             }
@@ -862,25 +865,27 @@ EOF;
     }
 
     //  一个SKU的qty_order > 1时平铺开来
-    protected function qty_order_check($origin_order_item){
+    protected function qty_order_check($origin_order_item)
+    {
         foreach ($origin_order_item as $origin_order_key => $origin_order_value) {
-             if($origin_order_value['qty_ordered'] > 1 && strpos($origin_order_value['sku'], 'Price') === false) {
+            if ($origin_order_value['qty_ordered'] > 1 && strpos($origin_order_value['sku'], 'Price') === false) {
                 unset($origin_order_item[$origin_order_key]);
                 // array_splice($origin_order_item,$origin_order_key,1);
-                for ( $i = 0 ; $i< $origin_order_value['qty_ordered']; $i++) {
+                for ($i = 0; $i < $origin_order_value['qty_ordered']; $i++) {
                     $tmp_order_value = $origin_order_value;
-                    $tmp_order_value['qty_ordered'] = 1 ;
-                    array_push($origin_order_item,$tmp_order_value);
+                    $tmp_order_value['qty_ordered'] = 1;
+                    array_push($origin_order_item, $tmp_order_value);
                 }
                 unset($tmp_order_value);
-             }
-        }    
-        $origin_order_item = $this->arraySequence($origin_order_item,'increment_id');
+            }
+        }
+        $origin_order_item = $this->arraySequence($origin_order_item, 'increment_id');
         return array_values($origin_order_item);
     }
 
     //  二维数组排序
-    protected function arraySequence($array, $field, $sort = 'SORT_DESC') {
+    protected function arraySequence($array, $field, $sort = 'SORT_DESC')
+    {
         $arrSort = array();
         foreach ($array as $uniqid => $row) {
             foreach ($row as $key => $value) {
@@ -889,5 +894,5 @@ EOF;
         }
         array_multisort($arrSort[$field], constant($sort), $array);
         return $array;
-    } 
+    }
 }
