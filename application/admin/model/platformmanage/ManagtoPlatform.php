@@ -71,6 +71,21 @@ class ManagtoPlatform extends Model
     }
 
 
+    /**
+     * 获取对应平台id
+     */
+    public function getManagtoPlatform($name = '')
+    {
+      $where['status'] = 1;
+      $where['is_del'] = 1;
+      $where['name'] = $name;
+      $id = $this->where($where)->value('id');
+      return $id ? $id : false;
+    }
+
+
+
+
 
 
 
