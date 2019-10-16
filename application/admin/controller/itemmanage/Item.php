@@ -7,6 +7,7 @@ use think\Request;
 use think\Db;
 use app\admin\model\itemmanage\ItemBrand;
 use app\admin\model\itemmanage\ItemPlatformSku;
+use app\admin\model\itemmanage\attribute\ItemAttribute;
 
 /**
  * 商品管理
@@ -25,7 +26,7 @@ class Item extends Backend
     /**
      * 不需要登陆
      */
-    protected $noNeedLogin = ['pullMagentoProductInfo','ceshi'];
+    protected $noNeedLogin = ['pullMagentoProductInfo','ceshi','optimizeSku','pullMagentoProductInfoTwo'];
 
     public function _initialize()
     {
@@ -1264,30 +1265,60 @@ class Item extends Backend
         $info   = Db::connect('database.db_stock')->name('item')->insertAll($result);
     }
     /***
+     * 第一步
      * 获取magento平台的商品信息
      */
     public function pullMagentoProductInfo()
     {
         //求出网站sku,分别对应的zeelool_sku,voogueme_sku,nihao_sku
-        $sku_map = Db::connect('database.db_stock')->table('sku_map')->field('sku,zeelool_sku,voogueme_sku,nihao_sku')->order('id desc')->limit(3)->select();
+        $where['pull_status'] = 0;
+        $sku_map = Db::connect('database.db_stock')->table('sku_map')->where($where)->field('sku,zeelool_sku,voogueme_sku,nihao_sku')->order('id desc')->limit(2)->select();
+        //求出每个站点的地址,用户名和key
         $magentoPlatform = Db::name('managto_platform')->field('id,managto_account,managto_key,managto_url')->select();
-        $arr = $productInfo = [];
+        //求出每个站点的存储信息(对应的魔晶平台存储字段和magento平台存储字段)
+        $platform_map = Db::name('platform_map')->field('platform_id,platform_field,magento_field')->select();
+        if(!$platform_map){
+            return false;
+        }
+        $mapArr = $map = $arr = [];
+        //每个平台的存储字段都放在一起
+        foreach($platform_map as $key=>$val){
+            if(1 == $val['platform_id']){
+                $mapArr[1]['platform_field'][] = $val['platform_field'];
+                $mapArr[1]['magento_field'][]  = $val['magento_field'];
+            }
+            if(2 == $val['platform_id']){
+                $mapArr[2]['platform_field'][] = $val['platform_field'];
+                $mapArr[2]['magento_field'][]  = $val['magento_field'];
+            }
+            if(3 == $val['platform_id']){
+                $mapArr[3]['platform_field'][] = $val['platform_field'];
+                $mapArr[3]['magento_field'][]  = $val['magento_field'];
+            }
+        }
+        //调用magento平台的API获取商品信息
+        $client = new \SoapClient($arr['managto_url'].'/api/soap/?wsdl');
+        $session = $client->login($arr['managto_account'],$arr['managto_key']);
         foreach($sku_map as $k =>$v){
             if(!empty($v['zeelool_sku'])){
+                $where['pull_status'] = 1;
+                $map = $mapArr[1];
                 $arr = $magentoPlatform[0];
                 $magento_sku = $v['zeelool_sku'];    
             }elseif(!empty($v['voogueme_sku'])){
+                $where['pull_status'] = 2;
+                $map = $mapArr[2];
                 $arr = $magentoPlatform[1];
                 $magento_sku = $v['voogueme_sku'];
             }elseif(!empty($v['nihao_sku'])){
+                $where['pull_status'] = 3;
+                $map = $mapArr[3];
                 $arr = $magentoPlatform[2];
                 $magento_sku = $v['nihao_sku'];
             }else{
                 continue;
             }
             try{
-                $client = new \SoapClient($arr['managto_url'].'/api/soap/?wsdl');
-                $session = $client->login($arr['managto_account'],$arr['managto_key']);
                 $result = $client->call($session, 'catalog_product.info', $magento_sku);
                 $client->endSession($session);
             }catch (\SoapFault $e){
@@ -1295,21 +1326,235 @@ class Item extends Backend
             }catch (\Exception $e){
                 $this->error($e->getMessage());
             }
-            $productInfo[] = $result;
+            $storeArr = [];
+            //循环magento平台存储的字段
+            foreach($map['magento_field'] as $keys =>$vals){
+                if(array_key_exists($vals,$result)){
+                    $storeArr[$vals] = $result[$vals];
+                }
+            }
+            $serializeResult = serialize($storeArr);
+            $where['information'] = $serializeResult;
+            Db::connect('database.db_stock')->table('sku_map')->where(['sku'=>$v['sku']])->update($where);
+            // echo '<pre>';
+            // var_dump($storeArr);
+            // $productInfo[] = $result;
         }
-            echo '<pre>';
-            var_dump($productInfo);
+            // echo '<pre>';
+            // var_dump($productInfo);
     }
     public function ceshi()
     {
         $magentoPlatform = Db::name('managto_platform')->where(['id'=>1])->field('id,managto_account,managto_key,managto_url')->find();
         $client = new \SoapClient($magentoPlatform['managto_url'].'/api/soap/?wsdl');
         $session = $client->login($magentoPlatform['managto_account'],$magentoPlatform['managto_key']);
-        $result = $client->call($session, 'product_attribute.info', '459');
-        dump($result);
-        exit;
-        
+        $listAttributes = $client->call(
+            $session,
+            'product_attribute.options',
+            //'product_attribute.info',
+            'material_b1'
+        );
+        echo '<pre>';
+        var_dump($listAttributes);
 
     }
-    
+    public function ceshi2()
+    {
+        $platform_map = Db::name('platform_map')->field('platform_id,platform_field,magento_field')->select();
+        if(!$platform_map){
+            return false;
+        }
+        $mapArr = [];
+        foreach($platform_map as $k=>$v){
+            if(1 == $v['platform_id']){
+                $mapArr[1]['platform_field'][] = $v['platform_field'];
+                $mapArr[1]['magento_field'][]  = $v['magento_field'];
+            }
+            if(2 == $v['platform_id']){
+                $mapArr[2]['platform_field'][] = $v['platform_field'];
+                $mapArr[2]['magento_field'][]  = $v['magento_field'];
+            }
+            if(3 == $v['platform_id']){
+                $mapArr[3]['platform_field'][] = $v['platform_field'];
+                $mapArr[3]['magento_field'][]  = $v['magento_field'];
+            }
+        }
+        echo '<pre>';
+        var_dump($mapArr);
+    }
+    public function ceshi3()
+    {
+
+    }
+    /***
+     * 第二步
+     * 解析magento字段获取字段的值
+     */
+    public  function  analyticMagentoField()
+    {
+        //求出每个站点的地址,用户名和key
+        $magentoPlatform = Db::name('managto_platform')->field('id,managto_account,managto_key,managto_url')->select();
+        $where['analytic_status'] = 0;
+        $result = Db::connect('database.db_stock')->table('sku_map')->where($where)->field('sku,information,pull_status')->order('id desc')->limit(1)->select();
+        if(!$result){
+            return false;
+        }
+        //求出每个站点的存储信息(对应的魔晶平台存储字段和magento平台存储字段)
+        // $platform_map = Db::name('platform_map')->field('platform_id,platform_field,magento_field')->select();
+        // if(!$platform_map){
+        //     return false;
+        // }
+        $updateData['analytic_status'] = 1;
+        foreach($result as $k =>$v){
+            $informationArr = unserialize($v['information']);
+            if(empty($informationArr)){
+                continue;
+            }
+            // echo '<pre>';
+            // var_dump($informationArr);
+            $arr = $changeArr = [];
+            if(1 == $v['pull_status']){ //zeelool商品
+                $arr = $magentoPlatform[0];
+            }elseif(2 == $v['pull_status']){ //voogueme站商品
+                $arr = $magentoPlatform[1];
+            }elseif(3 == $v['pull_status']){ //nihao商品
+                $arr = $magentoPlatform[2];
+            }
+            //调用magento平台的API获取商品信息
+            $client = new \SoapClient($arr['managto_url'].'/api/soap/?wsdl');
+            $session = $client->login($arr['managto_account'],$arr['managto_key']);
+            foreach($informationArr as $key => $val){
+                if(!empty($val)){
+                    $listAttributes = $client->call(
+                        $session,
+                        'product_attribute.options',
+                        $key
+                    );
+                    if(empty($listAttributes)){
+                        $changeArr[$key] = $val;
+                    }else{
+                        foreach($listAttributes as $keys =>$vals){
+                            if($val == $vals['value']){
+                                $changeArr[$key] = $vals['label'];
+                            }
+                        }
+                    }
+                }
+            }
+            $updateData['change_information'] = serialize($changeArr);
+            Db::connect('database.db_stock')->table('sku_map')->where(['sku'=>$v['sku']])->update($updateData);
+        }
+
+    }
+    /***
+     * 第三步
+     * 解析更新到数据库
+     */
+    public function analyticUpdate()
+    {
+        $where['change_information'] = ['NEQ',''];
+        $where['pull_status'] = ['GT',0];
+        $where['analytic_status'] = 1;
+        $result = Db::connect('database.db_stock')->table('sku_map')->where($where)->field('sku,change_information,pull_status')->order('id desc')->limit(1)->select();
+        if(!$result){
+            return false;
+        }
+        $platform_map = Db::name('platform_map')->field('platform_id,platform_field,magento_field')->select();
+        if(!$platform_map){
+            return false;
+        }
+        //获取所有眼镜形状
+        $frameShape = (new ItemAttribute())->getAllFrameShape();
+        //获取适合人群
+        $frameGender   = (new ItemAttribute())->getFrameGender();
+        //获取镜架所有的颜色
+        $frameColor    = (new ItemAttribute())->getFrameColor();
+        //获取眼镜类型
+        $glassesType   = (new ItemAttribute())->getGlassesType();
+        //获取所有线下采购产地
+        $origin        = (new ItemAttribute())->getOrigin();
+        //获取配镜类型
+        $frameType     = (new ItemAttribute())->getFrameType();
+        //每个平台的存储字段都放在一起
+        foreach($platform_map as $key=>$val){
+            if(1 == $val['platform_id']){
+                $mapArr[1][$val['platform_field']] = $val['magento_field'];
+            }
+            if(2 == $val['platform_id']){
+                $mapArr[2][$val['platform_field']] = $val['magento_field'];
+            }
+            if(3 == $val['platform_id']){
+                $mapArr[3][$val['platform_field']] = $val['magento_field'];
+            }
+        }
+        // echo '<pre>';
+        // var_dump($mapArr);
+        // exit;
+        $arr = $map = $platform = [];
+        foreach($result as $k =>$v){
+            if(!empty($v['change_information'])){
+                $arr = unserialize($v['change_information']);
+                if(1 == $v['pull_status']){
+                    $map = $mapArr[1];
+                }elseif(2 == $v['pull_status']){
+                    $map = $mapArr[2];
+                }elseif(3 == $v['pull_status']){
+                    $map = $mapArr[3]; 
+                }
+                if(2 != $v['pull_status']){
+                    //获得所有框型
+                    $shape  = (new ItemAttribute())->getAllShape();
+                    //获取尺寸型号
+                    $frameSize     = (new ItemAttribute())->getFrameSize();
+                }else{
+                    $shape  = (new ItemAttribute())->getAllShape(2);
+                    $frameSize     = (new ItemAttribute())->getFrameSize(2);
+                }
+                foreach($arr as $keys =>$vals){
+                    //找出键名
+                    $platformName =  array_search($keys,$map);
+                    if($platformName){
+                        $platform[$platformName] = $vals;
+                    }
+                }
+                // echo '<pre>';
+                // var_dump($platform);
+                if(array_key_exists('frame_texture',$platform)){
+                    //获取所有材质
+                    $texture    = (new ItemAttribute())->getAllTexture();
+                    //判断材质对应的值是否在平台的对应字段值当中，如果是的话求出值
+                    if(in_array($platform['frame_texture'],$texture)){
+                         echo $platform['frame_texture'];
+                         echo '<br/>';
+                         echo array_search($platform['frame_texture'],$texture); 
+                    }
+                    // echo '<pre>';
+                    // var_dump($texture);
+                }
+
+            }
+        }
+    }
+    /***
+     * 优化完善nihao站的sku
+     */
+    public function optimizeSku()
+    {
+        $where['nihao_sku'] = ['NEQ',''];
+        $where['status'] = 3;
+        $result = Db::connect('database.db_stock')->table('sku_map')->where($where)->field('sku,nihao_sku')->order('id desc')->limit(10)->select();
+        if(!$result){
+            return false;
+        }
+        foreach($result as $k=>$v){
+            $colorArr = explode('-',$v['sku']);
+            $data['status'] = 4;
+            $data['nihao_sku'] = $v['nihao_sku'].'-'.$colorArr[1];
+            Db::connect('database.db_stock')->table('sku_map')->where(['sku'=>$v['sku']])->update($data);
+        }
+    }
+    public function pullMagentoProductInfoTwo()
+    {
+
+    }
 }
