@@ -596,6 +596,7 @@ class PurchaseOrder extends Backend
         //查询入库信息
         $check_id = array_column($list, 'id');
         $instock_map['check_id'] = ['in', $check_id];
+        dump($instock_map);
         $Instock = new \app\admin\model\warehouse\Instock;
         $instock_list = $Instock->with(['instockItem'])
             ->where($instock_map)
