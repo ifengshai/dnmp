@@ -593,7 +593,8 @@ class PurchaseOrder extends Backend
         $this->assign('id', $id);
 
         //查询入库信息
-        $instock_map['purchase_id'] = $id;
+        $check_id = array_column($list, 'id');
+        $instock_map['check_id'] = ['in', $check_id];
         $Instock = new \app\admin\model\warehouse\Instock;
         $instock_list = $Instock->with(['instockItem'])
             ->where($instock_map)
