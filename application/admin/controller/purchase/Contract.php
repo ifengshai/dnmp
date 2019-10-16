@@ -166,7 +166,7 @@ class Contract extends Backend
         //查询供应商
         $supplier = new \app\admin\model\purchase\Supplier;
         $data = $supplier->get($id);
-        return json(['code' => 1, 'data' => $data]);
+        return json(['code' => 1, 'data' => $data ?? []]);
     }
 
 
