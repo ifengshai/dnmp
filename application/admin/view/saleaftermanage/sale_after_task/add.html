@@ -1,3 +1,31 @@
+<style>
+    .bg-aqua-gradient {
+        background: #F5F5F5 !important;
+        /* background: -webkit-gradient(linear, left bottom, left top, color-stop(0, #3498db), color-stop(1, #52a7e0)) !important; */
+        background: -ms-linear-gradient(bottom, #3498db, #52a7e0) !important;
+        background: -moz-linear-gradient(center bottom, #3498db 0%, #52a7e0 100%) !important;
+        background: -o-linear-gradient(#52a7e0, #3498db) !important;
+        filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#52a7e0', endColorstr='#3498db', GradientType=0) !important;
+        color: #333;
+        border: #eee solid 1px;
+    }
+    .bg-blue {
+        background-color: #F5F5F5 !important;
+        border: #eee solid 1px;
+    }
+    .panel-title {
+        color: #333;
+    }
+    #caigou-table-lens .form-control {
+        border-radius: 0;
+        box-shadow: none;
+        border-color: #d2d6de;
+        -webkit-appearance: none;
+        text-align: center;
+        -moz-appearance: none;
+        appearance: none;
+    }
+</style>
 <form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
 
     <div class="form-group">
@@ -82,7 +110,7 @@
         <label class="control-label col-xs-12 col-sm-2">{:__('Upload_photos')}:</label>
         <div class="col-xs-12 col-sm-8">
             <div class="input-group">
-                <input id="c-upload_photos" data-rule="required" class="form-control" size="50" name="row[upload_photos]" type="text" value="">
+                <input id="c-upload_photos" class="form-control" size="50" name="row[upload_photos]" type="text" value="">
                 <div class="input-group-addon no-border no-padding">
                     <span><button type="button" id="plupload-upload_photos"   class="btn btn-danger plupload" data-input-id="c-upload_photos" data-mimetype="image/gif,image/jpeg,image/png,image/jpg,image/bmp" data-url="ajax/upload?dir=saleAfterManage/saleAfterTask" data-multiple="true" data-preview-id="p-upload_photos" data-maxsize="2M"><i class="fa fa-upload"></i> 上传</button></span>
                 </div>
