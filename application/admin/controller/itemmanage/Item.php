@@ -905,7 +905,32 @@ class Item extends Backend
         $this->assign('info', $info);
 
 
+         /**
+          * @todo 待定
+          */
         //查询占用订单
+        // $zeelool = new \app\admin\model\order\order\Zeelool;
+        // $voogueme = new \app\admin\model\order\order\Voogueme;
+        // $nihao = new \app\admin\model\order\order\Nihao;
+        // $map['sku'] = 'FT0020-04';
+        // $itemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku;
+        // $skus = $itemPlatformSku->where($map)->column('platform_sku','platform_type');
+        // //查Z站对应SKU
+        // $where['sku'] = $skus[1];
+        // $zeeloolOrderList = $zeelool->alias('a')->where($where)
+        // ->field('increment_id,sku,qty_ordered,status,custom_is_match_frame,custom_is_match_lens,custom_is_send_factory,custom_is_delivery,custom_print_label')
+        // ->join(['sales_flat_order_item b'],'b.order_id=a.entity_id')
+        // ->select();
+        // $zeeloolOrderList = collection($zeeloolOrderList)->toArray();
+
+        // //查V站对应SKU
+        // $where['sku'] = $skus[2];
+        // $vooguemeOrderList = $zeelool->alias('a')->where($where)
+        // ->field('increment_id,sku,qty_ordered,status,custom_is_match_frame,custom_is_match_lens,custom_is_send_factory,custom_is_delivery,custom_print_label')
+        // ->join(['sales_flat_order_item b'],'b.order_id=a.entity_id')
+        // ->select();
+        // $vooguemeOrderList = collection($vooguemeOrderList)->toArray();
+
         
 
         return $this->view->fetch();

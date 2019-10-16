@@ -275,7 +275,6 @@ class Supplier extends Backend
         if (!$insert) {
             $this->error(__('No rows were updated'));
         }
-        
 
         try {
             //是否包含admin_id字段
@@ -302,7 +301,7 @@ class Supplier extends Backend
                     } elseif ($val['supplier_type'] == '镜布') {
                         $val['supplier_type'] = 4;
                     }
-                    $val['create_person'] = session('admin.username');
+                    $val['create_person'] = session('admin.nickname');
                     $val['createtime'] = date('Y-m-d H:i:s', time());
                 }
             } else {
@@ -317,7 +316,7 @@ class Supplier extends Backend
                     } elseif ($val['supplier_type'] == '镜布') {
                         $val['supplier_type'] = 4;
                     }
-                    $val['create_person'] = session('admin.username');
+                    $val['create_person'] = session('admin.nickname');
                     $val['createtime'] = date('Y-m-d H:i:s', time());
                 }
             }
@@ -334,5 +333,28 @@ class Supplier extends Backend
         }
 
         $this->success();
+    }
+
+    /**
+     * 添加供应商SKU绑定关系
+     */
+    public function addSupplierSku()
+    {
+        //查询所有SKU
+        $data = db('zeelool_product')->alias('a')->where('a.is_visable=1')->join(['fa_zeelool_supplier' => 'b'], 'a.supplier_id=b.id')->select();
+
+        //查询供应商id
+        $supplier = db('supplier')->column('id','supplier_name');
+        $list = [];
+        foreach ($data as $k => $v) {
+            $list[$k]['sku'] = $v['magento_sku'];
+            $list[$k]['supplier_sku'] = $v['sku'];
+            $list[$k]['supplier_id'] = $supplier[$v['name']];
+            $list[$k]['createtime'] = date('Y-m-d H:i:s',time());
+            $list[$k]['create_person'] = session('admin.nickname');
+            $list[$k]['link'] = $v['website'];
+        }
+        db('supplier_sku')->insertAll($list);
+        echo 'ok';
     }
 }
