@@ -592,7 +592,7 @@ class PurchaseOrder extends Backend
         $this->assign('list', $list);
         $this->assign('id', $id);
 
-        dump($list);die;
+        dump($list);
         //查询入库信息
         $check_id = array_column($list, 'id');
         $instock_map['check_id'] = ['in', $check_id];
@@ -600,6 +600,7 @@ class PurchaseOrder extends Backend
         $instock_list = $Instock->with(['instockItem'])
             ->where($instock_map)
             ->select();
+        echo $Instock->getLastSql();die;
         $instock_list = collection($instock_list)->toArray();
         $this->assign('instock_list', $instock_list);
 
