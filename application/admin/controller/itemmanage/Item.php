@@ -903,6 +903,11 @@ class Item extends Backend
             ->cache(true, 3600)
             ->select();
         $this->assign('info', $info);
+
+
+        //查询占用订单
+        
+
         return $this->view->fetch();
     }
 
