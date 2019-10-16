@@ -602,7 +602,7 @@ class PurchaseOrder extends Backend
                 ->select();
             $instock_list = collection($instock_list)->toArray();
         }
-        $this->assign('instock_list', $instock_list);
+        $this->assign('instock_list', $instock_list ?? []);
 
         //查询退销信息
         $PurchaseReturn_map['purchase_id'] = $id;
