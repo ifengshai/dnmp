@@ -5,7 +5,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             // 初始化表格参数配置
             Table.api.init({
                 searchFormVisible: true,
-                pageList: [10, 25, 50, 100],
+                pageList: [10, 25, 50, 100, 300],
                 extend: {
                     index_url: 'order/printlabel/zeelool/index' + location.search,
                     table: 'sales_flat_order',
@@ -23,8 +23,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     [
                         { checkbox: true },
                         { field: 'entity_id', title: __('记录标识'), operate: false },
-                        { field: 'increment_id', title: __('订单号') },
-                        { field: 'status', title: __('状态'), searchList: { "processing": __('processing'), "free_processing": __('free_processing'), "creditcard_proccessing": "creditcard_proccessing" } },
+                        { field: 'increment_id', title: __('订单号'), operate: 'like' },
+                        { field: 'status', title: __('状态'), addClass: 'selectpicker', data: 'multiple', operate: 'IN', searchList: { "processing": __('processing'), "free_processing": __('free_processing'), "creditcard_proccessing": "creditcard_proccessing" } },
                         { field: 'base_grand_total', title: __('订单金额'), operate: false, formatter: Controller.api.formatter.float_format },
                         { field: 'base_shipping_amount', title: __('运费'), operate: false, formatter: Controller.api.formatter.float_format },
 

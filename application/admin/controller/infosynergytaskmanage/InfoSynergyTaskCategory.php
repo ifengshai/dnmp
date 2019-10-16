@@ -68,6 +68,7 @@ class InfoSynergyTaskCategory extends Backend
         }
         return $this->view->fetch();
     }
+    
     /**
      * 删除
      */

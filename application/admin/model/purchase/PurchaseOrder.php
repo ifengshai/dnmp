@@ -23,7 +23,10 @@ class PurchaseOrder extends Model
     protected $deleteTime = false;
 
     // 追加属性
-    protected $append = [];
+    protected $append = [
+        
+    ];
+
 
     /**
      * 获取采购单

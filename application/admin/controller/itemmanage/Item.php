@@ -832,16 +832,17 @@ class Item extends Backend
             $skus = array_column($list, 'sku');
             //查询留样库存
             //查询实际采购信息 查询在途库存
-            $purchase_map['stock_status'] = ['in', [1, 2]];
+            $purchase_map['stock_status'] = ['in', [0, 1]];
             $purchase = new \app\admin\model\purchase\PurchaseOrder;
             $hasWhere['sku'] = ['in', $skus];
+            $hasWhere['instock_num'] = 0;
             $purchase_list = $purchase->hasWhere('purchaseOrderItem', $hasWhere)
                 ->where($purchase_map)
                 ->column('sku,purchase_num,instock_num', 'sku');
 
             //查询样品数量
             $check = new \app\admin\model\warehouse\CheckItem;
-            $check_list = $check->where($hasWhere)->column('sample_num', 'sku');
+            $check_list = $check->where('sku', 'in', $skus)->column('sum(sample_num) as sample_num', 'sku');
 
             foreach ($list as &$v) {
                 $v['on_way_stock'] = @$purchase_list[$v['sku']]['purchase_num'] - @$purchase_list[$v['sku']]['instock_num'];
@@ -858,10 +859,81 @@ class Item extends Backend
     /**
      * 商品库存详情
      */
-    public function goods_stock_detail()
+    public function goods_stock_detail($ids = null)
     {
-        $this->assign('row', []);
-        $this->assign('goods', []);
+        $row = $this->model->get($ids);
+        $this->assign('row', $row);
+
+        //查询实际采购信息 查询在途库存
+        $purchase_map['stock_status'] = ['in', [0, 1]];
+        $purchase = new \app\admin\model\purchase\PurchaseOrder;
+        $hasWhere['sku'] = $row['sku'];
+        $purchase_num = $purchase->hasWhere('purchaseOrderItem', $hasWhere)
+            ->where($purchase_map)
+            ->cache(true, 3600)
+            ->sum('purchase_num-instock_num');
+        $this->assign('purchase_num', $purchase_num);
+
+        //查询此sku采购单出库情况
+        $purchase_map['stock_status'] = ['in', [1, 2]];
+        $purchase = new \app\admin\model\purchase\PurchaseOrder;
+        $hasWhere['sku'] = $row['sku'];
+        $hasWhere['instock_num'] = ['>', 0];
+        $list = $purchase->hasWhere('purchaseOrderItem', $hasWhere)
+            ->where($purchase_map)
+            ->cache(true, 3600)
+            ->select();
+
+        //查询样品数量
+        $check = new \app\admin\model\warehouse\CheckItem;
+        $check_list = $check->where('sku', $row['sku'])->cache(true, 3600)->column('sum(sample_num) as sample_num', 'sku');
+        foreach ($list as &$v) {
+            $v['sample_stock'] = $check_list[$v['sku']]['sample_num'];
+        }
+        unset($v);
+        $this->assign('list', $list);
+
+
+        //在途库存列表
+        $purchase_map['stock_status'] = ['in', [0, 1]];
+        $purchase = new \app\admin\model\purchase\PurchaseOrder;
+        $hasWhere['sku'] = $row['sku'];
+        $hasWhere['instock_num'] = 0;
+        $info = $purchase->hasWhere('purchaseOrderItem', $hasWhere)
+            ->where($purchase_map)
+            ->cache(true, 3600)
+            ->select();
+        $this->assign('info', $info);
+
+
+         /**
+          * @todo 待定
+          */
+        //查询占用订单
+        // $zeelool = new \app\admin\model\order\order\Zeelool;
+        // $voogueme = new \app\admin\model\order\order\Voogueme;
+        // $nihao = new \app\admin\model\order\order\Nihao;
+        // $map['sku'] = 'FT0020-04';
+        // $itemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku;
+        // $skus = $itemPlatformSku->where($map)->column('platform_sku','platform_type');
+        // //查Z站对应SKU
+        // $where['sku'] = $skus[1];
+        // $zeeloolOrderList = $zeelool->alias('a')->where($where)
+        // ->field('increment_id,sku,qty_ordered,status,custom_is_match_frame,custom_is_match_lens,custom_is_send_factory,custom_is_delivery,custom_print_label')
+        // ->join(['sales_flat_order_item b'],'b.order_id=a.entity_id')
+        // ->select();
+        // $zeeloolOrderList = collection($zeeloolOrderList)->toArray();
+
+        // //查V站对应SKU
+        // $where['sku'] = $skus[2];
+        // $vooguemeOrderList = $zeelool->alias('a')->where($where)
+        // ->field('increment_id,sku,qty_ordered,status,custom_is_match_frame,custom_is_match_lens,custom_is_send_factory,custom_is_delivery,custom_print_label')
+        // ->join(['sales_flat_order_item b'],'b.order_id=a.entity_id')
+        // ->select();
+        // $vooguemeOrderList = collection($vooguemeOrderList)->toArray();
+
+        
+
         return $this->view->fetch();
     }
 
