@@ -5,6 +5,9 @@ namespace app\admin\controller\order;
 use app\common\controller\Backend;
 use think\Hook;
 use fast\Trackingmore;
+use Util\NihaoPrescriptionDetailHelper;
+use Util\ZeeloolPrescriptionDetailHelper;
+use Util\VooguemePrescriptionDetailHelper;
 
 
 /**
@@ -103,15 +106,22 @@ class Index extends Backend
             }
         }
 
-        //获取收货信息
+        //获取订单收货信息
         $address = $this->zeelool->getOrderDetail($label, $ids);
 
-        //获取订单商品信息
-        $goods = $this->zeelool->getGoodsDetail($label, $ids);
-
+        //获取订单处方信息
+        if ($label == 1) {
+            $goods = ZeeloolPrescriptionDetailHelper::get_list_by_entity_ids($ids);
+        } elseif ($label == 2) {
+            $goods = VooguemePrescriptionDetailHelper::get_list_by_entity_ids($ids);
+        } elseif ($label == 3) {
+            $goods = NihaoPrescriptionDetailHelper::get_list_by_entity_ids($ids);
+        }
+       
         //获取支付信息
         $pay = $this->zeelool->getPayDetail($label, $ids);
 
+        $this->view->assign("label", $label);
         $this->view->assign("row", $row);
         $this->view->assign("address", $address);
         $this->view->assign("goods", $goods);
