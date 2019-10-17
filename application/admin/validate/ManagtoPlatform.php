@@ -4,7 +4,7 @@ namespace app\admin\validate;
 
 use think\Validate;
 
-class ManagtoPlatform extends Validate
+class MagentoPlatform extends Validate
 {
     /**
      * 验证规则

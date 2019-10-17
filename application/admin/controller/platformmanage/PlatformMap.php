@@ -22,7 +22,7 @@ class PlatformMap extends Backend
     {
         parent::_initialize();
         $this->model = new \app\admin\model\platformmanage\PlatformMap;
-        $this->magentoPlatform = new \app\admin\model\platformmanage\ManagtoPlatform;
+        $this->magentoPlatform = new \app\admin\model\platformmanage\MagentoPlatform;
         $this->view->assign('magentoList',$this->magentoPlatform->getOrderPlatformList());
     }
     

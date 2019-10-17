@@ -8,7 +8,7 @@ use think\Db;
 use app\common\controller\Backend;
 use app\admin\model\Admin;
 use app\admin\model\AuthGroup;
-use app\admin\model\platformmanage\ManagtoPlatform;
+use app\admin\model\platformmanage\MagentoPlatform;
 use app\admin\model\saleaftermanage\SaleAfterIssue;
 use app\admin\model\saleaftermanage\SaleAfterTask;
 use app\admin\model\saleaftermanage\OrderReturnItem;
@@ -138,7 +138,7 @@ class OrderReturn extends Backend
             }
             $this->error(__('Parameter %s can not be empty', ''));
         }
-        $this->view->assign("orderPlatformList", (new ManagtoPlatform())->getOrderPlatformList());
+        $this->view->assign("orderPlatformList", (new MagentoPlatform())->getOrderPlatformList());
         //dump((new SaleAfterIssue())->getIssueList(2));
         $this->view->assign('issueList', (new SaleAfterIssue())->getIssueList(2));
         return $this->view->fetch();
@@ -219,14 +219,14 @@ class OrderReturn extends Backend
         $this->view->assign("row", $row);
         $this->view->assign('orderReturnRemark', (new OrderReturnRemark())->getOrderReturnRemark($row['id']));
         $this->view->assign("orderReturnItem", (new OrderReturnItem())->getOrderReturnItem($row['id']));
-        $this->view->assign("orderPlatformList", (new ManagtoPlatform())->getOrderPlatformList());
+        $this->view->assign("orderPlatformList", (new MagentoPlatform())->getOrderPlatformList());
         $this->view->assign('issueList', (new SaleAfterIssue())->getIssueList(2));
         return $this->view->fetch();
     }
     public function getAjaxOrderPlatformList()
     {
         if ($this->request->isAjax()) {
-            $json = (new ManagtoPlatform())->getOrderPlatformList();
+            $json = (new MagentoPlatform())->getOrderPlatformList();
             if (!$json) {
                 $json = [0 => '请添加订单平台'];
             }
@@ -257,7 +257,7 @@ class OrderReturn extends Backend
         $this->view->assign("row", $row);
         $this->view->assign('orderReturnRemark', (new OrderReturnRemark())->getOrderReturnRemark($row['id']));
         $this->view->assign("orderReturnItem", (new OrderReturnItem())->getOrderReturnItem($row['id']));
-        $this->view->assign("orderPlatformList", (new ManagtoPlatform())->getOrderPlatformList());
+        $this->view->assign("orderPlatformList", (new MagentoPlatform())->getOrderPlatformList());
         $this->view->assign('issueList', (new SaleAfterIssue())->getIssueList(2));
         return $this->view->fetch();
     }
@@ -312,7 +312,7 @@ class OrderReturn extends Backend
             $deptArr = (new AuthGroup())->getAllGroup();
             $repArr  = (new Admin())->getAllStaff();
             //求出订单平台
-            $orderPlatformList = (new ManagtoPlatform())->getOrderPlatformList();
+            $orderPlatformList = (new MagentoPlatform())->getOrderPlatformList();
             //求出任务优先级
             $prtyIdList     = (new SaleAfterTask())->getPrtyIdList();
             //求出售后问题分类列表
@@ -391,7 +391,7 @@ class OrderReturn extends Backend
             $this->view->assign('orderPlatform', $orderPlatformList[$order_platform]);
             $this->view->assign('customerInfo', $customerInfo);
         }
-        $this->view->assign("orderPlatformList", (new ManagtoPlatform())->getOrderPlatformList());
+        $this->view->assign("orderPlatformList", (new MagentoPlatform())->getOrderPlatformList());
         return $this->view->fetch();
     }
 

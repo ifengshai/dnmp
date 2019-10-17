@@ -25,13 +25,13 @@ class ItemCategory extends Backend
     {
         parent::_initialize();
         $this->model = new \app\admin\model\itemmanage\ItemCategory;
-        $this->platform = new \app\admin\model\platformmanage\ManagtoPlatform;
+        $this->platform = new \app\admin\model\platformmanage\MagentoPlatform;
         $this->view->assign('PutAway',$this->model->isPutAway());
         $this->view->assign('LevelList',$this->model->getLevelList());
         $this->view->assign('CategoryList',$this->model->getCategoryList());
         //$this->view->assign('PropertyGroup',(new ItemAttributePropertyGroup())->propertyGroupList());
         $this->view->assign('AttrGroup',$this->model->getAttrGroup());
-        $this->view->assign('PlatformList',$this->platform->managtoPlatformList());
+        $this->view->assign('PlatformList',$this->platform->magentoPlatformList());
     }
     
     /**
@@ -152,8 +152,8 @@ class ItemCategory extends Backend
             if(!$platformRow){
                 $this->error(__('Platform information error, please try again or contact the developer'));
             }
-            $managtoUrl = $platformRow->managto_url;
-            if(!$managtoUrl){
+            $magentoUrl = $platformRow->magento_url;
+            if(!$magentoUrl){
                 $this->error(__('The platform url does not exist. Please go to edit it and it cannot be empty'));
             }
             $categoryRow = $this->model->get($ids);
@@ -163,8 +163,8 @@ class ItemCategory extends Backend
              //拼接分类中状态存在的字段is_upload_zeelool/is_upload_voogueme/is_upload_nihao
              $is_upload_field = 'is_upload_'.$platformRow->name;
              try{
-                 $client = new \SoapClient($managtoUrl.'/api/soap/?wsdl');
-                 $session = $client->login($platformRow->managto_account,$platformRow->managto_key);
+                 $client = new \SoapClient($magentoUrl.'/api/soap/?wsdl');
+                 $session = $client->login($platformRow->magento_account,$platformRow->magento_key);
              }catch (Exception $e){
                  $this->error($e->getMessage());
              }catch(ErrorException $e){

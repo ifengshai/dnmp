@@ -82,14 +82,14 @@
             <div class="radio">
                 {foreach name="$vo.junior" item="issue"}
                 {if $issue.junior}
-                <label for="row[problem_id]-{$issue.id}"><input id="row[problem_id]-{$issue.id}" name="row[problem_id]" type="radio" value="{$issue.id}" {in name="key" value="$vo.junior"}checked{/in} /> <span style="color:green;" id="{$issue.id}" class="issueLevel">{$issue.name}<span></span></label>
+                <label for="row[problem_id]-{$issue.id}"><input data-rule="required" id="row[problem_id]-{$issue.id}" name="row[problem_id]" type="radio" value="{$issue.id}" {in name="key" value="$vo.junior"}checked{/in} /> <span style="color:green;" id="{$issue.id}" class="issueLevel">{$issue.name}<span></span></label>
                 <div class="radio" style="margin-left:20%;float:left;clear:both;display:none;" id="display-{$issue.id}" >
                     {foreach name="$issue.junior" item="finalIssue"}
-                    <label for="row[problem_id]-{$finalIssue.id}"><input id="row[problem_id]-{$finalIssue.id}" name="row[problem_id]" type="radio" value="{$finalIssue.id}" {in name="key" value="$issue.junior"}checked{/in} /> {$finalIssue.name}</label>
+                    <label for="row[problem_id]-{$finalIssue.id}"><input data-rule="required" id="row[problem_id]-{$finalIssue.id}" name="row[problem_id]" type="radio" value="{$finalIssue.id}" {in name="key" value="$issue.junior"}checked{/in} /> {$finalIssue.name}</label>
                     {/foreach}
                 </div>
                 {else/}
-                <label for="row[problem_id]-{$issue.id}"><input id="row[problem_id]-{$issue.id}" name="row[problem_id]" type="radio" value="{$issue.id}" {in name="key" value="$vo.junior"}checked{/in} /> {$issue.name}</label>
+                <label for="row[problem_id]-{$issue.id}"><input data-rule="required" id="row[problem_id]-{$issue.id}" name="row[problem_id]" type="radio" value="{$issue.id}" {in name="key" value="$vo.junior"}checked{/in} /> {$issue.name}</label>
                 {/if}
                 <!-- {if $issue.junior}
 

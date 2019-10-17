@@ -1346,7 +1346,7 @@ class Item extends Backend
         $where['pull_status'] = 0;
         $sku_map = Db::connect('database.db_stock')->table('sku_map')->where($where)->field('sku,zeelool_sku,voogueme_sku,nihao_sku')->order('id desc')->limit(2)->select();
         //求出每个站点的地址,用户名和key
-        $magentoPlatform = Db::name('managto_platform')->field('id,managto_account,managto_key,managto_url')->select();
+        $magentoPlatform = Db::name('magento_platform')->field('id,magento_account,magento_key,magento_url')->select();
         //求出每个站点的存储信息(对应的魔晶平台存储字段和magento平台存储字段)
         $platform_map = Db::name('platform_map')->field('platform_id,platform_field,magento_field')->select();
         if(!$platform_map){
@@ -1368,9 +1368,6 @@ class Item extends Backend
                 $mapArr[3]['magento_field'][]  = $val['magento_field'];
             }
         }
-        //调用magento平台的API获取商品信息
-        $client = new \SoapClient($arr['managto_url'].'/api/soap/?wsdl');
-        $session = $client->login($arr['managto_account'],$arr['managto_key']);
         foreach($sku_map as $k =>$v){
             if(!empty($v['zeelool_sku'])){
                 $where['pull_status'] = 1;
@@ -1391,6 +1388,9 @@ class Item extends Backend
                 continue;
             }
             try{
+                //调用magento平台的API获取商品信息
+                $client = new \SoapClient($arr['magento_url'].'/api/soap/?wsdl');
+                $session = $client->login($arr['magento_account'],$arr['magento_key']);
                 $result = $client->call($session, 'catalog_product.info', $magento_sku);
                 $client->endSession($session);
             }catch (\SoapFault $e){
@@ -1417,9 +1417,9 @@ class Item extends Backend
     }
     public function ceshi()
     {
-        $magentoPlatform = Db::name('managto_platform')->where(['id'=>1])->field('id,managto_account,managto_key,managto_url')->find();
-        $client = new \SoapClient($magentoPlatform['managto_url'].'/api/soap/?wsdl');
-        $session = $client->login($magentoPlatform['managto_account'],$magentoPlatform['managto_key']);
+        $magentoPlatform = Db::name('magento_platform')->where(['id'=>1])->field('id,magento_account,magento_key,magento_url')->find();
+        $client = new \SoapClient($magentoPlatform['magento_url'].'/api/soap/?wsdl');
+        $session = $client->login($magentoPlatform['magento_account'],$magentoPlatform['magento_key']);
         $listAttributes = $client->call(
             $session,
             'product_attribute.options',
@@ -1454,10 +1454,6 @@ class Item extends Backend
         echo '<pre>';
         var_dump($mapArr);
     }
-    public function ceshi3()
-    {
-
-    }
     /***
      * 第二步
      * 解析magento字段获取字段的值
@@ -1465,7 +1461,7 @@ class Item extends Backend
     public  function  analyticMagentoField()
     {
         //求出每个站点的地址,用户名和key
-        $magentoPlatform = Db::name('managto_platform')->field('id,managto_account,managto_key,managto_url')->select();
+        $magentoPlatform = Db::name('magento_platform')->field('id,magento_account,magento_key,magento_url')->select();
         $where['analytic_status'] = 0;
         $result = Db::connect('database.db_stock')->table('sku_map')->where($where)->field('sku,information,pull_status')->order('id desc')->limit(1)->select();
         if(!$result){
@@ -1493,8 +1489,8 @@ class Item extends Backend
                 $arr = $magentoPlatform[2];
             }
             //调用magento平台的API获取商品信息
-            $client = new \SoapClient($arr['managto_url'].'/api/soap/?wsdl');
-            $session = $client->login($arr['managto_account'],$arr['managto_key']);
+            $client = new \SoapClient($arr['magento_url'].'/api/soap/?wsdl');
+            $session = $client->login($arr['magento_account'],$arr['magento_key']);
             foreach($informationArr as $key => $val){
                 if(!empty($val)){
                     $listAttributes = $client->call(
@@ -1527,7 +1523,7 @@ class Item extends Backend
         $where['change_information'] = ['NEQ',''];
         $where['pull_status'] = ['GT',0];
         $where['analytic_status'] = 1;
-        $result = Db::connect('database.db_stock')->table('sku_map')->where($where)->field('sku,change_information,pull_status')->order('id desc')->limit(1)->select();
+        $result = Db::connect('database.db_stock')->table('sku_map')->where($where)->join('fa_item g','g.sku=sku_map.sku')->field('g.id,sku_map.sku,sku_map.change_information,sku_map.pull_status')->order('id desc')->limit(1)->select();
         if(!$result){
             return false;
         }
@@ -1535,16 +1531,18 @@ class Item extends Backend
         if(!$platform_map){
             return false;
         }
+        //获取所有材质
+        $texture    = (new ItemAttribute())->getAllTexture();
         //获取所有眼镜形状
         $frameShape = (new ItemAttribute())->getAllFrameShape();
         //获取适合人群
         $frameGender   = (new ItemAttribute())->getFrameGender();
         //获取镜架所有的颜色
-        $frameColor    = (new ItemAttribute())->getFrameColor();
+        //$frameColor    = (new ItemAttribute())->getFrameColor();
         //获取眼镜类型
         $glassesType   = (new ItemAttribute())->getGlassesType();
         //获取所有线下采购产地
-        $origin        = (new ItemAttribute())->getOrigin();
+        //$origin        = (new ItemAttribute())->getOrigin();
         //获取配镜类型
         $frameType     = (new ItemAttribute())->getFrameType();
         //每个平台的存储字段都放在一起
@@ -1562,7 +1560,7 @@ class Item extends Backend
         // echo '<pre>';
         // var_dump($mapArr);
         // exit;
-        $arr = $map = $platform = [];
+        $arr = $map = $platform = $finalResult = [];
         foreach($result as $k =>$v){
             if(!empty($v['change_information'])){
                 $arr = unserialize($v['change_information']);
@@ -1591,19 +1589,109 @@ class Item extends Backend
                 }
                 // echo '<pre>';
                 // var_dump($platform);
+                // exit;
+                //判断是否存在材质
+                $finalResult['item_id'] = $v['id'];
                 if(array_key_exists('frame_texture',$platform)){
-                    //获取所有材质
-                    $texture    = (new ItemAttribute())->getAllTexture();
                     //判断材质对应的值是否在平台的对应字段值当中，如果是的话求出值
                     if(in_array($platform['frame_texture'],$texture)){
-                         echo $platform['frame_texture'];
-                         echo '<br/>';
-                         echo array_search($platform['frame_texture'],$texture); 
+                        //  echo $platform['frame_texture'];
+                        //  echo '<br/>';
+                        //  echo array_search($platform['frame_texture'],$texture);
+                        $finalResult['frame_texture'] =  array_search($platform['frame_texture'],$texture);
+                        unset($platform['frame_texture']);
+                    }else{
+                        $finalResult['frame_texture'] = 0;
                     }
-                    // echo '<pre>';
-                    // var_dump($texture);
                 }
+                //判断是否存在眼镜类型
+                if(array_key_exists('glasses_type',$platform)){
+                    if(in_array($platform['glasses_type'],$glassesType)){
+                        //echo array_search($platform['frame_texture'],$texture);
+                        $finalResult['glasses_type'] = array_search($platform['glasses_type'],$glassesType);
+                        unset($platform['glasses_type']);
+                    }else{
+                        $finalResult['glasses_type'] = 0;
+                    }
 
+                }
+                //获取所有眼镜形状
+                if(array_key_exists('frame_shape',$platform)){
+                    if(in_array(lcfirst($platform['frame_shape']),$frameShape)){
+                        // echo 1234;
+                        // echo array_search($platform['frame_shape'],$frameShape);
+                        $finalResult['frame_shape'] = array_search(lcfirst($platform['frame_shape']),$frameShape);
+                        unset($platform['frame_shape']);
+                    }else{
+                        $finalResult['frame_shape'] = 0;
+                    }
+                }
+                if(array_key_exists('shape',$platform)){
+                    if(in_array($platform['shape'],$shape)){
+                        //echo array_search($platform['shape'],$shape);
+                        $finalResult['shape'] = array_search($platform['shape'],$shape);
+                        unset($platform['shape']); 
+                    }else{
+                        $finalResult['shape'] = 0;
+                    }
+                }
+                if(array_key_exists('frame_gender',$platform)){
+                    if(in_array($platform['frame_gender'],$frameGender)){
+                        //echo array_search($platform['frame_gender'],$frameGender);
+                        $finalResult['frame_gender'] = array_search($platform['frame_gender'],$frameGender);
+                        unset($platform['frame_gender']); 
+                    }else{
+                        $finalResult['frame_gender'] = 0;
+                    }
+                }
+                if(array_key_exists('frame_size',$platform)){
+                    if(in_array(lcfirst($platform['frame_size']),$frameSize)){
+                        //echo array_search($platform['frame_size'],$frameSize);
+                        $finalResult['frame_size'] = array_search(lcfirst($platform['frame_size']),$frameSize);
+                        unset($platform['frame_size']); 
+                    }else{
+                        $finalResult['frame_size'] = 0;
+                    }    
+                }
+                if(array_key_exists('frame_type',$platform)){
+                    if(in_array($platform['frame_type'],$frameType)){
+                        //echo array_search($platform['frame_type'],$frameType);
+                        $finalResult['frame_type'] = array_search($platform['frame_type'],$frameType);
+                        unset($platform['frame_type']); 
+                    }else{
+                        $finalResult['frame_type'] = 0;
+                    }
+                }
+                if(array_key_exists('frame_is_advance',$platform)){
+                    if(strcasecmp($platform['frame_is_advance'],'yes') == 0){
+                        $finalResult['frame_is_advance'] = 1;
+                        unset($platform['frame_is_advance']);
+                    }else{
+                        $finalResult['frame_is_advance'] = 0;
+                    }
+                }
+                if(array_key_exists('frame_temple_is_spring',$platform)){
+                    if(strcasecmp($platform['frame_temple_is_spring'],'yes') == 0){
+                        $finalResult['frame_temple_is_spring'] = 1;
+                        unset($platform['frame_temple_is_spring']);
+                    }else{
+                        $finalResult['frame_temple_is_spring'] = 0;
+                    }
+                }
+                if(array_key_exists('frame_is_adjust_nose_pad',$platform)){
+                    if(strcasecmp($platform['frame_is_adjust_nose_pad'],'yes') == 0){
+                        $finalResult['frame_is_adjust_nose_pad'] = 1;
+                        unset($platform['frame_is_adjust_nose_pad']);
+                    }else{
+                        $finalResult['frame_is_adjust_nose_pad'] = 0;
+                    }
+                }
+                $arrFinal = array_merge($platform,$finalResult);
+                $finalInsert = Db::connect('database.db_stock')->name('item_attribute')->insert($arrFinal);
+                if($finalInsert){
+                    Db::connect('database.db_stock')->table('sku_map')->where(['sku'=>$v['sku']])->update(['analytic_status'=>2]);
+                    Db::connect('database.db_stock')->name('item')->where(['id'=>$v['id']])->update(['category_id'=>6]);
+                }
             }
         }
     }
@@ -1627,6 +1715,16 @@ class Item extends Backend
     }
     public function pullMagentoProductInfoTwo()
     {
-
+        $a= array(
+            'one',
+            'two',
+            'three',
+            'four'
+           );
+           in_array('one', $a);
+           in_array('two', $a);
+           in_array('ONE', $a);
+           $result = in_array('fOUr', $a);
+           var_dump($result);
     }
 }

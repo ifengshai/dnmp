@@ -5,12 +5,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             // 初始化表格参数配置
             Table.api.init({
                 extend: {
-                    index_url: 'platformmanage/managto_platform/index' + location.search,
-                    add_url: 'platformmanage/managto_platform/add',
-                    edit_url: 'platformmanage/managto_platform/edit',
-                    del_url: 'platformmanage/managto_platform/del',
-                    multi_url: 'platformmanage/managto_platform/multi',
-                    table: 'managto_platform',
+                    index_url: 'platformmanage/magento_platform/index' + location.search,
+                    add_url: 'platformmanage/magento_platform/add',
+                    edit_url: 'platformmanage/magento_platform/edit',
+                    del_url: 'platformmanage/magento_platform/del',
+                    multi_url: 'platformmanage/magento_platform/multi',
+                    table: 'magento_platform',
                 }
             });
 
@@ -35,8 +35,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {field: 'name', title: __('Name')},
                         {field:'item_attr_name',title:__('Item_attr_name')},
                         {field:'item_type',title:__('Item_type')},
-                        {field:'managto_account',title:__('Managto_account')},
-                        {field:'managto_key',title:__('Managto_key')},
+                        {field:'magento_account',title:__('Magento_account')},
+                        {field:'magento_key',title:__('Magento_key')},
                         {
                             field:'is_upload_item',
                             title:__('Is_upload_item'),
@@ -44,7 +44,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             custom:{1:'blue',2:'green'},
                             formatter:Table.api.formatter.status,
                         },
-                        {field:'managto_url',title:__('Managto_url')},
+                        {field:'magento_url',title:__('Magento_url')},
                         {field: 'create_time', title: __('Create_time'), operate:'RANGE', addclass:'datetimerange'},
                         {field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate}
                     ]

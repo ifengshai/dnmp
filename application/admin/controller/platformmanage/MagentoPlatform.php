@@ -9,19 +9,19 @@ use app\common\controller\Backend;
  *
  * @icon fa fa-circle-o
  */
-class ManagtoPlatform extends Backend
+class MagentoPlatform extends Backend
 {
     
     /**
-     * ManagtoPlatform模型对象
-     * @var \app\admin\model\platformManage\ManagtoPlatform
+     * MagentoPlatform模型对象
+     * @var \app\admin\model\platformManage\MagentoPlatform
      */
     protected $model = null;
 
     public function _initialize()
     {
         parent::_initialize();
-        $this->model = new \app\admin\model\platformmanage\ManagtoPlatform;
+        $this->model = new \app\admin\model\platformmanage\MagentoPlatform;
         $this->view->assign('platformStatus',$this->model->getPlatformStatus());
         $this->view->assign('platformIsUpload',$this->model->getPlatformIsUpload());
 
