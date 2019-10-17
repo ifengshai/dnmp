@@ -288,6 +288,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     $('.supplier_address').val(data.address);
                 });
             })
+            
 
             if ($('.supplier').val()) {
                 $('.supplier').change();

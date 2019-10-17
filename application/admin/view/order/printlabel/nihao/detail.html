@@ -216,8 +216,11 @@
                                     {else/}
                                         <td rowspan="2">{:$sku['od_add'] ?? ''}</td>
                                     {/if}
-
-                                    <td>{:$sku['pd_r'] ?? ''}</td>
+                                    {if @$sku['pdcheck'] == 'on'}
+                                        <td>{:$sku['pd_r'] ?? ''}</td>
+                                    {else/}
+                                        <td rowspan="2">{:$sku['pd'] ?? ''}</td>
+                                    {/if}
                                 </tr>
                                 <tr>
                                     <td>Left(OS)</td>
@@ -229,7 +232,9 @@
                                         <td>{:$sku.os_add ?? ''}</td>
                                     {/if}
                                    
-                                    <td>{:$sku['pd_l'] ?? ''}</td>                                                                       
+                                    {if $sku['prismcheck'] == 'on'}
+                                    <td>{:$sku['pd_l'] ?? ''}</td>
+                                    {/if}                                                                            
                                 </tr>
                             </tbody>
                         </table>

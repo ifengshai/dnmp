@@ -36,7 +36,7 @@ class NihaoPrescriptionDetailHelper{
 	public static function get_one_by_increment_id($increment_id){
 		
 		if($increment_id){
-			$querySql = "select sfo.increment_id,sfoi.product_options,sfoi.order_id,sfo.`status`,sfoi.sku,sfoi.qty_ordered,sfoi.name,sfo.created_at
+			$querySql = "select sfoi.discount_amount,sfo.increment_id,sfoi.product_options,sfoi.order_id,sfo.`status`,sfoi.sku,sfoi.qty_ordered,sfoi.name,sfo.created_at
 			from sales_flat_order_item sfoi
 			left join sales_flat_order sfo on sfoi.order_id=sfo.entity_id 
 			where sfo.increment_id={$increment_id}";
@@ -59,7 +59,7 @@ class NihaoPrescriptionDetailHelper{
 	*/
 	public static function get_list_by_entity_ids($entity_id){
 		if($entity_id){
-			$querySql = "select sfo.increment_id,sfoi.product_options,sfoi.order_id,sfo.`status`,sfoi.sku,sfoi.qty_ordered,sfoi.name,sfo.created_at
+			$querySql = "select sfoi.discount_amount,sfo.increment_id,sfoi.product_options,sfoi.order_id,sfo.`status`,sfoi.sku,sfoi.qty_ordered,sfoi.name,sfo.created_at
 			from sales_flat_order_item sfoi
 			left join sales_flat_order sfo on sfoi.order_id=sfo.entity_id 
 			where sfo.entity_id in($entity_id)";
@@ -82,7 +82,7 @@ class NihaoPrescriptionDetailHelper{
 	public static function get_list_by_increment_ids($increment_ids){
 		if($increment_ids){
 			$increment_ids = rtrim($increment_ids,',');
-			$querySql = "select sfo.increment_id,sfoi.product_options,sfoi.order_id,sfo.`status`,sfoi.sku,sfoi.qty_ordered,sfoi.name,sfo.created_at
+			$querySql = "select sfoi.discount_amount,sfo.increment_id,sfoi.product_options,sfoi.order_id,sfo.`status`,sfoi.sku,sfoi.qty_ordered,sfoi.name,sfo.created_at
 			from sales_flat_order_item sfoi
 			left join sales_flat_order sfo on sfoi.order_id=sfo.entity_id 
 			where sfo.increment_id in($increment_ids)";
@@ -106,8 +106,8 @@ class NihaoPrescriptionDetailHelper{
 	protected function list_convert($item_list){
 		$items = array();	
 		foreach ($item_list as $item_key => $item_value) {
-            $product_options = unserialize($item_value['product_options']);
-            // dump($product_options);
+			$product_options = unserialize($item_value['product_options']);
+            
             $final_params['prescription_type'] = substr($product_options['info_buyRequest']['tmplens']['prescription_type'],0,100);
 
             $final_params['second_name'] = substr($product_options['info_buyRequest']['tmplens']['second_name'],0,100);
@@ -125,7 +125,9 @@ class NihaoPrescriptionDetailHelper{
             $items[$item_key]['second_id'] = $product_options['info_buyRequest']['tmplens']['second_id'];   
             $items[$item_key]['third_id'] = $product_options['info_buyRequest']['tmplens']['third_id'];   
             $items[$item_key]['four_id'] = $product_options['info_buyRequest']['tmplens']['four_id'];  
-            $items[$item_key]['is_frame_only'] = $product_options['info_buyRequest']['tmplens']['is_frame_only'];                
+			$items[$item_key]['is_frame_only'] = $product_options['info_buyRequest']['tmplens']['is_frame_only'];      
+			$items[$item_key]['cart_currency'] = $product_options['info_buyRequest']['cart_currency'];      
+			$items[$item_key]['options']  = $product_options['options'];          
                                                 
             // $prescription_params = $product_options['info_buyRequest']['tmplens']['prescription'];
             $prescription_params = json_decode($product_options['info_buyRequest']['tmplens']['prescription'], ture);
@@ -145,6 +147,7 @@ class NihaoPrescriptionDetailHelper{
             $items[$item_key]['increment_id'] = $item_value['increment_id'];
             $items[$item_key]['status'] = $item_value['status'];
             $items[$item_key]['qty_ordered'] = $item_value['qty_ordered'];            
+            $items[$item_key]['discount_amount'] = $item_value['discount_amount'];            
 
             $items[$item_key]['sku'] = $item_value['sku'];
             $items[$item_key]['name'] = $item_value['name'];        

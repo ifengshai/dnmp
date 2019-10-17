@@ -121,7 +121,7 @@ class Zeelool extends Model
                 if (@$lens_params['pdcheck'] == 'on') {
                     $lens_params['pd'] = '';
                 }
-                // dump($lens_params);
+                
                 if (@$lens_params['prismcheck'] != 'on') {
                     $lens_params['od_pv'] = '';
                     $lens_params['od_bd'] = '';

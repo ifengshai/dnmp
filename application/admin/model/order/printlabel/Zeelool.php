@@ -36,13 +36,13 @@ class Zeelool extends Model
     {
         switch ($ordertype) {
             case 1:
-                $db = 'database.db_zeelool_online';
+                $db = 'database.db_zeelool';
                 break;
             case 2:
-                $db = 'database.db_voogueme_online';
+                $db = 'database.db_voogueme';
                 break;
             case 3:
-                $db = 'database.db_nihao_online';
+                $db = 'database.db_nihao';
                 break;
             default:
                 return false;
