@@ -3,6 +3,45 @@
         max-width:100%;
     }
 </style>
+
+<style type="text/css">
+table.altrowstable {
+    margin: 0 auto;
+    width: 100%;
+    font-family: verdana, arial, sans-serif;
+    font-size: 11px;
+    color: #333333;
+    border-width: 1px;
+    border-color: #247692;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+table.altrowstable th {
+    border-width: 1px;
+    padding: 8px;
+    font-size: 14px;
+    border-style: solid;
+    border-color: #d2d6de;
+}
+
+table.altrowstable td {
+    border-width: 1px;
+    padding: 8px;
+    text-align: center;
+    font-size: 12px;
+    border-style: solid;
+    border-color: #ddd;
+}
+table.altrowstable tr:nth-child(odd){
+    background:#E9F1F4;
+    background: #F5F5F5;
+}
+table.altrowstable tr:nth-child(even){
+    background: #fff;
+    background: #eee;
+}
+</style>
 <div class="panel panel-default panel-intro">
     {:build_heading()}
 
@@ -88,11 +127,12 @@
                             </div>
                         </div>
                     </form>
-                    <div class="bs-bars pull-left">用户个人信息</div>
-                    <table id="info-customer-task" class="table table-striped table-bordered table-hover table-nowrap"
+                    <table id="info-customer-task" class="altrowstable"
                            data-operate-edit="{:$auth->check('saleaftermanage/order_return/edit')}"
                            data-operate-del="{:$auth->check('saleaftermanage/order_return/del')}"
                            width="100%">
+                    <thead>
+                            <tr><th colspan="16" style="font-size:16px;text-align: center; vertical-align: middle;">用户个人信息</th></tr>                           
                         <tr>
                             <th style="text-align: center; vertical-align: middle;">姓名</th>
                             <th style="text-align: center; vertical-align: middle;">邮箱</th>
@@ -101,6 +141,7 @@
                             <th style="text-align: center; vertical-align: middle;">支付失败次数</th>
                             <th style="text-align: center; vertical-align: middle;">支付失败金额</th>
                         </tr>
+                    </thead>
                         {notempty name="customerInfo"}
                         <tr>
                             <td style="text-align: center; vertical-align: middle;">{$customerInfo.customer_name}</td>
@@ -112,11 +153,12 @@
                         </tr>
                         {/notempty}
                     </table>
-                    <div class="bs-bars pull-left">协同任务列表</div>
-                        <table id="info-synergy-task" class="table table-striped table-bordered table-hover table-nowrap"
+                        <table id="info-synergy-task" class="altrowstable"
                                data-operate-edit="{:$auth->check('saleaftermanage/order_return/edit')}"
                                data-operate-del="{:$auth->check('saleaftermanage/order_return/del')}"
                                width="100%">
+                        <thead>
+                            <tr><th colspan="16" style="font-size:16px;text-align: center; vertical-align: middle;">协同任务列表</th></tr>                               
                           <tr>
                               <th style="text-align: center; vertical-align: middle;">序号</th>
                               <th style="text-align: center; vertical-align: middle;">协同任务单号</th>
@@ -130,6 +172,7 @@
                               <th style="text-align: center; vertical-align: middle;">创建人</th>
                               <th style="text-align: center; vertical-align: middle;">创建时间</th>
                           </tr>
+                        </thead>
                             {notempty name="infoSynergyTaskResult"}
                             {foreach name="infoSynergyTaskResult" item="synergyTaskList" }
                             <tr>
@@ -149,11 +192,12 @@
                             {/foreach}
                             {/notempty}
                         </table>
-                    <div class="bs-bars pull-left">售后任务列表</div>
-                        <table id="sale-after-task" class="table table-striped table-bordered table-hover table-nowrap"
+                        <table id="sale-after-task" class="altrowstable"
                            data-operate-edit="{:$auth->check('saleaftermanage/order_return/edit')}"
                            data-operate-del="{:$auth->check('saleaftermanage/order_return/del')}"
                            width="100%">
+                            <thead>
+                            <tr><th colspan="16" style="font-size:16px;text-align: center; vertical-align: middle;">售后任务列表</th></tr>                           
                             <tr>
                                 <th style="text-align: center; vertical-align: middle;">序号</th>
                                 <th style="text-align: center; vertical-align: middle;">任务单号</th>
@@ -170,6 +214,7 @@
                                 <th style="text-align: center; vertical-align: middle;">创建人</th>
                                 <th style="text-align: center; vertical-align: middle;">创建时间</th>
                             </tr>
+                        </thead>
                             {notempty name="saleAfterTaskResult"}
                             {foreach name="saleAfterTaskResult" item="saleTaskList"}
                             <tr>
@@ -192,11 +237,12 @@
                             {/foreach}
                             {/notempty}
                         </table>
-                    <div class="bs-bars pull-left">退货任务列表</div>
-                    <table id="order-return-task" class="table table-striped table-bordered table-hover table-nowrap"
+                    <table id="order-return-task" class="altrowstable"
                            data-operate-edit="{:$auth->check('saleaftermanage/order_return/edit')}"
                            data-operate-del="{:$auth->check('saleaftermanage/order_return/del')}"
                            width="100%">
+                        <thead>
+                            <tr><th colspan="16" style="font-size:16px;text-align: center; vertical-align: middle;">退货任务列表</th></tr>                           
                         <tr>
                             <th style="text-align: center; vertical-align: middle;">序号</th>
                             <th style="text-align: center; vertical-align: middle;">退货单号</th>
@@ -208,6 +254,7 @@
                             <th style="text-align: center; vertical-align: middle;">记录创建人</th>
                             <th style="text-align: center; vertical-align: middle;">创建日期</th>
                         </tr>
+                    </thead>
                      {notempty name="orderReturnResult"}
                         {foreach name="orderReturnResult" item="orderReturnList"}
                         <tr>
@@ -224,11 +271,12 @@
                         {/foreach}
                      {/notempty}
                     </table>
-                    <div class="bs-bars pull-left">订单信息列表</div>
-                    <table id="order-info-list" class="table table-striped table-bordered table-hover table-nowrap"
+                    <table id="order-info-list" class="altrowstable"
                            data-operate-edit="{:$auth->check('saleaftermanage/order_return/edit')}"
                            data-operate-del="{:$auth->check('saleaftermanage/order_return/del')}"
                            width="100%">
+                        <thead>
+                            <tr><th colspan="16" style="font-size:16px;text-align: center; vertical-align: middle;">订单信息列表</th></tr>                     
                         <tr>
                             <th style="text-align: center; vertical-align: middle;">序号</th>
                             <th style="text-align: center; vertical-align: middle;">订单号</th>
@@ -242,6 +290,7 @@
                             <th style="text-align: center; vertical-align: middle;">付款金额</th>
                             <th style="text-align: center; vertical-align: middle;">优惠券</th>
                         </tr>
+                        </thead>
                         {notempty name="orderInfoResult"}
                             {foreach name="orderInfoResult" item="orderInfoList"}
                              <tr>
@@ -260,11 +309,12 @@
                             {/foreach}
                         {/notempty}
                     </table>
-                    <div class="bs-bars pull-left">订单商品信息列表</div>
-                    <table id="order-item-list" class="table table-striped table-bordered table-hover table-nowrap"
+                    <table id="order-item-list" class="altrowstable"
                            data-operate-edit="{:$auth->check('saleaftermanage/order_return/edit')}"
                            data-operate-del="{:$auth->check('saleaftermanage/order_return/del')}"
                            width="100%">
+                        <thead>
+                            <tr><th colspan="16" style="font-size:16px;text-align: center; vertical-align: middle;">订单商品信息列表</th></tr> 
                         <tr>
                             <th style="text-align: center; vertical-align: middle;">订单号</th>
                             <th style="text-align: center; vertical-align: middle;">SKU</th>
@@ -273,14 +323,16 @@
                             <th style="text-align: center; vertical-align: middle;">镀膜类型</th>
                             <th style="text-align: center; vertical-align: middle;">镜片类型</th>
                             <th style="text-align: center; vertical-align: middle;">处方类型</th>
+                            <th style="text-align: center; vertical-align: middle;">左右眼</th>                            
                             <th style="text-align: center; vertical-align: middle;">SPH</th>
                             <th style="text-align: center; vertical-align: middle;">CYL</th>
                             <th style="text-align: center; vertical-align: middle;">AXI</th>
                             <th style="text-align: center; vertical-align: middle;">ADD</th>
                             <th style="text-align: center; vertical-align: middle;">PD</th>
-                            <th style="text-align: center; vertical-align: middle;">Prism(out/in)</th>
-                            <th style="text-align: center; vertical-align: middle;">Prism(up/down)</th>
+                            <th style="text-align: center; vertical-align: middle;">Prism<br>(out/in)</th>
+                            <th style="text-align: center; vertical-align: middle;">Prism<br>(up/down)</th>
                         </tr>
+                        </thead>  
                         {notempty name="orderInfoResult"}
                         {foreach name="orderInfoResult" item="orderInfoList"}
                         {foreach name="orderInfoList.arr" item="itemInfoList"}
@@ -292,35 +344,38 @@
                             <td style="text-align: center; vertical-align: middle;">{$itemInfoList.coatiing_name}</td>
                             <td style="text-align: center; vertical-align: middle;">{$itemInfoList.index_type}</td>
                             <td style="text-align: center; vertical-align: middle;">{$itemInfoList.prescription_type}</td>
-                            <td style="text-align: center; vertical-align: middle;">右眼:{$itemInfoList.od_sph}<br>左眼:{$itemInfoList.os_sph}</td>
-                            <td style="text-align: center; vertical-align: middle;">右眼:{$itemInfoList.od_cyl}<br>左眼:{$itemInfoList.os_cyl}</td>
-                            <td style="text-align: center; vertical-align: middle;">右眼:{$itemInfoList.od_axis}<br>左眼:{$itemInfoList.os_axis}</td>
-                            <td style="text-align: center; vertical-align: middle;">右眼:{$itemInfoList.od_add}<br>左眼:{$itemInfoList.os_add}</td>
-                            <td style="text-align: center; vertical-align: middle;">右眼:{$itemInfoList.pd_r}<br>左眼:{$itemInfoList.pd_l}</td>
-                            <td style="text-align: center; vertical-align: middle;">右眼:{$itemInfoList.od_pv_r}<br>左眼:{$itemInfoList.os_pv_r}</td>
-                            <td style="text-align: center; vertical-align: middle;">右眼:{$itemInfoList.od_bd_r}<br>左眼:{$itemInfoList.os_bd_r}</td>
+                             <td style="text-align: center; vertical-align: middle;">右眼<br>左眼</td>
+                            <td style="text-align: center; vertical-align: middle;">{$itemInfoList.od_sph}<br>{$itemInfoList.os_sph}</td>
+                            <td style="text-align: center; vertical-align: middle;">{$itemInfoList.od_cyl}<br>{$itemInfoList.os_cyl}</td>
+                            <td style="text-align: center; vertical-align: middle;">{$itemInfoList.od_axis}<br>{$itemInfoList.os_axis}</td>
+                            <td style="text-align: center; vertical-align: middle;">{$itemInfoList.od_add}<br>{$itemInfoList.os_add}</td>
+                            <td style="text-align: center; vertical-align: middle;">{$itemInfoList.pd_r}<br>{$itemInfoList.pd_l}</td>
+                            <td style="text-align: center; vertical-align: middle;">{$itemInfoList.od_pv_r}<br>{$itemInfoList.os_pv_r}</td>
+                            <td style="text-align: center; vertical-align: middle;">{$itemInfoList.od_bd_r}<br>{$itemInfoList.os_bd_r}</td>
                         </tr>
                         {/foreach}
                         {/foreach}
                         {/notempty}
                     </table>
-                    <div class="bs-bars pull-left">支付信息列表</div>
-                    <table id="order-pay-list" class="table table-striped table-bordered table-hover table-nowrap"
+                    <table id="order-pay-list" class="altrowstable"
                            data-operate-edit="{:$auth->check('saleaftermanage/order_return/edit')}"
                            data-operate-del="{:$auth->check('saleaftermanage/order_return/del')}"
                            width="100%">
-                        <tr>
-                            <th style="text-align: center; vertical-align: middle;">订单号</th>
-                            <th style="text-align: center; vertical-align: middle;">支付金额</th>
-                            <th style="text-align: center; vertical-align: middle;">订单金额</th>
-                            <th style="text-align: center; vertical-align: middle;">运费</th>
-                            <th style="text-align: center; vertical-align: middle;">支付方式</th>
-                            <th style="text-align: center; vertical-align: middle;">last_trans_id</th>
-                            <th style="text-align: center; vertical-align: middle;">paypal_payer_email</th>
-                            <th style="text-align: center; vertical-align: middle;">paypal_payer_id</th>
-                            <th style="text-align: center; vertical-align: middle;">paypal_payer_status</th>
-                            <th style="text-align: center; vertical-align: middle;">paypal_payment_status</th>
-                        </tr>
+                           <thead>
+                            <tr><th colspan="10" style="font-size:16px;text-align: center; vertical-align: middle;">支付信息列表</th></tr>
+                            <tr>
+                                <th style="text-align: center; vertical-align: middle;">订单号</th>
+                                <th style="text-align: center; vertical-align: middle;">支付金额</th>
+                                <th style="text-align: center; vertical-align: middle;">订单金额</th>
+                                <th style="text-align: center; vertical-align: middle;">运费</th>
+                                <th style="text-align: center; vertical-align: middle;">支付方式</th>
+                                <th style="text-align: center; vertical-align: middle;">last_trans_id</th>
+                                <th style="text-align: center; vertical-align: middle;">paypal_payer_email</th>
+                                <th style="text-align: center; vertical-align: middle;">paypal_payer_id</th>
+                                <th style="text-align: center; vertical-align: middle;">paypal_payer_status</th>
+                                <th style="text-align: center; vertical-align: middle;">paypal_payment_status</th>
+                            </tr>
+                        </thead>
                         {notempty name="orderInfoResult"}
                         {foreach name="orderInfoResult" item="orderInfoList"}
                         <tr>
@@ -338,21 +393,23 @@
                         {/foreach}
                         {/notempty}
                     </table>
-                    <div class="bs-bars pull-left">地址信息列表</div>
-                    <table id="order-address-list" class="table table-striped table-bordered table-hover table-nowrap"
+                    <table id="order-address-list" class="altrowstable"
                            data-operate-edit="{:$auth->check('saleaftermanage/order_return/edit')}"
                            data-operate-del="{:$auth->check('saleaftermanage/order_return/del')}"
                            width="100%">
-                        <tr>
-                            <th style="text-align: center; vertical-align: middle;">订单号</th>
-                            <th style="text-align: center; vertical-align: middle;">name</th>
-                            <th style="text-align: center; vertical-align: middle;">telephone</th>
-                            <th style="text-align: center; vertical-align: middle;">postcode</th>
-                            <th style="text-align: center; vertical-align: middle;">street</th>
-                            <th style="text-align: center; vertical-align: middle;">city</th>
-                            <th style="text-align: center; vertical-align: middle;">region</th>
-                            <th style="text-align: center; vertical-align: middle;">country_id</th>
-                        </tr>
+                           <thead>
+                            <tr><th colspan="10" style="font-size:16px;text-align: center; vertical-align: middle;">地址信息列表</th></tr>
+                            <tr>
+                                <th style="text-align: center; vertical-align: middle;">订单号</th>
+                                <th style="text-align: center; vertical-align: middle;">name</th>
+                                <th style="text-align: center; vertical-align: middle;">telephone</th>
+                                <th style="text-align: center; vertical-align: middle;">postcode</th>
+                                <th style="text-align: center; vertical-align: middle;">street</th>
+                                <th style="text-align: center; vertical-align: middle;">city</th>
+                                <th style="text-align: center; vertical-align: middle;">region</th>
+                                <th style="text-align: center; vertical-align: middle;">country_id</th>
+                            </tr>
+                        </thead> 
                         {notempty name="orderInfoResult"}
                         {foreach name="orderInfoResult" item="orderInfoList"}
                         <tr>
