@@ -61,13 +61,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                             custom: { 1: 'blue', 2: 'red' },
                             formatter: Table.api.formatter.status
                         },
-                        {
-                            field: 'is_presell',
-                            title: __('Is_presell'),
-                            searchList: { 1: '不是', 2: '是' },
-                            custom: { 1: 'blue', 2: 'red' },
-                            formatter: Table.api.formatter.status
-                        },
+                        // {
+                        //     field: 'is_presell',
+                        //     title: __('Is_presell'),
+                        //     searchList: { 1: '不是', 2: '是' },
+                        //     custom: { 1: 'blue', 2: 'red' },
+                        //     formatter: Table.api.formatter.status
+                        // },
                         { field: 'create_person', title: __('Create_person') },
                         { field: 'create_time', title: __('Create_time'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime },
                         {
