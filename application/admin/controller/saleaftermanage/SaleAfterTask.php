@@ -5,7 +5,7 @@ namespace app\admin\controller\saleaftermanage;
 use app\common\controller\Backend;
 use app\admin\model\AuthGroup;
 use app\admin\model\saleaftermanage\SaleAfterIssue;
-use app\admin\model\platformmanage\ManagtoPlatform;
+use app\admin\model\platformmanage\MagentoPlatform;
 use app\admin\model\saleaftermanage\SaleAfterTaskRemark;
 use app\admin\model\Admin;
 use think\Request;
@@ -57,7 +57,7 @@ class SaleAfterTask extends Backend
         $this->assignconfig("admin", ['id' => $this->auth->id, 'group_ids' => $this->auth->getGroupIds()]);
         $this->view->assign('staffList',$staffList);
         $this->view->assign('groupdata', $this->groupdata);
-        $this->view->assign("orderPlatformList", (new ManagtoPlatform())->getOrderPlatformList());
+        $this->view->assign("orderPlatformList", (new MagentoPlatform())->getOrderPlatformList());
         $this->view->assign("orderStatusList", $this->model->getOrderStatusList());
         $this->view->assign('prtyIdList',$this->model->getPrtyIdList());
         $this->view->assign('issueList',(new SaleAfterIssue())->getIssueList(1,0));
@@ -116,6 +116,9 @@ class SaleAfterTask extends Backend
     {
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
+            if(!isset($params['problem_id'])){
+                $this->error(__('Please select the problem category'));
+            }
             if ($params) {
                 $params = $this->preExcludeFields($params);
 
@@ -265,7 +268,7 @@ class SaleAfterTask extends Backend
     public function getAjaxOrderPlatformList()
     {
         if($this->request->isAjax()){
-            $json = (new ManagtoPlatform())->getOrderPlatformList();
+            $json = (new MagentoPlatform())->getOrderPlatformList();
             if(!$json){
                 $json = [0=>'请添加订单平台'];
             }

@@ -3,7 +3,7 @@
 namespace app\admin\model\itemmanage;
 use think\Db;
 use think\Model;
-use app\admin\model\platformmanage\ManagtoPlatform;
+use app\admin\model\platformmanage\MagentoPlatform;
 
 class ItemPlatformSku extends Model
 {
@@ -37,7 +37,7 @@ class ItemPlatformSku extends Model
         if($res){
             return false;
         }
-        $platform = (new ManagtoPlatform())->getOrderPlatformList();
+        $platform = (new MagentoPlatform())->getOrderPlatformList();
         if(!empty($platform) && is_array($platform)){
             $arr = [];
             foreach ($platform as $k =>$v){
@@ -98,8 +98,8 @@ class ItemPlatformSku extends Model
      */
     public function findItemPlatform_yuan($id)
     {
-        $result = $this->alias('g')->where('g.id','=',$id)->join('managto_platform p','g.platform_type=p.id')
-                 ->field('g.id,g.sku,g.platform_sku,g.platform_type,g.magento_id,g.is_upload,g.is_upload_images,g.uploaded_images,p.id as platform_id,p.status,p.managto_account,p.managto_key,p.managto_url,p.is_upload_item,p.is_del,p.name,p.item_attr_name,p.item_type,p.upload_field')->find();
+        $result = $this->alias('g')->where('g.id','=',$id)->join('magento_platform p','g.platform_type=p.id')
+                 ->field('g.id,g.sku,g.platform_sku,g.platform_type,g.magento_id,g.is_upload,g.is_upload_images,g.uploaded_images,p.id as platform_id,p.status,p.magento_account,p.magento_key,p.magento_url,p.is_upload_item,p.is_del,p.name,p.item_attr_name,p.item_type,p.upload_field')->find();
         return $result ? $result : false;
     }
     /***
@@ -111,15 +111,15 @@ class ItemPlatformSku extends Model
         if(!$resultItem){
             return false;
         }
-        $resultPlatform = Db::name('managto_platform')->where('id','=',$resultItem['platform_type'])->field('id as platform_id,status,managto_account,managto_key,managto_url,is_upload_item,is_del,name,item_attr_name,item_type,upload_field')->find();
+        $resultPlatform = Db::name('magento_platform')->where('id','=',$resultItem['platform_type'])->field('id as platform_id,status,magento_account,magento_key,magento_url,is_upload_item,is_del,name,item_attr_name,item_type,upload_field')->find();
         if(!$resultPlatform){
             return $resultItem;
         }
         $resultItem['platform_id']      = $resultPlatform['platform_id'];
         $resultItem['status']           = $resultPlatform['status'];
-        $resultItem['managto_account']  = $resultPlatform['managto_account'];
-        $resultItem['managto_key']      = $resultPlatform['managto_key'];
-        $resultItem['managto_url']      = $resultPlatform['managto_url'];
+        $resultItem['magento_account']  = $resultPlatform['magento_account'];
+        $resultItem['magento_key']      = $resultPlatform['magento_key'];
+        $resultItem['magento_url']      = $resultPlatform['magento_url'];
         $resultItem['is_upload_item']   = $resultPlatform['is_upload_item'];
         $resultItem['is_del']           = $resultPlatform['is_del'];
         $resultItem['name']             = $resultPlatform['name'];

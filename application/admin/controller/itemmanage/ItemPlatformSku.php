@@ -5,7 +5,7 @@ use think\Db;
 use think\Request;
 use app\common\controller\Backend;
 use app\admin\model\itemmanage\Item;
-use app\admin\model\platformmanage\ManagtoPlatform;
+use app\admin\model\platformmanage\MagentoPlatform;
 use app\admin\model\platformmanage\PlatformMap;
 /**
  * 平台SKU管理
@@ -25,7 +25,7 @@ class ItemPlatformSku extends Backend
     {
         parent::_initialize();
         $this->model = new \app\admin\model\itemmanage\ItemPlatformSku;
-        $this->platform = new \app\admin\model\platformmanage\ManagtoPlatform;
+        $this->platform = new \app\admin\model\platformmanage\MagentoPlatform;
 
     }
     
@@ -59,7 +59,7 @@ class ItemPlatformSku extends Backend
                 ->select();
             $list = collection($list)->toArray();
             if(!empty($list) && is_array($list)){
-                $platform = (new ManagtoPlatform())->getOrderPlatformList();
+                $platform = (new MagentoPlatform())->getOrderPlatformList();
                 foreach ($list as $k =>$v){
                     if($v['platform_type']){
                         $list[$k]['platform_type'] = $platform[$v['platform_type']];
@@ -72,7 +72,7 @@ class ItemPlatformSku extends Backend
 
             return json($result);
         }
-        $this->view->assign('PlatformList',$this->platform->managtoPlatformList());
+        $this->view->assign('PlatformList',$this->platform->magentoPlatformList());
         return $this->view->fetch();
     }
     //商品预售首页
@@ -101,7 +101,7 @@ class ItemPlatformSku extends Backend
 
             $list = collection($list)->toArray();
             if(!empty($list) && is_array($list)){
-                $platform = (new ManagtoPlatform())->getOrderPlatformList();
+                $platform = (new MagentoPlatform())->getOrderPlatformList();
                 foreach ($list as $k =>$v){
                     if($v['platform_type']){
                         $list[$k]['platform_type'] = $platform[$v['platform_type']];
@@ -383,8 +383,8 @@ class ItemPlatformSku extends Backend
             if(!$platformRow){
                 $this->error(__('Platform information error, please try again or contact the developer'));
             }
-            $managtoUrl = $platformRow->managto_url;
-            if(!$managtoUrl){
+            $magentoUrl = $platformRow->magento_url;
+            if(!$magentoUrl){
                 $this->error(__('The platform url does not exist. Please go to edit it and it cannot be empty'));
             }
 
@@ -409,7 +409,7 @@ class ItemPlatformSku extends Backend
             if($itemPlatformRow['is_upload_item'] == 2){ //控制不上传商品信息
                 $this->error(__('The corresponding platform does not need to upload product information, please do not upload'));
             }
-            if(!$itemPlatformRow['managto_url']){
+            if(!$itemPlatformRow['magento_url']){
                 $this->error(__('The platform url does not exist. Please go to edit it and it cannot be empty'));
             }
             if($itemPlatformRow['is_upload'] == 1){ //商品已经上传，无需再次上传
@@ -426,10 +426,10 @@ class ItemPlatformSku extends Backend
             if($itemRow['item_status']!=3){ //该商品没有审核通过
                 $this->error(__('This product has not been approved and cannot be uploaded'));
             }
-            $managtoUrl = $itemPlatformRow['managto_url'];
+            $magentoUrl = $itemPlatformRow['magento_url'];
             try{
-                $client = new \SoapClient($managtoUrl.'/api/soap/?wsdl');
-                $session = $client->login($itemPlatformRow['managto_account'],$itemPlatformRow['managto_key']);
+                $client = new \SoapClient($magentoUrl.'/api/soap/?wsdl');
+                $session = $client->login($itemPlatformRow['magento_account'],$itemPlatformRow['magento_key']);
                 $attributeSets = $client->call($session, 'product_attribute_set.list');
             }catch (\SoapFault $e){
                 $this->error(__('Platform account or key is incorrect, please go to the platform to edit'));
@@ -593,7 +593,7 @@ class ItemPlatformSku extends Backend
             if($itemPlatformRow['is_upload_item'] == 2){ //控制不上传商品信息
                 $this->error(__('The corresponding platform does not need to upload product information, please do not upload'));
             }
-            if(!$itemPlatformRow['managto_url']){
+            if(!$itemPlatformRow['magento_url']){
                 $this->error(__('The platform url does not exist. Please go to edit it and it cannot be empty'));
             }
             if(empty($itemPlatformRow['magento_id'])){
@@ -615,10 +615,10 @@ class ItemPlatformSku extends Backend
 
             //需要上传的图片
             $itemImagesArr = explode(',',$itemImagesRow['frame_images']);
-            $managtoUrl = $itemPlatformRow['managto_url'];
+            $magentoUrl = $itemPlatformRow['magento_url'];
                 try{
-                    $client = new \SoapClient($managtoUrl.'/api/soap/?wsdl');
-                    $session = $client->login($itemPlatformRow['managto_account'],$itemPlatformRow['managto_key']);
+                    $client = new \SoapClient($magentoUrl.'/api/soap/?wsdl');
+                    $session = $client->login($itemPlatformRow['magento_account'],$itemPlatformRow['magento_key']);
                     //如果存在需要删除的图片就删除magento平台上的照片
                     if($itemPlatformRow['uploaded_images']){
                         $itemImageDelArr = explode(',',$itemPlatformRow['uploaded_images']);

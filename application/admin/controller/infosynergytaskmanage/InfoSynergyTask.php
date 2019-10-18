@@ -6,7 +6,7 @@ use app\admin\model\Admin;
 use app\common\controller\Backend;
 use app\admin\model\infosynergytaskmanage\InfoSynergyTaskChangeSku;
 use app\admin\model\infosynergytaskmanage\InfoSynergyTaskCategory;
-use app\admin\model\platformmanage\ManagtoPlatform;
+use app\admin\model\platformmanage\MagentoPlatform;
 use app\admin\model\saleaftermanage\SaleAfterTask;
 use app\admin\model\infosynergytaskmanage\InfoSynergyTaskRemark;
 use app\admin\model\AuthGroup;
@@ -48,8 +48,9 @@ class InfoSynergyTask extends Backend
     {
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
-            //            dump($params);
-            //            //exit;
+            if(!isset($params['synergy_task_id'])){
+                $this->error(__('Please select the task category'));
+            }
             $item = isset($params['item']) ? $params['item']  : '';
             $lens = isset($params['lens']) ? $params['lens']  : '';
             if ($params) {
@@ -153,7 +154,7 @@ class InfoSynergyTask extends Backend
         //任务分类列表
         $this->view->assign('categoryList', (new InfoSynergyTaskCategory())->getIssueList(1, 0));
         //订单平台列表
-        $this->view->assign("orderPlatformList", (new ManagtoPlatform())->getOrderPlatformList());
+        $this->view->assign("orderPlatformList", (new MagentoPlatform())->getOrderPlatformList());
         //关联单据类型列表
         $this->view->assign('orderType', $this->model->orderType());
         //任务级别
@@ -287,7 +288,7 @@ class InfoSynergyTask extends Backend
         //任务分类列表
         $this->view->assign('categoryList', (new InfoSynergyTaskCategory())->getIssueList(1, 0));
         //订单平台列表
-        $this->view->assign("orderPlatformList", (new ManagtoPlatform())->getOrderPlatformList());
+        $this->view->assign("orderPlatformList", (new MagentoPlatform())->getOrderPlatformList());
         //关联单据类型列表
         $this->view->assign('orderType', $this->model->orderType());
         //任务级别
@@ -409,7 +410,7 @@ class InfoSynergyTask extends Backend
         $this->view->assign('row', $result);
         $this->view->assign('categoryList', (new InfoSynergyTaskCategory())->getIssueList(1, 0));
         //订单平台列表
-        $this->view->assign("orderPlatformList", (new ManagtoPlatform())->getOrderPlatformList());
+        $this->view->assign("orderPlatformList", (new MagentoPlatform())->getOrderPlatformList());
         //关联单据类型列表
         $this->view->assign('orderType', $this->model->orderType());
         //任务级别

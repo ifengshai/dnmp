@@ -42,7 +42,8 @@ class SaleAfterIssue extends Model
     public function getIssueList($level,$pid=0)
     {
         if($level!=0){
-            $result =$this->where('level','=',$level)->field('id,pid,name,level')->select();
+            $where['is_del'] = 1;
+            $result =$this->where('level','=',$level)->where($where)->field('id,pid,name,level')->select();
             if(!$result){
                 return false;
             }
@@ -57,7 +58,8 @@ class SaleAfterIssue extends Model
             }
             return $arr;
         }else{
-            $rs = $this->where('pid','=',$pid)->field('id,pid,name,level')->select();
+            $where['is_del'] = 1;
+            $rs = $this->where('pid','=',$pid)->where($where)->field('id,pid,name,level')->select();
             if(!$rs){
                 return false;
             }

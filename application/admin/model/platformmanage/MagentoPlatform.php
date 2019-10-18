@@ -5,7 +5,7 @@ namespace app\admin\model\platformManage;
 use think\Model;
 
 
-class ManagtoPlatform extends Model
+class MagentoPlatform extends Model
 {
 
     
@@ -13,7 +13,7 @@ class ManagtoPlatform extends Model
     //数据库
     protected $connection = 'database';
     // 表名
-    protected $name = 'managto_platform';
+    protected $name = 'magento_platform';
     
     // 自动写入时间戳字段
     protected $autoWriteTimestamp = false;
@@ -61,12 +61,12 @@ class ManagtoPlatform extends Model
     /**
      * 求出所有的对接平台
      */
-    public function managtoPlatformList()
+    public function magentoPlatformList()
     {
       $where['status'] = 1;
       $where['is_del'] = 1;
       $where['is_upload_item'] = 1;
-      $result = $this->where($where)->field('id,managto_account,managto_key,name')->select();
+      $result = $this->where($where)->field('id,magento_account,magento_key,name')->select();
       return $result ? $result : false;
     }
 
@@ -74,7 +74,7 @@ class ManagtoPlatform extends Model
     /**
      * 获取对应平台id
      */
-    public function getManagtoPlatform($name = '')
+    public function getMagentoPlatform($name = '')
     {
       $where['status'] = 1;
       $where['is_del'] = 1;

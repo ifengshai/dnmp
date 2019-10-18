@@ -120,7 +120,7 @@ class ItemAttribute extends Model
 //    }
     public function getGlassesType()
     {
-        return [0=>'请选择',1=>'progressive', 2 =>'sunglasses', 3=>'readers'];
+        return [0=>'请选择',1=>'progressive', 2 =>'sunglasses', 3=>'reader'];
     }
     /***
      * 获取所有线下采购产地
