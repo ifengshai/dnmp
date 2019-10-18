@@ -12,6 +12,7 @@ use think\Hook;
 use fast\Http;
 use fast\Alibaba;
 use app\admin\model\NewProduct;
+use app\admin\model\purchase\Supplier;
 use app\admin\model\purchase\SupplierSku;
 use think\Cache;
 
@@ -732,10 +733,11 @@ class PurchaseOrder extends Backend
         /**
          * @todo 后面添加采集时间段
          */
-        $params = [
-            'createStartTime' => date('YmdHis', strtotime("-30 day")) . '000+0800',
-            'createEndTime' => date('YmdHis') . '000+0800',
-        ];
+        // $params = [
+        //     'createStartTime' => date('YmdHis', strtotime("-30 day")) . '000+0800',
+        //     'createEndTime' => date('YmdHis') . '000+0800',
+        // ];
+        $params = [];
         //根据不同的状态取订单数据
         $success_data = Alibaba::getOrderList(1, $params);
 
@@ -790,6 +792,13 @@ class PurchaseOrder extends Backend
                     }
 
                     $list['online_status'] = $v->baseInfo->status;
+
+                    //匹配供应商
+                    if (!$res['supplier_id']) {
+                        $supplier = new Supplier;
+                        $list['supplier_id'] = $supplier->getSupplierId($v->baseInfo->sellerContact->companyName);
+                    }
+                    
                     //更新采购单状态
                     $result = $res->save($list);
                 } else {
@@ -832,7 +841,7 @@ class PurchaseOrder extends Backend
                     } else {
                         $list['purchase_status'] = 7; //已收货
                     }
-
+                    //收货地址
                     $list['delivery_address'] = $v->baseInfo->receiverInfo->toArea;
                     $list['online_status'] = $v->baseInfo->status;
                     $receivingTime = @$v->baseInfo->receivingTime;
@@ -842,6 +851,11 @@ class PurchaseOrder extends Backend
                         $list['receiving_time'] = date('Y-m-d H:i:s', strtotime($matches[0]));
                     }
                     $list['purchase_type'] = 2;
+
+                    //匹配供应商
+                    $supplier = new Supplier;
+                    $list['supplier_id'] = $supplier->getSupplierId($v->baseInfo->sellerContact->companyName);
+
                     //添加采购单
                     $result = $this->model->allowField(true)->create($list);
 
@@ -853,8 +867,10 @@ class PurchaseOrder extends Backend
                         $params[$key]['product_name'] = $val->name;
                         $params[$key]['supplier_sku'] = @$val->cargoNumber;
                         $params[$key]['purchase_num'] = $val->quantity;
-                        $params[$key]['purchase_price'] = $val->price;
+                        $params[$key]['purchase_price'] = $val->itemAmount / $val->quantity;
                         $params[$key]['purchase_total'] = $val->itemAmount;
+                        $params[$key]['price'] = $val->price;
+                        $params[$key]['discount_money'] = $val->entryDiscount/100;
                         $params[$key]['skuid'] = $val->skuID;
 
                         //匹配SKU
