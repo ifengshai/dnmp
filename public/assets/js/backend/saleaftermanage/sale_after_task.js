@@ -16,6 +16,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui'], function ($, 
                 }
             });
             var table = $("#table");
+            $(".btn-add").data("area", ["100%", "100%"]);
+            table.on('post-body.bs.table', function (e, settings, json, xhr) {
+                $(".btn-editone").data("area", ["100%", "100%"]);
+            });
             $(document).on('click',".problem_desc_info",function(){
                 var problem_desc = $(this).attr('name');
                 Layer.alert(problem_desc);
@@ -53,7 +57,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui'], function ($, 
                         //         name:'detail',
                         //     }]
                         // },
-                        {field: 'operate', width: "120px", title: __('操作'), table: table,events: Table.api.events.operate,formatter: Table.api.formatter.operate,
+                        {
+                            field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, extend: 'data-area = \'["100%","100%"]\'',
                             buttons: [
                                 {
                                     name: 'detail',
@@ -71,17 +76,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui'], function ($, 
                                         return true;
                                     }
                                 },
-                            ]
+                            ],formatter: Table.api.formatter.operate
                         },
-                        // {field:'Item_info',title:__('Item_info')},
-                        // {field:'Customer_name',title:__('Customer_name')},
-                        // {field:'Customer_email',title:__('Customer_email')},
-                        // {field:'Item_name',title:__('Item_name')},
-                        // {field:'Item_sku',title:__('Item_sku')},
-                        // {field:'Item_qty_ordered',title:__('Item_qty_ordered')},
-                        // {field:'Recipe_type',title:__('Recipe_type')},
-                        // {field:'Lens_type',title:__('Lens_type')},
-                        // {field:'Coating_film_type',title:__('Coating_film_type')},
                     ]
                 ]
             });
@@ -133,19 +129,22 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui'], function ($, 
                 Layer.confirm(
                     __('确定要处理完成吗?'),
                     {icon: 3, title: __('Warning'), offset: 0, shadeClose: true},
-                    function (index) {
-                        Layer.close(index);
-                        Backend.api.ajax({
-                            url:'saleaftermanage/sale_after_task/completeAjax',
-                            data:{idss:idss},
-                        }, function(data, ret){
-                            location.href='/admin/saleaftermanage/sale_after_task';
-                            //$(".btn-refresh").trigger("click");
-                            //table.bootstrapTable('refresh');
-                        }, function(data, ret){
-                            console.log('失败的回调');
-                        });
+                    // function (index) {
+                    //     Layer.close(index);
+                    //     Backend.api.ajax({
+                    //         url:'saleaftermanage/sale_after_task/completeAjax',
+                    //         data:{idss:idss},
+                    //     }, function(data, ret){
+                    //         Fast.api.redirect('/admin/saleaftermanage/sale_after_task?ref=addtabs');
+                    //     }, function(data, ret){
+                    //         console.log('失败的回调');
+                    //     });
 
+                    // }
+                    function (){
+                        location.href='/admin/saleaftermanage/sale_after_task/completeAjax?idss='+idss;
+                    },function(){
+                        return false;
                     }
                 );
 

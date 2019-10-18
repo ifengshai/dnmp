@@ -270,14 +270,15 @@ class ItemCategory extends Backend
             if (is_array($adminIds)) {
                 $this->model->where($this->dataLimitField, 'in', $adminIds);
             }
-            $list = $this->model->where($pk, 'in', $ids)->select();
+            //$list = $this->model->where($pk, 'in', $ids)->select();
 
             $count = 0;
             Db::startTrans();
             try {
-                foreach ($list as $k => $v) {
-                    $count += $v->delete();
-                }
+                // foreach ($list as $k => $v) {
+                //     $count += $v->delete();
+                // }
+                $count = $this->model->where($pk,'in',$ids)->update(['is_del'=>2]);
                 Db::commit();
             } catch (PDOException $e) {
                 Db::rollback();

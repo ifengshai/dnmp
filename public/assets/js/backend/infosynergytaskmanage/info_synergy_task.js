@@ -507,6 +507,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                  return false;
                              });
                          }
+                    }else{
+                        $(".item_info").empty();
                     }
                 });
 

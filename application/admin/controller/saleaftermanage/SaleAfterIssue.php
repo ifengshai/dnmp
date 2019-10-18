@@ -83,7 +83,7 @@ class SaleAfterIssue extends Backend
             if (is_array($adminIds)) {
                 $this->model->where($this->dataLimitField, 'in', $adminIds);
             }
-            $list = $this->model->where($pk, 'in', $ids)->select();
+            //$list = $this->model->where($pk, 'in', $ids)->select();
             $count = 0;
             Db::startTrans();
             try {

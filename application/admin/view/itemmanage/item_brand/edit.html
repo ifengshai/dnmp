@@ -15,7 +15,7 @@
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">{:__('Status')}:</label>
         <div class="col-xs-12 col-sm-8">
-            <select  id="c-is-putaway" data-rule="required" class="form-control selectpicker" name="row[is_putaway]">
+            <select  id="c-is-putaway" data-rule="required" class="form-control selectpicker" name="row[status]">
                 {foreach name="PutAway" item="vo"}
                 <option value="{$key}" {eq name="key" value="$row.status"}selected{/eq}>{$vo}</option>
                 {/foreach}
