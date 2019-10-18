@@ -168,7 +168,7 @@ class SaleAfterTask extends Backend
             $this->error(__('No Results were found'));
         }
         if($row['task_status'] ==2){ //如果任务已经处理完成
-            $this->error('该任务已经处理完成，无需再次处理');
+            $this->error('该任务已经处理完成，无需再次处理','admin/saleaftermanage/sale_after_task','',0);
         }
         $adminIds = $this->getDataLimitAdminIds();
         if (is_array($adminIds)) {
@@ -320,8 +320,8 @@ class SaleAfterTask extends Backend
      */
     public function completeAjax(Request $request)
     {
-        if($this->request->isAjax()){
-            $idss = $request->post('idss');
+        if($this->request->isGet()){
+            $idss = $request->param('idss');
             if(!$idss){
               return   $this->$this->error('处理失败，请重新尝试');
             }
@@ -330,12 +330,13 @@ class SaleAfterTask extends Backend
             $data['handle_time'] = date("Y-m-d H:i:s",time());
             $result = $this->model->where('id',$idss)->update($data);
             if($result !== false){
-              return  $this->success('ok');
+              return  $this->success('处理成功','/admin/saleaftermanage/sale_after_task');
             }
         }else{
             return $this->error('请求失败,请勿请求');
         }
     }
+
     /***
      * 异步更新任务状态(多个)
      */
