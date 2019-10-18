@@ -48,8 +48,9 @@ class InfoSynergyTask extends Backend
     {
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
-            //            dump($params);
-            //            //exit;
+            if(!isset($params['synergy_task_id'])){
+                $this->error(__('Please select the task category'));
+            }
             $item = isset($params['item']) ? $params['item']  : '';
             $lens = isset($params['lens']) ? $params['lens']  : '';
             if ($params) {
