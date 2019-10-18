@@ -53,7 +53,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui'], function ($, 
                         //         name:'detail',
                         //     }]
                         // },
-                        {field: 'operate', width: "120px", title: __('操作'), table: table,formatter: Table.api.formatter.operate,
+                        {field: 'operate', width: "120px", title: __('操作'), table: table,events: Table.api.events.operate,formatter: Table.api.formatter.operate,
                             buttons: [
                                 {
                                     name: 'detail',
