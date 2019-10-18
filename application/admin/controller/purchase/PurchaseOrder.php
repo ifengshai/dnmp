@@ -120,7 +120,7 @@ class PurchaseOrder extends Backend
                         $total = $this->request->post("purchase_total/a");
 
                         $data = [];
-                        foreach ($sku as $k => $v) {
+                        foreach (array_filter($sku) as $k => $v) {
                             $data[$k]['sku'] = $v;
                             $data[$k]['supplier_sku'] = $supplier_sku[$k];
                             $data[$k]['product_name'] = $product_name[$k];
@@ -281,7 +281,7 @@ class PurchaseOrder extends Backend
                         $item_id = $this->request->post("item_id/a");
 
                         $data = [];
-                        foreach ($sku as $k => $v) {
+                        foreach (array_filter($sku) as $k => $v) {
                             $data[$k]['sku'] = $v;
                             $data[$k]['supplier_sku'] = $supplier_sku[$k];
                             $data[$k]['product_name'] = $product_name[$k];

@@ -114,7 +114,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                             return false;
                                         }
                                     },
-                                }, 
+                                },
                                 {
                                     name: 'detail',
                                     text: '详情',
@@ -270,6 +270,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             $(document).on('click', '.btn-add', function () {
                 var content = $('#table-content table tbody').html();
                 $('.caigou table tbody').append(content);
+
+                Controller.api.bindevent();
             })
 
             $(document).on('click', '.btn-del', function () {
@@ -288,61 +290,25 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     $('.supplier_address').val(data.address);
                 });
             })
-            
+
 
             if ($('.supplier').val()) {
                 $('.supplier').change();
             }
 
-            //计算金额
-            $('.purchase_num').blur(function () {
-                var purchase_num = $(this).val();
-                var purchase_price = $(this).parent().next().find('.purchase_price').val();
-                if (purchase_num * 1 > 0 && purchase_price * 1 > 0) {
-                    $(this).parent().next().next().find('.goods_total').val(purchase_num * 1 * purchase_price);
-                }
-                var total = 0;
-                $('.goods_total').each(function () {
-                    var purchase_total = $(this).val();
-                    total += purchase_total * 1;
-                })
-                //商品总价
-                $('.total').val(total);
-                //运费
-                var freight = $('.freight').val();
-                //总计
-                $('.purchase_total').val(total + freight * 1);
-            })
-
-            $('.purchase_price').blur(function () {
-                var purchase_num = $(this).parent().prev().find('.purchase_num').val();
-                var purchase_price = $(this).val();
-                if (purchase_num * 1 > 0 && purchase_price * 1 > 0) {
-                    $(this).parent().next().find('.goods_total').val(purchase_num * 1 * purchase_price);
-                }
-                var total = 0;
-                $('.goods_total').each(function () {
-                    var purchase_total = $(this).val();
-                    total += purchase_total * 1;
-                })
-                //商品总价
-                $('.total').val(total);
-                //运费
-                var freight = $('.freight').val();
-                //总计
-                $('.purchase_total').val(total + freight * 1);
-            })
-
-            //运费
-            $('.freight').blur(function () {
-                var total = $('.total').val();
-                var freight = $(this).val();
-                //总计
-                $('.purchase_total').val(total * 1 + freight * 1);
-            })
         },
         edit: function () {
             Controller.api.bindevent();
+
+            $(document).on('click', '.btn-add', function () {
+                var content = $('#table-content table tbody').html();
+                $('.caigou table tbody').append(content);
+
+
+                Controller.api.bindevent();
+
+            })
+
 
             //判断合同是否有默认值
             var contract_id = $('.contract_id').val();
@@ -365,62 +331,22 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
 
             //删除商品数据
             $(document).on('click', '.btn-del', function () {
-                $(this).parent().parent().remove();
+                var _this = $(this);
                 var id = $(this).parent().parent().find('.item_id').val();
                 if (id) {
-                    Backend.api.ajax({
-                        url: '/admin/purchase/purchase_order/deleteItem',
-                        data: { id: id }
+                    Layer.confirm(__('确定删除此数据吗?'), function () {
+                        _this.parent().parent().remove();
+                        Backend.api.ajax({
+                            url: '/admin/purchase/purchase_order/deleteItem',
+                            data: { id: id }
+                        }, function () {
+                            Layer.closeAll();
+                        });
                     });
                 }
             })
 
-            //计算金额
-            $('.purchase_num').blur(function () {
-                var purchase_num = $(this).val();
-                var purchase_price = $(this).parent().next().find('.purchase_price').val();
-                if (purchase_num * 1 > 0 && purchase_price * 1 > 0) {
-                    $(this).parent().next().next().find('.goods_total').val(purchase_num * 1 * purchase_price);
-                }
-                var total = 0;
-                $('.goods_total').each(function () {
-                    var purchase_total = $(this).val();
-                    total += purchase_total * 1;
-                })
-                //商品总价
-                $('.total').val(total);
-                //运费
-                var freight = $('.freight').val();
-                //总计
-                $('.purchase_total').val(total + freight * 1);
-            })
 
-            $('.purchase_price').blur(function () {
-                var purchase_num = $(this).parent().prev().find('.purchase_num').val();
-                var purchase_price = $(this).val();
-                if (purchase_num * 1 > 0 && purchase_price * 1 > 0) {
-                    $(this).parent().next().find('.goods_total').val(purchase_num * 1 * purchase_price);
-                }
-                var total = 0;
-                $('.goods_total').each(function () {
-                    var purchase_total = $(this).val();
-                    total += purchase_total * 1;
-                })
-                //商品总价
-                $('.total').val(total);
-                //运费
-                var freight = $('.freight').val();
-                //总计
-                $('.purchase_total').val(total + freight * 1);
-            })
-
-            //运费
-            $('.freight').blur(function () {
-                var total = $('.total').val();
-                var freight = $(this).val();
-                //总计
-                $('.purchase_total').val(total * 1 + freight * 1);
-            })
 
         },
         logistics: function () {
@@ -529,6 +455,54 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
 
                 })
 
+
+                //计算金额
+                $('.purchase_num').blur(function () {
+
+                    var purchase_num = $(this).val();
+                    var purchase_price = $(this).parent().next().find('.purchase_price').val();
+                    if (purchase_num * 1 > 0 && purchase_price * 1 > 0) {
+                        $(this).parent().next().next().find('.goods_total').val(purchase_num * 1 * purchase_price);
+                    }
+                    var total = 0;
+                    $('.goods_total').each(function () {
+                        var purchase_total = $(this).val();
+                        total += purchase_total * 1;
+                    })
+                    //商品总价
+                    $('.total').val(total);
+                    //运费
+                    var freight = $('.freight').val();
+                    //总计
+                    $('.purchase_total').val(total + freight * 1);
+                })
+
+                $('.purchase_price').blur(function () {
+                    var purchase_num = $(this).parent().prev().find('.purchase_num').val();
+                    var purchase_price = $(this).val();
+                    if (purchase_num * 1 > 0 && purchase_price * 1 > 0) {
+                        $(this).parent().next().find('.goods_total').val(purchase_num * 1 * purchase_price);
+                    }
+                    var total = 0;
+                    $('.goods_total').each(function () {
+                        var purchase_total = $(this).val();
+                        total += purchase_total * 1;
+                    })
+                    //商品总价
+                    $('.total').val(total);
+                    //运费
+                    var freight = $('.freight').val();
+                    //总计
+                    $('.purchase_total').val(total + freight * 1);
+                })
+
+                //运费
+                $('.freight').blur(function () {
+                    var total = $('.total').val();
+                    var freight = $(this).val();
+                    //总计
+                    $('.purchase_total').val(total * 1 + freight * 1);
+                })
             }
         }
     };
