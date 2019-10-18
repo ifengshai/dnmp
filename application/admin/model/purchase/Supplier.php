@@ -12,7 +12,7 @@ class Supplier extends Model
     protected $connection = 'database';
     // 表名
     protected $name = 'supplier';
-    
+
     // 自动写入时间戳字段
     protected $autoWriteTimestamp = 'int';
 
@@ -22,29 +22,31 @@ class Supplier extends Model
     protected $deleteTime = false;
 
     // 追加属性
-    protected $append = [
+    protected $append = [];
 
-    ];
-    
 
     /**
      * 获取供应商
      */
-    public function getSupplierData() 
+    public function getSupplierData()
     {
         $data = $this->field('id,supplier_name')->select();
         $arr = [];
-        foreach($data as $v) {
+        foreach ($data as $v) {
             $arr[$v['id']] = $v['supplier_name'];
         }
         return $arr;
     }
-    
 
-
-
-
-
-
-
+    /**
+     * 查询供应商id
+     */
+    public function getSupplierId($name = '')
+    {
+        if ($name) {
+            $map['supplier_name'] = ['like', '%' . $name . '%'];
+            return $this->where($map)->value('id');
+        }
+        return false;
+    }
 }
