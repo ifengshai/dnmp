@@ -51,6 +51,11 @@ class InfoSynergyTask extends Backend
             if(!isset($params['synergy_task_id'])){
                 $this->error(__('Please select the task category'));
             }
+            if(in_array("",$params['rep_id'])){
+                $this->error(__('Please select the contractor'));
+            }
+            // var_dump($params['rep_id']);
+             //exit;
             $item = isset($params['item']) ? $params['item']  : '';
             $lens = isset($params['lens']) ? $params['lens']  : '';
             if ($params) {
