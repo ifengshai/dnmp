@@ -737,12 +737,11 @@ class PurchaseOrder extends Backend
             'createStartTime' => date('YmdHis', strtotime("-30 day")) . '000+0800',
             'createEndTime' => date('YmdHis') . '000+0800',
         ];
-        $params = [];
         //根据不同的状态取订单数据
         $success_data = Alibaba::getOrderList(1, $params);
 
         set_time_limit(0);
-        $data = cache('Crontab_getAlibabaPurchaseOrder_' . date('YmdH'));
+        $data = cache('Crontab_getAlibabaPurchaseOrder_' . date('YmdH') . md5(serialize($params)));
         if (!$data) {
             //根据不同的状态取订单数据
             $success_data = Alibaba::getOrderList(1, $params);
@@ -759,9 +758,9 @@ class PurchaseOrder extends Backend
             }
 
             //设置缓存
-            cache('Crontab_getAlibabaPurchaseOrder_' . date('YmdH'), $data, 3600);
+            cache('Crontab_getAlibabaPurchaseOrder_' . date('YmdH') . md5(serialize($params)), $data, 3600);
         }
-
+       
         foreach ($data as $key => $val) {
             if (!$val) {
                 continue;
@@ -798,7 +797,7 @@ class PurchaseOrder extends Backend
                         $supplier = new Supplier;
                         $list['supplier_id'] = $supplier->getSupplierId($v->baseInfo->sellerContact->companyName);
                     }
-                    
+
                     //更新采购单状态
                     $result = $res->save($list);
                 } else {
@@ -870,7 +869,7 @@ class PurchaseOrder extends Backend
                         $params[$key]['purchase_price'] = $val->itemAmount / $val->quantity;
                         $params[$key]['purchase_total'] = $val->itemAmount;
                         $params[$key]['price'] = $val->price;
-                        $params[$key]['discount_money'] = $val->entryDiscount/100;
+                        $params[$key]['discount_money'] = $val->entryDiscount / 100;
                         $params[$key]['skuid'] = $val->skuID;
 
                         //匹配SKU
