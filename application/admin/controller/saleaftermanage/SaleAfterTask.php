@@ -2,15 +2,19 @@
 
 namespace app\admin\controller\saleaftermanage;
 
+use think\Db;
+use fast\Tree;
+use app\admin\model\Admin;
+use think\Request;
 use app\common\controller\Backend;
 use app\admin\model\AuthGroup;
 use app\admin\model\saleaftermanage\SaleAfterIssue;
 use app\admin\model\platformmanage\MagentoPlatform;
 use app\admin\model\saleaftermanage\SaleAfterTaskRemark;
-use app\admin\model\Admin;
-use think\Request;
-use think\Db;
-use fast\Tree;
+use Util\NihaoPrescriptionDetailHelper;
+use Util\ZeeloolPrescriptionDetailHelper;
+use Util\VooguemePrescriptionDetailHelper;
+
 
 /**
  * 
@@ -235,32 +239,59 @@ class SaleAfterTask extends Backend
      */
 
     /***
-     * 异步请求获取订单所在平台和订单号处理
+     * 异步请求获取订单所在平台和订单号处理(原先)
      * @param
      */
-    public function ajax( Request $request)
-    {
-        if($this->request->isAjax()){
-            $ordertype = $request->post('ordertype');
-            $order_number = $request->post('order_number');
-            if($ordertype<1 || $ordertype>5){ //不在平台之内
-               return  $this->error('选择平台错误，请重新选择','','error',0);
-            }
-            if(!$order_number){
-               return  $this->error('订单号不存在，请重新选择','','error',0);
-            }
-            $result = $this->model->getOrderInfo($ordertype,$order_number);
-            if(!$result){
-                return $this->error('找不到这个订单，请重新尝试','','error',0);
-            }
-            return $this->success('','',$result,0);
-        }else{
-            return $this->error('404 Not Found');
-        }
+    // public function ajax( Request $request)
+    // {
+    //     if($this->request->isAjax()){
+    //         $ordertype = $request->post('ordertype');
+    //         $order_number = $request->post('order_number');
+    //         if($ordertype<1 || $ordertype>5){ //不在平台之内
+    //            return  $this->error('选择平台错误，请重新选择','','error',0);
+    //         }
+    //         if(!$order_number){
+    //            return  $this->error('订单号不存在，请重新选择','','error',0);
+    //         }
+    //         $result = $this->model->getOrderInfo($ordertype,$order_number);
+    //         if(!$result){
+    //             return $this->error('找不到这个订单，请重新尝试','','error',0);
+    //         }
+    //         return $this->success('','',$result,0);
+    //     }else{
+    //         return $this->error('404 Not Found');
+    //     }
 
 
-    }
-
+    // }
+    /***
+     * 修改之后的异步请求获取订单所在平台和订单号处理
+     */
+        public function ajax(Request $request){
+            if($this->request->isAjax()){
+                $ordertype = $request->post('ordertype');
+                $order_number = $request->post('order_number');
+                if($ordertype<1 || $ordertype>5){ //不在平台之内
+                    return $this->error('选择平台错误,请重新选择','','error',0);
+                }
+                if(!$order_number){
+                    return  $this->error('订单号不存在，请重新选择','','error',0);
+                }
+                if ($ordertype == 1) {
+                    $result = ZeeloolPrescriptionDetailHelper::get_one_by_increment_id($order_number);
+                } elseif ($ordertype == 2) {
+                    $result = VooguemePrescriptionDetailHelper::get_one_by_increment_id($order_number);
+                } elseif ($ordertype == 3) {
+                    $result = NihaoPrescriptionDetailHelper::get_one_by_increment_id($order_number);
+                }
+                if(!$result){
+                    return $this->error('找不到这个订单,请重新尝试','','error',0);
+                }
+                    return $this->success('','',$result,0);
+            }else{
+                return $this->error('404 Not Found');
+            }
+        }    
     /***
      * 异步获取订单平台
      * type 为 2 没有选择平台

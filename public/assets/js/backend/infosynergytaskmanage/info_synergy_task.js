@@ -320,7 +320,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                  //alert(ret);
                                  //清除html商品数据
                                   $(".item_info").empty();
-                                 var item = ret.data.item;
+                                 var item = ret.data;
                                  $('#customer_info').after(function(){
                                      var Str = '';
                                      Str+=  '<div class="caigou item_info" style="margin-top:15px;margin-left:10%;">'+
@@ -342,7 +342,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                          var m = j+1;
                                          Str +='<tr>';
                                          Str +='<td><input id="c-original_sku" class="form-control" name="row[item]['+m+'][original_sku]" type="text" value="'+newItem.sku+'"></td>';
-                                         Str +='<td><input id="c-original_number" class="form-control" name="row[item]['+m+'][original_number]" type="text" value="'+newItem.qty_ordered+'"></td>';
+                                         Str +='<td><input id="c-original_number" class="form-control" name="row[item]['+m+'][original_number]" type="text" value="'+Math.round(newItem.qty_ordered)+'"></td>';
                                          Str +='<td><input id="c-change_sku" class="form-control" name="row[item]['+m+'][change_sku]" type="text"></td>';
                                          Str +='<td><input id="c-change_number" class="form-control" name="row[item]['+m+'][change_number]" type="text"></td>';
                                          Str +='<td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>删除</a></td>';
@@ -376,7 +376,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                  data:{ordertype:orderPlatform,order_number:orderNumber}
                              }, function(data, ret){
                                  $(".item_info").empty();
-                                 var item = ret.data.item;
+                                 var item = ret.data;
 
                                      //console.log(newItem.name);
                                      $('#customer_info').after(function(){
@@ -413,7 +413,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                                  '<div class="panel-title">' +
                                                  '<label class="control-label col-xs-12 col-sm-3">数量:</label>' +
                                                  '<div class="col-xs-12 col-sm-8">' +
-                                                 '<input  id="c-item_qty_ordered"  class="form-control"  type="text" name="row[lens][original_number][]" value="' + newItem.qty_ordered + '">' +
+                                                 '<input  id="c-item_qty_ordered"  class="form-control"  type="text" name="row[lens][original_number][]" value="' + Math.round(newItem.qty_ordered) + '">' +
                                                  '</div>' +
                                                  '</div>' +
                                                  '</div>' +
@@ -421,7 +421,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                                  '<div class="panel-title">' +
                                                  '<label class="control-label col-xs-12 col-sm-3">处方类型:</label>' +
                                                  '<div class="col-xs-12 col-sm-8">' +
-                                                 '<input  id="c-recipe_type"  class="form-control" type="text" name="row[lens][recipe_type][]" value="' + newItem.prescription_type + '">' +
+                                                 '<input  id="c-recipe_type"  class="form-control" type="text" name="row[lens][recipe_type][]" value="' + (newItem.prescription_type !=undefined ? newItem.prescription_type : "") + '">' +
                                                  '</div>' +
                                                  '</div>' +
                                                  '</div>' +
@@ -429,7 +429,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                                  '<div class="panel-title">' +
                                                  '<label class="control-label col-xs-12 col-sm-3">镜片类型:</label>' +
                                                  '<div class="col-xs-12 col-sm-8">' +
-                                                 '<input  id="c-lens_type"  class="form-control"  type="text" name="row[lens][lens_type][]" value="' + newItem.index_type + '">' +
+                                                 '<input  id="c-lens_type"  class="form-control"  type="text" name="row[lens][lens_type][]" value="' + (newItem.index_type !=undefined ? newItem.index_type : "")+ '">' +
                                                  '</div>' +
                                                  '</div>' +
                                                  '</div>' +
@@ -437,7 +437,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                                  '<div class="panel-title">' +
                                                  '<label class="control-label col-xs-12 col-sm-3">镀膜类型:</label>' +
                                                  '<div class="col-xs-12 col-sm-8">' +
-                                                 '<input  id="c-coating_film_type"  class="form-control"  type="text" name="row[lens][coating_type][]" value="' + newItem.coatiing_name + '">' +
+                                                 '<input  id="c-coating_film_type"  class="form-control"  type="text" name="row[lens][coating_type][]" value="' + (newItem.coatiing_name!=undefined ? newItem.coatiing_name : "") + '">' +
                                                  '</div>' +
                                                  '</div>' +
                                                  '</div>' +
@@ -465,27 +465,27 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                                  '</tr>' +
                                                  '<tr>' +
                                                  '<td style="text-align: center">Right(OD)</td>' +
-                                                 '<td><input id="c-right_SPH" class="form-control"  type="text" name="row[lens][od_sph][]" value="' + newItem.od_sph + '"></td>' +
-                                                 '<td><input id="c-right_CYL" class="form-control"  type="text" name="row[lens][od_cyl][]" value="' + newItem.od_cyl + '"></td>' +
-                                                 '<td><input id="c-right_AXI" class="form-control"  type="text" name="row[lens][od_axis][]" value="' + newItem.od_axis + '"></td>' +
-                                                 '<td><input id="c-right_ADD" class="form-control"  type="text" name="row[lens][od_add][]" value="' + newItem.od_add + '"></td>' +
-                                                 '<td><input id="c-right_PD" class="form-control"  type="text"  name="row[lens][pd_r][]" value="' + newItem.pd_r + '"></td>' +
-                                                 '<td><input id="c-right_Prism_Horizontal" class="form-control" name="row[lens][od_pv][]" type="text" value="' + newItem.od_pv + '"></td>' +
-                                                 '<td><input id="c-right_" class="form-control"  type="text" name="row[lens][od_bd][]" value="' + newItem.od_bd + '"></td>' +
-                                                 '<td><input id="c-purchase_remark" class="form-control"  type="text" name="row[lens][od_pv_r][]" value="' + newItem.od_pv_r + '"></td>' +
-                                                 '<td><input id="c-purchase_remark" class="form-control"  type="text" name="row[lens][od_bd_r][]" value="' + newItem.od_bd_r + '"></td>' +
+                                                 '<td><input id="c-right_SPH" class="form-control"  type="text" name="row[lens][od_sph][]" value="' + (newItem.od_sph  != undefined ? newItem.od_sph : "") + '"></td>' +
+                                                 '<td><input id="c-right_CYL" class="form-control"  type="text" name="row[lens][od_cyl][]" value="' + (newItem.od_cyl  != undefined ? newItem.od_cyl : "") + '"></td>' +
+                                                 '<td><input id="c-right_AXI" class="form-control"  type="text" name="row[lens][od_axis][]" value="'+ (newItem.od_axis != undefined ? newItem.od_axis : "") + '"></td>' +
+                                                 '<td><input id="c-right_ADD" class="form-control"  type="text" name="row[lens][od_add][]" value="' + (newItem.od_add  != undefined ? newItem.od_add : "") + '"></td>' +
+                                                 '<td><input id="c-right_PD" class="form-control"  type="text"  name="row[lens][pd_r][]" value="'   + (newItem.pd_r    != undefined ? newItem.pd_r: "") + '"></td>' +
+                                                 '<td><input id="c-right_Prism_Horizontal" class="form-control" name="row[lens][od_pv][]" type="text" value="' + (newItem.od_pv != undefined ? newItem.od_pv: " ") + '"></td>' +
+                                                 '<td><input id="c-right_" class="form-control"  type="text" name="row[lens][od_bd][]" value="' + (newItem.od_bd != undefined ? newItem.od_bd:"")+ '"></td>' +
+                                                 '<td><input id="c-purchase_remark" class="form-control"  type="text" name="row[lens][od_pv_r][]" value="' + (newItem.od_pv_r != undefined ? newItem.od_pv_r:"") + '"></td>' +
+                                                 '<td><input id="c-purchase_remark" class="form-control"  type="text" name="row[lens][od_bd_r][]" value="' + (newItem.od_bd_r != undefined ? newItem.od_bd_r:"") + '"></td>' +
                                                  '</tr>' +
                                                  '<tr>' +
                                                  '<td style="text-align: center">Left(OS)</td>' +
-                                                 '<td><input id="c-left_SPH" class="form-control"  type="text" name="row[lens][os_sph][]" value="' + newItem.os_sph + '"></td>' +
-                                                 '<td><input id="c-left_CYL" class="form-control"  type="text" name="row[lens][os_cyl][]" value="' + newItem.os_cyl + '"></td>' +
-                                                 '<td><input id="c-purchase_remark" class="form-control"  type="text" name="row[lens][os_axis][]" value="' + newItem.os_axis + '"></td>' +
-                                                 '<td><input id="c-purchase_remark" class="form-control"  type="text" name="row[lens][os_add][]" value="' + newItem.os_add + '"></td>' +
-                                                 '<td><input id="c-purchase_remark" class="form-control"  type="text" name="row[lens][pd_l][]" value="' + newItem.pd_l + '"></td>' +
-                                                 '<td><input id="c-purchase_remark" class="form-control"  type="text" name="row[lens][os_pv][]" value="' + newItem.os_pv + '"></td>' +
-                                                 '<td><input id="c-purchase_remark" class="form-control"  type="text" name="row[lens][os_bd][]" value="' + newItem.os_bd + '"></td>' +
-                                                 '<td><input id="c-purchase_remark" class="form-control"  type="text" name="row[lens][os_pv_r][]" value="' + newItem.os_pv_r + '"></td>' +
-                                                 '<td><input id="c-purchase_remark" class="form-control"  type="text" name="row[lens][os_bd_r][]" value="' + newItem.os_bd_r + '"></td>' +
+                                                 '<td><input id="c-left_SPH" class="form-control"  type="text" name="row[lens][os_sph][]" value="' + (newItem.os_sph != undefined ? newItem.os_sph : "")+ '"></td>' +
+                                                 '<td><input id="c-left_CYL" class="form-control"  type="text" name="row[lens][os_cyl][]" value="' + (newItem.os_cyl != undefined ? newItem.os_cyl :"") + '"></td>' +
+                                                 '<td><input id="c-purchase_remark" class="form-control"  type="text" name="row[lens][os_axis][]" value="' + (newItem.os_axis != undefined ? newItem.os_axis :"")+ '"></td>' +
+                                                 '<td><input id="c-purchase_remark" class="form-control"  type="text" name="row[lens][os_add][]" value="' + (newItem.os_add != undefined ? newItem.os_add :"") + '"></td>' +
+                                                 '<td><input id="c-purchase_remark" class="form-control"  type="text" name="row[lens][pd_l][]" value="' + (newItem.pd_l != undefined ? newItem.pd_l :"") + '"></td>' +
+                                                 '<td><input id="c-purchase_remark" class="form-control"  type="text" name="row[lens][os_pv][]" value="' + (newItem.os_pv != undefined ? newItem.os_pv : "") + '"></td>' +
+                                                 '<td><input id="c-purchase_remark" class="form-control"  type="text" name="row[lens][os_bd][]" value="' + (newItem.os_bd != undefined ? newItem.os_bd : "")+ '"></td>' +
+                                                 '<td><input id="c-purchase_remark" class="form-control"  type="text" name="row[lens][os_pv_r][]" value="' + (newItem.os_pv_r!= undefined ? newItem.os_pv_r : "") + '"></td>' +
+                                                 '<td><input id="c-purchase_remark" class="form-control"  type="text" name="row[lens][os_bd_r][]" value="' + (newItem.os_bd_r!= undefined ? newItem.os_bd_r : "") + '"></td>' +
                                                  '</tr>' +
                                                  '</table>' +
                                                  '</div>' +
