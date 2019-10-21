@@ -1417,17 +1417,7 @@ class Item extends Backend
     }
     public function ceshi()
     {
-        $magentoPlatform = Db::name('magento_platform')->where(['id'=>1])->field('id,magento_account,magento_key,magento_url')->find();
-        $client = new \SoapClient($magentoPlatform['magento_url'].'/api/soap/?wsdl');
-        $session = $client->login($magentoPlatform['magento_account'],$magentoPlatform['magento_key']);
-        $listAttributes = $client->call(
-            $session,
-            'product_attribute.options',
-            //'product_attribute.info',
-            'material_b1'
-        );
-        echo '<pre>';
-        var_dump($listAttributes);
+        $str = 'a:1:{s:19:"paypal_ec_create_ba";N;}';
 
     }
     public function ceshi2()

@@ -360,6 +360,16 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
             Form.api.bindevent($("form[role=form]"), function (data) {
                 window.top.location.href = 'admin/saleaftermanage/order_return/search';
             });
+            // //点击重置按钮
+            // $(document).on('click','.btn-default',function(){
+            //     var increment_id = $('#increment_id').val();
+            //     console.log(increment_id)
+            //     $('#increment_id').val('8888888888')
+            //     // $('#customer_email').val("");
+            //     // $('#customer_name').val("");
+            //     // $('#customer_phone').val("");
+            //     // $('#track_number').val(""); 
+            // });
             //模糊匹配订单
             $('#increment_id').autocomplete({
                 source: function (request, response) {
