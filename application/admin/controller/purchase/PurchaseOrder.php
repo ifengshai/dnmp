@@ -733,10 +733,10 @@ class PurchaseOrder extends Backend
         /**
          * @todo 后面添加采集时间段
          */
-        // $params = [
-        //     'createStartTime' => date('YmdHis', strtotime("-30 day")) . '000+0800',
-        //     'createEndTime' => date('YmdHis') . '000+0800',
-        // ];
+        $params = [
+            'createStartTime' => date('YmdHis', strtotime("-30 day")) . '000+0800',
+            'createEndTime' => date('YmdHis') . '000+0800',
+        ];
         $params = [];
         //根据不同的状态取订单数据
         $success_data = Alibaba::getOrderList(1, $params);
