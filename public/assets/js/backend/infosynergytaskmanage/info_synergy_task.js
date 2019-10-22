@@ -114,12 +114,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             $('.panel-heading a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
                 var field = $(this).data("field");
                 var value = $(this).data("value");
-                console.log(field);
-                console.log(value);
                 var options = table.bootstrapTable('getOptions');
                 options.pageNumber = 1;
+                var queryParams = options.queryParams;
                 options.queryParams = function (params) {
-                    var filter = {};
+                    var params = queryParams(params);
+                    var filter = params.filter ? JSON.parse(params.filter) : {};
                     if (value !== '') {
                         filter[field] = value;
                     }

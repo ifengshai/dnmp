@@ -86,8 +86,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui'], function ($, 
                 var value = $(this).data("value");
                 var options = table.bootstrapTable('getOptions');
                 options.pageNumber = 1;
+                var queryParams = options.queryParams;
                 options.queryParams = function (params) {
-                    var filter = {};
+                    var params = queryParams(params);
+                    var filter = params.filter ? JSON.parse(params.filter) : {};
                     if (value !== '') {
                         filter[field] = value;
                     }
