@@ -148,14 +148,65 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
         api: {
             bindevent: function () {
                 Form.api.bindevent($("form[role=form]"));
+                //判断输入的sku的数量和sku编码是否符合需求
+                $(document).on('change','.change_sku',function(){
+                    var change_sku = $(this).val();
+                    var change_number    = $(this).parent().next().children().val();
+                    if(change_sku == ''){
+                        Layer.alert('请填写更改镜架的sku');
+                        return false;
+                    }
+                    if(change_number<1){
+                        Layer.alert('更改的数量不能小于1');
+                        return false;
+                    }
+                    Backend.api.ajax({
+                        url:'itemmanage/item/checkSkuAndQty',
+                        data:{change_sku:change_sku,change_number:change_number}
+                    }, function(data, ret){
+                        $('.btn-success').removeClass('btn-disabled disabled');
+                        return false;
+                    }, function(data, ret){
+                        //失败的回调
+                        Layer.alert(ret.msg);
+                        $('.btn-success').addClass('btn-disabled disabled');
+                        return false;
+                    });
+                });
+                //判断输入的sku的数量和sku编码是否符合需求
+                $(document).on('change','.change_number',function(){
+                    var change_number = $(this).val();
+                    var change_sku    = $(this).parent().prev().children().val();
+                    if(change_sku == ''){
+                        Layer.alert('请填写更改镜架的sku');
+                        return false;
+                    }
+                    if(change_number<1){
+                        Layer.alert('更改的数量不能小于1');
+                        return false;
+                    }
+                    Backend.api.ajax({
+                        url:'itemmanage/item/checkSkuAndQty',
+                        data:{change_sku:change_sku,change_number:change_number}
+                    }, function(data, ret){
+                        // console.log(ret.data);
+                        $('.btn-success').removeClass('btn-disabled disabled');
+                        return false;
+                    }, function(data, ret){
+                        //失败的回调
+                        Layer.alert(ret.msg);
+                        $('.btn-success').addClass('btn-disabled disabled');
+                        return false;
+                    });
+                });
                 //增加一行镜架数据
                 $(document).on('click', '.btn-add', function () {
                     var rows =  document.getElementById("caigou-table-sku").rows.length;
                     var content = '<tr>'+
                         '<td><input id="c-original_sku" class="form-control" name="row[item]['+rows+'][original_sku]" type="text"></td>'+
                         '<td><input id="c-original_number" class="form-control" name="row[item]['+rows+'][original_number]" type="text"></td>'+
-                        '<td><input id="c-change_sku" class="form-control" name="row[item]['+rows+'][change_sku]" type="text"></td>'+
-                        '<td><input id="c-change_number" class="form-control" name="row[item]['+rows+'][change_number]" type="text"></td>'+
+                        '<td><input id="c-change_sku" class="form-control change_sku" name="row[item]['+rows+'][change_sku]" type="text"></td>'+
+                        '<td><input id="c-change_number" class="form-control change_number" name="row[item]['+rows+'][change_number]" type="text"></td>'+
                         '<td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i> 删除</a></td>'+
                         '</tr>';
                     $('.caigou table tbody').append(content);
@@ -352,8 +403,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                          Str +='<tr>';
                                          Str +='<td><input id="c-original_sku" class="form-control" name="row[item]['+m+'][original_sku]" type="text" value="'+newItem.sku+'"></td>';
                                          Str +='<td><input id="c-original_number" class="form-control" name="row[item]['+m+'][original_number]" type="text" value="'+Math.round(newItem.qty_ordered)+'"></td>';
-                                         Str +='<td><input id="c-change_sku" class="form-control" name="row[item]['+m+'][change_sku]" type="text"></td>';
-                                         Str +='<td><input id="c-change_number" class="form-control" name="row[item]['+m+'][change_number]" type="text"></td>';
+                                         Str +='<td><input id="c-change_sku" class="form-control change_sku" name="row[item]['+m+'][change_sku]" type="text"></td>';
+                                         Str +='<td><input id="c-change_number" class="form-control change_number" name="row[item]['+m+'][change_number]" type="text"></td>';
                                          Str +='<td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>删除</a></td>';
                                          Str += '</tr>';
                                      }

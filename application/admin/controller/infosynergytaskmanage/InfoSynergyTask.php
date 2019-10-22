@@ -438,6 +438,8 @@ class InfoSynergyTask extends Backend
              $data['synergy_status'] = 2;
              $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
              if ($res !== false) {
+                 //如果是修改镜架的话更改库存
+                 
                 $this->success('操作成功');
             } else {
                 $this->error('操作失败,请重新尝试');

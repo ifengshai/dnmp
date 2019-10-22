@@ -269,5 +269,16 @@ class Item extends Model
         return $result ? $result : false;
 
     }
+    /***
+     * 查找一个sku是否存在
+     */
+    public function check_sku_qty($sku)
+    {
+        $where['is_open'] = 1;
+        $where['is_del']  = 1;
+        $where['sku']     = $sku;
+        $result = $this->where($where)->field('id,sku,available_stock')->find();
+        return $result;  
+    }
 
 }
