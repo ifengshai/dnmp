@@ -356,6 +356,8 @@ class InfoSynergyTask extends Backend
             return json($result);
         }
         $this->view->assign('getTabList', (new SaleAfterTask())->getTabList());
+        $this->view->assign('nickname',session('admin.nickname'));
+        $this->view->assign('idds',session('admin.id'));
         $this->assignconfig('synergy_order_number', $synergy_order_number);
         return $this->view->fetch();
     }

@@ -287,9 +287,6 @@ class Backend extends Controller
             unset($v);
             $where[] = [implode("|", $searcharr), "LIKE", "%{$search}%"];
         }
-        // echo '<pre>';
-        // var_dump($filter);
-        // exit;
         foreach ($filter as $k => $v) {
             //判断是否我的任务
             if($k == 'create_person'){

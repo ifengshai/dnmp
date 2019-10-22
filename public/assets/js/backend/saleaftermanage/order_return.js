@@ -218,8 +218,15 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                 options.queryParams = function (params) {
                     var params = queryParams(params);
                     var filter = params.filter ? JSON.parse(params.filter) : {};
-                    if (value !== '') {
+                    if(field == 'create_person'){
+                        delete filter.rep_id;
                         filter[field] = value;
+                    }else if(field == 'rep_id'){
+                        delete filter.create_person;
+                        filter[field] = value;
+                    }else{
+                        delete filter.rep_id;
+                        delete filter.create_person;
                     }
                     params.filter = JSON.stringify(filter);
                     return params;
