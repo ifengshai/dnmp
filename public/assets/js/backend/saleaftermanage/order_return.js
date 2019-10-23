@@ -9,7 +9,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                     index_url: 'saleaftermanage/order_return/index' + location.search,
                     add_url: 'saleaftermanage/order_return/add',
                     edit_url: 'saleaftermanage/order_return/edit',
-                    del_url: 'saleaftermanage/order_return/del',
+                    //del_url: 'saleaftermanage/order_return/del',
                     multi_url: 'saleaftermanage/order_return/multi',
                     table: 'order_return',
                 }
@@ -33,6 +33,15 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                 columns: [
                     [
                         { checkbox: true },
+                        {field: '', title: __('序号'), formatter: function (value, row, index) {
+                            var options = table.bootstrapTable('getOptions');
+                            var pageNumber = options.pageNumber;
+                            var pageSize = options.pageSize;
+
+                            //return (pageNumber - 1) * pageSize + 1 + index;
+                            return 1+index;
+                            }, operate: false
+                        },
                         { field: 'id', title: __('Id'), operate: false },
                         { field: 'return_order_number', title: __('Return_order_number') },
                         { field: 'increment_id', title: __('Increment_id') },
@@ -68,78 +77,78 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                                     //     return true;
                                     // }
                                 },
-                                {
-                                    name: 'receive',
-                                    text: '退货收到',
-                                    title: __('退货收到'),
-                                    classname: 'btn btn-xs btn-success btn-ajax',
-                                    icon: 'fa fa-pencil',
-                                    confirm: '确定要收到退货吗',
-                                    url: 'saleaftermanage/order_return/receive',
-                                    success: function (data, ret) {
-                                        Layer.alert(ret.msg);
-                                        $(".btn-refresh").trigger("click");
-                                        //如果需要阻止成功提示，则必须使用return false;
-                                        //return false;
-                                    },
-                                    error: function (data, ret) {
-                                        Layer.alert(ret.msg);
-                                        return false;
-                                    },
-                                    visible: function (row) {
-                                        //返回true时按钮显示,返回false隐藏
-                                        return true;
-                                    }
+                                // {
+                                //     name: 'receive',
+                                //     text: '退货收到',
+                                //     title: __('退货收到'),
+                                //     classname: 'btn btn-xs btn-success btn-ajax',
+                                //     icon: 'fa fa-pencil',
+                                //     confirm: '确定要收到退货吗',
+                                //     url: 'saleaftermanage/order_return/receive',
+                                //     success: function (data, ret) {
+                                //         Layer.alert(ret.msg);
+                                //         $(".btn-refresh").trigger("click");
+                                //         //如果需要阻止成功提示，则必须使用return false;
+                                //         //return false;
+                                //     },
+                                //     error: function (data, ret) {
+                                //         Layer.alert(ret.msg);
+                                //         return false;
+                                //     },
+                                //     visible: function (row) {
+                                //         //返回true时按钮显示,返回false隐藏
+                                //         return true;
+                                //     }
 
-                                },
-                                {
-                                    name: 'quality',
-                                    text: '退货质检',
-                                    title: __('quality'),
-                                    classname: 'btn btn-xs btn-success btn-ajax',
-                                    icon: 'fa fa-pencil',
-                                    confirm: '确定已经质检了吗',
-                                    url: 'saleaftermanage/order_return/quality',
-                                    success: function (data, ret) {
-                                        Layer.alert(ret.msg);
-                                        $(".btn-refresh").trigger("click");
-                                        //如果需要阻止成功提示，则必须使用return false;
-                                        //return false;
-                                    },
-                                    error: function (data, ret) {
-                                        Layer.alert(ret.msg);
-                                        return false;
-                                    },
-                                    visible: function (row) {
-                                        //返回true时按钮显示,返回false隐藏
-                                        return true;
-                                    }
+                                // },
+                                // {
+                                //     name: 'quality',
+                                //     text: '退货质检',
+                                //     title: __('quality'),
+                                //     classname: 'btn btn-xs btn-success btn-ajax',
+                                //     icon: 'fa fa-pencil',
+                                //     confirm: '确定已经质检了吗',
+                                //     url: 'saleaftermanage/order_return/quality',
+                                //     success: function (data, ret) {
+                                //         Layer.alert(ret.msg);
+                                //         $(".btn-refresh").trigger("click");
+                                //         //如果需要阻止成功提示，则必须使用return false;
+                                //         //return false;
+                                //     },
+                                //     error: function (data, ret) {
+                                //         Layer.alert(ret.msg);
+                                //         return false;
+                                //     },
+                                //     visible: function (row) {
+                                //         //返回true时按钮显示,返回false隐藏
+                                //         return true;
+                                //     }
 
-                                },
-                                {
-                                    name: 'syncStock',
-                                    text: '同步库存',
-                                    title: __('syncStock'),
-                                    classname: 'btn-xs btn-success btn-ajax',
-                                    icon: 'fa fa-pencil',
-                                    confirm: '确定要同步库存吗',
-                                    url: 'saleaftermanage/order_return/syncStock',
-                                    success: function (data, ret) {
-                                        Layer.alert(ret.msg);
-                                        $(".btn-refresh").trigger("click");
-                                        //如果需要阻止成功提示，则必须使用return false;
-                                        //return false;
-                                    },
-                                    error: function (data, ret) {
-                                        Layer.alert(ret.msg);
-                                        return false;
-                                    },
-                                    visible: function (row) {
-                                        //返回true时按钮显示,返回false隐藏
-                                        return true;
-                                    }
+                                // },
+                                // {
+                                //     name: 'syncStock',
+                                //     text: '同步库存',
+                                //     title: __('syncStock'),
+                                //     classname: 'btn-xs btn-success btn-ajax',
+                                //     icon: 'fa fa-pencil',
+                                //     confirm: '确定要同步库存吗',
+                                //     url: 'saleaftermanage/order_return/syncStock',
+                                //     success: function (data, ret) {
+                                //         Layer.alert(ret.msg);
+                                //         $(".btn-refresh").trigger("click");
+                                //         //如果需要阻止成功提示，则必须使用return false;
+                                //         //return false;
+                                //     },
+                                //     error: function (data, ret) {
+                                //         Layer.alert(ret.msg);
+                                //         return false;
+                                //     },
+                                //     visible: function (row) {
+                                //         //返回true时按钮显示,返回false隐藏
+                                //         return true;
+                                //     }
 
-                                },
+                                // },
                                 {
                                     name: 'refund',
                                     text: '退款',
@@ -214,10 +223,19 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                 var value = $(this).data("value");
                 var options = table.bootstrapTable('getOptions');
                 options.pageNumber = 1;
+                var queryParams = options.queryParams;
                 options.queryParams = function (params) {
-                    var filter = {};
-                    if (value !== '') {
+                    var params = queryParams(params);
+                    var filter = params.filter ? JSON.parse(params.filter) : {};
+                    if(field == 'create_person'){
+                        delete filter.rep_id;
                         filter[field] = value;
+                    }else if(field == 'rep_id'){
+                        delete filter.create_person;
+                        filter[field] = value;
+                    }else{
+                        delete filter.rep_id;
+                        delete filter.create_person;
                     }
                     params.filter = JSON.stringify(filter);
                     return params;
@@ -275,6 +293,42 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                     //console.log(ret);
                     location.href = ret.url;
                 });
+                //模糊匹配订单
+                $('#c-increment_id').autocomplete({
+                    source: function (request, response) {
+                        var incrementId = $('#c-increment_id').val();
+                        var orderType = $('#c-order_platform').val();
+                        if (incrementId.length > 2) {
+                            $.ajax({
+                                type: "POST",
+                                url: "saleaftermanage/order_return/ajaxGetLikeOrder",
+                                dataType: "json",
+                                cache: false,
+                                async: false,
+                                data: {
+                                    orderType: orderType, order_number: incrementId
+                                },
+                                success: function (json) {
+                                    var data = json.data;
+                                    response($.map(data, function (item) {
+                                        return {
+                                            label: item,//下拉框显示值
+                                            value: item,//选中后，填充到input框的值
+                                            //id:item.bankCodeInfo//选中后，填充到id里面的值
+                                        };
+                                    }));
+                                }
+                            });
+                        }
+                    },
+                    delay: 10,//延迟100ms便于输入
+                    select: function (event, ui) {
+                        $("#bankUnionNo").val(ui.item.id);//取出在return里面放入到item中的属性
+                    },
+                    scroll: true,
+                    pagingMore: true,
+                    max: 5000
+                });
                 $(document).on('blur', '#c-increment_id', function () {
                     var ordertype = $('#c-order_platform').val();
                     var order_number = $('#c-increment_id').val();
@@ -298,7 +352,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                         } else {
                             $('#c-order_source').val(1);
                         }
-                        var item = ret.data.item;
+                        var item = ret.data;
                         $('#customer_info').after(function () {
                             var Str = '';
                             Str += '<div class="row item_info" style="margin-top:15px;margin-left:15%;" >' +
@@ -360,6 +414,16 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
             Form.api.bindevent($("form[role=form]"), function (data) {
                 window.top.location.href = 'admin/saleaftermanage/order_return/search';
             });
+            // //点击重置按钮
+            // $(document).on('click','.btn-default',function(){
+            //     var increment_id = $('#increment_id').val();
+            //     console.log(increment_id)
+            //     $('#increment_id').val('8888888888')
+            //     // $('#customer_email').val("");
+            //     // $('#customer_name').val("");
+            //     // $('#customer_phone').val("");
+            //     // $('#track_number').val(""); 
+            // });
             //模糊匹配订单
             $('#increment_id').autocomplete({
                 source: function (request, response) {

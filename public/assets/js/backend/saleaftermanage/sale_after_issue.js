@@ -8,7 +8,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     index_url: 'saleaftermanage/sale_after_issue/index' + location.search,
                     add_url: 'saleaftermanage/sale_after_issue/add',
                     edit_url: 'saleaftermanage/sale_after_issue/edit',
-                    del_url: 'saleaftermanage/sale_after_issue/del',
+                    //del_url: 'saleaftermanage/sale_after_issue/del',
                     multi_url: 'saleaftermanage/sale_after_issue/multi',
                     table: 'sale_after_issue',
                 }
@@ -24,6 +24,15 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 columns: [
                     [
                         {checkbox: true},
+                        {field: '', title: __('序号'), formatter: function (value, row, index) {
+                            var options = table.bootstrapTable('getOptions');
+                            var pageNumber = options.pageNumber;
+                            var pageSize = options.pageSize;
+
+                            //return (pageNumber - 1) * pageSize + 1 + index;
+                            return 1+index;
+                            }, operate: false
+                        },
                         {field: 'id', title: __('Id')},
                         {field: 'pid', title: __('Pid')},
                         {field: 'name', title: __('Name')}, //formatter:Controller.api.formatter.task_status

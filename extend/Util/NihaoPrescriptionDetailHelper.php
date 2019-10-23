@@ -36,7 +36,7 @@ class NihaoPrescriptionDetailHelper{
 	public static function get_one_by_increment_id($increment_id){
 		
 		if($increment_id){
-			$querySql = "select sfoi.discount_amount,sfo.increment_id,sfoi.product_options,sfoi.order_id,sfo.`status`,sfoi.sku,sfoi.qty_ordered,sfoi.name,sfo.created_at
+			$querySql = "select sfoi.discount_amount,sfo.increment_id,sfo.customer_email,sfo.customer_firstname,sfo.customer_lastname,sfoi.product_options,sfoi.order_id,sfo.`status`,sfoi.sku,sfoi.qty_ordered,sfoi.name,sfo.created_at
 			from sales_flat_order_item sfoi
 			left join sales_flat_order sfo on sfoi.order_id=sfo.entity_id 
 			where sfo.increment_id={$increment_id}";
@@ -130,7 +130,7 @@ class NihaoPrescriptionDetailHelper{
 			$items[$item_key]['options']  = $product_options['options'];          
                                                 
             // $prescription_params = $product_options['info_buyRequest']['tmplens']['prescription'];
-            $prescription_params = json_decode($product_options['info_buyRequest']['tmplens']['prescription'], ture);
+            $prescription_params = json_decode($product_options['info_buyRequest']['tmplens']['prescription'], true);
             // dump($prescription_params);
             // $prescription_params = explode("&", $prescription_params);
             // $lens_params = array();
@@ -197,11 +197,21 @@ class NihaoPrescriptionDetailHelper{
                 $items[$item_key]['os_bd'] = $final_params['os_bd'];
                 $items[$item_key]['os_pv_r'] = $final_params['os_pv_r'];
                 $items[$item_key]['os_bd_r'] = $final_params['os_bd_r'];
-            }
+			}			
             unset($final_params);  
             unset($lens_params);
             unset($prescription_params); 
-            unset($product_options);                               
+			unset($product_options);
+			//添加上客户邮箱,客户姓名
+			if(isset($item_value['customer_email'])){
+				$items[$item_key]['customer_email'] = $item_value['customer_email'];
+			}
+			if(isset($item_value['customer_firstname'])){
+				$items[$item_key]['customer_firstname'] = $item_value['customer_firstname'];
+			}
+			if(isset($item_value['customer_lastname'])){
+				$items[$item_key]['customer_lastname']  = $item_value['customer_lastname'];
+			}                               
         }
 
 		return $items;

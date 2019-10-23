@@ -25,6 +25,15 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                 columns: [
                     [
                         { checkbox: true },
+                        {field: '', title: __('序号'), formatter: function (value, row, index) {
+                            var options = table.bootstrapTable('getOptions');
+                            var pageNumber = options.pageNumber;
+                            var pageSize = options.pageSize;
+
+                            //return (pageNumber - 1) * pageSize + 1 + index;
+                            return 1+index;
+                            }, operate: false
+                        },
                         { field: 'id', title: __('Id'), operate: false },
                         { field: 'name', title: __('Name') },
                         { field: 'origin_sku', title: __('Origin_sku') },
@@ -577,6 +586,15 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                 columns: [
                     [
                         { checkbox: true },
+                        {field: '', title: __('序号'), formatter: function (value, row, index) {
+                            var options = table.bootstrapTable('getOptions');
+                            var pageNumber = options.pageNumber;
+                            var pageSize = options.pageSize;
+
+                            //return (pageNumber - 1) * pageSize + 1 + index;
+                            return 1+index;
+                            }, operate: false
+                        },
                         { field: 'id', title: __('Id'), operate: false },
                         { field: 'name', title: __('Name') },
                         { field: 'origin_sku', title: __('Origin_sku'), operate: false },
@@ -747,6 +765,15 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                 columns: [
                     [
                         { checkbox: true },
+                        {field: '', title: __('序号'), formatter: function (value, row, index) {
+                            var options = table.bootstrapTable('getOptions');
+                            var pageNumber = options.pageNumber;
+                            var pageSize = options.pageSize;
+
+                            //return (pageNumber - 1) * pageSize + 1 + index;
+                            return 1+index;
+                            }, operate: false
+                        },
                         { field: 'id', title: __('Id'), operate: false },
                         { field: 'sku', title: __('Sku') },
                         { field: 'name', title: __('Name') },

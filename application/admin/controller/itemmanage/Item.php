@@ -1284,7 +1284,32 @@ class Item extends Backend
             $this->error('404 Not found');
         }
     }
-
+    /**
+     * 异步检测sku和库存的数量是否符合更改镜架的要求
+     */
+    public function checkSkuAndQty()
+    {
+        if($this->request->isAjax()){
+            $change_sku = $this->request->param('change_sku');
+            $change_number = $this->request->param('change_number');
+            if(!$change_sku){
+                return $this->error('请先填写商品sku');
+            }
+            if($change_number<1){
+                return $this->error('变更数量不能小于1');
+            }
+            $result = $this->model->check_sku_qty($change_sku);
+            if(!$result){
+                return $this->error('填写的sku不存在,请重新填写');
+            }
+            if($result['available_stock']<$change_number){
+                return $this->error('镜架可用数量大于可用库存数量,无法更改镜架');
+            }
+                return $this->success();
+        }else{
+            $this->error('404 Not found');
+        }
+    }
     /**
      * 异步获取商品库存信息
      */
@@ -1417,17 +1442,7 @@ class Item extends Backend
     }
     public function ceshi()
     {
-        $magentoPlatform = Db::name('magento_platform')->where(['id'=>1])->field('id,magento_account,magento_key,magento_url')->find();
-        $client = new \SoapClient($magentoPlatform['magento_url'].'/api/soap/?wsdl');
-        $session = $client->login($magentoPlatform['magento_account'],$magentoPlatform['magento_key']);
-        $listAttributes = $client->call(
-            $session,
-            'product_attribute.options',
-            //'product_attribute.info',
-            'material_b1'
-        );
-        echo '<pre>';
-        var_dump($listAttributes);
+        $str = 'a:1:{s:19:"paypal_ec_create_ba";N;}';
 
     }
     public function ceshi2()
@@ -1713,18 +1728,5 @@ class Item extends Backend
             Db::connect('database.db_stock')->table('sku_map')->where(['sku'=>$v['sku']])->update($data);
         }
     }
-    public function pullMagentoProductInfoTwo()
-    {
-        $a= array(
-            'one',
-            'two',
-            'three',
-            'four'
-           );
-           in_array('one', $a);
-           in_array('two', $a);
-           in_array('ONE', $a);
-           $result = in_array('fOUr', $a);
-           var_dump($result);
-    }
+
 }

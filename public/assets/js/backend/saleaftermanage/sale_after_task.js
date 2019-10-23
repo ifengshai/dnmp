@@ -10,7 +10,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui'], function ($, 
                     index_url: 'saleaftermanage/sale_after_task/index' + location.search,
                     add_url: 'saleaftermanage/sale_after_task/add',
                     edit_url: 'saleaftermanage/sale_after_task/edit',
-                    del_url: 'saleaftermanage/sale_after_task/del',
+                    //del_url: 'saleaftermanage/sale_after_task/del',
                     multi_url: 'saleaftermanage/sale_after_task/multi',
                     table: 'sale_after_task',
                 }
@@ -34,8 +34,16 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui'], function ($, 
                     [
                         {checkbox: true},
                         //{data:("area",["100%","100%"])},
-                        {field:'numberId',title:'序号'},
-                        {field: 'id', title: __('Id'),operate:false},
+                        {field: '', title: __('序号'), formatter: function (value, row, index) {
+                            var options = table.bootstrapTable('getOptions');
+                            var pageNumber = options.pageNumber;
+                            var pageSize = options.pageSize;
+
+                            //return (pageNumber - 1) * pageSize + 1 + index;
+                            return 1+index;
+                            }, operate: false
+                        },
+                        // {field: 'id', title: __('Id'),operate:false},
                         {field: 'task_number', title: __('Task_number')},
                         {field:'task_status',title:__('Task_status'),searchList:{0:'未处理',1:'处理中',2:'已完成'},formatter:Controller.api.formatter.task_status},
                         {field: 'order_platform',searchList:$.getJSON('saleaftermanage/sale_after_task/getAjaxOrderPlatformList'), title: __('Order_platform'),formatter: Controller.api.formatter.devicess},
@@ -86,10 +94,19 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui'], function ($, 
                 var value = $(this).data("value");
                 var options = table.bootstrapTable('getOptions');
                 options.pageNumber = 1;
+                var queryParams = options.queryParams;
                 options.queryParams = function (params) {
-                    var filter = {};
-                    if (value !== '') {
+                    var params = queryParams(params);
+                    var filter = params.filter ? JSON.parse(params.filter) : {};
+                    if(field == 'create_person'){
+                        delete filter.rep_id;
                         filter[field] = value;
+                    }else if(field == 'rep_id'){
+                        delete filter.create_person;
+                        filter[field] = value;
+                    }else{
+                        delete filter.rep_id;
+                        delete filter.create_person;
                     }
                     params.filter = JSON.stringify(filter);
                     return params;
@@ -264,16 +281,19 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui'], function ($, 
                         //成功的回调
                         //alert(ret);
                         //清除html商品数据
+                        var email = ret.data[0].customer_email != undefined ? ret.data[0].customer_email : '';
+                        var firstname =  ret.data[0].customer_firstname != undefined ? ret.data[0].customer_firstname : '';
+                        var lastname  =  ret.data[0].customer_lastname != undefined ? ret.data[0].customer_lastname : '';
                         $(".item_info").empty();
-                        $('#c-order_status').val(ret.data.status);
-                        $('#c-customer_name').val(ret.data.customer_firstname+" "+ ret.data.customer_lastname);
-                        $('#c-customer_email').val(ret.data.customer_email);
+                        $('#c-order_status').val(ret.data[0].status);
+                        $('#c-customer_name').val(firstname+" "+ lastname);
+                        $('#c-customer_email').val(email);
                         if(ret.data.store_id>=2){
                             $('#c-order_source').val(2);
                         }else{
                             $('#c-order_source').val(1);
                         }
-                        var item = ret.data.item;
+                        var item = ret.data;
                         for(var j = 0,len = item.length; j < len; j++){
                             //console.log(item[j]);
                             var newItem = item[j];
@@ -304,7 +324,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui'], function ($, 
                                     '<div class="panel-title">'+
                                     '<label class="control-label col-xs-12 col-sm-3">数量:</label>'+
                                     '<div class="col-xs-12 col-sm-8">'+
-                                    '<input  id="c-item_qty_ordered"  class="form-control"  type="text" value="'+newItem.qty_ordered+'">'+
+                                    '<input  id="c-item_qty_ordered"  class="form-control"  type="text" value="'+Math.round(newItem.qty_ordered)+'">'+
                                     '</div>'+
                                     '</div>'+
                                     '</div>'+
@@ -312,7 +332,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui'], function ($, 
                                     '<div class="panel-title">'+
                                     '<label class="control-label col-xs-12 col-sm-3">处方类型:</label>'+
                                     '<div class="col-xs-12 col-sm-8">'+
-                                    '<input  id="c-recipe_type"  class="form-control" type="text" value="'+newItem.prescription_type+'">'+
+                                    '<input  id="c-recipe_type"  class="form-control" type="text" value="'+(newItem.prescription_type != undefined ? newItem.prescription_type : '')+'">'+
                                     '</div>'+
                                     '</div>'+
                                     '</div>'+
@@ -320,7 +340,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui'], function ($, 
                                     '<div class="panel-title">'+
                                     '<label class="control-label col-xs-12 col-sm-3">镜片类型:</label>'+
                                     '<div class="col-xs-12 col-sm-8">'+
-                                    '<input  id="c-lens_type"  class="form-control"  type="text" value="'+newItem.index_type+'">'+
+                                    '<input  id="c-lens_type"  class="form-control"  type="text" value="'+(newItem.index_type != undefined ? newItem.index_type : '')+'">'+
                                     '</div>'+
                                     '</div>'+
                                     '</div>'+
@@ -328,7 +348,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui'], function ($, 
                                     '<div class="panel-title">'+
                                     '<label class="control-label col-xs-12 col-sm-3">镀膜类型:</label>'+
                                     '<div class="col-xs-12 col-sm-8">'+
-                                    '<input  id="c-coating_film_type"  class="form-control"  type="text" value="'+newItem.coatiing_name+'">'+
+                                    '<input  id="c-coating_film_type"  class="form-control"  type="text" value="'+(newItem.coatiing_name !=undefined ? newItem.coatiing_name : '')+'">'+
                                     '</div>'+
                                     '</div>'+
                                     '</div>'+
@@ -356,27 +376,27 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui'], function ($, 
                                     '</tr>'+
                                     '<tr>'+
                                     '<td style="text-align: center">Right(OD)</td>'+
-                                    '<td><input id="c-right_SPH" class="form-control"  type="text" value="'+newItem.od_sph+'"></td>'+
-                                    '<td><input id="c-right_CYL" class="form-control"  type="text" value="'+newItem.od_cyl+'"></td>'+
-                                    '<td><input id="c-right_AXI" class="form-control"  type="text" value="'+newItem.od_axis+'"></td>'+
-                                    '<td><input id="c-right_ADD" class="form-control"  type="text" value="'+newItem.od_add+'"></td>'+
-                                    '<td><input id="c-right_PD" class="form-control"  type="text" value="'+newItem.pd_r+'"></td>'+
-                                    '<td><input id="c-right_Prism_Horizontal" class="form-control"  type="text" value="'+newItem.od_pv+'"></td>'+
-                                    '<td><input id="c-right_" class="form-control"  type="text" value="'+newItem.od_bd+'"></td>'+
-                                    '<td><input id="c-purchase_remark" class="form-control"  type="text" value="'+newItem.od_pv_r+'"></td>'+
-                                    '<td><input id="c-purchase_remark" class="form-control"  type="text" value="'+newItem.od_bd_r+'"></td>'+
+                                    '<td><input id="c-right_SPH" class="form-control"  type="text" value="'+(newItem.od_sph !=undefined ? newItem.od_sph : '')+'"></td>'+
+                                    '<td><input id="c-right_CYL" class="form-control"  type="text" value="'+(newItem.od_cyl  != undefined ? newItem.od_cyl : "")+'"></td>'+
+                                    '<td><input id="c-right_AXI" class="form-control"  type="text" value="'+(newItem.od_axis != undefined ? newItem.od_axis : "")+'"></td>'+
+                                    '<td><input id="c-right_ADD" class="form-control"  type="text" value="'+(newItem.od_add  != undefined ? newItem.od_add : "")+'"></td>'+
+                                    '<td><input id="c-right_PD" class="form-control"  type="text" value="'+(newItem.pd_r    != undefined ? newItem.pd_r: "")+'"></td>'+
+                                    '<td><input id="c-right_Prism_Horizontal" class="form-control"  type="text" value="'+(newItem.od_pv != undefined ? newItem.od_pv: "")+'"></td>'+
+                                    '<td><input id="c-right_" class="form-control"  type="text" value="'+(newItem.od_bd != undefined ? newItem.od_bd:"")+'"></td>'+
+                                    '<td><input id="c-purchase_remark" class="form-control"  type="text" value="'+(newItem.od_pv_r != undefined ? newItem.od_pv_r:"")+'"></td>'+
+                                    '<td><input id="c-purchase_remark" class="form-control"  type="text" value="'+(newItem.od_bd_r != undefined ? newItem.od_bd_r:"")+'"></td>'+
                                     '</tr>'+
                                     '<tr>'+
                                     '<td style="text-align: center">Left(OS)</td>'+
-                                    '<td><input id="c-left_SPH" class="form-control"  type="text" value="'+newItem.os_sph+'"></td>'+
-                                    '<td><input id="c-left_CYL" class="form-control"  type="text" value="'+newItem.os_cyl+'"></td>'+
-                                    '<td><input id="c-purchase_remark" class="form-control"  type="text" value="'+newItem.os_axis+'"></td>'+
-                                    '<td><input id="c-purchase_remark" class="form-control"  type="text" value="'+newItem.os_add+'"></td>'+
-                                    '<td><input id="c-purchase_remark" class="form-control"  type="text" value="'+newItem.pd_l+'"></td>'+
-                                    '<td><input id="c-purchase_remark" class="form-control"  type="text" value="'+newItem.os_pv+'"></td>'+
-                                    '<td><input id="c-purchase_remark" class="form-control"  type="text" value="'+newItem.os_bd+'"></td>'+
-                                    '<td><input id="c-purchase_remark" class="form-control"  type="text" value="'+newItem.os_pv_r+'"></td>'+
-                                    '<td><input id="c-purchase_remark" class="form-control"  type="text" value="'+newItem.os_bd_r+'"></td>'+
+                                    '<td><input id="c-left_SPH" class="form-control"  type="text" value="'+(newItem.os_sph != undefined ? newItem.os_sph : "")+'"></td>'+
+                                    '<td><input id="c-left_CYL" class="form-control"  type="text" value="'+(newItem.os_cyl != undefined ? newItem.os_cyl :"")+'"></td>'+
+                                    '<td><input id="c-purchase_remark" class="form-control"  type="text" value="'+(newItem.os_axis != undefined ? newItem.os_axis :"")+'"></td>'+
+                                    '<td><input id="c-purchase_remark" class="form-control"  type="text" value="'+(newItem.os_add != undefined ? newItem.os_add :"")+'"></td>'+
+                                    '<td><input id="c-purchase_remark" class="form-control"  type="text" value="'+(newItem.pd_l != undefined ? newItem.pd_l :"")+'"></td>'+
+                                    '<td><input id="c-purchase_remark" class="form-control"  type="text" value="'+(newItem.os_pv != undefined ? newItem.os_pv : "")+'"></td>'+
+                                    '<td><input id="c-purchase_remark" class="form-control"  type="text" value="'+(newItem.os_bd != undefined ? newItem.os_bd : "")+'"></td>'+
+                                    '<td><input id="c-purchase_remark" class="form-control"  type="text" value="'+(newItem.os_pv_r!= undefined ? newItem.os_pv_r : "")+'"></td>'+
+                                    '<td><input id="c-purchase_remark" class="form-control"  type="text" value="'+(newItem.os_bd_r!= undefined ? newItem.os_bd_r : "")+'"></td>'+
                                     '</tr>'+
                                     '</table>'+
                                     '</div>'+

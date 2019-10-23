@@ -25,6 +25,15 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui'], function ($, 
                 columns: [
                     [
                         {checkbox: true},
+                        {field: '', title: __('序号'), formatter: function (value, row, index) {
+                            var options = table.bootstrapTable('getOptions');
+                            var pageNumber = options.pageNumber;
+                            var pageSize = options.pageSize;
+
+                            //return (pageNumber - 1) * pageSize + 1 + index;
+                            return 1+index;
+                            }, operate: false
+                        },
                         {field: 'id', title: __('Id'),operate:false},
                         {field: 'sku', title: __('Sku')},
                         {field: 'platform_sku', title: __('Platform_sku')},
@@ -80,60 +89,60 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui'], function ($, 
                             events: Table.api.events.operate,
                             formatter: Table.api.formatter.operate,
                             buttons:[
-                                {
-                                    name: 'putaway',
-                                    text: '上架',
-                                    title: __('上架'),
-                                    classname: 'btn btn-xs btn-success btn-ajax',
-                                    url: '/admin/itemmanage/item_platform_sku/putaway',
-                                    confirm: '确定要上架吗',
-                                    success: function (data, ret) {
-                                        Layer.alert(ret.msg);
-                                        $(".btn-refresh").trigger("click");
-                                        //如果需要阻止成功提示，则必须使用return false;
-                                        //return false;
-                                    },
-                                    error: function (data, ret) {
-                                        Layer.alert(ret.msg);
-                                        return false;
-                                    },
-                                    visible: function (row) {
-                                        //返回true时按钮显示,返回false隐藏
-                                        return true;
-                                        // if (row.outer_sku_status == 2) {
-                                        //     return true;
-                                        // } else {
-                                        //     return false;
-                                        // }
-                                    },
-                                },
-                                {
-                                    name: 'soldOut',
-                                    text: '下架',
-                                    title: __('下架'),
-                                    classname: 'btn btn-xs btn-danger btn-ajax',
-                                    url: '/admin/itemmanage/item_platform_sku/soldOut',
-                                    confirm: '确定要下架吗',
-                                    success: function (data, ret) {
-                                        Layer.alert(ret.msg);
-                                        $(".btn-refresh").trigger("click");
-                                        //如果需要阻止成功提示，则必须使用return false;
-                                        //return false;
-                                    },
-                                    error: function (data, ret) {
-                                        Layer.alert(ret.msg);
-                                        return false;
-                                    },
-                                    visible: function (row) {
-                                        //返回true时按钮显示,返回false隐藏
-                                        return true;
-                                        // if (row.outer_sku_status == 2) {
-                                        //     return true;
-                                        // } else {
-                                        //     return false;
-                                        // }
-                                    },
-                                },
+                                // {
+                                //     name: 'putaway',
+                                //     text: '上架',
+                                //     title: __('上架'),
+                                //     classname: 'btn btn-xs btn-success btn-ajax',
+                                //     url: '/admin/itemmanage/item_platform_sku/putaway',
+                                //     confirm: '确定要上架吗',
+                                //     success: function (data, ret) {
+                                //         Layer.alert(ret.msg);
+                                //         $(".btn-refresh").trigger("click");
+                                //         //如果需要阻止成功提示，则必须使用return false;
+                                //         //return false;
+                                //     },
+                                //     error: function (data, ret) {
+                                //         Layer.alert(ret.msg);
+                                //         return false;
+                                //     },
+                                //     visible: function (row) {
+                                //         //返回true时按钮显示,返回false隐藏
+                                //         return true;
+                                //         // if (row.outer_sku_status == 2) {
+                                //         //     return true;
+                                //         // } else {
+                                //         //     return false;
+                                //         // }
+                                //     },
+                                // },
+                                // {
+                                //     name: 'soldOut',
+                                //     text: '下架',
+                                //     title: __('下架'),
+                                //     classname: 'btn btn-xs btn-danger btn-ajax',
+                                //     url: '/admin/itemmanage/item_platform_sku/soldOut',
+                                //     confirm: '确定要下架吗',
+                                //     success: function (data, ret) {
+                                //         Layer.alert(ret.msg);
+                                //         $(".btn-refresh").trigger("click");
+                                //         //如果需要阻止成功提示，则必须使用return false;
+                                //         //return false;
+                                //     },
+                                //     error: function (data, ret) {
+                                //         Layer.alert(ret.msg);
+                                //         return false;
+                                //     },
+                                //     visible: function (row) {
+                                //         //返回true时按钮显示,返回false隐藏
+                                //         return true;
+                                //         // if (row.outer_sku_status == 2) {
+                                //         //     return true;
+                                //         // } else {
+                                //         //     return false;
+                                //         // }
+                                //     },
+                                // },
                                 {
                                     name: 'uploadToPlatform',
                                     text: '上传至对应平台',

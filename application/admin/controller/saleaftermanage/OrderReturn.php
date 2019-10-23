@@ -119,17 +119,19 @@ class OrderReturn extends Backend
                 }
                 if ($result !== false) {
                     $item = $params['item'];
-                    foreach ($item as $arr) {
-                        $data = [];
-                        $data['order_return_id'] = $this->model->id;
-                        $data['return_sku'] = $arr['item_sku'];
-                        $data['return_sku_name'] = $arr['item_name'];
-                        $data['sku_qty'] = $arr['sku_qty'];
-                        $data['return_sku_qty'] = $arr['return_sku_qty'];
-                        $data['arrived_sku_qty'] = $arr['arrived_sku_qty'];
-                        $data['check_sku_qty']   = $arr['check_sku_qty'];
-                        $data['create_time']     = date("Y-m-d H:i:s", time());
-                        (new OrderReturnItem())->allowField(true)->save($data);
+                    if($item){
+                        foreach ($item as $arr) {
+                            $data = [];
+                            $data['order_return_id'] = $this->model->id;
+                            $data['return_sku'] = $arr['item_sku'];
+                            $data['return_sku_name'] = $arr['item_name'];
+                            $data['sku_qty'] = $arr['sku_qty'];
+                            $data['return_sku_qty'] = $arr['return_sku_qty'];
+                            $data['arrived_sku_qty'] = $arr['arrived_sku_qty'];
+                            $data['check_sku_qty']   = $arr['check_sku_qty'];
+                            $data['create_time']     = date("Y-m-d H:i:s", time());
+                            (new OrderReturnItem())->allowField(true)->save($data);
+                        }
                     }
                     $this->success();
                 } else {
@@ -267,7 +269,136 @@ class OrderReturn extends Backend
     public function checkNoPass()
     { }
     /***
-     * 新建订单检索功能
+     * 新建订单检索功能(原先)
+     * 
+     */
+    // public function search(Request $request)
+    // {
+    //     if ($request->isPost()) {
+    //         //获取输入的订单号
+    //         $increment_id = $request->post('increment_id');
+    //         //            dump($increment_id);
+    //         //            exit;
+    //         //获取输入的平台
+    //         $order_platform = $request->post('order_platform');
+    //         //获取客户邮箱地址
+    //         $customer_email = $request->post('customer_email');
+    //         //获取客户姓名
+    //         $customer_name  = $request->post('customer_name');
+    //         //获取客户电话
+    //         $customer_phone = $request->post('customer_phone');
+    //         //获取运单号
+    //         $track_number   = $request->post('track_number');
+    //         if ($order_platform < 1) {
+    //             return $this->error('请选择正确的订单平台');
+    //         }
+    //         if ($customer_name) {
+    //             $customer_name = explode(' ', $customer_name);
+    //         }
+    //         //求出用户的所有订单信息
+    //         $customer = (new SaleAfterTask())->getCustomerEmail($order_platform, $increment_id, $customer_name, $customer_phone, $track_number, $customer_email);
+    //         //            dump($customer);
+    //         //            exit;
+    //         if (!$customer) {
+    //             $this->error('找不到订单信息，请重新尝试', '/admin/saleaftermanage/order_return/search?ref=addtabs');
+    //         }
+    //         //求出所有的订单号
+    //         $allIncrementOrder = $customer['increment_id'];
+    //         //求出会员的个人信息
+    //         $customerInfo = $customer['info'];
+    //         unset($customer['info']);
+    //         unset($customer['increment_id']);
+    //         $infoSynergyTaskResult = Db::name('info_synergy_task')->where('order_platform', $order_platform)->where('synergy_order_number', 'in', $allIncrementOrder)->order('id desc')->select();
+    //         $saleAfterTaskResult = Db::name('sale_after_task')->where('order_platform', $order_platform)->where('order_number', 'in', $allIncrementOrder)->order('id desc')->select();
+    //         $orderReturnResult = Db::name('order_return')->where('order_platform', $order_platform)->where('increment_id', 'in', $allIncrementOrder)->order('id desc')->select();
+    //         //求出承接部门和承接人
+    //         $deptArr = (new AuthGroup())->getAllGroup();
+    //         $repArr  = (new Admin())->getAllStaff();
+    //         //求出订单平台
+    //         $orderPlatformList = (new MagentoPlatform())->getOrderPlatformList();
+    //         //求出任务优先级
+    //         $prtyIdList     = (new SaleAfterTask())->getPrtyIdList();
+    //         //求出售后问题分类列表
+    //         $issueList      = (new SaleAfterIssue())->getAjaxIssueList();
+    //         //求出信息协同任务分类列表
+    //         $synergyTaskList = (new InfoSynergyTaskCategory())->getSynergyTaskCategoryList();
+    //         //求出关联单据类型
+    //         $relateOrderType = (new InfoSynergyTask())->orderType();
+    //         if (!empty($infoSynergyTaskResult)) {
+    //             foreach ($infoSynergyTaskResult as $k => $v) {
+    //                 if ($v['dept_id']) {
+    //                     $deptNumArr = explode('+', $v['dept_id']);
+    //                     $infoSynergyTaskResult[$k]['dept_id'] = '';
+    //                     foreach ($deptNumArr as $values) {
+    //                         $infoSynergyTaskResult[$k]['dept_id'] .= $deptArr[$values] . ' ';
+    //                     }
+    //                 }
+    //                 if ($v['rep_id']) {
+    //                     $repNumArr = explode('+', $v['rep_id']);
+    //                     $infoSynergyTaskResult[$k]['rep_id'] = '';
+    //                     foreach ($repNumArr as $vals) {
+    //                         $infoSynergyTaskResult[$k]['rep_id'] .= $repArr[$vals] . ' ';
+    //                     }
+    //                 }
+    //                 if ($v['order_platform']) {
+    //                     $infoSynergyTaskResult[$k]['order_platform'] = $orderPlatformList[$v['order_platform']];
+    //                 }
+    //                 if ($v['prty_id']) {
+    //                     $infoSynergyTaskResult[$k]['prty_id'] = $prtyIdList[$v['prty_id']];
+    //                 }
+    //                 if ($v['synergy_task_id']) {
+    //                     $infoSynergyTaskResult[$k]['synergy_task_id'] = $synergyTaskList[$v['synergy_task_id']];
+    //                 }
+    //                 if ($v['synergy_order_id']) {
+    //                     $infoSynergyTaskResult[$k]['synergy_order_id'] = $relateOrderType[$v['synergy_order_id']];
+    //                 }
+    //             }
+    //         }
+    //         if (!empty($saleAfterTaskResult)) {
+    //             foreach ($saleAfterTaskResult as $k => $v) {
+    //                 if ($v['dept_id']) {
+    //                     $saleAfterTaskResult[$k]['dept_id'] = $deptArr[$v['dept_id']];
+    //                 }
+    //                 if ($v['rep_id']) {
+    //                     $saleAfterTaskResult[$k]['rep_id'] = $repArr[$v['rep_id']];
+    //                 }
+    //                 if ($v['order_platform']) {
+    //                     $saleAfterTaskResult[$k]['order_platform'] = $orderPlatformList[$v['order_platform']];
+    //                 }
+    //                 if ($v['task_status'] == 1) {
+    //                     $saleAfterTaskResult[$k]['task_status'] = '处理中';
+    //                 } elseif ($v['task_status'] == 2) {
+    //                     $saleAfterTaskResult[$k]['task_status'] = '处理完成';
+    //                 } else {
+    //                     $saleAfterTaskResult[$k]['task_status'] = '未处理';
+    //                 }
+    //                 if ($v['prty_id']) {
+    //                     $saleAfterTaskResult[$k]['prty_id'] = $prtyIdList[$v['prty_id']];
+    //                 }
+    //                 if ($v['problem_id']) {
+    //                     $saleAfterTaskResult[$k]['problem_id'] = $issueList[$v['problem_id']];
+    //                 }
+    //             }
+    //         }
+    //         if (!empty($orderReturnResult)) {
+    //             foreach ($orderReturnResult as $k1 => $v1) {
+    //                 if ($v1['order_platform']) {
+    //                     $orderReturnResult[$k1]['order_platform'] = $orderPlatformList[$v1['order_platform']];
+    //                 }
+    //             }
+    //         }
+    //         $this->view->assign('infoSynergyTaskResult', $infoSynergyTaskResult);
+    //         $this->view->assign('saleAfterTaskResult', $saleAfterTaskResult);
+    //         $this->view->assign('orderReturnResult', $orderReturnResult);
+    //         $this->view->assign('orderInfoResult', $customer);
+    //         $this->view->assign('orderPlatform', $orderPlatformList[$order_platform]);
+    //         $this->view->assign('customerInfo', $customerInfo);
+    //     }
+    //     $this->view->assign("orderPlatformList", (new MagentoPlatform())->getOrderPlatformList());
+    //     return $this->view->fetch();
+    // }
+    /***
+     * 订单检索功能(修改之后)
      */
     public function search(Request $request)
     {
@@ -294,8 +425,8 @@ class OrderReturn extends Backend
             }
             //求出用户的所有订单信息
             $customer = (new SaleAfterTask())->getCustomerEmail($order_platform, $increment_id, $customer_name, $customer_phone, $track_number, $customer_email);
-            //            dump($customer);
-            //            exit;
+                    //    dump($customer);
+                    //    exit;
             if (!$customer) {
                 $this->error('找不到订单信息，请重新尝试', '/admin/saleaftermanage/order_return/search?ref=addtabs');
             }
@@ -390,11 +521,33 @@ class OrderReturn extends Backend
             $this->view->assign('orderInfoResult', $customer);
             $this->view->assign('orderPlatform', $orderPlatformList[$order_platform]);
             $this->view->assign('customerInfo', $customerInfo);
+            //如果查询订单
+            if($increment_id){
+                $this->view->assign('increment_id',$increment_id);
+            }
+            //如果查询邮箱
+            if($customer_email){
+                $this->view->assign('customer_email',$customer_email);    
+            }
+            //如果查询客户姓名
+            if($customer_name){
+                $this->view->assign('customer_name',$customer_name);
+            }
+            //如果查询客户电话
+            if($customer_phone){
+                $this->view->assign('customer_phone',$customer_phone);
+            }
+            //如果查询运单号
+            if($track_number){
+                $this->view->assign('track_number',$track_number);
+            }
+            //上传订单平台
+                $this->view->assign('order_platform',$order_platform);
+
         }
         $this->view->assign("orderPlatformList", (new MagentoPlatform())->getOrderPlatformList());
         return $this->view->fetch();
     }
-
     /***
      * 异步查询模糊订单
      * @param Request $request

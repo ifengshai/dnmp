@@ -2,15 +2,19 @@
 
 namespace app\admin\controller\saleaftermanage;
 
+use think\Db;
+use fast\Tree;
+use app\admin\model\Admin;
+use think\Request;
 use app\common\controller\Backend;
 use app\admin\model\AuthGroup;
 use app\admin\model\saleaftermanage\SaleAfterIssue;
 use app\admin\model\platformmanage\MagentoPlatform;
 use app\admin\model\saleaftermanage\SaleAfterTaskRemark;
-use app\admin\model\Admin;
-use think\Request;
-use think\Db;
-use fast\Tree;
+use Util\NihaoPrescriptionDetailHelper;
+use Util\ZeeloolPrescriptionDetailHelper;
+use Util\VooguemePrescriptionDetailHelper;
+
 
 /**
  * 
@@ -94,7 +98,6 @@ class SaleAfterTask extends Backend
             $deptArr = (new AuthGroup())->getAllGroup();
             $repArr  = (new Admin())->getAllStaff();
             foreach ($list as $key => $val){
-                $list[$key]['numberId'] = $key+1;
                 if($val['dept_id']){
                     $list[$key]['dept_id']= $deptArr[$val['dept_id']];
 
@@ -235,32 +238,59 @@ class SaleAfterTask extends Backend
      */
 
     /***
-     * 异步请求获取订单所在平台和订单号处理
+     * 异步请求获取订单所在平台和订单号处理(原先)
      * @param
      */
-    public function ajax( Request $request)
-    {
-        if($this->request->isAjax()){
-            $ordertype = $request->post('ordertype');
-            $order_number = $request->post('order_number');
-            if($ordertype<1 || $ordertype>5){ //不在平台之内
-               return  $this->error('选择平台错误，请重新选择','','error',0);
-            }
-            if(!$order_number){
-               return  $this->error('订单号不存在，请重新选择','','error',0);
-            }
-            $result = $this->model->getOrderInfo($ordertype,$order_number);
-            if(!$result){
-                return $this->error('找不到这个订单，请重新尝试','','error',0);
-            }
-            return $this->success('','',$result,0);
-        }else{
-            return $this->error('404 Not Found');
-        }
+    // public function ajax( Request $request)
+    // {
+    //     if($this->request->isAjax()){
+    //         $ordertype = $request->post('ordertype');
+    //         $order_number = $request->post('order_number');
+    //         if($ordertype<1 || $ordertype>5){ //不在平台之内
+    //            return  $this->error('选择平台错误，请重新选择','','error',0);
+    //         }
+    //         if(!$order_number){
+    //            return  $this->error('订单号不存在，请重新选择','','error',0);
+    //         }
+    //         $result = $this->model->getOrderInfo($ordertype,$order_number);
+    //         if(!$result){
+    //             return $this->error('找不到这个订单，请重新尝试','','error',0);
+    //         }
+    //         return $this->success('','',$result,0);
+    //     }else{
+    //         return $this->error('404 Not Found');
+    //     }
 
 
-    }
-
+    // }
+    /***
+     * 修改之后的异步请求获取订单所在平台和订单号处理
+     */
+        public function ajax(Request $request){
+            if($this->request->isAjax()){
+                $ordertype = $request->post('ordertype');
+                $order_number = $request->post('order_number');
+                if($ordertype<1 || $ordertype>5){ //不在平台之内
+                    return $this->error('选择平台错误,请重新选择','','error',0);
+                }
+                if(!$order_number){
+                    return  $this->error('订单号不存在，请重新选择','','error',0);
+                }
+                if ($ordertype == 1) {
+                    $result = ZeeloolPrescriptionDetailHelper::get_one_by_increment_id($order_number);
+                } elseif ($ordertype == 2) {
+                    $result = VooguemePrescriptionDetailHelper::get_one_by_increment_id($order_number);
+                } elseif ($ordertype == 3) {
+                    $result = NihaoPrescriptionDetailHelper::get_one_by_increment_id($order_number);
+                }
+                if(!$result){
+                    return $this->error('找不到这个订单,请重新尝试','','error',0);
+                }
+                    return $this->success('','',$result,0);
+            }else{
+                return $this->error('404 Not Found');
+            }
+        }    
     /***
      * 异步获取订单平台
      * type 为 2 没有选择平台
@@ -369,41 +399,5 @@ class SaleAfterTask extends Backend
         }else{
             return $this->error('请求失败,请勿请求');
         }
-    }
-    /***
-     * 测试订单信息
-     */
-    public function ceshi(){
-        $ordertype = 3;
-        $order_number = '600070496';
-        $result = $this->model->getOrderInfo($ordertype,$order_number);
-        echo '<pre>';
-        var_dump($result);
-
-    }
-    public function nihao()
-    {
-        $str = 'a:2:{s:15:"info_buyRequest";a:6:{s:7:"product";s:3:"405";s:8:"form_key";s:16:"XkbLBBEaNUn4Vddj";s:3:"qty";i:1;s:7:"options";a:1:{i:399;s:3:"759";}s:13:"cart_currency";s:3:"USD";s:7:"tmplens";a:17:{s:13:"is_frame_only";s:1:"1";s:12:"prescription";s:335:"{"customer_rx":"0","prescription_type":"Progressive","od_sph":"0.25","od_cyl":"0.00","od_axis":"None","os_sph":"0.50","os_cyl":"0.00","os_axis":"None","od_add":"1.50","os_add":"0.00","pd":"62","od_pv":"0.00","od_bd":"","od_pv_r":"0.00","od_bd_r":"","os_pv":"0.00","os_bd":"","os_pv_r":"0.00","os_bd_r":"","year":"Year","month":"Month"}";s:17:"prescription_type";s:11:"Progressive";s:11:"frame_price";d:22.949999999999999;s:19:"frame_regural_price";d:22.949999999999999;s:9:"second_id";s:6:"base-3";s:11:"second_name";s:12:"Resin Lenses";s:12:"second_price";i:0;s:8:"third_id";s:6:"lens-8";s:10:"third_name";s:7:"Classic";s:11:"third_price";d:55;s:7:"four_id";s:10:"coatings-9";s:9:"four_name";s:26:"Oleophobic Anti-Reflective";s:10:"four_price";d:9.9499999999999993;s:10:"lens_price";d:64.950000000000003;s:3:"zsl";s:4:"1.57";s:5:"total";d:87.900000000000006;}}s:7:"options";a:1:{i:0;a:7:{s:5:"label";s:5:"Color";s:5:"value";s:7:"Crystal";s:11:"print_value";s:7:"Crystal";s:9:"option_id";s:3:"399";s:11:"option_type";s:9:"drop_down";s:12:"option_value";s:3:"759";s:11:"custom_view";b:0;}}}';
-        $arr =  unserialize($str);
-        $resultArr = $arr['info_buyRequest']['tmplens']['prescription'];
-        $resultJson = json_decode($resultArr,true);
-        echo '<pre>';
-        var_dump($resultJson);
-
-    }
-    public function ceshi3()
-    {
-        $ordertype = 1;
-        $order_number = '400026721';
-        $result = $this->model->getOrderInfo($ordertype,$order_number);
-        echo '<pre>';
-        var_dump($result);
-    }
-    public function zeelool()
-    {
-        $str = 'a:2:{s:15:"info_buyRequest";a:9:{s:7:"product";s:3:"125";s:4:"uenc";s:80:"aHR0cHM6Ly9tLnplZWxvb2wuY29tL2xlbnMvaW5kZXgvaW5kZXgvbGVucy8yMDZfMzEwX29ub29mbA,,";s:8:"form_key";s:16:"Dx7ybRVskcXkwlCx";s:15:"related_product";s:0:"";s:15:"validate_rating";s:0:"";s:3:"qty";i:1;s:7:"options";a:1:{i:24;s:2:"71";}s:7:"tmplens";a:31:{s:10:"frame_type";s:0:"";s:10:"glass_type";s:10:"eyeglasses";s:19:"frame_regural_price";s:5:"17.95";s:11:"frame_price";s:5:"17.95";s:8:"lenskind";N;s:5:"prism";s:0:"";s:10:"prismprice";s:4:"0.00";s:5:"extra";s:0:"";s:10:"extraprice";s:4:"0.00";s:12:"prescription";s:276:"min_pd=54&max_pd=74&customer_rx=0&prescription_type=SingleVision&od_sph=-1.25&od_cyl=-0.75&od_axis=70&os_sph=-2.25&os_cyl=-0.25&os_axis=126&pd=0&pd_r=30.5&pd_l=30.5&pdcheck=on&od_pv=0.00&od_bd=&od_pv_r=0.00&od_bd_r=&os_pv=0.00&os_bd=&os_pv_r=0.00&os_bd_r=&save=Em&information=";s:10:"lens_title";s:24:"Standard Eyeglass Lenses";s:10:"index_type";s:14:"1.57 Mid-Index";s:11:"index_price";s:4:"0.00";s:10:"index_name";s:4:"1.57";s:10:"coating_id";s:9:"coating_3";s:13:"coatiing_name";s:15:"Premium Coating";s:14:"coatiing_price";s:4:"9.95";s:9:"lens_type";s:0:"";s:15:"lens_type_price";s:4:"0.00";s:9:"lens_tint";s:0:"";s:14:"lens_coating_1";s:0:"";s:20:"lens_coating_1_price";s:1:"0";s:14:"lens_coating_2";s:0:"";s:20:"lens_coating_2_price";s:1:"0";s:14:"lens_coating_3";s:15:"Premium Coating";s:20:"lens_coating_3_price";s:4:"9.95";s:14:"lens_coating_4";s:0:"";s:20:"lens_coating_4_price";s:1:"0";s:3:"rid";s:1:"0";s:4:"lens";s:4:"9.95";s:5:"total";s:5:"27.90";}s:11:"reset_count";b:1;}s:7:"options";a:1:{i:0;a:7:{s:5:"label";s:5:"Color";s:5:"value";s:11:"Bright pink";s:11:"print_value";s:11:"Bright pink";s:9:"option_id";s:2:"24";s:11:"option_type";s:9:"drop_down";s:12:"option_value";s:2:"71";s:11:"custom_view";b:0;}}}';
-        $arr = unserialize($str);
-        echo '<pre>';
-        var_dump($arr);
     }
 }

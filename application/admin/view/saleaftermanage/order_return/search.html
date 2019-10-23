@@ -49,7 +49,7 @@ table.altrowstable tr:nth-child(even){
         <div id="myTabContent" class="tab-content">
             <div class="tab-pane fade active in" id="one">
                 <div class="widget-body no-padding" style="wight: 400px; overflow:scroll">
-                    <form action="{:url('/admin/saleaftermanage/order_return/search')}" class="form-commonsearch form-horizontal" method="post">
+                    <form id = "form1" action="{:url('/admin/saleaftermanage/order_return/search')}" class="form-commonsearch form-horizontal" method="post">
                         <div style="border-radius:2px;margin-bottom:10px;background:#f5f5f5;padding:20px;">
                             <div class="row">
                                 <div class="col-xs-12 col-sm-6 col-md-3">
@@ -58,7 +58,11 @@ table.altrowstable tr:nth-child(even){
                                         <div class="col-xs-8">
                                             <select  id="c-order_platform" data-rule="required" class="form-control" name="order_platform">
                                                 {foreach name="orderPlatformList" item="vo"}
+                                                {if $key == $order_platform}
+                                                <option value="{$key}" selected="selected">{$vo}</option>
+                                                {else}
                                                 <option value="{$key}">{$vo}</option>
+                                                {/if}
                                                 {/foreach}
                                             </select>
                                         </div>
@@ -68,7 +72,7 @@ table.altrowstable tr:nth-child(even){
                                     <div class="form-group">
                                         <label class="control-label col-xs-4">订单号</label>
                                         <div class="col-xs-8">
-                                            <input id="increment_id" type="text" class="form-control" autocomplete="off" name="increment_id" value="" />
+                                            <input id="increment_id" type="text" class="form-control" autocomplete="off" name="increment_id" value="{$increment_id}" />
                                         </div>
                                     </div>
                                 </div>
@@ -78,7 +82,7 @@ table.altrowstable tr:nth-child(even){
                                     <div class="form-group">
                                         <label class="control-label col-xs-4">客户邮箱</label>
                                         <div class="col-xs-8">
-                                            <input type="text" id="customer_email" class="form-control" name="customer_email" value=""/>
+                                            <input type="text" id="customer_email" class="form-control" name="customer_email" value="{$customer_email}"/>
                                         </div>
                                     </div>
                                 </div>
@@ -94,7 +98,7 @@ table.altrowstable tr:nth-child(even){
                                     <div class="form-group">
                                         <label class="control-label col-xs-4">客户姓名</label>
                                         <div class="col-xs-8">
-                                            <input type="text" id="customer_name" class="form-control" name="customer_name" value=""/>
+                                            <input type="text" id="customer_name" class="form-control" name="customer_name" value="{$customer_name}"/>
                                         </div>
                                     </div>
                                 </div>
@@ -104,7 +108,7 @@ table.altrowstable tr:nth-child(even){
                                     <div class="form-group">
                                         <label class="control-label col-xs-4">客户电话</label>
                                         <div class="col-xs-8">
-                                            <input type="text" id="customer_phone" class="form-control" name="customer_phone" value=""/>
+                                            <input type="text" id="customer_phone" class="form-control" name="customer_phone" value="{$customer_phone}"/>
                                         </div>
                                     </div>
                                 </div>
@@ -112,15 +116,16 @@ table.altrowstable tr:nth-child(even){
                                     <div class="form-group">
                                         <label class="control-label col-xs-4">快递单号</label>
                                         <div class="col-xs-8">
-                                            <input type="text" id="track_number" class="form-control" name="track_number" value=""/>
+                                            <input type="text" id="track_number" class="form-control" name="track_number" value="{$track_number}"/>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="col-xs-12 col-sm-6 col-md-3">
                                     <div class="form-group">
                                         <div class="col-xs-8 col-xs-offset-4">
-                                            <input type="submit" class="btn " value="搜索"/>
-                                            <input type="reset" class="btn btn-primary"  value="重置"/>
+                                            <input type="submit" class="btn" value="搜索"/>
+                                            <input type="reset" class="btn btn-default btn-embossed"  value="重置"/>
+                                            <!-- <input type="reset" class="btn btn-primary"  value="重置"/> -->
                                         </div>
                                     </div>
                                 </div>
@@ -335,12 +340,12 @@ table.altrowstable tr:nth-child(even){
                         </thead>  
                         {notempty name="orderInfoResult"}
                         {foreach name="orderInfoResult" item="orderInfoList"}
-                        {foreach name="orderInfoList.arr" item="itemInfoList"}
+                        {foreach name="orderInfoList.item" item="itemInfoList"}
                         <tr>
                             <td style="text-align: center; vertical-align: middle;">{$orderInfoList.increment_id}</td>
                             <td style="text-align: center; vertical-align: middle;">{$itemInfoList.sku}</td>
                             <td style="text-align: center; vertical-align: middle;">{$itemInfoList.name}</td>
-                            <td style="text-align: center; vertical-align: middle;">{$itemInfoList.qty_ordered}</td>
+                            <td style="text-align: center; vertical-align: middle;">{:round($itemInfoList.qty_ordered)}</td>
                             <td style="text-align: center; vertical-align: middle;">{$itemInfoList.coatiing_name}</td>
                             <td style="text-align: center; vertical-align: middle;">{$itemInfoList.index_type}</td>
                             <td style="text-align: center; vertical-align: middle;">{$itemInfoList.prescription_type}</td>
