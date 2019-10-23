@@ -419,7 +419,7 @@
                                             <td rowspan="2">{:$sku['total_add'] ?? ''}</td>
                                             {else/}
 
-                                            <td>{:$label == 1 ? $sku['os_add'] : $sku['od_add']}</td>
+                                            <td>{:$sku['os_add']}</td>
                                             {/if}
                                             {if $sku['prismcheck'] == 'on'}
                                             <td>{:$sku['pd_r'] ?? ''}</td>
@@ -437,7 +437,7 @@
                                             <td>{:$sku['os_cyl'] ?? ''}</td>
                                             <td>{:$sku['os_axis'] ?? ''}</td>
                                             {if !$sku['total_add']}
-                                            <td>{:$label == 1 ? $sku['od_add'] : $sku['os_add']}</td>
+                                            <td>{:$sku['od_add']}</td>
                                             {/if}
                                             {if $sku['prismcheck'] == 'on'}
                                             <td>{:$sku['pd_l'] ?? ''}</td>
