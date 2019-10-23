@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'Id'                     => '序号',
+    'Id'                     => '自增ID',
     'Status'                 => '退货状态',
     'Order_platform'         => '订单平台',
     'Order_status'           => '退货状态',
