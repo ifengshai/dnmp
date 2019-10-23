@@ -293,6 +293,42 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                     //console.log(ret);
                     location.href = ret.url;
                 });
+                //模糊匹配订单
+                $('#c-increment_id').autocomplete({
+                    source: function (request, response) {
+                        var incrementId = $('#c-increment_id').val();
+                        var orderType = $('#c-order_platform').val();
+                        if (incrementId.length > 2) {
+                            $.ajax({
+                                type: "POST",
+                                url: "saleaftermanage/order_return/ajaxGetLikeOrder",
+                                dataType: "json",
+                                cache: false,
+                                async: false,
+                                data: {
+                                    orderType: orderType, order_number: incrementId
+                                },
+                                success: function (json) {
+                                    var data = json.data;
+                                    response($.map(data, function (item) {
+                                        return {
+                                            label: item,//下拉框显示值
+                                            value: item,//选中后，填充到input框的值
+                                            //id:item.bankCodeInfo//选中后，填充到id里面的值
+                                        };
+                                    }));
+                                }
+                            });
+                        }
+                    },
+                    delay: 10,//延迟100ms便于输入
+                    select: function (event, ui) {
+                        $("#bankUnionNo").val(ui.item.id);//取出在return里面放入到item中的属性
+                    },
+                    scroll: true,
+                    pagingMore: true,
+                    max: 5000
+                });
                 $(document).on('blur', '#c-increment_id', function () {
                     var ordertype = $('#c-order_platform').val();
                     var order_number = $('#c-increment_id').val();
@@ -316,7 +352,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                         } else {
                             $('#c-order_source').val(1);
                         }
-                        var item = ret.data.item;
+                        var item = ret.data;
                         $('#customer_info').after(function () {
                             var Str = '';
                             Str += '<div class="row item_info" style="margin-top:15px;margin-left:15%;" >' +

@@ -119,17 +119,19 @@ class OrderReturn extends Backend
                 }
                 if ($result !== false) {
                     $item = $params['item'];
-                    foreach ($item as $arr) {
-                        $data = [];
-                        $data['order_return_id'] = $this->model->id;
-                        $data['return_sku'] = $arr['item_sku'];
-                        $data['return_sku_name'] = $arr['item_name'];
-                        $data['sku_qty'] = $arr['sku_qty'];
-                        $data['return_sku_qty'] = $arr['return_sku_qty'];
-                        $data['arrived_sku_qty'] = $arr['arrived_sku_qty'];
-                        $data['check_sku_qty']   = $arr['check_sku_qty'];
-                        $data['create_time']     = date("Y-m-d H:i:s", time());
-                        (new OrderReturnItem())->allowField(true)->save($data);
+                    if($item){
+                        foreach ($item as $arr) {
+                            $data = [];
+                            $data['order_return_id'] = $this->model->id;
+                            $data['return_sku'] = $arr['item_sku'];
+                            $data['return_sku_name'] = $arr['item_name'];
+                            $data['sku_qty'] = $arr['sku_qty'];
+                            $data['return_sku_qty'] = $arr['return_sku_qty'];
+                            $data['arrived_sku_qty'] = $arr['arrived_sku_qty'];
+                            $data['check_sku_qty']   = $arr['check_sku_qty'];
+                            $data['create_time']     = date("Y-m-d H:i:s", time());
+                            (new OrderReturnItem())->allowField(true)->save($data);
+                        }
                     }
                     $this->success();
                 } else {
