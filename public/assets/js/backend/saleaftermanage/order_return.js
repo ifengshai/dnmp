@@ -9,7 +9,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                     index_url: 'saleaftermanage/order_return/index' + location.search,
                     add_url: 'saleaftermanage/order_return/add',
                     edit_url: 'saleaftermanage/order_return/edit',
-                    del_url: 'saleaftermanage/order_return/del',
+                    //del_url: 'saleaftermanage/order_return/del',
                     multi_url: 'saleaftermanage/order_return/multi',
                     table: 'order_return',
                 }
@@ -68,78 +68,78 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                                     //     return true;
                                     // }
                                 },
-                                {
-                                    name: 'receive',
-                                    text: '退货收到',
-                                    title: __('退货收到'),
-                                    classname: 'btn btn-xs btn-success btn-ajax',
-                                    icon: 'fa fa-pencil',
-                                    confirm: '确定要收到退货吗',
-                                    url: 'saleaftermanage/order_return/receive',
-                                    success: function (data, ret) {
-                                        Layer.alert(ret.msg);
-                                        $(".btn-refresh").trigger("click");
-                                        //如果需要阻止成功提示，则必须使用return false;
-                                        //return false;
-                                    },
-                                    error: function (data, ret) {
-                                        Layer.alert(ret.msg);
-                                        return false;
-                                    },
-                                    visible: function (row) {
-                                        //返回true时按钮显示,返回false隐藏
-                                        return true;
-                                    }
+                                // {
+                                //     name: 'receive',
+                                //     text: '退货收到',
+                                //     title: __('退货收到'),
+                                //     classname: 'btn btn-xs btn-success btn-ajax',
+                                //     icon: 'fa fa-pencil',
+                                //     confirm: '确定要收到退货吗',
+                                //     url: 'saleaftermanage/order_return/receive',
+                                //     success: function (data, ret) {
+                                //         Layer.alert(ret.msg);
+                                //         $(".btn-refresh").trigger("click");
+                                //         //如果需要阻止成功提示，则必须使用return false;
+                                //         //return false;
+                                //     },
+                                //     error: function (data, ret) {
+                                //         Layer.alert(ret.msg);
+                                //         return false;
+                                //     },
+                                //     visible: function (row) {
+                                //         //返回true时按钮显示,返回false隐藏
+                                //         return true;
+                                //     }
 
-                                },
-                                {
-                                    name: 'quality',
-                                    text: '退货质检',
-                                    title: __('quality'),
-                                    classname: 'btn btn-xs btn-success btn-ajax',
-                                    icon: 'fa fa-pencil',
-                                    confirm: '确定已经质检了吗',
-                                    url: 'saleaftermanage/order_return/quality',
-                                    success: function (data, ret) {
-                                        Layer.alert(ret.msg);
-                                        $(".btn-refresh").trigger("click");
-                                        //如果需要阻止成功提示，则必须使用return false;
-                                        //return false;
-                                    },
-                                    error: function (data, ret) {
-                                        Layer.alert(ret.msg);
-                                        return false;
-                                    },
-                                    visible: function (row) {
-                                        //返回true时按钮显示,返回false隐藏
-                                        return true;
-                                    }
+                                // },
+                                // {
+                                //     name: 'quality',
+                                //     text: '退货质检',
+                                //     title: __('quality'),
+                                //     classname: 'btn btn-xs btn-success btn-ajax',
+                                //     icon: 'fa fa-pencil',
+                                //     confirm: '确定已经质检了吗',
+                                //     url: 'saleaftermanage/order_return/quality',
+                                //     success: function (data, ret) {
+                                //         Layer.alert(ret.msg);
+                                //         $(".btn-refresh").trigger("click");
+                                //         //如果需要阻止成功提示，则必须使用return false;
+                                //         //return false;
+                                //     },
+                                //     error: function (data, ret) {
+                                //         Layer.alert(ret.msg);
+                                //         return false;
+                                //     },
+                                //     visible: function (row) {
+                                //         //返回true时按钮显示,返回false隐藏
+                                //         return true;
+                                //     }
 
-                                },
-                                {
-                                    name: 'syncStock',
-                                    text: '同步库存',
-                                    title: __('syncStock'),
-                                    classname: 'btn-xs btn-success btn-ajax',
-                                    icon: 'fa fa-pencil',
-                                    confirm: '确定要同步库存吗',
-                                    url: 'saleaftermanage/order_return/syncStock',
-                                    success: function (data, ret) {
-                                        Layer.alert(ret.msg);
-                                        $(".btn-refresh").trigger("click");
-                                        //如果需要阻止成功提示，则必须使用return false;
-                                        //return false;
-                                    },
-                                    error: function (data, ret) {
-                                        Layer.alert(ret.msg);
-                                        return false;
-                                    },
-                                    visible: function (row) {
-                                        //返回true时按钮显示,返回false隐藏
-                                        return true;
-                                    }
+                                // },
+                                // {
+                                //     name: 'syncStock',
+                                //     text: '同步库存',
+                                //     title: __('syncStock'),
+                                //     classname: 'btn-xs btn-success btn-ajax',
+                                //     icon: 'fa fa-pencil',
+                                //     confirm: '确定要同步库存吗',
+                                //     url: 'saleaftermanage/order_return/syncStock',
+                                //     success: function (data, ret) {
+                                //         Layer.alert(ret.msg);
+                                //         $(".btn-refresh").trigger("click");
+                                //         //如果需要阻止成功提示，则必须使用return false;
+                                //         //return false;
+                                //     },
+                                //     error: function (data, ret) {
+                                //         Layer.alert(ret.msg);
+                                //         return false;
+                                //     },
+                                //     visible: function (row) {
+                                //         //返回true时按钮显示,返回false隐藏
+                                //         return true;
+                                //     }
 
-                                },
+                                // },
                                 {
                                     name: 'refund',
                                     text: '退款',

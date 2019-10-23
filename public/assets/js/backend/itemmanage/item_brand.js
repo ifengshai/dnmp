@@ -9,7 +9,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     index_url: 'itemmanage/item_brand/index' + location.search,
                     add_url: 'itemmanage/item_brand/add',
                     edit_url: 'itemmanage/item_brand/edit',
-                    del_url: 'itemmanage/item_brand/del',
+                    //del_url: 'itemmanage/item_brand/del',
                     multi_url: 'itemmanage/item_brand/multi',
                     table: 'item_brand',
                 }
