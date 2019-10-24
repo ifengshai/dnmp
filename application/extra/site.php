@@ -1,7 +1,7 @@
 <?php
 
 return array (
-  'name' => '魔晶后台管理系统',
+  'name' => '魔晶',
   'beian' => '',
   'cdnurl' => '',
   'version' => '1.0.1',

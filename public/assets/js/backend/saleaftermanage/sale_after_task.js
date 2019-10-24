@@ -294,6 +294,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui'], function ($, 
                             $('#c-order_source').val(1);
                         }
                         var item = ret.data;
+                        console.log(item);
                         for(var j = 0,len = item.length; j < len; j++){
                             //console.log(item[j]);
                             var newItem = item[j];
