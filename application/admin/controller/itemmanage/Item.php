@@ -1358,8 +1358,10 @@ class Item extends Backend
         $result = Db::connect('database.db_stock')->table('zeelool_product')->field('magento_sku as sku,true_qty as stock,remark')->select();
         if(!$result){
             return false;
+        }else{
+            $info   = Db::connect('database.db_stock')->name('item')->insertAll($result);
         }
-        $info   = Db::connect('database.db_stock')->name('item')->insertAll($result);
+        
     }
     /***
      * 第一步
@@ -1419,8 +1421,12 @@ class Item extends Backend
                 $result = $client->call($session, 'catalog_product.info', $magento_sku);
                 $client->endSession($session);
             }catch (\SoapFault $e){
+                continue;
+                //$this->error(11111);
                 $this->error($e->getMessage());
             }catch (\Exception $e){
+                continue;
+                //$this->error(22222);
                 $this->error($e->getMessage());
             }
             $storeArr = [];
