@@ -175,6 +175,7 @@ class VooguemePrescriptionDetailHelper{
 
 			$items[$item_key]['od_axis'] = $final_params['od_axis'];
 			$items[$item_key]['os_axis'] = $final_params['os_axis'];
+			$items[$item_key]['pdcheck'] = $final_params['pdcheck'];
 
 			if($final_params['os_add'] && $final_params['od_add']){
 				$items[$item_key]['os_add'] = $final_params['os_add'];

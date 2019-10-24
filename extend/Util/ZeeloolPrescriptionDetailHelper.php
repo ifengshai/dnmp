@@ -124,7 +124,7 @@ class ZeeloolPrescriptionDetailHelper{
 			$items[$item_key]['discount_amount'] = $item_value['discount_amount']; 
 
 			$product_options = unserialize($item_value['product_options']);
-        	
+		
 			$final_params = array();
 
 			$final_params['coatiing_name'] = substr($product_options['info_buyRequest']['tmplens']['coatiing_name'],0,100);
@@ -158,8 +158,7 @@ class ZeeloolPrescriptionDetailHelper{
 			}
             // dump($lens_params);
 			$final_params = array_merge($lens_params, $final_params);
-          	// dump($final_params);      
-
+          
 			$items[$item_key]['coatiing_name'] = $final_params['coatiing_name'];
 			$items[$item_key]['index_type'] = $final_params['index_type'];
 			$items[$item_key]['prescription_type'] = $final_params['prescription_type'];
@@ -181,6 +180,7 @@ class ZeeloolPrescriptionDetailHelper{
 
 			$items[$item_key]['od_axis'] = $final_params['od_axis'];
 			$items[$item_key]['os_axis'] = $final_params['os_axis'];
+			$items[$item_key]['pdcheck'] = $final_params['pdcheck'];
 
 			if($final_params['os_add'] && $final_params['od_add']){
 				$items[$item_key]['os_add'] = $final_params['os_add'];
