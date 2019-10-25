@@ -412,7 +412,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
         },
         search: function () {
             Form.api.bindevent($("form[role=form]"), function (data) {
-                window.top.location.href = 'admin/saleaftermanage/order_return/search';
+                window.top.location.href = Config.moduleurl + '/saleaftermanage/order_return/search';
             });
             // //点击重置按钮
             // $(document).on('click','.btn-default',function(){
