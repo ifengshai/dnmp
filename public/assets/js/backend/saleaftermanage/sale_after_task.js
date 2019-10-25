@@ -1,4 +1,4 @@
-define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui'], function ($, undefined, Backend, Table, Form) {
+define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui','custom-css'], function ($, undefined, Backend, Table, Form) {
 
     var Controller = {
         index: function () {
@@ -460,13 +460,26 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui'], function ($, 
                                 '<td>'+(newItem.od_sph !=undefined ? newItem.od_sph : '')+'</td>'+
                                 '<td>'+(newItem.od_cyl  != undefined ? newItem.od_cyl : "")+'</td>'+
                                 '<td>'+(newItem.od_axis != undefined ? newItem.od_axis : "")+'</td>';
-                                if(newItem.total_add){
-                                    Str+= '<td rowspan="2">'+(newItem.total_add  != undefined ? newItem.total_add : "")+'</td>';
+                                if(ordertype<3){
+                                    if(newItem.total_add){
+                                        Str+= '<td rowspan="2">'+(newItem.total_add  != undefined ? newItem.total_add : "")+'</td>';
+                                    }else{
+                                        Str+='<td>'+(newItem.os_add  != undefined ? newItem.os_add : "")+'</td>';
+                                    }
                                 }else{
-                                    Str+='<td>'+(newItem.os_add  != undefined ? newItem.os_add : "")+'</td>';
+                                    if(newItem.prescription_type == 'Reading Glasses' && newItem.os_add>0 && newItem.od_add>0){
+                                        Str+='<td>'+(newItem.od_add  != undefined ? newItem.od_add : "")+'</td>';
+                                    }else{
+                                        Str+='<td rowspan="2">'+(newItem.od_add  != undefined ? newItem.od_add : "")+'</td>';
+                                    }
                                 }
-                            Str+= '<td>'+(newItem.pd_r    != undefined ? newItem.pd_r: "")+'</td>'+
-                                '<td>'+(newItem.od_pv != undefined ? newItem.od_pv: "")+'</td>'+
+
+                                if(newItem.pdcheck == 'on'){
+                                    Str+= '<td>'+(newItem.pd_r  != undefined ? newItem.pd_r : "")+'</td>';
+                                }else{
+                                    Str+='<td rowspan="2">'+(newItem.pd  != undefined ? newItem.pd : "")+'</td>';
+                                }
+                                Str+= '<td>'+(newItem.od_pv != undefined ? newItem.od_pv: "")+'</td>'+
                                 '<td>'+(newItem.od_bd != undefined ? newItem.od_bd:"")+'</td>'+
                                 '<td>'+(newItem.od_pv_r != undefined ? newItem.od_pv_r:"")+'</td>'+
                                 '<td>'+(newItem.od_bd_r != undefined ? newItem.od_bd_r:"")+'</td>'+
@@ -476,11 +489,20 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui'], function ($, 
                                 '<td>'+(newItem.os_sph != undefined ? newItem.os_sph : "")+'</td>'+
                                 '<td>'+(newItem.os_cyl != undefined ? newItem.os_cyl :"")+'</td>'+
                                 '<td>'+(newItem.os_axis != undefined ? newItem.os_axis :"")+'</td>';
-                                if(!newItem.total_add){
-                                    Str+='<td>'+(newItem.od_add != undefined ? newItem.od_add :"")+'</td>';
+                                if(ordertype<3){
+                                    if(!newItem.total_add){
+                                        Str+='<td>'+(newItem.od_add  != undefined ? newItem.od_add : "")+'</td>';
+                                    }
+                                }else{
+                                    if(newItem.prescription_type == 'Reading Glasses' && newItem.os_add>0 && newItem.od_add>0){
+                                        Str+='<td>'+(newItem.os_add  != undefined ? newItem.os_add : "")+'</td>';
+                                    }
                                 }
-                                    Str+='<td>'+(newItem.pd_l != undefined ? newItem.pd_l :"")+'</td>'+
-                                '<td>'+(newItem.os_pv != undefined ? newItem.os_pv : "")+'</td>'+
+
+                                if(newItem.pdcheck == 'on'){
+                                    Str+= '<td>'+(newItem.pd_l  != undefined ? newItem.pd_l : "")+'</td>';
+                                }
+                                Str+='<td>'+(newItem.os_pv != undefined ? newItem.os_pv : "")+'</td>'+
                                 '<td>'+(newItem.os_bd != undefined ? newItem.os_bd : "")+'</td>'+
                                 '<td>'+(newItem.os_pv_r!= undefined ? newItem.os_pv_r : "")+'</td>'+
                                 '<td>'+(newItem.os_bd_r!= undefined ? newItem.os_bd_r : "")+'</td>'+

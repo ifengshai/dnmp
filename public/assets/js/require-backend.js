@@ -51,7 +51,9 @@ require.config({
         'selectpage': '../libs/fastadmin-selectpage/selectpage',
         'citypicker': '../libs/fastadmin-citypicker/dist/js/city-picker.min',
         'citypicker-data': '../libs/fastadmin-citypicker/dist/js/city-picker.data',
-        'jqui':'../libs/jquery-ui/jquery-ui'
+        'jqui':'../libs/jquery-ui/jquery-ui',
+        //新增css文件
+        'custom-css':'../libs/css-min/css.min'
     },
     // shim依赖配置
     shim: {
@@ -108,7 +110,12 @@ require.config({
             exports: 'jqui'
         },
         //新增自定义的样式文件
-        'bootstrap':['css!../css/custom.css'],
+        'custom-css':{
+            deps:[
+                'css!../css/custom.css'
+            ],
+            
+        },
         'bootstrap-datetimepicker': [
             'moment/locale/zh-cn',
 //            'css!../libs/eonasdan-bootstrap-datetimepicker/build/css/bootstrap-datetimepicker.min.css',
