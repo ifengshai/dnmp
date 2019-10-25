@@ -300,111 +300,195 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui'], function ($, 
                             var newItem = item[j];
                             //console.log(newItem.name);
                             $('#customer_info').after(function(){
-                                return '<div class="row item_info" style="margin-top:15px;margin-left:7.6666%;" >'+
-                                    '<div class="col-lg-12">'+
-                                    '</div>'+
-                                    '<div class="col-xs-6 col-md-4">'+
-                                    '<div class="panel bg-blue">'+
-                                    '<div class="panel-body">'+
-                                    '<div class="panel-title">'+
-                                    '<label class="control-label col-xs-12 col-sm-3">商品名称:</label>'+
-                                    '<div class="col-xs-12 col-sm-8">'+
-                                    '<input  id="c-item_name"  class="form-control"  type="text" value="'+ newItem.name+'">'+
-                                    '</div>'+
-                                    '</div>'+
-                                    '</div>'+
-                                    '<div class="panel-body">'+
-                                    '<div class="panel-title">'+
-                                    '<label class="control-label col-xs-12 col-sm-3">SKU:</label>'+
-                                    '<div class="col-xs-12 col-sm-8">'+
-                                    '<input  id="c-item_sku" class="form-control"  type="text" value="'+newItem.sku+'">'+
-                                    '</div>'+
-                                    '</div>'+
-                                    '</div>'+
-                                    '<div class="panel-body">'+
-                                    '<div class="panel-title">'+
-                                    '<label class="control-label col-xs-12 col-sm-3">数量:</label>'+
-                                    '<div class="col-xs-12 col-sm-8">'+
-                                    '<input  id="c-item_qty_ordered"  class="form-control"  type="text" value="'+Math.round(newItem.qty_ordered)+'">'+
-                                    '</div>'+
-                                    '</div>'+
-                                    '</div>'+
-                                    '<div class="panel-body">'+
-                                    '<div class="panel-title">'+
-                                    '<label class="control-label col-xs-12 col-sm-3">处方类型:</label>'+
-                                    '<div class="col-xs-12 col-sm-8">'+
-                                    '<input  id="c-recipe_type"  class="form-control" type="text" value="'+(newItem.prescription_type != undefined ? newItem.prescription_type : '')+'">'+
-                                    '</div>'+
-                                    '</div>'+
-                                    '</div>'+
-                                    '<div class="panel-body">'+
-                                    '<div class="panel-title">'+
-                                    '<label class="control-label col-xs-12 col-sm-3">镜片类型:</label>'+
-                                    '<div class="col-xs-12 col-sm-8">'+
-                                    '<input  id="c-lens_type"  class="form-control"  type="text" value="'+(newItem.index_type != undefined ? newItem.index_type : '')+'">'+
-                                    '</div>'+
-                                    '</div>'+
-                                    '</div>'+
-                                    '<div class="panel-body">'+
-                                    '<div class="panel-title">'+
-                                    '<label class="control-label col-xs-12 col-sm-3">镀膜类型:</label>'+
-                                    '<div class="col-xs-12 col-sm-8">'+
-                                    '<input  id="c-coating_film_type"  class="form-control"  type="text" value="'+(newItem.coatiing_name !=undefined ? newItem.coatiing_name : '')+'">'+
-                                    '</div>'+
-                                    '</div>'+
-                                    '</div>'+
-                                    '</div>'+
-                                    '</div>'+
-                                    '<div class="col-xs-6 col-md-7">'+
-                                    '<div class="panel bg-aqua-gradient">'+
-                                    '<div class="panel-body">'+
-                                    '<div class="ibox-title">'+
-                                    '<table id="caigou-table">'+
-                                    '<tr>'+
-                                    '<td colspan="10" style="text-align: center">处方参数</td>'+
-                                    '</tr>'+
-                                    '<tr>'+
-                                    '<td style="text-align: center">参数</td>'+
-                                    '<td style="text-align: center">SPH</td>'+
-                                    '<td style="text-align: center">CYL</td>'+
-                                    '<td style="text-align: center">AXI</td>'+
-                                    '<td style="text-align: center">ADD</td>'+
-                                    '<td style="text-align: center">PD</td>'+
-                                    '<td style="text-align: center">Prism Horizontal</td>'+
-                                    '<td style="text-align: center">Base Direction</td>'+
-                                    '<td style="text-align: center">Prism Vertical</td>'+
-                                    '<td style="text-align: center">Base Direction</td>'+
-                                    '</tr>'+
-                                    '<tr>'+
-                                    '<td style="text-align: center">Right(OD)</td>'+
-                                    '<td><input id="c-right_SPH" class="form-control"  type="text" value="'+(newItem.od_sph !=undefined ? newItem.od_sph : '')+'"></td>'+
-                                    '<td><input id="c-right_CYL" class="form-control"  type="text" value="'+(newItem.od_cyl  != undefined ? newItem.od_cyl : "")+'"></td>'+
-                                    '<td><input id="c-right_AXI" class="form-control"  type="text" value="'+(newItem.od_axis != undefined ? newItem.od_axis : "")+'"></td>'+
-                                    '<td><input id="c-right_ADD" class="form-control"  type="text" value="'+(newItem.od_add  != undefined ? newItem.od_add : "")+'"></td>'+
-                                    '<td><input id="c-right_PD" class="form-control"  type="text" value="'+(newItem.pd_r    != undefined ? newItem.pd_r: "")+'"></td>'+
-                                    '<td><input id="c-right_Prism_Horizontal" class="form-control"  type="text" value="'+(newItem.od_pv != undefined ? newItem.od_pv: "")+'"></td>'+
-                                    '<td><input id="c-right_" class="form-control"  type="text" value="'+(newItem.od_bd != undefined ? newItem.od_bd:"")+'"></td>'+
-                                    '<td><input id="c-purchase_remark" class="form-control"  type="text" value="'+(newItem.od_pv_r != undefined ? newItem.od_pv_r:"")+'"></td>'+
-                                    '<td><input id="c-purchase_remark" class="form-control"  type="text" value="'+(newItem.od_bd_r != undefined ? newItem.od_bd_r:"")+'"></td>'+
-                                    '</tr>'+
-                                    '<tr>'+
-                                    '<td style="text-align: center">Left(OS)</td>'+
-                                    '<td><input id="c-left_SPH" class="form-control"  type="text" value="'+(newItem.os_sph != undefined ? newItem.os_sph : "")+'"></td>'+
-                                    '<td><input id="c-left_CYL" class="form-control"  type="text" value="'+(newItem.os_cyl != undefined ? newItem.os_cyl :"")+'"></td>'+
-                                    '<td><input id="c-purchase_remark" class="form-control"  type="text" value="'+(newItem.os_axis != undefined ? newItem.os_axis :"")+'"></td>'+
-                                    '<td><input id="c-purchase_remark" class="form-control"  type="text" value="'+(newItem.os_add != undefined ? newItem.os_add :"")+'"></td>'+
-                                    '<td><input id="c-purchase_remark" class="form-control"  type="text" value="'+(newItem.pd_l != undefined ? newItem.pd_l :"")+'"></td>'+
-                                    '<td><input id="c-purchase_remark" class="form-control"  type="text" value="'+(newItem.os_pv != undefined ? newItem.os_pv : "")+'"></td>'+
-                                    '<td><input id="c-purchase_remark" class="form-control"  type="text" value="'+(newItem.os_bd != undefined ? newItem.os_bd : "")+'"></td>'+
-                                    '<td><input id="c-purchase_remark" class="form-control"  type="text" value="'+(newItem.os_pv_r!= undefined ? newItem.os_pv_r : "")+'"></td>'+
-                                    '<td><input id="c-purchase_remark" class="form-control"  type="text" value="'+(newItem.os_bd_r!= undefined ? newItem.os_bd_r : "")+'"></td>'+
-                                    '</tr>'+
-                                    '</table>'+
-                                    '</div>'+
-                                    '</div>'+
-                                    '</div>'+
-                                    '</div>'+
-                                    '</div>';
+                            //    var  Str= '<div class="row item_info" style="margin-top:15px;margin-left:7.6666%;" >'+
+                            //         '<div class="col-lg-12">'+
+                            //         '</div>'+
+                            //         '<div class="col-xs-6 col-md-4" class="handle_table">'+
+                            //         '<div class="panel bg-blue">'+
+                            //         '<div class="panel-body">'+
+                            //         '<div class="panel-title">'+
+                            //         '<label class="control-label col-xs-12 col-sm-3"><td>商品名称:</td></label>'+
+                            //         '<div class="col-xs-12 col-sm-8">'+
+                            //         '<input  id="c-item_name"  class="form-control"  type="text" value="'+ newItem.name+'">'+
+                            //         '</div>'+
+                            //         '</div>'+
+                            //         '</div>'+
+                            //         '<div class="panel-body">'+
+                            //         '<div class="panel-title">'+
+                            //         '<label class="control-label col-xs-12 col-sm-3">SKU:</label>'+
+                            //         '<div class="col-xs-12 col-sm-8">'+
+                            //         '<input  id="c-item_sku" class="form-control"  type="text" value="'+newItem.sku+'">'+
+                            //         '</div>'+
+                            //         '</div>'+
+                            //         '</div>'+
+                            //         '<div class="panel-body">'+
+                            //         '<div class="panel-title">'+
+                            //         '<label class="control-label col-xs-12 col-sm-3">数量:</label>'+
+                            //         '<div class="col-xs-12 col-sm-8">'+
+                            //         '<input  id="c-item_qty_ordered"  class="form-control"  type="text" value="'+Math.round(newItem.qty_ordered)+'">'+
+                            //         '</div>'+
+                            //         '</div>'+
+                            //         '</div>'+
+                            //         '<div class="panel-body">'+
+                            //         '<div class="panel-title">'+
+                            //         '<label class="control-label col-xs-12 col-sm-3">处方类型:</label>'+
+                            //         '<div class="col-xs-12 col-sm-8">'+
+                            //         '<input  id="c-recipe_type"  class="form-control" type="text" value="'+(newItem.prescription_type != undefined ? newItem.prescription_type : '')+'">'+
+                            //         '</div>'+
+                            //         '</div>'+
+                            //         '</div>'+
+                            //         '<div class="panel-body">'+
+                            //         '<div class="panel-title">'+
+                            //         '<label class="control-label col-xs-12 col-sm-3">镜片类型:</label>'+
+                            //         '<div class="col-xs-12 col-sm-8">'+
+                            //         '<input  id="c-lens_type"  class="form-control"  type="text" value="'+(newItem.index_type != undefined ? newItem.index_type : '')+'">'+
+                            //         '</div>'+
+                            //         '</div>'+
+                            //         '</div>'+
+                            //         '<div class="panel-body">'+
+                            //         '<div class="panel-title">'+
+                            //         '<label class="control-label col-xs-12 col-sm-3">镀膜类型:</label>'+
+                            //         '<div class="col-xs-12 col-sm-8">'+
+                            //         '<input  id="c-coating_film_type"  class="form-control"  type="text" value="'+(newItem.coatiing_name !=undefined ? newItem.coatiing_name : '')+'">'+
+                            //         '</div>'+
+                            //         '</div>'+
+                            //         '</div>'+
+                            //         '</div>'+
+                            //         '</div>'+
+                            //         '<div class="col-xs-6 col-md-7" style="float:right;">'+
+                            //         '<table id="caigou-table" class="handle_table">'+
+                            //         '<tr>'+
+                            //         '<td colspan="10" style="text-align: center;">处方参数</td>'+
+                            //         '</tr>'+
+                            //         '<tr>'+
+                            //         '<td>参数</td>'+
+                            //         '<td>SPH</td>'+
+                            //         '<td>CYL</td>'+
+                            //         '<td>AXI</td>'+
+                            //         '<td>ADD</td>'+
+                            //         '<td>PD</td>'+
+                            //         '<td>Prism Horizontal</td>'+
+                            //         '<td>Base Direction</td>'+
+                            //         '<td>Prism Vertical</td>'+
+                            //         '<td>Base Direction</td>'+
+                            //         '</tr>'+
+                            //         '<tr>'+
+                            //         '<td>Right(OD)</td>'+
+                            //         '<td>'+(newItem.od_sph !=undefined ? newItem.od_sph : '')+'</td>'+
+                            //         '<td>'+(newItem.od_cyl  != undefined ? newItem.od_cyl : "")+'</td>'+
+                            //         '<td>'+(newItem.od_axis != undefined ? newItem.od_axis : "")+'</td>';
+                            //         if(newItem.total_add){
+                            //             Str+= '<td rowspan="2">'+(newItem.total_add  != undefined ? newItem.total_add : "")+'</td>';
+                            //         }else{
+                            //             Str+='<td>'+(newItem.os_add  != undefined ? newItem.os_add : "")+'</td>';
+                            //         }
+                            //        Str+= '<td>'+(newItem.pd_r    != undefined ? newItem.pd_r: "")+'</td>'+
+                            //         '<td>'+(newItem.od_pv != undefined ? newItem.od_pv: "")+'</td>'+
+                            //         '<td>'+(newItem.od_bd != undefined ? newItem.od_bd:"")+'</td>'+
+                            //         '<td>'+(newItem.od_pv_r != undefined ? newItem.od_pv_r:"")+'</td>'+
+                            //         '<td>'+(newItem.od_bd_r != undefined ? newItem.od_bd_r:"")+'</td>'+
+                            //         '</tr>'+
+                            //         '<tr>'+
+                            //         '<td>Left(OS)</td>'+
+                            //         '<td>'+(newItem.os_sph != undefined ? newItem.os_sph : "")+'</td>'+
+                            //         '<td>'+(newItem.os_cyl != undefined ? newItem.os_cyl :"")+'</td>'+
+                            //         '<td>'+(newItem.os_axis != undefined ? newItem.os_axis :"")+'</td>';
+                            //         if(!newItem.total_add){
+                            //             Str+='<td>'+(newItem.od_add != undefined ? newItem.od_add :"")+'</td>';
+                            //         }
+                            //             Str+='<td>'+(newItem.pd_l != undefined ? newItem.pd_l :"")+'</td>'+
+                            //         '<td>'+(newItem.os_pv != undefined ? newItem.os_pv : "")+'</td>'+
+                            //         '<td>'+(newItem.os_bd != undefined ? newItem.os_bd : "")+'</td>'+
+                            //         '<td>'+(newItem.os_pv_r!= undefined ? newItem.os_pv_r : "")+'</td>'+
+                            //         '<td>'+(newItem.os_bd_r!= undefined ? newItem.os_bd_r : "")+'</td>'+
+                            //         '</tr>'+
+                            //         '</table>'+
+                            //         '</div>'+
+                            //         '</div>';
+                                var  Str= '<div class="row item_info" style="margin-top:15px;margin-left:10.6666%;" >'+
+                                '<div class="col-lg-12">'+
+                                '</div>'+
+                                '<div class="col-xs-6 col-md-4">'+
+                                '<div>'+
+                                '<table id="caigou-table" class="handle_table1">'+
+                                '<tr>'+
+                                   '<td>商品名称</td>'+
+                                   '<td style="width:90%;">'+newItem.name+'</td>'+
+                                '</tr>'+
+                                '<tr>'+
+                                   '<td>SKU</td>'+
+                                   '<td style="width:90%;">'+newItem.sku+'</td>'+
+                                '</tr>'+
+                                '<tr>'+
+                                    '<td>数量</td>'+
+                                    '<td style="width:90%;">'+Math.round(newItem.qty_ordered)+'</td>'+
+                                '</tr>'+
+                                '<tr>'+
+                                    '<td>处方类型</td>'+
+                                    '<td style="width:90%;">'+(newItem.prescription_type != undefined ? newItem.prescription_type : '')+'</td>'+
+                                '</tr>'+
+                                '<tr>'+
+                                    '<td>镜片类型</td>'+
+                                    '<td style="width:90%;">'+(newItem.index_type != undefined ? newItem.index_type : '')+'</td>'+
+                                '</tr>'+
+                                '<tr>'+
+                                    '<td>镀膜类型</td>'+
+                                    '<td style="width:90%;">'+(newItem.coatiing_name !=undefined ? newItem.coatiing_name : '')+'</td>'+
+                                '</tr>'+      
+                               '</table>'+
+                                '</div>'+
+                                '</div>'+
+                                '<div class="col-xs-6 col-md-7" style="float:right;">'+
+                                '<table id="caigou-table" class="handle_table2">'+
+                                '<tr>'+
+                                '<td colspan="10" style="text-align: center;">处方参数</td>'+
+                                '</tr>'+
+                                '<tr>'+
+                                '<td>参数</td>'+
+                                '<td>SPH</td>'+
+                                '<td>CYL</td>'+
+                                '<td>AXI</td>'+
+                                '<td>ADD</td>'+
+                                '<td>PD</td>'+
+                                '<td>Prism Horizontal</td>'+
+                                '<td>Base Direction</td>'+
+                                '<td>Prism Vertical</td>'+
+                                '<td>Base Direction</td>'+
+                                '</tr>'+
+                                '<tr>'+
+                                '<td>Right(OD)</td>'+
+                                '<td>'+(newItem.od_sph !=undefined ? newItem.od_sph : '')+'</td>'+
+                                '<td>'+(newItem.od_cyl  != undefined ? newItem.od_cyl : "")+'</td>'+
+                                '<td>'+(newItem.od_axis != undefined ? newItem.od_axis : "")+'</td>';
+                                if(newItem.total_add){
+                                    Str+= '<td rowspan="2">'+(newItem.total_add  != undefined ? newItem.total_add : "")+'</td>';
+                                }else{
+                                    Str+='<td>'+(newItem.os_add  != undefined ? newItem.os_add : "")+'</td>';
+                                }
+                            Str+= '<td>'+(newItem.pd_r    != undefined ? newItem.pd_r: "")+'</td>'+
+                                '<td>'+(newItem.od_pv != undefined ? newItem.od_pv: "")+'</td>'+
+                                '<td>'+(newItem.od_bd != undefined ? newItem.od_bd:"")+'</td>'+
+                                '<td>'+(newItem.od_pv_r != undefined ? newItem.od_pv_r:"")+'</td>'+
+                                '<td>'+(newItem.od_bd_r != undefined ? newItem.od_bd_r:"")+'</td>'+
+                                '</tr>'+
+                                '<tr>'+
+                                '<td>Left(OS)</td>'+
+                                '<td>'+(newItem.os_sph != undefined ? newItem.os_sph : "")+'</td>'+
+                                '<td>'+(newItem.os_cyl != undefined ? newItem.os_cyl :"")+'</td>'+
+                                '<td>'+(newItem.os_axis != undefined ? newItem.os_axis :"")+'</td>';
+                                if(!newItem.total_add){
+                                    Str+='<td>'+(newItem.od_add != undefined ? newItem.od_add :"")+'</td>';
+                                }
+                                    Str+='<td>'+(newItem.pd_l != undefined ? newItem.pd_l :"")+'</td>'+
+                                '<td>'+(newItem.os_pv != undefined ? newItem.os_pv : "")+'</td>'+
+                                '<td>'+(newItem.os_bd != undefined ? newItem.os_bd : "")+'</td>'+
+                                '<td>'+(newItem.os_pv_r!= undefined ? newItem.os_pv_r : "")+'</td>'+
+                                '<td>'+(newItem.os_bd_r!= undefined ? newItem.os_bd_r : "")+'</td>'+
+                                '</tr>'+
+                                '</table>'+
+                                '</div>'+
+                                '</div>';
+                                return Str;
                             });
                         }
                         //console.log(ret);
