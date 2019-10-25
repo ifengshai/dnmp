@@ -10,6 +10,7 @@
 // | Author: liu21st <liu21st@gmail.com>
 // +----------------------------------------------------------------------
 use think\Env;
+
 error_reporting(E_ERROR | E_WARNING | E_PARSE);
 return [
     // +----------------------------------------------------------------------
@@ -57,7 +58,7 @@ return [
     // 默认模块名
     'default_module'         => 'admin',
     // 禁止访问模块
-    'deny_module_list'       => ['common'],
+    'deny_module_list'       => ['common', 'admin'],
     // 默认控制器名
     'default_controller'     => 'Index',
     // 默认操作名
