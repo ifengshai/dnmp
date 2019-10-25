@@ -117,7 +117,7 @@ class Index extends Backend
         } elseif ($label == 3) {
             $goods = NihaoPrescriptionDetailHelper::get_list_by_entity_ids($ids);
         }
-       
+    
         //获取支付信息
         $pay = $this->zeelool->getPayDetail($label, $ids);
 
