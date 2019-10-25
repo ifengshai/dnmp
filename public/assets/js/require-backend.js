@@ -108,7 +108,7 @@ require.config({
             exports: 'jqui'
         },
         //新增自定义的样式文件
-        // 'bootstrap':['css!../css/custom.css',],
+        'bootstrap':['css!../css/custom.css',],
         'bootstrap-datetimepicker': [
             'moment/locale/zh-cn',
 //            'css!../libs/eonasdan-bootstrap-datetimepicker/build/css/bootstrap-datetimepicker.min.css',
