@@ -89,7 +89,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                                     extend: 'data-area = \'["100%","100%"]\'',
                                     classname: 'btn btn-xs btn-primary btn-dialog',
                                     icon: 'fa fa-list',
-                                    url: '/admin/itemmanage/item/detail',
+                                    url: Config.moduleurl + '/itemmanage/item/detail',
                                     callback: function (data) {
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
                                     },
@@ -104,7 +104,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                                     title: __('Edit'),
                                     classname: 'btn btn-xs btn-success btn-dialog',
                                     icon: 'fa fa-pencil',
-                                    url: '/admin/itemmanage/item/edit',
+                                    url: Config.moduleurl + '/itemmanage/item/edit',
                                     extend: 'data-area = \'["100%","100%"]\'',
                                     callback: function (data) {
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
@@ -125,7 +125,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                                     title: __('提交审核'),
                                     classname: 'btn btn-xs btn-success btn-ajax',
                                     icon: 'fa fa-pencil',
-                                    url: '/admin/itemmanage/item/audit',
+                                    url: Config.moduleurl + '/itemmanage/item/audit',
                                     confirm: '确认提交审核吗',
                                     success: function (data, ret) {
                                         Layer.alert(ret.msg);
@@ -152,7 +152,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                                     title: __('审核通过'),
                                     classname: 'btn btn-xs btn-success btn-ajax',
                                     icon: 'fa fa-pencil',
-                                    url: '/admin/itemmanage/item/passAudit',
+                                    url: Config.moduleurl + '/itemmanage/item/passAudit',
                                     confirm: '确认审核通过吗',
                                     success: function (data, ret) {
                                         Layer.alert(ret.msg);
@@ -179,7 +179,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                                     title: __('审核拒绝'),
                                     classname: 'btn btn-xs btn-danger btn-ajax',
                                     icon: 'fa fa-pencil',
-                                    url: '/admin/itemmanage/item/auditRefused',
+                                    url: Config.moduleurl + '/itemmanage/item/auditRefused',
                                     confirm: '确认审核拒绝吗',
                                     success: function (data, ret) {
                                         Layer.alert(ret.msg);
@@ -206,7 +206,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                                     title: __('取消'),
                                     classname: 'btn btn-xs btn-danger btn-ajax',
                                     icon: 'fa fa-pencil',
-                                    url: '/admin/itemmanage/item/cancel',
+                                    url: Config.moduleurl + '/itemmanage/item/cancel',
                                     confirm: '确认取消吗',
                                     success: function (data, ret) {
                                         Layer.alert(ret.msg);
@@ -656,7 +656,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                                     extend: 'data-area = \'["100%","100%"]\'',
                                     classname: 'btn btn-xs btn-primary btn-dialog',
                                     icon: 'fa fa-list',
-                                    url: '/admin/itemmanage/item/detail',
+                                    url: Config.moduleurl + '/itemmanage/item/detail',
                                     callback: function (data) {
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
                                     },
@@ -671,7 +671,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                                     title: __('还原'),
                                     classname: 'btn btn-xs btn-success btn-ajax',
                                     icon: 'fa fa-pencil',
-                                    url: '/admin/itemmanage/item/oneRestore',
+                                    url: Config.moduleurl + '/itemmanage/item/oneRestore',
                                     confirm: '确认还原吗',
                                     success: function (data, ret) {
                                         Layer.alert(ret.msg);
@@ -794,7 +794,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                                     extend: 'data-area = \'["100%","100%"]\'',
                                     classname: 'btn btn-xs btn-primary btn-dialog',
                                     icon: 'fa fa-list',
-                                    url: '/admin/itemmanage/item/goods_stock_detail',
+                                    url: Config.moduleurl + '/itemmanage/item/goods_stock_detail',
                                     callback: function (data) {
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
                                     },

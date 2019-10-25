@@ -187,7 +187,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'editable'], function
                     { icon: 3, title: __('Warning'), shadeClose: true },
                     function (index) {
                         Backend.api.ajax({
-                            url: '/admin/warehouse/inventory/endInventory',
+                            url: Config.moduleurl + '/warehouse/inventory/endInventory',
                             data: { inventory_id: ids }
                         }, function (data, ret) {
                             Layer.close(index);
@@ -203,7 +203,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'editable'], function
             $(document).on('click', '.btn-open', function () {
                 var ids = Table.api.selectedids(table);
                 Backend.api.ajax({
-                    url: '/admin/warehouse/inventory/setStatus',
+                    url: Config.moduleurl + '/warehouse/inventory/setStatus',
                     data: { ids: ids, status: 2 }
                 }, function (data, ret) {
                     table.bootstrapTable('refresh');
@@ -214,7 +214,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'editable'], function
             $(document).on('click', '.btn-close', function () {
                 var ids = Table.api.selectedids(table);
                 Backend.api.ajax({
-                    url: '/admin/warehouse/inventory/setStatus',
+                    url: Config.moduleurl + '/warehouse/inventory/setStatus',
                     data: { ids: ids, status: 3 }
                 }, function (data, ret) {
                     table.bootstrapTable('refresh');
@@ -304,7 +304,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'editable'], function
                 $(document).on('click', '.btn-adds', function () {
                     var arr = table1.bootstrapTable('getSelections');
                     Backend.api.ajax({
-                        url: '/admin/warehouse/inventory/addTempProduct',
+                        url: Config.moduleurl + '/warehouse/inventory/addTempProduct',
                         data: { data: JSON.stringify(arr) }
                     }, function (data, ret) {
                         table1.bootstrapTable('refresh');
@@ -366,24 +366,24 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'editable'], function
                 $(document).on('click', '.btn-create', function () {
                     var arr = table2.bootstrapTable('getSelections');
                     Backend.api.ajax({
-                        url: '/admin/warehouse/inventory/createInventory',
+                        url: Config.moduleurl + '/warehouse/inventory/createInventory',
                         data: { data: JSON.stringify(arr) }
                     }, function (data, ret) {
-                        window.location.href = '/admin/warehouse/inventory/index';
+                        window.location.href = Config.moduleurl + '/warehouse/inventory/index';
                     }, function (data, ret) {
-                        window.location.href = '/admin/warehouse/inventory/index';
+                        window.location.href = Config.moduleurl + '/warehouse/inventory/index';
                     });
                 })
 
                 //全部创建
                 $(document).on('click', '.btn-createall', function () {
                     Backend.api.ajax({
-                        url: '/admin/warehouse/inventory/createInventory',
+                        url: Config.moduleurl + '/warehouse/inventory/createInventory',
                         data: { data: 'all' }
                     }, function (data, ret) {
-                        window.location.href = '/admin/warehouse/inventory/index';
+                        window.location.href = Config.moduleurl + '/warehouse/inventory/index';
                     }, function (data, ret) {
-                        window.location.href = '/admin/warehouse/inventory/index';
+                        window.location.href = Config.moduleurl + '/warehouse/inventory/index';
                     });
                 })
             }
@@ -455,7 +455,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'editable'], function
                 $(document).on('click', '.btn-adds', function () {
                     var arr = table1.bootstrapTable('getSelections');
                     Backend.api.ajax({
-                        url: '/admin/warehouse/inventory/addInventoryItem',
+                        url: Config.moduleurl + '/warehouse/inventory/addInventoryItem',
                         data: { data: JSON.stringify(arr), inventory_id: Config.id }
                     }, function (data, ret) {
                         table1.bootstrapTable('refresh');
@@ -586,7 +586,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'editable'], function
                     data: { inventory_id: inventory_id }
                 }, function (data) {
                     Layer.closeAll();
-                    parent.location.href = '/admin/warehouse/inventory/index';
+                    parent.location.href = Config.moduleurl + '/warehouse/inventory/index';
                 })
             })
         },

@@ -136,7 +136,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
             $(document).on('click', '.btn-open', function () {
                 var ids = Table.api.selectedids(table);
                 Backend.api.ajax({
-                    url: '/admin/warehouse/instock/setStatus',
+                    url: Config.moduleurl + '/warehouse/instock/setStatus',
                     data: { ids: ids, status: 2 }
                 }, function (data, ret) {
                     table.bootstrapTable('refresh');
@@ -147,7 +147,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
             $(document).on('click', '.btn-close', function () {
                 var ids = Table.api.selectedids(table);
                 Backend.api.ajax({
-                    url: '/admin/warehouse/instock/setStatus',
+                    url: Config.moduleurl + '/warehouse/instock/setStatus',
                     data: { ids: ids, status: 3 }
                 }, function (data, ret) {
                     table.bootstrapTable('refresh');
@@ -185,7 +185,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                 var id = $(this).parent().parent().find('.item_id').val();
                 if (id) {
                     Backend.api.ajax({
-                        url: '/admin/warehouse/instock/deleteItem',
+                        url: Config.moduleurl + '/warehouse/instock/deleteItem',
                         data: { id: id }
                     });
                 }
@@ -220,9 +220,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
 
                 //切换采购单
                 $(document).on('change', '.check_id', function () {
+                    
                     var id = $(this).val();
                     if (id) {
-                        var url = '/admin/warehouse/instock/getCheckData';
+                        var url = Config.moduleurl + '/warehouse/instock/getCheckData';
                         Backend.api.ajax({
                             url: url,
                             data: { id: id }
@@ -254,7 +255,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                     source: function (request, response) {
                         $.ajax({
                             type: "POST",
-                            url: "/admin/itemmanage/item/ajaxGetLikeOriginSku",
+                            url: Config.moduleurl + "/itemmanage/item/ajaxGetLikeOriginSku",
                             dataType: "json",
                             cache: false,
                             async: false,
@@ -293,7 +294,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                         source: function (request, response) {
                             $.ajax({
                                 type: "POST",
-                                url: "/admin/itemmanage/item/ajaxGetLikeOriginSku",
+                                url: Config.moduleurl + "/itemmanage/item/ajaxGetLikeOriginSku",
                                 dataType: "json",
                                 cache: false,
                                 async: false,

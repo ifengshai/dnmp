@@ -137,7 +137,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             $(document).on('click', '.btn-open', function () {
                 var ids = Table.api.selectedids(table);
                 Backend.api.ajax({
-                    url: '/admin/warehouse/check/setStatus',
+                    url: Config.moduleurl + '/warehouse/check/setStatus',
                     data: { ids: ids, status: 2 }
                 }, function (data, ret) {
                     table.bootstrapTable('refresh');
@@ -148,7 +148,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             $(document).on('click', '.btn-close', function () {
                 var ids = Table.api.selectedids(table);
                 Backend.api.ajax({
-                    url: '/admin/warehouse/check/setStatus',
+                    url: Config.moduleurl + '/warehouse/check/setStatus',
                     data: { ids: ids, status: 3 }
                 }, function (data, ret) {
                     table.bootstrapTable('refresh');
@@ -227,7 +227,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 var id = $(this).parent().parent().find('.item_id').val();
                 if (id) {
                     Backend.api.ajax({
-                        url: '/admin/warehouse/check/deleteItem',
+                        url: Config.moduleurl + '/warehouse/check/deleteItem',
                         data: { id: id }
                     });
                 }
@@ -304,7 +304,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 $(document).on('change', '.purchase_id', function () {
                     var id = $(this).val();
                     if (id) {
-                        var url = '/admin/warehouse/check/getPurchaseData';
+                        var url = Config.moduleurl + '/warehouse/check/getPurchaseData';
                         Backend.api.ajax({
                             url: url,
                             data: { id: id }

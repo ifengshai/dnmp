@@ -56,7 +56,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast'], func
                                     extend: 'data-area = \'["100%","100%"]\'',
                                     classname: 'btn btn-xs btn-primary btn-dialog',
                                     icon: 'fa fa-list',
-                                    url: '/admin/new_product/detail',
+                                    url: Config.moduleurl + '/new_product/detail',
                                     callback: function (data) {
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
                                     },
@@ -71,7 +71,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast'], func
                                     title: __('Edit'),
                                     classname: 'btn btn-xs btn-success btn-dialog',
                                     icon: 'fa fa-pencil',
-                                    url: '/admin/new_product/edit',
+                                    url: Config.moduleurl + '/new_product/edit',
                                     extend: 'data-area = \'["100%","100%"]\'',
                                     callback: function (data) {
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
@@ -93,7 +93,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast'], func
                                     title: __('取消'),
                                     classname: 'btn btn-xs btn-danger btn-ajax',
                                     icon: 'fa fa-remove',
-                                    url: '/admin/new_product/cancel',
+                                    url: Config.moduleurl + '/new_product/cancel',
                                     confirm: '确认取消吗',
                                     success: function (data, ret) {
                                         Layer.alert(ret.msg);

@@ -221,7 +221,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             $(document).on('click', '.btn-open', function () {
                 var ids = Table.api.selectedids(table);
                 Backend.api.ajax({
-                    url: '/admin/purchase/purchase_order/setStatus',
+                    url: Config.moduleurl + '/purchase/purchase_order/setStatus',
                     data: { ids: ids, status: 2 }
                 }, function (data, ret) {
                     table.bootstrapTable('refresh');
@@ -232,7 +232,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             $(document).on('click', '.btn-close', function () {
                 var ids = Table.api.selectedids(table);
                 Backend.api.ajax({
-                    url: '/admin/purchase/purchase_order/setStatus',
+                    url: Config.moduleurl + '/purchase/purchase_order/setStatus',
                     data: { ids: ids, status: 3 }
                 }, function (data, ret) {
                     table.bootstrapTable('refresh');
@@ -254,7 +254,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             //批量匹配SKU
             $(document).on('click', '.btn-matching', function (e) {
                 e.preventDefault();
-                var url = '/admin/purchase/purchase_order/matching';
+                var url = Config.moduleurl + '/purchase/purchase_order/matching';
                 layer.load();
                 Backend.api.ajax({
                     url: url,
@@ -284,7 +284,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             $(document).on('change', '.supplier', function () {
                 var id = $(this).val();
                 Backend.api.ajax({
-                    url: '/admin/purchase/contract/getSupplierData',
+                    url: Config.moduleurl + '/purchase/contract/getSupplierData',
                     data: { id: id }
                 }, function (data, ret) {
                     $('.supplier_address').val(data.address);
@@ -313,7 +313,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             //判断合同是否有默认值
             var contract_id = $('.contract_id').val();
             if (contract_id) {
-                var url = '/admin/purchase/purchase_order/getContractData';
+                var url = Config.moduleurl + '/purchase/purchase_order/getContractData';
                 Backend.api.ajax({
                     url: url,
                     data: { id: contract_id }
@@ -337,7 +337,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     Layer.confirm(__('确定删除此数据吗?'), function () {
                         _this.parent().parent().remove();
                         Backend.api.ajax({
-                            url: '/admin/purchase/purchase_order/deleteItem',
+                            url: Config.moduleurl + '/purchase/purchase_order/deleteItem',
                             data: { id: id }
                         }, function () {
                             Layer.closeAll();
@@ -363,7 +363,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 var id = $(this).data('id');
                 if (id) {
                     Backend.api.ajax({
-                        url: '/admin/purchase/purchase_order/confirmDiff',
+                        url: Config.moduleurl + '/purchase/purchase_order/confirmDiff',
                         data: { id: id }
                     }, function (data, ret) {
                         location.reload();
@@ -377,7 +377,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             //判断合同是否有默认值
             var contract_id = $('.contract_id').val();
             if (contract_id) {
-                var url = '/admin/purchase/purchase_order/getContractData';
+                var url = Config.moduleurl + '/purchase/purchase_order/getContractData';
                 Backend.api.ajax({
                     url: url,
                     data: { id: contract_id }
@@ -404,7 +404,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 $(document).on('change', '.contract_id', function () {
                     var id = $(this).val();
                     if (id) {
-                        var url = '/admin/purchase/purchase_order/getContractData';
+                        var url = Config.moduleurl + '/purchase/purchase_order/getContractData';
                         Backend.api.ajax({
                             url: url,
                             data: { id: id }

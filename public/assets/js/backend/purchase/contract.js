@@ -96,7 +96,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             $(document).on('click', '.btn-open', function () {
                 var ids = Table.api.selectedids(table);
                 Backend.api.ajax({
-                    url: '/admin/purchase/contract/setStatus',
+                    url: Config.moduleurl + '/purchase/contract/setStatus',
                     data: { ids: ids, status: 2 }
                 }, function (data, ret) {
                     table.bootstrapTable('refresh');
@@ -107,7 +107,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             $(document).on('click', '.btn-close', function () {
                 var ids = Table.api.selectedids(table);
                 Backend.api.ajax({
-                    url: '/admin/purchase/contract/setStatus',
+                    url: Config.moduleurl + '/purchase/contract/setStatus',
                     data: { ids: ids, status: 3 }
                 }, function (data, ret) {
                     table.bootstrapTable('refresh');
@@ -198,7 +198,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 var id = $(this).parent().parent().find('.item_id').val();
                 if (id) {
                     Backend.api.ajax({
-                        url: '/admin/purchase/contract/deleteItem',
+                        url: Config.moduleurl + '/purchase/contract/deleteItem',
                         data: { id: id }
                     });
                 }
@@ -303,7 +303,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 $(document).on('change', '.supplier', function () {
                     var id = $(this).val();
                     Backend.api.ajax({
-                        url: '/admin/purchase/contract/getSupplierData',
+                        url: Config.moduleurl + '/purchase/contract/getSupplierData',
                         data: { id: id }
                     }, function (data, ret) {
                         $('#c-seller_address').val(data.address);

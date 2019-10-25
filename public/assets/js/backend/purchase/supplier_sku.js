@@ -67,7 +67,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
             $(document).on('click', '.btn-open', function () {
                 var ids = Table.api.selectedids(table);
                 Backend.api.ajax({
-                    url: '/admin/purchase/supplier_sku/setStatus',
+                    url: Config.moduleurl + '/purchase/supplier_sku/setStatus',
                     data: { ids: ids, status: 1 }
                 }, function (data, ret) {
                     table.bootstrapTable('refresh');
@@ -78,7 +78,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
             $(document).on('click', '.btn-close', function () {
                 var ids = Table.api.selectedids(table);
                 Backend.api.ajax({
-                    url: '/admin/purchase/supplier_sku/setStatus',
+                    url: Config.moduleurl + '/purchase/supplier_sku/setStatus',
                     data: { ids: ids, status: 2 }
                 }, function (data, ret) {
                     table.bootstrapTable('refresh');

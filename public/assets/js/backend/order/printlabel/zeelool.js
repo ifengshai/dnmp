@@ -92,7 +92,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     id_params += row['entity_id'] + ',';
                 });
 
-                window.open('/admin/order/printlabel/zeelool/batch_print_label/id_params/' + id_params, '_blank');
+                window.open(Config.moduleurl + '/order/printlabel/zeelool/batch_print_label/id_params/' + id_params, '_blank');
             });
 
             //批量导出xls 
@@ -102,7 +102,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 $.each(table.bootstrapTable('getSelections'), function (index, row) {
                     id_params += row['entity_id'] + ',';
                 });
-                window.open('/admin/order/printlabel/zeelool/batch_export_xls/id_params/' + id_params, '_blank');
+                window.open(Config.moduleurl + '/order/printlabel/zeelool/batch_export_xls/id_params/' + id_params, '_blank');
             });
 
             //批量标记已打印    
@@ -114,7 +114,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     function (index) {
                         Layer.close(index);
                         Backend.api.ajax({
-                            url: '/admin/order/printlabel/zeelool/tag_printed',
+                            url: Config.moduleurl + '/order/printlabel/zeelool/tag_printed',
                             data: { id_params: ids },
                             type: 'post'
                         }, function (data, ret) {
@@ -138,7 +138,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     function (index) {
                         Layer.close(index);
                         Backend.api.ajax({
-                            url: '/admin/order/printlabel/zeelool/setOrderStatus',
+                            url: Config.moduleurl + '/order/printlabel/zeelool/setOrderStatus',
                             data: { id_params: ids, status: status },
                             type: 'post'
                         }, function (data, ret) {
@@ -154,7 +154,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             $(document).on('input', '#search_val', function (events) {
                 if (event.target.value.length == 9) {
                     Backend.api.ajax({
-                        url: '/admin/order/printlabel/zeelool/index',
+                        url: Config.moduleurl + '/order/printlabel/zeelool/index',
                         data: { increment_id: event.target.value },
                         type: 'post'
                     }, function (data, ret) {
@@ -269,7 +269,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     id_params += row['entity_id'] + ',';
                 });
 
-                window.open('/admin/order/printlabel/zeelool/batch_print_label/id_params/' + id_params, '_blank');
+                window.open(Config.moduleurl + '/order/printlabel/zeelool/batch_print_label/id_params/' + id_params, '_blank');
             });
 
             //批量导出xls 
@@ -279,7 +279,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 $.each(table.bootstrapTable('getSelections'), function (index, row) {
                     id_params += row['entity_id'] + ',';
                 });
-                window.open('/admin/order/printlabel/zeelool/batch_export_xls/id_params/' + id_params, '_blank');
+                window.open(Config.moduleurl + '/order/printlabel/zeelool/batch_export_xls/id_params/' + id_params, '_blank');
             });
 
             //批量标记已打印    
@@ -293,7 +293,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     function (index) {
                         Layer.close(index);
                         Backend.api.ajax({
-                            url: '/admin/order/printlabel/zeelool/tag_printed',
+                            url: Config.moduleurl + '/order/printlabel/zeelool/tag_printed',
                             data: { id_params: ids, label: 'list' },
                             type: 'post'
                         }, function (data) {
@@ -334,7 +334,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     function (index) {
                         Layer.close(index);
                         Backend.api.ajax({
-                            url: '/admin/order/printlabel/zeelool/setOrderStatus',
+                            url: Config.moduleurl + '/order/printlabel/zeelool/setOrderStatus',
                             data: { id_params: ids, status: status, label: 'list' },
                             type: 'post'
                         }, function (row) {
@@ -367,7 +367,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             $(document).on('input', '#search_val', function (events) {
                 if (event.target.value.length == 9) {
                     Backend.api.ajax({
-                        url: '/admin/order/printlabel/zeelool/_list',
+                        url: Config.moduleurl + '/order/printlabel/zeelool/_list',
                         data: { increment_id: event.target.value },
                         type: 'post'
                     }, function (data, ret) {

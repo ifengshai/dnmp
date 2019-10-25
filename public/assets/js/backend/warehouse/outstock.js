@@ -108,7 +108,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
             $(document).on('click', '.btn-open', function () {
                 var ids = Table.api.selectedids(table);
                 Backend.api.ajax({
-                    url: '/admin/warehouse/outstock/setStatus',
+                    url: Config.moduleurl + '/warehouse/outstock/setStatus',
                     data: { ids: ids, status: 2 }
                 }, function (data, ret) {
                     table.bootstrapTable('refresh');
@@ -119,7 +119,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
             $(document).on('click', '.btn-close', function () {
                 var ids = Table.api.selectedids(table);
                 Backend.api.ajax({
-                    url: '/admin/warehouse/outstock/setStatus',
+                    url: Config.moduleurl + '/warehouse/outstock/setStatus',
                     data: { ids: ids, status: 3 }
                 }, function (data, ret) {
                     table.bootstrapTable('refresh');
@@ -156,7 +156,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                 var id = $(this).parent().parent().find('.item_id').val();
                 if (id) {
                     Backend.api.ajax({
-                        url: '/admin/warehouse/outstock/deleteItem',
+                        url: Config.moduleurl + '/warehouse/outstock/deleteItem',
                         data: { id: id }
                     });
                 }
@@ -252,7 +252,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                     var _this = $(this);
                     var sku = _this.val();
                     Backend.api.ajax({
-                        url: '/admin/itemmanage/item/ajaxGoodsInfo',
+                        url: Config.moduleurl + '/itemmanage/item/ajaxGoodsInfo',
                         data: { sku: sku }
                     }, function (res) {
                         if (res) {

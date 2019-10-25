@@ -48,7 +48,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             $(document).on('click', '.btn-open', function () {
                 var ids = Table.api.selectedids(table);
                 Backend.api.ajax({
-                    url: '/admin/warehouse/stock_house/setStatus',
+                    url: Config.moduleurl + '/warehouse/stock_house/setStatus',
                     data: { ids: ids, status: 1 }
                 }, function (data, ret) {
                     table.bootstrapTable('refresh');
@@ -59,7 +59,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             $(document).on('click', '.btn-close', function () {
                 var ids = Table.api.selectedids(table);
                 Backend.api.ajax({
-                    url: '/admin/warehouse/stock_house/setStatus',
+                    url: Config.moduleurl + '/warehouse/stock_house/setStatus',
                     data: { ids: ids, status: 2 }
                 }, function (data, ret) {
                     table.bootstrapTable('refresh');

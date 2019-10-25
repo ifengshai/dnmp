@@ -108,7 +108,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 var id = $(this).parent().parent().find('.item_id').val();
                 if (id) {
                     Backend.api.ajax({
-                        url: '/admin/purchase/purchase_return/deleteItem',
+                        url: Config.moduleurl + '/purchase/purchase_return/deleteItem',
                         data: { id: id }
                     });
                 }
@@ -125,7 +125,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 $(document).on('change', '.purchase_id', function () {
                     var id = $(this).val();
                     if (id) {
-                        var url = '/admin/purchase/purchase_return/getPurchaseData';
+                        var url = Config.moduleurl + '/purchase/purchase_return/getPurchaseData';
                         Backend.api.ajax({
                             url: url,
                             data: { id: id }

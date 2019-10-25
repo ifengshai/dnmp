@@ -94,7 +94,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui'], function ($, 
                                 //     text: '上架',
                                 //     title: __('上架'),
                                 //     classname: 'btn btn-xs btn-success btn-ajax',
-                                //     url: '/admin/itemmanage/item_platform_sku/putaway',
+                                //     url: Config.moduleurl + '/itemmanage/item_platform_sku/putaway',
                                 //     confirm: '确定要上架吗',
                                 //     success: function (data, ret) {
                                 //         Layer.alert(ret.msg);
@@ -121,7 +121,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui'], function ($, 
                                 //     text: '下架',
                                 //     title: __('下架'),
                                 //     classname: 'btn btn-xs btn-danger btn-ajax',
-                                //     url: '/admin/itemmanage/item_platform_sku/soldOut',
+                                //     url: Config.moduleurl + '/itemmanage/item_platform_sku/soldOut',
                                 //     confirm: '确定要下架吗',
                                 //     success: function (data, ret) {
                                 //         Layer.alert(ret.msg);
@@ -148,7 +148,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui'], function ($, 
                                     text: '上传至对应平台',
                                     title: __('上传至对应平台'),
                                     classname: 'btn btn-xs btn-success btn-ajax',
-                                    url: '/admin/itemmanage/item_platform_sku/afterUploadItem',
+                                    url: Config.moduleurl + '/itemmanage/item_platform_sku/afterUploadItem',
                                     confirm: '确定要上传到对应平台吗',
                                     success: function (data, ret) {
                                         Layer.alert(ret.msg);
@@ -167,7 +167,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui'], function ($, 
                                     text: '上传商品图片',
                                     title: __('上传商品图片到平台'),
                                     classname: 'btn btn-xs btn-success btn-ajax',
-                                    url: '/admin/itemmanage/item_platform_sku/uploadImagesToPlatform',
+                                    url: Config.moduleurl + '/itemmanage/item_platform_sku/uploadImagesToPlatform',
                                     confirm: '确定要上传到对应平台吗',
                                     success: function (data, ret) {
                                         Layer.alert(ret.msg);
@@ -197,7 +197,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui'], function ($, 
                     __('确定要传至对应的平台吗'),
                     function (index) {
                         Backend.api.ajax({
-                            url: "/admin/itemmanage/item_platform_sku/uploadItem",
+                            url: Config.moduleurl + "/itemmanage/item_platform_sku/uploadItem",
                             data: { ids: ids,platformId:platformId }
                         }, function (data, ret) {
                             table.bootstrapTable('refresh');
@@ -403,7 +403,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui'], function ($, 
                                     text: '上架',
                                     title: __('上架'),
                                     classname: 'btn btn-xs btn-success btn-ajax',
-                                    url: '/admin/itemmanage/item_platform_sku/putaway',
+                                    url: Config.moduleurl + '/itemmanage/item_platform_sku/putaway',
                                     confirm: '确定要上架吗',
                                     success: function (data, ret) {
                                         Layer.alert(ret.msg);
@@ -430,7 +430,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui'], function ($, 
                                     text: '下架',
                                     title: __('下架'),
                                     classname: 'btn btn-xs btn-danger btn-ajax',
-                                    url: '/admin/itemmanage/item_platform_sku/soldOut',
+                                    url: Config.moduleurl + '/itemmanage/item_platform_sku/soldOut',
                                     confirm: '确定要下架吗',
                                     success: function (data, ret) {
                                         Layer.alert(ret.msg);
@@ -457,7 +457,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui'], function ($, 
                                     text: '开启预售',
                                     title: __('开启预售'),
                                     classname: 'btn btn-xs btn-danger btn-ajax',
-                                    url: '/admin/itemmanage/item_platform_sku/openStart',
+                                    url: Config.moduleurl + '/itemmanage/item_platform_sku/openStart',
                                     confirm: '确定要开启预售吗',
                                     success: function (data, ret) {
                                         Layer.alert(ret.msg);
@@ -484,7 +484,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui'], function ($, 
                                     text: '结束预售',
                                     title: __('结束预售'),
                                     classname: 'btn btn-xs btn-danger btn-ajax',
-                                    url: '/admin/itemmanage/item_platform_sku/openEnd',
+                                    url: Config.moduleurl + '/itemmanage/item_platform_sku/openEnd',
                                     confirm: '确定要结束预售吗',
                                     success: function (data, ret) {
                                         Layer.alert(ret.msg);

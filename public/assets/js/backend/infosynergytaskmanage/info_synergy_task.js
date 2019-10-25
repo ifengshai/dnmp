@@ -79,7 +79,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     title: __('处理任务'),
                                     classname: 'btn btn-xs btn-success btn-dialog',
                                     icon: 'fa fa-pencil',
-                                    url: '/admin/infosynergytaskmanage/info_synergy_task/edit',
+                                    url: Config.moduleurl + '/infosynergytaskmanage/info_synergy_task/edit',
                                     extend: 'data-area = \'["100%","100%"]\'',
                                     callback: function (data) {
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
@@ -94,7 +94,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     title: __('处理完成'),
                                     classname: 'btn btn-xs btn-success btn-ajax',
                                     icon: 'fa fa-pencil',
-                                    url: '/admin/infosynergytaskmanage/info_synergy_task/handleComplete',
+                                    url: Config.moduleurl + '/infosynergytaskmanage/info_synergy_task/handleComplete',
                                     confirm: '确认要处理完成吗',
                                     success: function (data, ret) {
                                         Layer.alert(ret.msg);

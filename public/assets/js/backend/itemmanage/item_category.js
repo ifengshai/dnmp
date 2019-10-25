@@ -83,7 +83,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     __('确定要传至对应的平台吗'),
                     function (index) {
                         Backend.api.ajax({
-                            url: "/admin/itemmanage/item_category/uploadItemCategory",
+                            url: Config.moduleurl + "/itemmanage/item_category/uploadItemCategory",
                             data: { ids: ids,platformId:platformId }
                         }, function (data, ret) {
                             table.bootstrapTable('refresh');
