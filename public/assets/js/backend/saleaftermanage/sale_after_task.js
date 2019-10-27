@@ -470,7 +470,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui','custom-css'], 
                                     if(newItem.prescription_type == 'Reading Glasses' && newItem.os_add>0 && newItem.od_add>0){
                                         Str+='<td>'+(newItem.od_add  != undefined ? newItem.od_add : "")+'</td>';
                                     }else{
-                                        Str+='<td rowspan="2">'+(newItem.od_add  != undefined ? newItem.od_add : "")+'</td>';
+                                        Str+='<td rowspan="2">'+(newItem.total_add  != undefined ? newItem.total_add : "")+'</td>';
                                     }
                                 }
 
