@@ -397,7 +397,8 @@ class Query
                         $seq = (ord(substr($type($value), 0, 1)) % $rule['num']) + 1;
                     } else {
                         // 按照字段的首字母的值分表
-                        $seq = (ord($value{0}) % $rule['num']) + 1;
+                        $seq = (ord($value{
+                            0}) % $rule['num']) + 1;
                     }
             }
             return $this->getTable() . '_' . $seq;
@@ -552,7 +553,6 @@ class Query
         }
 
         return is_string($count) ? $count : (int) $count;
-
     }
 
     /**
@@ -826,6 +826,8 @@ class Query
      */
     public function field($field, $except = false, $tableName = '', $prefix = '', $alias = '')
     {
+
+
         if (empty($field)) {
             return $this;
         } elseif ($field instanceof Expression) {
@@ -839,6 +841,7 @@ class Query
             }
             $field = array_map('trim', explode(',', $field));
         }
+
         if (true === $field) {
             // 获取全部字段
             $fields = $this->getTableInfo($tableName ?: (isset($this->options['table']) ? $this->options['table'] : ''), 'fields');
@@ -849,8 +852,10 @@ class Query
             $field  = $fields ? array_diff($fields, $field) : $field;
         }
         if ($tableName) {
+
             // 添加统一的前缀
             $prefix = $prefix ?: $tableName;
+
             foreach ($field as $key => $val) {
                 if (is_numeric($key)) {
                     $val = $prefix . '.' . $val . ($alias ? ' AS ' . $alias . $val : '');
@@ -2481,10 +2486,11 @@ class Query
      */
     public function select($data = null)
     {
+
         if ($data instanceof Query) {
             return $data->select();
         } elseif ($data instanceof \Closure) {
-            call_user_func_array($data, [ & $this]);
+            call_user_func_array($data, [&$this]);
             $data = null;
         }
         // 分析查询表达式
@@ -2517,8 +2523,7 @@ class Query
             }
 
             $options['data'] = $data;
-            if ($resultSet = $this->trigger('before_select', $options)) {
-            } else {
+            if ($resultSet = $this->trigger('before_select', $options)) { } else {
                 // 执行查询操作
                 $resultSet = $this->query($sql, $bind, $options['master'], $options['fetch_pdo']);
 
@@ -2631,7 +2636,7 @@ class Query
         if ($data instanceof Query) {
             return $data->find();
         } elseif ($data instanceof \Closure) {
-            call_user_func_array($data, [ & $this]);
+            call_user_func_array($data, [&$this]);
             $data = null;
         }
         // 分析查询表达式
@@ -2680,8 +2685,7 @@ class Query
             }
             $options['data'] = $data;
             // 事件回调
-            if ($result = $this->trigger('before_find', $options)) {
-            } else {
+            if ($result = $this->trigger('before_find', $options)) { } else {
                 // 执行查询
                 $resultSet = $this->query($sql, $bind, $options['master'], $options['fetch_pdo']);
 

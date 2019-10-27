@@ -237,7 +237,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                                 shtml += ' <td>' + data[i].purchase_num + '</td>'
                                 shtml += ' <td>' + data[i].arrivals_num + '</td>'
                                 shtml += ' <td>' + data[i].quantity_num + '</td>'
-                                shtml += ' <td>' + data[i].sample_num + '</td>'
+                                shtml += ' <td><input id="c-sample_num" class="form-control" name="sample_num[]" value="' + data[i].sample_num + '" type="text"></td>'
                                 shtml += ' <td><input id="c-in_stock_num" class="form-control" name="in_stock_num[]" value="' + data[i].quantity_num + '" type="text"></td>'
                                 shtml += ' <td>'
                                 shtml += ' <a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>删除</a>'

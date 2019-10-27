@@ -84,7 +84,7 @@ class Zeelool extends Backend
                      custom_is_send_factory,custom_is_delivery,custom_match_frame_created_at,custom_match_lens_created_at,custom_match_factory_created_at,
                      custom_match_delivery_created_at,custom_print_label,custom_order_prescription,custom_print_label_created_at,custom_service_name';
             $list = $this->model
-                // ->field($field)
+                //->field($field)
                 ->where($map)
                 ->where($where)
                 ->order($sort, $order)
@@ -112,7 +112,7 @@ class Zeelool extends Backend
                 $map['increment_id'] = $increment_id;
                 $map['status'] = ['in', ['free_processing', 'processing', 'complete']];
                 $list = $this->model
-                    // ->field($field)
+                    ->field('*')
                     ->where($map)
                     ->find();
                 $result = ['code' => 1, 'data' => $list ?? []];
@@ -148,7 +148,7 @@ class Zeelool extends Backend
             $map['entity_id'] = ['in', $entity_ids];
             $data['custom_print_label'] = 1;
             $data['custom_print_label_created_at'] = date('Y-m-d H:i:s', time());
-            $data['custom_print_label_person'] =  session('admin.username');
+            $data['custom_print_label_person'] =  session('admin.nickname');
             $connect = Db::connect('database.db_zeelool')->table('sales_flat_order');
             $connect->startTrans();
             try {
@@ -195,25 +195,25 @@ class Zeelool extends Backend
                     //配镜架
                     $data['custom_is_match_frame'] = 1;
                     $data['custom_match_frame_created_at'] = date('Y-m-d H:i:s', time());
-                    $data['custom_match_frame_person'] = session('admin.username');
+                    $data['custom_match_frame_person'] = session('admin.nickname');
                     break;
                 case 2:
                     //配镜片
                     $data['custom_is_match_lens'] = 1;
                     $data['custom_match_lens_created_at'] = date('Y-m-d H:i:s', time());
-                    $data['custom_match_lens_person'] = session('admin.username');
+                    $data['custom_match_lens_person'] = session('admin.nickname');
                     break;
                 case 3:
                     //移送加工时间
                     $data['custom_is_send_factory'] = 1;
                     $data['custom_match_factory_created_at'] = date('Y-m-d H:i:s', time());
-                    $data['custom_match_factory_person'] = session('admin.username');
+                    $data['custom_match_factory_person'] = session('admin.nickname');
                     break;
                 case 4:
                     //质检
                     $data['custom_is_delivery'] = 1;
                     $data['custom_match_delivery_created_at'] = date('Y-m-d H:i:s', time());
-                    $data['custom_match_delivery_person'] = session('admin.username');
+                    $data['custom_match_delivery_person'] = session('admin.nickname');
                     break;
                 default:
             }

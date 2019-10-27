@@ -23,7 +23,7 @@ class Index extends Backend
         parent::_initialize();
         $this->nihao = new \app\admin\model\order\order\Nihao;
         $this->zeelool = new \app\admin\model\order\order\Zeelool;
-        $this->voogueme = new \app\admin\model\order\order\Voogueme;
+        $this->voogueme = new \app\admin\model\order\order\Voogueme;        
     }
 
     /**
@@ -56,6 +56,7 @@ class Index extends Backend
                 $model = $this->nihao;
             }
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            
             $total = $model
                 ->where($where)
                 ->order($sort, $order)

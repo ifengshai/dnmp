@@ -840,13 +840,8 @@ class Item extends Backend
                 ->where($purchase_map)
                 ->column('sku,purchase_num,instock_num', 'sku');
 
-            //查询样品数量
-            $check = new \app\admin\model\warehouse\CheckItem;
-            $check_list = $check->where('sku', 'in', $skus)->column('sum(sample_num) as sample_num', 'sku');
-
             foreach ($list as &$v) {
-                $v['on_way_stock'] = @$purchase_list[$v['sku']]['purchase_num'] - @$purchase_list[$v['sku']]['instock_num'];
-                $v['sample_stock'] = @$check_list[$v['sku']]['sample_num'];
+                $v['on_way_stock'] = @$purchase_list[$v['sku']]['purchase_num'] - @$purchase_list[$v['sku']]['instock_num'];     
             }
             unset($v);
             $result = array("total" => $total, "rows" => $list);
