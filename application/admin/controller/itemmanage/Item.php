@@ -841,7 +841,8 @@ class Item extends Backend
                 ->column('sku,purchase_num,instock_num', 'sku');
 
             foreach ($list as &$v) {
-                $v['on_way_stock'] = @$purchase_list[$v['sku']]['purchase_num'] - @$purchase_list[$v['sku']]['instock_num'];     
+                $v['on_way_stock'] = @$purchase_list[$v['sku']]['purchase_num'] - @$purchase_list[$v['sku']]['instock_num'];
+               
             }
             unset($v);
             $result = array("total" => $total, "rows" => $list);
