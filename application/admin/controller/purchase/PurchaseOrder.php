@@ -739,6 +739,7 @@ class PurchaseOrder extends Backend
         ];
         //根据不同的状态取订单数据
         $success_data = Alibaba::getOrderList(1, $params);
+        dump($success_data);die;
         set_time_limit(0);
         $data = cache('Crontab_getAlibabaPurchaseOrder_' . date('YmdH') . md5(serialize($params)));
         if ($data) {
@@ -760,7 +761,7 @@ class PurchaseOrder extends Backend
             cache('Crontab_getAlibabaPurchaseOrder_' . date('YmdH') . md5(serialize($params)), $data, 3600);
         }
        
-        dump($data);die;
+        
         foreach ($data as $key => $val) {
             if (!$val) {
                 continue;
