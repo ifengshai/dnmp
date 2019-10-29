@@ -747,20 +747,16 @@ class PurchaseOrder extends Backend
             if ($success_data) {
                 $success_data = collection($success_data)->toArray();
             }
-            dump($success_data);
             $data = [];
             for ($i = 1; $i <= round($success_data['totalRecord'] / 50); $i++) {
 
                 //根据不同的状态取订单数据
                 $data[$i] = Alibaba::getOrderList($i, $params)->result;
             }
-            dump($data);
-
             //设置缓存
             cache('Crontab_getAlibabaPurchaseOrder_' . date('YmdH') . md5(serialize($params)), $data, 3600);
         }
        
-        dump($data);die;
         foreach ($data as $key => $val) {
             if (!$val) {
                 continue;
