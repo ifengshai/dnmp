@@ -105,8 +105,8 @@ class Ajax extends Backend
             '{.suffix}'  => $suffix ? '.' . $suffix : '',
             '{filemd5}'  => md5_file($fileInfo['tmp_name']),
         ];
-        $changeDir = $this->request->get('dir');
-//        dump($changeDir);
+        $changeDir = $this->request->param('dir');
+
 //        //$savekey = $upload['savekey'];
         $savekey = $changeDir ? "/uploads/{$changeDir}/{year}{mon}{day}/{filemd5}{.suffix}" : $upload['savekey'];
         $savekey = str_replace(array_keys($replaceArr), array_values($replaceArr), $savekey);
