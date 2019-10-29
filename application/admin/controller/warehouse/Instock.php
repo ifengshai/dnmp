@@ -222,14 +222,14 @@ class Instock extends Backend
                         $item_id = $this->request->post("item_id/a");
                         $in_stock_num = $this->request->post("in_stock_num/a");
                         $data = [];
-                        foreach (array_filter($sku) as $k => $v) { 
+                        foreach (array_filter($sku) as $k => $v) {
                             $data[$k]['sku'] = $v;
                             $data[$k]['in_stock_num'] = $in_stock_num[$k];
                             $data[$k]['no_stock_num'] = $in_stock_num[$k];
                             if (@$item_id[$k]) {
                                 $data[$k]['id'] = $item_id[$k];
                             } else {
-                                $data[$k]['in_stock_id'] = $ids;  
+                                $data[$k]['in_stock_id'] = $ids;
                             }
                         }
                         //批量添加
@@ -369,48 +369,65 @@ class Instock extends Backend
         try {
             $data['create_person'] = session('admin.nickname');
             $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
-            /**
-             * @todo 审核通过增加库存 并添加入库单入库数量
-             */
-            
-            foreach ($list as $k => $v) {
-                //更新商品表商品总库存
-                //总库存
-                $item_map['sku'] = $v['sku'];
-                $item_map['is_del'] = 1;
-                if ($v['sku']) {
-                    $item->where($item_map)->setInc('stock', $v['in_stock_num']);
-                    //可用库存
-                    $item->where($item_map)->setInc('available_stock', $v['in_stock_num']);
 
-                    $item->where($item_map)->setInc('sample_num', $v['sample_num']);
+            if ($data['status'] == 2) {
+                /**
+                 * @todo 审核通过增加库存 并添加入库单入库数量
+                 */
+                foreach ($list as $k => $v) {
+                    //更新商品表商品总库存
+                    //总库存
+                    $item_map['sku'] = $v['sku'];
+                    $item_map['is_del'] = 1;
+                    if ($v['sku']) {
+                        $stock_res = $item->where($item_map)->setInc('stock', $v['in_stock_num']);
+                        //可用库存
+                        $available_stock_res = $item->where($item_map)->setInc('available_stock', $v['in_stock_num']);
+
+                        $sample_num_res = $item->where($item_map)->setInc('sample_num', $v['sample_num']);
+                    }
+
+                    if ($stock_res === false || $available_stock_res === false || $sample_num_res === false) {
+                        $error_num[] = $k;
+                    }
+
+                    //根据质检id 查询采购单id 
+                    $check = new \app\admin\model\warehouse\Check;
+                    $purchase_id = $check->where('id', $v['check_id'])->value('purchase_id');
+                    //更新采购商品表 入库数量 如果为真则为采购入库
+                    if ($purchase_id) {
+                        $purchase_map['sku'] = $v['sku'];
+                        $purchase_map['purchase_id'] = $purchase_id;
+                        $purchase->where($purchase_map)->setInc('instock_num', $v['in_stock_num']);
+
+                        //更新采购单状态 已入库 或 部分入库
+                        //查询采购单商品总到货数量 以及采购数量
+                        //查询质检信息
+                        $check_map['purchase_id'] = $purchase_id;
+                        $check_map['type'] = 1;
+                        $check = new \app\admin\model\warehouse\Check;
+                        //总到货数量
+                        $all_arrivals_num = $check->hasWhere('checkItem')->where($check_map)->sum('arrivals_num');
+
+                        $all_purchase_num = $purchase->where('purchase_id', $purchase_id)->sum('purchase_num');
+                        //总入库数量 小于 采购单采购数量 则为部分入库 
+                        if ($all_arrivals_num < $all_purchase_num) {
+                            $stock_status = 1;
+                        } else {
+                            $stock_status = 2;
+                        }
+                        //修改采购单质检状态
+                        $purchase_data['stock_status'] = $stock_status;
+                        $this->purchase->allowField(true)->save($purchase_data, ['id' => $purchase_id]);
+                    }
                 }
 
-
-                //根据质检id 查询采购单id 
-                $check = new \app\admin\model\warehouse\Check;
-                $purchase_id = $check->where('id', $v['check_id'])->value('purchase_id');
-                //更新采购商品表 入库数量 如果为真则为采购入库
-                if ($purchase_id) {
-                    $purchase_map['sku'] = $v['sku'];
-                    $purchase_map['purchase_id'] = $purchase_id;
-                    $purchase->where($purchase_map)->setInc('instock_num', $v['in_stock_num']);
-
-                    //更新采购单状态 已入库 或 部分入库
-                    //查询采购单商品总入库数量 以及采购数量
-                    $all_stock_num = $purchase->where('purchase_id', $purchase_id)->sum('instock_num');
-                    $all_purchase_num = $purchase->where('purchase_id', $purchase_id)->sum('purchase_num');
-                    //总入库数量 小于 采购单采购数量 则为部分入库 
-                    if ($all_stock_num < $all_purchase_num) {
-                        $stock_status = 1;
-                    } else {
-                        $stock_status = 2;
-                    }
-                    //修改采购单质检状态
-                    $purchase_data['stock_status'] = $stock_status;
-                    $this->purchase->allowField(true)->save($purchase_data, ['id' => $purchase_id]);
+                //有错误 则回滚数据
+                if (count($error_num) > 0) {
+                    throw new Exception("入库失败！！请检查SKU");
                 }
             }
+
 
             $this->model->commit();
             $item->commit();

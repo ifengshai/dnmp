@@ -97,9 +97,6 @@ class PurchaseReturn extends Backend
                     $params['create_person'] = session('admin.username');
                     $params['createtime'] = date('Y-m-d H:i:s', time());
                     $result = $this->model->allowField(true)->save($params);
-
-
-
                     //添加产品信息
                     if ($result !== false) {
 
@@ -174,7 +171,7 @@ class PurchaseReturn extends Backend
 
         //查询采购单
         $purchase = new \app\admin\model\purchase\PurchaseOrder;
-        $purchase_data = $purchase->getPurchaseData();
+        $purchase_data = $purchase->getPurchaseReturnData([2], [1, 2]);
         $this->assign('purchase_data', $purchase_data);
 
 
@@ -292,7 +289,7 @@ class PurchaseReturn extends Backend
 
         //查询采购单
         $purchase = new \app\admin\model\purchase\PurchaseOrder;
-        $purchase_data = $purchase->getPurchaseData();
+        $purchase_data = $purchase->getPurchaseReturnData([2], [1, 2]);
         $this->assign('purchase_data', $purchase_data);
 
 
@@ -370,7 +367,7 @@ class PurchaseReturn extends Backend
 
         //查询采购单
         $purchase = new \app\admin\model\purchase\PurchaseOrder;
-        $purchase_data = $purchase->getPurchaseData();
+        $purchase_data = $purchase->getPurchaseReturnData([2], [1, 2]);
         $this->assign('purchase_data', $purchase_data);
 
 

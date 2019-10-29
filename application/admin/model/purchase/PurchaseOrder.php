@@ -23,9 +23,7 @@ class PurchaseOrder extends Model
     protected $deleteTime = false;
 
     // 追加属性
-    protected $append = [
-        
-    ];
+    protected $append = [];
 
 
     /**
@@ -38,6 +36,21 @@ class PurchaseOrder extends Model
         $data = $this->where($where)->column('purchase_number', 'id');
         return $data;
     }
+
+    /**
+     * 获取采购单
+     */
+    public function getPurchaseReturnData($check_status = [0, 1], $instock_status)
+    {
+        if ($instock_status) {
+            $where['stock_status'] = ['in', $instock_status];
+        }
+        $where['purchase_status'] = 7;
+        $where['check_status']  = ['in', $check_status];
+        $data = $this->where($where)->column('purchase_number', 'id');
+        return $data;
+    }
+
 
     /**
      * 采购单明细表
