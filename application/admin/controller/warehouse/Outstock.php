@@ -105,7 +105,7 @@ class Outstock extends Backend
                         $sku = $this->request->post("sku/a");
                         $out_stock_num = $this->request->post("out_stock_num/a");
                         $data = [];
-                        foreach ($sku as $k => $v) {
+                        foreach (array_filter($sku) as $k => $v) {
                             $data[$k]['sku'] = $v;
                             $data[$k]['out_stock_num'] = $out_stock_num[$k];
                             $data[$k]['out_stock_id'] = $this->model->id;
@@ -180,7 +180,7 @@ class Outstock extends Backend
                         $item_id = $this->request->post("item_id/a");
                         $out_stock_num = $this->request->post("out_stock_num/a");
                         $data = [];
-                        foreach ($sku as $k => $v) {
+                        foreach (array_filter($sku) as $k => $v) {
                             $data[$k]['sku'] = $v;
                             $data[$k]['out_stock_num'] = $out_stock_num[$k];
                             if (@$item_id[$k]) {

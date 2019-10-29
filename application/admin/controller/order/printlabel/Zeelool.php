@@ -7,7 +7,8 @@ use app\common\controller\Backend;
 use think\Db;
 use think\Loader;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
-
+use think\Exception;
+use think\exception\PDOException;
 use Util\ZeeloolPrescriptionDetailHelper;
 use Util\SKUHelper;
 
@@ -84,7 +85,7 @@ class Zeelool extends Backend
                      custom_is_send_factory,custom_is_delivery,custom_match_frame_created_at,custom_match_lens_created_at,custom_match_factory_created_at,
                      custom_match_delivery_created_at,custom_print_label,custom_order_prescription,custom_print_label_created_at,custom_service_name';
             $list = $this->model
-                // ->field($field)
+                //->field($field)
                 ->where($map)
                 ->where($where)
                 ->order($sort, $order)
@@ -112,7 +113,6 @@ class Zeelool extends Backend
                 $map['increment_id'] = $increment_id;
                 $map['status'] = ['in', ['free_processing', 'processing', 'complete']];
                 $list = $this->model
-                    // ->field($field)
                     ->where($map)
                     ->find();
                 $result = ['code' => 1, 'data' => $list ?? []];
@@ -148,17 +148,16 @@ class Zeelool extends Backend
             $map['entity_id'] = ['in', $entity_ids];
             $data['custom_print_label'] = 1;
             $data['custom_print_label_created_at'] = date('Y-m-d H:i:s', time());
-            $data['custom_print_label_person'] =  session('admin.username');
-            $connect = Db::connect('database.db_zeelool')->table('sales_flat_order');
-            $connect->startTrans();
+            $data['custom_print_label_person'] =  session('admin.nickname');
+            $this->model->startTrans();
             try {
-                $result = $connect->where($map)->update($data);
-                $connect->commit();
+                $result = $this->model->where($map)->update($data);
+                $this->model->commit();
             } catch (PDOException $e) {
-                $connect->rollback();
+                $this->model->rollback();
                 $this->error($e->getMessage());
             } catch (Exception $e) {
-                $connect->rollback();
+                $this->model->rollback();
                 $this->error($e->getMessage());
             }
             if ($result) {
@@ -195,38 +194,74 @@ class Zeelool extends Backend
                     //配镜架
                     $data['custom_is_match_frame'] = 1;
                     $data['custom_match_frame_created_at'] = date('Y-m-d H:i:s', time());
-                    $data['custom_match_frame_person'] = session('admin.username');
+                    $data['custom_match_frame_person'] = session('admin.nickname');
                     break;
                 case 2:
                     //配镜片
                     $data['custom_is_match_lens'] = 1;
                     $data['custom_match_lens_created_at'] = date('Y-m-d H:i:s', time());
-                    $data['custom_match_lens_person'] = session('admin.username');
+                    $data['custom_match_lens_person'] = session('admin.nickname');
                     break;
                 case 3:
                     //移送加工时间
                     $data['custom_is_send_factory'] = 1;
                     $data['custom_match_factory_created_at'] = date('Y-m-d H:i:s', time());
-                    $data['custom_match_factory_person'] = session('admin.username');
+                    $data['custom_match_factory_person'] = session('admin.nickname');
                     break;
                 case 4:
-                    //质检
+                    //质检通过
                     $data['custom_is_delivery'] = 1;
                     $data['custom_match_delivery_created_at'] = date('Y-m-d H:i:s', time());
-                    $data['custom_match_delivery_person'] = session('admin.username');
+                    $data['custom_match_delivery_person'] = session('admin.nickname');
                     break;
                 default:
             }
-            $connect = Db::connect('database.db_zeelool')->table('sales_flat_order');
-            $connect->startTrans();
+            $item = new \app\admin\model\itemmanage\Item;
+            $this->model->startTrans();
+            $item->startTrans();
             try {
-                $result = $connect->where($map)->update($data);
-                $connect->commit();
+                $result = $this->model->where($map)->update($data);
+                //质检通过扣减库存
+                if ($status == 4) {
+                    //查询出质检通过的订单
+                    $res = $this->model->alias('a')->where($map)->field('sku,qty_ordered')->join(['sales_flat_order_item' => 'b'],'a.entity_id = b.order_id')->select();
+                    if(!$res){
+                        throw new Exception("未查询到订单数据！！");
+                    };
+
+                    $ItemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku;
+                    //查出订单SKU映射表对应的仓库SKU
+                    foreach ($res as $k => $v) {
+                        $trueSku = $ItemPlatformSku->getTrueSku($v['sku'], 1);
+                        //总库存
+                        $item_map['sku'] = $trueSku;
+                        $item_map['is_del'] = 1;
+                        if ($v['sku']) {
+                            //扣减总库存 扣减占用库存
+                            $res_one = $item->where($item_map)->setDec('stock', $v['qty_ordered']);
+                            //占用库存
+                            $res_two = $item->where($item_map)->setDec('occupy_stock', $v['qty_ordered']);
+                        }
+
+                        if (!$res_one || !$res_two) {
+                            $error[] = $k;
+                        }
+                    }
+
+                    if(count($error)){
+                        throw new Exception("扣减库存失败！！请检查SKU");
+                    };
+                    $item->commit();
+                }
+
+                $this->model->commit();
             } catch (PDOException $e) {
-                $connect->rollback();
+                $item->rollback();
+                $this->model->rollback();
                 $this->error($e->getMessage());
             } catch (Exception $e) {
-                $connect->rollback();
+                $item->rollback();
+                $this->model->rollback();
                 $this->error($e->getMessage());
             }
             if ($result) {

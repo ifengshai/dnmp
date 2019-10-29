@@ -12,7 +12,6 @@ class Zeelool extends Model
 
 
     //数据库
-    // protected $connection = 'database';
     protected $connection = 'database.db_zeelool';
 
 
@@ -30,6 +29,7 @@ class Zeelool extends Model
     // 追加属性
     protected $append = [];
 
+    
     //名称获取器
     public function getCustomerFirstnameAttr($value, $data)
     {
@@ -109,7 +109,7 @@ class Zeelool extends Model
                 if ($arr_value[0]) {
                     $lens_params[$arr_value[0]] = $arr_value[1];
                 }
-                
+
 
                 //处理ADD转换    
                 if (@$lens_params['os_add'] && @$lens_params['od_add']) {
@@ -121,7 +121,7 @@ class Zeelool extends Model
                 if (@$lens_params['pdcheck'] == 'on') {
                     $lens_params['pd'] = '';
                 }
-                
+
                 if (@$lens_params['prismcheck'] != 'on') {
                     $lens_params['od_pv'] = '';
                     $lens_params['od_bd'] = '';
@@ -138,7 +138,7 @@ class Zeelool extends Model
             $v['product_options']['tmplens'] = $v['product_options']['info_buyRequest']['tmplens'];
         }
         unset($v);
-        
+
         if (!$result) {
             return false;
         }
@@ -174,9 +174,9 @@ class Zeelool extends Model
             ->field('additional_information,base_amount_paid,base_amount_ordered,base_shipping_amount,method,last_trans_id')
             ->where($map)
             ->find();
-    
+
         $result['additional_information'] =  unserialize($result['additional_information']);
-        
+
         if (!$result) {
             return false;
         }

@@ -705,6 +705,8 @@ class Inventory extends Backend
                         unset($v);
                         //批量添加
                         $instockItem->allowField(true)->saveAll($instockItemList);
+                    } else {
+                        throw new Exception('生成入库记录失败！！数据回滚');
                     }
                 }
 
@@ -729,6 +731,8 @@ class Inventory extends Backend
                         }
                         //批量添加
                         $outstockItem->allowField(true)->saveAll($outstockItemList);
+                    } else {
+                        throw new Exception('生成出库记录失败！！数据回滚');
                     }
                 }
             }
@@ -965,8 +969,5 @@ class Inventory extends Backend
             $this->error($e->getMessage());
         }
      }
-
-
-
     }
 }

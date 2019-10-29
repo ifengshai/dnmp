@@ -59,7 +59,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui','custom-css'], 
                         {field: 'sale_after_issue.name', title: __('Problem_id'),operate:false},
                         {field: 'problem_desc', title: __('problem_desc'),formatter:Controller.api.formatter.getClear,operate:false},
                         {field: 'create_person', title: __('Create_person')},
-                        {field: 'createtime', title: __('Createtime'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime},
+                        {field: 'create_time', title: __('Createtime'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime},
                         // {field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate,
                         //     buttons:[{
                         //         name:'detail',

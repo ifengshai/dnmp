@@ -1,6 +1,7 @@
 <?php
 
 namespace app\admin\model\itemmanage;
+
 use think\Db;
 use think\Model;
 use app\admin\model\platformmanage\MagentoPlatform;
@@ -12,7 +13,7 @@ class ItemPlatformSku extends Model
     protected $connection = 'database.db_stock';
     // 表名
     protected $name = 'item_platform_sku';
-    
+
     // 自动写入时间戳字段
     protected $autoWriteTimestamp = false;
 
@@ -22,9 +23,7 @@ class ItemPlatformSku extends Model
     protected $deleteTime = false;
 
     // 追加属性
-    protected $append = [
-
-    ];
+    protected $append = [];
     //关联item
     public function item()
     {
@@ -33,16 +32,15 @@ class ItemPlatformSku extends Model
     //添加商品平台sku
     public function addPlatformSku($row)
     {
-        $res = $this->where('sku',$row['sku'])->field('sku,name')->find();
-        return $res;
-        if($res){
-            return false;
-        }
+        // $res = $this->where('sku',$row['sku'])->field('sku,name')->find();
+        // if($res){
+        //     return false;
+        // }
         $platform = (new MagentoPlatform())->getOrderPlatformList();
-        if(!empty($platform) && is_array($platform)){
+        if (!empty($platform) && is_array($platform)) {
             $arr = [];
-            foreach ($platform as $k =>$v){
-                switch ($v){
+            foreach ($platform as $k => $v) {
+                switch ($v) {
                     case 'zeelool':
                         $prefix = 'Z';
                         break;
@@ -57,7 +55,7 @@ class ItemPlatformSku extends Model
                         break;
                 }
                 $arr[$k]['sku'] = $row['sku'];
-                $arr[$k]['platform_sku'] = $prefix.$row['sku'];
+                $arr[$k]['platform_sku'] = $prefix . $row['sku'];
                 $arr[$k]['name'] = $row['name'];
                 $arr[$k]['platform_type'] = $k;
                 $arr[$k]['create_person'] = session('admin.nickname') ? session('admin.nickname') : 'Admin';
@@ -65,18 +63,16 @@ class ItemPlatformSku extends Model
             }
             $result = $this->allowField(true)->saveAll($arr);
             return $result ? $result : false;
-        }else{
+        } else {
             return false;
         }
-
-
     }
     /***
      * 查找平台SKU
      */
     public function likePlatformSku($sku)
     {
-        $result = $this->where('platform_sku','like',"%{$sku}%")->field('platform_sku')->limit(10)->select();
+        $result = $this->where('platform_sku', 'like', "%{$sku}%")->field('platform_sku')->limit(10)->select();
         if (!$result) {
             return false;
         }
@@ -91,7 +87,7 @@ class ItemPlatformSku extends Model
      */
     public function getPlatformSku($platform_sku)
     {
-        $result = $this->where('platform_sku','eq',$platform_sku)->field('id,platform_sku')->find();
+        $result = $this->where('platform_sku', 'eq', $platform_sku)->field('id,platform_sku')->find();
         return $result ? $result : false;
     }
     /***
@@ -99,8 +95,8 @@ class ItemPlatformSku extends Model
      */
     public function findItemPlatform_yuan($id)
     {
-        $result = $this->alias('g')->where('g.id','=',$id)->join('magento_platform p','g.platform_type=p.id')
-                 ->field('g.id,g.sku,g.platform_sku,g.platform_type,g.magento_id,g.is_upload,g.is_upload_images,g.uploaded_images,p.id as platform_id,p.status,p.magento_account,p.magento_key,p.magento_url,p.is_upload_item,p.is_del,p.name,p.item_attr_name,p.item_type,p.upload_field')->find();
+        $result = $this->alias('g')->where('g.id', '=', $id)->join('magento_platform p', 'g.platform_type=p.id')
+            ->field('g.id,g.sku,g.platform_sku,g.platform_type,g.magento_id,g.is_upload,g.is_upload_images,g.uploaded_images,p.id as platform_id,p.status,p.magento_account,p.magento_key,p.magento_url,p.is_upload_item,p.is_del,p.name,p.item_attr_name,p.item_type,p.upload_field')->find();
         return $result ? $result : false;
     }
     /***
@@ -108,12 +104,12 @@ class ItemPlatformSku extends Model
      */
     public function findItemPlatform($id)
     {
-        $resultItem = $this->where('id','=',$id)->field('id,sku,platform_sku,platform_type,magento_id,is_upload,is_upload_images,uploaded_images')->find();
-        if(!$resultItem){
+        $resultItem = $this->where('id', '=', $id)->field('id,sku,platform_sku,platform_type,magento_id,is_upload,is_upload_images,uploaded_images')->find();
+        if (!$resultItem) {
             return false;
         }
-        $resultPlatform = Db::name('magento_platform')->where('id','=',$resultItem['platform_type'])->field('id as platform_id,status,magento_account,magento_key,magento_url,is_upload_item,is_del,name,item_attr_name,item_type,upload_field')->find();
-        if(!$resultPlatform){
+        $resultPlatform = Db::name('magento_platform')->where('id', '=', $resultItem['platform_type'])->field('id as platform_id,status,magento_account,magento_key,magento_url,is_upload_item,is_del,name,item_attr_name,item_type,upload_field')->find();
+        if (!$resultPlatform) {
             return $resultItem;
         }
         $resultItem['platform_id']      = $resultPlatform['platform_id'];
@@ -142,4 +138,16 @@ class ItemPlatformSku extends Model
         return $result;
     }
 
+    /**
+     * 根据平台SKU查出仓库SKU
+     * @param $sku 平台SKU
+     * @param $platform_type 对应平台
+     * @return string
+     */
+    public function getTrueSku($sku = '', $platform_type = '')
+    { 
+        $map['platform_sku'] = $sku;
+        $map['platform_type'] = $platform_type;
+        return $this->where($map)->value('sku');
+    }
 }

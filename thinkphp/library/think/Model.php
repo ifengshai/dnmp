@@ -116,7 +116,9 @@ abstract class Model implements \JsonSerializable, \ArrayAccess
      *
      * @var array
      */
-    protected static $initialized = [];
+    protected static $initialized = [
+
+    ];
 
     /**
      * 是否从主库读取（主从分布式有效）
@@ -177,6 +179,9 @@ abstract class Model implements \JsonSerializable, \ArrayAccess
         }
         // 执行初始化操作
         $this->initialize();
+
+        //修改时区
+        $this->query("set time_zone='+8:00'");
     }
 
     /**
@@ -230,6 +235,7 @@ abstract class Model implements \JsonSerializable, \ArrayAccess
         if (!empty($this->pk)) {
             $query->pk($this->pk);
         }
+        
 
         return $query;
     }

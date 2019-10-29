@@ -32,6 +32,15 @@ class OrderReturn extends Model
     {
         return $this->belongsTo('sale_after_issue', 'issue_id')->setEagerlyType(0);
     }
+
+    /**
+     * 获取退货单单号
+     */
+    public function getOrderReturnData()
+    {
+        $map['is_del'] = 1;
+        return $this->where($map)->column('return_order_number','id');
+    }
     
 
 

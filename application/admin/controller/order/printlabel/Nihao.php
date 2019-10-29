@@ -7,7 +7,8 @@ use app\common\controller\Backend;
 use think\Db;
 use think\Loader;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
-
+use think\Exception;
+use think\exception\PDOException;
 use Util\NihaoPrescriptionDetailHelper;
 use Util\SKUHelper;
 
@@ -204,16 +205,51 @@ class Nihao extends Backend
                     break;
                 default:
             }
-            $connect = Db::connect('database.db_nihao')->table('sales_flat_order');
-            $connect->startTrans();
+            $item = new \app\admin\model\itemmanage\Item;
+            $this->model->startTrans();
+            $item->startTrans();
             try {
-                $result = $connect->where($map)->update($data);
-                $connect->commit();
+                $result = $this->model->where($map)->update($data);
+
+                //质检通过扣减库存
+                if ($status == 4) {
+                    //查询出质检通过的订单
+                    $res = $this->model->alias('a')->where($map)->field('sku,qty_ordered')->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->select();
+                    if (!$res) {
+                        throw new Exception("未查询到订单数据！！");
+                    };
+
+                    $ItemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku;
+                    //查出订单SKU映射表对应的仓库SKU
+                    foreach ($res as $k => $v) {
+                        $trueSku = $ItemPlatformSku->getTrueSku($v['sku'], 3);
+                        //总库存
+                        $item_map['sku'] = $trueSku;
+                        $item_map['is_del'] = 1;
+                        if ($v['sku']) {
+                            //扣减总库存 扣减占用库存
+                            $res_one = $item->where($item_map)->setDec('stock', $v['qty_ordered']);
+                            //占用库存
+                            $res_two = $item->where($item_map)->setDec('occupy_stock', $v['qty_ordered']);
+                        }
+
+                        if (!$res_one || !$res_two) {
+                            $error[] = $k;
+                        }
+                    }
+
+                    if (count($error)) {
+                        throw new Exception("扣减库存失败！！请检查SKU");
+                    };
+                    $item->commit();
+                }
+
+                $this->model->commit();
             } catch (PDOException $e) {
-                $connect->rollback();
+                $this->model->rollback();
                 $this->error($e->getMessage());
             } catch (Exception $e) {
-                $connect->rollback();
+                $this->model->rollback();
                 $this->error($e->getMessage());
             }
             if ($result) {

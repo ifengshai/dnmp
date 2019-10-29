@@ -29,7 +29,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         { field: 'check_order_number', title: __('Check_order_number') },
                         { field: 'type', title: __('Type'), custom: { 1: 'success', 2: 'success' }, searchList: { 1: '采购质检', 2: '退货质检' }, formatter: Table.api.formatter.status },
                         { field: 'purchase_order.purchase_number', title: __('Purchase_id') },
-                        { field: 'order_number', title: __('Order_number') },
+                        { field: 'order_return.return_order_number', title: __('退货单号') },
                         { field: 'supplier.supplier_name', title: __('Supplier_id') },
                         { field: 'remark', title: __('Remark'), operate: false },
                         {
@@ -96,7 +96,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     },
                                     visible: function (row) {
                                         //返回true时按钮显示,返回false隐藏
-                                        if (row.status == 0 ) {
+                                        if (row.status == 0) {
                                             return true;
                                         } else {
                                             return false;
@@ -241,6 +241,18 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
         },
         detail: function () {
             Controller.api.bindevent();
+            //上传文件
+            $(document).on('click', '.pluploads', function () {
+                var _this = $(this);
+                var url = _this.parent().parent().parent().find('.unqualified_images').val();
+                Fast.api.open(
+                    'warehouse/check/uploads?img_url=' + url, '上传文件', {
+                    callback: function (data) {
+                        _this.parent().parent().parent().find('.unqualified_images').val(data.unqualified_images);
+                    }
+                }
+                )
+            })
         },
         api: {
             bindevent: function (success, error) {
@@ -265,26 +277,45 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
 
                 //计算不合格数量及合格率
                 $(document).on('blur', '.arrivals_num', function () {
-                    var check_num = $(this).parent().prev().find('input').val();
-                    var arrivals_num = $(this).val();
-                    var quantity_num = $(this).parent().next().find('.quantity_num').val();
-                    var sample_num = $(this).parent().next().next().find('.sample_num').val();
-                    var not_quantity_num = arrivals_num * 1 - quantity_num * 1 - sample_num * 1;
+                    var type = $('.type').val();
+                    if (type == 1) {
+                        var check_num = $(this).parent().prev().find('input').val();
+                        var arrivals_num = $(this).val();
+                        var quantity_num = $(this).parent().next().find('.quantity_num').val();
+                        var sample_num = $(this).parent().next().next().find('.sample_num').val();
+                        var not_quantity_num = arrivals_num * 1 - quantity_num * 1 - sample_num * 1;
 
-                    $(this).parent().next().next().next().find('input').val(not_quantity_num);
-                    $(this).parent().next().next().next().next().find('input').val(Math.round(quantity_num / arrivals_num * 100, 2));
+                        $(this).parent().next().next().next().find('input').val(not_quantity_num);
+                        $(this).parent().next().next().next().next().find('input').val((quantity_num / arrivals_num * 100).toFixed(2));
+                    } else if (type == 2) {
+                        var arrivals_num = $(this).val();
+                        var quantity_num = $(this).parent().parent().find('.quantity_num').val();
+                        var not_quantity_num = arrivals_num * 1 - quantity_num * 1;
+                        $(this).parent().parent().find('.unqualified_num').val(not_quantity_num);
+                        $(this).parent().parent().find('.quantity_rate').val((quantity_num / arrivals_num * 100).toFixed(2));
+                    }
+
                 })
 
                 //计算不合格数量及合格率
                 $(document).on('blur', '.quantity_num', function () {
-                    var check_num = $(this).parent().prev().prev().find('input').val();
-                    var arrivals_num = $(this).parent().prev().find('input').val();
-                    var quantity_num = $(this).val();
-                    var sample_num = $(this).parent().next().find('.sample_num').val();
-                    var not_quantity_num = arrivals_num * 1 - quantity_num * 1 - sample_num * 1;
+                    var type = $('.type').val();
+                    if (type == 1) {
+                        var check_num = $(this).parent().prev().prev().find('input').val();
+                        var arrivals_num = $(this).parent().prev().find('input').val();
+                        var quantity_num = $(this).val();
+                        var sample_num = $(this).parent().next().find('.sample_num').val();
+                        var not_quantity_num = arrivals_num * 1 - quantity_num * 1 - sample_num * 1;
 
-                    $(this).parent().next().next().find('input').val(not_quantity_num);
-                    $(this).parent().next().next().next().find('input').val(Math.round(quantity_num / arrivals_num * 100, 2));
+                        $(this).parent().next().next().find('input').val(not_quantity_num);
+                        $(this).parent().next().next().next().find('input').val((quantity_num / arrivals_num * 100).toFixed(2));
+                    } else if (type == 2) {
+                        var arrivals_num = $(this).parent().parent().find('.arrivals_num').val();
+                        var quantity_num = $(this).val();
+                        var not_quantity_num = arrivals_num * 1 - quantity_num * 1;
+                        $(this).parent().parent().find('.unqualified_num').val(not_quantity_num);
+                        $(this).parent().parent().find('.quantity_rate').val((quantity_num / arrivals_num * 100).toFixed(2));
+                    }
                 })
 
                 //计算不合格数量及合格率
@@ -296,11 +327,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     var not_quantity_num = arrivals_num * 1 - quantity_num * 1 - sample_num * 1;
 
                     $(this).parent().next().find('input').val(not_quantity_num);
-                    $(this).parent().next().next().find('input').val(Math.round(quantity_num / arrivals_num * 100, 2));
+                    $(this).parent().next().next().find('input').val((quantity_num / arrivals_num * 100).toFixed(2));
                 })
 
 
-                //切换合同 异步获取合同数据
+                //采购单
                 $(document).on('change', '.purchase_id', function () {
                     var id = $(this).val();
                     if (id) {
@@ -341,6 +372,44 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
 
                 })
 
+
+                //退货单
+                $(document).on('change', '.order_return_id', function () {
+                    var id = $(this).val();
+                    if (id) {
+                        var url = Config.moduleurl + '/warehouse/check/getOrderReturnData';
+                        Backend.api.ajax({
+                            url: url,
+                            data: { id: id }
+                        }, function (data, ret) {
+                            $('#toolbar').hide();
+                            $('.supplier').val(data.supplier_id);
+                            //循环展示商品信息
+                            var shtml = ' <tr><th>SKU</th><th>退货数量</th><th>到货数量</th><th>合格数量</th><th>不合格数量</th><th>合格率</th><th>备注</th><th>上传图片</th><th>操作</th></tr>';
+                            $('.caigou table tbody').html('');
+                            for (var i in data) {
+                                shtml += ' <tr><td><input id="c-purchase_remark" class="form-control" name="sku[]" type="text" value="' + data[i].return_sku + '"></td>'
+                                shtml += ' <td>' + data[i].return_sku_qty + '</td>'
+                                shtml += ' <td><input id="c-purchase_remark" class="form-control arrivals_num" name="arrivals_num[]" type="text"></td>'
+                                shtml += ' <td><input id="c-purchase_remark" class="form-control quantity_num" name="quantity_num[]" type="text"></td>'
+                                shtml += ' <td><input id="c-purchase_remark" class="form-control unqualified_num" name="unqualified_num[]" type="text"></td>'
+                                shtml += '  <td><input id="c-purchase_remark" class="form-control quantity_rate" name="quantity_rate[]" type="text">%</td>'
+                                shtml += ' <td><input style="width: 200px;" id="c-purchase_remark" class="form-control remark" name="remark[]" type="text"></td>'
+                                shtml += ' <td><input id="c-unqualified_images" style="width: 150px;" class="form-control unqualified_images" size="200" readonly name="unqualified_images[]" type="text"></td>'
+
+                                shtml += ' <td><span><button type="button" id="plupload-unqualified_images" class="btn btn-danger pluploads" data-input-id="c-unqualified_images" data-mimetype="image/gif,image/jpeg,image/png,image/jpg,image/bmp" data-multiple="true" data-maxcount="3" data-preview-id="p-unqualified_images"><i class="fa fa-upload"></i>'
+                                shtml += ' 上传</button></span>'
+
+                                shtml += ' <a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>删除</a>'
+                                shtml += ' </td>'
+
+                                shtml += ' </tr>'
+                            }
+                            $('.caigou table tbody').append(shtml);
+                        });
+                    }
+
+                })
 
             }
         }

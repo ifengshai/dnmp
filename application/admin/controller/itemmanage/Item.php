@@ -26,7 +26,7 @@ class Item extends Backend
     /**
      * 不需要登陆
      */
-    protected $noNeedLogin = ['pullMagentoProductInfo','ceshi','optimizeSku','pullMagentoProductInfoTwo','changeSkuToPlatformSku','findSku','skuMap'];
+    protected $noNeedLogin = ['pullMagentoProductInfo','ceshi','optimizeSku','pullMagentoProductInfoTwo','changeSkuToPlatformSku','findSku','skuMap','skuMapOne'];
 
     public function _initialize()
     {
@@ -840,13 +840,9 @@ class Item extends Backend
                 ->where($purchase_map)
                 ->column('sku,purchase_num,instock_num', 'sku');
 
-            //查询样品数量
-            $check = new \app\admin\model\warehouse\CheckItem;
-            $check_list = $check->where('sku', 'in', $skus)->column('sum(sample_num) as sample_num', 'sku');
-
             foreach ($list as &$v) {
                 $v['on_way_stock'] = @$purchase_list[$v['sku']]['purchase_num'] - @$purchase_list[$v['sku']]['instock_num'];
-                $v['sample_stock'] = @$check_list[$v['sku']]['sample_num'];
+               
             }
             unset($v);
             $result = array("total" => $total, "rows" => $list);
@@ -1355,7 +1351,8 @@ class Item extends Backend
      */
     public function changeSku()
     {
-        $result = Db::connect('database.db_stock')->table('zeelool_product')->field('magento_sku as sku,true_qty as stock,remark')->select();
+        $where['id'] = ['gt',4710];
+        $result = Db::connect('database.db_stock')->table('zeelool_product')->where($where)->field('magento_sku as sku,true_qty as stock,remark')->select();
         if(!$result){
             return false;
         }else{
@@ -1734,7 +1731,7 @@ class Item extends Backend
      */
     public function changeSkuToPlatformSku()
     {
-        $sql = "select name,sku from fa_item where is_update_platform = 1 limit 500 ";
+        $sql = "select name,sku from fa_item where is_update_platform = 0 limit 500 ";
         $result = Db::connect('database.db_stock')->query($sql);
         if(!$result){
             return false;
@@ -1743,7 +1740,7 @@ class Item extends Backend
             if(!empty($v['sku'])){
                 $info = (new ItemPlatformSku())->addPlatformSku($v);
                 if($info){
-                    Db::connect('database.db_stock')->name('item')->where(['sku'=>$v['sku']])->update(['is_update_platform'=>2]);
+                    Db::connect('database.db_stock')->name('item')->where(['sku'=>$v['sku']])->update(['is_update_platform'=>1]);
                 }
             }
         }
@@ -1773,11 +1770,26 @@ class Item extends Backend
         var_dump($finalArr);
     }
     /***
+     * 清除空的sku映射
+     */
+    public function skuMapOne(){
+        $sql = "select sku,zeelool_sku,voogueme_sku,nihao_sku from sku_map where is_update_sku=2 limit 50";
+        $result = Db::connect('database.db_stock')->query($sql);
+        if(!$result){
+            return false;
+        }
+        foreach($result as $v){
+            if(($v['zeelool_sku'] == '') && ($v['voogueme_sku'] == '') && ($v['nihao_sku'] == '')){
+                Db::connect('database.db_stock')->table('sku_map')->where(['sku'=>$v['sku']])->update(['is_update_sku'=>3]);
+            } 
+        }
+    }
+    /***
      * 找出平台映射关系表(sku_map)中的对应关系映射变更到fa_item_platform_sku当中
      */
     public function skuMap()
     {
-        $sql = "select sku,zeelool_sku,voogueme_sku,nihao_sku from sku_map where is_update_sku=1 limit 50";
+        $sql = "select sku,zeelool_sku,voogueme_sku,nihao_sku from sku_map where is_update_sku=2 limit 50";
         $result = Db::connect('database.db_stock')->query($sql);
         if(!$result){
             return false;
@@ -1788,7 +1800,7 @@ class Item extends Backend
                 $zeeloolWhere['sku'] = $v['sku'];
                 $zeeloolWhere['platform_type'] = 1;
                 $zeeloolData['platform_sku'] = $v['zeelool_sku'];
-                $zeeloolData['update_platform'] = 1;
+                $zeeloolData['update_platform'] = 2;
                 Db::connect('database.db_stock')->name('item_platform_sku')->where($zeeloolWhere)->update($zeeloolData);
                 $i++;
             }
@@ -1796,7 +1808,7 @@ class Item extends Backend
                 $vooguemeWhere['sku'] = $v['sku'];
                 $vooguemeWhere['platform_type'] = 2;
                 $vooguemeData['platform_sku'] = $v['voogueme_sku'];
-                $vooguemeData['update_platform'] = 1;
+                $vooguemeData['update_platform'] = 2;
                 Db::connect('database.db_stock')->name('item_platform_sku')->where($vooguemeWhere)->update($vooguemeData);
                 $i++;
             }
@@ -1804,11 +1816,11 @@ class Item extends Backend
                 $nihaoWhere['sku'] = $v['sku'];
                 $nihaoWhere['platform_type'] = 3;
                 $nihaoData['platform_sku'] = $v['nihao_sku'];
-                $nihaoData['update_platform'] = 1;
+                $nihaoData['update_platform'] = 2;
                 Db::connect('database.db_stock')->name('item_platform_sku')->where($nihaoWhere)->update($nihaoData);
                 $i++;
             }
-            Db::connect('database.db_stock')->table('sku_map')->where(['sku'=>$v['sku']])->update(['is_update_sku'=>2]);
+            Db::connect('database.db_stock')->table('sku_map')->where(['sku'=>$v['sku']])->update(['is_update_sku'=>3]);
         }
             echo $i;
             Db::connect('database.db_stock')->name('num')->where(['id'=>1])->setInc('num',$i);

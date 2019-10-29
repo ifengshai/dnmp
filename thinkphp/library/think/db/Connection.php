@@ -355,7 +355,6 @@ abstract class Connection
         if ($bind) {
             $this->bind = $bind;
         }
-
         Db::$queryTimes++;
         try {
             // 调试开始
@@ -376,6 +375,7 @@ abstract class Connection
             $this->PDOStatement->execute();
             // 调试结束
             $this->debug(false, '', $master);
+            
             // 返回结果集
             return $this->getResult($pdo, $procedure);
         } catch (\PDOException $e) {
@@ -577,6 +577,7 @@ abstract class Connection
         }
         $result        = $this->PDOStatement->fetchAll($this->fetchType);
         $this->numRows = count($result);
+
         return $result;
     }
 
