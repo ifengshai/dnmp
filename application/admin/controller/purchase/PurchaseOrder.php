@@ -760,6 +760,7 @@ class PurchaseOrder extends Backend
             cache('Crontab_getAlibabaPurchaseOrder_' . date('YmdH') . md5(serialize($params)), $data, 3600);
         }
        
+        dump($data);
         foreach ($data as $key => $val) {
             if (!$val) {
                 continue;
@@ -854,6 +855,7 @@ class PurchaseOrder extends Backend
                     $supplier = new Supplier;
                     $list['supplier_id'] = $supplier->getSupplierId($v->baseInfo->sellerContact->companyName);
 
+                    dump($list);
                     //添加采购单
                     $result = $this->model->allowField(true)->create($list);
 
