@@ -1,4 +1,4 @@
-define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefined, Backend, Table, Form) {
+define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($, undefined, Backend, Table, Form) {
 
     var Controller = {
         index: function () {
@@ -188,13 +188,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 $(this).parent().parent().remove();
             })
 
-            $(document).on('click', '.btn-add', function () {
-                var content = $('#table-content table tbody').html();
-                $('.caigou table tbody').append(content);
-            })
-
-
-
         },
         uploads: function () {
             Controller.api.bindevent(function (data, ret) {
@@ -233,11 +226,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 }
             })
 
-            //新增
-            $(document).on('click', '.btn-add', function () {
-                var content = $('#table-content table tbody').html();
-                $('.caigou table tbody').append(content);
-            })
+
         },
         detail: function () {
             Controller.api.bindevent();
@@ -255,10 +244,89 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             })
         },
         api: {
+            formatter: {
+
+            },
+
             bindevent: function (success, error) {
 
 
                 Form.api.bindevent($("form[role=form]"), success, error);
+
+                //模糊匹配订单
+                $('.sku').autocomplete({
+                    source: function (request, response) {
+                        $.ajax({
+                            type: "POST",
+                            url: Config.moduleurl + "/itemmanage/item/ajaxGetLikeOriginSku",
+                            dataType: "json",
+                            cache: false,
+                            async: false,
+                            data: {
+                                origin_sku: request.term
+                            },
+                            success: function (json) {
+                                var data = json.data;
+                                response($.map(data, function (item) {
+                                    return {
+                                        label: item,//下拉框显示值
+                                        value: item,//选中后，填充到input框的值
+                                        //id:item.bankCodeInfo//选中后，填充到id里面的值
+                                    };
+                                }));
+                            }
+                        });
+                    },
+                    delay: 10,//延迟100ms便于输入
+                    select: function (event, ui) {
+                        $("#bankUnionNo").val(ui.item.id);//取出在return里面放入到item中的属性
+                    },
+                    scroll: true,
+                    pagingMore: true,
+                    max: 5000
+                });
+
+
+                //新增
+                $(document).on('click', '.btn-add', function () {
+                    var content = $('#table-content table tbody').html();
+                    $('.caigou table tbody').append(content);
+
+
+                    //模糊匹配订单
+                    $('.sku').autocomplete({
+                        source: function (request, response) {
+                            $.ajax({
+                                type: "POST",
+                                url: Config.moduleurl + "/itemmanage/item/ajaxGetLikeOriginSku",
+                                dataType: "json",
+                                cache: false,
+                                async: false,
+                                data: {
+                                    origin_sku: request.term
+                                },
+                                success: function (json) {
+                                    var data = json.data;
+                                    response($.map(data, function (item) {
+                                        return {
+                                            label: item,//下拉框显示值
+                                            value: item,//选中后，填充到input框的值
+                                            //id:item.bankCodeInfo//选中后，填充到id里面的值
+                                        };
+                                    }));
+                                }
+                            });
+                        },
+                        delay: 10,//延迟100ms便于输入
+                        select: function (event, ui) {
+                            $("#bankUnionNo").val(ui.item.id);//取出在return里面放入到item中的属性
+                        },
+                        scroll: true,
+                        pagingMore: true,
+                        max: 5000
+                    });
+                })
+
 
 
                 //切换质检类型
@@ -346,7 +414,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             var shtml = ' <tr><th>SKU</th><th>供应商SKU</th><th>采购数量</th><th>已质检数量</th><th>到货数量</th><th>合格数量</th><th>留样数量</th><th>不合格数量</th><th>合格率</th><th>备注</th><th>上传图片</th><th>操作</th></tr>';
                             $('.caigou table tbody').html('');
                             for (var i in data.item) {
-                                shtml += ' <tr><td><input id="c-purchase_remark" class="form-control" name="sku[]" type="text" value="' + data.item[i].sku + '"></td>'
+                                shtml += ' <tr><td><input id="c-purchase_remark" class="form-control sku" name="sku[]" type="text" value="' + data.item[i].sku + '"></td>'
                                 shtml += ' <td><input id="c-purchase_remark" class="form-control" name="supplier_sku[]" type="text" value="' + data.item[i].supplier_sku + '"></td>'
                                 shtml += ' <td><input id="c-purchase_remark" class="form-control purchase_num" name="purchase_num[]" type="text" redeonly value="' + data.item[i].purchase_num + '"></td>'
                                 shtml += ' <td><input id="c-purchase_remark" class="form-control check_num" name="check_num[]" type="text" readonly value="' + data.item[i].check_num + '"></td>'
@@ -370,6 +438,41 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         });
                     }
 
+
+
+                    //模糊匹配订单
+                    $('.sku').autocomplete({
+                        source: function (request, response) {
+                            $.ajax({
+                                type: "POST",
+                                url: Config.moduleurl + "/itemmanage/item/ajaxGetLikeOriginSku",
+                                dataType: "json",
+                                cache: false,
+                                async: false,
+                                data: {
+                                    origin_sku: request.term
+                                },
+                                success: function (json) {
+                                    var data = json.data;
+                                    response($.map(data, function (item) {
+                                        return {
+                                            label: item,//下拉框显示值
+                                            value: item,//选中后，填充到input框的值
+                                            //id:item.bankCodeInfo//选中后，填充到id里面的值
+                                        };
+                                    }));
+                                }
+                            });
+                        },
+                        delay: 10,//延迟100ms便于输入
+                        select: function (event, ui) {
+                            $("#bankUnionNo").val(ui.item.id);//取出在return里面放入到item中的属性
+                        },
+                        scroll: true,
+                        pagingMore: true,
+                        max: 5000
+                    });
+
                 })
 
 
@@ -388,7 +491,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             var shtml = ' <tr><th>SKU</th><th>退货数量</th><th>到货数量</th><th>合格数量</th><th>不合格数量</th><th>合格率</th><th>备注</th><th>上传图片</th><th>操作</th></tr>';
                             $('.caigou table tbody').html('');
                             for (var i in data) {
-                                shtml += ' <tr><td><input id="c-purchase_remark" class="form-control" name="sku[]" type="text" value="' + data[i].return_sku + '"></td>'
+                                shtml += ' <tr><td><input id="c-purchase_remark" class="form-control sku" name="sku[]" type="text" value="' + data[i].return_sku + '"></td>'
                                 shtml += ' <td>' + data[i].return_sku_qty + '</td>'
                                 shtml += ' <td><input id="c-purchase_remark" class="form-control arrivals_num" name="arrivals_num[]" type="text"></td>'
                                 shtml += ' <td><input id="c-purchase_remark" class="form-control quantity_num" name="quantity_num[]" type="text"></td>'
@@ -409,7 +512,45 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         });
                     }
 
+
+
+                    //模糊匹配订单
+                    $('.sku').autocomplete({
+                        source: function (request, response) {
+                            $.ajax({
+                                type: "POST",
+                                url: Config.moduleurl + "/itemmanage/item/ajaxGetLikeOriginSku",
+                                dataType: "json",
+                                cache: false,
+                                async: false,
+                                data: {
+                                    origin_sku: request.term
+                                },
+                                success: function (json) {
+                                    var data = json.data;
+                                    response($.map(data, function (item) {
+                                        return {
+                                            label: item,//下拉框显示值
+                                            value: item,//选中后，填充到input框的值
+                                            //id:item.bankCodeInfo//选中后，填充到id里面的值
+                                        };
+                                    }));
+                                }
+                            });
+                        },
+                        delay: 10,//延迟100ms便于输入
+                        select: function (event, ui) {
+                            $("#bankUnionNo").val(ui.item.id);//取出在return里面放入到item中的属性
+                        },
+                        scroll: true,
+                        pagingMore: true,
+                        max: 5000
+                    });
+
                 })
+
+
+
 
             }
         }

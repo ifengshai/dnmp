@@ -114,21 +114,6 @@ class Check extends Backend
                         $unqualified_num = $this->request->post("unqualified_num/a");
                         $quantity_rate = $this->request->post("quantity_rate/a");
 
-                        //求和采购数量和已质检数量+到货数量
-                        if ($params['purchase_id']) {
-                            $all_purchase_num = array_sum($purchase_num);
-                            $all_check_num = array_sum($check_num) + array_sum($arrivals_num);
-                            //已质检数量+到货数量 小于 采购单采购数量 则为部分质检
-                            if ($all_check_num < $all_purchase_num) {
-                                $check_status = 1;
-                            } else {
-                                $check_status = 2;
-                            }
-                            //修改采购单质检状态
-                            $purchase_data['check_status'] = $check_status;
-                            $this->purchase->allowField(true)->save($purchase_data, ['id' => $params['purchase_id']]);
-                        }
-
 
                         $data = [];
                         foreach (array_filter($sku) as $k => $v) {
@@ -136,11 +121,11 @@ class Check extends Backend
                             if ($supplier_sku[$k]) {
                                 $data[$k]['supplier_sku'] = $supplier_sku[$k];
                             }
-                            
+
                             if ($product_name[$k]) {
                                 $data[$k]['product_name'] = $product_name[$k];
                             }
-                            
+
                             $data[$k]['purchase_num'] = $purchase_num[$k] ?? 0;
                             $data[$k]['check_num'] = $check_num[$k] ?? 0;
                             $data[$k]['arrivals_num'] = $arrivals_num[$k] ?? 0;
@@ -243,22 +228,6 @@ class Check extends Backend
                         $unqualified_num = $this->request->post("unqualified_num/a");
                         $quantity_rate = $this->request->post("quantity_rate/a");
 
-
-                        //求和采购数量和已质检数量+到货数量
-                        if ($params['purchase_id']) {
-                            $all_purchase_num = array_sum($purchase_num);
-                            $all_check_num = array_sum($check_num) + array_sum($arrivals_num);
-                            //已质检数量+到货数量 小于 采购单采购数量 则为部分质检
-                            if ($all_check_num < $all_purchase_num) {
-                                $check_status = 1;
-                            } else {
-                                $check_status = 2;
-                            }
-                            //修改采购单质检状态
-                            $purchase_data['check_status'] = $check_status;
-                            $this->purchase->allowField(true)->save($purchase_data, ['id' => $params['purchase_id']]);
-                        }
-
                         $data = [];
                         foreach (array_filter($sku) as $k => $v) {
                             $data[$k]['sku'] = $v;
@@ -312,10 +281,10 @@ class Check extends Backend
         $purchase_data = $purchase->getPurchaseData();
         $this->assign('purchase_data', $purchase_data);
 
-         //查询退货单
-         $orderReturn = new \app\admin\model\saleaftermanage\OrderReturn;
-         $orderReturnData = $orderReturn->getOrderReturnData();
-         $this->assign('order_return_data', $orderReturnData);
+        //查询退货单
+        $orderReturn = new \app\admin\model\saleaftermanage\OrderReturn;
+        $orderReturnData = $orderReturn->getOrderReturnData();
+        $this->assign('order_return_data', $orderReturnData);
 
         //查询质检单商品信息
         $check_item = new \app\admin\model\warehouse\CheckItem;
@@ -437,16 +406,13 @@ class Check extends Backend
         $orderReturnItem = new \app\admin\model\saleaftermanage\OrderReturnItem;
         $map['order_return_id'] = $id;
         $list = $orderReturnItem->where($map)->select();
-    
+
         if ($list) {
             $this->success('', '', $list);
         } else {
             $this->error();
         }
     }
-
-
-
 
     //删除合同里商品信息
     public function deleteItem()
@@ -471,6 +437,7 @@ class Check extends Backend
         }
         $map['id'] = ['in', $ids];
         $row = $this->model->where($map)->select();
+
         foreach ($row as $v) {
             if ($v['status'] !== 1) {
                 $this->error('只有待审核状态才能操作！！');
@@ -478,7 +445,37 @@ class Check extends Backend
         }
         $data['status'] = input('status');
         $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
+
         if ($res) {
+            if ($data['status'] == 2) {
+
+                //查询对应采购单总采购数量 以及总到货数量
+                foreach ($row as $k => $v) {
+                    if ($v['purchase_id']) {
+                        //查询质检信息
+                        $check_map['purchase_id'] = $v['purchase_id'];
+                        $check_map['type'] = 1;
+                        $check = new \app\admin\model\warehouse\Check;
+                        //总到货数量
+                        $all_arrivals_num = $check->hasWhere('checkItem')->where($check_map)->sum('arrivals_num');
+
+                        //查询总采购数量
+                        $purchaseItem = new \app\admin\model\purchase\PurchaseOrderItem;
+                        $all_purchase_num = $purchaseItem->where('purchase_id', $v['purchase_id'])->sum('purchase_num');
+                        //已质检数量+到货数量 小于 采购单采购数量 则为部分质检
+                        if ($all_arrivals_num < $all_purchase_num) {
+                            $check_status = 1;
+                        } else {
+                            $check_status = 2;
+                        }
+                        $purchase= new \app\admin\model\purchase\PurchaseOrder;
+                        //修改采购单质检状态
+                        $purchase_data['check_status'] = $check_status;
+                        $purchase->allowField(true)->save($purchase_data, ['id' => $v['purchase_id']]);
+                    }
+                }
+            }
+
             $this->success();
         } else {
             $this->error('修改失败！！');
