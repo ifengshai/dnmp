@@ -34,6 +34,7 @@ class ItemPlatformSku extends Model
     public function addPlatformSku($row)
     {
         $res = $this->where('sku',$row['sku'])->field('sku,name')->find();
+        return $res;
         if($res){
             return false;
         }
@@ -59,7 +60,7 @@ class ItemPlatformSku extends Model
                 $arr[$k]['platform_sku'] = $prefix.$row['sku'];
                 $arr[$k]['name'] = $row['name'];
                 $arr[$k]['platform_type'] = $k;
-                $arr[$k]['create_person'] = session('admin.nickname');
+                $arr[$k]['create_person'] = session('admin.nickname') ? session('admin.nickname') : 'Admin';
                 $arr[$k]['create_time'] = date("Y-m-d H:i:s", time());
             }
             $result = $this->allowField(true)->saveAll($arr);
@@ -127,6 +128,18 @@ class ItemPlatformSku extends Model
         $resultItem['item_type']        = $resultPlatform['item_type'];
         $resultItem['upload_field']     = $resultPlatform['upload_field'];
         return $resultItem;
+    }
+    /**
+     * 查询平台sku库存是否充足
+     */
+    public function check_platform_sku_qty($change_sku,$order_platform)
+    {
+        $where['platform_sku'] = $change_sku;
+        $where['platform_type'] = $order_platform;
+        $where['is_open'] = 1;
+        $where['is_del']  = 1;
+        $result = $this->alias('g')->join('item m','g.sku=m.sku')->where($where)->field('m.id,m.sku,m.available_stock')->find();
+        return $result;
     }
 
 }

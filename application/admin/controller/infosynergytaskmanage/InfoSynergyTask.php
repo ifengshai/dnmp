@@ -2,6 +2,7 @@
 
 namespace app\admin\controller\infosynergytaskmanage;
 
+use app\admin\controller\warehouse\Inventory;
 use app\admin\model\Admin;
 use app\common\controller\Backend;
 use app\admin\model\infosynergytaskmanage\InfoSynergyTaskChangeSku;
@@ -437,9 +438,18 @@ class InfoSynergyTask extends Backend
              $map['id'] = ['in',$ids];
              $data['synergy_status'] = 2;
              $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
-             if ($res !== false) {
+             if ($res !== false) {     
+                 $row = $this->model->get($ids);
+                //  echo '<pre>';
+                //  var_dump($row['synergy_task_id']);
+                //  exit;
                  //如果是修改镜架的话更改库存
-                 
+                 if ($row['synergy_task_id'] == 12) {   
+                   $result= (new Inventory())->changeFrame($row['id'],$row['order_platform'],$row['synergy_order_number']);
+                   echo '<pre>';
+                   var_dump($result);
+                   exit;
+                 }
                 $this->success('操作成功');
             } else {
                 $this->error('操作失败,请重新尝试');

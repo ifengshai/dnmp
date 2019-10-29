@@ -426,16 +426,39 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui','custom-css'], 
                                 '<tr>'+
                                     '<td>处方类型</td>'+
                                     '<td style="width:90%;">'+(newItem.prescription_type != undefined ? newItem.prescription_type : '')+'</td>'+
-                                '</tr>'+
-                                '<tr>'+
+                                '</tr>';
+                                if(ordertype ==3){
+                                    Str+='<tr>'+
+                                    '<td>基片类型</td>'+
+                                    '<td style="width:90%;">'+(newItem.second_name != undefined ? newItem.second_name : '')+'</td>'+
+                                    '</tr>'+
+                                    '<tr>'+
+                                    '<td>镜片类型</td>'+
+                                    '<td style="width:90%;">'+(newItem.third_name != undefined ? newItem.third_name : '')+'</td>'+
+                                    '</tr>'+
+                                    '<tr>'+
+                                    '<tr>'+
+                                    '<td>折射率</td>'+
+                                    '<td style="width:90%;">'+(newItem.zsl != undefined ? newItem.zsl : '')+'</td>'+
+                                    '</tr>'+
+                                    '<tr>'+
+                                    '<tr>'+
+                                    '<td>镀膜类型</td>'+
+                                    '<td style="width:90%;">'+(newItem.four_name != undefined ? newItem.four_name : '')+'</td>'+
+                                    '</tr>'+
+                                    '<tr>';
+
+                                }else{
+                                    Str+='<tr>'+
                                     '<td>镜片类型</td>'+
                                     '<td style="width:90%;">'+(newItem.index_type != undefined ? newItem.index_type : '')+'</td>'+
-                                '</tr>'+
-                                '<tr>'+
+                                    '</tr>'+
+                                    '<tr>'+
                                     '<td>镀膜类型</td>'+
                                     '<td style="width:90%;">'+(newItem.coatiing_name !=undefined ? newItem.coatiing_name : '')+'</td>'+
-                                '</tr>'+      
-                               '</table>'+
+                                    '</tr>';
+                                }
+                               Str+='</table>'+
                                 '</div>'+
                                 '</div>'+
                                 '<div class="col-xs-6 col-md-7" style="float:right;">'+
