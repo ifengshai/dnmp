@@ -1,7 +1,7 @@
 <?php
 
 namespace app\admin\controller\infosynergytaskmanage;
-
+use think\Db;
 use app\common\controller\Backend;
 
 /**
