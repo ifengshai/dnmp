@@ -8,7 +8,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     index_url: 'infosynergytaskmanage/info_synergy_task_category/index' + location.search,
                     add_url: 'infosynergytaskmanage/info_synergy_task_category/add',
                     edit_url: 'infosynergytaskmanage/info_synergy_task_category/edit',
-                    //del_url: 'infosynergytaskmanage/info_synergy_task_category/del',
+                    del_url: 'infosynergytaskmanage/info_synergy_task_category/del',
                     multi_url: 'infosynergytaskmanage/info_synergy_task_category/multi',
                     table: 'info_synergy_task_category',
                 }

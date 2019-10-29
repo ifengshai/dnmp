@@ -9,7 +9,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     index_url: 'infosynergytaskmanage/info_synergy_task/index' + location.search + '&synergy_order_number=' + Config.synergy_order_number,
                     add_url: 'infosynergytaskmanage/info_synergy_task/add',
                     edit_url: 'infosynergytaskmanage/info_synergy_task/edit',
-                    //del_url: 'infosynergytaskmanage/info_synergy_task/del',
+                    del_url: 'infosynergytaskmanage/info_synergy_task/del',
                     multi_url: 'infosynergytaskmanage/info_synergy_task/multi',
                     table: 'info_synergy_task',
                 }

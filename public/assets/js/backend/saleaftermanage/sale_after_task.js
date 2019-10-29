@@ -10,7 +10,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui','custom-css'], 
                     index_url: 'saleaftermanage/sale_after_task/index' + location.search,
                     add_url: 'saleaftermanage/sale_after_task/add',
                     edit_url: 'saleaftermanage/sale_after_task/edit',
-                    //del_url: 'saleaftermanage/sale_after_task/del',
+                    del_url: 'saleaftermanage/sale_after_task/del',
                     multi_url: 'saleaftermanage/sale_after_task/multi',
                     table: 'sale_after_task',
                 }

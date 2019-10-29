@@ -9,7 +9,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                     index_url: 'saleaftermanage/order_return/index' + location.search,
                     add_url: 'saleaftermanage/order_return/add',
                     edit_url: 'saleaftermanage/order_return/edit',
-                    // del_url: 'saleaftermanage/order_return/del',
+                    del_url: 'saleaftermanage/order_return/del',
                     multi_url: 'saleaftermanage/order_return/multi',
                     table: 'order_return',
                 }
