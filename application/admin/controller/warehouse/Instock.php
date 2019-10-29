@@ -108,7 +108,7 @@ class Instock extends Backend
                         $in_stock_num = $this->request->post("in_stock_num/a");
                         $sample_num = $this->request->post("sample_num/a");
                         $data = [];
-                        foreach ($sku as $k => $v) {
+                        foreach (array_filter($sku) as $k => $v) {
                             $data[$k]['sku'] = $v;
                             $data[$k]['in_stock_num'] = $in_stock_num[$k];
                             $data[$k]['sample_num'] = $sample_num[$k];
@@ -222,14 +222,14 @@ class Instock extends Backend
                         $item_id = $this->request->post("item_id/a");
                         $in_stock_num = $this->request->post("in_stock_num/a");
                         $data = [];
-                        foreach ($sku as $k => $v) {
+                        foreach (array_filter($sku) as $k => $v) { 
                             $data[$k]['sku'] = $v;
                             $data[$k]['in_stock_num'] = $in_stock_num[$k];
                             $data[$k]['no_stock_num'] = $in_stock_num[$k];
                             if (@$item_id[$k]) {
                                 $data[$k]['id'] = $item_id[$k];
                             } else {
-                                $data[$k]['in_stock_id'] = $ids;
+                                $data[$k]['in_stock_id'] = $ids;  
                             }
                         }
                         //批量添加

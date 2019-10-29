@@ -727,7 +727,6 @@ class PurchaseOrder extends Backend
         // waitselleract 等待卖家操作	 
         // waitbuyerconfirmaction 等待买家确认操作	 
         // waitsellerpush 等待卖家推进
-
         //refundStatus = refundsuccess 退款成功
 
         /**
@@ -851,7 +850,6 @@ class PurchaseOrder extends Backend
                     $supplier = new Supplier;
                     $list['supplier_id'] = $supplier->getSupplierId($v->baseInfo->sellerContact->companyName);
 
-                    dump($list);
                     //添加采购单
                     $result = $this->model->allowField(true)->create($list);
 

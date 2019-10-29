@@ -131,7 +131,7 @@ class Check extends Backend
 
 
                         $data = [];
-                        foreach ($sku as $k => $v) {
+                        foreach (array_filter($sku) as $k => $v) {
                             $data[$k]['sku'] = $v;
                             if ($supplier_sku[$k]) {
                                 $data[$k]['supplier_sku'] = $supplier_sku[$k];
@@ -260,7 +260,7 @@ class Check extends Backend
                         }
 
                         $data = [];
-                        foreach ($sku as $k => $v) {
+                        foreach (array_filter($sku) as $k => $v) {
                             $data[$k]['sku'] = $v;
                             $data[$k]['supplier_sku'] = $supplier_sku[$k];
                             $data[$k]['product_name'] = $product_name[$k];
