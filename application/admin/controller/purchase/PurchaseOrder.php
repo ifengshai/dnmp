@@ -737,25 +737,24 @@ class PurchaseOrder extends Backend
             'createStartTime' => date('YmdHis', strtotime("-30 day")) . '000+0800',
             'createEndTime' => date('YmdHis') . '000+0800',
         ];
-        //根据不同的状态取订单数据
-        $success_data = Alibaba::getOrderList(1, $params);
-        dump($success_data);
+       
         set_time_limit(0);
         $data = cache('Crontab_getAlibabaPurchaseOrder_' . date('YmdH') . md5(serialize($params)));
         if (!$data) {
             //根据不同的状态取订单数据
-            $success_data = Alibaba::getOrderList(1, $params);
+             $success_data = Alibaba::getOrderList(1, $params);
             //转为数组
             if ($success_data) {
                 $success_data = collection($success_data)->toArray();
             }
-
+            dump($success_data);
             $data = [];
             for ($i = 1; $i <= round($success_data['totalRecord'] / 50); $i++) {
 
                 //根据不同的状态取订单数据
                 $data[$i] = Alibaba::getOrderList($i, $params)->result;
             }
+            dump($data);
 
             //设置缓存
             cache('Crontab_getAlibabaPurchaseOrder_' . date('YmdH') . md5(serialize($params)), $data, 3600);
