@@ -9,7 +9,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui'], function ($, 
                     index_url: 'itemmanage/item_platform_sku/index' + location.search,
                     add_url: 'itemmanage/item_platform_sku/add',
                     //edit_url: 'itemmanage/item_platform_sku/edit',
-                    //del_url: 'itemmanage/item_platform_sku/del',
+                    del_url: 'itemmanage/item_platform_sku/del',
                     multi_url: 'itemmanage/item_platform_sku/multi',
                     table: 'item_platform_sku',
                 }

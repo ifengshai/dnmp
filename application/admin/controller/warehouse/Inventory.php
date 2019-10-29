@@ -840,4 +840,134 @@ class Inventory extends Backend
         $this->assignconfig('inventory_id', $ids);
         return $this->view->fetch();
     }
+    /***
+     * 更改镜架逻辑
+     * @param id 协同任务ID
+     * @param order_platform 订单平台
+     * @param increment_id 订单号
+     * @param original_sku 原sku
+     * @param original_number 原sku数量
+     * @param change_sku   改变之后的sKu
+     * @param change_number 改变之后的sku数量
+     */
+    public function changeFrame($id,$order_platform,$increment_id)
+    {
+        if(!$id ||!$order_platform || !$increment_id){
+            return false;
+        }
+        $item = new \app\admin\model\itemmanage\Item;
+        $instock = new \app\admin\model\warehouse\Instock;
+        $instockItem = new \app\admin\model\warehouse\InstockItem;
+        $outstock = new \app\admin\model\warehouse\Outstock;
+        $outstockItem = new \app\admin\model\warehouse\OutStockItem;
+        $taskChangeSku = new \app\admin\model\infosynergytaskmanage\InfoSynergyTaskChangeSku;
+        $platformSku   = new \app\admin\model\itemmanage\ItemPlatformSku;
+        $changeRow = $taskChangeSku->where(['tid'=>$id])->field('original_sku,original_number,change_sku,change_number')->select();
+        if(!$changeRow){ //如果不存在改变的sku
+            return false;
+        }
+        if(1 == $order_platform ){
+            $db = 'database.db_zeelool';
+        }elseif(2 == $order_platform){
+            $db = 'database.db_voogueme';
+        }elseif(3 == $order_platform){
+            $db = 'database.db_nihao';
+        }
+        foreach($changeRow as $v){
+            //原先sku
+            $original_sku    = $v['original_sku'];
+            //原先sku数量
+            $original_number = $v['original_number'];
+            //改变之后的sku
+            $change_sku      = $v['change_sku'];
+            //改变之后的sku数量
+            $change_number   = $v['change_number'];
+            //原先sku对应的仓库sku
+            $whereOriginSku['platform_sku'] = $original_sku;
+            $whereOriginSku['platform_type'] = $order_platform;
+            $warehouse_original_sku = $platformSku->where($whereOriginSku)->value('sku');
+            //改变sku对应的仓库sku
+            $whereChangeSku['platform_sku'] = $change_sku;
+            $whereChangeSku['platform_type'] = $order_platform;
+            $warehouse_change_sku = $platformSku->where($whereChangeSku)->value('sku');
+            //求出订单对应的order_id
+            $order_id = Db::connect($db)->table('sales_flat_order')->where(['increment_id'=>$increment_id])->value('entity_id');
+            if(!$original_sku ||!$original_number || !$change_sku || !$change_number){
+                return false;
+            }
+                    //回滚
+        Db::startTrans();
+        try {
+                //更改sales_flat_order_item表中的sku字段
+                $whereChange['order_id'] = $order_id;
+                $whereChange['sku']      = $original_sku; 
+                $changeData['is_change_frame'] = 2;
+                $changeSku = Db::connect($db)->table('sales_flat_order_item')->where($whereChange)->update($changeData);
+                //原先sku增加可用库存,减少占用库存
+                $original_stock = $item->where(['sku'=>$warehouse_original_sku])->inc('available_stock', $original_number)->dec('occupy_stock',$original_number)->update();
+                //更新之后的sku减少可用库存,增加占用库存
+                $change_stock = $item->where(['sku'=>$warehouse_change_sku])->dec('available_stock', $change_number)->inc('occupy_stock',$change_number)->update();
+                //修改库存结果为真
+                if ($changeSku === false || $original_stock === false || $change_stock === false) {
+                    throw new Exception('更改镜架失败,请检查SKU');
+                    break;
+                }else{
+                    $info = true;
+                }
+            //入库记录
+            if ($info) {
+                $params['in_stock_number'] = 'IN' . date('YmdHis') . rand(100, 999) . rand(100, 999);
+                $params['order_number']  = $increment_id;
+                $params['create_person'] = session('admin.nickname');
+                $params['createtime'] = date('Y-m-d H:i:s', time());
+                $params['type_id'] = 5;
+                $params['status'] = 2;
+                $params['remark'] = '更改镜架入库';
+                $params['check_time'] = date('Y-m-d H:i:s', time());
+                $params['check_person'] = session('admin.nickname');
+                $instorck_res = $instock->allowField(true)->save($params);
+
+                //添加入库信息
+                if ($instorck_res !== false) {
+                    $instockItemList['sku'] = $warehouse_original_sku;
+                    $instockItemList['in_stock_num'] = $original_number;
+                    $instockItemList['in_stock_id']  = $instock->id;
+                    //添加入库商品sku信息
+                    $instockItem->allowField(true)->save($instockItemList);
+                }
+            }
+            //出库记录
+            if ($info) {
+                $params = [];
+                $params['out_stock_number'] = 'OUT' . date('YmdHis') . rand(100, 999) . rand(100, 999);
+                $params['create_person'] = session('admin.nickname');
+                $params['createtime'] = date('Y-m-d H:i:s', time());
+                $params['type_id'] = 14;
+                $params['status'] = 2;
+                $params['remark'] = '更改镜架出库';
+                $params['check_time'] = date('Y-m-d H:i:s', time());
+                $params['check_person'] = session('admin.nickname');
+                $outstock_res = $outstock->allowField(true)->save($params);
+                //添加出库信息
+                if ($outstock_res !== false) {
+                    $outstockItemList['sku'] = $warehouse_change_sku;
+                    $outstockItemList['out_stock_num']  = $change_number;
+                    $outstockItemList['out_stock_id'] = $outstock->id;
+                    //批量添加
+                    $outstockItem->allowField(true)->save($outstockItemList);
+                }
+            }
+            Db::commit();
+        } catch (ValidateException $e) {
+            Db::rollback();
+            $this->error($e->getMessage());
+        } catch (PDOException $e) {
+            Db::rollback();
+            $this->error($e->getMessage());
+        } catch (Exception $e) {
+            Db::rollback();
+            $this->error($e->getMessage());
+        }
+     }
+    }
 }

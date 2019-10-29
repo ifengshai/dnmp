@@ -270,7 +270,8 @@ class Item extends Model
 
     }
     /***
-     * 查找一个sku是否存在
+     * 查找一个仓库sku是否存在
+     * @param sku 平台sku
      */
     public function check_sku_qty($sku)
     {

@@ -26,7 +26,7 @@ class Item extends Backend
     /**
      * 不需要登陆
      */
-    protected $noNeedLogin = ['pullMagentoProductInfo','ceshi','optimizeSku','pullMagentoProductInfoTwo'];
+    protected $noNeedLogin = ['pullMagentoProductInfo','ceshi','optimizeSku','pullMagentoProductInfoTwo','changeSkuToPlatformSku','findSku','skuMap','skuMapOne'];
 
     public function _initialize()
     {
@@ -1281,7 +1281,7 @@ class Item extends Backend
         }
     }
     /**
-     * 异步检测sku和库存的数量是否符合更改镜架的要求
+     * 异步检测仓库sku和库存的数量是否符合更改镜架的要求
      */
     public function checkSkuAndQty()
     {
@@ -1351,7 +1351,8 @@ class Item extends Backend
      */
     public function changeSku()
     {
-        $result = Db::connect('database.db_stock')->table('zeelool_product')->field('magento_sku as sku,true_qty as stock,remark')->select();
+        $where['id'] = ['gt',4710];
+        $result = Db::connect('database.db_stock')->table('zeelool_product')->where($where)->field('magento_sku as sku,true_qty as stock,remark')->select();
         if(!$result){
             return false;
         }else{
@@ -1441,11 +1442,6 @@ class Item extends Backend
         }
             // echo '<pre>';
             // var_dump($productInfo);
-    }
-    public function ceshi()
-    {
-        $str = 'a:1:{s:19:"paypal_ec_create_ba";N;}';
-
     }
     public function ceshi2()
     {
@@ -1729,6 +1725,108 @@ class Item extends Backend
             $data['nihao_sku'] = $v['nihao_sku'].'-'.$colorArr[1];
             Db::connect('database.db_stock')->table('sku_map')->where(['sku'=>$v['sku']])->update($data);
         }
+    }
+    /***
+     *商品sku转化到平台sku库里面
+     */
+    public function changeSkuToPlatformSku()
+    {
+        $sql = "select name,sku from fa_item where is_update_platform = 0 limit 500 ";
+        $result = Db::connect('database.db_stock')->query($sql);
+        if(!$result){
+            return false;
+        }
+        foreach($result as $v){
+            if(!empty($v['sku'])){
+                $info = (new ItemPlatformSku())->addPlatformSku($v);
+                if($info){
+                    Db::connect('database.db_stock')->name('item')->where(['sku'=>$v['sku']])->update(['is_update_platform'=>1]);
+                }
+            }
+        }
+    }
+    /**
+     * 查找对比fa_item中sku是否全部更新到fa_item_platform_sku当中
+     */
+    public function findSku()
+    {
+        $result = Db::connect('database.db_stock')->name('item')->field('sku')->select();
+        if(!$result){
+            return false;
+        }
+        $arr =  $newArr =[];
+        foreach($result as $v){
+            $arr[] = $v['sku'];
+        }
+        $info = Db::connect('database.db_stock')->name('item_platform_sku')->where('sku','in',$arr)->distinct(true)->field('sku')->select();
+        foreach($info as $vs){
+            $newArr[] = $vs['sku'];
+        }
+        echo '<pre>';
+        echo count(array_filter($arr)).'<br/>';
+        //var_dump($arr);
+        echo count($newArr).'<br/>';
+        $finalArr = array_diff($newArr,$arr);
+        var_dump($finalArr);
+    }
+    /***
+     * 清除空的sku映射
+     */
+    public function skuMapOne(){
+        $sql = "select sku,zeelool_sku,voogueme_sku,nihao_sku from sku_map where is_update_sku=2 limit 50";
+        $result = Db::connect('database.db_stock')->query($sql);
+        if(!$result){
+            return false;
+        }
+        foreach($result as $v){
+            if(($v['zeelool_sku'] == '') && ($v['voogueme_sku'] == '') && ($v['nihao_sku'] == '')){
+                Db::connect('database.db_stock')->table('sku_map')->where(['sku'=>$v['sku']])->update(['is_update_sku'=>3]);
+            } 
+        }
+    }
+    /***
+     * 找出平台映射关系表(sku_map)中的对应关系映射变更到fa_item_platform_sku当中
+     */
+    public function skuMap()
+    {
+        $sql = "select sku,zeelool_sku,voogueme_sku,nihao_sku from sku_map where is_update_sku=2 limit 50";
+        $result = Db::connect('database.db_stock')->query($sql);
+        if(!$result){
+            return false;
+        }
+        $i = 0;
+        foreach($result as $k =>$v){
+            if(!empty($v['zeelool_sku'])){
+                $zeeloolWhere['sku'] = $v['sku'];
+                $zeeloolWhere['platform_type'] = 1;
+                $zeeloolData['platform_sku'] = $v['zeelool_sku'];
+                $zeeloolData['update_platform'] = 2;
+                Db::connect('database.db_stock')->name('item_platform_sku')->where($zeeloolWhere)->update($zeeloolData);
+                $i++;
+            }
+            if(!empty($v['voogueme_sku'])){
+                $vooguemeWhere['sku'] = $v['sku'];
+                $vooguemeWhere['platform_type'] = 2;
+                $vooguemeData['platform_sku'] = $v['voogueme_sku'];
+                $vooguemeData['update_platform'] = 2;
+                Db::connect('database.db_stock')->name('item_platform_sku')->where($vooguemeWhere)->update($vooguemeData);
+                $i++;
+            }
+            if(!empty($v['nihao_sku'])){
+                $nihaoWhere['sku'] = $v['sku'];
+                $nihaoWhere['platform_type'] = 3;
+                $nihaoData['platform_sku'] = $v['nihao_sku'];
+                $nihaoData['update_platform'] = 2;
+                Db::connect('database.db_stock')->name('item_platform_sku')->where($nihaoWhere)->update($nihaoData);
+                $i++;
+            }
+            Db::connect('database.db_stock')->table('sku_map')->where(['sku'=>$v['sku']])->update(['is_update_sku'=>3]);
+        }
+            echo $i;
+            Db::connect('database.db_stock')->name('num')->where(['id'=>1])->setInc('num',$i);
+        // echo '<pre>';
+        // var_dump($result);
+
     }
 
 }

@@ -9,7 +9,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     index_url: 'infosynergytaskmanage/info_synergy_task/index' + location.search + '&synergy_order_number=' + Config.synergy_order_number,
                     add_url: 'infosynergytaskmanage/info_synergy_task/add',
                     edit_url: 'infosynergytaskmanage/info_synergy_task/edit',
-                    //del_url: 'infosynergytaskmanage/info_synergy_task/del',
+                    del_url: 'infosynergytaskmanage/info_synergy_task/del',
                     multi_url: 'infosynergytaskmanage/info_synergy_task/multi',
                     table: 'info_synergy_task',
                 }
@@ -161,6 +161,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 $(document).on('change','.change_sku',function(){
                     var change_sku = $(this).val();
                     var change_number    = $(this).parent().next().children().val();
+                    var order_platform = $('#c-order_platform').val();
+                    if(order_platform<1){
+                        Layer.alert('请选择订单所在平台');
+                        return false;
+                    }
                     if(change_sku == ''){
                         Layer.alert('请填写更改镜架的sku');
                         return false;
@@ -170,8 +175,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         return false;
                     }
                     Backend.api.ajax({
-                        url:'itemmanage/item/checkSkuAndQty',
-                        data:{change_sku:change_sku,change_number:change_number}
+                        url:'itemmanage/item_platform_sku/checkPlatformSkuAndQty',
+                        data:{change_sku:change_sku,change_number:change_number,order_platform:order_platform}
                     }, function(data, ret){
                         $('.btn-success').removeClass('btn-disabled disabled');
                         return false;
@@ -186,6 +191,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 $(document).on('change','.change_number',function(){
                     var change_number = $(this).val();
                     var change_sku    = $(this).parent().prev().children().val();
+                    var order_platform = $('#c-order_platform').val();
+                    if(order_platform<1){
+                        Layer.alert('请选择订单所在平台');
+                        return false;
+                    }
                     if(change_sku == ''){
                         Layer.alert('请填写更改镜架的sku');
                         return false;
@@ -195,8 +205,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         return false;
                     }
                     Backend.api.ajax({
-                        url:'itemmanage/item/checkSkuAndQty',
-                        data:{change_sku:change_sku,change_number:change_number}
+                        url:'itemmanage/item_platform_sku/checkPlatformSkuAndQty',
+                        data:{change_sku:change_sku,change_number:change_number,order_platform:order_platform}
                     }, function(data, ret){
                         // console.log(ret.data);
                         $('.btn-success').removeClass('btn-disabled disabled');

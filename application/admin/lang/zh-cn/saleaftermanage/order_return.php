@@ -26,5 +26,7 @@ return [
     'Issue_id'               => '退货原因',
     'Return_order_number'    => '退货单号',
     'Remark_record'          => '备注记录',
-    'Add_remark'             => '添加备注'
+    'Add_remark'             => '添加备注',
+    'Quality_status'         => '质检状态',
+    'In_stock_status'        => '入库状态'
 ];

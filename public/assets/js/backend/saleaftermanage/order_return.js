@@ -9,7 +9,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                     index_url: 'saleaftermanage/order_return/index' + location.search,
                     add_url: 'saleaftermanage/order_return/add',
                     edit_url: 'saleaftermanage/order_return/edit',
-                    // del_url: 'saleaftermanage/order_return/del',
+                    del_url: 'saleaftermanage/order_return/del',
                     multi_url: 'saleaftermanage/order_return/multi',
                     table: 'order_return',
                 }
@@ -52,9 +52,23 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                         {
                             field: 'order_status',
                             title: __('Order_status'),
-                            searchList: { 1: '新建', 2: '退货收到', 3: '退货质检', 4: '同步库存', 5: '已退款', 6: '关闭' },
-                            custom: { 1: 'yellow', 2: 'blue', 3: 'success', 4: 'red', 5: 'danger', 6: 'closed' },
+                            searchList: { 1: '新建', 2: '已审核', 3: '已拒绝', 4: '已取消'},
+                            custom: { 1: 'yellow', 2: 'blue', 3: 'success', 4: 'red'},
                             formatter: Table.api.formatter.status
+                        },
+                        {
+                            field:'quality_status',
+                            title:__('Quality_status'),
+                            searchList:{0:'未质检',1:'已质检'},
+                            custom:{0:'red',1:'blue'},
+                            formatter:Table.api.formatter.status
+                        },
+                        {
+                            field:'in_stock_status',
+                            title:__('In_stock_status'),
+                            searchList:{0:'未入库',1:'已入库'},
+                            custom:{0:'red',1:'blue'},
+                            formatter:Table.api.formatter.status
                         },
                         { field: 'create_person', title: __('Create_person') },
                         { field: 'create_time', title: __('Create_time'), operate: 'RANGE', addclass: 'datetimerange' },

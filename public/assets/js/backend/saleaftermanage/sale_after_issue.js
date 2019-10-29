@@ -8,7 +8,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     index_url: 'saleaftermanage/sale_after_issue/index' + location.search,
                     add_url: 'saleaftermanage/sale_after_issue/add',
                     edit_url: 'saleaftermanage/sale_after_issue/edit',
-                    //del_url: 'saleaftermanage/sale_after_issue/del',
+                    del_url: 'saleaftermanage/sale_after_issue/del',
                     multi_url: 'saleaftermanage/sale_after_issue/multi',
                     table: 'sale_after_issue',
                 }
@@ -43,7 +43,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         // formatter:Controller.api.formatter.levelList,
                          formatter: Table.api.formatter.status
                         },
-                        {field: 'createtime', title: __('Createtime'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime},
+                        {field: 'create_time', title: __('Createtime'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime},
                         {field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate}
                     ]
                 ]

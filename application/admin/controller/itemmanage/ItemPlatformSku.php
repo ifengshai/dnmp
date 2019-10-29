@@ -21,6 +21,7 @@ class ItemPlatformSku extends Backend
      */
     protected $model = null;
     protected $platform = null;
+    protected $noNeedLogin = ['ceshi'];
     public function _initialize()
     {
         parent::_initialize();
@@ -668,5 +669,41 @@ class ItemPlatformSku extends Backend
         }else{
             $this->error('404 Not found');
         }
+    }
+    /***
+     * 检测平台sku是否存在并且监测库存
+     */
+    public function checkPlatformSkuAndQty()
+    {
+        if($this->request->isAjax()){
+            $change_sku = $this->request->param('change_sku');
+            $change_number = $this->request->param('change_number');
+            $order_platform = $this->request->param('order_platform');
+            if(!$change_sku){
+                return $this->error('请先填写商品sku');
+            }
+            if(!$order_platform){
+                return $this->error('请选择订单平台');
+            }
+            if($change_number<1){
+                return $this->error('变更数量不能小于1');
+            }
+            $result = $this->model->check_platform_sku_qty($change_sku,$order_platform);
+            if(!$result){
+                return $this->error('填写的sku不存在,请重新填写');
+            }
+            if($result['available_stock']<$change_number){
+                return $this->error('镜架可用数量大于可用库存数量,无法更改镜架');
+            }
+                return $this->success();
+        }else{
+            $this->error('404 Not found');
+        }
+    }
+    public function ceshi()
+    {
+        $result = $this->model->check_platform_sku_qty('ZOM000780-04',1);
+        echo '<pre>';
+        var_dump($result);
     }
 }

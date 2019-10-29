@@ -10,7 +10,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui','custom-css'], 
                     index_url: 'saleaftermanage/sale_after_task/index' + location.search,
                     add_url: 'saleaftermanage/sale_after_task/add',
                     edit_url: 'saleaftermanage/sale_after_task/edit',
-                    //del_url: 'saleaftermanage/sale_after_task/del',
+                    del_url: 'saleaftermanage/sale_after_task/del',
                     multi_url: 'saleaftermanage/sale_after_task/multi',
                     table: 'sale_after_task',
                 }
@@ -59,7 +59,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui','custom-css'], 
                         {field: 'sale_after_issue.name', title: __('Problem_id'),operate:false},
                         {field: 'problem_desc', title: __('problem_desc'),formatter:Controller.api.formatter.getClear,operate:false},
                         {field: 'create_person', title: __('Create_person')},
-                        {field: 'createtime', title: __('Createtime'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime},
+                        {field: 'create_time', title: __('Createtime'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime},
                         // {field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate,
                         //     buttons:[{
                         //         name:'detail',
@@ -426,16 +426,39 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui','custom-css'], 
                                 '<tr>'+
                                     '<td>处方类型</td>'+
                                     '<td style="width:90%;">'+(newItem.prescription_type != undefined ? newItem.prescription_type : '')+'</td>'+
-                                '</tr>'+
-                                '<tr>'+
+                                '</tr>';
+                                if(ordertype ==3){
+                                    Str+='<tr>'+
+                                    '<td>基片类型</td>'+
+                                    '<td style="width:90%;">'+(newItem.second_name != undefined ? newItem.second_name : '')+'</td>'+
+                                    '</tr>'+
+                                    '<tr>'+
+                                    '<td>镜片类型</td>'+
+                                    '<td style="width:90%;">'+(newItem.third_name != undefined ? newItem.third_name : '')+'</td>'+
+                                    '</tr>'+
+                                    '<tr>'+
+                                    '<tr>'+
+                                    '<td>折射率</td>'+
+                                    '<td style="width:90%;">'+(newItem.zsl != undefined ? newItem.zsl : '')+'</td>'+
+                                    '</tr>'+
+                                    '<tr>'+
+                                    '<tr>'+
+                                    '<td>镀膜类型</td>'+
+                                    '<td style="width:90%;">'+(newItem.four_name != undefined ? newItem.four_name : '')+'</td>'+
+                                    '</tr>'+
+                                    '<tr>';
+
+                                }else{
+                                    Str+='<tr>'+
                                     '<td>镜片类型</td>'+
                                     '<td style="width:90%;">'+(newItem.index_type != undefined ? newItem.index_type : '')+'</td>'+
-                                '</tr>'+
-                                '<tr>'+
+                                    '</tr>'+
+                                    '<tr>'+
                                     '<td>镀膜类型</td>'+
                                     '<td style="width:90%;">'+(newItem.coatiing_name !=undefined ? newItem.coatiing_name : '')+'</td>'+
-                                '</tr>'+      
-                               '</table>'+
+                                    '</tr>';
+                                }
+                               Str+='</table>'+
                                 '</div>'+
                                 '</div>'+
                                 '<div class="col-xs-6 col-md-7" style="float:right;">'+

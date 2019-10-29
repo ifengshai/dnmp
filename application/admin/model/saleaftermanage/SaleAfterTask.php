@@ -23,7 +23,7 @@ class SaleAfterTask extends Model
     protected $autoWriteTimestamp = 'int';
 
     // 定义时间戳字段名
-    protected $createTime = 'createtime';
+    protected $createTime = false;
     protected $updateTime = false;
     protected $deleteTime = false;
     //定义任务记录属性
