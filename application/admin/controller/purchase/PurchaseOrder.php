@@ -918,7 +918,6 @@ class PurchaseOrder extends Backend
             $list = collection($list)->toArray();
             session('new_list',$list);
         }
-        dump($list);die;
         set_time_limit(0);
 
         //查询新系统采购单数据
