@@ -6,6 +6,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             Table.api.init({
                 searchFormVisible: true,
                 pageSize: 10,
+                pageList: [10, 25, 50, 100],
                 extend: {
                     index_url: 'purchase/purchase_order/index' + location.search,
                     add_url: 'purchase/purchase_order/add',

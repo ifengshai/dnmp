@@ -564,7 +564,7 @@ class Inventory extends Backend
                     }
                     //计算误差数量
                     if (@$params['inventory_qty']) {
-                        $params['error_qty'] = $params['inventory_qty'] - $row['available_stock'];
+                        $params['error_qty'] = $params['inventory_qty'] - $row['stock'];
                         $params['is_add'] = 1;
                     }
 
