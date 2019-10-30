@@ -26,10 +26,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     [
                         { checkbox: true },
                         { field: 'id', title: __('Id') },
-                        { field: 'item.sku', title: __('Sku'), operate: 'like' },
-                        { field: 'item.name', title: __('商品名称'), operate: 'like' },
+                        { field: 'sku', title: __('Sku'), operate: 'like' },
+                        { field: 'name', title: __('商品名称'), operate: 'like' },
                         {
-                            field: 'item.is_open', title: __('SKU启用状态'), custom: { 1: 'success', 2: 'danger' },
+                            field: 'is_open', title: __('SKU启用状态'), custom: { 1: 'success', 2: 'danger' },
                             searchList: { 1: '启用', 2: '禁用' },
                             formatter: Table.api.formatter.status
                         },

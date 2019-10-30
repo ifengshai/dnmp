@@ -159,8 +159,10 @@ class PurchaseOrder extends Backend
         if ($new_product_ids) {
             //查询所选择的数据
             $where['new_product.id'] = ['in', $new_product_ids];
+            $where['new_product.item_status'] = 3;
             $row = (new NewProduct())->where($where)->with(['newproductattribute'])->select();
             $row = collection($row)->toArray();
+            dump($row);die;
 
             //提取供应商id
             $supplier = array_unique(array_column($row, 'supplier_id'));
