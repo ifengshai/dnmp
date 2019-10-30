@@ -6,6 +6,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'fast'], function ($,
             Table.api.init({
                 searchFormVisible: true,
                 // searchFormTemplate: 'customformtpl',
+                pageList: [10, 25, 50, 100],
                 extend: {
                     index_url: 'purchase/supplier/index' + location.search,
                     add_url: 'purchase/supplier/add',
