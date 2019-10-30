@@ -693,7 +693,7 @@ class Inventory extends Backend
                     $params['remark'] = '盘盈入库';
                     $params['check_time'] = date('Y-m-d H:i:s', time());
                     $params['check_person'] = session('admin.nickname');
-                    $instorck_res = $instock->allowField(true)->save($params);
+                    $instorck_res = $instock->allowField(true)->isUpdate(false)->save($params);
 
                     //添加入库信息
                     if ($instorck_res !== false) {
@@ -721,7 +721,7 @@ class Inventory extends Backend
                     $params['remark'] = '盘亏出库';
                     $params['check_time'] = date('Y-m-d H:i:s', time());
                     $params['check_person'] = session('admin.nickname');
-                    $outstock_res = $outstock->allowField(true)->save($params);
+                    $outstock_res = $outstock->allowField(true)->isUpdate(false)->save($params);
 
                     //添加入库信息
                     if ($outstock_res !== false) {

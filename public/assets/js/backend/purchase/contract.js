@@ -159,6 +159,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     var total = $(this).val();
                     alltotal += total*1;
                 })
+
+                //运费
+                var freight = $('#c-freight').val();
+                alltotal += freight*1;
                 $('.alltotal').val(alltotal);
             })
 
@@ -183,6 +187,25 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     var total = $(this).val();
                     alltotal += total*1;
                 })
+
+                //运费
+                var freight = $('#c-freight').val();
+                alltotal += freight*1;
+                $('.alltotal').val(alltotal);
+            })
+
+
+            //单价触发事件
+            $(document).on('blur', '#c-freight', function () {
+                var freight = $(this).val();
+                //计算总金额
+                var alltotal = 0;
+                $('.total').each(function () {
+                    var total = $(this).val();
+                    alltotal += total*1;
+                })
+
+                alltotal += freight*1;
                 $('.alltotal').val(alltotal);
             })
 
@@ -302,13 +325,16 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 //异步获取供应商的数据
                 $(document).on('change', '.supplier', function () {
                     var id = $(this).val();
-                    Backend.api.ajax({
-                        url: Config.moduleurl + '/purchase/contract/getSupplierData',
-                        data: { id: id }
-                    }, function (data, ret) {
-                        $('#c-seller_address').val(data.address);
-                        $('#c-seller_phone').val(data.telephone);
-                    });
+                    if (id) {
+                        Backend.api.ajax({
+                            url: Config.moduleurl + '/purchase/contract/getSupplierData',
+                            data: { id: id }
+                        }, function (data, ret) {
+                            $('#c-seller_address').val(data.address);
+                            $('#c-seller_phone').val(data.telephone);
+                        });
+                    }
+                    
                 })
             }
         }
