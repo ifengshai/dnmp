@@ -316,7 +316,11 @@ class SupplierSku extends Backend
                         $row[$fieldArr[$k]] = $v;
                     }
                     if ($k == '供应商名称') {
-                        $row['supplier_id'] = array_search($v, $supplier);
+                        if (array_search($v, $supplier)) {
+                            $row['supplier_id'] = array_search($v, $supplier);
+                        } else {
+                            $this->error($v . '供应商未匹配到！！');
+                        }
                     }
                 }
                 if ($row) {

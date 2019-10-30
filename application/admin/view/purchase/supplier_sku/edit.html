@@ -58,7 +58,7 @@
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">{:__('Supplier_id')}:</label>
         <div class="col-xs-12 col-sm-8">
-            {:build_select('row[supplier_id]', $supplier, $row['supplier_id'])}
+            {:build_select('row[supplier_id]', $supplier ,$row['supplier_id'], ['class'=>'form-control selectpicker', 'data-live-search' => true])}
         </div>
     </div>
 

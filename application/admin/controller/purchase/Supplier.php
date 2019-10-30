@@ -275,7 +275,6 @@ class Supplier extends Backend
         if (!$insert) {
             $this->error(__('No rows were updated'));
         }
-
         try {
             //是否包含admin_id字段
             $has_admin_id = false;

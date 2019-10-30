@@ -94,7 +94,7 @@ class PurchaseReturn extends Backend
                         $this->model->validateFailException(true)->validate($validate);
                     }
 
-                    $params['create_person'] = session('admin.username');
+                    $params['create_person'] = session('admin.nickname');
                     $params['createtime'] = date('Y-m-d H:i:s', time());
                     $result = $this->model->allowField(true)->save($params);
                     //添加产品信息
@@ -133,15 +133,16 @@ class PurchaseReturn extends Backend
                             $purchase->allowField(true)->save($purchase_data, ['id' => $params['purchase_id']]);
                         }
 
-
                         $data = [];
-                        foreach ($sku as $k => $v) {
-                            $data[$k]['sku'] = $v;
-                            $data[$k]['return_num'] = $return_num[$k];
-                            $data[$k]['return_id'] = $this->model->id;
+                        if ($sku) {
+                            foreach (array_filter($sku) as $k => $v) {
+                                $data[$k]['sku'] = $v;
+                                $data[$k]['return_num'] = $return_num[$k];
+                                $data[$k]['return_id'] = $this->model->id;
+                            }
+                            //批量添加
+                            $this->purchase_return_item->allowField(true)->saveAll($data);
                         }
-                        //批量添加
-                        $this->purchase_return_item->allowField(true)->saveAll($data);
                     }
 
                     Db::commit();
@@ -251,14 +252,15 @@ class PurchaseReturn extends Backend
                         }
 
                         $data = [];
-                        foreach ($sku as $k => $v) {
-                            $data[$k]['sku'] = $v;
-                            $data[$k]['return_num'] = $return_num[$k];
-                            if (@$item_id[$k]) {
-                                $data[$k]['id'] = $item_id[$k];
+                        if ($sku) {
+                           foreach (array_filter($sku) as $k => $v) {
+                                $data[$k]['sku'] = $v;
+                                $data[$k]['return_num'] = $return_num[$k];
+                                if (@$item_id[$k]) {
+                                    $data[$k]['id'] = $item_id[$k];
+                                }
                             }
                         }
-
                         //批量添加
                         $this->purchase_return_item->allowField(true)->saveAll($data);
                     }

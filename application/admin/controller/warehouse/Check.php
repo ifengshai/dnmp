@@ -399,10 +399,10 @@ class Check extends Backend
     public function getOrderReturnData()
     {
         $id = input('id');
-        $orderReturn = new \app\admin\model\saleaftermanage\OrderReturn;
-        $data = $orderReturn->get($id);
+        // $orderReturn = new \app\admin\model\saleaftermanage\OrderReturn;
+        // $data = $orderReturn->get($id);
 
-        //查询采购单商品信息
+        //查询退货单商品信息
         $orderReturnItem = new \app\admin\model\saleaftermanage\OrderReturnItem;
         $map['order_return_id'] = $id;
         $list = $orderReturnItem->where($map)->select();
@@ -451,6 +451,7 @@ class Check extends Backend
 
                 //查询对应采购单总采购数量 以及总到货数量
                 foreach ($row as $k => $v) {
+                    //采购质检
                     if ($v['purchase_id']) {
                         //查询质检信息
                         $check_map['purchase_id'] = $v['purchase_id'];
@@ -473,6 +474,13 @@ class Check extends Backend
                         $purchase_data['check_status'] = $check_status;
                         $purchase->allowField(true)->save($purchase_data, ['id' => $v['purchase_id']]);
                     }
+
+                    //退货质检
+                    if ($v['order_return_id']) {
+                        $orderReturn = new \app\admin\model\saleaftermanage\OrderReturn;
+                        $orderReturn->allowField(true)->save(['quality_status' => 1], ['id' => $v['order_return_id']]);
+                    }
+
                 }
             }
 
