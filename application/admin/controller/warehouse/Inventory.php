@@ -769,7 +769,7 @@ class Inventory extends Backend
             $this->error('只有未提交状态才能取消！！');
         }
         $map['id'] = ['in', $ids];
-        $data['check_status'] = input('status');
+        $data['check_status'] = 4;
         $data['check_time'] = date('Y-m-d H:i:s', time());
         $data['check_person'] = session('admin.nickname');
         $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
@@ -842,7 +842,7 @@ class Inventory extends Backend
         return $this->view->fetch();
     }
 
-    
+
     /***
      * 更改镜架逻辑
      * @param id 协同任务ID
