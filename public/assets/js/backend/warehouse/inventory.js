@@ -384,9 +384,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'editable'], function
                         url: Config.moduleurl + '/warehouse/inventory/createInventory',
                         data: { data: 'all' }
                     }, function (data, ret) {
-                        window.location.href = Config.moduleurl + '/warehouse/inventory/index';
+                        location.reload();
                     }, function (data, ret) {
-                        window.location.href = Config.moduleurl + '/warehouse/inventory/index';
+                        location.reload();
                     });
                 })
             }
