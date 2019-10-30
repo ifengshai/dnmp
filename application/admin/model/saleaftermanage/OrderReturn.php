@@ -39,6 +39,7 @@ class OrderReturn extends Model
     public function getOrderReturnData()
     {
         $map['is_del'] = 1;
+        $map['order_status'] = 2;
         return $this->where($map)->column('return_order_number','id');
     }
     

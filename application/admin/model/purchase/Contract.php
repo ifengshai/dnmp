@@ -39,4 +39,6 @@ class Contract extends Model
     {
         return $this->where('status', 2)->select();
     }
+
+    
 }

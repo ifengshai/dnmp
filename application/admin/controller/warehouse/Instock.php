@@ -393,23 +393,23 @@ class Instock extends Backend
 
                     //根据质检id 查询采购单id 
                     $check = new \app\admin\model\warehouse\Check;
-                    $purchase_id = $check->where('id', $v['check_id'])->value('purchase_id');
+                    $check_res = $check->where('id', $v['check_id'])->find();
                     //更新采购商品表 入库数量 如果为真则为采购入库
-                    if ($purchase_id) {
+                    if ($check_res['purchase_id']) {
                         $purchase_map['sku'] = $v['sku'];
-                        $purchase_map['purchase_id'] = $purchase_id;
+                        $purchase_map['purchase_id'] = $check_res['purchase_id'];
                         $purchase->where($purchase_map)->setInc('instock_num', $v['in_stock_num']);
 
                         //更新采购单状态 已入库 或 部分入库
                         //查询采购单商品总到货数量 以及采购数量
                         //查询质检信息
-                        $check_map['purchase_id'] = $purchase_id;
+                        $check_map['purchase_id'] = $check_res['purchase_id'];
                         $check_map['type'] = 1;
                         $check = new \app\admin\model\warehouse\Check;
                         //总到货数量
                         $all_arrivals_num = $check->hasWhere('checkItem')->where($check_map)->sum('arrivals_num');
 
-                        $all_purchase_num = $purchase->where('purchase_id', $purchase_id)->sum('purchase_num');
+                        $all_purchase_num = $purchase->where('purchase_id', $check_res['purchase_id'])->sum('purchase_num');
                         //总入库数量 小于 采购单采购数量 则为部分入库 
                         if ($all_arrivals_num < $all_purchase_num) {
                             $stock_status = 1;
@@ -418,7 +418,13 @@ class Instock extends Backend
                         }
                         //修改采购单质检状态
                         $purchase_data['stock_status'] = $stock_status;
-                        $this->purchase->allowField(true)->save($purchase_data, ['id' => $purchase_id]);
+                        $this->purchase->allowField(true)->save($purchase_data, ['id' => $check_res['purchase_id']]);
+                    }
+
+                    //如果为退货单 修改退货单状态为入库
+                    if ($check_res['order_return_id']) {
+                        $orderReturn = new \app\admin\model\saleaftermanage\OrderReturn;
+                        $orderReturn->allowField(true)->save(['in_stock_status' => 1], ['id' => $v['order_return_id']]);
                     }
                 }
 
