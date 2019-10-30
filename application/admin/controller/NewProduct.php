@@ -635,7 +635,7 @@ class NewProduct extends Backend
         if ($this->request->isAjax()) {
             $id = $this->request->param('ids');
             $map['id'] = $id;
-            $data['item_status'] = 5;
+            $data['item_status'] = 4;
             $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
             if ($res) {
                 $this->success('取消成功');
