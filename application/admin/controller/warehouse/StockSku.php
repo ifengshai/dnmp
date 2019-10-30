@@ -50,21 +50,27 @@ class StockSku extends Backend
             }
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
-                ->with(['storehouse', 'item'])
+                ->with(['storehouse'])
                 ->where($where)
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->model
-                ->with(['storehouse', 'item'])
+                ->with(['storehouse'])
                 ->where($where)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
 
-            foreach ($list as $row) {
-
+            //查询商品SKU
+            $item = new \app\admin\model\itemmanage\Item;
+            $arr = $item->where('is_del',1)->column('sku,name,is_open','id');
+            foreach ($list as $k => $row) {
                 $row->getRelation('storehouse')->visible(['coding', 'library_name', 'status']);
+
+                $list[$k]['sku'] = $arr[$row['item_id']]['sku'];
+                $list[$k]['name'] = $arr[$row['item_id']]['name'];
+                $list[$k]['is_open'] = $arr[$row['item_id']]['is_open'];
             }
             $list = collection($list)->toArray();
 

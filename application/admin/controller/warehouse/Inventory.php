@@ -564,7 +564,7 @@ class Inventory extends Backend
                     }
                     //计算误差数量
                     if (@$params['inventory_qty']) {
-                        $params['error_qty'] = $params['inventory_qty'] - $row['available_stock'];
+                        $params['error_qty'] = $params['inventory_qty'] - $row['real_time_qty'];
                         $params['is_add'] = 1;
                     }
 
@@ -722,6 +722,7 @@ class Inventory extends Backend
                     $params['check_time'] = date('Y-m-d H:i:s', time());
                     $params['check_person'] = session('admin.nickname');
                     $outstock_res = $outstock->isUpdate(false)->allowField(true)->data($params,true)->save();
+
 
                     //添加入库信息
                     if ($outstock_res !== false) {

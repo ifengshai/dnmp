@@ -130,7 +130,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast'], func
                     __('确定要审核通过吗'),
                     function (index) {
                         Backend.api.ajax({
-                            url: "/admin/new_product/passAudit",
+                            url: "new_product/passAudit",
                             data: { ids: ids }
                         }, function (data, ret) {
                             table.bootstrapTable('refresh');
@@ -146,7 +146,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast'], func
                     __('确定要审核拒绝吗'),
                     function (index) {
                         Backend.api.ajax({
-                            url: "/admin/new_product/auditRefused",
+                            url: "new_product/auditRefused",
                             data: { ids: ids }
                         }, function (data, ret) {
                             table.bootstrapTable('refresh');

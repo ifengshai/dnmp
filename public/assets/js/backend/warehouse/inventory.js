@@ -5,6 +5,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'editable'], function
             // 初始化表格参数配置
             Table.api.init({
                 searchFormVisible: true,
+                pageList: [10, 25, 50, 100],
                 extend: {
                     index_url: 'warehouse/inventory/index' + location.search,
                     add_url: 'warehouse/inventory/add',
@@ -263,6 +264,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'editable'], function
                     showColumns: false,
                     showToggle: false,
                     pageSize: 50,
+                    pageList: [10, 25, 50, 100],
 
                 });
                 // 表格1
@@ -318,7 +320,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'editable'], function
                     showExport: false,
                     showColumns: false,
                     showToggle: false,
-                    pageSize: 50
+                    pageSize: 50,
+                    pageList: [10, 25, 50, 100],
                 });
                 // 表格2
                 var table2 = $("#table2");
@@ -414,6 +417,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'editable'], function
                     showColumns: false,
                     showToggle: false,
                     pageSize: 50,
+                    pageList: [10, 25, 50, 100],
 
                 });
                 // 表格1
@@ -469,7 +473,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'editable'], function
                     showExport: false,
                     showColumns: false,
                     showToggle: false,
-                    pageSize: 50
+                    pageSize: 50,
+                    pageList: [10, 25, 50, 100],
                 });
                 // 表格2
                 var table2 = $("#table2");
@@ -518,6 +523,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'editable'], function
             // 初始化表格参数配置
             Table.api.init({
                 searchFormVisible: true,
+                
                 extend: {
                     index_url: 'warehouse/inventory/start' + location.search + '&inventory_id=' + Config.inventory_id,
                     edit_url: 'warehouse/inventory/startEdit',
