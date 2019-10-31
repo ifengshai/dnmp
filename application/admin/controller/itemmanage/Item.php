@@ -1409,6 +1409,7 @@ class Item extends Backend
                 $arr = $magentoPlatform[2];
                 $magento_sku = $v['nihao_sku'];
             }else{
+                Db::connect('database.db_stock')->table('sku_map')->where(['sku'=>$v['sku']])->update(['pull_status'=>-1]);
                 continue;
             }
             try{
@@ -1418,10 +1419,12 @@ class Item extends Backend
                 $result = $client->call($session, 'catalog_product.info', $magento_sku);
                 $client->endSession($session);
             }catch (\SoapFault $e){
+                $this->error($e->getMessage());
                 continue;
                 //$this->error(11111);
                 $this->error($e->getMessage());
             }catch (\Exception $e){
+                $this->error($e->getMessage());
                 continue;
                 //$this->error(22222);
                 $this->error($e->getMessage());
@@ -1433,6 +1436,9 @@ class Item extends Backend
                     $storeArr[$vals] = $result[$vals];
                 }
             }
+            // echo '<pre>';
+            // var_dump($storeArr);
+            // exit;
             $serializeResult = serialize($storeArr);
             $where['information'] = $serializeResult;
             Db::connect('database.db_stock')->table('sku_map')->where(['sku'=>$v['sku']])->update($where);
@@ -1827,6 +1833,19 @@ class Item extends Backend
         // echo '<pre>';
         // var_dump($result);
 
+    }
+    /**
+     * 从仓库sku找到zeelool的sku并且更新到sku_map数据库当中
+     */
+    public function add_map_sku()
+    {
+        $where['magento_sku'] = ['NEQ',''];
+        $result = M('product')->where($where)->field('magento_sku as sku')->select();
+		if(!$result){
+			echo 123;
+			return 123;
+		}	
+        $map = M('map','sku_')->addAll($result);
     }
 
 }
