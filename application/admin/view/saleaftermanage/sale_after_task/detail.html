@@ -426,7 +426,7 @@
                 <td>{$vo.os_sph}</td>
                 <td>{$vo.os_cyl}</td>
                 <td>{$vo.os_axis}</td>
-                {if $orderPlatform gt 3}
+                {if $orderPlatform lt 3}
                     {if !isset($vo.total_add)}
                      <td>{$vo.od_add}</td>
                     {/if}
