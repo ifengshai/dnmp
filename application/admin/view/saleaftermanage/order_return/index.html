@@ -17,6 +17,7 @@
                     <div id="toolbar" class="toolbar">
                         <a href="javascript:;" class="btn btn-primary btn-refresh" title="{:__('Refresh')}" ><i class="fa fa-refresh"></i> </a>
                         <a href="javascript:;" data-area='["100%","100%"]' class="btn btn-success btn-add {:$auth->check('saleaftermanage/order_return/add')?'':'hide'}" title="{:__('Add')}" ><i class="fa fa-plus"></i> {:__('Add')}</a>
+                        <a href="javascript:;"  class="btn btn-success btn-start btn-disabled disabled {:$auth->check('saleaftermanage/order_return/submitAudit')?'':'hide'}" title="{:__('Edit')}" ><i class="fa fa-cog fa-spin"></i> {:__('SubmitAudit')}</a>
                         <a href="javascript:;"  class="btn btn-danger btn-pass btn-disabled disabled {:$auth->check('saleaftermanage/order_return/morePassAudit')?'':'hide'}" title="{:__('Edit')}" ><i class="fa fa-cog fa-spin"></i> {:__('PassAudit')}</a>
                         <a href="javascript:;"  class="btn btn-danger btn-refused btn-disabled disabled {:$auth->check('saleaftermanage/order_return/moreAuditRefused')?'':'hide'}" title="{:__('Edit')}" ><i class="fa fa-ban"></i> {:__('AuditRefused')}</a>
                         <!-- <a href="javascript:;" data-area='["100%","100%"]' class="btn btn-success btn-edit btn-disabled disabled {:$auth->check('saleaftermanage/order_return/edit')?'':'hide'}" title="{:__('Edit')}" ><i class="fa fa-pencil"></i> {:__('Edit')}</a> -->

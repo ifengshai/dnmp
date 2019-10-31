@@ -52,27 +52,26 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                         {
                             field: 'order_status',
                             title: __('Order_status'),
-                            searchList: { 1: '新建', 2: '已审核', 3: '已拒绝', 4: '已取消'},
-                            custom: { 1: 'yellow', 2: 'blue', 3: 'success', 4: 'red'},
+                            searchList: { 1: '新建', 2: '待审核', 3: '已审核', 4: '已拒绝',5:'已取消'},
+                            custom: { 1: 'yellow', 2: 'blue', 3: 'success', 4: 'red',5:'gray'},
                             formatter: Table.api.formatter.status
                         },
                         {
                             field:'quality_status',
                             title:__('Quality_status'),
                             searchList:{0:'未质检',1:'已质检'},
-                            custom:{0:'red',1:'blue'},
+                            custom:{0:'yellow',1:'blue'},
                             formatter:Table.api.formatter.status
                         },
                         {
                             field:'in_stock_status',
                             title:__('In_stock_status'),
                             searchList:{0:'未入库',1:'已入库'},
-                            custom:{0:'red',1:'blue'},
+                            custom:{0:'yellow',1:'blue'},
                             formatter:Table.api.formatter.status
                         },
                         { field: 'create_person', title: __('Create_person') },
                         { field: 'create_time', title: __('Create_time'), operate: 'RANGE', addclass: 'datetimerange' },
-                      
                         {
                             field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, extend: 'data-area = \'["100%","100%"]\'', buttons: [
                                 {
@@ -207,7 +206,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                                     },
                                     visible: function (row) {
                                         //返回true时按钮显示,返回false隐藏
-                                        if(row.order_status == 4){
+                                        if(row.order_status == 5){
                                             return false;
                                         }
                                             return true;
@@ -263,6 +262,23 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
             });
             // 为表格绑定事件
             Table.api.bindevent(table);
+            //提交审核
+            $(document).on('click', '.btn-start', function () {
+                var ids = Table.api.selectedids(table);
+                Layer.confirm(
+                    __('确定要提交审核吗'),
+                    function (index) {
+                        Backend.api.ajax({
+                            url: "saleaftermanage/order_return/submitAudit",
+                            data: { ids: ids }
+                        }, function (data, ret) {
+                            table.bootstrapTable('refresh');
+                            Layer.close(index);
+                        });
+                    }
+                );
+            });
+            //审核通过
             $(document).on('click', '.btn-pass', function () {
                 var ids = Table.api.selectedids(table);
                 Layer.confirm(
@@ -278,7 +294,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                     }
                 );
             });
-            //商品审核拒绝
+            //审核拒绝
             $(document).on('click', '.btn-refused', function () {
                 var ids = Table.api.selectedids(table);
                 Layer.confirm(

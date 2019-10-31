@@ -30,5 +30,6 @@ return [
     'Quality_status'         => '质检状态',
     'In_stock_status'        => '入库状态',
     'PassAudit'              => '审核通过',
-    'AuditRefused'           => '审核拒绝'
+    'AuditRefused'           => '审核拒绝',
+    'SubmitAudit'            => '提交审核'
 ];
