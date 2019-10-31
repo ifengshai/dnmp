@@ -239,7 +239,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                     __('确定要审核通过吗'),
                     function (index) {
                         Backend.api.ajax({
-                            url: "/admin/itemmanage/item/morePassAudit",
+                            url: "itemmanage/item/morePassAudit",
                             data: { ids: ids }
                         }, function (data, ret) {
                             table.bootstrapTable('refresh');
@@ -255,7 +255,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                     __('确定要审核拒绝吗'),
                     function (index) {
                         Backend.api.ajax({
-                            url: "/admin/itemmanage/item/moreAuditRefused",
+                            url: "itemmanage/item/moreAuditRefused",
                             data: { ids: ids }
                         }, function (data, ret) {
                             table.bootstrapTable('refresh');
@@ -271,7 +271,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                     __('确定要启用商品吗'),
                     function (index) {
                         Backend.api.ajax({
-                            url: "/admin/itemmanage/item/startItem",
+                            url: "itemmanage/item/startItem",
                             data: { ids: ids }
                         }, function (data, ret) {
                             table.bootstrapTable('refresh');
@@ -287,7 +287,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                     __('确定要禁用商品吗'),
                     function (index) {
                         Backend.api.ajax({
-                            url: "/admin/itemmanage/item/forbiddenItem",
+                            url: "itemmanage/item/forbiddenItem",
                             data: { ids: ids }
                         }, function (data, ret) {
                             table.bootstrapTable('refresh');
@@ -303,7 +303,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                     __('确定要移入回收站吗'),
                     function (index) {
                         Backend.api.ajax({
-                            url: "/admin/itemmanage/item/moveRecycle",
+                            url: "itemmanage/item/moveRecycle",
                             data: { ids: ids }
                         }, function (data, ret) {
                             table.bootstrapTable('refresh');
@@ -703,7 +703,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                     __('确定要审核通过吗'),
                     function (index) {
                         Backend.api.ajax({
-                            url: "/admin/itemmanage/item/morePassAudit",
+                            url: "itemmanage/item/morePassAudit",
                             data: { ids: ids }
                         }, function (data, ret) {
                             table.bootstrapTable('refresh');
@@ -719,7 +719,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                     __('确定要还原吗'),
                     function (index) {
                         Backend.api.ajax({
-                            url: "/admin/itemmanage/item/moreRestore",
+                            url: "itemmanage/item/moreRestore",
                             data: { ids: ids }
                         }, function (data, ret) {
                             table.bootstrapTable('refresh');
@@ -735,7 +735,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                     __('确定要移入回收站吗'),
                     function (index) {
                         Backend.api.ajax({
-                            url: "/admin/itemmanage/item/moveRecycle",
+                            url: "itemmanage/item/moveRecycle",
                             data: { ids: ids }
                         }, function (data, ret) {
                             table.bootstrapTable('refresh');
