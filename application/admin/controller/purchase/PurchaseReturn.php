@@ -182,9 +182,6 @@ class PurchaseReturn extends Backend
 
         
         $id = input('ids');
-
-        dump($purchase_data);
-        dump($id);die;
         $this->assign('id', $id);
         return $this->view->fetch();
     }
