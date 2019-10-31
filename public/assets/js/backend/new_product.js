@@ -49,6 +49,34 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast'], func
 
                         {
                             field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [
+
+                                {
+                                    name: 'submitAudit',
+                                    text: '提交审核',
+                                    title: __('提交审核'),
+                                    classname: 'btn btn-xs btn-success btn-ajax',
+                                    icon: 'fa fa-leaf',
+                                    url: 'new_product/audit',
+                                    confirm: '确认提交审核吗',
+                                    success: function (data, ret) {
+                                        Layer.alert(ret.msg);
+                                        $(".btn-refresh").trigger("click");
+                                        //如果需要阻止成功提示，则必须使用return false;
+                                        //return false;
+                                    },
+                                    error: function (data, ret) {
+                                        Layer.alert(ret.msg);
+                                        return false;
+                                    },
+                                    visible: function (row) {
+                                        //返回true时按钮显示,返回false隐藏
+                                        if (row.item_status == 1) {
+                                            return true;
+                                        } else {
+                                            return false;
+                                        }
+                                    },
+                                }, 
                                 {
                                     name: 'detail',
                                     text: '详情',
@@ -86,7 +114,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast'], func
                                         }
                                     }
                                 },
-                                
+
                                 {
                                     name: 'auditRefused',
                                     text: '取消',
@@ -178,7 +206,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast'], func
         },
         add: function () {
             Controller.api.bindevent();
-           
+
 
             //采集1688商品信息
             $(document).on('click', '.btn-caiji', function () {
@@ -216,7 +244,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast'], func
         },
         edit: function () {
             Controller.api.bindevent();
-           
+
         },
         detail: function () {
             Controller.api.bindevent();
