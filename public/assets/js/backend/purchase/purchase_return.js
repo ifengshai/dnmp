@@ -139,16 +139,17 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             for (var i in data.item) {
 
                                 var num = data.item[i].purchase_num * 1 - data.item[i].arrivals_num * 1;
-                                shtml += ' <tr><td><input id="c-purchase_remark" class="form-control" name="sku[]" type="text" value="' + data.item[i].sku + '"></td>'
-                                shtml += ' <td><input id="c-purchase_remark" class="form-control" disabled  type="text" value="' + data.item[i].product_name + '"></td>'
-                                shtml += ' <td><input id="c-purchase_remark" class="form-control" disabled  type="text" value="' + data.item[i].purchase_price + '"></td>'
-                                shtml += ' <td><input id="c-purchase_remark" class="form-control" disabled type="text" value="' + data.item[i].supplier_sku + '"></td>'
-                                shtml += ' <td><input id="c-purchase_remark" class="form-control purchase_num" disabled type="text" redeonly value="' + data.item[i].purchase_num + '"></td>'
-                                shtml += ' <td><input id="c-purchase_remark" class="form-control arrivals_num" disabled type="text" value="' + data.item[i].arrivals_num + '"></td>'
+                                var percent = Math.round(data.item[i].quantity_num / data.item[i].arrivals_num * 100);
+                                shtml += ' <tr><td><input id="c-purchase_remark" class="form-control" name="sku[]" type="text" value="' + data.item[i].sku ? data.item[i].sku : ''  + '"></td>'
+                                shtml += ' <td><input id="c-purchase_remark" class="form-control" disabled  type="text" value="' + data.item[i].product_name ? data.item[i].product_name : '' + '"></td>'
+                                shtml += ' <td><input id="c-purchase_remark" class="form-control" disabled  type="text" value="' + data.item[i].purchase_price ? data.item[i].purchase_price : '' + '"></td>'
+                                shtml += ' <td><input id="c-purchase_remark" class="form-control" disabled type="text" value="' + data.item[i].supplier_sku ? data.item[i].supplier_sku : '' + '"></td>'
+                                shtml += ' <td><input id="c-purchase_remark" class="form-control purchase_num" disabled type="text" redeonly value="' + data.item[i].purchase_num ? data.item[i].purchase_num : '' + '"></td>'
+                                shtml += ' <td><input id="c-purchase_remark" class="form-control arrivals_num" disabled type="text" value="' + data.item[i].arrivals_num ? data.item[i].arrivals_num : '' + '"></td>'
                                 shtml += ' <td><input id="c-purchase_remark" class="form-control arrivals_num" disabled  type="text" value="' + num + '"></td>'
-                                shtml += ' <td><input id="c-purchase_remark" class="form-control quantity_num" disabled type="text" value="' + data.item[i].quantity_num + '"></td>'
-                                shtml += ' <td><input id="c-purchase_remark" class="form-control unqualified_num" disabled  type="text" value="' + data.item[i].unqualified_num + '"></td>'
-                                shtml += ' <td><input id="c-purchase_remark" class="form-control sample_num" disabled  type="text" value="' + Math.round(data.item[i].quantity_num / data.item[i].arrivals_num * 100) + '%' + '"></td>'
+                                shtml += ' <td><input id="c-purchase_remark" class="form-control quantity_num" disabled type="text" value="' + data.item[i].quantity_num ? data.item[i].quantity_num : '' + '"></td>'
+                                shtml += ' <td><input id="c-purchase_remark" class="form-control unqualified_num" disabled  type="text" value="' + data.item[i].unqualified_num ? data.item[i].unqualified_num : '' + '"></td>'
+                                shtml += ' <td><input id="c-purchase_remark" class="form-control sample_num" disabled  type="text" value="' + percent ? percent + '%' : ''  + '"></td>'
                                 shtml += ' <td><input  id="c-purchase_remark" class="form-control" disabled  type="text" value="' + data.item[i].return_num + '"></td>'
 
                                 shtml += ' <td><input id="c-return_num"  class="form-control return_num" data-price="' + data.item[i].purchase_price + '" size="200"  name="return_num[]" type="text" ></td>'
