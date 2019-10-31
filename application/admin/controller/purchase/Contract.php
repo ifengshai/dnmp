@@ -506,4 +506,30 @@ class Contract extends Backend
             $this->error();
         }
     }
+
+
+    
+    /***
+     * 编辑之后提交审核
+     */
+    public function audit()
+    {
+        if ($this->request->isAjax()) {
+            $id = $this->request->param('ids');
+            $row = $this->model->get($id);
+            if ($row['status'] > 0) {
+                $this->error('此商品状态不能提交审核');
+            }
+            $map['id'] = $id;
+            $data['status'] = 1;
+            $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
+            if ($res) {
+                $this->success('提交审核成功');
+            } else {
+                $this->error('提交审核失败');
+            }
+        } else {
+            $this->error('404 Not found');
+        }
+    }
 }

@@ -172,7 +172,7 @@ class PurchaseReturn extends Backend
 
         //查询采购单
         $purchase = new \app\admin\model\purchase\PurchaseOrder;
-        $purchase_data = $purchase->getPurchaseReturnData([2], [1, 2]);
+        $purchase_data = $purchase->getPurchaseReturnData([1, 2],'');
         $this->assign('purchase_data', $purchase_data);
 
 
@@ -180,6 +180,7 @@ class PurchaseReturn extends Backend
         $return_number = 'RO' . date('YmdHis') . rand(100, 999) . rand(100, 999);
         $this->assign('return_number', $return_number);
 
+        
         $id = input('ids');
         $this->assign('id', $id);
         return $this->view->fetch();
@@ -253,7 +254,7 @@ class PurchaseReturn extends Backend
 
                         $data = [];
                         if ($sku) {
-                           foreach (array_filter($sku) as $k => $v) {
+                            foreach (array_filter($sku) as $k => $v) {
                                 $data[$k]['sku'] = $v;
                                 $data[$k]['return_num'] = $return_num[$k];
                                 if (@$item_id[$k]) {
