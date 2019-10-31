@@ -693,7 +693,7 @@ class Inventory extends Backend
                     $params['remark'] = '盘盈入库';
                     $params['check_time'] = date('Y-m-d H:i:s', time());
                     $params['check_person'] = session('admin.nickname');
-                    $instorck_res = $instock->isUpdate(false)->allowField(true)->data($params,true)->save();
+                    $instorck_res = $instock->isUpdate(false)->allowField(true)->data($params, true)->save();
 
                     //添加入库信息
                     if ($instorck_res !== false) {
@@ -721,7 +721,7 @@ class Inventory extends Backend
                     $params['remark'] = '盘亏出库';
                     $params['check_time'] = date('Y-m-d H:i:s', time());
                     $params['check_person'] = session('admin.nickname');
-                    $outstock_res = $outstock->isUpdate(false)->allowField(true)->data($params,true)->save();
+                    $outstock_res = $outstock->isUpdate(false)->allowField(true)->data($params, true)->save();
 
 
                     //添加入库信息
@@ -842,7 +842,7 @@ class Inventory extends Backend
         return $this->view->fetch();
     }
 
-    
+
     /***
      * 更改镜架逻辑
      * @param id 协同任务ID
@@ -898,7 +898,7 @@ class Inventory extends Backend
             if (!$original_sku || !$original_number || !$change_sku || !$change_number) {
                 return false;
             }
-                    //回滚
+            //回滚
             Db::startTrans();
             try {
                 //更改sales_flat_order_item表中的sku字段
@@ -914,7 +914,7 @@ class Inventory extends Backend
                 if (($changeSku === false) || ($original_stock === false) || ($change_stock === false)) {
                     throw new Exception('更改镜架失败,请检查SKU');
                     continue;
-                }else{
+                } else {
                     //入库记录
                     $paramsIn = [];
                     $paramsIn['in_stock_number'] = 'IN' . date('YmdHis') . rand(100, 999) . rand(100, 999);
@@ -926,14 +926,14 @@ class Inventory extends Backend
                     $paramsIn['remark'] = '更改镜架入库';
                     $paramsIn['check_time'] = date('Y-m-d H:i:s', time());
                     $paramsIn['check_person'] = session('admin.nickname');
-                    $instorck_res = $instock->isUpdate(false)->allowField(true)->data($paramsIn,true)->save();
+                    $instorck_res = $instock->isUpdate(false)->allowField(true)->data($paramsIn, true)->save();
                     //添加入库信息
                     if ($instorck_res !== false) {
                         $instockItemList['sku'] = $warehouse_original_sku;
                         $instockItemList['in_stock_num'] = $original_number;
                         $instockItemList['in_stock_id']  = $instock->id;
                         //添加入库商品sku信息
-                        $instockItem->isUpdate(false)->allowField(true)->data($instockItemList,true)->save();
+                        $instockItem->isUpdate(false)->allowField(true)->data($instockItemList, true)->save();
                     }
                     //出库记录
                     $paramsOut = [];
@@ -945,26 +945,27 @@ class Inventory extends Backend
                     $paramsOut['remark'] = '更改镜架出库';
                     $paramsOut['check_time'] = date('Y-m-d H:i:s', time());
                     $paramsOut['check_person'] = session('admin.nickname');
-                    $outstock_res = $outstock->isUpdate(false)->allowField(true)->data($paramsOut,true)->save();
+                    $outstock_res = $outstock->isUpdate(false)->allowField(true)->data($paramsOut, true)->save();
                     //添加出库信息
                     if ($outstock_res !== false) {
                         $outstockItemList['sku'] = $warehouse_change_sku;
                         $outstockItemList['out_stock_num']  = $change_number;
                         $outstockItemList['out_stock_id'] = $outstock->id;
                         //批量添加
-                        $outstockItem->isUpdate(false)->allowField(true)->data($outstockItemList,true)->save();
+                        $outstockItem->isUpdate(false)->allowField(true)->data($outstockItemList, true)->save();
                     }
                 }
-            Db::commit();
-        } catch (ValidateException $e) {
-            Db::rollback();
-            $this->error($e->getMessage());
-        } catch (PDOException $e) {
-            Db::rollback();
-            $this->error($e->getMessage());
-        } catch (Exception $e) {
-            Db::rollback();
-            $this->error($e->getMessage());
+                Db::commit();
+            } catch (ValidateException $e) {
+                Db::rollback();
+                $this->error($e->getMessage());
+            } catch (PDOException $e) {
+                Db::rollback();
+                $this->error($e->getMessage());
+            } catch (Exception $e) {
+                Db::rollback();
+                $this->error($e->getMessage());
+            }
         }
     }
   }

@@ -562,9 +562,13 @@ class NewProduct extends Backend
         if ($this->request->isAjax()) {
             //查询所选择的数据
             $where['new_product.id'] = ['in', $ids];
-            $where['new_product.item_status'] = 2;
             $row = $this->model->where($where)->with(['newproductattribute'])->select();
             $row = collection($row)->toArray();
+            foreach($row as $k => $v) {
+                if ($v['item_status'] != 1) {
+                    $this->error('此状态不能审核！！');
+                }
+            }
 
             $map['id'] = ['in', $ids];
             $map['item_status'] = 1;
@@ -572,6 +576,7 @@ class NewProduct extends Backend
             $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
             if ($res !== false) {
                 if ($row) {
+                    
                     foreach ($row as $val) {
                         $params = $val;
                         $params['create_person'] = session('admin.nickname');
