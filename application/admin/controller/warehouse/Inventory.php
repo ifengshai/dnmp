@@ -967,4 +967,5 @@ class Inventory extends Backend
             $this->error($e->getMessage());
         }
     }
+  }
 }
