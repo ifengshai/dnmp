@@ -467,9 +467,9 @@ class PurchaseReturn extends Backend
             ->column('sum(return_num) as return_num', 'sku');
 
         foreach ($item as $k => $v) {
-            $item[$k]['arrivals_num'] = $check_item[$v['sku']]['arrivals_num'];
-            $item[$k]['quantity_num'] = $check_item[$v['sku']]['quantity_num'];
-            $item[$k]['unqualified_num'] = $check_item[$v['sku']]['unqualified_num'];
+            $item[$k]['arrivals_num'] = $check_item[$v['sku']]['arrivals_num'] ?? 0;
+            $item[$k]['quantity_num'] = $check_item[$v['sku']]['quantity_num'] ?? 0;
+            $item[$k]['unqualified_num'] = $check_item[$v['sku']]['unqualified_num'] ?? 0;
             $item[$k]['return_num'] = @$return_item[$v['sku']] ? @$return_item[$v['sku']] : 0;
         }
 
