@@ -454,9 +454,9 @@ class PurchaseReturn extends Backend
         //重组数组
         $check_item = [];
         foreach ($list as $k => $v) {
-            $check_item[$v['sku']]['arrivals_num'] = $v['arrivals_num'];
-            $check_item[$v['sku']]['quantity_num'] = $v['quantity_num'];
-            $check_item[$v['sku']]['unqualified_num'] = $v['unqualified_num'];
+            $check_item[$v['sku']]['arrivals_num'] = $v['arrivals_num'] ?? 0;
+            $check_item[$v['sku']]['quantity_num'] = $v['quantity_num'] ?? 0;
+            $check_item[$v['sku']]['unqualified_num'] = $v['unqualified_num'] ?? 0;
         }
 
         //查询已退数量
