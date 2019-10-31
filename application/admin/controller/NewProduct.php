@@ -678,7 +678,7 @@ class NewProduct extends Backend
             $result = Alibaba::getGoodsDetail($goodsId[0]);
             session($path, $result);
         }
-
+        
         $list = [];
         foreach ($result->productInfo->skuInfos as $k => $v) {
             $list[$k]['id'] = $k + 1;
