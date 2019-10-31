@@ -969,4 +969,3 @@ class Inventory extends Backend
         }
     }
   }
-}
