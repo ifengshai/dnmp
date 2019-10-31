@@ -81,7 +81,7 @@
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">{:__('Createtime')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <input id="c-createtime" data-rule="required" class = "form-control" name="row[createtime]" value="{$row.createtime}" disabled="disabled" >
+            <input id="c-createtime" data-rule="required" class = "form-control" name="row[create_time]" value="{$row.create_time}" disabled="disabled" >
         </div>
         <label class="control-label col-xs-12 col-sm-2">{:__('Handle_scheme')}:</label>
         <div class="col-xs-12 col-sm-3">
@@ -328,106 +328,123 @@
         <div class="col-lg-12">
         </div>
         <div class="col-xs-6 col-md-4">
-            <div class="panel bg-blue">
-                <div class="panel-body">
-                    <div class="panel-title">
-                        <label class="control-label col-xs-12 col-sm-3">商品名称:</label>
-                        <div class="col-xs-12 col-sm-8">
-                            <input  id="c-item_name"  class="form-control"  disabled="disabled" type="text" value="{$vo.name}">
-                        </div>
-                    </div>
-                </div>
-                <div class="panel-body">
-                    <div class="panel-title">
-                        <label class="control-label col-xs-12 col-sm-3">SKU:</label>
-                        <div class="col-xs-12 col-sm-8">
-                            <input  id="c-item_sku" class="form-control" disabled="disabled" type="text" value="{$vo.sku}">
-                        </div>
-                    </div>
-                </div>
-                <div class="panel-body">
-                    <div class="panel-title">
-                        <label class="control-label col-xs-12 col-sm-3">数量:</label>
-                        <div class="col-xs-12 col-sm-8">
-                            <input  id="c-item_qty_ordered"  class="form-control" disabled="disabled" type="text" value="{$vo.qty_ordered}">
-                        </div>
-                    </div>
-                </div>
-                <div class="panel-body">
-                    <div class="panel-title">
-                        <label class="control-label col-xs-12 col-sm-3">处方类型:</label>
-                        <div class="col-xs-12 col-sm-8">
-                            <input  id="c-recipe_type"  class="form-control" disabled="disabled" type="text" value="{$vo.prescription_type}">
-                        </div>
-                    </div>
-                </div>
-                <div class="panel-body">
-                    <div class="panel-title">
-                        <label class="control-label col-xs-12 col-sm-3">镜片类型:</label>
-                        <div class="col-xs-12 col-sm-8">
-                            <input  id="c-lens_type"  class="form-control"  disabled="disabled" type="text" value="{$vo.index_type}">
-                        </div>
-                    </div>
-                </div>
-                <div class="panel-body">
-                    <div class="panel-title">
-                        <label class="control-label col-xs-12 col-sm-3">镀膜类型:</label>
-                        <div class="col-xs-12 col-sm-8">
-                            <input  id="c-coating_film_type"  class="form-control"  disabled="disabled" type="text" value="{$vo.coatiing_name}">
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-xs-6 col-md-7">
-            <div class="panel bg-aqua-gradient">
-                <div class="panel-body">
-                    <div class="ibox-title">
-                        <table id="caigou-table">
-                            <tr>
-                                <td colspan="10" style="text-align: center">处方参数</td>
-                            </tr>
-                            <tr>
-                                <td style="text-align: center">参数</td>
-                                <td style="text-align: center">SPH</td>
-                                <td style="text-align: center">CYL</td>
-                                <td style="text-align: center">AXI</td>
-                                <td style="text-align: center">ADD</td>
-                                <td style="text-align: center">PD</td>
-                                <td style="text-align: center">Prism Horizontal</td>
-                                <td style="text-align: center">Base Direction</td>
-                                <td style="text-align: center">Prism Vertical</td>
-                                <td style="text-align: center">Base Direction</td>
-                            </tr>
-                            <tr>
-                                <td style="text-align: center">Right(OD)</td>
-                                <td><input id="c-right_SPH" class="form-control" disabled="disabled"  type="text" value="{$vo.od_sph}"></td>
-                                <td><input id="c-right_CYL" class="form-control" disabled="disabled"  type="text" value="{$vo.od_cyl}"></td>
-                                <td><input id="c-right_AXI" class="form-control" disabled="disabled"  type="text" value="{$vo.od_axis}"></td>
-                                <td><input id="c-right_ADD" class="form-control" disabled="disabled"  type="text" value="{$vo.od_add}"></td>
-                                <td><input id="c-right_PD" class="form-control"  disabled="disabled"  type="text" value="{$vo.pd_r}"></td>
-                                <td><input id="c-right_Prism_Horizontal" class="form-control" disabled="disabled"  type="text" value="{$vo.od_pv}"></td>
-                                <td><input id="c-right_" class="form-control" disabled="disabled"  type="text" value="{$vo.od_bd}"></td>
-                                <td><input id="c-purchase_remark" class="form-control"  disabled="disabled" type="text" value="{$vo.od_pv_r}"></td>
-                                <td><input id="c-purchase_remark" class="form-control"  disabled="disabled"  type="text" value="{$vo.od_bd_r}"></td>
-                            </tr>
-                            <tr>
-                                <td style="text-align: center">Left(OS)</td>
-                                <td><input id="c-left_SPH" class="form-control" disabled="disabled" type="text" value="{$vo.os_sph}"></td>
-                                <td><input id="c-left_CYL" class="form-control" disabled="disabled" type="text" value="{$vo.os_cyl}"></td>
-                                <td><input id="c-purchase_remark" class="form-control" disabled="disabled" type="text" value="{$vo.os_axis}"></td>
-                                <td><input id="c-purchase_remark" class="form-control" disabled="disabled" type="text" value="{$vo.os_add}"></td>
-                                <td><input id="c-purchase_remark" class="form-control" disabled="disabled" type="text" value="{$vo.pd_l}"></td>
-                                <td><input id="c-purchase_remark" class="form-control" disabled="disabled" type="text" value="{$vo.os_pv}"></td>
-                                <td><input id="c-purchase_remark" class="form-control" disabled="disabled" type="text" value="{$vo.os_bd}"></td>
-                                <td><input id="c-purchase_remark" class="form-control" disabled="disabled" type="text" value="{$vo.os_pv_r}"></td>
-                                <td><input id="c-purchase_remark" class="form-control" disabled="disabled" type="text" value="{$vo.os_bd_r}"></td>
-                            </tr>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <div>
+        <table id="caigou-table" class="handle_table1">
+            <tr>
+                <td>商品名称</td>
+                <td style="width:90%;">{$vo.name}</td>
+            </tr>
+            <tr>
+                <td>SKU</td>
+                <td style="width:90%;">{$vo.sku}</td>
+            </tr>
+            <tr>
+                <td>数量</td>
+                <td style="width:90%;">{:round($vo.qty_ordered)}</td>
+            </tr>
+            <tr>
+                <td>处方类型</td>
+                <td style="width:90%;">{$vo.prescription_type}</td>
+            </tr>
+            {if $orderPlatform ==3}
+            <tr>
+                <td>基片类型</td>
+                <td style="width:90%;">{$vo.second_name}</td>
+            </tr>
+            <tr>
+                <td>镜片类型</td>
+                <td style="width:90%;">{$vo.third_name}</td>
+            </tr>
+            <tr>
+                <td>折射率</td>
+                <td style="width:90%;">{$vo.zsl}</td>
+            </tr>
+            <tr>
+                <td>镀膜类型</td>
+                <td style="width:90%;">{$vo.four_name}</td>
+            </tr>
+            {else/}
+            <tr>
+                <td>镜片类型</td>
+                <td style="width:90%;">{$vo.index_type}</td>
+                </tr>
+            <tr>
+                <td>镀膜类型</td>
+                <td style="width:90%;">{$vo.coatiing_name}</td>
+            </tr>
+            {/if}
+        </table>
+    </div>
+</div>
+        <div class="col-xs-6 col-md-7" style="float:right;">
+        <table id="caigou-table" class="handle_table2">
+            <tr>
+                <td colspan="10" style="text-align: center;">处方参数</td>
+            </tr>
+            <tr>
+                <td>参数</td>
+                <td>SPH</td>
+                <td>CYL</td>
+                <td>AXI</td>
+                <td>ADD</td>
+                <td>PD</td>
+                <td>Prism Horizontal</td>
+                <td>Base Direction</td>
+                <td>Prism Vertical</td>
+                <td>Base Direction</td>
+            </tr>
+            <tr>
+                <td>Right(OD)</td>
+                <td>{$vo.od_sph}</td>
+                <td>{$vo.od_cyl}</td>
+                <td>{$vo.od_axis}</td>
+                {if $orderPlatform lt 3 }
+                {if $vo.total_add}
+                <td rowspan="2">{$vo.total_add}</td>
+                {else/}
+                <td>{$vo.os_add}</td>
+                {/if}
+                {else/}
+                {if $vo.prescription_type eq 'Reading Glasses' && $vo.os_add>0 && $vo.od_add>0}
+                <td>{$vo.od_add}</td>
+                {else/}
+                <td rowspan="2">{$vo.total_add}</td>
+                {/if}
+                {/if}
+                {if $vo.pdcheck == 'on'}
+                <td>{$vo.pd_r}</td>
+                {else/}
+                <td rowspan="2">{$vo.pd}</td>
+                {/if}
+                <td>{$vo.od_pv}</td>
+                <td>{$vo.od_bd}</td>
+                <td>{$vo.od_pv_r}</td>
+                <td>{$vo.od_bd_r}</td>
+            </tr>
+            <tr>
+                <td>Left(OS)</td>
+                <td>{$vo.os_sph}</td>
+                <td>{$vo.os_cyl}</td>
+                <td>{$vo.os_axis}</td>
+                {if $orderPlatform lt 3}
+                    {if !isset($vo.total_add)}
+                     <td>{$vo.od_add}</td>
+                    {/if}
+                {else/}
+                {if $vo.prescription_type eq 'Reading Glasses' && $vo.os_add>0 && $vo.od_add>0}
+                    <td>{$vo.os_add}</td>
+                {/if}
+                {/if}
+                {if $vo.pdcheck == 'on'}
+                <td>{$vo.pd_l}</td>
+                {/if}
+                <td>{$vo.os_pv}</td>
+                <td>{$vo.os_bd}</td>
+                <td>{$vo.os_pv_r}</td>
+                <td>{$vo.os_bd_r}</td>
+            </tr>
+        </table>
+    </div>
     </div>
     {/foreach}
     {/if}

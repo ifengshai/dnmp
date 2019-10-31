@@ -343,7 +343,11 @@ class SaleAfterTask extends Backend
         }
         //dump($result);
         $this->view->assign('row',$result);
+        $this->view->assign('orderPlatform',$result['order_platform']);
         $this->view->assign('orderInfo',$this->model->getOrderInfo($result['order_platform'],$result['order_number']));
+        // echo '<pre>';
+        // var_dump($this->model->getOrderInfo($result['order_platform'],$result['order_number']));
+        // exit;
         return $this->view->fetch();
     }
     /***

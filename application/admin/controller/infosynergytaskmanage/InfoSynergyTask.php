@@ -447,9 +447,9 @@ class InfoSynergyTask extends Backend
                  //如果是修改镜架的话更改库存
                  if ($row['synergy_task_id'] == 12) {   
                    $result= (new Inventory())->changeFrame($row['id'],$row['order_platform'],$row['synergy_order_number']);
-                   echo '<pre>';
-                   var_dump($result);
-                   exit;
+                //    echo '<pre>';
+                //    var_dump($result);
+                //    exit;
                  }
                 $this->success('操作成功');
             } else {
