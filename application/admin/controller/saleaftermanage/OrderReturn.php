@@ -734,7 +734,7 @@ class OrderReturn extends Backend
     {
         if ($this->request->isAjax()) {
             $map['id'] = ['in', $ids];
-            $data['order_status'] = 6;
+            $data['order_status'] = 4;
             $result = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
             if (false !== $result) {
                 return $this->success('确认成功');
@@ -743,6 +743,44 @@ class OrderReturn extends Backend
             }
         } else {
             return $this->error('404 Not Found');
+        }
+    }
+        /***
+     * 多个一起审核通过
+     */
+    public function morePassAudit($ids = null)
+    {
+        if ($this->request->isAjax()) {
+            $map['id'] = ['in', $ids];
+            $map['order_status'] = 1;
+            $data['order_status'] = 2;
+            $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
+            if ($res !== false) {
+                $this->success('审核成功');
+            } else {
+                $this->error('审核失败');
+            }
+        } else {
+            $this->error('404 Not found');
+        }
+    }
+    /***
+     * 多个一起审核拒绝
+     */
+    public function moreAuditRefused($ids = null)
+    {
+        if ($this->request->isAjax()) {
+            $map['id'] = ['in', $ids];
+            $map['order_status'] =1;
+            $data['order_status'] = 3;
+            $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
+            if ($res !== false) {
+                $this->success('审核拒绝成功');
+            } else {
+                $this->error('审核拒绝失败');
+            }
+        } else {
+            $this->error('404 Not found');
         }
     }
 }

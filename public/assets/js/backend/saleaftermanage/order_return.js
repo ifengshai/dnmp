@@ -9,7 +9,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                     index_url: 'saleaftermanage/order_return/index' + location.search,
                     add_url: 'saleaftermanage/order_return/add',
                     edit_url: 'saleaftermanage/order_return/edit',
-                    del_url: 'saleaftermanage/order_return/del',
+                    //del_url: 'saleaftermanage/order_return/del',
                     multi_url: 'saleaftermanage/order_return/multi',
                     table: 'order_return',
                 }
@@ -163,37 +163,37 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                                 //     }
 
                                 // },
-                                {
-                                    name: 'refund',
-                                    text: '退款',
-                                    title: __('Refund'),
-                                    classname: 'btn btn-xs btn-success btn-ajax',
-                                    icon: 'fa fa-pencil',
-                                    confirm: '确定要退款吗',
-                                    url: 'saleaftermanage/order_return/refund',
-                                    success: function (data, ret) {
-                                        Layer.alert(ret.msg);
-                                        $(".btn-refresh").trigger("click");
-                                        //如果需要阻止成功提示，则必须使用return false;
-                                        //return false;
-                                    },
-                                    error: function (data, ret) {
-                                        Layer.alert(ret.msg);
-                                        return false;
-                                    },
-                                    visible: function (row) {
-                                        //返回true时按钮显示,返回false隐藏
-                                        return true;
-                                    }
+                                // {
+                                //     name: 'refund',
+                                //     text: '退款',
+                                //     title: __('Refund'),
+                                //     classname: 'btn btn-xs btn-success btn-ajax',
+                                //     icon: 'fa fa-pencil',
+                                //     confirm: '确定要退款吗',
+                                //     url: 'saleaftermanage/order_return/refund',
+                                //     success: function (data, ret) {
+                                //         Layer.alert(ret.msg);
+                                //         $(".btn-refresh").trigger("click");
+                                //         //如果需要阻止成功提示，则必须使用return false;
+                                //         //return false;
+                                //     },
+                                //     error: function (data, ret) {
+                                //         Layer.alert(ret.msg);
+                                //         return false;
+                                //     },
+                                //     visible: function (row) {
+                                //         //返回true时按钮显示,返回false隐藏
+                                //         return true;
+                                //     }
 
-                                },
+                                // },
                                 {
                                     name: 'closed',
-                                    text: '关闭',
+                                    text: '取消',
                                     title: __('Closed'),
-                                    classname: 'btn btn-xs btn-success btn-ajax',
-                                    icon: 'fa fa-money',
-                                    confirm: '确定要关闭吗',
+                                    classname: 'btn btn-xs btn-danger btn-ajax',
+                                    icon: 'fa fa-remove',
+                                    confirm: '确定要取消吗',
                                     url: 'saleaftermanage/order_return/closed',
                                     success: function (data, ret) {
                                         Layer.alert(ret.msg);
@@ -207,7 +207,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                                     },
                                     visible: function (row) {
                                         //返回true时按钮显示,返回false隐藏
-                                        return true;
+                                        if(row.order_status == 4){
+                                            return false;
+                                        }
+                                            return true;
+                                            
                                     }
 
                                 }
@@ -259,6 +263,37 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
             });
             // 为表格绑定事件
             Table.api.bindevent(table);
+            $(document).on('click', '.btn-pass', function () {
+                var ids = Table.api.selectedids(table);
+                Layer.confirm(
+                    __('确定要审核通过吗'),
+                    function (index) {
+                        Backend.api.ajax({
+                            url: "saleaftermanage/order_return/morePassAudit",
+                            data: { ids: ids }
+                        }, function (data, ret) {
+                            table.bootstrapTable('refresh');
+                            Layer.close(index);
+                        });
+                    }
+                );
+            });
+            //商品审核拒绝
+            $(document).on('click', '.btn-refused', function () {
+                var ids = Table.api.selectedids(table);
+                Layer.confirm(
+                    __('确定要审核拒绝吗'),
+                    function (index) {
+                        Backend.api.ajax({
+                            url: "saleaftermanage/order_return/moreAuditRefused",
+                            data: { ids: ids }
+                        }, function (data, ret) {
+                            table.bootstrapTable('refresh');
+                            Layer.close(index);
+                        });
+                    }
+                );
+            });
         },
         add: function () {
             Controller.api.bindevent();
