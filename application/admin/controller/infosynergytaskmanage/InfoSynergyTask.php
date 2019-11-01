@@ -182,7 +182,7 @@ class InfoSynergyTask extends Backend
             $this->error(__('No Results were found'));
         }
         if(2 == $row['synergy_status']){
-            $this->error(__('The collaborative task information has been completed and cannot be processed'),'infosynergytaskmanage/info_synergy_task/index');
+            $this->error(__('The collaborative task information has been completed and cannot be edit'),'infosynergytaskmanage/info_synergy_task/index');
         }
         $adminIds = $this->getDataLimitAdminIds();
         if (is_array($adminIds)) {
@@ -192,8 +192,6 @@ class InfoSynergyTask extends Backend
         }
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
-            $tid    = $params['id'];
-            unset($params['id']);
             $item = isset($params['item']) ? $params['item']  : '';
             $lens = isset($params['lens']) ? $params['lens']  : '';
             if ($params) {
@@ -207,7 +205,6 @@ class InfoSynergyTask extends Backend
                         $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.edit' : $name) : $this->modelValidate;
                         $row->validateFailException(true)->validate($validate);
                     }
-                    $params['synergy_status'] =1;
                     $result = $row->allowField(true)->save($params);
                     Db::commit();
                 } catch (ValidateException $e) {
@@ -221,25 +218,17 @@ class InfoSynergyTask extends Backend
                     $this->error($e->getMessage());
                 }
                 if ($result !== false) {
-                    if (!empty($params['remark_record'])) {
-                        $dataRecord = [];
-                        $dataRecord['tid'] = $tid;
-                        $dataRecord['remark_record'] = strip_tags($params['remark_record']);
-                        $dataRecord['create_person'] = session('admin.username');
-                        $dataRecord['create_time']   = date("Y-m-d H:i:s", time());
-                        (new InfoSynergyTaskRemark())->allowField(true)->save($dataRecord);
-                    }
                     if ($item) {
                         foreach ($item as $arr) {
                             $data = [];
-                            //$data['id'] = $arr['id'];
+                            $data['tid'] = $arr['id'];
                             $data['original_sku'] = !empty($arr['original_sku']) ? $arr['original_sku'] : '';
                             $data['original_number'] = !empty($arr['original_number']) ? $arr['original_number'] : '';
                             $data['change_sku'] = !empty($arr['change_sku']) ? $arr['change_sku'] : '';
                             $data['change_number'] = !empty($arr['change_number']) ? $arr['change_number'] : '';
                             $data['create_person'] = session('admin.nickname');
                             $data['update_time']     = date("Y-m-d H:i:s", time());
-                            (new InfoSynergyTaskChangeSku())->allowField(true)->where('id', $arr['id'])->save($data, ['id', $arr['id']]);
+                            (new InfoSynergyTaskChangeSku())->allowField(true)->save($data);
                         }
                     }
                     if ($lens) {
@@ -280,7 +269,6 @@ class InfoSynergyTask extends Backend
                         }
                         (new InfoSynergyTaskChangeSku())->allowField(true)->saveAll($dataLens);
                     }
-
                     $this->success();
                 } else {
                     $this->error(__('No rows were updated'));
@@ -300,8 +288,8 @@ class InfoSynergyTask extends Backend
         //任务级别
         $this->view->assign('prtyIdList', (new SaleAfterTask())->getPrtyIdList());
         //信息协同任务SKU信息
-        //        dump((new InfoSynergyTaskChangeSku())->getChangeSkuList($row['id']));
-        //        exit;
+            //    dump((new InfoSynergyTaskChangeSku())->getChangeSkuList($row['id']));
+            //    exit;
         $this->view->assign('taskChangeSku', (new InfoSynergyTaskChangeSku())->getChangeSkuList($row['id']));
         return $this->view->fetch();
     }
@@ -416,6 +404,7 @@ class InfoSynergyTask extends Backend
         if (!$result) {
             $this->error('任务信息不存在，请重新尝试', 'saleaftermanage/sale_after_task');
         }
+        $result['problem_desc'] = strip_tags($result['problem_desc']);
         //dump($result);
         $this->view->assign('row', $result);
         $this->view->assign('categoryList', (new InfoSynergyTaskCategory())->getIssueList(1, 0));
@@ -459,5 +448,86 @@ class InfoSynergyTask extends Backend
         }else{
             $this->error('404 Not found');
         }
+    }
+    /***
+     * 处理协同任务
+     */
+    public function handle_task($ids=null)
+    {
+        $row = $this->model->get($ids);
+        if (!$row) {
+            $this->error(__('No Results were found'));
+        }
+        if(2 == $row['synergy_status']){
+            $this->error(__('The collaborative task information has been completed and cannot be processed'),'infosynergytaskmanage/info_synergy_task/index');
+        }
+        $adminIds = $this->getDataLimitAdminIds();
+        if (is_array($adminIds)) {
+            if (!in_array($row[$this->dataLimitField], $adminIds)) {
+                $this->error(__('You have no permission'));
+            }
+        }
+        if ($this->request->isPost()) {
+            $params = $this->request->post("row/a");
+            $tid    = $params['id'];
+            unset($params['id']);
+            if ($params) {
+                $params = $this->preExcludeFields($params);
+                $result = false;
+                Db::startTrans();
+                try {
+                    //是否采用模型验证
+                    if ($this->modelValidate) {
+                        $name = str_replace("\\model\\", "\\validate\\", get_class($this->model));
+                        $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.edit' : $name) : $this->modelValidate;
+                        $row->validateFailException(true)->validate($validate);
+                    }
+                    $params['synergy_status'] =1;
+                    $result = $row->allowField(true)->save($params);
+                    Db::commit();
+                } catch (ValidateException $e) {
+                    Db::rollback();
+                    $this->error($e->getMessage());
+                } catch (PDOException $e) {
+                    Db::rollback();
+                    $this->error($e->getMessage());
+                } catch (Exception $e) {
+                    Db::rollback();
+                    $this->error($e->getMessage());
+                }
+                if ($result !== false) {
+                    if (!empty($params['remark_record'])) {
+                        $dataRecord = [];
+                        $dataRecord['tid'] = $tid;
+                        $dataRecord['remark_record'] = strip_tags($params['remark_record']);
+                        $dataRecord['create_person'] = session('admin.username');
+                        $dataRecord['create_time']   = date("Y-m-d H:i:s", time());
+                        (new InfoSynergyTaskRemark())->allowField(true)->save($dataRecord);
+                    }
+                    $this->success();
+                } else {
+                    $this->error(__('No rows were updated'));
+                }
+            }
+            $this->error(__('Parameter %s can not be empty', ''));
+        }
+        $row['dept_id'] = explode('+', $row['dept_id']);
+        $row['rep_id']  = explode('+', $row['rep_id']);
+        $row['problem_desc'] = strip_tags($row['problem_desc']);
+        $this->view->assign("row", $row);
+        //任务分类列表
+        $this->view->assign('categoryList', (new InfoSynergyTaskCategory())->getIssueList(1, 0));
+        //订单平台列表
+        $this->view->assign("orderPlatformList", (new MagentoPlatform())->getOrderPlatformList());
+        //关联单据类型列表
+        $this->view->assign('orderType', $this->model->orderType());
+        //任务级别
+        $this->view->assign('prtyIdList', (new SaleAfterTask())->getPrtyIdList());
+        //信息协同任务SKU信息
+        //        dump((new InfoSynergyTaskChangeSku())->getChangeSkuList($row['id']));
+        //        exit;
+        $this->view->assign('taskChangeSku', (new InfoSynergyTaskChangeSku())->getChangeSkuList($row['id']));
+        return $this->view->fetch();
+
     }
 }

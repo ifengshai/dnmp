@@ -147,6 +147,27 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             });
             //为表格绑定事件
             Table.api.bindevent(table);
+            //处理任务
+            $(document).on('click','.btn-handle',function(){
+                var ids = Table.api.selectedids(table);
+                Backend.api.open('infosynergytaskmanage/info_synergy_task/handle_task/ids/'+ids,'处理任务',{area:["100%", "100%"]});
+                //window.location.href = 'saleaftermanage/sale_after_task/handle_task/ids/'+ids;
+            });
+            $(document).on('click', '.btn-handle-complete', function () {
+                var ids = Table.api.selectedids(table);
+                Layer.confirm(
+                    __('确定要处理完成吗'),
+                    function (index) {
+                        Backend.api.ajax({
+                            url: "infosynergytaskmanage/info_synergy_task/handleComplete",
+                            data: { ids: ids }
+                        }, function (data, ret) {
+                            table.bootstrapTable('refresh');
+                            Layer.close(index);
+                        });
+                    }
+                );
+            });
         },
         add: function () {
             Controller.api.bindevent();
@@ -390,19 +411,18 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     var orderNumber   = $('#c-synergy_order_number').val();
                     var synergyOrderId = $('#c-synergy_order_id').val();
                      if( vals == 12){ //更改镜架
+                        
                          if( synergyOrderId == 2){
                              Backend.api.ajax({
                                  url:'saleaftermanage/sale_after_task/ajax',
                                  data:{ordertype:orderPlatform,order_number:orderNumber}
                              }, function(data, ret){
-                                 //成功的回调
-                                 //alert(ret);
-                                 //清除html商品数据
-                                  $(".item_info").empty();
+                                $(".recipe-info").remove();
+                                $(".item_info").empty();
                                  var item = ret.data;
                                  $('#customer_info').after(function(){
                                      var Str = '';
-                                     Str+=  '<div class="caigou item_info" style="margin-top:15px;margin-left:10%;">'+
+                                     Str+=  '<div class="caigou frame-info item_info" style="margin-top:15px;margin-left:10%;">'+
                                          '<p style="font-size: 16px;"><b>更改镜架</b></p>'+
                                          '<div>'+
                                          '<div id="toolbar" class="toolbar">'+
@@ -449,18 +469,18 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                              });
                          }
                      }else if(vals == 13){ //修改处方参数
+                        
                          if( synergyOrderId == 2){
                              Backend.api.ajax({
                                  url:'saleaftermanage/sale_after_task/ajax',
                                  data:{ordertype:orderPlatform,order_number:orderNumber}
                              }, function(data, ret){
+                                $(".frame-info").remove();
                                  $(".item_info").empty();
-                                 var item = ret.data;
-
-                                     //console.log(newItem.name);
+                                    var item = ret.data;
                                      $('#customer_info').after(function(){
                                          var str2 = '';
-                                          str2+= '<div class="row item_info" style="margin-top:15px;margin-left:7.6666%;">'+
+                                          str2+= '<div class="row recipe-info item_info" style="margin-top:15px;margin-left:7.6666%;">'+
                                                  '<p style="font-size: 16px;"><b>更改镜片</b></p>'+
                                                  '<div>'+
                                                  '<div id="toolbar" class="toolbar">'+
@@ -587,7 +607,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                              });
                          }
                     }else{
-                        $(".item_info").empty();
+                        //$(".item_info").empty();
+                        $(".item_info").remove();
                     }
                 });
 
@@ -645,6 +666,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             }
         },
         detail:function(){
+            Form.api.bindevent($("form[role=form]"));
+        },
+        handle_task:function(){
             Form.api.bindevent($("form[role=form]"));
         }
     };
