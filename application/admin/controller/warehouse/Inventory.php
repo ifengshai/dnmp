@@ -646,7 +646,7 @@ class Inventory extends Backend
             $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
             //审核通过 生成入库单 并同步库存
             if ($data['check_status'] == 2) {
-                $infos = $this->model->hasWhere('InventoryItem', ['inventory_id' => ['in', $ids]])
+                $infos = $this->item->where(['inventory_id' => ['in', $ids]])
                     ->field('sku,error_qty')
                     ->group('sku')
                     ->select();

@@ -29,7 +29,7 @@ class Contract extends Model
     //关联模型
     public function supplier()
     {
-        return $this->belongsTo('supplier', 'supplier_id')->setEagerlyType(0);;
+        return $this->belongsTo('supplier', 'supplier_id', '', [], 'left')->setEagerlyType(0);;
     }
 
     /**
@@ -39,6 +39,4 @@ class Contract extends Model
     {
         return $this->where('status', 2)->select();
     }
-
-    
 }

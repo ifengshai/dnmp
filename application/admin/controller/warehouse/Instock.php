@@ -350,15 +350,26 @@ class Instock extends Backend
                 $this->error('只有待审核状态才能操作！！');
             }
         }
-
         $data['status'] = input('status');
         if ($data['status'] == 2) {
             $data['check_time'] = date('Y-m-d H:i:s', time());
         }
 
         //查询入库明细数据
-        $list = $this->model->hasWhere('instockItem', ['in_stock_id' => ['in', $ids]])->field('sku,in_stock_num,sample_num')->select();
+        $list = $this->model->alias('a')
+            ->join(['fa_in_stock_item' => 'b'], 'a.id=b.in_stock_id')
+            ->where(['b.in_stock_id' => ['in', $ids]])
+            ->select();
         $list = collection($list)->toArray();
+        $skus = array_column($list, 'sku');
+        //查询存在产品库的sku
+        $item = new \app\admin\model\itemmanage\Item;
+        $skus = $item->where(['sku' => $skus])->column('sku');
+        foreach ($list as $v) {
+            if (!in_array($v['sku'], $skus)) {
+                $this->error('此sku:' . $v['sku'] . '不存在！！');
+            }
+        }
 
         $this->model->startTrans();
         $item = new \app\admin\model\itemmanage\Item;
@@ -497,8 +508,25 @@ class Instock extends Backend
             $id = $this->request->param('ids');
             $row = $this->model->get($id);
             if ($row['status'] != 0) {
-                $this->error('此商品状态不能提交审核');
+                $this->error('此状态不能提交审核');
             }
+
+            //查询入库明细数据
+            $list = $this->instockItem
+                ->where(['in_stock_id' => ['in', $id]])
+                ->select();
+            $list = collection($list)->toArray();
+            $skus = array_column($list, 'sku');
+            //查询存在产品库的sku
+            $item = new \app\admin\model\itemmanage\Item;
+            $skus = $item->where(['sku' => $skus])->column('sku');
+            foreach ($list as $v) {
+                if (!in_array($v['sku'], $skus)) {
+                    $this->error('此sku:' . $v['sku'] . '不存在！！');
+                }
+            }
+
+
             $map['id'] = $id;
             $data['status'] = 1;
             $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);

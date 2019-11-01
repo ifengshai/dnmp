@@ -1,4 +1,4 @@
-define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefined, Backend, Table, Form) {
+define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($, undefined, Backend, Table, Form) {
 
     var Controller = {
         index: function () {
@@ -139,8 +139,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             for (var i in data.item) {
 
                                 var num = data.item[i].purchase_num * 1 - data.item[i].arrivals_num * 1;
-                                shtml += ' <tr><td><input id="c-purchase_remark" class="form-control" name="sku[]" type="text" value="' + data.item[i].sku + '"></td>'
-                                shtml += ' <td><input id="c-purchase_remark" class="form-control" disabled  type="text" value="' + data.item[i].product_name + '"></td>'
+                                shtml += ' <tr><td><input id="c-purchase_remark" class="form-control sku" name="sku[]" type="text" value="' + data.item[i].sku + '"></td>'
+                                shtml += ' <td><input id="c-purchase_remark" class="form-control product_name" disabled  type="text" value="' + data.item[i].product_name + '"></td>'
                                 shtml += ' <td><input id="c-purchase_remark" class="form-control" disabled  type="text" value="' + data.item[i].purchase_price + '"></td>'
                                 shtml += ' <td><input id="c-purchase_remark" class="form-control" disabled type="text" value="' + data.item[i].supplier_sku + '"></td>'
                                 shtml += ' <td><input id="c-purchase_remark" class="form-control purchase_num" disabled type="text" redeonly value="' + data.item[i].purchase_num + '"></td>'
@@ -157,12 +157,133 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                 shtml += ' </tr>'
                             }
                             $('.caigou table tbody').append(shtml);
+
+                            //模糊匹配订单
+                            $('.sku').autocomplete({
+                                source: function (request, response) {
+                                    $.ajax({
+                                        type: "POST",
+                                        url: "ajax/ajaxGetLikeOriginSku",
+                                        dataType: "json",
+                                        cache: false,
+                                        async: false,
+                                        data: {
+                                            origin_sku: request.term
+                                        },
+                                        success: function (json) {
+                                            var data = json.data;
+                                            response($.map(data, function (item) {
+                                                return {
+                                                    label: item,//下拉框显示值
+                                                    value: item,//选中后，填充到input框的值
+                                                    //id:item.bankCodeInfo//选中后，填充到id里面的值
+                                                };
+                                            }));
+                                        }
+                                    });
+                                },
+                                delay: 10,//延迟100ms便于输入
+                                select: function (event, ui) {
+                                    $("#bankUnionNo").val(ui.item.id);//取出在return里面放入到item中的属性
+                                },
+                                scroll: true,
+                                pagingMore: true,
+                                max: 5000
+                            });
+
                         }, function (data, ret) {
                             $('.layer-footer').find('.btn-success').addClass('disabled');
+
+                            //模糊匹配订单
+                            $('.sku').autocomplete({
+                                source: function (request, response) {
+                                    $.ajax({
+                                        type: "POST",
+                                        url: "ajax/ajaxGetLikeOriginSku",
+                                        dataType: "json",
+                                        cache: false,
+                                        async: false,
+                                        data: {
+                                            origin_sku: request.term
+                                        },
+                                        success: function (json) {
+                                            var data = json.data;
+                                            response($.map(data, function (item) {
+                                                return {
+                                                    label: item,//下拉框显示值
+                                                    value: item,//选中后，填充到input框的值
+                                                    //id:item.bankCodeInfo//选中后，填充到id里面的值
+                                                };
+                                            }));
+                                        }
+                                    });
+                                },
+                                delay: 10,//延迟100ms便于输入
+                                select: function (event, ui) {
+                                    $("#bankUnionNo").val(ui.item.id);//取出在return里面放入到item中的属性
+                                },
+                                scroll: true,
+                                pagingMore: true,
+                                max: 5000
+                            });
                         });
                     }
 
                 })
+
+
+                //获取sku信息
+                $(document).on('change', '.sku', function () {
+                    var sku = $(this).val();
+                    var _this = $(this);
+                    if (!sku) {
+                        return false;
+                    }
+                    Backend.api.ajax({
+                        url: 'ajax/getSkuList',
+                        data: { sku: sku }
+                    }, function (data, ret) {
+                        _this.parent().parent().find('.product_name').val(data.name);
+                        _this.parent().parent().find('.supplier_sku').val(data.supplier_sku);
+                    }, function (data, ret) {
+                        Fast.api.error(ret.msg);
+                    });
+
+                })
+
+
+                //模糊匹配订单
+                $('.sku').autocomplete({
+                    source: function (request, response) {
+                        $.ajax({
+                            type: "POST",
+                            url: "ajax/ajaxGetLikeOriginSku",
+                            dataType: "json",
+                            cache: false,
+                            async: false,
+                            data: {
+                                origin_sku: request.term
+                            },
+                            success: function (json) {
+                                var data = json.data;
+                                response($.map(data, function (item) {
+                                    return {
+                                        label: item,//下拉框显示值
+                                        value: item,//选中后，填充到input框的值
+                                        //id:item.bankCodeInfo//选中后，填充到id里面的值
+                                    };
+                                }));
+                            }
+                        });
+                    },
+                    delay: 10,//延迟100ms便于输入
+                    select: function (event, ui) {
+                        $("#bankUnionNo").val(ui.item.id);//取出在return里面放入到item中的属性
+                    },
+                    scroll: true,
+                    pagingMore: true,
+                    max: 5000
+                });
             }
         }
     };

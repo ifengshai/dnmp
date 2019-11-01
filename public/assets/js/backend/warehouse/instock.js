@@ -66,7 +66,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                                             return false;
                                         }
                                     },
-                                }, 
+                                },
                                 {
                                     name: 'detail',
                                     text: '详情',
@@ -95,7 +95,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                                     },
                                     visible: function (row) {
                                         //返回true时按钮显示,返回false隐藏
-                                        if (row.status == 0 ) {
+                                        if (row.status == 0) {
                                             return true;
                                         } else {
                                             return false;
@@ -174,7 +174,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                 $(this).parent().parent().remove();
             })
 
-            
+
         },
         edit: function () {
             Controller.api.bindevent();
@@ -220,7 +220,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
 
                 //切换采购单
                 $(document).on('change', '.check_id', function () {
-                    
+
                     var id = $(this).val();
                     if (id) {
                         var url = Config.moduleurl + '/warehouse/instock/getCheckData';
@@ -232,8 +232,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                             var shtml = ' <tr><th>SKU</th><th>供应商SKU</th><th>采购数量</th>><th>到货数量</th><th>质检合格数量</th><th>留样数量</th><th>入库数量</th><th>操作</th></tr>';
                             $('.caigou table tbody').html('');
                             for (var i in data) {
-                                shtml += ' <tr><td><input id="c-purchase_remark" class="form-control" name="sku[]" type="text" value="' + data[i].sku + '"></td>'
-                                shtml += ' <td>' + data[i].supplier_sku + '</td>'
+                                shtml += ' <tr><td><input id="c-purchase_remark" class="form-control sku" name="sku[]" type="text" value="' + data[i].sku + '"></td>'
+                                shtml += ' <td class="supplier_sku">' + data[i].supplier_sku + '</td>'
                                 shtml += ' <td>' + data[i].purchase_num + '</td>'
                                 shtml += ' <td>' + data[i].arrivals_num + '</td>'
                                 shtml += ' <td>' + data[i].quantity_num + '</td>'
@@ -245,6 +245,40 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                                 shtml += ' </tr>'
                             }
                             $('.caigou table tbody').append(shtml);
+
+
+                            //模糊匹配订单
+                            $('.sku').autocomplete({
+                                source: function (request, response) {
+                                    $.ajax({
+                                        type: "POST",
+                                        url: "ajax/ajaxGetLikeOriginSku",
+                                        dataType: "json",
+                                        cache: false,
+                                        async: false,
+                                        data: {
+                                            origin_sku: request.term
+                                        },
+                                        success: function (json) {
+                                            var data = json.data;
+                                            response($.map(data, function (item) {
+                                                return {
+                                                    label: item,//下拉框显示值
+                                                    value: item,//选中后，填充到input框的值
+                                                    //id:item.bankCodeInfo//选中后，填充到id里面的值
+                                                };
+                                            }));
+                                        }
+                                    });
+                                },
+                                delay: 10,//延迟100ms便于输入
+                                select: function (event, ui) {
+                                    $("#bankUnionNo").val(ui.item.id);//取出在return里面放入到item中的属性
+                                },
+                                scroll: true,
+                                pagingMore: true,
+                                max: 5000
+                            });
                         });
                     }
 
@@ -255,7 +289,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                     source: function (request, response) {
                         $.ajax({
                             type: "POST",
-                            url: Config.moduleurl + "/itemmanage/item/ajaxGetLikeOriginSku",
+                            url: "ajax/ajaxGetLikeOriginSku",
                             dataType: "json",
                             cache: false,
                             async: false,
@@ -294,7 +328,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                         source: function (request, response) {
                             $.ajax({
                                 type: "POST",
-                                url: Config.moduleurl + "/itemmanage/item/ajaxGetLikeOriginSku",
+                                url: "ajax/ajaxGetLikeOriginSku",
                                 dataType: "json",
                                 cache: false,
                                 async: false,
@@ -323,6 +357,24 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                     });
                 })
 
+
+                //获取sku信息
+                $(document).on('change', '.sku', function () {
+                    var sku = $(this).val();
+                    var _this = $(this);
+                    if (!sku) {
+                        return false;
+                    }
+                    Backend.api.ajax({
+                        url: 'ajax/getSkuList',
+                        data: { sku: sku }
+                    }, function (data, ret) {
+                        _this.parent().parent().find('.supplier_sku').text(data.supplier_sku);
+                    }, function (data, ret) {
+                        Fast.api.error(ret.msg);
+                    });
+
+                })
 
             }
         }

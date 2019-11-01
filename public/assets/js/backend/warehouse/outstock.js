@@ -40,6 +40,33 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                         {
                             field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [
                                 {
+                                    name: 'submitAudit',
+                                    text: '提交审核',
+                                    title: __('提交审核'),
+                                    classname: 'btn btn-xs btn-success btn-ajax',
+                                    icon: 'fa fa-leaf',
+                                    url: 'warehouse/outstock/audit',
+                                    confirm: '确认提交审核吗',
+                                    success: function (data, ret) {
+                                        Layer.alert(ret.msg);
+                                        $(".btn-refresh").trigger("click");
+                                        //如果需要阻止成功提示，则必须使用return false;
+                                        //return false;
+                                    },
+                                    error: function (data, ret) {
+                                        Layer.alert(ret.msg);
+                                        return false;
+                                    },
+                                    visible: function (row) {
+                                        //返回true时按钮显示,返回false隐藏
+                                        if (row.status < 1) {
+                                            return true;
+                                        } else {
+                                            return false;
+                                        }
+                                    },
+                                },
+                                {
                                     name: 'detail',
                                     text: '详情',
                                     title: __('Detail'),
@@ -179,7 +206,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                     source: function (request, response) {
                         $.ajax({
                             type: "POST",
-                            url: "/admin/itemmanage/item/ajaxGetLikeOriginSku",
+                            url: "ajax/ajaxGetLikeOriginSku",
                             dataType: "json",
                             cache: false,
                             async: false,
@@ -218,7 +245,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                         source: function (request, response) {
                             $.ajax({
                                 type: "POST",
-                                url: "/admin/itemmanage/item/ajaxGetLikeOriginSku",
+                                url: "ajax/ajaxGetLikeOriginSku",
                                 dataType: "json",
                                 cache: false,
                                 async: false,

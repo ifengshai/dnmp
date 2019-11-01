@@ -94,6 +94,23 @@ class Voogueme extends Backend
                 ->select();
 
             $list = collection($list)->toArray();
+
+
+            //查询订单是否存在协同任务
+            $increment_ids = array_column($list, 'increment_id');
+            $infoSynergyTask = new \app\admin\model\infosynergytaskmanage\InfoSynergyTask;
+            $swhere['synergy_order_number'] = ['in', $increment_ids];
+            $swhere['is_del'] = 1;
+            $swhere['order_platform'] = 2;
+            $swhere['synergy_order_id'] = 2;
+            $order_arr = $infoSynergyTask->where($swhere)->column('synergy_order_number');
+            //查询是否存在协同任务
+            foreach ($list as $k => $v) {
+                if (in_array($v['increment_id'], $order_arr)) {
+                    $list[$k]['task_info'] = 1;
+                }
+            }
+
             $result = array("total" => $total, "rows" => $list);
             return json($result);
         }
@@ -117,6 +134,21 @@ class Voogueme extends Backend
                     // ->field($field)
                     ->where($map)
                     ->find();
+
+                if ($list) {
+                    //查询订单是否存在协同任务
+                    $infoSynergyTask = new \app\admin\model\infosynergytaskmanage\InfoSynergyTask;
+                    $swhere['synergy_order_number'] = $increment_id;
+                    $swhere['is_del'] = 1;
+                    $swhere['order_platform'] = 2;
+                    $swhere['synergy_order_id'] = 2;
+                    $count = $infoSynergyTask->where($swhere)->count();
+                    //查询是否存在协同任务
+                    if ($count > 0) {
+                        $list['task_info'] = 1;
+                    }
+                }
+
 
                 $result = ['code' => 1, 'data' => $list ?? []];
             } else {
