@@ -357,10 +357,20 @@ class Instock extends Backend
 
         //查询入库明细数据
         $list = $this->model->alias('a')
-        ->join(['fa_in_stock_item'=>'b'],'a.id=b.in_stock_id')
-        ->where(['b.in_stock_id' => ['in', $ids]])
-        ->select();
+            ->join(['fa_in_stock_item' => 'b'], 'a.id=b.in_stock_id')
+            ->where(['b.in_stock_id' => ['in', $ids]])
+            ->select();
         $list = collection($list)->toArray();
+        $skus = array_column($list, 'sku');
+        //查询存在产品库的sku
+        $item = new \app\admin\model\itemmanage\Item;
+        $skus = $item->where(['sku' => $skus])->column('sku');
+        foreach ($list as $v) {
+            if (!in_array($v['sku'], $skus)) {
+                $this->error('此sku:' . $v['sku'] . '不存在！！');
+            }
+        }
+
         $this->model->startTrans();
         $item = new \app\admin\model\itemmanage\Item;
         $item->startTrans();
