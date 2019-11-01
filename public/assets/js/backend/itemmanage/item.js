@@ -769,9 +769,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                             var options = table.bootstrapTable('getOptions');
                             var pageNumber = options.pageNumber;
                             var pageSize = options.pageSize;
-
-                            //return (pageNumber - 1) * pageSize + 1 + index;
-                            return 1+index;
+                            return (pageNumber - 1) * pageSize + 1 + index;
                             }, operate: false
                         },
                         { field: 'id', title: __('Id'), operate: false },
