@@ -828,7 +828,7 @@ class Item extends Backend
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
-
+          
             $list = collection($list)->toArray();
 
             $skus = array_column($list, 'sku');

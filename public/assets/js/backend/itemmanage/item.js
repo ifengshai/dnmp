@@ -25,13 +25,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                 columns: [
                     [
                         { checkbox: true },
-                        {field: '', title: __('序号'), formatter: function (value, row, index) {
-                            var options = table.bootstrapTable('getOptions');
-                            var pageNumber = options.pageNumber;
-                            var pageSize = options.pageSize;
+                        {
+                            field: '', title: __('序号'), formatter: function (value, row, index) {
+                                var options = table.bootstrapTable('getOptions');
+                                var pageNumber = options.pageNumber;
+                                var pageSize = options.pageSize;
 
-                            //return (pageNumber - 1) * pageSize + 1 + index;
-                            return 1+index;
+                                //return (pageNumber - 1) * pageSize + 1 + index;
+                                return 1 + index;
                             }, operate: false
                         },
                         { field: 'id', title: __('Id'), operate: false },
@@ -393,12 +394,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                 });
                 //根据随机数、采购类型、采购产地异步判断origin_sku是否存在
                 $(document).on('change', '#c-frame_texture', function () {
-                    var frame_texture       = $(this).val();
-                    var procurement_origin  = $('#c-procurement_origin').val();
-                    var origin_sku          = $('#c-origin_sku').val();
+                    var frame_texture = $(this).val();
+                    var procurement_origin = $('#c-procurement_origin').val();
+                    var origin_sku = $('#c-origin_sku').val();
                     Backend.api.ajax({
                         url: 'itemmanage/item/checkOriginIsExist',
-                        data: { frame_texture:frame_texture, procurement_origin:procurement_origin,origin_sku:origin_sku}
+                        data: { frame_texture: frame_texture, procurement_origin: procurement_origin, origin_sku: origin_sku }
                     }, function (data, ret) {
                         $('.btn-success').removeClass('btn-disabled disabled');
                         return false;
@@ -586,13 +587,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                 columns: [
                     [
                         { checkbox: true },
-                        {field: '', title: __('序号'), formatter: function (value, row, index) {
-                            var options = table.bootstrapTable('getOptions');
-                            var pageNumber = options.pageNumber;
-                            var pageSize = options.pageSize;
+                        {
+                            field: '', title: __('序号'), formatter: function (value, row, index) {
+                                var options = table.bootstrapTable('getOptions');
+                                var pageNumber = options.pageNumber;
+                                var pageSize = options.pageSize;
 
-                            //return (pageNumber - 1) * pageSize + 1 + index;
-                            return 1+index;
+                                //return (pageNumber - 1) * pageSize + 1 + index;
+                                return 1 + index;
                             }, operate: false
                         },
                         { field: 'id', title: __('Id'), operate: false },
@@ -765,15 +767,16 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                 columns: [
                     [
                         { checkbox: true },
-                        {field: '', title: __('序号'), formatter: function (value, row, index) {
-                            var options = table.bootstrapTable('getOptions');
-                            var pageNumber = options.pageNumber;
-                            var pageSize = options.pageSize;
-                            return (pageNumber - 1) * pageSize + 1 + index;
+                        {
+                            field: '', title: __('序号'), formatter: function (value, row, index) {
+                                var options = table.bootstrapTable('getOptions');
+                                var pageNumber = options.pageNumber;
+                                var pageSize = options.pageSize;
+                                return (pageNumber - 1) * pageSize + 1 + index;
                             }, operate: false
                         },
                         { field: 'id', title: __('Id'), operate: false },
-                        { field: 'sku', title: __('Sku') },
+                        { field: 'sku', title: __('Sku'), operate: 'FIND_IN_SET' },
                         { field: 'name', title: __('Name') },
                         { field: 'stock', title: __('实时库存'), operate: false },
                         { field: 'available_stock', title: __('可用库存'), operate: false },

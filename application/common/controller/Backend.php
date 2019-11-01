@@ -318,7 +318,7 @@ class Backend extends Controller
                 case 'FINDIN':
                 case 'FINDINSET':
                 case 'FIND_IN_SET':
-                    $where[] = "FIND_IN_SET('{$v}', " . ($relationSearch ? $k : '`' . str_replace('.', '`.`', $k) . '`') . ")";
+                    $where[] = "FIND_IN_SET( " . ($relationSearch ? $k : '`' . str_replace('.', '`.`', $k) . '`') . ",'{$v}')";
                     break;
                 case 'IN':
                 case 'IN(...)':
