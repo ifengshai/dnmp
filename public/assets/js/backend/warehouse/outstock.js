@@ -218,7 +218,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                         source: function (request, response) {
                             $.ajax({
                                 type: "POST",
-                                url: "/admin/itemmanage/item/ajaxGetLikeOriginSku",
+                                url: "ajax/ajaxGetLikeOriginSku",
                                 dataType: "json",
                                 cache: false,
                                 async: false,
