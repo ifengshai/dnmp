@@ -350,16 +350,17 @@ class Instock extends Backend
                 $this->error('只有待审核状态才能操作！！');
             }
         }
-
         $data['status'] = input('status');
         if ($data['status'] == 2) {
             $data['check_time'] = date('Y-m-d H:i:s', time());
         }
 
         //查询入库明细数据
-        $list = $this->model->hasWhere('instockItem', ['in_stock_id' => ['in', $ids]])->field('sku,in_stock_num,sample_num')->select();
+        $list = $this->model->alias('a')
+        ->join(['fa_in_stock_item'=>'b'],'a.id=b.in_stock_id')
+        ->where(['b.in_stock_id' => ['in', $ids]])
+        ->select();
         $list = collection($list)->toArray();
-
         $this->model->startTrans();
         $item = new \app\admin\model\itemmanage\Item;
         $item->startTrans();

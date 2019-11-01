@@ -285,6 +285,9 @@ class Outstock extends Backend
             if ($v['status'] !== 1) {
                 $this->error('只有待审核状态才能操作！！');
             }
+
+            //判断SKU是否存在产品库
+            
         }
 
         $data['status'] = 2;
