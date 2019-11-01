@@ -158,7 +158,7 @@
                         <input id="c-purchase_remark" class="form-control sku" name="sku[]" type="text" value="{$v.sku}">
                     </td>
                     {if $row['type'] == 1}
-                    <td><input id="c-purchase_remark" class="form-control" name="supplier_sku[]" type="text"
+                    <td><input id="c-purchase_remark" class="form-control supplier_sku" readonly name="supplier_sku[]" type="text"
                             value="{$v.supplier_sku}"></td>
                     <td><input id="c-purchase_remark" class="form-control purchase_num" name="purchase_num[]"
                             type="text" value="{$v.purchase_num}"></td>
@@ -222,7 +222,7 @@
             <td>
                 <input id="c-purchase_remark" class="form-control sku" name="sku[]" type="text">
             </td>
-            <td><input id="c-purchase_remark" class="form-control" name="supplier_sku[]" type="text"></td>
+            <td><input id="c-purchase_remark" class="form-control supplier_sku" readonly name="supplier_sku[]" type="text"></td>
             <td><input id="c-purchase_remark" class="form-control purchase_num" name="purchase_num[]" type="text"></td>
             <td><input id="c-purchase_remark" class="form-control check_num" name="check_num[]" type="text"></td>
             <td><input id="c-purchase_remark" class="form-control arrivals_num" name="arrivals_num[]" type="text"></td>
