@@ -151,6 +151,12 @@ class Contract extends Backend
         $data = $supplier->getSupplierData();
         $this->assign('supplier', $data);
 
+        //查询sku
+        $item = new \app\admin\model\itemmanage\Item;
+        $itemList = $item->getItemSkuInfo();
+        $this->assign('itemList', $itemList);
+
+
         //生成合同编号
         $contract_number = 'CN' . date('YmdHis') . rand(100, 999) . rand(100, 999);
         $this->assign('contract_number', $contract_number);
@@ -214,7 +220,7 @@ class Contract extends Backend
                         $price = $this->request->post("price/a");
                         $total = $this->request->post("total/a");
                         $item_id = $this->request->post("item_id/a");
-                        
+
                         $data = [];
                         foreach ($sku as $k => $v) {
                             $data[$k]['sku'] = $v;
@@ -261,6 +267,11 @@ class Contract extends Backend
         $item = $this->contract_item->where($map)->select();
         $this->assign('item', $item);
 
+        //查询sku
+        $item = new \app\admin\model\itemmanage\Item;
+        $itemList = $item->getItemSkuInfo();
+        $this->assign('itemList', $itemList);
+
         $this->view->assign("row", $row);
         return $this->view->fetch();
     }
@@ -275,14 +286,14 @@ class Contract extends Backend
         if (!$row) {
             $this->error(__('No Results were found'));
         }
-        
+
         $adminIds = $this->getDataLimitAdminIds();
         if (is_array($adminIds)) {
             if (!in_array($row[$this->dataLimitField], $adminIds)) {
                 $this->error(__('You have no permission'));
             }
         }
-        
+
         //查询供应商
         $supplier = new \app\admin\model\purchase\Supplier;
         $supplier = $supplier->getSupplierData();
@@ -308,7 +319,7 @@ class Contract extends Backend
         }
         $map['id'] = ['in', $ids];
         $row = $this->model->where($map)->select();
-        foreach($row as $v) {
+        foreach ($row as $v) {
             if ($v['status'] !== 1) {
                 $this->error('只有待审核状态才能操作！！');
             }
@@ -496,7 +507,7 @@ class Contract extends Backend
 
 
     //删除合同里商品信息
-    public function deleteItem() 
+    public function deleteItem()
     {
         $id = input('id');
         $res = $this->contract_item->destroy($id);
@@ -508,7 +519,7 @@ class Contract extends Backend
     }
 
 
-    
+
     /***
      * 编辑之后提交审核
      */
@@ -532,4 +543,6 @@ class Contract extends Backend
             $this->error('404 Not found');
         }
     }
+
+   
 }

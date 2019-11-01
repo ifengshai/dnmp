@@ -91,7 +91,39 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
             $(document).on('click', '.btn-add', function () {
                 var content = $('#table-content table tbody').html();
                 $('.caigou table tbody').append(content);
-                Controller.api.bindevent();
+
+                //模糊匹配订单
+                $('.sku').autocomplete({
+                    source: function (request, response) {
+                        $.ajax({
+                            type: "POST",
+                            url: "ajax/ajaxGetLikeOriginSku",
+                            dataType: "json",
+                            cache: false,
+                            async: false,
+                            data: {
+                                origin_sku: request.term
+                            },
+                            success: function (json) {
+                                var data = json.data;
+                                response($.map(data, function (item) {
+                                    return {
+                                        label: item,//下拉框显示值
+                                        value: item,//选中后，填充到input框的值
+                                        //id:item.bankCodeInfo//选中后，填充到id里面的值
+                                    };
+                                }));
+                            }
+                        });
+                    },
+                    delay: 10,//延迟100ms便于输入
+                    select: function (event, ui) {
+                        $("#bankUnionNo").val(ui.item.id);//取出在return里面放入到item中的属性
+                    },
+                    scroll: true,
+                    pagingMore: true,
+                    max: 5000
+                });
             })
 
             $(document).on('click', '.btn-del', function () {
@@ -178,33 +210,29 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
             bindevent: function () {
                 Form.api.bindevent($("form[role=form]"));
 
-                //模糊匹配原始sku
-                $('.c-origin_skus').autocomplete({
+                //模糊匹配订单
+                $('.sku').autocomplete({
                     source: function (request, response) {
-                        var origin_sku = request.term;
-                        if (origin_sku.length >= 4) {
-                            $.ajax({
-                                type: "POST",
-                                url: "/admin/itemmanage/item/ajaxGetLikeOriginSku",
-                                dataType: "json",
-                                cache: false,
-                                async: false,
-                                data: {
-                                    origin_sku: origin_sku
-                                },
-                                success: function (json) {
-                                    var data = json.data;
-                                    response($.map(data, function (item) {
-                                        return {
-                                            label: item,//下拉框显示值
-                                            value: item,//选中后，填充到input框的值
-                                            //id:item.bankCodeInfo//选中后，填充到id里面的值
-                                        };
-                                    }));
-                                }
-                            });
-                        }
-                        
+                        $.ajax({
+                            type: "POST",
+                            url: "ajax/ajaxGetLikeOriginSku",
+                            dataType: "json",
+                            cache: false,
+                            async: false,
+                            data: {
+                                origin_sku: request.term
+                            },
+                            success: function (json) {
+                                var data = json.data;
+                                response($.map(data, function (item) {
+                                    return {
+                                        label: item,//下拉框显示值
+                                        value: item,//选中后，填充到input框的值
+                                        //id:item.bankCodeInfo//选中后，填充到id里面的值
+                                    };
+                                }));
+                            }
+                        });
                     },
                     delay: 10,//延迟100ms便于输入
                     select: function (event, ui) {
@@ -214,6 +242,25 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                     pagingMore: true,
                     max: 5000
                 });
+
+
+                //盘点sku是否存在
+                $(document).on('change', '.sku', function () {
+                    var sku = $(this).val();
+                    var _this = $(this);
+                    if (!sku) {
+                        return false;
+                    }
+                    Backend.api.ajax({
+                        url: 'ajax/getSkuList',
+                        data: { sku: sku }
+                    }, function (data, ret) {
+                        
+                    }, function (data, ret) {
+                        Fast.api.error(ret.msg);
+                    });
+
+                })
             }
         }
     };

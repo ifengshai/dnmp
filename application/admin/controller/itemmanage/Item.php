@@ -752,6 +752,7 @@ class Item extends Backend
             return $this->error(__('404 Not Found'));
         }
     }
+    
     /***
      * 异步获取原始的sku(origin_sku)
      */
@@ -768,6 +769,7 @@ class Item extends Backend
             $this->error('404 not found');
         }
     }
+
     /***
      * 根据商品分类和sku求出所有的商品
      */

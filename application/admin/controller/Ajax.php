@@ -285,4 +285,52 @@ class Ajax extends Backend
         $this->success('', null, $provincelist);
     }
 
+
+     /**
+     * 根据sku 匹配商品名称 供应商SKU 公用
+     */
+    public function getSkuList()
+    {
+        $sku = input('sku');
+        if (!$sku) {
+            $this->error('参数错误！！');
+        }
+
+        //查询sku 商品名称
+        $item = new \app\admin\model\itemmanage\Item;
+        $data = $item->getGoodsInfo($sku);
+        if (!$data) {
+            $this->error('此SKU不存在！！');
+        }
+
+        //查询供应商SKU
+        $supplier = new \app\admin\model\purchase\SupplierSku;
+        $sullier_sku = $supplier->getSupplierSkuData($sku);
+        if (!$sullier_sku) {
+            $this->error('此SKU未绑定供应商SKU！！');
+        }
+
+        $data->supplier_sku = $sullier_sku;
+
+        $this->success('', '', $data);
+    }
+
+
+    /***
+     * 异步获取原始的sku(origin_sku)
+     */
+    public function ajaxGetLikeOriginSku()
+    {
+        if ($this->request->isAjax()) {
+            $origin_sku = $this->request->post('origin_sku');
+            $item = new \app\admin\model\itemmanage\Item;
+            $result = $item->likeOriginSku($origin_sku);
+            if (!$result) {
+                return $this->error('商品SKU不存在，请重新尝试');
+            }
+            return $this->success('', '', $result, 0);
+        } else {
+            $this->error('404 not found');
+        }
+    }
 }

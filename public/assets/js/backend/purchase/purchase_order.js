@@ -1,4 +1,4 @@
-define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefined, Backend, Table, Form) {
+define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui'], function ($, undefined, Backend, Table, Form) {
 
     var Controller = {
         index: function () {
@@ -445,12 +445,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             var shtml = ' <tr><th>SKU</td><th>产品名称</td><th>供应商sku</td><th>采购数量（个）</td><th>采购单价（元）</td><th>总价（元）</td><th>操作</td></tr>';
                             $('.caigou table tbody').html('');
                             for (var i in data.item) {
-                                shtml += '<tr><td><input id="c-purchase_remark" class="form-control" name="sku[]" value="' + data.item[i].sku + '" type="text"></td>'
-                                shtml += '<td><input id="c-purchase_remark" class="form-control" name="product_name[]" value="' + data.item[i].product_name + '" type="text"></td>'
-                                shtml += '<td><input id="c-purchase_remark" class="form-control" name="supplier_sku[]" value="' + data.item[i].supplier_sku + '" type="text"></td>'
-                                shtml += '<td><input id="c-purchase_remark" class="form-control" name="purchase_num[]" value="' + data.item[i].num + '" type="text"></td>'
-                                shtml += '<td><input id="c-purchase_remark" class="form-control" name="purchase_price[]" value="' + data.item[i].price + '" type="text"></td>'
-                                shtml += '<td><input id="c-purchase_remark" class="form-control" name="purchase_total[]" value="' + data.item[i].total + '" type="text"></td>'
+                                shtml += '<tr><td><input id="c-purchase_remark" class="form-control sku" name="sku[]" value="' + data.item[i].sku + '" type="text"></td>'
+                                shtml += '<td><input id="c-purchase_remark" class="form-control product_name" readonly name="product_name[]" value="' + data.item[i].product_name + '" type="text"></td>'
+                                shtml += '<td><input id="c-purchase_remark" class="form-control supplier_sku" readonly name="supplier_sku[]" value="' + data.item[i].supplier_sku + '" type="text"></td>'
+                                shtml += '<td><input id="c-purchase_remark" class="form-control purchase_num" name="purchase_num[]" value="' + data.item[i].num + '" type="text"></td>'
+                                shtml += '<td><input id="c-purchase_remark" class="form-control purchase_price" name="purchase_price[]" value="' + data.item[i].price + '" type="text"></td>'
+                                shtml += '<td><input id="c-purchase_remark" class="form-control goods_total" name="purchase_total[]" value="' + data.item[i].total + '" type="text"></td>'
                                 shtml += '<td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i> 删除</a></td>'
                                 shtml += '</tr>'
                             }
@@ -507,6 +507,60 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     var freight = $(this).val();
                     //总计
                     $('.purchase_total').val(total * 1 + freight * 1);
+                })
+
+
+                //模糊匹配订单
+                $('.sku').autocomplete({
+                    source: function (request, response) {
+                        $.ajax({
+                            type: "POST",
+                            url: "ajax/ajaxGetLikeOriginSku",
+                            dataType: "json",
+                            cache: false,
+                            async: false,
+                            data: {
+                                origin_sku: request.term
+                            },
+                            success: function (json) {
+                                var data = json.data;
+                                response($.map(data, function (item) {
+                                    return {
+                                        label: item,//下拉框显示值
+                                        value: item,//选中后，填充到input框的值
+                                        //id:item.bankCodeInfo//选中后，填充到id里面的值
+                                    };
+                                }));
+                            }
+                        });
+                    },
+                    delay: 10,//延迟100ms便于输入
+                    select: function (event, ui) {
+                        $("#bankUnionNo").val(ui.item.id);//取出在return里面放入到item中的属性
+                    },
+                    scroll: true,
+                    pagingMore: true,
+                    max: 5000
+                });
+
+
+                //获取sku信息
+                $(document).on('change', '.sku', function () {
+                    var sku = $(this).val();
+                    var _this = $(this);
+                    if (!sku) {
+                        return false;
+                    }
+                    Backend.api.ajax({
+                        url: 'ajax/getSkuList',
+                        data: { sku: sku }
+                    }, function (data, ret) {
+                        _this.parent().parent().find('.product_name').val(data.name);
+                        _this.parent().parent().find('.supplier_sku').val(data.supplier_sku);
+                    }, function (data, ret) {
+                        Fast.api.error(ret.msg);
+                    });
+
                 })
             }
         }
