@@ -364,7 +364,7 @@ class Instock extends Backend
         $skus = array_column($list, 'sku');
         //查询存在产品库的sku
         $item = new \app\admin\model\itemmanage\Item;
-        $skus = $item->where(['sku' => $skus])->column('sku');
+        $skus = $item->where(['sku' => ['in', $skus]])->column('sku');
         foreach ($list as $v) {
             if (!in_array($v['sku'], $skus)) {
                 $this->error('此sku:' . $v['sku'] . '不存在！！');
@@ -517,15 +517,16 @@ class Instock extends Backend
                 ->select();
             $list = collection($list)->toArray();
             $skus = array_column($list, 'sku');
+
             //查询存在产品库的sku
             $item = new \app\admin\model\itemmanage\Item;
-            $skus = $item->where(['sku' => $skus])->column('sku');
+            $skus = $item->where(['sku' => ['in', $skus]])->column('sku');
+
             foreach ($list as $v) {
                 if (!in_array($v['sku'], $skus)) {
                     $this->error('此sku:' . $v['sku'] . '不存在！！');
                 }
             }
-
 
             $map['id'] = $id;
             $data['status'] = 1;
