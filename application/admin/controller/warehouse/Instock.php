@@ -261,7 +261,7 @@ class Instock extends Backend
 
         //查询质检单
         $check = new \app\admin\model\warehouse\Check;
-        $purchase_data = $check->where('status', 0)->column('check_order_number', 'id');
+        $purchase_data = $check->where('status', 2)->column('check_order_number', 'id');
         $this->assign('purchase_data', $purchase_data);
 
 
@@ -302,7 +302,7 @@ class Instock extends Backend
 
         //查询质检单
         $check = new \app\admin\model\warehouse\Check;
-        $purchase_data = $check->where('status', 0)->column('check_order_number', 'id');
+        $purchase_data = $check->where('status', 2)->column('check_order_number', 'id');
         $this->assign('purchase_data', $purchase_data);
 
 
