@@ -497,7 +497,7 @@ class Instock extends Backend
             $id = $this->request->param('ids');
             $row = $this->model->get($id);
             if ($row['status'] != 0) {
-                $this->error('此商品状态不能提交审核');
+                $this->error('此状态不能提交审核');
             }
             $map['id'] = $id;
             $data['status'] = 1;
