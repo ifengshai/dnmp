@@ -66,6 +66,7 @@
         <label class="control-label col-xs-12 col-sm-2">{:__('Task_number')}:</label>
         <div class="col-xs-12 col-sm-3">
             <input id="c-id" type="hidden" name="row[id]" value="{$row.id}" readonly = "readonly"/>
+            <input id="c-task_status" type="hidden" name="row[task_status]" value="1"/>
             <input id="c-task_number" data-rule="required" class="form-control" name="row[task_number]" type="text" value="{$row.task_number|htmlentities}" disabled="disabled">
         </div>
         <label class="control-label col-xs-12 col-sm-2">{:__('Task_status')}:</label>
@@ -92,34 +93,34 @@
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">{:__('Dept_id')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <!--<input id="c-dept_id" data-rule="required" data-source="dept/index" class="form-control" name="row[dept_id]" type="text" value="{$row.dept_id|htmlentities}">-->
-            {:build_select('row[dept_id]', $groupdata, $row.dept_id, ['class'=>'form-control selectpicker', 'data-rule'=>'required','data-live-search' => true])}
+            <!-- <input id="c-dept_id" data-rule="required" data-source="dept/index" class="form-control" name="row[dept_id]" type="text" value="{$row.dept_id|htmlentities}"> -->
+            {:build_select('row[dept_id]', $groupdata, $row.dept_id, ['class'=>'form-control selectpicker', 'disabled'=>'disabled','data-live-search' => true])}
         </div>
         <label class="control-label col-xs-12 col-sm-2">{:__('Rep_id')}:</label>
         <div class="col-xs-12 col-sm-3">
             <!--<input id="c-rep_id" data-rule="required" data-source="rep/index" class="form-control" name="row[rep_id]" type="text" value="{$row.rep_id|htmlentities}">-->
-            {:build_select('row[rep_id]', $staffList, $row.rep_id, ['class'=>'form-control selectpicker', 'data-rule'=>'required','data-live-search' => true])}
+            {:build_select('row[rep_id]', $staffList, $row.rep_id, ['class'=>'form-control selectpicker', 'disabled'=>'disabled','data-live-search' => true])}
         </div>
     </div>
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">{:__('Prty_id')}:</label>
         <div class="col-xs-12 col-sm-3">
-                <select  id="c-prty_id" data-rule="required" class="form-control selectpicker" name="row[prty_id]">
+                <select  id="c-prty_id" disabled="disabled" class="form-control selectpicker" name="row[prty_id]">
                     {foreach name="prtyIdList" item="vo"}
                     <option value="{$key}" {eq name="key" value="$row.prty_id"}selected{/eq}>{$vo}</option>
                     {/foreach}
                 </select>
             </div>
-        <!-- <label class="control-label col-xs-12 col-sm-2">{:__('Handle_scheme')}:</label>
-        <div class="col-xs-12 col-sm-3">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Handle_scheme')}:</label>
+            <div class="col-xs-12 col-sm-3">
                 <select  id="c-handle_scheme" data-rule="required" class="form-control selectpicker" name="row[handle_scheme]">
                     {foreach name="SolveScheme" item="vo"}
                     <option value="{$key}" {in name="key" value="$row.handle_scheme"}selected{/in}>{$vo}</option>
                     {/foreach}
                 </select>
-        </div> -->
+        </div>
     </div>
-    <!-- <div class="form-group">
+    <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">{:__('Refund_money')}:</label>
         <div class="col-xs-12 col-sm-3">
             <input id="c-refund_money"  data-source="refund_money/index" class="form-control" name="row[refund_money]" type="text" value="{$row.refund_money|htmlentities}">
@@ -138,7 +139,7 @@
         <div class="col-xs-12 col-sm-3">
             <input id="c-make_up_price_order"  data-source="problem/index" class="form-control" name="row[make_up_price_order]" type="text" value="{$row.make_up_price_order|htmlentities}">
         </div>
-    </div> -->
+    </div>
     <div class="form-group">
         <div class="form-group">
             <label class="control-label col-xs-12 col-sm-2">问题分类:</label>
@@ -150,14 +151,14 @@
             <div class="radio">
                 {foreach name="$vo.junior" item="issue" key="key2"}
                 {if $issue.junior}
-                <label for="row[problem_id]-{$issue.id}"><input id="row[problem_id]-{$issue.id}" name="row[problem_id]" type="radio" value="{$issue.id}" {eq name="$issue.id" value="$row.problem_id"}checked{/eq} /> <span style="color:green;" id="{$issue.id}" class="issueLevel">{$issue.name}<span></span></label>
+                <label for="row[problem_id]-{$issue.id}"><input disabled="disabled" id="row[problem_id]-{$issue.id}" name="row[problem_id]" type="radio" value="{$issue.id}" {eq name="$issue.id" value="$row.problem_id"}checked{/eq} /> <span style="color:green;" id="{$issue.id}" class="issueLevel">{$issue.name}<span></span></label>
                 <div class="radio" style="margin-left:20%;float:left;clear:both;display:none;" id="display-{$issue.id}" >
                     {foreach name="$issue.junior" item="finalIssue" key="key3"}
-                    <label for="row[problem_id]-{$finalIssue.id}"><input id="row[problem_id]-{$finalIssue.id}" name="row[problem_id]" type="radio" value="{$finalIssue.id}" {eq name="$finalIssue.id" value="$row.problem_id"}checked{/eq} /> {$finalIssue.name}</label>
+                    <label for="row[problem_id]-{$finalIssue.id}"><input  disabled="disabled" id="row[problem_id]-{$finalIssue.id}" name="row[problem_id]" type="radio" value="{$finalIssue.id}" {eq name="$finalIssue.id" value="$row.problem_id"}checked{/eq} /> {$finalIssue.name}</label>
                     {/foreach}
                 </div>
                 {else/}
-                <label for="row[problem_id]-{$issue.id}"><input id="row[problem_id]-{$issue.id}" name="row[problem_id]" type="radio" value="{$issue.id}" {eq name="$issue.id" value="$row.problem_id"}checked{/eq} /> {$issue.name}</label>
+                <label for="row[problem_id]-{$issue.id}"><input disabled="disabled" id="row[problem_id]-{$issue.id}" name="row[problem_id]" type="radio" value="{$issue.id}" {eq name="$issue.id" value="$row.problem_id"}checked{/eq} /> {$issue.name}</label>
                 {/if}
                 {/foreach}
             </div>
@@ -168,7 +169,7 @@
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">{:__('Problem_desc')}:</label>
         <div class="col-xs-12 col-sm-8">
-            <textarea id="c-problem_desc" class="form-control editor " rows="5" name="row[problem_desc]" cols="50">{$row.problem_desc|htmlentities}</textarea>
+            <textarea  disabled="disabled" id="c-problem_desc" class="form-control editor " rows="5" name="row[problem_desc]" cols="50">{$row.problem_desc|htmlentities}</textarea>
         </div>
     </div>
     <div class="form-group">
@@ -181,7 +182,7 @@
                 </div>
                 <span class="msg-box n-right" for="c-upload_photos"></span>
             </div>
-            <ul class="row list-inline plupload-preview" id="p-upload_photos"></ul>
+            <!-- <ul class="row list-inline plupload-preview" id="p-upload_photos"></ul> -->
         </div>
     </div>
     {if $row.task_remark}
@@ -205,143 +206,18 @@
         </table>
     </div>
     {/if}
-    <!-- <div class="form-group">
+    <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">{:__('Add_remark')}:</label>
         <div class="col-xs-12 col-sm-8">
             <textarea id="c-task_remark" class="form-control editor " rows="5" name="row[task_remark]" cols="50"></textarea>
         </div>
-    </div> -->
-    {if $orderInfo}
-    {foreach name="orderInfo" item="vo"}
-    <div class="row item_info" style="margin-top:15px;margin-left:7.6666%;" >
-        <div class="col-lg-12">
-        </div>
-        <div class="col-xs-6 col-md-4">
-        <div>
-        <table id="caigou-table" class="handle_table1">
-            <tr>
-                <td>商品名称</td>
-                <td style="width:90%;">{$vo.name}</td>
-            </tr>
-            <tr>
-                <td>SKU</td>
-                <td style="width:90%;">{$vo.sku}</td>
-            </tr>
-            <tr>
-                <td>数量</td>
-                <td style="width:90%;">{:round($vo.qty_ordered)}</td>
-            </tr>
-            <tr>
-                <td>处方类型</td>
-                <td style="width:90%;">{$vo.prescription_type}</td>
-            </tr>
-            {if $orderPlatform ==3}
-            <tr>
-                <td>基片类型</td>
-                <td style="width:90%;">{$vo.second_name}</td>
-            </tr>
-            <tr>
-                <td>镜片类型</td>
-                <td style="width:90%;">{$vo.third_name}</td>
-            </tr>
-            <tr>
-                <td>折射率</td>
-                <td style="width:90%;">{$vo.zsl}</td>
-            </tr>
-            <tr>
-                <td>镀膜类型</td>
-                <td style="width:90%;">{$vo.four_name}</td>
-            </tr>
-            {else/}
-            <tr>
-                <td>镜片类型</td>
-                <td style="width:90%;">{$vo.index_type}</td>
-                </tr>
-            <tr>
-                <td>镀膜类型</td>
-                <td style="width:90%;">{$vo.coatiing_name}</td>
-            </tr>
-            {/if}
-        </table>
     </div>
-</div>
-        <div class="col-xs-6 col-md-7" style="float:right;">
-        <table id="caigou-table" class="handle_table2">
-            <tr>
-                <td colspan="10" style="text-align: center;">处方参数</td>
-            </tr>
-            <tr>
-                <td>参数</td>
-                <td>SPH</td>
-                <td>CYL</td>
-                <td>AXI</td>
-                <td>ADD</td>
-                <td>PD</td>
-                <td>Prism Horizontal</td>
-                <td>Base Direction</td>
-                <td>Prism Vertical</td>
-                <td>Base Direction</td>
-            </tr>
-            <tr>
-                <td>Right(OD)</td>
-                <td>{$vo.od_sph}</td>
-                <td>{$vo.od_cyl}</td>
-                <td>{$vo.od_axis}</td>
-                {if $orderPlatform lt 3 }
-                {if $vo.total_add}
-                <td rowspan="2">{$vo.total_add}</td>
-                {else/}
-                <td>{$vo.os_add}</td>
-                {/if}
-                {else/}
-                {if $vo.prescription_type eq 'Reading Glasses' && $vo.os_add>0 && $vo.od_add>0}
-                <td>{$vo.od_add}</td>
-                {else/}
-                <td rowspan="2">{$vo.total_add}</td>
-                {/if}
-                {/if}
-                {if $vo.pdcheck == 'on'}
-                <td>{$vo.pd_r}</td>
-                {else/}
-                <td rowspan="2">{$vo.pd}</td>
-                {/if}
-                <td>{$vo.od_pv}</td>
-                <td>{$vo.od_bd}</td>
-                <td>{$vo.od_pv_r}</td>
-                <td>{$vo.od_bd_r}</td>
-            </tr>
-            <tr>
-                <td>Left(OS)</td>
-                <td>{$vo.os_sph}</td>
-                <td>{$vo.os_cyl}</td>
-                <td>{$vo.os_axis}</td>
-                {if $orderPlatform lt 3}
-                    {if !isset($vo.total_add)}
-                     <td>{$vo.od_add}</td>
-                    {/if}
-                {else/}
-                {if $vo.prescription_type eq 'Reading Glasses' && $vo.os_add>0 && $vo.od_add>0}
-                    <td>{$vo.os_add}</td>
-                {/if}
-                {/if}
-                {if $vo.pdcheck == 'on'}
-                <td>{$vo.pd_l}</td>
-                {/if}
-                <td>{$vo.os_pv}</td>
-                <td>{$vo.os_bd}</td>
-                <td>{$vo.os_pv_r}</td>
-                <td>{$vo.os_bd_r}</td>
-            </tr>
-        </table>
-    </div>
-    </div>
-    {/foreach}
-    {/if}
     <div class="form-group layer-footer">
         <label class="control-label col-xs-12 col-sm-2"></label>
         <div class="col-xs-12 col-sm-8">
             <button type="submit" class="btn btn-success btn-embossed disabled">{:__('OK')}</button>
             <button type="reset" class="btn btn-default btn-embossed">{:__('Reset')}</button>
+            <button type="submit" class="btn btn-success button_complete btn-embossed">{:__('Handle_complete')}</button>
         </div>
     </div>
 </form>

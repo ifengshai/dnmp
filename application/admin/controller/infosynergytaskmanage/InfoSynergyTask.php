@@ -182,7 +182,7 @@ class InfoSynergyTask extends Backend
             $this->error(__('No Results were found'));
         }
         if(2 == $row['synergy_status']){
-            $this->error(__('The collaborative task information has been completed and cannot be processed'),'/admin/infosynergytaskmanage/info_synergy_task');
+            $this->error(__('The collaborative task information has been completed and cannot be processed'),'infosynergytaskmanage/info_synergy_task/index');
         }
         $adminIds = $this->getDataLimitAdminIds();
         if (is_array($adminIds)) {
@@ -312,7 +312,8 @@ class InfoSynergyTask extends Backend
     {
         //关联订单号 订单列表传递
         $synergy_order_number = input('synergy_order_number');
-
+        // var_dump($synergy_order_number);
+        // exit;
         //设置过滤方法
         $this->request->filter(['strip_tags']);
         if ($this->request->isAjax()) {
@@ -409,11 +410,11 @@ class InfoSynergyTask extends Backend
     {
         $id = $request->param('ids');
         if (!$id) {
-            $this->error('参数错误，请重新尝试', '/admin/saleaftermanage/sale_after_task/index');
+            $this->error('参数错误，请重新尝试', 'saleaftermanage/sale_after_task');
         }
         $result = $this->model->getInfoSynergyDetail($id);
         if (!$result) {
-            $this->error('任务信息不存在，请重新尝试', '/admin/saleaftermanage/sale_after_task/index');
+            $this->error('任务信息不存在，请重新尝试', 'saleaftermanage/sale_after_task');
         }
         //dump($result);
         $this->view->assign('row', $result);

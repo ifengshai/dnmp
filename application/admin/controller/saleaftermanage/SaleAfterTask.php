@@ -153,7 +153,7 @@ class SaleAfterTask extends Backend
                     $this->error($e->getMessage());
                 }
                 if ($result !== false) {
-                    $this->success('','/admin/saleaftermanage/sale_after_task/index');
+                    $this->success('','saleaftermanage/sale_after_task/index');
                 } else {
                     $this->error(__('No rows were inserted'));
                 }
@@ -172,7 +172,7 @@ class SaleAfterTask extends Backend
             $this->error(__('No Results were found'));
         }
         if($row['task_status'] ==2){ //如果任务已经处理完成
-            $this->error('该任务已经处理完成，无需再次处理','admin/saleaftermanage/sale_after_task','',0);
+            $this->error(__('该任务已经处理完成，无需再次编辑'),'saleaftermanage/sale_after_task/index');
         }
         $adminIds = $this->getDataLimitAdminIds();
         if (is_array($adminIds)) {
@@ -182,8 +182,6 @@ class SaleAfterTask extends Backend
         }
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
-            $tid = $params['id'];
-            unset($params['id']);
             if ($params) {
                 $params = $this->preExcludeFields($params);
                 $result = false;
@@ -194,9 +192,6 @@ class SaleAfterTask extends Backend
                         $name = str_replace("\\model\\", "\\validate\\", get_class($this->model));
                         $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.edit' : $name) : $this->modelValidate;
                         $row->validateFailException(true)->validate($validate);
-                    }
-                    if(!empty($params['task_remark'])){
-                        $params['task_status'] = 1;
                     }
                     $result = $row->allowField(true)->save($params);
                     Db::commit();
@@ -211,14 +206,14 @@ class SaleAfterTask extends Backend
                     $this->error($e->getMessage());
                 }
                 if ($result !== false) {
-                    if(!empty($params['task_remark'])){
-                        $data = [];
-                        $data['tid'] = $tid;
-                        $data['remark_record'] = strip_tags($params['task_remark']);
-                        $data['create_person'] = session('admin.nickname');
-                        $data['create_time']   = date("Y-m-d H:i:s",time());
-                        (new SaleAfterTaskRemark())->allowField(true)->save($data);
-                    }
+                    // if(!empty($params['task_remark'])){
+                    //     $data = [];
+                    //     $data['tid'] = $tid;
+                    //     $data['remark_record'] = strip_tags($params['task_remark']);
+                    //     $data['create_person'] = session('admin.nickname');
+                    //     $data['create_time']   = date("Y-m-d H:i:s",time());
+                    //     (new SaleAfterTaskRemark())->allowField(true)->save($data);
+                    // }
                     $this->success();
                 } else {
                     $this->error(__('No rows were updated'));
@@ -226,9 +221,18 @@ class SaleAfterTask extends Backend
             }
             $this->error(__('Parameter %s can not be empty', ''));
         }
+        if (1 == $row['order_platform']) {
+            $orderInfo = ZeeloolPrescriptionDetailHelper::get_one_by_increment_id($row['order_number']);
+        } elseif (2 == $row['order_platform']) {
+            $orderInfo = VooguemePrescriptionDetailHelper::get_one_by_increment_id($row['order_number']);
+        } elseif (3 == $row['order_platform']) {
+            $orderInfo = NihaoPrescriptionDetailHelper::get_one_by_increment_id($row['order_number']);
+        }
         //求出本条记录相对应的售后备注记录
         $row->task_remark = (new SaleAfterTaskRemark())->getRelevanceRecord($ids);
         $this->view->assign("row", $row);
+        $this->view->assign('orderInfo',$orderInfo);
+        $this->view->assign('orderPlatform',$result['order_platform']);
         $this->view->assign('SolveScheme',$this->model->getSolveScheme());
         return $this->view->fetch();
     }
@@ -335,19 +339,22 @@ class SaleAfterTask extends Backend
     {
         $id = $request->param('ids');
         if(!$id){
-            $this->error('参数错误，请重新尝试','/admin/saleaftermanage/sale_after_task/index');
+            $this->error('参数错误，请重新尝试','saleaftermanage/sale_after_task/index');
         }
         $result = $this->model->getTaskDetail($id);
         if(!$result){
-            $this->error('任务信息不存在，请重新尝试','/admin/saleaftermanage/sale_after_task/index');
+            $this->error('任务信息不存在，请重新尝试','saleaftermanage/sale_after_task/index');
         }
-        //dump($result);
+        if (1 == $result['order_platform']) {
+            $orderInfo = ZeeloolPrescriptionDetailHelper::get_one_by_increment_id($result['order_number']);
+        } elseif (2 == $result['order_platform']) {
+            $orderInfo = VooguemePrescriptionDetailHelper::get_one_by_increment_id($result['order_number']);
+        } elseif (3 == $result['order_platform']) {
+            $orderInfo = NihaoPrescriptionDetailHelper::get_one_by_increment_id($result['order_number']);
+        }
         $this->view->assign('row',$result);
         $this->view->assign('orderPlatform',$result['order_platform']);
-        $this->view->assign('orderInfo',$this->model->getOrderInfo($result['order_platform'],$result['order_number']));
-        // echo '<pre>';
-        // var_dump($this->model->getOrderInfo($result['order_platform'],$result['order_number']));
-        // exit;
+        $this->view->assign('orderInfo',$orderInfo);
         return $this->view->fetch();
     }
     /***
@@ -365,7 +372,7 @@ class SaleAfterTask extends Backend
             $data['handle_time'] = date("Y-m-d H:i:s",time());
             $result = $this->model->where('id',$idss)->update($data);
             if($result !== false){
-              return  $this->success('处理成功','/admin/saleaftermanage/sale_after_task');
+              return  $this->success('处理成功','saleaftermanage/sale_after_task');
             }
         }else{
             return $this->error('请求失败,请勿请求');
@@ -404,5 +411,71 @@ class SaleAfterTask extends Backend
         }else{
             return $this->error('请求失败,请勿请求');
         }
+    }
+    /***
+     * 处理任务
+     */
+    public function handle_task($ids=null){
+        $row = $this->model->get($ids);
+        if (!$row) {
+            $this->error(__('No Results were found'));
+        }
+        if($row['task_status'] ==2){ //如果任务已经处理完成
+            $this->error('该任务已经处理完成，无需再次处理','saleaftermanage/sale_after_task','',0);
+        }
+        $adminIds = $this->getDataLimitAdminIds();
+        if (is_array($adminIds)) {
+            if (!in_array($row[$this->dataLimitField], $adminIds)) {
+                $this->error(__('You have no permission'));
+            }
+        }
+        if ($this->request->isPost()) {
+            $params = $this->request->post("row/a");
+            $tid = $params['id'];
+            unset($params['id']);
+            if ($params) {
+                $params = $this->preExcludeFields($params);
+                $result = false;
+                Db::startTrans();
+                try {
+                    //是否采用模型验证
+                    if ($this->modelValidate) {
+                        $name = str_replace("\\model\\", "\\validate\\", get_class($this->model));
+                        $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.edit' : $name) : $this->modelValidate;
+                        $row->validateFailException(true)->validate($validate);
+                    }
+                    $result = $row->allowField(true)->save($params);
+                    Db::commit();
+                } catch (ValidateException $e) {
+                    Db::rollback();
+                    $this->error($e->getMessage());
+                } catch (PDOException $e) {
+                    Db::rollback();
+                    $this->error($e->getMessage());
+                } catch (Exception $e) {
+                    Db::rollback();
+                    $this->error($e->getMessage());
+                }
+                if ($result !== false) {
+                    if(!empty($params['task_remark'])){
+                        $data = [];
+                        $data['tid'] = $tid;
+                        $data['remark_record'] = strip_tags($params['task_remark']);
+                        $data['create_person'] = session('admin.nickname');
+                        $data['create_time']   = date("Y-m-d H:i:s",time());
+                        (new SaleAfterTaskRemark())->allowField(true)->save($data);
+                    }
+                    $this->success();
+                } else {
+                    $this->error(__('No rows were updated'));
+                }
+            }
+            $this->error(__('Parameter %s can not be empty', ''));
+        }
+        //求出本条记录相对应的售后备注记录
+        $row->task_remark = (new SaleAfterTaskRemark())->getRelevanceRecord($ids);
+        $this->view->assign("row", $row);
+        $this->view->assign('SolveScheme',$this->model->getSolveScheme());
+        return $this->view->fetch();
     }
 }

@@ -18,7 +18,8 @@ return [
     'Synergy_status'       => '任务状态',
     'Handle'               => '处理',
     'Remark_record'        => '处理记录',
+    'Handle_complete'      => '处理完成', 
     'Please select the task category' => '请选择任务分类',
     'Please select the contractor'=>'请选择承接人',
-    'The collaborative task information has been completed and cannot be processed' => '协同任务信息已经完成，无法处理',
+    'The collaborative task information has been completed and cannot be processed' => '任务信息已经处理完成，无法编辑',
 ];

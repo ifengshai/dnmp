@@ -6,10 +6,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             Table.api.init({
                 searchFormVisible: true,
                 extend: {
-                    index_url: 'infosynergytaskmanage/info_synergy_task/index' + location.search + '&synergy_order_number=' + Config.synergy_order_number,
+                    index_url: 'infosynergytaskmanage/info_synergy_task/index' + location.search + '/synergy_order_number/' + Config.synergy_order_number,
                     add_url: 'infosynergytaskmanage/info_synergy_task/add',
                     edit_url: 'infosynergytaskmanage/info_synergy_task/edit',
-                    del_url: 'infosynergytaskmanage/info_synergy_task/del',
+                    //del_url: 'infosynergytaskmanage/info_synergy_task/del',
                     multi_url: 'infosynergytaskmanage/info_synergy_task/multi',
                     table: 'info_synergy_task',
                 }
@@ -75,11 +75,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                 },
                                 {
                                     name: 'edit',
-                                    text: '处理',
-                                    title: __('处理任务'),
+                                    text: '编辑',
+                                    title: __('编辑'),
                                     classname: 'btn btn-xs btn-success btn-dialog',
                                     icon: 'fa fa-pencil',
-                                    url: Config.moduleurl + '/infosynergytaskmanage/info_synergy_task/edit',
+                                    url:  'infosynergytaskmanage/info_synergy_task/edit',
                                     extend: 'data-area = \'["100%","100%"]\'',
                                     callback: function (data) {
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
@@ -87,34 +87,34 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     visible: function (row) {
                                         return true;
                                     }
-                                },
-                                {
-                                    name: 'handleComplete',
-                                    text: '处理完成',
-                                    title: __('处理完成'),
-                                    classname: 'btn btn-xs btn-success btn-ajax',
-                                    icon: 'fa fa-pencil',
-                                    url: Config.moduleurl + '/infosynergytaskmanage/info_synergy_task/handleComplete',
-                                    confirm: '确认要处理完成吗',
-                                    success: function (data, ret) {
-                                        Layer.alert(ret.msg);
-                                        $(".btn-refresh").trigger("click");
-                                        //如果需要阻止成功提示，则必须使用return false;
-                                        //return false;
-                                    },
-                                    error: function (data, ret) {
-                                        Layer.alert(ret.msg);
-                                        return false;
-                                    },
-                                    visible: function (row) {
-                                        //返回true时按钮显示,返回false隐藏
-                                        if (row.synergy_status != 2) {
-                                            return true;
-                                        } else {
-                                            return false;
-                                        }
-                                    }
-                                },
+                                }
+                                // {
+                                //     name: 'handleComplete',
+                                //     text: '处理完成',
+                                //     title: __('处理完成'),
+                                //     classname: 'btn btn-xs btn-success btn-ajax',
+                                //     icon: 'fa fa-pencil',
+                                //     url: Config.moduleurl + '/infosynergytaskmanage/info_synergy_task/handleComplete',
+                                //     confirm: '确认要处理完成吗',
+                                //     success: function (data, ret) {
+                                //         Layer.alert(ret.msg);
+                                //         $(".btn-refresh").trigger("click");
+                                //         //如果需要阻止成功提示，则必须使用return false;
+                                //         //return false;
+                                //     },
+                                //     error: function (data, ret) {
+                                //         Layer.alert(ret.msg);
+                                //         return false;
+                                //     },
+                                //     visible: function (row) {
+                                //         //返回true时按钮显示,返回false隐藏
+                                //         if (row.synergy_status != 2) {
+                                //             return true;
+                                //         } else {
+                                //             return false;
+                                //         }
+                                //     }
+                                // },
                             ]
                         },
                     ]

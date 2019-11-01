@@ -10,7 +10,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui','custom-css'], 
                     index_url: 'saleaftermanage/sale_after_task/index' + location.search,
                     add_url: 'saleaftermanage/sale_after_task/add',
                     edit_url: 'saleaftermanage/sale_after_task/edit',
-                    del_url: 'saleaftermanage/sale_after_task/del',
+                    //del_url: 'saleaftermanage/sale_after_task/del',
                     multi_url: 'saleaftermanage/sale_after_task/multi',
                     table: 'sale_after_task',
                 }
@@ -116,6 +116,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui','custom-css'], 
             });
             // 为表格绑定事件
             Table.api.bindevent(table);
+            //处理任务
+            $(document).on('click','.btn-handle',function(){
+                var ids = Table.api.selectedids(table);
+                Backend.api.open('saleaftermanage/sale_after_task/handle_task/ids/'+ids,'处理任务',{area:["100%", "100%"]});
+                //window.location.href = 'saleaftermanage/sale_after_task/handle_task/ids/'+ids;
+            });
             //处理任务完成
             $(document).on('click', '.btn-handle-complete', function () {
                 var ids = Table.api.selectedids(table);
@@ -560,6 +566,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui','custom-css'], 
         },
         detail:function(){
             Form.api.bindevent($("form[role=form]"));
+        },
+        handle_task:function(){
+            Form.api.bindevent($("form[role=form]"));
+            $(document).on('click', '.button_complete', function () {
+                $('#c-task_status').val(2);
+            })
         }
     };
     return Controller;
