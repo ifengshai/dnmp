@@ -80,12 +80,12 @@ class Zeelool extends Backend
                 ->order($sort, $order)
                 ->count();
             // var_dump($total);die;                                                                            
-            $field = 'entity_id,status,increment_id,coupon_code,shipping_description,store_id,customer_id,base_discount_amount,base_grand_total,
+            $field = 'entity_id,status,base_shipping_amount,increment_id,coupon_code,shipping_description,store_id,customer_id,base_discount_amount,base_grand_total,
                      total_qty_ordered,quote_id,base_currency_code,customer_email,customer_firstname,customer_lastname,custom_is_match_frame,custom_is_match_lens,
                      custom_is_send_factory,custom_is_delivery,custom_match_frame_created_at,custom_match_lens_created_at,custom_match_factory_created_at,
                      custom_match_delivery_created_at,custom_print_label,custom_order_prescription,custom_print_label_created_at,custom_service_name';
             $list = $this->model
-                //->field($field)
+                ->field($field)
                 ->where($map)
                 ->where($where)
                 ->order($sort, $order)
@@ -93,6 +93,21 @@ class Zeelool extends Backend
                 ->select();
 
             $list = collection($list)->toArray();
+            //查询订单是否存在协同任务
+            $increment_ids = array_column($list, 'increment_id');
+            $infoSynergyTask = new \app\admin\model\infosynergytaskmanage\InfoSynergyTask;
+            $swhere['synergy_order_number'] = ['in', $increment_ids];
+            $swhere['is_del'] = 1;
+            $swhere['order_platform'] = 1;
+            $swhere['synergy_order_id'] = 2;
+            $order_arr = $infoSynergyTask->where($swhere)->column('synergy_order_number');
+            //查询是否存在协同任务
+            foreach ($list as $k => $v) {
+                if (in_array($v['increment_id'], $order_arr)) {
+                    $list[$k]['task_info'] = 1;
+                }
+            }
+
             $result = array("total" => $total, "rows" => $list);
             return json($result);
         }
@@ -115,6 +130,19 @@ class Zeelool extends Backend
                 $list = $this->model
                     ->where($map)
                     ->find();
+                if ($list) {
+                    //查询订单是否存在协同任务
+                    $infoSynergyTask = new \app\admin\model\infosynergytaskmanage\InfoSynergyTask;
+                    $swhere['synergy_order_number'] = $increment_id;
+                    $swhere['is_del'] = 1;
+                    $swhere['order_platform'] = 1;
+                    $swhere['synergy_order_id'] = 2;
+                    $count = $infoSynergyTask->where($swhere)->count();
+                    //查询是否存在协同任务
+                    if ($count > 0) {
+                        $list['task_info'] = 1;
+                    }
+                }
                 $result = ['code' => 1, 'data' => $list ?? []];
             } else {
                 $result = array("total" => 0, "rows" => []);
@@ -224,8 +252,8 @@ class Zeelool extends Backend
                 //质检通过扣减库存
                 if ($status == 4) {
                     //查询出质检通过的订单
-                    $res = $this->model->alias('a')->where($map)->field('sku,qty_ordered')->join(['sales_flat_order_item' => 'b'],'a.entity_id = b.order_id')->select();
-                    if(!$res){
+                    $res = $this->model->alias('a')->where($map)->field('sku,qty_ordered')->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->select();
+                    if (!$res) {
                         throw new Exception("未查询到订单数据！！");
                     };
 
@@ -248,7 +276,7 @@ class Zeelool extends Backend
                         }
                     }
 
-                    if(count($error)){
+                    if (count($error)) {
                         throw new Exception("扣减库存失败！！请检查SKU");
                     };
                     $item->commit();

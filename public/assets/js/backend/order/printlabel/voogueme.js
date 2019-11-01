@@ -40,6 +40,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         { field: 'custom_is_match_lens', title: __('是否配镜片'), searchList: { 1: '是', 0: '否' }, formatter: Table.api.formatter.status, visible: false },
                         { field: 'custom_is_send_factory', title: __('是否加工'), searchList: { 1: '是', 0: '否' }, formatter: Table.api.formatter.status, visible: false },
                         { field: 'custom_is_delivery', title: __('是否质检'), searchList: { 1: '是', 0: '否' }, formatter: Table.api.formatter.status, visible: false },
+                        {
+                            field: 'task_info', title: __('协同任务'), operate: false, formatter: function (value, row) {
+                                if (value) {
+                                    return '<a href="' + Config.moduleurl + '/infosynergytaskmanage/info_synergy_task/index?synergy_order_number=' + row.increment_id + '" class="btn btn-primary btn-xs btn-click btn-addtabs" data-table-id="table" data-field-index="11" data-row-index="0" data-button-index="3" title="协同任务"><i class="fa fa-list"></i> 问</a>'
+                                }
+                            }
+                        },
                         { field: 'created_at', title: __('创建时间'), operate: 'RANGE', addclass: 'datetimerange' },
                         {
                             field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [
@@ -246,6 +253,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         { field: 'custom_is_match_lens', title: __('是否配镜片'), searchList: { 1: '是', 0: '否' }, formatter: Table.api.formatter.status, visible: false },
                         { field: 'custom_is_send_factory', title: __('是否加工'), searchList: { 1: '是', 0: '否' }, formatter: Table.api.formatter.status, visible: false },
                         { field: 'custom_is_delivery', title: __('是否质检'), searchList: { 1: '是', 0: '否' }, formatter: Table.api.formatter.status, visible: false },
+                        {
+                            field: 'task_info', title: __('协同任务'), operate: false, formatter: function (value, row) {
+                                if (value) {
+                                    return '<a href="' + Config.moduleurl + '/infosynergytaskmanage/info_synergy_task/index?synergy_order_number=' + row.increment_id + '" class="btn btn-primary btn-xs btn-click btn-addtabs" data-table-id="table" data-field-index="11" data-row-index="0" data-button-index="3" title="协同任务"><i class="fa fa-list"></i> 问</a>'
+                                }
+                            }
+                        },
                         { field: 'created_at', title: __('创建时间'), operate: 'RANGE', addclass: 'datetimerange' },
                         {
                             field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [

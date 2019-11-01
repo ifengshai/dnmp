@@ -62,14 +62,14 @@ class Nihao extends Backend
 
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
 
-            $filter = json_decode($this->request->get('filter'),true);
+            $filter = json_decode($this->request->get('filter'), true);
 
             if ($filter['increment_id']) {
-                $map['status'] = ['in', ['free_processing', 'processing','complete']];
-            }else if($filter['custom_print_label'] == 1){
+                $map['status'] = ['in', ['free_processing', 'processing', 'complete']];
+            } else if ($filter['custom_print_label'] == 1) {
                 $map['status'] = ['in', ['free_processing', 'processing']];
                 $map['custom_print_label'] = ['eq', 1];
-            }else{                
+            } else {
                 $map['status'] = ['in', ['free_processing', 'processing']];
                 $map['custom_print_label'] = ['eq', 0];
             }
@@ -92,6 +92,22 @@ class Nihao extends Backend
                 ->select();
 
             $list = collection($list)->toArray();
+
+            //查询订单是否存在协同任务
+            $increment_ids = array_column($list, 'increment_id');
+            $infoSynergyTask = new \app\admin\model\infosynergytaskmanage\InfoSynergyTask;
+            $swhere['synergy_order_number'] = ['in', $increment_ids];
+            $swhere['is_del'] = 1;
+            $swhere['order_platform'] = 3;
+            $swhere['synergy_order_id'] = 2;
+            $order_arr = $infoSynergyTask->where($swhere)->column('synergy_order_number');
+            //查询是否存在协同任务
+            foreach ($list as $k => $v) {
+                if (in_array($v['increment_id'], $order_arr)) {
+                    $list[$k]['task_info'] = 1;
+                }
+            }
+
             $result = array("total" => $total, "rows" => $list);
             return json($result);
         }
@@ -110,11 +126,24 @@ class Nihao extends Backend
             $increment_id = $this->request->post('increment_id');
             if ($increment_id) {
                 $map['increment_id'] = $increment_id;
-                $map['status'] = ['in', ['free_processing', 'processing','complete']];
+                $map['status'] = ['in', ['free_processing', 'processing', 'complete']];
                 $list = $this->model
                     // ->field($field)
                     ->where($map)
                     ->find();
+                if ($list) {
+                    //查询订单是否存在协同任务
+                    $infoSynergyTask = new \app\admin\model\infosynergytaskmanage\InfoSynergyTask;
+                    $swhere['synergy_order_number'] = $increment_id;
+                    $swhere['is_del'] = 1;
+                    $swhere['order_platform'] = 3;
+                    $swhere['synergy_order_id'] = 2;
+                    $count = $infoSynergyTask->where($swhere)->count();
+                    //查询是否存在协同任务
+                    if ($count > 0) {
+                        $list['task_info'] = 1;
+                    }
+                }
 
                 $result = ['code' => 1, 'data' => $list ?? []];
             } else {

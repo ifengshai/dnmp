@@ -49,14 +49,14 @@ class InfoSynergyTask extends Backend
     {
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
-            if(!isset($params['synergy_task_id'])){
+            if (!isset($params['synergy_task_id'])) {
                 $this->error(__('Please select the task category'));
             }
-            if(in_array("",$params['rep_id'])){
+            if (in_array("", $params['rep_id'])) {
                 $this->error(__('Please select the contractor'));
             }
             // var_dump($params['rep_id']);
-             //exit;
+            //exit;
             $item = isset($params['item']) ? $params['item']  : '';
             $lens = isset($params['lens']) ? $params['lens']  : '';
             if ($params) {
@@ -181,8 +181,8 @@ class InfoSynergyTask extends Backend
         if (!$row) {
             $this->error(__('No Results were found'));
         }
-        if(2 == $row['synergy_status']){
-            $this->error(__('The collaborative task information has been completed and cannot be processed'),'infosynergytaskmanage/info_synergy_task/index');
+        if (2 == $row['synergy_status']) {
+            $this->error(__('The collaborative task information has been completed and cannot be processed'), 'infosynergytaskmanage/info_synergy_task/index');
         }
         $adminIds = $this->getDataLimitAdminIds();
         if (is_array($adminIds)) {
@@ -207,7 +207,7 @@ class InfoSynergyTask extends Backend
                         $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.edit' : $name) : $this->modelValidate;
                         $row->validateFailException(true)->validate($validate);
                     }
-                    $params['synergy_status'] =1;
+                    $params['synergy_status'] = 1;
                     $result = $row->allowField(true)->save($params);
                     Db::commit();
                 } catch (ValidateException $e) {
@@ -312,8 +312,6 @@ class InfoSynergyTask extends Backend
     {
         //关联订单号 订单列表传递
         $synergy_order_number = input('synergy_order_number');
-        // var_dump($synergy_order_number);
-        // exit;
         //设置过滤方法
         $this->request->filter(['strip_tags']);
         if ($this->request->isAjax()) {
@@ -322,7 +320,7 @@ class InfoSynergyTask extends Backend
                 return $this->selectpage();
             }
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
-            
+
             $total = $this->model
                 ->with(['infoSynergyTaskCategory'])
                 ->where($where)
@@ -359,9 +357,9 @@ class InfoSynergyTask extends Backend
             return json($result);
         }
         $this->view->assign('getTabList', (new SaleAfterTask())->getTabList());
-        $this->view->assign('nickname',session('admin.nickname'));
-        $this->view->assign('idds',session('admin.id'));
-        $this->assignconfig('synergy_order_number', $synergy_order_number);
+        $this->view->assign('nickname', session('admin.nickname'));
+        $this->view->assign('idds', session('admin.id'));
+        $this->assignconfig('synergy_order_number', $synergy_order_number ?? '');
         return $this->view->fetch();
     }
     /**
@@ -434,29 +432,29 @@ class InfoSynergyTask extends Backend
     /**
      * 处理完成
      */
-    public function handleComplete($ids=null)
+    public function handleComplete($ids = null)
     {
-        if($this->request->isAjax()){
-             $map['id'] = ['in',$ids];
-             $data['synergy_status'] = 2;
-             $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
-             if ($res !== false) {     
-                 $row = $this->model->get($ids);
+        if ($this->request->isAjax()) {
+            $map['id'] = ['in', $ids];
+            $data['synergy_status'] = 2;
+            $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
+            if ($res !== false) {
+                $row = $this->model->get($ids);
                 //  echo '<pre>';
                 //  var_dump($row['synergy_task_id']);
                 //  exit;
-                 //如果是修改镜架的话更改库存
-                 if ($row['synergy_task_id'] == 12) {   
-                   $result= (new Inventory())->changeFrame($row['id'],$row['order_platform'],$row['synergy_order_number']);
-                //    echo '<pre>';
-                //    var_dump($result);
-                //    exit;
-                 }
+                //如果是修改镜架的话更改库存
+                if ($row['synergy_task_id'] == 12) {
+                    $result = (new Inventory())->changeFrame($row['id'], $row['order_platform'], $row['synergy_order_number']);
+                    //    echo '<pre>';
+                    //    var_dump($result);
+                    //    exit;
+                }
                 $this->success('操作成功');
             } else {
                 $this->error('操作失败,请重新尝试');
             }
-        }else{
+        } else {
             $this->error('404 Not found');
         }
     }
