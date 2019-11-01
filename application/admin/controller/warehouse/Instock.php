@@ -510,6 +510,23 @@ class Instock extends Backend
             if ($row['status'] != 0) {
                 $this->error('此状态不能提交审核');
             }
+
+            //查询入库明细数据
+            $list = $this->instockItem
+                ->where(['in_stock_id' => ['in', $id]])
+                ->select();
+            $list = collection($list)->toArray();
+            $skus = array_column($list, 'sku');
+            //查询存在产品库的sku
+            $item = new \app\admin\model\itemmanage\Item;
+            $skus = $item->where(['sku' => $skus])->column('sku');
+            foreach ($list as $v) {
+                if (!in_array($v['sku'], $skus)) {
+                    $this->error('此sku:' . $v['sku'] . '不存在！！');
+                }
+            }
+
+
             $map['id'] = $id;
             $data['status'] = 1;
             $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
