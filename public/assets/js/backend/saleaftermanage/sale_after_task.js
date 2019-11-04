@@ -165,7 +165,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui','custom-css'], 
 
                     // }
                     function (){
-                        location.href='/admin/saleaftermanage/sale_after_task/completeAjax?idss='+idss;
+                        location.href='saleaftermanage/sale_after_task/completeAjax?idss='+idss;
                     },function(){
                         return false;
                     }

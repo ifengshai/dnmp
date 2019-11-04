@@ -353,7 +353,7 @@ class Inventory extends Backend
             $this->error(__('No Results were found'));
         }
         if ($row['status'] > 0) {
-            $this->error(__('此状态不能编辑！！'), '/admin/warehouse/Inventory/index');
+            $this->error(__('此状态不能编辑！！'), url('index'));
         }
 
         $adminIds = $this->getDataLimitAdminIds();

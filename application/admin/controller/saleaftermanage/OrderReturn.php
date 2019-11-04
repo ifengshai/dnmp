@@ -250,11 +250,11 @@ class OrderReturn extends Backend
     {
         $id = $request->param('ids');
         if (!$id) {
-            $this->error('参数错误，请重新尝试', '/admin/saleaftermanage/order_return/index');
+            $this->error('参数错误，请重新尝试', 'saleaftermanage/order_return/index');
         }
         $row = $this->model->get($id);
         if (!$row) {
-            $this->error('退货信息不存在，请重新尝试', '/admin/saleaftermanage/order_return/index');
+            $this->error('退货信息不存在，请重新尝试', 'saleaftermanage/order_return/index');
         }
         $this->view->assign("row", $row);
         $this->view->assign('orderReturnRemark', (new OrderReturnRemark())->getOrderReturnRemark($row['id']));
@@ -428,7 +428,7 @@ class OrderReturn extends Backend
                     //    dump($customer);
                     //    exit;
             if (!$customer) {
-                $this->error('找不到订单信息，请重新尝试', '/admin/saleaftermanage/order_return/search?ref=addtabs');
+                $this->error('找不到订单信息，请重新尝试', 'saleaftermanage/order_return/search?ref=addtabs');
             }
             //求出所有的订单号
             $allIncrementOrder = $customer['increment_id'];
