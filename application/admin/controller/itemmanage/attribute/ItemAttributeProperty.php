@@ -216,11 +216,11 @@ class ItemAttributeProperty extends Backend
     {
         $id = $request->param('ids');
         if(!$id){
-            $this->error('参数错误，请重新尝试','/admin/itemmanage/attribute/item_attribute_property/index');
+            $this->error('参数错误，请重新尝试','itemmanage/attribute/item_attribute_property/index');
         }
         $result = $this->model->getAttrPropertyDetail($id);
         if(!$result){
-            $this->error('属性项不存在，请重新尝试','/admin/itemmanage/attribute/item_attribute_property/index');
+            $this->error('属性项不存在，请重新尝试','itemmanage/attribute/item_attribute_property/index');
         }
 //        dump($result['is_required']);
 //        exit;
