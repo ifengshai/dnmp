@@ -100,7 +100,7 @@ class Auth
         }
 
         dump($name);
-        dump($rulelist);die;
+        dump($rulelist);
 
         if (is_string($name)) {
             $name = strtolower($name);
