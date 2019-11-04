@@ -106,13 +106,17 @@ class PurchaseOrder extends Backend
                         $this->model->validateFailException(true)->validate($validate);
                     }
 
+                    $sku = $this->request->post("sku/a");
+                    if (count(array_filter($sku)) < 1) {
+                        $this->error('sku不能为空！！');
+                    }
+
                     $params['create_person'] = session('admin.username');
                     $params['createtime'] = date('Y-m-d H:i:s', time());
                     $result = $this->model->allowField(true)->save($params);
 
                     //添加采购单商品信息
                     if ($result !== false) {
-                        $sku = $this->request->post("sku/a");
                         $product_name = $this->request->post("product_name/a");
                         $supplier_sku = $this->request->post("supplier_sku/a");
                         $num = $this->request->post("purchase_num/a");
@@ -162,7 +166,7 @@ class PurchaseOrder extends Backend
             $where['new_product.item_status'] = 2;
             $row = (new NewProduct())->where($where)->with(['newproductattribute'])->select();
             $row = collection($row)->toArray();
-    
+
             //提取供应商id
             $supplier = array_unique(array_column($row, 'supplier_id'));
             if (count($supplier) > 1) {
@@ -199,6 +203,26 @@ class PurchaseOrder extends Backend
             if ($row['purchase_status'] != 0) {
                 $this->error('此商品状态不能提交审核');
             }
+
+            //查询明细数据
+            $list = $this->purchase_order_item
+                ->where(['purchase_id' => ['in', $id]])
+                ->select();
+            $list = collection($list)->toArray();
+            $skus = array_column($list, 'sku');
+
+            //查询存在产品库的sku
+            $item = new \app\admin\model\itemmanage\Item;
+            $skus = $item->where(['sku' => ['in', $skus]])->column('sku');
+
+            foreach ($list as $v) {
+                if (!in_array($v['sku'], $skus)) {
+                    $this->error('此sku:' . $v['sku'] . '不存在！！');
+                }
+            }
+
+
+
             $map['id'] = $id;
             $data['purchase_status'] = 1;
             $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
@@ -269,11 +293,17 @@ class PurchaseOrder extends Backend
                         $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.edit' : $name) : $this->modelValidate;
                         $row->validateFailException(true)->validate($validate);
                     }
+
+                    $sku = $this->request->post("sku/a");
+                    if (count(array_filter($sku)) < 1) {
+                        $this->error('sku不能为空！！');
+                    }
+
+
                     $result = $row->allowField(true)->save($params);
 
                     //添加合同产品
                     if ($result !== false) {
-                        $sku = $this->request->post("sku/a");
                         $product_name = $this->request->post("product_name/a");
                         $supplier_sku = $this->request->post("supplier_sku/a");
                         $num = $this->request->post("purchase_num/a");
@@ -737,12 +767,12 @@ class PurchaseOrder extends Backend
             'createStartTime' => date('YmdHis', strtotime("-30 day")) . '000+0800',
             'createEndTime' => date('YmdHis') . '000+0800',
         ];
-       
+
         set_time_limit(0);
         $data = cache('Crontab_getAlibabaPurchaseOrder_' . date('YmdH') . md5(serialize($params)));
         if (!$data) {
             //根据不同的状态取订单数据
-             $success_data = Alibaba::getOrderList(1, $params);
+            $success_data = Alibaba::getOrderList(1, $params);
             //转为数组
             if ($success_data) {
                 $success_data = collection($success_data)->toArray();
@@ -756,7 +786,7 @@ class PurchaseOrder extends Backend
             //设置缓存
             cache('Crontab_getAlibabaPurchaseOrder_' . date('YmdH') . md5(serialize($params)), $data, 3600);
         }
-       
+
         foreach ($data as $key => $val) {
             if (!$val) {
                 continue;
@@ -886,22 +916,22 @@ class PurchaseOrder extends Backend
     {
         $list = session('list');
         if (!$list) {
-            $list = db('zeelool_purchase')->alias('a')->join(['fa_zeelool_purchase_item'=> 'b'],'a.id = b.purchase_id')->where('a.is_visable',1)->select();
+            $list = db('zeelool_purchase')->alias('a')->join(['fa_zeelool_purchase_item' => 'b'], 'a.id = b.purchase_id')->where('a.is_visable', 1)->select();
             $list = collection($list)->toArray();
-            session('list',$list);
+            session('list', $list);
         }
-        
+
         set_time_limit(0);
 
         //查询新系统采购单数据
         //查询实际采购单
         $purchase = new \app\admin\model\purchase\PurchaseOrderItem;
-        $purchase_list = $purchase->where('sku','NULL')->order('id asc')->select();
+        $purchase_list = $purchase->where('sku', 'NULL')->order('id asc')->select();
         $purchase_list = collection($purchase_list)->toArray();
-        foreach($list as $k => $v) {
-            foreach($purchase_list as $key => $val) {
+        foreach ($list as $k => $v) {
+            foreach ($purchase_list as $key => $val) {
                 if ($v['purchase_order_id'] == $val['purchase_order_number'] && $v['purchase_qty'] == $val['purchase_num']) {
-                    $purchase->save(['sku' => $v['product_sku']],['id'=>$val['id']]);
+                    $purchase->save(['sku' => $v['product_sku']], ['id' => $val['id']]);
                 }
             }
         }
@@ -915,25 +945,24 @@ class PurchaseOrder extends Backend
     {
         $list = session('new_list');
         if (!$list) {
-            $list = db('zeelool_new_purchase')->alias('a')->join(['fa_zeelool_new_purchase_item'=> 'b'],'a.id = b.new_purchase_id')->where('a.is_visable',1)->select();
+            $list = db('zeelool_new_purchase')->alias('a')->join(['fa_zeelool_new_purchase_item' => 'b'], 'a.id = b.new_purchase_id')->where('a.is_visable', 1)->select();
             $list = collection($list)->toArray();
-            session('new_list',$list);
+            session('new_list', $list);
         }
         set_time_limit(0);
 
         //查询新系统采购单数据
         //查询实际采购单
         $purchase = new \app\admin\model\purchase\PurchaseOrderItem;
-        $purchase_list = $purchase->where('sku','NULL')->order('id asc')->select();
+        $purchase_list = $purchase->where('sku', 'NULL')->order('id asc')->select();
         $purchase_list = collection($purchase_list)->toArray();
-        foreach($list as $k => $v) {
-            foreach($purchase_list as $key => $val) {
+        foreach ($list as $k => $v) {
+            foreach ($purchase_list as $key => $val) {
                 if ($v['purchase_order_id'] == $val['purchase_order_number'] && $v['purchase_qty'] == $val['purchase_num']) {
-                    $purchase->save(['sku' => $v['product_sku']],['id'=>$val['id']]);
+                    $purchase->save(['sku' => $v['product_sku']], ['id' => $val['id']]);
                 }
             }
         }
         echo 'ok';
     }
-    
 }

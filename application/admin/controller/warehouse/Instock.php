@@ -98,13 +98,18 @@ class Instock extends Backend
                         $this->model->validateFailException(true)->validate($validate);
                     }
 
+                    $sku = $this->request->post("sku/a");
+                    if (count(array_filter($sku)) < 1) {
+                        $this->error('sku不能为空！！');
+                    }
+
+
                     $params['create_person'] = session('admin.username');
                     $params['createtime'] = date('Y-m-d H:i:s', time());
                     $result = $this->model->allowField(true)->save($params);
 
                     //添加入库信息
                     if ($result !== false) {
-                        $sku = $this->request->post("sku/a");
                         $in_stock_num = $this->request->post("in_stock_num/a");
                         $sample_num = $this->request->post("sample_num/a");
                         $data = [];
@@ -214,11 +219,17 @@ class Instock extends Backend
                         $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.edit' : $name) : $this->modelValidate;
                         $row->validateFailException(true)->validate($validate);
                     }
+
+                    $sku = $this->request->post("sku/a");
+                    if (count(array_filter($sku)) < 1) {
+                        $this->error('sku不能为空！！');
+                    }
+
+
                     $result = $row->allowField(true)->save($params);
 
                     //修改产品
                     if ($result !== false) {
-                        $sku = $this->request->post("sku/a");
                         $item_id = $this->request->post("item_id/a");
                         $in_stock_num = $this->request->post("in_stock_num/a");
                         $data = [];

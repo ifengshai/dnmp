@@ -94,14 +94,18 @@ class Check extends Backend
                         $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.add' : $name) : $this->modelValidate;
                         $this->model->validateFailException(true)->validate($validate);
                     }
+                    $sku = $this->request->post("sku/a");
+                    if (count(array_filter($sku)) < 1) {
+                        $this->error('sku不能为空！！');
+                    }
 
-                    $params['create_person'] = session('admin.username');
+                    $params['create_person'] = session('admin.nickname');
                     $params['createtime'] = date('Y-m-d H:i:s', time());
                     $result = $this->model->allowField(true)->save($params);
 
                     //添加质检产品
                     if ($result !== false) {
-                        $sku = $this->request->post("sku/a");
+                        
                         $product_name = $this->request->post("product_name/a");
                         $supplier_sku = $this->request->post("supplier_sku/a");
                         $purchase_num = $this->request->post("purchase_num/a");
@@ -113,7 +117,6 @@ class Check extends Backend
                         $unqualified_images = $this->request->post("unqualified_images/a");
                         $unqualified_num = $this->request->post("unqualified_num/a");
                         $quantity_rate = $this->request->post("quantity_rate/a");
-
 
                         $data = [];
                         foreach (array_filter($sku) as $k => $v) {
@@ -210,11 +213,17 @@ class Check extends Backend
                         $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.edit' : $name) : $this->modelValidate;
                         $row->validateFailException(true)->validate($validate);
                     }
+
+                    $sku = $this->request->post("sku/a");
+                    if (count(array_filter($sku)) < 1) {
+                        $this->error('sku不能为空！！');
+                    }
+
+
                     $result = $row->allowField(true)->save($params);
 
                     //添加产品
                     if ($result !== false) {
-                        $sku = $this->request->post("sku/a");
                         $product_name = $this->request->post("product_name/a");
                         $supplier_sku = $this->request->post("supplier_sku/a");
                         $purchase_num = $this->request->post("purchase_num/a");
@@ -523,6 +532,26 @@ class Check extends Backend
             if ($row['status'] != 0) {
                 $this->error('此商品状态不能提交审核');
             }
+
+            //查询明细数据
+            $list = $this->check_item
+                ->where(['check_id' => ['in', $id]])
+                ->select();
+            $list = collection($list)->toArray();
+            $skus = array_column($list, 'sku');
+
+            //查询存在产品库的sku
+            $item = new \app\admin\model\itemmanage\Item;
+            $skus = $item->where(['sku' => ['in', $skus]])->column('sku');
+
+            foreach ($list as $v) {
+                if (!in_array($v['sku'], $skus)) {
+                    $this->error('此sku:' . $v['sku'] . '不存在！！');
+                }
+            }
+
+
+
             $map['id'] = $id;
             $data['status'] = 1;
             $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);

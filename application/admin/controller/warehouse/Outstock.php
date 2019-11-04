@@ -96,13 +96,18 @@ class Outstock extends Backend
                         $this->model->validateFailException(true)->validate($validate);
                     }
 
+                    $sku = $this->request->post("sku/a");
+                    if (count(array_filter($sku)) < 1) {
+                        $this->error('sku不能为空！！');
+                    }
+
+
                     $params['create_person'] = session('admin.username');
                     $params['createtime'] = date('Y-m-d H:i:s', time());
                     $result = $this->model->allowField(true)->save($params);
 
                     //添加入库信息
                     if ($result !== false) {
-                        $sku = $this->request->post("sku/a");
                         $out_stock_num = $this->request->post("out_stock_num/a");
                         $data = [];
                         foreach (array_filter($sku) as $k => $v) {
@@ -172,11 +177,16 @@ class Outstock extends Backend
                         $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.edit' : $name) : $this->modelValidate;
                         $row->validateFailException(true)->validate($validate);
                     }
+
+                    $sku = $this->request->post("sku/a");
+                    if (count(array_filter($sku)) < 1) {
+                        $this->error('sku不能为空！！');
+                    }
+
                     $result = $row->allowField(true)->save($params);
 
                     //修改产品
                     if ($result !== false) {
-                        $sku = $this->request->post("sku/a");
                         $item_id = $this->request->post("item_id/a");
                         $out_stock_num = $this->request->post("out_stock_num/a");
                         $data = [];
@@ -285,9 +295,6 @@ class Outstock extends Backend
             if ($v['status'] !== 1) {
                 $this->error('只有待审核状态才能操作！！');
             }
-
-            //判断SKU是否存在产品库
-            
         }
 
         $data['status'] = 2;
@@ -357,6 +364,25 @@ class Outstock extends Backend
             if ($row['status'] != 0) {
                 $this->error('此状态不能提交审核');
             }
+
+            //查询入库明细数据
+            $list = $this->item
+                ->where(['out_stock_id' => ['in', $id]])
+                ->select();
+            $list = collection($list)->toArray();
+            $skus = array_column($list, 'sku');
+
+            //查询存在产品库的sku
+            $item = new \app\admin\model\itemmanage\Item;
+            $skus = $item->where(['sku' => ['in', $skus]])->column('sku');
+
+            foreach ($list as $v) {
+                if (!in_array($v['sku'], $skus)) {
+                    $this->error('此sku:' . $v['sku'] . '不存在！！');
+                }
+            }
+
+
             $map['id'] = $id;
             $data['status'] = 1;
             $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);

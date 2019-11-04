@@ -94,13 +94,16 @@ class PurchaseReturn extends Backend
                         $this->model->validateFailException(true)->validate($validate);
                     }
 
+                    $sku = $this->request->post("sku/a");
+                    if (count(array_filter($sku)) < 1) {
+                        $this->error('sku不能为空！！');
+                    }
+
                     $params['create_person'] = session('admin.nickname');
                     $params['createtime'] = date('Y-m-d H:i:s', time());
                     $result = $this->model->allowField(true)->save($params);
                     //添加产品信息
                     if ($result !== false) {
-
-                        $sku = $this->request->post("sku/a");
                         $return_num = $this->request->post("return_num/a");
 
                         //求和不合格数量
@@ -214,11 +217,16 @@ class PurchaseReturn extends Backend
                         $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.edit' : $name) : $this->modelValidate;
                         $row->validateFailException(true)->validate($validate);
                     }
+
+                    $sku = $this->request->post("sku/a");
+                    if (count(array_filter($sku)) < 1) {
+                        $this->error('sku不能为空！！');
+                    }
+
                     $result = $row->allowField(true)->save($params);
 
                     //添加合同产品
                     if ($result !== false) {
-                        $sku = $this->request->post("sku/a");
                         $return_num = $this->request->post("return_num/a");
                         $item_id = $this->request->post("item_id/a");
 
