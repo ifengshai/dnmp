@@ -393,9 +393,10 @@ class SaleAfterTask extends Backend
             $list = $this->model->where($map)->field('id,task_status')->select();
             $arr = [];
             foreach($list as $val){
-                if($val['task_status'] ==1){
-                    $arr[] = $val['id'];    
-                }
+                // if($val['task_status'] ==1){
+                //     $arr[] = $val['id'];    
+                // }
+                $arr[] = $val['id'];
             }
             if(!empty($arr)){
                 $data = [];

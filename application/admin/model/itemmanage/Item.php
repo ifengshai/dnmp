@@ -79,16 +79,18 @@ class Item extends Model
         if (!$result) {
             return false;
         }
-        $colorArr = (new ItemAttribute())->getFrameColor();
-        $arr = $this->alias('m')->where('origin_sku', '=', $result['origin_sku'])->join('item_attribute a', 'm.id=a.item_id')->field('m.name,a.frame_color')->select();
-        if (is_array($arr)) {
-            foreach ($arr as $k => $v) {
-                $arr[$k]['frame_color_value'] = $colorArr[$v['frame_color']];
+        if(!empty($result['origin_sku'])){
+            $colorArr = (new ItemAttribute())->getFrameColor();
+            $arr = $this->alias('m')->where('origin_sku', '=', $result['origin_sku'])->join('item_attribute a', 'm.id=a.item_id')->field('m.name,a.frame_color')->select();
+            if (is_array($arr)) {
+                foreach ($arr as $k => $v) {
+                    $arr[$k]['frame_color_value'] = $colorArr[$v['frame_color']];
+                }
             }
+            $result['itemArr'] = $arr;
+            $result['itemCount'] = $this->where('origin_sku', '=', $result['origin_sku'])->count();
         }
-        $result['itemArr'] = $arr;
-        $result['itemCount'] = $this->where('origin_sku', '=', $result['origin_sku'])->count();
-        return $result;
+        return $result ? $result : false;
     }
     /**
      * 获取商品表SKU数据

@@ -789,9 +789,12 @@ class Item extends Backend
             }
             if ($result == 1) {
                 $row = $this->model->getItemInfo($sku);
-                if (!$row) {
-                    return false;
-                }
+                // if (!$row) {
+                //     return false;
+                // }
+                // // echo '<pre>';
+                // // var_dump($row);
+                // // exit;
                 return  $this->success('ok', '', $row);
             } elseif ($result == 2) { //商品是镜片类型
                 $data = $this->fetch('eyeglass');
