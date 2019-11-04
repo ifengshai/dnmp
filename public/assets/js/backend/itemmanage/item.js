@@ -526,7 +526,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                             }
                             $(".selectpicker").selectpicker('refresh');
                         }else{
-                            Layer.alert('旧商品SKU信息没有同步...请耐心等待');
+                            Layer.alert('旧商品SKU信息暂时没有同步...请耐心等待');
                         }     
                         return false;
                     }, function (data, ret) {
