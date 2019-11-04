@@ -102,12 +102,21 @@ class SupplierSku extends Backend
                         $this->model->validateFailException(true)->validate($validate);
                     }
                     $skus = $this->request->post("skus/a");
+                    if (count(array_filter($skus)) < 1) {
+                        $this->error('sku不能为空！！');
+                    }
 
                     $supplier_skus = $this->request->post("supplier_sku/a");
+
+                    if (count(array_filter($supplier_skus)) < 1) {
+                        $this->error('供应商sku不能为空！！');
+                    }
+
+
                     $link = $this->request->post("link/a");
 
                     $data = [];
-                    foreach ($skus as $k => $v) {
+                    foreach (array_filter($skus) as $k => $v) {
                         //供应商sku  和产品sku 必须为真 否则自动过滤
                         if ($v && $supplier_skus[$k]) {
                             $data[$k]['sku'] = $v;

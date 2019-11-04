@@ -99,13 +99,17 @@ class Contract extends Backend
                         $this->model->validateFailException(true)->validate($validate);
                     }
 
+                    $sku = $this->request->post("sku/a");
+                    if (count(array_filter($sku)) < 1) {
+                        $this->error('sku不能为空！！');
+                    }
+
                     $params['create_person'] = session('admin.username');
                     $params['createtime'] = date('Y-m-d H:i:s', time());
                     $result = $this->model->allowField(true)->save($params);
 
                     //添加合同产品
                     if ($result !== false) {
-                        $sku = $this->request->post("sku/a");
                         $product_name = $this->request->post("product_name/a");
                         $supplier_sku = $this->request->post("supplier_sku/a");
                         $num = $this->request->post("num/a");
@@ -209,11 +213,16 @@ class Contract extends Backend
                         $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.edit' : $name) : $this->modelValidate;
                         $row->validateFailException(true)->validate($validate);
                     }
+
+                    $sku = $this->request->post("sku/a");
+                    if (count(array_filter($sku)) < 1) {
+                        $this->error('sku不能为空！！');
+                    }
+
                     $result = $row->allowField(true)->save($params);
 
                     //添加合同产品
                     if ($result !== false) {
-                        $sku = $this->request->post("sku/a");
                         $product_name = $this->request->post("product_name/a");
                         $supplier_sku = $this->request->post("supplier_sku/a");
                         $num = $this->request->post("num/a");
@@ -531,6 +540,24 @@ class Contract extends Backend
             if ($row['status'] > 0) {
                 $this->error('此商品状态不能提交审核');
             }
+
+            //查询明细数据
+            $list = $this->contract_item
+                ->where(['contract_id' => ['in', $id]])
+                ->select();
+            $list = collection($list)->toArray();
+            $skus = array_column($list, 'sku');
+
+            //查询存在产品库的sku
+            $item = new \app\admin\model\itemmanage\Item;
+            $skus = $item->where(['sku' => ['in', $skus]])->column('sku');
+
+            foreach ($list as $v) {
+                if (!in_array($v['sku'], $skus)) {
+                    $this->error('此sku:' . $v['sku'] . '不存在！！');
+                }
+            }
+
             $map['id'] = $id;
             $data['status'] = 1;
             $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
@@ -543,6 +570,4 @@ class Contract extends Backend
             $this->error('404 Not found');
         }
     }
-
-   
 }
