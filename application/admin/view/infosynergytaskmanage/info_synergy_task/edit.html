@@ -174,7 +174,7 @@
             <textarea id="c-problem_desc" class="form-control editor" rows="5" name="row[problem_desc]" cols="50">{$row.problem_desc|htmlentities}</textarea>
         </div>
     </div>
-    <div class="form-group" >
+    <div class="form-group" id="customer_info">
         <label class="control-label col-xs-12 col-sm-2">{:__('Upload_photos')}:</label>
         <div class="col-xs-12 col-sm-8">
             <div class="input-group">
@@ -208,16 +208,16 @@
         </table>
     </div>
     {/present}
-    <div class="form-group" id="customer_info">
+    <!-- <div class="form-group" >
         <label class="control-label col-xs-12 col-sm-2">{:__('Add_remark')}:</label>
         <div class="col-xs-12 col-sm-8">
             <textarea id="c-task_remark" class="form-control editor " rows="5" name="row[remark_record]" cols="50"></textarea>
         </div>
-    </div>
+    </div> -->
     {present name="taskChangeSku"}
     {if condition="$taskChangeSku[0]['change_type'] eq 1"/}
-    <div class="caigou item_info" style="margin-top:15px;margin-left:10%;">
-        <p style="font-size: 16px;"><b>更改镜架</b></p>
+    <div class="caigou item_info del_item" style="margin-top:15px;margin-left:10%;">
+        <p style="font-size: 16px;"><b>更改镜架222</b></p>
         <div>
             <div id="toolbar" class="toolbar">
                 <a href="javascript:;" class="btn btn-success btn-add" title="增加"><i class="fa fa-plus"></i> 增加</a>
@@ -245,7 +245,7 @@
             </table>
         </div>
     </div>
-    {else/}
+    {elseif condition="$taskChangeSku[0]['change_type'] eq 2"/}
     <div class="row item_info" style="margin-top:15px;margin-left:7.6666%;">
         <p style="font-size: 16px;"><b>更改镜片</b></p>
         <div>

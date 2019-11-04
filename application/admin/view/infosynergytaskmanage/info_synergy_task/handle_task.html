@@ -96,7 +96,7 @@
         </div>
         <label class="control-label col-xs-12 col-sm-2">{:__('Synergy_order_id')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <select id="c-synergy_order_id" data-rule="required"  class="form-control selectpicker" name="row[synergy_order_id]">
+            <select id="c-synergy_order_id" data-rule="required" disabled="disabled" class="form-control selectpicker" name="row[synergy_order_id]">
                 <option value="0" selected>请选择</option>
                 {foreach name="orderType" item="vo"}
                 <option value="{$key}" {eq name="key" value="$row.synergy_order_id"}selected{/eq}>{$vo}</option>
@@ -107,7 +107,7 @@
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">{:__('Order_platform')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <select  id="c-order_platform" data-rule="required" class="form-control selectpicker" name="row[order_platform]">
+            <select  id="c-order_platform" disabled="disabled" data-rule="required" class="form-control selectpicker" name="row[order_platform]">
                 <option value="0" selected>请选择</option>
                 {foreach name="orderPlatformList" item="vo"}
                 <option value="{$key}" {eq name="key" value="$row.order_platform"}selected{/eq}>{$vo}</option>
@@ -116,23 +116,23 @@
         </div>
         <label class="control-label col-xs-12 col-sm-2">{:__('Synergy_order_number')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <input id="c-synergy_order_number" data-rule="required" class="form-control" name="row[synergy_order_number]" type="text" value="{$row.synergy_order_number}">
+            <input id="c-synergy_order_number" data-rule="required" class="form-control" name="row[synergy_order_number]" type="text" value="{$row.synergy_order_number}" disabled="disabled" />
         </div>
     </div>
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">{:__('Dept_id')}:</label>
         <div class="col-xs-12 col-sm-3">
-            {:build_select('row[dept_id][]', $allGroup, $row.dept_id,['class'=>'form-control selectpicker', 'data-rule'=>'required','data-live-search' => true,'multiple'=>'multiple','id'=>'choose_dept_id'])}
+            {:build_select('row[dept_id][]', $allGroup, $row.dept_id,['class'=>'form-control selectpicker', 'disabled'=>'disabled','data-live-search' => true,'multiple'=>'multiple','id'=>'choose_dept_id'])}
         </div>
         <label class="control-label col-xs-12 col-sm-2" >{:__('Rep_id')}:</label>
         <div class="col-xs-12 col-sm-3" id="add_rep_id">
-            {:build_select('row[rep_id][]', $allAdmin, $row.rep_id,['class'=>'form-control selectpicker', 'data-rule'=>'required','data-live-search' => true,'multiple'=>'multiple','id'=>"choose_rep_id"])}
+            {:build_select('row[rep_id][]', $allAdmin, $row.rep_id,['class'=>'form-control selectpicker', 'disabled'=>'disabled','data-live-search' => true,'multiple'=>'multiple','id'=>"choose_rep_id"])}
         </div>
     </div>
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">{:__('Prty_id')}:</label>
         <div class="col-xs-12 col-sm-8">
-            <select  id="c-prty_id" data-rule="required" class="form-control selectpicker" name="row[prty_id]">
+            <select  id="c-prty_id" data-rule="required" class="form-control selectpicker" name="row[prty_id]" disabled="disabled">
                 <option value="0" selected>请选择</option>
                 {foreach name="prtyIdList" item="vo"}
                 <option value="{$key}" {eq name="key" value="$row.prty_id"}selected{/eq}>{$vo}</option>
@@ -151,14 +151,14 @@
             <div class="radio">
                 {foreach name="$vo.junior" item="issue"}
                 {if $issue.junior}
-                <label for="row[synergy_task_id]-{$issue.id}"><input id="row[synergy_task_id]-{$issue.id}" name="row[synergy_task_id]" type="radio" value="{$issue.id}" {eq name="$issue.id" value="$row.synergy_task_id"}checked{/eq} /> <span style="color:green;" id="{$issue.id}" class="issueLevel">{$issue.name}<span></span></label>
+                <label for="row[synergy_task_id]-{$issue.id}"><input disabled="disabled" id="row[synergy_task_id]-{$issue.id}" name="row[synergy_task_id]" type="radio" value="{$issue.id}" {eq name="$issue.id" value="$row.synergy_task_id"}checked{/eq} /> <span style="color:green;" id="{$issue.id}" class="issueLevel">{$issue.name}<span></span></label>
                 {else/}
-                <label for="row[synergy_task_id]-{$issue.id}"><input id="row[synergy_task_id]-{$issue.id}" name="row[synergy_task_id]" type="radio" value="{$issue.id}" {in name="$issue.id" value="$row.synergy_task_id"}checked{/in} /> {$issue.name}</label>
+                <label for="row[synergy_task_id]-{$issue.id}"><input disabled="disabled" id="row[synergy_task_id]-{$issue.id}" name="row[synergy_task_id]" type="radio" value="{$issue.id}" {in name="$issue.id" value="$row.synergy_task_id"}checked{/in} /> {$issue.name}</label>
                 {/if}
                 {if $issue.junior}
                 <div class="radio" style="margin-left:20%;display:none;" id="display-{$issue.id}" >
                     {foreach name="$issue.junior" item="finalIssue"}
-                    <label for="row[synergy_task_id]-{$finalIssue.id}"><input id="row[synergy_task_id]-{$finalIssue.id}" name="row[synergy_task_id]" type="radio" value="{$finalIssue.id}" {in name="$finalIssue.id" value="$row.synergy_task_id"}checked{/in} />{$finalIssue.name}</label>
+                    <label for="row[synergy_task_id]-{$finalIssue.id}"><input disabled="disabled" id="row[synergy_task_id]-{$finalIssue.id}" name="row[synergy_task_id]" type="radio" value="{$finalIssue.id}" {in name="$finalIssue.id" value="$row.synergy_task_id"}checked{/in} />{$finalIssue.name}</label>
                     {/foreach}
                 </div>
                 {/if}
@@ -170,15 +170,15 @@
     </div>
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">{:__('Problem_desc')}:</label>
-        <div class="col-xs-12 col-sm-8">
-            <textarea id="c-problem_desc" readonly class="form-control" rows="10" name="row[problem_desc]" cols="50">{$row.problem_desc|htmlentities}</textarea>
+        <div class="col-xs-12 col-sm-8" >
+            <textarea id="c-problem_desc" disabled="disabled"  class="form-control" rows="10" name="row[problem_desc]" cols="50">{$row.problem_desc|htmlentities}</textarea>
         </div>
     </div>
     <div class="form-group" >
         <label class="control-label col-xs-12 col-sm-2">{:__('Upload_photos')}:</label>
         <div class="col-xs-12 col-sm-8">
             <div class="input-group">
-                <input id="c-upload_photos" data-rule="required" class="form-control" size="50" name="row[upload_photos]" type="text" value="{$row.upload_photos}">
+                <input id="c-upload_photos" readonly class="form-control" size="50" name="row[upload_photos]" type="text" value="{$row.upload_photos}">
                 <div class="input-group-addon no-border no-padding">
                     <span><button type="button" id="plupload-upload_photos"   class="btn btn-danger plupload" data-input-id="c-upload_photos" data-mimetype="image/gif,image/jpeg,image/png,image/jpg,image/bmp" data-url="ajax/upload?dir=infoSynergyTaskManage/infoSynergyTask" data-multiple="true" data-preview-id="p-upload_photos" data-maxsize="2M"><i class="fa fa-upload"></i> 上传</button></span>
                 </div>
@@ -208,12 +208,12 @@
         </table>
     </div>
     {/present}
-    <!-- <div class="form-group" id="customer_info">
+    <div class="form-group" id="customer_info">
         <label class="control-label col-xs-12 col-sm-2">{:__('Add_remark')}:</label>
         <div class="col-xs-12 col-sm-8">
             <textarea id="c-task_remark" class="form-control editor " rows="5" name="row[remark_record]" cols="50"></textarea>
         </div>
-    </div> -->
+    </div>
     {present name="taskChangeSku"}
     {if condition="$taskChangeSku[0]['change_type'] eq 1"/}
     <div class="caigou item_info" style="margin-top:15px;margin-left:10%;">
@@ -252,7 +252,7 @@
             <!-- <div id="toolbar" class="toolbar">
                 <a href="javascript:;" class="btn btn-success btn-add-lens" title="增加"><i class="fa fa-plus"></i> 增加</a>
             </div> -->
-            {foreach name="taskChangeSku" item="sku" key="kv"}
+     {foreach name="taskChangeSku" item="sku" key="kv"}
             <div class="col-lg-12">
             </div>
             <div class="col-xs-6 col-md-4" style="margin-top:15px;margin-left:5.6666%;" >
@@ -360,7 +360,14 @@
                     <a href="javascript:;" class="btn btn-danger btn-del-lens" title="删除"><i class="fa fa-trash"></i>删除</a>
                 </div> -->
             </div>
-            {/foreach}
-            {/if}
-            {/present}
+     {/foreach}
+    {/if}
+    {/present}
+    <div class="form-group layer-footer">
+        <label class="control-label col-xs-12 col-sm-2"></label>
+        <div class="col-xs-12 col-sm-8">
+            <button type="submit" class="btn btn-success btn-embossed disabled">{:__('OK')}</button>
+            <button type="reset" class="btn btn-default btn-embossed">{:__('Reset')}</button>
+        </div>
+    </div>
 </form>

@@ -342,6 +342,7 @@ class SaleAfterTask extends Backend
             $this->error('参数错误，请重新尝试','saleaftermanage/sale_after_task/index');
         }
         $result = $this->model->getTaskDetail($id);
+        $result['problem_desc'] = strip_tags($result['problem_desc']);
         if(!$result){
             $this->error('任务信息不存在，请重新尝试','saleaftermanage/sale_after_task/index');
         }
@@ -474,6 +475,7 @@ class SaleAfterTask extends Backend
         }
         //求出本条记录相对应的售后备注记录
         $row->task_remark = (new SaleAfterTaskRemark())->getRelevanceRecord($ids);
+        $row['problem_desc'] = strip_tags($row['problem_desc']);
         $this->view->assign("row", $row);
         $this->view->assign('SolveScheme',$this->model->getSolveScheme());
         return $this->view->fetch();
