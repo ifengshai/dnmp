@@ -141,6 +141,16 @@
         </div>
     </div>
     <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Refund_money')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-refund_money"  class="form-control" name="row[refund_money]" type="number" value="{$row.refund_money|htmlentities}">
+        </div>
+        <label class="control-label col-xs-12 col-sm-2">{:__('Make_up_price_order')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-make_up_price_order"  data-source="problem/index" class="form-control" name="row[make_up_price_order]" type="text" value="{$row.make_up_price_order|htmlentities}">
+        </div>
+    </div>    
+    <div class="form-group">
         <div class="form-group">
             <label class="control-label col-xs-12 col-sm-2">{:__('Synergy_task_id')}:</label>
         </div>
