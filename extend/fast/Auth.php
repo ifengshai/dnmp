@@ -98,7 +98,10 @@ class Auth
         if (in_array('*', $rulelist)) {
             return true;
         }
-        
+
+        dump($name);
+        dump($rulelist);
+
         if (is_string($name)) {
             $name = strtolower($name);
             if (strpos($name, ',') !== false) {
