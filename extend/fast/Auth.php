@@ -99,6 +99,8 @@ class Auth
             return true;
         }
 
+        dump($name);
+        dump($rulelist);die;
         if (is_string($name)) {
             $name = strtolower($name);
             if (strpos($name, ',') !== false) {

@@ -405,7 +405,7 @@ class Inventory extends Backend
     }
 
     /**
-     * 添加临时表数据
+     * 添加盘点数据
      */
     public function addInventoryItem()
     {

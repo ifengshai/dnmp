@@ -124,7 +124,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 $(document).on('change', '.purchase_id', function () {
                     var id = $(this).val();
                     if (id) {
-                        var url = Config.moduleurl + '/warehouse/purchase_return/getPurchaseData';
+                        var url = Config.moduleurl + '/purchase/purchase_return/getPurchaseData';
                         Backend.api.ajax({
                             url: url,
                             data: { id: id }

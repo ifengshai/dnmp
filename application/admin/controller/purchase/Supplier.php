@@ -334,8 +334,10 @@ class Supplier extends Backend
         $this->success();
     }
 
+
+
     /**
-     * 添加供应商SKU绑定关系
+     * 添加供应商SKU绑定关系  临时处理旧数据方法
      */
     public function addSupplierSku()
     {

@@ -423,7 +423,7 @@ class Check extends Backend
         }
     }
 
-    //删除合同里商品信息
+    //删除质检单商品信息
     public function deleteItem()
     {
         $id = input('id');
