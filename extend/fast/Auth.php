@@ -99,9 +99,6 @@ class Auth
             return true;
         }
 
-        dump($name);
-        dump($rulelist);die;
-        
         if (is_string($name)) {
             $name = strtolower($name);
             if (strpos($name, ',') !== false) {
@@ -197,6 +194,8 @@ class Auth
         }
         //读取用户组所有权限规则
         $this->rules = Db::name($this->config['auth_rule'])->where($where)->field('id,pid,condition,icon,name,title,ismenu')->select();
+
+        dump($this->rules);die;
 
         //循环规则，判断结果。
         $rulelist = []; //
