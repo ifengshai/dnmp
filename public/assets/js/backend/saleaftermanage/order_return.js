@@ -408,10 +408,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                         //成功的回调
                         //alert(ret);
                         //清除html商品数据
+                        var email = ret.data[0].customer_email != undefined ? ret.data[0].customer_email : '';
+                        var firstname =  ret.data[0].customer_firstname != undefined ? ret.data[0].customer_firstname : '';
+                        var lastname  =  ret.data[0].customer_lastname != undefined ? ret.data[0].customer_lastname : '';
                         $(".item_info").empty();
                         $('#c-order_status').val(ret.data.status);
-                        $('#c-customer_name').val(ret.data.customer_firstname + " " + ret.data.customer_lastname);
-                        $('#c-customer_email').val(ret.data.customer_email);
+                        $('#c-customer_name').val(firstname + " " + lastname);
+                        $('#c-customer_email').val(email);
                         if (ret.data.store_id >= 2) {
                             $('#c-order_source').val(2);
                         } else {
@@ -425,14 +428,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                                 '</div>' +
                                 '<div class="col-xs-6 col-md-12">' +
                                 '<div class="col-xs-6 col-md-10">' +
-                                '<div class="panel bg-aqua-gradient">' +
-                                '<div class="panel-body">' +
-                                '<div class="ibox-title">' +
                                 '<table id="caigou-table" class="col-xs-6 col-md-12">' +
                                 '<tr>' +
                                 '<td style="text-align: center">序号</td>' +
-                                '<td style="text-align: center">SKU</td>' +
-                                '<td style="text-align: center" class="col-xs-6 col-md-6">商品名称</td>' +
+                                '<td style="text-align: center" class="col-xs-6 col-md-4">SKU</td>' +
+                                '<td style="text-align: center" class="col-xs-6 col-md-4">商品名称</td>' +
                                 '<td style="text-align: center" >购买数量</td>' +
                                 '<td style="text-align: center">退回数量</td>' +
                                 '<td style="text-align: center">到货数量</td>' +
@@ -442,20 +442,16 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                                 var newItem = item[j];
                                 var m = j + 1;
                                 Str += '<tr>';
-                                //Str +='<input type="hidden" id="c-order_id" name="row[]"> ';
                                 Str += '<td><input id="c-right_SPH" class="form-control"  type="text" value="' + m + '"></td>';
                                 Str += '<td><input id="c-sku" class="form-control"  name="row[item][' + m + '][item_sku]" type="text" value="' + newItem.sku + '"></td>';
                                 Str += '<td><input id="c-name" class="form-control" name="row[item][' + m + '][item_name]" type="text" value="' + newItem.name + '"></td>';
-                                Str += '<td><input id="c-qty_ordered" class="form-control" name="row[item][' + m + '][sku_qty]"  type="text" value="' + newItem.qty_ordered + '"></td>';
+                                Str += '<td><input id="c-qty_ordered" class="form-control" name="row[item][' + m + '][sku_qty]"  type="text" value="' + Math.round(newItem.qty_ordered) + '"></td>';
                                 Str += '<td><input id="c-right_PD" class="form-control" name="row[item][' + m + '][return_sku_qty]" type="text" value="0"></td>';
                                 Str += '<td><input id="c-right_Prism_Horizontal" name="row[item][' + m + '][arrived_sku_qty]" class="form-control"  type="text" value="0"></td>';
                                 Str += '<td><input id="c-return_sku_qty" name="row[item][' + m + '][check_sku_qty]" class="form-control"  type="number" value="0"></td>';
                                 Str += '</tr>';
                             }
                             Str += '</table>' +
-                                '</div>' +
-                                '</div>' +
-                                '</div>' +
                                 '</div>' +
                                 '</div>';
                             return Str;
