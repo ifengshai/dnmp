@@ -133,8 +133,8 @@
                     <td></td>
                     <td></td>
                     <td></td>
-                    <td><input id="c-sample_num" class="form-control sample_num" name="sample_num[]" type="text"></td>
-                    <td><input id="c-purchase_remark" class="form-control in_stock_num" name="in_stock_num[]" type="text"></td>
+                    <td><input id="c-sample_num" class="form-control sample_num" oninput="if(value < 0){alert('只能输入正整数！');value = 0}" name="sample_num[]" type="text"></td>
+                    <td><input id="c-purchase_remark" class="form-control in_stock_num" oninput="if(value < 0){alert('只能输入正整数！');value = 0}" name="in_stock_num[]" type="text"></td>
                  
                     <td>
                         <a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>删除</a>
@@ -171,8 +171,8 @@
             <td></td>
             <td></td>
             <td></td>
-            <td><input id="c-sample_num" class="form-control sample_num" name="sample_num[]" type="text"></td>
-            <td><input id="c-purchase_remark" class="form-control in_stock_num" name="in_stock_num[]" type="text"></td>
+            <td><input id="c-sample_num" class="form-control sample_num" oninput="if(value < 0){alert('只能输入正整数！');value = 0}" name="sample_num[]" type="text"></td>
+            <td><input id="c-purchase_remark" class="form-control in_stock_num" oninput="if(value < 0){alert('只能输入正整数！');value = 0}" name="in_stock_num[]" type="text"></td>
          
             <td>
                 <a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>删除</a>

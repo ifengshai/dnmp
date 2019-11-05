@@ -32,14 +32,6 @@ class Zeelool extends Backend
         $this->model = new \app\admin\model\order\printlabel\Zeelool;
     }
 
-    // public function test(){
-    //     // echo '123456';
-    //     // $entity_id = 28966;
-    //     // dump(ZeeloolPrescriptionDetailHelper::get_one_by_entity_id($entity_id));
-    //     $increment_id = '100010649';
-    //     dump(ZeeloolPrescriptionDetailHelper::get_one_by_increment_id($increment_id));
-    // }
-
     /**
      * 默认生成的控制器所继承的父类中有index/add/edit/del/multi五个基础方法、destroy/restore/recyclebin三个回收站方法
      * 因此在当前控制器中可不用编写增删改查的代码,除非需要自己控制这部分逻辑
@@ -83,7 +75,7 @@ class Zeelool extends Backend
             $field = 'entity_id,status,base_shipping_amount,increment_id,coupon_code,shipping_description,store_id,customer_id,base_discount_amount,base_grand_total,
                      total_qty_ordered,quote_id,base_currency_code,customer_email,customer_firstname,customer_lastname,custom_is_match_frame,custom_is_match_lens,
                      custom_is_send_factory,custom_is_delivery,custom_match_frame_created_at,custom_match_lens_created_at,custom_match_factory_created_at,
-                     custom_match_delivery_created_at,custom_print_label,custom_order_prescription,custom_print_label_created_at,custom_service_name';
+                     custom_match_delivery_created_at,custom_print_label,custom_order_prescription,custom_print_label_created_at,custom_service_name,created_at';
             $list = $this->model
                 ->field($field)
                 ->where($map)
@@ -732,8 +724,8 @@ order by sfoi.order_id desc;";
     //批量打印标签
     public function batch_print_label()
     {
+         ob_start(); 
         // echo 'batch_print_label';
-
         $entity_ids = rtrim(input('id_params'), ',');
         // dump($entity_ids);
         if ($entity_ids) {
