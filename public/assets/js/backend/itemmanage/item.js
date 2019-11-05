@@ -582,7 +582,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                     index_url: 'itemmanage/item/recycle' + location.search,
                     add_url: 'itemmanage/item/add',
                     //edit_url: 'itemmanage/item/edit',
-                    del_url: 'itemmanage/item/del',
+                   // del_url: 'itemmanage/item/del',
                     multi_url: 'itemmanage/item/multi',
                     table: 'item',
                 }
