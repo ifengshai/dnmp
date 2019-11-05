@@ -750,7 +750,6 @@ order by sfoi.order_id desc;";
     public function batch_print_label()
     {
         // echo 'batch_print_label';
-
         $entity_ids = rtrim(input('id_params'), ',');
         // dump($entity_ids);
         if ($entity_ids) {
