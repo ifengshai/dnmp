@@ -1424,15 +1424,17 @@ class Item extends Backend
                 $result = $client->call($session, 'catalog_product.info', $magento_sku);
                 $client->endSession($session);
             }catch (\SoapFault $e){
-                $this->error($e->getMessage());
+                Db::connect('database.db_stock')->table('sku_map')->where(['sku'=>$v['sku']])->update(['pull_status'=>-1]);
+                //$this->error($e->getMessage());
                 continue;
                 //$this->error(11111);
-                $this->error($e->getMessage());
+                //$this->error($e->getMessage());
             }catch (\Exception $e){
-                $this->error($e->getMessage());
+                Db::connect('database.db_stock')->table('sku_map')->where(['sku'=>$v['sku']])->update(['pull_status'=>-1]);
+                //$this->error($e->getMessage());
                 continue;
                 //$this->error(22222);
-                $this->error($e->getMessage());
+                //$this->error($e->getMessage());
             }
             $storeArr = [];
             //循环magento平台存储的字段
@@ -1851,6 +1853,9 @@ class Item extends Backend
 			return 123;
 		}	
         $map = M('map','sku_')->addAll($result);
+    }
+    public function ceshi(){
+        
     }
 
 }
