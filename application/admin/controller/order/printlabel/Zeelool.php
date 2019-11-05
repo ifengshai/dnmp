@@ -11,7 +11,6 @@ use think\Exception;
 use think\exception\PDOException;
 use Util\ZeeloolPrescriptionDetailHelper;
 use Util\SKUHelper;
-use think\Config;
 
 /**
  * Sales Flat Order
@@ -29,18 +28,9 @@ class Zeelool extends Backend
 
     public function _initialize()
     {
-        Config::set('app_debug', true);
         parent::_initialize();
         $this->model = new \app\admin\model\order\printlabel\Zeelool;
     }
-
-    // public function test(){
-    //     // echo '123456';
-    //     // $entity_id = 28966;
-    //     // dump(ZeeloolPrescriptionDetailHelper::get_one_by_entity_id($entity_id));
-    //     $increment_id = '100010649';
-    //     dump(ZeeloolPrescriptionDetailHelper::get_one_by_increment_id($increment_id));
-    // }
 
     /**
      * 默认生成的控制器所继承的父类中有index/add/edit/del/multi五个基础方法、destroy/restore/recyclebin三个回收站方法
@@ -734,6 +724,7 @@ order by sfoi.order_id desc;";
     //批量打印标签
     public function batch_print_label()
     {
+         ob_start(); 
         // echo 'batch_print_label';
         $entity_ids = rtrim(input('id_params'), ',');
         // dump($entity_ids);
