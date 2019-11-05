@@ -739,6 +739,7 @@ order by sfoi.order_id desc;";
     //批量打印标签
     public function batch_print_label()
     {
+        ob_start(); 
         // echo 'batch_print_label';
 
         $entity_ids = rtrim(input('id_params'), ',');
