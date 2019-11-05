@@ -11,6 +11,7 @@ use think\Exception;
 use think\exception\PDOException;
 use Util\ZeeloolPrescriptionDetailHelper;
 use Util\SKUHelper;
+use think\Config;
 
 /**
  * Sales Flat Order
@@ -28,6 +29,7 @@ class Zeelool extends Backend
 
     public function _initialize()
     {
+        Config::set('app_debug', true);
         parent::_initialize();
         $this->model = new \app\admin\model\order\printlabel\Zeelool;
     }
@@ -733,7 +735,6 @@ order by sfoi.order_id desc;";
     public function batch_print_label()
     {
         // echo 'batch_print_label';
-
         $entity_ids = rtrim(input('id_params'), ',');
         // dump($entity_ids);
         if ($entity_ids) {

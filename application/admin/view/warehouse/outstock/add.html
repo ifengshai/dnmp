@@ -124,7 +124,7 @@
                     <td></td>
                     <td></td>
                   
-                    <td><input id="c-purchase_remark" class="form-control out_stock_num" min="0" step="1" name="out_stock_num[]" type="number"></td>
+                    <td><input id="c-purchase_remark" class="form-control out_stock_num" oninput="if(value < 0){alert('只能输入正整数！');value = 0}" name="out_stock_num[]" type="number"></td>
                  
                     <td>
                         <a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>删除</a>
@@ -162,7 +162,7 @@
             <td></td>
             <td></td>
           
-            <td><input id="c-purchase_remark" class="form-control out_stock_num" min="0" step="1" name="out_stock_num[]"  type="number"></td>
+            <td><input id="c-purchase_remark" class="form-control out_stock_num" oninput="if(value < 0){alert('只能输入正整数！');value = 0}" name="out_stock_num[]"  type="number"></td>
          
             <td>
                 <a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>删除</a>
