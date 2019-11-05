@@ -9,7 +9,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                     index_url: 'itemmanage/item/index' + location.search,
                     add_url: 'itemmanage/item/add',
                     edit_url: 'itemmanage/item/edit',
-                    del_url: 'itemmanage/item/del',
+                    //del_url: 'itemmanage/item/del',
                     multi_url: 'itemmanage/item/multi',
                     table: 'item',
                 }
@@ -81,7 +81,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                         { field: 'create_person', title: __('Create_person') },
                         { field: 'create_time', title: __('Create_time'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime },
                         {
-                            field: 'operate', width: "120px", title: __('操作'), table: table, formatter: Table.api.formatter.operate,
+                            field: 'operate', width: "120px", title: __('操作'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate,
                             buttons: [
                                 {
                                     name: 'detail',
