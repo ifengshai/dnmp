@@ -530,10 +530,10 @@ class ItemPlatformSku extends Backend
             $uploadItemArr['name']                  = $itemRow['name'];
             $uploadItemArr['description']           = 'Product description';
             $uploadItemArr['short_description']     = 'Product short description';
-            $uploadItemArr['url_key']               = $itemRow['sku'];
+            $uploadItemArr['url_key']               = $itemPlatformRow['platform_sku'];
             $uploadItemArr['url_path']              = $itemRow['sku'];
-            $uploadItemArr['true_sku']              = $itemPlatformRow['platform_sku'];
-            $uploadItemArr['status']                = '1';
+            $uploadItemArr['true_sku']              = $itemRow['sku'];
+            $uploadItemArr['status']                = '0';
             $uploadItemArr['visibility']            = '4';
             $uploadItemArr['meta_title']            = 'Product meta title';
             $uploadItemArr['meta_keyword']          = 'Product meta keyword';

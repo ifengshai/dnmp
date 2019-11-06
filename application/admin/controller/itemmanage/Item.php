@@ -1400,6 +1400,7 @@ class Item extends Backend
     public function changeSku()
     {
         $where['id'] = ['gt',4710];
+        $where['is_visable'] = 1;
         $result = Db::connect('database.db_stock')->table('zeelool_product')->where($where)->field('magento_sku as sku,true_qty as stock,remark')->select();
         if(!$result){
             return false;
@@ -1890,6 +1891,7 @@ class Item extends Backend
     public function add_map_sku()
     {
         $where['magento_sku'] = ['NEQ',''];
+        $where['is_visable'] = 1;
         $result = M('product')->where($where)->field('magento_sku as sku')->select();
 		if(!$result){
 			echo 123;
