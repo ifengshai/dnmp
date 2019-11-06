@@ -176,6 +176,9 @@ class ItemPlatformSku extends Backend
                 if(empty($params['presell_num'])){
                     $this->error(__('SKU pre-order quantity cannot be empty'));
                 }
+                if($params['presell_start_time'] == $params['presell_end_time']){
+                    $this->error('预售开始时间和结束时间不能相等');
+                }
 //                echo $params['presell_start_time'];
 //                echo '<br>';
 //                echo $params['presell_end_time'];
@@ -245,6 +248,9 @@ class ItemPlatformSku extends Backend
                 }
                 if(empty($params['presell_num'])){
                     $this->error(__('SKU pre-order quantity cannot be empty'));
+                }
+                if($params['presell_start_time'] == $params['presell_end_time']){
+                    $this->error('预售开始时间和结束时间不能相等');
                 }
                 $result = false;
                 Db::startTrans();
