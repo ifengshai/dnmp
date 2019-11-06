@@ -5,6 +5,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
             // 初始化表格参数配置
             Table.api.init({
                 searchFormVisible: true,
+                pageList: [10, 25, 50, 100],
                 extend: {
                     index_url: 'itemmanage/item/index' + location.search,
                     add_url: 'itemmanage/item/add',
@@ -762,6 +763,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
             // 初始化表格参数配置
             Table.api.init({
                 searchFormVisible: true,
+                pageList: [10, 25, 50, 100],
                 extend: {
                     index_url: 'itemmanage/item/goods_stock_list' + location.search,
                     table: 'item',

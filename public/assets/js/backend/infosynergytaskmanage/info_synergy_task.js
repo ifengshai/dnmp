@@ -5,6 +5,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             // 初始化表格参数配置
             Table.api.init({
                 searchFormVisible: true,
+                pageList: [10, 25, 50, 100],
                 extend: {
                     index_url: 'infosynergytaskmanage/info_synergy_task/index' + location.search + '/synergy_order_number/' + Config.synergy_order_number,
                     add_url: 'infosynergytaskmanage/info_synergy_task/add',

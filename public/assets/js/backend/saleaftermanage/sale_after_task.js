@@ -5,6 +5,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui','custom-css'], 
             // 初始化表格参数配置
             Table.api.init({
                 searchFormVisible: true,
+                pageList: [10, 25, 50, 100],
                 //searchFormTemplate: 'customformtpl',
                 extend: {
                     index_url: 'saleaftermanage/sale_after_task/index' + location.search,

@@ -5,6 +5,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui'], function ($, 
             // 初始化表格参数配置
             Table.api.init({
                 searchFormVisible: true,
+                pageList: [10, 25, 50, 100],
                 extend: {
                     index_url: 'itemmanage/item_platform_sku/index' + location.search,
                     add_url: 'itemmanage/item_platform_sku/add',
@@ -318,6 +319,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui'], function ($, 
         presell: function () {
             Table.api.init({
                 searchFormVisible: true,
+                pageList: [10, 25, 50, 100],
                 extend: {
                     index_url: 'itemmanage/item_platform_sku/presell' + location.search,
                     add_url: 'itemmanage/item_platform_sku/addPresell',
