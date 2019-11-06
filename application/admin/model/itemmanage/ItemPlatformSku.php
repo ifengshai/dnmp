@@ -32,10 +32,10 @@ class ItemPlatformSku extends Model
     //添加商品平台sku
     public function addPlatformSku($row)
     {
-        // $res = $this->where('sku',$row['sku'])->field('sku,name')->find();
-        // if($res){
-        //     return false;
-        // }
+        $res = $this->where('sku',$row['sku'])->field('sku,name')->find();
+        if($res){
+            return false;
+        }
         $platform = (new MagentoPlatform())->getOrderPlatformList();
         if (!empty($platform) && is_array($platform)) {
             $arr = [];

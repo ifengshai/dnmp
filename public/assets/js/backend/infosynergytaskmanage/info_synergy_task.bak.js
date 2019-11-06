@@ -5,7 +5,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             // 初始化表格参数配置
             Table.api.init({
                 searchFormVisible: true,
-                pageList: [10, 25, 50, 100],
                 extend: {
                     index_url: 'infosynergytaskmanage/info_synergy_task/index' + location.search + '/synergy_order_number/' + Config.synergy_order_number,
                     add_url: 'infosynergytaskmanage/info_synergy_task/add',
@@ -260,7 +259,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 $(document).on('click','.btn-add-lens',function(){
                     var contents = '<div class="col-lg-12">' +
                         '</div>' +
-                        '<div class="col-xs-6 col-md-4" style="margin-left:5.6666%;" >' +
+                        '<div class="col-xs-6 col-md-4" style="margin-top:15px;margin-left:5.6666%;" >' +
                         '<div class="panel bg-blue">' +
                         '<div class="panel-body">' +
                         '<div class="panel-title">' +
@@ -491,7 +490,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                              var newItem = item[j];
                                              str2 += '<div class="col-lg-12">' +
                                                  '</div>' +
-                                                 '<div class="col-xs-6 col-md-4" style="margin-left:5.6666%;" >' +
+                                                 '<div class="col-xs-6 col-md-4" style="margin-top:15px;margin-left:5.6666%;" >' +
                                                  '<div class="panel bg-blue">' +
                                                  '<div class="panel-body">' +
                                                  '<div class="panel-title">' +

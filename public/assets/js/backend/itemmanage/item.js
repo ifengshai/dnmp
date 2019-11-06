@@ -5,11 +5,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
             // 初始化表格参数配置
             Table.api.init({
                 searchFormVisible: true,
+                pageList: [10, 25, 50, 100],
                 extend: {
                     index_url: 'itemmanage/item/index' + location.search,
                     add_url: 'itemmanage/item/add',
                     edit_url: 'itemmanage/item/edit',
-                    del_url: 'itemmanage/item/del',
+                    //del_url: 'itemmanage/item/del',
                     multi_url: 'itemmanage/item/multi',
                     table: 'item',
                 }
@@ -53,7 +54,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                         },
                         {
                             field: 'item_status', title: __('Item_status'),
-                            searchList: { 1: '新建', 2: '提交审核', 3: '审核通过', 4: '审核拒绝', 5: '取消' },
+                            searchList: { 1: '新建', 2: '待审核', 3: '审核通过', 4: '审核拒绝', 5: '取消' },
                             custom: { 1: 'yellow', 2: 'blue', 3: 'success', 4: 'red', 5: 'danger' },
                             formatter: Table.api.formatter.status
                         },
@@ -81,7 +82,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                         { field: 'create_person', title: __('Create_person') },
                         { field: 'create_time', title: __('Create_time'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime },
                         {
-                            field: 'operate', width: "120px", title: __('操作'), table: table, formatter: Table.api.formatter.operate,
+                            field: 'operate', width: "120px", title: __('操作'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate,
                             buttons: [
                                 {
                                     name: 'detail',
@@ -221,7 +222,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                                     },
                                     visible: function (row) {
                                         //返回true时按钮显示,返回false隐藏
-                                        return true;
+                                        if(row.item_status == 5){
+                                            return false;
+                                        }
+                                            return true;
                                     }
                                 }
                             ]
@@ -457,6 +461,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                     }, function (data, ret) {
                         //console.log(ret);
                         var resultData = ret.data;
+                        if(resultData == -1){
+                            Layer.alert('输入的商品SKU有误，请重新输入');
+                        }
                         if(resultData != false){
                             $('.newAddition').remove();
                             if(resultData.procurement_type){
@@ -536,24 +543,24 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                     });
                 });
                 //根据填写的商品名称找出商品是否重复
-                $(document).on('blur', '.c-name', function () {
-                    var name = $(this).val();
-                    if (name.length > 0) {
-                        Backend.api.ajax({
-                            url: 'itemmanage/item/ajaxGetInfoName',
-                            data: { name: name }
-                        }, function (data, ret) {
-                            console.log(ret.data);
-                            $('.btn-success').removeClass('btn-disabled disabled');
-                            return false;
-                        }, function (data, ret) {
-                            //失败的回调
-                            $('.btn-success').addClass('btn-disabled disabled');
-                            alert(ret.msg);
-                            return false;
-                        });
-                    }
-                });
+                // $(document).on('blur', '.c-name', function () {
+                //     var name = $(this).val();
+                //     if (name.length > 0) {
+                //         Backend.api.ajax({
+                //             url: 'itemmanage/item/ajaxGetInfoName',
+                //             data: { name: name }
+                //         }, function (data, ret) {
+                //             console.log(ret.data);
+                //             $('.btn-success').removeClass('btn-disabled disabled');
+                //             return false;
+                //         }, function (data, ret) {
+                //             //失败的回调
+                //             $('.btn-success').addClass('btn-disabled disabled');
+                //             alert(ret.msg);
+                //             return false;
+                //         });
+                //     }
+                // });
             }
         },
         frame: function () {
@@ -582,7 +589,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                     index_url: 'itemmanage/item/recycle' + location.search,
                     add_url: 'itemmanage/item/add',
                     //edit_url: 'itemmanage/item/edit',
-                    del_url: 'itemmanage/item/del',
+                   // del_url: 'itemmanage/item/del',
                     multi_url: 'itemmanage/item/multi',
                     table: 'item',
                 }
@@ -762,6 +769,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
             // 初始化表格参数配置
             Table.api.init({
                 searchFormVisible: true,
+                pageList: [10, 25, 50, 100],
                 extend: {
                     index_url: 'itemmanage/item/goods_stock_list' + location.search,
                     table: 'item',

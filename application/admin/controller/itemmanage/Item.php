@@ -320,6 +320,12 @@ class Item extends Backend
                 $params = $this->preExcludeFields($params);
                 $itemName = $params['name'];
                 $itemColor = $params['color'];
+                if (count($itemColor) != count(array_unique($itemColor))){
+                    $this->error('同一款商品的颜色值不能相同');
+                }
+                // echo '<pre>';
+                // var_dump($itemColor);
+                // exit;
                 if (is_array($itemName) && !in_array("", $itemName)) {
                     $data = $itemAttribute = [];
                     //求出材质对应的编码
@@ -331,6 +337,14 @@ class Item extends Backend
                     //如果是后来添加的
                     if (!empty($params['origin_skus']) && $params['item-count'] >= 1) { //正常情况
                         $count = $params['item-count'];
+                        $row = Db::connect('database.db_stock')->name('item')->where(['sku'=>$params['origin_skus']])->field('id,sku')->find();
+                        $attributeWhere = [];
+                        $attributeWhere['item_id'] = $row['id'];
+                        $attributeWhere['frame_color'] = ['in',$itemColor];
+                        $attributeInfo = Db::connect('database.db_stock')->name('item_attribute')->where($attributeWhere)->field('id,frame_color')->find();
+                        if($attributeInfo){
+                            $this->error('追加的商品SKU不能添加之前的颜色');
+                        }
                         $params['origin_sku'] = substr($params['origin_skus'], 0, strpos($params['origin_skus'], '-'));
                     } elseif (empty($params['origin_skus']) && $params['item-count'] >= 1) { //去掉原始sku情况
                         $this->error(__('Make sure the original sku code exists'));
@@ -448,6 +462,9 @@ class Item extends Backend
                 $params = $this->preExcludeFields($params);
                 $itemName = $params['name'];
                 $itemColor = $params['color'];
+                if (count($itemColor) != count(array_unique($itemColor))){
+                    $this->error('同一款商品的颜色值不能相同');
+                }
                 if (is_array($itemName) && !in_array("", $itemName)) {
                     $data = $itemAttribute = [];
                     foreach ($itemName as $k => $v) {
@@ -535,8 +552,11 @@ class Item extends Backend
         if (!$row) {
             $this->error(__('No Results were found'));
         }
-        if ($row['item_status'] == 2) {
-            $this->error(__('The goods have been submitted for review and cannot be edited'), '/admin/itemmanage/item');
+        if (2 == $row['item_status']) {
+            $this->error(__('The goods have been submitted for review and cannot be edited'), 'itemmanage/item');
+        }
+        if(5 == $row['item_status']){
+            $this->error('此商品已经取消，不能编辑','itemmanage/item');
         }
         $adminIds = $this->getDataLimitAdminIds();
         if (is_array($adminIds)) {
@@ -550,6 +570,16 @@ class Item extends Backend
                 $params = $this->preExcludeFields($params);
                 $itemName = $params['name'];
                 $itemColor = $params['color'];
+                if (count($itemColor) != count(array_unique($itemColor))){
+                    $this->error('同一款商品的颜色值不能相同');
+                }
+                $attributeWhere = [];
+                $attributeWhere['item_id'] = $row['id'];
+                $attributeWhere['frame_color'] = ['in',$itemColor];
+                $attributeInfo = Db::connect('database.db_stock')->name('item_attribute')->where($attributeWhere)->field('id,frame_color')->find();
+                if($attributeInfo){
+                    $this->error('追加的商品SKU不能添加之前的颜色');
+                }
                 if (is_array($itemName) && !in_array("", $itemName)) {
                     $data = $itemAttribute = [];
                     Db::startTrans();
@@ -965,6 +995,9 @@ class Item extends Backend
     public function detail($ids = null)
     {
         $row = $this->model->get($ids, 'itemAttribute');
+        // echo '<pre>';
+        // var_dump($row);
+        // exit;
         if (!$row) {
             $this->error(__('No Results were found'));
         }
@@ -1134,11 +1167,14 @@ class Item extends Backend
     /***
      * 取消商品
      */
-    public function cancel()
+    public function cancel($ids=null)
     {
         if ($this->request->isAjax()) {
-            $id = $this->request->param('ids');
-            $map['id'] = $id;
+            $row = $this->model->get($ids);
+            if ($row['item_status'] == 5) {
+                $this->error('此商品已经取消,不能再次取消');
+            }
+            $map['id'] = $ids;
             $data['item_status'] = 5;
             $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
             if ($res) {
@@ -1157,6 +1193,12 @@ class Item extends Backend
     {
         if ($this->request->isAjax()) {
             $map['id'] = ['in', $ids];
+            $row = $this->model->where($map)->field('id,is_open')->select();
+            foreach ($row as $v) {
+                if ($v['is_open'] !=2) {
+                    $this->error('只有禁用状态才能操作！！');
+                }
+            }
             $data['is_open'] = 1;
             $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
             if ($res !== false) {
@@ -1175,6 +1217,12 @@ class Item extends Backend
     {
         if ($this->request->isAjax()) {
             $map['id'] = ['in', $ids];
+            $row = $this->model->where($map)->field('id,is_open')->select();
+            foreach ($row as $v) {
+                if ($v['is_open'] !=1) {
+                    $this->error('只有启用状态才能操作！！');
+                }
+            }
             $data['is_open'] = 2;
             $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
             if ($res !== false) {
@@ -1193,10 +1241,15 @@ class Item extends Backend
     {
         if ($this->request->isAjax()) {
             $map['id'] = ['in', $ids];
-            $map['item_status'] = 2;
+            $row = $this->model->where($map)->field('id,item_status')->select();
+            foreach ($row as $v) {
+                if ($v['item_status'] !=2) {
+                    $this->error('只有待审核状态才能操作！！');
+                }
+            }
             $data['item_status'] = 3;
             $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
-            if ($res !== false) {
+            if ($res != false) {
                 $row = $this->model->where('id', 'in', $ids)->field('sku,name')->select();
                 if ($row) {
                     foreach ($row as $val) {
@@ -1218,13 +1271,18 @@ class Item extends Backend
     {
         if ($this->request->isAjax()) {
             $map['id'] = ['in', $ids];
-            $map['item_status'] = 2;
+            $row = $this->model->where($map)->field('id,item_status')->select();
+            foreach ($row as $v) {
+                if ($v['item_status'] != 2) {
+                    $this->error('只有待审核状态才能操作！！');
+                }
+            }
             $data['item_status'] = 4;
             $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
             if ($res !== false) {
-                $this->success('拒绝审核成功');
+                $this->success('审核拒绝成功');
             } else {
-                $this->error('拒绝审核失败');
+                $this->error('审核拒绝失败');
             }
         } else {
             $this->error('404 Not found');
@@ -1237,6 +1295,12 @@ class Item extends Backend
     {
         if ($this->request->isAjax()) {
             $map['id'] = ['in', $ids];
+            $row = $this->model->where($map)->field('id,is_open')->select();
+            foreach ($row as $v) {
+                if (3 == $v['is_open']) {
+                    $this->error('只有不在回收站才能操作！！');
+                }
+            }
             $data['is_open'] = 3;
             $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
             if ($res !== false) {
@@ -1251,11 +1315,14 @@ class Item extends Backend
     /***
      * 一个还原
      */
-    public function oneRestore()
+    public function oneRestore($ids=null)
     {
         if ($this->request->isAjax()) {
-            $id = $this->request->param('ids');
-            $map['id'] = $id;
+            $row = $this->model->get($ids);
+            if(3 != $row['is_open']){
+                $this->error('只有在回收站才能操作！！');
+            }
+            $map['id'] = $ids;
             $data['is_open'] = 1;
             $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
             if ($res) {
@@ -1274,6 +1341,12 @@ class Item extends Backend
     {
         if ($this->request->isAjax()) {
             $map['id'] = ['in', $ids];
+            $row = $this->model->where($map)->field('id,is_open')->select();
+            foreach ($row as $v) {
+                if ( 3 != $v['is_open']) {
+                    $this->error('只有在回收站才能操作！！');
+                }
+            }
             $data['is_open'] = 1;
             $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
             if ($res !== false) {
@@ -1357,6 +1430,7 @@ class Item extends Backend
     public function changeSku()
     {
         $where['id'] = ['gt',4710];
+        $where['is_visable'] = 1;
         $result = Db::connect('database.db_stock')->table('zeelool_product')->where($where)->field('magento_sku as sku,true_qty as stock,remark')->select();
         if(!$result){
             return false;
@@ -1847,6 +1921,7 @@ class Item extends Backend
     public function add_map_sku()
     {
         $where['magento_sku'] = ['NEQ',''];
+        $where['is_visable'] = 1;
         $result = M('product')->where($where)->field('magento_sku as sku')->select();
 		if(!$result){
 			echo 123;

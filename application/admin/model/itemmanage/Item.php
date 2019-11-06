@@ -75,6 +75,10 @@ class Item extends Model
      */
     public function getItemInfo($sku)
     {
+        $info = $this->where('sku','=',$sku)->field('id,sku')->find();
+        if(!$info){
+            return -1;
+        }
         $result = $this->alias('m')->where('sku', '=', $sku)->join('item_attribute a', 'm.id=a.item_id')->find();
         if (!$result) {
             return false;

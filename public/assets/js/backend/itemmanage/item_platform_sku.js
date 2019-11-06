@@ -5,11 +5,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui'], function ($, 
             // 初始化表格参数配置
             Table.api.init({
                 searchFormVisible: true,
+                pageList: [10, 25, 50, 100],
                 extend: {
                     index_url: 'itemmanage/item_platform_sku/index' + location.search,
                     add_url: 'itemmanage/item_platform_sku/add',
                     //edit_url: 'itemmanage/item_platform_sku/edit',
-                    del_url: 'itemmanage/item_platform_sku/del',
+                    //del_url: 'itemmanage/item_platform_sku/del',
                     multi_url: 'itemmanage/item_platform_sku/multi',
                     table: 'item_platform_sku',
                 }
@@ -318,10 +319,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui'], function ($, 
         presell: function () {
             Table.api.init({
                 searchFormVisible: true,
+                pageList: [10, 25, 50, 100],
                 extend: {
                     index_url: 'itemmanage/item_platform_sku/presell' + location.search,
                     add_url: 'itemmanage/item_platform_sku/addPresell',
-                    edit_url: 'itemmanage/item_platform_sku/editPresell',
+                    //edit_url: 'itemmanage/item_platform_sku/editPresell',
                     //del_url: 'itemmanage/item_platform_sku/del',
                     multi_url: 'itemmanage/item_platform_sku/multi',
                     table: 'item_platform_sku',
@@ -398,60 +400,60 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui'], function ($, 
                             events: Table.api.events.operate,
                             formatter: Table.api.formatter.operate,
                             buttons:[
-                                {
-                                    name: 'putaway',
-                                    text: '上架',
-                                    title: __('上架'),
-                                    classname: 'btn btn-xs btn-success btn-ajax',
-                                    url: Config.moduleurl + '/itemmanage/item_platform_sku/putaway',
-                                    confirm: '确定要上架吗',
-                                    success: function (data, ret) {
-                                        Layer.alert(ret.msg);
-                                        $(".btn-refresh").trigger("click");
-                                        //如果需要阻止成功提示，则必须使用return false;
-                                        //return false;
-                                    },
-                                    error: function (data, ret) {
-                                        Layer.alert(ret.msg);
-                                        return false;
-                                    },
-                                    visible: function (row) {
-                                        //返回true时按钮显示,返回false隐藏
-                                        return true;
-                                        // if (row.outer_sku_status == 2) {
-                                        //     return true;
-                                        // } else {
-                                        //     return false;
-                                        // }
-                                    },
-                                },
-                                {
-                                    name: 'soldOut',
-                                    text: '下架',
-                                    title: __('下架'),
-                                    classname: 'btn btn-xs btn-danger btn-ajax',
-                                    url: Config.moduleurl + '/itemmanage/item_platform_sku/soldOut',
-                                    confirm: '确定要下架吗',
-                                    success: function (data, ret) {
-                                        Layer.alert(ret.msg);
-                                        $(".btn-refresh").trigger("click");
-                                        //如果需要阻止成功提示，则必须使用return false;
-                                        //return false;
-                                    },
-                                    error: function (data, ret) {
-                                        Layer.alert(ret.msg);
-                                        return false;
-                                    },
-                                    visible: function (row) {
-                                        //返回true时按钮显示,返回false隐藏
-                                        return true;
-                                        // if (row.outer_sku_status == 2) {
-                                        //     return true;
-                                        // } else {
-                                        //     return false;
-                                        // }
-                                    },
-                                },
+                                // {
+                                //     name: 'putaway',
+                                //     text: '上架',
+                                //     title: __('上架'),
+                                //     classname: 'btn btn-xs btn-success btn-ajax',
+                                //     url: Config.moduleurl + '/itemmanage/item_platform_sku/putaway',
+                                //     confirm: '确定要上架吗',
+                                //     success: function (data, ret) {
+                                //         Layer.alert(ret.msg);
+                                //         $(".btn-refresh").trigger("click");
+                                //         //如果需要阻止成功提示，则必须使用return false;
+                                //         //return false;
+                                //     },
+                                //     error: function (data, ret) {
+                                //         Layer.alert(ret.msg);
+                                //         return false;
+                                //     },
+                                //     visible: function (row) {
+                                //         //返回true时按钮显示,返回false隐藏
+                                //         return true;
+                                //         // if (row.outer_sku_status == 2) {
+                                //         //     return true;
+                                //         // } else {
+                                //         //     return false;
+                                //         // }
+                                //     },
+                                // },
+                                // {
+                                //     name: 'soldOut',
+                                //     text: '下架',
+                                //     title: __('下架'),
+                                //     classname: 'btn btn-xs btn-danger btn-ajax',
+                                //     url: Config.moduleurl + '/itemmanage/item_platform_sku/soldOut',
+                                //     confirm: '确定要下架吗',
+                                //     success: function (data, ret) {
+                                //         Layer.alert(ret.msg);
+                                //         $(".btn-refresh").trigger("click");
+                                //         //如果需要阻止成功提示，则必须使用return false;
+                                //         //return false;
+                                //     },
+                                //     error: function (data, ret) {
+                                //         Layer.alert(ret.msg);
+                                //         return false;
+                                //     },
+                                //     visible: function (row) {
+                                //         //返回true时按钮显示,返回false隐藏
+                                //         return true;
+                                //         // if (row.outer_sku_status == 2) {
+                                //         //     return true;
+                                //         // } else {
+                                //         //     return false;
+                                //         // }
+                                //     },
+                                // },
                                 {
                                     name: 'openStart',
                                     text: '开启预售',
