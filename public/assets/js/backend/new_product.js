@@ -337,18 +337,18 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast'], func
                         data: { categoryId: categoryId, sku: sku }
                     }, function (data, ret) {
                         var resultData = ret.data;
-                        if(resultData != false){
+                        if (resultData != false) {
                             $('.newAddition').remove();
-                            if(resultData.procurement_type){
+                            if (resultData.procurement_type) {
                                 $("#c-procurement_type").find("option[value=" + resultData.procurement_type + "]").prop("selected", true);
-                            }else{
+                            } else {
                                 $("#c-procurement_type").val("");
                             }
-                            if(resultData.procurement_origin){
+                            if (resultData.procurement_origin) {
                                 $("#c-procurement_origin").find("option[value=" + resultData.procurement_origin + "]").prop("selected", true);
-                            }else{
+                            } else {
                                 $("#c-procurement_origin").val();
-                            } 
+                            }
                             $("#c-frame_texture").find("option[value=" + resultData.frame_texture + "]").prop("selected", true);
                             $("#c-shape").find("option[value=" + resultData.shape + "]").prop("selected", true);
                             $("#c-frame_type").find("option[value=" + resultData.frame_type + "]").prop("selected", true);
@@ -371,43 +371,26 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast'], func
                             $('.note-editable').html(resultData.frame_remark);
                             $('#item-count').val(resultData.itemCount);
                             //$(".editor").textarea
-                            if(resultData.origin_sku){
-                                $(".addition").remove();
-                                $(".redact").after(function () {
-                                    var Str = '';
-                                    Str += '<div class="caigou ajax-add newAddition">' +
-                                        '<p style="font-size: 16px;"><b>产品信息</b></p>' +
-                                        '<div>' +
-                                        '<div id="toolbar" class="toolbar">' +
-                                        '<a href="javascript:;" class="btn btn-success btn-add" title="增加"><i class="fa fa-plus"></i> 增加</a>' +
-                                        '</div>' +
-                                        '<table id="caigou-table">' +
-                                        '<tr>' +
-                                        '<th>商品名称</th>' +
-                                        '<th>商品颜色</th>' +
-                                        '<th>操作</th>' +
-                                        '</tr>';
-                                    for (var j = 0, len = resultData.itemArr.length; j < len; j++) {
-                                        var newItem = resultData.itemArr[j];
-                                        Str += '<tr>';
-                                        Str += '<td><input id="c-name" class="form-control" name="row[name][]" type="text" value="' + newItem.name + '" disabled="disabled"></td>';
-                                        Str += '<td><div class="col-xs-12 col-sm-12">';
-                                        Str += '<select  id="c-color" data-rule="required" class="form-control " name="row[color][]" disabled="disabled">';
-                                        Str += '<option value="' + newItem.frame_color + '">' + newItem.frame_color_value + '</option>';
-                                        Str += '</select></td>';
-                                        Str += '<td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>删除</a></td>';
-                                        Str += '</tr>';
-                                    }
-                                    Str += '</table>' +
-                                        '</div>' +
-                                        '</div>';
-                                    return Str;
-                                });
+                            if (resultData.origin_sku) {
+                                
+                                var str = '<tr><th>商品名称</th><th>商品颜色</th><th>供应商SKU</th><th>单价</th><th>操作</th></tr>';
+                                console.log(data);
+                                $('#caigou-table tbody').html('');
+                                for (var i in data.itemArr) {
+                                    str += '<tr>'
+                                    str += '<td><input  data-rule="required"  class="form-control c-name" name="row[name][]" disabled value="' + data.itemArr[i].name + '"  type="text"></td>'
+                                    str += '<td><input  data-rule="required"  class="form-control c-color" name="row[color][]" disabled value="' + data.itemArr[i].frame_color + '" type="text"></td>'
+                                    str += '<td><input  data-rule="required"  class="form-control c-supplier_sku" name="row[supplier_sku][]" disabled value="' + data.itemArr[i].supplier_sku + '" type="text"></td>'
+                                    str += '<td><input  data-rule="required"  class="form-control c-price" name="row[price][]" disabled value="' + data.itemArr[i].price + '" type="text"></td>'
+                                    str += '<td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>删除</a></td></tr>'
+                                }
+                                $('#caigou-table tbody').html(str);
+                              
                             }
-                            $(".selectpicker").selectpicker('refresh');
-                        }else{
+                         
+                        } else {
                             Layer.alert('旧商品SKU信息暂时没有同步...请耐心等待');
-                        } 
+                        }
                         return false;
                     }, function (data, ret) {
                         //失败的回调

@@ -70,7 +70,7 @@ class NewProduct extends Model
         }
         $where['origin_sku'] = $result['origin_sku'];
         $where['is_del'] = 1;
-        $arr = $this->alias('m')->where($where)->join('new_product_attribute a', 'm.id=a.item_id')->field('m.name,a.frame_color,m.supplier_sku')->select();
+        $arr = $this->alias('m')->where($where)->join('new_product_attribute a', 'm.id=a.item_id')->field('m.name,a.frame_color,m.supplier_sku,m.price')->select();
         $result['itemArr'] = $arr;
         $result['itemCount'] = $this->where($where)->count();
         return $result;

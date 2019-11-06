@@ -351,7 +351,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                         var arrivals_num = $(this).val();
                         var quantity_num = $(this).parent().next().find('.quantity_num').val();
                         var sample_num = $(this).parent().next().next().find('.sample_num').val();
-                        var not_quantity_num = arrivals_num * 1 - quantity_num * 1 - sample_num * 1;
+                        var not_quantity_num = arrivals_num * 1 - quantity_num * 1;
 
                         $(this).parent().next().next().next().find('input').val(not_quantity_num);
                         $(this).parent().next().next().next().next().find('input').val((quantity_num / arrivals_num * 100).toFixed(2));
@@ -373,7 +373,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                         var arrivals_num = $(this).parent().prev().find('input').val();
                         var quantity_num = $(this).val();
                         var sample_num = $(this).parent().next().find('.sample_num').val();
-                        var not_quantity_num = arrivals_num * 1 - quantity_num * 1 - sample_num * 1;
+                        var not_quantity_num = arrivals_num * 1 - quantity_num * 1;
 
                         $(this).parent().next().next().find('input').val(not_quantity_num);
                         $(this).parent().next().next().next().find('input').val((quantity_num / arrivals_num * 100).toFixed(2));
@@ -392,7 +392,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                     var arrivals_num = $(this).parent().prev().prev().find('input').val();
                     var quantity_num = $(this).parent().prev().find('input').val();
                     var sample_num = $(this).val();
-                    var not_quantity_num = arrivals_num * 1 - quantity_num * 1 - sample_num * 1;
+                    var not_quantity_num = arrivals_num * 1 - quantity_num * 1;
 
                     $(this).parent().next().find('input').val(not_quantity_num);
                     $(this).parent().next().next().find('input').val((quantity_num / arrivals_num * 100).toFixed(2));
