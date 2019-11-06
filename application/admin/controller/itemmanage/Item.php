@@ -320,6 +320,12 @@ class Item extends Backend
                 $params = $this->preExcludeFields($params);
                 $itemName = $params['name'];
                 $itemColor = $params['color'];
+                if (count($itemColor) != count(array_unique($itemColor))){
+                    $this->error('同一款商品的颜色值不能相同');
+                }
+                // echo '<pre>';
+                // var_dump($itemColor);
+                // exit;
                 if (is_array($itemName) && !in_array("", $itemName)) {
                     $data = $itemAttribute = [];
                     //求出材质对应的编码
@@ -331,6 +337,14 @@ class Item extends Backend
                     //如果是后来添加的
                     if (!empty($params['origin_skus']) && $params['item-count'] >= 1) { //正常情况
                         $count = $params['item-count'];
+                        $row = Db::connect('database.db_stock')->name('item')->where(['sku'=>$params['origin_skus']])->field('id,sku')->find();
+                        $attributeWhere = [];
+                        $attributeWhere['item_id'] = $row['id'];
+                        $attributeWhere['frame_color'] = ['in',$itemColor];
+                        $attributeInfo = Db::connect('database.db_stock')->name('item_attribute')->where($attributeWhere)->field('id,frame_color')->find();
+                        if($attributeInfo){
+                            $this->error('追加的商品SKU不能添加之前的颜色');
+                        }
                         $params['origin_sku'] = substr($params['origin_skus'], 0, strpos($params['origin_skus'], '-'));
                     } elseif (empty($params['origin_skus']) && $params['item-count'] >= 1) { //去掉原始sku情况
                         $this->error(__('Make sure the original sku code exists'));
@@ -448,6 +462,9 @@ class Item extends Backend
                 $params = $this->preExcludeFields($params);
                 $itemName = $params['name'];
                 $itemColor = $params['color'];
+                if (count($itemColor) != count(array_unique($itemColor))){
+                    $this->error('同一款商品的颜色值不能相同');
+                }
                 if (is_array($itemName) && !in_array("", $itemName)) {
                     $data = $itemAttribute = [];
                     foreach ($itemName as $k => $v) {
@@ -553,6 +570,16 @@ class Item extends Backend
                 $params = $this->preExcludeFields($params);
                 $itemName = $params['name'];
                 $itemColor = $params['color'];
+                if (count($itemColor) != count(array_unique($itemColor))){
+                    $this->error('同一款商品的颜色值不能相同');
+                }
+                $attributeWhere = [];
+                $attributeWhere['item_id'] = $row['id'];
+                $attributeWhere['frame_color'] = ['in',$itemColor];
+                $attributeInfo = Db::connect('database.db_stock')->name('item_attribute')->where($attributeWhere)->field('id,frame_color')->find();
+                if($attributeInfo){
+                    $this->error('追加的商品SKU不能添加之前的颜色');
+                }
                 if (is_array($itemName) && !in_array("", $itemName)) {
                     $data = $itemAttribute = [];
                     Db::startTrans();
@@ -968,6 +995,9 @@ class Item extends Backend
     public function detail($ids = null)
     {
         $row = $this->model->get($ids, 'itemAttribute');
+        // echo '<pre>';
+        // var_dump($row);
+        // exit;
         if (!$row) {
             $this->error(__('No Results were found'));
         }
