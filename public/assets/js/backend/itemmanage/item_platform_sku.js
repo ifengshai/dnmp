@@ -323,7 +323,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui'], function ($, 
                 extend: {
                     index_url: 'itemmanage/item_platform_sku/presell' + location.search,
                     add_url: 'itemmanage/item_platform_sku/addPresell',
-                    edit_url: 'itemmanage/item_platform_sku/editPresell',
+                    //edit_url: 'itemmanage/item_platform_sku/editPresell',
                     //del_url: 'itemmanage/item_platform_sku/del',
                     multi_url: 'itemmanage/item_platform_sku/multi',
                     table: 'item_platform_sku',

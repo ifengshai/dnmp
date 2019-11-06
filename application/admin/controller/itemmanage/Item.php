@@ -535,8 +535,11 @@ class Item extends Backend
         if (!$row) {
             $this->error(__('No Results were found'));
         }
-        if ($row['item_status'] == 2) {
-            $this->error(__('The goods have been submitted for review and cannot be edited'), '/admin/itemmanage/item');
+        if (2 == $row['item_status']) {
+            $this->error(__('The goods have been submitted for review and cannot be edited'), 'itemmanage/item');
+        }
+        if(5 == $row['item_status']){
+            $this->error('此商品已经取消，不能编辑','itemmanage/item');
         }
         $adminIds = $this->getDataLimitAdminIds();
         if (is_array($adminIds)) {
@@ -1134,11 +1137,14 @@ class Item extends Backend
     /***
      * 取消商品
      */
-    public function cancel()
+    public function cancel($ids=null)
     {
         if ($this->request->isAjax()) {
-            $id = $this->request->param('ids');
-            $map['id'] = $id;
+            $row = $this->model->get($ids);
+            if ($row['item_status'] == 5) {
+                $this->error('此商品已经取消,不能再次取消');
+            }
+            $map['id'] = $ids;
             $data['item_status'] = 5;
             $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
             if ($res) {
@@ -1157,6 +1163,12 @@ class Item extends Backend
     {
         if ($this->request->isAjax()) {
             $map['id'] = ['in', $ids];
+            $row = $this->model->where($map)->field('id,is_open')->select();
+            foreach ($row as $v) {
+                if ($v['is_open'] !=2) {
+                    $this->error('只有禁用状态才能操作！！');
+                }
+            }
             $data['is_open'] = 1;
             $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
             if ($res !== false) {
@@ -1175,6 +1187,12 @@ class Item extends Backend
     {
         if ($this->request->isAjax()) {
             $map['id'] = ['in', $ids];
+            $row = $this->model->where($map)->field('id,is_open')->select();
+            foreach ($row as $v) {
+                if ($v['is_open'] !=1) {
+                    $this->error('只有启用状态才能操作！！');
+                }
+            }
             $data['is_open'] = 2;
             $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
             if ($res !== false) {
@@ -1193,10 +1211,15 @@ class Item extends Backend
     {
         if ($this->request->isAjax()) {
             $map['id'] = ['in', $ids];
-            $map['item_status'] = 2;
+            $row = $this->model->where($map)->field('id,item_status')->select();
+            foreach ($row as $v) {
+                if ($v['item_status'] !=2) {
+                    $this->error('只有待审核状态才能操作！！');
+                }
+            }
             $data['item_status'] = 3;
             $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
-            if ($res !== false) {
+            if ($res != false) {
                 $row = $this->model->where('id', 'in', $ids)->field('sku,name')->select();
                 if ($row) {
                     foreach ($row as $val) {
@@ -1218,13 +1241,18 @@ class Item extends Backend
     {
         if ($this->request->isAjax()) {
             $map['id'] = ['in', $ids];
-            $map['item_status'] = 2;
+            $row = $this->model->where($map)->field('id,item_status')->select();
+            foreach ($row as $v) {
+                if ($v['item_status'] != 2) {
+                    $this->error('只有待审核状态才能操作！！');
+                }
+            }
             $data['item_status'] = 4;
             $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
             if ($res !== false) {
-                $this->success('拒绝审核成功');
+                $this->success('审核拒绝成功');
             } else {
-                $this->error('拒绝审核失败');
+                $this->error('审核拒绝失败');
             }
         } else {
             $this->error('404 Not found');
@@ -1237,6 +1265,12 @@ class Item extends Backend
     {
         if ($this->request->isAjax()) {
             $map['id'] = ['in', $ids];
+            $row = $this->model->where($map)->field('id,is_open')->select();
+            foreach ($row as $v) {
+                if (3 == $v['is_open']) {
+                    $this->error('只有不在回收站才能操作！！');
+                }
+            }
             $data['is_open'] = 3;
             $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
             if ($res !== false) {
@@ -1251,11 +1285,14 @@ class Item extends Backend
     /***
      * 一个还原
      */
-    public function oneRestore()
+    public function oneRestore($ids=null)
     {
         if ($this->request->isAjax()) {
-            $id = $this->request->param('ids');
-            $map['id'] = $id;
+            $row = $this->model->get($ids);
+            if(3 != $row['is_open']){
+                $this->error('只有在回收站才能操作！！');
+            }
+            $map['id'] = $ids;
             $data['is_open'] = 1;
             $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
             if ($res) {
@@ -1274,6 +1311,12 @@ class Item extends Backend
     {
         if ($this->request->isAjax()) {
             $map['id'] = ['in', $ids];
+            $row = $this->model->where($map)->field('id,is_open')->select();
+            foreach ($row as $v) {
+                if ( 3 != $v['is_open']) {
+                    $this->error('只有在回收站才能操作！！');
+                }
+            }
             $data['is_open'] = 1;
             $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
             if ($res !== false) {
