@@ -357,6 +357,9 @@ class ItemPlatformSku extends Backend
         if ($this->request->isAjax()) {
             $platform_sku = $request->post('platform_sku');
             $result = $this->model->getPlatformSku($platform_sku);
+            if($result == -1){
+                return $this->error('此SKU有预售数量,请直接编辑');
+            }
             if (!$result) {
                 return $this->error('平台商品SKU不存在，请重新填写');
             }

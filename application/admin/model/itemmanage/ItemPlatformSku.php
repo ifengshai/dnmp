@@ -87,7 +87,10 @@ class ItemPlatformSku extends Model
      */
     public function getPlatformSku($platform_sku)
     {
-        $result = $this->where('platform_sku', 'eq', $platform_sku)->field('id,platform_sku')->find();
+        $result = $this->where('platform_sku', 'eq', $platform_sku)->field('id,platform_sku,presell_num')->find();
+        if($result['presell_num']>0){
+            return -1;
+        }
         return $result ? $result : false;
     }
     /***

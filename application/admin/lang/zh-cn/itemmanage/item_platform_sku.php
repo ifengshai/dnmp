@@ -9,6 +9,7 @@ return [
     'Outer_sku_status'      => '对应平台SKU状态',
     'Platform_sku_status'   => '平台SKU状态',
     'Presell_num'           => '预售数量',
+    'Presell_open_time'     => '开启预售或结束时间',
     'Presell_residue_num'   => '预售剩余数量',
     'Presell_start_time'    => '预售开始时间',
     'Presell_end_time'      => '预售结束时间',
