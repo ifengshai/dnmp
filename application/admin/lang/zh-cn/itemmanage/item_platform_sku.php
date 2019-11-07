@@ -21,6 +21,7 @@ return [
     'Is_upload_images'      => '是否上传照片',
     'Platform sku cannot be empty' => '平台sku不能为空',
     'SKU pre-order quantity cannot be empty' => 'SKU预售数量不能为空',
+    'The number of pre-sale skus cannot be less than or equal to 0' => '预售sku数量不能小于等于0',
     'Pre-sale on, do not repeat on' =>'预售开启中，请勿重复开启',
     'Pre-order has been closed, do not repeat the closing'=>'预售已经关闭,请勿重复关闭',
     'The closing time has expired, please select again' =>'预售结束时间已过，请重新选择',

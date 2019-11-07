@@ -197,6 +197,7 @@ class ItemPlatformSku extends Backend
                         $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.add' : $name) : $this->modelValidate;
                         $this->model->validateFailException(true)->validate($validate);
                     }
+                    $params['presell_residue_num'] = $params['presell_num'];
                     $params['presell_create_person'] = session('admin.nickname');
                     $params['presell_create_time'] = $now_time =  date("Y-m-d H:i:s", time());
                     if($now_time>=$params['presell_start_time']){ //如果当前时间大于开始时间
