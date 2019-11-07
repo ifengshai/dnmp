@@ -13,13 +13,14 @@ use app\admin\model\platformmanage\MagentoPlatform;
  */
 class Itempresell extends Backend
 {
-    
+
     /**
      * Itempresell模型对象
      * @var \app\admin\model\itemmanage\Itempresell
      */
     protected $model = null;
     protected $platformSku = null;
+    protected $noNeedLogin = ['updateItemPresellStatus'];
     public function _initialize()
     {
         parent::_initialize();
@@ -272,5 +273,23 @@ class Itempresell extends Backend
         }else{
             $this->error('404 Not found');
         }
+    }
+    /**
+     * 每10分钟执行一次
+     * 更新商品预售状态
+     */
+    public function updateItemPresellStatus()
+    {
+        $now_time =  date("Y-m-d H:i:s", time());
+        //1.更新当前时间段处在预售中的字段(预售中)
+        $sql1 = 'update fa_item_presell set presell_status=2 where presell_start_time <= "{$now_time}"  and presell_start_time>= "{$now_time}"';
+        //2.更新到未开始
+        $sql2 = 'update fa_item_presell set presell_status=1 where presell_start_time > "{$now_time}"';
+        //3.更新到已结束
+        $sql3 = 'update fa_item_presell set presell_status=3 where presell_start_time > "{$now_time}"';
+        DB::connect('database.db_stock')->name('item_presell')->query($sql1);
+        DB::connect('database.db_stock')->name('item_presell')->query($sql2);
+        DB::connect('database.db_stock')->name('item_presell')->query($sql3);
+
     }
 }
