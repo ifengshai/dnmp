@@ -703,6 +703,7 @@ class ItemPlatformSku extends Backend
                 return $this->error('填写的sku不存在,请重新填写');
             }
             echo '<pre>';
+            var_dump($order_platform);
             var_dump($result['available_stock']);
             var_dump($change_number);
             exit;
