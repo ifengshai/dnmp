@@ -702,6 +702,10 @@ class ItemPlatformSku extends Backend
             if(!$result){
                 return $this->error('填写的sku不存在,请重新填写');
             }
+            echo '<pre>';
+            var_dump($result);
+            var_dump($change_number);
+            exit;
             if($result['available_stock']<$change_number){
                 return $this->error('镜架可用数量大于可用库存数量,无法更改镜架');
             }
