@@ -786,6 +786,7 @@ class PurchaseOrder extends Backend
             //设置缓存
             cache('Crontab_getAlibabaPurchaseOrder_' . date('YmdH') . md5(serialize($params)), $data, 3600);
         }
+        dump($data);die;
 
         foreach ($data as $key => $val) {
             if (!$val) {
