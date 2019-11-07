@@ -36,8 +36,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui'], function ($, 
                             }, operate: false
                         },
                         {field: 'id', title: __('Id'),operate:false},
-                        {field: 'sku', title: __('Sku')},
-                        {field: 'platform_sku', title: __('Platform_sku')},
+                        {field: 'sku', title: __('Sku'),operate:'LIKE'},
+                        {field: 'platform_sku', title: __('Platform_sku'),operate:'LIKE'},
                         {field: 'name', title: __('Name')},
                         {
                             field: 'platform_type',
@@ -340,8 +340,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui'], function ($, 
                     [
                         {checkbox: true},
                         {field: 'id', title: __('Id'),operate:false},
-                        {field: 'sku', title: __('Sku')},
-                        {field: 'platform_sku', title: __('Platform_sku')},
+                        {field: 'sku', title: __('Sku'),operate:'LIKE'},
+                        {field: 'platform_sku', title: __('Platform_sku'),operate:'LIKE'},
                         {field: 'name', title: __('Name')},
                         {
                             field: 'platform_type',
