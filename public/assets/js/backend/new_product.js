@@ -388,13 +388,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast'], func
                               
                             }
                          
-                        } else {
-                            Layer.alert('旧商品SKU信息暂时没有同步...请耐心等待');
-                        }
+                        } 
                         return false;
                     }, function (data, ret) {
                         //失败的回调
-                        alert(ret.msg);
+                        Layer.alert(ret.msg);
                         return false;
                     });
                 });
@@ -412,7 +410,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast'], func
                         }, function (data, ret) {
                             //失败的回调
                             $('.btn-success').addClass('btn-disabled disabled');
-                            alert(ret.msg);
+                            Layer.alert(ret.msg);
                             return false;
                         });
                     }

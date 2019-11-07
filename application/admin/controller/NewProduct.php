@@ -436,9 +436,9 @@ class NewProduct extends Backend
             $origin_sku = $request->post('origin_sku');
             $result = $this->model->likeOriginSku($origin_sku);
             if (!$result) {
-                return $this->error('商品SKU不存在，请重新尝试');
+                $this->error('商品SKU不存在，请重新尝试');
             }
-            return $this->success('', '', $result, 0);
+            $this->success('', '', $result, 0);
         } else {
             $this->error('404 not found');
         }
@@ -456,16 +456,16 @@ class NewProduct extends Backend
             }
             $result = $this->category->getAttrCategoryById($categoryId);
             if (!$result) {
-                return  $this->error('对应分类不存在,请从新尝试');
+                $this->error('对应分类不存在,请从新尝试');
             } elseif ($result == -1) {
-                return $this->error('对应分类存在下级分类,请从新选择');
+                $this->error('对应分类存在下级分类,请从新选择');
             }
             if ($result == 1) {
                 $row = $this->model->getItemInfo($sku);
                 if (!$row) {
-                    return false;
+                    $this->error(__('此SKU不存在！！'));
                 }
-                return  $this->success('ok', '', $row);
+                $this->success('ok', '', $row);
             } elseif ($result == 2) { //商品是镜片类型
                 $data = $this->fetch('eyeglass');
             } elseif ($result == 3) { //商品是饰品类型
@@ -474,7 +474,7 @@ class NewProduct extends Backend
                 $data = $this->fetch('attribute');
             }
         } else {
-            return $this->error(__('404 Not Found'));
+             $this->error(__('404 Not Found'));
         }
     }
 
@@ -505,7 +505,7 @@ class NewProduct extends Backend
             }
             return json($json);
         } else {
-            $this->error('404 Not found');
+            $this->error('请求出错！！');
         }
     }
 
@@ -526,7 +526,7 @@ class NewProduct extends Backend
                 return $this->error('商品名称已经存在,请重新添加');
             }
         } else {
-            return $this->error(__('404 Not Found'));
+            return $this->error(__('请求出错！！'));
         }
     }
 
@@ -593,7 +593,7 @@ class NewProduct extends Backend
                         }
 
                         //添加商品主表信息
-                        $this->item->allowField(true)->isUpdate(false)->data($params, true)->save($params);
+                        $this->item->allowField(true)->isUpdate(false)->data($params, true)->save();
                         $attributeParams = $val['newproductattribute'];
                         unset($attributeParams['id']);
                         $attributeParams['item_id'] = $this->item->id;
