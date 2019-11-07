@@ -5,6 +5,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast'], func
             // 初始化表格参数配置
             Table.api.init({
                 searchFormVisible: true,
+                pageList: [10, 25, 50, 100],
                 extend: {
                     index_url: 'new_product/index' + location.search,
                     add_url: 'new_product/add',

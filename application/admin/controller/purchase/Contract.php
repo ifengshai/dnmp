@@ -191,7 +191,7 @@ class Contract extends Backend
         }
         //判断状态是否为新建
         if ($row['status'] > 0) {
-            $this->error('只有新建状态才能编辑！！');
+            $this->error('只有新建状态才能编辑！！', url('index'));
         }
 
         $adminIds = $this->getDataLimitAdminIds();
