@@ -176,6 +176,9 @@ class ItemPlatformSku extends Backend
                 if(empty($params['presell_num'])){
                     $this->error(__('SKU pre-order quantity cannot be empty'));
                 }
+                if($params['presell_start_time'] == $params['presell_end_time']){
+                    $this->error('预售开始时间和结束时间不能相等');
+                }
 //                echo $params['presell_start_time'];
 //                echo '<br>';
 //                echo $params['presell_end_time'];
@@ -194,6 +197,7 @@ class ItemPlatformSku extends Backend
                         $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.add' : $name) : $this->modelValidate;
                         $this->model->validateFailException(true)->validate($validate);
                     }
+                    $params['presell_residue_num'] = $params['presell_num'];
                     $params['presell_create_person'] = session('admin.nickname');
                     $params['presell_create_time'] = $now_time =  date("Y-m-d H:i:s", time());
                     if($now_time>=$params['presell_start_time']){ //如果当前时间大于开始时间
@@ -245,6 +249,9 @@ class ItemPlatformSku extends Backend
                 }
                 if(empty($params['presell_num'])){
                     $this->error(__('SKU pre-order quantity cannot be empty'));
+                }
+                if($params['presell_start_time'] == $params['presell_end_time']){
+                    $this->error('预售开始时间和结束时间不能相等');
                 }
                 $result = false;
                 Db::startTrans();
@@ -357,6 +364,9 @@ class ItemPlatformSku extends Backend
         if ($this->request->isAjax()) {
             $platform_sku = $request->post('platform_sku');
             $result = $this->model->getPlatformSku($platform_sku);
+            if($result == -1){
+                return $this->error('此SKU有预售数量,请直接编辑');
+            }
             if (!$result) {
                 return $this->error('平台商品SKU不存在，请重新填写');
             }
