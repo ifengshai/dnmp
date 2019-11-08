@@ -26,7 +26,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         { field: 'id', title: __('Id') },
                         { field: 'return_number', title: __('Return_number'), operate: 'like' },
                         //{ field: 'purchase_order.purchase_number', title: __('Purchase_id'), operate: 'like' },
-                        { field: 'purchaseOrder.purchase_number', title: __('Purchase_id'), operate: 'like' },
+                        { field: 'purchase_number', title: __('Purchase_id'), operate: 'like' },
                         { field: 'supplier.supplier_name', title: __('Supplier_id'), operate: 'like' },
                         { field: 'return_type', title: __('Return_type'), custom: { 1: 'success', 2: 'success', 3: 'success' }, searchList: { 1: '仅退款', 2: '退货退款', 3: '调换货' }, formatter: Table.api.formatter.status },
                         { field: 'status', title: __('Status'), custom: { 0: 'danger', 1: 'success', 2: 'success' }, searchList: { 0: '未打印', 1: '已打印', 2: '已上传物流单号' }, formatter: Table.api.formatter.status },
