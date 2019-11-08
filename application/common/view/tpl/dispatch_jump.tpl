@@ -41,7 +41,7 @@
     <p class="clearfix">
         <a href="__PUBLIC__" class="btn btn-grey">{:__('Go back')}</a>
         {if $url}
-            <a  href="javascript:void(0)"  class="btn btn-primary jumpss">{:__('Jump now')}</a>
+            <a  href="javascript:void(0)"  class="btn btn-primary" id="jumpss">{:__('Jump now')}</a>
         {/if}
     </p>
 </div>
@@ -60,7 +60,7 @@
                 }
             }, 1000);
         })();
-     document.getElementsByName("jumpss").click(function(){
+     document.getElementById("jumpss").onclick(function(){
          parent.location.href = history.length <= 1 ? "/" : "{$url}";
      });
     </script>
