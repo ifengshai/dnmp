@@ -60,9 +60,9 @@
                 }
             }, 1000);
         })();
-     document.getElementById("jumpss").onclick(function(){
+     document.getElementById("jumpss").onclick=function(){
          parent.location.href = history.length <= 1 ? "/" : "{$url}";
-     });
+     };
     </script>
 {/if}
 </body>
