@@ -60,7 +60,7 @@
                 }
             }, 1000);
         })();
-     document.getElementsByName("jumpss").onclick(function(){
+     document.getElementsByName("jumpss").click(function(){
          parent.location.href = history.length <= 1 ? "/" : "{$url}";
      });
     </script>
