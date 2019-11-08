@@ -127,8 +127,8 @@ class OrderReturn extends Backend
                             $data['return_sku_name'] = $arr['item_name'];
                             $data['sku_qty'] = $arr['sku_qty'];
                             $data['return_sku_qty'] = $arr['return_sku_qty'];
-                            $data['arrived_sku_qty'] = $arr['arrived_sku_qty'];
-                            $data['check_sku_qty']   = $arr['check_sku_qty'];
+                            // $data['arrived_sku_qty'] = $arr['arrived_sku_qty'];
+                            // $data['check_sku_qty']   = $arr['check_sku_qty'];
                             $data['create_time']     = date("Y-m-d H:i:s", time());
                             (new OrderReturnItem())->allowField(true)->save($data);
                         }
@@ -156,6 +156,9 @@ class OrderReturn extends Backend
         $row = $this->model->get($ids);
         if (!$row) {
             $this->error(__('No Results were found'));
+        }
+        if(2 < $row['order_status']){
+            $this->error(__('Cannot edit in this state'),'saleaftermanage/order_return');
         }
         $adminIds = $this->getDataLimitAdminIds();
         if (is_array($adminIds)) {
@@ -198,8 +201,8 @@ class OrderReturn extends Backend
                             $data['return_sku_name'] = $arr['item_name'];
                             $data['sku_qty'] = $arr['sku_qty'];
                             $data['return_sku_qty'] = $arr['return_sku_qty'];
-                            $data['arrived_sku_qty'] = $arr['arrived_sku_qty'];
-                            $data['check_sku_qty']   = $arr['check_sku_qty'];
+                            // $data['arrived_sku_qty'] = $arr['arrived_sku_qty'];
+                            // $data['check_sku_qty']   = $arr['check_sku_qty'];
                             (new OrderReturnItem())->where('order_return_id', '=', $tid)->update($data);
                         }
                     }

@@ -31,5 +31,6 @@ return [
     'In_stock_status'        => '入库状态',
     'PassAudit'              => '审核通过',
     'AuditRefused'           => '审核拒绝',
-    'SubmitAudit'            => '提交审核'
+    'SubmitAudit'            => '提交审核',
+    'Cannot edit in this state' => '此状态下不能编辑'
 ];
