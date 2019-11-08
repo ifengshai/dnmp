@@ -86,7 +86,7 @@
         <div class="form-group">
             <label class="control-label col-xs-12 col-sm-2">合同编号:</label>
             <div class="col-xs-12 col-sm-8">
-                <select name="row[contract_id]" class="form-control contract_id" required>
+                <select name="row[contract_id]" class="form-control contract_id selectpicker" required data-live-search='true'>
                     <option value="">请选择</option>
                     {foreach $contract_data as $k => $v}
                     <option value="{$v.id}" {:$row['contract_id'] == $v['id'] ? 'selected' : ''}>{$v.contract_number}</option>
