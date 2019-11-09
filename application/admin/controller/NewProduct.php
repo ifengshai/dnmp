@@ -617,16 +617,27 @@ class NewProduct extends Backend
     {
         if ($this->request->isAjax()) {
             $map['id'] = ['in', $ids];
-            $map['item_status'] = 2;
-            $data['item_status'] = 4;
+            //查询所选择的数据
+            $where['new_product.id'] = ['in', $ids];
+            $row = $this->model->where($where)->with(['newproductattribute'])->select();
+            $row = collection($row)->toArray();
+            foreach($row as $k => $v) {
+                if ($v['item_status'] != 1) {
+                    $this->error('此状态不能审核！！');
+                }
+            }
+
+            
+            $map['item_status'] = 1;
+            $data['item_status'] = 3;
             $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
             if ($res !== false) {
-                $this->success('拒绝审核成功');
+                $this->success('操作成功');
             } else {
-                $this->error('拒绝审核失败');
+                $this->error('操作失败');
             }
         } else {
-            $this->error('404 Not found');
+            $this->error('加载错误！！');
         }
     }
 
