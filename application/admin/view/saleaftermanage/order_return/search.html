@@ -158,6 +158,7 @@ table.altrowstable tr:nth-child(even){
                         </tr>
                         {/notempty}
                     </table>
+                        {notempty name="infoSynergyTaskResult"}
                         <table id="info-synergy-task" class="altrowstable"
                                data-operate-edit="{:$auth->check('saleaftermanage/order_return/edit')}"
                                data-operate-del="{:$auth->check('saleaftermanage/order_return/del')}"
@@ -178,7 +179,6 @@ table.altrowstable tr:nth-child(even){
                               <th style="text-align: center; vertical-align: middle;">创建时间</th>
                           </tr>
                         </thead>
-                            {notempty name="infoSynergyTaskResult"}
                             {foreach name="infoSynergyTaskResult" item="synergyTaskList" }
                             <tr>
                                 <td style="text-align: center; vertical-align: middle;">{$synergyTaskList.id}</td>
@@ -195,8 +195,9 @@ table.altrowstable tr:nth-child(even){
 
                             </tr>
                             {/foreach}
-                            {/notempty}
                         </table>
+                        {/notempty}
+                        {notempty name="saleAfterTaskResult"}
                         <table id="sale-after-task" class="altrowstable"
                            data-operate-edit="{:$auth->check('saleaftermanage/order_return/edit')}"
                            data-operate-del="{:$auth->check('saleaftermanage/order_return/del')}"
@@ -219,8 +220,7 @@ table.altrowstable tr:nth-child(even){
                                 <th style="text-align: center; vertical-align: middle;">创建人</th>
                                 <th style="text-align: center; vertical-align: middle;">创建时间</th>
                             </tr>
-                        </thead>
-                            {notempty name="saleAfterTaskResult"}
+                        </thead> 
                             {foreach name="saleAfterTaskResult" item="saleTaskList"}
                             <tr>
                                 <td style="text-align: center; vertical-align: middle;">{$saleTaskList.id}</td>
@@ -238,10 +238,10 @@ table.altrowstable tr:nth-child(even){
                                 <td style="text-align: center; vertical-align: middle;">{$saleTaskList.create_person}</td>
                                 <td style="text-align: center; vertical-align: middle;">{$saleTaskList.createtime}</td>
                             </tr>
-
                             {/foreach}
-                            {/notempty}
                         </table>
+                        {/notempty}
+                    {notempty name="orderReturnResult"}
                     <table id="order-return-task" class="altrowstable"
                            data-operate-edit="{:$auth->check('saleaftermanage/order_return/edit')}"
                            data-operate-del="{:$auth->check('saleaftermanage/order_return/del')}"
@@ -260,7 +260,6 @@ table.altrowstable tr:nth-child(even){
                             <th style="text-align: center; vertical-align: middle;">创建日期</th>
                         </tr>
                     </thead>
-                     {notempty name="orderReturnResult"}
                         {foreach name="orderReturnResult" item="orderReturnList"}
                         <tr>
                             <td style="text-align: center; vertical-align: middle;">{$orderReturnList.id}</td>
@@ -274,8 +273,8 @@ table.altrowstable tr:nth-child(even){
                             <td style="text-align: center; vertical-align: middle;">{$orderReturnList.create_time}</td>
                         </tr>
                         {/foreach}
-                     {/notempty}
                     </table>
+                    {/notempty}
                     <table id="order-info-list" class="altrowstable"
                            data-operate-edit="{:$auth->check('saleaftermanage/order_return/edit')}"
                            data-operate-del="{:$auth->check('saleaftermanage/order_return/del')}"

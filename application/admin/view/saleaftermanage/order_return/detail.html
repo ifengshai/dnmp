@@ -135,8 +135,8 @@
                                     <td style="text-align: center" class="col-xs-6 col-md-6">商品名称</td>
                                     <td style="text-align: center" >购买数量</td>
                                     <td style="text-align: center">退回数量</td>
-                                    <td style="text-align: center">到货数量</td>
-                                    <td style="text-align: center">质检合格数量</td>
+                                    <!-- <td style="text-align: center">到货数量</td>
+                                    <td style="text-align: center">质检合格数量</td> -->
                                 </tr>
                                 {foreach name="orderReturnItem" item="orderItem"}
                                 <tr>
@@ -145,8 +145,8 @@
                                     <td><input id="c-name" class="form-control" name="row[item][{$key}][item_name]" type="text" value="{$orderItem.return_sku_name}"></td>
                                     <td><input id="c-qty_ordered" class="form-control" name="row[item][{$key}][sku_qty]"  type="text" value="{$orderItem.sku_qty}"></td>
                                     <td><input id="c-right_PD" class="form-control" name="row[item][{$key}][return_sku_qty]" type="text" value="{$orderItem.return_sku_qty}"></td>
-                                    <td><input id="c-right_Prism_Horizontal" name="row[item][{$key}][arrived_sku_qty]" class="form-control"  type="text" value="{$orderItem.arrived_sku_qty}"></td>
-                                    <td><input id="c-return_sku_qty" name="row[item][{$key}][check_sku_qty]" class="form-control"  type="number" value="{$orderItem.check_sku_qty}"></td>
+                                    <!-- <td><input id="c-right_Prism_Horizontal" name="row[item][{$key}][arrived_sku_qty]" class="form-control"  type="text" value="{$orderItem.arrived_sku_qty}"></td>
+                                    <td><input id="c-return_sku_qty" name="row[item][{$key}][check_sku_qty]" class="form-control"  type="number" value="{$orderItem.check_sku_qty}"></td> -->
                                 </tr>
                                 {/foreach}
                             </table>

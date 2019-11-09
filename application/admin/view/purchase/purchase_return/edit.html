@@ -141,8 +141,17 @@
                             value="{$v.quantity_num}"></td>
                     <td><input id="c-purchase_remark" class="form-control unqualified_num" disabled type="text"
                             value="{$v.unqualified_num}"></td>
-                    <td><input id="c-purchase_remark" class="form-control unqualified_num" disabled type="text"
-                            value="{:round($v['quantity_num']/$v['arrivals_num']*100)}">%</td>
+                     {if $v['arrivals_num']>0}              
+                    <td>
+                        <input id="c-purchase_remark" class="form-control unqualified_num" disabled type="text"
+                            value="{:round($v['quantity_num']/$v['arrivals_num']*100)}">%
+                    </td>
+                    {else}
+                    <td>
+                            <input id="c-purchase_remark" class="form-control unqualified_num" disabled type="text"
+                                value="0">%
+                        </td>
+                     {/if}      
                     <td><input id="c-purchase_remark" class="form-control quantity_rate" disabled type="text"
                             value="{$v.return_all_num}"></td>
                     <td>

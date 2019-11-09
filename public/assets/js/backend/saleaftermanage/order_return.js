@@ -436,8 +436,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                                 '<td style="text-align: center" class="col-xs-6 col-md-4">商品名称</td>' +
                                 '<td style="text-align: center" >购买数量</td>' +
                                 '<td style="text-align: center">退回数量</td>' +
-                                '<td style="text-align: center">到货数量</td>' +
-                                '<td style="text-align: center">质检合格数量</td>' +
+                                // '<td style="text-align: center">到货数量</td>' +
+                                // '<td style="text-align: center">质检合格数量</td>' +
                                 '</tr>';
                             for (var j = 0, len = item.length; j < len; j++) {
                                 var newItem = item[j];
@@ -448,8 +448,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                                 Str += '<td><input id="c-name" class="form-control" name="row[item][' + m + '][item_name]" type="text" value="' + newItem.name + '"></td>';
                                 Str += '<td><input id="c-qty_ordered" class="form-control" name="row[item][' + m + '][sku_qty]"  type="text" value="' + Math.round(newItem.qty_ordered) + '"></td>';
                                 Str += '<td><input id="c-right_PD" class="form-control" name="row[item][' + m + '][return_sku_qty]" type="text" value="0"></td>';
-                                Str += '<td><input id="c-right_Prism_Horizontal" name="row[item][' + m + '][arrived_sku_qty]" class="form-control"  type="text" value="0"></td>';
-                                Str += '<td><input id="c-return_sku_qty" name="row[item][' + m + '][check_sku_qty]" class="form-control"  type="number" value="0"></td>';
+                                // Str += '<td><input id="c-right_Prism_Horizontal" name="row[item][' + m + '][arrived_sku_qty]" class="form-control"  type="text" value="0"></td>';
+                                // Str += '<td><input id="c-return_sku_qty" name="row[item][' + m + '][check_sku_qty]" class="form-control"  type="number" value="0"></td>';
                                 Str += '</tr>';
                             }
                             Str += '</table>' +

@@ -1323,7 +1323,7 @@ class Item extends Backend
                 $this->error('只有在回收站才能操作！！');
             }
             $map['id'] = $ids;
-            $data['is_open'] = 1;
+            $data['is_open'] = 2;
             $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
             if ($res) {
                 $this->success('还原成功');
@@ -1347,7 +1347,7 @@ class Item extends Backend
                     $this->error('只有在回收站才能操作！！');
                 }
             }
-            $data['is_open'] = 1;
+            $data['is_open'] = 2;
             $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
             if ($res !== false) {
                 $this->success('还原成功');
@@ -1429,12 +1429,13 @@ class Item extends Backend
      */
     public function changeSku()
     {
-        $where['id'] = ['gt',4710];
+        $where['magento_sku'] = ['NEQ',''];
         $where['is_visable'] = 1;
-        $result = Db::connect('database.db_stock')->table('zeelool_product')->where($where)->field('magento_sku as sku,true_qty as stock,remark')->select();
+        $result = Db::connect('database.db_stock')->table('zeelool_product')->where($where)->field('name,magento_sku as sku,true_qty as stock,true_qty as available_stock,3 as item_status, remark')->select();
         if(!$result){
             return false;
         }else{
+
             $info   = Db::connect('database.db_stock')->name('item')->insertAll($result);
         }
         
@@ -1918,19 +1919,19 @@ class Item extends Backend
     /**
      * 从仓库sku找到zeelool的sku并且更新到sku_map数据库当中
      */
-    public function add_map_sku()
-    {
-        $where['magento_sku'] = ['NEQ',''];
-        $where['is_visable'] = 1;
-        $result = M('product')->where($where)->field('magento_sku as sku')->select();
-		if(!$result){
-			echo 123;
-			return 123;
-		}	
-        $map = M('map','sku_')->addAll($result);
-    }
-    public function ceshi(){
+    // public function add_map_sku()
+    // {
+    //     $where['magento_sku'] = ['NEQ',''];
+    //     $where['is_visable'] = 1;
+    //     $result = M('product')->where($where)->field('magento_sku as sku')->select();
+	// 	if(!$result){
+	// 		echo 123;
+	// 		return 123;
+	// 	}	
+    //     $map = M('map','sku_')->addAll($result);
+    // }
+    // public function ceshi(){
         
-    }
+    // }
 
 }
