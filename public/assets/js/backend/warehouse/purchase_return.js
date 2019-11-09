@@ -28,8 +28,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         { field: 'purchaseorder.purchase_number', title: __('Purchase_id'), operate: 'like' },
                         { field: 'supplier.supplier_name', title: __('Supplier_id'), operate: 'like' },
                         { field: 'return_type', title: __('Return_type'), custom: { 1: 'success', 2: 'success', 3: 'success' }, searchList: { 1: '仅退款', 2: '退货退款', 3: '调换货' }, formatter: Table.api.formatter.status },
-                        { field: 'status', title: __('Status'), custom: { 0: 'danger', 1: 'success', 2: 'success' }, searchList: { 0: '未打印', 1: '已打印', 2: '已上传物流单号' }, formatter: Table.api.formatter.status },
-                        
+                        {
+                            field: 'status', title: __('status'),
+                            custom: { 0: 'success', 1: 'yellow', 2: 'blue', 3: 'blue', 4: 'green', 5: 'gray' },
+                            searchList: { 0: '新建', 1: '待发货', 2: '已发货', 3: '已核对', 4: '已退款', 5: '已取消' },
+                            addClass: 'selectpicker', data: 'multiple', operate: 'IN',
+                            formatter: Table.api.formatter.status
+                        },
                         { field: 'createtime', title: __('Createtime'), operate: 'RANGE', addclass: 'datetimerange' },
                         { field: 'create_person', title: __('Create_person'), operate: 'like' },
                         {

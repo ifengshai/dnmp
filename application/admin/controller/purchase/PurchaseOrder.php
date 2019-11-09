@@ -221,8 +221,6 @@ class PurchaseOrder extends Backend
                 }
             }
 
-
-
             $map['id'] = $id;
             $data['purchase_status'] = 1;
             $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);

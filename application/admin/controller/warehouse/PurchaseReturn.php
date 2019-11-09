@@ -50,14 +50,18 @@ class PurchaseReturn extends Backend
                 return $this->selectpage();
             }
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            //退销状态
+            $map['purchase_return.status'] = ['in', [1, 2, 3, 4]];
             $total = $this->model
                 ->with(['purchaseorder', 'supplier'])
                 ->where($where)
+                ->where($map)
                 ->order($sort, $order)
                 ->count();
             $list = $this->model
                 ->with(['purchaseorder', 'supplier'])
                 ->where($where)
+                ->where($map)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();

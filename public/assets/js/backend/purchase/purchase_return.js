@@ -31,11 +31,19 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                         { field: 'purchaseorder.purchase_number', title: __('Purchase_id'), operate: 'like' },
                         { field: 'supplier.supplier_name', title: __('Supplier_id'), operate: 'like' },
                         { field: 'return_type', title: __('Return_type'), custom: { 1: 'success', 2: 'success', 3: 'success' }, searchList: { 1: '仅退款', 2: '退货退款', 3: '调换货' }, formatter: Table.api.formatter.status },
+                        {
+                            field: 'status', title: __('status'),
+                            custom: { 0: 'success', 1: 'yellow', 2: 'blue', 3: 'blue', 4: 'green', 5: 'gray' },
+                            searchList: { 0: '新建', 1: '待发货', 2: '已发货', 3: '已核对', 4: '已退款', 5: '已取消' },
+                            addClass: 'selectpicker', data: 'multiple', operate: 'IN',
+                            formatter: Table.api.formatter.status
+                        },
                         { field: 'supplier_linkname', title: __('Supplier_linkname'), operate: 'like' },
                         { field: 'supplier_linkphone', title: __('Supplier_linkphone'), operate: 'like' },
                         { field: 'supplier_address', title: __('Supplier_address'), operate: 'like' },
                         { field: 'createtime', title: __('Createtime'), operate: 'RANGE', addclass: 'datetimerange' },
                         { field: 'create_person', title: __('Create_person'), operate: 'like' },
+
                         {
                             field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [
                                 {
@@ -67,7 +75,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                                     },
                                     visible: function (row) {
                                         //返回true时按钮显示,返回false隐藏
-                                        return true;
+                                        if (row.status == 0) {
+                                            return true;
+                                        } else {
+                                            return false;
+                                        }
                                     }
                                 },
                                 {
@@ -91,6 +103,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                                     }
                                 },
 
+
                             ], formatter: Table.api.formatter.operate
                         }
                     ]
@@ -100,22 +113,22 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
             // 为表格绑定事件
             Table.api.bindevent(table);
 
-            //审核通过
+            //提交
             $(document).on('click', '.btn-open', function () {
                 var ids = Table.api.selectedids(table);
                 Backend.api.ajax({
-                    url: Config.moduleurl + '/purchase/purchase_order/setStatus',
-                    data: { ids: ids, status: 2 }
+                    url: Config.moduleurl + '/purchase/purchase_return/setStatus',
+                    data: { ids: ids, status: 1 }
                 }, function (data, ret) {
                     table.bootstrapTable('refresh');
                 });
             })
 
-            //审核拒绝
+            //已核对
             $(document).on('click', '.btn-close', function () {
                 var ids = Table.api.selectedids(table);
                 Backend.api.ajax({
-                    url: Config.moduleurl + '/purchase/purchase_order/setStatus',
+                    url: Config.moduleurl + '/purchase/purchase_return/setStatus',
                     data: { ids: ids, status: 3 }
                 }, function (data, ret) {
                     table.bootstrapTable('refresh');
@@ -128,7 +141,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                 var url = $(this).attr('href');
                 Backend.api.ajax({
                     url: url,
-                    data: { status: 4 }
+                    data: { status: 5 }
                 }, function (data, ret) {
                     table.bootstrapTable('refresh');
                 });
