@@ -419,6 +419,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                              }, function(data, ret){
                                 $(".recipe-info").remove();
                                 $(".item_info").empty();
+                                $("#c-change_type").val(1);
                                  var item = ret.data;
                                  $('#customer_info').after(function(){
                                      var Str = '';
@@ -477,6 +478,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                              }, function(data, ret){
                                 $(".frame-info").remove();
                                  $(".item_info").empty();
+                                 $("#c-change_type").val(2);
                                     var item = ret.data;
                                      $('#customer_info').after(function(){
                                          var str2 = '';
@@ -614,6 +616,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             }, function(data, ret){
                                $(".recipe-info").remove();
                                $(".item_info").empty();
+                               $("#c-change_type").val(3);
                                 var item = ret.data;
                                 $('#customer_info').after(function(){
                                     var Str = '';
