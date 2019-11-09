@@ -56,7 +56,7 @@ class SaleAfterTask extends Model
     public function getTabList()
     {
         return [
-            ['name'=>'我创建的任务','field'=>'create_person','value'=>session('admin.username')],
+            ['name'=>'我创建的任务','field'=>'create_person','value'=>session('admin.nickname')],
             ['name'=>'我的任务','field'=>'rep_id','value'=>session('admin.id')],
         ];
     }
