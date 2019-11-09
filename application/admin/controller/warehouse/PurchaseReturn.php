@@ -65,7 +65,6 @@ class PurchaseReturn extends Backend
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
-
             $list = collection($list)->toArray();
             $result = array("total" => $total, "rows" => $list);
 

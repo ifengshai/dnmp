@@ -288,10 +288,7 @@ class Backend extends Controller
             $where[] = [implode("|", $searcharr), "LIKE", "%{$search}%"];
         }
         foreach ($filter as $k => $v) {
-            //判断是否我的任务
-            if($k == 'create_person'){
-                $v = session('admin.nickname');
-            }
+           
             $sym = isset($op[$k]) ? $op[$k] : '=';
             if (stripos($k, ".") === false) {
                 $k = $tableName . $k;
