@@ -968,4 +968,94 @@ class Inventory extends Backend
             }
         }
     }
+    /***
+     * 取消订单的逻辑
+     * @param id 协同任务ID
+     * @param order_platform 订单平台
+     * @param increment_id 订单号
+     */
+    public function cancelOrder($id, $order_platform, $increment_id)
+    {
+        if (!$id || !$order_platform || !$increment_id) {
+            return false;
+        }
+        $item = new \app\admin\model\itemmanage\Item;
+        $instock = new \app\admin\model\warehouse\Instock;
+        $instockItem = new \app\admin\model\warehouse\InstockItem;
+        $taskChangeSku = new \app\admin\model\infosynergytaskmanage\InfoSynergyTaskChangeSku;
+        $platformSku   = new \app\admin\model\itemmanage\ItemPlatformSku;
+        $changeRow = $taskChangeSku->where(['tid' => $id])->field('original_sku,original_number')->select();
+        if (!$changeRow) { //如果不存在改变的sku
+            return false;
+        }
+        if (1 == $order_platform) {
+            $db = 'database.db_zeelool';
+        } elseif (2 == $order_platform) {
+            $db = 'database.db_voogueme';
+        } elseif (3 == $order_platform) {
+            $db = 'database.db_nihao';
+        }
+        foreach ($changeRow as $v) {
+            //原先sku
+            $original_sku    = $v['original_sku'];
+            //原先sku数量
+            $original_number = $v['original_number'];
+            //原先sku对应的仓库sku
+            $whereOriginSku['platform_sku'] = $original_sku;
+            $whereOriginSku['platform_type'] = $order_platform;
+            $warehouse_original_sku = $platformSku->where($whereOriginSku)->value('sku');
+            //求出订单对应的order_id
+            $order_id = Db::connect($db)->table('sales_flat_order')->where(['increment_id' => $increment_id])->value('entity_id');
+            if (!$original_sku || !$original_number) {
+                return false;
+            }
+            //回滚
+            Db::startTrans();
+            try {
+                //更改sales_flat_order_item表中的sku字段
+                $whereChange['order_id'] = $order_id;
+                $whereChange['sku']      = $original_sku;
+                $changeData['is_change_frame'] = 3;
+                $changeSku = Db::connect($db)->table('sales_flat_order_item')->where($whereChange)->update($changeData);
+                //原先sku增加可用库存,减少占用库存
+                $original_stock = $item->where(['sku' => $warehouse_original_sku])->inc('available_stock', $original_number)->dec('occupy_stock', $original_number)->update();
+                //修改库存结果为真
+                if (($changeSku === false) || ($original_stock === false)) {
+                    throw new Exception('更改镜架失败,请检查SKU');
+                    continue;
+                } else {
+                    //入库记录
+                    $paramsIn = [];
+                    $paramsIn['in_stock_number'] = 'IN' . date('YmdHis') . rand(100, 999) . rand(100, 999);
+                    $paramsIn['order_number']  = $increment_id;
+                    $paramsIn['create_person'] = session('admin.nickname');
+                    $paramsIn['createtime'] = date('Y-m-d H:i:s', time());
+                    $paramsIn['type_id'] = 7;
+                    $paramsIn['status'] = 2;
+                    $paramsIn['remark'] = '取消订单入库';
+                    $paramsIn['check_time'] = date('Y-m-d H:i:s', time());
+                    $paramsIn['check_person'] = session('admin.nickname');
+                    $instorck_res = $instock->isUpdate(false)->allowField(true)->data($paramsIn, true)->save();
+                    //添加入库信息
+                    if ($instorck_res !== false) {
+                        $instockItemList['sku'] = $warehouse_original_sku;
+                        $instockItemList['in_stock_num'] = $original_number;
+                        $instockItemList['in_stock_id']  = $instock->id;
+                        //添加入库商品sku信息
+                        $instockItem->isUpdate(false)->allowField(true)->data($instockItemList, true)->save();
+                    }
+                }
+                Db::commit();
+            } catch (ValidateException $e) {
+                Db::rollback();
+                $this->error($e->getMessage());
+            } catch (PDOException $e) {
+                Db::rollback();
+                $this->error($e->getMessage());
+            } catch (Exception $e) {
+                Db::rollback();
+                $this->error($e->getMessage());
+            }
+        }
+    }
   }

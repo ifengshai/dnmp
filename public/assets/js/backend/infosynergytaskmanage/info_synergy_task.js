@@ -411,8 +411,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     var orderPlatform = $('#c-order_platform').val();
                     var orderNumber   = $('#c-synergy_order_number').val();
                     var synergyOrderId = $('#c-synergy_order_id').val();
-                     if( vals == 12){ //更改镜架
-                        
+                     if( (vals == 12)){ //更改镜架                        
                          if( synergyOrderId == 2){
                              Backend.api.ajax({
                                  url:'saleaftermanage/sale_after_task/ajax',
@@ -607,6 +606,45 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                  return false;
                              });
                          }
+                    }else if(vals == 29){
+                        if( synergyOrderId == 2){
+                            Backend.api.ajax({
+                                url:'saleaftermanage/sale_after_task/ajax',
+                                data:{ordertype:orderPlatform,order_number:orderNumber}
+                            }, function(data, ret){
+                               $(".recipe-info").remove();
+                               $(".item_info").empty();
+                                var item = ret.data;
+                                $('#customer_info').after(function(){
+                                    var Str = '';
+                                    Str+=  '<div class="caigou frame-info item_info" style="margin-top:15px;margin-left:10%;">'+
+                                        '<p style="font-size: 16px;"><b>取消订单</b></p>'+
+                                        '<div>'+
+                                        '<table id="caigou-table-sku">'+
+                                        '<tr>'+
+                                        '<th>原始SKU</th>'+
+                                        '<th>原始数量</th>'+
+                                        '</tr>';
+                                    for(var j = 0,len = item.length; j <len; j++) {
+                                        var newItem = item[j];
+                                        var m = j+1;
+                                        Str +='<tr>';
+                                        Str +='<td><input id="c-original_sku" class="form-control" readonly name="row[item]['+m+'][original_sku]" type="text" value="'+newItem.sku+'"></td>';
+                                        Str +='<td><input id="c-original_number" class="form-control" readonly  name="row[item]['+m+'][original_number]" type="text" value="'+Math.round(newItem.qty_ordered)+'"></td>';
+                                        Str += '</tr>';
+                                    }
+                                    Str+='</table>'+
+                                        '</div>'+
+                                        '</div>';
+                                    return Str;
+                                });
+                            }, function(data, ret){
+                                //失败的回调
+                                alert(ret.msg);
+                                console.log(ret);
+                                return false;
+                            });
+                        }
                     }else{
                         //$(".item_info").empty();
                         $(".item_info").remove();

@@ -21,7 +21,7 @@ class ItemPlatformSku extends Backend
      */
     protected $model = null;
     protected $platform = null;
-    protected $noNeedLogin = ['ceshi'];
+    protected $relationSearch = true;
     public function _initialize()
     {
         parent::_initialize();
@@ -39,6 +39,7 @@ class ItemPlatformSku extends Backend
     public function index()
     {
         //设置过滤方法
+        //
         $this->request->filter(['strip_tags']);
         if ($this->request->isAjax()) {
             //如果发送的来源是Selectpage，则转发到Selectpage
@@ -59,6 +60,7 @@ class ItemPlatformSku extends Backend
                 ->limit($offset, $limit)
                 ->select();
             $list = collection($list)->toArray();
+            // var_dump($list);
             if(!empty($list) && is_array($list)){
                 $platform = (new MagentoPlatform())->getOrderPlatformList();
                 foreach ($list as $k =>$v){
