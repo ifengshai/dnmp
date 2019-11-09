@@ -64,13 +64,11 @@ class StockSku extends Backend
 
             //查询商品SKU
             $item = new \app\admin\model\itemmanage\Item;
-            $arr = $item->where('is_del',1)->column('sku,name,is_open','id');
+            $arr = $item->where('is_del',1)->column('name,is_open','sku');
             foreach ($list as $k => $row) {
                 $row->getRelation('storehouse')->visible(['coding', 'library_name', 'status']);
-
-                $list[$k]['sku'] = $arr[$row['item_id']]['sku'];
-                $list[$k]['name'] = $arr[$row['item_id']]['name'];
-                $list[$k]['is_open'] = $arr[$row['item_id']]['is_open'];
+                $list[$k]['name'] = $arr[$row['sku']]['name'];
+                $list[$k]['is_open'] = $arr[$row['sku']]['is_open'];
             }
             $list = collection($list)->toArray();
 

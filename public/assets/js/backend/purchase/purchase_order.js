@@ -185,10 +185,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                                     },
                                     visible: function (row) {
                                         //返回true时按钮显示,返回false隐藏
-                                        if (row.purchase_type == 2) {
-                                            return false;
+                                        if (row.purchase_status == 2) {
+                                            return true;
                                         }
-                                        return true;
+                                        return false;
                                     }
                                 },
                                 {
