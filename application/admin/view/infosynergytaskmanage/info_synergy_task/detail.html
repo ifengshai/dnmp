@@ -51,6 +51,32 @@
 
         width: 150px;
     }
+    
+    .bg-aqua-gradient {
+        background: #F5F5F5 !important;
+        /* background: -webkit-gradient(linear, left bottom, left top, color-stop(0, #3498db), color-stop(1, #52a7e0)) !important; */
+        background: -ms-linear-gradient(bottom, #3498db, #52a7e0) !important;
+        background: -moz-linear-gradient(center bottom, #3498db 0%, #52a7e0 100%) !important;
+        background: -o-linear-gradient(#52a7e0, #3498db) !important;
+        filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#52a7e0', endColorstr='#3498db', GradientType=0) !important;
+        color: #333;
+        border: #eee solid 1px;
+    }
+    .bg-blue {
+        background-color: #F5F5F5 !important;
+    }
+    .panel-title {
+        color: #333;
+    }
+    #caigou-table-lens .form-control {
+        border-radius: 0;
+        box-shadow: none;
+        border-color: #d2d6de;
+        -webkit-appearance: none;
+        text-align: center;
+        -moz-appearance: none;
+        appearance: none;
+    }
 </style>
 <style>
     #remark-table{
@@ -255,7 +281,28 @@
             </table>
         </div>
     </div>
-    {else/}
+    {elseif condition="$taskChangeSku[0]['change_type'] eq 3"}
+    <div class="caigou item_info" style="margin-top:15px;margin-left:10%;">
+            <p style="font-size: 16px;"><b>取消订单</b></p>
+            <div>
+                <table id="caigou-table-sku">
+                    <tr>
+                        <th>原始SKU</th>
+                        <th>原始数量</th>
+                    </tr>
+                    {foreach name="taskChangeSku" item="sku" key="k"}
+                    <tr>
+                        <td>
+                            <input class="form-control" name="row[item][{$k+1}][id]" type="hidden" value="{$sku.id}">
+                            <input id="c-original_sku" class="form-control" name="row[item][{$k+1}][original_sku]" type="text" value="{$sku.original_sku}">
+                        </td>
+                        <td><input id="c-original_number" class="form-control" name="row[item][{$k+1}][original_number]" type="text" value="{$sku.original_number}"></td>
+                    </tr>
+                    {/foreach}
+                </table>
+            </div>
+        </div>
+    {elseif condition="$taskChangeSku[0]['change_type'] eq 2"/}
     <div class="row item_info" style="margin-top:15px;margin-left:7.6666%;">
         <p style="font-size: 16px;"><b>更改镜片</b></p>
         <div>
