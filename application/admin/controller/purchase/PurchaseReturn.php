@@ -198,6 +198,13 @@ class PurchaseReturn extends Backend
         if (!$row) {
             $this->error(__('No Results were found'));
         }
+
+         //判断状态是否为新建
+         if ($row['status'] > 0) {
+            $this->error('只有新建状态才能编辑！！', url('index'));
+        }
+
+
         $adminIds = $this->getDataLimitAdminIds();
         if (is_array($adminIds)) {
             if (!in_array($row[$this->dataLimitField], $adminIds)) {
@@ -506,4 +513,62 @@ class PurchaseReturn extends Backend
             $this->error();
         }
     }
+
+   
+     /**
+     * 审核
+     */
+    public function setStatus()
+    {
+        $ids = $this->request->post("ids/a");
+        $status = input('status');
+        if (!$ids) {
+            $this->error('缺少参数！！');
+        }
+        $map['id'] = ['in', $ids];
+        $row = $this->model->where($map)->select();
+        foreach ($row as $v) {
+            if ($status == 1 || $status == 5) {
+                if ($v['status'] !== 0) {
+                    $this->error('只有新建状态才能操作！！');
+                }
+            } elseif ($status == 3) {
+                if ($v['status'] != 2) {
+                    $this->error('只有已发货状态才能操作！！');
+                }
+            }
+            
+        }
+
+        $data['status'] = $status;
+        $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
+        if ($res !== false) {
+            $this->success();
+        } else {
+            $this->error('修改失败！！');
+        }
+    }
+
+    /**
+     * 取消
+     */
+    public function cancel($ids = null)
+    {
+        if (!$ids) {
+            $this->error('缺少参数！！');
+        }
+        $row = $this->model->get($ids);
+        if ($row['status'] !== 0) {
+            $this->error('只有新建状态才能取消！！');
+        }
+        $map['id'] = ['in', $ids];
+        $data['status'] = input('status');
+        $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
+        if ($res !== false) {
+            $this->success();
+        } else {
+            $this->error('取消失败！！');
+        }
+    }
+
 }
