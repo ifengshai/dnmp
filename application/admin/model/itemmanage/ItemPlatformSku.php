@@ -24,11 +24,13 @@ class ItemPlatformSku extends Model
 
     // 追加属性
     protected $append = [];
+    
     //关联item
     public function item()
     {
-        return $this->belongsTo('app\admin\model\itemmanage\Item', 'sku', 'sku');
+        return $this->belongsTo('app\admin\model\itemmanage\Item', 'sku', 'sku')->setEagerlyType(0);
     }
+
     //添加商品平台sku
     public function addPlatformSku($row)
     {

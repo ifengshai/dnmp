@@ -1,4 +1,4 @@
-define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui'], function ($, undefined, Backend, Table, Form) {
+define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($, undefined, Backend, Table, Form) {
 
     var Controller = {
         index: function () {
@@ -37,8 +37,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui'], function ($, 
                             }, operate: false
                         },
                         { field: 'id', title: __('Id'), operate: false, visible: false },
-                        { field: 'purchase_number', title: __('Purchase_number') },
-                        { field: 'purchase_name', title: __('Purchase_name') },
+                        { field: 'purchase_number', title: __('Purchase_number'), operate: 'like' },
+                        { field: 'purchase_name', title: __('Purchase_name'), operate: 'like' },
                         { field: 'product_total', title: __('Product_total'), operate: 'BETWEEN' },
                         { field: 'purchase_freight', title: __('Purchase_freight'), operate: 'BETWEEN' },
                         { field: 'purchase_total', title: __('Purchase_total'), operate: 'BETWEEN' },
@@ -85,7 +85,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui'], function ($, 
                             searchList: { 0: '否', 1: '是' },
                             formatter: Table.api.formatter.status
                         },
-                        { field: 'create_person', title: __('Create_person') },
+                        { field: 'create_person', title: __('Create_person') ,operate: 'like'},
                         { field: 'createtime', title: __('Createtime'), operate: 'RANGE', addclass: 'datetimerange' },
                         {
                             field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [
@@ -203,8 +203,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui'], function ($, 
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
                                     },
                                     visible: function (row) {
-                                         //返回true时按钮显示,返回false隐藏
-                                         if (row.purchase_status == 0) {
+                                        //返回true时按钮显示,返回false隐藏
+                                        if (row.purchase_status == 0) {
                                             return true;
                                         } else {
                                             return false;
