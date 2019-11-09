@@ -408,13 +408,16 @@ class Check extends Backend
     public function getOrderReturnData()
     {
         $id = input('id');
-        // $orderReturn = new \app\admin\model\saleaftermanage\OrderReturn;
-        // $data = $orderReturn->get($id);
-
         //查询退货单商品信息
         $orderReturnItem = new \app\admin\model\saleaftermanage\OrderReturnItem;
         $map['order_return_id'] = $id;
-        $list = $orderReturnItem->where($map)->select();
+        $list = $orderReturnItem->where($map)->alias('a')->field('b.order_platform,a.*')->join(['fa_order_return'=> 'b'],'a.order_return_id = b.id')->select();
+        $ItemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku;
+        //平台SKU转商品SKU
+        foreach($list as $k => $v) {
+            $return_sku = $ItemPlatformSku->getTrueSku($v['return_sku'], $v['order_platform']);
+            $list[$k]['return_sku'] = $return_sku ?? '';
+        }
 
         if ($list) {
             $this->success('', '', $list);

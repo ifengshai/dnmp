@@ -253,7 +253,7 @@ class Nihao extends Backend
                     foreach ($res as $k => $v) {
 
                         //是否为更换镜架 如果为更换镜架 扣减库存逻辑已在协同任务处理  此处不在执行扣减库存逻辑
-                        if ($v['is_change_frame'] == 2) {
+                        if ($v['is_change_frame'] != 1) {
                             continue;
                         }
 
