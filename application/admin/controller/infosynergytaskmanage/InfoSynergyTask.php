@@ -55,10 +55,14 @@ class InfoSynergyTask extends Backend
             if (in_array("", $params['rep_id'])) {
                 $this->error(__('Please select the contractor'));
             }
-            // var_dump($params['rep_id']);
-            //exit;
+            // echo '<pre>';
+            // var_dump($params['change_type']);
+            // exit;
             $item = isset($params['item']) ? $params['item']  : '';
             $lens = isset($params['lens']) ? $params['lens']  : '';
+            //更改类型
+            $change_type = $params['change_type'];
+            unset($params['change_type']);
             if ($params) {
                 $params = $this->preExcludeFields($params);
                 //承接部门和承接人写入数据库
@@ -103,6 +107,7 @@ class InfoSynergyTask extends Backend
                         foreach ($item as $arr) {
                             $data = [];
                             $data['tid'] = $this->model->id;
+                            $data['change_type']  = $change_type;
                             $data['original_sku'] = !empty($arr['original_sku']) ? $arr['original_sku'] : '';
                             $data['original_number'] = !empty($arr['original_number']) ? $arr['original_number'] : '';
                             $data['change_sku'] = !empty($arr['change_sku']) ? $arr['change_sku'] : '';
@@ -121,7 +126,7 @@ class InfoSynergyTask extends Backend
                             $dataLens[$k]['original_name'] = $lens['original_name'][$k];
                             $dataLens[$k]['original_sku'] = $lens['original_sku'][$k];
                             $dataLens[$k]['original_number'] = $lens['original_number'][$k];
-                            $dataLens[$k]['change_type'] = 2;
+                            $dataLens[$k]['change_type'] = $change_type;
                             $dataLens[$k]['recipe_type'] = $lens['recipe_type'][$k];
                             $dataLens[$k]['lens_type'] = $lens['lens_type'][$k];
                             $dataLens[$k]['coating_type'] = $lens['coating_type'][$k];
