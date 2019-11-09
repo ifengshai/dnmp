@@ -313,7 +313,7 @@ class Voogueme extends Backend
                 //质检通过扣减库存
                 if ($status == 4) {
                     //查询出质检通过的订单
-                    $res = $this->model->alias('a')->where($map)->field('sku,qty_ordered')->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->select();
+                    $res = $this->model->alias('a')->where($map)->field('b.sku,b.qty_ordered,b.is_change_frame')->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->select();
                     if (!$res) {
                         throw new Exception("未查询到订单数据！！");
                     };
@@ -321,6 +321,13 @@ class Voogueme extends Backend
                     $ItemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku;
                     //查出订单SKU映射表对应的仓库SKU
                     foreach ($res as $k => $v) {
+
+                        //是否为更换镜架 如果为更换镜架 扣减库存逻辑已在协同任务处理  此处不在执行扣减库存逻辑
+                        if ($v['is_change_frame'] != 1) {
+                            continue;
+                        }
+
+
                         $trueSku = $ItemPlatformSku->getTrueSku($v['sku'], 2);
                         //总库存
                         $item_map['sku'] = $trueSku;

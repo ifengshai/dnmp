@@ -24,11 +24,13 @@ class ItemPlatformSku extends Model
 
     // 追加属性
     protected $append = [];
+    
     //关联item
     public function item()
     {
-        return $this->belongsTo('app\admin\model\itemmanage\Item', 'sku', 'sku','','left')->setEagerlyType(0);
+        return $this->belongsTo('app\admin\model\itemmanage\Item', 'sku', 'sku')->setEagerlyType(0);
     }
+
     //添加商品平台sku
     public function addPlatformSku($row)
     {
@@ -144,7 +146,7 @@ class ItemPlatformSku extends Model
     /**
      * 根据平台SKU查出仓库SKU
      * @param $sku 平台SKU
-     * @param $platform_type 对应平台
+     * @param $platform_type 对应平台 1 Zeelool 2 Voogueme 3 Nihao
      * @return string
      */
     public function getTrueSku($sku = '', $platform_type = '')

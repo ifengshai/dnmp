@@ -22,7 +22,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui'], function ($, 
             table.bootstrapTable({
                 url: $.fn.bootstrapTable.defaults.extend.index_url,
                 pk: 'id',
-                sortName: 'id',
+                sortName: 'item_platform_sku.id',
                 columns: [
                     [
                         {checkbox: true},

@@ -28,7 +28,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                         { checkbox: true },
                         { field: 'id', title: __('Id') },
                         { field: 'return_number', title: __('Return_number'), operate: 'like' },
-                        { field: 'purchase_order.purchase_number', title: __('Purchase_id'), operate: 'like' },
+                        { field: 'purchaseorder.purchase_number', title: __('Purchase_id'), operate: 'like' },
                         { field: 'supplier.supplier_name', title: __('Supplier_id'), operate: 'like' },
                         { field: 'return_type', title: __('Return_type'), custom: { 1: 'success', 2: 'success', 3: 'success' }, searchList: { 1: '仅退款', 2: '退货退款', 3: '调换货' }, formatter: Table.api.formatter.status },
                         { field: 'supplier_linkname', title: __('Supplier_linkname'), operate: 'like' },
@@ -69,7 +69,27 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                                         //返回true时按钮显示,返回false隐藏
                                         return true;
                                     }
-                                }
+                                },
+                                {
+                                    name: 'cancel',
+                                    text: '取消',
+                                    title: '取消',
+                                    classname: 'btn btn-xs btn-danger btn-cancel',
+                                    icon: 'fa fa-remove',
+                                    url: 'purchase/purchase_return/cancel',
+                                    callback: function (data) {
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                    },
+                                    visible: function (row) {
+                                        //返回true时按钮显示,返回false隐藏
+                                        if (row.status == 0) {
+                                            return true;
+                                        } else {
+                                            return false;
+                                        }
+
+                                    }
+                                },
 
                             ], formatter: Table.api.formatter.operate
                         }
@@ -79,6 +99,40 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
 
             // 为表格绑定事件
             Table.api.bindevent(table);
+
+            //审核通过
+            $(document).on('click', '.btn-open', function () {
+                var ids = Table.api.selectedids(table);
+                Backend.api.ajax({
+                    url: Config.moduleurl + '/purchase/purchase_order/setStatus',
+                    data: { ids: ids, status: 2 }
+                }, function (data, ret) {
+                    table.bootstrapTable('refresh');
+                });
+            })
+
+            //审核拒绝
+            $(document).on('click', '.btn-close', function () {
+                var ids = Table.api.selectedids(table);
+                Backend.api.ajax({
+                    url: Config.moduleurl + '/purchase/purchase_order/setStatus',
+                    data: { ids: ids, status: 3 }
+                }, function (data, ret) {
+                    table.bootstrapTable('refresh');
+                });
+            })
+
+            //审核取消
+            $(document).on('click', '.btn-cancel', function (e) {
+                e.preventDefault();
+                var url = $(this).attr('href');
+                Backend.api.ajax({
+                    url: url,
+                    data: { status: 4 }
+                }, function (data, ret) {
+                    table.bootstrapTable('refresh');
+                });
+            })
         },
         add: function () {
             Controller.api.bindevent();

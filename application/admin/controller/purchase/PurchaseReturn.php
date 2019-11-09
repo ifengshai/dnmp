@@ -51,12 +51,12 @@ class PurchaseReturn extends Backend
             }
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
-                ->with(['purchaseOrder', 'supplier'])
+                ->with(['purchaseorder', 'supplier'])
                 ->where($where)
                 ->order($sort, $order)
                 ->count();
             $list = $this->model
-                ->with(['purchaseOrder', 'supplier'])
+                ->with(['purchaseorder', 'supplier'])
                 ->where($where)
                 ->order($sort, $order)
                 ->limit($offset, $limit)

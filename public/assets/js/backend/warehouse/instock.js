@@ -205,19 +205,19 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                 })
 
                 Form.api.bindevent($("form[role=form]"));
-                //切换质检类型
-                $(document).on('change', '.type', function () {
-                    var type = $(this).val();
-                    if (type == 1) {
-                        $('.order_number').addClass('hidden');
-                        $('.purchase_id_number').removeClass('hidden');
-                        $('#c-order_number').val('');
-                    } else {
-                        $('.order_number').removeClass('hidden');
-                        $('.purchase_id_number').addClass('hidden');
-                        $('.purchase_id').val('');
-                    }
-                })
+                // //切换质检类型
+                // $(document).on('change', '.type', function () {
+                //     var type = $(this).val();
+                //     if (type == 1) {
+                //         $('.order_number').addClass('hidden');
+                //         $('.purchase_id_number').removeClass('hidden');
+                //         $('#c-order_number').val('');
+                //     } else {
+                //         $('.order_number').removeClass('hidden');
+                //         $('.purchase_id_number').addClass('hidden');
+                //         $('.purchase_id').val('');
+                //     }
+                // })
 
                 //切换采购单
                 $(document).on('change', '.check_id', function () {
