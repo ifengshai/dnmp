@@ -1819,7 +1819,7 @@ class Item extends Backend
      */
     public function changeSkuToPlatformSku()
     {
-        $sql = "select name,sku from fa_item where is_update_platform = 0 limit 500 ";
+        $sql = "select name,sku from fa_item where is_update_platform = 0 limit 100 ";
         $result = Db::connect('database.db_stock')->query($sql);
         if(!$result){
             return false;
@@ -1861,7 +1861,7 @@ class Item extends Backend
      * 清除空的sku映射
      */
     public function skuMapOne(){
-        $sql = "select sku,zeelool_sku,voogueme_sku,nihao_sku from sku_map where is_update_sku=2 limit 50";
+        $sql = "select sku,zeelool_sku,voogueme_sku,nihao_sku from sku_map where is_update_sku=1 limit 50";
         $result = Db::connect('database.db_stock')->query($sql);
         if(!$result){
             return false;
@@ -1869,6 +1869,8 @@ class Item extends Backend
         foreach($result as $v){
             if(($v['zeelool_sku'] == '') && ($v['voogueme_sku'] == '') && ($v['nihao_sku'] == '')){
                 Db::connect('database.db_stock')->table('sku_map')->where(['sku'=>$v['sku']])->update(['is_update_sku'=>3]);
+            }else{
+                Db::connect('database.db_stock')->table('sku_map')->where(['sku'=>$v['sku']])->update(['is_update_sku'=>2]);
             } 
         }
     }
@@ -1877,7 +1879,7 @@ class Item extends Backend
      */
     public function skuMap()
     {
-        $sql = "select sku,zeelool_sku,voogueme_sku,nihao_sku from sku_map where is_update_sku=1 limit 50";
+        $sql = "select sku,zeelool_sku,voogueme_sku,nihao_sku from sku_map where is_update_sku=2 limit 50";
         $result = Db::connect('database.db_stock')->query($sql);
         if(!$result){
             return false;
@@ -1908,7 +1910,7 @@ class Item extends Backend
                 Db::connect('database.db_stock')->name('item_platform_sku')->where($nihaoWhere)->update($nihaoData);
                 $i++;
             }
-            Db::connect('database.db_stock')->table('sku_map')->where(['sku'=>$v['sku']])->update(['is_update_sku'=>2]);
+            Db::connect('database.db_stock')->table('sku_map')->where(['sku'=>$v['sku']])->update(['is_update_sku'=>1]);
         }
             echo $i;
             Db::connect('database.db_stock')->name('num')->where(['id'=>1])->setInc('num',$i);
