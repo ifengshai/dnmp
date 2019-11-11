@@ -205,10 +205,16 @@ class Zeelool extends Backend
         $entity_ids = input('id_params/a');
         $status = input('status');
         $label = input('label');
-        if ($entity_ids) {
-            //多数据库
-            $map['entity_id'] = ['in', $entity_ids];
+        $map['entity_id'] = ['in', $entity_ids];
+        $res = $this->model->where($map)->select();
+        foreach($res as $v) {
+            if ($v['custom_is_delivery'] == 1) {
+                $this->error('存在已质检通过的订单！！');
+            }
+        }
 
+
+        if ($entity_ids) {
             switch ($status) {
                 case 1:
                     //配镜架
@@ -237,6 +243,7 @@ class Zeelool extends Backend
                 default:
             }
             $item = new \app\admin\model\itemmanage\Item;
+            $outStockItem = new \app\admin\model\warehouse\OutStockItem;
             $this->model->startTrans();
             $item->startTrans();
             try {
@@ -244,7 +251,7 @@ class Zeelool extends Backend
                 //质检通过扣减库存
                 if ($status == 4) {
                     //查询出质检通过的订单
-                    $res = $this->model->alias('a')->where($map)->field('b.sku,b.qty_ordered,b.is_change_frame')->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->select();
+                    $res = $this->model->alias('a')->where($map)->field('a.increment_id,b.sku,b.qty_ordered,b.is_change_frame')->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->select();
                     if (!$res) {
                         throw new Exception("未查询到订单数据！！");
                     };
@@ -270,6 +277,13 @@ class Zeelool extends Backend
                         if (!$res_one || !$res_two) {
                             $error[] = $k;
                         }
+
+                        //先入先出逻辑
+                        $rows['sku'] = $trueSku;
+                        $rows['out_stock_num'] = $v['qty_ordered'];
+                        $rows['increment_id'] = $v['increment_id'];
+                        $outStockItem->setOrderOutStock($rows);
+
                     }
 
                     if (count($error)) {
