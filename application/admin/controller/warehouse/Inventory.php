@@ -283,7 +283,7 @@ class Inventory extends Backend
                 Db::startTrans();
                 try {
                     if ($data) {
-                        $skus = $this->item->where('is_add', '=', 0)->column('sku');
+                        $skus = $this->item->where('is_add', 0)->column('sku');
                         $sku_arr = [];
                         foreach ($data as $k => $v) {
                             //查询是否已添加
@@ -375,6 +375,7 @@ class Inventory extends Backend
     public function inventoryEdit()
     {
 
+        $this->model = new \app\admin\model\warehouse\InventoryItem;
         //设置过滤方法
         $this->request->filter(['strip_tags']);
         if ($this->request->isAjax()) {
@@ -384,12 +385,12 @@ class Inventory extends Backend
             }
             $map['inventory_id'] = input('inventory_id');
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
-            $total = $this->item
+            $total = $this->model
                 ->where($where)
                 ->where($map)
                 ->order($sort, $order)
                 ->count();
-            $list = $this->item
+            $list = $this->model
                 ->where($where)
                 ->where($map)
                 ->order($sort, $order)
@@ -418,7 +419,7 @@ class Inventory extends Backend
                 Db::startTrans();
                 try {
                     if ($data) {
-                        $skus = $this->item->where('is_add', '=', 0)->column('sku');
+                        $skus = $this->item->where('is_add', 0)->column('sku');
                         $list = [];
                         foreach ($data as $k => $v) {
                             //查询是否已添加
@@ -627,7 +628,7 @@ class Inventory extends Backend
         $map['id'] = ['in', $ids];
         $row = $this->model->where($map)->select();
         foreach ($row as $v) {
-            if ($v['check_status'] !== 1) {
+            if ($v['check_status'] !== 1 &&　＄ｖ['check_status'] !== 1) {
                 $this->error('只有待审核状态才能操作！！');
             }
         }
