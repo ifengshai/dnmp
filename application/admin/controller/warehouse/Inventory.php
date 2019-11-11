@@ -94,7 +94,17 @@ class Inventory extends Backend
                 return $this->selectpage();
             }
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+
+            //查询临时表数据
+            $temp = new \app\admin\model\warehouse\TempProduct;
+            $skus = $temp->column('sku');
+
+            $inventoryItem = new \app\admin\model\warehouse\InventoryItem;
+            $itemSkus = $inventoryItem->where('is_add',0)->column('sku');
+
+            $skus = array_unique(array_merge($skus, $itemSkus));
             $map['is_open'] = ['in', [1, 2]];
+            $map['sku'] = ['not in', $skus];
             $total = $this->product
                 ->where($where)
                 ->where($map)
@@ -113,20 +123,15 @@ class Inventory extends Backend
             $skus = array_column($list, 'sku');
             //查询留样库存
             //查询实际采购信息 查询在途库存
-            $purchase_map['stock_status'] = ['in', [1, 2]];
+            $purchase_map['stock_status'] = ['in', [0, 1]];
             $purchase = new \app\admin\model\purchase\PurchaseOrder;
             $hasWhere['sku'] = ['in', $skus];
             $purchase_list = $purchase->hasWhere('purchaseOrderItem', $hasWhere)
                 ->where($purchase_map)
-                ->column('sku,purchase_num,instock_num,sample_num', 'sku');
-
-            //查询样品数量
-            $check = new \app\admin\model\warehouse\CheckItem;
-            $check_list = $check->where($hasWhere)->column('sample_num', 'sku');
-
+                ->group('sku')
+                ->column('sum(purchase_num) as purchase_num,sum(instock_num) as instock_num', 'sku');
             foreach ($list as &$v) {
                 $v['on_way_stock'] = @$purchase_list[$v['sku']]['purchase_num'] - @$purchase_list[$v['sku']]['instock_num'];
-                $v['sample_stock'] = @$check_list[$v['sku']]['sample_num'];
             }
             unset($v);
             $result = array("total" => $total, "rows" => $list);
