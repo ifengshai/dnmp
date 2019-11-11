@@ -669,7 +669,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                  return false;
                              });
                          }
-                    }else if(vals == 29){
+                    }else if(vals == 14){
                         if( synergyOrderId == 2){
                             Backend.api.ajax({
                                 url:'saleaftermanage/sale_after_task/ajax',
