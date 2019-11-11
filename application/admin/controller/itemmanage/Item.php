@@ -1935,5 +1935,12 @@ class Item extends Backend
     // public function ceshi(){
         
     // }
+    public function ceshi(){
+        $str = 'a:18:{s:6:"od_sph";s:5:"-0.50";s:6:"od_cyl";s:5:"-0.50";s:7:"od_axis";s:3:"180";s:6:"od_add";s:0:"";s:4:"pd_r";s:0:"";s:5:"od_pv";s:0:"";s:5:"od_bd";s:0:"";s:7:"od_pv_r";s:0:"";s:7:"od_bd_r";s:0:"";s:6:"os_sph";s:5:"-0.50";s:6:"os_cyl";s:5:"-0.50";s:7:"os_axis";s:3:"171";s:6:"os_add";s:0:"";s:4:"pd_l";s:0:"";s:5:"os_pv";s:0:"";s:5:"os_bd";s:0:"";s:7:"os_pv_r";s:0:"";s:7:"os_bd_r";s:0:"";}';
+        $result = unserialize($str);
+        echo '<pre>';
+        var_dump($result);
+        exit;
+    }
 
 }
