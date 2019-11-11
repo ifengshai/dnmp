@@ -469,8 +469,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                  return false;
                              });
                          }
-                     }else if(vals == 13){ //修改处方参数
-                        
+                     }else if(vals == 13){ //修改处方参数                     
                          if( synergyOrderId == 2){
                              Backend.api.ajax({
                                  url:'saleaftermanage/sale_after_task/ajax',
