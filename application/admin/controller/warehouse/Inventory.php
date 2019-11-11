@@ -118,7 +118,7 @@ class Inventory extends Backend
             $hasWhere['sku'] = ['in', $skus];
             $purchase_list = $purchase->hasWhere('purchaseOrderItem', $hasWhere)
                 ->where($purchase_map)
-                ->column('sku,purchase_num,instock_num', 'sku');
+                ->column('sku,purchase_num,instock_num,sample_num', 'sku');
 
             //查询样品数量
             $check = new \app\admin\model\warehouse\CheckItem;
@@ -628,8 +628,8 @@ class Inventory extends Backend
         $map['id'] = ['in', $ids];
         $row = $this->model->where($map)->select();
         foreach ($row as $v) {
-            if ($v['check_status'] !== 1 &&　＄ｖ['check_status'] !== 1) {
-                $this->error('只有待审核状态才能操作！！');
+            if ($v['check_status'] != 1 || $v['status'] != 2) {
+                $this->error('只有待审核已完成状态才能操作！！');
             }
         }
         $data['check_status'] = input('status');
