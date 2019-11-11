@@ -33,9 +33,9 @@ class InfoSynergyTaskChangeSku extends Model
         if(!$result){
             return false;
         }
-          foreach ($result as $k =>$v){
-            $result[$k]['option'] = unserialize($v['options']);
-          }
+          // foreach ($result as $k =>$v){
+          //   $result[$k]['option'] = unserialize($v['options']);
+          // }
           return $result;
     }
 

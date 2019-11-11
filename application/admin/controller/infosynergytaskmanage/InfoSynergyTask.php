@@ -119,37 +119,40 @@ class InfoSynergyTask extends Backend
                     }
                     if ($lens) {
                         $dataLens = [];
-                        $recipeLens = [];
                         foreach ($lens['original_sku'] as $k => $v) {
                             //镜架数据
                             $dataLens[$k]['tid'] = $this->model->id;
-                            $dataLens[$k]['original_name'] = $lens['original_name'][$k];
-                            $dataLens[$k]['original_sku'] = $lens['original_sku'][$k];
-                            $dataLens[$k]['original_number'] = $lens['original_number'][$k];
-                            $dataLens[$k]['change_type'] = $change_type;
-                            $dataLens[$k]['recipe_type'] = $lens['recipe_type'][$k];
-                            $dataLens[$k]['lens_type'] = $lens['lens_type'][$k];
-                            $dataLens[$k]['coating_type'] = $lens['coating_type'][$k];
+                            $dataLens[$k]['increment_id'] = $params['synergy_order_number'] ?: '';
+                            $dataLens[$k]['platform_type'] = $params['order_platform'] ?: 0;
+                            $dataLens[$k]['original_name'] = $lens['original_name'][$k] ?: '';
+                            $dataLens[$k]['original_sku'] = $lens['original_sku'][$k] ?: '';
+                            $dataLens[$k]['original_number'] = $lens['original_number'][$k] ?: '';
+                            $dataLens[$k]['change_type'] = $change_type ?: '';
+                            $dataLens[$k]['recipe_type'] = $lens['recipe_type'][$k] ?: '';
+                            $dataLens[$k]['lens_type'] = $lens['lens_type'][$k] ?: '';
+                            $dataLens[$k]['coating_type'] = $lens['coating_type'][$k] ?: '';
                             //镜片数据
-                            $recipeLens[$k]['od_sph'] = $lens['od_sph'][$k];
-                            $recipeLens[$k]['od_cyl'] = $lens['od_cyl'][$k];
-                            $recipeLens[$k]['od_axis'] = $lens['od_axis'][$k];
-                            $recipeLens[$k]['od_add'] = $lens['od_add'][$k];
-                            $recipeLens[$k]['pd_r'] = $lens['pd_r'][$k];
-                            $recipeLens[$k]['od_pv'] = $lens['od_pv'][$k];
-                            $recipeLens[$k]['od_bd'] = $lens['od_bd'][$k];
-                            $recipeLens[$k]['od_pv_r'] = $lens['od_pv_r'][$k];
-                            $recipeLens[$k]['od_bd_r'] = $lens['od_bd_r'][$k];
-                            $recipeLens[$k]['os_sph'] = $lens['os_sph'][$k];
-                            $recipeLens[$k]['os_cyl'] = $lens['os_cyl'][$k];
-                            $recipeLens[$k]['os_axis'] = $lens['os_axis'][$k];
-                            $recipeLens[$k]['os_add'] = $lens['os_add'][$k];
-                            $recipeLens[$k]['pd_l'] = $lens['pd_l'][$k];
-                            $recipeLens[$k]['os_pv'] = $lens['os_pv'][$k];
-                            $recipeLens[$k]['os_bd'] = $lens['os_bd'][$k];
-                            $recipeLens[$k]['os_pv_r'] = $lens['os_pv_r'][$k];
-                            $recipeLens[$k]['os_bd_r'] = $lens['os_bd_r'][$k];
-                            $dataLens[$k]['options'] = serialize($recipeLens[$k]);
+                            $dataLens[$k]['second_name'] = $lens['second_name'][$k] ?: '';
+                            $dataLens[$k]['zsl']         = $lens['zsl'][$k] ?: ''; 
+                            $dataLens[$k]['od_sph'] = $lens['od_sph'][$k] ?: '';
+                            $dataLens[$k]['od_cyl'] = $lens['od_cyl'][$k] ?: '';
+                            $dataLens[$k]['od_axis'] = $lens['od_axis'][$k] ?: '';
+                            $dataLens[$k]['od_add'] = $lens['od_add'][$k] ?: '';
+                            $dataLens[$k]['pd_r'] = $lens['pd_r'][$k] ?: '';
+                            $dataLens[$k]['od_pv'] = $lens['od_pv'][$k] ?: '';
+                            $dataLens[$k]['od_bd'] = $lens['od_bd'][$k] ?: '';
+                            $dataLens[$k]['od_pv_r'] = $lens['od_pv_r'][$k] ?: '';
+                            $dataLens[$k]['od_bd_r'] = $lens['od_bd_r'][$k] ?: '';
+                            $dataLens[$k]['os_sph'] = $lens['os_sph'][$k] ?: '';
+                            $dataLens[$k]['os_cyl'] = $lens['os_cyl'][$k] ?: '';
+                            $dataLens[$k]['os_axis'] = $lens['os_axis'][$k] ?: '';
+                            $dataLens[$k]['os_add'] = $lens['os_add'][$k] ?: '';
+                            $dataLens[$k]['pd_l'] = $lens['pd_l'][$k] ?: '';
+                            $dataLens[$k]['os_pv'] = $lens['os_pv'][$k] ?: '';
+                            $dataLens[$k]['os_bd'] = $lens['os_bd'][$k] ?: '';
+                            $dataLens[$k]['os_pv_r'] = $lens['os_pv_r'][$k] ?: '';
+                            $dataLens[$k]['os_bd_r'] = $lens['os_bd_r'][$k] ?: '';
+                           // $dataLens[$k]['options'] = serialize($recipeLens[$k]);
                             $dataLens[$k]['create_person'] = session('admin.nickname');
                             $dataLens[$k]['create_time']   = date("Y-m-d H:i:s", time());
                         }
@@ -200,6 +203,9 @@ class InfoSynergyTask extends Backend
             $params = $this->request->post("row/a");
             $item = isset($params['item']) ? $params['item']  : '';
             $lens = isset($params['lens']) ? $params['lens']  : '';
+            //更改类型
+            $change_type = $params['change_type'];
+            unset($params['change_type']);
             if ($params) {
                 $params = $this->preExcludeFields($params);
                 $result = false;
@@ -227,7 +233,7 @@ class InfoSynergyTask extends Backend
                     if ($item) {
                         foreach ($item as $arr) {
                             $data = [];
-                            $data['tid'] = $arr['id'];
+                            $data['tid'] = $arr['id'];                                                    
                             $data['original_sku'] = !empty($arr['original_sku']) ? $arr['original_sku'] : '';
                             $data['original_number'] = !empty($arr['original_number']) ? $arr['original_number'] : '';
                             $data['change_sku'] = !empty($arr['change_sku']) ? $arr['change_sku'] : '';
@@ -239,37 +245,40 @@ class InfoSynergyTask extends Backend
                     }
                     if ($lens) {
                         $dataLens = [];
-                        $recipeLens = [];
                         foreach ($lens['id'] as $k => $v) {
                             //镜架数据
                             $dataLens[$k]['id'] = $v;
-                            $dataLens[$k]['original_name'] = $lens['original_name'][$k];
-                            $dataLens[$k]['original_sku'] = $lens['original_sku'][$k];
-                            $dataLens[$k]['original_number'] = $lens['original_number'][$k];
-                            $dataLens[$k]['change_type'] = 2;
-                            $dataLens[$k]['recipe_type'] = $lens['recipe_type'][$k];
-                            $dataLens[$k]['lens_type'] = $lens['lens_type'][$k];
-                            $dataLens[$k]['coating_type'] = $lens['coating_type'][$k];
+                            $dataLens[$k]['increment_id'] = $params['synergy_order_number'] ?: '';
+                            $dataLens[$k]['platform_type'] = $params['order_platform'] ?: 0;  
+                            $dataLens[$k]['original_name'] = $lens['original_name'][$k] ?: '';
+                            $dataLens[$k]['original_sku'] = $lens['original_sku'][$k] ?: '';
+                            $dataLens[$k]['original_number'] = $lens['original_number'][$k] ?: '';
+                            $dataLens[$k]['change_type'] = $change_type ?: 2;
+                            $dataLens[$k]['recipe_type'] = $lens['recipe_type'][$k] ?: '';
+                            $dataLens[$k]['lens_type'] = $lens['lens_type'][$k] ?: '';
+                            $dataLens[$k]['coating_type'] = $lens['coating_type'][$k] ?: '';
                             //镜片数据
-                            $recipeLens[$k]['od_sph'] = $lens['od_sph'][$k];
-                            $recipeLens[$k]['od_cyl'] = $lens['od_cyl'][$k];
-                            $recipeLens[$k]['od_axis'] = $lens['od_axis'][$k];
-                            $recipeLens[$k]['od_add'] = $lens['od_add'][$k];
-                            $recipeLens[$k]['pd_r'] = $lens['pd_r'][$k];
-                            $recipeLens[$k]['od_pv'] = $lens['od_pv'][$k];
-                            $recipeLens[$k]['od_bd'] = $lens['od_bd'][$k];
-                            $recipeLens[$k]['od_pv_r'] = $lens['od_pv_r'][$k];
-                            $recipeLens[$k]['od_bd_r'] = $lens['od_bd_r'][$k];
-                            $recipeLens[$k]['os_sph'] = $lens['os_sph'][$k];
-                            $recipeLens[$k]['os_cyl'] = $lens['os_cyl'][$k];
-                            $recipeLens[$k]['os_axis'] = $lens['os_axis'][$k];
-                            $recipeLens[$k]['os_add'] = $lens['os_add'][$k];
-                            $recipeLens[$k]['pd_l'] = $lens['pd_l'][$k];
-                            $recipeLens[$k]['os_pv'] = $lens['os_pv'][$k];
-                            $recipeLens[$k]['os_bd'] = $lens['os_bd'][$k];
-                            $recipeLens[$k]['os_pv_r'] = $lens['os_pv_r'][$k];
-                            $recipeLens[$k]['os_bd_r'] = $lens['os_bd_r'][$k];
-                            $dataLens[$k]['options'] = serialize($recipeLens[$k]);
+                            $dataLens[$k]['second_name'] = $lens['second_name'] ?: '';
+                            $dataLens[$k]['zsl']         = $lens['zsl'] ?: ''; 
+                            $dataLens[$k]['od_sph'] = $lens['od_sph'][$k] ?: '';
+                            $dataLens[$k]['od_cyl'] = $lens['od_cyl'][$k] ?: '';
+                            $dataLens[$k]['od_axis'] = $lens['od_axis'][$k] ?: '';
+                            $dataLens[$k]['od_add'] = $lens['od_add'][$k] ?: '';
+                            $dataLens[$k]['pd_r'] = $lens['pd_r'][$k] ?: '';
+                            $dataLens[$k]['od_pv'] = $lens['od_pv'][$k] ?: '';
+                            $dataLens[$k]['od_bd'] = $lens['od_bd'][$k] ?: '';
+                            $dataLens[$k]['od_pv_r'] = $lens['od_pv_r'][$k] ?: '';
+                            $dataLens[$k]['od_bd_r'] = $lens['od_bd_r'][$k] ?: '';
+                            $dataLens[$k]['os_sph'] = $lens['os_sph'][$k] ?: '';
+                            $dataLens[$k]['os_cyl'] = $lens['os_cyl'][$k] ?: '';
+                            $dataLens[$k]['os_axis'] = $lens['os_axis'][$k] ?: '';
+                            $dataLens[$k]['os_add'] = $lens['os_add'][$k] ?: '';
+                            $dataLens[$k]['pd_l'] = $lens['pd_l'][$k] ?: '';
+                            $dataLens[$k]['os_pv'] = $lens['os_pv'][$k] ?: '';
+                            $dataLens[$k]['os_bd'] = $lens['os_bd'][$k] ?: '';
+                            $dataLens[$k]['os_pv_r'] = $lens['os_pv_r'][$k] ?: '';
+                            $dataLens[$k]['os_bd_r'] = $lens['os_bd_r'][$k] ?: '';
+                            //$dataLens[$k]['options'] = serialize($recipeLens[$k]);
                             $dataLens[$k]['create_person'] = session('admin.nickname');
                             $dataLens[$k]['update_time']   = date("Y-m-d H:i:s", time());
                         }
