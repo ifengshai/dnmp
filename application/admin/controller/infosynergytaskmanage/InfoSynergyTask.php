@@ -445,9 +445,9 @@ class InfoSynergyTask extends Backend
             if ($res !== false) {
                 $row = $this->model->get($ids);
                 //如果是修改镜架的话更改库存
-                if ($row['synergy_task_id'] == 12) { //执行更改镜架的逻辑
+                if (12 == $row['synergy_task_id']) { //执行更改镜架的逻辑
                     (new Inventory())->changeFrame($row['id'], $row['order_platform'], $row['synergy_order_number']);
-                }elseif($row['synergy_task_id'] == 29){ //执行取消订单的逻辑
+                }elseif(14 == $row['synergy_task_id']){ //执行取消订单的逻辑
                     (new Inventory())->cancelOrder($row['id'], $row['order_platform'], $row['synergy_order_number']);
                 }
                 $this->success('操作成功');
