@@ -34,7 +34,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             }, operate: false
                         },
                         {field: 'id', title: __('Id')},
-                        {field: 'pid', title: __('Pid')},
+                        {field: 'pid', 
+                         title: __('Pid'),
+                        },
                         {field: 'name', title: __('Name')}, //formatter:Controller.api.formatter.task_status
                         {field: 'level',
                          title: __('Level'),

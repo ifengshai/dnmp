@@ -99,7 +99,7 @@ class SaleAfterIssue extends Model
      */
     public function issueList()
     {
-        $result = $this->field('id,pid,name')->select();
+        $result = $this->where(['is_del'=>1])->field('id,pid,name')->select();
         if(!$result){
             $finalArr =[];
             $finalArr[0] = '无';
