@@ -423,7 +423,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                             $('.contract_images').val(data.contract_images);
                             $('#c-contract_images').change();
 
-                            $(".supplier").val(data.supplier_id);
+                            $(".supplier").selectpicker('val', data.supplier_id);//默认选中
                             $(".supplier_address").val(data.supplier_address);
                             $(".total").val(data.total);
                             $(".freight").val(data.freight);
