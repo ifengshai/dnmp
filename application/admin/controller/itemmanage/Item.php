@@ -961,7 +961,6 @@ class Item extends Backend
         // ->select();
         // $vooguemeOrderList = collection($vooguemeOrderList)->toArray();
 
-        
 
         return $this->view->fetch();
     }
