@@ -626,13 +626,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                             formatter: Table.api.formatter.status,
                             operate: false
                         },
-                        {
-                            field: 'category_id', title: __('Category_id'),
-                            searchList: $.getJSON('itemmanage/item/ajaxGetItemCategoryList'),
-                            formatter: Table.api.formatter.status,
-                            operate: false
-                            //formatter: Controller.api.formatter.devicess
-                        },
+                        // {
+                        //     field: 'category_id', title: __('Category_id'),
+                        //     searchList: $.getJSON('itemmanage/item/ajaxGetItemCategoryList'),
+                        //     formatter: Table.api.formatter.status,
+                        //     operate: false
+                        // },
                         {
                             field: 'item_status', title: __('Item_status'),
                             searchList: { 1: '保存', 2: '提交审核', 3: '审核通过', 4: '审核拒绝', 5: '取消' },
