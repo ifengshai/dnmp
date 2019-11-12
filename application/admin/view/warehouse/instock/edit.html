@@ -135,7 +135,7 @@
                     <td>{$check_data[$v['sku']]['purchase_num']}</td>
                     <td>{$check_data[$v['sku']]['arrivals_num']}</td>
                     <td>{$check_data[$v['sku']]['quantity_num']}</td>
-                    <td><input id="c-sample_num" class="form-control sample_num" name="sample_num[]" readonly type="text" value="{$v.sample_num}"></td>
+                    <td><input id="c-sample_num" class="form-control sample_num" readonly name="sample_num[]" readonly type="text" value="{$v.sample_num}"></td>
                     <td><input id="c-purchase_remark" class="form-control in_stock_num" name="in_stock_num[]" oninput="if(value < 0){alert('只能输入正整数！');value = 0}" type="text" value="{$v.in_stock_num}"></td>
                  
                     <td>
@@ -171,7 +171,7 @@
             <td></td>
             <td></td>
             <td></td>
-            <td><input id="c-sample_num" class="form-control sample_num" name="sample_num[]" oninput="if(value < 0){alert('只能输入正整数！');value = 0}" type="text"></td>
+            <td><input id="c-sample_num" class="form-control sample_num" name="sample_num[]" readonly oninput="if(value < 0){alert('只能输入正整数！');value = 0}" type="text"></td>
     
             <td><input id="c-purchase_remark" class="form-control in_stock_num" oninput="if(value < 0){alert('只能输入正整数！');value = 0}" name="in_stock_num[]" type="text"></td>
          
