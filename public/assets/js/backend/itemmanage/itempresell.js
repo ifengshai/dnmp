@@ -223,7 +223,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui'], function ($, 
                     if(time_value>now){
                         //console.log(1111);
                     }else{
-                        Layer.alert('预售开始时间超过当前时间,如果添加则默认开始预售');
+                        Layer.alert('预售开始时间小于当前时间,如果添加则默认开始预售');
                         //console.log(2222);
                     }
                     //console.log(now);
