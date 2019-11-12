@@ -29,11 +29,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                         { field: 'id', title: __('Id') },
                         { field: 'sku', title: __('Sku'), operate: 'like' },
                         { field: 'name', title: __('商品名称'), operate: false },
-                        {
-                            field: 'is_open', title: __('SKU启用状态'), custom: { 1: 'success', 2: 'danger' },
-                            searchList: { 1: '启用', 2: '禁用' }, operate: false,
-                            formatter: Table.api.formatter.status
-                        },
+                        // {
+                        //     field: 'is_open', title: __('SKU启用状态'), custom: { 1: 'success', 2: 'danger' },
+                        //     searchList: { 1: '启用', 2: '禁用' }, operate: false,
+                        //     formatter: Table.api.formatter.status
+                        // },
 
                         { field: 'storehouse.coding', title: __('Storehouse.coding'), operate: 'like' },
                         { field: 'storehouse.library_name', title: __('Storehouse.library_name'), operate: 'like' },
