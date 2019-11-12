@@ -37,6 +37,6 @@ class Contract extends Model
      */
     public function getContractData()
     {
-        return $this->where('status', 2)->select();
+        return $this->where('status', 2)->order('createtime desc')->select();
     }
 }

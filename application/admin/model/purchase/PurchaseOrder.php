@@ -33,7 +33,7 @@ class PurchaseOrder extends Model
     {
         $where['purchase_status'] = 7;
         $where['check_status']  = ['in', [0, 1]];
-        $data = $this->where($where)->column('purchase_number', 'id');
+        $data = $this->where($where)->order('createtime desc')->column('purchase_number', 'id');
         return $data;
     }
 
@@ -47,7 +47,7 @@ class PurchaseOrder extends Model
         }
         $where['purchase_status'] = 7;
         $where['check_status']  = ['in', $check_status];
-        $data = $this->where($where)->column('purchase_number', 'id');
+        $data = $this->where($where)->order('createtime desc')->column('purchase_number', 'id');
         return $data;
     }
 
