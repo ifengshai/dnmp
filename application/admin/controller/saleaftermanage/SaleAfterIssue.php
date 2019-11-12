@@ -58,7 +58,7 @@ class SaleAfterIssue extends Backend
             $list = collection($list)->toArray();
             foreach ($list as $k =>$v ){
                 if($v['pid']){
-                    $list[$k]['pid'] = $rsAll[$v['pid']];
+                    $list[$k]['pidName'] = $rsAll[$v['pid']];
                 }
 
             }
@@ -221,5 +221,18 @@ class SaleAfterIssue extends Backend
         }
         $this->view->assign("row", $row);
         return $this->view->fetch();
+    }
+    public function ajaxGetIssuePname()
+    {
+        if($this->request->isAjax()){
+            $json = $this->model->getAjaxIssueList();
+            if(!$json){
+                $json = [0=>'请先添加任务问题'];
+            }
+            $arrToObject = (object)($json);
+            return json($arrToObject);
+        }else{
+            return $this->error('404 Not Found');    
+        }
     }
 }

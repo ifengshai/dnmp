@@ -737,6 +737,12 @@ class OrderReturn extends Backend
     {
         if ($this->request->isAjax()) {
             $map['id'] = ['in', $ids];
+            $row = $this->model->where($map)->field('id,order_status')->select();
+            foreach ($row as $v) {
+                if ( 1 != $v['order_status']) {
+                    $this->error('只有新建状态才能操作！！');
+                }
+            }
             $data['order_status'] = 5;
             $result = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
             if (false !== $result) {
@@ -753,13 +759,18 @@ class OrderReturn extends Backend
     {
         if ($this->request->isAjax()) {
             $map['id'] = ['in', $ids];
-            $map['order_status'] = 1;
+            $row = $this->model->where($map)->field('id,order_status')->select();
+            foreach ($row as $v) {
+                if ( 1 != $v['order_status']) {
+                    $this->error('只有新建状态才能操作！！');
+                }
+            }
             $data['order_status'] = 2;
             $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
             if ($res !== false) {
-                $this->success('启动成功');
+                $this->success('提交成功');
             } else {
-                $this->error('启动失败');
+                $this->error('提交失败');
             }
         } else {
             $this->error('404 Not found');
@@ -772,7 +783,12 @@ class OrderReturn extends Backend
     {
         if ($this->request->isAjax()) {
             $map['id'] = ['in', $ids];
-            $map['order_status'] = 2;
+            $row = $this->model->where($map)->field('id,order_status')->select();
+            foreach ($row as $v) {
+                if ( 2 != $v['order_status']) {
+                    $this->error('只有待审核状态才能操作！！');
+                }
+            }
             $data['order_status'] = 3;
             $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
             if ($res !== false) {
@@ -791,7 +807,12 @@ class OrderReturn extends Backend
     {
         if ($this->request->isAjax()) {
             $map['id'] = ['in', $ids];
-            $map['order_status'] =2;
+            $row = $this->model->where($map)->field('id,order_status')->select();
+            foreach ($row as $v) {
+                if ( 2 != $v['order_status']) {
+                    $this->error('只有待审核状态才能操作！！');
+                }
+            }
             $data['order_status'] = 4;
             $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
             if ($res !== false) {

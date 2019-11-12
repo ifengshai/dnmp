@@ -34,8 +34,15 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             }, operate: false
                         },
                         {field: 'id', title: __('Id')},
-                        {field: 'pid', 
+                        {
+                            field:'pid',
+                            title:__('Pid'),
+                            searchList:$.getJSON('saleaftermanage/sale_after_issue/ajaxGetIssuePname'),
+                            visible:false
+                        },
+                        {field: 'pidName', 
                          title: __('Pid'),
+                         operate:false
                         },
                         {field: 'name', title: __('Name')}, //formatter:Controller.api.formatter.task_status
                         {field: 'level',

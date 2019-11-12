@@ -39,7 +39,7 @@ class ZeeloolPrescriptionDetailHelper{
 		// }
 
 		if($increment_id){
-			$querySql = "select sfoi.discount_amount,sfo.increment_id,sfo.customer_email,sfo.customer_firstname,sfo.customer_lastname,sfoi.product_options,sfoi.order_id,sfo.`status`,sfoi.sku,sfoi.qty_ordered,sfoi.name,sfo.created_at
+			$querySql = "select sfoi.discount_amount,sfo.increment_id,sfo.customer_email,sfo.customer_firstname,sfo.customer_lastname,sfo.store_id,sfoi.product_options,sfoi.order_id,sfo.`status`,sfoi.sku,sfoi.qty_ordered,sfoi.name,sfo.created_at
 			from sales_flat_order_item sfoi
 			left join sales_flat_order sfo on sfoi.order_id=sfo.entity_id 
 			where sfo.increment_id={$increment_id}";
@@ -217,6 +217,10 @@ class ZeeloolPrescriptionDetailHelper{
 			}
 			if(isset($item_value['customer_lastname'])){
 				$items[$item_key]['customer_lastname']  = $item_value['customer_lastname'];
+			}
+			//添加上订单来源
+			if(isset($item_value['store_id'])){
+				$items[$item_key]['store_id'] = $item_value['store_id'];
 			}
 
 		}

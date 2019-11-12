@@ -82,7 +82,7 @@ class SaleAfterIssue extends Model
      */
     public function getAjaxIssueList()
     {
-        $result = $this->field('id,name')->select();
+        $result = $this->where(['is_del'=>1])->field('id,name')->select();
         if(!$result){
             return [0=>'问题不存在请添加问题'];
         }

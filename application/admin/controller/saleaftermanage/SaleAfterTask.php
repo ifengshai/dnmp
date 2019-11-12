@@ -124,7 +124,9 @@ class SaleAfterTask extends Backend
             }
             if ($params) {
                 $params = $this->preExcludeFields($params);
-
+                // echo '<pre>';
+                // var_dump($params);
+                // exit;
                 if ($this->dataLimit && $this->dataLimitFieldAutoFill) {
                     $params[$this->dataLimitField] = $this->auth->id;
                 }

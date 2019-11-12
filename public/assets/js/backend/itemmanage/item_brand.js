@@ -42,7 +42,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             custom: {  0: 'yellow', 1: 'blue' },
                             formatter: Table.api.formatter.status
                         },
-                        {field:'images',title:__('Images'),formatter:Table.api.formatter.images,operate:false},
+                        {field:'images',title:__('Images'),formatter:Table.api.formatter.images,events:Table.api.events.image},
                         {field: 'create_time', title: __('Create_time'), operate:'RANGE', addclass:'datetimerange'},
                         {field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate}
                     ]
