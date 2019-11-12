@@ -173,6 +173,7 @@ class PurchaseOrder extends Backend
                 $this->error(__('必须选择相同的供应商！！', url('admin/new_product/index')));
             }
             $this->assign('row', $row);
+            $this->assign('is_new_product', 1);
         }
 
 
@@ -296,7 +297,6 @@ class PurchaseOrder extends Backend
                     if (count(array_filter($sku)) < 1) {
                         $this->error('sku不能为空！！');
                     }
-
 
                     $result = $row->allowField(true)->save($params);
 

@@ -156,7 +156,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                 sortName: 'id',
                 columns: [
                     [
-                        { checkbox: true },
+                        // { checkbox: true },
                         { field: 'id', title: __('Id'), operate: false },
                         { field: 'title', title: '标题', operate: false },
                         { field: 'color', title: '颜色', operate: false },
