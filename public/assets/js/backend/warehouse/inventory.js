@@ -294,7 +294,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'editable'], function
                             { field: 'sample_num', title: __('留样库存'), operate: false },
 
                             { field: 'on_way_stock', title: __('在途库存'), operate: false },
-                            { field: 'is_open', title: __('启用状态'), searchList: { 1: '启用', 2: '禁用' }, formatter: Table.api.formatter.status }
+                            { field: 'is_open', title: __('启用状态'), searchList: { 1: '启用', 2: '禁用' }, operate: false, formatter: Table.api.formatter.status }
                         ]
                     ]
                 });
@@ -523,7 +523,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'editable'], function
             // 初始化表格参数配置
             Table.api.init({
                 searchFormVisible: true,
-                
+
                 extend: {
                     index_url: 'warehouse/inventory/start' + location.search + '&inventory_id=' + Config.inventory_id,
                     edit_url: 'warehouse/inventory/startEdit',
