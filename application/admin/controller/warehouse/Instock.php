@@ -283,7 +283,7 @@ class Instock extends Backend
 
         //查询对应质检数据
         $checkItem = new \app\admin\model\warehouse\CheckItem;
-        $check_data = $checkItem->where('check_id', $row['check_id'])->order('createtime desc')->column('*', 'sku');
+        $check_data = $checkItem->where('check_id', $row['check_id'])->column('*', 'sku');
         /***********end***************/
         $this->assign('item', $item);
         $this->assign('check_data', $check_data);
@@ -324,7 +324,7 @@ class Instock extends Backend
 
         //查询对应质检数据
         $checkItem = new \app\admin\model\warehouse\CheckItem;
-        $check_data = $checkItem->where('check_id', $row['check_id'])->order('createtime desc')->column('*', 'sku');
+        $check_data = $checkItem->where('check_id', $row['check_id'])->column('*', 'sku');
         /***********end***************/
         $this->assign('item', $item);
         $this->assign('check_data', $check_data);
