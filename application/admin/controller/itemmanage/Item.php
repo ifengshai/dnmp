@@ -912,6 +912,7 @@ class Item extends Backend
         $hasWhere['instock_num'] = ['>', 0];
         $list = $purchase->hasWhere('purchaseOrderItem', $hasWhere)
             ->where($purchase_map)
+            ->field('PurchaseOrderItem.*')
             ->cache(true, 3600)
             ->select();
         foreach ($list as &$v) {
@@ -927,11 +928,12 @@ class Item extends Backend
         $hasWhere['sku'] = $row['sku'];
         $hasWhere['instock_num'] = 0;
         $info = $purchase->hasWhere('purchaseOrderItem', $hasWhere)
+            ->field('PurchaseOrderItem.*')
             ->where($purchase_map)
             ->cache(true, 3600)
             ->group('PurchaseOrderItem.id')
             ->select();
-        $this->assign('info', $info ?? []);
+        $this->assign('info', $info);
 
 
          /**
