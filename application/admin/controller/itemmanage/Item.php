@@ -914,12 +914,8 @@ class Item extends Backend
             ->where($purchase_map)
             ->cache(true, 3600)
             ->select();
-
-        //查询样品数量
-        $check = new \app\admin\model\warehouse\CheckItem;
-        $check_list = $check->where('sku', $row['sku'])->cache(true, 3600)->column('sum(sample_num) as sample_num', 'sku');
         foreach ($list as &$v) {
-            $v['sample_stock'] = $check_list[$v['sku']]['sample_num'];
+            $v['sample_stock'] = $row['sample_num'];
         }
         unset($v);
         $this->assign('list', $list);
@@ -933,8 +929,9 @@ class Item extends Backend
         $info = $purchase->hasWhere('purchaseOrderItem', $hasWhere)
             ->where($purchase_map)
             ->cache(true, 3600)
+            ->group('PurchaseOrderItem.id')
             ->select();
-        $this->assign('info', $info);
+        $this->assign('info', $info ?? []);
 
 
          /**
