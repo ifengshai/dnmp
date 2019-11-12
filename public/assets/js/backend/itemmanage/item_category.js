@@ -37,7 +37,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {field: 'pid', title: __('Pid')},
                         {field: 'name', title: __('Name')},
                         {field: 'is_putaway', title: __('Is_putaway'),
-                         searchList: { 1: '上架', 2: '下架' },
+                         searchList: { 1: '上架', 0: '下架' },
                          custom: {  0: 'yellow', 1: 'blue' },
                          formatter: Table.api.formatter.status
                         },
@@ -85,6 +85,38 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         Backend.api.ajax({
                             url: Config.moduleurl + "/itemmanage/item_category/uploadItemCategory",
                             data: { ids: ids,platformId:platformId }
+                        }, function (data, ret) {
+                            table.bootstrapTable('refresh');
+                            Layer.close(index);
+                        });
+                    }
+                );
+            });
+            //商品上架
+            $(document).on('click', '.btn-start', function () {
+                var ids = Table.api.selectedids(table);
+                Layer.confirm(
+                    __('确定要商品分类上架吗'),
+                    function (index) {
+                        Backend.api.ajax({
+                            url: "itemmanage/item_category/putaway",
+                            data: { ids: ids }
+                        }, function (data, ret) {
+                            table.bootstrapTable('refresh');
+                            Layer.close(index);
+                        });
+                    }
+                );
+            });
+            //商品下架
+            $(document).on('click', '.btn-forbidden', function () {
+                var ids = Table.api.selectedids(table);
+                Layer.confirm(
+                    __('确定要商品分类下架吗'),
+                    function (index) {
+                        Backend.api.ajax({
+                            url: "itemmanage/item_category/soldout",
+                            data: { ids: ids }
                         }, function (data, ret) {
                             table.bootstrapTable('refresh');
                             Layer.close(index);

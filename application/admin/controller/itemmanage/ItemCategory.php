@@ -295,5 +295,53 @@ class ItemCategory extends Backend
         }
         $this->error(__('Parameter %s can not be empty', 'ids'));
     }
+    /**
+     * 分类上架
+     */
+    public function putaway($ids = null)
+    {
+        if ($this->request->isAjax()) {
+            $map['id'] = ['in', $ids];
+            $row = $this->model->where($map)->field('id,is_putaway')->select();
+            foreach ($row as $v) {
+                if ( 0 !=$v['is_putaway']) {
+                    $this->error('只有下架状态才能操作！！');
+                }
+            }
+            $data['is_putaway'] = 1;
+            $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
+            if ($res !== false) {
+                $this->success('上架成功');
+            } else {
+                $this->error('上架失败');
+            }
+        } else {
+            $this->error('404 Not found');
+        }
+    }
+    /***
+     * 分类下架
+     */
+    public function soldout($ids = null)
+    {
+        if ($this->request->isAjax()) {
+            $map['id'] = ['in', $ids];
+            $row = $this->model->where($map)->field('id,is_putaway')->select();
+            foreach ($row as $v) {
+                if ( 1 != $v['is_putaway']) {
+                    $this->error('只有上架状态才能操作！！');
+                }
+            }
+            $data['is_putaway'] = 0;
+            $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
+            if ($res !== false) {
+                $this->success('下架成功');
+            } else {
+                $this->error('下架失败');
+            }
+        } else {
+            $this->error('404 Not found');
+        }
+    }
 
 }

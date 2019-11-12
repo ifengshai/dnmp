@@ -6,6 +6,8 @@ return [
     'Name'        => '分类名称',
     'Is_putaway'  => '是否上架',
     'Level'       => '分类等级',
+    'Putaway'     => '上架',
+    'Soldout'     => '下架',
     'Is_upload_zeelool' => '是否已经上传到zeelool',
     'Is_upload_voogueme'=> '是否已经上传到voogueme',
     'Is_upload_nihao'   =>'是否已经上传到nihao',
