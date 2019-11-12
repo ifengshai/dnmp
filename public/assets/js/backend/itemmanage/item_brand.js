@@ -42,7 +42,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             custom: {  0: 'yellow', 1: 'blue' },
                             formatter: Table.api.formatter.status
                         },
-                        {field:'images',title:__('Images'),formatter:Table.api.formatter.images,operate:false},
+                        {field:'images',title:__('Images'),formatter:Table.api.formatter.images,events:Table.api.events.image},
                         {field: 'create_time', title: __('Create_time'), operate:'RANGE', addclass:'datetimerange'},
                         {field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate}
                     ]
@@ -61,6 +61,24 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
         api: {
             bindevent: function () {
                 Form.api.bindevent($("form[role=form]"));
+            },
+            image: function (value, row, index, custom) {
+                var classname = typeof custom !== 'undefined' ? custom : 'img-sm img-center';
+               //增加图片可以点击
+               return '<a target="_blank;" href="' + Fast.api.cdnurl(value) + '"><img class="' + classname + '" src="' + Fast.api.cdnurl(value) + '" /></a>';
+              
+              
+            },
+            images: function (value, row, index, custom) {
+                var classname = typeof custom !== 'undefined' ? custom : 'img-sm img-center';
+                var arr = value.split(',');
+                var html = [];
+                $.each(arr, function (i, value) {
+                    //增加图片可以点击
+                    html.push('<a target="_blank;" href="' + Fast.api.cdnurl(value) + '"><img class="' + classname + '" src="' + Fast.api.cdnurl(value) + '" /></a>');
+                 
+                });
+                return html.join(' ');
             }
         }
     };
