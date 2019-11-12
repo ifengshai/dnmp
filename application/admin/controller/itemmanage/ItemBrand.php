@@ -31,5 +31,53 @@ class ItemBrand extends Backend
      * 因此在当前控制器中可不用编写增删改查的代码,除非需要自己控制这部分逻辑
      * 需要将application/admin/library/traits/Backend.php中对应的方法复制到当前控制器,然后进行修改
      */
+        /***
+     * 启用商品
+     */
+    public function startItemBrand($ids = null)
+    {
+        if ($this->request->isAjax()) {
+            $map['id'] = ['in', $ids];
+            $row = $this->model->where($map)->field('id,status')->select();
+            foreach ($row as $v) {
+                if ( 0 !=$v['status']) {
+                    $this->error('只有禁用状态才能操作！！');
+                }
+            }
+            $data['status'] = 1;
+            $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
+            if ($res !== false) {
+                $this->success('启动成功');
+            } else {
+                $this->error('启动失败');
+            }
+        } else {
+            $this->error('404 Not found');
+        }
+    }
+    /***
+     * 禁止商品
+     */
+    public function forbiddenItemBrand($ids = null)
+    {
+        if ($this->request->isAjax()) {
+            $map['id'] = ['in', $ids];
+            $row = $this->model->where($map)->field('id,status')->select();
+            foreach ($row as $v) {
+                if ( 1 != $v['status']) {
+                    $this->error('只有启用状态才能操作！！');
+                }
+            }
+            $data['status'] = 0;
+            $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
+            if ($res !== false) {
+                $this->success('禁止成功');
+            } else {
+                $this->error('禁止失败');
+            }
+        } else {
+            $this->error('404 Not found');
+        }
+    }
 
 }

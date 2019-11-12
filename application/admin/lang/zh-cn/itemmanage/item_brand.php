@@ -7,5 +7,7 @@ return [
     'Status'      => '状态',
     'Descb'       => '品牌描述',
     'Images'      => '品牌图片',
-    'Create_time' => '创建时间'
+    'Create_time' => '创建时间',
+    'Start'       => '启用',
+    'Forbidden'   => '禁用'
 ];

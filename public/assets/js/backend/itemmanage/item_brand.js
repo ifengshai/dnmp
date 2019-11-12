@@ -51,6 +51,38 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
 
             // 为表格绑定事件
             Table.api.bindevent(table);
+            //商品品牌启用
+            $(document).on('click', '.btn-start', function () {
+                var ids = Table.api.selectedids(table);
+                Layer.confirm(
+                    __('确定要启用商品品牌吗'),
+                    function (index) {
+                        Backend.api.ajax({
+                            url: "itemmanage/item_brand/startItemBrand",
+                            data: { ids: ids }
+                        }, function (data, ret) {
+                            table.bootstrapTable('refresh');
+                            Layer.close(index);
+                        });
+                    }
+                );
+            });
+            //商品品牌禁用
+            $(document).on('click', '.btn-forbidden', function () {
+                var ids = Table.api.selectedids(table);
+                Layer.confirm(
+                    __('确定要禁用商品品牌吗'),
+                    function (index) {
+                        Backend.api.ajax({
+                            url: "itemmanage/item_brand/forbiddenItemBrand",
+                            data: { ids: ids }
+                        }, function (data, ret) {
+                            table.bootstrapTable('refresh');
+                            Layer.close(index);
+                        });
+                    }
+                );
+            });
         },
         add: function () {
             Controller.api.bindevent();
