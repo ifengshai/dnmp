@@ -61,24 +61,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
         api: {
             bindevent: function () {
                 Form.api.bindevent($("form[role=form]"));
-            },
-            image: function (value, row, index, custom) {
-                var classname = typeof custom !== 'undefined' ? custom : 'img-sm img-center';
-               //增加图片可以点击
-               return '<a target="_blank;" href="' + Fast.api.cdnurl(value) + '"><img class="' + classname + '" src="' + Fast.api.cdnurl(value) + '" /></a>';
-              
-              
-            },
-            images: function (value, row, index, custom) {
-                var classname = typeof custom !== 'undefined' ? custom : 'img-sm img-center';
-                var arr = value.split(',');
-                var html = [];
-                $.each(arr, function (i, value) {
-                    //增加图片可以点击
-                    html.push('<a target="_blank;" href="' + Fast.api.cdnurl(value) + '"><img class="' + classname + '" src="' + Fast.api.cdnurl(value) + '" /></a>');
-                 
-                });
-                return html.join(' ');
             }
         }
     };
