@@ -397,26 +397,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast'], func
                         return false;
                     });
                 });
-                //根据填写的商品名称找出商品是否重复
-                $(document).on('blur', '.c-name', function () {
-                    var name = $(this).val();
-                    if (name.length > 0) {
-                        Backend.api.ajax({
-                            url: 'new_product/ajaxGetInfoName',
-                            data: { name: name }
-                        }, function (data, ret) {
-                            console.log(ret.data);
-                            $('.btn-success').removeClass('btn-disabled disabled');
-                            return false;
-                        }, function (data, ret) {
-                            //失败的回调
-                            $('.btn-success').addClass('btn-disabled disabled');
-                            Layer.alert(ret.msg);
-                            return false;
-                        });
-                    }
-                    console.log(name);
-                });
+               
             }
         },
         frame: function () {

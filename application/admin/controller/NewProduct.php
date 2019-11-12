@@ -509,26 +509,26 @@ class NewProduct extends Backend
         }
     }
 
-    /***
-     * ajax请求比对商品名称是否重复
-     */
-    public function ajaxGetInfoName()
-    {
-        if ($this->request->isAjax()) {
-            $name = $this->request->post('name');
-            if (!$name) {
-                $this->error('参数错误，请重新尝试');
-            }
-            $result = $this->model->getInfoName($name);
-            if ($result < 1) {
-                return  $this->success('可以添加');
-            } else {
-                return $this->error('商品名称已经存在,请重新添加');
-            }
-        } else {
-            return $this->error(__('请求出错！！'));
-        }
-    }
+    // /***
+    //  * ajax请求比对商品名称是否重复
+    //  */
+    // public function ajaxGetInfoName()
+    // {
+    //     if ($this->request->isAjax()) {
+    //         $name = $this->request->post('name');
+    //         if (!$name) {
+    //             $this->error('参数错误，请重新尝试');
+    //         }
+    //         $result = $this->model->getInfoName($name);
+    //         if ($result < 1) {
+    //             return  $this->success('可以添加');
+    //         } else {
+    //             return $this->error('商品名称已经存在,请重新添加');
+    //         }
+    //     } else {
+    //         return $this->error(__('请求出错！！'));
+    //     }
+    // }
 
     /***
      * 编辑之后提交审核
