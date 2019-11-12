@@ -7,6 +7,7 @@ use app\admin\model\warehouse\StockHouse;
 use app\admin\model\itemmanage;
 use app\admin\model\itemmanage\Item;
 use think\Db;
+
 /**
  * SKU库位绑定
  *
@@ -64,7 +65,7 @@ class StockSku extends Backend
 
             //查询商品SKU
             $item = new \app\admin\model\itemmanage\Item;
-            $arr = $item->where('is_del',1)->column('name,is_open','sku');
+            $arr = $item->where('is_del', 1)->column('name,is_open', 'sku');
             foreach ($list as $k => $row) {
                 $row->getRelation('storehouse')->visible(['coding', 'library_name', 'status']);
                 $list[$k]['name'] = $arr[$row['sku']]['name'];
@@ -76,7 +77,7 @@ class StockSku extends Backend
 
             return json($result);
         }
-        
+
         return $this->view->fetch();
     }
 
@@ -93,6 +94,14 @@ class StockSku extends Backend
                 if ($this->dataLimit && $this->dataLimitFieldAutoFill) {
                     $params[$this->dataLimitField] = $this->auth->id;
                 }
+                //判断选择的库位是否已存在
+                $map['sku'] = $params['sku'];
+                $map['store_id'] = $params['store_id'];
+                $count = $this->model->where($map)->count();
+                if ($count > 　0) {
+                    $this->error('已存在此绑定关系！！');
+                }
+
                 $result = false;
                 Db::startTrans();
                 try {
@@ -102,7 +111,7 @@ class StockSku extends Backend
                         $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.add' : $name) : $this->modelValidate;
                         $this->model->validateFailException(true)->validate($validate);
                     }
-                    $params['create_person'] = session('admin.username');
+                    $params['create_person'] = session('admin.nickname');
                     $params['createtime'] = date('Y-m-d H:i:s', time());
                     $result = $this->model->allowField(true)->save($params);
                     Db::commit();
@@ -149,10 +158,21 @@ class StockSku extends Backend
                 $this->error(__('You have no permission'));
             }
         }
+
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
             if ($params) {
                 $params = $this->preExcludeFields($params);
+
+                //判断选择的库位是否已存在
+                $map['sku'] = $params['sku'];
+                $map['store_id'] = $params['store_id'];
+                $map['id'] = ['<>', $row->id];
+                $count = $this->model->where($map)->count();
+                if ($count > 　0) {
+                    $this->error('已存在此绑定关系！！');
+                }
+
                 $result = false;
                 Db::startTrans();
                 try {
@@ -162,6 +182,8 @@ class StockSku extends Backend
                         $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.edit' : $name) : $this->modelValidate;
                         $row->validateFailException(true)->validate($validate);
                     }
+
+
                     $result = $row->allowField(true)->save($params);
                     Db::commit();
                 } catch (ValidateException $e) {
@@ -192,5 +214,4 @@ class StockSku extends Backend
         $this->view->assign("row", $row);
         return $this->view->fetch();
     }
-
 }
