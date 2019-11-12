@@ -626,12 +626,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                             formatter: Table.api.formatter.status,
                             operate: false
                         },
-                        // {
-                        //     field: 'category_id', title: __('Category_id'),
-                        //     searchList: $.getJSON('itemmanage/item/ajaxGetItemCategoryList'),
-                        //     formatter: Table.api.formatter.status,
-                        //     operate: false
-                        // },
+                        {
+                            field: 'category_id', title: __('Category_id'),
+                            searchList: $.getJSON('itemmanage/item/ajaxGetItemCategoryList'),
+                            formatter: Table.api.formatter.status,
+                            operate: false
+                        },
                         {
                             field: 'item_status', title: __('Item_status'),
                             searchList: { 1: '保存', 2: '提交审核', 3: '审核通过', 4: '审核拒绝', 5: '取消' },
@@ -655,14 +655,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                             formatter: Table.api.formatter.status,
                             operate: false
                         },
-                        {
-                            field: 'is_presell',
-                            title: __('Is_presell'),
-                            searchList: { 1: '不是', 2: '是' },
-                            custom: { 1: 'blue', 2: 'red' },
-                            formatter: Table.api.formatter.status,
-                            operate: false
-                        },
+                        // {
+                        //     field: 'is_presell',
+                        //     title: __('Is_presell'),
+                        //     searchList: { 1: '不是', 2: '是' },
+                        //     custom: { 1: 'blue', 2: 'red' },
+                        //     formatter: Table.api.formatter.status,
+                        //     operate: false
+                        // },
                         { field: 'create_person', title: __('Create_person'), operate: false },
                         { field: 'create_time', title: __('Create_time'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime },
                         {
