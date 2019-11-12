@@ -931,9 +931,7 @@ class Item extends Backend
             ->cache(true, 3600)
             ->group('PurchaseOrderItem.id')
             ->select();
-
-        dump($info);die;
-        $this->assign('info', $info);
+        $this->assign('info', $info ?? []);
 
 
          /**
