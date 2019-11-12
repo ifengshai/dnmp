@@ -929,7 +929,7 @@ class Item extends Backend
         $info = $purchase->hasWhere('purchaseOrderItem', $hasWhere)
             ->where($purchase_map)
             ->cache(true, 3600)
-            ->group('purchaseOrderItem.id')
+            ->group('PurchaseOrderItem.id')
             ->select();
         $this->assign('info', $info);
 
