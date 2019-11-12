@@ -631,7 +631,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                             searchList: $.getJSON('itemmanage/item/ajaxGetItemCategoryList'),
                             formatter: Table.api.formatter.status,
                             operate: false
-                            //formatter: Controller.api.formatter.devicess
                         },
                         {
                             field: 'item_status', title: __('Item_status'),
@@ -656,14 +655,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                             formatter: Table.api.formatter.status,
                             operate: false
                         },
-                        {
-                            field: 'is_presell',
-                            title: __('Is_presell'),
-                            searchList: { 1: '不是', 2: '是' },
-                            custom: { 1: 'blue', 2: 'red' },
-                            formatter: Table.api.formatter.status,
-                            operate: false
-                        },
+                        // {
+                        //     field: 'is_presell',
+                        //     title: __('Is_presell'),
+                        //     searchList: { 1: '不是', 2: '是' },
+                        //     custom: { 1: 'blue', 2: 'red' },
+                        //     formatter: Table.api.formatter.status,
+                        //     operate: false
+                        // },
                         { field: 'create_person', title: __('Create_person'), operate: false },
                         { field: 'create_time', title: __('Create_time'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime },
                         {
