@@ -175,6 +175,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
         },
         edit: function () {
             Controller.api.bindevent();
+
         },
         api: {
             bindevent: function () {
@@ -469,8 +470,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                  return false;
                              });
                          }
-                     }else if(vals == 13){ //修改处方参数
-                        
+                     }else if(vals == 13){ //修改处方参数                     
                          if( synergyOrderId == 2){
                              Backend.api.ajax({
                                  url:'saleaftermanage/sale_after_task/ajax',
@@ -714,7 +714,19 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         $(".item_info").remove();
                     }
                 });
-
+                //显示/隐藏三级问题
+                $(document).on('click','.issueLevel',function(){
+                    var issueId = $(this).attr("id");
+                    var vals = $(this).offset().left+10;
+                    var node = $('#display-'+issueId);
+                    if(node.is(':hidden')){
+                        $('.three_level').hide();
+                        node.css("marginLeft",vals);
+                        node.show();
+                    }else{
+                        node.hide();
+                    }
+                });
             },
             formatter:{
                 orderDevice:function (value) {

@@ -99,7 +99,7 @@ class SaleAfterIssue extends Model
      */
     public function issueList()
     {
-        $result = $this->field('id,pid,name')->select();
+        $result = $this->where(['is_del'=>1])->field('id,pid,name')->select();
         if(!$result){
             $finalArr =[];
             $finalArr[0] = '无';
@@ -146,6 +146,15 @@ class SaleAfterIssue extends Model
         return $strIds;
     }
 
-
+    /***
+     * 查找问题分类的等级
+     * @param pid 问题分类的ID
+     */
+    public function findLevel($pid)
+    {
+        $where['id'] = $pid;
+        $where['is_del'] = 1;
+        return $this->where($where)->value('level');
+    }
 
 }

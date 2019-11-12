@@ -34,7 +34,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             }, operate: false
                         },
                         {field: 'id', title: __('Id')},
-                        {field: 'pid', title: __('Pid')},
+                        {field: 'pid', 
+                         title: __('Pid'),
+                        },
                         {field: 'name', title: __('Name')}, //formatter:Controller.api.formatter.task_status
                         {field: 'level',
                          title: __('Level'),
@@ -43,7 +45,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         // formatter:Controller.api.formatter.levelList,
                          formatter: Table.api.formatter.status
                         },
-                        {field: 'create_time', title: __('Createtime'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime},
+                        {field: 'create_time', title: __('Create_time'), operate:'RANGE', addclass:'datetimerange'},
                         {field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate}
                     ]
                 ]
