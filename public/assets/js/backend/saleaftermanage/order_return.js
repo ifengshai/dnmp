@@ -188,6 +188,24 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
 
                                 // },
                                 {
+                                    name: 'edit',
+                                    text: '编辑',
+                                    title: __('编辑'),
+                                    classname: 'btn btn-xs btn-success btn-dialog',
+                                    icon: 'fa fa-pencil',
+                                    url:  'saleaftermanage/order_return/edit',
+                                    extend: 'data-area = \'["100%","100%"]\'',
+                                    callback: function (data) {
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                    },
+                                    visible: function (row) {
+                                        if(row.order_status == 1){
+                                            return true;
+                                        }
+                                            return false;
+                                    }
+                                },
+                                {
                                     name: 'closed',
                                     text: '取消',
                                     title: __('Closed'),
