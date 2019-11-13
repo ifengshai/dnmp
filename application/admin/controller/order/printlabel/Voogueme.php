@@ -169,7 +169,7 @@ class Voogueme extends Backend
         //查询订单详情
         // $result = $this->zeelool->getOrderDetail(2, $ids);
         $result = VooguemePrescriptionDetailHelper::get_one_by_entity_id($ids);
-         dump($result);die;
+        
         $this->assign('result', $result);
         return $this->view->fetch();
     }
