@@ -207,7 +207,7 @@ class Zeelool extends Backend
         $label = input('label');
         $map['entity_id'] = ['in', $entity_ids];
         $res = $this->model->where($map)->select();
-        foreach($res as $v) {
+        foreach ($res as $v) {
             if ($v['custom_is_delivery'] == 1) {
                 $this->error('存在已质检通过的订单！！');
             }
@@ -258,12 +258,19 @@ class Zeelool extends Backend
 
                     $ItemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku;
                     //查出订单SKU映射表对应的仓库SKU
-                    foreach ($res as $k => $v) {
-                        //是否为更换镜架 如果为更换镜架 扣减库存逻辑已在协同任务处理  此处不在执行扣减库存逻辑
+                    foreach ($res as $k => &$v) {
+                        //是否为更换镜架 如果为更换镜架 需处理更换之后SKU的库存
                         if ($v['is_change_frame'] != 1) {
-                            continue;
+                            //根据订单号 SKU查询更换镜架记录表 处理更换之后SKU库存
+                            $infotask = new \app\admin\model\infosynergytaskmanage\InfoSynergyTaskChangeSku;
+                            $infoTaskRes = $infotask->getChangeSkuData($v['increment_id'], 1, $v['sku']);
+                           
+                            $v['sku'] = $infoTaskRes['change_sku'];
+                            $v['qty_ordered'] = $infoTaskRes['change_number'];
                         }
+                        
                         $trueSku = $ItemPlatformSku->getTrueSku($v['sku'], 1);
+
                         //总库存
                         $item_map['sku'] = $trueSku;
                         $item_map['is_del'] = 1;
@@ -283,9 +290,8 @@ class Zeelool extends Backend
                         $rows['out_stock_num'] = $v['qty_ordered'];
                         $rows['increment_id'] = $v['increment_id'];
                         $outStockItem->setOrderOutStock($rows);
-
                     }
-
+                    unset($v);
                     if (count($error)) {
                         throw new Exception("扣减库存失败！！请检查SKU");
                     };
@@ -742,7 +748,7 @@ order by sfoi.order_id desc;";
     //批量打印标签
     public function batch_print_label()
     {
-         ob_start(); 
+        ob_start();
         // echo 'batch_print_label';
         $entity_ids = rtrim(input('id_params'), ',');
         // dump($entity_ids);
