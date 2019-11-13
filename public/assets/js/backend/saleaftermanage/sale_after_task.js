@@ -73,7 +73,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui','custom-css'], 
                         //     }]
                         // },
                         {
-                            field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, extend: 'data-area = \'["100%","100%"]\'',
+                            field: 'operate',width: "120px", title: __('Operate'), table: table,events: Table.api.events.operate,formatter: Table.api.formatter.operate,
                             buttons: [
                                 {
                                     name: 'detail',
@@ -91,7 +91,53 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui','custom-css'], 
                                         return true;
                                     }
                                 },
-                            ],formatter: Table.api.formatter.operate
+                                {
+                                    name: 'edit',
+                                    text: '编辑',
+                                    title: __('编辑'),
+                                    classname: 'btn btn-xs btn-success btn-dialog',
+                                    icon: 'fa fa-pencil',
+                                    url:  'saleaftermanage/sale_after_task/edit',
+                                    extend: 'data-area = \'["100%","100%"]\'',
+                                    callback: function (data) {
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                    },
+                                    visible: function (row) {
+                                        if(row.task_status == 0){
+                                            return true;
+                                        }
+                                            return false;
+                                    }
+                                },
+                                {
+                                    name: 'closed',
+                                    text: '取消',
+                                    title: __('Closed'),
+                                    classname: 'btn btn-xs btn-danger btn-ajax',
+                                    icon: 'fa fa-remove',
+                                    confirm: '确定要取消吗',
+                                    url: 'saleaftermanage/sale_after_task/closed',
+                                    success: function (data, ret) {
+                                        Layer.alert(ret.msg);
+                                        $(".btn-refresh").trigger("click");
+                                        //如果需要阻止成功提示，则必须使用return false;
+                                        //return false;
+                                    },
+                                    error: function (data, ret) {
+                                        Layer.alert(ret.msg);
+                                        return false;
+                                    },
+                                    visible: function (row) {
+                                        //返回true时按钮显示,返回false隐藏
+                                        if(row.task_status == 0){
+                                            return true;
+                                        }
+                                            return false;
+                                            
+                                    }
+
+                                }
+                            ]
                         },
                     ]
                 ]
