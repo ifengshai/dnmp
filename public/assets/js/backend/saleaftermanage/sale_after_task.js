@@ -46,7 +46,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui','custom-css'], 
                         },
                         // {field: 'id', title: __('Id'),operate:false},
                         {field: 'task_number', title: __('Task_number')},
-                        {field:'task_status',title:__('Task_status'),searchList:{0:'未处理',1:'处理中',2:'已完成'},formatter:Controller.api.formatter.task_status},
+                        {
+                            field:'task_status',
+                            title:__('Task_status'),
+                            searchList:{0:'未处理',1:'处理中',2:'已完成',3:'已取消'},
+                            custom: { 0: 'blue', 1: 'yellow', 2: 'success',3:'red'},
+                            formatter:Table.api.formatter.status
+                        },
                         {field: 'order_platform',searchList:$.getJSON('saleaftermanage/sale_after_task/getAjaxOrderPlatformList'), title: __('Order_platform'),formatter: Controller.api.formatter.devicess},
                         {
                             field:'order_source',
