@@ -794,7 +794,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                             }, operate: false
                         },
                         { field: 'id', title: __('Id'), operate: false },
-                        { field: 'sku', title: __('Sku'), operate: 'FIND_IN_SET' },
+                        { field: 'sku', title: __('Sku'), operate: 'like' },
                         { field: 'name', title: __('Name') },
                         { field: 'stock', title: __('实时库存'), operate: false },
                         { field: 'available_stock', title: __('可用库存'), operate: false },

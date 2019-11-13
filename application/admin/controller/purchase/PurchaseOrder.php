@@ -663,6 +663,7 @@ class PurchaseOrder extends Backend
         $purchase_list = $purchase->hasWhere('purchaseOrderItem')
             ->where($purchase_map)
             ->field('sku,purchase_num')
+            ->group('PurchaseOrderItem.id')
             ->column('*', 'sku');
 
 

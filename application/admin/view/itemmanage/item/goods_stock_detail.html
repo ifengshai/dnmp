@@ -220,8 +220,8 @@
                 <tr>
                     <td>{:$k+1}</td>
                     <td>{$v.purchase_number}</td>
-                    <td>{:confing('purchase_status')[$v['purchase_status']]}</td>
-                    <td>{$v.purchase_num}</td>
+                    <td>{:config('purchase_status')[$v['purchase_status']]}</td>
+                    <td>{$v['purchase_num'] - $v['instock_num']}</td>
                     <td>{$v.createtime}</td>
                     <td>{$v.create_person}</td>
                     <td></td>
