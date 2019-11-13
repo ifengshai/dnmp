@@ -865,10 +865,10 @@ class Inventory extends Backend
             return false;
         }
         $item = new \app\admin\model\itemmanage\Item;
-        $instock = new \app\admin\model\warehouse\Instock;
-        $instockItem = new \app\admin\model\warehouse\InstockItem;
-        $outstock = new \app\admin\model\warehouse\Outstock;
-        $outstockItem = new \app\admin\model\warehouse\OutStockItem;
+        // $instock = new \app\admin\model\warehouse\Instock;
+        // $instockItem = new \app\admin\model\warehouse\InstockItem;
+        // $outstock = new \app\admin\model\warehouse\Outstock;
+        // $outstockItem = new \app\admin\model\warehouse\OutStockItem;
         $taskChangeSku = new \app\admin\model\infosynergytaskmanage\InfoSynergyTaskChangeSku;
         $platformSku   = new \app\admin\model\itemmanage\ItemPlatformSku;
         $changeRow = $taskChangeSku->where(['tid' => $id])->field('original_sku,original_number,change_sku,change_number')->select();
@@ -911,56 +911,57 @@ class Inventory extends Backend
                 $whereChange['order_id'] = $order_id;
                 $whereChange['sku']      = $original_sku;
                 $changeData['is_change_frame'] = 2;
-                $changeSku = Db::connect($db)->table('sales_flat_order_item')->where($whereChange)->update($changeData);
+                Db::connect($db)->table('sales_flat_order_item')->where($whereChange)->update($changeData);
                 //原先sku增加可用库存,减少占用库存
-                $original_stock = $item->where(['sku' => $warehouse_original_sku])->inc('available_stock', $original_number)->dec('occupy_stock', $original_number)->update();
+                $item->where(['sku' => $warehouse_original_sku])->inc('available_stock', $original_number)->dec('occupy_stock', $original_number)->update();
                 //更新之后的sku减少可用库存,增加占用库存
-                $change_stock = $item->where(['sku' => $warehouse_change_sku])->dec('available_stock', $change_number)->inc('occupy_stock', $change_number)->update();
+                $item->where(['sku' => $warehouse_change_sku])->dec('available_stock', $change_number)->inc('occupy_stock', $change_number)->update();
+                //不需要添加出入库逻辑(主要针对总库存)
                 //修改库存结果为真
-                if (($changeSku === false) || ($original_stock === false) || ($change_stock === false)) {
-                    throw new Exception('更改镜架失败,请检查SKU');
-                    continue;
-                } else {
-                    //入库记录
-                    $paramsIn = [];
-                    $paramsIn['in_stock_number'] = 'IN' . date('YmdHis') . rand(100, 999) . rand(100, 999);
-                    $paramsIn['order_number']  = $increment_id;
-                    $paramsIn['create_person'] = session('admin.nickname');
-                    $paramsIn['createtime'] = date('Y-m-d H:i:s', time());
-                    $paramsIn['type_id'] = 5;
-                    $paramsIn['status'] = 2;
-                    $paramsIn['remark'] = '更改镜架入库';
-                    $paramsIn['check_time'] = date('Y-m-d H:i:s', time());
-                    $paramsIn['check_person'] = session('admin.nickname');
-                    $instorck_res = $instock->isUpdate(false)->allowField(true)->data($paramsIn, true)->save();
-                    //添加入库信息
-                    if ($instorck_res !== false) {
-                        $instockItemList['sku'] = $warehouse_original_sku;
-                        $instockItemList['in_stock_num'] = $original_number;
-                        $instockItemList['in_stock_id']  = $instock->id;
-                        //添加入库商品sku信息
-                        $instockItem->isUpdate(false)->allowField(true)->data($instockItemList, true)->save();
-                    }
-                    //出库记录
-                    $paramsOut = [];
-                    $paramsOut['out_stock_number'] = 'OUT' . date('YmdHis') . rand(100, 999) . rand(100, 999);
-                    $paramsOut['create_person'] = session('admin.nickname');
-                    $paramsOut['createtime'] = date('Y-m-d H:i:s', time());
-                    $paramsOut['type_id'] = 14;
-                    $paramsOut['status'] = 2;
-                    $paramsOut['remark'] = '更改镜架出库';
-                    $paramsOut['check_time'] = date('Y-m-d H:i:s', time());
-                    $paramsOut['check_person'] = session('admin.nickname');
-                    $outstock_res = $outstock->isUpdate(false)->allowField(true)->data($paramsOut, true)->save();
-                    //添加出库信息
-                    if ($outstock_res !== false) {
-                        $outstockItemList['sku'] = $warehouse_change_sku;
-                        $outstockItemList['out_stock_num']  = $change_number;
-                        $outstockItemList['out_stock_id'] = $outstock->id;
-                        //批量添加
-                        $outstockItem->isUpdate(false)->allowField(true)->data($outstockItemList, true)->save();
-                    }
-                }
+                // if (($changeSku === false) || ($original_stock === false) || ($change_stock === false)) {
+                //     throw new Exception('更改镜架失败,请检查SKU');
+                //     continue;
+                // } else {
+                //     //入库记录
+                //     $paramsIn = [];
+                //     $paramsIn['in_stock_number'] = 'IN' . date('YmdHis') . rand(100, 999) . rand(100, 999);
+                //     $paramsIn['order_number']  = $increment_id;
+                //     $paramsIn['create_person'] = session('admin.nickname');
+                //     $paramsIn['createtime'] = date('Y-m-d H:i:s', time());
+                //     $paramsIn['type_id'] = 5;
+                //     $paramsIn['status'] = 2;
+                //     $paramsIn['remark'] = '更改镜架入库';
+                //     $paramsIn['check_time'] = date('Y-m-d H:i:s', time());
+                //     $paramsIn['check_person'] = session('admin.nickname');
+                //     $instorck_res = $instock->isUpdate(false)->allowField(true)->data($paramsIn, true)->save();
+                //     //添加入库信息
+                //     if ($instorck_res !== false) {
+                //         $instockItemList['sku'] = $warehouse_original_sku;
+                //         $instockItemList['in_stock_num'] = $original_number;
+                //         $instockItemList['in_stock_id']  = $instock->id;
+                //         //添加入库商品sku信息
+                //         $instockItem->isUpdate(false)->allowField(true)->data($instockItemList, true)->save();
+                //     }
+                //     //出库记录
+                //     $paramsOut = [];
+                //     $paramsOut['out_stock_number'] = 'OUT' . date('YmdHis') . rand(100, 999) . rand(100, 999);
+                //     $paramsOut['create_person'] = session('admin.nickname');
+                //     $paramsOut['createtime'] = date('Y-m-d H:i:s', time());
+                //     $paramsOut['type_id'] = 14;
+                //     $paramsOut['status'] = 2;
+                //     $paramsOut['remark'] = '更改镜架出库';
+                //     $paramsOut['check_time'] = date('Y-m-d H:i:s', time());
+                //     $paramsOut['check_person'] = session('admin.nickname');
+                //     $outstock_res = $outstock->isUpdate(false)->allowField(true)->data($paramsOut, true)->save();
+                //     //添加出库信息
+                //     if ($outstock_res !== false) {
+                //         $outstockItemList['sku'] = $warehouse_change_sku;
+                //         $outstockItemList['out_stock_num']  = $change_number;
+                //         $outstockItemList['out_stock_id'] = $outstock->id;
+                //         //批量添加
+                //         $outstockItem->isUpdate(false)->allowField(true)->data($outstockItemList, true)->save();
+                //     }
+                // }
                 Db::commit();
             } catch (ValidateException $e) {
                 Db::rollback();
@@ -986,8 +987,8 @@ class Inventory extends Backend
             return false;
         }
         $item = new \app\admin\model\itemmanage\Item;
-        $instock = new \app\admin\model\warehouse\Instock;
-        $instockItem = new \app\admin\model\warehouse\InstockItem;
+        // $instock = new \app\admin\model\warehouse\Instock;
+        // $instockItem = new \app\admin\model\warehouse\InstockItem;
         $taskChangeSku = new \app\admin\model\infosynergytaskmanage\InfoSynergyTaskChangeSku;
         $platformSku   = new \app\admin\model\itemmanage\ItemPlatformSku;
         $changeRow = $taskChangeSku->where(['tid' => $id])->field('original_sku,original_number')->select();
@@ -1022,35 +1023,36 @@ class Inventory extends Backend
                 $whereChange['order_id'] = $order_id;
                 $whereChange['sku']      = $original_sku;
                 $changeData['is_change_frame'] = 3;
-                $changeSku = Db::connect($db)->table('sales_flat_order_item')->where($whereChange)->update($changeData);
+                Db::connect($db)->table('sales_flat_order_item')->where($whereChange)->update($changeData);
                 //原先sku增加可用库存,减少占用库存
-                $original_stock = $item->where(['sku' => $warehouse_original_sku])->inc('available_stock', $original_number)->dec('occupy_stock', $original_number)->update();
+                $item->where(['sku' => $warehouse_original_sku])->inc('available_stock', $original_number)->dec('occupy_stock', $original_number)->update();
+                //不需要添加出入库逻辑(主要针对总库存)
                 //修改库存结果为真
-                if (($changeSku === false) || ($original_stock === false)) {
-                    throw new Exception('更改镜架失败,请检查SKU');
-                    continue;
-                } else {
-                    //入库记录
-                    $paramsIn = [];
-                    $paramsIn['in_stock_number'] = 'IN' . date('YmdHis') . rand(100, 999) . rand(100, 999);
-                    $paramsIn['order_number']  = $increment_id;
-                    $paramsIn['create_person'] = session('admin.nickname');
-                    $paramsIn['createtime'] = date('Y-m-d H:i:s', time());
-                    $paramsIn['type_id'] = 7;
-                    $paramsIn['status'] = 2;
-                    $paramsIn['remark'] = '取消订单入库';
-                    $paramsIn['check_time'] = date('Y-m-d H:i:s', time());
-                    $paramsIn['check_person'] = session('admin.nickname');
-                    $instorck_res = $instock->isUpdate(false)->allowField(true)->data($paramsIn, true)->save();
-                    //添加入库信息
-                    if ($instorck_res !== false) {
-                        $instockItemList['sku'] = $warehouse_original_sku;
-                        $instockItemList['in_stock_num'] = $original_number;
-                        $instockItemList['in_stock_id']  = $instock->id;
-                        //添加入库商品sku信息
-                        $instockItem->isUpdate(false)->allowField(true)->data($instockItemList, true)->save();
-                    }
-                }
+                // if (($changeSku === false) || ($original_stock === false)) {
+                //     throw new Exception('更改镜架失败,请检查SKU');
+                //     continue;
+                // } else {
+                //     //入库记录
+                //     $paramsIn = [];
+                //     $paramsIn['in_stock_number'] = 'IN' . date('YmdHis') . rand(100, 999) . rand(100, 999);
+                //     $paramsIn['order_number']  = $increment_id;
+                //     $paramsIn['create_person'] = session('admin.nickname');
+                //     $paramsIn['createtime'] = date('Y-m-d H:i:s', time());
+                //     $paramsIn['type_id'] = 7;
+                //     $paramsIn['status'] = 2;
+                //     $paramsIn['remark'] = '取消订单入库';
+                //     $paramsIn['check_time'] = date('Y-m-d H:i:s', time());
+                //     $paramsIn['check_person'] = session('admin.nickname');
+                //     $instorck_res = $instock->isUpdate(false)->allowField(true)->data($paramsIn, true)->save();
+                //     //添加入库信息
+                //     if ($instorck_res !== false) {
+                //         $instockItemList['sku'] = $warehouse_original_sku;
+                //         $instockItemList['in_stock_num'] = $original_number;
+                //         $instockItemList['in_stock_id']  = $instock->id;
+                //         //添加入库商品sku信息
+                //         $instockItem->isUpdate(false)->allowField(true)->data($instockItemList, true)->save();
+                //     }
+                // }
                 Db::commit();
             } catch (ValidateException $e) {
                 Db::rollback();
