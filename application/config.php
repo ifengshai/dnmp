@@ -277,4 +277,10 @@ return [
         //API接口地址
         'api_url'             => 'https://api.fastadmin.net',
     ],
+
+    //快递100配置
+    'kuaidi100' => [
+        //订阅推送回调地址
+        'callback' => 'http://mojing.mruilove.com/admin_1biSSnWyfW.php/purchase/purchase_order/callback'
+    ]
 ];

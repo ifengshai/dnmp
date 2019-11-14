@@ -15,6 +15,7 @@ use app\admin\model\NewProduct;
 use app\admin\model\purchase\Supplier;
 use app\admin\model\purchase\SupplierSku;
 use think\Cache;
+use fast\Kuaidi100;
 
 
 /**
@@ -35,7 +36,7 @@ class PurchaseOrder extends Backend
      * 无需登录的方法,同时也就不需要鉴权了
      * @var array
      */
-    protected $noNeedLogin = ['getAlibabaPurchaseOrder'];
+    protected $noNeedLogin = ['getAlibabaPurchaseOrder', 'callback'];
 
     public function _initialize()
     {
@@ -438,6 +439,9 @@ class PurchaseOrder extends Backend
                     $params['purchase_status'] = 6; //待收货
                     $result = $row->allowField(true)->save($params);
 
+                    //添加快递100订阅推送服务
+                    Kuaidi100::setPoll($params['logistics_company_no'], $params['logistics_number'], $row->id);
+
                     //添加物流汇总表
                     $logistics = new \app\admin\model\LogisticsInfo();
                     $list['logistics_number'] = $params['logistics_number'];
@@ -551,7 +555,7 @@ class PurchaseOrder extends Backend
             $data = Cache::get($cacheIndex);
             if (!$data) {
                 $data = Alibaba::getLogisticsMsg($row['purchase_number']);
-                // 记录缓存, 时效10分钟
+                // 记录缓存, 时效1小时
                 Cache::set($cacheIndex, $data, 3600);
             }
             $data = $data->logisticsTrace[0];
@@ -785,7 +789,7 @@ class PurchaseOrder extends Backend
             //设置缓存
             cache('Crontab_getAlibabaPurchaseOrder_' . date('YmdH') . md5(serialize($params)), $data, 3600);
         }
-    
+
         foreach (array_values($data) as $key => $val) {
             if (!$val) {
                 continue;
@@ -963,5 +967,15 @@ class PurchaseOrder extends Backend
             }
         }
         echo 'ok';
+    }
+
+    /**
+     * 快递100回调地址
+     */
+    public function callback()
+    {
+        $purchase_id = input('purchase_id');
+        $params = $this->request->post('params');
+        dump($params);
     }
 }
