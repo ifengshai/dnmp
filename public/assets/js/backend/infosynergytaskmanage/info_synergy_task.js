@@ -44,8 +44,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {
                             field: 'synergy_status',
                             title:__('Synergy_status'),
-                            searchList: { 0: '新建', 1: '处理中', 2: '处理完成' },
-                            custom: { 0: 'blue', 2: 'yellow', 3: 'success'},
+                            searchList: { 0: '新建', 1: '处理中', 2: '处理完成',3:'取消'},
+                            custom: { 0: 'blue', 1: 'yellow', 2: 'success',3:'red'},
                             formatter: Table.api.formatter.status
                         },
                         {field: 'dept', title: __('Dept_id')},
@@ -86,8 +86,39 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
                                     },
                                     visible: function (row) {
-                                        return true;
+                                        if(row.synergy_status == 0){
+                                            return true;
+                                        }
+                                            return false;
                                     }
+                                },
+                                {
+                                    name: 'closed',
+                                    text: '取消',
+                                    title: __('Closed'),
+                                    classname: 'btn btn-xs btn-danger btn-ajax',
+                                    icon: 'fa fa-remove',
+                                    confirm: '确定要取消吗',
+                                    url: 'infosynergytaskmanage/info_synergy_task/closed',
+                                    success: function (data, ret) {
+                                        Layer.alert(ret.msg);
+                                        $(".btn-refresh").trigger("click");
+                                        //如果需要阻止成功提示，则必须使用return false;
+                                        //return false;
+                                    },
+                                    error: function (data, ret) {
+                                        Layer.alert(ret.msg);
+                                        return false;
+                                    },
+                                    visible: function (row) {
+                                        //返回true时按钮显示,返回false隐藏
+                                        if(row.synergy_status == 0){
+                                            return true;
+                                        }
+                                            return false;
+                                            
+                                    }
+
                                 }
                                 // {
                                 //     name: 'handleComplete',

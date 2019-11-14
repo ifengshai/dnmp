@@ -483,4 +483,28 @@ class SaleAfterTask extends Backend
         $this->view->assign('SolveScheme',$this->model->getSolveScheme());
         return $this->view->fetch();
     }
+    /**
+     * 取消
+     */
+    public function closed($ids = null)
+    {
+        if ($this->request->isAjax()) {
+            $map['id'] = ['in', $ids];
+            $row = $this->model->where($map)->field('id,task_status')->select();
+            foreach ($row as $v) {
+                if ( 0 != $v['task_status']) {
+                    $this->error('只有新建状态才能操作！！');
+                }
+            }
+            $data['task_status'] = 3;
+            $result = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
+            if (false !== $result) {
+                return $this->success('确认成功');
+            } else {
+                return $this->error('确认失败');
+            }
+        } else {
+            return $this->error('404 Not Found');
+        }
+    }
 }
