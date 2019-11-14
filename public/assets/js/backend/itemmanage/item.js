@@ -222,10 +222,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                                     },
                                     visible: function (row) {
                                         //返回true时按钮显示,返回false隐藏
-                                        if(row.item_status == 5){
-                                            return false;
-                                        }
+                                        if(row.item_status == 1){
                                             return true;
+                                        }
+                                            return false;
                                     }
                                 }
                             ]

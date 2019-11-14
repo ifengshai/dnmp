@@ -1,7 +1,7 @@
 <?php
 
 namespace app\admin\controller\itemmanage;
-
+use think\Db;
 use app\common\controller\Backend;
 
 /**
@@ -17,7 +17,7 @@ class ItemBrand extends Backend
      * @var \app\admin\model\itemmanage\ItemBrand
      */
     protected $model = null;
-
+    protected $noNeedLogin = ['del_img'];
     public function _initialize()
     {
         parent::_initialize();
@@ -78,6 +78,76 @@ class ItemBrand extends Backend
         } else {
             $this->error('404 Not found');
         }
+    }
+    /***
+     * 删除品牌
+     */
+    public function del($ids = "")
+    {
+        if ($ids) {
+            $pk = $this->model->getPk();
+            $adminIds = $this->getDataLimitAdminIds();
+            if (is_array($adminIds)) {
+                $this->model->where($this->dataLimitField, 'in', $adminIds);
+            }
+            $list = $this->model->where($pk, 'in', $ids)->select();
+
+            $count = 0;
+            Db::startTrans();
+            try {
+                if (!empty($this->model)) {
+                    $fieldArr = $this->model->getTableFields();
+                    if (in_array('is_del', $fieldArr)) {
+                        foreach ($list as $val){
+                             $this->del_img($val['images']);
+                        }
+                        $this->model->where($pk, 'in', $ids)->update(['is_del' => 2]);
+                        $count = 1;
+                    } else {
+                        foreach ($list as $k => $v) {
+                            $count += $v->delete();
+                        }
+                    }
+                } else {
+                    foreach ($list as $k => $v) {
+                        $count += $v->delete();
+                    }
+                }
+
+                Db::commit();
+            } catch (PDOException $e) {
+                Db::rollback();
+                $this->error($e->getMessage());
+            } catch (Exception $e) {
+                Db::rollback();
+                $this->error($e->getMessage());
+            }
+            if ($count) {
+                $this->success();
+            } else {
+                $this->error(__('No rows were deleted'));
+            }
+        }
+        $this->error(__('Parameter %s can not be empty', 'ids'));
+    }
+    /***
+     * 删除图片
+     * 
+     */
+    public function del_img($str)
+    {
+        if(false != $str){
+            $arr = explode(',',$str);
+            if(is_array($arr) && !in_array('',$arr)){
+                foreach($arr as $v){
+                    $path  = '.'.$v;
+                    if(file_exists($path)){
+                        @unlink($path);
+                    }
+                }
+            }
+        }
+
     }
 
 }
