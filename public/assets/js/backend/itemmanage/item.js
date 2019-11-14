@@ -455,6 +455,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                         Layer.alert('请先选择商品分类');
                         return false;
                     }
+                    if(sku == ''){
+                        Layer.alert('请输入您的商品SKU');
+                        return false;
+                    }
+                    console.log(sku);
                     Backend.api.ajax({
                         url: 'itemmanage/item/ajaxItemInfo',
                         data: { categoryId: categoryId, sku: sku }
@@ -538,7 +543,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                         return false;
                     }, function (data, ret) {
                         //失败的回调
-                        alert(ret.msg);
+                        Layer.alert(ret.msg);
                         return false;
                     });
                 });

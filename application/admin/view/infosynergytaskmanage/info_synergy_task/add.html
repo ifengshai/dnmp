@@ -107,7 +107,6 @@
         <label class="control-label col-xs-12 col-sm-2">{:__('Prty_id')}:</label>
         <div class="col-xs-12 col-sm-3">
             <select  id="c-prty_id" data-rule="required" class="form-control selectpicker" name="row[prty_id]">
-                <option value="0" selected>请选择</option>
                 {foreach name="prtyIdList" item="vo"}
                 <option value="{$key}" {in name="key" value="0"}selected{/in}>{$vo}</option>
                 {/foreach}
