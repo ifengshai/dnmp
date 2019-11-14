@@ -976,6 +976,7 @@ class PurchaseOrder extends Backend
     {
         $purchase_id = input('purchase_id');
         $params = $this->request->post();
-        dump(json_decode($params['params']));
+        var_dump($params);
+        dump(json_decode($params));
     }
 }
