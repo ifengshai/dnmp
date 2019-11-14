@@ -1,4 +1,13 @@
-/composer.lock
-/vendor
+/nbproject/
+/runtime/*
+/public/uploads/*
 .idea
-.DS_Store
+composer.lock
+*.log
+*.css.map
+!.gitkeep
+.env
+.svn
+.vscode
+tryon/*
+/application/extra/*
