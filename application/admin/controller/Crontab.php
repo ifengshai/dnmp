@@ -21,12 +21,8 @@ class Crontab extends Backend
      */
     public function setPurchaseStatus()
     {
-        //获取采购单物流单号
-        $purchase = new \app\admin\model\purchase\PurchaseOrder;
-        $map['purchase_type'] = 1;   //线下采购单
-        $map['purchase_status'] = 5; //待收货
-        $res = $purchase->field('logistics_company_no,logistics_company_name,id')->where($map)->select();
         
+
     
         
     }

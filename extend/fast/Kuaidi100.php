@@ -23,11 +23,11 @@ class Kuaidi100
         //参数设置
         $key = self::$key;    //客户授权key
         $param = array(
-            'company' => $company,            //快递公司编码
+            'company' => $company,  //快递公司编码
             'number' => $number,    //快递单号
-            'from' => '',                    //出发地城市
-            'to' => '',                        //目的地城市
-            'key' => $key,                    //客户授权key
+            'from' => '',           //出发地城市
+            'to' => '',             //目的地城市
+            'key' => $key,          //客户授权key
             'parameters' => array(
                 'callbackurl' => config('kuaidi100.callback') . '?purchase_id=' . $purchase_id,        //回调地址
                 'salt' => '',                //加密串
