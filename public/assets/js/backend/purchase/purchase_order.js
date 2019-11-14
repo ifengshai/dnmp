@@ -185,7 +185,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                                     },
                                     visible: function (row) {
                                         //返回true时按钮显示,返回false隐藏
-                                        if (row.purchase_status == 2) {
+                                        if (row.purchase_status == 2 || row.purchase_status == 6) {
                                             return true;
                                         }
                                         return false;
