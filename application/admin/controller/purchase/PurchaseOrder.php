@@ -975,7 +975,7 @@ class PurchaseOrder extends Backend
     public function callback()
     {
         $purchase_id = input('purchase_id');
-        $params = $this->request->param();
+        $params = $this->request->post();
         dump($params);
     }
 }
