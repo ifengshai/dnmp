@@ -1939,5 +1939,13 @@ class Item extends Backend
         var_dump($result);
         exit;
     }
+    /***
+     * 同步库存
+     */
+    public function sync_stock()
+    {
+        
+    }
+
 
 }
