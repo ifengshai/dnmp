@@ -975,8 +975,24 @@ class PurchaseOrder extends Backend
     public function callback()
     {
         $purchase_id = input('purchase_id');
+        if (!$purchase_id) {
+            return json(['result' => false, 'returnCode' => 302, 'message' => '采购单未获取到']);
+        }
         $params = $this->request->post('param');
-        
-        dump(json_decode($params, true));
+        $params = json_decode($params, true);
+        //此状态未已签收
+        if ($params['lastResult']['state'] == 3) {
+            //更改为已收货
+            $data['purchase_status'] = 7;
+            //收货时间
+            $data['receiving_time'] = date('Y-m-d H:i:s', time());
+        }
+        $data['logistics_info'] = serialize($params);
+        $res = $this->model->allowField(true)->save($data, ['id' => $purchase_id]);
+        if ($res !== false) {
+            return json(['result' => true, 'returnCode' => 200, 'message' => '接收成功']);
+        } else {
+            return json(['result' => false, 'returnCode' => 301, 'message' => '接收失败']);
+        }
     }
 }
