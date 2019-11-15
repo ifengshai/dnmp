@@ -283,10 +283,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                 $(this).parent().parent().remove();
             })
 
-
+            if ($('.supplier.selectpicker').val()) {
+                $('.supplier.selectpicker').change();
+            }
 
             //异步获取供应商的数据
-            $(document).on('change', '.supplier', function () {
+            $(document).on('change', '.supplier.selectpicker', function () {
                 var id = $(this).val();
                 Backend.api.ajax({
                     url: Config.moduleurl + '/purchase/contract/getSupplierData',
@@ -297,9 +299,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
             })
 
 
-            if ($('.supplier').val()) {
-                $('.supplier').change();
-            }
+           
 
         },
         edit: function () {
