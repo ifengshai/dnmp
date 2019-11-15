@@ -270,7 +270,6 @@ class Zeelool extends Backend
                       
                         $trueSku = $ItemPlatformSku->getTrueSku($v['sku'], 1);
                        
-
                         //总库存
                         $item_map['sku'] = $trueSku;
                         $item_map['is_del'] = 1;
