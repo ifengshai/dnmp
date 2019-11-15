@@ -164,9 +164,13 @@ class PurchaseOrder extends Backend
         if ($new_product_ids) {
             //查询所选择的数据
             $where['new_product.id'] = ['in', $new_product_ids];
-            $where['new_product.item_status'] = ['in', [1, 2]];
             $row = (new NewProduct())->where($where)->with(['newproductattribute'])->select();
             $row = collection($row)->toArray();
+            foreach($row as $v) {
+                if ($v['item_status'] != 1) {
+                    $this->error(__('只有待选品状态能够创建！！', url('admin/new_product/index')));
+                }
+            }
 
             //提取供应商id
             $supplier = array_unique(array_column($row, 'supplier_id'));
