@@ -164,9 +164,13 @@ class PurchaseOrder extends Backend
         if ($new_product_ids) {
             //查询所选择的数据
             $where['new_product.id'] = ['in', $new_product_ids];
-            $where['new_product.item_status'] = 2;
             $row = (new NewProduct())->where($where)->with(['newproductattribute'])->select();
             $row = collection($row)->toArray();
+            foreach($row as $v) {
+                if ($v['item_status'] != 1) {
+                    $this->error(__('只有待选品状态能够创建！！', url('admin/new_product/index')));
+                }
+            }
 
             //提取供应商id
             $supplier = array_unique(array_column($row, 'supplier_id'));
@@ -982,13 +986,14 @@ class PurchaseOrder extends Backend
         }
         $params = $this->request->post('param');
         $params = json_decode($params, true);
-        //此状态未已签收
+        //此状态为已签收
         if ($params['lastResult']['state'] == 3) {
             //更改为已收货
             $data['purchase_status'] = 7;
             //收货时间
-            $data['receiving_time'] = date('Y-m-d H:i:s', time());
+            $data['receiving_time'] = date('Y-m-d H:i:s', strtotime($params['lastResult']['data'][0]['ftime']));
         }
+        $data['push_time'] = date('Y-m-d H:i:s'); //推送时间
         $data['logistics_info'] = serialize($params);
         $res = $this->model->allowField(true)->save($data, ['id' => $purchase_id]);
         if ($res !== false) {

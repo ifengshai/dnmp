@@ -35,10 +35,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast'], func
                             }, operate: false
                         },
                         { field: 'id', title: __('Id'), operate: false, visible: false },
-                        { field: 'sku', title: __('Sku') },
-                        { field: 'name', title: __('Name') },
-                        { field: 'supplier.supplier_name', title: __('供应商名称') },
-                        { field: 'supplier_sku', title: __('供应商SKU') },
+                        { field: 'sku', title: __('Sku'), operate: 'like' },
+                        { field: 'name', title: __('Name') , operate: 'like'},
+                        { field: 'supplier.supplier_name', title: __('供应商名称'), operate: 'like' },
+                        { field: 'supplier_sku', title: __('供应商SKU') , operate: 'like'},
                         {
                             field: 'item_status', title: __('选品状态'),
                             custom: { 1: 'success', 2: 'blue', 3: 'danger', 4: 'gray' },
