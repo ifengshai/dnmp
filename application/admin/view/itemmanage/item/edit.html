@@ -2,7 +2,7 @@
     {:build_heading()}
     <ul class="nav nav-tabs" >
         <li class="active"><a href="#t-all" data-value="" data-field="" data-toggle="tab">基本信息</a></li>
-        <li><a href="{:url('images')}?id={$row.id}">照片信息</a></li>
+        <li><a href="{:url('images')}?ids={$row.id}">照片信息</a></li>
     </ul>
 </div>
 {present name="template"}
@@ -275,7 +275,7 @@
         </div>
     </div>
     <input type='hidden' name="row[item_status]" id="status" value="1">
-    <div class="form-group layer-footer">
+    <div class="form-group layer-footer" style="display:none;">
         <label class="control-label col-xs-12 col-sm-2"></label>
         <div class="col-xs-12 col-sm-8">
             <button type="submit" class="btn btn-success btn-embossed disabled">{:__('OK')}</button>
@@ -283,9 +283,10 @@
             <button type="reset" class="btn btn-default btn-embossed">{:__('Reset')}</button>
         </div>
     </div>
-</form>
-{elseif $template eq 2 /}
-{elseif $template eq 3 /}
-{/if}
+    {elseif $template eq 2 /}
+    {elseif $template eq 3 /}
+    {/if}
 {/present}
+</form>
+
 
