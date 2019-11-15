@@ -264,6 +264,7 @@ class Zeelool extends Backend
                             //根据订单号 SKU查询更换镜架记录表 处理更换之后SKU库存
                             $infotask = new \app\admin\model\infosynergytaskmanage\InfoSynergyTaskChangeSku;
                             $infoTaskRes = $infotask->getChangeSkuData($v['increment_id'], 1, $v['sku']);
+                            dump($infoTaskRes);
                            
                             $v['sku'] = $infoTaskRes['change_sku'];
                             $v['qty_ordered'] = $infoTaskRes['change_number'];
