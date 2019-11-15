@@ -982,12 +982,12 @@ class PurchaseOrder extends Backend
         }
         $params = $this->request->post('param');
         $params = json_decode($params, true);
-        //此状态未已签收
+        //此状态为已签收
         if ($params['lastResult']['state'] == 3) {
             //更改为已收货
             $data['purchase_status'] = 7;
             //收货时间
-            $data['receiving_time'] = date('Y-m-d H:i:s', time());
+            $data['receiving_time'] = date('Y-m-d H:i:s', strtotime($params['lastResult']['data'][0]['ftime']));
         }
         $data['logistics_info'] = serialize($params);
         $res = $this->model->allowField(true)->save($data, ['id' => $purchase_id]);
