@@ -573,13 +573,13 @@ class Item extends Backend
                 if (count($itemColor) != count(array_unique($itemColor))){
                     $this->error('同一款商品的颜色值不能相同');
                 }
-                $attributeWhere = [];
-                $attributeWhere['item_id'] = $row['id'];
-                $attributeWhere['frame_color'] = ['in',$itemColor];
-                $attributeInfo = Db::connect('database.db_stock')->name('item_attribute')->where($attributeWhere)->field('id,frame_color')->find();
-                if($attributeInfo){
-                    $this->error('追加的商品SKU不能添加之前的颜色');
-                }
+                // $attributeWhere = [];
+                // $attributeWhere['item_id'] = $row['id'];
+                // $attributeWhere['frame_color'] = ['in',$itemColor];
+                // $attributeInfo = Db::connect('database.db_stock')->name('item_attribute')->where($attributeWhere)->field('id,frame_color')->find();
+                // if($attributeInfo){
+                //     $this->error('追加的商品SKU不能添加之前的颜色');
+                // }
                 if (is_array($itemName) && !in_array("", $itemName)) {
                     $data = $itemAttribute = [];
                     Db::startTrans();
@@ -1034,18 +1034,18 @@ class Item extends Backend
     /***
      * 编辑商品的图片信息
      */
-    public function images($id = null)
+    public function images($ids = null)
     {
-        $row = $this->model->get($id, 'itemAttribute');
+        $row = $this->model->get($ids, 'itemAttribute');
         if ($this->request->isAjax()) {
             $params = $this->request->post("row/a");
-            $id = $params['id'];
+            $ids = $params['ids'];
             $item_status = $params['item_status'];
             $itemAttrData['frame_images'] = $params['frame_images'];
             $itemAttrData['create_frame_images_time'] = date("Y-m-d H:i:s", time());
-            $itemAttrResult = Db::connect('database.db_stock')->name('item_attribute')->where('item_id', '=', $id)->update($itemAttrData);
+            $itemAttrResult = Db::connect('database.db_stock')->name('item_attribute')->where('item_id', '=', $ids)->update($itemAttrData);
             if ($item_status == 2) {
-                $itemResult = Db::connect('database.db_stock')->name('item')->where('id', '=', $id)->update(['item_status' => $item_status]);
+                $itemResult = Db::connect('database.db_stock')->name('item')->where('id', '=', $ids)->update(['item_status' => $item_status]);
             } else {
                 $itemResult = true;
             }
