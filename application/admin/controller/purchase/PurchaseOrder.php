@@ -989,6 +989,7 @@ class PurchaseOrder extends Backend
             //收货时间
             $data['receiving_time'] = date('Y-m-d H:i:s', strtotime($params['lastResult']['data'][0]['ftime']));
         }
+        $data['push_time'] = date('Y-m-d H:i:s');//推送时间
         $data['logistics_info'] = serialize($params);
         $res = $this->model->allowField(true)->save($data, ['id' => $purchase_id]);
         if ($res !== false) {
