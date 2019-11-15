@@ -207,11 +207,11 @@ class Zeelool extends Backend
         $label = input('label');
         $map['entity_id'] = ['in', $entity_ids];
         $res = $this->model->where($map)->select();
-        foreach ($res as $v) {
-            if ($v['custom_is_delivery'] == 1) {
-                $this->error('存在已质检通过的订单！！');
-            }
-        }
+        // foreach ($res as $v) {
+        //     if ($v['custom_is_delivery'] == 1) {
+        //         $this->error('存在已质检通过的订单！！');
+        //     }
+        // }
 
 
         if ($entity_ids) {
@@ -268,8 +268,9 @@ class Zeelool extends Backend
                             $v['sku'] = $infoTaskRes['change_sku'];
                             $v['qty_ordered'] = $infoTaskRes['change_number'];
                         }
-                        
+                        dump($v['sku']);
                         $trueSku = $ItemPlatformSku->getTrueSku($v['sku'], 1);
+                        dump($trueSku);die;
 
                         //总库存
                         $item_map['sku'] = $trueSku;
