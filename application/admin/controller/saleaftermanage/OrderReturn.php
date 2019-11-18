@@ -829,6 +829,8 @@ class OrderReturn extends Backend
      */
     public function get_logistics_info($track_number=null)
     {
+        var_dump($track_number);
+        exit;
         $track = new Trackingmore();
         $track = $track->getRealtimeTrackingResults('查询物流信息', $track_number);
         $express_data = $track['data']['items'][0];
