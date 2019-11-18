@@ -832,6 +832,9 @@ class OrderReturn extends Backend
         $track = new Trackingmore();
         $track = $track->getRealtimeTrackingResults('查询物流信息', $track_number);
         $express_data = $track['data']['items'][0];
+        echo '<pre>';
+        var_dump($express_data);
+        exit;
         $this->view->assign("express_data", $express_data);
         return $this->view->fetch();
     }
