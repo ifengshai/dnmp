@@ -207,11 +207,11 @@ class Zeelool extends Backend
         $label = input('label');
         $map['entity_id'] = ['in', $entity_ids];
         $res = $this->model->where($map)->select();
-        foreach ($res as $v) {
-            if ($v['custom_is_delivery'] == 1) {
-                $this->error('存在已质检通过的订单！！');
-            }
-        }
+        // foreach ($res as $v) {
+        //     if ($v['custom_is_delivery'] == 1) {
+        //         $this->error('存在已质检通过的订单！！');
+        //     }
+        // }
 
 
         if ($entity_ids) {
@@ -264,13 +264,12 @@ class Zeelool extends Backend
                             //根据订单号 SKU查询更换镜架记录表 处理更换之后SKU库存
                             $infotask = new \app\admin\model\infosynergytaskmanage\InfoSynergyTaskChangeSku;
                             $infoTaskRes = $infotask->getChangeSkuData($v['increment_id'], 1, $v['sku']);
-                           
                             $v['sku'] = $infoTaskRes['change_sku'];
                             $v['qty_ordered'] = $infoTaskRes['change_number'];
                         }
-                        
+                      
                         $trueSku = $ItemPlatformSku->getTrueSku($v['sku'], 1);
-
+                       
                         //总库存
                         $item_map['sku'] = $trueSku;
                         $item_map['is_del'] = 1;

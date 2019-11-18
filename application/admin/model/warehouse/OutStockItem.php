@@ -30,7 +30,7 @@ class OutStockItem extends Model
                 ->field('no_stock_num,in_stock_num,in_stock_id,InstockItem.id as item_id,sku')
                 ->where($map)
                 ->order('check_time asc')
-                ->group('instockItem.id')
+                ->group('InstockItem.id')
                 ->limit(10)
                 ->select();
             $res = collection($res)->toArray();
@@ -98,7 +98,7 @@ class OutStockItem extends Model
             ->field('no_stock_num,in_stock_num,in_stock_id,InstockItem.id as item_id,sku')
             ->where($map)
             ->order('check_time asc')
-            ->group('instockItem.id')
+            ->group('InstockItem.id')
             ->limit(10)
             ->select();
         $res = collection($res)->toArray();

@@ -164,6 +164,13 @@ class Outstock extends Backend
                 $this->error(__('You have no permission'));
             }
         }
+
+        //判断状态是否为新建
+        if ($row['status'] > 0) {
+            $this->error('只有新建状态才能编辑！！', url('index'));
+        }
+
+        
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
             if ($params) {

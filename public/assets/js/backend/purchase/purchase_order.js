@@ -85,7 +85,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                             searchList: { 0: '否', 1: '是' },
                             formatter: Table.api.formatter.status
                         },
-                        { field: 'create_person', title: __('Create_person') ,operate: 'like'},
+                        { field: 'create_person', title: __('Create_person'), operate: 'like' },
                         { field: 'createtime', title: __('Createtime'), operate: 'RANGE', addclass: 'datetimerange' },
                         {
                             field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [
@@ -283,10 +283,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                 $(this).parent().parent().remove();
             })
 
-
+            if ($('.supplier.selectpicker').val()) {
+                $('.supplier.selectpicker').change();
+            }
 
             //异步获取供应商的数据
-            $(document).on('change', '.supplier', function () {
+            $(document).on('change', '.supplier.selectpicker', function () {
                 var id = $(this).val();
                 Backend.api.ajax({
                     url: Config.moduleurl + '/purchase/contract/getSupplierData',
@@ -297,9 +299,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
             })
 
 
-            if ($('.supplier').val()) {
-                $('.supplier').change();
-            }
+
 
         },
         edit: function () {
@@ -562,7 +562,71 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                     });
 
                 })
+
+
+
+                //选中的开始时间和现在的时间比较
+                $(document).on('dp.change', '.delivery_stime', function () {
+                    var time_value = $(this).val();
+                    var end_time = $('.delivery_etime').val();
+
+                    function getNow(s) {
+                        return s < 10 ? '0' + s: s;
+                    }
+
+                    var myDate = new Date();
+
+                    var year=myDate.getFullYear();        //获取当前年
+                    var month=myDate.getMonth()+1;   //获取当前月
+                    var date=myDate.getDate();            //获取当前日
+                    var h=myDate.getHours();              //获取当前小时数(0-23)
+                    var m=myDate.getMinutes()-10;          //获取当前分钟数(0-59)
+                    var s=myDate.getSeconds();
+                    var now=year+'-'+getNow(month)+"-"+getNow(date)+" "+getNow(h)+':'+getNow(m)+":"+getNow(s);
+
+
+                    if (time_value > end_time) {
+                        Layer.alert('开始时间不能大于结束时间！！');
+                        $(this).val(now);
+                        return false;
+                    } 
+
+                });
+
+
+                //选中的开始时间和现在的时间比较
+                $(document).on('dp.change', '.contract_stime', function () {
+                    var time_value = $(this).val();
+                    var end_time = $('.contract_etime').val();
+
+                    function getNow(s) {
+                        return s < 10 ? '0' + s: s;
+                    }
+
+                    var myDate = new Date();
+
+                    var year=myDate.getFullYear();        //获取当前年
+                    var month=myDate.getMonth()+1;   //获取当前月
+                    var date=myDate.getDate();            //获取当前日
+                    var h=myDate.getHours();              //获取当前小时数(0-23)
+                    var m=myDate.getMinutes()-10;          //获取当前分钟数(0-59)
+                    var s=myDate.getSeconds();
+                    var now=year+'-'+getNow(month)+"-"+getNow(date)+" "+getNow(h)+':'+getNow(m)+":"+getNow(s);
+
+
+                    if (time_value > end_time) {
+                        Layer.alert('开始时间不能大于结束时间！！');
+                        $(this).val(now);
+                        return false;
+                    } 
+
+                });
+
+
+            
+               
             }
+
         }
     };
     return Controller;

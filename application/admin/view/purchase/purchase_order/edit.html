@@ -102,22 +102,21 @@
         </div>
 
         <div class="form-group">
-            <label class="control-label col-xs-12 col-sm-2">交货地点:</label>
-            <div class="col-xs-12 col-sm-8">
-                <input id="c-delivery_address" class="form-control delivery_address"  readonly
-                    name="" type="text">
-            </div>
-        </div>
-
-        <div class="form-group">
             <label class="control-label col-xs-12 col-sm-2">交货时间:</label>
             <div class="col-xs-12 col-sm-8">
-                <input id="c-delivery_stime" style="width: 200px;" class="form-control datetimepicker delivery_stime"
-                    data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name=""
-                    type="text" value="{:date('Y-m-d H:i:s')}"> -
-                <input id="c-delivery_etime" style="width: 200px;" class="form-control datetimepicker delivery_etime"
-                    data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name=""
-                    type="text" value="{:date('Y-m-d H:i:s')}">
+                <input id="c-delivery_stime" style="width: 200px;" readonly class="form-control datetimepicker"
+                    data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[delivery_stime]"
+                    type="text" value="{$row.delivery_stime}"> -
+                <input id="c-delivery_etime" style="width: 200px;" readonly class="form-control datetimepicker"
+                    data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[delivery_etime]"
+                    type="text" value="{$row.delivery_etime}">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="control-label col-xs-12 col-sm-2">交货地址:</label>
+            <div class="col-xs-12 col-sm-8">
+                <input id="c-delivery_address" readonly class="form-control address" 
+                    name="row[delivery_address]" type="text" value="{$row.delivery_address}">
             </div>
         </div>
 
@@ -125,10 +124,10 @@
         <div class="form-group">
             <label class="control-label col-xs-12 col-sm-2">合同有效期</label>
             <div class="col-xs-12 col-sm-8">
-                <input id="c-contract_stime" style="width: 200px;" class="form-control datetimepicker contract_stime"
+                <input id="c-contract_stime" style="width: 200px;" readonly class="form-control datetimepicker contract_stime"
                     data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name=""
                     type="text" value="{:date('Y-m-d H:i:s')}"> -
-                <input id="c-contract_etime" style="width: 200px;" class="form-control datetimepicker contract_etime"
+                <input id="c-contract_etime" style="width: 200px;" readonly class="form-control datetimepicker contract_etime"
                     data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name=""
                     type="text" value="{:date('Y-m-d H:i:s')}">
             </div>
@@ -166,7 +165,7 @@
             <label class="control-label col-xs-12 col-sm-2">供应商名称:</label>
             <div class="col-xs-12 col-sm-8">
                
-                <select name="row[supplier_id]" class="form-control supplier selectpicker" required data-live-search='true'>
+                <select name="row[supplier_id]" class="form-control supplier selectpicker" disabled required data-live-search='true'>
                     <option value="">请选择</option>
                     {foreach $supplier as $k => $v}
                     <option value="{$k}" {:$row['supplier_id'] == $k ? 'selected' : ''}>{$v}</option>
@@ -260,24 +259,7 @@
                 <input id="c-final_amount" class="form-control final_amount" step="0.01" name="row[final_amount]" value="{$row.final_amount}" type="number">
             </div>
         </div>
-        <div class="form-group">
-            <label class="control-label col-xs-12 col-sm-2">交货时间:</label>
-            <div class="col-xs-12 col-sm-8">
-                <input id="c-delivery_stime" style="width: 200px;" class="form-control datetimepicker"
-                    data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[delivery_stime]"
-                    type="text" value="{$row.delivery_stime}"> -
-                <input id="c-delivery_etime" style="width: 200px;" class="form-control datetimepicker"
-                    data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[delivery_etime]"
-                    type="text" value="{$row.delivery_etime}">
-            </div>
-        </div>
-        <div class="form-group">
-            <label class="control-label col-xs-12 col-sm-2">交货地址:</label>
-            <div class="col-xs-12 col-sm-8">
-                <input id="c-delivery_address" class="form-control address" 
-                    name="row[delivery_address]" type="text" value="{$row.delivery_address}">
-            </div>
-        </div>
+        
     </div>
 
     <input type='hidden' name="row[purchase_status]" class="status" value="{$row.purchase_status}">

@@ -230,8 +230,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                             data: { id: id }
                         }, function (data, ret) {
                             //循环展示商品信息
-                            var shtml = ' <tr><th>SKU</th><th>供应商SKU</th><th>采购数量</th>><th>到货数量</th><th>质检合格数量</th><th>留样数量</th><th>入库数量</th><th>操作</th></tr>';
+                            var shtml = ' <tr><th>SKU</th><th>供应商SKU</th><th>采购数量</th>><th>到货数量</th><th>质检合格数量</th><th>留样数量</th><th>入库数量</th></tr>';
                             $('.caigou table tbody').html('');
+                            $('#toolbar').hide();
                             for (var i in data) {
                                 shtml += ' <tr><td><input id="c-purchase_remark" class="form-control sku" name="sku[]" type="text" value="' + data[i].sku + '"></td>'
                                 shtml += ' <td class="supplier_sku">' + data[i].supplier_sku + '</td>'
@@ -240,9 +241,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                                 shtml += ' <td>' + data[i].quantity_num + '</td>'
                                 shtml += ' <td><input id="c-sample_num" class="form-control" readonly oninput="if(value < 0){alert(\'只能输入正整数！\');value = 0}" name="sample_num[]" value="' + data[i].sample_num + '" type="text"></td>'
                                 shtml += ' <td><input id="c-in_stock_num" class="form-control" oninput="if(value < 0){alert(\'只能输入正整数！\');value = 0}" name="in_stock_num[]" value="' + (data[i].quantity_num - data[i].sample_num ) + '" type="text"></td>'
-                                shtml += ' <td>'
-                                shtml += ' <a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>删除</a>'
-                                shtml += ' </td>'
                                 shtml += ' </tr>'
                             }
                             $('.caigou table tbody').append(shtml);
