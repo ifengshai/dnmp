@@ -166,16 +166,16 @@ class PurchaseOrder extends Backend
             $where['new_product.id'] = ['in', $new_product_ids];
             $row = (new NewProduct())->where($where)->with(['newproductattribute'])->select();
             $row = collection($row)->toArray();
-            foreach($row as $v) {
+            foreach ($row as $v) {
                 if ($v['item_status'] != 1) {
-                    $this->error(__('只有待选品状态能够创建！！', url('admin/new_product/index')));
+                    $this->error(__('只有待选品状态能够创建！！'), url('new_product/index'));
                 }
             }
 
             //提取供应商id
             $supplier = array_unique(array_column($row, 'supplier_id'));
             if (count($supplier) > 1) {
-                $this->error(__('必须选择相同的供应商！！', url('admin/new_product/index')));
+                $this->error(__('必须选择相同的供应商！！'), url('new_product/index'));
             }
             $this->assign('row', $row);
             $this->assign('is_new_product', 1);
