@@ -684,6 +684,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                 pagingMore: true,
                 max: 5000
             });
+            //点击查看物流信息
+            $(document).on('click','.track_number',function(){
+                var track_number = $(this).html();
+                console.log(track_number);
+                // var ids = Table.api.selectedids(table);
+                 Backend.api.open('saleaftermanage/order_return/get_logistics_info/track_number/'+track_number,'查询物流信息',{area:["50%", "50%"]});
+            });
             // $(document).on('change','#increment_id',function(){
             //     var incrementId = $('#increment_id').val();
             //     var orderType = $('#c-order_platform').val();

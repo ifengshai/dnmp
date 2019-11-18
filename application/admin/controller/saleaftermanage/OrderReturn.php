@@ -14,7 +14,7 @@ use app\admin\model\saleaftermanage\SaleAfterTask;
 use app\admin\model\saleaftermanage\OrderReturnItem;
 use app\admin\model\saleaftermanage\OrderReturnRemark;
 use think\Request;
-
+use fast\Trackingmore;
 /**
  * 退货列管理
  *
@@ -823,5 +823,16 @@ class OrderReturn extends Backend
         } else {
             $this->error('404 Not found');
         }
+    }
+    /***
+     * 获取订单物流信息
+     */
+    public function get_logistics_info($track_number=null)
+    {
+        $track = new Trackingmore();
+        $track = $track->getRealtimeTrackingResults('查询物流信息', $track_number);
+        $express_data = $track['data']['items'][0];
+        $this->view->assign("express_data", $express_data);
+        return $this->view->fetch();
     }
 }
