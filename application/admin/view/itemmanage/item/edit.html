@@ -14,7 +14,7 @@
         border-color: rgba(188, 188, 188, 1);
         border-radius: 6px;
         padding: 10px;
-        width: 70%;
+        width: 73%;
         margin-left: 10%;
         margin-bottom: 10px;
     }
@@ -70,6 +70,36 @@
         <label class="control-label col-xs-12 col-sm-2">{:__('ID')}:</label>
         <div class="col-xs-12 col-sm-3">
             <input id="c-id" data-rule="required" class="form-control"  name="row[origin_sku]" type="text" value="{$row.sku}" disabled='disabled'>
+        </div>
+    </div>
+    <div class='caigou ajax-add'>
+        <p style="font-size: 16px;text-align: center;"><b>产品信息</b></p>
+        <div style="margin-bottom:20px;">
+            <div id="toolbar" class="toolbar">
+                <a href="javascript:;" class="btn btn-success btn-add" title="增加"><i class="fa fa-plus"></i> 增加</a>
+            </div>
+            <table id="caigou-table">
+                <tr>
+                    <th>商品名称</th>
+                    <th>商品颜色</th>
+                    <th>操作</th>
+                </tr>
+                <tr>
+                    <td><input id="c-name" data-rule="required"  class="form-control" name="row[name][]" type="text" value="{$row.name}"></td>
+                    <td>
+                        <div class="col-xs-12 col-sm-12">
+                            <select  id="c-color" data-rule="required" class="form-control " name="row[color][]">
+                                {foreach name="AllFrameColor" item="vo"}
+                                <option value="{$key}"{eq name="$row['itemAttribute']['frame_color']" value="$key"}selected{/eq}>{$vo}</option>
+                                {/foreach}
+                            </select>
+                        </div>
+                    </td>
+                    <td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>
+                        删除</a></td>
+                </tr>
+
+            </table>
         </div>
     </div>
     <div class="form-group ajax-add">
@@ -242,36 +272,6 @@
         <label class="control-label col-xs-12 col-sm-2">{:__('Frame_remark')}:</label>
         <div class="col-xs-12 col-sm-8">
             <textarea id="c-problem_desc" class="form-control editor" rows="5" name="row[frame_remark]" cols="50">{$row['itemAttribute']['frame_remark']}</textarea>
-        </div>
-    </div>
-    <div class='caigou ajax-add'>
-        <p style="font-size: 16px;text-align: center;"><b>产品信息</b></p>
-        <div style="margin-bottom:20px;">
-            <div id="toolbar" class="toolbar">
-                <a href="javascript:;" class="btn btn-success btn-add" title="增加"><i class="fa fa-plus"></i> 增加</a>
-            </div>
-            <table id="caigou-table">
-                <tr>
-                    <th>商品名称</th>
-                    <th>商品颜色</th>
-                    <th>操作</th>
-                </tr>
-                <tr>
-                    <td><input id="c-name" data-rule="required"  class="form-control" name="row[name][]" type="text" value="{$row.name}"></td>
-                    <td>
-                        <div class="col-xs-12 col-sm-12">
-                            <select  id="c-color" data-rule="required" class="form-control " name="row[color][]">
-                                {foreach name="AllFrameColor" item="vo"}
-                                <option value="{$key}"{eq name="$row['itemAttribute']['frame_color']" value="$key"}selected{/eq}>{$vo}</option>
-                                {/foreach}
-                            </select>
-                        </div>
-                    </td>
-                    <td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>
-                        删除</a></td>
-                </tr>
-
-            </table>
         </div>
     </div>
     <input type='hidden' name="row[item_status]" id="status" value="1">
