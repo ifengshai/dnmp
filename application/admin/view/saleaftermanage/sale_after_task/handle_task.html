@@ -173,10 +173,10 @@
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">{:__('Upload_photos')}:</label>
         <div class="col-xs-12 col-sm-8" readonly="readonly">
-            <div class="input-group" readonly="readonly">
+            <div class="input-group" readonly="readonly" style="width:100%;">
                 <input id="c-upload_photos" class="form-control" size="50" type="text" value="{$row.upload_photos}" readonly="readonly">
-                <div class="input-group-addon no-border no-padding">
-                    <span><button type="button" id="plupload-upload_photos"   class="btn btn-danger plupload" data-input-id="c-upload_photos" data-mimetype="image/gif,image/jpeg,image/png,image/jpg,image/bmp" data-url="ajax/upload?dir=saleAfterManage/saleAfterTask" data-multiple="true" data-preview-id="p-upload_photos" data-maxsize="2M"><i class="fa fa-upload"></i> 上传</button></span>
+                <div class="input-group-addon no-border no-padding" style="display: none;">
+                    <span><button type="button" id="plupload-upload_photos"   class="btn btn-danger plupload" data-input-id="c-upload_photos" data-mimetype="image/gif,image/jpeg,image/png,image/jpg,image/bmp" data-url="ajax/upload?dir=saleAfterManage/saleAfterTask" data-multiple="true" data-preview-id="p-upload_photos" data-maxsize="2M"></span>
                 </div>
                 <span class="msg-box n-right" for="c-upload_photos" readonly="readonly"></span>
             </div>
