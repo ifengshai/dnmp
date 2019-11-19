@@ -1096,9 +1096,12 @@ class Item extends Backend
     {
         if ($this->request->isAjax()) {
             $id = $this->request->param('ids');
-            $row = $this->model->get($id);
+            $row = $this->model->get($id,'itemAttribute');
             if ($row['item_status'] != 1) {
                 $this->error('此商品状态不能提交审核');
+            }
+            if(false == $row['itemAttribute']['frame_images']){
+                $this->error('请先上传商品图片');
             }
             $map['id'] = $id;
             $data['item_status'] = 2;
