@@ -175,6 +175,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                 $(this).parent().parent().remove();
             })
 
+            var check_id = $('.check_id').val();
+            if (check_id) {
+                $('.check_id').change();
+            }
+
 
         },
         edit: function () {

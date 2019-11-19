@@ -127,7 +127,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 Form.api.bindevent($("form[role=form]"));
 
                 //切换合同 异步获取合同数据
-                $(document).on('change', '.purchase_id', function () {
+                $(document).on('change', '.purchase_id', function () { 
                     var id = $(this).val();
                     if (id) {
                         var url = Config.moduleurl + '/purchase/purchase_return/getPurchaseData';
@@ -142,9 +142,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             var shtml = ' <tr><th>SKU</th><th>产品名称</th><th>供应商SKU</th><th>采购数量</th><th>到货数量</th><th>未到数量</th><th>合格数量</th><th>不合格数量</th><th>合格率</th><th>已退数量</th><th>退销数量</th><th>操作</th></tr>';
                             $('.caigou table tbody').html('');
                             for (var i in data.item) {
+                                var sku = data.item[i].sku;
+                                if (!sku) {
+                                    sku = '';
+                                }
 
                                 var num = data.item[i].purchase_num * 1 - data.item[i].arrivals_num * 1;
-                                shtml += ' <tr><td><input id="c-purchase_remark" class="form-control" name="sku[]" type="text" value="' + data.item[i].sku + '"></td>'
+                                shtml += ' <tr><td><input id="c-purchase_remark" class="form-control" name="sku[]" type="text" value="' + sku + '"></td>'
                                 shtml += ' <td><input id="c-purchase_remark" class="form-control" disabled  type="text" value="' + data.item[i].product_name + '"></td>'
                                 shtml += ' <td><input id="c-purchase_remark" class="form-control" disabled type="text" value="' + data.item[i].supplier_sku + '"></td>'
                                 shtml += ' <td><input id="c-purchase_remark" class="form-control purchase_num" disabled type="text" redeonly value="' + data.item[i].purchase_num + '"></td>'

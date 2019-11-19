@@ -206,11 +206,16 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                             $('.caigou table tbody').html('');
                             for (var i in data.item) {
 
+                                var sku = data.item[i].sku;
+                                if (!sku) {
+                                    sku = '';
+                                }
+
                                 var num = data.item[i].purchase_num * 1 - data.item[i].arrivals_num * 1;
 
                                 var supplier_sku = data.item[i].supplier_sku ?　data.item[i].supplier_sku : '';
                                 var percent = data.item[i].arrivals_num > 0 ? Math.round(data.item[i].quantity_num / data.item[i].arrivals_num * 100) : 0;
-                                shtml += ' <tr><td><input id="c-purchase_remark" class="form-control sku" name="sku[]" type="text" value="' + data.item[i].sku + '"></td>'
+                                shtml += ' <tr><td><input id="c-purchase_remark" class="form-control sku" name="sku[]" type="text" readonly value="' + sku + '"></td>'
                                 shtml += ' <td><input id="c-purchase_remark" class="form-control product_name" disabled  type="text" value="' + data.item[i].product_name + '"></td>'
                                 shtml += ' <td><input id="c-purchase_remark" class="form-control" disabled  type="text" value="' + data.item[i].purchase_price + '"></td>'
                                 shtml += ' <td><input id="c-purchase_remark" class="form-control" disabled type="text" value="' + supplier_sku + '"></td>'

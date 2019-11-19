@@ -143,6 +143,14 @@ class Instock extends Backend
             }
             $this->error(__('Parameter %s can not be empty', ''));
         }
+
+        //质检单id
+        $ids = input('ids');
+        if ($ids) {
+            $this->assign('ids', $ids);
+            $this->assign('instocktype', 1);
+        }
+
         //查询入库分类
         $type = $this->type->select();
         $this->assign('type', $type);

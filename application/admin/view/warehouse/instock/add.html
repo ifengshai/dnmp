@@ -68,7 +68,7 @@
                 <select name="row[type_id]" class="form-control type" required>
                     <option value="">请选择</option>
                     {foreach $type as $k => $v}
-                    <option value="{$v.id}">{$v.name}</option>
+                    <option value="{$v.id}" {:$instocktype == $v['id'] ? 'selected' : ''}>{$v.name}</option>
                     {/foreach}
                 </select>
             </div>
@@ -86,7 +86,7 @@
                 <select name="row[check_id]" class="form-control check_id selectpicker" data-live-search='true'>
                     <option value="">请选择</option>
                     {foreach $purchase_data as $k => $v}
-                    <option value="{$k}">{$v}</option>
+                    <option value="{$k}" {:$ids == $k ? 'selected' : ''}>{$v}</option>
                     {/foreach}
                 </select>
             </div>

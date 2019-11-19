@@ -93,6 +93,8 @@ class Zeelool extends Backend
             $swhere['order_platform'] = 1;
             $swhere['synergy_order_id'] = 2;
             $order_arr = $infoSynergyTask->where($swhere)->column('synergy_order_number');
+
+            
             //查询是否存在协同任务
             foreach ($list as $k => $v) {
                 if (in_array($v['increment_id'], $order_arr)) {
@@ -207,11 +209,11 @@ class Zeelool extends Backend
         $label = input('label');
         $map['entity_id'] = ['in', $entity_ids];
         $res = $this->model->where($map)->select();
-        // foreach ($res as $v) {
-        //     if ($v['custom_is_delivery'] == 1) {
-        //         $this->error('存在已质检通过的订单！！');
-        //     }
-        // }
+        foreach ($res as $v) {
+            if ($v['custom_is_delivery'] == 1) {
+                $this->error('存在已质检通过的订单！！');
+            }
+        }
 
 
         if ($entity_ids) {
