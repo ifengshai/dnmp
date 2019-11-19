@@ -130,7 +130,8 @@ class NihaoPrescriptionDetailHelper{
 			$items[$item_key]['options']  = $product_options['options'];          
                                                 
             // $prescription_params = $product_options['info_buyRequest']['tmplens']['prescription'];
-            $prescription_params = json_decode($product_options['info_buyRequest']['tmplens']['prescription'], true);
+			$prescription_params = json_decode($product_options['info_buyRequest']['tmplens']['prescription'], true);
+			
             // dump($prescription_params);
             // $prescription_params = explode("&", $prescription_params);
             // $lens_params = array();
@@ -139,7 +140,8 @@ class NihaoPrescriptionDetailHelper{
             //     $arr_value = explode("=", $value);
             //     $lens_params[$arr_value[0]] = $arr_value[1];
             // }
-            // dump($lens_params);
+            dump($prescription_params);
+            dump($final_params);die;
             $final_params = array_merge($prescription_params, $final_params);
             // dump($final_params);            
             $items[$item_key]['order_item_id'] = $item_value['item_id'];
