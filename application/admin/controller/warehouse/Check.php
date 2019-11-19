@@ -105,7 +105,7 @@ class Check extends Backend
 
                     //添加质检产品
                     if ($result !== false) {
-                        
+
                         $product_name = $this->request->post("product_name/a");
                         $supplier_sku = $this->request->post("supplier_sku/a");
                         $purchase_num = $this->request->post("purchase_num/a");
@@ -163,6 +163,15 @@ class Check extends Backend
             }
             $this->error(__('Parameter %s can not be empty', ''));
         }
+
+        //查询物流单检索表数据
+        $ids = input('ids');
+        if ($ids) {
+            $logisticsinfo = new \app\admin\model\warehouse\LogisticsInfo;
+            $info = $logisticsinfo->get($ids);
+            $this->assign('info', $info);
+        }
+
 
         //查询供应商
         $supplier = new \app\admin\model\purchase\Supplier;
@@ -411,10 +420,10 @@ class Check extends Backend
         //查询退货单商品信息
         $orderReturnItem = new \app\admin\model\saleaftermanage\OrderReturnItem;
         $map['order_return_id'] = $id;
-        $list = $orderReturnItem->where($map)->alias('a')->field('b.order_platform,a.*')->join(['fa_order_return'=> 'b'],'a.order_return_id = b.id')->select();
+        $list = $orderReturnItem->where($map)->alias('a')->field('b.order_platform,a.*')->join(['fa_order_return' => 'b'], 'a.order_return_id = b.id')->select();
         $ItemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku;
         //平台SKU转商品SKU
-        foreach($list as $k => $v) {
+        foreach ($list as $k => $v) {
             $return_sku = $ItemPlatformSku->getTrueSku($v['return_sku'], $v['order_platform']);
             $list[$k]['return_sku'] = $return_sku ?? '';
         }
@@ -481,7 +490,7 @@ class Check extends Backend
                         } else {
                             $check_status = 2;
                         }
-                        $purchase= new \app\admin\model\purchase\PurchaseOrder;
+                        $purchase = new \app\admin\model\purchase\PurchaseOrder;
                         //修改采购单质检状态
                         $purchase_data['check_status'] = $check_status;
                         $purchase->allowField(true)->save($purchase_data, ['id' => $v['purchase_id']]);
@@ -492,7 +501,6 @@ class Check extends Backend
                         $orderReturn = new \app\admin\model\saleaftermanage\OrderReturn;
                         $orderReturn->allowField(true)->save(['quality_status' => 1], ['id' => $v['order_return_id']]);
                     }
-
                 }
             }
 

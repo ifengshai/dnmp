@@ -241,6 +241,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast'], func
                 //根据商品分类的不同请求不同属性页面
                 $(document).on('change', '#choose_category_id', function () {
                     var categoryId = $('#choose_category_id').val();
+                    if (categoryId == 0) {
+                        return false;
+                    }
                     Backend.api.ajax({
                         url: 'new_product/ajaxCategoryInfo',
                         data: { categoryId: categoryId }
@@ -255,16 +258,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast'], func
                         return false;
                     }, function (data, ret) {
                         //失败的回调
-                        alert(ret.msg);
+                        Layer.alert(ret.msg);
                         return false;
                     });
                 });
                 //采购类型和采购产地二级联动
                 $(document).on('change', '#c-procurement_type', function () {
                     var arrIds = $(this).val();
-                    console.log(arrIds);
                     if (arrIds == 0) {
-                        Layer.alert('请选择采购类型');
                         return false;
                     }
                     //线上采购

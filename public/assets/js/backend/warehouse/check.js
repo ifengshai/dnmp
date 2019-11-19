@@ -203,6 +203,16 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                 )
             })
 
+            var purchase_id = $('.purchase_id').val();
+            if (purchase_id) {
+                $('.purchase_id').change();
+            }
+
+            var order_return_id = $('.order_return_id').val();
+            if (order_return_id) {
+                $('.order_return_id').change();
+            }
+
 
             //移除
             $(document).on('click', '.btn-del', function () {
