@@ -48,6 +48,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     },
                                     visible: function (row) {
                                         //返回true时按钮显示,返回false隐藏
+                                        if (row.type == 2) {
+                                            return false;
+                                        }
                                         return true;
                                     }
                                 }], formatter: Table.api.formatter.operate

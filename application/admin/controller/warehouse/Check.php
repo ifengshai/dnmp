@@ -427,11 +427,10 @@ class Check extends Backend
             $return_sku = $ItemPlatformSku->getTrueSku($v['return_sku'], $v['order_platform']);
             $list[$k]['return_sku'] = $return_sku ?? '';
         }
-
         if ($list) {
             $this->success('', '', $list);
         } else {
-            $this->error();
+            $this->error('未查询到数据！！');
         }
     }
 
