@@ -1,3 +1,33 @@
+<div class='caigou ajax-add addition'>
+    <p style="font-size: 16px;text-align: center;"><b>产品信息</b></p>
+    <div style="margin-bottom:20px;">
+        <div id="toolbar" class="toolbar">
+            <a href="javascript:;" class="btn btn-success btn-add" title="增加"><i class="fa fa-plus"></i> 增加</a>
+        </div>
+        <table id="caigou-table">
+            <tr>
+                <th>商品名称</th>
+                <th>商品颜色</th>
+                <th>操作</th>
+            </tr>
+            <tr>
+                <td><input id="c-name" data-rule="required"  class="form-control c-name" name="row[name][]" type="text"></td>
+                <td>
+                    <div class="col-xs-12 col-sm-12">
+                    <select  id="c-color" data-rule="required" class="form-control c-color" name="row[color][]">
+                        {foreach name="AllFrameColor" item="vo"}
+                        <option value="{$key}">{$vo}</option>
+                        {/foreach}
+                    </select>
+                    </div>
+                </td>
+                <td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>
+                    删除</a></td>
+            </tr>
+
+        </table>
+    </div>
+</div>
 <div class="form-group ajax-add">
     <label class="control-label col-xs-12 col-sm-2">{:__('Procurement_type')}:</label>
     <div class="col-xs-12 col-sm-3">
@@ -173,35 +203,5 @@
     <label class="control-label col-xs-12 col-sm-2">{:__('Frame_remark')}:</label>
     <div class="col-xs-12 col-sm-8">
         <textarea id="c-problem_desc" class="form-control editor" rows="5" name="row[frame_remark]" cols="50"></textarea>
-    </div>
-</div>
-<div class='caigou ajax-add addition'>
-    <p style="font-size: 16px;text-align: center;"><b>产品信息</b></p>
-    <div style="margin-bottom:20px;">
-        <div id="toolbar" class="toolbar">
-            <a href="javascript:;" class="btn btn-success btn-add" title="增加"><i class="fa fa-plus"></i> 增加</a>
-        </div>
-        <table id="caigou-table">
-            <tr>
-                <th>商品名称</th>
-                <th>商品颜色</th>
-                <th>操作</th>
-            </tr>
-            <tr>
-                <td><input id="c-name" data-rule="required"  class="form-control c-name" name="row[name][]" type="text"></td>
-                <td>
-                    <div class="col-xs-12 col-sm-12">
-                    <select  id="c-color" data-rule="required" class="form-control c-color" name="row[color][]">
-                        {foreach name="AllFrameColor" item="vo"}
-                        <option value="{$key}">{$vo}</option>
-                        {/foreach}
-                    </select>
-                    </div>
-                </td>
-                <td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>
-                    删除</a></td>
-            </tr>
-
-        </table>
     </div>
 </div>
