@@ -130,6 +130,13 @@ class PurchaseReturn extends Backend
                             } else {
                                 $return_status = 2;
                             }
+                            //查询采购单质检状态 如果为部分质检 则采购单必定为部分退销
+                            $purchase = new \app\admin\model\purchase\PurchaseOrder;
+                            $purchase_res = $purchase->get($params['purchase_id']);
+                            if ($purchase_res['check_status'] == 1) {
+                                $return_status = 1;
+                            }
+
                             //修改采购单退销状态
                             $purchase_data['return_status'] = $return_status;
                             //查询采购单
@@ -268,6 +275,15 @@ class PurchaseReturn extends Backend
                             } else {
                                 $return_status = 2;
                             }
+
+                            //查询采购单质检状态 如果为部分质检 则采购单必定为部分退销
+                            $purchase = new \app\admin\model\purchase\PurchaseOrder;
+                            $purchase_res = $purchase->get($params['purchase_id']);
+                            if ($purchase_res['check_status'] == 1) {
+                                $return_status = 1;
+                            }
+
+
                             //修改采购单退销状态
                             $purchase_data['return_status'] = $return_status;
                             //查询采购单
@@ -341,15 +357,15 @@ class PurchaseReturn extends Backend
             ->select();
         $list = collection($list)->toArray();
 
-        //查询已退数量
-        $return_map['purchase_id'] = $row['purchase_id'];
-        $return_item = $this->model->hasWhere('purchaseReturnItem', ['sku' => ['in', array_keys($return_arr)]])
-            ->where($return_map)
-            ->group('sku')
-            ->column('sum(return_num) as return_all_num', 'sku');
+        // //查询已退数量
+        // $return_map['purchase_id'] = $row['purchase_id'];
+        // $return_item = $this->model->hasWhere('purchaseReturnItem', ['sku' => ['in', array_keys($return_arr)]])
+        //     ->where($return_map)
+        //     ->group('sku')
+        //     ->column('sum(return_num) as return_all_num', 'sku');
 
         foreach ($list as $k => $v) {
-            $list[$k]['return_num'] = @$return_item[$v['sku']] ? @$return_item[$v['sku']] : 0;
+            // $list[$k]['return_num'] = @$return_item[$v['sku']] ? @$return_item[$v['sku']] : 0;
             $list[$k]['purchase_price'] = $item[$v['sku']]['purchase_price'];
             $list[$k]['supplier_sku'] = $item[$v['sku']]['supplier_sku'];
             $list[$k]['purchase_num'] = $item[$v['sku']]['purchase_num'];
@@ -410,15 +426,15 @@ class PurchaseReturn extends Backend
             ->select();
         $list = collection($list)->toArray();
 
-        //查询已退数量
-        $return_map['purchase_id'] = $row['purchase_id'];
-        $return_item = $this->model->hasWhere('purchaseReturnItem', ['sku' => ['in', array_keys($return_arr)]])
-            ->where($return_map)
-            ->group('sku')
-            ->column('sum(return_num) as return_all_num', 'sku');
+        // //查询已退数量
+        // $return_map['purchase_id'] = $row['purchase_id'];
+        // $return_item = $this->model->hasWhere('purchaseReturnItem', ['sku' => ['in', array_keys($return_arr)]])
+        //     ->where($return_map)
+        //     ->group('sku')
+        //     ->column('sum(return_num) as return_all_num', 'sku');
 
         foreach ($list as $k => $v) {
-            $list[$k]['return_num'] = @$return_item[$v['sku']] ? @$return_item[$v['sku']] : 0;
+            // $list[$k]['return_num'] = @$return_item[$v['sku']] ? @$return_item[$v['sku']] : 0;
             $list[$k]['purchase_price'] = $item[$v['sku']]['purchase_price'];
             $list[$k]['supplier_sku'] = $item[$v['sku']]['supplier_sku'];
             $list[$k]['purchase_num'] = $item[$v['sku']]['purchase_num'];
@@ -457,15 +473,15 @@ class PurchaseReturn extends Backend
             ->select();
         $list = collection($list)->toArray();
 
-        //查询已退数量
-        $return_map['purchase_id'] = $id;
-        $return_item = $this->model->hasWhere('purchaseReturnItem', ['sku' => ['in', $skus]])
-            ->where($return_map)
-            ->group('sku')
-            ->column('sum(return_num) as return_num', 'sku');
+        // //查询已退数量
+        // $return_map['purchase_id'] = $id;
+        // $return_item = $this->model->hasWhere('purchaseReturnItem', ['sku' => ['in', $skus]])
+        //     ->where($return_map)
+        //     ->group('sku')
+        //     ->column('sum(return_num) as return_num', 'sku');
 
         foreach ($list as $k => $v) {
-            $list[$k]['return_num'] = @$return_item[$v['sku']] ? @$return_item[$v['sku']] : 0;
+            // $list[$k]['return_num'] = @$return_item[$v['sku']] ? @$return_item[$v['sku']] : 0;
             $list[$k]['purchase_price'] = $item[$v['sku']]['purchase_price'];
             $list[$k]['supplier_sku'] = $item[$v['sku']]['supplier_sku'];
             $list[$k]['purchase_num'] = $item[$v['sku']]['purchase_num'];

@@ -152,7 +152,7 @@ class Instock extends Backend
         }
 
         //查询入库分类
-        $type = $this->type->select();
+        $type = $this->type->where('is_del', 1)->select();
         $this->assign('type', $type);
 
         //查询质检单
@@ -275,7 +275,7 @@ class Instock extends Backend
         }
 
         //查询入库分类
-        $type = $this->type->select();
+        $type = $this->type->where('is_del', 1)->select();
         $this->assign('type', $type);
 
         //查询质检单
@@ -316,7 +316,7 @@ class Instock extends Backend
         }
 
         //查询入库分类
-        $type = $this->type->select();
+        $type = $this->type->where('is_del', 1)->select();
         $this->assign('type', $type);
 
         //查询质检单
@@ -437,10 +437,10 @@ class Instock extends Backend
                         $check_map['type'] = 1;
                         $check = new \app\admin\model\warehouse\Check;
                         //总到货数量
-                        $all_arrivals_num = $check->hasWhere('checkItem')->where($check_map)->sum('arrivals_num');
+                        $all_arrivals_num = $check->hasWhere('checkItem')->where($check_map)->group('Check.purchase_id')->sum('arrivals_num');
 
                         $all_purchase_num = $purchase->where('purchase_id', $check_res['purchase_id'])->sum('purchase_num');
-                        //总入库数量 小于 采购单采购数量 则为部分入库 
+                        //总到货数量 小于 采购单采购数量 则为部分入库 
                         if ($all_arrivals_num < $all_purchase_num) {
                             $stock_status = 1;
                         } else {

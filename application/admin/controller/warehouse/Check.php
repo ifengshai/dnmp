@@ -478,11 +478,12 @@ class Check extends Backend
                         $check_map['type'] = 1;
                         $check = new \app\admin\model\warehouse\Check;
                         //总到货数量
-                        $all_arrivals_num = $check->hasWhere('checkItem')->where($check_map)->sum('arrivals_num');
-
+                        $all_arrivals_num = $check->hasWhere('checkItem')->where($check_map)->group('Check.purchase_id')->sum('arrivals_num');
+                       
                         //查询总采购数量
                         $purchaseItem = new \app\admin\model\purchase\PurchaseOrderItem;
                         $all_purchase_num = $purchaseItem->where('purchase_id', $v['purchase_id'])->sum('purchase_num');
+
                         //已质检数量+到货数量 小于 采购单采购数量 则为部分质检
                         if ($all_arrivals_num < $all_purchase_num) {
                             $check_status = 1;
