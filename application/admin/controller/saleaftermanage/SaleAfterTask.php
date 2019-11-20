@@ -370,6 +370,10 @@ class SaleAfterTask extends Backend
             if(!$idss){
               return   $this->$this->error('处理失败，请重新尝试');
             }
+            $row = $this->model->get($idss);
+            if(2 == $row['task_status']){
+                $this->error('已经处理完成,无需再次操作！！');
+            }
             $data = [];
             $data['task_status'] = 2;
             $data['handle_time'] = date("Y-m-d H:i:s",time());
@@ -393,25 +397,20 @@ class SaleAfterTask extends Backend
             }
             $map['id'] = ['in',$ids];
             $list = $this->model->where($map)->field('id,task_status')->select();
-            $arr = [];
             foreach($list as $val){
-                // if($val['task_status'] ==1){
-                //     $arr[] = $val['id'];    
-                // }
-                $arr[] = $val['id'];
-            }
-            if(!empty($arr)){
-                $data = [];
-                $data['task_status'] = 2;
-                $data['handle_time'] = date("Y-m-d H:i:s",time());
-                $result = $this->model->where('id','in',$arr)->update($data);
-                if($result !== false){
-                  return  $this->success('操作成功');
+                if ( 2 <= $val['task_status']) {
+                    $this->error('此状态无法处理完成操作！！');
                 }
-            }else{
-                return $this->error(__('Select the updated record does not meet the requirements, please re-select'));
             }
-
+            $data = [];
+            $data['task_status'] = 2;
+            $data['handle_time'] = date("Y-m-d H:i:s",time());
+            $result = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
+            if (false !== $result) {
+                return $this->success('处理成功');
+            } else {
+                return $this->error('处理失败');
+            }
         }else{
             return $this->error('请求失败,请勿请求');
         }
@@ -424,8 +423,8 @@ class SaleAfterTask extends Backend
         if (!$row) {
             $this->error(__('No Results were found'));
         }
-        if($row['task_status'] ==2){ //如果任务已经处理完成
-            $this->error('该任务已经处理完成，无需再次处理','saleaftermanage/sale_after_task','',0);
+        if($row['task_status'] >=2){ //如果任务已经处理完成
+            $this->error('该状态无法处理！！','saleaftermanage/sale_after_task');
         }
         $adminIds = $this->getDataLimitAdminIds();
         if (is_array($adminIds)) {

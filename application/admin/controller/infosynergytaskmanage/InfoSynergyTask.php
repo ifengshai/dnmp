@@ -453,11 +453,17 @@ class InfoSynergyTask extends Backend
     public function handleComplete($ids = null)
     {
         if ($this->request->isAjax()) {
+            if(1 < count($ids)){
+                $this->error('只能单个处理完成,不能批量处理完成');
+            }
+            $row = $this->model->get($ids);
+            if(2 <= $row['synergy_status']){
+                $this->error('此状态不能处理完成');
+            }
             $map['id'] = ['in', $ids];
             $data['synergy_status'] = 2;
             $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
             if ($res !== false) {
-                $row = $this->model->get($ids);
                 //如果是修改镜架的话更改库存
                 if (12 == $row['synergy_task_id']) { //执行更改镜架的逻辑
                     (new Inventory())->changeFrame($row['id'], $row['order_platform'], $row['synergy_order_number']);
@@ -481,7 +487,7 @@ class InfoSynergyTask extends Backend
         if (!$row) {
             $this->error(__('No Results were found'));
         }
-        if(2 == $row['synergy_status']){
+        if(2 >= $row['synergy_status']){
             $this->error(__('The collaborative task information has been completed and cannot be processed'),'infosynergytaskmanage/info_synergy_task/index');
         }
         $adminIds = $this->getDataLimitAdminIds();

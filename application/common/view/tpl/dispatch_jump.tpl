@@ -39,7 +39,7 @@
         </p>
     {/if}
     <p class="clearfix">
-        <a href="__PUBLIC__" class="btn btn-grey">{:__('Go back')}</a>
+        <a href="javascript:void(0)" class="btn btn-grey" id="jump-to-index">{:__('Go back')}</a>
         {if $url}
             <a  href="javascript:void(0)"  class="btn btn-primary" id="jumpss">{:__('Jump now')}</a>
         {/if}
@@ -62,6 +62,9 @@
         })();
      document.getElementById("jumpss").onclick=function(){
          parent.location.href = history.length <= 1 ? "/" : "{$url}";
+     };
+     document.getElementById("jump-to-index").onclick=function(){
+         parent.parent.location.href ="http://{$_SERVER['HTTP_HOST']}/admin_1biSSnWyfW.php";
      };
     </script>
 {/if}
