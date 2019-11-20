@@ -35,8 +35,7 @@ class ItemBrand extends Model
      */
     public function getBrandList()
     {
-        $where['is_del'] = 1;
-        $result = $this->where('status','=',1)->where($where)->field('id,name_cn')->select();
+        $result = $this->field('id,name_cn')->select();
         if(!$result){
             return false;
         }
