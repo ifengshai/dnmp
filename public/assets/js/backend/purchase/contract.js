@@ -480,7 +480,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
 
                     if (time_value > end_time) {
                         Layer.alert('开始时间不能大于结束时间！！');
-                        $(this).val(now);
+                        $(this).val(end_time);
                         return false;
                     } 
 
@@ -509,7 +509,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
 
                     if (time_value > end_time) {
                         Layer.alert('开始时间不能大于结束时间！！');
-                        $(this).val(now);
+                        $(this).val(end_time);
                         return false;
                     } 
 
