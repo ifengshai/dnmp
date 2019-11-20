@@ -524,9 +524,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                             //循环展示商品信息
                             var shtml = ' <tr><th>SKU</th><th>退货数量</th><th>到货数量</th><th>合格数量</th><th>不合格数量</th><th>合格率</th><th>备注</th><th>上传图片</th><th>操作</th></tr>';
                             $('.caigou table tbody').html('');
-                            
+                           
                             for (var i in data) { 
-                                var sku = data.item[i].sku;
+                                var sku = data[i].return_sku;
                                 if (!sku) {
                                     sku = '';
                                 }
