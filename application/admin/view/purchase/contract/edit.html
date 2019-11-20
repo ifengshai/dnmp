@@ -152,7 +152,7 @@
                     </td>
                     <td><input id="c-purchase_remark" class="form-control price" name="price[]" type="text"
                             value="{$v.price}"></td>
-                    <td><input id="c-purchase_remark" class="form-control total" name="total[]" type="text"
+                    <td><input id="c-purchase_remark" class="form-control total" readonly name="total[]" type="text"
                             value="{$v.total}"></td>
                     <td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>
                             删除</a></td>
@@ -171,14 +171,14 @@
         <div class="form-group">
             <label class="control-label col-xs-12 col-sm-2">{:__('Total')}:</label>
             <div class="col-xs-12 col-sm-8">
-                <input id="c-total" class="form-control alltotal" step="0.01" name="row[total]" type="number" placeholder="单位：元"
+                <input id="c-total" class="form-control alltotal" readonly step="0.01" name="row[total]" type="number" placeholder="单位：元"
                     value="{$row.total}">
             </div>
         </div>
         <div class="form-group">
             <label class="control-label col-xs-12 col-sm-2">{:__('Num')}:</label>
             <div class="col-xs-12 col-sm-8">
-                <input id="c-num" class="form-control allnum" name="row[num]" type="number" value="{$row.num}"
+                <input id="c-num" class="form-control allnum" name="row[num]" readonly type="number" value="{$row.num}"
                     placeholder="单位：个">
             </div>
         </div>
@@ -301,7 +301,7 @@
             <td><input id="c-purchase_remark" class="form-control supplier_sku" name="supplier_sku[]" type="text"></td>
             <td><input id="c-purchase_remark" class="form-control num" name="num[]" type="text"></td>
             <td><input id="c-purchase_remark" class="form-control price" name="price[]" type="text"></td>
-            <td><input id="c-purchase_remark" class="form-control total" name="total[]" type="text"></td>
+            <td><input id="c-purchase_remark" class="form-control total" readonly name="total[]" type="text"></td>
             <td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>
                     删除</a></td>
         </tr>
