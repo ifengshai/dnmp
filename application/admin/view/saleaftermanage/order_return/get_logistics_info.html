@@ -52,16 +52,16 @@
     <p style="font-size: 16px;text-align: center;"><b>物流信息</b></p>
     <div class='caigou'>
         <div class="form-group">
-            <label class="col-xs-12 col-sm-3">承运公司:</label>
-            <label class="col-xs-12 col-sm-5">{$express_data.carrier_code}</label>
+            <label class="col-xs-12 col-sm-8">承运公司:</label>
+            <label class="col-xs-12 col-sm-8">{$express_data.carrier_code}</label>
         </div>
         <div class="form-group">
-            <label class="col-xs-12 col-sm-3">物流单号:</label>
-            <label class="col-xs-12 col-sm-5">{$express_data.tracking_number}</label>
+            <label class="col-xs-12 col-sm-8">物流单号:</label>
+            <label class="col-xs-12 col-sm-8">{$express_data.tracking_number}</label>
         </div>
         <div class="form-group">
-            <label class="col-xs-12 col-sm-3">物流信息:</label>
-            <label class="col-xs-12 col-sm-3">
+            <label class="col-xs-12 col-sm-8">物流信息:</label>
+            <label class="col-xs-12 col-sm-8">
                 {foreach name="express_data.origin_info.trackinfo" item="vi"}
                 <p>{$vi.Date} <br>{$vi.StatusDescription} <br>{$vi.checkpoint_status}</p>
                 {/foreach}
