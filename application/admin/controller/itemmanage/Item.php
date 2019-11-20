@@ -1039,7 +1039,6 @@ class Item extends Backend
         $row = $this->model->get($ids, 'itemAttribute');
         if ($this->request->isAjax()) {
             $params = $this->request->post("row/a");
-            $ids = $params['ids'];
             $item_status = $params['item_status'];
             $itemAttrData['frame_images'] = $params['frame_images'];
             $itemAttrData['create_frame_images_time'] = date("Y-m-d H:i:s", time());
@@ -1935,13 +1934,6 @@ class Item extends Backend
     // public function ceshi(){
         
     // }
-    public function ceshi(){
-        $str = 'a:18:{s:6:"od_sph";s:5:"-0.50";s:6:"od_cyl";s:5:"-0.50";s:7:"od_axis";s:3:"180";s:6:"od_add";s:0:"";s:4:"pd_r";s:0:"";s:5:"od_pv";s:0:"";s:5:"od_bd";s:0:"";s:7:"od_pv_r";s:0:"";s:7:"od_bd_r";s:0:"";s:6:"os_sph";s:5:"-0.50";s:6:"os_cyl";s:5:"-0.50";s:7:"os_axis";s:3:"171";s:6:"os_add";s:0:"";s:4:"pd_l";s:0:"";s:5:"os_pv";s:0:"";s:5:"os_bd";s:0:"";s:7:"os_pv_r";s:0:"";s:7:"os_bd_r";s:0:"";}';
-        $result = unserialize($str);
-        echo '<pre>';
-        var_dump($result);
-        exit;
-    }
     /***
      * 同步库存
      */
@@ -1949,6 +1941,92 @@ class Item extends Backend
     {
         
     }
+    public function ceshi()
+    {
+        $params['customer_email'] = 'msdeedeemusic@gmail.com';
+        //$params['customer_email'] = 'bills.payments.etc@gmail.com';
+        if ($params) {
+            if (is_array($params['customer_email'])) {
+                $customer_email = "'" . str_replace(",", "','", implode(',', array_unique($params['customer_email']))) . "'";
+            } else {
+                $customer_email = "'" . $params['customer_email'] . "'";
+            }
+            $order_querySql = "select sfo.entity_id,sfo.increment_id,sfo.`status`,sfst.track_number,sfst.title,sfo.coupon_code,sfo.coupon_rule_name,sfo.shipping_description,round(sfo.base_grand_total,2) base_grand_total,sfo.order_currency_code,round(sfo.total_qty_ordered,0) total_qty_ordered,sfo.created_at
+            from sales_flat_order sfo left join sales_flat_shipment_track sfst on  sfst.order_id=sfo.entity_id
+            where sfo.customer_email in ($customer_email) order by sfo.entity_id desc;";
+            $order_list = Db::connect('database.db_nihao_online')->query($order_querySql);
+            $this->assign('order_list', $order_list);
 
+            $returnResult = array();
+            $status = array('complete', 'processing', 'free_processing', 'creditcard_proccessing');
+            // dump($status);
+            $increment_id_str = "";
+            foreach ($order_list as $order_key => $order_value) {
+                $increment_id_str .= "'" . $order_value['increment_id'] . "',";
+                if (in_array($order_value['status'], $status)) {
+                    $returnResult['success_counter']++;
+                    $returnResult['success_total'] += $order_value['base_grand_total'];
+                } else {
+                    $returnResult['failed_counter']++;
+                    $returnResult['failed_total'] += $order_value['base_grand_total'];
+                }
+            }
+            // if ($increment_id_str) {
+            //     $increment_id_str = trim($increment_id_str, ',');
+            //     // dump($increment_id_str);
+            //     $this->service_question_collaboration($increment_id_str);
+            //     $this->order_return_reissue_collaboration($increment_id_str);
+            // }
+
+            // dump($returnResult);
+            // exit;
+            $order_item_querySql = "select sfo.increment_id,sfoi.sku,round(sfoi.qty_ordered,0) qty_ordered,sfoi.original_price,sfoi.discount_amount,sfoi.product_options,sfo.created_at,sfoi.name
+            from sales_flat_order_item sfoi
+            left join sales_flat_order sfo on sfo.entity_id = sfoi.order_id 
+            where sfo.customer_email in ($customer_email)
+            order by sfoi.item_id desc";
+            // dump($order_querySql);
+            $order_item_list = Db::connect('database.db_nihao_online')->query($order_item_querySql);
+            // echo '<pre>';
+            // var_dump($order_item_list);
+            // exit;
+            foreach ($order_item_list as $order_item_key => $order_item_value) {
+                $product_options = unserialize($order_item_value['product_options']);
+
+                unset($order_item_value['product_options']);
+
+                $final_print = array();
+                $final_print['frame_price'] = $product_options['info_buyRequest']['tmplens']['frame_price'];
+
+                $final_print['coatiing_name'] = substr($product_options['info_buyRequest']['tmplens']['four_name'], 0, 60);
+                $final_print['coatiing_price'] = $product_options['info_buyRequest']['tmplens']['four_price'];
+
+                $final_print['index_type'] = substr($product_options['info_buyRequest']['tmplens']['third_name'], 0, 60);
+                $final_print['index_price'] = $product_options['info_buyRequest']['tmplens']['third_price'];
+                $final_print['product_color'] = $product_options['info_buyRequest']['tmplens']['product_color'];
+                $final_print['name'] = $order_item_value['name'];
+                // if(!empty($product_options['info_buyRequest']['tmplens']['prescription'])){
+                //     $prescription_params = json_decode($product_options['info_buyRequest']['tmplens']['prescription'], true);
+                //     $final_print = array_merge($prescription_params, $final_print);
+                // }
+                $prescription_params = json_decode($product_options['info_buyRequest']['tmplens']['prescription'], true);
+                $final_print = array_merge($prescription_params, $final_print);
+                // dump($final_print);
+                $order_item_list[$order_item_key] = array_merge($order_item_value, $final_print);
+                //unset($lens_params);
+                //unset($final_print);
+
+                if (!$returnResult['birthday'] && $final_print['year'] && $final_print['month']) {
+                    $returnResult['birthday'] = $final_print['year'] . ' ' . $final_print['month'];
+                }
+                $order_item_list[$order_item_key]['created_at'] = str_replace(' ', '<br>', $order_item_value['created_at']);
+            }
+             dump($order_item_list);
+             exit;
+            $this->assign('order_item_list', $order_item_list);
+            // dump($returnResult);
+            return $returnResult;
+        }
+    }
 
 }
