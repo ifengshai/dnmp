@@ -423,8 +423,8 @@ class SaleAfterTask extends Backend
         if (!$row) {
             $this->error(__('No Results were found'));
         }
-        if($row['task_status'] ==2){ //如果任务已经处理完成
-            $this->error('该任务已经处理完成，无需再次处理','saleaftermanage/sale_after_task','',0);
+        if($row['task_status'] >=2){ //如果任务已经处理完成
+            $this->error('该状态无法处理！！','saleaftermanage/sale_after_task','',0);
         }
         $adminIds = $this->getDataLimitAdminIds();
         if (is_array($adminIds)) {
