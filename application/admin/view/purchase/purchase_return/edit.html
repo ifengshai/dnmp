@@ -112,7 +112,7 @@
                     <th>合格数量</th>
                     <th>不合格数量</th>
                     <th>合格率</th>
-                    <th>已退数量</th>
+                    <!-- <th>已退数量</th> -->
                     <th>退销数量</th>
                     <th>操作</th>
                 </tr>
@@ -141,19 +141,19 @@
                             value="{$v.unqualified_num}"></td>
                      {if $v['arrivals_num']>0}              
                     <td>
-                        <input id="c-purchase_remark" class="form-control unqualified_num" disabled type="text"
+                        <input id="c-purchase_remark" class="form-control quantity_rate" disabled type="text"
                             value="{:round($v['quantity_num']/$v['arrivals_num']*100)}">%
                     </td>
                     {else}
                     <td>
-                            <input id="c-purchase_remark" class="form-control unqualified_num" disabled type="text"
+                            <input id="c-purchase_remark" class="form-control quantity_rate" disabled type="text"
                                 value="0">%
                         </td>
                      {/if}      
-                    <td><input id="c-purchase_remark" class="form-control quantity_rate" disabled type="text"
-                            value="{$v.return_all_num}"></td>
+                    <!-- <td><input id="c-purchase_remark" class="form-control quantity_rate" disabled type="text"
+                            value="{$v.return_all_num}"></td> -->
                     <td>
-                        <input id="c-contract_images" class="form-control return_num" size="200" name="return_num[]"
+                        <input id="c-contract_images" class="form-control return_num" readonly size="200" name="return_num[]"
                             value="{$v.return_num}" type="text">
 
                     </td>

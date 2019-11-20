@@ -202,7 +202,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                             $('.supplier').val(data.supplier_id);
                             $('.purchase_total').val(data.purchase_total);
                             //循环展示商品信息
-                            var shtml = ' <tr><th>SKU</th><th>采购单价</th><th>供应商SKU</th><th>采购数量</th><th>到货数量</th><th>未到数量</th><th>合格数量</th><th>不合格数量</th><th>合格率</th><th>已退数量</th><th>退销数量</th><th>操作</th></tr>';
+                            var shtml = ' <tr><th>SKU</th><th>采购单价</th><th>供应商SKU</th><th>采购数量</th><th>到货数量</th><th>未到数量</th><th>合格数量</th><th>不合格数量</th><th>合格率</th><th>退销数量</th><th>操作</th></tr>';
                             $('.caigou table tbody').html('');
                             var return_money = 0;
                             for (var i in data.item) {
@@ -228,9 +228,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                                 shtml += ' <td><input id="c-purchase_remark" class="form-control quantity_num" disabled type="text" value="' + data.item[i].quantity_num + '"></td>'
                                 shtml += ' <td><input id="c-purchase_remark" class="form-control unqualified_num" disabled  type="text" value="' + data.item[i].unqualified_num + '"></td>'
                                 shtml += ' <td><input id="c-purchase_remark" class="form-control sample_num" disabled  type="text" value="' + percent + '%' + '"></td>'
-                                shtml += ' <td><input  id="c-purchase_remark" class="form-control" disabled  type="text" value="' + data.item[i].return_num + '"></td>'
+                                //shtml += ' <td><input  id="c-purchase_remark" class="form-control" disabled  type="text" value="' + data.item[i].return_num + '"></td>'
 
-                                shtml += ' <td><input id="c-return_num"  class="form-control return_num" data-price="' + data.item[i].purchase_price + '" size="200"  name="return_num[]" type="text" value="' + data.item[i].unqualified_num + '"></td>'
+                                shtml += ' <td><input id="c-return_num"  class="form-control return_num" data-price="' + data.item[i].purchase_price + '" size="200" readonly  name="return_num[]" type="text" value="' + data.item[i].unqualified_num + '"></td>'
                                 shtml += ' <td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>删除</a>'
                                 shtml += ' </td>'
                                 shtml += ' </tr>'
