@@ -118,7 +118,9 @@ class ItemCategory extends Model
      */
     public function categoryList()
     {
-        $result = $this->where(['is_del'=>1])->field('id,pid,name')->select();
+        $where['is_del'] = 1;
+        $where['is_putaway'] =1;
+        $result = $this->where($where)->field('id,pid,name')->select();
         if(!$result){
             $finalArr =[];
             $finalArr[0] = '无';
