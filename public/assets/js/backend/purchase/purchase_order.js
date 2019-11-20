@@ -449,7 +449,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                                 if (!sku) {
                                     sku = '';
                                 }
-
                                 shtml += '<tr><td><input id="c-purchase_remark" class="form-control sku" name="sku[]" value="' + sku + '" type="text"></td>'
                                 shtml += '<td><input id="c-purchase_remark" class="form-control product_name" readonly name="product_name[]" value="' + data.item[i].product_name + '" type="text"></td>'
                                 shtml += '<td><input id="c-purchase_remark" class="form-control supplier_sku" readonly name="supplier_sku[]" value="' + data.item[i].supplier_sku + '" type="text"></td>'
@@ -460,6 +459,41 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                                 shtml += '</tr>'
                             }
                             $('.caigou table tbody').append(shtml);
+
+
+
+                            //模糊匹配订单
+                            $('.sku').autocomplete({
+                                source: function (request, response) {
+                                    $.ajax({
+                                        type: "POST",
+                                        url: "ajax/ajaxGetLikeOriginSku",
+                                        dataType: "json",
+                                        cache: false,
+                                        async: false,
+                                        data: {
+                                            origin_sku: request.term
+                                        },
+                                        success: function (json) {
+                                            var data = json.data;
+                                            response($.map(data, function (item) {
+                                                return {
+                                                    label: item,//下拉框显示值
+                                                    value: item,//选中后，填充到input框的值
+                                                    //id:item.bankCodeInfo//选中后，填充到id里面的值
+                                                };
+                                            }));
+                                        }
+                                    });
+                                },
+                                delay: 10,//延迟100ms便于输入
+                                select: function (event, ui) {
+                                    $("#bankUnionNo").val(ui.item.id);//取出在return里面放入到item中的属性
+                                },
+                                scroll: true,
+                                pagingMore: true,
+                                max: 5000
+                            });
                         });
                     }
 
@@ -467,7 +501,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
 
 
                 //计算金额
-                $('.purchase_num').blur(function () {
+                $(document).on('blur', '.purchase_num', function () {
 
                     var purchase_num = $(this).val();
                     var purchase_price = $(this).parent().next().find('.purchase_price').val();
@@ -487,7 +521,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                     $('.purchase_total').val(total + freight * 1);
                 })
 
-                $('.purchase_price').blur(function () {
+                $(document).on('blur', '.purchase_price', function () {
                     var purchase_num = $(this).parent().prev().find('.purchase_num').val();
                     var purchase_price = $(this).val();
                     if (purchase_num * 1 > 0 && purchase_price * 1 > 0) {
@@ -576,25 +610,25 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                     var end_time = $('.delivery_etime').val();
 
                     function getNow(s) {
-                        return s < 10 ? '0' + s: s;
+                        return s < 10 ? '0' + s : s;
                     }
 
                     var myDate = new Date();
 
-                    var year=myDate.getFullYear();        //获取当前年
-                    var month=myDate.getMonth()+1;   //获取当前月
-                    var date=myDate.getDate();            //获取当前日
-                    var h=myDate.getHours();              //获取当前小时数(0-23)
-                    var m=myDate.getMinutes()-10;          //获取当前分钟数(0-59)
-                    var s=myDate.getSeconds();
-                    var now=year+'-'+getNow(month)+"-"+getNow(date)+" "+getNow(h)+':'+getNow(m)+":"+getNow(s);
+                    var year = myDate.getFullYear();        //获取当前年
+                    var month = myDate.getMonth() + 1;   //获取当前月
+                    var date = myDate.getDate();            //获取当前日
+                    var h = myDate.getHours();              //获取当前小时数(0-23)
+                    var m = myDate.getMinutes() - 10;          //获取当前分钟数(0-59)
+                    var s = myDate.getSeconds();
+                    var now = year + '-' + getNow(month) + "-" + getNow(date) + " " + getNow(h) + ':' + getNow(m) + ":" + getNow(s);
 
 
                     if (time_value > end_time) {
                         Layer.alert('开始时间不能大于结束时间！！');
                         $(this).val(now);
                         return false;
-                    } 
+                    }
 
                 });
 
@@ -605,31 +639,31 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                     var end_time = $('.contract_etime').val();
 
                     function getNow(s) {
-                        return s < 10 ? '0' + s: s;
+                        return s < 10 ? '0' + s : s;
                     }
 
                     var myDate = new Date();
 
-                    var year=myDate.getFullYear();        //获取当前年
-                    var month=myDate.getMonth()+1;   //获取当前月
-                    var date=myDate.getDate();            //获取当前日
-                    var h=myDate.getHours();              //获取当前小时数(0-23)
-                    var m=myDate.getMinutes()-10;          //获取当前分钟数(0-59)
-                    var s=myDate.getSeconds();
-                    var now=year+'-'+getNow(month)+"-"+getNow(date)+" "+getNow(h)+':'+getNow(m)+":"+getNow(s);
+                    var year = myDate.getFullYear();        //获取当前年
+                    var month = myDate.getMonth() + 1;   //获取当前月
+                    var date = myDate.getDate();            //获取当前日
+                    var h = myDate.getHours();              //获取当前小时数(0-23)
+                    var m = myDate.getMinutes() - 10;          //获取当前分钟数(0-59)
+                    var s = myDate.getSeconds();
+                    var now = year + '-' + getNow(month) + "-" + getNow(date) + " " + getNow(h) + ':' + getNow(m) + ":" + getNow(s);
 
 
                     if (time_value > end_time) {
                         Layer.alert('开始时间不能大于结束时间！！');
                         $(this).val(now);
                         return false;
-                    } 
+                    }
 
                 });
 
 
-            
-               
+
+
             }
 
         }

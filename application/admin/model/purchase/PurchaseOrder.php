@@ -40,10 +40,14 @@ class PurchaseOrder extends Model
     /**
      * 获取采购单
      */
-    public function getPurchaseReturnData($check_status = [0, 1], $instock_status)
+    public function getPurchaseReturnData($check_status = [0, 1], $instock_status, $return_status = [])
     {
         if ($instock_status) {
             $where['stock_status'] = ['in', $instock_status];
+        }
+
+        if ($return_status) {
+            $where['return_status'] = ['in', $return_status];
         }
         $where['purchase_status'] = 7;
         $where['check_status']  = ['in', $check_status];

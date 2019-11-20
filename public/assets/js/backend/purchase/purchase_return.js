@@ -202,9 +202,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                             $('.supplier').val(data.supplier_id);
                             $('.purchase_total').val(data.purchase_total);
                             //循环展示商品信息
-                            var shtml = ' <tr><th>SKU</th><th>产品名称</th><th>采购单价</th><th>供应商SKU</th><th>采购数量</th><th>到货数量</th><th>未到数量</th><th>合格数量</th><th>不合格数量</th><th>合格率</th><th>已退数量</th><th>退销数量</th><th>操作</th></tr>';
+                            var shtml = ' <tr><th>SKU</th><th>采购单价</th><th>供应商SKU</th><th>采购数量</th><th>到货数量</th><th>未到数量</th><th>合格数量</th><th>不合格数量</th><th>合格率</th><th>已退数量</th><th>退销数量</th><th>操作</th></tr>';
                             $('.caigou table tbody').html('');
+                            var return_money = 0;
                             for (var i in data.item) {
+                                return_money += data.item[i].purchase_price*data.item[i].unqualified_num;
 
                                 var sku = data.item[i].sku;
                                 if (!sku) {
@@ -215,8 +217,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
 
                                 var supplier_sku = data.item[i].supplier_sku ?　data.item[i].supplier_sku : '';
                                 var percent = data.item[i].arrivals_num > 0 ? Math.round(data.item[i].quantity_num / data.item[i].arrivals_num * 100) : 0;
-                                shtml += ' <tr><td><input id="c-purchase_remark" class="form-control sku" name="sku[]" type="text" readonly value="' + sku + '"></td>'
-                                shtml += ' <td><input id="c-purchase_remark" class="form-control product_name" disabled  type="text" value="' + data.item[i].product_name + '"></td>'
+                                shtml += '<tr><input  class="form-control" name="item_id[]" type="hidden" readonly value="' + data.item[i].ids + '">'
+                                shtml += ' <td><input id="c-purchase_remark" class="form-control sku" name="sku[]" type="text" readonly value="' + sku + '"></td>'
+                               
                                 shtml += ' <td><input id="c-purchase_remark" class="form-control" disabled  type="text" value="' + data.item[i].purchase_price + '"></td>'
                                 shtml += ' <td><input id="c-purchase_remark" class="form-control" disabled type="text" value="' + supplier_sku + '"></td>'
                                 shtml += ' <td><input id="c-purchase_remark" class="form-control purchase_num" disabled type="text" redeonly value="' + data.item[i].purchase_num + '"></td>'
@@ -227,11 +230,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                                 shtml += ' <td><input id="c-purchase_remark" class="form-control sample_num" disabled  type="text" value="' + percent + '%' + '"></td>'
                                 shtml += ' <td><input  id="c-purchase_remark" class="form-control" disabled  type="text" value="' + data.item[i].return_num + '"></td>'
 
-                                shtml += ' <td><input id="c-return_num"  class="form-control return_num" data-price="' + data.item[i].purchase_price + '" size="200"  name="return_num[]" type="text" ></td>'
+                                shtml += ' <td><input id="c-return_num"  class="form-control return_num" data-price="' + data.item[i].purchase_price + '" size="200"  name="return_num[]" type="text" value="' + data.item[i].unqualified_num + '"></td>'
                                 shtml += ' <td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>删除</a>'
                                 shtml += ' </td>'
                                 shtml += ' </tr>'
+
                             }
+                            $('.return_money').val(return_money);
                             $('.caigou table tbody').append(shtml);
 
                             //模糊匹配订单
