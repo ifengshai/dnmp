@@ -139,7 +139,7 @@ class Outstock extends Backend
             $this->error(__('Parameter %s can not be empty', ''));
         }
         //查询出库分类
-        $type = $this->type->select();
+        $type = $this->type->where('is_del', 1)->select();
         $this->assign('type', $type);
 
 
@@ -230,7 +230,7 @@ class Outstock extends Backend
         }
 
         //查询入库分类
-        $type = $this->type->select();
+        $type = $this->type->where('is_del', 1)->select();
         $this->assign('type', $type);
 
 
@@ -261,7 +261,7 @@ class Outstock extends Backend
         }
 
         //查询入库分类
-        $type = $this->type->select();
+        $type = $this->type->where('is_del', 1)->select();
         $this->assign('type', $type);
 
 

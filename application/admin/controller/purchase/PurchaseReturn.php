@@ -130,6 +130,13 @@ class PurchaseReturn extends Backend
                             } else {
                                 $return_status = 2;
                             }
+                            //查询采购单质检状态 如果为部分质检 则采购单必定为部分退销
+                            $purchase = new \app\admin\model\purchase\PurchaseOrder;
+                            $purchase_res = $purchase->get($params['purchase_id']);
+                            if ($purchase_res['check_status'] == 1) {
+                                $return_status = 1;
+                            }
+
                             //修改采购单退销状态
                             $purchase_data['return_status'] = $return_status;
                             //查询采购单
@@ -268,6 +275,15 @@ class PurchaseReturn extends Backend
                             } else {
                                 $return_status = 2;
                             }
+
+                            //查询采购单质检状态 如果为部分质检 则采购单必定为部分退销
+                            $purchase = new \app\admin\model\purchase\PurchaseOrder;
+                            $purchase_res = $purchase->get($params['purchase_id']);
+                            if ($purchase_res['check_status'] == 1) {
+                                $return_status = 1;
+                            }
+
+                            
                             //修改采购单退销状态
                             $purchase_data['return_status'] = $return_status;
                             //查询采购单

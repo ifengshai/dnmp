@@ -152,7 +152,7 @@ class Instock extends Backend
         }
 
         //查询入库分类
-        $type = $this->type->select();
+        $type = $this->type->where('is_del', 1)->select();
         $this->assign('type', $type);
 
         //查询质检单
@@ -275,7 +275,7 @@ class Instock extends Backend
         }
 
         //查询入库分类
-        $type = $this->type->select();
+        $type = $this->type->where('is_del', 1)->select();
         $this->assign('type', $type);
 
         //查询质检单
@@ -316,7 +316,7 @@ class Instock extends Backend
         }
 
         //查询入库分类
-        $type = $this->type->select();
+        $type = $this->type->where('is_del', 1)->select();
         $this->assign('type', $type);
 
         //查询质检单
