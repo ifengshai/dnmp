@@ -81,6 +81,9 @@ class Itempresell extends Backend
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
             if ($params) {
+                if($params['presell_start_time'] > $params['presell_end_time']){
+                    $this->error(__('预售开始时间大于结束时间,不能添加'));
+                }
                 $params = $this->preExcludeFields($params);
                 if(empty($params['platform_sku'])){
                     $this->error(__('Platform sku cannot be empty'));

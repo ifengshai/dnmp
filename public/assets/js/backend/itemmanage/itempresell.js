@@ -230,6 +230,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui'], function ($, 
                 });
                 ////选中的结束时间和现在的时间比较
                 $(document).on('dp.change','#c-presell_end_time',function () {
+                    var time_start_value = $("#c-presell_start_time").val();
                     var time_end_value = $(this).val();
                     console.log(time_end_value);
                     function getNow(s) {
@@ -243,6 +244,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui'], function ($, 
                     var m=myDate.getMinutes()-10;          //获取当前分钟数(0-59)
                     var s=myDate.getSeconds();
                     var now=year+'-'+getNow(month)+"-"+getNow(date)+" "+getNow(h)+':'+getNow(m)+":"+getNow(s);
+                    if(time_end_value <time_start_value){
+                        $('.btn-success').addClass('btn-disabled disabled');
+                        Layer.alert('预售开始时间不能大于预售结束时间,请重新选择');
+                        return false;
+                    }
                     if(time_end_value>now){
                         $('.btn-success').removeClass('btn-disabled disabled');
                     }else{
