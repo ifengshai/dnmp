@@ -398,8 +398,8 @@ class SaleAfterTask extends Backend
             $map['id'] = ['in',$ids];
             $list = $this->model->where($map)->field('id,task_status')->select();
             foreach($list as $val){
-                if ( 2 == $val['task_status']) {
-                    $this->error('已经处理完成,无需再次操作！！');
+                if ( 2 <= $val['task_status']) {
+                    $this->error('此状态无法处理完成操作！！');
                 }
             }
             $data = [];
