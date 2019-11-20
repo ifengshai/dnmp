@@ -444,7 +444,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                             //循环展示商品信息
                             var shtml = ' <tr><th>SKU</th><th>供应商SKU</th><th>采购数量</th><th>已质检数量</th><th>到货数量</th><th>合格数量</th><th>留样数量</th><th>不合格数量</th><th>合格率</th><th>备注</th><th>上传图片</th><th>操作</th></tr>';
                             $('.caigou table tbody').html('');
-                            var sku = data.item[i].sku ? data.item[i].sku : '';
+                            var sku = data.item[i].sku;
+                            if (!sku) {
+                                sku = '';
+                            }
                             for (var i in data.item) {
                                 shtml += ' <tr><td><input id="c-purchase_remark" class="form-control sku" name="sku[]" type="text" value="' + sku + '"></td>'
                                 shtml += ' <td><input id="c-purchase_remark" class="form-control" name="supplier_sku[]" type="text" value="' + data.item[i].supplier_sku + '"></td>'
@@ -519,7 +522,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                             //循环展示商品信息
                             var shtml = ' <tr><th>SKU</th><th>退货数量</th><th>到货数量</th><th>合格数量</th><th>不合格数量</th><th>合格率</th><th>备注</th><th>上传图片</th><th>操作</th></tr>';
                             $('.caigou table tbody').html('');
-                            var sku = data[i].return_sku ? data[i].return_sku : '';
+                            var sku = data[i].return_sku;
+                            if (!sku) {
+                                sku = '';
+                            }
                             for (var i in data) {
                                 shtml += ' <tr><td><input id="c-purchase_remark" class="form-control sku" name="sku[]" type="text" value="' + sku + '"></td>'
                                 shtml += ' <td>' + data[i].return_sku_qty + '</td>'
