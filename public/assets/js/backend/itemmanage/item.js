@@ -61,8 +61,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                         { field: 'stock', title: __('Stock') },
                         {
                             field: 'is_open', title: __('Is_open'),
-                            searchList: { 1: '启用', 2: '禁用', 3: '回收站' },
-                            custom: { 1: 'blue', 2: 'yellow', 3: 'red' },
+                            searchList: { 1: '启用', 2: '禁用'},
+                            custom: { 1: 'blue', 2: 'yellow' },
                             formatter: Table.api.formatter.status
                         },
                         {
