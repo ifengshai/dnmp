@@ -444,8 +444,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                             //循环展示商品信息
                             var shtml = ' <tr><th>SKU</th><th>供应商SKU</th><th>采购数量</th><th>已质检数量</th><th>到货数量</th><th>合格数量</th><th>留样数量</th><th>不合格数量</th><th>合格率</th><th>备注</th><th>上传图片</th><th>操作</th></tr>';
                             $('.caigou table tbody').html('');
+
                             for (var i in data.item) {
-                                shtml += ' <tr><td><input id="c-purchase_remark" class="form-control sku" name="sku[]" type="text" value="' + data.item[i].sku + '"></td>'
+                                var sku = data.item[i].sku;
+                                if (!sku) {
+                                    sku = '';
+                                }
+
+                                shtml += ' <tr><td><input id="c-purchase_remark" class="form-control sku" name="sku[]" type="text" value="' + sku + '"></td>'
                                 shtml += ' <td><input id="c-purchase_remark" class="form-control" name="supplier_sku[]" type="text" value="' + data.item[i].supplier_sku + '"></td>'
                                 shtml += ' <td><input id="c-purchase_remark" class="form-control purchase_num" name="purchase_num[]" type="text" redeonly value="' + data.item[i].purchase_num + '"></td>'
                                 shtml += ' <td><input id="c-purchase_remark" class="form-control check_num" name="check_num[]" type="text" readonly value="' + data.item[i].check_num + '"></td>'
@@ -518,8 +524,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                             //循环展示商品信息
                             var shtml = ' <tr><th>SKU</th><th>退货数量</th><th>到货数量</th><th>合格数量</th><th>不合格数量</th><th>合格率</th><th>备注</th><th>上传图片</th><th>操作</th></tr>';
                             $('.caigou table tbody').html('');
-                            for (var i in data) {
-                                shtml += ' <tr><td><input id="c-purchase_remark" class="form-control sku" name="sku[]" type="text" value="' + data[i].return_sku + '"></td>'
+                           
+                            for (var i in data) { 
+                                var sku = data[i].return_sku;
+                                if (!sku) {
+                                    sku = '';
+                                }
+                                shtml += ' <tr><td><input id="c-purchase_remark" class="form-control sku" name="sku[]" type="text" value="' + sku + '"></td>'
                                 shtml += ' <td>' + data[i].return_sku_qty + '</td>'
                                 shtml += ' <td><input id="c-purchase_remark" class="form-control arrivals_num" name="arrivals_num[]" type="text"></td>'
                                 shtml += ' <td><input id="c-purchase_remark" class="form-control quantity_num" name="quantity_num[]" type="text"></td>'

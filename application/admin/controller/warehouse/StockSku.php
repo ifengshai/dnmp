@@ -97,6 +97,7 @@ class StockSku extends Backend
                 //判断选择的库位是否已存在
                 $map['sku'] = $params['sku'];
                 $map['store_id'] = $params['store_id'];
+                $map['is_del'] = 1;
                 $count = $this->model->where($map)->count();
                 if ($count > 　0) {
                     $this->error('已存在此绑定关系！！');
@@ -168,6 +169,7 @@ class StockSku extends Backend
                 $map['sku'] = $params['sku'];
                 $map['store_id'] = $params['store_id'];
                 $map['id'] = ['<>', $row->id];
+                $map['is_del'] = 1;
                 $count = $this->model->where($map)->count();
                 if ($count > 　0) {
                     $this->error('已存在此绑定关系！！');
