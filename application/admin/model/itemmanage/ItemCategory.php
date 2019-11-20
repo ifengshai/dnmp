@@ -206,7 +206,7 @@ class ItemCategory extends Model
     }
     public function getItemCategoryList()
     {
-        $result = $this->where('is_putaway','=',1)->field('id,name')->select();
+        $result = $this->field('id,name')->select();
         if(!$result){
             return false;
         }
