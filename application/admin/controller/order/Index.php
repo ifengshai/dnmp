@@ -174,7 +174,7 @@ class Index extends Backend
         }
 
         $this->view->assign("row", $row);
-
+        $this->view->assign("label",$label);
         return $this->view->fetch();
     }
 }
