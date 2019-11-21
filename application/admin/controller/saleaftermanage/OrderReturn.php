@@ -28,6 +28,7 @@ class OrderReturn extends Backend
      * @var \app\admin\model\saleaftermanage\OrderReturn
      */
     protected $model = null;
+    protected $zeelool = null;
     protected $relationSearch = true;
     public function _initialize()
     {
@@ -827,15 +828,32 @@ class OrderReturn extends Backend
     /***
      * 获取订单物流信息
      */
-    public function get_logistics_info($track_number=null)
+    public function get_logistics_info($track_number=null,$entity_id=null,$order_platform=null)
     {
-        $track = new Trackingmore();
-        $track = $track->getRealtimeTrackingResults('查询物流信息', $track_number);
-        $express_data = $track['data']['items'][0];
-        echo '<pre>';
-        var_dump($track);
-        exit;
-        $this->view->assign("express_data", $express_data);
-        return $this->view->fetch();
+        if(!empty($track_number) && !empty($entity_id) && !empty($order_platform)){
+            $this->zeelool = new \app\admin\model\order\order\Zeelool;
+            $express = $this->zeelool->getExpressData($order_platform, $entity_id);
+            if($express){
+                 //缓存一个小时
+                $express_data = session('order_checkDetail_' . $express['track_number'] . '_' . date('YmdH'));
+                if (!$express_data) {
+                    try {
+                    //查询物流信息
+                        $title = str_replace(' ', '-', $express['title']);
+                        $track = new Trackingmore();
+                        $track = $track->getRealtimeTrackingResults($title, $express['track_number']);
+                        $express_data = $track['data']['items'][0];
+                        session('order_checkDetail_' . $express['track_number'] . '_' . date('YmdH'), $express_data);
+                        } catch (\Exception $e) {
+                        $this->error($e->getMessage());
+                     }
+                }
+            $this->view->assign("express_data", $express_data);
+            }
+            return $this->view->fetch();
+        }else{
+            $this->error('参数错误,请重新尝试');
+        }
+
     }
 }
