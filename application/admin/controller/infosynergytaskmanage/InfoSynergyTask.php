@@ -487,7 +487,7 @@ class InfoSynergyTask extends Backend
         if (!$row) {
             $this->error(__('No Results were found'));
         }
-        if(2 >= $row['synergy_status']){
+        if(2 <= $row['synergy_status']){
             $this->error(__('The collaborative task information has been completed and cannot be processed'),'infosynergytaskmanage/info_synergy_task/index');
         }
         $adminIds = $this->getDataLimitAdminIds();
