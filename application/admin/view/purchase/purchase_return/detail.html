@@ -107,7 +107,7 @@
                         <th>供应商SKU</th>
                         <th>采购数量</th>
                         <th>到货数量</th>
-                        <th>未到数量</th>
+                        <!-- <th>未到数量</th> -->
                         <th>合格数量</th>
                         <th>不合格数量</th>
                         <th>合格率</th>
@@ -128,8 +128,8 @@
                                 value="{$v.purchase_num}"></td>
                         <td><input id="c-purchase_remark" class="form-control arrivals_num" disabled type="text"
                                 value="{$v.arrivals_num}"></td>
-                        <td><input id="c-purchase_remark" class="form-control arrivals_num" disabled type="text"
-                                value="{:$v['purchase_num'] - $v['arrivals_num']}"></td>
+                        <!-- <td><input id="c-purchase_remark" class="form-control arrivals_num" disabled type="text"
+                                value="{:$v['purchase_num'] - $v['arrivals_num']}"></td> -->
                         <td><input id="c-purchase_remark" class="form-control quantity_num" disabled type="text"
                                 value="{$v.quantity_num}"></td>
                         <td><input id="c-purchase_remark" class="form-control unqualified_num" disabled type="text"
