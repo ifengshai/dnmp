@@ -901,7 +901,6 @@ class Item extends Backend
         $hasWhere['sku'] = $row['sku'];
         $purchase_num = $purchase->hasWhere('purchaseOrderItem', $hasWhere)
             ->where($purchase_map)
-            ->cache(true, 3600)
             ->sum('purchase_num-instock_num');
         $this->assign('purchase_num', $purchase_num);
 
@@ -913,7 +912,7 @@ class Item extends Backend
         $list = $purchase->hasWhere('purchaseOrderItem', $hasWhere)
             ->where($purchase_map)
             ->field('PurchaseOrderItem.*')
-            ->cache(true, 3600)
+            ->group('PurchaseOrderItem.id')
             ->select();
         foreach ($list as &$v) {
             $v['sample_stock'] = $row['sample_num'];
@@ -926,10 +925,10 @@ class Item extends Backend
         $purchase_map['stock_status'] = ['in', [0, 1]];
         $purchase = new \app\admin\model\purchase\PurchaseOrder;
         $hasWhere['sku'] = $row['sku'];
+        $hasWhere['instock_num'] = 0;
         $info = $purchase->hasWhere('purchaseOrderItem', $hasWhere)
             ->field('PurchaseOrderItem.*')
             ->where($purchase_map)
-            ->cache(true, 3600)
             ->group('PurchaseOrderItem.id')
             ->select();
         $this->assign('info', $info);

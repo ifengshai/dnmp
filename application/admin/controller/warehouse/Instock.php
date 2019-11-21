@@ -110,6 +110,11 @@ class Instock extends Backend
 
                     //添加入库信息
                     if ($result !== false) {
+                        //更改质检单为已创建入库单
+                        $check = new \app\admin\model\warehouse\Check;
+                        $check->allowField(true)->save(['is_stock' => 1], ['id' => $params['check_id']]);
+
+
                         $in_stock_num = $this->request->post("in_stock_num/a");
                         $sample_num = $this->request->post("sample_num/a");
                         $data = [];
@@ -157,7 +162,9 @@ class Instock extends Backend
 
         //查询质检单
         $check = new \app\admin\model\warehouse\Check;
-        $purchase_data = $check->where('status', 2)->order('createtime desc')->column('check_order_number', 'id');
+        $map['status'] = 2;
+        $map['is_stock'] = 0;
+        $purchase_data = $check->where($map)->order('createtime desc')->column('check_order_number', 'id');
         $this->assign('purchase_data', $purchase_data);
 
         //质检单
@@ -176,11 +183,12 @@ class Instock extends Backend
         //查询质检信息
         $check_map['Check.id'] = $id;
         $check_map['Check.status'] = 2;
+        $check_map['Check.is_stock'] = 0;
         $check = new \app\admin\model\warehouse\Check;
         $list = $check->hasWhere('checkItem')
             ->where($check_map)
             ->field('sku,supplier_sku,purchase_num,check_num,arrivals_num,quantity_num,sample_num')
-            ->group('sku')
+            ->group('CheckItem.id')
             ->select();
         $list = collection($list)->toArray();
 
@@ -280,7 +288,9 @@ class Instock extends Backend
 
         //查询质检单
         $check = new \app\admin\model\warehouse\Check;
-        $purchase_data = $check->where('status', 2)->column('check_order_number', 'id');
+        $map['status'] = 2;
+        $map['is_stock'] = 0;
+        $purchase_data = $check->where($map)->order('createtime desc')->column('check_order_number', 'id');
         $this->assign('purchase_data', $purchase_data);
 
 
@@ -321,7 +331,9 @@ class Instock extends Backend
 
         //查询质检单
         $check = new \app\admin\model\warehouse\Check;
-        $purchase_data = $check->where('status', 2)->column('check_order_number', 'id');
+        $map['status'] = 2;
+        $map['is_stock'] = 0;
+        $purchase_data = $check->where($map)->order('createtime desc')->column('check_order_number', 'id');
         $this->assign('purchase_data', $purchase_data);
 
 
@@ -446,7 +458,7 @@ class Instock extends Backend
                         } else {
                             $stock_status = 2;
                         }
-                        //修改采购单质检状态
+                        //修改采购单入库状态
                         $purchase_data['stock_status'] = $stock_status;
                         $this->purchase->allowField(true)->save($purchase_data, ['id' => $check_res['purchase_id']]);
                     }
@@ -511,6 +523,10 @@ class Instock extends Backend
         $data['status'] = input('status');
         $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
         if ($res) {
+            //如果取消入库单 则 去掉质检单已入库标记
+            $check = new \app\admin\model\warehouse\Check;
+            $check->allowField(true)->save(['is_stock' => 0], ['id' => $row['check_id']]);
+
             $this->success();
         } else {
             $this->error('取消失败！！');

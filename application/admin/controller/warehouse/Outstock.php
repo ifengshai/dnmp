@@ -170,7 +170,7 @@ class Outstock extends Backend
             $this->error('只有新建状态才能编辑！！', url('index'));
         }
 
-        
+
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
             if ($params) {
@@ -303,8 +303,8 @@ class Outstock extends Backend
                 $this->error('只有待审核状态才能操作！！');
             }
         }
-
-        $data['status'] = 2;
+    
+        $data['status'] = input('status');
         $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
 
         if ($res != false) {
