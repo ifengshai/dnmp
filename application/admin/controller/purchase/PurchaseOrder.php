@@ -76,7 +76,7 @@ class PurchaseOrder extends Backend
                 ->select();
             $list = collection($list)->toArray();
 
-            
+
             $result = array("total" => $total, "rows" => $list);
 
             return json($result);
@@ -674,7 +674,7 @@ class PurchaseOrder extends Backend
         $purchase = new \app\admin\model\purchase\PurchaseOrder;
         $purchase_list = $purchase->hasWhere('purchaseOrderItem')
             ->where($purchase_map)
-            ->field('sku,purchase_num')
+            ->field('sku,purchase_num,PurchaseOrderItem.id as ids')
             ->group('PurchaseOrderItem.id')
             ->column('*', 'sku');
 
@@ -694,23 +694,25 @@ class PurchaseOrder extends Backend
             //到货数量小于采购数量 更新实际到货数量为采购数量
             if ($v['arrivals_num'] < @$purchase_list[$v['sku']]['purchase_num']) {
                 $data[$k]['sku'] = $v['sku'];
-                $data[$k]['id'] = @$purchase_list[$v['sku']]['id'];
+                $data[$k]['id'] = @$purchase_list[$v['sku']]['ids'];
                 $data[$k]['purchase_num'] = $v['arrivals_num'];
 
                 $check_data[$k]['sku'] = $v['sku'];
                 $check_data[$k]['purchase_num'] = $v['arrivals_num'];
-                $check_data[$k]['check_id'] = $v['id'];
+                $check_data[$k]['purchase_id'] = $id;
             }
         }
         if ($data) {
             //批量修改
             $this->purchase_order_item->allowField(true)->saveAll($data);
 
+            $check = new \app\admin\model\warehouse\Check;
+            $checkids = $check->where('purchase_id', $id)->column('id');
             //更改质检单商品信息采购数量
             foreach ($check_data as $k => $v) {
                 $checkItem = new \app\admin\model\warehouse\CheckItem;
                 $where['sku'] = $v['sku'];
-                $where['check_id'] = $v['check_id'];
+                $where['check_id'] = ['in', $checkids];
                 $checkItem->allowField(true)->save(['purchase_num' => $v['purchase_num']], $where);
             }
         }
