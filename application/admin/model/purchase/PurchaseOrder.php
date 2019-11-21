@@ -38,6 +38,18 @@ class PurchaseOrder extends Model
     }
 
     /**
+     * 获取采购单详情
+     */
+    public function getPurchaseDataDetail()
+    {
+        $where['purchase_status'] = ['in', [6, 7]];
+        $where['check_status']  = ['in', [0, 1, 2]];
+        $data = $this->where($where)->order('createtime desc')->column('purchase_number', 'id');
+        return $data;
+    }
+
+
+    /**
      * 获取采购单
      */
     public function getPurchaseReturnData($check_status = [0, 1], $instock_status, $return_status = [])

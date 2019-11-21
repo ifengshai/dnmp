@@ -321,7 +321,7 @@ class Check extends Backend
     }
 
     /**
-     * 编辑
+     * 详情
      */
     public function detail($ids = null)
     {
@@ -343,7 +343,7 @@ class Check extends Backend
 
         //查询采购单
         $purchase = new \app\admin\model\purchase\PurchaseOrder;
-        $purchase_data = $purchase->getPurchaseData();
+        $purchase_data = $purchase->getPurchaseDataDetail();
         $this->assign('purchase_data', $purchase_data);
 
         //查询退货单
