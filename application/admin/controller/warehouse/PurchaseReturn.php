@@ -103,50 +103,43 @@ class PurchaseReturn extends Backend
         /***********查询退销商品信息***************/
         //查询退销单商品信息
         $return_item_map['return_id'] = $ids;
-        $return_arr = $this->purchase_return_item->where($return_item_map)->column('return_num,id', 'sku');
+        $return_arr = $this->purchase_return_item->where($return_item_map)->select();
+        $return_arr = collection($return_arr)->toArray();
 
+        $check_item_id = array_column($return_arr, 'check_item_id');
+        $skus = array_column($return_arr, 'sku');
         //查询采购单商品信息
         $purchase_item = new \app\admin\model\purchase\PurchaseOrderItem;
         $map['purchase_id'] = $row['purchase_id'];
-        $map['sku'] = ['in', array_keys($return_arr)];
-        $item = $purchase_item->where($map)->select();
-
+        $map['sku'] = ['in', $skus];
+        $item = $purchase_item->where($map)->column('*', 'sku');
+      
         //查询质检信息
-        $check_map['purchase_id'] = $row['purchase_id'];
-        $check_map['type'] = 1;
-        $check = new \app\admin\model\warehouse\Check;
-        $list = $check->hasWhere('checkItem', ['sku' => ['in', array_keys($return_arr)]])
+        $check_map['id'] = ['in', $check_item_id];
+        $check = new \app\admin\model\warehouse\CheckItem;
+        $list = $check
             ->where($check_map)
-            ->field('sku,sum(arrivals_num) as arrivals_num,sum(quantity_num) as quantity_num,sum(unqualified_num) as unqualified_num')
-            ->group('sku')
-            ->select();
-        $list = collection($list)->toArray();
-        //重组数组
-        $check_item = [];
-        foreach ($list as $k => $v) {
-            $check_item[$v['sku']]['arrivals_num'] = $v['arrivals_num'];
-            $check_item[$v['sku']]['quantity_num'] = $v['quantity_num'];
-            $check_item[$v['sku']]['unqualified_num'] = $v['unqualified_num'];
-        }
+            ->column('*', 'id');
+        
 
-        //查询已退数量
-        $return_map['purchase_id'] = $row['purchase_id'];
-        $return_item = $this->model->hasWhere('purchaseReturnItem', ['sku' => ['in', array_keys($return_arr)]])
-            ->where($return_map)
-            ->group('sku')
-            ->column('sum(return_num) as return_all_num', 'sku');
+        // //查询已退数量
+        // $return_map['purchase_id'] = $row['purchase_id'];
+        // $return_item = $this->model->hasWhere('purchaseReturnItem', ['sku' => ['in', array_keys($return_arr)]])
+        //     ->where($return_map)
+        //     ->group('sku')
+        //     ->column('sum(return_num) as return_all_num', 'sku');
 
-        foreach ($item as $k => $v) {
-            $item[$k]['arrivals_num'] = $check_item[$v['sku']]['arrivals_num'];
-            $item[$k]['quantity_num'] = $check_item[$v['sku']]['quantity_num'];
-            $item[$k]['unqualified_num'] = $check_item[$v['sku']]['unqualified_num'];
-            $item[$k]['return_all_num'] = @$return_item[$v['sku']] ? @$return_item[$v['sku']] : 0;
-            $item[$k]['return_num'] = $return_arr[$v['sku']]['return_num'];
-            $item[$k]['item_id'] = $return_arr[$v['sku']]['id'];
+        foreach ($return_arr as $k => $v) {
+            $return_arr[$k]['purchase_price'] = $item[$v['sku']]['purchase_price'];
+            $return_arr[$k]['supplier_sku'] = $item[$v['sku']]['supplier_sku'];
+            $return_arr[$k]['purchase_num'] = $item[$v['sku']]['purchase_num'];
+            $return_arr[$k]['arrivals_num'] = $list[$v['check_item_id']]['arrivals_num'];
+            $return_arr[$k]['quantity_num'] = $list[$v['check_item_id']]['quantity_num'];
+            $return_arr[$k]['unqualified_num'] = $list[$v['check_item_id']]['unqualified_num'];
         }
 
         /***********end***************/
-        $this->assign('item', $item);
+        $this->assign('item', $return_arr);
         $this->view->assign("row", $row);
         return $this->view->fetch();
     }

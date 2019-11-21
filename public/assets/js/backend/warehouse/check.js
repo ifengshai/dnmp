@@ -38,6 +38,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                             searchList: { 0: '新建', 1: '待审核', 2: '已审核', 3: '已拒绝', 4: '已取消' },
                             formatter: Table.api.formatter.status
                         },
+                        {
+                            field: 'is_stock', title: __('是否已创建入库单'), custom: { 0: 'danger', 1: 'success' },
+                            searchList: { 0: '否', 1: '是' },
+                            formatter: Table.api.formatter.status
+                        },
                         { field: 'createtime', title: __('Createtime'), operate: 'RANGE', addclass: 'datetimerange' },
                         { field: 'create_person', title: __('Create_person') },
                         {
@@ -137,7 +142,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                                     },
                                     visible: function (row) {
                                         //返回true时按钮显示,返回false隐藏
-                                        if (row.status == 2) {
+                                        if (row.status == 2 &&　row.is_stock == 0) {
                                             return true;
                                         } else {
                                             return false;

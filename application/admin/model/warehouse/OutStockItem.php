@@ -7,6 +7,8 @@ use app\admin\model\warehouse\Instock;
 use app\admin\model\warehouse\InstockItem;
 use app\admin\model\warehouse\OutStockLog;
 use app\admin\model\itemmanage\Item;
+use app\admin\model\warehouse\Check;
+use app\admin\model\purchase\PurchaseOrderItem;
 
 class OutStockItem extends Model
 {
@@ -34,6 +36,7 @@ class OutStockItem extends Model
                 ->limit(10)
                 ->select();
             $res = collection($res)->toArray();
+            
             $list = [];
             $data = [];
             /**
@@ -53,6 +56,20 @@ class OutStockItem extends Model
                     $data[$k]['instock_item_id'] = $v['item_id'];
                     $data[$k]['out_stock_num'] = $v['no_stock_num'];
                     $data[$k]['createtime'] = date('Y-m-d H:i:s', time());
+                   
+
+                    //查询质检单采购单id 并添加采购单出库数量
+                    $check = (new Check())->get($v['check_id']);
+                    $purchase_map['sku'] = $v['sku'];
+                    $purchase_map['purchase_id'] = $check['purchase_id'];
+                    (new PurchaseOrderItem())->where($purchase_map)->setInc('outstock_num', $v['no_stock_num']);
+
+
+                    $data[$k]['purchase_id'] = $check['purchase_id'];
+
+                    //剩余未冲减数量 进入下次循环
+                    $value['out_stock_num'] = $value['out_stock_num'] - $v['no_stock_num'];
+                    
                 } else {
                     $list[$k]['id'] = $v['item_id'];
                     $list[$k]['no_stock_num'] = $v['no_stock_num'] - $value['out_stock_num'];
@@ -64,9 +81,18 @@ class OutStockItem extends Model
                     $data[$k]['instock_item_id'] = $v['item_id'];
                     $data[$k]['out_stock_num'] = $value['out_stock_num'];
                     $data[$k]['createtime'] = date('Y-m-d H:i:s', time());
+
+                    //查询质检单采购单id 并添加采购单出库数量
+                    $check = (new Check())->get($v['check_id']);
+                    $purchase_map['sku'] = $v['sku'];
+                    $purchase_map['purchase_id'] = $check['purchase_id'];
+                    (new PurchaseOrderItem())->where($purchase_map)->setInc('outstock_num', $value['out_stock_num']);
+                    
+                    $data[$k]['purchase_id'] = $check['purchase_id'];
                     break;
                 }
             }
+          
             if ($list) {
                 //批量更改出库数量
                 (new InstockItem())->allowField(true)->saveAll($list);
@@ -122,6 +148,19 @@ class OutStockItem extends Model
                 $data[$k]['out_stock_num'] = $v['no_stock_num'];
                 $data[$k]['createtime'] = date('Y-m-d H:i:s', time());
                 $data[$k]['order_number'] = $rows['increment_id'];
+
+                 //查询质检单采购单id 并添加采购单出库数量
+                 $check = (new Check())->get($v['check_id']);
+                 $purchase_map['sku'] = $v['sku'];
+                 $purchase_map['purchase_id'] = $check['purchase_id'];
+                 (new PurchaseOrderItem())->where($purchase_map)->setInc('outstock_num', $v['no_stock_num']);
+
+
+                 $data[$k]['purchase_id'] = $check['purchase_id'];
+
+                 //剩余未冲减数量 进入下次循环
+                 $rows['out_stock_num'] = $rows['out_stock_num'] - $v['no_stock_num'];
+
             } else {
                 $list[$k]['id'] = $v['item_id'];
                 $list[$k]['no_stock_num'] = $v['no_stock_num'] - $rows['out_stock_num'];
@@ -133,6 +172,15 @@ class OutStockItem extends Model
                 $data[$k]['out_stock_num'] = $rows['out_stock_num'];
                 $data[$k]['createtime'] = date('Y-m-d H:i:s', time());
                 $data[$k]['order_number'] = $rows['increment_id'];
+
+                //查询质检单采购单id 并添加采购单出库数量
+                $check = (new Check())->get($v['check_id']);
+                $purchase_map['sku'] = $v['sku'];
+                $purchase_map['purchase_id'] = $check['purchase_id'];
+                (new PurchaseOrderItem())->where($purchase_map)->setInc('outstock_num', $rows['out_stock_num']);
+                
+                $data[$k]['purchase_id'] = $check['purchase_id'];
+
                 break;
             }
         }
