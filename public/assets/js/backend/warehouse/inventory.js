@@ -356,7 +356,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'editable'], function
                             { field: 'stock', title: __('实时库存'), operate: false },
                             { field: 'available_stock', title: __('可用库存'), operate: false },
                             { field: 'occupy_stock', title: __('占用库存'), operate: false },
-                            { field: 'sample_num', title: __('留样库存'), operate: false },
+                            { field: 'sample_stock', title: __('留样库存'), operate: false },
                             { field: 'on_way_stock', title: __('在途库存'), operate: false }
                         ]
                     ]
@@ -384,9 +384,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'editable'], function
                         url: Config.moduleurl + '/warehouse/inventory/createInventory',
                         data: { data: 'all' }
                     }, function (data, ret) {
-                        location.reload();
+                        parent.location.reload();
                     }, function (data, ret) {
-                        location.reload();
+                        parent.location.reload();
                     });
                 })
             }
