@@ -904,7 +904,7 @@ class Item extends Backend
             ->sum('purchase_num-instock_num');
         $this->assign('purchase_num', $purchase_num);
 
-        //查询此sku采购单出库情况
+        //查询此sku采购单库存情况
         $purchase_map['stock_status'] = ['in', [1, 2]];
         $purchase = new \app\admin\model\purchase\PurchaseOrder;
         $hasWhere['sku'] = $row['sku'];

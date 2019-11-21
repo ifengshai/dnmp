@@ -224,7 +224,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                                     },
                                     visible: function (row) {
                                         //返回true时按钮显示,返回false隐藏
-                                        if ((row.purchase_status == 6 ||　row.purchase_status == 7 ) &&　row.check_status != 2) {
+                                        if (row.purchase_status == 6 ||　row.purchase_status == 7) {
                                             return true;
                                         } else {
                                             return false;

@@ -179,7 +179,6 @@ class Check extends Backend
         }
 
         
-
         //查询供应商
         $supplier = new \app\admin\model\purchase\Supplier;
         $data = $supplier->getSupplierData();
@@ -343,7 +342,7 @@ class Check extends Backend
 
         //查询采购单
         $purchase = new \app\admin\model\purchase\PurchaseOrder;
-        $purchase_data = $purchase->getPurchaseDataDetail();
+        $purchase_data = $purchase->getPurchaseData();
         $this->assign('purchase_data', $purchase_data);
 
         //查询退货单
