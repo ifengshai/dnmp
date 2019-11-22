@@ -865,18 +865,29 @@ class Item extends Backend
             $list = collection($list)->toArray();
 
             $skus = array_column($list, 'sku');
+
+            //计算SKU总采购数量
+            $purchase = new \app\admin\model\purchase\PurchaseOrder;
+            $hasWhere['sku'] = ['in', $skus];
+            $purchase_map['purchase_status'] = 2;
+            $purchase_list = $purchase->hasWhere('purchaseOrderItem', $hasWhere)
+            ->where($purchase_map)
+            ->group('sku')
+            ->column('sku,sum(purchase_num) as purchase_num', 'sku');
+
+
             //查询留样库存
             //查询实际采购信息 查询在途库存 = 采购数量 减去 到货数量
-            $purchase_map['status'] = 2;
+            $check_map['status'] = 2;
             $check = new \app\admin\model\warehouse\Check;
             $hasWhere['sku'] = ['in', $skus];
-            $purchase_list = $check->hasWhere('checkItem', $hasWhere)
-                ->where($purchase_map)
+            $check_list = $check->hasWhere('checkItem', $hasWhere)
+                ->where($check_map)
                 ->group('sku')
-                ->column('sku,purchase_num,sum(arrivals_num) as arrivals_num', 'sku');
+                ->column('sku,sum(arrivals_num) as arrivals_num', 'sku');
 
             foreach ($list as &$v) {
-                $v['on_way_stock'] = @$purchase_list[$v['sku']]['purchase_num'] - @$purchase_list[$v['sku']]['arrivals_num'];
+                $v['on_way_stock'] = @$purchase_list[$v['sku']]['purchase_num'] - @$check_list[$v['sku']]['arrivals_num'];
                
             }
             unset($v);
