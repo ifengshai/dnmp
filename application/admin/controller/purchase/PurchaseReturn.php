@@ -116,6 +116,7 @@ class PurchaseReturn extends Backend
                             $all_unqualified_num = $check->hasWhere('checkItem')
                                 ->where($check_map)
                                 ->sum('unqualified_num');
+                                echo $this->model->getLastSql();
 
                             
 
@@ -124,7 +125,7 @@ class PurchaseReturn extends Backend
                             $all_return_num = $this->model->hasWhere('purchaseReturnItem')
                                 ->where($return_map)
                                 ->sum('return_num');
-
+                            echo $this->model->getLastSql();
                                 dump(array_sum($return_num));
 
                             $all_return_num = $all_return_num + array_sum($return_num);
