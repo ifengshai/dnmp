@@ -466,9 +466,10 @@ class PurchaseReturn extends Backend
 
         $skus = array_column($item, 'sku');
         //查询质检信息 
-        //不合格数量不等于0 并且 未处理过退销
+        //不合格数量不等于0 并且 未处理过退销 审核通过的质检单信息
         $check_map['purchase_id'] = $id;
         $check_map['type'] = 1;
+        $check_map['status'] = 2;//已审核
         $check = new \app\admin\model\warehouse\Check;
         $list = $check->hasWhere('checkItem', ['sku' => ['in', $skus], 'unqualified_num' => ['<>', 0], 'is_process' => 0])
             ->where($check_map)
@@ -477,15 +478,8 @@ class PurchaseReturn extends Backend
             ->select();
         $list = collection($list)->toArray();
 
-        // //查询已退数量
-        // $return_map['purchase_id'] = $id;
-        // $return_item = $this->model->hasWhere('purchaseReturnItem', ['sku' => ['in', $skus]])
-        //     ->where($return_map)
-        //     ->group('sku')
-        //     ->column('sum(return_num) as return_num', 'sku');
-
         foreach ($list as $k => $v) {
-            // $list[$k]['return_num'] = @$return_item[$v['sku']] ? @$return_item[$v['sku']] : 0;
+            
             $list[$k]['purchase_price'] = $item[$v['sku']]['purchase_price'];
             $list[$k]['supplier_sku'] = $item[$v['sku']]['supplier_sku'];
             $list[$k]['purchase_num'] = $item[$v['sku']]['purchase_num'];
