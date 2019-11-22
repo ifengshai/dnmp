@@ -390,13 +390,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-se
                         var not_quantity_num = arrivals_num * 1 - quantity_num * 1;
 
                         $(this).parent().next().next().next().find('input').val(not_quantity_num);
-                        $(this).parent().next().next().next().next().find('input').val((quantity_num / arrivals_num * 100).toFixed(2));
+                        $(this).parent().next().next().next().next().find('input').val((quantity_num*1 / arrivals_num * 100).toFixed(2));
                     } else if (type == 2) {
                         var arrivals_num = $(this).val();
                         var quantity_num = $(this).parent().parent().find('.quantity_num').val();
                         var not_quantity_num = arrivals_num * 1 - quantity_num * 1;
                         $(this).parent().parent().find('.unqualified_num').val(not_quantity_num);
-                        $(this).parent().parent().find('.quantity_rate').val((quantity_num / arrivals_num * 100).toFixed(2));
+                        $(this).parent().parent().find('.quantity_rate').val((quantity_num*1 / arrivals_num * 100).toFixed(2));
                     }
 
                 })
@@ -412,13 +412,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-se
                         var not_quantity_num = arrivals_num * 1 - quantity_num * 1;
 
                         $(this).parent().next().next().find('input').val(not_quantity_num);
-                        $(this).parent().next().next().next().find('input').val((quantity_num / arrivals_num * 100).toFixed(2));
+                        $(this).parent().next().next().next().find('input').val((quantity_num*1 / arrivals_num * 100).toFixed(2));
                     } else if (type == 2) {
                         var arrivals_num = $(this).parent().parent().find('.arrivals_num').val();
                         var quantity_num = $(this).val();
                         var not_quantity_num = arrivals_num * 1 - quantity_num * 1;
                         $(this).parent().parent().find('.unqualified_num').val(not_quantity_num);
-                        $(this).parent().parent().find('.quantity_rate').val((quantity_num / arrivals_num * 100).toFixed(2));
+                        $(this).parent().parent().find('.quantity_rate').val((quantity_num*1 / arrivals_num * 100).toFixed(2));
                     }
                 })
 
@@ -431,7 +431,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-se
                     var not_quantity_num = arrivals_num * 1 - quantity_num * 1;
 
                     $(this).parent().next().find('input').val(not_quantity_num);
-                    $(this).parent().next().next().find('input').val((quantity_num / arrivals_num * 100).toFixed(2));
+                    $(this).parent().next().next().find('input').val((quantity_num*1 / arrivals_num * 100).toFixed(2));
                 })
 
 
