@@ -194,7 +194,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-se
             })
         },
         add: function () {
-            Controller.api.bindevent();
+            Controller.api.bindevent(function(){});
             //上传文件
             $(document).on('click', '.pluploads', function () {
                 var _this = $(this);
@@ -444,8 +444,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-se
                             url: url,
                             data: { id: id }
                         }, function (data, ret) {
-
-                            if (data.supplier_id) {
+                            if ($('.supplier.selectpicker option').length > 1) {
                                 $(".supplier").selectpicker('val', data.supplier_id);//默认选中
                             }
                             
@@ -528,7 +527,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-se
                             data: { id: id }
                         }, function (data, ret) {
                             $('#toolbar').hide();
-                            $('.supplier').val(data.supplier_id);
+
+                            if ($('.supplier.selectpicker option').length > 1) {
+                                $(".supplier").selectpicker('val', data.supplier_id);//默认选中
+                            }
+
                             //循环展示商品信息
                             var shtml = ' <tr><th>SKU</th><th>退货数量</th><th>到货数量</th><th>合格数量</th><th>不合格数量</th><th>合格率</th><th>备注</th><th>上传图片</th><th>操作</th></tr>';
                             $('.caigou table tbody').html('');
