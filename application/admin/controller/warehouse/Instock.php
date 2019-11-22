@@ -331,7 +331,7 @@ class Instock extends Backend
 
         //查询质检单
         $check = new \app\admin\model\warehouse\Check;
-        $map['is_stock'] = 0;
+        $map['status'] = 2;
         $purchase_data = $check->where($map)->order('createtime desc')->column('check_order_number', 'id');
         $this->assign('purchase_data', $purchase_data);
 
