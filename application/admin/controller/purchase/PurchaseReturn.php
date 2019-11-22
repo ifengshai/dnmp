@@ -115,19 +115,16 @@ class PurchaseReturn extends Backend
                             $check = new \app\admin\model\warehouse\Check;
                             $all_unqualified_num = $check->hasWhere('checkItem')
                                 ->where($check_map)
+                                ->group('Check.purchase_id')
                                 ->sum('unqualified_num');
-                                echo $this->model->getLastSql();
-
-                            
-
+                          
                             //查询退销总数量
                             $return_map['purchase_id'] = $params['purchase_id'];
                             $all_return_num = $this->model->hasWhere('purchaseReturnItem')
                                 ->where($return_map)
+                                ->group('PurchaseReturn.purchase_id')
                                 ->sum('return_num');
-                            echo $this->model->getLastSql();
-                                dump(array_sum($return_num));
-
+                           
                             $all_return_num = $all_return_num + array_sum($return_num);
                             //已退销数量+退销数量 小于 采购单不合格数量 则为部分退销
                             if ($all_return_num < $all_unqualified_num) {
@@ -143,13 +140,6 @@ class PurchaseReturn extends Backend
                             if ($purchase_res['check_status'] == 1) {
                                 $return_status = 1;
                             }
-
-                            dump($all_unqualified_num);
-                            dump($all_return_num);
-                            dump($return_status);
-                            Db::rollback();
-                            
-                            die;
 
                             //修改采购单退销状态
                             $purchase_data['return_status'] = $return_status;
@@ -274,14 +264,16 @@ class PurchaseReturn extends Backend
                             $check = new \app\admin\model\warehouse\Check;
                             $all_unqualified_num = $check->hasWhere('checkItem')
                                 ->where($check_map)
+                                ->group('Check.purchase_id')
                                 ->sum('unqualified_num');
-
+                          
                             //查询退销总数量
                             $return_map['purchase_id'] = $params['purchase_id'];
                             $all_return_num = $this->model->hasWhere('purchaseReturnItem')
                                 ->where($return_map)
+                                ->group('PurchaseReturn.purchase_id')
                                 ->sum('return_num');
-
+                           
                             $all_return_num = $all_return_num + array_sum($return_num);
                             //已退销数量+退销数量 小于 采购单不合格数量 则为部分退销
                             if ($all_return_num < $all_unqualified_num) {
@@ -290,6 +282,7 @@ class PurchaseReturn extends Backend
                                 $return_status = 2;
                             }
 
+                            
                             //查询采购单质检状态 如果为部分质检 则采购单必定为部分退销
                             $purchase = new \app\admin\model\purchase\PurchaseOrder;
                             $purchase_res = $purchase->get($params['purchase_id']);
@@ -297,13 +290,13 @@ class PurchaseReturn extends Backend
                                 $return_status = 1;
                             }
 
-
                             //修改采购单退销状态
                             $purchase_data['return_status'] = $return_status;
                             //查询采购单
                             $purchase = new \app\admin\model\purchase\PurchaseOrder;
                             $purchase->allowField(true)->save($purchase_data, ['id' => $params['purchase_id']]);
                         }
+
 
                         $data = [];
                         if ($sku) {
