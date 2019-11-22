@@ -866,7 +866,7 @@ class Item extends Backend
 
             $skus = array_column($list, 'sku');
             //查询留样库存
-            //查询实际采购信息 查询在途库存
+            //查询实际采购信息 查询在途库存 = 采购数量 减去 到货数量
             $purchase_map['stock_status'] = ['in', [0, 1]];
             $purchase = new \app\admin\model\purchase\PurchaseOrder;
             $hasWhere['sku'] = ['in', $skus];

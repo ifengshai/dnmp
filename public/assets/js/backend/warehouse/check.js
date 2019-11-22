@@ -445,7 +445,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                             data: { id: id }
                         }, function (data, ret) {
 
-                            $(".supplier").selectpicker('val', data.supplier_id);//默认选中
+                            if (data.supplier_id) {
+                                $(".supplier").selectpicker('val', data.supplier_id);//默认选中
+                            }
+                            
                             //循环展示商品信息
                             var shtml = ' <tr><th>SKU</th><th>供应商SKU</th><th>采购数量</th><th>已质检数量</th><th>到货数量</th><th>合格数量</th><th>留样数量</th><th>不合格数量</th><th>合格率</th><th>备注</th><th>上传图片</th><th>操作</th></tr>';
                             $('.caigou table tbody').html('');
