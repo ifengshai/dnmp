@@ -78,7 +78,7 @@
             <div class="form-group">
                 <label class="control-label col-xs-12 col-sm-2">供应商:</label>
                 <div class="col-xs-12 col-sm-8">
-                    <select name="row[supplier_id]" class="form-control supplier" required>
+                    <select name="row[supplier_id]" class="form-control supplier" disabled required>
                         <option value="">请选择</option>
                         {foreach $supplier as $k => $v}
                         <option value="{$k}" {:$row['supplier_id']==$k ? 'selected' : '' }>{$v}</option>
@@ -120,7 +120,7 @@
                     <tr>
                             <input id="c-purchase_remark" class="form-control item_id" name="item_id[]" type="hidden" value="{$v.item_id}">
                         <td>
-                            <input id="c-purchase_remark" class="form-control" name="sku[]" type="text" value="{$v.sku}">
+                            <input id="c-purchase_remark" class="form-control" name="sku[]" readonly type="text" value="{$v.sku}">
                         </td>
                         <td><input id="c-purchase_remark" class="form-control supplier_sku" disabled type="text"
                                 value="{$v.supplier_sku}"></td>
@@ -154,7 +154,7 @@
             <div class="form-group">
                 <label class="control-label col-xs-12 col-sm-2">退销类型:</label>
                 <div class="col-xs-12 col-sm-8">
-                    <select name="row[return_type]" class="form-control">
+                    <select name="row[return_type]" class="form-control" disabled>
                         <option value="">请选择</option>
                         <option value="1" {:$row['return_type'] == 1 ? 'selected' : ''}>仅退款</option>
                         <option value="2" {:$row['return_type'] == 2 ? 'selected' : ''}>退货退款</option>
@@ -166,14 +166,14 @@
             <div class="form-group">
                 <label class="control-label col-xs-12 col-sm-2">退销金额:</label>
                 <div class="col-xs-12 col-sm-8">
-                    <input id="c-total" class="form-control return_money" step="0.01" name="row[return_money]" type="number"
+                    <input id="c-total" class="form-control return_money" step="0.01" readonly name="row[return_money]" type="number"
                         placeholder="单位：元" value="{$row.return_money}">
                 </div>
             </div>
             <div class="form-group">
                 <label class="control-label col-xs-12 col-sm-2">采购总金额:</label>
                 <div class="col-xs-12 col-sm-8">
-                    <input id="c-num" class="form-control purchase_total" name="row[purchase_total]" type="number" 
+                    <input id="c-num" class="form-control purchase_total" readonly name="row[purchase_total]" type="number" 
                         placeholder="单位：元" value="{$row.purchase_total}">
                 </div>
             </div>
@@ -186,14 +186,14 @@
             <div class="form-group">
                 <label class="control-label col-xs-12 col-sm-2">联系人:</label>
                 <div class="col-xs-12 col-sm-8">
-                    <input id="c-supplier_linkname" class="form-control" name="row[supplier_linkname]" value="{$row.supplier_linkname}" type="text">
+                    <input id="c-supplier_linkname" class="form-control" readonly name="row[supplier_linkname]" value="{$row.supplier_linkname}" type="text">
                 </div>
             </div>
     
             <div class="form-group">
                 <label class="control-label col-xs-12 col-sm-2">联系电话:</label>
                 <div class="col-xs-12 col-sm-8">
-                    <input id="c-supplier_linkphone" class="form-control" name="row[supplier_linkphone]" value="{$row.supplier_linkphone}"
+                    <input id="c-supplier_linkphone" class="form-control" readonly name="row[supplier_linkphone]" value="{$row.supplier_linkphone}"
                         type="text">
                 </div>
             </div>
@@ -203,7 +203,7 @@
             <div class="form-group">
                 <label class="control-label col-xs-12 col-sm-2">收货地址:</label>
                 <div class="col-xs-12 col-sm-8">
-                    <input id="c-supplier_address" class="form-control" name="row[supplier_address]" value="{$row.supplier_address}" type="text">
+                    <input id="c-supplier_address" class="form-control" readonly name="row[supplier_address]" value="{$row.supplier_address}" type="text">
                 </div>
             </div>
     
