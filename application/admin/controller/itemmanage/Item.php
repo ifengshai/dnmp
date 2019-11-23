@@ -883,7 +883,7 @@ class Item extends Backend
 
             //查询留样库存
             //查询实际采购信息 查询在途库存 = 采购数量 减去 到货数量
-            $check_map['status'] = 2;
+            $check_map['status'] = ['in', [0, 1, 2]];
             $check_map['purchase_id'] = ['in', $ids];
             $check = new \app\admin\model\warehouse\Check;
             $hasWhere['sku'] = ['in', $skus];
@@ -937,21 +937,21 @@ class Item extends Backend
         $where['a.purchase_status'] = ['in', [2, 5, 6, 7]];
         $where['a.stock_status'] = ['in', [0, 1]];
         $where['b.sku'] = $row['sku'];
-        $where['c.status'] = 2;
+       
         $info = $purchase->alias('a')->where($where)->field('a.purchase_number,b.sku,a.purchase_status,a.receiving_time,a.create_person,a.createtime,b.purchase_num,sum(d.arrivals_num) as arrivals_num')
             ->join(['fa_purchase_order_item' => 'b'], 'a.id=b.purchase_id')
             ->join(['fa_check_order' => 'c'], 'a.id=c.purchase_id', 'left')
             ->join(['fa_check_order_item' => 'd'], 'c.id=d.check_id', 'left')
             ->group('b.id')
             ->select();
-        
+
         $num = 0;
-        foreach($info as $k => $v) {
+        foreach ($info as $k => $v) {
             if ($v['purchase_num'] - $v['arrivals_num'] <= 0) {
                 unset($info[$k]);
                 continue;
             }
-            $num+= $v['purchase_num'] - $v['arrivals_num'];
+            $num += $v['purchase_num'] - $v['arrivals_num'];
         }
 
         $this->assign('info', $info);
