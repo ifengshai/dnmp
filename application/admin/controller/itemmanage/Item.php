@@ -908,14 +908,25 @@ class Item extends Backend
         $row = $this->model->get($ids);
         $this->assign('row', $row);
 
-        //查询实际采购信息 查询在途库存
-        $purchase_map['stock_status'] = ['in', [0, 1]];
+        //计算SKU总采购数量
         $purchase = new \app\admin\model\purchase\PurchaseOrder;
         $hasWhere['sku'] = $row['sku'];
+        $purchase_map['purchase_status'] = ['in', [2, 5, 6, 7]];
         $purchase_num = $purchase->hasWhere('purchaseOrderItem', $hasWhere)
             ->where($purchase_map)
-            ->sum('purchase_num-instock_num');
-        $this->assign('purchase_num', $purchase_num);
+            ->group('sku')
+            ->sum('purchase_num');
+
+        $check_map['status'] = 2;
+        $check = new \app\admin\model\warehouse\Check;
+        $hasWhere['sku'] = $row['sku'];
+        $arrivals_num = $check->hasWhere('checkItem', $hasWhere)
+            ->where($check_map)
+            ->group('sku')
+            ->sum('arrivals_num');
+
+        //查询实际采购信息 查询在途库存
+        $this->assign('purchase_num', $purchase_num - $arrivals_num);
 
         //查询此sku采购单库存情况
         $purchase_map['stock_status'] = ['in', [1, 2]];
