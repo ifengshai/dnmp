@@ -346,11 +346,17 @@ class InfoSynergyTask extends Backend
                     if(($key == 'dept') && (in_array($whereval,$deptArr))){
                         $dept_id = array_search($whereval,$deptArr);
                         $addWhere  .= " AND FIND_IN_SET($dept_id,dept_id)";
+                        unset($whereArr['dept']);                 
+                    }elseif($key == 'dept'){
+                        $addWhere  .= " AND dept_id=''";
                         unset($whereArr['dept']);
                     }
                     if(($key == 'rep') && (in_array($whereval,$repArr))){
                         $rep_id  = array_search($whereval,$repArr);
                         $addWhere .= " AND FIND_IN_SET($rep_id,rep_id)";
+                        unset($whereArr['rep']);
+                    }elseif($key == 'rep'){
+                        $addWhere .= " AND rep_id=''";
                         unset($whereArr['rep']);
                     }
                 }

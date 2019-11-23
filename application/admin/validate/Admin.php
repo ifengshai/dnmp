@@ -13,7 +13,7 @@ class Admin extends Validate
     protected $rule = [
         'username' => 'require|max:50|unique:admin',
         'nickname' => 'require',
-        'password' => 'require',
+        'password' => 'require|min:6|max:50',
         'email'    => 'require|email|unique:admin,email',
     ];
 
@@ -33,8 +33,8 @@ class Admin extends Validate
      * 验证场景
      */
     protected $scene = [
-        'add'  => ['username', 'email', 'nickname', 'password'],
-        'edit' => ['username', 'email', 'nickname'],
+        'add'  => ['username', 'email', 'nickname'],
+        'edit' => ['username', 'email', 'nickname','password'],
     ];
 
     public function __construct(array $rules = [], $message = [], $field = [])
