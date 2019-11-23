@@ -888,6 +888,9 @@ class Item extends Backend
             foreach ($list as &$v) {
                 $v['on_way_stock'] = @$purchase_list[$v['sku']]['purchase_num'] - @$check_list[$v['sku']]['arrivals_num'];
             }
+            dump($purchase_list);
+            dump($check_list);
+            dump($list);die;
             unset($v);
             $result = array("total" => $total, "rows" => $list);
 
