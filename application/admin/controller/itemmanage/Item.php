@@ -925,10 +925,7 @@ class Item extends Backend
             ->field('PurchaseOrderItem.*')
             ->group('PurchaseOrderItem.id')
             ->select();
-        foreach ($list as &$v) {
-            $v['sample_stock'] = $row['sample_num'];
-        }
-        unset($v);
+       
         $this->assign('list', $list);
 
 

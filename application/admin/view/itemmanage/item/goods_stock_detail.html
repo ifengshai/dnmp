@@ -180,7 +180,6 @@
                     <th>采购单号</td>
                     <th>采购数量</td>
                     <th>入库数量</td>
-                    <th>留样数量</td>
                     <th>剩余数量</td>
                    
                 </tr>
@@ -190,7 +189,6 @@
                     <td>{$v.purchase_number}</td>
                     <td>{$v.purchase_num}</td>
                     <td>{$v.instock_num}</td>
-                    <td>{$v.sample_stock}</td>
                     <td>{$v['instock_num'] - $v['outstock_num']}</td>
                 </tr>
                 {/foreach}
