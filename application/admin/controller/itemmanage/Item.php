@@ -918,6 +918,7 @@ class Item extends Backend
         $purchase = new \app\admin\model\purchase\PurchaseOrder;
         $hasWhere['sku'] = $row['sku'];
         $hasWhere['instock_num'] = ['>', 0];
+        $hasWhere['outstock_num'] = ['<>', 0];
         $list = $purchase->hasWhere('purchaseOrderItem', $hasWhere)
             ->where($purchase_map)
             ->field('PurchaseOrderItem.*')
