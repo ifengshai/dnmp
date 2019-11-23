@@ -946,12 +946,12 @@ class Item extends Backend
         $purchase_map['stock_status'] = ['in', [0, 1]];
         $purchase = new \app\admin\model\purchase\PurchaseOrder;
         $hasWhere['sku'] = $row['sku'];
-        $hasWhere['instock_num'] = 0;
         $info = $purchase->hasWhere('purchaseOrderItem', $hasWhere)
             ->field('PurchaseOrderItem.*')
             ->where($purchase_map)
             ->group('PurchaseOrderItem.id')
             ->select();
+        
         $this->assign('info', $info);
 
 
