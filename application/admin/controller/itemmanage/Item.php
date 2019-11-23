@@ -883,7 +883,7 @@ class Item extends Backend
 
             //查询留样库存
             //查询实际采购信息 查询在途库存 = 采购数量 减去 到货数量
-            $check_map['status'] = ['in', [0, 1, 2]];
+            $check_map['status'] = 2;
             $check_map['purchase_id'] = ['in', $ids];
             $check = new \app\admin\model\warehouse\Check;
             $hasWhere['sku'] = ['in', $skus];
@@ -937,23 +937,28 @@ class Item extends Backend
         $where['a.purchase_status'] = ['in', [2, 5, 6, 7]];
         $where['a.stock_status'] = ['in', [0, 1]];
         $where['b.sku'] = $row['sku'];
-       
-        $info = $purchase->alias('a')->where($where)->field('a.purchase_number,b.sku,a.purchase_status,a.receiving_time,a.create_person,a.createtime,b.purchase_num,sum(d.arrivals_num) as arrivals_num')
+
+        $info = $purchase->alias('a')->where($where)->field('a.id,a.purchase_number,b.sku,a.purchase_status,a.receiving_time,a.create_person,a.createtime,b.purchase_num')
             ->join(['fa_purchase_order_item' => 'b'], 'a.id=b.purchase_id')
-            ->join(['fa_check_order' => 'c'], 'a.id=c.purchase_id', 'left')
-            ->join(['fa_check_order_item' => 'd'], 'c.id=d.check_id', 'left')
-            ->group('b.id')
+            ->group('a.id')
             ->select();
 
         $num = 0;
+        $check = new \app\admin\model\warehouse\Check;
         foreach ($info as $k => $v) {
-            if ($v['purchase_num'] - $v['arrivals_num'] <= 0) {
+            //计算质检单到货数量
+            $map['a.purchase_id'] = $v['id'];
+            $map['a.status'] = 2;
+            $map['b.sku'] = $v['sku'];
+            $arrivals_num = $check->alias('a')->where($map)->join(['fa_check_order_item' => 'b'], 'a.id=b.check_id')->sum('arrivals_num');
+            if ($v['purchase_num'] - $arrivals_num <= 0) {
                 unset($info[$k]);
                 continue;
             }
-            $num += $v['purchase_num'] - $v['arrivals_num'];
+            $info[$k]['arrivals_num'] = $arrivals_num;
+            $num += $v['purchase_num'] - $arrivals_num;
         }
-
+    
         $this->assign('info', $info);
         $this->assign('num', $num);
 
