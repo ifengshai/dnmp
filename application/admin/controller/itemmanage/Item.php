@@ -875,6 +875,9 @@ class Item extends Backend
                 ->group('sku')
                 ->column('sku,sum(purchase_num) as purchase_num', 'sku');
 
+            dump($purchase_list);
+            die;
+
 
             //查询留样库存
             //查询实际采购信息 查询在途库存 = 采购数量 减去 到货数量
