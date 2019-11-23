@@ -473,8 +473,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-se
                                     sku = '';
                                 }
 
+                                var supplier_sku = data.item[i].supplier_sku;
+                                if (!supplier_sku) {
+                                    supplier_sku = '';
+                                }
+
                                 shtml += ' <tr><td><input id="c-purchase_remark" class="form-control sku" name="sku[]" type="text" value="' + sku + '"></td>'
-                                shtml += ' <td><input id="c-purchase_remark" class="form-control" name="supplier_sku[]" type="text" value="' + data.item[i].supplier_sku + '"></td>'
+                                shtml += ' <td><input id="c-purchase_remark" class="form-control" name="supplier_sku[]" type="text" value="' + supplier_sku + '"></td>'
                                 shtml += ' <td><input id="c-purchase_remark" class="form-control purchase_num" name="purchase_num[]" type="text" redeonly value="' + data.item[i].purchase_num + '"></td>'
                                 shtml += ' <td><input id="c-purchase_remark" class="form-control check_num" name="check_num[]" type="text" readonly value="' + data.item[i].check_num + '"></td>'
                                 shtml += ' <td><input id="c-purchase_remark" class="form-control arrivals_num" name="arrivals_num[]" type="text"></td>'
