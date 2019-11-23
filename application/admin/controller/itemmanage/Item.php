@@ -873,7 +873,7 @@ class Item extends Backend
             $purchase_list = $purchase->hasWhere('purchaseOrderItem', $hasWhere)
                 ->where($purchase_map)
                 ->group('sku')
-                ->column('sku,sum(purchase_num) as purchase_num', 'sku');
+                ->column('sum(purchase_num) as purchase_num', 'sku');
 
             //查询留样库存
             //查询实际采购信息 查询在途库存 = 采购数量 减去 到货数量
@@ -883,10 +883,10 @@ class Item extends Backend
             $check_list = $check->hasWhere('checkItem', $hasWhere)
                 ->where($check_map)
                 ->group('sku')
-                ->column('sku,sum(arrivals_num) as arrivals_num', 'sku');
+                ->column('sum(arrivals_num) as arrivals_num', 'sku');
             
             foreach ($list as &$v) {
-                $v['on_way_stock'] = @$purchase_list[$v['sku']]['purchase_num'] - @$check_list[$v['sku']]['arrivals_num'];
+                $v['on_way_stock'] = @$purchase_list[$v['sku']] - @$check_list[$v['sku']];
             }
             dump($purchase_list);
             dump($check_list);
