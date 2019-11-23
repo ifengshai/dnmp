@@ -1,4 +1,4 @@
-define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($, undefined, Backend, Table, Form) {
+define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-select'], function ($, undefined, Backend, Table, Form) {
 
     var Controller = {
         index: function () {
@@ -194,7 +194,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
             })
         },
         add: function () {
-            Controller.api.bindevent();
+            Controller.api.bindevent(function(){});
             //上传文件
             $(document).on('click', '.pluploads', function () {
                 var _this = $(this);
@@ -390,13 +390,19 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                         var not_quantity_num = arrivals_num * 1 - quantity_num * 1;
 
                         $(this).parent().next().next().next().find('input').val(not_quantity_num);
-                        $(this).parent().next().next().next().next().find('input').val((quantity_num / arrivals_num * 100).toFixed(2));
+                        if (arrivals_num*1 > 0) {
+                            $(this).parent().next().next().next().next().find('input').val((quantity_num*1 / arrivals_num * 100).toFixed(2));
+                        }
+                        
                     } else if (type == 2) {
                         var arrivals_num = $(this).val();
                         var quantity_num = $(this).parent().parent().find('.quantity_num').val();
                         var not_quantity_num = arrivals_num * 1 - quantity_num * 1;
                         $(this).parent().parent().find('.unqualified_num').val(not_quantity_num);
-                        $(this).parent().parent().find('.quantity_rate').val((quantity_num / arrivals_num * 100).toFixed(2));
+                        if (arrivals_num*1 > 0) {
+                            $(this).parent().parent().find('.quantity_rate').val((quantity_num*1 / arrivals_num * 100).toFixed(2));
+                        }
+                       
                     }
 
                 })
@@ -412,13 +418,19 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                         var not_quantity_num = arrivals_num * 1 - quantity_num * 1;
 
                         $(this).parent().next().next().find('input').val(not_quantity_num);
-                        $(this).parent().next().next().next().find('input').val((quantity_num / arrivals_num * 100).toFixed(2));
+                        if (arrivals_num*1 > 0) {
+                            $(this).parent().next().next().next().find('input').val((quantity_num*1 / arrivals_num * 100).toFixed(2));
+                        }
+                        
                     } else if (type == 2) {
                         var arrivals_num = $(this).parent().parent().find('.arrivals_num').val();
                         var quantity_num = $(this).val();
                         var not_quantity_num = arrivals_num * 1 - quantity_num * 1;
                         $(this).parent().parent().find('.unqualified_num').val(not_quantity_num);
-                        $(this).parent().parent().find('.quantity_rate').val((quantity_num / arrivals_num * 100).toFixed(2));
+                        if (arrivals_num*1 > 0) {
+                            $(this).parent().parent().find('.quantity_rate').val((quantity_num*1 / arrivals_num * 100).toFixed(2));
+                        }
+                        
                     }
                 })
 
@@ -431,7 +443,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                     var not_quantity_num = arrivals_num * 1 - quantity_num * 1;
 
                     $(this).parent().next().find('input').val(not_quantity_num);
-                    $(this).parent().next().next().find('input').val((quantity_num / arrivals_num * 100).toFixed(2));
+                    if (arrivals_num*1 > 0) {
+                        $(this).parent().next().next().find('input').val((quantity_num*1 / arrivals_num * 100).toFixed(2));
+                    }
+                   
                 })
 
 
@@ -444,8 +459,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                             url: url,
                             data: { id: id }
                         }, function (data, ret) {
-
-                            $(".supplier").selectpicker('val', data.supplier_id);//默认选中
+                            if ($('.supplier.selectpicker option').length > 1) {
+                                $(".supplier").selectpicker('val', data.supplier_id);//默认选中
+                            }
+                            
                             //循环展示商品信息
                             var shtml = ' <tr><th>SKU</th><th>供应商SKU</th><th>采购数量</th><th>已质检数量</th><th>到货数量</th><th>合格数量</th><th>留样数量</th><th>不合格数量</th><th>合格率</th><th>备注</th><th>上传图片</th><th>操作</th></tr>';
                             $('.caigou table tbody').html('');
@@ -525,7 +542,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                             data: { id: id }
                         }, function (data, ret) {
                             $('#toolbar').hide();
-                            $('.supplier').val(data.supplier_id);
+
+                            if ($('.supplier.selectpicker option').length > 1) {
+                                $(".supplier").selectpicker('val', data.supplier_id);//默认选中
+                            }
+
                             //循环展示商品信息
                             var shtml = ' <tr><th>SKU</th><th>退货数量</th><th>到货数量</th><th>合格数量</th><th>不合格数量</th><th>合格率</th><th>备注</th><th>上传图片</th><th>操作</th></tr>';
                             $('.caigou table tbody').html('');

@@ -39,6 +39,14 @@ class SupplierSku extends Model
         return $this->where($map)->value('sku');
     }
 
+    //根据SKUID 匹配sku
+    public function getSupplierData($skuid)
+    {
+        $map['skuid'] = $skuid;
+        $map['status'] = 1;
+        return $this->where($map)->value('supplier_sku');
+    }
+
     //根据sku 获取供应商sku
     public function getSupplierSkuData($sku) 
     {

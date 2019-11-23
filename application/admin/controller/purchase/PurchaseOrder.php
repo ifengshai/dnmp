@@ -76,7 +76,7 @@ class PurchaseOrder extends Backend
                 ->select();
             $list = collection($list)->toArray();
 
-            
+
             $result = array("total" => $total, "rows" => $list);
 
             return json($result);
@@ -668,63 +668,16 @@ class PurchaseOrder extends Backend
         if (!$row) {
             $this->error(__('No Results were found'));
         }
-
-        //查询实际采购信息
-        $purchase_map['purchase_id'] = $id;
-        $purchase = new \app\admin\model\purchase\PurchaseOrder;
-        $purchase_list = $purchase->hasWhere('purchaseOrderItem')
-            ->where($purchase_map)
-            ->field('sku,purchase_num')
-            ->group('PurchaseOrderItem.id')
-            ->column('*', 'sku');
-
-
-        //查询质检信息
-        $check_map['purchase_id'] = $id;
-        $check = new \app\admin\model\warehouse\Check;
-        $list = $check->hasWhere('checkItem')
-            ->where($check_map)
-            ->field('sku,sum(arrivals_num) as arrivals_num')
-            ->group('sku')
-            ->select();
-        $list = collection($list)->toArray();
-        $data = [];
-        $check_data = [];
-        foreach ($list as $k => $v) {
-            //到货数量小于采购数量 更新实际到货数量为采购数量
-            if ($v['arrivals_num'] < @$purchase_list[$v['sku']]['purchase_num']) {
-                $data[$k]['sku'] = $v['sku'];
-                $data[$k]['id'] = @$purchase_list[$v['sku']]['id'];
-                $data[$k]['purchase_num'] = $v['arrivals_num'];
-
-                $check_data[$k]['sku'] = $v['sku'];
-                $check_data[$k]['purchase_num'] = $v['arrivals_num'];
-                $check_data[$k]['check_id'] = $v['id'];
-            }
+        $data['check_status'] = 2;
+        $data['stock_status'] = 2;
+        $data['return_status'] = 2;
+        $res = $this->model->allowField(true)->save($data, ['id' => $id]);
+        if ($res !== false) {
+            $this->success('操作成功！！');
+        } else {
+            $this->error('操作失败！！');
         }
-        if ($data) {
-            //批量修改
-            $this->purchase_order_item->allowField(true)->saveAll($data);
-
-            //更改质检单商品信息采购数量
-            foreach ($check_data as $k => $v) {
-                $checkItem = new \app\admin\model\warehouse\CheckItem;
-                $where['sku'] = $v['sku'];
-                $where['check_id'] = $v['check_id'];
-                $checkItem->allowField(true)->save(['purchase_num' => $v['purchase_num']], $where);
-            }
-        }
-
-        //同时判断采购单下所有商品是否全部质检
-        $purchase_all_num =  array_sum(array_column($purchase_list, 'purchase_num'));
-
-        //到货数量
-        $arrivals_all_num = array_sum(array_column($list, 'arrivals_num'));
-        //到货数量 大于或等于采购数量 更改采购状态为全部质检
-        if ($arrivals_all_num >= $purchase_all_num) {
-            $this->model->allowField(true)->save(['check_status' => 2], ['id' => $id]);
-        }
-        $this->success();
+       
     }
 
     /**
@@ -844,7 +797,9 @@ class PurchaseOrder extends Backend
                     }
 
                     $list['purchase_number'] = $v->baseInfo->idOfStr;
-                    $list['create_person'] = $v->baseInfo->buyerContact->name;
+                    //1688用户配置id
+                    $userIDs = config('1688user');
+                    $list['create_person'] = $userIDs[$v->baseInfo->buyerSubID];
                     $jsonDate = $v->baseInfo->createTime;
                     preg_match('/\d{14}/', $jsonDate, $matches);
                     $list['createtime'] = date('Y-m-d H:i:s', strtotime($matches[0]));
@@ -901,7 +856,6 @@ class PurchaseOrder extends Backend
                         $params[$key]['purchase_id'] = $result->id;
                         $params[$key]['purchase_order_number'] = $v->baseInfo->idOfStr;
                         $params[$key]['product_name'] = $val->name;
-                        $params[$key]['supplier_sku'] = @$val->cargoNumber;
                         $params[$key]['purchase_num'] = $val->quantity;
                         $params[$key]['purchase_price'] = $val->itemAmount / $val->quantity;
                         $params[$key]['purchase_total'] = $val->itemAmount;
@@ -909,8 +863,9 @@ class PurchaseOrder extends Backend
                         $params[$key]['discount_money'] = $val->entryDiscount / 100;
                         $params[$key]['skuid'] = $val->skuID;
 
-                        //匹配SKU
+                        //匹配SKU 供应商SKU
                         $params[$key]['sku'] = (new SupplierSku())->getSkuData($val->skuID);
+                        $params[$key]['supplier_sku'] = (new SupplierSku())->getSupplierData($val->skuID);
                     }
                     $this->purchase_order_item->allowField(true)->saveAll($params);
                 }

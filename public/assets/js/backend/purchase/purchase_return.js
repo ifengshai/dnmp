@@ -202,7 +202,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                             $('.supplier').val(data.supplier_id);
                             $('.purchase_total').val(data.purchase_total);
                             //循环展示商品信息
-                            var shtml = ' <tr><th>SKU</th><th>采购单价</th><th>供应商SKU</th><th>采购数量</th><th>到货数量</th><th>未到数量</th><th>合格数量</th><th>不合格数量</th><th>合格率</th><th>退销数量</th><th>操作</th></tr>';
+                            var shtml = ' <tr><th>SKU</th><th>采购单价</th><th>供应商SKU</th><th>采购数量</th><th>到货数量</th><th>合格数量</th><th>不合格数量</th><th>合格率</th><th>退销数量</th><th>操作</th></tr>';
                             $('.caigou table tbody').html('');
                             var return_money = 0;
                             for (var i in data.item) {
@@ -213,7 +213,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                                     sku = '';
                                 }
 
-                                var num = data.item[i].purchase_num * 1 - data.item[i].arrivals_num * 1;
+                                // var num = data.item[i].purchase_num * 1 - data.item[i].arrivals_num * 1;
 
                                 var supplier_sku = data.item[i].supplier_sku ?　data.item[i].supplier_sku : '';
                                 var percent = data.item[i].arrivals_num > 0 ? Math.round(data.item[i].quantity_num / data.item[i].arrivals_num * 100) : 0;
@@ -224,7 +224,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                                 shtml += ' <td><input id="c-purchase_remark" class="form-control" disabled type="text" value="' + supplier_sku + '"></td>'
                                 shtml += ' <td><input id="c-purchase_remark" class="form-control purchase_num" disabled type="text" redeonly value="' + data.item[i].purchase_num + '"></td>'
                                 shtml += ' <td><input id="c-purchase_remark" class="form-control arrivals_num" disabled type="text" value="' + data.item[i].arrivals_num + '"></td>'
-                                shtml += ' <td><input id="c-purchase_remark" class="form-control arrivals_num" disabled  type="text" value="' + num + '"></td>'
+                                // shtml += ' <td><input id="c-purchase_remark" class="form-control arrivals_num" disabled  type="text" value="' + num + '"></td>'
                                 shtml += ' <td><input id="c-purchase_remark" class="form-control quantity_num" disabled type="text" value="' + data.item[i].quantity_num + '"></td>'
                                 shtml += ' <td><input id="c-purchase_remark" class="form-control unqualified_num" disabled  type="text" value="' + data.item[i].unqualified_num + '"></td>'
                                 shtml += ' <td><input id="c-purchase_remark" class="form-control sample_num" disabled  type="text" value="' + percent + '%' + '"></td>'

@@ -31,11 +31,12 @@ class PurchaseOrder extends Model
      */
     public function getPurchaseData()
     {
-        $where['purchase_status'] = 7;
-        $where['check_status']  = ['in', [0, 1]];
+        $where['purchase_status'] = ['in', [6, 7]];
         $data = $this->where($where)->order('createtime desc')->column('purchase_number', 'id');
         return $data;
     }
+
+   
 
     /**
      * 获取采购单

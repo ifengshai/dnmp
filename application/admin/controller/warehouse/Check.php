@@ -164,15 +164,21 @@ class Check extends Backend
             $this->error(__('Parameter %s can not be empty', ''));
         }
 
+        //采购单id
+        $purchase_id = input('purchase_id');
+        if ($purchase_id) {
+            $this->assign('purchase_id', $purchase_id);
+        }
+
         //查询物流单检索表数据
         $ids = input('ids');
-        if ($ids) {
+        if ($ids && !$purchase_id) {
             $logisticsinfo = new \app\admin\model\warehouse\LogisticsInfo;
             $info = $logisticsinfo->get($ids);
             $this->assign('info', $info);
         }
 
-
+        
         //查询供应商
         $supplier = new \app\admin\model\purchase\Supplier;
         $data = $supplier->getSupplierData();
@@ -314,7 +320,7 @@ class Check extends Backend
     }
 
     /**
-     * 编辑
+     * 详情
      */
     public function detail($ids = null)
     {

@@ -165,7 +165,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                                     },
                                     visible: function (row) {
                                         //返回true时按钮显示,返回false隐藏
-                                        if (row.purchase_status == 7 && row.return_status != 2 && row.check_status > 0) {
+                                        if (row.purchase_status == 7 && row.check_status > 0) {
                                             return true;
                                         } else {
                                             return false;
@@ -205,6 +205,26 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                                     visible: function (row) {
                                         //返回true时按钮显示,返回false隐藏
                                         if (row.purchase_status == 0) {
+                                            return true;
+                                        } else {
+                                            return false;
+                                        }
+                                    }
+                                },
+                                {
+                                    name: 'check',
+                                    text: '去质检',
+                                    title: __('质检'),
+                                    classname: 'btn btn-xs btn-success btn-dialog',
+                                    icon: 'fa fa-plus',
+                                    url: 'warehouse/check/add/purchase_id/{id}',
+                                    extend: 'data-area = \'["100%","100%"]\'',
+                                    callback: function (data) {
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                    },
+                                    visible: function (row) {
+                                        //返回true时按钮显示,返回false隐藏
+                                        if (row.purchase_status == 6 ||　row.purchase_status == 7) {
                                             return true;
                                         } else {
                                             return false;
