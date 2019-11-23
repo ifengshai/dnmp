@@ -937,6 +937,7 @@ class Item extends Backend
         $where['a.purchase_status'] = ['in', [2, 5, 6, 7]];
         $where['a.stock_status'] = ['in', [0, 1]];
         $where['b.sku'] = $row['sku'];
+        $where['c.status'] = 2;
         $info = $purchase->alias('a')->where($where)->field('a.purchase_number,b.sku,a.purchase_status,a.receiving_time,a.create_person,a.createtime,b.purchase_num,sum(d.arrivals_num) as arrivals_num')
             ->join(['fa_purchase_order_item' => 'b'], 'a.id=b.purchase_id')
             ->join(['fa_check_order' => 'c'], 'a.id=c.purchase_id', 'left')
