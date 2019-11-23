@@ -26,7 +26,7 @@ class Item extends Backend
     /**
      * 不需要登陆
      */
-    protected $noNeedLogin = ['pullMagentoProductInfo','ceshi','optimizeSku','pullMagentoProductInfoTwo','changeSkuToPlatformSku','findSku','skuMap','skuMapOne'];
+    protected $noNeedLogin = ['pullMagentoProductInfo', 'ceshi', 'optimizeSku', 'pullMagentoProductInfoTwo', 'changeSkuToPlatformSku', 'findSku', 'skuMap', 'skuMapOne'];
 
     public function _initialize()
     {
@@ -320,7 +320,7 @@ class Item extends Backend
                 $params = $this->preExcludeFields($params);
                 $itemName = $params['name'];
                 $itemColor = $params['color'];
-                if (count($itemColor) != count(array_unique($itemColor))){
+                if (count($itemColor) != count(array_unique($itemColor))) {
                     $this->error('同一款商品的颜色值不能相同');
                 }
                 // echo '<pre>';
@@ -337,12 +337,12 @@ class Item extends Backend
                     //如果是后来添加的
                     if (!empty($params['origin_skus']) && $params['item-count'] >= 1) { //正常情况
                         $count = $params['item-count'];
-                        $row = Db::connect('database.db_stock')->name('item')->where(['sku'=>$params['origin_skus']])->field('id,sku')->find();
+                        $row = Db::connect('database.db_stock')->name('item')->where(['sku' => $params['origin_skus']])->field('id,sku')->find();
                         $attributeWhere = [];
                         $attributeWhere['item_id'] = $row['id'];
-                        $attributeWhere['frame_color'] = ['in',$itemColor];
+                        $attributeWhere['frame_color'] = ['in', $itemColor];
                         $attributeInfo = Db::connect('database.db_stock')->name('item_attribute')->where($attributeWhere)->field('id,frame_color')->find();
-                        if($attributeInfo){
+                        if ($attributeInfo) {
                             $this->error('追加的商品SKU不能添加之前的颜色');
                         }
                         $params['origin_sku'] = substr($params['origin_skus'], 0, strpos($params['origin_skus'], '-'));
@@ -462,7 +462,7 @@ class Item extends Backend
                 $params = $this->preExcludeFields($params);
                 $itemName = $params['name'];
                 $itemColor = $params['color'];
-                if (count($itemColor) != count(array_unique($itemColor))){
+                if (count($itemColor) != count(array_unique($itemColor))) {
                     $this->error('同一款商品的颜色值不能相同');
                 }
                 if (is_array($itemName) && !in_array("", $itemName)) {
@@ -555,8 +555,8 @@ class Item extends Backend
         if (2 == $row['item_status']) {
             $this->error(__('The goods have been submitted for review and cannot be edited'), 'itemmanage/item');
         }
-        if(5 == $row['item_status']){
-            $this->error('此商品已经取消，不能编辑','itemmanage/item');
+        if (5 == $row['item_status']) {
+            $this->error('此商品已经取消，不能编辑', 'itemmanage/item');
         }
         $adminIds = $this->getDataLimitAdminIds();
         if (is_array($adminIds)) {
@@ -570,7 +570,7 @@ class Item extends Backend
                 $params = $this->preExcludeFields($params);
                 $itemName = $params['name'];
                 $itemColor = $params['color'];
-                if (count($itemColor) != count(array_unique($itemColor))){
+                if (count($itemColor) != count(array_unique($itemColor))) {
                     $this->error('同一款商品的颜色值不能相同');
                 }
                 // $attributeWhere = [];
@@ -782,7 +782,7 @@ class Item extends Backend
             return $this->error(__('404 Not Found'));
         }
     }
-    
+
     /***
      * 异步获取原始的sku(origin_sku)
      */
@@ -861,7 +861,7 @@ class Item extends Backend
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
-          
+
             $list = collection($list)->toArray();
 
             $skus = array_column($list, 'sku');
@@ -869,11 +869,11 @@ class Item extends Backend
             //计算SKU总采购数量
             $purchase = new \app\admin\model\purchase\PurchaseOrder;
             $hasWhere['sku'] = ['in', $skus];
-            $purchase_map['purchase_status'] = 2;
+            $purchase_map['purchase_status'] = ['in', [2, 5, 6, 7]];
             $purchase_list = $purchase->hasWhere('purchaseOrderItem', $hasWhere)
-            ->where($purchase_map)
-            ->group('sku')
-            ->column('sku,sum(purchase_num) as purchase_num', 'sku');
+                ->where($purchase_map)
+                ->group('sku')
+                ->column('sku,sum(purchase_num) as purchase_num', 'sku');
 
 
             //查询留样库存
@@ -888,7 +888,6 @@ class Item extends Backend
 
             foreach ($list as &$v) {
                 $v['on_way_stock'] = @$purchase_list[$v['sku']]['purchase_num'] - @$check_list[$v['sku']]['arrivals_num'];
-               
             }
             unset($v);
             $result = array("total" => $total, "rows" => $list);
@@ -945,9 +944,9 @@ class Item extends Backend
         $this->assign('info', $info);
 
 
-         /**
-          * @todo 待定
-          */
+        /**
+         * @todo 待定
+         */
         //查询占用订单
         // $zeelool = new \app\admin\model\order\order\Zeelool;
         // $voogueme = new \app\admin\model\order\order\Voogueme;
@@ -1105,11 +1104,11 @@ class Item extends Backend
     {
         if ($this->request->isAjax()) {
             $id = $this->request->param('ids');
-            $row = $this->model->get($id,'itemAttribute');
+            $row = $this->model->get($id, 'itemAttribute');
             if ($row['item_status'] != 1) {
                 $this->error('此商品状态不能提交审核');
             }
-            if(false == $row['itemAttribute']['frame_images']){
+            if (false == $row['itemAttribute']['frame_images']) {
                 $this->error('请先上传商品图片');
             }
             $map['id'] = $id;
@@ -1176,7 +1175,7 @@ class Item extends Backend
     /***
      * 取消商品
      */
-    public function cancel($ids=null)
+    public function cancel($ids = null)
     {
         if ($this->request->isAjax()) {
             $row = $this->model->get($ids);
@@ -1204,7 +1203,7 @@ class Item extends Backend
             $map['id'] = ['in', $ids];
             $row = $this->model->where($map)->field('id,is_open')->select();
             foreach ($row as $v) {
-                if ($v['is_open'] !=2) {
+                if ($v['is_open'] != 2) {
                     $this->error('只有禁用状态才能操作！！');
                 }
             }
@@ -1228,7 +1227,7 @@ class Item extends Backend
             $map['id'] = ['in', $ids];
             $row = $this->model->where($map)->field('id,is_open')->select();
             foreach ($row as $v) {
-                if ($v['is_open'] !=1) {
+                if ($v['is_open'] != 1) {
                     $this->error('只有启用状态才能操作！！');
                 }
             }
@@ -1252,7 +1251,7 @@ class Item extends Backend
             $map['id'] = ['in', $ids];
             $row = $this->model->where($map)->field('id,item_status')->select();
             foreach ($row as $v) {
-                if ($v['item_status'] !=2) {
+                if ($v['item_status'] != 2) {
                     $this->error('只有待审核状态才能操作！！');
                 }
             }
@@ -1324,11 +1323,11 @@ class Item extends Backend
     /***
      * 一个还原
      */
-    public function oneRestore($ids=null)
+    public function oneRestore($ids = null)
     {
         if ($this->request->isAjax()) {
             $row = $this->model->get($ids);
-            if(3 != $row['is_open']){
+            if (3 != $row['is_open']) {
                 $this->error('只有在回收站才能操作！！');
             }
             $map['id'] = $ids;
@@ -1352,7 +1351,7 @@ class Item extends Backend
             $map['id'] = ['in', $ids];
             $row = $this->model->where($map)->field('id,is_open')->select();
             foreach ($row as $v) {
-                if ( 3 != $v['is_open']) {
+                if (3 != $v['is_open']) {
                     $this->error('只有在回收站才能操作！！');
                 }
             }
@@ -1372,24 +1371,24 @@ class Item extends Backend
      */
     public function checkSkuAndQty()
     {
-        if($this->request->isAjax()){
+        if ($this->request->isAjax()) {
             $change_sku = $this->request->param('change_sku');
             $change_number = $this->request->param('change_number');
-            if(!$change_sku){
+            if (!$change_sku) {
                 return $this->error('请先填写商品sku');
             }
-            if($change_number<1){
+            if ($change_number < 1) {
                 return $this->error('变更数量不能小于1');
             }
             $result = $this->model->check_sku_qty($change_sku);
-            if(!$result){
+            if (!$result) {
                 return $this->error('填写的sku不存在,请重新填写');
             }
-            if($result['available_stock']<$change_number){
+            if ($result['available_stock'] < $change_number) {
                 return $this->error('镜架可用数量大于可用库存数量,无法更改镜架');
             }
-                return $this->success();
-        }else{
+            return $this->success();
+        } else {
             $this->error('404 Not found');
         }
     }
@@ -1438,16 +1437,15 @@ class Item extends Backend
      */
     public function changeSku()
     {
-        $where['magento_sku'] = ['NEQ',''];
+        $where['magento_sku'] = ['NEQ', ''];
         $where['is_visable'] = 1;
         $result = Db::connect('database.db_stock')->table('zeelool_product')->where($where)->field('name,magento_sku as sku,true_qty as stock,true_qty as available_stock,3 as item_status, remark')->select();
-        if(!$result){
+        if (!$result) {
             return false;
-        }else{
+        } else {
 
             $info   = Db::connect('database.db_stock')->name('item')->insertAll($result);
         }
-        
     }
     /***
      * 第一步
@@ -1462,59 +1460,59 @@ class Item extends Backend
         $magentoPlatform = Db::name('magento_platform')->field('id,magento_account,magento_key,magento_url')->select();
         //求出每个站点的存储信息(对应的魔晶平台存储字段和magento平台存储字段)
         $platform_map = Db::name('platform_map')->field('platform_id,platform_field,magento_field')->select();
-        if(!$platform_map){
+        if (!$platform_map) {
             return false;
         }
         $mapArr = $map = $arr = [];
         //每个平台的存储字段都放在一起
-        foreach($platform_map as $key=>$val){
-            if(1 == $val['platform_id']){
+        foreach ($platform_map as $key => $val) {
+            if (1 == $val['platform_id']) {
                 $mapArr[1]['platform_field'][] = $val['platform_field'];
                 $mapArr[1]['magento_field'][]  = $val['magento_field'];
             }
-            if(2 == $val['platform_id']){
+            if (2 == $val['platform_id']) {
                 $mapArr[2]['platform_field'][] = $val['platform_field'];
                 $mapArr[2]['magento_field'][]  = $val['magento_field'];
             }
-            if(3 == $val['platform_id']){
+            if (3 == $val['platform_id']) {
                 $mapArr[3]['platform_field'][] = $val['platform_field'];
                 $mapArr[3]['magento_field'][]  = $val['magento_field'];
             }
         }
-        foreach($sku_map as $k =>$v){
-            if(!empty($v['zeelool_sku'])){
+        foreach ($sku_map as $k => $v) {
+            if (!empty($v['zeelool_sku'])) {
                 $where['pull_status'] = 1;
                 $map = $mapArr[1];
                 $arr = $magentoPlatform[0];
-                $magento_sku = $v['zeelool_sku'];    
-            }elseif(!empty($v['voogueme_sku'])){
+                $magento_sku = $v['zeelool_sku'];
+            } elseif (!empty($v['voogueme_sku'])) {
                 $where['pull_status'] = 2;
                 $map = $mapArr[2];
                 $arr = $magentoPlatform[1];
                 $magento_sku = $v['voogueme_sku'];
-            }elseif(!empty($v['nihao_sku'])){
+            } elseif (!empty($v['nihao_sku'])) {
                 $where['pull_status'] = 3;
                 $map = $mapArr[3];
                 $arr = $magentoPlatform[2];
                 $magento_sku = $v['nihao_sku'];
-            }else{
-                Db::connect('database.db_stock')->table('sku_map')->where(['sku'=>$v['sku']])->update(['pull_status'=>-1]);
+            } else {
+                Db::connect('database.db_stock')->table('sku_map')->where(['sku' => $v['sku']])->update(['pull_status' => -1]);
                 continue;
             }
-            try{
+            try {
                 //调用magento平台的API获取商品信息
-                $client = new \SoapClient($arr['magento_url'].'/api/soap/?wsdl');
-                $session = $client->login($arr['magento_account'],$arr['magento_key']);
+                $client = new \SoapClient($arr['magento_url'] . '/api/soap/?wsdl');
+                $session = $client->login($arr['magento_account'], $arr['magento_key']);
                 $result = $client->call($session, 'catalog_product.info', $magento_sku);
                 $client->endSession($session);
-            }catch (\SoapFault $e){
-                Db::connect('database.db_stock')->table('sku_map')->where(['sku'=>$v['sku']])->update(['pull_status'=>-1]);
+            } catch (\SoapFault $e) {
+                Db::connect('database.db_stock')->table('sku_map')->where(['sku' => $v['sku']])->update(['pull_status' => -1]);
                 //$this->error($e->getMessage());
                 continue;
                 //$this->error(11111);
                 //$this->error($e->getMessage());
-            }catch (\Exception $e){
-                Db::connect('database.db_stock')->table('sku_map')->where(['sku'=>$v['sku']])->update(['pull_status'=>-1]);
+            } catch (\Exception $e) {
+                Db::connect('database.db_stock')->table('sku_map')->where(['sku' => $v['sku']])->update(['pull_status' => -1]);
                 //$this->error($e->getMessage());
                 continue;
                 //$this->error(22222);
@@ -1522,8 +1520,8 @@ class Item extends Backend
             }
             $storeArr = [];
             //循环magento平台存储的字段
-            foreach($map['magento_field'] as $keys =>$vals){
-                if(array_key_exists($vals,$result)){
+            foreach ($map['magento_field'] as $keys => $vals) {
+                if (array_key_exists($vals, $result)) {
                     $storeArr[$vals] = $result[$vals];
                 }
             }
@@ -1532,31 +1530,31 @@ class Item extends Backend
             // exit;
             $serializeResult = serialize($storeArr);
             $where['information'] = $serializeResult;
-            Db::connect('database.db_stock')->table('sku_map')->where(['sku'=>$v['sku']])->update($where);
+            Db::connect('database.db_stock')->table('sku_map')->where(['sku' => $v['sku']])->update($where);
             // echo '<pre>';
             // var_dump($storeArr);
             // $productInfo[] = $result;
         }
-            // echo '<pre>';
-            // var_dump($productInfo);
+        // echo '<pre>';
+        // var_dump($productInfo);
     }
     public function ceshi2()
     {
         $platform_map = Db::name('platform_map')->field('platform_id,platform_field,magento_field')->select();
-        if(!$platform_map){
+        if (!$platform_map) {
             return false;
         }
         $mapArr = [];
-        foreach($platform_map as $k=>$v){
-            if(1 == $v['platform_id']){
+        foreach ($platform_map as $k => $v) {
+            if (1 == $v['platform_id']) {
                 $mapArr[1]['platform_field'][] = $v['platform_field'];
                 $mapArr[1]['magento_field'][]  = $v['magento_field'];
             }
-            if(2 == $v['platform_id']){
+            if (2 == $v['platform_id']) {
                 $mapArr[2]['platform_field'][] = $v['platform_field'];
                 $mapArr[2]['magento_field'][]  = $v['magento_field'];
             }
-            if(3 == $v['platform_id']){
+            if (3 == $v['platform_id']) {
                 $mapArr[3]['platform_field'][] = $v['platform_field'];
                 $mapArr[3]['magento_field'][]  = $v['magento_field'];
             }
@@ -1574,7 +1572,7 @@ class Item extends Backend
         $magentoPlatform = Db::name('magento_platform')->field('id,magento_account,magento_key,magento_url')->select();
         $where['analytic_status'] = 0;
         $result = Db::connect('database.db_stock')->table('sku_map')->where($where)->field('sku,information,pull_status')->order('id desc')->limit(1)->select();
-        if(!$result){
+        if (!$result) {
             return false;
         }
         //求出每个站点的存储信息(对应的魔晶平台存储字段和magento平台存储字段)
@@ -1583,36 +1581,36 @@ class Item extends Backend
         //     return false;
         // }
         $updateData['analytic_status'] = 1;
-        foreach($result as $k =>$v){
+        foreach ($result as $k => $v) {
             $informationArr = unserialize($v['information']);
-            if(empty($informationArr)){
+            if (empty($informationArr)) {
                 continue;
             }
             // echo '<pre>';
             // var_dump($informationArr);
             $arr = $changeArr = [];
-            if(1 == $v['pull_status']){ //zeelool商品
+            if (1 == $v['pull_status']) { //zeelool商品
                 $arr = $magentoPlatform[0];
-            }elseif(2 == $v['pull_status']){ //voogueme站商品
+            } elseif (2 == $v['pull_status']) { //voogueme站商品
                 $arr = $magentoPlatform[1];
-            }elseif(3 == $v['pull_status']){ //nihao商品
+            } elseif (3 == $v['pull_status']) { //nihao商品
                 $arr = $magentoPlatform[2];
             }
             //调用magento平台的API获取商品信息
-            $client = new \SoapClient($arr['magento_url'].'/api/soap/?wsdl');
-            $session = $client->login($arr['magento_account'],$arr['magento_key']);
-            foreach($informationArr as $key => $val){
-                if(!empty($val)){
+            $client = new \SoapClient($arr['magento_url'] . '/api/soap/?wsdl');
+            $session = $client->login($arr['magento_account'], $arr['magento_key']);
+            foreach ($informationArr as $key => $val) {
+                if (!empty($val)) {
                     $listAttributes = $client->call(
                         $session,
                         'product_attribute.options',
                         $key
                     );
-                    if(empty($listAttributes)){
+                    if (empty($listAttributes)) {
                         $changeArr[$key] = $val;
-                    }else{
-                        foreach($listAttributes as $keys =>$vals){
-                            if($val == $vals['value']){
+                    } else {
+                        foreach ($listAttributes as $keys => $vals) {
+                            if ($val == $vals['value']) {
                                 $changeArr[$key] = $vals['label'];
                             }
                         }
@@ -1620,9 +1618,8 @@ class Item extends Backend
                 }
             }
             $updateData['change_information'] = serialize($changeArr);
-            Db::connect('database.db_stock')->table('sku_map')->where(['sku'=>$v['sku']])->update($updateData);
+            Db::connect('database.db_stock')->table('sku_map')->where(['sku' => $v['sku']])->update($updateData);
         }
-
     }
     /***
      * 第三步
@@ -1630,15 +1627,15 @@ class Item extends Backend
      */
     public function analyticUpdate()
     {
-        $where['change_information'] = ['NEQ',''];
-        $where['pull_status'] = ['GT',0];
+        $where['change_information'] = ['NEQ', ''];
+        $where['pull_status'] = ['GT', 0];
         $where['analytic_status'] = 1;
-        $result = Db::connect('database.db_stock')->table('sku_map')->where($where)->join('fa_item g','g.sku=sku_map.sku')->field('g.id,sku_map.sku,sku_map.change_information,sku_map.pull_status')->order('id desc')->limit(1)->select();
-        if(!$result){
+        $result = Db::connect('database.db_stock')->table('sku_map')->where($where)->join('fa_item g', 'g.sku=sku_map.sku')->field('g.id,sku_map.sku,sku_map.change_information,sku_map.pull_status')->order('id desc')->limit(1)->select();
+        if (!$result) {
             return false;
         }
         $platform_map = Db::name('platform_map')->field('platform_id,platform_field,magento_field')->select();
-        if(!$platform_map){
+        if (!$platform_map) {
             return false;
         }
         //获取所有材质
@@ -1656,14 +1653,14 @@ class Item extends Backend
         //获取配镜类型
         $frameType     = (new ItemAttribute())->getFrameType();
         //每个平台的存储字段都放在一起
-        foreach($platform_map as $key=>$val){
-            if(1 == $val['platform_id']){
+        foreach ($platform_map as $key => $val) {
+            if (1 == $val['platform_id']) {
                 $mapArr[1][$val['platform_field']] = $val['magento_field'];
             }
-            if(2 == $val['platform_id']){
+            if (2 == $val['platform_id']) {
                 $mapArr[2][$val['platform_field']] = $val['magento_field'];
             }
-            if(3 == $val['platform_id']){
+            if (3 == $val['platform_id']) {
                 $mapArr[3][$val['platform_field']] = $val['magento_field'];
             }
         }
@@ -1671,29 +1668,29 @@ class Item extends Backend
         // var_dump($mapArr);
         // exit;
         $arr = $map = $platform = $finalResult = [];
-        foreach($result as $k =>$v){
-            if(!empty($v['change_information'])){
+        foreach ($result as $k => $v) {
+            if (!empty($v['change_information'])) {
                 $arr = unserialize($v['change_information']);
-                if(1 == $v['pull_status']){
+                if (1 == $v['pull_status']) {
                     $map = $mapArr[1];
-                }elseif(2 == $v['pull_status']){
+                } elseif (2 == $v['pull_status']) {
                     $map = $mapArr[2];
-                }elseif(3 == $v['pull_status']){
-                    $map = $mapArr[3]; 
+                } elseif (3 == $v['pull_status']) {
+                    $map = $mapArr[3];
                 }
-                if(2 != $v['pull_status']){
+                if (2 != $v['pull_status']) {
                     //获得所有框型
                     $shape  = (new ItemAttribute())->getAllShape();
                     //获取尺寸型号
                     $frameSize     = (new ItemAttribute())->getFrameSize();
-                }else{
+                } else {
                     $shape  = (new ItemAttribute())->getAllShape(2);
                     $frameSize     = (new ItemAttribute())->getFrameSize(2);
                 }
-                foreach($arr as $keys =>$vals){
+                foreach ($arr as $keys => $vals) {
                     //找出键名
-                    $platformName =  array_search($keys,$map);
-                    if($platformName){
+                    $platformName =  array_search($keys, $map);
+                    if ($platformName) {
                         $platform[$platformName] = $vals;
                     }
                 }
@@ -1702,105 +1699,104 @@ class Item extends Backend
                 // exit;
                 //判断是否存在材质
                 $finalResult['item_id'] = $v['id'];
-                if(array_key_exists('frame_texture',$platform)){
+                if (array_key_exists('frame_texture', $platform)) {
                     //判断材质对应的值是否在平台的对应字段值当中，如果是的话求出值
-                    if(in_array($platform['frame_texture'],$texture)){
+                    if (in_array($platform['frame_texture'], $texture)) {
                         //  echo $platform['frame_texture'];
                         //  echo '<br/>';
                         //  echo array_search($platform['frame_texture'],$texture);
-                        $finalResult['frame_texture'] =  array_search($platform['frame_texture'],$texture);
+                        $finalResult['frame_texture'] =  array_search($platform['frame_texture'], $texture);
                         unset($platform['frame_texture']);
-                    }else{
+                    } else {
                         $finalResult['frame_texture'] = 0;
                     }
                 }
                 //判断是否存在眼镜类型
-                if(array_key_exists('glasses_type',$platform)){
-                    if(in_array($platform['glasses_type'],$glassesType)){
+                if (array_key_exists('glasses_type', $platform)) {
+                    if (in_array($platform['glasses_type'], $glassesType)) {
                         //echo array_search($platform['frame_texture'],$texture);
-                        $finalResult['glasses_type'] = array_search($platform['glasses_type'],$glassesType);
+                        $finalResult['glasses_type'] = array_search($platform['glasses_type'], $glassesType);
                         unset($platform['glasses_type']);
-                    }else{
+                    } else {
                         $finalResult['glasses_type'] = 0;
                     }
-
                 }
                 //获取所有眼镜形状
-                if(array_key_exists('frame_shape',$platform)){
-                    if(in_array(lcfirst($platform['frame_shape']),$frameShape)){
+                if (array_key_exists('frame_shape', $platform)) {
+                    if (in_array(lcfirst($platform['frame_shape']), $frameShape)) {
                         // echo 1234;
                         // echo array_search($platform['frame_shape'],$frameShape);
-                        $finalResult['frame_shape'] = array_search(lcfirst($platform['frame_shape']),$frameShape);
+                        $finalResult['frame_shape'] = array_search(lcfirst($platform['frame_shape']), $frameShape);
                         unset($platform['frame_shape']);
-                    }else{
+                    } else {
                         $finalResult['frame_shape'] = 0;
                     }
                 }
-                if(array_key_exists('shape',$platform)){
-                    if(in_array($platform['shape'],$shape)){
+                if (array_key_exists('shape', $platform)) {
+                    if (in_array($platform['shape'], $shape)) {
                         //echo array_search($platform['shape'],$shape);
-                        $finalResult['shape'] = array_search($platform['shape'],$shape);
-                        unset($platform['shape']); 
-                    }else{
+                        $finalResult['shape'] = array_search($platform['shape'], $shape);
+                        unset($platform['shape']);
+                    } else {
                         $finalResult['shape'] = 0;
                     }
                 }
-                if(array_key_exists('frame_gender',$platform)){
-                    if(in_array($platform['frame_gender'],$frameGender)){
+                if (array_key_exists('frame_gender', $platform)) {
+                    if (in_array($platform['frame_gender'], $frameGender)) {
                         //echo array_search($platform['frame_gender'],$frameGender);
-                        $finalResult['frame_gender'] = array_search($platform['frame_gender'],$frameGender);
-                        unset($platform['frame_gender']); 
-                    }else{
+                        $finalResult['frame_gender'] = array_search($platform['frame_gender'], $frameGender);
+                        unset($platform['frame_gender']);
+                    } else {
                         $finalResult['frame_gender'] = 0;
                     }
                 }
-                if(array_key_exists('frame_size',$platform)){
-                    if(in_array(lcfirst($platform['frame_size']),$frameSize)){
+                if (array_key_exists('frame_size', $platform)) {
+                    if (in_array(lcfirst($platform['frame_size']), $frameSize)) {
                         //echo array_search($platform['frame_size'],$frameSize);
-                        $finalResult['frame_size'] = array_search(lcfirst($platform['frame_size']),$frameSize);
-                        unset($platform['frame_size']); 
-                    }else{
+                        $finalResult['frame_size'] = array_search(lcfirst($platform['frame_size']), $frameSize);
+                        unset($platform['frame_size']);
+                    } else {
                         $finalResult['frame_size'] = 0;
-                    }    
+                    }
                 }
-                if(array_key_exists('frame_type',$platform)){
-                    if(in_array($platform['frame_type'],$frameType)){
+                if (array_key_exists('frame_type', $platform)) {
+                    if (in_array($platform['frame_type'], $frameType)) {
                         //echo array_search($platform['frame_type'],$frameType);
-                        $finalResult['frame_type'] = array_search($platform['frame_type'],$frameType);
-                        unset($platform['frame_type']); 
-                    }else{
+                        $finalResult['frame_type'] = array_search($platform['frame_type'], $frameType);
+                        unset($platform['frame_type']);
+                    } else {
                         $finalResult['frame_type'] = 0;
                     }
                 }
-                if(array_key_exists('frame_is_advance',$platform)){
-                    if(strcasecmp($platform['frame_is_advance'],'yes') == 0){
+                if (array_key_exists('frame_is_advance', $platform)) {
+                    if (strcasecmp($platform['frame_is_advance'], 'yes') == 0) {
                         $finalResult['frame_is_advance'] = 1;
                         unset($platform['frame_is_advance']);
-                    }else{
+                    } else {
                         $finalResult['frame_is_advance'] = 0;
                     }
                 }
-                if(array_key_exists('frame_temple_is_spring',$platform)){
-                    if(strcasecmp($platform['frame_temple_is_spring'],'yes') == 0){
+                if (array_key_exists('frame_temple_is_spring', $platform)) {
+                    if (strcasecmp($platform['frame_temple_is_spring'], 'yes') == 0) {
                         $finalResult['frame_temple_is_spring'] = 1;
                         unset($platform['frame_temple_is_spring']);
-                    }else{
+                    } else {
                         $finalResult['frame_temple_is_spring'] = 0;
                     }
                 }
-                if(array_key_exists('frame_is_adjust_nose_pad',$platform)){
-                    if(strcasecmp($platform['frame_is_adjust_nose_pad'],'yes') == 0){
+                if (array_key_exists('frame_is_adjust_nose_pad', $platform)) {
+                    if (strcasecmp($platform['frame_is_adjust_nose_pad'], 'yes') == 0) {
                         $finalResult['frame_is_adjust_nose_pad'] = 1;
                         unset($platform['frame_is_adjust_nose_pad']);
-                    }else{
+                    } else {
                         $finalResult['frame_is_adjust_nose_pad'] = 0;
                     }
                 }
-                $arrFinal = array_merge($platform,$finalResult);
+                $arrFinal = array_merge($platform, $finalResult);
                 $finalInsert = Db::connect('database.db_stock')->name('item_attribute')->insert($arrFinal);
-                if($finalInsert){
-                    Db::connect('database.db_stock')->table('sku_map')->where(['sku'=>$v['sku']])->update(['analytic_status'=>2]);
-                    Db::connect('database.db_stock')->name('item')->where(['id'=>$v['id']])->update(['category_id'=>6]);
+                if ($finalInsert) {
+                    Db::connect('database.db_stock')->table('sku_map')->where(['sku' => $v['sku']])->update(['analytic_status' => 2]);
+                    Db::connect('database.db_stock')->name('item')->where(['id' => $v['id']])->update(['category_id' => 6]);
                 }
             }
         }
@@ -1810,17 +1806,17 @@ class Item extends Backend
      */
     public function optimizeSku()
     {
-        $where['nihao_sku'] = ['NEQ',''];
+        $where['nihao_sku'] = ['NEQ', ''];
         $where['status'] = 3;
         $result = Db::connect('database.db_stock')->table('sku_map')->where($where)->field('sku,nihao_sku')->order('id desc')->limit(10)->select();
-        if(!$result){
+        if (!$result) {
             return false;
         }
-        foreach($result as $k=>$v){
-            $colorArr = explode('-',$v['sku']);
+        foreach ($result as $k => $v) {
+            $colorArr = explode('-', $v['sku']);
             $data['status'] = 4;
-            $data['nihao_sku'] = $v['nihao_sku'].'-'.$colorArr[1];
-            Db::connect('database.db_stock')->table('sku_map')->where(['sku'=>$v['sku']])->update($data);
+            $data['nihao_sku'] = $v['nihao_sku'] . '-' . $colorArr[1];
+            Db::connect('database.db_stock')->table('sku_map')->where(['sku' => $v['sku']])->update($data);
         }
     }
     /***
@@ -1830,14 +1826,14 @@ class Item extends Backend
     {
         $sql = "select name,sku from fa_item where is_update_platform = 0 limit 100 ";
         $result = Db::connect('database.db_stock')->query($sql);
-        if(!$result){
+        if (!$result) {
             return false;
         }
-        foreach($result as $v){
-            if(!empty($v['sku'])){
+        foreach ($result as $v) {
+            if (!empty($v['sku'])) {
                 $info = (new ItemPlatformSku())->addPlatformSku($v);
-                if($info){
-                    Db::connect('database.db_stock')->name('item')->where(['sku'=>$v['sku']])->update(['is_update_platform'=>1]);
+                if ($info) {
+                    Db::connect('database.db_stock')->name('item')->where(['sku' => $v['sku']])->update(['is_update_platform' => 1]);
                 }
             }
         }
@@ -1848,39 +1844,40 @@ class Item extends Backend
     public function findSku()
     {
         $result = Db::connect('database.db_stock')->name('item')->field('sku')->select();
-        if(!$result){
+        if (!$result) {
             return false;
         }
-        $arr =  $newArr =[];
-        foreach($result as $v){
+        $arr =  $newArr = [];
+        foreach ($result as $v) {
             $arr[] = $v['sku'];
         }
-        $info = Db::connect('database.db_stock')->name('item_platform_sku')->where('sku','in',$arr)->distinct(true)->field('sku')->select();
-        foreach($info as $vs){
+        $info = Db::connect('database.db_stock')->name('item_platform_sku')->where('sku', 'in', $arr)->distinct(true)->field('sku')->select();
+        foreach ($info as $vs) {
             $newArr[] = $vs['sku'];
         }
         echo '<pre>';
-        echo count(array_filter($arr)).'<br/>';
+        echo count(array_filter($arr)) . '<br/>';
         //var_dump($arr);
-        echo count($newArr).'<br/>';
-        $finalArr = array_diff($newArr,$arr);
+        echo count($newArr) . '<br/>';
+        $finalArr = array_diff($newArr, $arr);
         var_dump($finalArr);
     }
     /***
      * 清除空的sku映射
      */
-    public function skuMapOne(){
+    public function skuMapOne()
+    {
         $sql = "select sku,zeelool_sku,voogueme_sku,nihao_sku from sku_map where is_update_sku=1 limit 50";
         $result = Db::connect('database.db_stock')->query($sql);
-        if(!$result){
+        if (!$result) {
             return false;
         }
-        foreach($result as $v){
-            if(($v['zeelool_sku'] == '') && ($v['voogueme_sku'] == '') && ($v['nihao_sku'] == '')){
-                Db::connect('database.db_stock')->table('sku_map')->where(['sku'=>$v['sku']])->update(['is_update_sku'=>3]);
-            }else{
-                Db::connect('database.db_stock')->table('sku_map')->where(['sku'=>$v['sku']])->update(['is_update_sku'=>2]);
-            } 
+        foreach ($result as $v) {
+            if (($v['zeelool_sku'] == '') && ($v['voogueme_sku'] == '') && ($v['nihao_sku'] == '')) {
+                Db::connect('database.db_stock')->table('sku_map')->where(['sku' => $v['sku']])->update(['is_update_sku' => 3]);
+            } else {
+                Db::connect('database.db_stock')->table('sku_map')->where(['sku' => $v['sku']])->update(['is_update_sku' => 2]);
+            }
         }
     }
     /***
@@ -1890,12 +1887,12 @@ class Item extends Backend
     {
         $sql = "select sku,zeelool_sku,voogueme_sku,nihao_sku from sku_map where is_update_sku=2 limit 50";
         $result = Db::connect('database.db_stock')->query($sql);
-        if(!$result){
+        if (!$result) {
             return false;
         }
         $i = 0;
-        foreach($result as $k =>$v){
-            if(!empty($v['zeelool_sku'])){
+        foreach ($result as $k => $v) {
+            if (!empty($v['zeelool_sku'])) {
                 $zeeloolWhere['sku'] = $v['sku'];
                 $zeeloolWhere['platform_type'] = 1;
                 $zeeloolData['platform_sku'] = $v['zeelool_sku'];
@@ -1903,7 +1900,7 @@ class Item extends Backend
                 Db::connect('database.db_stock')->name('item_platform_sku')->where($zeeloolWhere)->update($zeeloolData);
                 $i++;
             }
-            if(!empty($v['voogueme_sku'])){
+            if (!empty($v['voogueme_sku'])) {
                 $vooguemeWhere['sku'] = $v['sku'];
                 $vooguemeWhere['platform_type'] = 2;
                 $vooguemeData['platform_sku'] = $v['voogueme_sku'];
@@ -1911,7 +1908,7 @@ class Item extends Backend
                 Db::connect('database.db_stock')->name('item_platform_sku')->where($vooguemeWhere)->update($vooguemeData);
                 $i++;
             }
-            if(!empty($v['nihao_sku'])){
+            if (!empty($v['nihao_sku'])) {
                 $nihaoWhere['sku'] = $v['sku'];
                 $nihaoWhere['platform_type'] = 3;
                 $nihaoData['platform_sku'] = $v['nihao_sku'];
@@ -1919,10 +1916,10 @@ class Item extends Backend
                 Db::connect('database.db_stock')->name('item_platform_sku')->where($nihaoWhere)->update($nihaoData);
                 $i++;
             }
-            Db::connect('database.db_stock')->table('sku_map')->where(['sku'=>$v['sku']])->update(['is_update_sku'=>1]);
+            Db::connect('database.db_stock')->table('sku_map')->where(['sku' => $v['sku']])->update(['is_update_sku' => 1]);
         }
-            echo $i;
-            Db::connect('database.db_stock')->name('num')->where(['id'=>1])->setInc('num',$i);
+        echo $i;
+        Db::connect('database.db_stock')->name('num')->where(['id' => 1])->setInc('num', $i);
         // echo '<pre>';
         // var_dump($result);
 
@@ -1935,22 +1932,20 @@ class Item extends Backend
     //     $where['magento_sku'] = ['NEQ',''];
     //     $where['is_visable'] = 1;
     //     $result = M('product')->where($where)->field('magento_sku as sku')->select();
-	// 	if(!$result){
-	// 		echo 123;
-	// 		return 123;
-	// 	}	
+    // 	if(!$result){
+    // 		echo 123;
+    // 		return 123;
+    // 	}	
     //     $map = M('map','sku_')->addAll($result);
     // }
     // public function ceshi(){
-        
+
     // }
     /***
      * 同步库存
      */
     public function sync_stock()
-    {
-        
-    }
+    { }
     public function ceshi()
     {
         $params['customer_email'] = 'msdeedeemusic@gmail.com';
@@ -2031,12 +2026,11 @@ class Item extends Backend
                 }
                 $order_item_list[$order_item_key]['created_at'] = str_replace(' ', '<br>', $order_item_value['created_at']);
             }
-             dump($order_item_list);
-             exit;
+            dump($order_item_list);
+            exit;
             $this->assign('order_item_list', $order_item_list);
             // dump($returnResult);
             return $returnResult;
         }
     }
-
 }

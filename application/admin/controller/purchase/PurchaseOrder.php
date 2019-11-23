@@ -797,7 +797,9 @@ class PurchaseOrder extends Backend
                     }
 
                     $list['purchase_number'] = $v->baseInfo->idOfStr;
-                    $list['create_person'] = $v->baseInfo->buyerContact->name;
+                    //1688用户配置id
+                    $userIDs = config('1688user');
+                    $list['create_person'] = $userIDs[$v->baseInfo->buyerSubID];
                     $jsonDate = $v->baseInfo->createTime;
                     preg_match('/\d{14}/', $jsonDate, $matches);
                     $list['createtime'] = date('Y-m-d H:i:s', strtotime($matches[0]));
@@ -854,7 +856,6 @@ class PurchaseOrder extends Backend
                         $params[$key]['purchase_id'] = $result->id;
                         $params[$key]['purchase_order_number'] = $v->baseInfo->idOfStr;
                         $params[$key]['product_name'] = $val->name;
-                        $params[$key]['supplier_sku'] = @$val->cargoNumber;
                         $params[$key]['purchase_num'] = $val->quantity;
                         $params[$key]['purchase_price'] = $val->itemAmount / $val->quantity;
                         $params[$key]['purchase_total'] = $val->itemAmount;
@@ -862,8 +863,9 @@ class PurchaseOrder extends Backend
                         $params[$key]['discount_money'] = $val->entryDiscount / 100;
                         $params[$key]['skuid'] = $val->skuID;
 
-                        //匹配SKU
+                        //匹配SKU 供应商SKU
                         $params[$key]['sku'] = (new SupplierSku())->getSkuData($val->skuID);
+                        $params[$key]['supplier_sku'] = (new SupplierSku())->getSupplierData($val->skuID);
                     }
                     $this->purchase_order_item->allowField(true)->saveAll($params);
                 }
