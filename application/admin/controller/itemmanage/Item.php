@@ -875,10 +875,6 @@ class Item extends Backend
                 ->group('sku')
                 ->column('sku,sum(purchase_num) as purchase_num', 'sku');
 
-            dump($purchase_list);
-            
-
-
             //查询留样库存
             //查询实际采购信息 查询在途库存 = 采购数量 减去 到货数量
             $check_map['status'] = 2;
@@ -888,9 +884,7 @@ class Item extends Backend
                 ->where($check_map)
                 ->group('sku')
                 ->column('sku,sum(arrivals_num) as arrivals_num', 'sku');
-                dump($check_list);
-            die;
-
+            
             foreach ($list as &$v) {
                 $v['on_way_stock'] = @$purchase_list[$v['sku']]['purchase_num'] - @$check_list[$v['sku']]['arrivals_num'];
             }
