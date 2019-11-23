@@ -95,7 +95,7 @@
         <div class="form-group">
             <label class="control-label col-xs-12 col-sm-2">备注:</label>
             <div class="col-xs-12 col-sm-8">
-                <textarea id="c-quality_standard" class="form-control " rows="5" name="row[remark]"
+                <textarea id="c-quality_standard" class="form-control " readonly rows="5" name="row[remark]"
                     cols="50">{$row.remark}</textarea>
             </div>
         </div>
@@ -126,14 +126,14 @@
                 <tr>
                     <input id="c-purchase_remark" class="form-control" name="item_id[]" type="hidden" value="{$v.id}">
                     <td>
-                        <input id="c-purchase_remark" class="form-control" name="sku[]" type="text" value="{$v.sku}">
+                        <input id="c-purchase_remark" class="form-control" name="sku[]" readonly type="text" value="{$v.sku}">
                     </td>
                     <td>{$check_data[$v['sku']]['supplier_sku']}</td>
                     <td>{$check_data[$v['sku']]['purchase_num']}</td>
                     <td>{$check_data[$v['sku']]['arrivals_num']}</td>
                     <td>{$check_data[$v['sku']]['quantity_num']}</td>
                     <td>{$check_data[$v['sku']]['sample_num']}</td>
-                    <td><input id="c-purchase_remark" class="form-control in_stock_num" name="in_stock_num[]" type="text" value="{$v.in_stock_num}"></td>
+                    <td><input id="c-purchase_remark" class="form-control in_stock_num" name="in_stock_num[]" readonly type="text" value="{$v.in_stock_num}"></td>
                  
                 </tr>
                 {/foreach}

@@ -239,13 +239,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                             $('.caigou table tbody').html('');
                             $('#toolbar').hide();
                             for (var i in data) {
-                                shtml += ' <tr><td><input id="c-purchase_remark" class="form-control sku" name="sku[]" type="text" value="' + data[i].sku + '"></td>'
+                                shtml += ' <tr><td><input id="c-purchase_remark" class="form-control sku" name="sku[]" readonly type="text" value="' + data[i].sku + '"></td>'
                                 shtml += ' <td class="supplier_sku">' + data[i].supplier_sku + '</td>'
                                 shtml += ' <td>' + data[i].purchase_num + '</td>'
                                 shtml += ' <td>' + data[i].arrivals_num + '</td>'
                                 shtml += ' <td>' + data[i].quantity_num + '</td>'
                                 shtml += ' <td><input id="c-sample_num" class="form-control" readonly oninput="if(value < 0){alert(\'只能输入正整数！\');value = 0}" name="sample_num[]" value="' + data[i].sample_num + '" type="text"></td>'
-                                shtml += ' <td><input id="c-in_stock_num" class="form-control" oninput="if(value < 0){alert(\'只能输入正整数！\');value = 0}" name="in_stock_num[]" value="' + (data[i].quantity_num - data[i].sample_num ) + '" type="text"></td>'
+                                shtml += ' <td><input id="c-in_stock_num" class="form-control"  oninput="if(value < 0){alert(\'只能输入正整数！\');value = 0}" name="in_stock_num[]" value="' + (data[i].quantity_num - data[i].sample_num ) + '" type="text"></td>'
                                 shtml += ' </tr>'
                             }
                             $('.caigou table tbody').append(shtml);

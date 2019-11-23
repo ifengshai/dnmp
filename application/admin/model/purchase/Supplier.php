@@ -30,7 +30,7 @@ class Supplier extends Model
      */
     public function getSupplierData()
     {
-        $data = $this->field('id,supplier_name')->select();
+        $data = $this->field('id,supplier_name')->where('status', 1)->select();
         $arr = [];
         foreach ($data as $v) {
             $arr[$v['id']] = $v['supplier_name'];
@@ -45,6 +45,7 @@ class Supplier extends Model
     {
         if ($name) {
             $map['supplier_name'] = ['like', '%' . $name . '%'];
+            $map['status'] = 1;
             return $this->where($map)->value('id');
         }
         return false;
