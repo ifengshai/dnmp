@@ -1942,90 +1942,9 @@ class Item extends Backend
     }
     public function ceshi()
     {
-        $params['customer_email'] = 'msdeedeemusic@gmail.com';
-        //$params['customer_email'] = 'bills.payments.etc@gmail.com';
-        if ($params) {
-            if (is_array($params['customer_email'])) {
-                $customer_email = "'" . str_replace(",", "','", implode(',', array_unique($params['customer_email']))) . "'";
-            } else {
-                $customer_email = "'" . $params['customer_email'] . "'";
-            }
-            $order_querySql = "select sfo.entity_id,sfo.increment_id,sfo.`status`,sfst.track_number,sfst.title,sfo.coupon_code,sfo.coupon_rule_name,sfo.shipping_description,round(sfo.base_grand_total,2) base_grand_total,sfo.order_currency_code,round(sfo.total_qty_ordered,0) total_qty_ordered,sfo.created_at
-            from sales_flat_order sfo left join sales_flat_shipment_track sfst on  sfst.order_id=sfo.entity_id
-            where sfo.customer_email in ($customer_email) order by sfo.entity_id desc;";
-            $order_list = Db::connect('database.db_nihao_online')->query($order_querySql);
-            $this->assign('order_list', $order_list);
-
-            $returnResult = array();
-            $status = array('complete', 'processing', 'free_processing', 'creditcard_proccessing');
-            // dump($status);
-            $increment_id_str = "";
-            foreach ($order_list as $order_key => $order_value) {
-                $increment_id_str .= "'" . $order_value['increment_id'] . "',";
-                if (in_array($order_value['status'], $status)) {
-                    $returnResult['success_counter']++;
-                    $returnResult['success_total'] += $order_value['base_grand_total'];
-                } else {
-                    $returnResult['failed_counter']++;
-                    $returnResult['failed_total'] += $order_value['base_grand_total'];
-                }
-            }
-            // if ($increment_id_str) {
-            //     $increment_id_str = trim($increment_id_str, ',');
-            //     // dump($increment_id_str);
-            //     $this->service_question_collaboration($increment_id_str);
-            //     $this->order_return_reissue_collaboration($increment_id_str);
-            // }
-
-            // dump($returnResult);
-            // exit;
-            $order_item_querySql = "select sfo.increment_id,sfoi.sku,round(sfoi.qty_ordered,0) qty_ordered,sfoi.original_price,sfoi.discount_amount,sfoi.product_options,sfo.created_at,sfoi.name
-            from sales_flat_order_item sfoi
-            left join sales_flat_order sfo on sfo.entity_id = sfoi.order_id 
-            where sfo.customer_email in ($customer_email)
-            order by sfoi.item_id desc";
-            // dump($order_querySql);
-            $order_item_list = Db::connect('database.db_nihao_online')->query($order_item_querySql);
-            // echo '<pre>';
-            // var_dump($order_item_list);
-            // exit;
-            foreach ($order_item_list as $order_item_key => $order_item_value) {
-                $product_options = unserialize($order_item_value['product_options']);
-
-                unset($order_item_value['product_options']);
-
-                $final_print = array();
-                $final_print['frame_price'] = $product_options['info_buyRequest']['tmplens']['frame_price'];
-
-                $final_print['coatiing_name'] = substr($product_options['info_buyRequest']['tmplens']['four_name'], 0, 60);
-                $final_print['coatiing_price'] = $product_options['info_buyRequest']['tmplens']['four_price'];
-
-                $final_print['index_type'] = substr($product_options['info_buyRequest']['tmplens']['third_name'], 0, 60);
-                $final_print['index_price'] = $product_options['info_buyRequest']['tmplens']['third_price'];
-                $final_print['product_color'] = $product_options['info_buyRequest']['tmplens']['product_color'];
-                $final_print['name'] = $order_item_value['name'];
-                // if(!empty($product_options['info_buyRequest']['tmplens']['prescription'])){
-                //     $prescription_params = json_decode($product_options['info_buyRequest']['tmplens']['prescription'], true);
-                //     $final_print = array_merge($prescription_params, $final_print);
-                // }
-                $prescription_params = json_decode($product_options['info_buyRequest']['tmplens']['prescription'], true);
-                $final_print = array_merge($prescription_params, $final_print);
-                // dump($final_print);
-                $order_item_list[$order_item_key] = array_merge($order_item_value, $final_print);
-                //unset($lens_params);
-                //unset($final_print);
-
-                if (!$returnResult['birthday'] && $final_print['year'] && $final_print['month']) {
-                    $returnResult['birthday'] = $final_print['year'] . ' ' . $final_print['month'];
-                }
-                $order_item_list[$order_item_key]['created_at'] = str_replace(' ', '<br>', $order_item_value['created_at']);
-            }
-             dump($order_item_list);
-             exit;
-            $this->assign('order_item_list', $order_item_list);
-            // dump($returnResult);
-            return $returnResult;
-        }
+      $str = 'a:2:{s:15:"info_buyRequest";a:6:{s:7:"product";s:4:"1735";s:8:"form_key";s:16:"WScoYO7a38EwKRt1";s:3:"qty";i:1;s:7:"options";a:1:{i:1637;s:4:"1999";}s:13:"cart_currency";s:3:"CAD";s:7:"tmplens";a:19:{s:19:"frame_regural_price";s:4:"9.26";s:11:"frame_price";s:6:"9.2617";s:12:"prescription";s:302:"min_pd=54&max_pd=78&progressive_bifocal=62&customer_rx=0&prescription_type=SingleVision&pd=60&pd_r=&pd_l=&od_sph=-2.00&od_cyl=0.00&os_sph=-1.75&os_cyl=0.00&od_pv=0.00&od_bd=&od_pv_r=0.00&od_bd_r=&os_pv=0.00&os_bd=&os_pv_r=0.00&os_bd_r=&year=1991&savePrescription=on&save=Prescription1%28SingleVision%29";s:16:"is_special_price";s:1:"0";s:10:"index_type";s:14:"1.57 Mid-Index";s:11:"index_price";s:4:"6.62";s:10:"index_name";s:4:"1.57";s:8:"index_id";s:12:"refractive_2";s:8:"color_id";s:0:"";s:10:"color_name";s:0:"";s:10:"coating_id";s:9:"coating_4";s:13:"coatiing_name";s:26:"No anti-reflective coating";s:14:"coatiing_price";s:4:"0.00";s:9:"dyeing_id";N;s:11:"dyeing_name";N;s:12:"dyeing_price";N;s:3:"rid";s:1:"0";s:4:"lens";s:4:"6.62";s:5:"total";s:5:"15.88";}}s:7:"options";a:1:{i:0;a:7:{s:5:"label";s:5:"Color";s:5:"value";s:3:"Red";s:11:"print_value";s:3:"Red";s:9:"option_id";s:4:"1637";s:11:"option_type";s:9:"drop_down";s:12:"option_value";s:4:"1999";s:11:"custom_view";b:0;}}}';
+      $arr = unserialize($str);
+      dump($arr);
     }
 
 }

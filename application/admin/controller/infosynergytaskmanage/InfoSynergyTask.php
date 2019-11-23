@@ -332,27 +332,46 @@ class InfoSynergyTask extends Backend
         //设置过滤方法
         $this->request->filter(['strip_tags']);
         if ($this->request->isAjax()) {
+            $deptArr = (new AuthGroup())->getAllGroup();
+            $repArr  = (new Admin())->getAllStaff();   
             //如果发送的来源是Selectpage，则转发到Selectpage
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
+            $rep    = $this->request->get('filter');
+            $addWhere = '1=1';
+            if($rep != '{}'){
+                $whereArr = json_decode($rep,true);
+                foreach($whereArr as $key => $whereval){
+                    if(($key == 'dept') && (in_array($whereval,$deptArr))){
+                        $dept_id = array_search($whereval,$deptArr);
+                        $addWhere  .= " AND FIND_IN_SET($dept_id,dept_id)";
+                        unset($whereArr['dept']);
+                    }
+                    if(($key == 'rep') && (in_array($whereval,$repArr))){
+                        $rep_id  = array_search($whereval,$repArr);
+                        $addWhere .= " AND FIND_IN_SET($rep_id,rep_id)";
+                        unset($whereArr['rep']);
+                    }
+                }
+                $this->request->get(['filter'=>json_encode($whereArr)]);
+            }
+            //exit;
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
-
             $total = $this->model
                 ->with(['infoSynergyTaskCategory'])
-                ->where($where)
+                ->where($where)->where($addWhere)
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->model
                 ->with(['infoSynergyTaskCategory'])
-                ->where($where)
+                ->where($where)->where($addWhere)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
             $list = collection($list)->toArray();
-            $deptArr = (new AuthGroup())->getAllGroup();
-            $repArr  = (new Admin())->getAllStaff();
+
             foreach ($list as $key => $val) {
                 if ($val['dept_id']) {
                     $deptNumArr = explode('+', $val['dept_id']);
