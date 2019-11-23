@@ -875,16 +875,23 @@ class Item extends Backend
                 ->group('sku')
                 ->column('sum(purchase_num) as purchase_num', 'sku');
 
+            //查询出满足条件的采购单号
+            $ids = $purchase->hasWhere('purchaseOrderItem', $hasWhere)
+                ->where($purchase_map)
+                ->group('PurchaseOrder.id')
+                ->column('PurchaseOrder.id');
+
             //查询留样库存
             //查询实际采购信息 查询在途库存 = 采购数量 减去 到货数量
             $check_map['status'] = 2;
+            $check_map['purchase_id'] = ['in', $ids];
             $check = new \app\admin\model\warehouse\Check;
             $hasWhere['sku'] = ['in', $skus];
             $check_list = $check->hasWhere('checkItem', $hasWhere)
                 ->where($check_map)
                 ->group('sku')
                 ->column('sum(arrivals_num) as arrivals_num', 'sku');
-            
+
             foreach ($list as &$v) {
                 $v['on_way_stock'] = @$purchase_list[$v['sku']] - @$check_list[$v['sku']];
             }
@@ -905,25 +912,6 @@ class Item extends Backend
         $row = $this->model->get($ids);
         $this->assign('row', $row);
 
-        //计算SKU总采购数量
-        $purchase = new \app\admin\model\purchase\PurchaseOrder;
-        $hasWhere['sku'] = $row['sku'];
-        $purchase_map['purchase_status'] = ['in', [2, 5, 6, 7]];
-        $purchase_num = $purchase->hasWhere('purchaseOrderItem', $hasWhere)
-            ->where($purchase_map)
-            ->group('sku')
-            ->sum('purchase_num');
-
-        $check_map['status'] = 2;
-        $check = new \app\admin\model\warehouse\Check;
-        $hasWhere['sku'] = $row['sku'];
-        $arrivals_num = $check->hasWhere('checkItem', $hasWhere)
-            ->where($check_map)
-            ->group('sku')
-            ->sum('arrivals_num');
-
-        //查询实际采购信息 查询在途库存
-        $this->assign('purchase_num', $purchase_num - $arrivals_num);
 
         //查询此sku采购单库存情况
         $purchase_map['stock_status'] = ['in', [1, 2]];
@@ -943,16 +931,29 @@ class Item extends Backend
 
 
         //在途库存列表
-        $purchase_map['stock_status'] = ['in', [0, 1]];
+        //计算SKU总采购数量
         $purchase = new \app\admin\model\purchase\PurchaseOrder;
-        $hasWhere['sku'] = $row['sku'];
-        $info = $purchase->hasWhere('purchaseOrderItem', $hasWhere)
-            ->field('PurchaseOrderItem.*')
-            ->where($purchase_map)
-            ->group('PurchaseOrderItem.id')
+        $where['a.purchase_status'] = ['in', [2, 5, 6, 7]];
+        $where['a.stock_status'] = ['in', [0, 1]];
+        $where['b.sku'] = $row['sku'];
+        $info = $purchase->alias('a')->where($where)->field('a.purchase_number,b.sku,a.purchase_status,a.receiving_time,a.create_person,a.createtime,b.purchase_num,sum(d.arrivals_num) as arrivals_num')
+            ->join(['fa_purchase_order_item' => 'b'], 'a.id=b.purchase_id')
+            ->join(['fa_check_order' => 'c'], 'a.id=c.purchase_id', 'left')
+            ->join(['fa_check_order_item' => 'd'], 'c.id=d.check_id', 'left')
+            ->group('b.id')
             ->select();
         
+        $num = 0;
+        foreach($info as $k => $v) {
+            if ($v['purchase_num'] - $v['arrivals_num'] <= 0) {
+                unset($info[$k]);
+                continue;
+            }
+            $num+= $v['purchase_num'] - $v['arrivals_num'];
+        }
+
         $this->assign('info', $info);
+        $this->assign('num', $num);
 
 
         /**
