@@ -931,7 +931,6 @@ order by sfoi.item_id asc limit 1000";
             } else {
                 echo '<br>执行失败';
             }
-            C('SHOW_PAGE_TRACE', true);
         } else {
             echo '执行完毕！';
         }
