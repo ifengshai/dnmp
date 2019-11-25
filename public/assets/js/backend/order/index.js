@@ -30,8 +30,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         { field: 'base_grand_total', title: __('订单金额'), operate: false, formatter: Controller.api.formatter.float_format },
                         { field: 'base_total_paid', title: __('支付金额'), operate: false, formatter: Controller.api.formatter.float_format },
                         { field: 'base_shipping_amount', title: __('邮费'), operate: false, formatter: Controller.api.formatter.float_format },
-
-                        // { field: 'store_id', title: __('订单来源'), custom: { 1: 'blue', 4: 'blue', 2: 'blue' }, searchList: { 1: 'PC端', 4: '移动端', 2: '未知' }, formatter: Table.api.formatter.status },
                         { field: 'created_at', title: __('创建时间'), operate: 'RANGE', addclass: 'datetimerange' },
                         {
                             field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [
