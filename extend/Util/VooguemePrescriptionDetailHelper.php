@@ -39,7 +39,7 @@ class VooguemePrescriptionDetailHelper{
 			$querySql = "select sfoi.discount_amount,sfo.increment_id,sfo.customer_email,sfo.customer_firstname,sfo.store_id,sfo.customer_lastname,sfoi.product_options,sfoi.order_id,sfo.`status`,sfoi.sku,sfoi.qty_ordered,sfoi.name,sfo.created_at
 			from sales_flat_order_item sfoi
 			left join sales_flat_order sfo on sfoi.order_id=sfo.entity_id 
-			where sfo.increment_id={$increment_id}";
+			where sfo.increment_id='{$increment_id}'";
 			$item_list = Db::connect('database.db_voogueme')->query($querySql);
 
 			// 如果为空，则直接返回false
