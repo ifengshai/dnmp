@@ -464,6 +464,7 @@ define(['jquery', 'bootstrap', 'moment', 'moment/locale/zh-cn', 'bootstrap-table
                     if (typeof this.custom !== 'undefined') {
                         custom = $.extend(custom, this.custom);
                     }
+                    
                     value = value === null ? '' : value.toString();
                     var keys = typeof this.searchList === 'object' ? Object.keys(this.searchList) : [];
                     var index = keys.indexOf(value);
