@@ -69,6 +69,19 @@ class Index extends Backend
     public function login()
     {
         $url = $this->request->get('url', 'index/index');
+        //修改跳转(开始)
+        if( false !== strpos($url,'?dialog=1')){
+            $arr = explode( '/',$url);
+            if(is_array($arr) && 1<=count($arr)){
+                $url = '/'.$arr[1];
+            }else{
+                $url = '/';
+            }
+        }
+        if( false  !== strpos($url,'?addtabs=1')){
+            $url = str_replace("?addtabs=1","?ref=addtabs",$url);
+        }
+        //修改跳转(结束)
         if ($this->auth->isLogin()) {
             $this->success(__("You've logged in, do not login again"), $url);
         }

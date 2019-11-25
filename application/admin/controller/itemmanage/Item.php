@@ -68,7 +68,7 @@ class Item extends Backend
             //求出分类列表
             $categoryArr = $this->category->getItemCategoryList();
             //求出品牌列表
-            $brandArr    = (new ItemBrand())->getBrandList();
+            $brandArr    = (new ItemBrand())->getBrandToItemList();
             $list = collection($list)->toArray();
             foreach ($list as $k => $v) {
                 if ($v['category_id']) {
@@ -1104,7 +1104,7 @@ class Item extends Backend
     public function ajaxGetItemBrandList()
     {
         if ($this->request->isAjax()) {
-            $json = (new ItemBrand())->getBrandList();
+            $json = (new ItemBrand())->getBrandToItemList();
             if (!$json) {
                 $json = [0 => '请添加商品分类'];
             }
@@ -1958,5 +1958,12 @@ class Item extends Backend
     // public function ceshi(){
 
     // }
+    public function ceshi(){
+        $str  = '/admin_1biSSnWyfW.php/saleaftermanage/sale_after_task/add?dialog=1';
+        $arr = explode( '/',$str);
+        var_dump($arr);
+        //echo substr($str,strstr($str, '.php'));
+        //echo $str2;
+    }
 
 }
