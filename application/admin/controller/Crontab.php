@@ -16,7 +16,7 @@ use think\Validate;
 class Crontab extends Backend
 {
 
-    protected $noNeedLogin = ['order_custom_order_prescription', 'index'];
+    protected $noNeedLogin = ['zeelool_order_custom_order_prescription', 'zeelool_order_item_process', 'voogueme_order_custom_order_prescription', 'voogueme_order_item_process', 'nihao_order_custom_order_prescription', 'nihao_order_item_process'];
 
     /**
      * 获取采购到货状态、到货时间
