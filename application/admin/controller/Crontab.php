@@ -59,7 +59,9 @@ class Crontab extends Backend
         foreach ($order_entity_id_list as $key => $value) {
 
             $items = Db::connect('database.db_zeelool')->table('sales_flat_order_item_prescription')->where('order_id=' . $value['entity_id'])->select();
-
+            if (!$items) {
+                continue;
+            }
 
             $label = [];
             foreach ($items as $k => $v) {
@@ -364,6 +366,9 @@ order by sfoi.item_id asc limit 1000";
         foreach ($order_entity_id_list as $key => $value) {
 
             $items = Db::connect('database.db_voogueme')->table('sales_flat_order_item_prescription')->where('order_id=' . $value['entity_id'])->select();
+            if (!$items) {
+                continue;
+            }
 
             $label = [];
             foreach ($items as $k => $v) {
@@ -664,7 +669,10 @@ order by sfoi.item_id asc limit 1000";
         foreach ($order_entity_id_list as $key => $value) {
 
             $items = Db::connect('database.db_nihao')->table('sales_flat_order_item_prescription')->where('order_id=' . $value['entity_id'])->select();
-
+            if (!$items) {
+                continue;
+            }
+            
             $label = [];
             foreach ($items as $k => $v) {
                 //如果镜片参数为真 或 不等于 Plastic Lenses 并且不等于 FRAME ONLY则此订单为含处方
