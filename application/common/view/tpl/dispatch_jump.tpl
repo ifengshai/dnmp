@@ -54,14 +54,32 @@
             var wait = document.getElementById('wait');
             var interval = setInterval(function () {
                 var time = --wait.innerHTML;
+                var url  = "{$url}";
+                var pattOne = new RegExp("dialog%3D1");
+                var pattTwo = new RegExp("index/login?");
+                var resultOne = pattOne.test(url);
+                var resultTwo = pattTwo.test(url);
                 if (time <= 0) {
-					parent.location.href = history.length <= 1 ? "/" : "{$url}";
-                    clearInterval(interval);
+                    if((resultOne != false) && (resultTwo != false)){
+                        parent.parent.location.href = history.length <= 1 ? "/" : "{$url}"; 
+                    }else{
+                        parent.location.href = history.length <= 1 ? "/" : "{$url}";  
+                    }
+                        clearInterval(interval);
                 }
             }, 1000);
         })();
      document.getElementById("jumpss").onclick=function(){
-         parent.location.href = history.length <= 1 ? "/" : "{$url}";
+         var url = "{$url}";
+         var pattOne = new RegExp("dialog%3D1");
+         var pattTwo = new RegExp("index/login?");
+         var resultOne = pattOne.test(url);
+         var resultTwo = pattTwo.test(url);
+         if((resultOne != false) && (resultOne != false)){
+             parent.parent.location.href = history.length <= 1 ? "/" : "{$url}";
+         }else{
+             parent.location.href = history.length <= 1 ? "/" : "{$url}";
+         }     
      };
      document.getElementById("jump-to-index").onclick=function(){
          parent.parent.location.href ="http://{$_SERVER['HTTP_HOST']}/admin_1biSSnWyfW.php";
