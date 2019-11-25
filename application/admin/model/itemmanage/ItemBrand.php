@@ -48,6 +48,23 @@ class ItemBrand extends Model
         }
         return $arr;
     }
+    /***
+     * 商品列表得到商品品牌列表
+     * 
+     */
+    public function getBrandToItemList()
+    {
+        $result = $this->field('id,name_cn')->select();
+        if(!$result){
+            return false;
+        }
+        $arr = [];
+        $arr[0] = '无';
+        foreach($result as $k=>$v){
+            $arr[$v['id']] = $v['name_cn'];
+        }
+        return $arr;
+    }
     
 
 

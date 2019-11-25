@@ -1104,7 +1104,7 @@ class Item extends Backend
     public function ajaxGetItemBrandList()
     {
         if ($this->request->isAjax()) {
-            $json = (new ItemBrand())->getBrandList();
+            $json = (new ItemBrand())->getBrandToItemList();
             if (!$json) {
                 $json = [0 => '请添加商品分类'];
             }
