@@ -68,7 +68,7 @@ class Item extends Backend
             //求出分类列表
             $categoryArr = $this->category->getItemCategoryList();
             //求出品牌列表
-            $brandArr    = (new ItemBrand())->getBrandList();
+            $brandArr    = (new ItemBrand())->getBrandToItemList();
             $list = collection($list)->toArray();
             foreach ($list as $k => $v) {
                 if ($v['category_id']) {
