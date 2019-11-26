@@ -247,7 +247,12 @@ class PurchaseReturn extends Backend
         //去掉控制台
         $this->view->engine->layout(false);
 
-        $mpdf = new Mpdf();
+        $dir = './pdftmp';
+        if(!is_dir($dir)) {
+            @mkdir($dir, 777);
+        }
+        
+        $mpdf = new Mpdf(['tempDir' => $dir]);
         $mpdf->autoScriptToLang = true;
         $mpdf->autoLangToFont = true;
 
