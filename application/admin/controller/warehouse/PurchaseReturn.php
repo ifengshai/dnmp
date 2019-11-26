@@ -249,9 +249,9 @@ class PurchaseReturn extends Backend
 
         $dir = './pdftmp';
         if(!is_dir($dir)) {
-            @mkdir($dir, 777);
+            @mkdir($dir, 0777);
         }
-        
+
         $mpdf = new Mpdf(['tempDir' => $dir]);
         $mpdf->autoScriptToLang = true;
         $mpdf->autoLangToFont = true;
