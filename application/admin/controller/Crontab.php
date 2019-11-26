@@ -1017,8 +1017,6 @@ order by sfoi.item_id asc limit 10";
                 od_pv_r,od_bd_r,os_pv,os_bd,os_pv_r,os_bd_r,pdcheck,information,is_custom_lens) values$batch_order_item_prescription_values";
             $batch_order_item_prescription_insertSql = rtrim($batch_order_item_prescription_insertSql, ',');
 
-            echo $batch_order_item_prescription_insertSql;die;
-
             $result = Db::connect('database.db_nihao')->execute($batch_order_item_prescription_insertSql);
 
             if ($result) {
