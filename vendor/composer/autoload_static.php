@@ -13,6 +13,7 @@ class ComposerStaticInitb98307c2f45aa3f721d213bf9f8b996a
         'c964ee0ededf28c96ebd9db5099ef910' => __DIR__ . '/..' . '/guzzlehttp/promises/src/functions_include.php',
         'a0edc8309cc5e1d60e3047b5df6b7052' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/functions_include.php',
         '37a3dc5111fe8f707ab4c132ef1dbc62' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/functions_include.php',
+        '6124b4c8570aa390c21fafd04a26c69f' => __DIR__ . '/..' . '/myclabs/deep-copy/src/DeepCopy/deep_copy.php',
         'abede361264e2ae69ec1eee813a101af' => __DIR__ . '/..' . '/markbaker/complex/classes/src/functions/abs.php',
         '21a5860fbef5be28db5ddfbc3cca67c4' => __DIR__ . '/..' . '/markbaker/complex/classes/src/functions/acos.php',
         '1546e3f9d127f2a9bb2d1b6c31c26ef1' => __DIR__ . '/..' . '/markbaker/complex/classes/src/functions/acosh.php',
@@ -69,6 +70,10 @@ class ComposerStaticInitb98307c2f45aa3f721d213bf9f8b996a
             'think\\captcha\\' => 14,
             'think\\' => 6,
         ),
+        's' => 
+        array (
+            'setasign\\Fpdi\\' => 14,
+        ),
         'S' => 
         array (
             'Symfony\\Polyfill\\Php70\\' => 23,
@@ -92,6 +97,7 @@ class ComposerStaticInitb98307c2f45aa3f721d213bf9f8b996a
         ),
         'M' => 
         array (
+            'Mpdf\\' => 5,
             'Monolog\\' => 8,
         ),
         'G' => 
@@ -104,6 +110,10 @@ class ComposerStaticInitb98307c2f45aa3f721d213bf9f8b996a
         array (
             'Endroid\\QrCode\\' => 15,
             'EasyWeChat\\' => 11,
+        ),
+        'D' => 
+        array (
+            'DeepCopy\\' => 9,
         ),
         'C' => 
         array (
@@ -129,6 +139,10 @@ class ComposerStaticInitb98307c2f45aa3f721d213bf9f8b996a
         array (
             0 => __DIR__ . '/..' . '/karsonzhang/fastadmin-addons/src',
             1 => __DIR__ . '/../..' . '/thinkphp/library/think',
+        ),
+        'setasign\\Fpdi\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/setasign/fpdi/src',
         ),
         'Symfony\\Polyfill\\Php70\\' => 
         array (
@@ -178,6 +192,10 @@ class ComposerStaticInitb98307c2f45aa3f721d213bf9f8b996a
         array (
             0 => __DIR__ . '/..' . '/overtrue/pinyin/src',
         ),
+        'Mpdf\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/mpdf/mpdf/src',
+        ),
         'Monolog\\' => 
         array (
             0 => __DIR__ . '/..' . '/monolog/monolog/src/Monolog',
@@ -201,6 +219,10 @@ class ComposerStaticInitb98307c2f45aa3f721d213bf9f8b996a
         'EasyWeChat\\' => 
         array (
             0 => __DIR__ . '/..' . '/overtrue/wechat/src',
+        ),
+        'DeepCopy\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/myclabs/deep-copy/src/DeepCopy',
         ),
         'Cron\\' => 
         array (

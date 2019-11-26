@@ -7,6 +7,7 @@ use think\Db;
 use think\Exception;
 use think\exception\PDOException;
 use think\exception\ValidateException;
+use Mpdf\Mpdf;
 
 /**
  * 退销单管理
@@ -113,14 +114,14 @@ class PurchaseReturn extends Backend
         $map['purchase_id'] = $row['purchase_id'];
         $map['sku'] = ['in', $skus];
         $item = $purchase_item->where($map)->column('*', 'sku');
-      
+
         //查询质检信息
         $check_map['id'] = ['in', $check_item_id];
         $check = new \app\admin\model\warehouse\CheckItem;
         $list = $check
             ->where($check_map)
             ->column('*', 'id');
-        
+
 
         // //查询已退数量
         // $return_map['purchase_id'] = $row['purchase_id'];
@@ -205,5 +206,57 @@ class PurchaseReturn extends Backend
         }
         $this->view->assign("row", $row);
         return $this->view->fetch();
+    }
+
+    public function test()
+    {
+        //查询退销信息
+        $PurchaseReturn_map['id'] = ['in', [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]];
+        $PurchaseReturn = new \app\admin\model\purchase\PurchaseReturn;
+        $return_list = $PurchaseReturn->with(['purchaseReturnItem'])
+            ->where($PurchaseReturn_map)
+            ->select();
+        $return_list = collection($return_list)->toArray();
+
+
+        /***********查询退销商品信息***************/
+        //查询退销单商品信息
+        $return_item_map['return_id'] = ['in', [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]];
+        $return_arr = $this->purchase_return_item->where($return_item_map)->select();
+        $return_arr = collection($return_arr)->toArray();
+
+        $check_item_id = array_column($return_arr, 'check_item_id');
+
+        //查询质检信息
+        $check_map['id'] = ['in', $check_item_id];
+        $check = new \app\admin\model\warehouse\CheckItem;
+        $list = $check
+            ->where($check_map)
+            ->column('*', 'id');
+        foreach ($return_list as $k => &$v) {
+            foreach ($v['purchase_return_item'] as &$va) {
+                $va['supplier_sku'] = $list[$va['check_item_id']]['supplier_sku'];
+                $va['purchase_num'] = $list[$va['check_item_id']]['purchase_num'];
+                $va['arrivals_num'] = $list[$va['check_item_id']]['arrivals_num'];
+                $va['quantity_num'] = $list[$va['check_item_id']]['quantity_num'];
+            }
+        }
+        $this->assign('return_list', $return_list);
+        /***********end***************/
+
+        //去掉控制台
+        $this->view->engine->layout(false);
+
+        $mpdf = new Mpdf();
+        $mpdf->autoScriptToLang = true;
+        $mpdf->autoLangToFont = true;
+
+        //打印模板
+        $html =  $this->fetch('print');
+
+        $mpdf->WriteHTML($html);
+
+        $mpdf->Output('pdf.pdf', 'I'); //D是下载
+        die;
     }
 }
