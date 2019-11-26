@@ -1016,7 +1016,8 @@ order by sfoi.item_id asc limit 1000";
                 cart_currency,is_frame_only,zsl,lens_price,total,prescription_type,year,month,od_sph,os_sph,od_cyl,os_cyl,od_axis,os_axis,pd_l,pd_r,pd,os_add,od_add,total_add,od_pv,od_bd,
                 od_pv_r,od_bd_r,os_pv,os_bd,os_pv_r,os_bd_r,pdcheck,information,is_custom_lens) values$batch_order_item_prescription_values";
             $batch_order_item_prescription_insertSql = rtrim($batch_order_item_prescription_insertSql, ',');
-            
+
+            echo $batch_order_item_prescription_insertSql;die;
             $result = Db::connect('database.db_nihao')->execute($batch_order_item_prescription_insertSql);
 
             if ($result) {
