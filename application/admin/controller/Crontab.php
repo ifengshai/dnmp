@@ -824,12 +824,12 @@ order by sfoi.item_id asc limit 1000";
         }
 
         $max_item_id = $max_item_id > 0 ? $max_item_id : 0;
-        // echo 'fetch_template<br>';
+        
         $order_item_prescription_querySql = "select sfoi.item_id,sfoi.order_id,sfoi.product_id,sfoi.`name`,sfoi.sku,sfoi.product_options,sfoi.created_at,sfoi.qty_ordered,sfoi.quote_item_id
 from sales_flat_order_item sfoi where sfoi.item_id > $max_item_id
 order by sfoi.item_id asc limit 1000";
         $order_item_list = Db::connect('database.db_nihao')->query($order_item_prescription_querySql);
-
+        
         $finalResult = array();
         foreach ($order_item_list as $key => $value) {
             $finalResult[$key]['item_id'] = $value['item_id'];
@@ -947,7 +947,7 @@ order by sfoi.item_id asc limit 1000";
                 $finalResult[$key]['is_custom_lens'] = 1;
             }
         }
-        // dump($finalResult);
+         dump($finalResult);die;
 
         if ($finalResult) {
             $batch_order_item_prescription_values = "";
