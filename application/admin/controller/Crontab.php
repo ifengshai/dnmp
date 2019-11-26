@@ -732,7 +732,7 @@ order by sfoi.item_id asc limit 1000";
         $type_6_entity_id = [];
         foreach ($order_entity_id_list as $key => $value) {
 
-            $items = Db::connect('database.db_nihao')->table('sales_flat_order_item_prescription')->where('order_id=8106')->select();
+            $items = Db::connect('database.db_nihao')->table('sales_flat_order_item_prescription')->where('order_id='. $value['entity_id'])->select();
             if (!$items) {
                 continue;
             }
