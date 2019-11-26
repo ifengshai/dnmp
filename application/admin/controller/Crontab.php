@@ -829,7 +829,7 @@ order by sfoi.item_id asc limit 1000";
 from sales_flat_order_item sfoi where sfoi.item_id > $max_item_id
 order by sfoi.item_id asc limit 1000";
         $order_item_list = Db::connect('database.db_nihao')->query($order_item_prescription_querySql);
-        
+        dump($order_item_list);
         $finalResult = array();
         foreach ($order_item_list as $key => $value) {
             $finalResult[$key]['item_id'] = $value['item_id'];
