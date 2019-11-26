@@ -349,12 +349,29 @@ table.altrowstable tr:nth-child(even){
                             <td style="text-align: center; vertical-align: middle;">{$itemInfoList.coatiing_name}</td>
                             <td style="text-align: center; vertical-align: middle;">{$itemInfoList.index_type}</td>
                             <td style="text-align: center; vertical-align: middle;">{$itemInfoList.prescription_type}</td>
-                             <td style="text-align: center; vertical-align: middle;">右眼<br>左眼</td>
+                            <td style="text-align: center; vertical-align: middle;">右眼<br>左眼</td>
                             <td style="text-align: center; vertical-align: middle;">{$itemInfoList.od_sph}<br>{$itemInfoList.os_sph}</td>
                             <td style="text-align: center; vertical-align: middle;">{$itemInfoList.od_cyl}<br>{$itemInfoList.os_cyl}</td>
                             <td style="text-align: center; vertical-align: middle;">{$itemInfoList.od_axis}<br>{$itemInfoList.os_axis}</td>
-                            <td style="text-align: center; vertical-align: middle;">{$itemInfoList.od_add}<br>{$itemInfoList.os_add}</td>
+                            {if $orderPlatformId lt 3}
+                                {if $itemInfoList.total_add}
+                                <td style="text-align: center; vertical-align: middle;" rowspan="2">{$itemInfoList.total_add}</td>
+                                {else/}
+                                <td style="text-align: center; vertical-align: middle;">{$itemInfoList.os_add}<br>{$itemInfoList.od_add}</td>
+                                {/if}                           
+                            {else/}
+                               {if $itemInfoList.prescription_type eq 'Reading Glasses' && $itemInfoList.os_add>0 && $itemInfoList.od_add>0}
+                               <td style="text-align: center; vertical-align: middle;">{$itemInfoList.od_add}<br>{$itemInfoList.os_add}</td>
+                               {else/}
+                               <td style="text-align: center; vertical-align: middle;">{$itemInfoList.total_add}</td>
+                               {/if} 
+                            {/if}
+                            {if $itemInfoList.pdcheck == 'on'}
                             <td style="text-align: center; vertical-align: middle;">{$itemInfoList.pd_r}<br>{$itemInfoList.pd_l}</td>
+                            {else/}
+                            <td style="text-align: center; vertical-align: middle;" rowspan="2">{$itemInfoList.pd}</td>
+                            {/if}
+                            
                             <td style="text-align: center; vertical-align: middle;">{$itemInfoList.od_pv_r}<br>{$itemInfoList.os_pv_r}</td>
                             <td style="text-align: center; vertical-align: middle;">{$itemInfoList.od_bd_r}<br>{$itemInfoList.os_bd_r}</td>
                         </tr>
