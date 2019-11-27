@@ -250,6 +250,51 @@ class Zeelool extends Backend
             $item->startTrans();
             try {
                 $result = $this->model->where($map)->update($data);
+
+                if ($status == 1) {
+                    //查询出质检通过的订单
+                    $res = $this->model->alias('a')->where($map)->field('a.increment_id,b.sku,b.qty_ordered,b.is_change_frame')->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->select();
+                    if (!$res) {
+                        throw new Exception("未查询到订单数据！！");
+                    };
+
+                    $ItemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku;
+                    //查出订单SKU映射表对应的仓库SKU
+                    foreach ($res as $k => &$v) {
+
+                        //是否为更换镜架 如果为更换镜架 需处理更换之后SKU的库存
+                        if ($v['is_change_frame'] == 2) {
+                            //根据订单号 SKU查询更换镜架记录表 处理更换之后SKU库存
+                            $infotask = new \app\admin\model\infosynergytaskmanage\InfoSynergyTaskChangeSku;
+                            $infoTaskRes = $infotask->getChangeSkuData($v['increment_id'], 1, $v['sku']);
+                           
+                            $v['sku'] = $infoTaskRes['change_sku'];
+                            $v['qty_ordered'] = $infoTaskRes['change_number'];
+                        }
+
+                        $trueSku = $ItemPlatformSku->getTrueSku($v['sku'], 1);
+                        //总库存
+                        $item_map['sku'] = $trueSku;
+                        $item_map['is_del'] = 1;
+                        if ($v['sku']) {
+                            //增加配货占用
+                            $res_three = $item->where($item_map)->setInc('distribution_occupy_stock', $v['qty_ordered']);
+                        }
+
+                        if (!$res_three) {
+                            $error[] = $k;
+                        }
+
+                    }
+                    unset($v);
+
+                    if (count($error)) {
+                        throw new Exception("增加配货占用库存失败！！请检查SKU");
+                    };
+                    $item->commit();
+                }
+
+
                 //质检通过扣减库存
                 if ($status == 4) {
                     //查询出质检通过的订单
@@ -262,14 +307,14 @@ class Zeelool extends Backend
                     //查出订单SKU映射表对应的仓库SKU
                     foreach ($res as $k => &$v) {
                         //是否为更换镜架 如果为更换镜架 需处理更换之后SKU的库存
-                        if ($v['is_change_frame'] != 1) {
+                        if ($v['is_change_frame'] == 2) {
                             //根据订单号 SKU查询更换镜架记录表 处理更换之后SKU库存
                             $infotask = new \app\admin\model\infosynergytaskmanage\InfoSynergyTaskChangeSku;
                             $infoTaskRes = $infotask->getChangeSkuData($v['increment_id'], 1, $v['sku']);
                             $v['sku'] = $infoTaskRes['change_sku'];
                             $v['qty_ordered'] = $infoTaskRes['change_number'];
                         }
-                      
+
                         $trueSku = $ItemPlatformSku->getTrueSku($v['sku'], 1);
                        
                         //总库存
@@ -280,9 +325,12 @@ class Zeelool extends Backend
                             $res_one = $item->where($item_map)->setDec('stock', $v['qty_ordered']);
                             //占用库存
                             $res_two = $item->where($item_map)->setDec('occupy_stock', $v['qty_ordered']);
+
+                            //扣减配货占用
+                            $res_three = $item->where($item_map)->setDec('distribution_occupy_stock', $v['qty_ordered']);
                         }
 
-                        if (!$res_one || !$res_two) {
+                        if (!$res_one || !$res_two || !$res_three) {
                             $error[] = $k;
                         }
 
