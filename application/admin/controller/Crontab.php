@@ -264,7 +264,7 @@ order by sfoi.item_id asc limit 3";
              * 3、染色镜 镜片类型包含Lens with Color Tint
              * 4、当cyl<=-4或cyl>=4
              */
-            
+
             if ($final_params['prescription_type'] == 'Progressive') {
                 echo 111;
                 $items[$order_item_key]['is_custom_lens'] = 1;
@@ -279,7 +279,8 @@ order by sfoi.item_id asc limit 3";
                 $items[$order_item_key]['is_custom_lens'] = 1;
                 echo 333;
             }
-            
+            dump($final_params['od_cyl']);
+            dump($final_params['os_cyl']);
             if ($final_params['od_cyl'] <= -4 || $final_params['od_cyl'] >= 4) {
                 $items[$order_item_key]['is_custom_lens'] = 1;
 
