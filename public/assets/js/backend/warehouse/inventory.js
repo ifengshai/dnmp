@@ -1,9 +1,10 @@
-define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'editable'], function ($, undefined, Backend, Table, Form, undefined) {
+define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'editable','bootstrap-table-jump-to'], function ($, undefined, Backend, Table, Form, undefined) {
 
     var Controller = {
         index: function () {
             // 初始化表格参数配置
             Table.api.init({
+                showJumpto: true,
                 searchFormVisible: true,
                 pageList: [10, 25, 50, 100],
                 extend: {

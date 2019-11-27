@@ -1,9 +1,10 @@
-define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'fast'], function ($, undefined, Backend, Table, Form, Fast) {
+define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'fast','bootstrap-table-jump-to'], function ($, undefined, Backend, Table, Form, Fast) {
 
     var Controller = {
         index: function () {
             // 初始化表格参数配置
             Table.api.init({
+                showJumpto: true,
                 searchFormVisible: true,
                 // searchFormTemplate: 'customformtpl',
                 pageList: [10, 25, 50, 100],
