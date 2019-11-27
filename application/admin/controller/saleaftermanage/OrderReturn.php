@@ -840,7 +840,24 @@ class OrderReturn extends Backend
                 if (!$express_data) {
                     try {
                     //查询物流信息
-                        $title = str_replace(' ', '-', $express['title']);
+                        //$title = str_replace(' ', '-', $express['title']);
+                        switch($express['title']){
+                            case 'DHL (Deprecated)':
+                            $title = 'dhl';
+                            break;
+                            case 'China Post':
+                            $title = 'china-ems';
+                            break;
+                            case 'china-ems':
+                            $title = 'china-ems';
+                            break;
+                            case 'DHL':
+                            $title = 'dhl';
+                            break;
+                            case 'USPS':
+                            $title = 'usps';
+                            break;              
+                        }
                         $track = new Trackingmore();
                         $track = $track->getRealtimeTrackingResults($title, $express['track_number']);
                         $express_data = $track['data']['items'][0];
