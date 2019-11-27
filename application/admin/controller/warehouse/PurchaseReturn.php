@@ -208,10 +208,11 @@ class PurchaseReturn extends Backend
         return $this->view->fetch();
     }
 
-    public function test()
+    public function print()
     {
+        $ids = $this->request->get("ids");
         //查询退销信息
-        $PurchaseReturn_map['id'] = ['in', [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]];
+        $PurchaseReturn_map['id'] = ['in', $ids];
         $PurchaseReturn = new \app\admin\model\purchase\PurchaseReturn;
         $return_list = $PurchaseReturn->with(['purchaseReturnItem'])
             ->where($PurchaseReturn_map)
@@ -221,7 +222,7 @@ class PurchaseReturn extends Backend
 
         /***********查询退销商品信息***************/
         //查询退销单商品信息
-        $return_item_map['return_id'] = ['in', [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]];
+        $return_item_map['return_id'] = ['in', $ids];
         $return_arr = $this->purchase_return_item->where($return_item_map)->select();
         $return_arr = collection($return_arr)->toArray();
 
@@ -248,7 +249,7 @@ class PurchaseReturn extends Backend
         $this->view->engine->layout(false);
 
         $dir = './pdftmp';
-        if(!is_dir($dir)) {
+        if (!is_dir($dir)) {
             @mkdir($dir, 0777);
         }
 
