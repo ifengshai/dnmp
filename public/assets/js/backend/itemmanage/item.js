@@ -1,9 +1,10 @@
-define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($, undefined, Backend, Table, Form) {
+define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','bootstrap-table-jump-to'], function ($, undefined, Backend, Table, Form) {
 
     var Controller = {
         index: function () {
             // 初始化表格参数配置
             Table.api.init({
+                showJumpto: true,
                 searchFormVisible: true,
                 pageList: [10, 25, 50, 100],
                 extend: {
@@ -459,7 +460,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                         Layer.alert('请输入您的商品SKU');
                         return false;
                     }
-                    console.log(sku);
                     Backend.api.ajax({
                         url: 'itemmanage/item/ajaxItemInfo',
                         data: { categoryId: categoryId, sku: sku }
@@ -589,6 +589,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
         recycle: function () {
             // 初始化表格参数配置
             Table.api.init({
+                showJumpto: true,
                 searchFormVisible: true,
                 extend: {
                     index_url: 'itemmanage/item/recycle' + location.search,
@@ -772,6 +773,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
         goods_stock_list: function () {
             // 初始化表格参数配置
             Table.api.init({
+                showJumpto: true,
                 searchFormVisible: true,
                 pageList: [10, 25, 50, 100],
                 extend: {

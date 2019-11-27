@@ -1,9 +1,10 @@
-define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefined, Backend, Table, Form) {
+define(['jquery', 'bootstrap', 'backend', 'table', 'form','bootstrap-table-jump-to'], function ($, undefined, Backend, Table, Form) {
 
     var Controller = {
         index: function () {
             // 初始化表格参数配置
             Table.api.init({
+                showJumpto: true,
                 extend: {
                     index_url: 'platformmanage/platform_map/index' + location.search,
                     add_url: 'platformmanage/platform_map/add',

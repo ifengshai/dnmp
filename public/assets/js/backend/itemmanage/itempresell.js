@@ -1,8 +1,9 @@
-define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui'], function ($, undefined, Backend, Table, Form) {
+define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui','bootstrap-table-jump-to'], function ($, undefined, Backend, Table, Form) {
 
     var Controller = {
         index: function () {
             Table.api.init({
+                showJumpto: true,
                 searchFormVisible: true,
                 pageList: [10, 25, 50, 100],
                 extend: {
