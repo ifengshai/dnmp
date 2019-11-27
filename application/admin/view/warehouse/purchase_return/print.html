@@ -1,12 +1,11 @@
 <style>
     .caigou {
+        width: 100%;
         border-width: 1px;
         border-style: solid;
         border-color: rgba(188, 188, 188, 1);
         border-radius: 6px;
         padding: 10px;
-        width: 100%;
-        margin-bottom: 30px;
     }
 
     .caigou #caigou-table {
@@ -50,6 +49,13 @@
     table {
         border-collapse: separate;
         border-spacing: 0px;
+        margin-bottom: 20px;
+    }
+
+    .lists {
+       
+        width: 100%;
+        margin-bottom: 30px;
     }
 </style>
 
@@ -63,44 +69,46 @@
 
     <div class='caigou'>
         <p style="font-size: 16px;text-align: center;"><b>退销信息</b></p>
-        <div style="margin-bottom: 20px;">
+        <div style="margin-bottom: 20px;width: 100%;">
             {foreach $return_list as $k => $v}
-            <p style="font-size: 14px;margin-top: 20px;"><span>退销单号：</span><span>{$v.return_number}</span> <span
-                    style="margin-left: 20px;">退销时间：</span><span>{$v.createtime}</span> <span
-                    style="margin-left: 20px;">质检人：</span><span>{$v.create_person}</span></p>
-            <p style="font-size: 14px;margin-top: 20px;"><span>退销类型：</span>
-                <span>
-                    {if $v['return_type'] == 1}
-                    仅退款
-                    {elseif $v['return_type'] == 2}
-                    退货退款
-                    {else/}
-                    调换货
-                    {/if}
-                </span>
-                <span style="margin-left: 20px;">退回物流单号：</span><span>{$v.logistics_number}</span></p>
-            <table id="caigou-table">
-                <tr>
-                    <th style="width: 5%">序号</th>
-                    <th style="width: 20%">SKU</th>
-                    <th style="width: 20%">供应商sku</th>
-                    <th style="width: 10%">采购数量（个）</th>
-                    <th style="width: 10%">合格数量（个）</th>
-                    <th style="width: 10%">退销数量</th>
-                </tr>
-                {foreach $v['purchase_return_item'] as $key => $val}
-                <tr>
-                    <td>{$key+1}</td>
-                    <td>{$val.sku}</td>
-                    <td>{$val['supplier_sku']}</td>
-                    <td>{$val['purchase_num']}</td>
-                    <td>{$val['quantity_num']}</td>
-                    <td>{$val.return_num}</td>
+            <div class='lists'>
+                <p style="font-size: 14px;margin-top: 20px;"><span>退销单号：</span><span>{$v.return_number}</span> <span
+                        style="margin-left: 20px;">退销时间：</span><span>{$v.createtime}</span> <span
+                        style="margin-left: 20px;">质检人：</span><span>{$v.create_person}</span></p>
+                <p style="font-size: 14px;margin-top: 20px;"><span>退销类型：</span>
+                    <span>
+                        {if $v['return_type'] == 1}
+                        仅退款
+                        {elseif $v['return_type'] == 2}
+                        退货退款
+                        {else/}
+                        调换货
+                        {/if}
+                    </span>
+                    <span style="margin-left: 20px;">退回物流单号：</span><span>{$v.logistics_number}</span></p>
+                <table id="caigou-table">
+                    <tr>
+                        <th style="width: 5%">序号</th>
+                        <th style="width: 20%">SKU</th>
+                        <th style="width: 20%">供应商sku</th>
+                        <th style="width: 10%">采购数量（个）</th>
+                        <th style="width: 10%">合格数量（个）</th>
+                        <th style="width: 10%">退销数量</th>
+                    </tr>
+                    {foreach $v['purchase_return_item'] as $key => $val}
+                    <tr>
+                        <td>{$key+1}</td>
+                        <td>{$val.sku}</td>
+                        <td>{$val['supplier_sku']}</td>
+                        <td>{$val['purchase_num']}</td>
+                        <td>{$val['quantity_num']}</td>
+                        <td>{$val.return_num}</td>
 
-                </tr>
-                {/foreach}
+                    </tr>
+                    {/foreach}
 
-            </table>
+                </table>
+            </div>
             {/foreach}
 
 

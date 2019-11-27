@@ -161,8 +161,8 @@ class Crontab extends Backend
 
         $max_item_id = $max_item_id > 0 ? $max_item_id : 0;
         $order_item_prescription_querySql = "select sfoi.item_id,sfoi.order_id,sfoi.product_id,sfoi.`name`,sfoi.sku,sfoi.product_options,sfoi.created_at,sfoi.qty_ordered,sfoi.quote_item_id
-from sales_flat_order_item sfoi where sfoi.item_id > $max_item_id
-order by sfoi.item_id asc limit 1000";
+from sales_flat_order_item sfoi where sfoi.item_id in (373094,373095,373096)
+order by sfoi.item_id asc limit 3";
 
         $order_item_list = Db::connect('database.db_zeelool')->query($order_item_prescription_querySql);
         
@@ -264,24 +264,33 @@ order by sfoi.item_id asc limit 1000";
              * 3、染色镜 镜片类型包含Lens with Color Tint
              * 4、当cyl<=-4或cyl>=4
              */
+
             if ($final_params['prescription_type'] == 'Progressive') {
+                echo 111;
                 $items[$order_item_key]['is_custom_lens'] = 1;
             } 
 
             if (strpos($final_params['index_type'], 'Polarized') !== false) {
                 $items[$order_item_key]['is_custom_lens'] = 1;
+                echo 222;
             } 
 
             if (strpos($final_params['index_type'], 'Lens with Color Tint') !== false) {
                 $items[$order_item_key]['is_custom_lens'] = 1;
+                echo 333;
             }
-            
-            if ($final_params['od_cyl'] <= -4 || $final_params['od_cyl'] >= 4) {
+            dump($final_params['od_cyl']);
+            dump($final_params['os_cyl']);
+            if ($final_params['od_cyl']*1 <= -4 || $final_params['od_cyl']*1 >= 4) {
                 $items[$order_item_key]['is_custom_lens'] = 1;
+
+                echo 444;
             }
 
-            if ($final_params['os_cyl'] <= -4 || $final_params['os_cyl'] >= 4) {
+            if ($final_params['os_cyl']*1 <= -4 || $final_params['os_cyl']*1 >= 4) {
                 $items[$order_item_key]['is_custom_lens'] = 1;
+
+                echo 555;
             }
 
             unset($final_params);
@@ -289,6 +298,8 @@ order by sfoi.item_id asc limit 1000";
             unset($prescription_params);
             unset($product_options);
         }
+
+        dump($items);die;
 
         if ($items) {
             $batch_order_item_prescription_values = "";

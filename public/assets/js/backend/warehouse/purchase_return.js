@@ -80,6 +80,18 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
 
             // 为表格绑定事件
             Table.api.bindevent(table);
+
+            //打印
+            $('.print').click(function () {
+                var ids = Table.api.selectedids(table);
+                console.log(ids);
+                if (ids.length <= 0) {
+                    Layer.alert('请先选择单据！！');
+                    return false;
+                }
+                window.open(Config.moduleurl + '/warehouse/purchase_return/print?ids=' + ids.join(','), '_blank');
+            })
+
         },
         add: function () {
             Controller.api.bindevent();
@@ -127,7 +139,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 Form.api.bindevent($("form[role=form]"));
 
                 //切换合同 异步获取合同数据
-                $(document).on('change', '.purchase_id', function () { 
+                $(document).on('change', '.purchase_id', function () {
                     var id = $(this).val();
                     if (id) {
                         var url = Config.moduleurl + '/purchase/purchase_return/getPurchaseData';
