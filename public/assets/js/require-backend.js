@@ -21,6 +21,8 @@ require.config({
         'adminlte': 'adminlte',
         'bootstrap-table-commonsearch': 'bootstrap-table-commonsearch',
         'bootstrap-table-template': 'bootstrap-table-template',
+        //新加制定页面跳转js
+        'bootstrap-table-jump-to': 'bootstrap-table-page-jump-to',
         //
         // 以下的包从bower的libs目录加载
         'jquery': '../libs/jquery/dist/jquery.min',
@@ -90,6 +92,15 @@ require.config({
             deps: ['bootstrap-table', 'template'],
             exports: '$.fn.bootstrapTable.defaults'
         },
+        //新增指定页面跳转功能(开始)
+        'bootstrap-table-jump-to':{
+            deps:[
+                'bootstrap-table',
+                'css!../libs/bootstrap-jump/bootstrap-table-page-jump-to.css' 
+            ],
+            exports:'$.fn.bootstrapTable.defaults'
+        },
+        //新增指定页面跳转功能(结束)
         'tableexport': {
             deps: ['jquery'],
             exports: '$.fn.extend'
