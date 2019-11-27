@@ -196,7 +196,7 @@ class Inventory extends Backend
                             $list[$k]['sku'] = $v->sku;
                             $list[$k]['name'] = $v->name;
                             $list[$k]['stock'] = $v->stock;
-                            $list[$k]['occupy_stock'] = $v->occupy_stock;
+                            $list[$k]['distribution_occupy_stock'] = $v->distribution_occupy_stock;
                             $list[$k]['available_stock'] = $v->available_stock;
                             $list[$k]['on_way_stock'] = $v->on_way_stock;
                             $list[$k]['sample_stock'] = $v->sample_stock ?? 0;
@@ -305,7 +305,7 @@ class Inventory extends Backend
                         if ($data) {
                             //创建盘点单
                             $arr['number'] = 'IS' . date('YmdHis') . rand(100, 999) . rand(100, 999);
-                            $arr['create_person'] = session('admin.username');
+                            $arr['create_person'] = session('admin.nickname');
                             $arr['createtime'] = date('Y-m-d H:i:s', time());
                             $this->model->allowField(true)->save($arr);
 
@@ -314,8 +314,8 @@ class Inventory extends Backend
                                 $list[$k]['inventory_id'] = $this->model->id;
                                 $list[$k]['sku'] = $v->sku;
                                 $list[$k]['name'] = $v->name;
-                                $list[$k]['real_time_qty'] = $v->stock ?? 0;
-                                $list[$k]['occupy_stock'] = $v->occupy_stock;
+                                $list[$k]['real_time_qty'] = ($v->stock*1 - $v->distribution_occupy_stock*1) ?? 0;
+                                $list[$k]['distribution_occupy_stock'] = $v->distribution_occupy_stock;
                                 $list[$k]['available_stock'] = $v->available_stock;
                             }
                             //添加明细表数据
@@ -435,7 +435,7 @@ class Inventory extends Backend
                             $list[$k]['sku'] = $v->sku;
                             $list[$k]['name'] = $v->name;
                             $list[$k]['real_time_qty'] = $v->stock ?? 0;
-                            $list[$k]['occupy_stock'] = $v->occupy_stock;
+                            $list[$k]['distribution_occupy_stock'] = $v->distribution_occupy_stock;
                             $list[$k]['available_stock'] = $v->available_stock;
                         }
                     }

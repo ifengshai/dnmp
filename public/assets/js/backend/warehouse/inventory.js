@@ -288,13 +288,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'editable','bootstrap
                             },
                             { field: 'id', title: __('Id'), operate: false, visible: false },
                             { field: 'sku', title: __('Sku'), operate: 'like' },
-                            { field: 'name', title: __('Name'), operate: false },
-                            { field: 'stock', title: __('实时库存'), operate: 'BETWEEN' },
+                            { field: 'stock', title: __('总库存'), operate: 'BETWEEN' },
                             { field: 'available_stock', title: __('可用库存'), operate: false },
-                            { field: 'occupy_stock', title: __('占用库存'), operate: false },
-                            { field: 'sample_num', title: __('留样库存'), operate: false },
-
-                            { field: 'on_way_stock', title: __('在途库存'), operate: false },
+                            { field: 'distribution_occupy_stock', title: __('配货占用库存'), operate: false },
                             { field: 'is_open', title: __('启用状态'), searchList: { 1: '启用', 2: '禁用' }, operate: false, formatter: Table.api.formatter.status }
                         ]
                     ]
@@ -353,12 +349,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'editable','bootstrap
                             },
                             { field: 'id', title: __('Id'), operate: false, visible: false },
                             { field: 'sku', title: __('Sku'), operate: 'like' },
-                            { field: 'name', title: __('Name'), operate: false },
-                            { field: 'stock', title: __('实时库存'), operate: false },
+                            { field: 'stock', title: __('总库存'), operate: false },
                             { field: 'available_stock', title: __('可用库存'), operate: false },
-                            { field: 'occupy_stock', title: __('占用库存'), operate: false },
-                            { field: 'sample_stock', title: __('留样库存'), operate: false },
-                            { field: 'on_way_stock', title: __('在途库存'), operate: false }
+                            { field: 'distribution_occupy_stock', title: __('配货占用库存'), operate: false },
                         ]
                     ]
                 });
@@ -441,13 +434,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'editable','bootstrap
                             },
                             { field: 'id', title: __('Id'), operate: false, visible: false },
                             { field: 'sku', title: __('Sku'), operate: 'like' },
-                            { field: 'name', title: __('Name'), operate: false },
-                            { field: 'stock', title: __('实时库存'), operate: 'BETWEEN' },
+                            { field: 'stock', title: __('总库存'), operate: 'BETWEEN' },
                             { field: 'available_stock', title: __('可用库存'), operate: false },
-                            { field: 'occupy_stock', title: __('占用库存'), operate: false },
-                            { field: 'sample_num', title: __('留样库存'), operate: false },
-
-                            { field: 'on_way_stock', title: __('在途库存'), operate: false },
+                            { field: 'distribution_occupy_stock', title: __('配货占用库存'), operate: false },
                             { field: 'is_open', title: __('启用状态'), searchList: { 1: '启用', 2: '禁用' }, formatter: Table.api.formatter.status }
                         ]
                     ]
@@ -506,17 +495,15 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'editable','bootstrap
                             },
                             { field: 'id', title: __('Id'), operate: false, visible: false },
                             { field: 'sku', title: __('Sku'), operate: 'like' },
-                            { field: 'name', title: __('Name'), operate: false },
                             { field: 'real_time_qty', title: __('实时库存'), operate: false },
                             { field: 'available_stock', title: __('可用库存'), operate: false },
-                            { field: 'occupy_stock', title: __('占用库存'), operate: false }
+                            { field: 'distribution_occupy_stock', title: __('配货占用库存'), operate: false }
                         ]
                     ]
                 });
 
                 // 为表格2绑定事件
                 Table.api.bindevent(table2);
-
 
             }
         },
@@ -552,10 +539,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'editable','bootstrap
                         },
                         { field: 'id', title: __('Id'), visible: false, operate: false },
                         { field: 'sku', title: __('Sku'), operate: 'like' },
-                        { field: 'name', title: __('Name'), operate: false },
                         { field: 'real_time_qty', title: __('实时库存'), operate: false },
                         { field: 'available_stock', title: __('可用库存'), operate: false },
-                        { field: 'occupy_stock', title: __('占用库存'), operate: false },
+                        { field: 'distribution_occupy_stock', title: __('配货占用库存'), operate: false },
                         {
                             field: 'inventory_qty', title: __('盘点数量'), operate: false, editable: true
                         },
@@ -627,10 +613,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'editable','bootstrap
                         },
                         { field: 'id', title: __('Id'), visible: false, operate: false },
                         { field: 'sku', title: __('Sku'), operate: 'like' },
-                        { field: 'name', title: __('Name'), operate: false },
                         { field: 'real_time_qty', title: __('实时库存'), operate: false },
                         { field: 'available_stock', title: __('可用库存'), operate: false },
-                        { field: 'occupy_stock', title: __('占用库存'), operate: false },
+                        { field: 'distribution_occupy_stock', title: __('配货占用库存'), operate: false },
                         {
                             field: 'inventory_qty', title: __('盘点数量'), operate: false
                         },
