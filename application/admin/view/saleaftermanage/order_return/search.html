@@ -355,7 +355,7 @@ table.altrowstable tr:nth-child(even){
                             <td style="text-align: center; vertical-align: middle;">{$itemInfoList.od_axis}<br>{$itemInfoList.os_axis}</td>
                             {if $orderPlatformId lt 3}
                                 {if $itemInfoList.total_add}
-                                <td style="text-align: center; vertical-align: middle;" rowspan="2">{$itemInfoList.total_add}</td>
+                                <td style="text-align: center; vertical-align: middle;">{$itemInfoList.total_add}</td>
                                 {else/}
                                 <td style="text-align: center; vertical-align: middle;">{$itemInfoList.os_add}<br>{$itemInfoList.od_add}</td>
                                 {/if}                           
@@ -369,7 +369,7 @@ table.altrowstable tr:nth-child(even){
                             {if $itemInfoList.pdcheck == 'on'}
                             <td style="text-align: center; vertical-align: middle;">{$itemInfoList.pd_r}<br>{$itemInfoList.pd_l}</td>
                             {else/}
-                            <td style="text-align: center; vertical-align: middle;" rowspan="2">{$itemInfoList.pd}</td>
+                            <td style="text-align: center; vertical-align: middle;">{$itemInfoList.pd}</td>
                             {/if}
                             
                             <td style="text-align: center; vertical-align: middle;">{$itemInfoList.od_pv_r}<br>{$itemInfoList.os_pv_r}</td>
