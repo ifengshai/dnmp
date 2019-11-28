@@ -939,7 +939,7 @@ class Item extends Backend
 
         $info = $purchase->alias('a')->where($where)->field('a.id,a.purchase_number,b.sku,a.purchase_status,a.receiving_time,a.create_person,a.createtime,b.purchase_num')
             ->join(['fa_purchase_order_item' => 'b'], 'a.id=b.purchase_id')
-            ->group('a.id')
+            ->group('b.id')
             ->select();
 
         $num = 0;
@@ -951,7 +951,6 @@ class Item extends Backend
             $map['b.sku'] = $v['sku'];
             $map['a.type'] = 1;
             $arrivals_num = $check->alias('a')->where($map)->join(['fa_check_order_item' => 'b'], 'a.id=b.check_id')->sum('arrivals_num');
-            echo $check->getLastSql();die;
             if ($v['purchase_num'] - $arrivals_num <= 0) {
                 unset($info[$k]);
                 continue;
