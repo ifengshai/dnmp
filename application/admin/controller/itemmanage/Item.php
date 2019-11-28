@@ -870,6 +870,7 @@ class Item extends Backend
             $purchase = new \app\admin\model\purchase\PurchaseOrder;
             $hasWhere['sku'] = ['in', $skus];
             $purchase_map['purchase_status'] = ['in', [2, 5, 6, 7]];
+            $purchase_map['stock_status'] = ['in', [0, 1]];
             $purchase_list = $purchase->hasWhere('purchaseOrderItem', $hasWhere)
                 ->where($purchase_map)
                 ->group('sku')
