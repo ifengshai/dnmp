@@ -153,6 +153,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','bootstrap-tab
             //移除
             $(document).on('click', '.btn-del', function () {
                 $(this).parent().parent().remove();
+                
+                var all_price = 0;
+                $('.return_num').each(function () {
+                    var num = $(this).val();
+                    var price = $(this).data('price');
+                    all_price = all_price + num * 1 * price * 1;
+                })
+                $('.return_money').val(all_price);
             })
 
             $(document).on('blur', '.return_num', function () {

@@ -486,8 +486,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-se
                                 shtml += ' <td><input id="c-purchase_remark" class="form-control arrivals_num" name="arrivals_num[]" type="text"></td>'
                                 shtml += ' <td><input id="c-purchase_remark" class="form-control quantity_num" name="quantity_num[]" type="text"></td>'
                                 shtml += ' <td><input id="c-purchase_remark" class="form-control sample_num" name="sample_num[]" type="text"></td>'
-                                shtml += ' <td><input id="c-purchase_remark" class="form-control unqualified_num" name="unqualified_num[]" type="text"></td>'
-                                shtml += '  <td><input id="c-purchase_remark" class="form-control quantity_rate" name="quantity_rate[]" type="text">%</td>'
+                                shtml += ' <td><input id="c-purchase_remark" class="form-control unqualified_num" name="unqualified_num[]" readonly type="text"></td>'
+                                shtml += '  <td><input id="c-purchase_remark" class="form-control quantity_rate" name="quantity_rate[]" readonly type="text">%</td>'
                                 shtml += ' <td><input style="width: 200px;" id="c-purchase_remark" class="form-control remark" name="remark[]" type="text"></td>'
                                 shtml += ' <td><input id="c-unqualified_images" style="width: 150px;" class="form-control unqualified_images" size="200" readonly name="unqualified_images[]" type="text"></td>'
 
@@ -566,8 +566,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-se
                                 shtml += ' <td>' + data[i].return_sku_qty + '</td>'
                                 shtml += ' <td><input id="c-purchase_remark" class="form-control arrivals_num" name="arrivals_num[]" type="text"></td>'
                                 shtml += ' <td><input id="c-purchase_remark" class="form-control quantity_num" name="quantity_num[]" type="text"></td>'
-                                shtml += ' <td><input id="c-purchase_remark" class="form-control unqualified_num" name="unqualified_num[]" type="text"></td>'
-                                shtml += '  <td><input id="c-purchase_remark" class="form-control quantity_rate" name="quantity_rate[]" type="text">%</td>'
+                                shtml += ' <td><input id="c-purchase_remark" class="form-control unqualified_num" readonly name="unqualified_num[]" type="text"></td>'
+                                shtml += '  <td><input id="c-purchase_remark" class="form-control quantity_rate" readonly name="quantity_rate[]" type="text">%</td>'
                                 shtml += ' <td><input style="width: 200px;" id="c-purchase_remark" class="form-control remark" name="remark[]" type="text"></td>'
                                 shtml += ' <td><input id="c-unqualified_images" style="width: 150px;" class="form-control unqualified_images" size="200" readonly name="unqualified_images[]" type="text"></td>'
 

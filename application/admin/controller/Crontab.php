@@ -22,7 +22,9 @@ class Crontab extends Backend
      * 获取采购到货状态、到货时间
      */
     public function setPurchaseStatus()
-    { }
+    {
+        dump(urldecode('%2B1.25'));
+     }
 
 
 
@@ -37,7 +39,7 @@ class Crontab extends Backend
      */
     public function  zeelool_order_custom_order_prescription()
     {
-        $order_entity_id_querySql = "select sfo.entity_id from sales_flat_order sfo where sfo.custom_order_prescription_type is null order by entity_id desc limit 1000 ";
+        $order_entity_id_querySql = "select sfo.entity_id from sales_flat_order sfo where sfo.custom_order_prescription_type is null order by entity_id asc limit 1000";
         $order_entity_id_list = Db::connect('database.db_zeelool')->query($order_entity_id_querySql);
         if (empty($order_entity_id_list)) {
             echo '处理完毕！';
@@ -165,7 +167,7 @@ from sales_flat_order_item sfoi where sfoi.item_id > $max_item_id
 order by sfoi.item_id asc limit 1000";
 
         $order_item_list = Db::connect('database.db_zeelool')->query($order_item_prescription_querySql);
-        
+
         foreach ($order_item_list as $order_item_key => $order_item_value) {
 
             $product_options = unserialize($order_item_value['product_options']);
@@ -267,22 +269,26 @@ order by sfoi.item_id asc limit 1000";
 
             if ($final_params['prescription_type'] == 'Progressive') {
                 $items[$order_item_key]['is_custom_lens'] = 1;
-            } 
+            }
 
             if (strpos($final_params['index_type'], 'Polarized') !== false) {
                 $items[$order_item_key]['is_custom_lens'] = 1;
-            } 
+            }
 
             if (strpos($final_params['index_type'], 'Lens with Color Tint') !== false) {
                 $items[$order_item_key]['is_custom_lens'] = 1;
             }
- 
-            if ($final_params['od_cyl']*1 <= -4 || $final_params['od_cyl']*1 >= 4) {
-                $items[$order_item_key]['is_custom_lens'] = 1;
+        
+            if ($final_params['od_cyl']) {
+                if (urldecode($final_params['od_cyl']) * 1 <= -4 || urldecode($final_params['od_cyl']) * 1 >= 4) {
+                    $items[$order_item_key]['is_custom_lens'] = 1;
+                }
             }
 
-            if ($final_params['os_cyl']*1 <= -4 || $final_params['os_cyl']*1 >= 4) {
-                $items[$order_item_key]['is_custom_lens'] = 1;
+            if ($final_params['os_cyl']) {
+                if (urldecode($final_params['os_cyl']) * 1 <= -4 || urldecode($final_params['os_cyl']) * 1 >= 4) {
+                    $items[$order_item_key]['is_custom_lens'] = 1;
+                }
             }
 
             unset($final_params);
@@ -595,24 +601,27 @@ order by sfoi.item_id asc limit 1000";
              */
             if ($final_params['prescription_type'] == 'Progressive') {
                 $items[$order_item_key]['is_custom_lens'] = 1;
-            } 
+            }
 
             if (strpos($final_params['index_type'], 'Polarized') !== false) {
                 $items[$order_item_key]['is_custom_lens'] = 1;
-            } 
+            }
 
             if (strpos($final_params['index_type'], 'Lens with Color Tint') !== false) {
                 $items[$order_item_key]['is_custom_lens'] = 1;
             }
-            
-            if ($final_params['od_cyl']*1 <= -4 || $final_params['od_cyl']*1 >= 4) {
-                $items[$order_item_key]['is_custom_lens'] = 1;
+
+            if ($final_params['od_cyl']) {
+                if ($final_params['od_cyl'] * 1 <= -4 || $final_params['od_cyl'] * 1 >= 4) {
+                    $items[$order_item_key]['is_custom_lens'] = 1;
+                }
             }
 
-            if ($final_params['os_cyl']*1 <= -4 || $final_params['os_cyl']*1 >= 4) {
-                $items[$order_item_key]['is_custom_lens'] = 1;
+            if ($final_params['os_cyl']) {
+                if ($final_params['os_cyl'] * 1 <= -4 || $final_params['os_cyl'] * 1 >= 4) {
+                    $items[$order_item_key]['is_custom_lens'] = 1;
+                }
             }
-
 
             unset($final_params);
             unset($lens_params);
@@ -710,7 +719,7 @@ order by sfoi.item_id asc limit 1000";
      */
     public function  nihao_order_custom_order_prescription()
     {
-        $order_entity_id_querySql = "select sfo.entity_id from sales_flat_order sfo where sfo.custom_order_prescription_type is null order by entity_id desc limit 1000 ";
+        $order_entity_id_querySql = "select sfo.entity_id from sales_flat_order sfo where sfo.custom_order_prescription_type is null order by entity_id desc limit 1000";
         $order_entity_id_list = Db::connect('database.db_nihao')->query($order_entity_id_querySql);
         if (empty($order_entity_id_list)) {
             echo '处理完毕！';
@@ -733,19 +742,19 @@ order by sfoi.item_id asc limit 1000";
         $type_6_entity_id = [];
         foreach ($order_entity_id_list as $key => $value) {
 
-            $items = Db::connect('database.db_nihao')->table('sales_flat_order_item_prescription')->where('order_id='. $value['entity_id'])->select();
+            $items = Db::connect('database.db_nihao')->table('sales_flat_order_item_prescription')->where('order_id=' . $value['entity_id'])->select();
             if (!$items) {
                 continue;
             }
-            
+
             $label = [];
             foreach ($items as $k => $v) {
                 //如果镜片参数为真 或 不等于 Plastic Lenses 并且不等于 FRAME ONLY则此订单为含处方
-                if ($v['index_type'] == '' || $v['index_type'] == 'Plastic Lenses' || $v['index_type'] == 'FRAME ONLY') {
+                if ($v['third_name'] == '' || $v['third_name'] == 'Plastic Lenses' || $v['third_name'] == 'FRAME ONLY') {
                     $label[] = 1; //仅镜架
-                } else if (($v['index_type'] && $v['index_type'] != 'Plastic Lenses' && $v['index_type'] != 'FRAME ONLY') && $v['is_custom_lens'] == 0) {
+                } else if (($v['third_name'] && $v['third_name'] != 'Plastic Lenses' && $v['third_name'] != 'FRAME ONLY') && $v['is_custom_lens'] == 0) {
                     $label[] = 2; //现片含处方
-                } else if (($v['index_type'] && $v['index_type'] != 'Plastic Lenses' && $v['index_type'] != 'FRAME ONLY') && $v['is_custom_lens'] == 1) {
+                } else if (($v['third_name'] && $v['third_name'] != 'Plastic Lenses' && $v['third_name'] != 'FRAME ONLY') && $v['is_custom_lens'] == 1) {
                     $label[] = 3; //定制含处方
                 }
             }
@@ -825,12 +834,12 @@ order by sfoi.item_id asc limit 1000";
         }
 
         $max_item_id = $max_item_id > 0 ? $max_item_id : 0;
-        
+
         $order_item_prescription_querySql = "select sfoi.item_id,sfoi.order_id,sfoi.product_id,sfoi.`name`,sfoi.sku,sfoi.product_options,sfoi.created_at,sfoi.qty_ordered,sfoi.quote_item_id
 from sales_flat_order_item sfoi where sfoi.item_id > $max_item_id
 order by sfoi.item_id asc limit 1000";
         $order_item_list = Db::connect('database.db_nihao')->query($order_item_prescription_querySql);
-        
+
         $finalResult = array();
         foreach ($order_item_list as $key => $value) {
             $finalResult[$key]['item_id'] = $value['item_id'];
@@ -930,25 +939,28 @@ order by sfoi.item_id asc limit 1000";
              */
             if ($tmp_lens_params['prescription_type'] == 'Progressive') {
                 $finalResult[$key]['is_custom_lens'] = 1;
-            } 
+            }
 
             if (strpos($tmp_product_options['info_buyRequest']['tmplens']['third_name'], 'Polarized') !== false) {
                 $finalResult[$key]['is_custom_lens'] = 1;
-            } 
+            }
 
             if (strpos($tmp_product_options['info_buyRequest']['tmplens']['third_name'], 'Lens with Color Tint') !== false) {
                 $finalResult[$key]['is_custom_lens'] = 1;
             }
-            
-            if ($tmp_lens_params['od_cyl']*1 <= -4 || $tmp_lens_params['od_cyl']*1 >= 4) {
-                $finalResult[$key]['is_custom_lens'] = 1;
-            }
 
-            if ($tmp_lens_params['os_cyl']*1 <= -4 || $tmp_lens_params['os_cyl']*1 >= 4) {
-                $finalResult[$key]['is_custom_lens'] = 1;
+            if ($tmp_lens_params['od_cyl']) {
+                if ($tmp_lens_params['od_cyl'] * 1 <= -4 || $tmp_lens_params['od_cyl'] * 1 >= 4) {
+                    $finalResult[$key]['is_custom_lens'] = 1;
+                }
+            }
+            if ($tmp_lens_params['os_cyl']) {
+                if ($tmp_lens_params['os_cyl'] * 1 <= -4 || $tmp_lens_params['os_cyl'] * 1 >= 4) {
+                    $finalResult[$key]['is_custom_lens'] = 1;
+                }
             }
         }
-      
+
 
         if ($finalResult) {
             $batch_order_item_prescription_values = "";

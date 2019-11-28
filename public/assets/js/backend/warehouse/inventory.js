@@ -1,4 +1,4 @@
-define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'editable','bootstrap-table-jump-to'], function ($, undefined, Backend, Table, Form, undefined) {
+define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'editable', 'bootstrap-table-jump-to'], function ($, undefined, Backend, Table, Form, undefined) {
 
     var Controller = {
         index: function () {
@@ -289,6 +289,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'editable','bootstrap
                             { field: 'id', title: __('Id'), operate: false, visible: false },
                             { field: 'sku', title: __('Sku'), operate: 'like' },
                             { field: 'stock', title: __('总库存'), operate: 'BETWEEN' },
+                            {
+                                field: '', title: __('实时库存'), operate: false, formatter: function (value, row) {
+                                    return row.stock - row.distribution_occupy_stock;
+                                }
+                            },
                             { field: 'available_stock', title: __('可用库存'), operate: false },
                             { field: 'distribution_occupy_stock', title: __('配货占用库存'), operate: false },
                             { field: 'is_open', title: __('启用状态'), searchList: { 1: '启用', 2: '禁用' }, operate: false, formatter: Table.api.formatter.status }
@@ -350,6 +355,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'editable','bootstrap
                             { field: 'id', title: __('Id'), operate: false, visible: false },
                             { field: 'sku', title: __('Sku'), operate: 'like' },
                             { field: 'stock', title: __('总库存'), operate: false },
+                            {
+                                field: '', title: __('实时库存'), operate: false, formatter: function (value, row) {
+                                    return row.stock - row.distribution_occupy_stock;
+                                }
+                            },
                             { field: 'available_stock', title: __('可用库存'), operate: false },
                             { field: 'distribution_occupy_stock', title: __('配货占用库存'), operate: false },
                         ]
@@ -435,6 +445,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'editable','bootstrap
                             { field: 'id', title: __('Id'), operate: false, visible: false },
                             { field: 'sku', title: __('Sku'), operate: 'like' },
                             { field: 'stock', title: __('总库存'), operate: 'BETWEEN' },
+                            {
+                                field: '', title: __('实时库存'), operate: false, formatter: function (value, row) {
+                                    return row.stock - row.distribution_occupy_stock;
+                                }
+                            },
                             { field: 'available_stock', title: __('可用库存'), operate: false },
                             { field: 'distribution_occupy_stock', title: __('配货占用库存'), operate: false },
                             { field: 'is_open', title: __('启用状态'), searchList: { 1: '启用', 2: '禁用' }, formatter: Table.api.formatter.status }

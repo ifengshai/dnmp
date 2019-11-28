@@ -803,7 +803,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','bootstrap-tab
                         { field: 'id', title: __('Id'), operate: false },
                         { field: 'sku', title: __('Sku'), operate: 'like' },
                         { field: 'name', title: __('Name') },
-                        { field: 'stock', title: __('实时库存'), operate: false },
+                        { field: 'stock', title: __('总库存'), operate: false },
+                        {
+                            field: '', title: __('仓库实时库存'), operate: false, formatter: function (value, row) {
+                                return row.stock - row.distribution_occupy_stock;
+                            }
+                        },
                         { field: 'available_stock', title: __('可用库存'), operate: false },
                         { field: 'occupy_stock', title: __('占用库存'), operate: false },
                         { field: 'sample_num', title: __('留样库存'), operate: false },

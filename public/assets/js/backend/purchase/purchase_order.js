@@ -304,9 +304,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','bootstrap-tab
                 $(this).parent().parent().remove();
             })
 
-            if ($('.supplier.selectpicker').val()) {
-                $('.supplier.selectpicker').change();
-            }
+            
 
             //异步获取供应商的数据
             $(document).on('change', '.supplier.selectpicker', function () {
@@ -319,7 +317,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','bootstrap-tab
                 });
             })
 
-
+            if ($('.supplier.selectpicker').val()) {
+                
+                $('.supplier.selectpicker').change();
+            }
 
 
         },

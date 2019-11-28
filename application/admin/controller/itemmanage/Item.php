@@ -870,20 +870,22 @@ class Item extends Backend
             $purchase = new \app\admin\model\purchase\PurchaseOrder;
             $hasWhere['sku'] = ['in', $skus];
             $purchase_map['purchase_status'] = ['in', [2, 5, 6, 7]];
+            $purchase_map['stock_status'] = ['in', [0, 1]];
             $purchase_list = $purchase->hasWhere('purchaseOrderItem', $hasWhere)
                 ->where($purchase_map)
                 ->group('sku')
                 ->column('sum(purchase_num) as purchase_num', 'sku');
-
+               
             //查询出满足条件的采购单号
             $ids = $purchase->hasWhere('purchaseOrderItem', $hasWhere)
                 ->where($purchase_map)
                 ->group('PurchaseOrder.id')
                 ->column('PurchaseOrder.id');
-
+            
             //查询留样库存
             //查询实际采购信息 查询在途库存 = 采购数量 减去 到货数量
             $check_map['status'] = 2;
+            $check_map['type'] = 1;
             $check_map['purchase_id'] = ['in', $ids];
             $check = new \app\admin\model\warehouse\Check;
             $hasWhere['sku'] = ['in', $skus];
@@ -891,7 +893,6 @@ class Item extends Backend
                 ->where($check_map)
                 ->group('sku')
                 ->column('sum(arrivals_num) as arrivals_num', 'sku');
-
             foreach ($list as &$v) {
                 $v['on_way_stock'] = @$purchase_list[$v['sku']] - @$check_list[$v['sku']];
             }
@@ -938,7 +939,7 @@ class Item extends Backend
 
         $info = $purchase->alias('a')->where($where)->field('a.id,a.purchase_number,b.sku,a.purchase_status,a.receiving_time,a.create_person,a.createtime,b.purchase_num')
             ->join(['fa_purchase_order_item' => 'b'], 'a.id=b.purchase_id')
-            ->group('a.id')
+            ->group('b.id')
             ->select();
 
         $num = 0;
@@ -948,8 +949,9 @@ class Item extends Backend
             $map['a.purchase_id'] = $v['id'];
             $map['a.status'] = 2;
             $map['b.sku'] = $v['sku'];
+            $map['a.type'] = 1;
             $arrivals_num = $check->alias('a')->where($map)->join(['fa_check_order_item' => 'b'], 'a.id=b.check_id')->sum('arrivals_num');
-            if ($v['purchase_num'] - $arrivals_num <= 0) {
+            if ($v['purchase_num'] - $arrivals_num == 0) {
                 unset($info[$k]);
                 continue;
             }
