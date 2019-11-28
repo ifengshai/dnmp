@@ -276,7 +276,7 @@ order by sfoi.item_id asc limit 1000";
             if (strpos($final_params['index_type'], 'Lens with Color Tint') !== false) {
                 $items[$order_item_key]['is_custom_lens'] = 1;
             }
-
+            dump($final_params['od_cyl']);
             if ($final_params['od_cyl']) {
                 if ($final_params['od_cyl'] * 1 <= -4 || $final_params['od_cyl'] * 1 >= 4) {
                     $items[$order_item_key]['is_custom_lens'] = 1;
