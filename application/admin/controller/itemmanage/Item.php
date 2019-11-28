@@ -951,7 +951,7 @@ class Item extends Backend
             $map['b.sku'] = $v['sku'];
             $map['a.type'] = 1;
             $arrivals_num = $check->alias('a')->where($map)->join(['fa_check_order_item' => 'b'], 'a.id=b.check_id')->sum('arrivals_num');
-            if ($v['purchase_num'] - $arrivals_num <= 0) {
+            if ($v['purchase_num'] - $arrivals_num == 0) {
                 unset($info[$k]);
                 continue;
             }
