@@ -876,6 +876,7 @@ class Item extends Backend
                 ->group('sku')
                 ->column('sum(purchase_num) as purchase_num', 'sku');
 
+            dump($purchase_list);
             //查询出满足条件的采购单号
             $ids = $purchase->hasWhere('purchaseOrderItem', $hasWhere)
                 ->where($purchase_map)
@@ -893,7 +894,7 @@ class Item extends Backend
                 ->where($check_map)
                 ->group('sku')
                 ->column('sum(arrivals_num) as arrivals_num', 'sku');
-
+                dump($check_list);die;
             foreach ($list as &$v) {
                 $v['on_way_stock'] = @$purchase_list[$v['sku']] - @$check_list[$v['sku']];
             }
