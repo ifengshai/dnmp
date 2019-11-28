@@ -22,7 +22,9 @@ class Crontab extends Backend
      * 获取采购到货状态、到货时间
      */
     public function setPurchaseStatus()
-    { }
+    {
+        dump(urldecode('%2B1.25'));
+     }
 
 
 
@@ -276,20 +278,18 @@ order by sfoi.item_id asc limit 1000";
             if (strpos($final_params['index_type'], 'Lens with Color Tint') !== false) {
                 $items[$order_item_key]['is_custom_lens'] = 1;
             }
-            dump($final_params['od_cyl']);
-            dump($order_item_value['order_id']);
+        
             if ($final_params['od_cyl']) {
-                if ($final_params['od_cyl'] * 1 <= -4 || $final_params['od_cyl'] * 1 >= 4) {
+                if (urldecode($final_params['od_cyl']) * 1 <= -4 || urldecode($final_params['od_cyl']) * 1 >= 4) {
                     $items[$order_item_key]['is_custom_lens'] = 1;
                 }
             }
 
             if ($final_params['os_cyl']) {
-                if ($final_params['os_cyl'] * 1 <= -4 || $final_params['os_cyl'] * 1 >= 4) {
+                if (urldecode($final_params['os_cyl']) * 1 <= -4 || urldecode($final_params['os_cyl']) * 1 >= 4) {
                     $items[$order_item_key]['is_custom_lens'] = 1;
                 }
             }
-
 
             unset($final_params);
             unset($lens_params);
