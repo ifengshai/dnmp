@@ -383,7 +383,7 @@ order by sfoi.item_id asc limit 1000";
      */
     public function  voogueme_order_custom_order_prescription()
     {
-        $order_entity_id_querySql = "select sfo.entity_id from sales_flat_order sfo where sfo.custom_order_prescription_type = 6 order by entity_id desc limit 40000 ";
+        $order_entity_id_querySql = "select sfo.entity_id from sales_flat_order sfo where sfo.custom_order_prescription_type is null order by entity_id desc limit 1000 ";
         $order_entity_id_list = Db::connect('database.db_voogueme')->query($order_entity_id_querySql);
         if (empty($order_entity_id_list)) {
             echo '处理完毕！';
@@ -719,7 +719,7 @@ order by sfoi.item_id asc limit 1000";
      */
     public function  nihao_order_custom_order_prescription()
     {
-        $order_entity_id_querySql = "select sfo.entity_id from sales_flat_order sfo where sfo.custom_order_prescription_type is null order by entity_id desc limit 1000 ";
+        $order_entity_id_querySql = "select sfo.entity_id from sales_flat_order sfo where sfo.custom_order_prescription_type > 0 order by entity_id desc limit 5000 ";
         $order_entity_id_list = Db::connect('database.db_nihao')->query($order_entity_id_querySql);
         if (empty($order_entity_id_list)) {
             echo '处理完毕！';
