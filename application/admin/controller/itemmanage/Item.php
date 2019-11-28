@@ -875,13 +875,13 @@ class Item extends Backend
                 ->where($purchase_map)
                 ->group('sku')
                 ->column('sum(purchase_num) as purchase_num', 'sku');
-
-            dump($purchase_list);
+                echo $purchase->getLastSql();die;
             //查询出满足条件的采购单号
             $ids = $purchase->hasWhere('purchaseOrderItem', $hasWhere)
                 ->where($purchase_map)
                 ->group('PurchaseOrder.id')
                 ->column('PurchaseOrder.id');
+            
 
             //查询留样库存
             //查询实际采购信息 查询在途库存 = 采购数量 减去 到货数量
@@ -894,8 +894,6 @@ class Item extends Backend
                 ->where($check_map)
                 ->group('sku')
                 ->column('sum(arrivals_num) as arrivals_num', 'sku');
-                echo $check->getLastSql();die;
-                dump($check_list);die;
             foreach ($list as &$v) {
                 $v['on_way_stock'] = @$purchase_list[$v['sku']] - @$check_list[$v['sku']];
             }
