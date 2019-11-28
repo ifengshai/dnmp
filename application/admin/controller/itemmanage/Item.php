@@ -894,6 +894,7 @@ class Item extends Backend
                 ->where($check_map)
                 ->group('sku')
                 ->column('sum(arrivals_num) as arrivals_num', 'sku');
+                echo $check->getLastSql();die;
                 dump($check_list);die;
             foreach ($list as &$v) {
                 $v['on_way_stock'] = @$purchase_list[$v['sku']] - @$check_list[$v['sku']];
