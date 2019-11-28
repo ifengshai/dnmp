@@ -884,6 +884,7 @@ class Item extends Backend
             //查询留样库存
             //查询实际采购信息 查询在途库存 = 采购数量 减去 到货数量
             $check_map['status'] = 2;
+            $check_map['type'] = 1;
             $check_map['purchase_id'] = ['in', $ids];
             $check = new \app\admin\model\warehouse\Check;
             $hasWhere['sku'] = ['in', $skus];
@@ -948,6 +949,7 @@ class Item extends Backend
             $map['a.purchase_id'] = $v['id'];
             $map['a.status'] = 2;
             $map['b.sku'] = $v['sku'];
+            $map['a.type'] = 1;
             $arrivals_num = $check->alias('a')->where($map)->join(['fa_check_order_item' => 'b'], 'a.id=b.check_id')->sum('arrivals_num');
             if ($v['purchase_num'] - $arrivals_num <= 0) {
                 unset($info[$k]);
