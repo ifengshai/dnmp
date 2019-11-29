@@ -94,7 +94,7 @@ class Zeelool extends Backend
             $swhere['synergy_order_id'] = 2;
             $order_arr = $infoSynergyTask->where($swhere)->column('synergy_order_number');
 
-            
+
             //查询是否存在协同任务
             foreach ($list as $k => $v) {
                 if (in_array($v['increment_id'], $order_arr)) {
@@ -210,6 +210,9 @@ class Zeelool extends Backend
         $map['entity_id'] = ['in', $entity_ids];
         $res = $this->model->where($map)->select();
         foreach ($res as $v) {
+            if ($status == 1 && $v['custom_is_match_frame'] == 1) {
+                $this->error('存在已配过镜架的订单！！');
+             }
             if ($v['custom_is_delivery'] == 1) {
                 $this->error('存在已质检通过的订单！！');
             }
@@ -267,7 +270,7 @@ class Zeelool extends Backend
                             //根据订单号 SKU查询更换镜架记录表 处理更换之后SKU库存
                             $infotask = new \app\admin\model\infosynergytaskmanage\InfoSynergyTaskChangeSku;
                             $infoTaskRes = $infotask->getChangeSkuData($v['increment_id'], 1, $v['sku']);
-                           
+
                             $v['sku'] = $infoTaskRes['change_sku'];
                             $v['qty_ordered'] = $infoTaskRes['change_number'];
                         }
@@ -284,7 +287,6 @@ class Zeelool extends Backend
                         if (!$res_three) {
                             $error[] = $k;
                         }
-
                     }
                     unset($v);
 
@@ -316,7 +318,7 @@ class Zeelool extends Backend
                         }
 
                         $trueSku = $ItemPlatformSku->getTrueSku($v['sku'], 1);
-                       
+
                         //总库存
                         $item_map['sku'] = $trueSku;
                         $item_map['is_del'] = 1;

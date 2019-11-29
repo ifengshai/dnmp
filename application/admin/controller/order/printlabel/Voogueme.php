@@ -169,7 +169,7 @@ class Voogueme extends Backend
         //查询订单详情
         // $result = $this->zeelool->getOrderDetail(2, $ids);
         $result = VooguemePrescriptionDetailHelper::get_one_by_entity_id($ids);
-        
+
         $this->assign('result', $result);
         return $this->view->fetch();
     }
@@ -275,14 +275,19 @@ class Voogueme extends Backend
         $label = input('label');
         $map['entity_id'] = ['in', $entity_ids];
         $res = $this->model->where($map)->select();
-        foreach($res as $v) {
+        foreach ($res as $v) {
+
+            if ($status == 1 && $v['custom_is_match_frame'] == 1) {
+                $this->error('存在已配过镜架的订单！！');
+            }
+
             if ($v['custom_is_delivery'] == 1) {
                 $this->error('存在已质检通过的订单！！');
             }
         }
 
         if ($entity_ids) {
-        
+
             switch ($status) {
                 case 1:
                     //配镜架
@@ -333,7 +338,7 @@ class Voogueme extends Backend
                             //根据订单号 SKU查询更换镜架记录表 处理更换之后SKU库存
                             $infotask = new \app\admin\model\infosynergytaskmanage\InfoSynergyTaskChangeSku;
                             $infoTaskRes = $infotask->getChangeSkuData($v['increment_id'], 2, $v['sku']);
-                           
+
                             $v['sku'] = $infoTaskRes['change_sku'];
                             $v['qty_ordered'] = $infoTaskRes['change_number'];
                         }
@@ -350,7 +355,6 @@ class Voogueme extends Backend
                         if (!$res_three) {
                             $error[] = $k;
                         }
-
                     }
                     unset($v);
 
@@ -377,7 +381,7 @@ class Voogueme extends Backend
                             //根据订单号 SKU查询更换镜架记录表 处理更换之后SKU库存
                             $infotask = new \app\admin\model\infosynergytaskmanage\InfoSynergyTaskChangeSku;
                             $infoTaskRes = $infotask->getChangeSkuData($v['increment_id'], 2, $v['sku']);
-                           
+
                             $v['sku'] = $infoTaskRes['change_sku'];
                             $v['qty_ordered'] = $infoTaskRes['change_number'];
                         }
@@ -821,7 +825,7 @@ order by sfoi.order_id desc;";
     //批量打印标签
     public function batch_print_label()
     {
-        ob_start(); 
+        ob_start();
         // echo 'batch_print_label';
         $entity_ids = rtrim(input('id_params'), ',');
         // dump($entity_ids);
