@@ -799,7 +799,11 @@ class PurchaseOrder extends Backend
                     $list['purchase_number'] = $v->baseInfo->idOfStr;
                     //1688用户配置id
                     $userIDs = config('1688user');
-                    $list['create_person'] = $userIDs[$v->baseInfo->buyerSubID];
+                    $list['create_person'] = $userIDs[$v->baseInfo->buyerSubID] ?? '任萍';
+                    //采购02账号 默认都为新品
+                    if($v->baseInfo->buyerSubID == 2201224483475) {
+                        $list['is_new_product'] = 1;
+                    }
                     $jsonDate = $v->baseInfo->createTime;
                     preg_match('/\d{14}/', $jsonDate, $matches);
                     $list['createtime'] = date('Y-m-d H:i:s', strtotime($matches[0]));
