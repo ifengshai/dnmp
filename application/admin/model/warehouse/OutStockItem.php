@@ -53,6 +53,7 @@ class OutStockItem extends Model
                     $data[$k]['check_id'] = $v['check_id'];
                     $data[$k]['sku'] = $v['sku'];
                     $data[$k]['outstock_item_id'] = $value['id'];
+                    $data[$k]['out_stock_id'] = $value['out_stock_id'];
                     $data[$k]['instock_item_id'] = $v['item_id'];
                     $data[$k]['out_stock_num'] = $v['no_stock_num'];
                     $data[$k]['createtime'] = date('Y-m-d H:i:s', time());
@@ -77,6 +78,7 @@ class OutStockItem extends Model
                     //记录扣除的采购单id 以及对应的入库单
                     $data[$k]['check_id'] = $v['check_id'];
                     $data[$k]['sku'] = $v['sku'];
+                    $data[$k]['out_stock_id'] = $value['out_stock_id'];
                     $data[$k]['outstock_item_id'] = $value['id'];
                     $data[$k]['instock_item_id'] = $v['item_id'];
                     $data[$k]['out_stock_num'] = $value['out_stock_num'];
