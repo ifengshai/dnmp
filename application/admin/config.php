@@ -19,7 +19,9 @@ return [
         'tiantian' => '天天快递',
         'ems' => 'EMS',
         'debangwuliu' => '德邦',
-        'debangkuaidi' => '德邦快递'
+        'debangkuaidi' => '德邦快递',
+        'ane66' => '安能快递',
+        'annengwuliu' => '安能快运'
     ],
 
     'purchase_status' => [
