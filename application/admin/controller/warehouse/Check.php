@@ -550,25 +550,6 @@ class Check extends Backend
                 $this->error('此商品状态不能提交审核');
             }
 
-            //查询明细数据
-            $list = $this->check_item
-                ->where(['check_id' => ['in', $id]])
-                ->select();
-            $list = collection($list)->toArray();
-            $skus = array_column($list, 'sku');
-
-            //查询存在产品库的sku
-            $item = new \app\admin\model\itemmanage\Item;
-            $skus = $item->where(['sku' => ['in', $skus]])->column('sku');
-
-            foreach ($list as $v) {
-                if (!in_array($v['sku'], $skus)) {
-                    $this->error('此sku:' . $v['sku'] . '不存在！！');
-                }
-            }
-
-
-
             $map['id'] = $id;
             $data['status'] = 1;
             $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
