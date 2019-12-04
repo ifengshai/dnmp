@@ -222,13 +222,15 @@ class PurchaseOrder extends Backend
             //查询存在产品库的sku
             $item = new \app\admin\model\itemmanage\Item;
             $skus = $item->where(['sku' => ['in', $skus]])->column('sku');
-
-            foreach ($list as $v) {
-                if (!in_array($v['sku'], $skus)) {
-                    $this->error('此sku:' . $v['sku'] . '不存在！！');
+            
+            if ($row['is_new_product'] == 0) {
+                foreach ($list as $v) {
+                    if (!in_array($v['sku'], $skus)) {
+                        $this->error('此sku:' . $v['sku'] . '不存在！！');
+                    }
                 }
             }
-
+            
             $map['id'] = $id;
             $data['purchase_status'] = 1;
             $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
