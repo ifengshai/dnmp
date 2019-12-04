@@ -1,6 +1,7 @@
 /nbproject/
 /runtime/*
 /public/uploads/*
+/public/uploads/*
 .idea
 composer.lock
 *.log
