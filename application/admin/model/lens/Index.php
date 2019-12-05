@@ -8,10 +8,6 @@ use think\Model;
 class Index extends Model
 {
 
-    
-
-    
-
     // 表名
     protected $name = 'lens';
     

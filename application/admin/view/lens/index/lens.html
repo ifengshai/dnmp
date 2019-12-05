@@ -1,0 +1,220 @@
+<div class="panel panel-default panel-intro">
+    <div class="panel-heading">
+        {:build_heading()}
+        <ul class="nav nav-tabs">
+            <li class="active"><a class="zheng" href="javascript:;">正度数</a>
+            </li>
+            <li class=""><a class="fu" href="javascript:;">负度数</a>
+            </li>
+
+        </ul>
+    </div>
+    <div class="panel-body">
+        <div id="myTabContent" class="tab-content">
+            <div class="tab-pane fade active in" id="one">
+                <div class="widget-body no-padding">
+                    <div class="commonsearch-table">
+                        <form class="form-horizontal form-commonsearch nice-validator n-default n-bootstrap"
+                            novalidate="" method="post" action="">
+                            <fieldset>
+                                <div class="row">
+
+                                    <div class="form-group col-xs-12 col-sm-6 col-md-4 col-lg-3"><label for="type"
+                                            class="control-label col-xs-4">显示类型</label>
+                                        <div class="col-xs-8">
+                                            <select class="form-control type" name="type">
+                                                <option value="">选择</option>
+                                                <option value="1" {:$type==1 ? 'selected' : '' }>库存</option>
+                                                <option value="2" {:$type==2 ? 'selected' : '' }>价格</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group col-xs-12 col-sm-6 col-md-4 col-lg-3"><label for="label"
+                                            class="control-label col-xs-4">显示范围</label>
+                                        <div class="col-xs-8">
+                                            <select class="form-control" name="label">
+                                                <option value="">选择</option>
+                                                <option value="1" {:$label==1 ? 'selected' : '' }>0-4</option>
+                                                <option value="2" {:$label==2 ? 'selected' : '' }>4.25-8</option>
+                                                <option value="3" {:$label==3 ? 'selected' : '' }>0-8</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+
+                                    <div class="form-group col-xs-12 col-sm-6 col-md-4 col-lg-3"><label
+                                            for="refractive_index" class="control-label col-xs-4">折射率</label>
+                                        <div class="col-xs-8">
+                                            <select class="form-control refractive_index" name="refractive_index">
+                                                <option {:$refractive_index=='1.57' ? 'selected' : '' }>1.57</option>
+                                                <option {:$refractive_index=='1.61' ? 'selected' : '' }>1.61</option>
+                                                <option {:$refractive_index=='1.67' ? 'selected' : '' }>1.67</option>
+                                                <option {:$refractive_index=='1.71' ? 'selected' : '' }>1.71</option>
+                                                <option {:$refractive_index=='1.74' ? 'selected' : '' }>1.74</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group col-xs-12 col-sm-6 col-md-4 col-lg-3"><label
+                                            for="refractive_index" class="control-label col-xs-4">镜片类型</label>
+                                        <div class="col-xs-8">
+                                            <select class="form-control lens_type" name="lens_type">
+                                                <option {:$lens_type=='Mid-Index' ? 'selected' : '' }>Mid-Index</option>
+                                                <option {:$lens_type=='High-Index Beyond UV Blue Blockers' ? 'selected' : '' }>High-Index Beyond UV Blue Blockers</option>
+                                                <option {:$lens_type=='Photochromic - Gray (about 90% tint exposed to strong UV light)' ? 'selected' : '' }>Photochromic - Gray (about 90% tint exposed to strong UV light)</option>
+                                                <option {:$lens_type=='Photochromic - Amber ( about 50% tint exposed to strong UV light)' ? 'selected' : '' }>Photochromic - Amber ( about 50% tint exposed to strong UV light)</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+
+                                    <div class="form-group col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                                        <div class="col-sm-8 col-xs-offset-4"><button type="submit"
+                                                class="btn btn-success" formnovalidate="">提交</button> <button
+                                                type="reset" class="btn btn-default">重置</button> </div>
+                                    </div>
+                                </div>
+                            </fieldset>
+                        </form>
+                    </div>
+                    <div id="toolbar" class="toolbar">
+                        <a href="{:url('lens')}" class="btn btn-primary"  title="{:__('Refresh')}"><i
+                                class="fa fa-refresh"></i> </a>
+                        <a href="javascript:;"
+                            class="btn btn-success btn-add {:$auth->check('lens/index/add')?'':'hide'}"
+                            title="{:__('Add')}"><i class="fa fa-plus"></i> {:__('Add')}</a>
+                        
+                        <a href="javascript:;"
+                            class="btn btn-danger btn-import {:$auth->check('lens/index/import')?'':'hide'}"
+                            title="{:__('Import')}" id="btn-import-file" data-url="ajax/upload"
+                            data-mimetype="csv,xls,xlsx" data-multiple="false"><i class="fa fa-upload"></i>
+                            {:__('Import')}</a>
+
+                        
+                    </div>
+                    <style type="text/css">
+                        table.altrowstable {
+                            margin-top: 20px;
+                            width: 100%;
+                            font-family: verdana, arial, sans-serif;
+                            font-size: 11px;
+                            color: #333333;
+                            border-width: 1px;
+                            border-color: #247692;
+                            border-collapse: collapse;
+                            margin-bottom: 20px;
+                            float: left;
+                        }
+
+                        table.altrowstable th {
+                            border-width: 1px;
+                            padding: 8px;
+                            font-size: 14px;
+                            border-style: solid;
+                            border-color: #d2d6de;
+                        }
+
+                        table.altrowstable td {
+                            border-width: 1px;
+                            padding: 8px;
+                            text-align: center;
+                            font-size: 14px;
+                            border-style: solid;
+                            border-color: #d2d6de;
+                        }
+
+                        table.altrowstable tr:nth-child(odd) {
+                            background: #E9F1F4;
+                            background: #F5F5F5;
+                            background: #F1F1F1;
+                        }
+
+                        table.altrowstable tr:nth-child(even) {
+                            background: #F5FAFA;
+                            background: #eee;
+                        }
+
+                        .reds {
+                            color: red;
+                        }
+
+                        .yellows {
+                            color: blue;
+                        }
+                    </style>
+                    <table class="altrowstable zheng_table">
+                        <tbody>
+                            <tr>
+                                <td>SPH\CYL</td>
+                                {foreach $data.CYL as $vi}
+                                <td>{$vi}</td>
+                                {/foreach}
+                            </tr>
+                            {foreach $data.SPH as $vo}
+                            <tr>
+                                <td>{$vo}</td>
+                                {foreach $data.CYL as $vi}
+                                <td class="ceshi">
+                                    {php}
+                                    $label = '';
+                                    if($list[$vo][$vi]['data'] == '0')
+                                    {
+                                    $label='reds';
+                                    } elseif($list[$vo][$vi]['data'] <= 30 && $list[$vo][$vi]['data']>0)
+                                        {
+                                        $label='yellows';
+                                        }
+                                        {/php}
+                                        <span class="{$label}" data-sph="{$vo}"
+                                            data-cyl="{$vi}" data-id="{$list[$vo][$vi]['id']}"
+                                            data="{$list[$vo][$vi]['value']}">{$list[$vo][$vi]['data']}</span>
+
+                                </td>
+                                {/foreach}
+                            </tr>
+                            {/foreach}
+
+                        </tbody>
+                    </table>
+
+                    <table class="altrowstable fu_table hide">
+                        <tbody>
+                            <tr>
+                                <td>SPH\CYL</td>
+                                {foreach $data.CYL as $vi}
+                                <td>{$vi}</td>
+                                {/foreach}
+                            </tr>
+                            {foreach $data.FSPH as $vo}
+                            <tr>
+                                <td>{$vo}</td>
+                                {foreach $data.CYL as $vi}
+                                <td class="ceshi">
+                                    {php}
+                                    $label = '';
+                                    if($list[$vo][$vi]['data'] == '0')
+                                    {
+                                    $label='reds';
+                                    } elseif($list[$vo][$vi]['data'] <= 30 && $list[$vo][$vi]['data']>0)
+                                        {
+                                        $label='yellows';
+                                        }
+                                        {/php}
+                                        <span class="{$label}" data-sph="{$vo}"
+                                            data-cyl="{$vi}" data-id="{$list[$vo][$vi]['id']}"
+                                            data="{$list[$vo][$vi]['value']}">{$list[$vo][$vi]['data']}</span>
+
+                                </td>
+                                {/foreach}
+                            </tr>
+                            {/foreach}
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
