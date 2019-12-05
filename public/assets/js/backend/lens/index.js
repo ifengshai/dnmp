@@ -2,8 +2,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
 
     var Controller = {
         index: function () {
+
             // 初始化表格参数配置
             Table.api.init({
+                showJumpto: true,
+                searchFormVisible: true,
                 extend: {
                     index_url: 'lens/index/index' + location.search,
                     add_url: 'lens/index/add',
