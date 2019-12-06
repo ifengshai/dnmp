@@ -7,6 +7,7 @@ use think\Db;
 use think\Exception;
 use think\exception\PDOException;
 use think\exception\ValidateException;
+use app\admin\model\warehouse\OutStockLog;
 
 /**
  * 出库单管理
@@ -401,5 +402,89 @@ class Outstock extends Backend
         } else {
             $this->error('404 Not found');
         }
+    }
+    /***
+     * 出库单成本核算 create@lsw
+     */
+    public function out_stock_order()
+    {
+        //设置过滤方法
+        $this->request->filter(['strip_tags']);
+        if ($this->request->isAjax()) {
+            //如果发送的来源是Selectpage，则转发到Selectpage
+            if ($this->request->request('keyField')) {
+                return $this->selectpage();
+            }
+            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            $total = $this->model
+                ->with(['outstocktype'])
+                ->where(['status'=>2])
+                ->where($where)
+                ->order($sort, $order)
+                ->count();
+
+            $list = $this->model
+                ->with(['outstocktype'])
+                ->where(['status'=>2])
+                ->where($where)
+                ->order($sort, $order)
+                ->limit($offset, $limit)
+                ->select();    
+            $list = collection($list)->toArray();
+            //总共的
+            $totalId = $this->model
+            ->with(['outstocktype'])
+            ->where(['status'=>2])
+            ->where($where)
+            ->column('outstock.id');
+            $totalPriceInfo = (new OutStockLog())->calculateMoneyAccordOutStock($totalId);
+            // echo '<pre>';
+            // var_dump($totalPriceInfo);
+            //本页的
+            $thisPageId = $this->model
+            ->with(['outstocktype'])
+            ->where(['status'=>2])
+            ->where($where)
+            ->order($sort, $order)
+            ->limit($offset, $limit)
+            ->column('outstock.id');
+            $thisPagePriceInfo = (new OutStockLog())->calculateMoneyAccordThisPageId($thisPageId);
+            if(0 != $thisPagePriceInfo){
+                foreach($list as $keys => $vals){
+                    if(array_key_exists($vals['id'],$thisPagePriceInfo)){
+                         $list[$keys]['total_money'] = $thisPagePriceInfo[$vals['id']];
+                    }
+                }
+            }
+            $result = array("total" => $total, "rows" => $list,"totalPriceInfo"=>$totalPriceInfo['total_money']);
+
+            return json($result);
+        }
+        return $this->view->fetch();
+    }
+    /****
+     * 出库单成本核算详情 create@lsw
+     */
+    public function out_stock_order_detail($ids=null)
+    {
+        $row = $this->model->get($ids,['outstocktype']);
+        if (!$row) {
+            $this->error(__('No Results were found'));
+        }
+        $adminIds = $this->getDataLimitAdminIds();
+        if (is_array($adminIds)) {
+            if (!in_array($row[$this->dataLimitField], $adminIds)) {
+                $this->error(__('You have no permission'));
+            }
+        }
+        $item = (new OutStockLog())->getPurchaseItemInfo($ids);
+        //查询入库分类
+        $type = $this->type->select();
+            $this->assign('type', $type);
+        if($item){
+            $this->assign('item', $item);
+        }
+            $this->assign("row", $row);
+        return $this->view->fetch();
     }
 }

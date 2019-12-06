@@ -1,0 +1,149 @@
+<style>
+    .caigou {
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+        padding: 10px;
+        width: 98%;
+        margin-left: 20px;
+        margin-bottom: 10px;
+    }
+
+    .caigou #caigou-table {
+        width: 100%;
+        height: 130px;
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+        text-align: center;
+    }
+
+    .caigou #caigou-table tr {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+        line-height: 50px;
+    }
+
+    .caigou #caigou-table tr th {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+        text-align: center;
+        font-size: 14px;
+    }
+
+    .caigou #caigou-table tr td {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+        width: 300px;
+    }
+
+    .caigou #caigou-table tr td input {
+
+        width: 200px;
+    }
+</style>
+
+<form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
+    <div class='caigou'>
+        <div class="form-group">
+            <label class="control-label col-xs-12 col-sm-2">出库单号:</label>
+            <div class="col-xs-12 col-sm-2">
+                <input id="c-check_order_number" class="form-control" name="row[out_stock_number]"
+                    value="{$row.out_stock_number}" readonly type="text">
+            </div>
+            <label class="control-label col-xs-12 col-sm-2">出库状态:</label>
+            <div class="col-xs-12 col-sm-2">
+                {if $row.status eq 0}
+                <input id="c-status" class="form-control" name="row[status]"
+                value="新建" readonly type="text">
+                {elseif $row.status eq 1 /}
+                <input id="c-status" class="form-control" name="row[status]"
+                value="待审核" readonly type="text">
+                {elseif $row.status eq 2 /}
+                <input id="c-status" class="form-control" name="row[status]"
+                value="已审核" readonly type="text">
+                {elseif $row.status eq 3 /}
+                <input id="c-status" class="form-control" name="row[status]"
+                value="已拒绝" readonly type="text">
+                {else /}
+                <input id="c-status" class="form-control" name="row[status]"
+                value="已取消" readonly type="text">
+                {/if}
+            </div>
+            <label class="control-label col-xs-12 col-sm-2">出库分类:</label>
+            <div class="col-xs-12 col-sm-2">
+                <select name="row[type_id]" class="form-control type" required readonly>
+                    <option value="">请选择</option>
+                    {foreach $type as $k => $v}
+                    <option value="{$v.id}" {:$row['type_id'] == $v['id'] ? 'selected' : ''}>{$v.name}</option>
+                    {/foreach}
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="control-label col-xs-12 col-sm-2">创建时间:</label>
+            <div class="col-xs-12 col-sm-2">
+                <input id="c-order_number" class="form-control" name="row[order_number]"
+                    value="{$row.createtime}" readonly type="text">
+            </div>
+            <label class="control-label col-xs-12 col-sm-2">创建人:</label>
+            <div class="col-xs-12 col-sm-2">
+                <input id="c-order_number" class="form-control" name="row[order_number]"
+                    value="{$row.create_person}" readonly  type="text">
+            </div>
+        </div>
+    </div>
+    <style>
+        .plupload-preview li {
+            width: 80px;
+        }
+    </style>
+
+    <hr>
+    <div class='caigou' style="margin-left:20px;width:98%;">
+        <p style="font-size: 16px;text-align: center;"><b>产品信息</b></p>
+        <div style="margin-bottom:20px;">
+            
+            <table id="caigou-table">
+                <tr>
+                    <th>SKU</th>
+                    <th>商品名称</th>
+                    <th>出库数量</th>
+                    <th>商品单价(元)</th>
+                    <th>合计(元)</th>
+                
+                </tr>
+                {foreach $item as $v}
+                <tr>
+                    <input   class="form-control" name="item_id[]" type="hidden" value="{$v.id}">
+                    <td>
+                        <input class="form-control" name="sku[]" type="text" value="{$v.sku}">
+                    </td>
+                    <td><input class="form-control" name="sku[]" type="text" value="{$v.product_name}"></td>
+                    <td><input class="form-control" name="sku[]" type="text" value="{$v.out_stock_num}"></td>
+                    <td><input class="form-control" name="sku[]" type="text" value="{$v.purchase_price}"></td>
+                    <td><input class="form-control" name="sku[]" type="text" value="{$v.total_money}"></td>
+                </tr>
+                {/foreach}
+
+            </table>
+        </div>
+
+    </div>
+
+
+
+    
+</form>
+

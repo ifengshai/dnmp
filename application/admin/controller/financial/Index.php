@@ -110,7 +110,7 @@ class Index extends Backend
     /**
      * 出库单成本核算
      */
-    public function outStockOrder()
+    public function out_stock_order()
     {
         return $this->view->fetch();
     }

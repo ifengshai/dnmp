@@ -615,45 +615,15 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'template'], function
             // 初始化表格参数配置
             Table.api.init({
                 extend: {
-                    index_url: 'example/bootstraptable/index',
+                    index_url: 'warehouse/outstock/out_stock_order',
                     add_url: '',
                     edit_url: '',
-                    del_url: 'example/bootstraptable/del',
+                    del_url: '',
                     multi_url: '',
                 }
             });
 
             var table = $("#table");
-
-            //在普通搜索提交搜索前
-            table.on('common-search.bs.table', function (event, table, query) {
-                //这里可以获取到普通搜索表单中字段的查询条件
-                console.log(query);
-            });
-
-            //在普通搜索渲染后
-            table.on('post-common-search.bs.table', function (event, table) {
-                var form = $("form", table.$commonsearch);
-                $("input[name='title']", form).addClass("selectpage").data("source", "auth/adminlog/selectpage").data("primaryKey", "title").data("field", "title").data("orderBy", "id desc");
-                $("input[name='username']", form).addClass("selectpage").data("source", "auth/admin/index").data("primaryKey", "username").data("field", "username").data("orderBy", "id desc");
-                Form.events.cxselect(form);
-                Form.events.selectpage(form);
-            });
-
-            //在表格内容渲染完成后回调的事件
-            table.on('post-body.bs.table', function (e, settings, json, xhr) {
-                console.log(e, settings, json, xhr);
-            });
-
-            //当表格数据加载完成时
-            table.on('load-success.bs.table', function (e, data) {
-                //这里可以获取从服务端获取的JSON数据
-                console.log(data);
-                //这里我们手动设置底部的值
-                $("#money").text(data.extend.money);
-                $("#price").text(data.extend.price);
-            });
-
             // 初始化表格
             // 这里使用的是Bootstrap-table插件渲染表格
             // 相关文档：http://bootstrap-table.wenzhixin.net.cn/zh-cn/documentation/
@@ -661,114 +631,107 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'template'], function
                 url: $.fn.bootstrapTable.defaults.extend.index_url,
                 columns: [
                     [
-                        //更多配置参数可参考http://bootstrap-table.wenzhixin.net.cn/zh-cn/documentation/#c
-                        //该列为复选框字段,如果后台的返回state值将会默认选中
-                        { field: 'state', checkbox: true, },
-                        //sortable为是否排序,operate为搜索时的操作符,visible表示是否可见
-                        { field: 'id', title: 'ID', sortable: true, operate: false },
-                        //默认隐藏该列
-                        { field: 'admin_id', title: __('管理员'), operate: false },
-                        //直接响应搜索
-                        { field: 'username', title: __('管理员'), formatter: Table.api.formatter.search },
-                        //模糊搜索
-                        { field: 'title', title: __('Title'), operate: 'LIKE %...%', placeholder: '模糊搜索，*表示任意字符' },
-                        //通过Ajax渲染searchList，也可以使用JSON数据
+                        { checkbox: true },
+                        { field: 'id', title: __('Id') },
+                        { field: 'out_stock_number', title: __('Out_stock_number') },
+                        { field: 'outstocktype.name', title: __('Type_id') },
+                        { field: 'order_number', title: __('Order_number') },
+                        { field: 'remark', title: __('Remark') },
                         {
-                            field: 'url',
-                            title: __('Url'),
-                            align: 'left',
-                            searchList: $.getJSON('example/bootstraptable/searchlist?search=a&field=row[user_id]'),
-                            formatter: Controller.api.formatter.url
+                            field: 'status', title: __('Status'), custom: { 0: 'success', 1: 'yellow', 2: 'blue', 3: 'danger', 4: 'gray' },
+                            searchList: { 0: '新建', 1: '待审核', 2: '已审核', 3: '已拒绝', 4: '已取消' },
+                            formatter: Table.api.formatter.status
                         },
-                        //点击IP时同时执行搜索此IP
+                        { field: 'createtime', title: __('Createtime'), operate: 'RANGE', addclass: 'datetimerange' },
+                        { field: 'create_person', title: __('Create_person') },
                         {
-                            field: 'ip',
-                            title: __('IP'),
-                            events: Controller.api.events.ip,
-                            formatter: Controller.api.formatter.ip
-                        },
-                        //自定义栏位,custom是不存在的字段
-                        { field: 'custom', title: __('切换'), operate: false, formatter: Controller.api.formatter.custom },
-                        //browser是一个不存在的字段
-                        //通过formatter来渲染数据,同时为它添加上事件
-                        {
-                            field: 'browser',
-                            title: __('Browser'),
-                            operate: false,
-                            events: Controller.api.events.browser,
-                            formatter: Controller.api.formatter.browser
-                        },
-                        {
-                            field: 'admin_id', title: __('联动搜索'), searchList: function (column) {
-                                return Template('categorytpl', {});
-                            }, formatter: function (value, row, index) {
-                                return '无';
-                            }, visible: false
-                        },
-                        //启用时间段搜索
-                        {
-                            field: 'createtime',
-                            title: __('Update time'),
-                            sortable: true,
-                            formatter: Table.api.formatter.datetime,
-                            operate: 'RANGE',
-                            addclass: 'datetimerange'
-                        },
-                        //操作栏,默认有编辑、删除或排序按钮,可自定义配置buttons来扩展按钮
-                        {
-                            field: 'operate',
-                            width: "150px",
-                            title: __('Operate'),
-                            table: table,
-                            events: Table.api.events.operate,
-                            buttons: [
+                            field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [
                                 {
-                                    name: 'click',
-                                    title: __('点击执行事件'),
-                                    classname: 'btn btn-xs btn-info btn-click',
+                                    name: 'submitAudit',
+                                    text: '提交审核',
+                                    title: __('提交审核'),
+                                    classname: 'btn btn-xs btn-success btn-ajax',
                                     icon: 'fa fa-leaf',
-                                    click: function (data) {
-                                        Layer.alert("点击按钮执行的事件");
-                                    }
-                                },
-                                {
-                                    name: 'detail',
-                                    title: __('弹出窗口打开'),
-                                    classname: 'btn btn-xs btn-primary btn-dialog',
-                                    icon: 'fa fa-list',
-                                    url: 'example/bootstraptable/detail',
-                                    callback: function (data) {
-                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
-                                    }
-                                },
-                                {
-                                    name: 'ajax',
-                                    title: __('发送Ajax'),
-                                    classname: 'btn btn-xs btn-success btn-magic btn-ajax',
-                                    icon: 'fa fa-magic',
-                                    url: 'example/bootstraptable/detail',
+                                    url: 'warehouse/outstock/audit',
+                                    confirm: '确认提交审核吗',
                                     success: function (data, ret) {
-                                        Layer.alert(ret.msg + ",返回数据：" + JSON.stringify(data));
+                                        Layer.alert(ret.msg);
+                                        $(".btn-refresh").trigger("click");
                                         //如果需要阻止成功提示，则必须使用return false;
                                         //return false;
                                     },
                                     error: function (data, ret) {
-                                        console.log(data, ret);
                                         Layer.alert(ret.msg);
                                         return false;
+                                    },
+                                    visible: function (row) {
+                                        //返回true时按钮显示,返回false隐藏
+                                        if (row.status < 1) {
+                                            return true;
+                                        } else {
+                                            return false;
+                                        }
+                                    },
+                                },
+                                {
+                                    name: 'detail',
+                                    text: '详情',
+                                    title: __('Detail'),
+                                    classname: 'btn btn-xs  btn-primary  btn-dialog',
+                                    icon: 'fa fa-list',
+                                    url: 'warehouse/outstock/detail',
+                                    extend: 'data-area = \'["100%","100%"]\'',
+                                    callback: function (data) {
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                    },
+                                    visible: function (row) {
+                                        //返回true时按钮显示,返回false隐藏
+                                        return true;
                                     }
                                 },
                                 {
-                                    name: 'addtabs',
-                                    title: __('新选项卡中打开'),
-                                    classname: 'btn btn-xs btn-warning btn-addtabs',
-                                    icon: 'fa fa-folder-o',
-                                    url: 'example/bootstraptable/detail'
+                                    name: 'cancel',
+                                    text: '取消',
+                                    title: '取消',
+                                    classname: 'btn btn-xs btn-danger btn-cancel',
+                                    icon: 'fa fa-remove',
+                                    url: 'warehouse/outstock/cancel',
+                                    callback: function (data) {
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                    },
+                                    visible: function (row) {
+                                        //返回true时按钮显示,返回false隐藏
+                                        if (row.status == 0) {
+                                            return true;
+                                        } else {
+                                            return false;
+                                        }
+                                    }
+                                },
+                                {
+                                    name: 'edit',
+                                    text: '',
+                                    title: __('Edit'),
+                                    classname: 'btn btn-xs btn-success btn-dialog',
+                                    icon: 'fa fa-pencil',
+                                    url: 'warehouse/outstock/edit',
+                                    extend: 'data-area = \'["100%","100%"]\'',
+                                    callback: function (data) {
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                    },
+                                    visible: function (row) {
+                                        //返回true时按钮显示,返回false隐藏
+                                        if (row.status == 0) {
+                                            return true;
+                                        } else {
+                                            return false;
+                                        }
+                                    }
                                 }
-                            ],
-                            formatter: Table.api.formatter.operate
-                        },
-                    ],
+
+                            ], formatter: Table.api.formatter.operate
+                        }
+                    ]
                 ],
                 //更多配置参数可参考http://bootstrap-table.wenzhixin.net.cn/zh-cn/documentation/#t
                 //亦可以参考require-table.js中defaults的配置
