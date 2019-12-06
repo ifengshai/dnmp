@@ -36,7 +36,7 @@ class PurchaseOrder extends Model
         return $data;
     }
 
-   
+
 
     /**
      * 获取采购单
@@ -50,7 +50,8 @@ class PurchaseOrder extends Model
         if ($return_status) {
             $where['return_status'] = ['in', $return_status];
         }
-        $where['purchase_status'] = 7;
+        
+        $where['purchase_status'] = ['in', [6, 7]];
         $where['check_status']  = ['in', $check_status];
         $data = $this->where($where)->order('createtime desc')->column('purchase_number', 'id');
         return $data;

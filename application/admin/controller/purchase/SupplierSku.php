@@ -13,6 +13,7 @@ use PhpOffice\PhpSpreadsheet\Reader\Csv;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use fast\Alibaba;
 use think\Loader;
+use fast\Auth;
 
 /**
  * 供应商sku管理
@@ -391,7 +392,7 @@ class SupplierSku extends Backend
             $this->error(__('No Results were found'));
         }
         if (!$row['link']) {
-            $this->error('请先补充1688对应商品链接！！');
+            $this->error('请先补充1688对应商品链接！！', url('index'));
         }
         if ($this->request->isAjax()) {
             $ids = $this->request->get('ids');
@@ -439,7 +440,7 @@ class SupplierSku extends Backend
         $skuId = $this->request->get('skuId');
         $res = $this->model->save(['skuid' => $skuId, 'is_matching' => 1], ['id' => $ids]);
         if ($res !== false) {
-            $this->success();
+            $this->success('操作成功！！');
         } else {
             $this->error(__('No rows were updated'));
         }
