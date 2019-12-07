@@ -43,5 +43,6 @@ return [
     'Purchaseorder.check_status'      => '质检状态 0 未质检 1部分质检  2已质检',
     'Purchaseorder.stock_status'      => '入库状态 0 未入库 1部分入库 2已入库',
     'Purchaseorder.return_status'     => '退销状态 0 未退回 1部分退回 2 已退回',
-    'Purchaseorder.online_status'     => '线上1688订单状态【success 成功 waitsellersend 等待发货 waitbuyerreceive 等待买家收货】'
+    'Purchaseorder.online_status'     => '线上1688订单状态【success 成功 waitsellersend 等待发货 waitbuyerreceive 等待买家收货】',
+    'Financial_total_money'           => '总金额'
 ];

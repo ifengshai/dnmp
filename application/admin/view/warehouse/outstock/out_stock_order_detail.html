@@ -83,7 +83,7 @@
             </div>
             <label class="control-label col-xs-12 col-sm-2">出库分类:</label>
             <div class="col-xs-12 col-sm-2">
-                <select name="row[type_id]" class="form-control type" required readonly>
+                <select name="row[type_id]" class="form-control type" required disabled="disabled">
                     <option value="">请选择</option>
                     {foreach $type as $k => $v}
                     <option value="{$v.id}" {:$row['type_id'] == $v['id'] ? 'selected' : ''}>{$v.name}</option>
@@ -130,10 +130,10 @@
                     <td>
                         <input class="form-control" name="sku[]" type="text" value="{$v.sku}">
                     </td>
-                    <td><input class="form-control" name="sku[]" type="text" value="{$v.product_name}"></td>
-                    <td><input class="form-control" name="sku[]" type="text" value="{$v.out_stock_num}"></td>
-                    <td><input class="form-control" name="sku[]" type="text" value="{$v.purchase_price}"></td>
-                    <td><input class="form-control" name="sku[]" type="text" value="{$v.total_money}"></td>
+                    <td><input style="width: 450px;" class="form-control" name="sku[]" type="text" value="{$v.product_name}"></td>
+                    <td><input style="width: 150px;"  class="form-control" name="sku[]" type="text" value="{$v.out_stock_num}"></td>
+                    <td><input style="width: 150px;" class="form-control" name="sku[]" type="text" value="{$v.purchase_price}"></td>
+                    <td><input style="width: 150px;" class="form-control" name="sku[]" type="text" value="{$v.total_money}"></td>
                 </tr>
                 {/foreach}
 

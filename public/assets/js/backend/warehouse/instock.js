@@ -247,6 +247,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','bootstrap-tab
                                 shtml += ' <td>' + data[i].quantity_num + '</td>'
                                 shtml += ' <td><input id="c-sample_num" class="form-control" readonly oninput="if(value < 0){alert(\'只能输入正整数！\');value = 0}" name="sample_num[]" value="' + data[i].sample_num + '" type="text"></td>'
                                 shtml += ' <td><input id="c-in_stock_num" class="form-control"  oninput="if(value < 0){alert(\'只能输入正整数！\');value = 0}" name="in_stock_num[]" value="' + (data[i].quantity_num - data[i].sample_num ) + '" type="text"></td>'
+                                shtml += ' <td><input id="c-purchase_id" class="form-control"  name="purchase_id[]" value="' + data[i].purchase_id + '" type="hidden"></td>'
                                 shtml += ' </tr>'
                             }
                             $('.caigou table tbody').append(shtml);
@@ -382,6 +383,148 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','bootstrap-tab
                 })
 
             }
+        },
+        account_in_stock_order:function(){
+             // 初始化表格参数配置
+             Table.api.init({
+                showJumpto: true,
+                searchFormVisible: true,
+                pageList: [10, 25, 50, 100],
+                extend: {
+                    index_url: 'warehouse/instock/account_in_stock_order' + location.search,
+                    add_url: '',
+                    edit_url: '',
+                    multi_url: '',
+                    table: 'in_stock',
+                }
+            });
+
+            var table = $("#table");
+            table.on('load-success.bs.table', function (e, data) {
+                //这里可以获取从服务端获取的JSON数据
+                //这里我们手动设置底部的值
+                //console.log(data);
+                $("#money").text(data.totalPriceInfo);
+
+            });
+            // 初始化表格
+            table.bootstrapTable({
+                url: $.fn.bootstrapTable.defaults.extend.index_url,
+                pk: 'id',
+                sortName: 'id',
+                columns: [
+                    [
+                        { checkbox: true },
+                        { field: 'id', title: __('Id'),operate:false },
+                        { field: 'in_stock_number', title: __('In_stock_number') },
+                        { field: 'instocktype.name', title: __('In_stock_type'),operate:false },
+                        { field: 'checkorder.check_order_number', title: __('质检单号'),operate:false },
+                        { field: 'order_number', title: __('Order_number'),operate:false},
+                        {
+                            field: 'status', title: __('Status'), custom: { 0: 'success', 1: 'yellow', 2: 'blue', 3: 'danger', 4: 'gray' },
+                            searchList: { 0: '新建', 1: '待审核', 2: '已审核', 3: '已拒绝', 4: '已取消' },
+                            operate:false,
+                            formatter: Table.api.formatter.status
+                        },
+                        {
+                            field:'total_money',title:__('Financial_total_money'),operate:false
+                        },
+                        { field: 'createtime', title: __('Createtime'), operate: 'RANGE', addclass: 'datetimerange' },
+                        {
+                            field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [
+                                {
+                                    name: 'submitAudit',
+                                    text: '提交审核',
+                                    title: __('提交审核'),
+                                    classname: 'btn btn-xs btn-success btn-ajax',
+                                    icon: 'fa fa-leaf',
+                                    url: 'warehouse/instock/audit',
+                                    confirm: '确认提交审核吗',
+                                    success: function (data, ret) {
+                                        Layer.alert(ret.msg);
+                                        $(".btn-refresh").trigger("click");
+                                        //如果需要阻止成功提示，则必须使用return false;
+                                        //return false;
+                                    },
+                                    error: function (data, ret) {
+                                        Layer.alert(ret.msg);
+                                        return false;
+                                    },
+                                    visible: function (row) {
+                                        //返回true时按钮显示,返回false隐藏
+                                        if (row.status == 0) {
+                                            return true;
+                                        } else {
+                                            return false;
+                                        }
+                                    },
+                                },
+                                {
+                                    name: 'detail',
+                                    text: '详情',
+                                    title: __('Detail'),
+                                    classname: 'btn btn-xs  btn-primary  btn-dialog',
+                                    icon: 'fa fa-list',
+                                    url: 'warehouse/instock/account_in_stock_order_detail',
+                                    extend: 'data-area = \'["100%","100%"]\'',
+                                    callback: function (data) {
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                    },
+                                    visible: function (row) {
+                                        //返回true时按钮显示,返回false隐藏
+                                        return true;
+                                    }
+                                },
+                                {
+                                    name: 'cancel',
+                                    text: '取消',
+                                    title: '取消',
+                                    classname: 'btn btn-xs btn-danger btn-cancel',
+                                    icon: 'fa fa-remove',
+                                    url: 'warehouse/instock/cancel',
+                                    callback: function (data) {
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                    },
+                                    visible: function (row) {
+                                        //返回true时按钮显示,返回false隐藏
+                                        if (row.status == 0) {
+                                            return true;
+                                        } else {
+                                            return false;
+                                        }
+                                    }
+                                },
+                                {
+                                    name: 'edit',
+                                    text: '',
+                                    title: __('Edit'),
+                                    classname: 'btn btn-xs btn-success btn-dialog',
+                                    icon: 'fa fa-pencil',
+                                    url: 'warehouse/instock/edit',
+                                    extend: 'data-area = \'["100%","100%"]\'',
+                                    callback: function (data) {
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                    },
+                                    visible: function (row) {
+                                        //返回true时按钮显示,返回false隐藏
+                                        if (row.status == 0) {
+                                            return true;
+                                        } else {
+                                            return false;
+                                        }
+                                    }
+                                }
+
+                            ], formatter: Table.api.formatter.operate
+                        }
+                    ]
+                ]
+            });
+            // 为表格绑定事件
+            Table.api.bindevent(table);         
+        },
+        account_in_stock_order_detail:function(){
+            Form.api.bindevent($("form[role=form]"));
         }
     };
     return Controller;
