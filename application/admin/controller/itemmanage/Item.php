@@ -1960,12 +1960,4 @@ class Item extends Backend
     // public function ceshi(){
 
     // }
-    public function ceshi(){
-        $str  = '/admin_1biSSnWyfW.php/saleaftermanage/sale_after_task/add?dialog=1';
-        $arr = explode( '/',$str);
-        var_dump($arr);
-        //echo substr($str,strstr($str, '.php'));
-        //echo $str2;
-    }
-
 }

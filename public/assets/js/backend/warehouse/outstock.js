@@ -430,6 +430,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','bootstrap-tab
                     ]
                 ]
             });
+        },
+        out_stock_order_detail:function(){
+            Form.api.bindevent($("form[role=form]"));
         }
     };
     return Controller;

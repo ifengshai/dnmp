@@ -117,13 +117,16 @@ class Instock extends Backend
 
                         $in_stock_num = $this->request->post("in_stock_num/a");
                         $sample_num = $this->request->post("sample_num/a");
+                        $purchase_id = $this->request->post("purchase_id/a");
                         $data = [];
                         foreach (array_filter($sku) as $k => $v) {
                             $data[$k]['sku'] = $v;
                             $data[$k]['in_stock_num'] = $in_stock_num[$k];
                             $data[$k]['sample_num'] = $sample_num[$k];
                             $data[$k]['no_stock_num'] = $in_stock_num[$k];
+                            $data[$k]['purchase_id']  = $purchase_id[$k];  
                             $data[$k]['in_stock_id'] = $this->model->id;
+
                         }
                         //批量添加
                         $this->instockItem->allowField(true)->saveAll($data);
@@ -187,7 +190,7 @@ class Instock extends Backend
         $check = new \app\admin\model\warehouse\Check;
         $list = $check->hasWhere('checkItem')
             ->where($check_map)
-            ->field('sku,supplier_sku,purchase_num,check_num,arrivals_num,quantity_num,sample_num')
+            ->field('Check.purchase_id,sku,supplier_sku,purchase_num,check_num,arrivals_num,quantity_num,sample_num')
             ->group('CheckItem.id')
             ->select();
         $list = collection($list)->toArray();
@@ -572,5 +575,100 @@ class Instock extends Backend
         } else {
             $this->error('404 Not found');
         }
+    }
+    //入库单成本核算 create@lsw
+    public function account_in_stock_order()
+    {
+        //设置过滤方法
+        $this->request->filter(['strip_tags']);
+        if ($this->request->isAjax()) {
+            //如果发送的来源是Selectpage，则转发到Selectpage
+            if ($this->request->request('keyField')) {
+                return $this->selectpage();
+            }
+            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            $total = $this->model
+                ->with(['checkorder', 'instocktype'])
+                ->where(['instock.status'=>2,'type_id'=>1])
+                ->where($where)
+                ->order($sort, $order)
+                ->count();
+
+            $list = $this->model
+                ->with(['checkorder', 'instocktype'])
+                ->where(['instock.status'=>2,'type_id'=>1])
+                ->where($where)
+                ->order($sort, $order)
+                ->limit($offset, $limit)
+                ->select();
+            $list = collection($list)->toArray();
+            $totalId = $this->model
+                    ->with(['checkorder','instocktype'])
+                    ->where(['instock.status'=>2,'type_id'=>1])
+                    ->where($where)
+                    ->column('instock.id');
+            $thisPageId = $this->model
+                    ->with(['checkorder', 'instocktype'])
+                    ->where(['instock.status'=>2,'type_id'=>1])
+                    ->where($where)
+                    ->order($sort, $order)
+                    ->limit($offset, $limit)
+                    ->column('instock.id');
+            $totalPriceInfo =  $this->instockItem->calculateMoneyAccordInStock($totalId);
+            $thisPagePriceInfo = $this->instockItem->calculateMoneyAccordInStockThisPageId($thisPageId);
+            if(0 != $thisPagePriceInfo){
+                foreach($list as $keys => $vals){
+                    if(array_key_exists($vals['id'],$thisPagePriceInfo)){
+                         $list[$keys]['total_money'] = $thisPagePriceInfo[$vals['id']];
+                    }
+                }
+            }
+            $result = array("total" => $total, "rows" => $list,"totalPriceInfo"=>$totalPriceInfo['total_money']);
+            return json($result);
+        }
+        return $this->view->fetch();
+    }
+    //入库单成本核算详情 create@lsw
+    public function account_in_stock_order_detail($ids=null)
+    {
+        $row = $this->model->get($ids);
+        if (!$row) {
+            $this->error(__('No Results were found'));
+        }
+        $adminIds = $this->getDataLimitAdminIds();
+        if (is_array($adminIds)) {
+            if (!in_array($row[$this->dataLimitField], $adminIds)) {
+                $this->error(__('You have no permission'));
+            }
+        }
+
+        //查询入库分类
+        $type = $this->type->where('is_del', 1)->select();
+        $this->assign('type', $type);
+
+        // //查询质检单
+        // $check = new \app\admin\model\warehouse\Check;
+        // $map['status'] = 2;
+        // $purchase_data = $check->where($map)->order('createtime desc')->column('check_order_number', 'id');
+        // $this->assign('purchase_data', $purchase_data);
+
+
+        /***********查询入库商品信息***************/
+        //查询入库单商品信息
+        // $item_map['in_stock_id'] = $ids;
+        // $item = $this->instockItem->where($item_map)->select();
+        $item = $this->instockItem->getPurchaseItemInfo($ids);
+        // var_dump($item);
+        // exit;
+        //查询对应质检数据
+        // $checkItem = new \app\admin\model\warehouse\CheckItem;
+        // $check_data = $checkItem->where('check_id', $row['check_id'])->column('*', 'sku');
+        /***********end***************/
+        if($item){
+            $this->assign('item', $item);
+        }
+            // $this->assign('check_data', $check_data);
+            $this->view->assign("row", $row);
+            return $this->view->fetch();
     }
 }

@@ -50,19 +50,19 @@
 
     .caigou #caigou-table tr td input {
 
-        width: 300px;
+        width: 200px;
     }
 </style>
 
 <form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
     <div class='caigou'>
         <div class="form-group">
-            <label class="control-label col-xs-12 col-sm-2">出库单号:</label>
+            <label class="control-label col-xs-12 col-sm-2">入库单号:</label>
             <div class="col-xs-12 col-sm-2">
                 <input id="c-check_order_number" class="form-control" name="row[out_stock_number]"
-                    value="{$row.out_stock_number}" readonly type="text">
+                    value="{$row.in_stock_number}" readonly type="text">
             </div>
-            <label class="control-label col-xs-12 col-sm-2">出库状态:</label>
+            <label class="control-label col-xs-12 col-sm-2">入库状态:</label>
             <div class="col-xs-12 col-sm-2">
                 {if $row.status eq 0}
                 <input id="c-status" class="form-control" name="row[status]"
@@ -81,9 +81,9 @@
                 value="已取消" readonly type="text">
                 {/if}
             </div>
-            <label class="control-label col-xs-12 col-sm-2">出库分类:</label>
+            <label class="control-label col-xs-12 col-sm-2">入库分类:</label>
             <div class="col-xs-12 col-sm-2">
-                <select name="row[type_id]" class="form-control type" required readonly>
+                <select name="row[type_id]" class="form-control type" required disabled="disabled">
                     <option value="">请选择</option>
                     {foreach $type as $k => $v}
                     <option value="{$v.id}" {:$row['type_id'] == $v['id'] ? 'selected' : ''}>{$v.name}</option>
@@ -126,13 +126,14 @@
                 </tr>
                 {foreach $item as $v}
                 <tr>
+                    <input   class="form-control" name="item_id[]" type="hidden" value="{$v.id}">
                     <td>
                         <input class="form-control" name="sku[]" type="text" value="{$v.sku}">
                     </td>
-                    <td><input class="form-control" name="sku[]" type="text" value="{$v.product_name}"></td>
-                    <td style="width: 50px;"><input class="form-control" name="sku[]" type="text" value="{$v.out_stock_num}"></td>
-                    <td><input class="form-control" name="sku[]" type="text" value="{$v.purchase_price}"></td>
-                    <td><input class="form-control" name="sku[]" type="text" value="{$v.total_money}"></td>
+                    <td><input style="width: 450px;" class="form-control" name="sku[]" type="text" value="{$v.product_name}"></td>
+                    <td><input style="width: 150px;"  class="form-control" name="sku[]" type="text" value="{$v.in_stock_num}"></td>
+                    <td><input style="width: 150px;" class="form-control" name="sku[]" type="text" value="{$v.purchase_price}"></td>
+                    <td><input style="width: 150px;" class="form-control" name="sku[]" type="text" value="{$v.total_money}"></td>
                 </tr>
                 {/foreach}
 
