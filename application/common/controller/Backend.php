@@ -375,10 +375,6 @@ class Backend extends Controller
         }
 
         //判断是否存在逻辑删除字段
-        // echo '<pre>';
-        // var_dump($tableName);
-        // var_dump($name);
-        // exit;
         if (!empty($this->model)) {
             $fieldArr = $this->model->getTableFields();
             if (in_array('is_del', $fieldArr)) {

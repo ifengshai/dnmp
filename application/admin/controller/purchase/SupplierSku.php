@@ -124,7 +124,7 @@ class SupplierSku extends Backend
                             $data[$k]['supplier_sku'] = $supplier_skus[$k];
                             $data[$k]['link'] = $link[$k];
                             $data[$k]['supplier_id'] = $params['supplier_id'];
-                            $data[$k]['create_person'] = session('admin.username');
+                            $data[$k]['create_person'] = session('admin.nickname');
                             $data[$k]['createtime'] = date('Y-m-d H:i:s', time());
                         }
                     }
@@ -360,12 +360,12 @@ class SupplierSku extends Backend
                     if (!isset($val['admin_id']) || empty($val['admin_id'])) {
                         $val['admin_id'] = $auth->isLogin() ? $auth->id : 0;
                     }
-                    $val['create_person'] = session('admin.username');
+                    $val['create_person'] = session('admin.nickname');
                     $val['createtime'] = date('Y-m-d H:i:s', time());
                 }
             } else {
                 foreach ($insert as &$val) {
-                    $val['create_person'] = session('admin.username');
+                    $val['create_person'] = session('admin.nickname');
                     $val['createtime'] = date('Y-m-d H:i:s', time());
                 }
             }

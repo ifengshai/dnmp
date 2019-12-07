@@ -60,7 +60,7 @@ class Ajax extends Backend
         preg_match('/(\d+)(\w+)/', $upload['maxsize'], $matches);
         $type = strtolower($matches[2]);
         $typeDict = ['b' => 0, 'k' => 1, 'kb' => 1, 'm' => 2, 'mb' => 2, 'gb' => 3, 'g' => 3];
-        $size = (int)$upload['maxsize'] * pow(1024, isset($typeDict[$type]) ? $typeDict[$type] : 0);
+        $size = (int) $upload['maxsize'] * pow(1024, isset($typeDict[$type]) ? $typeDict[$type] : 0);
         $fileInfo = $file->getInfo();
         $suffix = strtolower(pathinfo($fileInfo['name'], PATHINFO_EXTENSION));
         $suffix = $suffix && preg_match("/^[a-zA-Z0-9]+$/", $suffix) ? $suffix : 'file';
@@ -73,11 +73,9 @@ class Ajax extends Backend
             $this->error(__('Uploaded file format is limited'));
         }
         //验证文件后缀
-        if ($upload['mimetype'] !== '*' &&
-            (
-                !in_array($suffix, $mimetypeArr)
-                || (stripos($typeArr[0] . '/', $upload['mimetype']) !== false && (!in_array($fileInfo['type'], $mimetypeArr) && !in_array($typeArr[0] . '/*', $mimetypeArr)))
-            )
+        if (
+            $upload['mimetype'] !== '*' && (!in_array($suffix, $mimetypeArr)
+                || (stripos($typeArr[0] . '/', $upload['mimetype']) !== false && (!in_array($fileInfo['type'], $mimetypeArr) && !in_array($typeArr[0] . '/*', $mimetypeArr))))
         ) {
             $this->error(__('Uploaded file format is limited'));
         }
@@ -105,9 +103,10 @@ class Ajax extends Backend
             '{.suffix}'  => $suffix ? '.' . $suffix : '',
             '{filemd5}'  => md5_file($fileInfo['tmp_name']),
         ];
+        
         $changeDir = $this->request->param('dir');
 
-//        //$savekey = $upload['savekey'];
+        //        //$savekey = $upload['savekey'];
         $savekey = $changeDir ? "/uploads/{$changeDir}/{year}{mon}{day}/{filemd5}{.suffix}" : $upload['savekey'];
         $savekey = str_replace(array_keys($replaceArr), array_values($replaceArr), $savekey);
 
@@ -117,7 +116,7 @@ class Ajax extends Backend
         $splInfo = $file->validate(['size' => $size])->move(ROOT_PATH . '/public' . $uploadDir, $fileName);
         if ($splInfo) {
             $params = array(
-                'admin_id'    => (int)$this->auth->id,
+                'admin_id'    => (int) $this->auth->id,
                 'user_id'     => 0,
                 'filesize'    => $fileInfo['size'],
                 'imagewidth'  => $imagewidth,
@@ -286,7 +285,7 @@ class Ajax extends Backend
     }
 
 
-     /**
+    /**
      * 根据sku 匹配商品名称 供应商SKU 公用
      */
     public function getSkuList()
