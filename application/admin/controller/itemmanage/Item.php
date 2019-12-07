@@ -1960,8 +1960,4 @@ class Item extends Backend
     // public function ceshi(){
 
     // }
-    public function ceshi(){
-        phpinfo();
-    }
-
 }
