@@ -291,6 +291,18 @@ order by sfoi.item_id asc limit 1000";
                 }
             }
 
+            if ($final_params['od_sph']) {
+                if (urldecode($final_params['od_sph']) * 1 < -8 || urldecode($final_params['od_sph']) * 1 > 8) {
+                    $items[$order_item_key]['is_custom_lens'] = 1;
+                }
+            }
+
+            if ($final_params['os_sph']) {
+                if (urldecode($final_params['os_sph']) * 1 < -8 || urldecode($final_params['os_sph']) * 1 > 8) {
+                    $items[$order_item_key]['is_custom_lens'] = 1;
+                }
+            }
+            
             unset($final_params);
             unset($lens_params);
             unset($prescription_params);
@@ -619,6 +631,18 @@ order by sfoi.item_id asc limit 1000";
 
             if ($final_params['os_cyl']) {
                 if ($final_params['os_cyl'] * 1 <= -4 || $final_params['os_cyl'] * 1 >= 4) {
+                    $items[$order_item_key]['is_custom_lens'] = 1;
+                }
+            }
+
+            if ($final_params['od_sph']) {
+                if (urldecode($final_params['od_sph']) * 1 < -8 || urldecode($final_params['od_sph']) * 1 > 8) {
+                    $items[$order_item_key]['is_custom_lens'] = 1;
+                }
+            }
+
+            if ($final_params['os_sph']) {
+                if (urldecode($final_params['os_sph']) * 1 < -8 || urldecode($final_params['os_sph']) * 1 > 8) {
                     $items[$order_item_key]['is_custom_lens'] = 1;
                 }
             }
@@ -956,6 +980,18 @@ order by sfoi.item_id asc limit 1000";
             }
             if ($tmp_lens_params['os_cyl']) {
                 if ($tmp_lens_params['os_cyl'] * 1 <= -4 || $tmp_lens_params['os_cyl'] * 1 >= 4) {
+                    $finalResult[$key]['is_custom_lens'] = 1;
+                }
+            }
+
+            if ($tmp_lens_params['od_sph']) {
+                if (urldecode($tmp_lens_params['od_sph']) * 1 < -8 || urldecode($tmp_lens_params['od_sph']) * 1 > 8) {
+                    $finalResult[$key]['is_custom_lens'] = 1;
+                }
+            }
+
+            if ($tmp_lens_params['os_sph']) {
+                if (urldecode($tmp_lens_params['os_sph']) * 1 < -8 || urldecode($tmp_lens_params['os_sph']) * 1 > 8) {
                     $finalResult[$key]['is_custom_lens'] = 1;
                 }
             }

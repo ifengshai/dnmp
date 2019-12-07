@@ -491,6 +491,7 @@ class Index extends Backend
                     $fields[] = $val;
                 }
             }
+            
             //模板文件不正确
             if ($listName !== $fields) {
                 throw new Exception("模板文件不正确！！");
