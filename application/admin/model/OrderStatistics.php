@@ -26,7 +26,7 @@ class OrderStatistics extends Model
      */
     public function getAllData()
     {
-        $stime = date("Y-m-d", strtotime("-15 day"));
+        $stime = date("Y-m-d", strtotime("-30 day"));
         $etime = date("Y-m-d", strtotime("-1 day"));
         $map['create_date'] = ['between', [$stime, $etime]];
         return $this->where($map)->cache(21600)->select();
