@@ -16,7 +16,7 @@ use think\Validate;
 class Crontab extends Backend
 {
 
-    protected $noNeedLogin = ['zeelool_order_custom_order_prescription', 'zeelool_order_item_process', 'voogueme_order_custom_order_prescription', 'voogueme_order_item_process', 'nihao_order_custom_order_prescription', 'nihao_order_item_process'];
+    protected $noNeedLogin = ['get_sales_order_num', 'zeelool_order_custom_order_prescription', 'zeelool_order_item_process', 'voogueme_order_custom_order_prescription', 'voogueme_order_item_process', 'nihao_order_custom_order_prescription', 'nihao_order_item_process'];
 
     /**
      * 获取采购到货状态、到货时间
@@ -1097,7 +1097,7 @@ order by sfoi.item_id asc limit 1000";
 
         $nihao_count = Db::connect('database.db_nihao')->table('sales_flat_order')->where($map)->count(1);
         $nihao_total = Db::connect('database.db_nihao')->table('sales_flat_order')->where($map)->sum('base_grand_total');
-        
+
         $data['zeelool_sales_num'] = $zeelool_count;
         $data['voogueme_sales_num'] = $voogueme_count;
         $data['nihao_sales_num'] = $nihao_count;
@@ -1109,6 +1109,7 @@ order by sfoi.item_id asc limit 1000";
         $data['create_date'] = date("Y-m-d", strtotime("-1 day"));
         $data['createtime'] = date("Y-m-d H:i:s");
         Db::name('order_statistics')->insert($data);
-        echo 'ok';die;
+        echo 'ok';
+        die;
     }
 }
