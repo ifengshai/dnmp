@@ -1087,10 +1087,10 @@ order by sfoi.item_id asc limit 1000";
         Db::connect('database.db_zeelool')->table('sales_flat_order')->query("set time_zone='+8:00'");
         Db::connect('database.db_voogueme')->table('sales_flat_order')->query("set time_zone='+8:00'");
         Db::connect('database.db_nihao')->table('sales_flat_order')->query("set time_zone='+8:00'");
-        
+
         //计算前一天的销量
-        $stime = date("Y-m-d 00:00:00", strtotime("-1 day"));
-        $etime = date("Y-m-d 23:59:59", strtotime("-1 day"));
+        $stime = date("Y-m-d 00:00:00", strtotime("-30 day"));
+        $etime = date("Y-m-d 23:59:59", strtotime("-30 day"));
         $map['created_at'] = ['between', [$stime, $etime]];
         $map['status'] = ['in', ['processing', 'complete', 'creditcard_proccessing']];
         $zeelool_count = Db::connect('database.db_zeelool')->table('sales_flat_order')->where($map)->count(1);
