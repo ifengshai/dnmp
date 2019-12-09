@@ -19,7 +19,10 @@ class Dashboard extends Backend
      */
     public function index()
     {
-       
+        
+
+
+
         $seventtime = \fast\Date::unixtime('day', -7);
         $paylist = $createlist = [];
         for ($i = 0; $i < 7; $i++)

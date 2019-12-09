@@ -24,7 +24,7 @@ class Crontab extends Backend
     public function setPurchaseStatus()
     {
         dump(urldecode('%2B1.25'));
-     }
+    }
 
 
 
@@ -278,7 +278,7 @@ order by sfoi.item_id asc limit 1000";
             if (strpos($final_params['index_type'], 'Lens with Color Tint') !== false) {
                 $items[$order_item_key]['is_custom_lens'] = 1;
             }
-        
+
             if ($final_params['od_cyl']) {
                 if (urldecode($final_params['od_cyl']) * 1 <= -4 || urldecode($final_params['od_cyl']) * 1 >= 4) {
                     $items[$order_item_key]['is_custom_lens'] = 1;
@@ -302,7 +302,7 @@ order by sfoi.item_id asc limit 1000";
                     $items[$order_item_key]['is_custom_lens'] = 1;
                 }
             }
-            
+
             unset($final_params);
             unset($lens_params);
             unset($prescription_params);
@@ -1076,5 +1076,39 @@ order by sfoi.item_id asc limit 1000";
         } else {
             echo '执行完毕！';
         }
+    }
+
+
+    /**
+     * 定时统计每天的销量
+     */
+    public function get_sales_order_num()
+    {
+        //计算前一天的销量
+        $stime = date("Y-m-d 00:00:00", strtotime("-1 day"));
+        $etime = date("Y-m-d 23:59:59", strtotime("-1 day"));
+        $map['created_at'] = ['between', [$stime, $etime]];
+        $map['status'] = ['processing', 'complete', 'creditcard_proccessing'];
+        $zeelool_count = Db::connect('database.db_zeelool')->table('sales_flat_order')->where($map)->count(1);
+        $zeelool_total = Db::connect('database.db_zeelool')->table('sales_flat_order')->where($map)->sum('base_grand_total');
+
+        $voogueme_count = Db::connect('database.db_voogueme')->table('sales_flat_order')->where($map)->count(1);
+        $voogueme_total = Db::connect('database.db_voogueme')->table('sales_flat_order')->where($map)->sum('base_grand_total');
+
+        $nihao_count = Db::connect('database.db_nihao')->table('sales_flat_order')->where($map)->count(1);
+        $nihao_total = Db::connect('database.db_nihao')->table('sales_flat_order')->where($map)->sum('base_grand_total');
+        
+        $data['zeelool_sales_num'] = $zeelool_count;
+        $data['voogueme_sales_num'] = $voogueme_count;
+        $data['nihao_sales_num'] = $nihao_count;
+        $data['all_sales_num'] = $zeelool_count + $voogueme_count + $nihao_count;
+        $data['zeelool_sales_money'] = $zeelool_total;
+        $data['voogueme_sales_money'] = $voogueme_total;
+        $data['nihao_sales_money'] = $nihao_total;
+        $data['all_sales_money'] = $zeelool_total + $voogueme_count + $nihao_total;
+        $data['create_date'] = date("Y-m-d", strtotime("-1 day"));
+        $data['createtime'] = date("Y-m-d H:i:s");
+        Db::name('order_statistics')->insert($data);
+        echo 'ok';die;
     }
 }
