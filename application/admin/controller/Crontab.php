@@ -1088,7 +1088,7 @@ order by sfoi.item_id asc limit 1000";
         $stime = date("Y-m-d 00:00:00", strtotime("-1 day"));
         $etime = date("Y-m-d 23:59:59", strtotime("-1 day"));
         $map['created_at'] = ['between', [$stime, $etime]];
-        $map['status'] = ['processing', 'complete', 'creditcard_proccessing'];
+        $map['status'] = ['in', ['processing', 'complete', 'creditcard_proccessing']];
         $zeelool_count = Db::connect('database.db_zeelool')->table('sales_flat_order')->where($map)->count(1);
         $zeelool_total = Db::connect('database.db_zeelool')->table('sales_flat_order')->where($map)->sum('base_grand_total');
 
