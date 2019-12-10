@@ -94,13 +94,14 @@ class Index extends Backend
                     }
                     //查询是否已存在记录
                     $map['refractive_index'] = $params['refractive_index'];
-                    $map['lens_type'] = $params['lens_type'];
+                    $map['lens_type'] = $params['refractive_index'] . ' '. $params['lens_type'];
                     $map['sph'] = $params['sph'];
                     $map['cyl'] = $params['cyl'];
                     $count =  $this->model->where($map)->count();
                     if ($count > 0) {
                         $this->error('已存在此记录！！');
                     }
+                    $params['lens_type'] = $params['refractive_index'] . ' '. $params['lens_type'];
                     $params['create_person'] = session('admin.nickname');
                     $params['createtime'] = date('Y-m-d H:i:s', time());
                     $result = $this->model->allowField(true)->save($params);
@@ -207,6 +208,7 @@ class Index extends Backend
         }
 
         $res = collection($res)->toArray();
+        
         $list = [];
         foreach ($res as  $v) {
             $list[$v['sph']][$v['cyl']] = $v;
@@ -489,6 +491,7 @@ class Index extends Backend
                     $fields[] = $val;
                 }
             }
+            
             //模板文件不正确
             if ($listName !== $fields) {
                 throw new Exception("模板文件不正确！！");
