@@ -688,6 +688,178 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','bootstrap-tab
 
             }
 
+        },
+        account_purchase_order:function(){
+            // 初始化表格参数配置
+            Table.api.init({
+                showJumpto: true,
+                searchFormVisible: true,
+                pageSize: 10,
+                pageList: [10, 25, 50, 100],
+                extend: {
+                    index_url: 'purchase/purchase_order/account_purchase_order' + location.search,
+                    add_url: '',
+                    edit_url: '',
+                    // del_url: 'purchase/purchase_order/del',
+                    multi_url: '',
+                    table: 'purchase_order',
+                }
+            });
+
+            var table = $("#table");
+            table.on('load-success.bs.table', function (e, data) {
+                //这里可以获取从服务端获取的JSON数据
+                //这里我们手动设置底部的值
+                //console.log(data.total_money);
+                $("#total-money").text(data.total_money);
+                $("#return-money").text(data.return_money);
+
+            });
+            // 初始化表格
+            table.bootstrapTable({
+                url: $.fn.bootstrapTable.defaults.extend.index_url,
+                pk: 'id',
+                sortName: 'createtime',
+                sortOrder: 'desc',
+                columns: [
+                    [
+                        { checkbox: true },
+                        {
+                            field: '', title: __('序号'), formatter: function (value, row, index) {
+                                var options = table.bootstrapTable('getOptions');
+                                var pageNumber = options.pageNumber;
+                                var pageSize = options.pageSize;
+                                return (pageNumber - 1) * pageSize + 1 + index;
+                            }, operate: false
+                        },
+                        { field: 'id', title: __('Id'), operate: false, visible: false },
+                        { field: 'purchase_number', title: __('Purchase_number'), operate: 'like' },
+                        { field: 'purchase_name', title: __('Purchase_name'), operate: 'like' },
+                        { field: 'supplier.supplier_name',title:__('供应商')},
+                        { field: 'purchase_total', title: __('Purchase_total'), operate: 'BETWEEN' },
+                        { field: 'purchase_virtual_total',title:__('实际采购金额（元）'),operate:'BETWEEN'},
+                        { field: 'refund_amount',title:__('退款金额（元）'),operate:false},
+                        { field: 'purchase_freight',title:__('邮费（元）')},
+                        { field: 'payment_money',title:__('已付款金额')},
+                        {
+                            field: 'purchase_status', title: __('Purchase_status'),
+                            custom: { 0: 'success', 1: 'yellow', 2: 'blue', 3: 'danger', 4: 'gray', 5: 'yellow', 6: 'yellow', 7: 'success' },
+                            searchList: { 0: '新建', 1: '待审核', 2: '已审核', 3: '已拒绝', 4: '已取消', 5: '待发货', 6: '待收货', 7: '已收货', 8: '已退款' },
+                            addClass: 'selectpicker', data: 'multiple', operate: 'IN',
+                            formatter: Table.api.formatter.status
+                        },
+                        {
+                            field:'settlement_method',title:__('Settlement_method'),
+                            custom:{1:'bule',2:'yellow',3:'gray'},
+                            searchList:{1:'先付款',2:'货到付款',3:'付定金 货到付款'},
+                            formatter:Table.api.formatter.status
+                        },
+                        {
+                            field: 'payment_status', title: __('Payment_status'),
+                            custom: { 1: 'danger', 2: 'blue', 3: 'success' },
+                            searchList: { 1: '未付款', 2: '部分付款', 3: '已付款' },
+                            formatter: Table.api.formatter.status
+                        },
+                        { field: 'create_person', title: __('Create_person'), operate: 'like' },
+                        { field: 'createtime', title: __('Createtime'), operate: 'RANGE', addclass: 'datetimerange' },
+                        {
+                            field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [
+                                {
+                                    name: 'submitAudit',
+                                    text: '提交审核',
+                                    title: __('提交审核'),
+                                    classname: 'btn btn-xs btn-success btn-ajax',
+                                    icon: 'fa fa-leaf',
+                                    url: 'purchase/purchase_order/audit',
+                                    confirm: '确认提交审核吗',
+                                    success: function (data, ret) {
+                                        Layer.alert(ret.msg);
+                                        $(".btn-refresh").trigger("click");
+                                        //如果需要阻止成功提示，则必须使用return false;
+                                        //return false;
+                                    },
+                                    error: function (data, ret) {
+                                        Layer.alert(ret.msg);
+                                        return false;
+                                    },
+                                    visible: function (row) {
+                                        //返回true时按钮显示,返回false隐藏
+                                        if (row.purchase_status == 0) {
+                                            return true;
+                                        } else {
+                                            return false;
+                                        }
+                                    },
+                                },
+                                {
+                                    name: 'detail',
+                                    text: '详情',
+                                    title: __('Detail'),
+                                    classname: 'btn btn-xs  btn-primary btn-dialog',
+                                    icon: 'fa fa-list',
+                                    url: 'purchase/purchase_order/detail',
+                                    extend: 'data-area = \'["100%","100%"]\'',
+                                    callback: function (data) {
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                    },
+                                    visible: function (row) {
+                                        //返回true时按钮显示,返回false隐藏
+                                        return true;
+                                    }
+                                },
+                                {
+                                    name: 'return',
+                                    text: '付款',
+                                    title: '付款',
+                                    classname: 'btn btn-xs  btn-success  btn-dialog',
+                                    icon: 'fa fa-plus',
+                                    url: 'purchase/purchase_order/purchase_order_pay',
+                                    extend: 'data-area = \'["60%","60%"]\'',
+                                    callback: function (data) {
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                    },
+                                    visible: function (row) {
+                                            return true;
+                                    }
+                                },
+                                {
+                                    name: 'detail',
+                                    text: '确认退款',
+                                    title: '确认退款',
+                                    classname: 'btn btn-xs btn-danger btn-ajax',
+                                    icon: 'fa fa-plus',
+                                    url: 'purchase/purchase_order/purchase_order_affirm_refund',
+                                    confirm: '确认退款吗',
+                                    success: function (data, ret) {
+                                        //Layer.alert(ret.msg);
+                                        table.bootstrapTable('refresh');
+                                        //如果需要阻止成功提示，则必须使用return false;
+                                        return false;
+                                    },
+                                    error: function (data, ret) {
+                                        Layer.alert(ret.msg);
+                                        return false;
+                                    },
+                                    visible: function (row) {
+                                        //返回true时按钮显示,返回false隐藏
+                                        if(row.purchase_status == 8){
+                                            return false;
+                                        }
+                                            return true;
+                                    }
+                                }
+
+                            ], formatter: Table.api.formatter.operate
+                        }
+                    ]
+                ]
+            });
+
+            // 为表格绑定事件
+            Table.api.bindevent(table);                    
+        },
+        purchase_order_pay:function(){
+            
         }
     };
     return Controller;
