@@ -456,9 +456,9 @@
                         </tr>
                         <tr>
                             <td>{$yestoday_date}</td>
-                            <td>{:$yestoday['zeelool_sales_money'] ? $yestoday['zeelool_sales_num'] : 0}</td>
-                            <td>{:$yestoday['voogueme_sales_money'] ? $yestoday['voogueme_sales_num'] : 0}</td>
-                            <td>{:$yestoday['nihao_sales_money'] ? $yestoday['nihao_sales_num'] : 0}</td>
+                            <td>{:$yestoday['zeelool_sales_num'] ? round($yestoday['zeelool_sales_money']/$yestoday['zeelool_sales_num'],2) : 0}</td>
+                            <td>{:$yestoday['voogueme_sales_num'] ? round(yestoday['voogueme_sales_money']/$yestoday['voogueme_sales_num'],2) : 0}</td>
+                            <td>{:$yestoday['nihao_sales_num'] ? round($yestoday['nihao_sales_money']/$yestoday['nihao_sales_num'],2) : 0}</td>
                            
                         </tr>
                     </table>
