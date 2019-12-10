@@ -149,6 +149,48 @@
     .item {
         padding: 30px 0;
     }
+
+
+
+    .caigou-table {
+        width: 30%;
+        height: 130px;
+        border-width: 1px;
+        border-style: solid;
+        border-color: #a9c6c9;
+        border-radius: 6px;
+        text-align: center;
+        float: left;
+        margin-left: 15px;
+        background-color: #c3dde0;
+    }
+
+    .caigou-table tr {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: #a9c6c9;
+        border-radius: 6px;
+        line-height: 50px;
+    }
+
+    .caigou-table tr th {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: #a9c6c9;
+        border-radius: 6px;
+        text-align: center;
+        font-size: 14px;
+    }
+
+    .caigou-table tr td {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: #a9c6c9;
+        border-radius: 6px;
+    }
 </style>
 {if preg_match('/\/admin\/|admin\.php|admin_d75KABNWt\.php/i', url())}
 <div class="alert alert-danger-light">
@@ -257,7 +299,7 @@
                                     <div class="col-xs-6  stat-col">
                                         <div class="stat-icon"><i class="fa fa-list-alt"></i></div>
                                         <div class="stat">
-                                            <div class="value"> {:round($yestoday['all_sales_money']/$yestoday['all_sales_num'],2)}</div>
+                                            <div class="value"> {:$yestoday['all_sales_num'] ? round($yestoday['all_sales_money']/$yestoday['all_sales_num'],2) : 0}</div>
                                             <div class="name"> {:__('昨日客单价')}</div>
                                         </div>
                                         <div class="progress">
@@ -267,7 +309,7 @@
                                     <div class="col-xs-6 stat-col">
                                         <div class="stat-icon"><i class="fa fa-shopping-bag"></i></div>
                                         <div class="stat">
-                                            <div class="value"> {:round($last7days['all_sales_money']/$last7days['all_sales_num'],2)}</div>
+                                            <div class="value"> {:$last7days['all_sales_num'] ? round($last7days['all_sales_money']/$last7days['all_sales_num'],2) : 0}</div>
                                             <div class="name"> {:__('最近7天客单价')}</div>
                                         </div>
                                         <div class="progress">
@@ -346,8 +388,83 @@
                         </div>
                     </div>
                 </div>
+                <div class="row" style="margin-top:15px;">
 
-               
+                    <div class="col-lg-12">
+                    </div>
+                    <table class="caigou-table" style="margin-left: 30px;">
+                        <tr>
+                            <th>日期</td>
+                            <th>Z站订单数</td>
+                            <th>V站订单数</td>
+                            <th>Nihao站订单数</td>
+                        </tr>
+                        <tr>
+                            <td>{$today_date}</td>
+                            <td>{$zeelool_count}</td>
+                            <td>{$voogueme_count}</td>
+                            <td>{$nihao_count}</td>
+                           
+                        </tr>
+                        <tr>
+                            <td>{$yestoday_date}</td>
+                            <td>{$yestoday.zeelool_sales_num}</td>
+                            <td>{$yestoday.voogueme_sales_num}</td>
+                            <td>{$yestoday.nihao_sales_num}</td>
+                           
+                        </tr>
+                    </table>
+
+                    <table class="caigou-table">
+                        <tr>
+                            <th>日期</td>
+                            <th>Z站销售额</td>
+                            <th>V站销售额</td>
+                            <th>Nihao站销售额</td>
+                        </tr>
+                        <tr>
+                            <td>{$today_date}</td>
+                            <td>{$zeelool_total}</td>
+                            <td>{$voogueme_total}</td>
+                            <td>{$nihao_total}</td>
+                           
+                        </tr>
+                        <tr>
+                            <td>{$yestoday_date}</td>
+                            <td>{$yestoday.zeelool_sales_money}</td>
+                            <td>{$yestoday.voogueme_sales_money}</td>
+                            <td>{$yestoday.nihao_sales_money}</td>
+                           
+                        </tr>
+                    </table>
+
+                   
+
+                    <table class="caigou-table" style="margin-left: 30px;">
+                        <tr>
+                            <th>日期</td>
+                            <th>Z站客单价</td>
+                            <th>V站客单价</td>
+                            <th>Nihao站客单价</td>
+                        </tr>
+                        <tr>
+                            <td>{$today_date}</td>
+                            <td>{:$zeelool_count ? round($zeelool_total/$zeelool_count,2) : 0}</td>
+                            <td>{:$voogueme_count ? round($voogueme_total/$voogueme_count,2) : 0}</td>
+                            <td>{:$nihao_count ? round($nihao_total/$nihao_count,2) : 0}</td>
+                           
+                        </tr>
+                        <tr>
+                            <td>{$yestoday_date}</td>
+                            <td>{:$yestoday['zeelool_sales_money'] ? $yestoday['zeelool_sales_num'] : 0}</td>
+                            <td>{:$yestoday['voogueme_sales_money'] ? $yestoday['voogueme_sales_num'] : 0}</td>
+                            <td>{:$yestoday['nihao_sales_money'] ? $yestoday['nihao_sales_num'] : 0}</td>
+                           
+                        </tr>
+                    </table>
+                </div>
+
+
             </div>
             <div class="tab-pane fade" id="two">
                 <div class="row">

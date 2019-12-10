@@ -63,15 +63,23 @@ class Dashboard extends Backend
         $nihao_total = $nihao->where($where)->sum('base_grand_total');
 
         $this->view->assign([
-            'order_num'        => $zeelool_count + $voogueme_count + $nihao_count,
-            'order_sales_money'=> $zeelool_total + $voogueme_total + $nihao_total,
-            'totalorder'       => 32143,
-            'totalorderamount' => 174800,
-            'zeeloolSalesNumList'     => $zeeloolSalesNumList,
-            'vooguemeSalesNumList'    => $vooguemeSalesNumList,
-            'nihaoSalesNumList'       => $nihaoSalesNumList,
-            'yestoday'        => $yestoday,
-            'last7days'       => $last7days
+            'order_num'                 => $zeelool_count + $voogueme_count + $nihao_count,//实时订单总数
+            'order_sales_money'         => $zeelool_total + $voogueme_total + $nihao_total,//实时销售额
+            'zeelool_count'             => $zeelool_count,//Z站实时订单数
+            'voogueme_count'            => $voogueme_count,//V站实时订单数
+            'nihao_count'               => $nihao_count,//nihao站实时订单数
+            'zeelool_total'             => $zeelool_total,//Z站实时销售额
+            'voogueme_total'            => $voogueme_total,//V站实时销售额
+            'nihao_total'               => $nihao_total,//nihao站实时销售额
+            'totalorder'                => 32143,
+            'totalorderamount'          => 174800,
+            'zeeloolSalesNumList'       => $zeeloolSalesNumList,//折线图数据
+            'vooguemeSalesNumList'      => $vooguemeSalesNumList,
+            'nihaoSalesNumList'         => $nihaoSalesNumList,
+            'yestoday'                  => $yestoday,//昨天的销量
+            'last7days'                 => $last7days,//最近7天
+            'yestoday_date'             => date("Y-m-d", strtotime("-1 day")),
+            'today_date'                => date("Y-m-d"),
         ]);
 
 
