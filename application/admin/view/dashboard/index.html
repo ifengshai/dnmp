@@ -161,7 +161,7 @@
         border-radius: 6px;
         text-align: center;
         float: left;
-        margin-left: 15px;
+        margin-left: 30px;
         background-color: #c3dde0;
     }
 
@@ -392,7 +392,7 @@
 
                     <div class="col-lg-12">
                     </div>
-                    <table class="caigou-table" style="margin-left: 30px;">
+                    <table class="caigou-table" >
                         <tr>
                             <th>日期</td>
                             <th>Z站订单数</td>
@@ -415,7 +415,7 @@
                         </tr>
                     </table>
 
-                    <table class="caigou-table">
+                    <table class="caigou-table" style="margin-left: 30px;">
                         <tr>
                             <th>日期</td>
                             <th>Z站销售额</td>
@@ -456,9 +456,9 @@
                         </tr>
                         <tr>
                             <td>{$yestoday_date}</td>
-                            <td>{:round($yestoday['zeelool_sales_money']/$yestoday['zeelool_sales_num'],2)}</td>
-                            <td>{:round($yestoday['voogueme_sales_money']/$yestoday['voogueme_sales_num'],2)}</td>
-                            <td>{:round($yestoday['nihao_sales_money']/$yestoday['nihao_sales_num'],2)}</td>
+                            <td>{:$yestoday['zeelool_sales_num'] ? round($yestoday['zeelool_sales_money']/$yestoday['zeelool_sales_num'],2) : 0}</td>
+                            <td>{:$yestoday['voogueme_sales_num'] ? round($yestoday['voogueme_sales_money']/$yestoday['voogueme_sales_num'],2) : 0}</td>
+                            <td>{:$yestoday['nihao_sales_num'] ? round($yestoday['nihao_sales_money']/$yestoday['nihao_sales_num'],2) : 0}</td>
                            
                         </tr>
                     </table>
