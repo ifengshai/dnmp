@@ -62,6 +62,24 @@ class Dashboard extends Backend
         $nihao_count = $nihao->where($where)->count(1);
         $nihao_total = $nihao->where($where)->sum('base_grand_total');
 
+        //总会员数
+        $zeelool_customer_count = Db::connect('database.db_zeelool')->table('customer_entity')->count(1);
+        $voogueme_customer_count = Db::connect('database.db_voogueme')->table('customer_entity')->count(1);
+        $nihao_customer_count = Db::connect('database.db_nihao')->table('customer_entity')->count(1);
+
+
+        //总订单数
+        $zeelool_order_count = Db::connect('database.db_zeelool')->table('sales_flat_order')->count(1);
+        $voogueme_order_count = Db::connect('database.db_voogueme')->table('sales_flat_order')->count(1);
+        $nihao_order_count = Db::connect('database.db_nihao')->table('sales_flat_order')->count(1);
+
+        //总金额
+        $zeelool_order_money = Db::connect('database.db_zeelool')->table('sales_flat_order')->sum('base_grand_total');
+        $voogueme_order_money = Db::connect('database.db_voogueme')->table('sales_flat_order')->sum('base_grand_total');
+        $nihao_order_money = Db::connect('database.db_nihao')->table('sales_flat_order')->sum('base_grand_total');
+
+
+
         $this->view->assign([
             'order_num'                 => $zeelool_count + $voogueme_count + $nihao_count,//实时订单总数
             'order_sales_money'         => $zeelool_total + $voogueme_total + $nihao_total,//实时销售额
@@ -71,8 +89,9 @@ class Dashboard extends Backend
             'zeelool_total'             => $zeelool_total,//Z站实时销售额
             'voogueme_total'            => $voogueme_total,//V站实时销售额
             'nihao_total'               => $nihao_total,//nihao站实时销售额
-            'totalorder'                => 32143,
-            'totalorderamount'          => 174800,
+            'totalorder'                => $zeelool_order_count + $voogueme_order_count + $nihao_order_count,
+            'totalorderamount'          => $zeelool_order_money + $voogueme_order_money + $nihao_order_money,
+            'totaluser'                 => $zeelool_customer_count + $voogueme_customer_count + $nihao_customer_count,
             'zeeloolSalesNumList'       => $zeeloolSalesNumList,//折线图数据
             'vooguemeSalesNumList'      => $vooguemeSalesNumList,
             'nihaoSalesNumList'         => $nihaoSalesNumList,
