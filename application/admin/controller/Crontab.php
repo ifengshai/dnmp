@@ -2,12 +2,13 @@
 
 namespace app\admin\controller;
 
-use app\admin\model\AdminLog;
+use app\admin\model\purchase\PurchaseOrder;
+use app\admin\model\warehouse\LogisticsInfo;
 use app\common\controller\Backend;
-use think\Config;
 use think\Db;
-use think\Hook;
-use think\Validate;
+use fast\Alibaba;
+
+
 
 /**
  * 定时任务
@@ -16,16 +17,16 @@ use think\Validate;
 class Crontab extends Backend
 {
 
-    protected $noNeedLogin = ['get_sales_order_num', 'zeelool_order_custom_order_prescription', 'zeelool_order_item_process', 'voogueme_order_custom_order_prescription', 'voogueme_order_item_process', 'nihao_order_custom_order_prescription', 'nihao_order_item_process'];
-
-    /**
-     * 获取采购到货状态、到货时间
-     */
-    public function setPurchaseStatus()
-    {
-        dump(urldecode('%2B1.25'));
-    }
-
+    protected $noNeedLogin = [
+        'get_sales_order_num',
+        'zeelool_order_custom_order_prescription',
+        'zeelool_order_item_process',
+        'voogueme_order_custom_order_prescription',
+        'voogueme_order_item_process',
+        'nihao_order_custom_order_prescription',
+        'nihao_order_item_process',
+        'set_purchase_order_logistics'
+    ];
 
 
     /**
@@ -1115,5 +1116,47 @@ order by sfoi.item_id asc limit 1000";
         Db::name('order_statistics')->insert($data);
         echo 'ok';
         die;
+    }
+
+    /**
+     * 定时获取1688发货采购单 生成物流单绑定关系
+     */
+    public function set_purchase_order_logistics()
+    {
+        //查询线上已发货的采购单
+        $purchase = new PurchaseOrder();
+        $map['purchase_type'] = 2;
+        $map['purchase_status'] = ['>', 6];
+        $map['is_add_logistics'] = 0;
+        $map['is_del'] = 1;
+        $list = $purchase->where($map)->select();
+        $list = collection($list)->toArray();
+        dump($list);die;
+        foreach($list as $k => $v) {
+            $res = Alibaba::getOrderDetail($v['purchase_number']);
+            $res = collection($res)->toArray();
+            if ($res['result']->nativeLogistics->logisticsItems[0]->logisticsBillNo) {
+                $data[$k]['id'] = $v['id'];
+                $data[$k]['logistics_number'] = $res['result']->nativeLogistics->logisticsItems[0]->logisticsBillNo;
+                $data[$k]['logistics_company_no'] = $res['result']->nativeLogistics->logisticsItems[0]->logisticsCompanyNo;
+                $data[$k]['logistics_company_name'] = $res['result']->nativeLogistics->logisticsItems[0]->logisticsCompanyName;
+                $data[$k]['is_add_logistics'] = 1;
+
+                $params[$k]['logistics_number'] = $res['result']->nativeLogistics->logisticsItems[0]->logisticsBillNo;
+                $params[$k]['type'] = 1;
+                $params[$k]['order_number'] = $v['purchase_number'];
+                $params[$k]['purchase_id'] = $v['id'];
+                $params[$k]['createtime'] = date('Y-m-d H:i:s');
+                $params[$k]['create_person'] = 'Admin';
+            }
+        }
+        $logistics = new LogisticsInfo();
+        if ($data) {
+            $purchase->saveAll($data);
+
+            $logistics->saveAll($params);
+        }
+        
+        echo 'ok';
     }
 }
