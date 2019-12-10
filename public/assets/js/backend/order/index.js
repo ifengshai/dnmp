@@ -108,6 +108,111 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','bootstrap-table-jump-
             bindevent: function () {
                 Form.api.bindevent($("form[role=form]"));
             }
+        },
+        account_order: function () {
+            // 初始化表格参数配置
+            Table.api.init({
+                showJumpto: true,
+                showExport: false,
+                showColumns: false,
+                showToggle: false,
+                extend: {
+                    index_url: 'order/index/account_order' + '?label=' + Config.label,
+                    add_url: '',
+                    edit_url: '',
+                    del_url: '',
+                    multi_url: '',
+                }
+            });
+
+            var table = $("#table");
+
+            //在普通搜索提交搜索前
+            table.on('common-search.bs.table', function (event, table, query) {
+                //这里可以获取到普通搜索表单中字段的查询条件
+                console.log(query);
+            });
+
+
+            //在表格内容渲染完成后回调的事件
+            table.on('post-body.bs.table', function (e, settings, json, xhr) {
+                console.log(e, settings, json, xhr);
+            });
+
+            //当表格数据加载完成时
+            table.on('load-success.bs.table', function (e, data) {
+                //这里可以获取从服务端获取的JSON数据
+                console.log(data);
+                //这里我们手动设置底部的值
+                $("#money").text(data.extend.money);
+
+            });
+
+            // 初始化表格
+            // 这里使用的是Bootstrap-table插件渲染表格
+            // 相关文档：http://bootstrap-table.wenzhixin.net.cn/zh-cn/documentation/
+            table.bootstrapTable({
+                url: $.fn.bootstrapTable.defaults.extend.index_url,
+                pk: 'entity_id',
+                sortName: 'entity_id',
+                columns: [
+                    [
+                        //更多配置参数可参考http://bootstrap-table.wenzhixin.net.cn/zh-cn/documentation/#c
+                        //该列为复选框字段,如果后台的返回state值将会默认选中
+                        // {field: 'state', checkbox: true,},
+                        //sortable为是否排序,operate为搜索时的操作符,visible表示是否可见
+                        { checkbox: true },
+                        { field: 'entity_id', title: __('记录标识'), operate: false },
+                        //默认隐藏该列
+                        { field: 'increment_id', title: __('订单号') },
+                        { field: 'base_total_paid', title: __('支付金额（$）'), operate: false, formatter: Controller.api.formatter.float_format },
+                        { field: 'frame_cost',title:__('镜架成本金额（￥）'),operate:false,formatter:Controller.api.formatter.float_format},
+                        { field: 'lens_cost',title:__('镜架成本金额（￥）'),operate:false,formatter:Controller.api.formatter.float_format},
+                        { field: 'postage_cost',title:__('邮费成本金额（￥）'),operate:false,formatter:Controller.api.formatter.float_format},
+                        { field: 'process_cost',title:__('加工费成本金额（￥）'),operate:false,formatter:Controller.api.formatter.float_format},
+                        { field: 'created_at', title: __('创建时间'), operate: 'RANGE', addclass: 'datetimerange' },
+                        //操作栏,默认有编辑、删除或排序按钮,可自定义配置buttons来扩展按钮
+                        {
+                            field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [
+                                {
+                                    name: 'detail',
+                                    text: '详情',
+                                    title: __('Detail'),
+                                    classname: 'btn btn-xs  btn-primary  btn-dialog',
+                                    icon: 'fa fa-list',
+                                    url: 'order/index/account_order_detail?label=' + Config.label,
+                                    extend: 'data-area = \'["100%","100%"]\'',
+                                    callback: function (data) {
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                    },
+                                    visible: function (row) {
+                                        //返回true时按钮显示,返回false隐藏
+                                        return true;
+                                    }
+                                }
+
+                            ], formatter: Table.api.formatter.operate
+                        },
+                    ],
+                ],
+                //更多配置参数可参考http://bootstrap-table.wenzhixin.net.cn/zh-cn/documentation/#t
+                //亦可以参考require-table.js中defaults的配置
+                //快捷搜索,这里可在控制器定义快捷搜索的字段
+                search: false,
+                //启用普通表单搜索
+                commonSearch: true,
+                //显示导出按钮
+                showExport: true,
+                //导出类型
+                exportDataType: "all", //共有basic, all, selected三种值 basic当前页 all全部 selected仅选中
+                //导出下拉列表选项
+                exportTypes: ['json', 'xml', 'csv', 'txt', 'doc', 'excel'],
+                //可以控制是否默认显示搜索单表,false则隐藏,默认为false
+                searchFormVisible: true
+            });
+
+            // 为表格绑定事件
+            Table.api.bindevent(table);
         }
     };
     return Controller;

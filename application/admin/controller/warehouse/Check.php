@@ -117,7 +117,8 @@ class Check extends Backend
                         $unqualified_images = $this->request->post("unqualified_images/a");
                         $unqualified_num = $this->request->post("unqualified_num/a");
                         $quantity_rate = $this->request->post("quantity_rate/a");
-
+                        //新增采购单ID create@lsw
+                        $purchase_id = $this->request->post("purchase_id/a");
                         $data = [];
                         foreach (array_filter($sku) as $k => $v) {
                             $data[$k]['sku'] = $v;
@@ -128,7 +129,8 @@ class Check extends Backend
                             if ($product_name[$k]) {
                                 $data[$k]['product_name'] = $product_name[$k];
                             }
-
+                            //新增采购单ID create@lsw
+                            $data[$k]['purchase_id']  = $purchase_id[$k];
                             $data[$k]['purchase_num'] = $purchase_num[$k] ?? 0;
                             $data[$k]['check_num'] = $check_num[$k] ?? 0;
                             $data[$k]['arrivals_num'] = $arrivals_num[$k] ?? 0;
@@ -390,7 +392,7 @@ class Check extends Backend
         //查询质检数量
         $skus = array_column($item, 'sku');
         //查询质检信息
-        $check_map['purchase_id'] = $id;
+        $check_map['check.purchase_id'] = $id;
         $check_map['type'] = 1;
         $check = new \app\admin\model\warehouse\Check;
         $list = $check->hasWhere('checkItem', ['sku' => ['in', $skus]])

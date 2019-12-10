@@ -404,7 +404,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','bootstrap-tab
                 //这里可以获取从服务端获取的JSON数据
                 //这里我们手动设置底部的值
                 //console.log(data);
-                $("#money").text(data.totalPriceInfo);
+                $("#total-money").text(data.totalPriceInfo);
 
             });
             // 初始化表格

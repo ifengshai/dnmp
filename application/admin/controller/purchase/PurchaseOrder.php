@@ -31,6 +31,7 @@ class PurchaseOrder extends Backend
      * @var \app\admin\model\purchase\PurchaseOrder
      */
     protected $model = null;
+    protected $relationSearch = null;
 
     /**
      * 无需登录的方法,同时也就不需要鉴权了
@@ -963,6 +964,100 @@ class PurchaseOrder extends Backend
             return json(['result' => true, 'returnCode' => 200, 'message' => '接收成功']);
         } else {
             return json(['result' => false, 'returnCode' => 301, 'message' => '接收失败']);
+        }
+    }
+    /**
+     * 核算采购单成本 create@lsw
+     */
+    public function account_purchase_order()
+    {
+        //设置过滤方法
+        $this->relationSearch = true;
+        $this->request->filter(['strip_tags']);
+        if ($this->request->isAjax()) {
+            //如果发送的来源是Selectpage，则转发到Selectpage
+            if ($this->request->request('keyField')) {
+                return $this->selectpage();
+            }
+            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            $total = $this->model
+                ->with(['supplier'])
+                ->where(['purchase_status'=>['>=',2]])
+                ->where($where)
+                ->order($sort, $order)
+                ->count();
+
+            $list = $this->model
+                ->with(['supplier'])
+                ->where(['purchase_status'=>['>=',2]])
+                ->where($where)
+                ->order($sort, $order)
+                ->limit($offset, $limit)
+                ->select();
+            //查询总共的ID    
+            $totalId = $this->model
+                ->with(['supplier'])
+                ->where(['purchase_status'=>['>=',2]])
+                ->where($where)
+                ->column('purchase_order.id');    
+            //这个页面的ID    
+            $thisPageId = $this->model
+                ->with(['supplier'])
+                ->where(['purchase_status'=>['>=',2]])
+                ->where($where)
+                ->order($sort,$order)
+                ->limit($offset,$limit)
+                ->column('purchase_order.id');      
+            $list = collection($list)->toArray();
+            //求出所有的总共的实际采购总额和本页面的实际采购金额
+            $purchaseMoney = $this->model->calculatePurchaseOrderMoney($totalId,$thisPageId);
+            //求出退款金额信息
+            $returnMoney   = $this->model->calculatePurchaseReturnMoney($totalId,$thisPageId);
+            if(is_array($purchaseMoney['thisPageArr'])){
+                foreach($list as $key =>$val){
+                    if(array_key_exists($val['id'],$purchaseMoney['thisPageArr'])){
+                       $list[$key]['purchase_virtual_total'] = round($purchaseMoney['thisPageArr'][$val['id']]+$val['purchase_freight'],2);
+                    }                    
+             }
+            }
+            if(is_array($returnMoney['thisPageArr'])){
+                foreach($list as $keys =>$vals){
+                    if(array_key_exists($vals['id'],$returnMoney['thisPageArr'])){
+                       $list[$keys]['refund_amount']  = $returnMoney['thisPageArr'][$vals['id']];   
+                    }
+                }
+            }
+
+
+            $result = array("total" => $total, "rows" => $list,"total_money"=>$purchaseMoney['total_money'],"return_money"=>$returnMoney['return_money']);
+
+            return json($result);
+        }
+            return $this->view->fetch();
+    }
+    /***
+     * 核算采购单付款  create@lsw
+     */
+    public function purchase_order_pay($ids=null)
+    {
+        return $this->view->fetch();
+    }
+    /***
+     * 核算采购单确认退款 create@lsw
+     */
+    public function purchase_order_affirm_refund($ids=null)
+    {
+        if($this->request->isAjax()){
+            $row = $this->model->get($ids);
+            if( 8 == $row['purchase_status']){
+                return $this->error('已经是退款状态,无须再次退款');
+            }
+            $data['purchase_status'] = 8;
+            $result = $this->model->allowField(true)->save($data,['id'=>$ids]);
+            if($result){
+                return $this->success();
+            }
+                return $this->error();
         }
     }
 }

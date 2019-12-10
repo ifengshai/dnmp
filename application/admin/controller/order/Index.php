@@ -177,4 +177,57 @@ class Index extends Backend
         $this->view->assign("label",$label);
         return $this->view->fetch();
     }
+    /**
+     * 订单成本核算 create@lsw
+     */
+    public function account_order()
+    {
+        $label = $this->request->get('label', 1);
+        //设置过滤方法
+        $this->request->filter(['strip_tags']);
+        if ($this->request->isAjax()) {
+            //如果发送的来源是Selectpage，则转发到Selectpage
+            if ($this->request->request('keyField')) {
+
+                return $this->selectpage();
+            }
+
+            //根据传的标签切换对应站点数据库
+            $label = $this->request->get('label', 1);
+            if ($label == 1) {
+                $model = $this->zeelool;
+            } elseif ($label == 2) {
+                $model = $this->voogueme;
+            } elseif ($label == 3) {
+                $model = $this->nihao;
+            }
+
+            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            $total = $model
+                ->where($where)
+                ->order($sort, $order)
+                ->count();
+
+            $list = $model
+                ->where($where)
+                ->order($sort, $order)
+                ->limit($offset, $limit)
+                ->select();
+
+            $list = collection($list)->toArray();
+            $result = array("total" => $total, "rows" => $list, "extend" => ['money' => mt_rand(100000, 999999)]);
+
+            return json($result);
+        }
+        $this->assign('label', $label);
+        $this->assignconfig('label', $label);
+        return $this->view->fetch();
+    }
+    /**
+     * 订单核算成本 create@lsw
+     */
+    public function account_order_detail()
+    {
+        echo 123;
+    }
 }
