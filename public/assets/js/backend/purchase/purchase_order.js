@@ -797,7 +797,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','bootstrap-tab
                                     title: __('Detail'),
                                     classname: 'btn btn-xs  btn-primary btn-dialog',
                                     icon: 'fa fa-list',
-                                    url: 'purchase/purchase_order/detail',
+                                    url: 'purchase/purchase_order/account_purchase_order_detail',
                                     extend: 'data-area = \'["100%","100%"]\'',
                                     callback: function (data) {
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
@@ -859,7 +859,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','bootstrap-tab
             Table.api.bindevent(table);                    
         },
         purchase_order_pay:function(){
-            
+            Form.api.bindevent($("form[role=form]"));
         }
     };
     return Controller;

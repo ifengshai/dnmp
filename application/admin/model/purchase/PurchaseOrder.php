@@ -147,4 +147,14 @@ class PurchaseOrder extends Model
         }
         return $arr;
     }
+    /***
+     * 求出采购单核算成本详情页面所需要的信息 create@lsw
+     * @param id 采购单ID
+     */
+    // public function getPurchaseOrderItemInfo($id)
+    // {
+    //     $map['purchase_id'] = $id;
+    //     $purchaseOrderInfo = Db::name('purchase_order_item')->alias('m')->where($map)->join('check_order_item c','m.purchase_id=c.purchase_id and m.sku=c.sku','left')
+    //     ->field('')
+    // }
 }

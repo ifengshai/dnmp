@@ -1,11 +1,11 @@
 <form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
     <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Upload_photos')}:</label>
+        <label class="control-label col-xs-12 col-sm-2">上传付款凭证:</label>
         <div class="col-xs-12 col-sm-8">
             <div class="input-group">
-                <input id="c-upload_photos" class="form-control" size="50" name="row[upload_photos]" type="text" value="">
+                <input id="c-upload_photos" class="form-control" size="50" name="row[pay_photos]" type="text" value="">
                 <div class="input-group-addon no-border no-padding">
-                    <span><button type="button" id="plupload-upload_photos"   class="btn btn-danger plupload" data-input-id="c-upload_photos" data-mimetype="image/gif,image/jpeg,image/png,image/jpg,image/bmp" data-url="ajax/upload?dir=saleAfterManage/saleAfterTask" data-multiple="true" data-preview-id="p-upload_photos" data-maxsize="2M"><i class="fa fa-upload"></i> 上传</button></span>
+                    <span><button type="button" id="plupload-upload_photos"   class="btn btn-danger plupload" data-input-id="c-upload_photos" data-mimetype="image/gif,image/jpeg,image/png,image/jpg,image/bmp" data-url="ajax/upload?dir=purchase/purchaseOrder" data-multiple="true" data-preview-id="p-upload_photos" data-maxsize="2M"><i class="fa fa-upload"></i> 上传</button></span>
                 </div>
                 <span class="msg-box n-right" for="c-upload_photos"></span>
             </div>
@@ -13,15 +13,15 @@
         </div>
     </div>
     <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Platform_sku')}:</label>
+        <label class="control-label col-xs-12 col-sm-2">付款金额（元）:</label>
         <div class="col-xs-12 col-sm-8">
-            <input id="c-platform_sku" data-rule="required" class="form-control" name="row[platform_sku]" type="text" value="">
+            <input id="c-pay_money" data-rule="required" class="form-control" name="row[pay_money]" type="text" value="">
         </div>
     </div>
     <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Problem_desc')}:</label>
+        <label class="control-label col-xs-12 col-sm-2">付款说明:</label>
         <div class="col-xs-12 col-sm-8">
-            <textarea id="c-problem_desc" class="form-control editor" rows="5" name="row[problem_desc]" cols="50"></textarea>
+            <textarea id="c-pay_explain"  rows="5" name="row[pay_explain]" cols="103"></textarea>
         </div>
     </div>
     <div class="form-group layer-footer">
