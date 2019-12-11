@@ -459,6 +459,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                                 $('.final_amount').removeClass('hidden');
                             }
 
+                            $('.freight').attr("readonly","readonly");;
+
                             //总计
                             var purchase_total = data.total * 1 + data.freight * 1;
                             $('.purchase_total').val(purchase_total);
@@ -860,7 +862,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
             // 为表格绑定事件
             Table.api.bindevent(table);
         },
-        purchase_order_pay:function(){
+        purchase_order_pay: function () {
             Form.api.bindevent($("form[role=form]"));
         }
     };
