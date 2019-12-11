@@ -73,14 +73,8 @@
                 </select>
             </div>
         </div>
-        <div class="form-group {:$row['type_id'] == 1 ? 'hidden' : ''} order_number">
-            <label class="control-label col-xs-12 col-sm-2">关联订单:</label>
-            <div class="col-xs-12 col-sm-8">
-                <input id="c-order_number" class="form-control" disabled name="row[order_number]"
-                    value="{$row.order_number}"  type="text">
-            </div>
-        </div>
-        <div class="form-group {:$row['type_id'] == 1 ? '' : 'hidden'} purchase_id_number">
+     
+        <div class="form-group purchase_id_number">
             <label class="control-label col-xs-12 col-sm-2">质检单:</label>
             <div class="col-xs-12 col-sm-8">
                 <select name="row[check_id]" class="form-control check_id selectpicker" disabled data-live-search='true'>
