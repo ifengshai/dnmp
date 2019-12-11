@@ -480,7 +480,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-se
                                 }
 
                                 shtml += ' <tr><td><input id="c-purchase_remark" class="form-control sku" name="sku[]" readonly type="text" value="' + sku + '"></td>'
-                                shtml += ' <td><input id="c-purchase_remark" class="form-control sku" name="purchase_id[]" readonly type="hidden" value="' + data.id + '"></td>'
+                                shtml += ' <input id="c-purchase_remark" class="form-control sku" name="purchase_id[]" readonly type="hidden" value="' + data.id + '">'
                                 shtml += ' <td><input id="c-purchase_remark" class="form-control" name="supplier_sku[]" readonly type="text" value="' + supplier_sku + '"></td>'
                                 shtml += ' <td><input id="c-purchase_remark" class="form-control purchase_num" name="purchase_num[]" readonly type="text" redeonly value="' + data.item[i].purchase_num + '"></td>'
                                 shtml += ' <td><input id="c-purchase_remark" class="form-control check_num" name="check_num[]" type="text" readonly value="' + data.item[i].check_num + '"></td>'
