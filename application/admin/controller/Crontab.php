@@ -1131,7 +1131,6 @@ order by sfoi.item_id asc limit 1000";
         $map['is_del'] = 1;
         $list = $purchase->where($map)->select();
         $list = collection($list)->toArray();
-        dump($list);die;
         foreach($list as $k => $v) {
             $res = Alibaba::getOrderDetail($v['purchase_number']);
             $res = collection($res)->toArray();
