@@ -78,13 +78,13 @@ class Dashboard extends Backend
         
         //实时用户数量
         $total_customer_count = Cache::get('dashboard_total_customer_count');
-        if (!$total_customer_count) {
+        if ($total_customer_count) {
             $stime = date("Y-m-d 00:00:00", time());
             $etime = date("Y-m-d H:i:s", time());
             $swhere['created_at'] = ['between', [$stime, $etime]];
-            $total_zeelool_customer_count = Db::connect('database.db_zeelool')->table('sales_flat_quote')->where($swhere)->count(1);
-            $total_voogueme_customer_count = Db::connect('database.db_voogueme')->table('sales_flat_quote')->where($swhere)->count(1);
-            $total_nihao_customer_count = Db::connect('database.db_nihao')->table('sales_flat_quote')->where($swhere)->count(1);
+            $total_zeelool_customer_count = Db::connect('database.db_zeelool')->table('customer_entity')->where($swhere)->count(1);
+            $total_voogueme_customer_count = Db::connect('database.db_voogueme')->table('customer_entity')->where($swhere)->count(1);
+            $total_nihao_customer_count = Db::connect('database.db_nihao')->table('customer_entity')->where($swhere)->count(1);
             $total_customer_count = $total_zeelool_customer_count + $total_voogueme_customer_count + $total_nihao_customer_count;
             Cache::set('dashboard_total_customer_count', $total_customer_count, 3600);
         }
