@@ -1129,7 +1129,7 @@ order by sfoi.item_id asc limit 1000";
         $map['purchase_status'] = ['>', 6];
         $map['is_add_logistics'] = 0;
         $map['is_del'] = 1;
-        $list = $purchase->where($map)->limit(20)->select();
+        $list = $purchase->where($map)->limit(10)->select();
         $list = collection($list)->toArray();
         foreach($list as $k => $v) {
             $res = Alibaba::getOrderDetail($v['purchase_number']);
@@ -1152,6 +1152,9 @@ order by sfoi.item_id asc limit 1000";
                 $params[$k]['create_person'] = 'Admin';
             }
         }
+
+        dump($data);
+        dump($params);die;
         $logistics = new LogisticsInfo();
         if ($data) {
             $purchase->saveAll($data);
