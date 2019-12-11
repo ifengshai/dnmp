@@ -557,13 +557,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-se
                             //循环展示商品信息
                             var shtml = ' <tr><th>SKU</th><th>退货数量</th><th>到货数量</th><th>合格数量</th><th>不合格数量</th><th>合格率</th><th>备注</th><th>上传图片</th><th>操作</th></tr>';
                             $('.caigou table tbody').html('');
-                           
+                            console.log(data);
                             for (var i in data) { 
                                 var sku = data[i].return_sku;
                                 if (!sku) {
                                     sku = '';
                                 }
                                 shtml += ' <tr><td><input id="c-purchase_remark" class="form-control sku" name="sku[]" readonly type="text" value="' + sku + '"></td>'
+                                shtml += ' <input id="c-purchase_remark" class="form-control sku" name="purchase_id[]" readonly type="hidden" value="0">'
                                 shtml += ' <td>' + data[i].return_sku_qty + '</td>'
                                 shtml += ' <td><input id="c-purchase_remark" class="form-control arrivals_num" name="arrivals_num[]" type="text"></td>'
                                 shtml += ' <td><input id="c-purchase_remark" class="form-control quantity_num" name="quantity_num[]" type="text"></td>'
