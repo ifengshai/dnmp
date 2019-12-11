@@ -1129,7 +1129,7 @@ order by sfoi.item_id asc limit 1000";
         $map['purchase_status'] = ['>', 6];
         $map['is_add_logistics'] = 0;
         $map['is_del'] = 1;
-        $list = $purchase->where($map)->select();
+        $list = $purchase->where($map)->limit(20)->select();
         $list = collection($list)->toArray();
         foreach($list as $k => $v) {
             $res = Alibaba::getOrderDetail($v['purchase_number']);
