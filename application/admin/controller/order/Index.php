@@ -215,7 +215,16 @@ class Index extends Backend
                 ->select();
             $totalId = $model
                    ->where($where)
-                   ->cloumn()    
+                   ->column('entity_id');
+            $thisPageId = $model
+                   ->where($where)
+                   ->order($sort,$order)
+                   ->limit($offset,$limit)
+                   ->column('entity_id');              
+            // echo '<pre>';       
+            // //var_dump($totalId);
+            // var_dump($thisPageId);
+            // exit;           
             $list = collection($list)->toArray();
             $result = array("total" => $total, "rows" => $list, "extend" => ['money' => mt_rand(100000, 999999)]);
 
