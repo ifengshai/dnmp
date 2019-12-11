@@ -16,6 +16,7 @@ use app\admin\model\purchase\Supplier;
 use app\admin\model\purchase\SupplierSku;
 use think\Cache;
 use fast\Kuaidi100;
+use app\admin\model\purchase\Purchase_order_pay;
 
 
 /**
@@ -1036,10 +1037,53 @@ class PurchaseOrder extends Backend
             return $this->view->fetch();
     }
     /***
+     * 采购单成本核算详情 create@lsw 
+     */
+    public function account_purchase_order_detail($ids=null)
+    {
+        $row = $this->model->get($ids);
+        if (!$row) {
+            $this->error(__('No Results were found'));
+        }
+
+        $adminIds = $this->getDataLimitAdminIds();
+        if (is_array($adminIds)) {
+            if (!in_array($row[$this->dataLimitField], $adminIds)) {
+                $this->error(__('You have no permission'));
+            }
+        }
+        $info = $this->model->getPurchaseOrderItemInfo($row['id']);
+        $this->view->assign("row", $row);
+        return $this->view->fetch();
+    }
+    /***
      * 核算采购单付款  create@lsw
      */
     public function purchase_order_pay($ids=null)
     {
+        if($this->request->isAjax()){
+            $params = $this->request->post("row/a");
+            $row = $this->model->get($ids);
+            if( 1 == $row['purchase_type']){
+                $resultInfo = $this->model->where(['id'=>$row['id']])->setInc('payment_money',$params['pay_money']);
+            }else{
+                $resultInfo = true;
+
+            }
+            if(false !== $resultInfo){
+                $params['purchase_id']   = $row['id'];
+                $params['create_person'] = session('admin.nickname');
+                $params['createtime'] = date('Y-m-d H:i:s', time());
+                $result = (new purchase_order_pay())->allowField(true)->save($params);
+                if($result){
+                    return    $this->success('添加成功');
+                }
+            }else{
+                    return    $this->error('添加失败');
+            }
+
+
+        }
         return $this->view->fetch();
     }
     /***

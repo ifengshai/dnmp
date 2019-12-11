@@ -392,7 +392,7 @@ class Check extends Backend
         //查询质检数量
         $skus = array_column($item, 'sku');
         //查询质检信息
-        $check_map['check.purchase_id'] = $id;
+        $check_map['Check.purchase_id'] = $id;
         $check_map['type'] = 1;
         $check = new \app\admin\model\warehouse\Check;
         $list = $check->hasWhere('checkItem', ['sku' => ['in', $skus]])
