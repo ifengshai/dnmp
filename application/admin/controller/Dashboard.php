@@ -76,7 +76,7 @@ class Dashboard extends Backend
             Cache::set('dashboard_total_quote_count', $total_quote_count, 3600);
         }
         
-        //实时查询当天购物车数量
+        //实时用户数量
         $total_customer_count = Cache::get('dashboard_total_customer_count');
         if (!$total_customer_count) {
             $stime = date("Y-m-d 00:00:00", time());
@@ -141,6 +141,8 @@ class Dashboard extends Backend
             'last7days'                 => $last7days, //最近7天
             'yestoday_date'             => date("Y-m-d", strtotime("-1 day")),
             'today_date'                => date("Y-m-d"),
+            'total_quote_count'         => $total_quote_count,
+            'total_customer_count'      => $total_customer_count,
         ]);
 
 
