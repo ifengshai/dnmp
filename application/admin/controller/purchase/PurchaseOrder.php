@@ -131,7 +131,7 @@ class PurchaseOrder extends Backend
                         $data = [];
                         foreach (array_filter($sku) as $k => $v) {
                             $data[$k]['sku'] = $v;
-                            $data[$k]['supplier_sku'] = $supplier_sku[$k];
+                            $data[$k]['supplier_sku'] = trim($supplier_sku[$k]);
                             $data[$k]['product_name'] = $product_name[$k];
                             $data[$k]['purchase_num'] = $num[$k];
                             $data[$k]['purchase_price'] = $price[$k];
@@ -323,7 +323,7 @@ class PurchaseOrder extends Backend
                         $data = [];
                         foreach (array_filter($sku) as $k => $v) {
                             $data[$k]['sku'] = $v;
-                            $data[$k]['supplier_sku'] = $supplier_sku[$k];
+                            $data[$k]['supplier_sku'] = trim($supplier_sku[$k]);
                             $data[$k]['product_name'] = $product_name[$k];
                             $data[$k]['purchase_num'] = $num[$k];
                             $data[$k]['purchase_price'] = $price[$k];

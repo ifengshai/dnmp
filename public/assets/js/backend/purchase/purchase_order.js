@@ -1,4 +1,4 @@
-define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','bootstrap-table-jump-to'], function ($, undefined, Backend, Table, Form) {
+define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-table-jump-to'], function ($, undefined, Backend, Table, Form) {
 
     var Controller = {
         index: function () {
@@ -43,6 +43,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','bootstrap-tab
                         { field: 'product_total', title: __('Product_total'), operate: 'BETWEEN' },
                         { field: 'purchase_freight', title: __('Purchase_freight'), operate: 'BETWEEN' },
                         { field: 'purchase_total', title: __('Purchase_total'), operate: 'BETWEEN' },
+                        { field: 'logistics_number', title: __('物流单号'), operate: 'like', visible: false },
                         {
                             field: 'purchase_status', title: __('Purchase_status'),
                             custom: { 0: 'success', 1: 'yellow', 2: 'blue', 3: 'danger', 4: 'gray', 5: 'yellow', 6: 'yellow', 7: 'success' },
@@ -225,7 +226,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','bootstrap-tab
                                     },
                                     visible: function (row) {
                                         //返回true时按钮显示,返回false隐藏
-                                        if (row.purchase_status == 6 ||　row.purchase_status == 7) {
+                                        if (row.purchase_status == 6 || row.purchase_status == 7) {
                                             return true;
                                         } else {
                                             return false;
@@ -304,7 +305,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','bootstrap-tab
                 $(this).parent().parent().remove();
             })
 
-            
+
 
             //异步获取供应商的数据
             $(document).on('change', '.supplier.selectpicker', function () {
@@ -318,7 +319,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','bootstrap-tab
             })
 
             if ($('.supplier.selectpicker').val()) {
-                
+
                 $('.supplier.selectpicker').change();
             }
 
@@ -464,20 +465,21 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','bootstrap-tab
 
 
                             //循环展示商品信息
-                            var shtml = ' <tr><th>SKU</td><th>产品名称</td><th>供应商sku</td><th>采购数量（个）</td><th>采购单价（元）</td><th>总价（元）</td><th>操作</td></tr>';
+                            var shtml = ' <tr><th>SKU</td><th>产品名称</td><th>供应商sku</td><th>采购数量（个）</td><th>采购单价（元）</td><th>总价（元）</td></tr>';
                             $('.caigou table tbody').html('');
+                            $('#toolbar').remove();
                             for (var i in data.item) {
                                 var sku = data.item[i].sku;
                                 if (!sku) {
                                     sku = '';
                                 }
-                                shtml += '<tr><td><input id="c-purchase_remark" class="form-control sku" name="sku[]" value="' + sku + '" type="text"></td>'
+                                shtml += '<tr><td><input id="c-purchase_remark" class="form-control sku" name="sku[]" readonly value="' + sku + '" type="text"></td>'
                                 shtml += '<td><input id="c-purchase_remark" class="form-control product_name" readonly name="product_name[]" value="' + data.item[i].product_name + '" type="text"></td>'
                                 shtml += '<td><input id="c-purchase_remark" class="form-control supplier_sku" readonly name="supplier_sku[]" value="' + data.item[i].supplier_sku + '" type="text"></td>'
                                 shtml += '<td><input id="c-purchase_remark" class="form-control purchase_num" name="purchase_num[]" value="' + data.item[i].num + '" type="text"></td>'
                                 shtml += '<td><input id="c-purchase_remark" class="form-control purchase_price" name="purchase_price[]" value="' + data.item[i].price + '" type="text"></td>'
-                                shtml += '<td><input id="c-purchase_remark" class="form-control goods_total" name="purchase_total[]" value="' + data.item[i].total + '" type="text"></td>'
-                                shtml += '<td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i> 删除</a></td>'
+                                shtml += '<td><input id="c-purchase_remark" class="form-control goods_total" readonly name="purchase_total[]" value="' + data.item[i].total + '" type="text"></td>'
+                                // shtml += '<td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i> 删除</a></td>'
                                 shtml += '</tr>'
                             }
                             $('.caigou table tbody').append(shtml);
@@ -689,7 +691,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','bootstrap-tab
             }
 
         },
-        account_purchase_order:function(){
+        account_purchase_order: function () {
             // 初始化表格参数配置
             Table.api.init({
                 showJumpto: true,
@@ -735,12 +737,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','bootstrap-tab
                         { field: 'id', title: __('Id'), operate: false, visible: false },
                         { field: 'purchase_number', title: __('Purchase_number'), operate: 'like' },
                         { field: 'purchase_name', title: __('Purchase_name'), operate: 'like' },
-                        { field: 'supplier.supplier_name',title:__('供应商')},
+                        { field: 'supplier.supplier_name', title: __('供应商') },
                         { field: 'purchase_total', title: __('Purchase_total'), operate: 'BETWEEN' },
-                        { field: 'purchase_virtual_total',title:__('实际采购金额（元）'),operate:'BETWEEN'},
-                        { field: 'refund_amount',title:__('退款金额（元）'),operate:false},
-                        { field: 'purchase_freight',title:__('邮费（元）')},
-                        { field: 'payment_money',title:__('已付款金额')},
+                        { field: 'purchase_virtual_total', title: __('实际采购金额（元）'), operate: 'BETWEEN' },
+                        { field: 'refund_amount', title: __('退款金额（元）'), operate: false },
+                        { field: 'purchase_freight', title: __('邮费（元）') },
+                        { field: 'payment_money', title: __('已付款金额') },
                         {
                             field: 'purchase_status', title: __('Purchase_status'),
                             custom: { 0: 'success', 1: 'yellow', 2: 'blue', 3: 'danger', 4: 'gray', 5: 'yellow', 6: 'yellow', 7: 'success' },
@@ -749,10 +751,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','bootstrap-tab
                             formatter: Table.api.formatter.status
                         },
                         {
-                            field:'settlement_method',title:__('Settlement_method'),
-                            custom:{1:'bule',2:'yellow',3:'gray'},
-                            searchList:{1:'先付款',2:'货到付款',3:'付定金 货到付款'},
-                            formatter:Table.api.formatter.status
+                            field: 'settlement_method', title: __('Settlement_method'),
+                            custom: { 1: 'bule', 2: 'yellow', 3: 'gray' },
+                            searchList: { 1: '先付款', 2: '货到付款', 3: '付定金 货到付款' },
+                            formatter: Table.api.formatter.status
                         },
                         {
                             field: 'payment_status', title: __('Payment_status'),
@@ -819,7 +821,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','bootstrap-tab
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
                                     },
                                     visible: function (row) {
-                                            return true;
+                                        return true;
                                     }
                                 },
                                 {
@@ -842,10 +844,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','bootstrap-tab
                                     },
                                     visible: function (row) {
                                         //返回true时按钮显示,返回false隐藏
-                                        if(row.purchase_status == 8){
+                                        if (row.purchase_status == 8) {
                                             return false;
                                         }
-                                            return true;
+                                        return true;
                                     }
                                 }
 
@@ -856,7 +858,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','bootstrap-tab
             });
 
             // 为表格绑定事件
-            Table.api.bindevent(table);                    
+            Table.api.bindevent(table);
         },
         purchase_order_pay:function(){
             Form.api.bindevent($("form[role=form]"));

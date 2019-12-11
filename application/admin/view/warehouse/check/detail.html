@@ -65,7 +65,7 @@
         <div class="form-group">
             <label class="control-label col-xs-12 col-sm-2">质检类型:</label>
             <div class="col-xs-12 col-sm-8">
-                <select name="row[type]" class="form-control type">
+                <select name="row[type]" class="form-control type" disabled>
                     <option value="1" {:$row['type'] == 1 ? 'selected' : ''}>采购质检</option>
                     <option value="2" {:$row['type'] == 2 ? 'selected' : ''}>退货质检</option>
                 </select>
@@ -90,7 +90,7 @@
         <div class="form-group">
             <label class="control-label col-xs-12 col-sm-2">采购单:</label>
             <div class="col-xs-12 col-sm-8">
-                <select name="row[purchase_id]" class="form-control purchase_id">
+                <select name="row[purchase_id]" class="form-control purchase_id" disabled>
                     <option value="">请选择</option>
                     {foreach $purchase_data as $k => $v}
                     <option value="{$k}" {:$row['purchase_id']==$k ? 'selected' : '' }>{$v}</option>
@@ -102,7 +102,7 @@
         <div class="form-group">
             <label class="control-label col-xs-12 col-sm-2">供应商:</label>
             <div class="col-xs-12 col-sm-8">
-                <select name="row[supplier_id]" class="form-control supplier" required>
+                <select name="row[supplier_id]" class="form-control supplier" disabled>
                     <option value="">请选择</option>
                     {foreach $supplier as $k => $v}
                     <option value="{$k}" {:$row['supplier_id'] == $k ? 'selected' : ''}>{$v}</option>
@@ -114,7 +114,7 @@
         <div class="form-group">
             <label class="control-label col-xs-12 col-sm-2">备注:</label>
             <div class="col-xs-12 col-sm-8">
-                <textarea id="c-quality_standard" class="form-control " rows="5" name="row[remark]"
+                <textarea id="c-quality_standard" class="form-control " disabled rows="5" name="row[remark]"
                     cols="50">{$row.remark}</textarea>
             </div>
         </div>
@@ -157,33 +157,33 @@
                     <input id="c-purchase_remark" class="form-control item_id" name="item_id[]" type="hidden"
                         value="{$v.id}">
                     <td>
-                        <input id="c-purchase_remark" class="form-control" name="sku[]" type="text" value="{$v.sku}">
+                        <input id="c-purchase_remark" class="form-control" name="sku[]" disabled type="text" value="{$v.sku}">
                     </td>
                     {if $row['type'] == 1}
-                    <td><input id="c-purchase_remark" class="form-control" name="supplier_sku[]" type="text"
+                    <td><input id="c-purchase_remark" class="form-control" name="supplier_sku[]" disabled type="text"
                             value="{$v.supplier_sku}"></td>
-                    <td><input id="c-purchase_remark" class="form-control purchase_num" name="purchase_num[]"
+                    <td><input id="c-purchase_remark" class="form-control purchase_num" disabled name="purchase_num[]"
                             type="text" value="{$v.purchase_num}"></td>
-                    <td><input id="c-purchase_remark" class="form-control check_num" readonly name="check_num[]" type="text"
+                    <td><input id="c-purchase_remark" class="form-control check_num" disabled name="check_num[]" type="text"
                             value="{$v.check_num}"></td>
                     {/if}
-                    <td><input id="c-purchase_remark" class="form-control arrivals_num" name="arrivals_num[]"
+                    <td><input id="c-purchase_remark" class="form-control arrivals_num" disabled name="arrivals_num[]"
                             type="text" value="{$v.arrivals_num}"></td>
-                    <td><input id="c-purchase_remark" class="form-control quantity_num" name="quantity_num[]"
+                    <td><input id="c-purchase_remark" class="form-control quantity_num" disabled name="quantity_num[]"
                             type="text" value="{$v.quantity_num}"></td>
                     {if $row['type'] == 1}
-                    <td><input id="c-purchase_remark" class="form-control sample_num" name="sample_num[]" type="text"
+                    <td><input id="c-purchase_remark" class="form-control sample_num" disabled name="sample_num[]" type="text"
                             value="{$v.sample_num}"></td>
                     {/if}
-                    <td><input id="c-purchase_remark" class="form-control unqualified_num" readonly name="unqualified_num[]" type="text"
+                    <td><input id="c-purchase_remark" class="form-control unqualified_num" disabled name="unqualified_num[]" type="text"
                         value="{$v.unqualified_num}"></td>
-                    <td><input id="c-purchase_remark" class="form-control quantity_rate" readonly name="quantity_rate[]" type="text"
+                    <td><input id="c-purchase_remark" class="form-control quantity_rate" disabled name="quantity_rate[]" type="text"
                         value="{$v.quantity_rate}">%</td>
-                    <td><input style="width: 200px;" id="c-purchase_remark" class="form-control remark" name="remark[]"
+                    <td><input style="width: 200px;" id="c-purchase_remark" disabled class="form-control remark" name="remark[]"
                             type="text" value="{$v.remark}"></td>
                     <td>
                         <input id="c-contract_images" style="width: 150px;" class="form-control unqualified_images"
-                            size="200" readonly name="unqualified_images[]" type="text" value="{$v.unqualified_images}">
+                            size="200" disabled name="unqualified_images[]" type="text" value="{$v.unqualified_images}">
 
                     </td>
 
