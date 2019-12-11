@@ -213,7 +213,9 @@ class Index extends Backend
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
-
+            $totalId = $model
+                   ->where($where)
+                   ->cloumn()    
             $list = collection($list)->toArray();
             $result = array("total" => $total, "rows" => $list, "extend" => ['money' => mt_rand(100000, 999999)]);
 

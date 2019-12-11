@@ -169,7 +169,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','bootstrap-table-jump-
                         { field: 'status', title: __('状态'), searchList: { "processing": __('processing'), 'complete': 'complete', 'creditcard_failed': 'creditcard_failed', 'creditcard_pending': 'creditcard_pending', 'holded': 'holded', 'payment_review': 'payment_review', 'paypal_canceled_reversal': 'paypal_canceled_reversal', 'paypal_reversed': 'paypal_reversed', 'pending': 'pending', 'canceled': 'canceled', 'closed': 'closed', "free_processing": __('free_processing') } },
                         { field: 'base_total_paid', title: __('支付金额（$）'), operate: false, formatter: Controller.api.formatter.float_format },
                         { field: 'frame_cost',title:__('镜架成本金额（￥）'),operate:false,formatter:Controller.api.formatter.float_format},
-                        { field: 'lens_cost',title:__('镜架成本金额（￥）'),operate:false,formatter:Controller.api.formatter.float_format},
+                        { field: 'lens_cost',title:__('镜片成本金额（￥）'),operate:false,formatter:Controller.api.formatter.float_format},
                         { field: 'postage_cost',title:__('邮费成本金额（￥）'),operate:false,formatter:Controller.api.formatter.float_format},
                         { field: 'process_cost',title:__('加工费成本金额（￥）'),operate:false,formatter:Controller.api.formatter.float_format},
                         { field: 'created_at', title: __('创建时间'), operate: 'RANGE', addclass: 'datetimerange' },

@@ -392,7 +392,7 @@ class PurchaseReturn extends Backend
         $skus = array_column($item, 'sku');
         //查询质检信息 
         //不合格数量不等于0 并且 未处理过退销 审核通过的质检单信息
-        $check_map['purchase_id'] = $id;
+        $check_map['Check.purchase_id'] = $id;
         $check_map['type'] = 1;
         $check_map['status'] = 2; //已审核
         $check = new \app\admin\model\warehouse\Check;
