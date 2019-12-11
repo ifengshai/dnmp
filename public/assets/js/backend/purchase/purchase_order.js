@@ -465,20 +465,21 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
 
 
                             //循环展示商品信息
-                            var shtml = ' <tr><th>SKU</td><th>产品名称</td><th>供应商sku</td><th>采购数量（个）</td><th>采购单价（元）</td><th>总价（元）</td><th>操作</td></tr>';
+                            var shtml = ' <tr><th>SKU</td><th>产品名称</td><th>供应商sku</td><th>采购数量（个）</td><th>采购单价（元）</td><th>总价（元）</td></tr>';
                             $('.caigou table tbody').html('');
+                            $('#toolbar').remove();
                             for (var i in data.item) {
                                 var sku = data.item[i].sku;
                                 if (!sku) {
                                     sku = '';
                                 }
-                                shtml += '<tr><td><input id="c-purchase_remark" class="form-control sku" name="sku[]" value="' + sku + '" type="text"></td>'
+                                shtml += '<tr><td><input id="c-purchase_remark" class="form-control sku" name="sku[]" readonly value="' + sku + '" type="text"></td>'
                                 shtml += '<td><input id="c-purchase_remark" class="form-control product_name" readonly name="product_name[]" value="' + data.item[i].product_name + '" type="text"></td>'
                                 shtml += '<td><input id="c-purchase_remark" class="form-control supplier_sku" readonly name="supplier_sku[]" value="' + data.item[i].supplier_sku + '" type="text"></td>'
                                 shtml += '<td><input id="c-purchase_remark" class="form-control purchase_num" name="purchase_num[]" value="' + data.item[i].num + '" type="text"></td>'
                                 shtml += '<td><input id="c-purchase_remark" class="form-control purchase_price" name="purchase_price[]" value="' + data.item[i].price + '" type="text"></td>'
-                                shtml += '<td><input id="c-purchase_remark" class="form-control goods_total" name="purchase_total[]" value="' + data.item[i].total + '" type="text"></td>'
-                                shtml += '<td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i> 删除</a></td>'
+                                shtml += '<td><input id="c-purchase_remark" class="form-control goods_total" readonly name="purchase_total[]" value="' + data.item[i].total + '" type="text"></td>'
+                                // shtml += '<td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i> 删除</a></td>'
                                 shtml += '</tr>'
                             }
                             $('.caigou table tbody').append(shtml);
