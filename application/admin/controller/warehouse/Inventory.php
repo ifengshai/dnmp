@@ -722,7 +722,7 @@ class Inventory extends Backend
                     $params['out_stock_number'] = 'OUT' . date('YmdHis') . rand(100, 999) . rand(100, 999);
                     $params['create_person'] = session('admin.nickname');
                     $params['createtime'] = date('Y-m-d H:i:s', time());
-                    $params['type_id'] = 8;
+                    $params['type_id'] = 1;
                     $params['status'] = 2;
                     $params['remark'] = '盘亏出库';
                     $params['check_time'] = date('Y-m-d H:i:s', time());
