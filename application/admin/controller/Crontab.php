@@ -1153,8 +1153,6 @@ order by sfoi.item_id asc limit 1000";
             }
         }
 
-        dump($data);
-        dump($params);die;
         $logistics = new LogisticsInfo();
         if ($data) {
             $purchase->saveAll($data);
