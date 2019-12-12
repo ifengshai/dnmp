@@ -509,7 +509,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','bootstrap-tab
 
                     if (time_value > end_time) {
                         Layer.alert('开始时间不能大于结束时间！！');
-                        $(this).val(end_time);
+                        $(this).val(time_value);
                         return false;
                     } 
 
@@ -564,7 +564,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','bootstrap-tab
 
                     if (time_value > end_time) {
                         Layer.alert('开始时间不能大于结束时间！！');
-                        $(this).val(end_time);
+                        $(this).val(time_value);
                         return false;
                     } 
                 });
