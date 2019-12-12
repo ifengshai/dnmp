@@ -567,7 +567,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','bootstrap-tab
                         $(this).val(end_time);
                         return false;
                     } 
-
                 });
             }
         }
