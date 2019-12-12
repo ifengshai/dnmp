@@ -76,4 +76,8 @@ class Nihao extends Model
         }
         return $result;
     }
+    /***
+     * 获取nihao订单的成本信息  create@lsw 
+     */
+    
 }
