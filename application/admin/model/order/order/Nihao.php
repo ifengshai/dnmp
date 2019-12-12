@@ -77,7 +77,11 @@ class Nihao extends Model
         return $result;
     }
     /***
-     * 获取nihao订单的成本信息  create@lsw 
+     * 获取nihao订单的成本信息  create@lsw
+     * @param totalId 所有的 
      */
-    
+    public function getOrderCostInfo($totalId,$thisPageId)
+    {
+
+    }
 }
