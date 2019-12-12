@@ -183,6 +183,8 @@ class Index extends Backend
     public function account_order()
     {
         $label = $this->request->get('label', 1);
+        
+
         //设置过滤方法
         $this->request->filter(['strip_tags']);
         if ($this->request->isAjax()) {
@@ -191,7 +193,16 @@ class Index extends Backend
 
                 return $this->selectpage();
             }
-
+            $rep    = $this->request->get('filter');
+            $addWhere = '1=1';
+            if($rep != '{}'){
+                $whereArr = json_decode($rep,true);
+                if(!array_key_exists('created_at',$whereArr)){
+                    $addWhere  .= " AND DATE_SUB(CURDATE(), INTERVAL 1 MONTH) <= date(created_at)";
+                }
+            }else{
+                    $addWhere  .= " AND DATE_SUB(CURDATE(), INTERVAL 1 MONTH) <= date(created_at)";
+            }
             //根据传的标签切换对应站点数据库
             $label = $this->request->get('label', 1);
             if ($label == 1) {
@@ -215,12 +226,16 @@ class Index extends Backend
                 ->select();
             $totalId = $model
                    ->where($where)
+                   ->where($addWhere)
                    ->column('entity_id');
             $thisPageId = $model
                    ->where($where)
                    ->order($sort,$order)
                    ->limit($offset,$limit)
                    ->column('entity_id');
+            echo '<pre>';
+            var_dump($totalId);
+            exit;       
             //$costInfo = $model->getOrderCostInfo($totalId,$thisPageId);                     
             // echo '<pre>';       
             // //var_dump($totalId);
