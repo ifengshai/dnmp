@@ -886,7 +886,7 @@ class Item extends Backend
             //查询实际采购信息 查询在途库存 = 采购数量 减去 到货数量
             $check_map['status'] = 2;
             $check_map['type'] = 1;
-            $check_map['purchase_id'] = ['in', $ids];
+            $check_map['Check.purchase_id'] = ['in', $ids];
             $check = new \app\admin\model\warehouse\Check;
             $hasWhere['sku'] = ['in', $skus];
             $check_list = $check->hasWhere('checkItem', $hasWhere)

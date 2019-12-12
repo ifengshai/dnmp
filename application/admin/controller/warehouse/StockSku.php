@@ -7,6 +7,9 @@ use app\admin\model\warehouse\StockHouse;
 use app\admin\model\itemmanage;
 use app\admin\model\itemmanage\Item;
 use think\Db;
+use think\Exception;
+use think\exception\PDOException;
+use think\exception\ValidateException;
 
 /**
  * SKU库位绑定
@@ -171,7 +174,7 @@ class StockSku extends Backend
                 $map['id'] = ['<>', $row->id];
                 $map['is_del'] = 1;
                 $count = $this->model->where($map)->count();
-                if ($count > 　0) {
+                if ($count > 0) {
                     $this->error('已存在此绑定关系！！');
                 }
 
