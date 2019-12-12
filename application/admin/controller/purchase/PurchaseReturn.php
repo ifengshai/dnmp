@@ -463,7 +463,7 @@ class PurchaseReturn extends Backend
                 //求和不合格数量
                 if ($v['purchase_id']) {
                     //查询不合格数量
-                    $check_map['purchase_id'] = $v['purchase_id'];
+                    $check_map['Check.purchase_id'] = $v['purchase_id'];
                     $check_map['type'] = 1;
                     $check = new \app\admin\model\warehouse\Check;
                     $all_unqualified_num = $check->hasWhere('checkItem')
