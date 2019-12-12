@@ -487,6 +487,34 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','bootstrap-tab
 
                 });
 
+                //选中的开始时间和现在的时间比较
+                $(document).on('dp.change', '.delivery_etime', function () {
+                    var time_value = $('.delivery_stime').val();
+                    var end_time = $(this).val();
+
+                    function getNow(s) {
+                        return s < 10 ? '0' + s: s;
+                    }
+
+                    var myDate = new Date();
+
+                    var year=myDate.getFullYear();        //获取当前年
+                    var month=myDate.getMonth()+1;   //获取当前月
+                    var date=myDate.getDate();            //获取当前日
+                    var h=myDate.getHours();              //获取当前小时数(0-23)
+                    var m=myDate.getMinutes()-10;          //获取当前分钟数(0-59)
+                    var s=myDate.getSeconds();
+                    var now=year+'-'+getNow(month)+"-"+getNow(date)+" "+getNow(h)+':'+getNow(m)+":"+getNow(s);
+
+
+                    if (time_value > end_time) {
+                        Layer.alert('开始时间不能大于结束时间！！');
+                        $(this).val(end_time);
+                        return false;
+                    } 
+
+                });
+
 
                  //选中的开始时间和现在的时间比较
                  $(document).on('dp.change', '.contract_stime', function () {
@@ -507,6 +535,32 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','bootstrap-tab
                     var s=myDate.getSeconds();
                     var now=year+'-'+getNow(month)+"-"+getNow(date)+" "+getNow(h)+':'+getNow(m)+":"+getNow(s);
 
+
+                    if (time_value > end_time) {
+                        Layer.alert('开始时间不能大于结束时间！！');
+                        $(this).val(end_time);
+                        return false;
+                    } 
+
+                });
+
+                $(document).on('dp.change', '.contract_etime', function () {
+                    var time_value = $('.contract_stime').val();
+                    var end_time = $(this).val();
+
+                    function getNow(s) {
+                        return s < 10 ? '0' + s: s;
+                    }
+
+                    var myDate = new Date();
+
+                    var year=myDate.getFullYear();        //获取当前年
+                    var month=myDate.getMonth()+1;   //获取当前月
+                    var date=myDate.getDate();            //获取当前日
+                    var h=myDate.getHours();              //获取当前小时数(0-23)
+                    var m=myDate.getMinutes()-10;          //获取当前分钟数(0-59)
+                    var s=myDate.getSeconds();
+                    var now=year+'-'+getNow(month)+"-"+getNow(date)+" "+getNow(h)+':'+getNow(m)+":"+getNow(s);
 
                     if (time_value > end_time) {
                         Layer.alert('开始时间不能大于结束时间！！');
