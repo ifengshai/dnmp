@@ -446,7 +446,7 @@ class Instock extends Backend
                         //更新采购单状态 已入库 或 部分入库
                         //查询采购单商品总到货数量 以及采购数量
                         //查询质检信息
-                        $check_map['purchase_id'] = $check_res['purchase_id'];
+                        $check_map['Check.purchase_id'] = $check_res['purchase_id'];
                         $check_map['type'] = 1;
                         $check = new \app\admin\model\warehouse\Check;
                         //总到货数量

@@ -482,7 +482,7 @@ class Check extends Backend
                     //采购质检
                     if ($v['purchase_id']) {
                         //查询质检信息
-                        $check_map['purchase_id'] = $v['purchase_id'];
+                        $check_map['Check.purchase_id'] = $v['purchase_id'];
                         $check_map['type'] = 1;
                         $check = new \app\admin\model\warehouse\Check;
                         //总到货数量

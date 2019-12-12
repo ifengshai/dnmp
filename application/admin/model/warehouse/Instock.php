@@ -50,27 +50,4 @@ class Instock extends Model
         return $this->hasMany('InstockItem', 'in_stock_id');
     }
 
-    //入库数量回写采购单入库数量
-    public function setPurchaseOrder($id)
-    {
-        //查询入库单 查询出采购单号
-        $data = $this->get($id);
-        $map['status'] = 2;
-        $map['purchase_id'] = $data['purchase_id'];
-        $rows = $this
-            ->hasWhere('instockItem')
-            ->field("sum(in_stock_num) as num,sku")
-            ->where($map)
-            ->group('sku')
-            ->select();
-        $rows = collection($rows)->toArray();
-
-        //写入对应采购单
-        $purchase = new \app\admin\model\purchase\PurchaseOrderItem;
-        foreach ($rows as $v) {
-            $where['purchase_id'] = $data['purchase_id'];
-            $where['sku'] = $v['sku'];
-            $purchase->save(['instock_num' => $v['num']], $where);
-        }
-    }
 }
