@@ -236,7 +236,7 @@ class Zeelool extends Model
         }
         $thisPageInfo = collection($thisPageInfo)->toArray($thisPageInfo);
         foreach($thisPageInfo as  $v){
-                $arr['thisPageTotalPay'][$v['parent_id']] = $v['base_amount_paid'];
+                $arr['thisPageTotalPrice'][$v['parent_id']] = $v['base_amount_paid'];
         }
         //求出镜架成本start
         //1.求出所有的订单号
@@ -252,7 +252,7 @@ class Zeelool extends Model
             return $arr;
         }
         //求出镜架成本start
-        $arr['total_frame_price'] = $arr['total_lens_price'] = 0;
+        $arr['totalFramePrice'] = $arr['totalLensPrice'] = 0;
         $outStockMap['order_number'] = ['in',$order['increment_id']];
         $frameInfo = Db::table('fa_outstock_log')->alias('g')->where($outStockMap)->join('purchase_order_item m','g.purchase_id=m.purchase_id and g.sku=m.sku')
         ->field('g.sku,g.order_number,g.out_stock_num,g.purchase_id,m.purchase_price')->select(); 
@@ -261,9 +261,9 @@ class Zeelool extends Model
         }
         $frameInfo = collection($frameInfo)->toArray();
         foreach($frameInfo as $fv){
-             $arr['total_frame_price'] +=round($fv['out_stock_num']*$fv['purchase_price'],2);
+             $arr['totalFramePrice'] +=round($fv['out_stock_num']*$fv['purchase_price'],2);
             if(in_array($fv['order_number'],$order['this_increment_id'])){
-                $arr['thispageId_frame_price'][$fv['order_number']] = round($fv['out_stock_num']*$fv['purchase_price'],2);
+                $arr['thispageFramePrice'][$fv['order_number']] = round($fv['out_stock_num']*$fv['purchase_price'],2);
             }
         }
         //求出镜架成本end
@@ -274,9 +274,9 @@ class Zeelool extends Model
         }
         $lensInfo = collection($lensInfo)->toArray();
         foreach($lensInfo as  $lv){
-            $arr['total_lens_price'] += round($lv['num']*$lv['price'],2);
+            $arr['totalLensPrice'] += round($lv['num']*$lv['price'],2);
             if(in_array($lv['order_number'],$order['this_increment_id'])){
-                $arr['thispageId_lens_price'][$lv['order_number']] = round($lv['num']*$lv['price'],2);
+                $arr['thispageLensPrice'][$lv['order_number']] = round($lv['num']*$lv['price'],2);
             }
         }
         //求出镜片成本end
