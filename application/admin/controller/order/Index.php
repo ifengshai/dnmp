@@ -198,10 +198,10 @@ class Index extends Backend
             if($rep != '{}'){
                 $whereArr = json_decode($rep,true);
                 if(!array_key_exists('created_at',$whereArr)){
-                    $addWhere  .= " AND DATE_SUB(CURDATE(), INTERVAL 1 MONTH) <= date(created_at)";
+                    $addWhere  .= " AND DATE_SUB(CURDATE(), INTERVAL 7 DAY) <= date(created_at)";
                 }
             }else{
-                    $addWhere  .= " AND DATE_SUB(CURDATE(), INTERVAL 1 MONTH) <= date(created_at)";
+                    $addWhere  .= " AND DATE_SUB(CURDATE(), INTERVAL 7 DAY) <= date(created_at)";
             }
             //根据传的标签切换对应站点数据库
             $label = $this->request->get('label', 1);
@@ -235,8 +235,8 @@ class Index extends Backend
                    ->column('entity_id');       
             $costInfo = $model->getOrderCostInfo($totalId,$thisPageId);                     
             echo '<pre>';
-            var_dump($totalId);
-            var_dump($thisPageId);
+            // var_dump($totalId);
+            // var_dump($thisPageId);
             var_dump($costInfo);
             exit;           
             $list = collection($list)->toArray();
