@@ -236,7 +236,7 @@ class Zeelool extends Model
         }
         $thisPageInfo = collection($thisPageInfo)->toArray($thisPageInfo);
         foreach($thisPageInfo as  $v){
-                $arr['thisPageTotalPrice'][$v['parent_id']] = $v['base_amount_paid'];
+                $arr['thisPageTotalPrice'][$v['parent_id']] = round($v['base_amount_paid'],2);
         }
         //求出镜架成本start
         //1.求出所有的订单号
