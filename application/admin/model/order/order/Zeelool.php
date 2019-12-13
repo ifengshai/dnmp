@@ -257,7 +257,6 @@ class Zeelool extends Model
         $frameInfo = Db::table('fa_outstock_log')->alias('g')->where($outStockMap)->join('purchase_order_item m','g.purchase_id=m.purchase_id and g.sku=m.sku')
         ->field('g.sku,g.order_number,g.out_stock_num,g.purchase_id,m.purchase_price')->select(); 
         if(!$frameInfo){
-            return 123;
             return $arr;
         }
         $frameInfo = collection($frameInfo)->toArray();
