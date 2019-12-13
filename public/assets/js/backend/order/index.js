@@ -168,7 +168,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','bootstrap-table-jump-
                         { field: 'increment_id', title: __('订单号') },
                         { field: 'customer_email', title: __('邮箱'), operate: 'like' },
                         { field: 'status', title: __('状态'), searchList: { "processing": __('processing'), 'complete': 'complete', 'creditcard_failed': 'creditcard_failed', 'creditcard_pending': 'creditcard_pending', 'holded': 'holded', 'payment_review': 'payment_review', 'paypal_canceled_reversal': 'paypal_canceled_reversal', 'paypal_reversed': 'paypal_reversed', 'pending': 'pending', 'canceled': 'canceled', 'closed': 'closed', "free_processing": __('free_processing') } },
-                        { field: 'total_money', title: __('支付金额（$）'), operate: false, formatter: Controller.api.formatter.float_format },
+                        { field: 'total_money', title: __('支付金额（$）'), operate: false},
                         { field: 'frame_cost',title:__('镜架成本金额（￥）'),operate:false,formatter:Controller.api.formatter.float_format},
                         { field: 'lens_cost',title:__('镜片成本金额（￥）'),operate:false,formatter:Controller.api.formatter.float_format},
                         { field: 'postage_cost',title:__('邮费成本金额（￥）'),operate:false,formatter:Controller.api.formatter.float_format},
