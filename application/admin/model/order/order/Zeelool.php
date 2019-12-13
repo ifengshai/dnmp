@@ -230,7 +230,7 @@ class Zeelool extends Model
         $payInfo = Db::connect($this->connection)->table('sales_flat_order_payment')->where($totalMap)->sum('base_amount_paid');
         $arr['totalPayInfo'] = $payInfo;
         $thisPageIdMap['parent_id'] = ['in',$thisPageId];
-        $thisPageInfo = Db::connect($this->connection)->table('sales_flat_order_payment')->where($thisPageIdMap)->filed('parent_id,base_amount_paid')->select();
+        $thisPageInfo = Db::connect($this->connection)->table('sales_flat_order_payment')->where($thisPageIdMap)->field('parent_id,base_amount_paid')->select();
         if(!$thisPageInfo){
             return $arr;
         }
