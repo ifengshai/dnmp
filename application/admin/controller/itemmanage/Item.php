@@ -1155,6 +1155,7 @@ class Item extends Backend
             }
             $map['id'] = $id;
             $data['item_status'] = 3;
+            $data['check_time']  = date("Y-m-d H:i:s", time());
             $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
             if ($res) {
                 //添加到商品平台sku
@@ -1275,6 +1276,7 @@ class Item extends Backend
                 }
             }
             $data['item_status'] = 3;
+            $data['check_time']  = date("Y-m-d H:i:s", time());
             $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
             if ($res != false) {
                 $row = $this->model->where('id', 'in', $ids)->field('sku,name')->select();

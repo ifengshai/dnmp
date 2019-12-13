@@ -232,11 +232,8 @@ class Index extends Backend
                    ->where($where)
                    ->order($sort,$order)
                    ->limit($offset,$limit)
-                   ->column('entity_id');
-            echo '<pre>';
-            var_dump($totalId);
-            exit;       
-            //$costInfo = $model->getOrderCostInfo($totalId,$thisPageId);                     
+                   ->column('entity_id');       
+            $costInfo = $model->getOrderCostInfo($totalId,$thisPageId);                     
             // echo '<pre>';       
             // //var_dump($totalId);
             // var_dump($thisPageId);
