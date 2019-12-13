@@ -241,7 +241,7 @@ class Zeelool extends Model
         //求出镜架成本start
         //1.求出所有的订单号
         $frameTotalMap['entity_id'] = ['in',$totalId];
-        $frameThisPageMap['entity_id'] = ['in',$totalId];
+        $frameThisPageMap['entity_id'] = ['in',$thisPageId];
         $arr['increment_id'] = Db::connect($this->connection)->table('sales_flat_order')->where($frameTotalMap)->column('increment_id');
         if(!$arr['increment_id']){
             return $arr;
