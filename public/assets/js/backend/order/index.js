@@ -142,6 +142,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','bootstrap-table-jump-
             //当表格数据加载完成时
             table.on('load-success.bs.table', function (e, data) {
                 //这里我们手动设置底部的值
+                console.log(data);
                 $("#totalPayInfo").text(data.totalPayInfo);
                 $("#totalFramePrice").text(data.totalFramePrice);
                 $("#totalLensPrice").text(data.totalLensPrice);
