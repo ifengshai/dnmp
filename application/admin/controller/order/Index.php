@@ -234,10 +234,11 @@ class Index extends Backend
                    ->limit($offset,$limit)
                    ->column('entity_id');       
             $costInfo = $model->getOrderCostInfo($totalId,$thisPageId);                     
-            // echo '<pre>';       
-            // //var_dump($totalId);
-            // var_dump($thisPageId);
-            // exit;           
+            echo '<pre>';
+            var_dump($totalId);
+            var_dump($thisPageId);
+            var_dump($costInfo);
+            exit;           
             $list = collection($list)->toArray();
             $result = array("total" => $total, "rows" => $list, "extend" => ['money' => mt_rand(100000, 999999)]);
 
