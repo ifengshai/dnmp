@@ -233,14 +233,32 @@ class Index extends Backend
                    ->order($sort,$order)
                    ->limit($offset,$limit)
                    ->column('entity_id');       
-            $costInfo = $model->getOrderCostInfo($totalId,$thisPageId);                     
-            echo '<pre>';
-            // var_dump($totalId);
-            // var_dump($thisPageId);
-            var_dump($costInfo);
-            exit;           
+            $costInfo = $model->getOrderCostInfo($totalId,$thisPageId);         
             $list = collection($list)->toArray();
-            $result = array("total" => $total, "rows" => $list, "extend" => ['money' => mt_rand(100000, 999999)]);
+            foreach($list as $k =>$v){
+                if(isset($costInfo['thisPagePayPrice'])){
+                    if(array_key_exists($v['entity_id'],$costInfo['thisPagePayPrice'])){
+                        $list[$k]['total_money'] = $costInfo['thisPagePayPrice'][$v['entity_id']];
+                   }
+                }
+                if(isset($costInfo['thispageFramePrice'])){
+                    if(array_key_exists($v['increment_id'],$costInfo['thispageFramePrice'])){
+                        $list[$k]['frame_cost'] = $costInfo['thispageFramePrice'][$v['increment_id']];
+                    }
+                }
+                if(isset($costInfo['thispageLensPrice'])){
+                    if(array_key_exists($v['increment_id'],$costInfo['thispageLensPrice'])){
+                        $list[$k]['lens_cost']  = $costInfo['thispageLensPrice'][$v['increment_id']];
+                    }
+                }
+            }
+            $result = array(
+                "total"             =>  $total, 
+                "rows"              =>  $list, 
+                "totalPayInfo"      =>  $costInfo['totalPayInfo'],
+                "totalLensPrice"    =>  $costInfo['totalLensPrice'],
+                "totalFramePrice"   =>  $costInfo['totalFramePrice']
+            );
 
             return json($result);
         }
