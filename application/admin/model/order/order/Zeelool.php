@@ -242,18 +242,18 @@ class Zeelool extends Model
         //1.求出所有的订单号
         $frameTotalMap['entity_id'] = ['in',$totalId];
         $frameThisPageMap['entity_id'] = ['in',$thisPageId];
-        $arr['increment_id'] = Db::connect($this->connection)->table('sales_flat_order')->where($frameTotalMap)->column('increment_id');
-        if(!$arr['increment_id']){
+        $order['increment_id'] = Db::connect($this->connection)->table('sales_flat_order')->where($frameTotalMap)->column('increment_id');
+        if(!$order['increment_id']){
             return $arr;
         }
         //2.求出本页面的订单号
-        $arr['this_increment_id'] = Db::connect($this->connection)->table('sales_flat_order')->where($frameThisPageMap)->column('increment_id');
-        if(!$arr['this_increment_id']){
+        $order['this_increment_id'] = Db::connect($this->connection)->table('sales_flat_order')->where($frameThisPageMap)->column('increment_id');
+        if(!$order['this_increment_id']){
             return $arr;
         }
         //求出镜架成本start
         $arr['total_frame_price'] = $arr['total_lens_price'] = 0;
-        $outStockMap['order_number'] = ['in',$arr['increment_id']];
+        $outStockMap['order_number'] = ['in',$order['increment_id']];
         $frameInfo = Db::table('fa_outstock_log')->alias('g')->where($outStockMap)->join('purchase_order_item m','g.purchase_id=m.purchase_id and g.sku=m.sku')
         ->field('g.sku,g.order_number,g.out_stock_num,g.purchase_id,m.purchase_price')->select(); 
         if(!$frameInfo){
@@ -263,7 +263,7 @@ class Zeelool extends Model
         $frameInfo = collection($frameInfo)->toArray();
         foreach($frameInfo as $fv){
              $arr['total_frame_price'] +=round($fv['out_stock_num']*$fv['purchase_price'],2);
-            if(in_array($fv['order_number'],$arr['this_increment_id'])){
+            if(in_array($fv['order_number'],$order['this_increment_id'])){
                 $arr['thispageId_frame_price'][$fv['order_number']] = round($fv['out_stock_num']*$fv['purchase_price'],2);
             }
         }
@@ -276,7 +276,7 @@ class Zeelool extends Model
         $lensInfo = collection($lensInfo)->toArray();
         foreach($lensInfo as  $lv){
             $arr['total_lens_price'] += round($lv['num']*$lv['price'],2);
-            if(in_array($lv['order_number'],$arr['this_increment_id'])){
+            if(in_array($lv['order_number'],$order['this_increment_id'])){
                 $arr['thispageId_lens_price'][$lv['order_number']] = round($lv['num']*$lv['price'],2);
             }
         }
