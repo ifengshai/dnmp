@@ -1405,4 +1405,18 @@ order by sfoi.item_id asc limit 1000";
         }
         echo 'ok';
     }
+    /***
+     * 定时把新品sku变成老品
+     */
+    public function changeItemNewToOld()
+    {
+        //select*from table where now() >SUBDATE(times,interval -1 day);
+        $where['is_new'] = 1;
+        $itemId = Db::connect('database.db_stock')->name('item')->where($where)->where("now() >SUBDATE(check_time,interval -15 day)")->column('id');
+        if(false == $itemId){
+            return 'ok';
+        }
+        $map['id'] = ['in',$itemId];
+        Db::connect('database.db_stock')->name('item')->where($map)->update(['is_new'=>2]);
+    }
 }

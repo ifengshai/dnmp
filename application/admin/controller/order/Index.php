@@ -198,10 +198,10 @@ class Index extends Backend
             if($rep != '{}'){
                 $whereArr = json_decode($rep,true);
                 if(!array_key_exists('created_at',$whereArr)){
-                    $addWhere  .= " AND DATE_SUB(CURDATE(), INTERVAL 1 MONTH) <= date(created_at)";
+                    $addWhere  .= " AND DATE_SUB(CURDATE(), INTERVAL 7 DAY) <= date(created_at)";
                 }
             }else{
-                    $addWhere  .= " AND DATE_SUB(CURDATE(), INTERVAL 1 MONTH) <= date(created_at)";
+                    $addWhere  .= " AND DATE_SUB(CURDATE(), INTERVAL 7 DAY) <= date(created_at)";
             }
             //根据传的标签切换对应站点数据库
             $label = $this->request->get('label', 1);
@@ -232,17 +232,33 @@ class Index extends Backend
                    ->where($where)
                    ->order($sort,$order)
                    ->limit($offset,$limit)
-                   ->column('entity_id');
-            echo '<pre>';
-            var_dump($totalId);
-            exit;       
-            //$costInfo = $model->getOrderCostInfo($totalId,$thisPageId);                     
-            // echo '<pre>';       
-            // //var_dump($totalId);
-            // var_dump($thisPageId);
-            // exit;           
+                   ->column('entity_id');       
+            $costInfo = $model->getOrderCostInfo($totalId,$thisPageId);         
             $list = collection($list)->toArray();
-            $result = array("total" => $total, "rows" => $list, "extend" => ['money' => mt_rand(100000, 999999)]);
+            foreach($list as $k =>$v){
+                if(isset($costInfo['thisPagePayPrice'])){
+                    if(array_key_exists($v['entity_id'],$costInfo['thisPagePayPrice'])){
+                        $list[$k]['total_money'] = $costInfo['thisPagePayPrice'][$v['entity_id']];
+                   }
+                }
+                if(isset($costInfo['thispageFramePrice'])){
+                    if(array_key_exists($v['increment_id'],$costInfo['thispageFramePrice'])){
+                        $list[$k]['frame_cost'] = $costInfo['thispageFramePrice'][$v['increment_id']];
+                    }
+                }
+                if(isset($costInfo['thispageLensPrice'])){
+                    if(array_key_exists($v['increment_id'],$costInfo['thispageLensPrice'])){
+                        $list[$k]['lens_cost']  = $costInfo['thispageLensPrice'][$v['increment_id']];
+                    }
+                }
+            }
+            $result = array(
+                "total"             =>  $total, 
+                "rows"              =>  $list, 
+                "totalPayInfo"      =>  $costInfo['totalPayInfo'],
+                "totalLensPrice"    =>  $costInfo['totalLensPrice'],
+                "totalFramePrice"   =>  $costInfo['totalFramePrice']
+            );
 
             return json($result);
         }
