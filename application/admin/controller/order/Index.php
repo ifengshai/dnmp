@@ -242,8 +242,10 @@ class Index extends Backend
                 //         $list[$k]['total_money'] = $costInfo['thisPagePayPrice'][$v['entity_id']];
                 //    }
                 // }
-                $costInfo['totalPayInfo'] +=  round($v['base_total_paid']+$v['base_total_due'],2);
-                $list[$k]['total_money']   =  round($v['base_total_paid']+$v['base_total_due'],2);
+                if(in_array($v['status'],['processing','complete','creditcard_proccessing','free_processing'])){
+                    $costInfo['totalPayInfo'] +=  round($v['base_total_paid']+$v['base_total_due'],2);
+                    $list[$k]['total_money']   =  round($v['base_total_paid']+$v['base_total_due'],2);
+                }
                 if(isset($costInfo['thispageFramePrice'])){
                     if(array_key_exists($v['increment_id'],$costInfo['thispageFramePrice'])){
                         $list[$k]['frame_cost'] = $costInfo['thispageFramePrice'][$v['increment_id']];
@@ -258,9 +260,9 @@ class Index extends Backend
             $result = array(
                 "total"             =>  $total, 
                 "rows"              =>  $list, 
-                "totalPayInfo"      =>  $costInfo['totalPayInfo'],
-                "totalLensPrice"    =>  $costInfo['totalLensPrice'],
-                "totalFramePrice"   =>  $costInfo['totalFramePrice']
+                "totalPayInfo"      =>  round($costInfo['totalPayInfo'],2),
+                "totalLensPrice"    =>  round($costInfo['totalLensPrice'],2),
+                "totalFramePrice"   =>  round($costInfo['totalFramePrice'],2)
             );
 
             return json($result);

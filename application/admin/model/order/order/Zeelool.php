@@ -226,7 +226,7 @@ class Zeelool extends Model
             return $arr;
         }
         $totalMap['parent_id'] = ['in',$totalId];
-        //(原先)总付款金额
+        //原先逻辑已经废弃(总付款金额)
         // $payInfo = Db::connect($this->connection)->table('sales_flat_order_payment')->where($totalMap)->sum('base_amount_paid');
         // $arr['totalPayInfo'] = $payInfo;
         // $thisPageIdMap['parent_id'] = ['in',$thisPageId];
