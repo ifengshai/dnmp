@@ -25,7 +25,8 @@ class Crontab extends Backend
         'voogueme_order_item_process',
         'nihao_order_custom_order_prescription',
         'nihao_order_item_process',
-        'set_purchase_order_logistics'
+        'set_purchase_order_logistics',
+        'product_grade_list_crontab'
     ];
 
 
@@ -1131,7 +1132,7 @@ order by sfoi.item_id asc limit 1000";
         $map['is_del'] = 1;
         $list = $purchase->where($map)->limit(50)->select();
         $list = collection($list)->toArray();
-        foreach($list as $k => $v) {
+        foreach ($list as $k => $v) {
             $res = Alibaba::getOrderDetail($v['purchase_number']);
             if (!$res) {
                 continue;
@@ -1159,7 +1160,250 @@ order by sfoi.item_id asc limit 1000";
 
             $logistics->saveAll($params);
         }
+
+        echo 'ok';
+    }
+
+
+
+    /**
+     * 每天9点 根据销量计算产品分级
+     */
+    public function product_grade_list_crontab()
+    {
+        $start = date("Y-m-d", strtotime("-3 month"));
+        $end = date("Y-m-d", time());
         
+        //$zeelool_model = Db::connect('database.db_zeelool')->table('sales_flat_order');
+
+        $zeelool_model = new \app\admin\model\order\order\Zeelool;
+        $voogueme_model = new \app\admin\model\order\order\Voogueme;
+        $nihao_model = new \app\admin\model\order\order\Nihao;
+        $intelligent_purchase_query_sql = "select sfoi.sku,round(sum(sfoi.qty_ordered),0) counter,IF
+        ( datediff( now(),cpe.created_at) > 90, 90, datediff( now(),cpe.created_at ) ) days,cpe.created_at
+ from sales_flat_order_item sfoi
+ left join sales_flat_order sfo on sfo.entity_id=sfoi.order_id
+ left join catalog_product_entity cpe on cpe.entity_id=sfoi.product_id
+ where sfo.status in('complete','processing','creditcard_proccessing') and if (datediff(now(),cpe.created_at) > 90,sfo.created_at between '$start' and '$end',sfo.created_at between cpe.created_at and '$end')
+ GROUP BY sfoi.sku order by counter desc";
+        $zeelool_list = $zeelool_model->query($intelligent_purchase_query_sql);
+        //查询sku映射关系表 
+        $itemPlatFormSku = new \app\admin\model\itemmanage\ItemPlatformSku;
+        $sku_list = $itemPlatFormSku->column('sku', 'platform_sku');
+
+        //查询产品库sku
+        foreach ($zeelool_list as $k => $v) {
+            $true_sku = $sku_list[$v['sku']];
+            $zeelool_list[$k]['true_sku'] = $true_sku;
+            $zeelool_list[$k]['zeelool_sku'] = $v['sku'];
+        }
+
+        //$voogueme_model = Db::connect('database.db_voogueme')->table('sales_flat_order');
+        $voogueme_list = $voogueme_model->query($intelligent_purchase_query_sql);
+        //查询产品库sku
+        foreach ($voogueme_list as $k => $v) {
+            $true_sku = $sku_list[$v['sku']];
+            $voogueme_list[$k]['true_sku'] = $true_sku;
+            $voogueme_list[$k]['voogueme_sku'] = $v['sku'];
+        }
+
+       // $nihao_model = Db::connect('database.db_nihao')->table('sales_flat_order');
+        $nihao_list = $nihao_model->query($intelligent_purchase_query_sql);
+        //查询产品库sku
+        foreach ($nihao_list as $k => $v) {
+            $true_sku = $sku_list[$v['sku']];
+            $nihao_list[$k]['true_sku'] = $true_sku;
+            $nihao_list[$k]['nihao_sku'] = $v['sku'];
+        }
+
+        //合并数组
+        $lists = array_merge($zeelool_list, $voogueme_list, $nihao_list);
+
+
+        $data = [];
+        foreach ($lists as $k => $v) {
+            if ($data[$v['true_sku']]) {
+                if ($v['voogueme_sku']) {
+                    $data[$v['true_sku']]['voogueme_sku'] = $v['voogueme_sku'];
+                }
+
+                if ($v['nihao_sku']) {
+                    $data[$v['true_sku']]['nihao_sku'] = $v['nihao_sku'];
+                }
+
+                $data[$v['true_sku']]['counter'] = $data[$v['true_sku']]['counter'] + $v['counter'];
+
+                if ($v['days'] > $data[$v['true_sku']]['days']) {
+                    $data[$v['true_sku']]['days'] = $v['days'];
+                }
+            } else {
+                $data[$v['true_sku']] = $v;
+            }
+        }
+
+
+        //查询供货商
+        $supplier = new \app\admin\model\purchase\SupplierSku;
+        $supplier_list = $supplier->alias('a')->join(['fa_supplier' => 'b'], 'a.supplier_id=b.id')->column('b.supplier_name', 'a.sku');
+
+       
+        //删除无用数组 释放内存
+        unset($lists);
+        unset($zeelool_list);
+        unset($voogueme_list);
+        //重置KEY
+        $data = array_values($data);
+
+        $AA_num = 0;
+        $A_num = 0;
+        $B_num = 0;
+        $CA_num = 0;
+        $C_num = 0;
+        $D_num = 0;
+        $E_num = 0;
+        $F_num = 0;
+        $list = [];
+        foreach ($data as $k => $val) {
+            $list[$k]['counter'] = $val['counter'];
+            $list[$k]['days'] = $val['days'];
+            $list[$k]['created_at'] = $val['created_at'];
+            $list[$k]['true_sku'] = $val['true_sku'];
+            $list[$k]['zeelool_sku'] = $val['zeelool_sku'] ? $val['zeelool_sku'] : '';
+            $list[$k]['voogueme_sku'] = $val['voogueme_sku'] ? $val['voogueme_sku'] : '';
+            $list[$k]['nihao_sku'] = $val['nihao_sku'] ? $val['nihao_sku'] : '';
+
+            //分等级产品
+            $num = round($val['counter'] * 1 / $val['days'] * 1 * 30);
+            $list[$k]['num'] = $num;
+            $list[$k]['supplier_name'] =  $supplier_list[$val['true_sku']];
+
+
+            if ($num >= 300) {
+                $list[$k]['grade'] = 'A+';
+                $AA_num++;
+            } elseif ($num >= 150 && $num < 300) {
+                $list[$k]['grade'] = 'A';
+                $A_num++;
+            } elseif ($num >= 90 && $num < 150) {
+                $list[$k]['grade'] = 'B';
+                $B_num++;
+            } elseif ($num >= 60 && $num < 90) {
+                $list[$k]['grade'] = 'C+';
+                $CA_num++;
+            } elseif ($num >= 30 && $num < 60) {
+                $list[$k]['grade'] = 'C';
+                $C_num++;
+            } elseif ($num >= 15 && $num < 30) {
+                $list[$k]['grade'] = 'D';
+                $D_num++;
+            } elseif ($num >= 1 && $num < 15) {
+                $list[$k]['grade'] = 'E';
+                $E_num++;
+            } else {
+                $list[$k]['grade'] = 'F';
+                $F_num++;
+            }
+            $list[$k]['createtime'] = date('Y-m-d H:i:s');
+        }
+        unset($data);
+
+        
+        $map = [];
+        foreach ($list as $k => $v) {
+            if ($v['grade'] == 'A+' || $v['grade'] == 'A') {
+                if ($v['zeelool_sku']) {
+                    $map['a.status'] = ['in', ['complete', 'processing', 'creditcard_proccessing']];
+                    $map['a.created_at'] = ['between', [date("Y-m-d 00:00:00", strtotime("-2 day")), date("Y-m-d 00:00:00", time())]];
+                    $map['b.sku'] = $v['zeelool_sku'];
+                    $zeelool_num = $zeelool_model->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')->group('b.sku')->sum('b.qty_ordered');
+                }
+
+                if ($v['voogueme_sku']) {
+                    $map['a.status'] = ['in', ['complete', 'processing', 'creditcard_proccessing']];
+                    $map['a.created_at'] = ['between', [date("Y-m-d 00:00:00", strtotime("-2 day")), date("Y-m-d 00:00:00", time())]];
+                    $map['b.sku'] = $v['voogueme_sku'];
+                    $voogueme_num = $voogueme_model->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')->group('b.sku')->sum('b.qty_ordered');
+                }
+
+                if ($v['nihao_sku']) {
+                    $map['a.status'] = ['in', ['complete', 'processing', 'creditcard_proccessing']];
+                    $map['a.created_at'] = ['between', [date("Y-m-d 00:00:00", strtotime("-2 day")), date("Y-m-d 00:00:00", time())]];
+                    $map['b.sku'] = $v['nihao_sku'];
+                    $nihao_num = $nihao_model->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')->group('b.sku')->sum('b.qty_ordered');
+                }
+                $list[$k]['days_sales_num'] = round(($zeelool_num + $voogueme_num + $nihao_num) / 2);
+            }
+
+            if ($v['grade'] == 'B' || $v['grade'] == 'C' || $v['grade'] == 'C+') {
+                if ($v['zeelool_sku']) {
+                    $map['a.status'] = ['in', ['complete', 'processing', 'creditcard_proccessing']];
+                    $map['a.created_at'] = ['between', [date("Y-m-d 00:00:00", strtotime("-5 day")), date("Y-m-d 00:00:00", time())]];
+                    $map['b.sku'] = $v['zeelool_sku'];
+                    $zeelool_num = $zeelool_model->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')->group('b.sku')->sum('b.qty_ordered');
+                }
+
+                if ($v['voogueme_sku']) {
+                    $map['a.status'] = ['in', ['complete', 'processing', 'creditcard_proccessing']];
+                    $map['a.created_at'] = ['between', [date("Y-m-d 00:00:00", strtotime("-5 day")), date("Y-m-d 00:00:00", time())]];
+                    $map['b.sku'] = $v['voogueme_sku'];
+                    $voogueme_num = $voogueme_model->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')->group('b.sku')->sum('b.qty_ordered');
+                }
+
+                if ($v['nihao_sku']) {
+                    $map['a.status'] = ['in', ['complete', 'processing', 'creditcard_proccessing']];
+                    $map['a.created_at'] = ['between', [date("Y-m-d 00:00:00", strtotime("-5 day")), date("Y-m-d 00:00:00", time())]];
+                    $map['b.sku'] = $v['nihao_sku'];
+                    $nihao_num = $nihao_model->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')->group('b.sku')->sum('b.qty_ordered');
+                }
+                $list[$k]['days_sales_num'] = round(($zeelool_num + $voogueme_num + $nihao_num) / 5);
+            }
+
+            if ($v['grade'] == 'D' || $v['grade'] == 'E' || $v['grade'] == 'F') {
+                if ($v['zeelool_sku']) {
+                    $zeelool_sku[] = $v['zeelool_sku'];
+                }
+
+                if ($v['voogueme_sku']) {
+                    $voogueme_sku[] = $v['voogueme_sku'];
+                }
+
+                if ($v['nihao_sku']) {
+                    $nihao_sku[] = $v['nihao_sku'];
+                }
+            }
+        }
+
+        $map = [];
+        $map['a.status'] = ['in', ['complete', 'processing', 'creditcard_proccessing']];
+        $map['a.created_at'] = ['between', [date("Y-m-d 00:00:00", strtotime("-30 day")), date("Y-m-d 00:00:00", time())]];
+        //计算三个站最近30天销量
+        if ($zeelool_sku) {
+            $map['b.sku'] = ['in', $zeelool_sku];
+            $zeelool = $zeelool_model->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')->group('b.sku')->column('sum(b.qty_ordered) as num,b.sku');
+        }
+
+        if ($voogueme_sku) {
+            $map['b.sku'] = ['in', $voogueme_sku];
+            $voogueme = $voogueme_model->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')->group('b.sku')->column('sum(b.qty_ordered) as num,b.sku');
+        }
+
+        if ($nihao_sku) {
+            $map['b.sku'] = ['in', $nihao_sku];
+            $nihao = $nihao_model->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')->group('b.sku')->column('sum(b.qty_ordered) as num,b.sku');
+        }
+
+        foreach ($list as $k => $v) {
+            if ($v['grade'] == 'D' || $v['grade'] == 'E' || $v['grade'] == 'F') {
+                $list[$k]['days_sales_num'] = round(($zeelool[$v['zeelool_sku']] + $voogueme[$v['voogueme_sku']] + $nihao[$v['nihao_sku']]) / 30);
+            }
+        }
+
+        if ($list) {
+            //清空表
+            Db::execute("truncate table fa_product_grade;");
+            //批量添加
+            $res = Db::table('fa_product_grade')->insertAll($list);
+        }
         echo 'ok';
     }
     /***

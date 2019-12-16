@@ -1,0 +1,100 @@
+
+
+<div class="panel panel-default panel-intro">
+    {:build_heading()}
+
+    <div class="fixed-table-container" style="padding-bottom: 0px;">
+        <div class="fixed-table-header" style="display: none;">
+            
+        </div>
+        <div class="fixed-table-body">
+            
+            <table id="table1" class="table table-striped table-bordered table-hover table-nowrap" data-operate-edit="1"
+                data-operate-del="1" width="100%">
+                <thead>
+                    <tr>
+                        <td style="text-align: center; vertical-align: middle; ">序号</td>
+                        <td style="text-align: center; vertical-align: middle; ">级别</td>
+                        <td style="text-align: center; vertical-align: middle; ">数量</td>
+                        <td style="text-align: center; vertical-align: middle; ">百分比</td>
+                    </tr>
+                </thead>
+                <tbody data-listidx="0">
+                   
+                    <tr data-index="9">
+                        <td style="text-align: center; vertical-align: middle; ">1</td>
+                        <td style="text-align: center; vertical-align: middle; ">A+ <img src="/assets/img/tip.png" width="15px;" title=" 数量 >= 300"></td>
+                        <td style="text-align: center; vertical-align: middle; ">{$res.AA_num}</td>
+                        <td style="text-align: center; vertical-align: middle; ">{$res.AA_percent}</td>
+                    </tr>
+                    <tr data-index="9">
+                        <td style="text-align: center; vertical-align: middle; ">2</td>
+                        <td style="text-align: center; vertical-align: middle; ">A <img src="/assets/img/tip.png" width="15px;" title="150 <= 数量<300"></td>
+                        <td style="text-align: center; vertical-align: middle; ">{$res.A_num}</td>
+                        <td style="text-align: center; vertical-align: middle; ">{$res.A_percent}</td>
+                    </tr>
+                    <tr data-index="9">
+                        <td style="text-align: center; vertical-align: middle; ">3</td>
+                        <td style="text-align: center; vertical-align: middle; ">B <img src="/assets/img/tip.png" width="15px;" title="90 <= 数量 < 150"></td>
+                        <td style="text-align: center; vertical-align: middle; ">{$res.B_num}</td>
+                        <td style="text-align: center; vertical-align: middle; ">{$res.B_percent}</td>
+                    </tr>
+                    <tr data-index="9">
+                        <td style="text-align: center; vertical-align: middle; ">4</td>
+                        <td style="text-align: center; vertical-align: middle; ">C+ <img src="/assets/img/tip.png" width="15px;" title="60<= 数量 < 90"></td>
+                        <td style="text-align: center; vertical-align: middle; ">{$res.CA_num}</td>
+                        <td style="text-align: center; vertical-align: middle; ">{$res.CA_percent}</td>
+                    </tr>
+                    <tr data-index="9">
+                        <td style="text-align: center; vertical-align: middle; ">5</td>
+                        <td style="text-align: center; vertical-align: middle; ">C <img src="/assets/img/tip.png" width="15px;" title="30<= 数量 < 60"></td>
+                        <td style="text-align: center; vertical-align: middle; ">{$res.C_num}</td>
+                        <td style="text-align: center; vertical-align: middle; ">{$res.C_percent}</td>
+                    </tr>
+                    <tr data-index="9">
+                        <td style="text-align: center; vertical-align: middle; ">6</td>
+                        <td style="text-align: center; vertical-align: middle; ">D <img src="/assets/img/tip.png" width="15px;" title="15<= 数量 < 30"></td>
+                        <td style="text-align: center; vertical-align: middle; ">{$res.D_num}</td>
+                        <td style="text-align: center; vertical-align: middle; ">{$res.D_percent}</td>
+                    </tr>
+                    <tr data-index="9">
+                        <td style="text-align: center; vertical-align: middle; ">7</td>
+                        <td style="text-align: center; vertical-align: middle; ">E <img src="/assets/img/tip.png" width="15px;" title="1<= 数量 < 15"></td>
+                        <td style="text-align: center; vertical-align: middle; ">{$res.E_num}</td>
+                        <td style="text-align: center; vertical-align: middle; ">{$res.E_percent}</td>
+                    </tr>
+    
+                    <tr data-index="9">
+                        <td style="text-align: center; vertical-align: middle; ">8</td>
+                        <td style="text-align: center; vertical-align: middle; ">F <img src="/assets/img/tip.png" width="15px;" title="数量 < 1"></td>
+                        <td style="text-align: center; vertical-align: middle; ">{$res.F_num}</td>
+                        <td style="text-align: center; vertical-align: middle; ">{$res.F_percent}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+       
+    </div>
+    <div class="panel-body">
+        <div id="myTabContent" class="tab-content">
+            <div class="tab-pane fade active in" id="one">
+                <div class="widget-body no-padding">
+                    <div id="toolbar" class="toolbar">
+                        <a href="javascript:;" class="btn btn-primary btn-refresh" title="{:__('Refresh')}"><i
+                                class="fa fa-refresh"></i> </a>
+                    </div>
+                    <table id="table1" class="table table-striped table-bordered table-hover table-nowrap"
+                        data-operate-edit="{:$auth->check('purchase/purchase_order/edit')}"
+                        data-operate-del="{:$auth->check('purchase/purchase_order/del')}" width="100%">
+                    </table>
+
+                    <table id="table" class="table table-striped table-bordered table-hover table-nowrap"
+                        data-operate-edit="{:$auth->check('purchase/purchase_order/edit')}"
+                        data-operate-del="{:$auth->check('purchase/purchase_order/del')}" width="100%">
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
