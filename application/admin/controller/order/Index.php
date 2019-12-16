@@ -243,7 +243,7 @@ class Index extends Backend
                 //    }
                 // }
                 if(in_array($v['status'],['processing','complete','creditcard_proccessing','free_processing'])){
-                    $costInfo['totalPayInfo'] +=  round($v['base_total_paid']+$v['base_total_due'],2);
+                    //$costInfo['totalPayInfo'] +=  round($v['base_total_paid']+$v['base_total_due'],2);
                     $list[$k]['total_money']   =  round($v['base_total_paid']+$v['base_total_due'],2);
                 }
                 if(isset($costInfo['thispageFramePrice'])){
