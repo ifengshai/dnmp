@@ -1047,7 +1047,7 @@ class PurchaseOrder extends Backend
         
             foreach ($list as &$v) {
                 $product_cycle = $product[$v['true_sku']]['product_cycle'] ? $product[$v['true_sku']]['product_cycle'] : 7;
-                $onway_stock = $purchase_list[$v['true_sku']] - $check_list[$v['true_sku']];
+                $onway_stock = $purchase_list[$v['true_sku']] - ($check_list[$v['true_sku']] ?? 0);
                 if ($v['grade'] == 'A+') {
                     $times = 1.5;
                 } elseif ($v['grade'] == 'A') {
