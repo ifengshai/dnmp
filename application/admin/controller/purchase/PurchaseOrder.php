@@ -1003,7 +1003,7 @@ class PurchaseOrder extends Backend
             $product = $item->where($map)->column('stock,product_cycle', 'sku');
 
             //计算在途数量
-            $skus = array_column($list, 'sku');
+            $skus = array_column($list, 'true_sku');
 
             //计算SKU总采购数量
             $purchase = new \app\admin\model\purchase\PurchaseOrder;
@@ -1044,6 +1044,7 @@ class PurchaseOrder extends Backend
              * C和D和E等级按照计划售卖周期的1倍来补
              * 补货量=日均销量*生产入库周期+日均销量*计划售卖周期-实时库存-库存在途
              */
+
         
             foreach ($list as &$v) {
                 $product_cycle = $product[$v['true_sku']]['product_cycle'] ? $product[$v['true_sku']]['product_cycle'] : 7;
@@ -1063,7 +1064,7 @@ class PurchaseOrder extends Backend
                 //补货量
                 $v['replenish_num'] = round(($v['days_sales_num'] * $product_cycle) + ($v['days_sales_num'] * $product_cycle * $times) - $product[$v['true_sku']]['true_qty'] - $onway_stock);
                 $v['stock'] = $product[$v['true_sku']]['stock'];
-                $v['purchase_qty'] = $onway_stock ? $onway_stock : 0;
+                $v['purchase_qty'] = $onway_stock > 0 ? $onway_stock : 0;
                 //$res[$k]['out_of_stock_num'] = $sku_list[$v['true_sku']]['num'];
 
             }
