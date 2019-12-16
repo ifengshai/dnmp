@@ -236,11 +236,14 @@ class Index extends Backend
             $costInfo = $model->getOrderCostInfo($totalId,$thisPageId);         
             $list = collection($list)->toArray();
             foreach($list as $k =>$v){
-                if(isset($costInfo['thisPagePayPrice'])){
-                    if(array_key_exists($v['entity_id'],$costInfo['thisPagePayPrice'])){
-                        $list[$k]['total_money'] = $costInfo['thisPagePayPrice'][$v['entity_id']];
-                   }
-                }
+                //原先
+                // if(isset($costInfo['thisPagePayPrice'])){
+                //     if(array_key_exists($v['entity_id'],$costInfo['thisPagePayPrice'])){
+                //         $list[$k]['total_money'] = $costInfo['thisPagePayPrice'][$v['entity_id']];
+                //    }
+                // }
+                $costInfo['totalPayInfo'] +=  round($v['base_total_paid']+$v['base_total_due'],2);
+                $list[$k]['total_money']   =  round($v['base_total_paid']+$v['base_total_due'],2);
                 if(isset($costInfo['thispageFramePrice'])){
                     if(array_key_exists($v['increment_id'],$costInfo['thispageFramePrice'])){
                         $list[$k]['frame_cost'] = $costInfo['thispageFramePrice'][$v['increment_id']];

@@ -226,18 +226,18 @@ class Zeelool extends Model
             return $arr;
         }
         $totalMap['parent_id'] = ['in',$totalId];
-        //总付款金额
-        $payInfo = Db::connect($this->connection)->table('sales_flat_order_payment')->where($totalMap)->sum('base_amount_paid');
-        $arr['totalPayInfo'] = $payInfo;
-        $thisPageIdMap['parent_id'] = ['in',$thisPageId];
-        $thisPageInfo = Db::connect($this->connection)->table('sales_flat_order_payment')->where($thisPageIdMap)->field('parent_id,base_amount_paid')->select();
-        if(!$thisPageInfo){
-            return $arr;
-        }
-        $thisPageInfo = collection($thisPageInfo)->toArray($thisPageInfo);
-        foreach($thisPageInfo as  $v){
-                $arr['thisPagePayPrice'][$v['parent_id']] = round($v['base_amount_paid'],2);
-        }
+        //(原先)总付款金额
+        // $payInfo = Db::connect($this->connection)->table('sales_flat_order_payment')->where($totalMap)->sum('base_amount_paid');
+        // $arr['totalPayInfo'] = $payInfo;
+        // $thisPageIdMap['parent_id'] = ['in',$thisPageId];
+        // $thisPageInfo = Db::connect($this->connection)->table('sales_flat_order_payment')->where($thisPageIdMap)->field('parent_id,base_amount_paid')->select();
+        // if(!$thisPageInfo){
+        //     return $arr;
+        // }
+        // $thisPageInfo = collection($thisPageInfo)->toArray($thisPageInfo);
+        // foreach($thisPageInfo as  $v){
+        //         $arr['thisPagePayPrice'][$v['parent_id']] = round($v['base_amount_paid'],2);
+        // }
         //求出镜架成本start
         //1.求出所有的订单号
         $frameTotalMap['entity_id'] = ['in',$totalId];
