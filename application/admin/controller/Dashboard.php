@@ -149,4 +149,24 @@ class Dashboard extends Backend
 
         return $this->view->fetch();
     }
+
+    //获取
+    public function tempTest()
+    {
+        $map['is_visable'] = 1;
+        $res = Db::table('zeelool_product')->where($map)->select();
+        $list = Db::table('fa_store_house')->column('id','coding');
+        $i = 0;
+        foreach($res as $k => $v) {
+            if ($v['cargo_location_number']) {
+                $data[$i]['sku'] = $v['magento_sku'];
+                $data[$i]['store_id'] = $list[$v['cargo_location_number']];
+                $data[$i]['createtime'] = date('Y-m-d H:i:s');
+                $data[$i]['create_person'] = session('admin.nickname');
+                $i++;
+            }
+        }
+        Db::table('fa_store_sku')->insertAll($data);
+        
+    }
 }

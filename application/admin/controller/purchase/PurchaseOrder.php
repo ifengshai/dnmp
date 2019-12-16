@@ -224,7 +224,7 @@ class PurchaseOrder extends Backend
             //查询存在产品库的sku
             $item = new \app\admin\model\itemmanage\Item;
             $skus = $item->where(['sku' => ['in', $skus]])->column('sku');
-            
+
             if ($row['is_new_product'] == 0) {
                 foreach ($list as $v) {
                     if (!in_array($v['sku'], $skus)) {
@@ -232,7 +232,7 @@ class PurchaseOrder extends Backend
                     }
                 }
             }
-            
+
             $map['id'] = $id;
             $data['purchase_status'] = 1;
             $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
@@ -675,13 +675,13 @@ class PurchaseOrder extends Backend
         $data['check_status'] = 2;
         $data['stock_status'] = 2;
         $data['return_status'] = 2;
+        $data['is_diff'] = 1;
         $res = $this->model->allowField(true)->save($data, ['id' => $id]);
         if ($res !== false) {
             $this->success('操作成功！！');
         } else {
             $this->error('操作失败！！');
         }
-       
     }
 
     /**
@@ -805,7 +805,7 @@ class PurchaseOrder extends Backend
                     $userIDs = config('1688user');
                     $list['create_person'] = $userIDs[$v->baseInfo->buyerSubID] ?? '任萍';
                     //采购02账号 默认都为新品
-                    if($v->baseInfo->buyerSubID == 2201224483475) {
+                    if ($v->baseInfo->buyerSubID == 2201224483475) {
                         $list['is_new_product'] = 1;
                     }
                     $jsonDate = $v->baseInfo->createTime;
@@ -967,6 +967,185 @@ class PurchaseOrder extends Backend
             return json(['result' => false, 'returnCode' => 301, 'message' => '接收失败']);
         }
     }
+
+    /**
+     * 产品补货列表
+     */
+    public function product_grade_list()
+    {
+        $this->model = new \app\admin\model\ProductGrade;
+        //设置过滤方法
+        $this->request->filter(['strip_tags']);
+        if ($this->request->isAjax()) {
+            //如果发送的来源是Selectpage，则转发到Selectpage
+            if ($this->request->request('keyField')) {
+                return $this->selectpage();
+            }
+           
+            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            $total = $this->model
+                ->where($where)
+                ->order($sort, $order)
+                ->count();
+
+            $list = $this->model
+                ->where($where)
+                ->order($sort, $order)
+                ->limit($offset, $limit)
+                ->order('counter desc')
+                ->select();
+            $list = collection($list)->toArray();
+
+
+            //查询所有产品库存
+            $map['is_del'] = 1;
+            $item = new \app\admin\model\itemmanage\Item;
+            $product = $item->where($map)->column('stock,product_cycle', 'sku');
+
+            //计算在途数量
+            $skus = array_column($list, 'sku');
+
+            //计算SKU总采购数量
+            $purchase = new \app\admin\model\purchase\PurchaseOrder;
+            $hasWhere['sku'] = ['in', $skus];
+            $purchase_map['purchase_status'] = ['in', [2, 5, 6, 7]];
+            $purchase_map['stock_status'] = ['in', [0, 1]];
+            $purchase_list = $purchase->hasWhere('purchaseOrderItem', $hasWhere)
+                ->where($purchase_map)
+                ->group('sku')
+                ->column('sum(purchase_num) as purchase_num', 'sku');
+
+            //查询出满足条件的采购单号
+            $ids = $purchase->hasWhere('purchaseOrderItem', $hasWhere)
+                ->where($purchase_map)
+                ->group('PurchaseOrder.id')
+                ->column('PurchaseOrder.id');
+
+            //查询留样库存
+            //查询实际采购信息 查询在途库存 = 采购数量 减去 到货数量
+            $check_map['status'] = 2;
+            $check_map['type'] = 1;
+            $check_map['Check.purchase_id'] = ['in', $ids];
+            $check = new \app\admin\model\warehouse\Check;
+            $hasWhere['sku'] = ['in', $skus];
+            $check_list = $check->hasWhere('checkItem', $hasWhere)
+                ->where($check_map)
+                ->group('sku')
+                ->column('sum(arrivals_num) as arrivals_num', 'sku');
+
+            /**
+             * 日均销量：A+ 和 A等级，日均销量变动较大，按照2天日均销量补；
+             * B和C，C+等级按照5天的日均销量来补货;
+             * D和E等级按照30天日均销量补货，生产入库周期按照7天；
+             * 
+             * 计划售卖周期	计划售卖周期至少是生产入库周期的1倍
+             * A+ 按照计划售卖周期的1.5倍来补
+             * A和 B,C+等级按照计划售卖周期的1.3/1.2/1.1倍来补
+             * C和D和E等级按照计划售卖周期的1倍来补
+             * 补货量=日均销量*生产入库周期+日均销量*计划售卖周期-实时库存-库存在途
+             */
+        
+            foreach ($list as &$v) {
+                $product_cycle = $product[$v['true_sku']]['product_cycle'] ? $product[$v['true_sku']]['product_cycle'] : 7;
+                $onway_stock = $purchase_list[$v['true_sku']] - $check_list[$v['true_sku']];
+                if ($v['grade'] == 'A+') {
+                    $times = 1.5;
+                } elseif ($v['grade'] == 'A') {
+                    $times = 1.3;
+                } elseif ($v['grade'] == 'B') {
+                    $times = 1.2;
+                } elseif ($v['grade'] == 'C+') {
+                    $times = 1.1;
+                } else {
+                    $times = 1;
+                }
+
+                //补货量
+                $v['replenish_num'] = round(($v['days_sales_num'] * $product_cycle) + ($v['days_sales_num'] * $product_cycle * $times) - $product[$v['true_sku']]['true_qty'] - $onway_stock);
+                $v['stock'] = $product[$v['true_sku']]['stock'];
+                $v['purchase_qty'] = $onway_stock ? $onway_stock : 0;
+                //$res[$k]['out_of_stock_num'] = $sku_list[$v['true_sku']]['num'];
+
+            }
+            unset($v);
+
+
+            $result = array("total" => $total, "rows" => $list);
+
+            return json($result);
+        }
+
+        //计算产品等级的数量
+        $where = [];
+        $where['grade'] = 'A+';
+        $AA_num = $this->model->where($where)->count();
+        $where['grade'] = 'A';
+        $A_num = $this->model->where($where)->count();
+        $where['grade'] = 'B';
+        $B_num = $this->model->where($where)->count();
+        $where['grade'] = 'C+';
+        $CA_num = $this->model->where($where)->count();
+        $where['grade'] = 'C';
+        $C_num = $this->model->where($where)->count();
+        $where['grade'] = 'D';
+        $D_num = $this->model->where($where)->count();
+        $where['grade'] = 'E';
+        $E_num = $this->model->where($where)->count();
+        $where['grade'] = 'F';
+        $F_num = $this->model->where($where)->count();
+
+        //总数
+        $all_num = $AA_num + $A_num + $B_num + $CA_num + $C_num + $D_num + $E_num + $F_num;
+        //A级数量即总占比
+        $res['AA_num'] = $AA_num;
+        $res['AA_percent'] = round($AA_num / $all_num * 100, 2);
+        $res['A_num'] = $A_num;
+        $res['A_percent'] = round($A_num / $all_num * 100, 2);
+        $res['B_num'] = $B_num;
+        $res['B_percent'] = round($B_num / $all_num * 100, 2);
+        $res['CA_num'] = $CA_num;
+        $res['CA_percent'] = round($CA_num / $all_num * 100, 2);
+        $res['C_num'] = $C_num;
+        $res['C_percent'] = round($C_num / $all_num * 100, 2);
+        $res['D_num'] = $D_num;
+        $res['D_percent'] = round($D_num / $all_num * 100, 2);
+        $res['E_num'] = $E_num;
+        $res['E_percent'] = round($E_num / $all_num * 100, 2);
+        $res['F_num'] = $F_num;
+        $res['F_percent'] = round($F_num / $all_num * 100, 2);
+
+        $this->assign('res', $res);
+
+        return $this->view->fetch();
+
+        // //计算断货频次
+        // $sku_where['sku'] = ['in', $sku_list];
+        // $sku_data = M('product_sku_stock', 'zeelool_')->where($sku_where)->order('sku asc,createtime asc')->cache(true, 86400)->select();
+        // $sku_list = [];
+        // foreach ($sku_data as $k => $v) {
+        //     //实时库存加上采购未入库库存
+        //     if (($v['qty'] + $v['stock_num']) <= 0) {
+        //         if (!$sku_list[$v['sku']]) {
+        //             $sku_list[$v['sku']]['num'] = 1;
+        //         } else {
+        //             //实时库存加上采购未入库库存
+        //             if (($sku_data[$k - 1]['qty'] + $sku_data[$k - 1]['stock_num']) > 0) {
+        //                 $sku_list[$v['sku']]['num'] = $sku_list[$v['sku']]['num'] + 1;
+        //             }
+        //         }
+        //     }
+        // }
+
+
+
+    }
+
+
+
+
+
+
+
     /**
      * 核算采购单成本 create@lsw
      */
@@ -983,14 +1162,14 @@ class PurchaseOrder extends Backend
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
                 ->with(['supplier'])
-                ->where(['purchase_status'=>['>=',2]])
+                ->where(['purchase_status' => ['>=', 2]])
                 ->where($where)
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->model
                 ->with(['supplier'])
-                ->where(['purchase_status'=>['>=',2]])
+                ->where(['purchase_status' => ['>=', 2]])
                 ->where($where)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
@@ -998,48 +1177,48 @@ class PurchaseOrder extends Backend
             //查询总共的ID    
             $totalId = $this->model
                 ->with(['supplier'])
-                ->where(['purchase_status'=>['>=',2]])
+                ->where(['purchase_status' => ['>=', 2]])
                 ->where($where)
-                ->column('purchase_order.id');    
+                ->column('purchase_order.id');
             //这个页面的ID    
             $thisPageId = $this->model
                 ->with(['supplier'])
-                ->where(['purchase_status'=>['>=',2]])
+                ->where(['purchase_status' => ['>=', 2]])
                 ->where($where)
-                ->order($sort,$order)
-                ->limit($offset,$limit)
-                ->column('purchase_order.id');      
+                ->order($sort, $order)
+                ->limit($offset, $limit)
+                ->column('purchase_order.id');
             $list = collection($list)->toArray();
             //求出所有的总共的实际采购总额和本页面的实际采购金额
-            $purchaseMoney = $this->model->calculatePurchaseOrderMoney($totalId,$thisPageId);
+            $purchaseMoney = $this->model->calculatePurchaseOrderMoney($totalId, $thisPageId);
             //求出退款金额信息
-            $returnMoney   = $this->model->calculatePurchaseReturnMoney($totalId,$thisPageId);
-            if(is_array($purchaseMoney['thisPageArr'])){
-                foreach($list as $key =>$val){
-                    if(array_key_exists($val['id'],$purchaseMoney['thisPageArr'])){
-                       $list[$key]['purchase_virtual_total'] = round($purchaseMoney['thisPageArr'][$val['id']]+$val['purchase_freight'],2);
-                    }                    
-             }
+            $returnMoney   = $this->model->calculatePurchaseReturnMoney($totalId, $thisPageId);
+            if (is_array($purchaseMoney['thisPageArr'])) {
+                foreach ($list as $key => $val) {
+                    if (array_key_exists($val['id'], $purchaseMoney['thisPageArr'])) {
+                        $list[$key]['purchase_virtual_total'] = round($purchaseMoney['thisPageArr'][$val['id']] + $val['purchase_freight'], 2);
+                    }
+                }
             }
-            if(is_array($returnMoney['thisPageArr'])){
-                foreach($list as $keys =>$vals){
-                    if(array_key_exists($vals['id'],$returnMoney['thisPageArr'])){
-                       $list[$keys]['refund_amount']  = $returnMoney['thisPageArr'][$vals['id']];   
+            if (is_array($returnMoney['thisPageArr'])) {
+                foreach ($list as $keys => $vals) {
+                    if (array_key_exists($vals['id'], $returnMoney['thisPageArr'])) {
+                        $list[$keys]['refund_amount']  = $returnMoney['thisPageArr'][$vals['id']];
                     }
                 }
             }
 
 
-            $result = array("total" => $total, "rows" => $list,"total_money"=>$purchaseMoney['total_money'],"return_money"=>$returnMoney['return_money']);
+            $result = array("total" => $total, "rows" => $list, "total_money" => $purchaseMoney['total_money'], "return_money" => $returnMoney['return_money']);
 
             return json($result);
         }
-            return $this->view->fetch();
+        return $this->view->fetch();
     }
     /***
      * 采购单成本核算详情 create@lsw 
      */
-    public function account_purchase_order_detail($ids=null)
+    public function account_purchase_order_detail($ids = null)
     {
         $row = $this->model->get($ids);
         if (!$row) {
@@ -1059,49 +1238,46 @@ class PurchaseOrder extends Backend
     /***
      * 核算采购单付款  create@lsw
      */
-    public function purchase_order_pay($ids=null)
+    public function purchase_order_pay($ids = null)
     {
-        if($this->request->isAjax()){
+        if ($this->request->isAjax()) {
             $params = $this->request->post("row/a");
             $row = $this->model->get($ids);
-            if( 1 == $row['purchase_type']){
-                $resultInfo = $this->model->where(['id'=>$row['id']])->setInc('payment_money',$params['pay_money']);
-            }else{
+            if (1 == $row['purchase_type']) {
+                $resultInfo = $this->model->where(['id' => $row['id']])->setInc('payment_money', $params['pay_money']);
+            } else {
                 $resultInfo = true;
-
             }
-            if(false !== $resultInfo){
+            if (false !== $resultInfo) {
                 $params['purchase_id']   = $row['id'];
                 $params['create_person'] = session('admin.nickname');
                 $params['createtime'] = date('Y-m-d H:i:s', time());
                 $result = (new purchase_order_pay())->allowField(true)->save($params);
-                if($result){
+                if ($result) {
                     return    $this->success('添加成功');
                 }
-            }else{
-                    return    $this->error('添加失败');
+            } else {
+                return    $this->error('添加失败');
             }
-
-
         }
         return $this->view->fetch();
     }
     /***
      * 核算采购单确认退款 create@lsw
      */
-    public function purchase_order_affirm_refund($ids=null)
+    public function purchase_order_affirm_refund($ids = null)
     {
-        if($this->request->isAjax()){
+        if ($this->request->isAjax()) {
             $row = $this->model->get($ids);
-            if( 8 == $row['purchase_status']){
+            if (8 == $row['purchase_status']) {
                 return $this->error('已经是退款状态,无须再次退款');
             }
             $data['purchase_status'] = 8;
-            $result = $this->model->allowField(true)->save($data,['id'=>$ids]);
-            if($result){
+            $result = $this->model->allowField(true)->save($data, ['id' => $ids]);
+            if ($result) {
                 return $this->success();
             }
-                return $this->error();
+            return $this->error();
         }
     }
 }

@@ -421,6 +421,65 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                 });
             }
         },
+        product_grade_list: function () {
+            // 初始化表格参数配置
+            Table.api.init({
+                showJumpto: true,
+                searchFormVisible: true,
+                pageSize: 10,
+                pageList: [10, 25, 50, 100],
+                extend: {
+                    index_url: 'purchase/purchase_order/product_grade_list' + location.search,
+                    table: 'product_grade_list',
+                }
+            });
+
+            var table = $("#table");
+
+            // 初始化表格
+            table.bootstrapTable({
+                url: $.fn.bootstrapTable.defaults.extend.index_url,
+                pk: 'id',
+                sortName: 'createtime',
+                sortOrder: 'desc',
+                columns: [
+                    [
+                        { checkbox: true },
+                        {
+                            field: '', title: __('序号'), formatter: function (value, row, index) {
+                                var options = table.bootstrapTable('getOptions');
+                                var pageNumber = options.pageNumber;
+                                var pageSize = options.pageSize;
+                                return (pageNumber - 1) * pageSize + 1 + index;
+                            }, operate: false
+                        },
+                        { field: 'supplier_name', title: __('供应商名称'), operate: 'like' },
+                        { field: 'true_sku', title: __('SKU'), operate: 'like' },
+                        { field: 'grade', title: __('等级'), operate: 'like' },
+                        { field: 'zeelool_sku', title: __('Zeelool_Sku'), operate: 'like' },
+                        { field: 'voogueme_sku', title: __('Voogueme_Sku'), operate: 'like' },
+                        { field: 'nihao_sku', title: __('Nihao_Sku'), operate: 'like' },
+                        {
+                            field: 'counter', title: __('总销量'), operate: false, formatter: function (value, rows) {
+                                return rows.days + '天:' + rows.counter;
+                            }
+                        },
+
+                        { field: 'num', title: __('30天预估销量'), operate: false },
+                        { field: 'days_sales_num', title: __('日均销量'), operate: false },
+                        { field: 'stock', title: __('实时库存'), operate: false },
+                        { field: 'purchase_qty', title: __('在途库存'), operate: false },
+                        { field: 'replenish_num', title: __('建议补货量'), operate: false },
+                        { field: 'createtime', title: __('上架时间'), operate: 'RANGE', addclass: 'datetimerange' },
+
+                    ]
+                ]
+            });
+            
+
+            // 为表格绑定事件
+            Table.api.bindevent(table);
+        },
         api: {
             bindevent: function () {
                 $(document).on('click', '.btn-status', function () {
@@ -459,7 +518,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                                 $('.final_amount').removeClass('hidden');
                             }
 
-                            $('.freight').attr("readonly","readonly");;
+                            $('.freight').attr("readonly", "readonly");;
 
                             //总计
                             var purchase_total = data.total * 1 + data.freight * 1;
