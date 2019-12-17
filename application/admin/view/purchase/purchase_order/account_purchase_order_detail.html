@@ -58,53 +58,32 @@
     <div class='caigou'>
             <p style="font-size: 16px;text-align: center;"><b>采购单信息</b></p>
         <div class="form-group">
-            <label class="control-label col-xs-12 col-sm-2">采购单号:</label>
+            <label class="control-label col-xs-12 col-sm-2">采购金额:</label>
             <div class="col-xs-12 col-sm-2">
                 <input id="c-check_order_number" class="form-control" name="row[purchase_number]"
-                    value="{$row.purchase_number}" readonly type="text">
+                    value="{$row.purchase_total}" readonly type="text">
             </div>
-            <label class="control-label col-xs-12 col-sm-2">采购单状态:</label>
+            <label class="control-label col-xs-12 col-sm-2">实际采购金额:</label>
             <div class="col-xs-12 col-sm-2">
-                {if $row.purchase_status eq 0}
-                <input id="c-status" class="form-control" name="row[purchase_status]"
-                value="新建" readonly type="text">
-                {elseif $row.purchase_status eq 1 /}
-                <input id="c-status" class="form-control" name="row[purchase_status]"
-                value="审核中" readonly type="text">
-                {elseif $row.purchase_status eq 2 /}
-                <input id="c-status" class="form-control" name="row[purchase_status]"
-                value="已审核" readonly type="text">
-                {elseif $row.purchase_status eq 3 /}
-                <input id="c-status" class="form-control" name="row[purchase_status]"
-                value="已拒绝" readonly type="text">
-                {elseif $row.purchase_status eq 4 /}
-                <input id="c-status" class="form-control" name="row[purchase_status]"
-                value="已取消" readonly type="text">
-                {elseif $row.purchase_status eq 5 /}
-                <input id="c-status" class="form-control" name="row[purchase_status]"
-                value="待发货" readonly type="text">
-                {elseif $row.purchase_status eq 6 /}
-                <input id="c-status" class="form-control" name="row[purchase_status]"
-                value="待收货" readonly type="text">
-                {elseif $row.purchase_status eq 7 /}
-                <input id="c-status" class="form-control" name="row[purchase_status]"
-                value="已收货" readonly type="text">
-                {else/}
-                <input id="c-status" class="form-control" name="row[purchase_status]"
-                value="已退款" readonly type="text">
-                {/if}
+                <input id="c-check_order_number" class="form-control" name="row[purchase_number]"
+                    value="{$purchase_virtual_total}" readonly type="text">
+            </div>
+            <label class="control-label col-xs-12 col-sm-2">退款金额:</label>
+            <div class="col-xs-12 col-sm-2">
+                <input id="c-check_order_number" class="form-control" name="row[purchase_number]"
+                    value="{$refund_amount}" readonly type="text">
             </div>
         </div>
         <div class="form-group">
-            <label class="control-label col-xs-12 col-sm-2">采购单创建时间:</label>
+            <label class="control-label col-xs-12 col-sm-2">采购结算金额:</label>
             <div class="col-xs-12 col-sm-2">
                 <input id="c-order_number" class="form-control" name="row[createtime]"
-                    value="{$row.createtime}" readonly type="text">
+                    value="{$purchase_settle_money}" readonly type="text">
             </div>
-            <label class="control-label col-xs-12 col-sm-2">采购单创建人:</label>
+            <label class="control-label col-xs-12 col-sm-2">已付金额:</label>
             <div class="col-xs-12 col-sm-2">
                 <input id="c-order_number" class="form-control" name="row[create_person]"
-                    value="{$row.create_person}" readonly  type="text">
+                    value="{$row.payment_money}" readonly  type="text">
             </div>
         </div>
     </div>
@@ -121,186 +100,29 @@
             
             <table id="caigou-table">
                 <tr>
-                    <th>SKU</th>
-                    <th>商品名称</th>
-                    <th>采购数量</th>
-                    <th>到货数量</th>
-                    <th>质检合格数量</th>
-                    <th>入库数量</th>
-                    <th>采购单价（元）</th>
-                    <th>总价（元）</th>               
+                    <th>付款金额</th>
+                    <th>付款凭证</th>
+                    <th>付款说明</th>
+                    <th>付款人</th>
+                    <th>付款时间</th>           
                 </tr>
+                {notempty name="item"}
                 {foreach $item as $v}
                 <tr>
-                    <input class="form-control" name="item_id[]" type="hidden" value="{$v.id}">
-                    <td><input class="form-control" name="sku[]" type="text" value="{$v.sku}"></td>
-                    <td><input style="width: 450px;" class="form-control" name="sku[]" type="text" value="{$v.product_name}"></td>
-                    <td><input style="width: 150px;"  class="form-control" name="sku[]" type="text" value="{$v.purchase_num}"></td>
-                    <td><input style="width: 150px;" class="form-control" name="sku[]" type="text" value=""></td>
-                    <td><input style="width: 150px;" class="form-control" name="sku[]" type="text" value=""></td>
-                    <td><input style="width: 150px;" class="form-control" name="sku[]" type="text" value="{$v.instock_num}"></td>
-                    <td><input style="width: 150px;" class="form-control" name="sku[]" type="text" value="{$v.purchase_price}"></td>
-                    <td><input style="width: 150px;" class="form-control" name="sku[]" type="text" value=""></td>
-                </tr>
-                {/foreach}
-            </table>
-        </div>
-    </div>    
-</form>
-<form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
-    <div class='caigou' style="margin-left:20px;width:98%;">
-         <p style="font-size: 16px;text-align: center;"><b>退销单信息</b></p>
-        <div class="form-group">
-            <label class="control-label col-xs-12 col-sm-2">采购单号:</label>
-            <div class="col-xs-12 col-sm-2">
-                <input id="c-check_order_number" class="form-control" name="row[purchase_number]"
-                    value="{$row.purchase_number}" readonly type="text">
-            </div>
-            <label class="control-label col-xs-12 col-sm-2">采购单状态:</label>
-            <div class="col-xs-12 col-sm-2">
-                {if $row.purchase_status eq 0}
-                <input id="c-status" class="form-control" name="row[purchase_status]"
-                value="新建" readonly type="text">
-                {elseif $row.purchase_status eq 1 /}
-                <input id="c-status" class="form-control" name="row[purchase_status]"
-                value="审核中" readonly type="text">
-                {elseif $row.purchase_status eq 2 /}
-                <input id="c-status" class="form-control" name="row[purchase_status]"
-                value="已审核" readonly type="text">
-                {elseif $row.purchase_status eq 3 /}
-                <input id="c-status" class="form-control" name="row[purchase_status]"
-                value="已拒绝" readonly type="text">
-                {elseif $row.purchase_status eq 4 /}
-                <input id="c-status" class="form-control" name="row[purchase_status]"
-                value="已取消" readonly type="text">
-                {elseif $row.purchase_status eq 5 /}
-                <input id="c-status" class="form-control" name="row[purchase_status]"
-                value="待发货" readonly type="text">
-                {elseif $row.purchase_status eq 6 /}
-                <input id="c-status" class="form-control" name="row[purchase_status]"
-                value="待收货" readonly type="text">
-                {elseif $row.purchase_status eq 7 /}
-                <input id="c-status" class="form-control" name="row[purchase_status]"
-                value="已收货" readonly type="text">
-                {else/}
-                <input id="c-status" class="form-control" name="row[purchase_status]"
-                value="已退款" readonly type="text">
-                {/if}
-            </div>
-        </div>
-        <div class="form-group">
-            <label class="control-label col-xs-12 col-sm-2">采购单创建时间:</label>
-            <div class="col-xs-12 col-sm-2">
-                <input id="c-order_number" class="form-control" name="row[createtime]"
-                    value="{$row.createtime}" readonly type="text">
-            </div>
-            <label class="control-label col-xs-12 col-sm-2">采购单创建人:</label>
-            <div class="col-xs-12 col-sm-2">
-                <input id="c-order_number" class="form-control" name="row[create_person]"
-                    value="{$row.create_person}" readonly  type="text">
-            </div>
-        </div>
-        <div style="margin-bottom:20px;">
-            
-            <table id="caigou-table">
-                <tr>
-                    <th>SKU</th>
-                    <th>商品名称</th>
-                    <th>供应商SKU</th>
-                    <th>采购数量</th>
-                    <th>到货数量</th>
-                    <th>质检合格数量</th>
-                    <th>退销数量</th>             
-                </tr>
-                {foreach $item as $v}
-                <tr>
-                    <td><input class="form-control" name="sku[]" type="text" value="{$v.sku}"></td>
-                    <td><input style="width: 450px;" class="form-control" name="sku[]" type="text" value="{$v.product_name}"></td>
-                    <td><input style="width: 150px;"  class="form-control" name="sku[]" type="text" value="{$v.purchase_num}"></td>
-                    <td><input style="width: 150px;" class="form-control" name="sku[]" type="text" value=""></td>
-                    <td><input style="width: 150px;" class="form-control" name="sku[]" type="text" value=""></td>
-                    <td><input style="width: 150px;" class="form-control" name="sku[]" type="text" value="{$v.instock_num}"></td>
-                    <td><input style="width: 150px;" class="form-control" name="sku[]" type="text" value="{$v.purchase_price}"></td>
-                </tr>
-                {/foreach}
-            </table>
-        </div>
-    </div>    
-</form>
-<form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
-        <div class='caigou' style="margin-left:20px;width:98%;">
-             <p style="font-size: 16px;text-align: center;"><b>付款信息</b></p>
-            <div class="form-group">
-                <label class="control-label col-xs-12 col-sm-2">采购单号:</label>
-                <div class="col-xs-12 col-sm-2">
-                    <input id="c-check_order_number" class="form-control" name="row[purchase_number]"
-                        value="{$row.purchase_number}" readonly type="text">
-                </div>
-                <label class="control-label col-xs-12 col-sm-2">采购单状态:</label>
-                <div class="col-xs-12 col-sm-2">
-                    {if $row.purchase_status eq 0}
-                    <input id="c-status" class="form-control" name="row[purchase_status]"
-                    value="新建" readonly type="text">
-                    {elseif $row.purchase_status eq 1 /}
-                    <input id="c-status" class="form-control" name="row[purchase_status]"
-                    value="审核中" readonly type="text">
-                    {elseif $row.purchase_status eq 2 /}
-                    <input id="c-status" class="form-control" name="row[purchase_status]"
-                    value="已审核" readonly type="text">
-                    {elseif $row.purchase_status eq 3 /}
-                    <input id="c-status" class="form-control" name="row[purchase_status]"
-                    value="已拒绝" readonly type="text">
-                    {elseif $row.purchase_status eq 4 /}
-                    <input id="c-status" class="form-control" name="row[purchase_status]"
-                    value="已取消" readonly type="text">
-                    {elseif $row.purchase_status eq 5 /}
-                    <input id="c-status" class="form-control" name="row[purchase_status]"
-                    value="待发货" readonly type="text">
-                    {elseif $row.purchase_status eq 6 /}
-                    <input id="c-status" class="form-control" name="row[purchase_status]"
-                    value="待收货" readonly type="text">
-                    {elseif $row.purchase_status eq 7 /}
-                    <input id="c-status" class="form-control" name="row[purchase_status]"
-                    value="已收货" readonly type="text">
-                    {else/}
-                    <input id="c-status" class="form-control" name="row[purchase_status]"
-                    value="已退款" readonly type="text">
-                    {/if}
-                </div>
-            </div>
-            <div class="form-group">
-                <label class="control-label col-xs-12 col-sm-2">采购单创建时间:</label>
-                <div class="col-xs-12 col-sm-2">
-                    <input id="c-order_number" class="form-control" name="row[createtime]"
-                        value="{$row.createtime}" readonly type="text">
-                </div>
-                <label class="control-label col-xs-12 col-sm-2">采购单创建人:</label>
-                <div class="col-xs-12 col-sm-2">
-                    <input id="c-order_number" class="form-control" name="row[create_person]"
-                        value="{$row.create_person}" readonly  type="text">
-                </div>
-            </div>
-            <div style="margin-bottom:20px;">
-                
-                <table id="caigou-table">
-                    <tr>
-                        <th>付款金额</th>
-                        <th>付款凭证</th>
-                        <th>付款说明</th>
-                        <th>付款人</th>
-                        <th>付款时间</th>             
-                    </tr>
-                    {foreach $item as $v}
-                    <tr>
-                        <input class="form-control" name="item_id[]" type="hidden" value="{$v.id}">
-                        <td><input class="form-control" name="sku[]" type="text" value="{$v.sku}"></td>
-                        <td><input style="width: 450px;" class="form-control" name="sku[]" type="text" value="{$v.product_name}"></td>
-                        <td><input style="width: 150px;"  class="form-control" name="sku[]" type="text" value="{$v.purchase_num}"></td>
-                        <td><input style="width: 150px;" class="form-control" name="sku[]" type="text" value=""></td>
-                        <td><input style="width: 150px;" class="form-control" name="sku[]" type="text" value=""></td>
-                    </tr>
+                    <input class="form-control" name="item_id[]" type="hidden" value="">
+                    <td>{$v.pay_money}</td>
+                    <td>
+                    {foreach $v.pay_photos as $photos}
+                    <img src="{$photos}" height="100px;"/>
                     {/foreach}
-                </table>
-            </div>
-        </div>    
+                    </td>
+                    <td>{$v.pay_explain}</td>
+                    <td>{$v.create_person}</td>
+                    <td>{$v.create_time}</td>
+                </tr>
+                {/foreach}
+                {/notempty}
+            </table>
+        </div>
+    </div>    
 </form>

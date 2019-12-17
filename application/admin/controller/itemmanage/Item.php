@@ -26,7 +26,7 @@ class Item extends Backend
     /**
      * 不需要登陆
      */
-    protected $noNeedLogin = ['pullMagentoProductInfo', 'ceshi', 'optimizeSku', 'pullMagentoProductInfoTwo', 'changeSkuToPlatformSku', 'findSku', 'skuMap', 'skuMapOne'];
+    protected $noNeedLogin = ['pullMagentoProductInfo','analyticMagentoField','analyticUpdate', 'ceshi', 'optimizeSku', 'pullMagentoProductInfoTwo', 'changeSkuToPlatformSku', 'findSku', 'skuMap', 'skuMapOne'];
 
     public function _initialize()
     {

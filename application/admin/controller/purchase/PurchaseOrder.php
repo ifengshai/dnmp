@@ -1185,26 +1185,34 @@ class PurchaseOrder extends Backend
                 ->column('purchase_order.id');
             $list = collection($list)->toArray();
             //求出所有的总共的实际采购总额和本页面的实际采购金额
-            $purchaseMoney = $this->model->calculatePurchaseOrderMoney($totalId, $thisPageId);
+            $purchaseMoney = $this->model->calculatePurchaseOrderMoney($totalId,$thisPageId);
+            // echo '<pre>';
+            // var_dump($purchaseMoney);
+            // exit;
             //求出退款金额信息
-            $returnMoney   = $this->model->calculatePurchaseReturnMoney($totalId, $thisPageId);
-            if (is_array($purchaseMoney['thisPageArr'])) {
-                foreach ($list as $key => $val) {
-                    if (array_key_exists($val['id'], $purchaseMoney['thisPageArr'])) {
-                        $list[$key]['purchase_virtual_total'] = round($purchaseMoney['thisPageArr'][$val['id']] + $val['purchase_freight'], 2);
+            $returnMoney   = $this->model->calculatePurchaseReturnMoney($totalId,$thisPageId);
+            if(is_array($returnMoney['thisPageArr'])){
+                foreach($list as $keys =>$vals){
+                    if(array_key_exists($vals['id'],$returnMoney['thisPageArr'])){
+                       //采购单的退款金额 
+                       $list[$keys]['refund_amount']  = round($returnMoney['thisPageArr'][$vals['id']],2);   
                     }
                 }
             }
-            if (is_array($returnMoney['thisPageArr'])) {
-                foreach ($list as $keys => $vals) {
-                    if (array_key_exists($vals['id'], $returnMoney['thisPageArr'])) {
-                        $list[$keys]['refund_amount']  = $returnMoney['thisPageArr'][$vals['id']];
-                    }
-                }
+            if(is_array($purchaseMoney['thisPageArr'])){
+                foreach($list as $key =>$val){
+                    if(array_key_exists($val['id'],$purchaseMoney['thisPageArr'])){
+                       //采购单的实际采购金额 
+                       $list[$key]['purchase_virtual_total'] = round($purchaseMoney['thisPageArr'][$val['id']]+$val['purchase_freight'],2);
+                       //采购单实际结算金额(如果存在实际采购金额要从实际采购金额扣减)
+                       $list[$key]['purchase_settle_money']  = round($list[$key]['purchase_virtual_total']-$list[$key]['refund_amount'],2);
+                    }else{
+                       //采购单实际结算金额(如果不存在实际采购金额要从采购金额中扣减) 
+                       $list[$key]['purchase_settle_money']  = round(($list[$key]['purchase_total']-$list[$key]['refund_amount']),2);
+                    }                    
+             }
             }
-
-
-            $result = array("total" => $total, "rows" => $list, "total_money" => $purchaseMoney['total_money'], "return_money" => $returnMoney['return_money']);
+            $result = array("total" => $total, "rows" => $list,"total_money"=>$purchaseMoney['total_money'],"return_money"=>$returnMoney['return_money']);
 
             return json($result);
         }
@@ -1213,7 +1221,7 @@ class PurchaseOrder extends Backend
     /***
      * 采购单成本核算详情 create@lsw 
      */
-    public function account_purchase_order_detail($ids = null)
+    public function account_purchase_order_detail($ids=null,$purchase_virtual_total=0,$refund_amount=0,$purchase_settle_money=0)
     {
         $row = $this->model->get($ids);
         if (!$row) {
@@ -1227,8 +1235,14 @@ class PurchaseOrder extends Backend
             }
         }
         $info = $this->model->getPurchaseOrderItemInfo($row['id']);
-        $this->view->assign("row", $row);
-        return $this->view->fetch();
+        if($info){
+            $this->view->assign("item",$info); 
+        }
+            $this->view->assign("row", $row);
+            $this->view->assign("refund_amount",$refund_amount);
+            $this->view->assign("purchase_settle_money",$purchase_settle_money);
+            $this->view->assign("purchase_virtual_total",$purchase_virtual_total);
+            return $this->view->fetch();
     }
     /***
      * 核算采购单付款  create@lsw

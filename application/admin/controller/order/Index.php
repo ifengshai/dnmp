@@ -236,10 +236,15 @@ class Index extends Backend
             $costInfo = $model->getOrderCostInfo($totalId,$thisPageId);         
             $list = collection($list)->toArray();
             foreach($list as $k =>$v){
-                if(isset($costInfo['thisPagePayPrice'])){
-                    if(array_key_exists($v['entity_id'],$costInfo['thisPagePayPrice'])){
-                        $list[$k]['total_money'] = $costInfo['thisPagePayPrice'][$v['entity_id']];
-                   }
+                //原先
+                // if(isset($costInfo['thisPagePayPrice'])){
+                //     if(array_key_exists($v['entity_id'],$costInfo['thisPagePayPrice'])){
+                //         $list[$k]['total_money'] = $costInfo['thisPagePayPrice'][$v['entity_id']];
+                //    }
+                // }
+                if(in_array($v['status'],['processing','complete','creditcard_proccessing','free_processing'])){
+                    //$costInfo['totalPayInfo'] +=  round($v['base_total_paid']+$v['base_total_due'],2);
+                    $list[$k]['total_money']   =  round($v['base_total_paid']+$v['base_total_due'],2);
                 }
                 if(isset($costInfo['thispageFramePrice'])){
                     if(array_key_exists($v['increment_id'],$costInfo['thispageFramePrice'])){
@@ -255,9 +260,9 @@ class Index extends Backend
             $result = array(
                 "total"             =>  $total, 
                 "rows"              =>  $list, 
-                "totalPayInfo"      =>  $costInfo['totalPayInfo'],
-                "totalLensPrice"    =>  $costInfo['totalLensPrice'],
-                "totalFramePrice"   =>  $costInfo['totalFramePrice']
+                "totalPayInfo"      =>  round($costInfo['totalPayInfo'],2),
+                "totalLensPrice"    =>  round($costInfo['totalLensPrice'],2),
+                "totalFramePrice"   =>  round($costInfo['totalFramePrice'],2)
             );
 
             return json($result);

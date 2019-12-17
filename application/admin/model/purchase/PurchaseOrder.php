@@ -98,28 +98,33 @@ class PurchaseOrder extends Model
         if( (0 == count($totalArr)) || (0 == count($thisPageIdArr))){
             return 0.00;
         }
+        //求出有确认差异的采购单
+        $where['id'] = ['in',$totalArr];
+        $where['is_diff'] = 1;
+        $trueTotalArr = $this->where($where)->column('id');
         //首先求出总的邮费
         $postAgeMap['id'] = ['in',$totalArr];
-        $totalPostage = $this->where($postAgeMap)->sum('purchase_freight');
-        $totalMap['p.purchase_id'] = ['in',$totalArr];
+        $totalPostage = $this->where($postAgeMap)->field('sum(purchase_total) purchase_total,sum(purchase_freight) purchase_freight')->select();
+        $totalPostage = collection($totalPostage)->toArray();
+        $totalMap['p.purchase_id'] = ['in',$trueTotalArr];
         //求出所有的实际采购金额
         $arr = [];
         $arr['total_money'] = 0;
         $purchaseResult = Db::name('purchase_order_item')->alias('p')->where($totalMap)->join('check_order_item m','p.sku=m.sku and p.purchase_id = m.purchase_id')
         ->field('p.purchase_id,p.purchase_price,m.quantity_num,m.unqualified_num')->select();
         if(!$purchaseResult){
-            $arr['total_money'] = $totalPostage;
+            $arr['total_money'] = $totalPostage[0]['purchase_total'];
             $arr['thisPageArr'] = [];
             return $arr;
         }
         $purchaseResult = collection($purchaseResult)->toArray();
         foreach($purchaseResult  as $v){
-            $arr['total_money'] += round($v['purchase_price']*($v['quantity_num']+$v['unqualified_num']),2);
+            //$arr['total_money'] += round($v['purchase_price']*($v['quantity_num']+$v['unqualified_num']),2);
             if(in_array($v['purchase_id'],$thisPageIdArr)){
                 $arr['thisPageArr'][$v['purchase_id']] = round($v['purchase_price']*($v['quantity_num']+$v['unqualified_num']),2);
             }
         } 
-        $arr['total_money']+=$totalPostage;
+        $arr['total_money']=$totalPostage[0]['purchase_total'];
         return $arr;
     }
     /***
@@ -151,10 +156,16 @@ class PurchaseOrder extends Model
      * 求出采购单核算成本详情页面所需要的信息 create@lsw
      * @param id 采购单ID
      */
-    // public function getPurchaseOrderItemInfo($id)
-    // {
-    //     $map['purchase_id'] = $id;
-    //     $purchaseOrderInfo = Db::name('purchase_order_item')->alias('m')->where($map)->join('check_order_item c','m.purchase_id=c.purchase_id and m.sku=c.sku','left')
-    //     ->field('')
-    // }
+    public function getPurchaseOrderItemInfo($id)
+    {
+        $map['purchase_id'] = $id;
+        $info = Db::name('purchase_order_pay')->where($map)->select();
+        if(!$info){
+            return false;
+        }
+        foreach($info as $k =>$v){
+            $info[$k]['pay_photos'] = explode(',',$v['pay_photos']);
+        }
+        return $info;
+    }
 }
