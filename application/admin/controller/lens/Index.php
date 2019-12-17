@@ -546,7 +546,7 @@ class Index extends Backend
             }
 
             //如果cyl 为+;则sph = sph + cyl;cyl 正号变为负号
-            if (intval($v[5]) * 1 > 0) {
+            if ($v[5] * 1 > 0) {
                 $sph = $sph * 1 + $v[5] * 1;
                 if ($sph > 0) {
                     $sph = '+' . number_format($sph, 2);
@@ -558,10 +558,10 @@ class Index extends Backend
                 $cyl = $v[5];
             }
 
-            if (intval($cyl) * 1 == 0) {
+            if ($cyl * 1 == 0) {
                 $cyl = '+0.00';
             }
-            if (intval($sph) * 1 == 0) {
+            if ($sph * 1 == 0) {
                 $sph = '+0.00';
             }
 
