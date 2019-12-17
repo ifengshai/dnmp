@@ -186,9 +186,9 @@
     <div class='caigou'>
         <p style="font-size: 16px;text-align: center;"><b>商品信息</b></p>
         <div style="margin-bottom: 20px;">
-            <div id="toolbar" class="toolbar {:$row['contract_id'] ? 'hide' : ''}" >
+            <!-- <div id="toolbar" class="toolbar {:$row['contract_id'] ? 'hide' : ''}" >
                 <a href="javascript:;" class="btn btn-success btn-add" title="增加"><i class="fa fa-plus"></i> 增加</a>
-            </div>
+            </div> -->
             <table id="caigou-table">
                 <tr>
                     <th>SKU</td>
@@ -197,7 +197,7 @@
                     <th>采购数量（个）</td>
                     <th>采购单价（元）</td>
                     <th>总价（元）</td>
-                    <th class="{:$row['contract_id'] ? 'hide' : ''}">操作</td>
+                    <!-- <th class="{:$row['contract_id'] ? 'hide' : ''}">操作</td> -->
                 </tr>
                 {foreach $item as $v}
                 <tr>
@@ -210,7 +210,7 @@
                     <td><input id="c-purchase_remark" class="form-control purchase_num" {:$row['contract_id'] ? 'readonly' : ''} name="purchase_num[]" value="{$v.purchase_num}" type="text"></td>
                     <td><input id="c-purchase_remark" class="form-control purchase_price" {:$row['contract_id'] ? 'readonly' : ''} name="purchase_price[]" value="{$v.purchase_price}" type="text"></td>
                     <td><input id="c-purchase_remark" class="form-control goods_total" name="purchase_total[]" readonly value="{$v.purchase_total}" type="text"></td>
-                    <td class="{:$row['contract_id'] ? 'hide' : ''}"><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i> 删除</a></td>
+                    <!-- <td class="{:$row['contract_id'] ? 'hide' : ''}"><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i> 删除</a></td> -->
                 </tr>
                 {/foreach}
             </table>

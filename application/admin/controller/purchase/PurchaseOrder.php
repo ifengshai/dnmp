@@ -1141,12 +1141,6 @@ class PurchaseOrder extends Backend
 
     }
 
-
-
-
-
-
-
     /**
      * 核算采购单成本 create@lsw
      */
