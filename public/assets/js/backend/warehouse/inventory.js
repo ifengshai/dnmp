@@ -561,11 +561,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'editable', 'bootstra
                             field: 'inventory_qty', title: __('盘点数量'), operate: false, editable: true
                         },
                         { field: 'error_qty', title: __('误差数量'), operate: false },
-                        {
-                            field: 'remark', title: __('备注'), operate: false, editable: {
-                                emptytext: '-'
-                            }
-                        },
+                        // {
+                        //     field: 'remark', title: __('备注'), operate: false, editable: {
+                        //         emptytext: '-'
+                        //     }
+                        // },
 
                     ]
                 ]

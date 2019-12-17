@@ -233,6 +233,7 @@ class Admin extends Backend
             $this->error($exception->getMessage());
         }
 
+        
         foreach($data as $k => $v) {
                 $params['username'] = $v[0];
                 $params['nickname'] = $v[1];
