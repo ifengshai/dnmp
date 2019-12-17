@@ -241,13 +241,14 @@ class Zeelool extends Model
         //求出总付款金额
         $totalMap['entity_id'] = ['in',$totalId];
         $totalMap['status']    = ['in',['processing','complete','creditcard_proccessing','free_processing']];
-        $payInfo = $this->where($totalMap)->where($totalMap)->field('entity_id,base_total_paid,base_total_due')->select();
+        $payInfo = $this->where($totalMap)->field('entity_id,base_total_paid,base_total_due,postage_money')->select();
         if(!$payInfo){
             return $arr;
         }
         $payInfo = collection($payInfo)->toArray();
         foreach($payInfo as $v){
             $arr['totalPayInfo'] +=round($v['base_total_paid']+$v['base_total_due'],2);
+            $arr['totalPostageMoney'] += round($v['postage_money'],2);
         }
         //求出镜架成本start
         //1.求出所有的订单号
@@ -291,6 +292,97 @@ class Zeelool extends Model
             }
         }
         //求出镜片成本end
+        //求出退款金额和补差价金额start
+        $saleMap['order_number'] = ['in',$order['increment_id']];
+        $saleMap['task_status']  = 2;
+        $synergyMap['synergy_status'] = 2;
+        $synergyMap['synergy_order_number'] = ['in',$order['increment_id']];
+        $synergyMap['synergy_order_id'] = 2;
+        $arr['totalRefundMoney'] = $arr['totalFullPostMoney'] = 0;
+        $saleAfterInfo = Db::name('sale_after_task')->where($saleMap)->field('order_number,refund_money,make_up_price_order')->select(); 
+        $infoSynergyInfo = Db::name('info_synergy_task')->where($synergyMap)->field('synergy_order_number,refund_money,make_up_price_order')->select();
+        //求出退款金额
+        //把补差价订单号存起来
+        $fullPostOrder = [];
+        if($saleAfterInfo){
+            $saleAfterInfo = collection($saleAfterInfo)->toArray();
+            foreach($saleAfterInfo as $sv){
+                $arr['totalRefundMoney'] += round($sv['refund_money'],2);
+                if(in_array($sv['order_number'],$order['this_increment_id'])){
+                    $arr['thispageRefundMoney'][$sv['order_number']] = round($sv['refund_money'],2);
+                }
+                //如果补差价订单存在的话,把补差价订单存起来
+                if($sv['make_up_price_order']){
+                    $fullPostOrder[$sv['order_number']] = $sv['make_up_price_order'];
+                }
+            }
+        }
+        if($infoSynergyInfo){
+            $infoSynergyInfo = collection($infoSynergyInfo)->toArray();
+            foreach($infoSynergyInfo as $vs){
+                $arr['totalRefundMoney'] += round($vs['refund_money'],2);
+                if(in_array($vs['synergy_order_number'],$order['this_increment_id'])){
+                    if(isset($arr['thispageRefundMoney'][$vs['synergy_order_number']])){
+                        $arr['thispageRefundMoney'][$vs['synergy_order_number']] += round($vs['refund_money'],2);
+                    }else{
+                        $arr['thispageRefundMoney'][$vs['synergy_order_number']] = round($vs['refund_money'],2);
+                    }
+                }
+                if($vs['make_up_price_order']){
+                    $fullPostOrder[$vs['synergy_order_number']] = $vs['make_up_price_order'];
+                }
+            }
+        }
+        //求出退款金额成本end
+        //求出补差价订单
+        //去掉重复的补差价订单号
+        $fullPostOrder = array_unique($fullPostOrder);
+        //搜索订单条件
+        $fullPostMap['status']       = ['in',['processing','complete','creditcard_proccessing','free_processing']];
+        $fullPostMap['increment_id'] = ['in',$fullPostOrder];
+        $fullPostResult = $this->where($fullPostMap)->field('increment_id,base_total_paid,base_total_due')->select();
+        if($fullPostResult){
+            $fullPostResult = collection($fullPostResult)->toArray();
+            foreach($fullPostResult as $vf){
+                $arr['totalFullPostMoney'] +=round($vf['base_total_paid']+$vf['base_total_due'],2);
+                //求出订单号
+                $originOrder = array_search($vf['increment_id'],$fullPostOrder);
+                if(in_array($originOrder,$order['this_increment_id'])){
+                    $arr['thispageFullPostMoney'][$originOrder] = round($vf['base_total_paid']+$vf['base_total_due'],2);
+                }
+
+            }
+            
+        }
+        
             return $arr;
+    }
+    /***
+     * 求出退款金额和补差价订单金额  create@lsw
+     * 
+     */
+    public function getOrderRefundMoney()
+    {
+
+    }
+
+    /***
+     * 批量导入邮费  create@lsw
+     * @param increment_id 订单号
+     * @param postage_money 邮费 
+     */
+    public function updatePostageMoney($increment_id,$postage_money)
+    {
+        $where['increment_id'] = $increment_id;
+        $data['postage_money'] = $postage_money;
+        $data['postage_create_time'] = date("Y-m-d H:i:s",time());
+        $rs1 = Db::connect('database.db_zeelool')->table('sales_flat_order')->where($where)->update($data);
+        $rs2 = Db::connect('database.db_voogueme')->table('sales_flat_order')->where($where)->update($data);
+        $rs3 = Db::connect('database.db_nihao')->table('sales_flat_order')->where($where)->update($data);
+        if(($rs1 === false) && ($rs2 === false) && ($rs3 === false)){
+            return false;
+        }else{
+            return true;
+        }
     }
 }

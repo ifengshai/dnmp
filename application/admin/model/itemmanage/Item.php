@@ -287,5 +287,18 @@ class Item extends Model
         $result = $this->where($where)->field('id,sku,available_stock')->find();
         return $result;  
     }
+    /**
+     * 查询一个通过审核之后的仓库sku是否存在
+     * @param sku 仓库sku
+     */
+    public function pass_check_sku($sku)
+    {
+        $where['is_open'] = 1;
+        $where['is_del']  = 1;
+        $where['item_status'] = 3;
+        $where['sku']     = $sku;
+        $result = $this->where($where)->field('id,sku,available_stock')->find();
+        return $result;  
+    }
 
 }

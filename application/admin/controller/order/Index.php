@@ -8,7 +8,12 @@ use fast\Trackingmore;
 use Util\NihaoPrescriptionDetailHelper;
 use Util\ZeeloolPrescriptionDetailHelper;
 use Util\VooguemePrescriptionDetailHelper;
-
+use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
+use PhpOffice\PhpSpreadsheet\Reader\Xls;
+use PhpOffice\PhpSpreadsheet\Reader\Csv;
+use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
+use think\Exception;
+use think\exception\PDOException;
 
 /**
  * 订单列表
@@ -242,18 +247,33 @@ class Index extends Backend
                 //         $list[$k]['total_money'] = $costInfo['thisPagePayPrice'][$v['entity_id']];
                 //    }
                 // }
+                //订单支付金额
                 if(in_array($v['status'],['processing','complete','creditcard_proccessing','free_processing'])){
                     //$costInfo['totalPayInfo'] +=  round($v['base_total_paid']+$v['base_total_due'],2);
-                    $list[$k]['total_money']   =  round($v['base_total_paid']+$v['base_total_due'],2);
+                    $list[$k]['total_money']      =  round($v['base_total_paid']+$v['base_total_due'],2);
                 }
+                //订单镜架成本
                 if(isset($costInfo['thispageFramePrice'])){
                     if(array_key_exists($v['increment_id'],$costInfo['thispageFramePrice'])){
-                        $list[$k]['frame_cost'] = $costInfo['thispageFramePrice'][$v['increment_id']];
+                        $list[$k]['frame_cost']   = $costInfo['thispageFramePrice'][$v['increment_id']];
                     }
                 }
+                //订单镜片成本
                 if(isset($costInfo['thispageLensPrice'])){
                     if(array_key_exists($v['increment_id'],$costInfo['thispageLensPrice'])){
-                        $list[$k]['lens_cost']  = $costInfo['thispageLensPrice'][$v['increment_id']];
+                        $list[$k]['lens_cost']    = $costInfo['thispageLensPrice'][$v['increment_id']];
+                    }
+                }
+                //订单退款金额
+                if(isset($costInfo['thispageRefundMoney'])){
+                    if(array_key_exists($v['increment_id'],$costInfo['thispageRefundMoney'])){
+                        $list[$k]['refund_money'] = $costInfo['thispageRefundMoney'][$v['increment_id']];
+                    }
+                }
+                //订单补差价金额
+                if(isset($costInfo['thispageFullPostMoney'])){
+                    if(array_key_exists($v['increment_id'],$costInfo['thispageFullPostMoney'])){
+                        $list[$k]['fill_post']    = $costInfo['thispageFullPostMoney'][$v['increment_id']];
                     }
                 }
             }
@@ -262,7 +282,11 @@ class Index extends Backend
                 "rows"              =>  $list, 
                 "totalPayInfo"      =>  round($costInfo['totalPayInfo'],2),
                 "totalLensPrice"    =>  round($costInfo['totalLensPrice'],2),
-                "totalFramePrice"   =>  round($costInfo['totalFramePrice'],2)
+                "totalFramePrice"   =>  round($costInfo['totalFramePrice'],2),
+                "totalPostageMoney" =>  round($costInfo['totalPostageMoney'],2),
+                "totalRefundMoney"  =>  round($costInfo['totalRefundMoney'],2),
+                "totalFullPostMoney"=>  round($costInfo['totalFullPostMoney'],2)
+
             );
 
             return json($result);
@@ -278,4 +302,143 @@ class Index extends Backend
     {
         echo 123;
     }
+    /***
+     * 导入邮费页面 create@lsw
+     */
+    public function postage_import()
+    {
+        $label = $this->request->get('label', 1);
+        //设置过滤方法
+        $this->request->filter(['strip_tags']);
+        if ($this->request->isAjax()) {
+            //如果发送的来源是Selectpage，则转发到Selectpage
+            if ($this->request->request('keyField')) {
+                return $this->selectpage();
+            }
+            //根据传的标签切换对应站点数据库
+            $label = $this->request->get('label', 1);
+            if ($label == 1) {
+                $model = $this->zeelool;
+            } elseif ($label == 2) {
+                $model = $this->voogueme;
+            } elseif ($label == 3) {
+                $model = $this->nihao;
+            }
+            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            
+            $total = $model
+                ->where($where)
+                ->order($sort, $order)
+                ->count();
+
+            $list = $model
+                ->where($where)
+                ->order($sort, $order)
+                ->limit($offset, $limit)
+                ->select();
+
+            $list = collection($list)->toArray();
+
+            $result = array("total" => $total, "rows" => $list);
+
+            return json($result);
+        }
+        $this->assign('label', $label);
+        $this->assignconfig('label', $label);
+        return $this->view->fetch();
+    }
+
+    /***
+     * 邮费导入   create@lsw
+     */
+        public function import()
+        {
+            
+            $file = $this->request->request('file');
+            if (!$file) {
+                $this->error(__('Parameter %s can not be empty', 'file'));
+            }
+            $filePath = ROOT_PATH . DS . 'public' . DS . $file;
+            if (!is_file($filePath)) {
+                $this->error(__('No results were found'));
+            }
+            //实例化reader
+            $ext = pathinfo($filePath, PATHINFO_EXTENSION);
+            if (!in_array($ext, ['csv', 'xls', 'xlsx'])) {
+                $this->error(__('Unknown data format'));
+            }
+            if ($ext === 'csv') {
+                $file = fopen($filePath, 'r');
+                $filePath = tempnam(sys_get_temp_dir(), 'import_csv');
+                $fp = fopen($filePath, "w");
+                $n = 0;
+                while ($line = fgets($file)) {
+                    $line = rtrim($line, "\n\r\0");
+                    $encoding = mb_detect_encoding($line, ['utf-8', 'gbk', 'latin1', 'big5']);
+                    if ($encoding != 'utf-8') {
+                        $line = mb_convert_encoding($line, 'utf-8', $encoding);
+                    }
+                    if ($n == 0 || preg_match('/^".*"$/', $line)) {
+                        fwrite($fp, $line . "\n");
+                    } else {
+                        fwrite($fp, '"' . str_replace(['"', ','], ['""', '","'], $line) . "\"\n");
+                    }
+                    $n++;
+                }
+                fclose($file) || fclose($fp);
+    
+                $reader = new Csv();
+            } elseif ($ext === 'xls') {
+                $reader = new Xls();
+            } else {
+                $reader = new Xlsx();
+            }
+    
+            //导入文件首行类型,默认是注释,如果需要使用字段名称请使用name
+            //$importHeadType = isset($this->importHeadType) ? $this->importHeadType : 'comment';
+            //模板文件列名
+            $listName = ['订单号', '邮费'];
+            try {
+                if (!$PHPExcel = $reader->load($filePath)) {
+                    $this->error(__('Unknown data format'));
+                }
+                $currentSheet = $PHPExcel->getSheet(0);  //读取文件中的第一个工作表
+                $allColumn = $currentSheet->getHighestDataColumn(); //取得最大的列号
+                $allRow = $currentSheet->getHighestRow(); //取得一共有多少行
+                $maxColumnNumber = Coordinate::columnIndexFromString($allColumn);
+    
+                $fields = [];
+                for ($currentRow = 1; $currentRow <= 1; $currentRow++) {
+                    for ($currentColumn = 1; $currentColumn <= $maxColumnNumber; $currentColumn++) {
+                        $val = $currentSheet->getCellByColumnAndRow($currentColumn, $currentRow)->getValue();
+                        $fields[] = $val;
+                    }
+                }
+    
+                //模板文件不正确
+                if ($listName !== $fields) {
+                    throw new Exception("模板文件不正确！！");
+                }
+    
+                $data = [];
+                for ($currentRow = 2; $currentRow <= $allRow; $currentRow++) {
+                    for ($currentColumn = 1; $currentColumn <= $maxColumnNumber; $currentColumn++) {
+                        $val = $currentSheet->getCellByColumnAndRow($currentColumn, $currentRow)->getValue();
+                        $data[$currentRow - 2][$currentColumn - 1] = is_null($val) ? '' : $val;
+                    }
+                }
+            } catch (Exception $exception) {
+                $this->error($exception->getMessage());
+            }
+            $model = $this->zeelool;
+            foreach($data as $k => $v) {
+                    $increment_id = $v[0];
+                    $postage_money = $v[1];
+                    $result = $model->updatePostageMoney($increment_id,$postage_money);
+                    if ($result === false) {
+                        $this->error($this->model->getError());
+                    }
+            }
+            $this->success();
+        }
 }
