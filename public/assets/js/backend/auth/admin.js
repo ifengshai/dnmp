@@ -9,6 +9,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     add_url: 'auth/admin/add',
                     edit_url: 'auth/admin/edit',
                     del_url: 'auth/admin/del',
+                    import_url: 'auth/admin/import',
                     multi_url: 'auth/admin/multi',
                 }
             });
