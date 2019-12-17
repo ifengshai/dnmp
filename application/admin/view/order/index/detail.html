@@ -278,6 +278,7 @@
             <table id="caigou-table">
                 <tr>
                     <th>订单号</th>
+                    <th>货币</th>
                     <th>支付金额</th>
                     <th>订单金额</th>
                     <th>积分</th>
@@ -292,7 +293,8 @@
                 </tr>
                 <tr>
                     <td>{$row.increment_id} </td>
-                    <td>{$pay.base_amount_paid|sprintf='%.2f',###}</td>
+                    <td>{$row.order_currency_code} </td>
+                    <td>{:round(($row['base_total_paid'] + $row['base_total_due'])*$row['base_to_order_rate'],3)}</td>
                     <td>{$row.base_grand_total|sprintf='%.2f',###} </td>
                     <td>{$row.mw_rewardpoint} </td>
                     <td>{$row.mw_rewardpoint_discount_show|sprintf='%.2f',###} </td>
