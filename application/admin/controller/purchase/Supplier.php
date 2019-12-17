@@ -11,6 +11,7 @@ use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use think\Exception;
 use think\exception\PDOException;
 use think\exception\ValidateException;
+use fast\Auth;
 
 /**
  * 供应商管理
