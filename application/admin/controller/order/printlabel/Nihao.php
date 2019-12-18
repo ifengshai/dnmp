@@ -489,13 +489,13 @@ class Nihao extends Backend
             $bridge_querySql = "select cpev.attribute_id,cpev.`value`,cpev.entity_id
 from catalog_product_entity_varchar cpev
 where cpev.attribute_id =149 and cpev.store_id=0 and cpev.entity_id=$product_id";
-            $bridge_resultList = Db::connect('database.db_nihao_online')->query($bridge_querySql);
+            $bridge_resultList = Db::connect('database.db_nihao')->query($bridge_querySql);
 
             $lens_querySql = "select cped.attribute_id,cped.`value`,cped.entity_id
 from catalog_product_entity_decimal cped 
 where cped.attribute_id in(146,147) and cped.store_id=0 and cped.entity_id=$product_id";
 
-            $lens_resultList = Db::connect('database.db_nihao_online')->query($lens_querySql);
+            $lens_resultList = Db::connect('database.db_nihao')->query($lens_querySql);
 
             $result = array();
             if ($lens_resultList) {
