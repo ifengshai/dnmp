@@ -501,13 +501,12 @@ class Index extends Backend
             for ($currentRow = 2; $currentRow <= $allRow; $currentRow++) {
                 for ($currentColumn = 1; $currentColumn <= $maxColumnNumber; $currentColumn++) {
                     $val = $currentSheet->getCellByColumnAndRow($currentColumn, $currentRow)->getValue();
-                    $data[$currentRow - 2][$currentColumn - 1] = is_null($val) ? '' : $val;
+                    $data[$currentRow - 2][$currentColumn - 1] = is_null(trim($val)) ? 0 : trim($val);
                 }
             }
         } catch (Exception $exception) {
             $this->error($exception->getMessage());
         }
-
 
         /*********************镜片出库计算逻辑***********************/
         /**
@@ -545,8 +544,7 @@ class Index extends Backend
             }
             //如果cyl 为+;则sph = sph + cyl;cyl 正号变为负号
 
-            if ((int)$v[5] * 1 > 0) {
-
+            if ($v[5] && $v[5] * 1 > 0) {
                 $sph = $sph * 1 + $v[5] * 1;
                 if ($sph > 0) {
                     $sph = '+' . number_format($sph, 2);
@@ -559,11 +557,10 @@ class Index extends Backend
             }
 
 
-
-            if ((int)$cyl * 1 == 0) {
+            if (!$cyl || $cyl * 1 == 0) {
                 $cyl = '+0.00';
             }
-            if ((int)$sph * 1 == 0) {
+            if (!$sph || $sph * 1 == 0) {
                 $sph = '+0.00';
             }
 
@@ -600,8 +597,8 @@ class Index extends Backend
                 $params[$k]['order_lens_type'] = $v[8];
                 $params[$k]['prescription_type'] = $v[9];
             }
-
         }
+
         $this->outorder->saveAll($params);
         /*********************end***********************/
         $this->success('导入成功！！');
