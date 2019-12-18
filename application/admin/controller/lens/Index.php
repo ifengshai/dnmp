@@ -491,12 +491,12 @@ class Index extends Backend
                     $fields[] = $val;
                 }
             }
-            
+
             //模板文件不正确
-            if ($listName !== $fields) {
+            if ($listName !== array_filter($fields)) {
                 throw new Exception("模板文件不正确！！");
             }
-
+            
             $data = [];
             for ($currentRow = 2; $currentRow <= $allRow; $currentRow++) {
                 for ($currentColumn = 1; $currentColumn <= $maxColumnNumber; $currentColumn++) {
