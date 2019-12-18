@@ -297,7 +297,7 @@ class Item extends Model
         $where['is_del']  = 1;
         $where['item_status'] = 3;
         $where['sku']     = $sku;
-        $result = $this->where($where)->field('id,sku,available_stock')->find();
+        $result = $this->where($where)->field('id,sku,available_stock,presell_residue_num,presell_num')->find();
         return $result;  
     }
 

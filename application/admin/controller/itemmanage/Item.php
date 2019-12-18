@@ -2026,9 +2026,14 @@ class Item extends Backend
                 if($params['presell_start_time'] == $params['presell_end_time']){
                     $this->error('预售开始时间和结束时间不能相等');
                 }
+                $row = $this->model->pass_check_sku($params['sku']);
+                if($row['presell_residue_num']>0){
+                    $this->error('SKU剩余预售数量没有扣完,不能添加');
+                }
                 if ($this->dataLimit && $this->dataLimitFieldAutoFill) {
                     $params[$this->dataLimitField] = $this->auth->id;
                 }
+                
                 $result = false;
                 Db::startTrans();
                 try {
@@ -2039,7 +2044,9 @@ class Item extends Backend
                         $this->model->validateFailException(true)->validate($validate);
                     }
                     $params['presell_residue_num'] = $params['presell_num'];
+                    $params['presell_num']         += $row['presell_num']; 
                     $params['presell_create_time'] = $now_time =  date("Y-m-d H:i:s", time());
+
                     if($now_time>=$params['presell_end_time']){ //如果当前时间大于开始时间
                         $params['presell_status'] = 2;
                     }
@@ -2082,5 +2089,53 @@ class Item extends Backend
       }else{
         $this->error('404 Not found');
      }   
+  }
+      /***
+     * 开启预售
+     */
+    public function openStart($ids = null)
+    {
+        if($this->request->isAjax()){
+            $row = $this->model->get($ids);
+            if($row['presell_status'] == 1){
+                $this->error(__('Pre-sale on, do not repeat on'));
+            }
+            $now_time = date('Y-m-d H:i:s',time());
+            if($row['presell_end_time']<$now_time){
+                $this->error(__('The closing time has expired, please select again'));
+            }
+            $map['id'] = $ids;
+            $data['presell_status'] = 1;
+            $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
+            if ($res) {
+                $this->success('预售开启成功');
+            } else {
+                $this->error('预售开启失败');
+            }
+        }else{
+            $this->error('404 Not found');
+        }
+    }
+    /***
+     * 关闭预售
+     */
+    public function openEnd($ids = null)
+    {
+        if($this->request->isAjax()){
+            $row = $this->model->get($ids);
+            if($row['presell_status'] == 2){
+                $this->error(__('Pre-sale on, do not repeat on'));
+            }
+            $map['id'] = $ids;
+            $data['presell_status'] = 2;
+            $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
+            if ($res) {
+                $this->success('关闭预售成功');
+            } else {
+                $this->error('关闭预售失败');
+            }
+        }else{
+            $this->error('404 Not found');
+        }
     }
 }

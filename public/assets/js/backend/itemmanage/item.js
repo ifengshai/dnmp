@@ -909,7 +909,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','bootstrap-tab
                                     text: '开启预售',
                                     title: __('开启预售'),
                                     classname: 'btn btn-xs btn-danger btn-ajax',
-                                    url: Config.moduleurl + '/itemmanage/item_platform_sku/openStart',
+                                    url: Config.moduleurl + '/itemmanage/item/openStart',
                                     confirm: '确定要开启预售吗',
                                     success: function (data, ret) {
                                         Layer.alert(ret.msg);
@@ -922,13 +922,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','bootstrap-tab
                                         return false;
                                     },
                                     visible: function (row) {
-                                        //返回true时按钮显示,返回false隐藏
-                                        return true;
-                                        // if (row.outer_sku_status == 2) {
-                                        //     return true;
-                                        // } else {
-                                        //     return false;
-                                        // }
+                                        if (row.presell_status != 1) {
+                                            return true;
+                                        } else {
+                                            return false;
+                                        }
                                     },
                                 },
                                 {
@@ -936,7 +934,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','bootstrap-tab
                                     text: '结束预售',
                                     title: __('结束预售'),
                                     classname: 'btn btn-xs btn-danger btn-ajax',
-                                    url: Config.moduleurl + '/itemmanage/item_platform_sku/openEnd',
+                                    url: Config.moduleurl + '/itemmanage/item/openEnd',
                                     confirm: '确定要结束预售吗',
                                     success: function (data, ret) {
                                         Layer.alert(ret.msg);
@@ -949,13 +947,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','bootstrap-tab
                                         return false;
                                     },
                                     visible: function (row) {
-                                        //返回true时按钮显示,返回false隐藏
-                                        return true;
-                                        // if (row.outer_sku_status == 2) {
-                                        //     return true;
-                                        // } else {
-                                        //     return false;
-                                        // }
+                                        if (row.presell_status != 2) {
+                                            return true;
+                                        } else {
+                                            return false;
+                                        }
                                     },
                                 },
                             ]
