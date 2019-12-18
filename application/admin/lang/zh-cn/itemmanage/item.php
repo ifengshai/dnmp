@@ -51,5 +51,9 @@ return [
     'Submit_audit'=>'提交审核',
     'Origin_sku'  =>'原始SKU编码',
     'Create_person' => '创建人',
-    'Create_time'   => '创建时间'
+    'Create_time'   => '创建时间',
+    'SKU pre-order quantity cannot be empty' => 'SKU预售数量不能为空',
+    'Platform sku cannot be empty' => 'sku不能为空',
+    'The closing time has expired, please select again' =>'预售结束时间已过，请重新选择',
+    'Pre-sale on, do not repeat on' =>'预售开启中，请勿重复开启'
 ];
