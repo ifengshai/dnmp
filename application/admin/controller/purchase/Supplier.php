@@ -343,7 +343,7 @@ class Supplier extends Backend
     public function addSupplierSku()
     {
         //查询所有SKU
-        $data = db('zeelool_product')->alias('a')->where('a.is_visable=1')->join(['zeelool_supplier' => 'b'], 'a.supplier_id=b.id')->select();
+        $data = db('zeelool_product')->alias('a')->field('a.*,b.name')->where('a.is_visable=1')->join(['zeelool_supplier' => 'b'], 'a.supplier_id=b.id')->select();
 
         //查询供应商id
         $supplier = db('supplier')->column('id','supplier_name');
