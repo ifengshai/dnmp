@@ -276,6 +276,12 @@ class Index extends Backend
                         $list[$k]['fill_post']    = $costInfo['thispageFullPostMoney'][$v['increment_id']];
                     }
                 }
+                //订单加工费
+                if(isset($costInfo['thisPageProcessCost'])){
+                    if(array_key_exists($v['entity_id'],$costInfo['thisPageProcessCost'])){
+                        $list[$k]['process_cost'] = $costInfo['thisPageProcessCost'][$v['entity_id']];
+                    }
+                }
             }
             $result = array(
                 "total"             =>  $total, 
@@ -285,7 +291,8 @@ class Index extends Backend
                 "totalFramePrice"   =>  round($costInfo['totalFramePrice'],2),
                 "totalPostageMoney" =>  round($costInfo['totalPostageMoney'],2),
                 "totalRefundMoney"  =>  round($costInfo['totalRefundMoney'],2),
-                "totalFullPostMoney"=>  round($costInfo['totalFullPostMoney'],2)
+                "totalFullPostMoney"=>  round($costInfo['totalFullPostMoney'],2),
+                "totalProcessCost"  =>  round($costInfo['totalProcessCost'],2)
 
             );
 
