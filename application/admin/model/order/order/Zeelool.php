@@ -268,27 +268,26 @@ class Zeelool extends Model
         $outStockMap['order_number'] = ['in',$order['increment_id']];
         $frameInfo = Db::table('fa_outstock_log')->alias('g')->where($outStockMap)->join('purchase_order_item m','g.purchase_id=m.purchase_id and g.sku=m.sku')
         ->field('g.sku,g.order_number,g.out_stock_num,g.purchase_id,m.purchase_price')->select(); 
-        if(!$frameInfo){
-            return $arr;
-        }
-        $frameInfo = collection($frameInfo)->toArray();
-        foreach($frameInfo as $fv){
-             $arr['totalFramePrice'] +=round($fv['out_stock_num']*$fv['purchase_price'],2);
-            if(in_array($fv['order_number'],$order['this_increment_id'])){
-                $arr['thispageFramePrice'][$fv['order_number']] = round($fv['out_stock_num']*$fv['purchase_price'],2);
+        if($frameInfo){
+            $frameInfo = collection($frameInfo)->toArray();
+            foreach($frameInfo as $fv){
+                 $arr['totalFramePrice'] +=round($fv['out_stock_num']*$fv['purchase_price'],2);
+                if(in_array($fv['order_number'],$order['this_increment_id'])){
+                    $arr['thispageFramePrice'][$fv['order_number']] = round($fv['out_stock_num']*$fv['purchase_price'],2);
+                }
             }
         }
+
         //求出镜架成本end
         //求出镜片成本start
         $lensInfo = Db::table('fa_lens_outorder')->where($outStockMap)->field('order_number,num,price')->select();
-        if(!$lensInfo){
-            return $arr;
-        }
-        $lensInfo = collection($lensInfo)->toArray();
-        foreach($lensInfo as  $lv){
-            $arr['totalLensPrice'] += round($lv['num']*$lv['price'],2);
-            if(in_array($lv['order_number'],$order['this_increment_id'])){
-                $arr['thispageLensPrice'][$lv['order_number']] = round($lv['num']*$lv['price'],2);
+        if($lensInfo){
+            $lensInfo = collection($lensInfo)->toArray();
+            foreach($lensInfo as  $lv){
+                $arr['totalLensPrice'] += round($lv['num']*$lv['price'],2);
+                if(in_array($lv['order_number'],$order['this_increment_id'])){
+                    $arr['thispageLensPrice'][$lv['order_number']] = round($lv['num']*$lv['price'],2);
+                }
             }
         }
         //求出镜片成本end
@@ -389,6 +388,8 @@ class Zeelool extends Model
                 //其他的不是Plastic Lens的类型 5元   
                 }elseif((!empty($pv['index_type']) && ('Plastic Lens' !=$pv['index_type']))){
                     $process_price = 5;
+                }else{
+                    $process_price = 0;
                 }
                 $arr['totalProcessCost'] += round($pv['qty_ordered']*$process_price,2);
                 if(in_array($pv['order_id'],$thisPageId)){

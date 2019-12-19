@@ -237,8 +237,8 @@ class Index extends Backend
                    ->where($where)
                    ->order($sort,$order)
                    ->limit($offset,$limit)
-                   ->column('entity_id');       
-            $costInfo = $model->getOrderCostInfo($totalId,$thisPageId);         
+                   ->column('entity_id');
+            $costInfo = $model->getOrderCostInfo($totalId,$thisPageId);       
             $list = collection($list)->toArray();
             foreach($list as $k =>$v){
                 //原先
