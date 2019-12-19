@@ -211,6 +211,8 @@ class Voogueme extends Model
                 //其他的不是Plastic Lens的类型 5元   
                 }elseif((!empty($pv['index_type']) && ('Plastic Lens' !=$pv['index_type']))){
                     $process_price = 5;
+                }else{
+                    $process_price = 0;
                 }
                 $arr['totalProcessCost'] += round($pv['qty_ordered']*$process_price,2);
                 if(in_array($pv['order_id'],$thisPageId)){
