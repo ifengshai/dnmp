@@ -1,4 +1,4 @@
-define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','bootstrap-table-jump-to'], function ($, undefined, Backend, Table, Form) {
+define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-table-jump-to'], function ($, undefined, Backend, Table, Form) {
 
     var Controller = {
         index: function () {
@@ -39,8 +39,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','bootstrap-tab
                         },
                         { field: 'id', title: __('Id'), operate: false },
                         { field: 'name', title: __('Name') },
-                        { field: 'origin_sku', title: __('Origin_sku'),operate:'LIKE' },
-                        { field: 'sku', title: __('Sku') ,operate:'LIKE'},
+                        { field: 'origin_sku', title: __('Origin_sku'), operate: 'LIKE' },
+                        { field: 'sku', title: __('Sku'), operate: 'LIKE' },
+                        { field: 'price', title: __('参考进价'), operate: false },
                         {
                             field: 'brand_id',
                             title: __('Brand_id'),
@@ -62,7 +63,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','bootstrap-tab
                         { field: 'stock', title: __('Stock') },
                         {
                             field: 'is_open', title: __('Is_open'),
-                            searchList: { 1: '启用', 2: '禁用'},
+                            searchList: { 1: '启用', 2: '禁用' },
                             custom: { 1: 'blue', 2: 'yellow' },
                             formatter: Table.api.formatter.status
                         },
@@ -223,10 +224,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','bootstrap-tab
                                     },
                                     visible: function (row) {
                                         //返回true时按钮显示,返回false隐藏
-                                        if(row.item_status == 1){
+                                        if (row.item_status == 1) {
                                             return true;
                                         }
-                                            return false;
+                                        return false;
                                     }
                                 }
                             ]
@@ -456,7 +457,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','bootstrap-tab
                         Layer.alert('请先选择商品分类');
                         return false;
                     }
-                    if(sku == ''){
+                    if (sku == '') {
                         Layer.alert('请输入您的商品SKU');
                         return false;
                     }
@@ -466,21 +467,21 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','bootstrap-tab
                     }, function (data, ret) {
                         //console.log(ret);
                         var resultData = ret.data;
-                        if(resultData == -1){
+                        if (resultData == -1) {
                             Layer.alert('输入的商品SKU有误，请重新输入');
                         }
-                        if(resultData != false){
+                        if (resultData != false) {
                             $('.newAddition').remove();
-                            if(resultData.procurement_type){
+                            if (resultData.procurement_type) {
                                 $("#c-procurement_type").find("option[value=" + resultData.procurement_type + "]").prop("selected", true);
-                            }else{
+                            } else {
                                 $("#c-procurement_type").val("");
                             }
-                            if(resultData.procurement_origin){
+                            if (resultData.procurement_origin) {
                                 $("#c-procurement_origin").find("option[value=" + resultData.procurement_origin + "]").prop("selected", true);
-                            }else{
+                            } else {
                                 $("#c-procurement_origin").val();
-                            } 
+                            }
                             $("#c-frame_texture").find("option[value=" + resultData.frame_texture + "]").prop("selected", true);
                             $("#c-shape").find("option[value=" + resultData.shape + "]").prop("selected", true);
                             $("#c-frame_type").find("option[value=" + resultData.frame_type + "]").prop("selected", true);
@@ -503,7 +504,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','bootstrap-tab
                             $('.note-editable').html(resultData.frame_remark);
                             $('#item-count').val(resultData.itemCount);
                             //$(".editor").textarea
-                            if(resultData.origin_sku){
+                            if (resultData.origin_sku) {
                                 $(".addition").remove();
                                 $(".redact").after(function () {
                                     var Str = '';
@@ -537,9 +538,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','bootstrap-tab
                                 });
                             }
                             $(".selectpicker").selectpicker('refresh');
-                        }else{
+                        } else {
                             Layer.alert('旧商品SKU信息暂时没有同步...请耐心等待');
-                        }     
+                        }
                         return false;
                     }, function (data, ret) {
                         //失败的回调
@@ -595,7 +596,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','bootstrap-tab
                     index_url: 'itemmanage/item/recycle' + location.search,
                     add_url: 'itemmanage/item/add',
                     //edit_url: 'itemmanage/item/edit',
-                   // del_url: 'itemmanage/item/del',
+                    // del_url: 'itemmanage/item/del',
                     multi_url: 'itemmanage/item/multi',
                     table: 'item',
                 }
@@ -623,8 +624,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','bootstrap-tab
                         },
                         { field: 'id', title: __('Id'), operate: false },
                         { field: 'name', title: __('Name') },
-                        { field: 'origin_sku', title: __('Origin_sku'), operate:'LIKE' },
-                        { field: 'sku', title: __('Sku'),operate:'LIKE' },
+                        { field: 'origin_sku', title: __('Origin_sku'), operate: 'LIKE' },
+                        { field: 'sku', title: __('Sku'), operate: 'LIKE' },
                         {
                             field: 'brand_id',
                             title: __('Brand_id'),
@@ -814,7 +815,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','bootstrap-tab
                         { field: 'sample_num', title: __('留样库存'), operate: false },
 
                         { field: 'on_way_stock', title: __('在途库存'), operate: false },
-                        { field: 'is_open', title: __('SKU启用状态'), searchList: { 1: '启用', 2: '禁用',3:'回收站'}, formatter: Table.api.formatter.status },
+                        { field: 'is_open', title: __('SKU启用状态'), searchList: { 1: '启用', 2: '禁用', 3: '回收站' }, formatter: Table.api.formatter.status },
                         {
                             field: 'operate', title: __('操作'), table: table, formatter: Table.api.formatter.operate,
                             buttons: [
@@ -879,12 +880,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','bootstrap-tab
                         { field: 'name', title: __('Name') },
                         { field: 'available_stock', title: __('可用库存'), operate: false },
                         { field: 'occupy_stock', title: __('占用库存'), operate: false },
-                        { field: 'presell_num',title:__('预售数量'),operate:false},
-                        { field: 'presell_residue_num',title:__('预售剩余数量'),operate:false},
-                        { field: 'presell_status',title:__('预售状态'),searchList:{0:'未开始',1:'预售中',2:'已结束'},formatter: Table.api.formatter.status},
-                        { field: 'presell_create_time',title:__('预售开始时间'),operate:false},
-                        { field: 'presell_end_time',title:__('预售结束时间'),operate:false},
-                        { field: 'is_open', title: __('SKU启用状态'), searchList: { 1: '启用', 2: '禁用',3:'回收站'}, formatter: Table.api.formatter.status },
+                        { field: 'presell_num', title: __('预售数量'), operate: false },
+                        { field: 'presell_residue_num', title: __('预售剩余数量'), operate: false },
+                        { field: 'presell_status', title: __('预售状态'), searchList: { 0: '未开始', 1: '预售中', 2: '已结束' }, formatter: Table.api.formatter.status },
+                        { field: 'presell_create_time', title: __('预售开始时间'), operate: false },
+                        { field: 'presell_end_time', title: __('预售结束时间'), operate: false },
+                        { field: 'is_open', title: __('SKU启用状态'), searchList: { 1: '启用', 2: '禁用', 3: '回收站' }, formatter: Table.api.formatter.status },
                         {
                             field: 'operate', title: __('操作'), table: table, formatter: Table.api.formatter.operate,
                             buttons: [
@@ -963,7 +964,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','bootstrap-tab
             // 为表格绑定事件
             Table.api.bindevent(table);
         },
-        add_presell:function () {
+        add_presell: function () {
             Controller.api.bindevent();
             Form.api.bindevent($("form[role=form]"));
             $('#c-sku').autocomplete({
@@ -999,7 +1000,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','bootstrap-tab
                 max: 5000
             });
             //检查填写的平台sku数据库有没有
-            $(document).on('change','#c-sku',function () {
+            $(document).on('change', '#c-sku', function () {
                 var platform_sku = $(this).val();
                 Backend.api.ajax({
                     url: 'itemmanage/item/check_sku_exists',
@@ -1016,54 +1017,54 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','bootstrap-tab
                 });
             });
             //选中的开始时间和现在的时间比较
-            $(document).on('dp.change','#c-presell_start_time',function () {
+            $(document).on('dp.change', '#c-presell_start_time', function () {
                 var time_value = $(this).val();
                 //console.log(time_value);
                 function getNow(s) {
-                    return s < 10 ? '0' + s: s;
+                    return s < 10 ? '0' + s : s;
                 }
 
                 var myDate = new Date();
 
-                var year=myDate.getFullYear();        //获取当前年
-                var month=myDate.getMonth()+1;   //获取当前月
-                var date=myDate.getDate();            //获取当前日
-                var h=myDate.getHours();              //获取当前小时数(0-23)
-                var m=myDate.getMinutes()-10;          //获取当前分钟数(0-59)
-                var s=myDate.getSeconds();
-                var now=year+'-'+getNow(month)+"-"+getNow(date)+" "+getNow(h)+':'+getNow(m)+":"+getNow(s);
-                if(time_value>now){
+                var year = myDate.getFullYear();        //获取当前年
+                var month = myDate.getMonth() + 1;   //获取当前月
+                var date = myDate.getDate();            //获取当前日
+                var h = myDate.getHours();              //获取当前小时数(0-23)
+                var m = myDate.getMinutes() - 10;          //获取当前分钟数(0-59)
+                var s = myDate.getSeconds();
+                var now = year + '-' + getNow(month) + "-" + getNow(date) + " " + getNow(h) + ':' + getNow(m) + ":" + getNow(s);
+                if (time_value > now) {
                     //console.log(1111);
-                }else{
+                } else {
                     Layer.alert('预售开始时间小于当前时间,如果添加则默认开始预售');
                     //console.log(2222);
                 }
                 //console.log(now);
             });
             ////选中的结束时间和现在的时间比较
-            $(document).on('dp.change','#c-presell_end_time',function () {
+            $(document).on('dp.change', '#c-presell_end_time', function () {
                 var time_start_value = $("#c-presell_start_time").val();
                 var time_end_value = $(this).val();
                 console.log(time_end_value);
                 function getNow(s) {
-                    return s < 10 ? '0' + s: s;
+                    return s < 10 ? '0' + s : s;
                 }
                 var myDate = new Date();
-                var year=myDate.getFullYear();        //获取当前年
-                var month=myDate.getMonth()+1;   //获取当前月
-                var date=myDate.getDate();            //获取当前日
-                var h=myDate.getHours();              //获取当前小时数(0-23)
-                var m=myDate.getMinutes()-10;          //获取当前分钟数(0-59)
-                var s=myDate.getSeconds();
-                var now=year+'-'+getNow(month)+"-"+getNow(date)+" "+getNow(h)+':'+getNow(m)+":"+getNow(s);
-                if(time_end_value <time_start_value){
+                var year = myDate.getFullYear();        //获取当前年
+                var month = myDate.getMonth() + 1;   //获取当前月
+                var date = myDate.getDate();            //获取当前日
+                var h = myDate.getHours();              //获取当前小时数(0-23)
+                var m = myDate.getMinutes() - 10;          //获取当前分钟数(0-59)
+                var s = myDate.getSeconds();
+                var now = year + '-' + getNow(month) + "-" + getNow(date) + " " + getNow(h) + ':' + getNow(m) + ":" + getNow(s);
+                if (time_end_value < time_start_value) {
                     $('.btn-success').addClass('btn-disabled disabled');
                     Layer.alert('预售开始时间不能大于预售结束时间,请重新选择');
                     return false;
                 }
-                if(time_end_value>now){
+                if (time_end_value > now) {
                     $('.btn-success').removeClass('btn-disabled disabled');
-                }else{
+                } else {
                     $('.btn-success').addClass('btn-disabled disabled');
                     Layer.alert('当前时间大于预售结束时间无法添加,请重新选择');
                     return false;
