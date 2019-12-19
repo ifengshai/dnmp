@@ -178,28 +178,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','bootstrap-table-jump-
                         { field: 'refund_money',title:__('退款金额'),operate:false,formatter:Controller.api.formatter.float_format},
                         { field: 'fill_post',title:__('补差价金额'),operate:false,formatter:Controller.api.formatter.float_format},
                         { field: 'created_at', title: __('创建时间'), operate: 'RANGE', addclass: 'datetimerange' },
-                        //操作栏,默认有编辑、删除或排序按钮,可自定义配置buttons来扩展按钮
-                        {
-                            field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [
-                                {
-                                    name: 'detail',
-                                    text: '详情',
-                                    title: __('Detail'),
-                                    classname: 'btn btn-xs  btn-primary  btn-dialog',
-                                    icon: 'fa fa-list',
-                                    url: 'order/index/account_order_detail?label=' + Config.label,
-                                    extend: 'data-area = \'["100%","100%"]\'',
-                                    callback: function (data) {
-                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
-                                    },
-                                    visible: function (row) {
-                                        //返回true时按钮显示,返回false隐藏
-                                        return true;
-                                    }
-                                }
-
-                            ], formatter: Table.api.formatter.operate
-                        },
                     ],
                 ],
                 //更多配置参数可参考http://bootstrap-table.wenzhixin.net.cn/zh-cn/documentation/#t
