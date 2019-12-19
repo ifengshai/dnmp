@@ -299,7 +299,7 @@
                                     <div class="col-xs-6  stat-col">
                                         <div class="stat-icon"><i class="fa fa-list-alt"></i></div>
                                         <div class="stat">
-                                            <div class="value"> {:$yestoday['all_sales_num'] ? round($yestoday['all_sales_money']/$yestoday['all_sales_num'],2) : 0}</div>
+                                            <div class="value"> {:round($yestoday['all_sales_money']/$yestoday['all_sales_num'],2)}</div>
                                             <div class="name"> {:__('昨日客单价')}</div>
                                         </div>
                                         <div class="progress">
@@ -309,7 +309,7 @@
                                     <div class="col-xs-6 stat-col">
                                         <div class="stat-icon"><i class="fa fa-shopping-bag"></i></div>
                                         <div class="stat">
-                                            <div class="value"> {:$last7days['all_sales_num'] ? round($last7days['all_sales_money']/$last7days['all_sales_num'],2) : 0}</div>
+                                            <div class="value"> {:round($last7days['all_sales_money']/$last7days['all_sales_num'],2)}</div>
                                             <div class="name"> {:__('最近7天客单价')}</div>
                                         </div>
                                         <div class="progress">
