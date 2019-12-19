@@ -238,7 +238,10 @@ class Index extends Backend
                    ->order($sort,$order)
                    ->limit($offset,$limit)
                    ->column('entity_id');       
-            $costInfo = $model->getOrderCostInfo($totalId,$thisPageId);         
+            $costInfo = $model->getOrderCostInfo($totalId,$thisPageId);
+            echo '<pre>';
+            var_dump($costInfo);
+            exit;         
             $list = collection($list)->toArray();
             foreach($list as $k =>$v){
                 //原先
