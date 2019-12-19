@@ -303,7 +303,7 @@ class Zeelool extends Model
         $infoSynergyInfo = Db::name('info_synergy_task')->where($synergyMap)->field('synergy_order_number,refund_money,make_up_price_order')->select();
         //求出退款金额
         //把补差价订单号存起来
-        $fullPostOrder = [];
+        $fullPostOrderTask = $fullPostOrderSynergy = [];
         if($saleAfterInfo){
             $saleAfterInfo = collection($saleAfterInfo)->toArray();
             foreach($saleAfterInfo as $sv){
@@ -313,7 +313,7 @@ class Zeelool extends Model
                 }
                 //如果补差价订单存在的话,把补差价订单存起来
                 if($sv['make_up_price_order']){
-                    $fullPostOrder[$sv['order_number']] = $sv['make_up_price_order'];
+                    $fullPostOrderTask[$sv['order_number']] = $sv['make_up_price_order'];
                 }
             }
         }
@@ -329,24 +329,24 @@ class Zeelool extends Model
                     }
                 }
                 if($vs['make_up_price_order']){
-                    $fullPostOrder[$vs['synergy_order_number']] = $vs['make_up_price_order'];
+                    $fullPostOrderSynergy[$vs['synergy_order_number']] = $vs['make_up_price_order'];
                 }
             }
         }
         //求出退款金额成本end
-        //求出补差价订单
+        //求出补差价订单(售后的补差价订单)
         //去掉重复的补差价订单号
-        $fullPostOrder = array_unique($fullPostOrder);
+        //$fullPostOrder = array_unique($fullPostOrder);
         //搜索订单条件
         $fullPostMap['status']       = ['in',['processing','complete','creditcard_proccessing','free_processing']];
-        $fullPostMap['increment_id'] = ['in',$fullPostOrder];
+        $fullPostMap['increment_id'] = ['in',$fullPostOrderTask];
         $fullPostResult = $this->where($fullPostMap)->field('increment_id,base_total_paid,base_total_due')->select();
         if($fullPostResult){
             $fullPostResult = collection($fullPostResult)->toArray();
             foreach($fullPostResult as $vf){
                 $arr['totalFullPostMoney'] +=round($vf['base_total_paid']+$vf['base_total_due'],2);
                 //求出订单号
-                $originOrder = array_search($vf['increment_id'],$fullPostOrder);
+                $originOrder = array_search($vf['increment_id'],$fullPostOrderTask);
                 if(in_array($originOrder,$order['this_increment_id'])){
                     $arr['thispageFullPostMoney'][$originOrder] = round($vf['base_total_paid']+$vf['base_total_due'],2);
                 }
@@ -354,8 +354,50 @@ class Zeelool extends Model
             }
             
         }
+        //求出补差价订单(信息协同补差价订单)
+        $synergyFullPostMap['status']       = ['in',['processing','complete','creditcard_proccessing','free_processing']];
+        $synergyFullPostMap['increment_id'] = ['in',$fullPostOrderSynergy];
+        $synergyPostResult = $this->where($synergyFullPostMap)->field('increment_id,base_total_paid,base_total_due')->select();
+        if($synergyPostResult){
+            $synergyPostResult = collection($synergyPostResult)->toArray();
+            foreach($synergyPostResult as $svf){
+                $arr['totalFullPostMoney'] +=round($svf['base_total_paid']+$svf['base_total_due'],2);
+                //求出订单号
+                $originOrder = array_search($svf['increment_id'],$fullPostOrderSynergy);
+                if(in_array($originOrder,$order['this_increment_id'])){
+                    $arr['thispageFullPostMoney'][$originOrder] += round($svf['base_total_paid']+$svf['base_total_due'],2);
+                }
+
+            }
+            
+        }
+
+
+        //求出加工费
+        $arr['totalProcessCost'] = 0;
+        $totalprocessMap['order_id'] = ['in',$totalId];
+        $processResult = Db::connect($this->connection)->table('sales_flat_order_item_prescription')->where($totalprocessMap)->field('order_id,sku,prescription_type,index_type,frame_type_is_rimless,qty_ordered')->select();
+        if($processResult){
+            $processResult = collection($processResult)->toArray();
+            foreach($processResult as $pv){
+                //1.处方类型为渐进镜,或者镜架是无框的都是8 元
+                if(('Progressive' == $pv['prescription_type']) || ('Bifocal' == $pv['prescription_type']) ||((2 ==  $pv['frame_type_is_rimless']))){
+                    $process_price = 8;
+                //2.处方类型为单光并且折射率比较高的话是8元    
+                }elseif((false !== strpos($pv['index_type'],'1.67')) || (false !== strpos($pv['index_type'],'1.71') || (false !== strpos($pv['index_type'],'1.74')))){
+                    $process_price = 8;
+                //其他的不是Plastic Lens的类型 5元   
+                }elseif((!empty($pv['index_type']) && ('Plastic Lens' !=$pv['index_type']))){
+                    $process_price = 5;
+                }
+                $arr['totalProcessCost'] += round($pv['qty_ordered']*$process_price,2);
+                if(in_array($pv['order_id'],$thisPageId)){
+                    $arr['thisPageProcessCost'][$pv['order_id']] += round($pv['qty_ordered']*$process_price,2);
+                }
+            } 
+        }
         
-            return $arr;
+        return $arr;
     }
     /***
      * 求出退款金额和补差价订单金额  create@lsw

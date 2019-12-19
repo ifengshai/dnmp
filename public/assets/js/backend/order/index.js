@@ -146,6 +146,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','bootstrap-table-jump-
                 $("#totalPayInfo").text(data.totalPayInfo);
                 $("#totalFramePrice").text(data.totalFramePrice);
                 $("#totalLensPrice").text(data.totalLensPrice);
+                $("#totalRefundMoney").text(data.totalRefundMoney);
+                $("#totalFullPostMoney").text(data.totalFullPostMoney);
 
             });
 

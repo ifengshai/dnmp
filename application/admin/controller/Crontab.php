@@ -313,8 +313,10 @@ order by sfoi.item_id asc limit 1000";
 
         if ($items) {
             $batch_order_item_prescription_values = "";
-
+            $frameArr = $orderArr = [];
             foreach ($items as $key => $value) {
+                $frameArr[] = $value['sku'];
+                $orderArr[] = $value['item_id'];
                 $batch_order_item_prescription_values .= "("
                     . $value['order_id'] . ","
                     . $value['item_id'] . ","
@@ -380,6 +382,24 @@ order by sfoi.item_id asc limit 1000";
                 echo '<br>执行成功';
             } else {
                 echo '<br>执行失败';
+            }
+            //新增镜架是否无框
+            if($frameArr){
+                $whereMap['platform_sku'] = ['in',$frameArr];
+                $whereMap['platform_type'] = 1;
+                $skuType = Db::connect('database.db_stock')->table('fa_item_platform_sku')->where($whereMap)->field('platform_sku,platform_frame_is_rimless')->select();
+                if($skuType){
+                    $skuType = collection($skuType)->toArray();
+                    $frameRimless = [];
+                    foreach($skuType as $k =>$v){
+                        if(2 == $v['platform_frame_is_rimless']){
+                            $frameRimless[] = $v['platform_sku'];
+                        }
+                    }
+                }
+                $wherePrescription['sku'] = ['in',$frameRimless];
+                $wherePrescription['order_id'] = ['in',$orderArr];
+                Db::connect('database.db_zeelool')->table('sales_flat_order_item_prescription')->where($wherePrescription)->update(['frame_type_is_rimless'=>2]);
             }
         } else {
             echo '执行完毕！';
@@ -660,7 +680,10 @@ order by sfoi.item_id asc limit 1000";
             $batch_order_item_prescription_values = "";
             $batch_order_item_updateSql = "";
             $batch_order_updateSql = "";
+            $frameArr = $orderArr = [];
             foreach ($items as $key => $value) {
+                $frameArr[] = $value['sku'];
+                $orderArr[] = $value['item_id'];
                 $batch_order_item_prescription_values .= "("
                     . $value['order_id'] . ","
                     . $value['item_id'] . ","
@@ -727,6 +750,24 @@ order by sfoi.item_id asc limit 1000";
                 echo '<br>执行成功';
             } else {
                 echo '<br>执行失败';
+            }
+            //新增镜架是否无框
+            if($frameArr){
+                $whereMap['platform_sku'] = ['in',$frameArr];
+                $whereMap['platform_type'] = 2;
+                $skuType = Db::connect('database.db_stock')->table('fa_item_platform_sku')->where($whereMap)->field('platform_sku,platform_frame_is_rimless')->select();
+                if($skuType){
+                    $skuType = collection($skuType)->toArray();
+                    $frameRimless = [];
+                    foreach($skuType as $k =>$v){
+                        if(2 == $v['platform_frame_is_rimless']){
+                            $frameRimless[] = $v['platform_sku'];
+                        }
+                    }
+                }
+                $wherePrescription['sku'] = ['in',$frameRimless];
+                $wherePrescription['order_id'] = ['in',$orderArr];
+                Db::connect('database.db_zeelool')->table('sales_flat_order_item_prescription')->where($wherePrescription)->update(['frame_type_is_rimless'=>2]);
             }
         } else {
             echo '执行完毕！';
@@ -1002,7 +1043,10 @@ order by sfoi.item_id asc limit 1000";
 
         if ($finalResult) {
             $batch_order_item_prescription_values = "";
+            $frameArr = $orderArr = [];
             foreach ($finalResult as $key => $value) {
+                $frameArr[] = $value['sku'];
+                $orderArr[] = $value['item_id'];
                 $batch_order_item_prescription_values .= "("
                     . "'" . $value['item_id'] . "',"
                     . "'" . $value['quote_item_id'] . "',"
@@ -1074,6 +1118,24 @@ order by sfoi.item_id asc limit 1000";
                 echo '<br>执行成功';
             } else {
                 echo '<br>执行失败';
+            }
+            //新增镜架是否无框
+            if($frameArr){
+                $whereMap['platform_sku'] = ['in',$frameArr];
+                $whereMap['platform_type'] = 3;
+                $skuType = Db::connect('database.db_stock')->table('fa_item_platform_sku')->where($whereMap)->field('platform_sku,platform_frame_is_rimless')->select();
+                if($skuType){
+                    $skuType = collection($skuType)->toArray();
+                    $frameRimless = [];
+                    foreach($skuType as $k =>$v){
+                        if(2 == $v['platform_frame_is_rimless']){
+                            $frameRimless[] = $v['platform_sku'];
+                        }
+                    }
+                }
+                $wherePrescription['sku'] = ['in',$frameRimless];
+                $wherePrescription['order_id'] = ['in',$orderArr];
+                Db::connect('database.db_zeelool')->table('sales_flat_order_item_prescription')->where($wherePrescription)->update(['frame_type_is_rimless'=>2]);
             }
         } else {
             echo '执行完毕！';
