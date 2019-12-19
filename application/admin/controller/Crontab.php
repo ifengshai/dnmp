@@ -1111,7 +1111,7 @@ order by sfoi.item_id asc limit 1000";
         $data['zeelool_sales_money'] = $zeelool_total;
         $data['voogueme_sales_money'] = $voogueme_total;
         $data['nihao_sales_money'] = $nihao_total;
-        $data['all_sales_money'] = $zeelool_total + $voogueme_count + $nihao_total;
+        $data['all_sales_money'] = $zeelool_total + $voogueme_total + $nihao_total;
         $data['create_date'] = date("Y-m-d", strtotime("-1 day"));
         $data['createtime'] = date("Y-m-d H:i:s");
         Db::name('order_statistics')->insert($data);
