@@ -1,4 +1,4 @@
-define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','custom-css','bootstrap-table-jump-to'], function ($, undefined, Backend, Table, Form, undefined) {
+define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'custom-css', 'bootstrap-table-jump-to'], function ($, undefined, Backend, Table, Form, undefined) {
 
     var Controller = {
         index: function () {
@@ -176,13 +176,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','custom-css','
                                     url: 'purchase/supplier_sku/matchingSkuId?skuId={skuId}&parent_id={parent_id}',
                                     confirm: '确认选择？',
                                     success: function (data, ret) {
-                                        Layer.alert(ret.msg + ",返回数据：" + JSON.stringify(data));
-                                        parent.location.reload();
+                                        Layer.alert(ret.msg);
+                                        //再执行关闭
+                                        parent.Layer.closeAll();
+                                        parent.$("a.btn-refresh").trigger("click");
                                         //如果需要阻止成功提示，则必须使用return false;
                                         //return false;
                                     },
                                     error: function (data, ret) {
-                                        console.log(data, ret);
                                         Layer.alert(ret.msg);
                                         return false;
                                     }
@@ -245,7 +246,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','custom-css','
                 });
 
 
-                //盘点sku是否存在
                 $(document).on('change', '.sku', function () {
                     var sku = $(this).val();
                     var _this = $(this);
@@ -256,7 +256,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','custom-css','
                         url: 'ajax/getSkuList',
                         data: { sku: sku }
                     }, function (data, ret) {
-                        
+
                     }, function (data, ret) {
                         Fast.api.error(ret.msg);
                     });

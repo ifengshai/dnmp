@@ -94,14 +94,14 @@ class Index extends Backend
                     }
                     //查询是否已存在记录
                     $map['refractive_index'] = $params['refractive_index'];
-                    $map['lens_type'] = $params['refractive_index'] . ' '. $params['lens_type'];
+                    $map['lens_type'] = $params['refractive_index'] . ' ' . $params['lens_type'];
                     $map['sph'] = $params['sph'];
                     $map['cyl'] = $params['cyl'];
                     $count =  $this->model->where($map)->count();
                     if ($count > 0) {
                         $this->error('已存在此记录！！');
                     }
-                    $params['lens_type'] = $params['refractive_index'] . ' '. $params['lens_type'];
+                    $params['lens_type'] = $params['refractive_index'] . ' ' . $params['lens_type'];
                     $params['create_person'] = session('admin.nickname');
                     $params['createtime'] = date('Y-m-d H:i:s', time());
                     $result = $this->model->allowField(true)->save($params);
@@ -208,7 +208,7 @@ class Index extends Backend
         }
 
         $res = collection($res)->toArray();
-        
+
         $list = [];
         foreach ($res as  $v) {
             $list[$v['sph']][$v['cyl']] = $v;
@@ -276,7 +276,7 @@ class Index extends Backend
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
-            
+
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
 
             $total = $this->outorder
@@ -385,22 +385,22 @@ class Index extends Backend
         foreach ($data as $k => $v) {
             $map['refractive_index'] = trim($v[0]);
             $map['lens_type'] = trim($v[1]);
-            $sph = $v[2]*1;
+            $sph = $v[2] * 1;
             if ($sph >= 0) {
                 $sph = '+' . number_format($sph, 2);
             } else {
                 $sph = number_format($sph, 2);
             }
 
-            $cyl = $v[3]*1;
+            $cyl = $v[3] * 1;
             if ($cyl > 0 || $cyl < -4) {
                 $this->error('数据异常！！CYL不能大于0并且小于-4！！');
-            } 
+            }
 
             $map['sph'] = $sph;
             $map['cyl'] = $v[3];
             $res = $this->model->where($map)->find();
-            
+
             if ($res) {
                 $params[$k]['id'] = $res->id;
                 $params[$k]['stock_num'] = $res['stock_num'] * 1 + $v[4] * 1;
@@ -413,7 +413,7 @@ class Index extends Backend
                 $params[$k]['stock_num'] = $v[4];
                 $params[$k]['price'] = $v[5];
                 $params[$k]['createtime'] = date('Y-m-d H:i:s', time());
-                $params[$k]['create_person'] = session('admin.nickname'); 
+                $params[$k]['create_person'] = session('admin.nickname');
             }
         }
         $result = $this->model->allowField(true)->saveAll($params);
@@ -491,9 +491,9 @@ class Index extends Backend
                     $fields[] = $val;
                 }
             }
-            
+
             //模板文件不正确
-            if ($listName !== $fields) {
+            if ($listName !== array_filter($fields)) {
                 throw new Exception("模板文件不正确！！");
             }
 
@@ -501,13 +501,12 @@ class Index extends Backend
             for ($currentRow = 2; $currentRow <= $allRow; $currentRow++) {
                 for ($currentColumn = 1; $currentColumn <= $maxColumnNumber; $currentColumn++) {
                     $val = $currentSheet->getCellByColumnAndRow($currentColumn, $currentRow)->getValue();
-                    $data[$currentRow - 2][$currentColumn - 1] = is_null($val) ? '' : $val;
+                    $data[$currentRow - 2][$currentColumn - 1] = is_null(trim($val)) ? 0 : trim($val);
                 }
             }
         } catch (Exception $exception) {
             $this->error($exception->getMessage());
         }
-
 
         /*********************镜片出库计算逻辑***********************/
         /**
@@ -532,7 +531,6 @@ class Index extends Backend
 
         foreach ($data as $k => $v) {
             $lens_type = trim($v[8]);
-
             //如果ADD为真  sph = sph + ADD;
             if ($v[7]) {
                 $sph = $v[4] * 1 + $v[7] * 1;
@@ -544,9 +542,9 @@ class Index extends Backend
             } else {
                 $sph = $v[4];
             }
-
             //如果cyl 为+;则sph = sph + cyl;cyl 正号变为负号
-            if ($v[5] * 1 > 0) {
+
+            if ($v[5] && $v[5] * 1 > 0) {
                 $sph = $sph * 1 + $v[5] * 1;
                 if ($sph > 0) {
                     $sph = '+' . number_format($sph, 2);
@@ -558,10 +556,11 @@ class Index extends Backend
                 $cyl = $v[5];
             }
 
-            if ($cyl * 1 == 0) {
+
+            if (!$cyl || $cyl * 1 == 0) {
                 $cyl = '+0.00';
             }
-            if ($sph * 1 == 0) {
+            if (!$sph || $sph * 1 == 0) {
                 $sph = '+0.00';
             }
 
@@ -599,6 +598,7 @@ class Index extends Backend
                 $params[$k]['prescription_type'] = $v[9];
             }
         }
+
         $this->outorder->saveAll($params);
         /*********************end***********************/
         $this->success('导入成功！！');

@@ -99,12 +99,15 @@ class Dashboard extends Backend
             Cache::set('dashboard_totaluser', $totaluser, 3600);
         }
 
+        $where = [];
+        $where['status'] = ['in', ['processing', 'complete', 'creditcard_proccessing']];
+
         //总订单数
         $totalorder = Cache::get('dashboard_totalorder');
         if (!$totalorder) {
-            $zeelool_order_count = Db::connect('database.db_zeelool')->table('sales_flat_order')->count(1);
-            $voogueme_order_count = Db::connect('database.db_voogueme')->table('sales_flat_order')->count(1);
-            $nihao_order_count = Db::connect('database.db_nihao')->table('sales_flat_order')->count(1);
+            $zeelool_order_count = Db::connect('database.db_zeelool')->where($where)->table('sales_flat_order')->count(1);
+            $voogueme_order_count = Db::connect('database.db_voogueme')->where($where)->table('sales_flat_order')->count(1);
+            $nihao_order_count = Db::connect('database.db_nihao')->where($where)->table('sales_flat_order')->count(1);
             $totalorder = $zeelool_order_count + $voogueme_order_count + $nihao_order_count;
             Cache::set('dashboard_totalorder', $totalorder, 3600);
         }
@@ -112,9 +115,9 @@ class Dashboard extends Backend
         //总金额
         $totalorderamount = Cache::get('dashboard_totalorderamount');
         if (!$totalorderamount) {
-            $zeelool_order_money = Db::connect('database.db_zeelool')->table('sales_flat_order')->sum('base_grand_total');
-            $voogueme_order_money = Db::connect('database.db_voogueme')->table('sales_flat_order')->sum('base_grand_total');
-            $nihao_order_money = Db::connect('database.db_nihao')->table('sales_flat_order')->sum('base_grand_total');
+            $zeelool_order_money = Db::connect('database.db_zeelool')->where($where)->table('sales_flat_order')->sum('base_grand_total');
+            $voogueme_order_money = Db::connect('database.db_voogueme')->where($where)->table('sales_flat_order')->sum('base_grand_total');
+            $nihao_order_money = Db::connect('database.db_nihao')->where($where)->table('sales_flat_order')->sum('base_grand_total');
             $totalorderamount = $zeelool_order_money + $voogueme_order_money + $nihao_order_money;
             Cache::set('dashboard_totalorderamount', $totalorderamount, 3600);
         }
@@ -143,6 +146,7 @@ class Dashboard extends Backend
             'today_date'                => date("Y-m-d"),
             'total_quote_count'         => $total_quote_count,
             'total_customer_count'      => $total_customer_count,
+            
         ]);
 
 

@@ -1060,6 +1060,9 @@ class PurchaseOrder extends Backend
                 } else {
                     $times = 1;
                 }
+                if ($v['grade'] == 'D' || $v['grade'] == 'E' || $v['grade'] == 'F') {
+                    $product_cycle = 7;
+                }
 
                 //补货量
                 $v['replenish_num'] = round(($v['days_sales_num'] * $product_cycle) + ($v['days_sales_num'] * $product_cycle * $times) - $product[$v['true_sku']]['true_qty'] - $onway_stock);

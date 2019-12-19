@@ -481,7 +481,7 @@ class Zeelool extends Backend
 from catalog_product_entity_varchar cpev
 LEFT JOIN catalog_product_entity cpe on cpe.entity_id=cpev.entity_id 
 where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$product_id";
-            $resultList = Db::connect('database.db_zeelool_online')->query($querySql);
+            $resultList = Db::connect('database.db_zeelool')->query($querySql);
             if ($resultList) {
                 $result = array();
                 foreach ($resultList as $key => $value) {
