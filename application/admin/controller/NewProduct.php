@@ -134,6 +134,7 @@ class NewProduct extends Backend
                         $data['supplier_id']    = $params['supplier_id'];
                         $data['supplier_sku']    = $supplierSku[$k];
                         $data['link']    = $params['link'];
+                        $data['frame_is_rimless'] = $params['shape'] == 1 ? 2 :1;
                         $data['price']    = $price[$k];
                         $data['supplier_id']    = $params['supplier_id'];
                         $data['create_person'] = session('admin.nickname');
