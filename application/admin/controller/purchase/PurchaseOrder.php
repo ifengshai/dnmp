@@ -1207,6 +1207,7 @@ class PurchaseOrder extends Backend
                 $resultInfo = true;
             }
             if (false !== $resultInfo) {
+                $this->model->save(['payment_status'=>3],['id'=>$row['id']]);
                 $params['purchase_id']   = $row['id'];
                 $params['create_person'] = session('admin.nickname');
                 $params['createtime'] = date('Y-m-d H:i:s', time());

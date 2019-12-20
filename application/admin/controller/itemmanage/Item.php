@@ -368,6 +368,7 @@ class Item extends Backend
                             $data['category_id'] = $params['category_id'];
                             $data['item_status'] = $params['item_status'];
                             $data['brand_id']    = $params['brand_id'];
+                            $data['frame_is_rimless'] = $params['shape'] == 1 ? 2 :1;
                             $data['create_person'] = session('admin.nickname');
                             $data['create_time'] = date("Y-m-d H:i:s", time());
                             //后来添加的商品数据
@@ -589,6 +590,7 @@ class Item extends Backend
                             $data['item_status'] = $params['item_status'];
                             $data['create_person'] = session('admin.nickname');
                             $data['create_time'] = date("Y-m-d H:i:s", time());
+                            $data['frame_is_rimless'] = $params['shape'] == 1 ? 2 :1;
                             $item = Db::connect('database.db_stock')->name('item')->where('id', '=', $row['id'])->update($data);
                             $itemAttribute['attribute_type'] = $params['attribute_type'];
                             $itemAttribute['glasses_type'] = $params['glasses_type'];
