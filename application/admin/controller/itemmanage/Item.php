@@ -26,7 +26,7 @@ class Item extends Backend
     /**
      * 不需要登陆
      */
-    protected $noNeedLogin = ['pullMagentoProductInfo','analyticMagentoField','analyticUpdate', 'ceshi', 'optimizeSku', 'pullMagentoProductInfoTwo', 'changeSkuToPlatformSku', 'findSku', 'skuMap', 'skuMapOne'];
+    protected $noNeedLogin = ['pullMagentoProductInfo', 'analyticMagentoField', 'analyticUpdate', 'ceshi', 'optimizeSku', 'pullMagentoProductInfoTwo', 'changeSkuToPlatformSku', 'findSku', 'skuMap', 'skuMapOne'];
 
     public function _initialize()
     {
@@ -368,7 +368,7 @@ class Item extends Backend
                             $data['category_id'] = $params['category_id'];
                             $data['item_status'] = $params['item_status'];
                             $data['brand_id']    = $params['brand_id'];
-                            $data['frame_is_rimless'] = $params['shape'] == 1 ? 2 :1;
+                            $data['frame_is_rimless'] = $params['shape'] == 1 ? 2 : 1;
                             $data['create_person'] = session('admin.nickname');
                             $data['create_time'] = date("Y-m-d H:i:s", time());
                             //后来添加的商品数据
@@ -590,7 +590,7 @@ class Item extends Backend
                             $data['item_status'] = $params['item_status'];
                             $data['create_person'] = session('admin.nickname');
                             $data['create_time'] = date("Y-m-d H:i:s", time());
-                            $data['frame_is_rimless'] = $params['shape'] == 1 ? 2 :1;
+                            $data['frame_is_rimless'] = $params['shape'] == 1 ? 2 : 1;
                             $item = Db::connect('database.db_stock')->name('item')->where('id', '=', $row['id'])->update($data);
                             $itemAttribute['attribute_type'] = $params['attribute_type'];
                             $itemAttribute['glasses_type'] = $params['glasses_type'];
@@ -877,13 +877,13 @@ class Item extends Backend
                 ->where($purchase_map)
                 ->group('sku')
                 ->column('sum(purchase_num) as purchase_num', 'sku');
-               
+
             //查询出满足条件的采购单号
             $ids = $purchase->hasWhere('purchaseOrderItem', $hasWhere)
                 ->where($purchase_map)
                 ->group('PurchaseOrder.id')
                 ->column('PurchaseOrder.id');
-            
+
             //查询留样库存
             //查询实际采购信息 查询在途库存 = 采购数量 减去 到货数量
             $check_map['status'] = 2;
@@ -921,14 +921,14 @@ class Item extends Backend
         $purchase = new \app\admin\model\purchase\PurchaseOrder;
         $hasWhere['sku'] = $row['sku'];
         $hasWhere['instock_num'] = ['>', 0];
-        
+
         $list = $purchase->hasWhere('purchaseOrderItem', $hasWhere)
             ->where($purchase_map)
             ->where('instock_num-outstock_num<>0')
             ->field('PurchaseOrderItem.*')
             ->group('PurchaseOrderItem.id')
             ->select();
-       
+
         $this->assign('list', $list);
 
 
@@ -943,6 +943,14 @@ class Item extends Backend
             ->join(['fa_purchase_order_item' => 'b'], 'a.id=b.purchase_id')
             ->group('b.id')
             ->select();
+
+        //查询生产周期
+        $supplier_sku = new \app\admin\model\purchase\SupplierSku;
+        $supplier_where['sku'] = $row['sku'];
+        $supplier_where['status'] = 1;
+        $supplier_where['label'] = 1;
+        $product_cycle = $supplier_sku->where($supplier_where)->value('product_cycle');
+
 
         $num = 0;
         $check = new \app\admin\model\warehouse\Check;
@@ -959,10 +967,14 @@ class Item extends Backend
             }
             $info[$k]['arrivals_num'] = $arrivals_num;
             $num += $v['purchase_num'] - $arrivals_num;
+            $product_cycle = $product_cycle ? $product_cycle : 7;
+            $info[$k]['product_cycle_time'] = date('Y-m-d H:i:s', strtotime('+' . $product_cycle . ' day', strtotime($v['createtime'])));
+
         }
-    
+
         $this->assign('info', $info);
         $this->assign('num', $num);
+        $this->assign('product_cycle', $product_cycle);
 
 
         /**
@@ -1981,13 +1993,13 @@ class Item extends Backend
             }
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model->where('is_open', '<', 3)
-                ->where(['item_status'=>3])
+                ->where(['item_status' => 3])
                 ->where($where)
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->model->where('is_open', '<', 3)
-                ->where(['item_status'=>3])
+                ->where(['item_status' => 3])
                 ->where($where)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
@@ -2019,23 +2031,23 @@ class Item extends Backend
             $params = $this->request->post("row/a");
             if ($params) {
                 $params = $this->preExcludeFields($params);
-                if(empty($params['sku'])){
+                if (empty($params['sku'])) {
                     $this->error(__('Platform sku cannot be empty'));
                 }
-                if(empty($params['presell_num'])){
+                if (empty($params['presell_num'])) {
                     $this->error(__('SKU pre-order quantity cannot be empty'));
                 }
-                if($params['presell_start_time'] == $params['presell_end_time']){
+                if ($params['presell_start_time'] == $params['presell_end_time']) {
                     $this->error('预售开始时间和结束时间不能相等');
                 }
                 $row = $this->model->pass_check_sku($params['sku']);
-                if($row['presell_residue_num']>0){
+                if ($row['presell_residue_num'] > 0) {
                     $this->error('SKU剩余预售数量没有扣完,不能添加');
                 }
                 if ($this->dataLimit && $this->dataLimitFieldAutoFill) {
                     $params[$this->dataLimitField] = $this->auth->id;
                 }
-                
+
                 $result = false;
                 Db::startTrans();
                 try {
@@ -2046,13 +2058,13 @@ class Item extends Backend
                         $this->model->validateFailException(true)->validate($validate);
                     }
                     $params['presell_residue_num'] = $params['presell_num'];
-                    $params['presell_num']         += $row['presell_num']; 
+                    $params['presell_num']         += $row['presell_num'];
                     $params['presell_create_time'] = $now_time =  date("Y-m-d H:i:s", time());
 
-                    if($now_time>=$params['presell_end_time']){ //如果当前时间大于开始时间
+                    if ($now_time >= $params['presell_end_time']) { //如果当前时间大于开始时间
                         $params['presell_status'] = 2;
                     }
-                    $result = $this->model->allowField(true)->isUpdate(true)->save($params,['sku'=>$params['sku']]);
+                    $result = $this->model->allowField(true)->isUpdate(true)->save($params, ['sku' => $params['sku']]);
                     Db::commit();
                 } catch (ValidateException $e) {
                     Db::rollback();
@@ -2080,30 +2092,30 @@ class Item extends Backend
      */
     public function check_sku_exists()
     {
-     if($this->request->isAjax()){
-        $final_sku = $this->request->post('origin_sku');
-        $checkOriginSku     = $this->model->pass_check_sku($final_sku);
-        if ($checkOriginSku) {
-            return  $this->success(__('此sku存在'));
+        if ($this->request->isAjax()) {
+            $final_sku = $this->request->post('origin_sku');
+            $checkOriginSku     = $this->model->pass_check_sku($final_sku);
+            if ($checkOriginSku) {
+                return  $this->success(__('此sku存在'));
+            } else {
+                return $this->error(__('此sku不存在'));
+            }
         } else {
-            return $this->error(__('此sku不存在'));
+            $this->error('404 Not found');
         }
-      }else{
-        $this->error('404 Not found');
-     }   
-  }
-      /***
+    }
+    /***
      * 开启预售
      */
     public function openStart($ids = null)
     {
-        if($this->request->isAjax()){
+        if ($this->request->isAjax()) {
             $row = $this->model->get($ids);
-            if($row['presell_status'] == 1){
+            if ($row['presell_status'] == 1) {
                 $this->error(__('Pre-sale on, do not repeat on'));
             }
-            $now_time = date('Y-m-d H:i:s',time());
-            if($row['presell_end_time']<$now_time){
+            $now_time = date('Y-m-d H:i:s', time());
+            if ($row['presell_end_time'] < $now_time) {
                 $this->error(__('The closing time has expired, please select again'));
             }
             $map['id'] = $ids;
@@ -2114,7 +2126,7 @@ class Item extends Backend
             } else {
                 $this->error('预售开启失败');
             }
-        }else{
+        } else {
             $this->error('404 Not found');
         }
     }
@@ -2123,9 +2135,9 @@ class Item extends Backend
      */
     public function openEnd($ids = null)
     {
-        if($this->request->isAjax()){
+        if ($this->request->isAjax()) {
             $row = $this->model->get($ids);
-            if($row['presell_status'] == 2){
+            if ($row['presell_status'] == 2) {
                 $this->error(__('Pre-sale on, do not repeat on'));
             }
             $map['id'] = $ids;
@@ -2136,7 +2148,7 @@ class Item extends Backend
             } else {
                 $this->error('关闭预售失败');
             }
-        }else{
+        } else {
             $this->error('404 Not found');
         }
     }

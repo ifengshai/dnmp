@@ -211,7 +211,8 @@
                     <th>数量</th>
                     <th>创建时间</th>
                     <th>创建人</th>
-                    <th>到货时间</th>
+                    <th>预计到货时间</th>
+                    <th>实际到货时间</th>
                 </tr>
                 {foreach $info as $k => $v}
                 <tr>
@@ -221,6 +222,7 @@
                     <td>{$v['purchase_num'] - $v['arrivals_num']}</td>
                     <td>{$v.createtime}</td>
                     <td>{$v.create_person}</td>
+                    <td>{$v.product_cycle_time}</td>
                     <td>{$v.receiving_time}</td>
                 </tr>
                 {/foreach}
