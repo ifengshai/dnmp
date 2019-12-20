@@ -119,11 +119,12 @@
                 <tr>
                     <th>SKU</th>
                     <th>商品名称</th>
-                    <th>出库数量</th>
+                    <th>入库数量</th>
                     <th>商品单价(元)</th>
                     <th>合计(元)</th>
                 
                 </tr>
+                {present name="item"}
                 {foreach $item as $v}
                 <tr>
                     <input   class="form-control" name="item_id[]" type="hidden" value="{$v.id}">
@@ -136,7 +137,7 @@
                     <td><input style="width: 150px;" class="form-control" name="sku[]" type="text" value="{$v.total_money}"></td>
                 </tr>
                 {/foreach}
-
+               {/present} 
             </table>
         </div>
 
