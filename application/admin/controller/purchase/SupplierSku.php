@@ -207,7 +207,7 @@ class SupplierSku extends Backend
                     $where['sku'] = $params['sku'];
                     $where['supplier_id'] = $params['supplier_id'];
                     $count = $this->model->where($where)->count();
-                    if ($count > 0) {
+                    if ($count > 1) {
                         $this->error('记录已存在！！SKU:' . $params['sku']);
                     }
 
@@ -354,7 +354,7 @@ class SupplierSku extends Backend
                 }
                 $row = [];
                 $temp = array_combine($fields, $values);
-                
+
                 foreach ($temp as $k => $v) {
                     if (isset($fieldArr[$k]) && $k !== '') {
                         $row[$fieldArr[$k]] = $v;

@@ -307,6 +307,7 @@ class PurchaseOrder extends Backend
                     }
 
                     $sku = $this->request->post("sku/a");
+
                     //执行过滤空值
                     array_walk ($sku, 'trim_value');
                     if (count(array_filter($sku)) < 1) {
@@ -1207,7 +1208,6 @@ class PurchaseOrder extends Backend
                 $resultInfo = true;
             }
             if (false !== $resultInfo) {
-                $this->model->save(['payment_status'=>3],['id'=>$row['id']]);
                 $params['purchase_id']   = $row['id'];
                 $params['create_person'] = session('admin.nickname');
                 $params['createtime'] = date('Y-m-d H:i:s', time());
