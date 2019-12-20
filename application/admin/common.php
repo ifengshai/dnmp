@@ -194,3 +194,11 @@ if (!function_exists('build_heading')) {
         return $result;
     }
 }
+
+/**
+ * 过滤数组空值
+ */
+function trim_value(&$value)
+{
+    $value  =  trim($value);
+}

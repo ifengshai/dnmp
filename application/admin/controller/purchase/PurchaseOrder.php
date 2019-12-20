@@ -86,7 +86,7 @@ class PurchaseOrder extends Backend
         return $this->view->fetch();
     }
 
-
+    
 
     /**
      * 添加
@@ -112,6 +112,8 @@ class PurchaseOrder extends Backend
                     }
 
                     $sku = $this->request->post("sku/a");
+                    //执行过滤空值
+                    array_walk ($sku, 'trim_value');
                     if (count(array_filter($sku)) < 1) {
                         $this->error('sku不能为空！！');
                     }
@@ -305,6 +307,8 @@ class PurchaseOrder extends Backend
                     }
 
                     $sku = $this->request->post("sku/a");
+                    //执行过滤空值
+                    array_walk ($sku, 'trim_value');
                     if (count(array_filter($sku)) < 1) {
                         $this->error('sku不能为空！！');
                     }

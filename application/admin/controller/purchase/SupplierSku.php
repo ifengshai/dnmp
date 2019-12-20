@@ -103,31 +103,47 @@ class SupplierSku extends Backend
                         $this->model->validateFailException(true)->validate($validate);
                     }
                     $skus = $this->request->post("skus/a");
+                    //执行过滤空值
+                    array_walk($skus, 'trim_value');
                     if (count(array_filter($skus)) < 1) {
                         $this->error('sku不能为空！！');
                     }
 
                     $supplier_skus = $this->request->post("supplier_sku/a");
-
+                    array_walk($supplier_skus, 'trim_value');
                     if (count(array_filter($supplier_skus)) < 1) {
                         $this->error('供应商sku不能为空！！');
                     }
-
-                    
-
 
                     $link = $this->request->post("link/a");
 
                     $data = [];
                     foreach (array_filter($skus) as $k => $v) {
+                        //判断是否重复
+                        $where['sku'] = $v;
+                        $where['supplier_id'] = $params['supplier_id'];
+                        $count = $this->model->where($where)->count();
+                        if ($count > 0) {
+                            $this->error('记录已存在！！SKU:' . $v);
+                        }
+
                         //供应商sku  和产品sku 必须为真 否则自动过滤
                         if ($v && $supplier_skus[$k]) {
                             $data[$k]['sku'] = $v;
                             $data[$k]['supplier_sku'] = $supplier_skus[$k];
                             $data[$k]['link'] = $link[$k];
                             $data[$k]['supplier_id'] = $params['supplier_id'];
+                            $data[$k]['label'] = $params['label'];
+                            $data[$k]['is_big_goods'] = $params['is_big_goods'];
+                            $data[$k]['product_cycle'] = $params['product_cycle'];
                             $data[$k]['create_person'] = session('admin.nickname');
                             $data[$k]['createtime'] = date('Y-m-d H:i:s', time());
+                        }
+
+                        //如果选择主供应商 则同SKU下 其他记录设置为辅供应商
+                        if ($params['label'] == 1) {
+                            $map['sku'] = $v;
+                            $this->model->where($map)->update(['label' => 0]);
                         }
                     }
                     $result = $this->model->allowField(true)->saveAll($data);
@@ -186,6 +202,21 @@ class SupplierSku extends Backend
                         $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.edit' : $name) : $this->modelValidate;
                         $row->validateFailException(true)->validate($validate);
                     }
+
+                    //判断是否重复
+                    $where['sku'] = $params['sku'];
+                    $where['supplier_id'] = $params['supplier_id'];
+                    $count = $this->model->where($where)->count();
+                    if ($count > 0) {
+                        $this->error('记录已存在！！SKU:' . $params['sku']);
+                    }
+
+                    //如果选择主供应商 则同SKU下 其他记录设置为辅供应商
+                    if ($params['label'] == 1) {
+                        $map['sku'] = $params['sku'];
+                        $this->model->allowField(true)->isUpdate(true, $map)->save(['label' => 0]);
+                    }
+
                     $result = $row->allowField(true)->save($params);
                     Db::commit();
                 } catch (ValidateException $e) {
@@ -323,11 +354,12 @@ class SupplierSku extends Backend
                 }
                 $row = [];
                 $temp = array_combine($fields, $values);
+                
                 foreach ($temp as $k => $v) {
                     if (isset($fieldArr[$k]) && $k !== '') {
                         $row[$fieldArr[$k]] = $v;
                     }
-                    if ($k == '供应商名称') {
+                    if ($k == '供应商名称' && $v) {
                         if (array_search($v, $supplier)) {
                             $row['supplier_id'] = array_search($v, $supplier);
                         } else {
@@ -336,7 +368,7 @@ class SupplierSku extends Backend
                     }
                 }
                 if ($row) {
-                    $insert[] = $row;
+                    $insert[] = array_filter($row);
                 }
             }
         } catch (Exception $exception) {
