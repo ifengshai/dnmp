@@ -113,6 +113,8 @@ class SupplierSku extends Backend
                         $this->error('供应商sku不能为空！！');
                     }
 
+                    
+
 
                     $link = $this->request->post("link/a");
 
