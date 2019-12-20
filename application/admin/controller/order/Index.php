@@ -201,13 +201,15 @@ class Index extends Backend
             $rep    = $this->request->get('filter');
             $addWhere = '1=1';
             if($rep != '{}'){
-                $whereArr = json_decode($rep,true);
-                if(!array_key_exists('created_at',$whereArr)){
-                    $addWhere  .= " AND DATE_SUB(CURDATE(), INTERVAL 7 DAY) <= date(created_at)";
-                }
+                // $whereArr = json_decode($rep,true);
+                // if(!array_key_exists('created_at',$whereArr)){
+                //     $addWhere  .= " AND DATE_SUB(CURDATE(), INTERVAL 7 DAY) <= date(created_at)";
+                // }
             }else{
                     $addWhere  .= " AND DATE_SUB(CURDATE(), INTERVAL 7 DAY) <= date(created_at)";
             }
+            // echo $addWhere;
+            // exit;
             //根据传的标签切换对应站点数据库
             $label = $this->request->get('label', 1);
             if ($label == 1) {
