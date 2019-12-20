@@ -282,5 +282,8 @@ return [
     'kuaidi100' => [
         //订阅推送回调地址
         'callback' => 'http://mojing.mruilove.com/admin_1biSSnWyfW.php/purchase/purchase_order/callback'
-    ]
+    ],
+
+    //后台地址
+    'admin_url' => 'admin_1biSSnWyfW.php'
 ];

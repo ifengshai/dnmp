@@ -882,64 +882,6 @@ class PurchaseOrder extends Backend
         echo 'ok';
     }
 
-
-    /**
-     * 根据采购单号处理旧数据SKU
-     */
-    public function getPurchaseSku()
-    {
-        $list = session('list');
-        if (!$list) {
-            $list = db('zeelool_purchase')->alias('a')->join(['fa_zeelool_purchase_item' => 'b'], 'a.id = b.purchase_id')->where('a.is_visable', 1)->select();
-            $list = collection($list)->toArray();
-            session('list', $list);
-        }
-
-        set_time_limit(0);
-
-        //查询新系统采购单数据
-        //查询实际采购单
-        $purchase = new \app\admin\model\purchase\PurchaseOrderItem;
-        $purchase_list = $purchase->where('sku', 'NULL')->order('id asc')->select();
-        $purchase_list = collection($purchase_list)->toArray();
-        foreach ($list as $k => $v) {
-            foreach ($purchase_list as $key => $val) {
-                if ($v['purchase_order_id'] == $val['purchase_order_number'] && $v['purchase_qty'] == $val['purchase_num']) {
-                    $purchase->save(['sku' => $v['product_sku']], ['id' => $val['id']]);
-                }
-            }
-        }
-        echo 'ok';
-    }
-
-    /**
-     * 根据新品采购单号处理旧数据SKU
-     */
-    public function getNewPurchaseSku()
-    {
-        $list = session('new_list');
-        if (!$list) {
-            $list = db('zeelool_new_purchase')->alias('a')->join(['fa_zeelool_new_purchase_item' => 'b'], 'a.id = b.new_purchase_id')->where('a.is_visable', 1)->select();
-            $list = collection($list)->toArray();
-            session('new_list', $list);
-        }
-        set_time_limit(0);
-
-        //查询新系统采购单数据
-        //查询实际采购单
-        $purchase = new \app\admin\model\purchase\PurchaseOrderItem;
-        $purchase_list = $purchase->where('sku', 'NULL')->order('id asc')->select();
-        $purchase_list = collection($purchase_list)->toArray();
-        foreach ($list as $k => $v) {
-            foreach ($purchase_list as $key => $val) {
-                if ($v['purchase_order_id'] == $val['purchase_order_number'] && $v['purchase_qty'] == $val['purchase_num']) {
-                    $purchase->save(['sku' => $v['product_sku']], ['id' => $val['id']]);
-                }
-            }
-        }
-        echo 'ok';
-    }
-
     /**
      * 快递100回调地址
      */
