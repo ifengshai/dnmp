@@ -1021,7 +1021,8 @@ class PurchaseOrder extends Backend
                 }
 
                 //补货量
-                $v['replenish_num'] = round(($v['days_sales_num'] * $product_cycle) + ($v['days_sales_num'] * $product_cycle * $times) - $product[$v['true_sku']] - $onway_stock);
+                $replenish_num = round(($v['days_sales_num'] * $product_cycle) + ($v['days_sales_num'] * $product_cycle * $times) - $product[$v['true_sku']] - $onway_stock);
+                $v['replenish_num'] = $replenish_num > 0 ? $replenish_num : 0;
                 $v['stock'] = $product[$v['true_sku']];
                 $v['purchase_qty'] = $onway_stock > 0 ? $onway_stock : 0;
                 //$res[$k]['out_of_stock_num'] = $sku_list[$v['true_sku']]['num'];
