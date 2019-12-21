@@ -1220,7 +1220,7 @@ class PurchaseOrder extends Backend
                 $this->model->save(['payment_status'=>3],['id'=>$row['id']]);
                 $params['purchase_id']   = $row['id'];
                 $params['create_person'] = session('admin.nickname');
-                $params['createtime'] = date('Y-m-d H:i:s', time());
+                $params['create_time'] = date('Y-m-d H:i:s', time());
                 $result = (new purchase_order_pay())->allowField(true)->save($params);
                 if ($result) {
                     return    $this->success('添加成功');
