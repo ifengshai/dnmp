@@ -304,13 +304,6 @@ class Index extends Backend
         $this->assignconfig('label', $label);
         return $this->view->fetch();
     }
-    /**
-     * 订单核算成本 create@lsw
-     */
-    public function account_order_detail()
-    {
-        echo 123;
-    }
     /***
      * 导入邮费页面 create@lsw
      */

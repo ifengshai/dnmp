@@ -1106,7 +1106,7 @@ class PurchaseOrder extends Backend
     public function account_purchase_order()
     {
         //设置过滤方法
-        $this->relationSearch = true;
+        //$this->relationSearch = true;
         $this->request->filter(['strip_tags']);
         if ($this->request->isAjax()) {
             //如果发送的来源是Selectpage，则转发到Selectpage
@@ -1114,34 +1114,35 @@ class PurchaseOrder extends Backend
                 return $this->selectpage();
             }
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            $whereCondition['purchase_status'] = ['egt',2];
             $total = $this->model
-                ->with(['supplier'])
-                ->where(['purchase_status' => ['>=', 2]])
+                //->with(['supplier'])
+                ->where($whereCondition)
                 ->where($where)
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->model
-                ->with(['supplier'])
-                ->where(['purchase_status' => ['>=', 2]])
+                //->with(['supplier'])
+                ->where($whereCondition)
                 ->where($where)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
             //查询总共的ID    
             $totalId = $this->model
-                ->with(['supplier'])
-                ->where(['purchase_status' => ['>=', 2]])
+                //->with(['supplier'])
+                ->where($whereCondition)
                 ->where($where)
-                ->column('purchase_order.id');
+                ->column('id');
             //这个页面的ID    
             $thisPageId = $this->model
-                ->with(['supplier'])
-                ->where(['purchase_status' => ['>=', 2]])
+                //->with(['supplier'])
+                ->where($whereCondition)
                 ->where($where)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
-                ->column('purchase_order.id');
+                ->column('id');
             $list = collection($list)->toArray();
             //求出所有的总共的实际采购总额和本页面的实际采购金额
             $purchaseMoney = $this->model->calculatePurchaseOrderMoney($totalId,$thisPageId);
@@ -1217,9 +1218,10 @@ class PurchaseOrder extends Backend
                 $resultInfo = true;
             }
             if (false !== $resultInfo) {
+                $this->model->save(['payment_status'=>3],['id'=>$row['id']]);
                 $params['purchase_id']   = $row['id'];
                 $params['create_person'] = session('admin.nickname');
-                $params['createtime'] = date('Y-m-d H:i:s', time());
+                $params['create_time'] = date('Y-m-d H:i:s', time());
                 $result = (new purchase_order_pay())->allowField(true)->save($params);
                 if ($result) {
                     return    $this->success('添加成功');
