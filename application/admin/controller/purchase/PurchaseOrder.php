@@ -1115,14 +1115,14 @@ class PurchaseOrder extends Backend
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $whereCondition['purchase_status'] = ['egt',2];
             $total = $this->model
-                ->with(['supplier'])
+                //->with(['supplier'])
                 ->where($whereCondition)
                 ->where($where)
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->model
-                ->with(['supplier'])
+                //->with(['supplier'])
                 ->where($whereCondition)
                 ->where($where)
                 ->order($sort, $order)
@@ -1130,13 +1130,13 @@ class PurchaseOrder extends Backend
                 ->select();
             //查询总共的ID    
             $totalId = $this->model
-                ->with(['supplier'])
+                //->with(['supplier'])
                 ->where($whereCondition)
                 ->where($where)
                 ->column('purchase_order.id');
             //这个页面的ID    
             $thisPageId = $this->model
-                ->with(['supplier'])
+                //->with(['supplier'])
                 ->where($whereCondition)
                 ->where($where)
                 ->order($sort, $order)
