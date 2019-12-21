@@ -159,6 +159,7 @@ class PurchaseOrder extends Model
     public function getPurchaseOrderItemInfo($id)
     {
         $map['purchase_id'] = $id;
+        Db::name('purchase_order_pay')->query("set time_zone='+8:00'");
         $info = Db::name('purchase_order_pay')->where($map)->select();
         if(!$info){
             return false;
