@@ -86,7 +86,7 @@ class PurchaseOrder extends Backend
         return $this->view->fetch();
     }
 
-
+    
 
     /**
      * 添加
@@ -112,6 +112,8 @@ class PurchaseOrder extends Backend
                     }
 
                     $sku = $this->request->post("sku/a");
+                    //执行过滤空值
+                    array_walk ($sku, 'trim_value');
                     if (count(array_filter($sku)) < 1) {
                         $this->error('sku不能为空！！');
                     }
@@ -305,6 +307,8 @@ class PurchaseOrder extends Backend
                     }
 
                     $sku = $this->request->post("sku/a");
+                    //执行过滤空值
+                    array_walk ($sku, 'trim_value');
                     if (count(array_filter($sku)) < 1) {
                         $this->error('sku不能为空！！');
                     }
@@ -942,7 +946,7 @@ class PurchaseOrder extends Backend
             //查询所有产品库存
             $map['is_del'] = 1;
             $item = new \app\admin\model\itemmanage\Item;
-            $product = $item->where($map)->column('stock,product_cycle', 'sku');
+            $product = $item->where($map)->column('stock', 'sku');
 
             //计算在途数量
             $skus = array_column($list, 'true_sku');
@@ -975,6 +979,16 @@ class PurchaseOrder extends Backend
                 ->group('sku')
                 ->column('sum(arrivals_num) as arrivals_num', 'sku');
 
+
+            //查询生产周期
+            $supplier_sku = new \app\admin\model\purchase\SupplierSku;
+            $supplier_where['sku'] = ['in',$skus];
+            $supplier_where['status'] = 1;
+            $supplier_where['label'] = 1;
+            $supplier_res = $supplier_sku->where($supplier_where)->column('product_cycle', 'sku');
+
+
+
             /**
              * 日均销量：A+ 和 A等级，日均销量变动较大，按照2天日均销量补；
              * B和C，C+等级按照5天的日均销量来补货;
@@ -987,9 +1001,8 @@ class PurchaseOrder extends Backend
              * 补货量=日均销量*生产入库周期+日均销量*计划售卖周期-实时库存-库存在途
              */
 
-        
             foreach ($list as &$v) {
-                $product_cycle = $product[$v['true_sku']]['product_cycle'] ? $product[$v['true_sku']]['product_cycle'] : 7;
+                $product_cycle = $supplier_res[$v['true_sku']]['product_cycle'] ? $supplier_res[$v['true_sku']]['product_cycle'] : 7;
                 $onway_stock = $purchase_list[$v['true_sku']] - ($check_list[$v['true_sku']] ?? 0);
                 if ($v['grade'] == 'A+') {
                     $times = 1.5;
@@ -1204,7 +1217,6 @@ class PurchaseOrder extends Backend
                 $resultInfo = true;
             }
             if (false !== $resultInfo) {
-                $this->model->save(['payment_status'=>3],['id'=>$row['id']]);
                 $params['purchase_id']   = $row['id'];
                 $params['create_person'] = session('admin.nickname');
                 $params['createtime'] = date('Y-m-d H:i:s', time());
