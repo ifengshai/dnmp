@@ -1105,7 +1105,7 @@ class PurchaseOrder extends Backend
     public function account_purchase_order()
     {
         //设置过滤方法
-        $this->relationSearch = true;
+        //$this->relationSearch = true;
         $this->request->filter(['strip_tags']);
         if ($this->request->isAjax()) {
             //如果发送的来源是Selectpage，则转发到Selectpage
