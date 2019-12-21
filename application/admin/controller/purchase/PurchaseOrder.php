@@ -1022,16 +1022,12 @@ class PurchaseOrder extends Backend
 
                 //补货量
                 $v['replenish_num'] = round(($v['days_sales_num'] * $product_cycle) + ($v['days_sales_num'] * $product_cycle * $times) - $product[$v['true_sku']]['true_qty'] - $onway_stock);
-                $v['stock'] = $product[$v['true_sku']]['stock'];
-                echo $v['true_sku'];
-                echo $v['stock'];
+                $v['stock'] = $product[$v['true_sku']];
                 $v['purchase_qty'] = $onway_stock > 0 ? $onway_stock : 0;
                 //$res[$k]['out_of_stock_num'] = $sku_list[$v['true_sku']]['num'];
 
             }
-            die;
             unset($v);
-
 
             $result = array("total" => $total, "rows" => $list);
 
