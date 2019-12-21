@@ -1133,7 +1133,7 @@ class PurchaseOrder extends Backend
                 //->with(['supplier'])
                 ->where($whereCondition)
                 ->where($where)
-                ->column('purchase_order.id');
+                ->column('id');
             //这个页面的ID    
             $thisPageId = $this->model
                 //->with(['supplier'])
@@ -1141,7 +1141,7 @@ class PurchaseOrder extends Backend
                 ->where($where)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
-                ->column('purchase_order.id');
+                ->column('id');
             $list = collection($list)->toArray();
             //求出所有的总共的实际采购总额和本页面的实际采购金额
             $purchaseMoney = $this->model->calculatePurchaseOrderMoney($totalId,$thisPageId);
