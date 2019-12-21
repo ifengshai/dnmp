@@ -914,7 +914,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                                     },
                                     visible: function (row) {
                                         //返回true时按钮显示,返回false隐藏
-                                        if (row.purchase_status == 8) {
+                                        if ((row.purchase_status == 8) ||(row.payment_status == 1)) {
                                             return false;
                                         }
                                         return true;
