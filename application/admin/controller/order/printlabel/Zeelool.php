@@ -212,6 +212,10 @@ class Zeelool extends Backend
             if ($v['custom_is_delivery'] == 1) {
                 $this->error('存在已质检通过的订单！！');
             }
+
+            if ($status == 4 && $v['custom_is_match_frame'] == 0) {
+                $this->error('存在未配镜架的订单！！');
+            }
         }
 
 
