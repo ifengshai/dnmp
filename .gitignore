@@ -11,4 +11,3 @@ composer.lock
 .svn
 .vscode
 tryon/*
-/application/extra/*
