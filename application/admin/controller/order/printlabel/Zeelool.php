@@ -142,6 +142,9 @@ class Zeelool extends Backend
         return $this->view->fetch('_list');
     }
 
+    /**
+     * 详情
+     */
     public function detail($ids = null)
     {
         $row = $this->model->get($ids);
@@ -155,7 +158,9 @@ class Zeelool extends Backend
         return $this->view->fetch();
     }
 
-    //标记为已打印标签
+    /**
+     * 标记为已打印标签
+     */
     public function tag_printed()
     {
         // echo 'tag_printed';
@@ -197,7 +202,9 @@ class Zeelool extends Backend
         }
     }
 
-    //配镜架 配镜片 加工 质检通过
+    /**
+     * 配镜架 配镜片 加工 质检通过
+     */
     public function setOrderStatus()
     {
         $entity_ids = input('id_params/a');
@@ -211,6 +218,10 @@ class Zeelool extends Backend
              }
             if ($v['custom_is_delivery'] == 1) {
                 $this->error('存在已质检通过的订单！！');
+            }
+
+            if ($status == 4 && $v['custom_is_match_frame'] == 0) {
+                $this->error('存在未配镜架的订单！！');
             }
         }
 
@@ -374,7 +385,9 @@ class Zeelool extends Backend
         }
     }
 
-    //操作记录
+    /**
+     * 操作记录
+     */
     public function operational($ids = null)
     {
         $row = $this->model->get($ids);
@@ -425,7 +438,9 @@ class Zeelool extends Backend
     }
 
 
-    //生成条形码
+    /**
+     * 生成条形码
+     */
     public function generate_barcode($text, $fileName)
     {
         // 引用barcode文件夹对应的类
@@ -473,7 +488,9 @@ class Zeelool extends Backend
         $drawing->finish(\BCGDrawing::IMG_FORMAT_PNG);
     }
 
-    //获取镜架尺寸 
+    /**
+     * 获取镜架尺寸
+     */ 
     protected function get_frame_lens_width_height_bridge($product_id)
     {
         if ($product_id) {
@@ -824,13 +841,14 @@ table.addpro.re tbody td{ position:relative}
 EOF;
 
             //查询产品货位号
-            // $product = M('product', 'zeelool_', 'DB_STOCK')->field('magento_sku,cargo_location_number')->where('is_active=1')->select();
-            // //重组数组
-            // $cargo_number = [];
-            // foreach ($product as $k => $v) {
-            //     $cargo_number[$v['magento_sku']] = $v['cargo_location_number'];
-            // }
+            $store_sku = new \app\admin\model\warehouse\StockHouse;
+            $cargo_number = $store_sku->alias('a')->where('status',1)->join(['fa_store_sku' => 'b'],'a.id=b.store_id')->column('coding','sku');
 
+            //查询sku映射表
+            $item = new \app\admin\model\itemmanage\ItemPlatformSku;
+            $item_res = $item->cache(3600)->column('sku','platform_sku');
+            
+            
             $file_content = '';
             $temp_increment_id = 0;
             foreach ($processing_order_list as $processing_key => $processing_value) {
@@ -942,11 +960,11 @@ EOF;
                 $final_print['prescription_type'] = substr($final_print['prescription_type'], 0, 15);
 
                 //判断货号是否存在
-                // if ($cargo_number[$processing_value['sku']]) {
-                //     $cargo_number_str = $cargo_number[$processing_value['sku']] . "<br>";
-                // } else {
-                //     $cargo_number_str = "";
-                // }
+                if ($cargo_number[$item_res[$processing_value['sku']]]) {
+                    $cargo_number_str = "<b>" . $cargo_number[$item_res[$processing_value['sku']]] . "</b><br>";
+                } else {
+                    $cargo_number_str = "";
+                }
 
                 $file_content .= "<div  class = 'single_box'>
             <table width='400mm' height='102px' border='0' cellspacing='0' cellpadding='0' class='addpro' style='margin:0px auto;margin-top:0px;' >
@@ -984,7 +1002,7 @@ EOF;
             " . $prismcheck_os_value . $os_add . $os_pd .
                     " </tr>
             <tr>
-            <td colspan='2'>" . SKUHelper::sku_filter($processing_value['sku']) . "</td>
+            <td colspan='2'>" .$cargo_number_str . SKUHelper::sku_filter($processing_value['sku']) . "</td>
             <td colspan='8' style=' text-align:center'>Lens：" . $final_print['index_type'] . "</td>
             </tr>  
             </tbody></table></div>";

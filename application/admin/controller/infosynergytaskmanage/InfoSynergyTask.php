@@ -611,4 +611,6 @@ class InfoSynergyTask extends Backend
             return $this->error('404 Not Found');
         }
     }
+
+
 }

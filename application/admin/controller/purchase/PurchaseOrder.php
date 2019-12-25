@@ -1001,6 +1001,7 @@ class PurchaseOrder extends Backend
              * 补货量=日均销量*生产入库周期+日均销量*计划售卖周期-实时库存-库存在途
              */
 
+       
             foreach ($list as &$v) {
                 $product_cycle = $supplier_res[$v['true_sku']]['product_cycle'] ? $supplier_res[$v['true_sku']]['product_cycle'] : 7;
                 $onway_stock = $purchase_list[$v['true_sku']] - ($check_list[$v['true_sku']] ?? 0);
@@ -1020,14 +1021,14 @@ class PurchaseOrder extends Backend
                 }
 
                 //补货量
-                $v['replenish_num'] = round(($v['days_sales_num'] * $product_cycle) + ($v['days_sales_num'] * $product_cycle * $times) - $product[$v['true_sku']]['true_qty'] - $onway_stock);
-                $v['stock'] = $product[$v['true_sku']]['stock'];
+                $replenish_num = round(($v['days_sales_num'] * $product_cycle) + ($v['days_sales_num'] * $product_cycle * $times) - $product[$v['true_sku']] - $onway_stock);
+                $v['replenish_num'] = $replenish_num > 0 ? $replenish_num : 0;
+                $v['stock'] = $product[$v['true_sku']];
                 $v['purchase_qty'] = $onway_stock > 0 ? $onway_stock : 0;
                 //$res[$k]['out_of_stock_num'] = $sku_list[$v['true_sku']]['num'];
 
             }
             unset($v);
-
 
             $result = array("total" => $total, "rows" => $list);
 

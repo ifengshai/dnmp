@@ -75,7 +75,7 @@ class Dashboard extends Backend
             $total_quote_count = $zeelool_quote_count + $voogueme_quote_count + $nihao_quote_count;
             Cache::set('dashboard_total_quote_count', $total_quote_count, 3600);
         }
-        
+
         //实时用户数量
         $total_customer_count = Cache::get('dashboard_total_customer_count');
         if (!$total_customer_count) {
@@ -146,7 +146,7 @@ class Dashboard extends Backend
             'today_date'                => date("Y-m-d"),
             'total_quote_count'         => $total_quote_count,
             'total_customer_count'      => $total_customer_count,
-            
+
         ]);
 
 
@@ -159,9 +159,9 @@ class Dashboard extends Backend
     {
         $map['is_visable'] = 1;
         $res = Db::table('zeelool_product')->where($map)->select();
-        $list = Db::table('fa_store_house')->column('id','coding');
+        $list = Db::table('fa_store_house')->column('id', 'coding');
         $i = 0;
-        foreach($res as $k => $v) {
+        foreach ($res as $k => $v) {
             if ($v['cargo_location_number']) {
                 $data[$i]['sku'] = $v['magento_sku'];
                 $data[$i]['store_id'] = $list[$v['cargo_location_number']];
@@ -171,6 +171,12 @@ class Dashboard extends Backend
             }
         }
         Db::table('fa_store_sku')->insertAll($data);
-        
+    }
+
+
+    //测试
+    public function get_info_test()
+    {
+        Db::table('zeelool_service_collaboration')->join(['zeelool_service_collaboration_category' => 'b'], 'a.cate_id=b.id')->where('is_visable', 1)->select();
     }
 }
