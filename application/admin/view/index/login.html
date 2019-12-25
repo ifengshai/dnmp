@@ -22,15 +22,15 @@
         .login-screen {
             max-width: 400px;
             padding: 0;
-            
+
         }
 
         .login-screen .well {
-			background:#fff;
-			border:0;
-			box-shadow:0;
-			padding:0; 
-           
+            background: #fff;
+            border: 0;
+            box-shadow: 0;
+            padding: 0;
+
         }
 
         .login-screen .copyright {
@@ -67,101 +67,129 @@
 
         .btn-success {
             background-color: #6384FB;
-			height:80px;
-			font-size:32px;
-			font-weight:bold;
-			box-shadow:0px 5px 15px 0px rgba(55,81,254,0.5);
-             border-radius:8px;
-			 margin-top:18%;
-	
+            height: 80px;
+            font-size: 32px;
+            font-weight: bold;
+            box-shadow: 0px 5px 15px 0px rgba(55, 81, 254, 0.5);
+            border-radius: 8px;
+            margin-top: 18%;
+
         }
-		  .btn-success:hover{
-			  background-color: #5c7efb;
-			  border:1px solid #5c7efb;
-			  }
-	 .btn-success:active{
-			  background-color: #5c7efb;
-			  border:1px solid #5c7efb;
-			  }
 
-    .btn-success.active{
-			  background-color: #5c7efb;
-			  border:1px solid #5c7efb;
-			  }
+        .btn-success:hover {
+            background-color: #5c7efb;
+            border: 1px solid #5c7efb;
+        }
 
-.btn-success:active:hover,
-.btn-success.active:hover,
-.open > .dropdown-toggle.btn-success:hover,
-.btn-success:active:focus,
-.btn-success.active:focus,
-.open > .dropdown-toggle.btn-success:focus,
-.btn-success:active.focus,
-.btn-success.active.focus,
-.open > .dropdown-toggle.btn-success.focus {
-  color: #fff;
-  background-color: #5c7efb;
-  border-color: #5c7efb;
-}
+        .btn-success:active {
+            background-color: #5c7efb;
+            border: 1px solid #5c7efb;
+        }
+
+        .btn-success.active {
+            background-color: #5c7efb;
+            border: 1px solid #5c7efb;
+        }
+
+        .btn-success:active:hover,
+        .btn-success.active:hover,
+        .open>.dropdown-toggle.btn-success:hover,
+        .btn-success:active:focus,
+        .btn-success.active:focus,
+        .open>.dropdown-toggle.btn-success:focus,
+        .btn-success:active.focus,
+        .btn-success.active.focus,
+        .open>.dropdown-toggle.btn-success.focus {
+            color: #fff;
+            background-color: #5c7efb;
+            border-color: #5c7efb;
+        }
+
         .container {
             width: 100%;
         }
-		#login-form .input-group{
-			
-			height:100px;
-			width:100%;
-			
-			}
-		
-	   .input-group .input-group-addon{
-		   position:absolute;
-		   left:2px;
-		   top:2px;
-		   right:0;
-		   border:0;
-		   font-size:22px;
-		   color:#9289A6;
-		   height:40px;
-		   line-height:40px;
-		   z-index:2;
 
-   
-		 
+        #login-form .input-group {
+
+            height: 100px;
+            width: 100%;
+
         }
-		#login-form .input-group{
-			margin-bottom:0!important;
-			}
-		.input-group .form-control{
-			position:absolute;
-			top:0px;
-			height:100px;
-			border:0;
-			color:#6384FB;
-			font-size:22px;
-			border:1px solid #eee;
-		    z-index:1;
-			padding-top:40px;
-			padding-left:13px;
-			
-			}
-	   .input-group .form-control:focus{
-			border-left:2px solid #6384FB;
-			z-index:1;
-			padding-left:12px;
-		}
-	   .login-screen{max-width: 500px;}
+
+        .input-group .input-group-addon {
+            position: absolute;
+            left: 2px;
+            top: 2px;
+            right: 0;
+            border: 0;
+            font-size: 22px;
+            color: #9289A6;
+            height: 40px;
+            line-height: 40px;
+            z-index: 2;
+
+
+
+        }
+
+        #login-form .input-group {
+            margin-bottom: 0 !important;
+        }
+
+        .input-group .form-control {
+            position: absolute;
+            top: 0px;
+            height: 100px;
+            border: 0;
+            color: #6384FB;
+            font-size: 22px;
+            border: 1px solid #eee;
+            z-index: 1;
+            padding-top: 40px;
+            padding-left: 13px;
+
+        }
+
+        .input-group .form-control:focus {
+            border-left: 2px solid #6384FB;
+            z-index: 1;
+            padding-left: 12px;
+        }
+
+        .login-screen {
+            max-width: 500px;
+        }
+
+        input::-webkit-input-placeholder {
+            /* 修改字体颜色 */
+            color: #6384FB;
+            /* 修改字号，默认继承input */
+            font-size: 12px;
+            /* 设置背景色 */
+            background: #8ac6d1;
+        }
+
+        input:-webkit-autofill {
+            /* 修改记住密码浏览器自动修改背景色问题 */
+            -webkit-box-shadow: 0 0 0 1000px white inset !important;
+            transition: background-color 50000s ease-in-out 0s;
+            -webkit-text-fill-color: #6384FB !important;
+        }
+
+       
     </style>
-    
+
 </head>
 
 <body>
     <div class="container">
         <div style="margin-left:60%;margin-top: 200px;margin-bottom: 50px;">
-        <p style="font-size: 35px; color:#203052"><b>欢迎登录魔晶管理系统</b></p>
-        <p style="font-size:24px; color:#203052">请使用本人的账号密码登录</p>
+            <p style="font-size: 35px; color:#203052"><b>欢迎登录魔晶管理系统</b></p>
+            <p style="font-size:24px; color:#203052">请使用本人的账号密码登录</p>
         </div>
         <div class="login-wrapper" style="margin-left:60%; margin-top:4%;">
             <div class="login-screen">
-                
+
                 <div class="well">
                     <div class="login-form">
                         <!--<img id="profile-img" class="profile-img-card" src="__CDN__/assets/img/avatar.png" />-->
@@ -172,16 +200,14 @@
                             {:token()}
                             <div class="input-group">
                                 <div class="input-group-addon">输入账号</div>
-                                <input type="text" class="form-control" id="pd-form-username"
-                                     name="username" autocomplete="off" value=""
-                                    data-rule="{:__('Username')}:required;username" />
+                                <input type="text" class="form-control" id="pd-form-username" name="username"
+                                    autocomplete="off" value="" data-rule="{:__('Username')}:required;username" />
                             </div>
 
                             <div class="input-group">
                                 <div class="input-group-addon">输入密码</div>
-                                <input type="password" class="form-control" id="pd-form-password"
-                                     name="password" autocomplete="off" value=""
-                                    data-rule="{:__('Password')}:required;password" />
+                                <input type="password" class="form-control" id="pd-form-password" name="password"
+                                    autocomplete="off" value="" data-rule="{:__('Password')}:required;password" />
                             </div>
                             {if $config.fastadmin.login_captcha}
                             <div class="input-group">
