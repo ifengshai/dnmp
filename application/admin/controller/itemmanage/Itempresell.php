@@ -5,6 +5,9 @@ use think\Db;
 use think\Request;
 use app\common\controller\Backend;
 use app\admin\model\platformmanage\MagentoPlatform;
+use think\Exception;
+use think\exception\PDOException;
+use think\exception\ValidateException;
 
 /**
  * 平台SKU预售管理

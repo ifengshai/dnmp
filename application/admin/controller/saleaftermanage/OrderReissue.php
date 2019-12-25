@@ -1,7 +1,10 @@
 <?php
 
 namespace app\admin\controller\saleaftermanage;
-
+use think\Db;
+use think\Exception;
+use think\exception\PDOException;
+use think\exception\ValidateException;
 use app\common\controller\Backend;
 use app\admin\model\saleaftermanage\SaleAfterIssue;
 /**

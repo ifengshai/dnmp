@@ -7,6 +7,9 @@ use app\common\controller\Backend;
 use app\admin\model\itemmanage\Item;
 use app\admin\model\platformmanage\MagentoPlatform;
 use app\admin\model\platformmanage\PlatformMap;
+use think\Exception;
+use think\exception\PDOException;
+use think\exception\ValidateException;
 /**
  * 平台SKU管理
  *

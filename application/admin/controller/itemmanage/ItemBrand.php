@@ -3,6 +3,9 @@
 namespace app\admin\controller\itemmanage;
 use think\Db;
 use app\common\controller\Backend;
+use think\Exception;
+use think\exception\PDOException;
+use think\exception\ValidateException;
 
 /**
  * 商品分类管理

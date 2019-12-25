@@ -4,7 +4,9 @@ namespace app\admin\controller\itemmanage\attribute;
 
 use think\Db;
 use app\common\controller\Backend;
-
+use think\Exception;
+use think\exception\PDOException;
+use think\exception\ValidateException;
 /**
  * 
  *

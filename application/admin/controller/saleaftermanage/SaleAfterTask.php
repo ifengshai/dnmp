@@ -6,6 +6,9 @@ use think\Db;
 use fast\Tree;
 use app\admin\model\Admin;
 use think\Request;
+use think\Exception;
+use think\exception\PDOException;
+use think\exception\ValidateException;
 use app\common\controller\Backend;
 use app\admin\model\AuthGroup;
 use app\admin\model\saleaftermanage\SaleAfterIssue;
@@ -31,6 +34,7 @@ class SaleAfterTask extends Backend
     protected $model = null;
     protected $relationSearch = true;
     protected $groupdata = [];
+    protected $noNeedLogin = ['updateRepId','updateMoreRepId'];
     public function _initialize()
     {
         parent::_initialize();
@@ -420,6 +424,9 @@ class SaleAfterTask extends Backend
      */
     public function handle_task($ids=null){
         $row = $this->model->get($ids);
+        // echo '<pre>';
+        // var_dump($row);
+        // exit;
         if (!$row) {
             $this->error(__('No Results were found'));
         }
@@ -506,4 +513,58 @@ class SaleAfterTask extends Backend
             return $this->error('404 Not Found');
         }
     }
+    //更新旧数据的承接人,单个情况
+   public function updateRepId()
+   {
+       $where['rep_id'] =0;
+       $where['nickname'] = ['neq',''];
+       $result = Db::name('sale_after_task')->alias('t')->where($where)->join('fa_admin a','t.rep_preson = a.nickname')
+       ->field('DISTINCT(t.rep_preson),a.id as aid,a.nickname')->select();
+       if(!$result){
+           return false;
+       }
+       foreach($result as $k =>$v){
+         Db::name('sale_after_task')->where(['rep_preson'=>$v['rep_preson']])->update(['rep_id'=>$v['aid']]);
+       }
+   }
+   //更新多个承接人的情况，多个情况
+   public function updateMoreRepId()
+   {
+      $where['rep_id'] = 0;
+      $where['rep_preson'] = ['like','%,%'];
+      $result = Db::name('sale_after_task')->where($where)->field('DISTINCT(rep_preson),id,create_person')->select();
+      if(!$result){
+          return false;
+      }
+      foreach($result as $k =>$v){
+          if(strpos($v['rep_preson'],'王伟') !== false){
+             //echo $v['id'].'<br>';
+             Db::name('sale_after_task')->where(['id'=>$v['id']])->update(['rep_id'=>75]);
+          }else{
+            $rep_id = Db::name('admin')->where(['nickname'=>$v['create_person']])->value('id');
+            Db::name('sale_after_task')->where(['id'=>$v['id']])->update(['rep_id'=>$rep_id]);
+          }
+      }
+   }
+   
+   //旧售后记录日志添加到新系统备注当中
+   public function updateLog()
+   {
+       $where['is_update'] = 1;
+       $result = Db::connect('database.db_zeelool')->table('zeelool_service_saled_log')->where($where)->limit(500)->select();
+       if(!$result){
+         return false;
+       }
+       foreach($result as $k => $v){
+           $tid = Db::name('sale_after_task')->where(['order_number'=>$v['increment_id']])->value('id');
+           if($tid){
+            $data['tid'] = $tid;
+            $data['remark_record'] = $v['remark'];
+            $data['create_person'] = $v['created_operater'];
+            $data['create_time']   = $v['created_at'];
+            Db::name('sale_after_task_remark')->insert($data);
+            Db::connect('database.db_zeelool')->table('zeelool_service_saled_log')->where(['id'=>$v['id']])->update(['is_update'=>2]);
+           }
+       }
+   }
 }

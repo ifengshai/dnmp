@@ -5,7 +5,9 @@ namespace app\admin\controller\itemmanage\attribute;
 use app\common\controller\Backend;
 use think\Db;
 use think\Request;
-
+use think\Exception;
+use think\exception\PDOException;
+use think\exception\ValidateException;
 /**
  * 商品属性项列管理
  *

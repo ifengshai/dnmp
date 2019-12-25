@@ -5,6 +5,8 @@ use think\Db;
 use app\common\controller\Backend;
 use app\admin\model\itemmanage\attribute\ItemAttributePropertyGroup;
 use think\Exception;
+use think\exception\PDOException;
+use think\exception\ValidateException;
 use think\exception\ErrorException;
 
 /**
