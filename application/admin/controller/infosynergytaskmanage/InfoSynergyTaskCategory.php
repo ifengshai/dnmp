@@ -2,6 +2,9 @@
 
 namespace app\admin\controller\infosynergytaskmanage;
 use think\Db;
+use think\Exception;
+use think\exception\PDOException;
+use think\exception\ValidateException;
 use app\common\controller\Backend;
 
 /**

@@ -13,6 +13,9 @@ use app\admin\model\infosynergytaskmanage\InfoSynergyTaskRemark;
 use app\admin\model\AuthGroup;
 use think\Db;
 use think\Request;
+use think\Exception;
+use think\exception\PDOException;
+use think\exception\ValidateException;
 
 /**
  * 协同任务管理
@@ -608,4 +611,6 @@ class InfoSynergyTask extends Backend
             return $this->error('404 Not Found');
         }
     }
+
+
 }

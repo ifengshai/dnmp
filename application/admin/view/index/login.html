@@ -1,107 +1,218 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        {include file="common/meta" /}
 
-        <style type="text/css">
-            body {
-                color:#999;
-                background:url('{$background}');
-                background-size:cover;
-            }
-            a {
-                color:#fff;
-            }
-            .login-panel{margin-top:150px;}
+<head>
+    {include file="common/meta" /}
+
+    <style type="text/css">
+        body {
+            color: #3b3a3a;
+            background:url('{$background}');
+            background-size: cover;
+        }
+
+        a {
+            color: #fff;
+        }
+
+        .login-panel {
+            margin-top: 150px;
+        }
+
+        .login-screen {
+            max-width: 400px;
+            padding: 0;
+            
+        }
+
+        .login-screen .well {
+			background:#fff;
+			border:0;
+			box-shadow:0;
+			padding:0; 
+           
+        }
+
+        .login-screen .copyright {
+            text-align: center;
+        }
+
+        @media(max-width:767px) {
             .login-screen {
-                max-width:400px;
-                padding:0;
-                margin:100px auto 0 auto;
+                padding: 0 20px;
+            }
+        }
 
-            }
-            .login-screen .well {
-                border-radius: 3px;
-                -webkit-box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-                box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-                background: rgba(255,255,255, 0.2);
-            }
-            .login-screen .copyright {
-                text-align: center;
-            }
-            @media(max-width:767px) {
-                .login-screen {
-                    padding:0 20px;
-                }
-            }
-            .profile-img-card {
-                width: 100px;
-                height: 100px;
-                margin: 10px auto;
-                display: block;
-                -moz-border-radius: 50%;
-                -webkit-border-radius: 50%;
-                border-radius: 50%;
-            }
-            .profile-name-card {
-                text-align: center;
-            }
+        .profile-img-card {
+            width: 100px;
+            height: 100px;
+            margin: 10px auto;
+            display: block;
+            -moz-border-radius: 50%;
+            -webkit-border-radius: 50%;
+            border-radius: 50%;
+        }
 
-            #login-form {
-                margin-top:20px;
-            }
-            #login-form .input-group {
-                margin-bottom:15px;
-            }
+        .profile-name-card {
+            text-align: center;
+        }
 
-        </style>
-    </head>
-    <body>
-        <div class="container">
-            <div class="login-wrapper">
-                <div class="login-screen">
-                    <div class="well">
-                        <div class="login-form">
-                            <img id="profile-img" class="profile-img-card" src="__CDN__/assets/img/avatar.png" />
-                            <p id="profile-name" class="profile-name-card"></p>
+        #login-form {
+            margin-top: 20px;
+        }
 
-                            <form action="" method="post" id="login-form">
-                                <div id="errtips" class="hide"></div>
-                                {:token()}
-                                <div class="input-group">
-                                    <div class="input-group-addon"><span class="glyphicon glyphicon-user" aria-hidden="true"></span></div>
-                                    <input type="text" class="form-control" id="pd-form-username" placeholder="{:__('Username')}" name="username" autocomplete="off" value="" data-rule="{:__('Username')}:required;username" />
-                                </div>
+        #login-form .input-group {
+            margin-bottom: 15px;
+        }
 
-                                <div class="input-group">
-                                    <div class="input-group-addon"><span class="glyphicon glyphicon-lock" aria-hidden="true"></span></div>
-                                    <input type="password" class="form-control" id="pd-form-password" placeholder="{:__('Password')}" name="password" autocomplete="off" value="" data-rule="{:__('Password')}:required;password" />
-                                </div>
-                                {if $config.fastadmin.login_captcha}
-                                <div class="input-group">
-                                    <div class="input-group-addon"><span class="glyphicon glyphicon-option-horizontal" aria-hidden="true"></span></div>
-                                    <input type="text" name="captcha" class="form-control" placeholder="{:__('Captcha')}" data-rule="{:__('Captcha')}:required;length(4)" />
-                                    <span class="input-group-addon" style="padding:0;border:none;cursor:pointer;">
-                                        <img src="{:rtrim('__PUBLIC__', '/')}/index.php?s=/captcha" width="100" height="30" onclick="this.src = '{:rtrim('__PUBLIC__', '/')}/index.php?s=/captcha&r=' + Math.random();"/>
-                                    </span>
-                                </div>
-                                {/if}
-                                <div class="form-group">
-                                    <label class="inline" for="keeplogin">
-                                        <input type="checkbox" name="keeplogin" id="keeplogin" value="1" />
-                                        {:__('Keep login')}
-                                    </label>
-                                </div>
-                                <div class="form-group">
-                                    <button type="submit" class="btn btn-success btn-lg btn-block">{:__('Sign in')}</button>
-                                </div>
-                            </form>
-                        </div>
+        .btn-success {
+            background-color: #6384FB;
+			height:80px;
+			font-size:32px;
+			font-weight:bold;
+			box-shadow:0px 5px 15px 0px rgba(55,81,254,0.5);
+             border-radius:8px;
+			 margin-top:18%;
+	
+        }
+		  .btn-success:hover{
+			  background-color: #5c7efb;
+			  border:1px solid #5c7efb;
+			  }
+	 .btn-success:active{
+			  background-color: #5c7efb;
+			  border:1px solid #5c7efb;
+			  }
+
+    .btn-success.active{
+			  background-color: #5c7efb;
+			  border:1px solid #5c7efb;
+			  }
+
+.btn-success:active:hover,
+.btn-success.active:hover,
+.open > .dropdown-toggle.btn-success:hover,
+.btn-success:active:focus,
+.btn-success.active:focus,
+.open > .dropdown-toggle.btn-success:focus,
+.btn-success:active.focus,
+.btn-success.active.focus,
+.open > .dropdown-toggle.btn-success.focus {
+  color: #fff;
+  background-color: #5c7efb;
+  border-color: #5c7efb;
+}
+        .container {
+            width: 100%;
+        }
+		#login-form .input-group{
+			
+			height:100px;
+			width:100%;
+			
+			}
+		
+	   .input-group .input-group-addon{
+		   position:absolute;
+		   left:2px;
+		   top:2px;
+		   right:0;
+		   border:0;
+		   font-size:22px;
+		   color:#9289A6;
+		   height:40px;
+		   line-height:40px;
+		   z-index:2;
+
+   
+		 
+        }
+		#login-form .input-group{
+			margin-bottom:0!important;
+			}
+		.input-group .form-control{
+			position:absolute;
+			top:0px;
+			height:100px;
+			border:0;
+			color:#6384FB;
+			font-size:22px;
+			border:1px solid #eee;
+		    z-index:1;
+			padding-top:40px;
+			padding-left:13px;
+			
+			}
+	   .input-group .form-control:focus{
+			border-left:2px solid #6384FB;
+			z-index:1;
+			padding-left:12px;
+		}
+	   .login-screen{max-width: 500px;}
+    </style>
+    
+</head>
+
+<body>
+    <div class="container">
+        <div style="margin-left:60%;margin-top: 200px;margin-bottom: 50px;">
+        <p style="font-size: 35px; color:#203052"><b>欢迎登录魔晶管理系统</b></p>
+        <p style="font-size:24px; color:#203052">请使用本人的账号密码登录</p>
+        </div>
+        <div class="login-wrapper" style="margin-left:60%; margin-top:4%;">
+            <div class="login-screen">
+                
+                <div class="well">
+                    <div class="login-form">
+                        <!--<img id="profile-img" class="profile-img-card" src="__CDN__/assets/img/avatar.png" />-->
+                        <p id="profile-name" class="profile-name-card"></p>
+
+                        <form action="" method="post" id="login-form">
+                            <div id="errtips" class="hide"></div>
+                            {:token()}
+                            <div class="input-group">
+                                <div class="input-group-addon">输入账号</div>
+                                <input type="text" class="form-control" id="pd-form-username"
+                                     name="username" autocomplete="off" value=""
+                                    data-rule="{:__('Username')}:required;username" />
+                            </div>
+
+                            <div class="input-group">
+                                <div class="input-group-addon">输入密码</div>
+                                <input type="password" class="form-control" id="pd-form-password"
+                                     name="password" autocomplete="off" value=""
+                                    data-rule="{:__('Password')}:required;password" />
+                            </div>
+                            {if $config.fastadmin.login_captcha}
+                            <div class="input-group">
+                                <div class="input-group-addon"><span class="glyphicon glyphicon-option-horizontal"
+                                        aria-hidden="true"></span></div>
+                                <input type="text" name="captcha" class="form-control" placeholder="{:__('Captcha')}"
+                                    data-rule="{:__('Captcha')}:required;length(4)" />
+                                <span class="input-group-addon" style="padding:0;border:none;cursor:pointer;">
+                                    <img src="{:rtrim('__PUBLIC__', '/')}/index.php?s=/captcha" width="100" height="30"
+                                        onclick="this.src = '{:rtrim('__PUBLIC__', '/')}/index.php?s=/captcha&r=' + Math.random();" />
+                                </span>
+                            </div>
+                            {/if}
+                            <div class="form-group">
+                                <label class="inline" for="keeplogin">
+                                    <!-- <input type="checkbox" name="keeplogin" id="keeplogin" value="1" />
+                                    {:__('Keep login')} -->
+                                </label>
+                            </div>
+                            <div class="form-group">
+                                <button type="submit" class="btn btn-success btn-lg btn-block">{:__('Sign in')}</button>
+                            </div>
+                        </form>
                     </div>
-                    <!-- FastAdmin是开源程序，建议在您的网站底部保留一个FastAdmin的链接 -->
-                    <p class="copyright"><a href="javacript:;">Powered By 魔晶</a></p>
                 </div>
+                <!-- FastAdmin是开源程序，建议在您的网站底部保留一个FastAdmin的链接 -->
+                <p class="copyright"><a href="javacript:;">Powered By 魔晶</a></p>
             </div>
         </div>
-        {include file="common/script" /}
-    </body>
+    </div>
+    {include file="common/script" /}
+</body>
+
 </html>
