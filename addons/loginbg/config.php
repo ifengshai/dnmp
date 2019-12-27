@@ -27,7 +27,7 @@ return array (
     'content' => 
     array (
     ),
-    'value' => '/assets/img/login1.jpg',
+    'value' => '/assets/img/login.jpg',
     'rule' => 'required',
     'msg' => '',
     'tip' => '',

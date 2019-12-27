@@ -286,7 +286,7 @@ class Zeelool extends Backend
                         //总库存
                         $item_map['sku'] = $trueSku;
                         $item_map['is_del'] = 1;
-                        if ($v['sku']) {
+                        if ($trueSku) {
                             //增加配货占用
                             $res_three = $item->where($item_map)->setInc('distribution_occupy_stock', $v['qty_ordered']);
                         }
@@ -329,7 +329,7 @@ class Zeelool extends Backend
                         //总库存
                         $item_map['sku'] = $trueSku;
                         $item_map['is_del'] = 1;
-                        if ($v['sku']) {
+                        if ($trueSku) {
                             //扣减总库存 扣减占用库存
                             $res_one = $item->where($item_map)->setDec('stock', $v['qty_ordered']);
                             //占用库存
@@ -799,14 +799,9 @@ order by sfoi.order_id desc;";
         //禁止缓存
         header('Cache-Control: max-age=0');
         $writer = new $class($spreadsheet);
-        // exit;
-        // $filePath = env('runtime_path')."temp/".time().microtime(true).".tmp";
-        // $writer->save($filePath);
+       
         $writer->save('php://output');
-        // $writer->save('file.xlsx');
-
-        // readfile($filePath);
-        // unlink($filePath);
+      
     }
 
     //批量打印标签

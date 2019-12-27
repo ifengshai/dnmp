@@ -475,7 +475,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                     ]
                 ]
             });
-            
+
 
             // 为表格绑定事件
             Table.api.bindevent(table);
@@ -802,7 +802,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                         { field: 'purchase_total', title: __('Purchase_total'), operate: 'BETWEEN' },
                         { field: 'purchase_virtual_total', title: __('实际采购金额（元）'), operate: 'BETWEEN' },
                         { field: 'refund_amount', title: __('退款金额（元）'), operate: false },
-                        { field: 'purchase_settle_money', title: __('采购结算金额（元）')},
+                        { field: 'purchase_settle_money', title: __('采购结算金额（元）') },
                         //{ field: 'purchase_freight', title: __('邮费（元）') },
                         { field: 'payment_money', title: __('已付款金额') },
                         {
@@ -862,13 +862,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                                     classname: 'btn btn-xs  btn-primary btn-dialog',
                                     icon: 'fa fa-list',
                                     //url: "purchase/purchase_order/account_purchase_order_detail?purchase_virtual_total="+row.refund_amount,
-                                    url:function(row){
+                                    url: function (row) {
                                         //实际采购金额（元）
                                         var purchase_virtual_total = row.purchase_virtual_total != undefined ? row.purchase_virtual_total : 0;
                                         //退款金额
-                                        var refund_amount          = row.refund_amount != undefined ? row.refund_amount : 0;
-                                        var purchase_settle_money  = row.purchase_settle_money != undefined ? row.purchase_settle_money : 0;
-                                        return "purchase/purchase_order/account_purchase_order_detail?purchase_virtual_total="+purchase_virtual_total+"&refund_amount="+refund_amount+"&purchase_settle_money="+purchase_settle_money+"&ids="+row.id;
+                                        var refund_amount = row.refund_amount != undefined ? row.refund_amount : 0;
+                                        var purchase_settle_money = row.purchase_settle_money != undefined ? row.purchase_settle_money : 0;
+                                        return "purchase/purchase_order/account_purchase_order_detail?purchase_virtual_total=" + purchase_virtual_total + "&refund_amount=" + refund_amount + "&purchase_settle_money=" + purchase_settle_money + "&ids=" + row.id;
                                     },
                                     extend: 'data-area = \'["100%","100%"]\'',
                                     callback: function (data) {
@@ -914,7 +914,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                                     },
                                     visible: function (row) {
                                         //返回true时按钮显示,返回false隐藏
-                                        if ((row.purchase_status == 8) ||(row.payment_status == 1)) {
+                                        if ((row.purchase_status == 8) || (row.payment_status == 1)) {
                                             return false;
                                         }
                                         return true;

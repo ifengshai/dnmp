@@ -575,6 +575,7 @@ class PurchaseOrder extends Backend
                 Cache::set($cacheIndex, $data, 3600);
             }
             $data = $data->logisticsTrace[0];
+            
         } else {
             if ($row['logistics_number']) {
                 $arr = explode(',', $row['logistics_number']);
