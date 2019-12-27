@@ -61,13 +61,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui','bootstrap-tabl
                             custom:{1:'blue',2:'red'},
                             formatter:Table.api.formatter.status,
                         },
-                        {
-                            field: 'platform_sku_status',
-                            title: __('Platform_sku_status'),
-                            searchList: { 1:'上架', 2:'下架' },
-                            custom: { 1: 'blue', 2: 'red' },
-                            formatter: Table.api.formatter.status,
-                        },
+                        // {
+                        //     field: 'platform_sku_status',
+                        //     title: __('Platform_sku_status'),
+                        //     searchList: { 1:'上架', 2:'下架' },
+                        //     custom: { 1: 'blue', 2: 'red' },
+                        //     formatter: Table.api.formatter.status,
+                        // },
                         {
                             field:'is_upload',
                             title:__('Is_upload_item'),

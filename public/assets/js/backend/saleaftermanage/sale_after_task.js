@@ -24,7 +24,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui','custom-css','b
             });
             $(document).on('click',".problem_desc_info",function(){
                 var problem_desc = $(this).attr('name');
-                Layer.alert(problem_desc);
+                //Layer.alert(problem_desc);
+                Layer.open({
+                    closeBtn: 1,
+                    title: '问题描述',
+                    area: ['900px', '500px'],
+                    content:problem_desc
+                });
                 return false;
             });
             // 初始化表格
@@ -63,6 +69,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui','custom-css','b
                             formatter: Table.api.formatter.status
                         },
                         {field: 'order_number', title: __('Order_number')},
+                        {field:'order_skus',title:__('Order_skus')},
                         {field: 'customer_name',title:__('Customer_name'),operate:false},
                         {field: 'customer_email',title:__('Customer_email'),operate:false},
                         {field: 'order_status', title: __('Order_status'),searchList:{'canceled':'canceled','closed':'closed','complete':'complete','creditcard_failed':'creditcard_failed','creditcard_pending':'creditcard_pending','free_processing':'free_processing','holded':'holded','payment_review':'payment_review','paypal_canceled_reversal':'paypal_canceled_reversal','paypal_reversed':'paypal_reversed','pending':'pending','processing':'processing'}},
@@ -274,13 +281,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui','custom-css','b
                     if (value == null || value == undefined) {
                         return '';
                     } else {
-                         var tem = value
-                            .replace(/&lt;/g, "<")
-                            .replace(/&gt;/g, ">")
-                            .replace(/&quot;/g, "\"")
-                            .replace(/&apos;/g, "'")
-                            .replace(/&amp;/g, "&")
-                            .replace(/&nbsp;/g, '').replace(/<\/?.+?\/?>/g, '').replace(/<[^>]+>/g, "")
+                         var tem = value;
+                            // .replace(/&lt;/g, "<")
+                            // .replace(/&gt;/g, ">")
+                            // .replace(/&quot;/g, "\"")
+                            // .replace(/&apos;/g, "'")
+                            // .replace(/&amp;/g, "&")
+                            // .replace(/&nbsp;/g, '').replace(/<\/?.+?\/?>/g, '').replace(/<[^>]+>/g, "")
+                           //.replace(/<\/?.+?\/?>/g, '').replace(/<[^>]+>/g, "")
                         if(tem.length<=10){
                             //console.log(row.id);
                             return tem;
@@ -354,6 +362,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui','custom-css','b
                         var lastname  =  ret.data[0].customer_lastname != undefined ? ret.data[0].customer_lastname : '';
                         $(".item_info").empty();
                         $('#c-order_status').val(ret.data[0].status);
+                        //$('#c-order_sku').val()
                         $('#c-customer_name').val(firstname+" "+ lastname);
                         $('#c-customer_email').val(email);
                         if(ret.data[0].store_id>=2){

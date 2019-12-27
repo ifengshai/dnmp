@@ -65,14 +65,13 @@ class Voogueme extends Model
         $totalMap['entity_id'] = ['in',$totalId];
         $totalMap['status']    = ['in',['processing','complete','creditcard_proccessing','free_processing']];
         $payInfo = $this->where($totalMap)->field('entity_id,base_total_paid,base_total_due,postage_money')->select();
-        if(!$payInfo){
-            return $arr;
+        if($payInfo){
+            foreach($payInfo as $v){
+                $arr['totalPayInfo'] +=round($v['base_total_paid']+$v['base_total_due'],2);
+                $arr['totalPostageMoney'] += round($v['postage_money'],2);
+            }
         }
-        $payInfo = collection($payInfo)->toArray();
-        foreach($payInfo as $v){
-            $arr['totalPayInfo'] +=round($v['base_total_paid']+$v['base_total_due'],2);
-            $arr['totalPostageMoney'] += round($v['postage_money'],2);
-        }
+
         //求出镜架成本start
         //1.求出所有的订单号
         $frameTotalMap['entity_id'] = ['in',$totalId];
@@ -92,7 +91,6 @@ class Voogueme extends Model
         $frameInfo = Db::table('fa_outstock_log')->alias('g')->where($outStockMap)->join('purchase_order_item m','g.purchase_id=m.purchase_id and g.sku=m.sku')
         ->field('g.sku,g.order_number,g.out_stock_num,g.purchase_id,m.purchase_price')->select(); 
         if($frameInfo){
-            $frameInfo = collection($frameInfo)->toArray();
             foreach($frameInfo as $fv){
                  $arr['totalFramePrice'] +=round($fv['out_stock_num']*$fv['purchase_price'],2);
                 if(in_array($fv['order_number'],$order['this_increment_id'])){
@@ -105,7 +103,6 @@ class Voogueme extends Model
         //求出镜片成本start
         $lensInfo = Db::table('fa_lens_outorder')->where($outStockMap)->field('order_number,num,price')->select();
         if($lensInfo){
-            $lensInfo = collection($lensInfo)->toArray();
             foreach($lensInfo as  $lv){
                 $arr['totalLensPrice'] += round($lv['num']*$lv['price'],2);
                 if(in_array($lv['order_number'],$order['this_increment_id'])){
@@ -127,7 +124,6 @@ class Voogueme extends Model
         //把补差价订单号存起来
         $fullPostOrderTask = $fullPostOrderSynergy = [];
         if($saleAfterInfo){
-            $saleAfterInfo = collection($saleAfterInfo)->toArray();
             foreach($saleAfterInfo as $sv){
                 $arr['totalRefundMoney'] += round($sv['refund_money'],2);
                 if(in_array($sv['order_number'],$order['this_increment_id'])){
@@ -140,7 +136,6 @@ class Voogueme extends Model
             }
         }
         if($infoSynergyInfo){
-            $infoSynergyInfo = collection($infoSynergyInfo)->toArray();
             foreach($infoSynergyInfo as $vs){
                 $arr['totalRefundMoney'] += round($vs['refund_money'],2);
                 if(in_array($vs['synergy_order_number'],$order['this_increment_id'])){
@@ -164,7 +159,6 @@ class Voogueme extends Model
         $fullPostMap['increment_id'] = ['in',$fullPostOrderTask];
         $fullPostResult = $this->where($fullPostMap)->field('increment_id,base_total_paid,base_total_due')->select();
         if($fullPostResult){
-            $fullPostResult = collection($fullPostResult)->toArray();
             foreach($fullPostResult as $vf){
                 $arr['totalFullPostMoney'] +=round($vf['base_total_paid']+$vf['base_total_due'],2);
                 //求出订单号
@@ -181,7 +175,6 @@ class Voogueme extends Model
         $synergyFullPostMap['increment_id'] = ['in',$fullPostOrderSynergy];
         $synergyPostResult = $this->where($synergyFullPostMap)->field('increment_id,base_total_paid,base_total_due')->select();
         if($synergyPostResult){
-            $synergyPostResult = collection($synergyPostResult)->toArray();
             foreach($synergyPostResult as $svf){
                 $arr['totalFullPostMoney'] +=round($svf['base_total_paid']+$svf['base_total_due'],2);
                 //求出订单号
@@ -200,7 +193,6 @@ class Voogueme extends Model
         $totalprocessMap['order_id'] = ['in',$totalId];
         $processResult = Db::connect($this->connection)->table('sales_flat_order_item_prescription')->where($totalprocessMap)->field('order_id,sku,prescription_type,index_type,frame_type_is_rimless,qty_ordered')->select();
         if($processResult){
-            $processResult = collection($processResult)->toArray();
             foreach($processResult as $pv){
                 //1.处方类型为渐进镜,或者镜架是无框的都是8 元
                 if(('Progressive' == $pv['prescription_type']) || ('Bifocal' == $pv['prescription_type']) ||((2 ==  $pv['frame_type_is_rimless']))){

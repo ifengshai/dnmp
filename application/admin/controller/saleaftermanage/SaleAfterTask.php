@@ -6,6 +6,9 @@ use think\Db;
 use fast\Tree;
 use app\admin\model\Admin;
 use think\Request;
+use think\Exception;
+use think\exception\PDOException;
+use think\exception\ValidateException;
 use app\common\controller\Backend;
 use app\admin\model\AuthGroup;
 use app\admin\model\saleaftermanage\SaleAfterIssue;
@@ -31,6 +34,15 @@ class SaleAfterTask extends Backend
     protected $model = null;
     protected $relationSearch = true;
     protected $groupdata = [];
+    protected $noNeedLogin = [
+        'updateRepId',
+        'updateMoreRepId',
+        'updateCategoryVoogueme',
+        'updateCategoryNihao',
+        'updateCategoryProblemIdNihao',
+        'contrastCategory',
+        'zeeloolSaleImport'
+    ];
     public function _initialize()
     {
         parent::_initialize();
@@ -420,6 +432,9 @@ class SaleAfterTask extends Backend
      */
     public function handle_task($ids=null){
         $row = $this->model->get($ids);
+        // echo '<pre>';
+        // var_dump($row);
+        // exit;
         if (!$row) {
             $this->error(__('No Results were found'));
         }
@@ -506,4 +521,504 @@ class SaleAfterTask extends Backend
             return $this->error('404 Not Found');
         }
     }
+    //更新旧数据的承接人,单个情况
+   public function updateRepId()
+   {
+       $where['rep_id'] =0;
+       $where['nickname'] = ['neq',''];
+       $result = Db::name('sale_after_task')->alias('t')->where($where)->join('fa_admin a','t.rep_preson = a.nickname')
+       ->field('DISTINCT(t.rep_preson),a.id as aid,a.nickname')->select();
+       if(!$result){
+           return false;
+       }
+       foreach($result as $v){
+         Db::name('sale_after_task')->where(['rep_preson'=>$v['rep_preson']])->update(['rep_id'=>$v['aid']]);
+       }
+   }
+   //更新多个承接人的情况，多个情况 zeelool
+   public function updateMoreRepId()
+   {
+      $where['rep_id'] = 0;
+      $where['rep_preson'] = ['like','%,%'];
+      $result = Db::name('sale_after_task')->where($where)->field('DISTINCT(rep_preson),id,create_person')->select();
+      if(!$result){
+          return false;
+      }
+      foreach($result as $v){
+          if(strpos($v['rep_preson'],'王伟') !== false){
+             //echo $v['id'].'<br>';
+             Db::name('sale_after_task')->where(['id'=>$v['id']])->update(['rep_id'=>75]);
+          }else{
+            $rep_id = Db::name('admin')->where(['nickname'=>$v['create_person']])->value('id');
+            if($rep_id){
+                Db::name('sale_after_task')->where(['id'=>$v['id']])->update(['rep_id'=>$rep_id]);
+            }
+            
+          }
+      }
+   }
+
+    //更新多个承接人的情况，多个情况 voogueme
+    public function updateMoreRepIdVoogueme()
+    {
+        $where['rep_id'] = 0;
+        $where['rep_preson'] = ['like','%,%'];
+        $result = Db::name('sale_after_task')->where($where)->field('DISTINCT(rep_preson),id,create_person')->select();
+        if(!$result){
+            return false;
+        }
+        foreach($result as $v){
+            if(strpos($v['rep_preson'],'白青青') !== false){
+            Db::name('sale_after_task')->where(['id'=>$v['id']])->update(['rep_id'=>95]);
+            }else{
+            $rep_id = Db::name('admin')->where(['nickname'=>$v['create_person']])->value('id');
+            if($rep_id){
+                Db::name('sale_after_task')->where(['id'=>$v['id']])->update(['rep_id'=>$rep_id]);
+            }
+            
+            }
+        }
+    }
+   
+   //旧售后记录日志添加到新系统备注当中,zeelool站
+   public function updateLog()
+   {
+       $where['is_update'] = 1;
+       $result = Db::table('zeelool_service_saled_log')->where($where)->limit(500)->select();
+       if(!$result){
+         return false;
+       }
+       foreach($result as $v){
+           $tid = Db::name('sale_after_task')->where(['order_number'=>$v['increment_id']])->value('id');
+           if($tid){
+            $data['tid'] = $tid;
+            $data['remark_record'] = $v['remark'];
+            $data['create_person'] = $v['created_operater'];
+            $data['create_time']   = $v['created_at'];
+            Db::name('sale_after_task_remark')->insert($data);
+            Db::table('zeelool_service_saled_log')->where(['id'=>$v['id']])->update(['is_update'=>2]);
+           }
+       }
+   }
+      //旧售后记录日志添加到新系统备注当中,voogueme站
+      public function updateLogVoogueme()
+      {
+          $where['is_update'] = 1;
+          $result = Db::table('voogueme_service_saled_log')->where($where)->limit(500)->select();
+          if(!$result){
+            return false;
+          }
+          foreach($result as $v){
+              $tid = Db::name('sale_after_task')->where(['order_number'=>$v['increment_id']])->value('id');
+              if($tid){
+               $data['tid'] = $tid;
+               $data['remark_record'] = $v['remark'];
+               $data['create_person'] = $v['created_operater'];
+               $data['create_time']   = $v['created_at'];
+               Db::name('sale_after_task_remark')->insert($data);
+               Db::table('voogueme_service_saled_log')->where(['id'=>$v['id']])->update(['is_update'=>2]);
+              }
+          }
+      }
+      ////旧售后记录日志添加到新系统备注当中,nihao站
+      public function updateLogNihao()
+      {
+          $where['is_update'] = 1;
+          $result = Db::table('nihao_service_saled_log')->where($where)->limit(500)->select();
+          if(!$result){
+            return false;
+          }
+          foreach($result as $v){
+              $tid = Db::name('sale_after_task')->where(['order_number'=>$v['increment_id']])->value('id');
+              if($tid){
+               $data['tid'] = $tid;
+               $data['remark_record'] = $v['remark'];
+               $data['create_person'] = $v['created_operater'];
+               $data['create_time']   = $v['created_at'];
+               Db::name('sale_after_task_remark')->insert($data);
+               Db::table('nihao_service_saled_log')->where(['id'=>$v['id']])->update(['is_update'=>2]);
+              }
+          }
+      }
+      //更新voogueme站的分类数据
+      public function updateCategoryVoogueme()
+      {
+         $where['order_platform'] = 2;
+         $where['is_update_category'] =1; 
+         $result = Db::name('sale_after_task')->where($where)->field('id,problem_id,voogueme_category_name')->limit(200)->select();
+         if(!$result){
+             return false;
+         }
+         $categoryInfo = Db::connect('database.db_voogueme')->table('zeelool_service_saled_category')->field('id,name')->select();
+         if(!$categoryInfo){
+             return false;
+         }
+         $arr = [];
+         foreach($categoryInfo as $vs){
+             $arr[$vs['id']] = $vs['name'];
+         }
+         foreach($result as $v){
+             $data['voogueme_category_name'] = $arr[$v['problem_id']];
+             $data['is_update_category'] = 2;
+             Db::name('sale_after_task')->where(['id'=>$v['id']])->update($data);
+         }
+      }
+      //更新nihao站的分类数据
+      public function updateCategoryNihao()
+      {
+        $where['order_platform'] = 3;
+        $where['is_update_category'] =1; 
+        $result = Db::name('sale_after_task')->where($where)->field('id,problem_id,nihao_category_name')->limit(200)->select();
+        if(!$result){
+            return false;
+        }
+        $categoryInfo = Db::connect('database.db_nihao')->table('zeelool_service_saled_category')->field('id,name')->select();
+        if(!$categoryInfo){
+            return false;
+        }
+        $arr = [];
+        foreach($categoryInfo as $vs){
+            $arr[$vs['id']] = $vs['name'];
+        }
+        foreach($result as $v){
+            $data['nihao_category_name'] = $arr[$v['problem_id']];
+            $data['is_update_category'] = 3;
+            Db::name('sale_after_task')->where(['id'=>$v['id']])->update($data);
+        }
+      }
+      //把voogueme站的分类更新到数据当中
+      public function updateCategoryProblemId()
+      {
+          $where['order_platform'] = 2;
+          $where['is_update_category'] = 2;
+          $result = Db::name('sale_after_task')->where($where)->field('id,voogueme_category_name')->limit(300)->select();
+          if(!$result){
+              return false;
+          }
+          $categoryInfo = Db::name('sale_after_issue')->field('id,name')->select();
+          if(!$categoryInfo){
+              return false;
+          }
+          $arr = [];
+          foreach($categoryInfo as $vs){
+            $arr[$vs['name']] = $vs['id'];
+          }
+          foreach($result as $v){
+            
+             if(isset($arr[$v['voogueme_category_name']])){
+                $problem_id = $arr[$v['voogueme_category_name']];
+                if($problem_id){
+                    $data['problem_id'] = $problem_id;
+                    $data['is_update_category'] = 4;
+                    Db::name('sale_after_task')->where(['id'=>$v['id']])->update($data);
+                }
+             }elseif('其它' == $v['voogueme_category_name']){
+                $data['problem_id'] = 19;
+                $data['is_update_category'] = 4;
+                Db::name('sale_after_task')->where(['id'=>$v['id']])->update($data);
+             } 
+
+          }
+      }
+      //把nihao站的分类更新到数据当中
+      public function updateCategoryProblemIdNihao()
+      {
+        $where['order_platform'] = 3;
+        $where['is_update_category'] = 3;
+        $result = Db::name('sale_after_task')->where($where)->field('id,nihao_category_name')->limit(300)->select();
+        if(!$result){
+            return false;
+        }
+        $categoryInfo = Db::name('sale_after_issue')->field('id,name')->select();
+        if(!$categoryInfo){
+            return false;
+        }
+        $arr = [];
+        foreach($categoryInfo as $vs){
+          $arr[$vs['name']] = $vs['id'];
+        }
+        foreach($result as $v){
+           if(isset($arr[$v['nihao_category_name']])){
+              $problem_id = $arr[$v['nihao_category_name']];
+              if($problem_id){
+                  $data['problem_id'] = $problem_id;
+                  $data['is_update_category'] = 6;
+                  Db::name('sale_after_task')->where(['id'=>$v['id']])->update($data);
+              }
+           }
+        }
+      }
+
+      /***
+       * 对比售后分类和问题分类
+       */
+      public function contrastCategory()
+      {
+        $categoryInfo = Db::name('sale_after_issue')->field('id,name')->select();
+        $categoryInfo2 = Db::table('zeelool_service_question_category')->field('id,pid,name')->select();
+        $arr = $arr2 = [];
+        foreach($categoryInfo as $v){
+            $arr[] = $v['name'];
+        }
+        foreach($categoryInfo2 as $v2){
+            $arr2[] = $v2['name'];
+        }
+        echo '<pre>';
+        $arr3 =  array_diff($arr2,$arr);
+        dump($arr3);
+      }
+
+      //导入zeelool站的问题管理数据
+      public function zeeloolImport()
+      {
+          $result = Db::table('zeelool_service_question')->field('increment_id,email,cate_id,description,created_operator,task_operator,remark,created_at')->limit(12000,4000)->select();
+          $categoryInfo = Db::name('sale_after_issue')->field('id,name')->select();
+          $categoryInfo2 = Db::table('zeelool_service_question_category')->field('id,name')->select();
+          $user = Db::name('admin')->field('id,nickname')->select();
+          //$sku  = Db::table('zeelool_service_question_sku')->field('increment_id,sku')->select();
+          $categoryArr = $categoryArr2 = $userArr = [];
+          foreach($categoryInfo as $vs){
+            $categoryArr[$vs['name']] = $vs['id'];
+          }
+          foreach($categoryInfo2 as $vc){
+            $categoryArr2[$vc['id']] = $vc['name'];
+          }
+          foreach($user as $vu){
+            $userArr[$vu['nickname']] = $vu['id'];  
+          }
+          $arr = [];
+          foreach($result as $k=> $v){
+             $arr[$k]['order_number'] = $v['increment_id'];
+             $arr[$k]['order_platform'] = 1;
+             $arr[$k]['task_status'] = 2;
+             $arr[$k]['prty_id'] = 1;
+             $arr[$k]['customer_email'] = isset($v['email']) ? $v['email'] : ''; 
+             $arr[$k]['task_number'] = 'CO'.date('YmdHis') . rand(100, 999) . rand(100, 999); 
+             $arr[$k]['problem_id'] = isset($categoryArr[$categoryArr2[$v['cate_id']]]) ? $categoryArr[$categoryArr2[$v['cate_id']]] : 0; 
+             $arr[$k]['problem_desc'] = $v['description'].'<br/>'.$v['remark']; 
+             $arr[$k]['create_person'] = $v['created_operator']; 
+             $arr[$k]['create_time'] = $v['created_at']; 
+             $arr[$k]['rep_id'] = isset($userArr[$v['task_operator']]) ? $userArr[$v['task_operator']] : 0; 
+          }
+          $this->model->allowField(true)->saveAll($arr);
+      }
+  
+      //导入voogueme站问题管理数据
+      public function vooguemeImport()
+      {
+        $result = Db::table('voogueme_service_question')->field('increment_id,email,cate_id,description,created_operator,task_operator,remark,created_at')->limit(0,4000)->select();
+        $categoryInfo = Db::name('sale_after_issue')->field('id,name')->select();
+        $categoryInfo2 = Db::table('voogueme_service_question_category')->field('id,name')->select();
+        $user = Db::name('admin')->field('id,nickname')->select();
+        //$sku  = Db::table('zeelool_service_question_sku')->field('increment_id,sku')->select();
+        $categoryArr = $categoryArr2 = $userArr = [];
+        foreach($categoryInfo as $vs){
+          $categoryArr[$vs['name']] = $vs['id'];
+        }
+        foreach($categoryInfo2 as $vc){
+          $categoryArr2[$vc['id']] = $vc['name'];
+        }
+        foreach($user as $vu){
+          $userArr[$vu['nickname']] = $vu['id'];  
+        }
+        $arr = [];
+        foreach($result as $k=> $v){
+           $arr[$k]['order_number'] = $v['increment_id'];
+           $arr[$k]['order_platform'] = 2;
+           $arr[$k]['task_status'] = 2;
+           $arr[$k]['prty_id'] = 1;
+           $arr[$k]['customer_email'] = isset($v['email']) ? $v['email'] : ''; 
+           $arr[$k]['task_number'] = 'CO'.date('YmdHis') . rand(100, 999) . rand(100, 999); 
+           $arr[$k]['problem_id'] = isset($categoryArr[$categoryArr2[$v['cate_id']]]) ? $categoryArr[$categoryArr2[$v['cate_id']]] : 0; 
+           $arr[$k]['problem_desc'] = $v['description'].'<br/>'.$v['remark']; 
+           $arr[$k]['create_person'] = $v['created_operator']; 
+           $arr[$k]['create_time'] = $v['created_at']; 
+           $arr[$k]['rep_id'] = isset($userArr[$v['task_operator']]) ? $userArr[$v['task_operator']] : 0; 
+        }
+        $this->model->allowField(true)->saveAll($arr);
+      }
+      //导入你好站问题数据,为空不用执行
+      public function nihaoImport()
+      {
+        $result = Db::table('nihao_service_question')->field('increment_id,email,cate_id,description,created_operator,task_operator,remark,created_at')->limit(0,4000)->select();
+        echo '<pre>';
+        var_dump($result);
+        exit;
+        $categoryInfo = Db::name('sale_after_issue')->field('id,name')->select();
+        $categoryInfo2 = Db::table('nihao_service_question_category')->field('id,name')->select();
+        $user = Db::name('admin')->field('id,nickname')->select();
+        $categoryArr = $categoryArr2 = $userArr = [];
+        foreach($categoryInfo as $vs){
+          $categoryArr[$vs['name']] = $vs['id'];
+        }
+        foreach($categoryInfo2 as $vc){
+          $categoryArr2[$vc['id']] = $vc['name'];
+        }
+        foreach($user as $vu){
+          $userArr[$vu['nickname']] = $vu['id'];  
+        }
+        $arr = [];
+        foreach($result as $k=> $v){
+           $arr[$k]['order_number'] = $v['increment_id'];
+           $arr[$k]['order_platform'] = 3;
+           $arr[$k]['task_status'] = 2;
+           $arr[$k]['prty_id'] = 1;
+           $arr[$k]['customer_email'] = isset($v['email']) ? $v['email'] : ''; 
+           $arr[$k]['task_number'] = 'CO'.date('YmdHis') . rand(100, 999) . rand(100, 999); 
+           $arr[$k]['problem_id'] = isset($categoryArr[$categoryArr2[$v['cate_id']]]) ? $categoryArr[$categoryArr2[$v['cate_id']]] : 0; 
+           $arr[$k]['problem_desc'] = $v['description'].'<br/>'.$v['remark']; 
+           $arr[$k]['create_person'] = $v['created_operator']; 
+           $arr[$k]['create_time'] = $v['created_at']; 
+           $arr[$k]['rep_id'] = isset($userArr[$v['task_operator']]) ? $userArr[$v['task_operator']] : 0; 
+        }
+        $this->model->allowField(true)->saveAll($arr);
+      }
+      //导入zeelool售后数据
+      public function zeeloolSaleImport()
+      {
+        $where['created_at'] = ['LT','2019-09-01 00:00:00'];
+        $result = Db::table('zeelool_service_saled')->where($where)->field('increment_id,email,cate_id,solution_id,description,created_operator,skus,flag,task_operator,refund_amount,refund_mode,
+        gift_coupons,tariff_amount,remark,status,complate_at,is_visable,created_at,updatetime')->limit(4000,4000)->select();
+        $categoryInfo = Db::name('sale_after_issue')->field('id,name')->select();
+        $categoryInfo2 = Db::table('zeelool_service_saled_category')->field('id,name')->select();
+        $user = Db::name('admin')->field('id,nickname')->select();
+        $categoryArr = $categoryArr2 = $userArr = [];
+        foreach($categoryInfo as $vs){
+          $categoryArr[$vs['name']] = $vs['id'];
+        }
+        foreach($categoryInfo2 as $vc){
+          $categoryArr2[$vc['id']] = $vc['name'];
+        }
+        foreach($user as $vu){
+          $userArr[$vu['nickname']] = $vu['id'];  
+        }
+        $arr = [];
+        foreach($result as $k =>$v)
+        {
+            $arr[$k]['order_number'] = $v['increment_id'];
+            $arr[$k]['order_platform'] = 1;
+        if('processing' == $v['status']){
+            $arr[$k]['task_status'] = 1;
+        }elseif('complate' == $v['status']){
+            $arr[$k]['task_status'] = 2;
+        } 
+            $arr[$k]['customer_email'] = isset($v['email']) ? $v['email'] : '';
+            $arr[$k]['task_number'] = 'CO'.date('YmdHis') . rand(100, 999) . rand(100, 999); 
+            $arr[$k]['problem_id'] = isset($categoryArr[$categoryArr2[$v['cate_id']]]) ? $categoryArr[$categoryArr2[$v['cate_id']]] : 0;
+            $arr[$k]['handle_scheme'] = $v['solution_id'];
+            $arr[$k]['problem_desc'] = $v['description'].'<br/>'.$v['remark'];
+            $arr[$k]['create_person'] = $v['created_operator'];
+            $arr[$k]['order_skus'] = isset($v['skus']) ? $v['skus'] : '';
+            $arr[$k]['prty_id'] = $v['flag'];
+            $arr[$k]['rep_id'] = isset($userArr[$v['task_operator']]) ? $userArr[$v['task_operator']] : 0;
+            $arr[$k]['refund_money'] = $v['refund_amount'];
+            $arr[$k]['refund_way'] = $v['refund_mode'];
+            $arr[$k]['give_coupon'] = $v['gift_coupons'];
+            $arr[$k]['tariff'] = $v['tariff_amount'];
+            $arr[$k]['complate_time'] = $v['complate_at'];
+            $arr[$k]['create_time']  = $v['created_at'];
+            $arr[$k]['handle_time']  = $v['updatetime'];
+
+        }
+        $this->model->allowField(true)->saveAll($arr);
+      }
+      //导入voogueme售后数据
+      public function vooguemeSaleImport()
+      {
+        $where['created_at'] = ['LT','2019-09-01 00:00:00'];
+        $result = Db::table('voogueme_service_saled')->where($where)->field('increment_id,email,cate_id,solution_id,description,created_operator,skus,flag,task_operator,refund_amount,refund_mode,
+        gift_coupons,tariff_amount,remark,status,complate_at,is_visable,created_at,updatetime')->limit(0,4000)->select();
+        $categoryInfo = Db::name('sale_after_issue')->field('id,name')->select();
+        $categoryInfo2 = Db::table('voogueme_service_saled_category')->field('id,name')->select();
+        $user = Db::name('admin')->field('id,nickname')->select();
+        $categoryArr = $categoryArr2 = $userArr = [];
+        foreach($categoryInfo as $vs){
+          $categoryArr[$vs['name']] = $vs['id'];
+        }
+        foreach($categoryInfo2 as $vc){
+          $categoryArr2[$vc['id']] = $vc['name'];
+        }
+        foreach($user as $vu){
+          $userArr[$vu['nickname']] = $vu['id'];  
+        }
+        $arr = [];
+        foreach($result as $k =>$v)
+        {
+            $arr[$k]['order_number'] = $v['increment_id'];
+            $arr[$k]['order_platform'] = 2;
+        if('processing' == $v['status']){
+            $arr[$k]['task_status'] = 1;
+        }elseif('complate' == $v['status']){
+            $arr[$k]['task_status'] = 2;
+        } 
+            $arr[$k]['customer_email'] = isset($v['email']) ? $v['email'] : '';
+            $arr[$k]['task_number'] = 'CO'.date('YmdHis') . rand(100, 999) . rand(100, 999); 
+            $arr[$k]['problem_id'] = isset($categoryArr[$categoryArr2[$v['cate_id']]]) ? $categoryArr[$categoryArr2[$v['cate_id']]] : 0;
+            $arr[$k]['handle_scheme'] = $v['solution_id'];
+            $arr[$k]['problem_desc'] = $v['description'].'<br/>'.$v['remark'];
+            $arr[$k]['create_person'] = $v['created_operator'];
+            $arr[$k]['order_skus'] = isset($v['skus']) ? $v['skus'] : '';
+            $arr[$k]['prty_id'] = $v['flag'];
+            $arr[$k]['rep_id'] = isset($userArr[$v['task_operator']]) ? $userArr[$v['task_operator']] : 0;
+            $arr[$k]['refund_money'] = $v['refund_amount'];
+            $arr[$k]['refund_way'] = $v['refund_mode'];
+            $arr[$k]['give_coupon'] = $v['gift_coupons'];
+            $arr[$k]['tariff'] = $v['tariff_amount'];
+            $arr[$k]['complate_time'] = $v['complate_at'];
+            $arr[$k]['create_time']  = $v['created_at'];
+            $arr[$k]['handle_time']  = $v['updatetime'];
+
+        }
+        $this->model->allowField(true)->saveAll($arr);
+      }
+        //导入nihao售后数据
+        public function nihaoSaleImport()
+        {
+            $where['created_at'] = ['LT','2019-09-01 00:00:00'];
+            $result = Db::table('nihao_service_saled')->where($where)->field('increment_id,email,cate_id,solution_id,description,created_operator,skus,flag,task_operator,refund_amount,refund_mode,
+            gift_coupons,tariff_amount,remark,status,complate_at,is_visable,created_at,updatetime')->limit(0,4000)->select();
+            $categoryInfo = Db::name('sale_after_issue')->field('id,name')->select();
+            $categoryInfo2 = Db::table('nihao_service_saled_category')->field('id,name')->select();
+            $user = Db::name('admin')->field('id,nickname')->select();
+            $categoryArr = $categoryArr2 = $userArr = [];
+            foreach($categoryInfo as $vs){
+            $categoryArr[$vs['name']] = $vs['id'];
+            }
+            foreach($categoryInfo2 as $vc){
+            $categoryArr2[$vc['id']] = $vc['name'];
+            }
+            foreach($user as $vu){
+            $userArr[$vu['nickname']] = $vu['id'];  
+            }
+            $arr = [];
+            foreach($result as $k =>$v)
+            {
+                $arr[$k]['order_number'] = $v['increment_id'];
+                $arr[$k]['order_platform'] = 3;
+            if('processing' == $v['status']){
+                $arr[$k]['task_status'] = 1;
+            }elseif('complate' == $v['status']){
+                $arr[$k]['task_status'] = 2;
+            } 
+                $arr[$k]['customer_email'] = isset($v['email']) ? $v['email'] : '';
+                $arr[$k]['task_number'] = 'CO'.date('YmdHis') . rand(100, 999) . rand(100, 999); 
+                $arr[$k]['problem_id'] = isset($categoryArr[$categoryArr2[$v['cate_id']]]) ? $categoryArr[$categoryArr2[$v['cate_id']]] : 0;
+                $arr[$k]['handle_scheme'] = $v['solution_id'];
+                $arr[$k]['problem_desc'] = $v['description'].'<br/>'.$v['remark'];
+                $arr[$k]['create_person'] = $v['created_operator'];
+                $arr[$k]['order_skus'] = isset($v['skus']) ? $v['skus'] : '';
+                $arr[$k]['prty_id'] = $v['flag'];
+                $arr[$k]['rep_id'] = isset($userArr[$v['task_operator']]) ? $userArr[$v['task_operator']] : 0;
+                $arr[$k]['refund_money'] = $v['refund_amount'];
+                $arr[$k]['refund_way'] = $v['refund_mode'];
+                $arr[$k]['give_coupon'] = $v['gift_coupons'];
+                $arr[$k]['tariff'] = $v['tariff_amount'];
+                $arr[$k]['complate_time'] = $v['complate_at'];
+                $arr[$k]['create_time']  = $v['created_at'];
+                $arr[$k]['handle_time']  = $v['updatetime'];
+    
+            }
+            $this->model->allowField(true)->saveAll($arr);
+        }
+
 }

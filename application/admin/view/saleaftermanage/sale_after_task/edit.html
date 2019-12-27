@@ -110,14 +110,10 @@
                     {/foreach}
                 </select>
             </div>
-        <!-- <label class="control-label col-xs-12 col-sm-2">{:__('Handle_scheme')}:</label>
+        <label class="control-label col-xs-12 col-sm-2">{:__('Order_skus')}:</label>
         <div class="col-xs-12 col-sm-3">
-                <select  id="c-handle_scheme" data-rule="required" class="form-control selectpicker" name="row[handle_scheme]">
-                    {foreach name="SolveScheme" item="vo"}
-                    <option value="{$key}" {in name="key" value="$row.handle_scheme"}selected{/in}>{$vo}</option>
-                    {/foreach}
-                </select>
-        </div> -->
+            <input id="c-order_skus" data-rule="required" class="form-control" name="row[order_skus]" type="text" value="{$row.order_skus}">
+        </div>
     </div>
     <!-- <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">{:__('Refund_money')}:</label>

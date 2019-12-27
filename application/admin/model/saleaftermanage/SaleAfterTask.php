@@ -71,7 +71,9 @@ class SaleAfterTask extends Model
           4=>"加钱补发",
           5=>"退款+补发",
           6=>"折扣买新",
-          7=>"退货"
+          7=>"发放积分",
+          8=>"安抚",
+          9=>"长时间未回复"
       ];
     }
     /***
@@ -213,7 +215,7 @@ class SaleAfterTask extends Model
     public function getTaskDetail($id)
     {
         $result = $this->alias('t')->join(' sale_after_issue s','t.problem_id = s.id')->where('t.id','=',$id)->field('t.id,task_status,task_number,order_platform,
-        order_number,order_status,order_source,dept_id,rep_id,prty_id,problem_id,problem_desc,upload_photos,create_person,customer_name,handle_scheme,
+        order_number,order_status,order_skus,order_source,dept_id,rep_id,prty_id,problem_id,problem_desc,upload_photos,create_person,customer_name,handle_scheme,
         customer_email,refund_money,give_coupon,tariff,make_up_price_order,t.create_time,s.name')->find();
         if(!$result){
             return false;

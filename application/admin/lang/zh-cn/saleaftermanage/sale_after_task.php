@@ -36,5 +36,7 @@ return [
     'Handle_complete'=> '处理完成',
     'Please select the problem category' =>'请选择问题分类',
     'This task has been processed and does not need to be processed again' =>'该任务已经处理完成，无需再次处理',
-    'Select the updated record does not meet the requirements, please re-select'=>'选择更新的记录不符合要求，请您重新选择'
+    'Select the updated record does not meet the requirements, please re-select'=>'选择更新的记录不符合要求，请您重新选择',
+    'Order_skus'     => '订单SKU',
+    'Refund_way'     => '退款方式'
 ];

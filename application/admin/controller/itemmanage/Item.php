@@ -5,6 +5,9 @@ namespace app\admin\controller\itemmanage;
 use app\common\controller\Backend;
 use think\Request;
 use think\Db;
+use think\Exception;
+use think\exception\PDOException;
+use think\exception\ValidateException;
 use app\admin\model\itemmanage\ItemBrand;
 use app\admin\model\itemmanage\ItemPlatformSku;
 use app\admin\model\itemmanage\attribute\ItemAttribute;
@@ -1293,7 +1296,7 @@ class Item extends Backend
             $data['check_time']  = date("Y-m-d H:i:s", time());
             $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
             if ($res != false) {
-                $row = $this->model->where('id', 'in', $ids)->field('sku,name')->select();
+                $row = $this->model->where('id', 'in', $ids)->field('sku,name,frame_is_rimless')->select();
                 if ($row) {
                     foreach ($row as $val) {
                         (new ItemPlatformSku())->addPlatformSku($val);
@@ -1859,7 +1862,7 @@ class Item extends Backend
      */
     public function changeSkuToPlatformSku()
     {
-        $sql = "select name,sku from fa_item where is_update_platform = 0 limit 100 ";
+        $sql = "select name,sku,frame_is_rimless from fa_item where is_update_platform = 0 limit 100 ";
         $result = Db::connect('database.db_stock')->query($sql);
         if (!$result) {
             return false;
