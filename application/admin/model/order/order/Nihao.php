@@ -106,14 +106,13 @@ class Nihao extends Model
         $totalMap['entity_id'] = ['in',$totalId];
         $totalMap['status']    = ['in',['processing','complete','creditcard_proccessing','free_processing']];
         $payInfo = $this->where($totalMap)->field('entity_id,base_total_paid,base_total_due,postage_money')->select();
-        if(!$payInfo){
-            return $arr;
+        if($payInfo){
+            foreach($payInfo as $v){
+                $arr['totalPayInfo'] +=round($v['base_total_paid']+$v['base_total_due'],2);
+                $arr['totalPostageMoney'] += round($v['postage_money'],2);
+            }
         }
-        $payInfo = collection($payInfo)->toArray();
-        foreach($payInfo as $v){
-            $arr['totalPayInfo'] +=round($v['base_total_paid']+$v['base_total_due'],2);
-            $arr['totalPostageMoney'] += round($v['postage_money'],2);
-        }
+
         //求出镜架成本start
         //1.求出所有的订单号
         $frameTotalMap['entity_id'] = ['in',$totalId];
