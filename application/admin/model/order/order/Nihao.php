@@ -233,17 +233,17 @@ class Nihao extends Model
         //求出加工费
         $arr['totalProcessCost'] = 0;
         $totalprocessMap['order_id'] = ['in',$totalId];
-        $processResult = Db::connect($this->connection)->table('sales_flat_order_item_prescription')->where($totalprocessMap)->field('order_id,sku,prescription_type,index_type,frame_type_is_rimless,qty_ordered')->select();
+        $processResult = Db::connect($this->connection)->table('sales_flat_order_item_prescription')->where($totalprocessMap)->field('order_id,sku,prescription_type,third_name,frame_type_is_rimless,qty_ordered')->select();
         if($processResult){
             foreach($processResult as $pv){
                 //1.处方类型为渐进镜,或者镜架是无框的都是8 元
                 if(('Progressive' == $pv['prescription_type']) || ('Bifocal' == $pv['prescription_type']) ||((2 ==  $pv['frame_type_is_rimless']))){
                     $process_price = 8;
                 //2.处方类型为单光并且折射率比较高的话是8元    
-                }elseif((false !== strpos($pv['index_type'],'1.67')) || (false !== strpos($pv['index_type'],'1.71') || (false !== strpos($pv['index_type'],'1.74')))){
+                }elseif((false !== strpos($pv['third_name'],'1.67')) || (false !== strpos($pv['third_name'],'1.71') || (false !== strpos($pv['third_name'],'1.74')))){
                     $process_price = 8;
                 //其他的不是Plastic Lens的类型 5元   
-                }elseif((!empty($pv['index_type']) && ('Plastic Lens' !=$pv['index_type']))){
+                }elseif((!empty($pv['third_name']) && ('Plastic Lens' !=$pv['third_name']))){
                     $process_price = 5;
                 }else{
                     $process_price = 0;
