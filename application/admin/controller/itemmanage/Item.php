@@ -1860,7 +1860,7 @@ class Item extends Backend
     /***
      *商品sku转化到平台sku库里面
      */
-    public function changeSkuToPlatformSku2()
+    public function changeSkuToPlatformSku()
     {
         $sql = "select name,sku,frame_is_rimless from fa_item where is_update_platform = 0 limit 100 ";
         $result = Db::connect('database.db_stock')->query($sql);
@@ -1875,15 +1875,6 @@ class Item extends Backend
                 }
             }
         }
-    }
-    public function changeSkuToPlatformSku(){
-        $result = Db::connect('database.db_stock')->table('fa_item')->order('id desc')->limit(61)->select();
-        $arr = [];
-        foreach($result as $val){
-            $arr[] = $val['sku'];
-        }
-        $info = Db::connect('database.db_stock')->table('fa_item_platform_sku')->where(['sku','in',$arr])->field('sku,platform_sku')->select();
-        dump($info);
     }
     /**
      * 查找对比fa_item中sku是否全部更新到fa_item_platform_sku当中
