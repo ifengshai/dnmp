@@ -276,7 +276,7 @@ class Nihao extends Backend
                         //总库存
                         $item_map['sku'] = $trueSku;
                         $item_map['is_del'] = 1;
-                        if ($v['sku']) {
+                        if ($trueSku) {
                             //增加配货占用
                             $res_three = $item->where($item_map)->setInc('distribution_occupy_stock', $v['qty_ordered']);
                         }
@@ -319,7 +319,7 @@ class Nihao extends Backend
                         //总库存
                         $item_map['sku'] = $trueSku;
                         $item_map['is_del'] = 1;
-                        if ($v['sku']) {
+                        if ($trueSku) {
                             //扣减总库存 扣减占用库存
                             $res_one = $item->where($item_map)->setDec('stock', $v['qty_ordered']);
                             //占用库存
