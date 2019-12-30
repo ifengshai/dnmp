@@ -879,8 +879,8 @@ class SaleAfterTask extends Backend
         $where['created_at'] = ['egt','2019-09-01 00:00:00'];
         $result = Db::table('zeelool_service_saled')->where($where)->field('increment_id,email,cate_id,solution_id,description,created_operator,skus,flag,task_operator,refund_amount,refund_mode,
         gift_coupons,tariff_amount,remark,status,complate_at,is_visable,created_at,updatetime')->select();
-        var_dump($result);
-        exit;
+        // var_dump($result);
+        // exit;
         $categoryInfo = Db::name('sale_after_issue')->field('id,name')->select();
         $categoryInfo2 = Db::table('zeelool_service_saled_category')->field('id,name')->select();
         $user = Db::name('admin')->field('id,nickname')->select();
@@ -930,8 +930,8 @@ class SaleAfterTask extends Backend
         $where['created_at'] = ['egt','2019-09-01 00:00:00'];
         $result = Db::table('voogueme_service_saled')->where($where)->field('increment_id,email,cate_id,solution_id,description,created_operator,skus,flag,task_operator,refund_amount,refund_mode,
         gift_coupons,tariff_amount,remark,status,complate_at,is_visable,created_at,updatetime')->limit(0,4000)->select();
-        var_dump($result);
-        exit;
+        // var_dump($result);
+        // exit;
         $categoryInfo = Db::name('sale_after_issue')->field('id,name')->select();
         $categoryInfo2 = Db::table('voogueme_service_saled_category')->field('id,name')->select();
         $user = Db::name('admin')->field('id,nickname')->select();
@@ -981,8 +981,8 @@ class SaleAfterTask extends Backend
             $where['created_at'] = ['egt','2019-09-01 00:00:00'];
             $result = Db::table('nihao_service_saled')->where($where)->field('increment_id,email,cate_id,solution_id,description,created_operator,skus,flag,task_operator,refund_amount,refund_mode,
             gift_coupons,tariff_amount,remark,status,complate_at,is_visable,created_at,updatetime')->limit(0,4000)->select();
-            var_dump($result);
-            exit;
+            // var_dump($result);
+            // exit;
             $categoryInfo = Db::name('sale_after_issue')->field('id,name')->select();
             $categoryInfo2 = Db::table('nihao_service_saled_category')->field('id,name')->select();
             $user = Db::name('admin')->field('id,nickname')->select();
