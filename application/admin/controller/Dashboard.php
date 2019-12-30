@@ -708,7 +708,7 @@ class Dashboard extends Backend
                 foreach($val['item'] as $key => $va) {
                     $info[$key]['check_id'] = $id;
                     $info[$key]['sku'] = $va['input_sku'];
-                    $info[$key]['supplier_sku'] = $va['supplier_sku'];
+                    $info[$key]['supplier_sku'] = $va['supplier_sku'] ?? '';
                     $info[$key]['purchase_id'] = $va['purchase_id'];
                     $info[$key]['purchase_num'] = $va['purchase_qty'];
                     $info[$key]['arrivals_num'] = $va['arrival_qty'];
@@ -744,6 +744,36 @@ class Dashboard extends Backend
             
         }
 
+        echo 'ok';
+    }
+
+
+    //出库记录
+    public function outstock()
+    {
+        set_time_limit(0);
+        //查询采购单数据
+        $res = Db::table('zeelool_hander_output_stock')->cache(3600)->select();
+        foreach($res as $k => $v) {
+            $list['out_stock_number'] = 'OUT' . date('YmdHis') . rand(100, 999) . rand(100, 999);
+            $list['type_id'] = $v['cate_id'];
+            $list['order_number'] = $v['increment_id'];
+            $list['status'] = 2;
+            $list['remark'] = $v['remark'];
+            $list['createtime'] = $v['created_at'];
+            $list['create_person'] = $v['created_operator'];
+            $outid = Db::table('fa_out_stock')->insertGetId($list);
+            $info = Db::table('zeelool_hander_output_stock_item')->where('output_stock_id',$v['id'])->select();
+            $params = [];
+            foreach($info as $key => $val) {
+                $params[$key]['sku'] = $val['output_sku'];
+                $params[$key]['out_stock_num'] = $val['output_sku_qty'];
+                $params[$key]['out_stock_id'] = $outid;
+            }
+            if ($params) {
+                Db::table('fa_out_stock_item')->insertAll($params);
+            }
+        }
         echo 'ok';
     }
 }
