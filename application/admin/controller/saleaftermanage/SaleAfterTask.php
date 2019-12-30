@@ -878,9 +878,7 @@ class SaleAfterTask extends Backend
       {
         $where['created_at'] = ['egt','2019-09-01 00:00:00'];
         $result = Db::table('zeelool_service_saled')->where($where)->field('increment_id,email,cate_id,solution_id,description,created_operator,skus,flag,task_operator,refund_amount,refund_mode,
-        gift_coupons,tariff_amount,remark,status,complate_at,is_visable,created_at,updatetime')->limit(4000,4000)->select();
-        var_dump($result);
-        exit;
+        gift_coupons,tariff_amount,remark,status,complate_at,is_visable,created_at,updatetime')->select();
         $categoryInfo = Db::name('sale_after_issue')->field('id,name')->select();
         $categoryInfo2 = Db::table('zeelool_service_saled_category')->field('id,name')->select();
         $user = Db::name('admin')->field('id,nickname')->select();
@@ -917,9 +915,9 @@ class SaleAfterTask extends Backend
             $arr[$k]['refund_way'] = $v['refund_mode'];
             $arr[$k]['give_coupon'] = $v['gift_coupons'];
             $arr[$k]['tariff'] = $v['tariff_amount'];
-            $arr[$k]['complate_time'] = $v['complate_at'];
+            $arr[$k]['complate_time'] = isset($v['complate_at']) ? $v['complate_at'] : '0000-00-00 00:00:00';;
             $arr[$k]['create_time']  = $v['created_at'];
-            $arr[$k]['handle_time']  = $v['updatetime'];
+            $arr[$k]['handle_time']  = isset($v['updatetime']) ? $v['updatetime'] : '0000-00-00 00:00:00';
 
         }
         $this->model->allowField(true)->saveAll($arr);
@@ -930,8 +928,6 @@ class SaleAfterTask extends Backend
         $where['created_at'] = ['egt','2019-09-01 00:00:00'];
         $result = Db::table('voogueme_service_saled')->where($where)->field('increment_id,email,cate_id,solution_id,description,created_operator,skus,flag,task_operator,refund_amount,refund_mode,
         gift_coupons,tariff_amount,remark,status,complate_at,is_visable,created_at,updatetime')->limit(0,4000)->select();
-        var_dump($result);
-        exit;
         $categoryInfo = Db::name('sale_after_issue')->field('id,name')->select();
         $categoryInfo2 = Db::table('voogueme_service_saled_category')->field('id,name')->select();
         $user = Db::name('admin')->field('id,nickname')->select();
@@ -968,9 +964,9 @@ class SaleAfterTask extends Backend
             $arr[$k]['refund_way'] = $v['refund_mode'];
             $arr[$k]['give_coupon'] = $v['gift_coupons'];
             $arr[$k]['tariff'] = $v['tariff_amount'];
-            $arr[$k]['complate_time'] = $v['complate_at'];
+            $arr[$k]['complate_time'] = isset($v['complate_at']) ? $v['complate_at'] : '0000-00-00 00:00:00';;
             $arr[$k]['create_time']  = $v['created_at'];
-            $arr[$k]['handle_time']  = $v['updatetime'];
+            $arr[$k]['handle_time']  = isset($v['updatetime']) ? $v['updatetime'] : '0000-00-00 00:00:00';;
 
         }
         $this->model->allowField(true)->saveAll($arr);
@@ -981,8 +977,6 @@ class SaleAfterTask extends Backend
             $where['created_at'] = ['egt','2019-09-01 00:00:00'];
             $result = Db::table('nihao_service_saled')->where($where)->field('increment_id,email,cate_id,solution_id,description,created_operator,skus,flag,task_operator,refund_amount,refund_mode,
             gift_coupons,tariff_amount,remark,status,complate_at,is_visable,created_at,updatetime')->limit(0,4000)->select();
-            var_dump($result);
-            exit;
             $categoryInfo = Db::name('sale_after_issue')->field('id,name')->select();
             $categoryInfo2 = Db::table('nihao_service_saled_category')->field('id,name')->select();
             $user = Db::name('admin')->field('id,nickname')->select();
@@ -1019,9 +1013,9 @@ class SaleAfterTask extends Backend
                 $arr[$k]['refund_way'] = $v['refund_mode'];
                 $arr[$k]['give_coupon'] = $v['gift_coupons'];
                 $arr[$k]['tariff'] = $v['tariff_amount'];
-                $arr[$k]['complate_time'] = $v['complate_at'];
+                $arr[$k]['complate_time'] = isset($v['complate_at']) ? $v['complate_at'] : '0000-00-00 00:00:00';
                 $arr[$k]['create_time']  = $v['created_at'];
-                $arr[$k]['handle_time']  = $v['updatetime'];
+                $arr[$k]['handle_time']  = isset($v['updatetime']) ? $v['updatetime'] : '0000-00-00 00:00:00';
     
             }
             $this->model->allowField(true)->saveAll($arr);
