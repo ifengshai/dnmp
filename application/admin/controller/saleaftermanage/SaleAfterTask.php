@@ -876,9 +876,9 @@ class SaleAfterTask extends Backend
       //导入zeelool售后数据
       public function zeeloolSaleImport()
       {
-        $where['created_at'] = ['LT','2019-09-01 00:00:00'];
+        $where['created_at'] = ['egt','2019-09-01 00:00:00'];
         $result = Db::table('zeelool_service_saled')->where($where)->field('increment_id,email,cate_id,solution_id,description,created_operator,skus,flag,task_operator,refund_amount,refund_mode,
-        gift_coupons,tariff_amount,remark,status,complate_at,is_visable,created_at,updatetime')->limit(4000,4000)->select();
+        gift_coupons,tariff_amount,remark,status,complate_at,is_visable,created_at,updatetime')->select();
         var_dump($result);
         exit;
         $categoryInfo = Db::name('sale_after_issue')->field('id,name')->select();
@@ -927,7 +927,7 @@ class SaleAfterTask extends Backend
       //导入voogueme售后数据
       public function vooguemeSaleImport()
       {
-        $where['created_at'] = ['LT','2019-09-01 00:00:00'];
+        $where['created_at'] = ['egt','2019-09-01 00:00:00'];
         $result = Db::table('voogueme_service_saled')->where($where)->field('increment_id,email,cate_id,solution_id,description,created_operator,skus,flag,task_operator,refund_amount,refund_mode,
         gift_coupons,tariff_amount,remark,status,complate_at,is_visable,created_at,updatetime')->limit(0,4000)->select();
         var_dump($result);
@@ -978,7 +978,7 @@ class SaleAfterTask extends Backend
         //导入nihao售后数据
         public function nihaoSaleImport()
         {
-            $where['created_at'] = ['LT','2019-09-01 00:00:00'];
+            $where['created_at'] = ['egt','2019-09-01 00:00:00'];
             $result = Db::table('nihao_service_saled')->where($where)->field('increment_id,email,cate_id,solution_id,description,created_operator,skus,flag,task_operator,refund_amount,refund_mode,
             gift_coupons,tariff_amount,remark,status,complate_at,is_visable,created_at,updatetime')->limit(0,4000)->select();
             var_dump($result);
