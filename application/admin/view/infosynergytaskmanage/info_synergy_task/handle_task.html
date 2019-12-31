@@ -156,13 +156,17 @@
     </div>
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">{:__('Prty_id')}:</label>
-        <div class="col-xs-12 col-sm-8">
+        <div class="col-xs-12 col-sm-3">
             <select  id="c-prty_id" data-rule="required" class="form-control selectpicker" name="row[prty_id]" disabled="disabled">
                 <option value="0" selected>请选择</option>
                 {foreach name="prtyIdList" item="vo"}
                 <option value="{$key}" {eq name="key" value="$row.prty_id"}selected{/eq}>{$vo}</option>
                 {/foreach}
             </select>
+        </div>
+        <label class="control-label col-xs-12 col-sm-2">退款方式:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-refund_money"  class="form-control" name="row[refund_way]" type="number" value="{$row.refund_way|htmlentities}">
         </div>
     </div>
     <div class="form-group">

@@ -537,12 +537,21 @@ class InfoSynergyTask extends Backend
         }
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
-            dump($params);
-            exit;
             $tid    = $params['id'];
             unset($params['id']);
             if ($params) {
                 $params = $this->preExcludeFields($params);
+                 //承接部门和承接人写入数据库
+                 if (count($params['dept_id']) > 1) {
+                    $params['dept_id'] = implode('+', $params['dept_id']);
+                } else {
+                    $params['dept_id'] = $params['dept_id'][0];
+                }
+                if (count($params['rep_id']) > 1) {
+                    $params['rep_id']  = implode('+', $params['rep_id']);
+                } else {
+                    $params['rep_id'] = $params['rep_id'][0];
+                }               
                 $result = false;
                 Db::startTrans();
                 try {
