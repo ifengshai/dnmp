@@ -462,7 +462,8 @@ class NewProduct extends Backend
                 $this->error('对应分类存在下级分类,请从新选择');
             }
             if ($result == 1) {
-                $row = $this->model->getItemInfo($sku);
+                $item = new \app\admin\model\itemmanage\Item;
+                $row = $item->getItemInfo($sku);
                 if (!$row) {
                     $this->error(__('此SKU不存在！！'));
                 }
