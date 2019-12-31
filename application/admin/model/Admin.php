@@ -45,7 +45,8 @@ class Admin extends Model
             return false;
         }
         $groupStaff = [];
-        foreach($result as $key=>$val){
+        foreach($result as $val){
+            $groupStaff[0] = '请选择...';
             $groupStaff[$val['id']] = $val['nickname'];
         }
         return $result ? $groupStaff : false;
@@ -58,7 +59,8 @@ class Admin extends Model
             return false;
         }
         $groupStaff = [];
-        foreach($result as $key=>$val){
+        foreach($result as $val){
+            $groupStaff[0] = '请选择...';
             $groupStaff[$val['id']] = $val['nickname'];
         }
         return $result ? $groupStaff : false;
