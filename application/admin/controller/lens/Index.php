@@ -24,7 +24,7 @@ class Index extends Backend
      * 无需鉴权的方法,但需要登录
      * @var array
      */
-    protected $noNeedRight = ['add', 'edit', 'lens_edit', 'import', 'import_xls_order'];
+    protected $noNeedRight = ['add','edit','lens_edit','import','import_xls_order'];
 
 
     /**
@@ -378,7 +378,7 @@ class Index extends Backend
             $data = [];
             for ($currentRow = 2; $currentRow <= $allRow; $currentRow++) {
                 for ($currentColumn = 1; $currentColumn <= $maxColumnNumber; $currentColumn++) {
-                    $val = $currentSheet->getCellByColumnAndRow($currentColumn, $currentRow)->getValue();
+                    $val = $currentSheet->getCellByColumnAndRow($currentColumn, $currentRow)->getCalculatedValue();
                     $data[$currentRow - 2][$currentColumn - 1] = is_null($val) ? '' : $val;
                 }
             }
@@ -400,12 +400,18 @@ class Index extends Backend
             }
 
             $cyl = $v[3] * 1;
+            
             if ($cyl > 0 || $cyl < -4) {
                 $this->error('数据异常！！CYL不能大于0并且小于-4！！');
+            } 
+            if ($cyl < 0) {
+                $cyl = number_format($cyl, 2);
+            } else {
+                $cyl = '+' . number_format($cyl, 2);
             }
 
             $map['sph'] = $sph;
-            $map['cyl'] = $v[3];
+            $map['cyl'] = $cyl;
             $res = $this->model->where($map)->find();
 
             if ($res) {
@@ -416,13 +422,14 @@ class Index extends Backend
                 $params[$k]['refractive_index'] = trim($v[0]);
                 $params[$k]['lens_type'] = trim($v[1]);
                 $params[$k]['sph'] = $sph;
-                $params[$k]['cyl'] = $v[3];
+                $params[$k]['cyl'] = $cyl;
                 $params[$k]['stock_num'] = $v[4];
                 $params[$k]['price'] = $v[5];
                 $params[$k]['createtime'] = date('Y-m-d H:i:s', time());
                 $params[$k]['create_person'] = session('admin.nickname');
             }
         }
+        
         $result = $this->model->allowField(true)->saveAll($params);
         if ($result) {
             $this->success('导入成功！！');
