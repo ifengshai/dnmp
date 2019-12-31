@@ -668,9 +668,6 @@ order by sfoi.order_id desc;";
             $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 2 + 2), $value['od_axis']);
             $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 2 + 3), $value['os_axis']);
 
-            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 2 + 2), $value['od_axis']);
-            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 2 + 3), $value['os_axis']);
-
             $spreadsheet->getActiveSheet()->setCellValue("Q" . ($key * 2 + 2), $value['od_pv']);
             $spreadsheet->getActiveSheet()->setCellValue("Q" . ($key * 2 + 3), $value['os_pv']);
 
