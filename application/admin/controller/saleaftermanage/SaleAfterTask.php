@@ -155,6 +155,8 @@ class SaleAfterTask extends Backend
                     $params['create_person'] = session('admin.nickname'); //创建人
                     $params['create_time']   = date("Y-m-d H:i:s",time());
                     //$result = $this->model->allowField(true)->save($params);
+                    $data = $params;
+                    unset($data['task_remark']);
                     $resultId = Db::name('sale_after_task')->insertGetId($params);
                     Db::commit();
                 } catch (ValidateException $e) {
