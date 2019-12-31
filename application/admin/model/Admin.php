@@ -39,7 +39,9 @@ class Admin extends Model
     public function getStaffList($id)
     {
         $id = 35;
-        $result = $this->alias('a')->join(' auth_group_access g','a.id = g.uid')->where('a.status','=','normal')->where('g.group_id','in',$id)->field('a.id,a.nickname
+        // $result = $this->alias('a')->join(' auth_group_access g','a.id = g.uid')->where('a.status','=','normal')->where('g.group_id','in',$id)->field('a.id,a.nickname
+        // ')->select();
+        $result = $this->alias('a')->join(' auth_group_access g','a.id = g.uid')->where('a.status','=','normal')->field('a.id,a.nickname
         ')->select();
         if(!$result){
             return false;
