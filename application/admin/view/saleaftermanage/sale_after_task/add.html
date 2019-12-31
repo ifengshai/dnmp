@@ -76,6 +76,52 @@
         <div class="col-xs-12 col-sm-3">
             <input id="c-order_skus" data-rule="required" class="form-control" name="row[order_skus]"  type="text" value="" >
         </div>
+        <label class="control-label col-xs-12 col-sm-2">{:__('Handle_scheme')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <select  id="c-handle_scheme" data-rule="required" class="form-control selectpicker" name="row[handle_scheme]">
+                {foreach name="SolveScheme" item="vo"}
+                <option value="{$key}" {in name="key" value="$row.handle_scheme"}selected{/in}>{$vo}</option>
+                {/foreach}
+            </select>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Refund_money')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-refund_money"  data-source="refund_money/index" class="form-control" name="row[refund_money]" type="text" value="{$row.refund_money|htmlentities}">
+        </div>
+        <label class="control-label col-xs-12 col-sm-2">{:__('Give_coupon')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-give_coupon"  data-source="give_coupon/index" class="form-control" name="row[give_coupon]" type="text" value="{$row.give_coupon|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Tariff')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-tariff"  class="form-control" name="row[tariff]" type="number" value="{$row.tariff|htmlentities}">
+        </div>
+        <label class="control-label col-xs-12 col-sm-2">{:__('Make_up_price_order')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-make_up_price_order"  data-source="problem/index" class="form-control" name="row[make_up_price_order]" type="text" value="{$row.make_up_price_order|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Refund_way')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <select  id="c-refund_way" data-rule="required" class="form-control selectpicker" type="text" name="row[refund_way]">
+                <option value="0">请选择..</option>
+                {if $row.refund_way eq 'paypal'}
+                <option value="paypal" selected>paypal</option>
+                {else/}
+                <option value="paypal">paypal</option>
+                {/if}
+                {if $row.refund_way eq 'credit_card'}
+                <option value="credit_card" selected>credit_card</option>
+                {else/}
+                <option value="credit_card">credit_card</option>
+                {/if}
+            </select>
+        </div>
     </div>
     <div class="form-group">
         <div class="form-group">
@@ -120,6 +166,12 @@
                 <span class="msg-box n-right" for="c-upload_photos"></span>
             </div>
             <ul class="row list-inline plupload-preview" id="p-upload_photos"></ul>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Add_remark')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <textarea id="c-task_remark" class="form-control editor " rows="5" name="row[task_remark]" cols="50"></textarea>
         </div>
     </div>
     <div class="form-group">
