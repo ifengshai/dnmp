@@ -537,6 +537,8 @@ class InfoSynergyTask extends Backend
         }
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
+            dump($params);
+            exit;
             $tid    = $params['id'];
             unset($params['id']);
             if ($params) {
