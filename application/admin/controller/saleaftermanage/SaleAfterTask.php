@@ -154,7 +154,8 @@ class SaleAfterTask extends Backend
                     $params['task_number'] = 'CO'.date('YmdHis') . rand(100, 999) . rand(100, 999);
                     $params['create_person'] = session('admin.nickname'); //创建人
                     $params['create_time']   = date("Y-m-d H:i:s",time());
-                    $result = $this->model->allowField(true)->save($params);
+                    //$result = $this->model->allowField(true)->save($params);
+                    $resultId = Db::name('sale_after_task')->insertGetId($params);
                     Db::commit();
                 } catch (ValidateException $e) {
                     Db::rollback();
@@ -166,7 +167,15 @@ class SaleAfterTask extends Backend
                     Db::rollback();
                     $this->error($e->getMessage());
                 }
-                if ($result !== false) {
+                if ($resultId !== false) {
+                    if(!empty($params['task_remark'])){
+                        $data = [];
+                        $data['tid'] = $resultId;
+                        $data['remark_record'] = strip_tags($params['task_remark']);
+                        $data['create_person'] = session('admin.nickname');
+                        $data['create_time']   = date("Y-m-d H:i:s",time());
+                        (new SaleAfterTaskRemark())->allowField(true)->save($data);
+                    }
                     $this->success('','saleaftermanage/sale_after_task/index');
                 } else {
                     $this->error(__('No rows were inserted'));
