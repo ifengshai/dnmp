@@ -36,13 +36,24 @@ class Admin extends Model
      * @param $id
      * @return array|bool
      */
-    public function getStaffList($id)
+    public function getStaffListss($id)
     {
         $id = [31,32,33,34];
         $result = $this->alias('a')->join(' auth_group_access g','a.id = g.uid')->where('a.status','=','normal')->where('g.group_id','in',$id)->field('a.id,a.nickname
         ')->select();
-        // $result = $this->alias('a')->join(' auth_group_access g','a.id = g.uid')->where('a.status','=','normal')->field('a.id,a.nickname
-        // ')->select();
+        if(!$result){
+            return false;
+        }
+        $groupStaff = [];
+        foreach($result as $key=>$val){
+            $groupStaff[$val['id']] = $val['nickname'];
+        }
+        return $result ? $groupStaff : false;
+    }
+    public function getStaffList($id)
+    {
+        $result = $this->alias('a')->join(' auth_group_access g','a.id = g.uid')->where('a.status','=','normal')->where('g.group_id','in',$id)->field('a.id,a.nickname
+        ')->select();
         if(!$result){
             return false;
         }

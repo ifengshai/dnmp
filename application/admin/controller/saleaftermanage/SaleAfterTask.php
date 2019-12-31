@@ -34,15 +34,15 @@ class SaleAfterTask extends Backend
     protected $model = null;
     protected $relationSearch = true;
     protected $groupdata = [];
-    protected $noNeedLogin = [
-        'updateRepId',
-        'updateMoreRepId',
-        'updateCategoryVoogueme',
-        'updateCategoryNihao',
-        'updateCategoryProblemIdNihao',
-        'contrastCategory',
-        'zeeloolSaleImport'
-    ];
+    // protected $noNeedLogin = [
+    //     'updateRepId',
+    //     'updateMoreRepId',
+    //     'updateCategoryVoogueme',
+    //     'updateCategoryNihao',
+    //     'updateCategoryProblemIdNihao',
+    //     'contrastCategory',
+    //     'zeeloolSaleImport'
+    // ];
     public function _initialize()
     {
         parent::_initialize();
@@ -68,7 +68,7 @@ class SaleAfterTask extends Backend
             $groupName[$v['id']] = $v['name'];
         }
         $staffArr = array_keys($groupName);
-        $staffList = (new Admin())->getStaffList($staffArr);
+        $staffList = (new Admin())->getStaffListss($staffArr);
         $this->groupdata = $groupName;
         $this->assignconfig("admin", ['id' => $this->auth->id, 'group_ids' => $this->auth->getGroupIds()]);
         $this->view->assign('staffList',$staffList);
