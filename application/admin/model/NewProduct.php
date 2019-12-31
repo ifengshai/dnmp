@@ -75,6 +75,10 @@ class NewProduct extends Model
         $where['m.is_del'] = 1;
         $arr = $item->alias('m')->where($where)->join('item_attribute a', 'm.id=a.item_id', 'left')->field('m.name,a.frame_color,m.price')->select();
         $result['itemArr'] = $arr;
+        
+
+        //截取掉色号
+        $where['m.sku'] = substr($result['sku'], 0, strpos($result['sku'], '-'));
         $result['itemCount'] = $item->alias('m')->where($where)->count();
         return $result;
     }
