@@ -470,6 +470,8 @@ class InfoSynergyTask extends Backend
         if (!$result) {
             $this->error('任务信息不存在，请重新尝试', 'saleaftermanage/sale_after_task');
         }
+        $result['dept_id'] = explode('+', $result['dept_id']);
+        $result['rep_id']  = explode('+', $result['rep_id']);
         $result['problem_desc'] = strip_tags($result['problem_desc']);
         //dump($result);
         $this->view->assign('row', $result);
