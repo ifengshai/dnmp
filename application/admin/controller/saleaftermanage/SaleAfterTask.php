@@ -174,6 +174,7 @@ class SaleAfterTask extends Backend
             }
             $this->error(__('Parameter %s can not be empty', ''));
         }
+        $this->view->assign('SolveScheme',$this->model->getSolveScheme());
         return $this->view->fetch();
     }
     /**
