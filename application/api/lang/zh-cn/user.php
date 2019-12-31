@@ -8,7 +8,7 @@ return [
     'Username can not be empty'             => '用户名不能为空',
     'Username must be 6 to 30 characters'   => '用户名必须6-30个字符',
     'Password can not be empty'             => '密码不能为空',
-    'Password must be 6 to 30 characters'   => '密码必须6-30个字符',
+    'Password must be 3 to 30 characters'   => '密码必须3-30个字符',
     'Mobile is incorrect'                   => '手机格式不正确',
     'Username already exist'                => '用户名已经存在',
     'Email already exist'                   => '邮箱已经存在',

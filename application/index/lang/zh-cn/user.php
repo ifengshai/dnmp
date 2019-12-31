@@ -25,7 +25,7 @@ return [
     'Username must be 3 to 30 characters'   => '用户名必须3-30个字符',
     'Account must be 3 to 50 characters'    => '账户必须3-50个字符',
     'Password can not be empty'             => '密码不能为空',
-    'Password must be 6 to 30 characters'   => '密码必须6-30个字符',
+    'Password must be 3 to 30 characters'   => '密码必须3-30个字符',
     'Email is incorrect'                    => '邮箱格式不正确',
     'Mobile is incorrect'                   => '手机格式不正确',
     'Username already exist'                => '用户名已经存在',
