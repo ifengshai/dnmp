@@ -147,11 +147,11 @@
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">{:__('Dept_id')}:</label>
         <div class="col-xs-12 col-sm-3">
-            {:build_select('row[dept_id][]', $allGroup, $row.dept_id,['class'=>'form-control selectpicker', 'disabled'=>'disabled','data-live-search' => true,'multiple'=>'multiple','id'=>'choose_dept_id'])}
+            {:build_select('row[dept_id][]', $allGroup, $row.dept_id,['class'=>'form-control selectpicker', 'data-live-search' => true,'multiple'=>'multiple','id'=>'choose_dept_id'])}
         </div>
         <label class="control-label col-xs-12 col-sm-2" >{:__('Rep_id')}:</label>
         <div class="col-xs-12 col-sm-3" id="add_rep_id">
-            {:build_select('row[rep_id][]', $allAdmin, $row.rep_id,['class'=>'form-control selectpicker', 'disabled'=>'disabled','data-live-search' => true,'multiple'=>'multiple','id'=>"choose_rep_id"])}
+            {:build_select('row[rep_id][]', $allAdmin, $row.rep_id,['class'=>'form-control selectpicker', 'data-live-search' => true,'multiple'=>'multiple','id'=>"choose_rep_id"])}
         </div>
     </div>
     <div class="form-group">
