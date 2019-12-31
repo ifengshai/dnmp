@@ -48,9 +48,10 @@ class NewProduct extends Model
      */
     public function likeOriginSku($value)
     {
+        $item = new \app\admin\model\itemmanage\Item;
         $map['sku'] = ['like', '%' . $value . '%'];
         $map['is_del'] = 1;
-        $result = $this->where($map)->field('sku')->distinct(true)->limit(10)->column('sku');
+        $result = $item->where($map)->field('sku')->distinct(true)->limit(10)->column('sku');
         return $result;
     }
 
