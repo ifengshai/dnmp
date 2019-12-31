@@ -852,7 +852,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                 pageList: [10, 25, 50, 100],
                 extend: {
                     index_url: 'itemmanage/item/presell' + location.search,
-                    add_url: 'itemmanage/item/add_Presell',
+                    add_url: 'itemmanage/item/add_presell',
                     table: 'item',
                 }
             });
