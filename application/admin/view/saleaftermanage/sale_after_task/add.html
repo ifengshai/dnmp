@@ -76,6 +76,34 @@
         <div class="col-xs-12 col-sm-3">
             <input id="c-order_skus" data-rule="required" class="form-control" name="row[order_skus]"  type="text" value="" >
         </div>
+        <label class="control-label col-xs-12 col-sm-2">{:__('Handle_scheme')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <select  id="c-handle_scheme" data-rule="required" class="form-control selectpicker" name="row[handle_scheme]">
+                {foreach name="SolveScheme" item="vo"}
+                <option value="{$key}" {in name="key" value="$row.handle_scheme"}selected{/in}>{$vo}</option>
+                {/foreach}
+            </select>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Refund_money')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-refund_money"  data-source="refund_money/index" class="form-control" name="row[refund_money]" type="text" value="{$row.refund_money|htmlentities}">
+        </div>
+        <label class="control-label col-xs-12 col-sm-2">{:__('Give_coupon')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-give_coupon"  data-source="give_coupon/index" class="form-control" name="row[give_coupon]" type="text" value="{$row.give_coupon|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Tariff')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-tariff"  class="form-control" name="row[tariff]" type="number" value="{$row.tariff|htmlentities}">
+        </div>
+        <label class="control-label col-xs-12 col-sm-2">{:__('Make_up_price_order')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-make_up_price_order"  data-source="problem/index" class="form-control" name="row[make_up_price_order]" type="text" value="{$row.make_up_price_order|htmlentities}">
+        </div>
     </div>
     <div class="form-group">
         <div class="form-group">
