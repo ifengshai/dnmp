@@ -385,7 +385,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                         type: 'post'
                     }, function (data, ret) {
                         $('#search_val').val('');
-                        table.bootstrapTable("append", data);
+                        table.bootstrapTable("prepend", data);
                     });
                 }
             })
