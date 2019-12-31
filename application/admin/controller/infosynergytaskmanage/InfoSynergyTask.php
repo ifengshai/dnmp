@@ -581,6 +581,10 @@ class InfoSynergyTask extends Backend
         }
         $row['dept_id'] = explode('+', $row['dept_id']);
         $row['rep_id']  = explode('+', $row['rep_id']);
+        // echo '<pre>';
+        // var_dump($row['dept_id']);
+        // var_dump($row['rep_id']);
+        // exit;
         $row['problem_desc'] = strip_tags($row['problem_desc']);
         $this->view->assign("row", $row);
         //任务分类列表
