@@ -232,14 +232,14 @@ class SaleAfterTask extends Backend
                     $this->error($e->getMessage());
                 }
                 if ($result !== false) {
-                    // if(!empty($params['task_remark'])){
-                    //     $data = [];
-                    //     $data['tid'] = $tid;
-                    //     $data['remark_record'] = strip_tags($params['task_remark']);
-                    //     $data['create_person'] = session('admin.nickname');
-                    //     $data['create_time']   = date("Y-m-d H:i:s",time());
-                    //     (new SaleAfterTaskRemark())->allowField(true)->save($data);
-                    // }
+                    if(!empty($params['task_remark'])){
+                        $data = [];
+                        $data['tid'] = $row['id'];
+                        $data['remark_record'] = strip_tags($params['task_remark']);
+                        $data['create_person'] = session('admin.nickname');
+                        $data['create_time']   = date("Y-m-d H:i:s",time());
+                        (new SaleAfterTaskRemark())->allowField(true)->save($data);
+                    }
                     $this->success();
                 } else {
                     $this->error(__('No rows were updated'));
