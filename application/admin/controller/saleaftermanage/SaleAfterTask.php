@@ -157,7 +157,7 @@ class SaleAfterTask extends Backend
                     //$result = $this->model->allowField(true)->save($params);
                     $data = $params;
                     unset($data['task_remark']);
-                    $resultId = Db::name('sale_after_task')->insertGetId($params);
+                    $resultId = Db::name('sale_after_task')->insertGetId($data);
                     Db::commit();
                 } catch (ValidateException $e) {
                     Db::rollback();
