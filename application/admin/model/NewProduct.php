@@ -55,7 +55,7 @@ class NewProduct extends Model
         return $result;
     }
 
-    
+
     /***
      * 查询sku信息
      * @param $sku
@@ -63,17 +63,19 @@ class NewProduct extends Model
      */
     public function getItemInfo($sku)
     {
+        $item = new \app\admin\model\itemmanage\Item;
         $map['is_del'] = 1;
         $map['sku'] = $sku;
-        $result = $this->alias('m')->where($map)->join('new_product_attribute a', 'm.id=a.item_id')->find();
+        $result = $item->alias('m')->where($map)->join('item_attribute a', 'm.id=a.item_id', 'left')->find();
+
         if (!$result) {
             return false;
         }
-        $where['origin_sku'] = $result['origin_sku'];
-        $where['is_del'] = 1;
-        $arr = $this->alias('m')->where($where)->join('new_product_attribute a', 'm.id=a.item_id')->field('m.name,a.frame_color,m.supplier_sku,m.price')->select();
+        $where['m.sku'] = $result['sku'];
+        $where['m.is_del'] = 1;
+        $arr = $item->alias('m')->where($where)->join('item_attribute a', 'm.id=a.item_id', 'left')->field('m.name,a.frame_color,m.price')->select();
         $result['itemArr'] = $arr;
-        $result['itemCount'] = $this->where($where)->count();
+        $result['itemCount'] = $item->alias('m')->where($where)->count();
         return $result;
     }
 }
