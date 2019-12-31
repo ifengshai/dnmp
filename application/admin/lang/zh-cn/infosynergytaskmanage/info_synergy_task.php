@@ -20,6 +20,7 @@ return [
     'Remark_record'        => '处理记录',
     'Handle_complete'      => '处理完成',
     'Refund_money'         => '退款金额',
+    'Refund_way'           => '退款方式', 
     'Make_up_price_order'  => '补差价订单号',  
     'Please select the task category' => '请选择任务分类',
     'Please select the contractor'=>'请选择承接人',

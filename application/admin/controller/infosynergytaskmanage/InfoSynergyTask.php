@@ -470,6 +470,8 @@ class InfoSynergyTask extends Backend
         if (!$result) {
             $this->error('任务信息不存在，请重新尝试', 'saleaftermanage/sale_after_task');
         }
+        $result['dept_id'] = explode('+', $result['dept_id']);
+        $result['rep_id']  = explode('+', $result['rep_id']);
         $result['problem_desc'] = strip_tags($result['problem_desc']);
         //dump($result);
         $this->view->assign('row', $result);
@@ -541,6 +543,17 @@ class InfoSynergyTask extends Backend
             unset($params['id']);
             if ($params) {
                 $params = $this->preExcludeFields($params);
+                 //承接部门和承接人写入数据库
+                 if (count($params['dept_id']) > 1) {
+                    $params['dept_id'] = implode('+', $params['dept_id']);
+                } else {
+                    $params['dept_id'] = $params['dept_id'][0];
+                }
+                if (count($params['rep_id']) > 1) {
+                    $params['rep_id']  = implode('+', $params['rep_id']);
+                } else {
+                    $params['rep_id'] = $params['rep_id'][0];
+                }               
                 $result = false;
                 Db::startTrans();
                 try {
@@ -581,6 +594,10 @@ class InfoSynergyTask extends Backend
         }
         $row['dept_id'] = explode('+', $row['dept_id']);
         $row['rep_id']  = explode('+', $row['rep_id']);
+        // echo '<pre>';
+        // var_dump($row['dept_id']);
+        // var_dump($row['rep_id']);
+        // exit;
         $row['problem_desc'] = strip_tags($row['problem_desc']);
         $this->view->assign("row", $row);
         //任务分类列表

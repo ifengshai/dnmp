@@ -147,16 +147,16 @@
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">{:__('Dept_id')}:</label>
         <div class="col-xs-12 col-sm-3">
-            {:build_select('row[dept_id][]', $allGroup, $row.dept_id,['class'=>'form-control selectpicker', 'disabled'=>'disabled','data-live-search' => true,'multiple'=>'multiple','id'=>'choose_dept_id'])}
+            {:build_select('row[dept_id][]', $allGroup, $row.dept_id,['class'=>'form-control selectpicker', 'data-live-search' => true,'multiple'=>'multiple','id'=>'choose_dept_id'])}
         </div>
         <label class="control-label col-xs-12 col-sm-2" >{:__('Rep_id')}:</label>
         <div class="col-xs-12 col-sm-3" id="add_rep_id">
-            {:build_select('row[rep_id][]', $allAdmin, $row.rep_id,['class'=>'form-control selectpicker', 'disabled'=>'disabled','data-live-search' => true,'multiple'=>'multiple','id'=>"choose_rep_id"])}
+            {:build_select('row[rep_id][]', $allAdmin, $row.rep_id,['class'=>'form-control selectpicker', 'data-live-search' => true,'multiple'=>'multiple','id'=>'choose_rep_id'])}
         </div>
     </div>
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">{:__('Prty_id')}:</label>
-        <div class="col-xs-12 col-sm-8">
+        <div class="col-xs-12 col-sm-3">
             <select  id="c-prty_id" data-rule="required" class="form-control selectpicker" name="row[prty_id]" disabled="disabled">
                 <option value="0" selected>请选择</option>
                 {foreach name="prtyIdList" item="vo"}
@@ -164,6 +164,22 @@
                 {/foreach}
             </select>
         </div>
+        <label class="control-label col-xs-12 col-sm-2">{:__('Refund_way')}:</label>
+            <div class="col-xs-12 col-sm-3">
+                <select  id="c-refund_way" data-rule="required" class="form-control selectpicker" type="text" name="row[refund_way]">
+                    <option value="0">请选择..</option>
+                    {if $row.refund_way eq 'paypal'}
+                    <option value="paypal" selected>paypal</option>
+                    {else/}
+                    <option value="paypal">paypal</option>
+                    {/if}
+                    {if $row.refund_way eq 'credit_card'}
+                    <option value="credit_card" selected>credit_card</option>
+                    {else/}
+                    <option value="credit_card">credit_card</option>
+                    {/if}
+                </select>
+            </div>
     </div>
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">{:__('Refund_money')}:</label>
@@ -174,7 +190,7 @@
         <div class="col-xs-12 col-sm-3">
             <input id="c-make_up_price_order"  data-source="problem/index" class="form-control" name="row[make_up_price_order]" type="text" value="{$row.make_up_price_order|htmlentities}">
         </div>
-    </div>    
+    </div>   
     <div class="form-group">
         <div class="form-group">
             <label class="control-label col-xs-12 col-sm-2">{:__('Synergy_task_id')}:</label>

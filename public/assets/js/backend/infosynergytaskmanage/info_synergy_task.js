@@ -817,6 +817,38 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','bootstrap-table-jump-
         },
         handle_task:function(){
             Form.api.bindevent($("form[role=form]"));
+            //承接部门和承接人二级联动
+            $(document).on('change','#choose_dept_id',function(){
+                var arrIds = $(this).val();
+                if(arrIds == null){
+                    Layer.alert('请选择承接部门');
+                    return false;
+                }
+                var arrStr = arrIds.join("&");
+                //根据承接部门查找出承接人
+                Backend.api.ajax({
+                    url:'infosynergytaskmanage/info_synergy_task/ajaxFindRecipient',
+                    data:{arrIds:arrStr}
+                }, function(data, ret){
+                    // console.log(ret.data);
+                    var rs = ret.data;
+                    var x;
+                    $("#choose_rep_id").html('');
+                    var str = '';
+                    for( x in rs ){
+                        str +='<option value="'+x+'">' + rs[x]+'</option>';
+                    }
+                    $("#choose_rep_id").append(str);
+                    $("#choose_rep_id").selectpicker('refresh');
+                    return false;
+                }, function(data, ret){
+                    //失败的回调
+                    alert(ret.msg);
+                    console.log(ret);
+                    return false;
+                });
+                //console.log($(this).val());
+            });
         }
     };
     return Controller;
