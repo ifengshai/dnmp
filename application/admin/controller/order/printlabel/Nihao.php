@@ -541,6 +541,8 @@ left join sales_flat_order sfo on  sfoi.order_id=sfo.entity_id
 where sfo.`status` in ('processing','creditcard_proccessing','free_processing','paypal_reversed','complete') and sfo.entity_id in($entity_ids)
 order by sfoi.order_id desc;";
         $resultList = Db::connect('database.db_nihao')->query($processing_order_querySql);
+
+        $resultList = $this->qty_order_check($resultList);
         // dump($resultList);
 
         $finalResult = array();
@@ -825,6 +827,8 @@ left join sales_flat_order sfo on  sfoi.order_id=sfo.entity_id
 where sfo.`status` in ('processing','creditcard_proccessing','free_processing','complete','paypal_reversed','paypal_canceled_reversal') and sfo.entity_id in($entity_ids)
 order by sfoi.order_id desc;";
             $processing_order_list = Db::connect('database.db_nihao')->query($processing_order_querySql);
+
+            $processing_order_list = $this->qty_order_check($processing_order_list);
             // dump($processing_order_list);exit;
 
             $file_header = <<<EOF
@@ -1020,5 +1024,38 @@ EOF;
             }
             echo $file_header . $file_content;
         }
+    }
+
+
+    //  一个SKU的qty_order > 1时平铺开来
+    protected function qty_order_check($origin_order_item)
+    {
+        foreach ($origin_order_item as $origin_order_key => $origin_order_value) {
+            if ($origin_order_value['qty_ordered'] > 1 && strpos($origin_order_value['sku'], 'Price') === false) {
+                unset($origin_order_item[$origin_order_key]);
+                // array_splice($origin_order_item,$origin_order_key,1);
+                for ($i = 0; $i < $origin_order_value['qty_ordered']; $i++) {
+                    $tmp_order_value = $origin_order_value;
+                    $tmp_order_value['qty_ordered'] = 1;
+                    array_push($origin_order_item, $tmp_order_value);
+                }
+                unset($tmp_order_value);
+            }
+        }
+        $origin_order_item = $this->arraySequence($origin_order_item, 'increment_id');
+        return array_values($origin_order_item);
+    }
+
+    //  二维数组排序
+    protected function arraySequence($array, $field, $sort = 'SORT_DESC')
+    {
+        $arrSort = array();
+        foreach ($array as $uniqid => $row) {
+            foreach ($row as $key => $value) {
+                $arrSort[$key][$uniqid] = $value;
+            }
+        }
+        array_multisort($arrSort[$field], constant($sort), $array);
+        return $array;
     }
 }
