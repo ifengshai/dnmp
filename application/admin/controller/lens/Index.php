@@ -416,7 +416,7 @@ class Index extends Backend
 
             if ($res) {
                 $params[$k]['id'] = $res->id;
-                $params[$k]['stock_num'] = $res['stock_num'] * 1 + $v[4] * 1;
+                $params[$k]['stock_num'] = $v[4] * 1;
                 $params[$k]['price'] = $v[5];
             } else {
                 $params[$k]['refractive_index'] = trim($v[0]);
