@@ -177,13 +177,14 @@ class Dashboard extends Backend
     //测试 zeelool 
     public function get_info_test()
     {
+        set_time_limit(0);
         $where['a.is_visable'] = 1;
         $where['a.is_show'] = 0;
-        $where['a.complate'] = 1;
+        
         $data = Db::table('zeelool_service_collaboration')->alias('a')->field('a.*,b.name')
             ->join(['zeelool_service_collaboration_category' => 'b'], 'a.cate_id=b.id')
             ->where($where)
-            ->limit(1000)
+            ->limit(2000)
             ->select();
         //查询用户角色
         $user = Db::table('fa_admin')->alias('a')
@@ -308,13 +309,14 @@ class Dashboard extends Backend
     //测试 voogueme
     public function get_info_test_voogueme()
     {
+        set_time_limit(0);
         $where['a.is_visable'] = 1;
         $where['a.is_show'] = 0;
-        $where['a.complate'] = 1;
+   
         $data = Db::table('voogueme_service_collaboration')->alias('a')->field('a.*,b.name')
             ->join(['voogueme_service_collaboration_category' => 'b'], 'a.cate_id=b.id')
             ->where($where)
-            ->limit(1000)
+            ->limit(2000)
             ->select();
         //查询用户角色
         $user = Db::table('fa_admin')->alias('a')
@@ -436,9 +438,10 @@ class Dashboard extends Backend
     //测试 nihao
     public function get_info_test_nihao()
     {
+        set_time_limit(0);
         $where['a.is_visable'] = 1;
         $where['a.is_show'] = 0;
-        $where['a.complate'] = 1;
+      
         $data = Db::table('nihao_service_collaboration')->alias('a')->field('a.*,b.name')
             ->join(['nihao_service_collaboration_category' => 'b'], 'a.cate_id=b.id')
             ->where($where)
@@ -555,7 +558,7 @@ class Dashboard extends Backend
     {
         set_time_limit(0);
         $start = date("Y-m-d", strtotime("-3 month"));
-        $end = date("Y-m-d", time());
+        $end = date("Y-m-d", time()+86400);
         $map['a.is_visable'] = 1;
         $map['a.created_at'] = ['between', [$start, $end]];
         $res = Db::table('zeelool_purchase')
