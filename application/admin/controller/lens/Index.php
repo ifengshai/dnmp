@@ -21,6 +21,13 @@ class Index extends Backend
 {
 
     /**
+     * 无需鉴权的方法,但需要登录
+     * @var array
+     */
+    protected $noNeedRight = ['add', 'edit', 'lens_edit', 'import', 'import_xls_order'];
+
+
+    /**
      * Index模型对象
      * @var \app\admin\model\lens\Index
      */
