@@ -176,6 +176,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','bootstrap-table-jump-
                         delete filter.create_person;
                     }
                     params.filter = JSON.stringify(filter);
+                    params.op     = JSON.stringify(op);
                     return params;
                 };
                 table.bootstrapTable('refresh', {});
