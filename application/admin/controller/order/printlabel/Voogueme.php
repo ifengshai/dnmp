@@ -688,7 +688,7 @@ order by sfoi.order_id desc;";
             $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 2 + 2), $value['od_axis']);
             $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 2 + 3), $value['os_axis']);
 
-            if ($value['od_add'] && $value['os_add']) {
+            if (strlen($value['os_add']) > 0 && strlen($value['od_add']) > 0) {
                 // 双ADD值时，左右眼互换
                 $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 2 + 2), $value['os_add']);
                 $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 2 + 3), $value['od_add']);
