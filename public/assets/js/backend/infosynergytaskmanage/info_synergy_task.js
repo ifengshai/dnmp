@@ -156,6 +156,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','bootstrap-table-jump-
             $('.panel-heading a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
                 var field = $(this).data("field");
                 var value = $(this).data("value");
+                console.log(value);
                 var options = table.bootstrapTable('getOptions');
                 options.pageNumber = 1;
                 var queryParams = options.queryParams;
@@ -173,6 +174,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','bootstrap-table-jump-
                         delete filter.create_person;
                     }
                     params.filter = JSON.stringify(filter);
+                    console.log(params);
                     return params;
                 };
                 table.bootstrapTable('refresh', {});
