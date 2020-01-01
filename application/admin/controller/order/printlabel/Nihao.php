@@ -684,7 +684,7 @@ order by sfoi.order_id desc;";
             $spreadsheet->getActiveSheet()->setCellValue("V" . ($key * 2 + 2), $value['second_name']);
             $spreadsheet->getActiveSheet()->setCellValue("W" . ($key * 2 + 2), $value['four_name']);
 
-            if ($value['od_add'] && $value['os_add']) {
+            if ($value['od_add'] > 0 && $value['os_add'] > 0) {
                 $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 2 + 2), $value['od_add']);
                 $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 2 + 3), $value['os_add']);
             } else {
