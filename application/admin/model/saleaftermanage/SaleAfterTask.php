@@ -50,7 +50,8 @@ class SaleAfterTask extends Model
     //优先级返回数据
     public function getPrtyIdList()
     {
-        return [1=>'高',2=>'中',3=>'低'];
+        //return [1=>'高',2=>'中',3=>'低'];
+          return [3=>'低',2=>'中',1=>'高'];
     }
     //获取选项卡列表
     public function getTabList()
