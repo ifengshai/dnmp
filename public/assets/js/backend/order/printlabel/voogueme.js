@@ -48,7 +48,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                                 }
                             }
                         },
-                        { field: 'custom_order_prescription_type', title: __('处方类型'),addClass: 'selectpicker', data: 'multiple', operate: 'IN', custom: { 1: 'green', 2: 'green', 3: 'green', 4: 'green', 5: 'green', 6: 'green', }, searchList: { 1: '仅镜架', 2: '现货处方镜', 3: '定制处方镜', 4: '镜架+现货', 5: '镜架+定制', 6: '现片+定制片', '': '获取中' }, formatter: Table.api.formatter.status },
+                        { field: 'custom_order_prescription_type', title: __('处方类型'), addClass: 'selectpicker', data: 'multiple', operate: 'IN', custom: { 1: 'green', 2: 'green', 3: 'green', 4: 'green', 5: 'green', 6: 'green', }, searchList: { 1: '仅镜架', 2: '现货处方镜', 3: '定制处方镜', 4: '镜架+现货', 5: '镜架+定制', 6: '现片+定制片', '': '获取中' }, formatter: Table.api.formatter.status },
                         { field: 'order_type', title: __('订单类型'), custom: { 1: 'blue', 2: 'blue', 3: 'blue', 4: 'blue' }, searchList: { 1: '普通订单', 2: '批发单', 3: '网红单', 4: '补发单' }, formatter: Table.api.formatter.status },
                         { field: 'created_at', title: __('创建时间'), operate: 'RANGE', addclass: 'datetimerange' },
                         {
@@ -235,7 +235,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
             table.bootstrapTable({
                 url: $.fn.bootstrapTable.defaults.extend.index_url,
                 pk: 'entity_id',
-                sortName: 'entity_id',
                 columns: [
                     [
                         { checkbox: true },
@@ -374,7 +373,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                 var status = $(this).data('status');
                 var data = table.bootstrapTable("getAllSelections");
                 var newdata = $.extend(true, [], data); //复制一份数据
-
                 Layer.confirm(
                     __('确定要修改这%s条记录配货状态吗?', ids.length),
                     { icon: 3, title: __('Warning'), shadeClose: true },
@@ -385,6 +383,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                             data: { id_params: ids, status: status, label: 'list' },
                             type: 'post'
                         }, function (row) {
+
                             //移除所有
                             table.bootstrapTable("removeAll");
                             //取消选中
@@ -404,6 +403,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                             $('.btn-set-status').addClass('disabled');
                             $('.btn-tag-printed').addClass('disabled');
                             $('.btn-batch-printed').addClass('disabled');
+
                         });
 
                     }
