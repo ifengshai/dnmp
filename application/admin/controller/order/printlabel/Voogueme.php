@@ -541,7 +541,7 @@ order by sfoi.order_id desc;";
         $resultList = Db::connect('database.db_voogueme')->query($processing_order_querySql);
         // dump($resultList);
 
-        // $resultList = $this->qty_order_check($resultList);
+        $resultList = $this->qty_order_check($resultList);
 
         $finalResult = array();
         foreach ($resultList as $key => $value) {
@@ -686,7 +686,7 @@ order by sfoi.order_id desc;";
             $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 2 + 3), $value['os_cyl'] > 0 ? ' +' . $value['os_cyl'] : ' ' . $value['os_cyl']);
 
             $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 2 + 2), $value['od_axis']);
-            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 2 + 3), $value['od_axis']);
+            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 2 + 3), $value['os_axis']);
 
             if ($value['od_add'] && $value['os_add']) {
                 // 双ADD值时，左右眼互换
