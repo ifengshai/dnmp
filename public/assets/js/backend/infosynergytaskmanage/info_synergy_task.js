@@ -723,7 +723,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','bootstrap-table-jump-
                                         '<table id="caigou-table-sku">'+
                                         '<tr>'+
                                         '<th>原始SKU</th>'+
-                                        '<th>原始数量</th>'+
+                                        '<th>取消数量</th>'+
                                         '</tr>';
                                     for(var j = 0,len = item.length; j <len; j++) {
                                         var newItem = item[j];
