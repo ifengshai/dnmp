@@ -103,7 +103,7 @@ class Outstock extends Backend
                     }
 
 
-                    $params['create_person'] = session('admin.username');
+                    $params['create_person'] = session('admin.nickname');
                     $params['createtime'] = date('Y-m-d H:i:s', time());
                     $result = $this->model->allowField(true)->save($params);
 
