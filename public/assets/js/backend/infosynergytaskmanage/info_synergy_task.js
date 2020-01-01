@@ -731,8 +731,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','bootstrap-table-jump-
                                         var m = j+1;
                                         Str +='<tr>';
                                         Str +='<td><input id="c-original_sku" class="form-control" readonly name="row[item]['+m+'][original_sku]" type="text" value="'+newItem.sku+'"></td>';
-                                        Str +='<td><input id="c-original_number" class="form-control" readonly type="text" value="'+Math.round(newItem.qty_ordered)+'"></td>';
-                                        Str +='<td><input id="c-original_number" class="form-control" name="row[item]['+m+'][original_number]" type="text" value="'+Math.round(newItem.qty_ordered)+'"></td>';
+                                        Str +='<td><input id="c-original_number" class="form-control" name="row[item]['+m+'][original_number]" readonly type="text" value="'+Math.round(newItem.qty_ordered)+'"></td>';
+                                        Str +='<td><input id="c-original_number" class="form-control" name="row[item]['+m+'][change_number]" type="text" value="'+Math.round(newItem.qty_ordered)+'"></td>';
                                         Str += '</tr>';
                                     }
                                     Str+='</table>'+
