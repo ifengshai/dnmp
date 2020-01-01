@@ -195,6 +195,8 @@ define(['jquery', 'bootstrap', 'upload', 'validator'], function ($, undefined, U
                                 cancelLabel: __("Clear"),
                             },
                             ranges: ranges,
+                            timePicker : true,
+                            timePickerIncrement : 1
                         };
                         var origincallback = function (start, end) {
                             $(this.element).val(start.format(this.locale.format) + " - " + end.format(this.locale.format));
