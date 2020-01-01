@@ -542,7 +542,7 @@ where sfo.`status` in ('processing','creditcard_proccessing','free_processing','
 order by sfoi.order_id desc;";
         $resultList = Db::connect('database.db_nihao')->query($processing_order_querySql);
 
-        $resultList = $this->qty_order_check($resultList);
+        // $resultList = $this->qty_order_check($resultList);
         // dump($resultList);
 
         $finalResult = array();

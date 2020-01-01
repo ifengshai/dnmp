@@ -541,7 +541,7 @@ order by sfoi.order_id desc;";
         $resultList = Db::connect('database.db_voogueme')->query($processing_order_querySql);
         // dump($resultList);
 
-        $resultList = $this->qty_order_check($resultList);
+        // $resultList = $this->qty_order_check($resultList);
 
         $finalResult = array();
         foreach ($resultList as $key => $value) {
