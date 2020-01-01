@@ -337,7 +337,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
             $('.btn-set-status').click(function () {
                 var ids = Table.api.selectedids(table);
                 var status = $(this).data('status');
-                var data = table.bootstrapTable("getAllSelections");
+                var data = table.bootstrapTable("getData");
                 var newdata = $.extend(true, [], data); //复制一份数据
 
                 Layer.confirm(
@@ -355,14 +355,18 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                             //取消选中
                             table.bootstrapTable('uncheckAll');
                             for (var i in newdata) {
-                                newdata[i].custom_is_delivery = row[i].custom_is_delivery;
-                                newdata[i].custom_is_match_frame = row[i].custom_is_match_frame;
-                                newdata[i].custom_is_match_lens = row[i].custom_is_match_lens;
-                                newdata[i].custom_is_send_factory = row[i].custom_is_send_factory;
-                                newdata[i].custom_print_label = row[i].custom_print_label;
+                                for (var k in row) {
+                                    if (row[k].entity_id == newdata[i].entity_id) {
+                                        newdata[i].custom_is_delivery = row[k].custom_is_delivery;
+                                        newdata[i].custom_is_match_frame = row[k].custom_is_match_frame;
+                                        newdata[i].custom_is_match_lens = row[k].custom_is_match_lens;
+                                        newdata[i].custom_is_send_factory = row[k].custom_is_send_factory;
+                                        newdata[i].custom_print_label = row[k].custom_print_label;
+                                    }
+                                }
                             }
                             //追加
-                            table.bootstrapTable("append", newdata);
+                            table.bootstrapTable("prepend", newdata);
 
                             //取消选中
                             table.bootstrapTable('uncheckAll');
