@@ -902,7 +902,7 @@ class Inventory extends Backend
             //求出订单对应的order_id
             $order = Db::connect($db)->table('sales_flat_order')->where(['increment_id' => $increment_id])->field('entity_id,custom_is_match_frame')->find();
             if (!$original_sku || !$original_number || !$change_sku || !$change_number) {
-                return false;
+                continue;
             }
             //回滚
             Db::startTrans();
@@ -1023,7 +1023,7 @@ class Inventory extends Backend
             //求出订单对应的order_id
             $order = Db::connect($db)->table('sales_flat_order')->where(['increment_id' => $increment_id])->field('entity_id,custom_is_match_frame')->find();
             if (!$original_sku || !$original_number) {
-                return false;
+                continue;
             }
             //回滚
             Db::startTrans();
