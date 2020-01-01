@@ -167,11 +167,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','bootstrap-table-jump-
                      if(field == 'create_person'){
                         delete filter.rep_id;
                         filter[field] = value;
-                        op[field] = 'FIND_IN_SET';
+                        op[field] = 'FINDINSET';
                     }else if(field == 'rep_id'){
                         delete filter.create_person;
                         filter[field] = value;
-                        op[field] = 'FIND_IN_SET';
+                        op[field] = 'FINDINSET';
                     }else{
                         delete filter.rep_id;
                         delete filter.create_person;
