@@ -245,16 +245,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                         { field: 'base_shipping_amount', title: __('运费'), operate: false, formatter: Controller.api.formatter.float_format },
 
                         { field: 'total_qty_ordered', title: __('SKU数量'), operate: false, formatter: Controller.api.formatter.int_format },
-                        { field: 'custom_print_label', title: __('打印标签'), operate: false, formatter: Controller.api.formatter.printLabel },
-                        { field: 'custom_is_match_frame', title: __('配镜架'), operate: false, formatter: Controller.api.formatter.printLabel },
-                        { field: 'custom_is_match_lens', title: __('配镜片'), operate: false, formatter: Controller.api.formatter.printLabel },
-                        { field: 'custom_is_send_factory', title: __('加工'), operate: false, formatter: Controller.api.formatter.printLabel },
-                        { field: 'custom_is_delivery', title: __('质检'), operate: false, formatter: Controller.api.formatter.printLabel },
-                        { field: 'custom_print_label', title: __('是否打印'), searchList: { 1: '是', 0: '否' }, formatter: Table.api.formatter.status, visible: false },
-                        { field: 'custom_is_match_frame', title: __('是否配镜架'), searchList: { 1: '是', 0: '否' }, formatter: Table.api.formatter.status, visible: false },
-                        { field: 'custom_is_match_lens', title: __('是否配镜片'), searchList: { 1: '是', 0: '否' }, formatter: Table.api.formatter.status, visible: false },
-                        { field: 'custom_is_send_factory', title: __('是否加工'), searchList: { 1: '是', 0: '否' }, formatter: Table.api.formatter.status, visible: false },
-                        { field: 'custom_is_delivery', title: __('是否质检'), searchList: { 1: '是', 0: '否' }, formatter: Table.api.formatter.status, visible: false },
+                        { field: 'custom_print_label', title: __('打印标签'), operate: false, custom: { 0: 'danger', 1: 'green' }, searchList: { 1: '是', 0: '否' }, formatter: Table.api.formatter.status },
+                        { field: 'custom_is_match_frame', title: __('配镜架'), operate: false, custom: { 0: 'danger', 1: 'green' }, searchList: { 1: '是', 0: '否' }, formatter: Table.api.formatter.status },
+                        { field: 'custom_is_match_lens', title: __('配镜片'), operate: false, custom: { 0: 'danger', 1: 'green' }, searchList: { 1: '是', 0: '否' }, formatter: Table.api.formatter.status },
+                        { field: 'custom_is_send_factory', title: __('加工'), operate: false, custom: { 0: 'danger', 1: 'green' }, searchList: { 1: '是', 0: '否' }, formatter: Table.api.formatter.status },
+                        { field: 'custom_is_delivery', title: __('质检'), operate: false, custom: { 0: 'danger', 1: 'green' }, searchList: { 1: '是', 0: '否' }, formatter: Table.api.formatter.status },
+
                         {
                             field: 'task_info', title: __('协同任务'), operate: false, formatter: function (value, row) {
                                 if (value) {
@@ -371,7 +367,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
             $('.btn-set-status').click(function () {
                 var ids = Table.api.selectedids(table);
                 var status = $(this).data('status');
-                var data = table.bootstrapTable("getAllSelections");
+                var data = table.bootstrapTable("getData");
                 var newdata = $.extend(true, [], data); //复制一份数据
                 Layer.confirm(
                     __('确定要修改这%s条记录配货状态吗?', ids.length),
@@ -389,14 +385,18 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                             //取消选中
                             table.bootstrapTable('uncheckAll');
                             for (var i in newdata) {
-                                newdata[i].custom_is_delivery = row[i].custom_is_delivery;
-                                newdata[i].custom_is_match_frame = row[i].custom_is_match_frame;
-                                newdata[i].custom_is_match_lens = row[i].custom_is_match_lens;
-                                newdata[i].custom_is_send_factory = row[i].custom_is_send_factory;
-                                newdata[i].custom_print_label = row[i].custom_print_label;
+                                for (var k in row) {
+                                    if (row[k].entity_id == newdata[i].entity_id) {
+                                        newdata[i].custom_is_delivery = row[k].custom_is_delivery;
+                                        newdata[i].custom_is_match_frame = row[k].custom_is_match_frame;
+                                        newdata[i].custom_is_match_lens = row[k].custom_is_match_lens;
+                                        newdata[i].custom_is_send_factory = row[k].custom_is_send_factory;
+                                        newdata[i].custom_print_label = row[k].custom_print_label;
+                                    }
+                                }
                             }
                             //追加
-                            table.bootstrapTable("append", newdata);
+                            table.bootstrapTable("prepend", newdata);
 
                             //取消选中
                             table.bootstrapTable('uncheckAll');
