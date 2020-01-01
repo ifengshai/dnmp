@@ -231,7 +231,7 @@ class Voogueme extends Backend
             $map['entity_id'] = ['in', $entity_ids];
             $data['custom_print_label'] = 1;
             $data['custom_print_label_created_at'] = date('Y-m-d H:i:s', time());
-            $data['custom_print_label_person'] =  session('admin.username');
+            $data['custom_print_label_person'] =  session('admin.nickname');
             $connect = Db::connect('database.db_voogueme')->table('sales_flat_order');
             $connect->startTrans();
             try {
@@ -293,25 +293,25 @@ class Voogueme extends Backend
                     //配镜架
                     $data['custom_is_match_frame'] = 1;
                     $data['custom_match_frame_created_at'] = date('Y-m-d H:i:s', time());
-                    $data['custom_match_frame_person'] = session('admin.username');
+                    $data['custom_match_frame_person'] = session('admin.nickname');
                     break;
                 case 2:
                     //配镜片
                     $data['custom_is_match_lens'] = 1;
                     $data['custom_match_lens_created_at'] = date('Y-m-d H:i:s', time());
-                    $data['custom_match_lens_person'] = session('admin.username');
+                    $data['custom_match_lens_person'] = session('admin.nickname');
                     break;
                 case 3:
                     //移送加工时间
                     $data['custom_is_send_factory'] = 1;
                     $data['custom_match_factory_created_at'] = date('Y-m-d H:i:s', time());
-                    $data['custom_match_factory_person'] = session('admin.username');
+                    $data['custom_match_factory_person'] = session('admin.nickname');
                     break;
                 case 4:
                     //提货
                     $data['custom_is_delivery'] = 1;
                     $data['custom_match_delivery_created_at'] = date('Y-m-d H:i:s', time());
-                    $data['custom_match_delivery_person'] = session('admin.username');
+                    $data['custom_match_delivery_person'] = session('admin.nickname');
                     break;
                 default:
             }
