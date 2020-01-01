@@ -58,6 +58,9 @@ class InfoSynergyTask extends Backend
             if (in_array("", $params['rep_id'])) {
                 $this->error(__('Please select the contractor'));
             }
+            if(0 == $params['synergy_order_id']){
+                $this->error(__('请选择关联单据类型'));    
+            }
             // echo '<pre>';
             // var_dump($params['change_type']);
             // exit;
