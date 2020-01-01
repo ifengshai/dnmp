@@ -1000,7 +1000,7 @@ class Inventory extends Backend
         // $instockItem = new \app\admin\model\warehouse\InstockItem;
         $taskChangeSku = new \app\admin\model\infosynergytaskmanage\InfoSynergyTaskChangeSku;
         $platformSku   = new \app\admin\model\itemmanage\ItemPlatformSku;
-        $changeRow = $taskChangeSku->where(['tid' => $id])->field('original_sku,change_number')->select();
+        $changeRow = $taskChangeSku->where(['tid' => $id])->field('original_sku,original_number')->select();
         if (!$changeRow) { //如果不存在改变的sku
             return false;
         }
@@ -1015,7 +1015,7 @@ class Inventory extends Backend
             //原先sku
             $original_sku    = $v['original_sku'];
             //原先sku数量
-            $original_number = $v['change_number'];
+            $original_number = $v['original_number'];
             //原先sku对应的仓库sku
             $whereOriginSku['platform_sku'] = $original_sku;
             $whereOriginSku['platform_type'] = $order_platform;
