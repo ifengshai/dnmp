@@ -724,15 +724,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','bootstrap-table-jump-
                                         '<tr>'+
                                         '<th>原始SKU</th>'+
                                         '<th>原始数量</th>'+
-                                        '<th>取消后数量</th>'+
                                         '</tr>';
                                     for(var j = 0,len = item.length; j <len; j++) {
                                         var newItem = item[j];
                                         var m = j+1;
                                         Str +='<tr>';
                                         Str +='<td><input id="c-original_sku" class="form-control" readonly name="row[item]['+m+'][original_sku]" type="text" value="'+newItem.sku+'"></td>';
-                                        Str +='<td><input id="c-original_number" class="form-control" name="row[item]['+m+'][original_number]" readonly type="text" value="'+Math.round(newItem.qty_ordered)+'"></td>';
-                                        Str +='<td><input id="c-original_number" class="form-control" name="row[item]['+m+'][change_number]" type="text" value="'+Math.round(newItem.qty_ordered)+'"></td>';
+                                        Str +='<td><input id="c-original_number" class="form-control" name="row[item]['+m+'][original_number]"  type="text" value="'+Math.round(newItem.qty_ordered)+'"></td>';
                                         Str += '</tr>';
                                     }
                                     Str+='</table>'+

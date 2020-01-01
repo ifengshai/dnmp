@@ -293,7 +293,6 @@
                     <tr>
                         <th>原始SKU</th>
                         <th>原始数量</th>
-                        <th>取消后数量</th>
                     </tr>
                     {foreach name="taskChangeSku" item="sku" key="k"}
                     <tr>
@@ -302,7 +301,6 @@
                             <input id="c-original_sku" class="form-control" name="row[item][{$k+1}][original_sku]" type="text" value="{$sku.original_sku}">
                         </td>
                         <td><input id="c-original_number" class="form-control" name="row[item][{$k+1}][original_number]" type="text" value="{$sku.original_number}"></td>
-                        <td><input id="c-original_number" class="form-control" name="row[item][{$k+1}][change_number]" type="text" value="{$sku.change_number}"></td>
                     </tr>
                     {/foreach}
                 </table>
