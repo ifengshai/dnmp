@@ -110,7 +110,7 @@ class Index extends Backend
                 $this->error($validate->getError(), $url, ['token' => $this->request->token()]);
             }
             AdminLog::setTitle(__('Login'));
-            $result = $this->auth->login($username, $password, $keeplogin ? 86400 : 0);
+            $result = $this->auth->login($username, $password, $keeplogin ? 86400 : 7200);
             if ($result === true) {
                 Hook::listen("admin_login_after", $this->request);
                 $this->success(__('Login successful'), $url, ['url' => $url, 'id' => $this->auth->id, 'username' => $username, 'avatar' => $this->auth->avatar]);

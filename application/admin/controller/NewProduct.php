@@ -187,7 +187,7 @@ class NewProduct extends Backend
                             $supplier_data['skuid'] = $skuId[$k];
                             $supplier_data['supplier_id'] = $data['supplier_id'];
                             $supplier_data['createtime'] = date("Y-m-d H:i:s", time());
-                            $supplier_data['create_person'] = session('admin.username');
+                            $supplier_data['create_person'] = session('admin.nickname');
                             $supplier_data['link'] = $data['link'];
                             $supplier_data['is_matching'] = 1;
                             Db::name('supplier_sku')->insert($supplier_data);
