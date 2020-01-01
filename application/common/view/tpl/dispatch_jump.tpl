@@ -63,7 +63,7 @@
                     if((resultOne != false) && (resultTwo != false)){
                         parent.parent.location.href = history.length <= 1 ? "/" : "{$url}"; 
                     }else{
-                        parent.location.href = history.length <= 1 ? "/" : "{$url}";  
+                        parent.location.href = history.length <= 1 ? "{$url}" : "{$url}";  
                     }
                         clearInterval(interval);
                 }
@@ -78,7 +78,7 @@
          if((resultOne != false) && (resultOne != false)){
              parent.parent.location.href = history.length <= 1 ? "/" : "{$url}";
          }else{
-             parent.location.href = history.length <= 1 ? "/" : "{$url}";
+             parent.location.href = history.length <= 1 ? "{$url}" : "{$url}";
          }     
      };
      document.getElementById("jump-to-index").onclick=function(){
