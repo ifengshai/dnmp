@@ -597,5 +597,7 @@ class Check extends Backend
         $ids = input('ids');
         //查询质检单
         
+
+        return $this->view->fetch();
     }
 }
