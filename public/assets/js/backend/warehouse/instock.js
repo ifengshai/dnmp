@@ -28,18 +28,19 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','bootstrap-tab
                     [
                         { checkbox: true },
                         { field: 'id', title: __('Id') },
-                        { field: 'in_stock_number', title: __('In_stock_number') },
-                        { field: 'instocktype.name', title: __('In_stock_type') },
-                        { field: 'checkorder.check_order_number', title: __('质检单号') },
-                        { field: 'order_number', title: __('Order_number') },
-                        { field: 'remark', title: __('Remark') },
+                        { field: 'in_stock_number', title: __('In_stock_number'), operate: 'like' },
+                        { field: 'instocktype.name', title: __('In_stock_type'), operate: 'like'  },
+                        { field: 'checkorder.check_order_number', title: __('质检单号'), operate: 'like' },
+                        { field: 'order_number', title: __('Order_number'), operate: 'like' },
+                        { field: 'remark', title: __('Remark'), operate: false },
                         {
                             field: 'status', title: __('Status'), custom: { 0: 'success', 1: 'yellow', 2: 'blue', 3: 'danger', 4: 'gray' },
                             searchList: { 0: '新建', 1: '待审核', 2: '已审核', 3: '已拒绝', 4: '已取消' },
                             formatter: Table.api.formatter.status
                         },
                         { field: 'createtime', title: __('Createtime'), operate: 'RANGE', addclass: 'datetimerange' },
-                        { field: 'create_person', title: __('Create_person') },
+                        { field: 'create_person', title: __('Create_person') , operate: 'like'},
+                        { field: 'sku', title: __('sku'), operate: 'like', visible: false },
                         {
                             field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [
                                 {
