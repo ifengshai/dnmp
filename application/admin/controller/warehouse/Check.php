@@ -59,8 +59,17 @@ class Check extends Backend
                 $map['check.id'] = ['in', $ids];
                 unset($filter['sku']);
                 $this->request->get(['filter' => json_encode($filter)]);
-            } 
+            }
 
+            //是否存在需要退回产品
+            if ($filter['is_process'] || $filter['is_process'] == '0') {
+                
+                $smap['unqualified_num'] = $filter['is_process'] == 1 ? ['>', 0] : ['=', 0];
+                $ids = $this->check_item->where($smap)->column('check_id');
+                $map['check.id'] = ['in', $ids];
+                unset($filter['is_process']);
+                $this->request->get(['filter' => json_encode($filter)]);
+            }
 
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
@@ -76,6 +85,7 @@ class Check extends Backend
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
+            
 
             $list = collection($list)->toArray();
             $result = array("total" => $total, "rows" => $list);
@@ -194,7 +204,7 @@ class Check extends Backend
             $this->assign('info', $info);
         }
 
-        
+
         //查询供应商
         $supplier = new \app\admin\model\purchase\Supplier;
         $data = $supplier->getSupplierData();
@@ -501,7 +511,7 @@ class Check extends Backend
                         $check = new \app\admin\model\warehouse\Check;
                         //总到货数量
                         $all_arrivals_num = $check->hasWhere('checkItem')->where($check_map)->group('Check.purchase_id')->sum('arrivals_num');
-                       
+
                         //查询总采购数量
                         $purchaseItem = new \app\admin\model\purchase\PurchaseOrderItem;
                         $all_purchase_num = $purchaseItem->where('purchase_id', $v['purchase_id'])->sum('purchase_num');
@@ -577,5 +587,15 @@ class Check extends Backend
         } else {
             $this->error('404 Not found');
         }
+    }
+
+    /**
+     * 批量生成退销单
+     */
+    public function add_return_order()
+    {
+        $ids = input('ids');
+        //查询质检单
+        
     }
 }

@@ -32,8 +32,7 @@ class PurchaseOrder extends Backend
      * @var \app\admin\model\purchase\PurchaseOrder
      */
     protected $model = null;
-    protected $relationSearch = true;
-
+    
     /**
      * 无需登录的方法,同时也就不需要鉴权了
      * @var array
@@ -58,6 +57,8 @@ class PurchaseOrder extends Backend
      */
     public function index()
     {
+        $this->relationSearch = true;
+        
         //设置过滤方法
         $this->request->filter(['strip_tags']);
         if ($this->request->isAjax()) {

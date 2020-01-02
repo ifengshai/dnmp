@@ -48,6 +48,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-se
                         { field: 'create_person', title: __('Create_person') },
                         { field: 'sku', title: __('sku'), operate: 'like', visible: false },
                         {
+                            field: 'is_process', title: __('是否需要处理'), custom: { 0: 'danger', 1: 'success' },
+                            searchList: { 0: '否', 1: '是' }, visible: false,
+                            formatter: Table.api.formatter.status
+                        },
+                        {
                             field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [
                                 {
                                     name: 'submitAudit',
@@ -194,6 +199,16 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-se
                     table.bootstrapTable('refresh');
                 });
             })
+
+
+            //批量生成退销单
+            $(document).on('click', '.btn-matching', function () {
+                var ids = Table.api.selectedids(table);
+                Backend.api.open('warehouse/check/add_return_order/ids/' + ids, '批量生成退销单', { area: ["80%", "60%"] });
+
+            });
+
+
         },
         add: function () {
             Controller.api.bindevent(function () { });
@@ -226,6 +241,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-se
                 $(this).parent().parent().remove();
             })
 
+        },
+        add_return_order: function () {
+            Controller.api.bindevent();
         },
         uploads: function () {
             Controller.api.bindevent(function (data, ret) {
