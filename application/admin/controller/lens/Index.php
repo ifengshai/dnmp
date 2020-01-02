@@ -24,7 +24,7 @@ class Index extends Backend
      * 无需鉴权的方法,但需要登录
      * @var array
      */
-    protected $noNeedRight = ['add','edit','lens_edit','import','import_xls_order'];
+    protected $noNeedRight = ['add', 'edit', 'lens_edit', 'import', 'import_xls_order'];
 
 
     /**
@@ -400,10 +400,10 @@ class Index extends Backend
             }
 
             $cyl = $v[3] * 1;
-            
+
             if ($cyl > 0 || $cyl < -4) {
                 $this->error('数据异常！！CYL不能大于0并且小于-4！！');
-            } 
+            }
             if ($cyl < 0) {
                 $cyl = number_format($cyl, 2);
             } else {
@@ -429,7 +429,7 @@ class Index extends Backend
                 $params[$k]['create_person'] = session('admin.nickname');
             }
         }
-        
+
         $result = $this->model->allowField(true)->saveAll($params);
         if ($result) {
             $this->success('导入成功！！');
@@ -546,30 +546,30 @@ class Index extends Backend
         foreach ($data as $k => $v) {
             $lens_type = trim($v[8]);
             //如果ADD为真  sph = sph + ADD;
-            if ($v[7]) {
-                $sph = $v[4] * 1 + $v[7] * 1;
+            $sph = $v[4];
+            $cyl = $v[5];
+            if ($sph) {
+                $sph = $sph * 1;
+                if ($v[7]) {
+                    $sph = $sph + $v[7] * 1;
+                }
+                
+                //如果cyl 为+;则sph = sph + cyl;cyl 正号变为负号
+                if ($cyl && $cyl * 1 > 0) {
+                    $sph = $sph + $cyl * 1;
+                    $cyl = '-' . number_format($cyl * 1, 2);
+                } else {
+                    if ($cyl) {
+                        $cyl = number_format($cyl * 1, 2);
+                    } 
+                }
+                
                 if ($sph > 0) {
                     $sph = '+' . number_format($sph, 2);
                 } else {
                     $sph = number_format($sph, 2);
                 }
-            } else {
-                $sph = $v[4];
             }
-            //如果cyl 为+;则sph = sph + cyl;cyl 正号变为负号
-
-            if ($v[5] && $v[5] * 1 > 0) {
-                $sph = $sph * 1 + $v[5] * 1;
-                if ($sph > 0) {
-                    $sph = '+' . number_format($sph, 2);
-                } else {
-                    $sph = number_format($sph, 2);
-                }
-                $cyl = '-' . number_format($v[5] * 1, 2);
-            } else {
-                $cyl = $v[5];
-            }
-
 
             if (!$cyl || $cyl * 1 == 0) {
                 $cyl = '+0.00';

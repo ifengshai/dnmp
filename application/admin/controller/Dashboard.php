@@ -554,13 +554,12 @@ class Dashboard extends Backend
     /**
      * 处理采购单旧数据
      */
-    protected function purchase_test()
+    public function purchase_test()
     {
         set_time_limit(0);
-        $start = '2019-07-01 00:00:00';
-        $end = '2019-09-30 02:17:59';
+        
         $map['a.is_visable'] = 1;
-        $map['a.created_at'] = ['between', [$start, $end]];
+        $map['a.id'] = ['between', [10485, 10803]];
         $res = Db::table('zeelool_purchase')
             ->alias('a')
             ->where($map)->cache(3600)->select();
