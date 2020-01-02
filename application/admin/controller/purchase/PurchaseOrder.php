@@ -32,7 +32,7 @@ class PurchaseOrder extends Backend
      * @var \app\admin\model\purchase\PurchaseOrder
      */
     protected $model = null;
-    protected $relationSearch = null;
+    protected $relationSearch = true;
 
     /**
      * 无需登录的方法,同时也就不需要鉴权了
@@ -65,14 +65,29 @@ class PurchaseOrder extends Backend
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
+
+            //自定义sku搜索
+            $filter = json_decode($this->request->get('filter'), true);
+            if ($filter['sku']) {
+                $smap['sku'] = ['like', '%' . $filter['sku'] . '%'];
+                $ids = $this->purchase_order_item->where($smap)->column('purchase_id');
+                $map['purchase_order.id'] = ['in', $ids];
+                unset($filter['sku']);
+                $this->request->get(['filter' => json_encode($filter)]);
+            } 
+            
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
+                ->with(['supplier'])
                 ->where($where)
+                ->where($map)
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->model
+                ->with(['supplier'])
                 ->where($where)
+                ->where($map)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
