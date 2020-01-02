@@ -968,7 +968,7 @@ class PurchaseOrder extends Backend
                 ->group('PurchaseOrder.id')
                 ->column('PurchaseOrder.id');
             echo $purchase->getLastSql();
-            dump($ids);
+           
 
             //查询留样库存
             //查询实际采购信息 查询在途库存 = 采购数量 减去 到货数量
@@ -981,6 +981,8 @@ class PurchaseOrder extends Backend
                 ->where($check_map)
                 ->group('sku')
                 ->column('sum(arrivals_num) as arrivals_num', 'sku');
+
+            echo $check->getLastSql();
 
             //查询生产周期
             $supplier_sku = new \app\admin\model\purchase\SupplierSku;
