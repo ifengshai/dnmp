@@ -700,7 +700,7 @@ class PurchaseOrder extends Backend
         foreach ($data as $k => $v) {
             //匹配SKU
             $params['sku'] = (new SupplierSku())->getSkuData($v['skuid']);
-            $this->purchase_order_item->allowField(true)->save($params, ['id' => $v['id']]);
+            $this->purchase_order_item->allowField(true)->isUpdate(true, ['id' => $v['id']])->data($params)->save();
         }
         $this->success();
     }

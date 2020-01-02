@@ -554,11 +554,11 @@ class Dashboard extends Backend
     /**
      * 处理采购单旧数据
      */
-    public function purchase_test()
+    protected function purchase_test()
     {
         set_time_limit(0);
-        $start = date("Y-m-d", strtotime("-3 month"));
-        $end = date("Y-m-d", time()+86400);
+        $start = '2019-07-01 00:00:00';
+        $end = '2019-09-30 02:17:59';
         $map['a.is_visable'] = 1;
         $map['a.created_at'] = ['between', [$start, $end]];
         $res = Db::table('zeelool_purchase')
@@ -577,6 +577,11 @@ class Dashboard extends Backend
                 $list['purchase_type'] = 2;
             } else {
                 $list['purchase_type'] = 1;
+            }
+
+            $count = Db::table('fa_purchase_order')->where('old_purchase_id',$v['id'])->count();
+            if ($count > 0) {
+                continue;
             }
 
             $list['purchase_remark'] = $v['purchase_remark'];

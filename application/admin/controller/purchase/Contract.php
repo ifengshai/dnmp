@@ -104,7 +104,7 @@ class Contract extends Backend
                         $this->error('sku不能为空！！');
                     }
 
-                    $params['create_person'] = session('admin.username');
+                    $params['create_person'] = session('admin.nickname');
                     $params['createtime'] = date('Y-m-d H:i:s', time());
                     $result = $this->model->allowField(true)->save($params);
 
@@ -490,12 +490,12 @@ class Contract extends Backend
                     if (!isset($val['admin_id']) || empty($val['admin_id'])) {
                         $val['admin_id'] = $auth->isLogin() ? $auth->id : 0;
                     }
-                    $val['create_person'] = session('admin.username');
+                    $val['create_person'] = session('admin.nickname');
                     $val['createtime'] = date('Y-m-d H:i:s', time());
                 }
             } else {
                 foreach ($insert as &$val) {
-                    $val['create_person'] = session('admin.username');
+                    $val['create_person'] = session('admin.nickname');
                     $val['createtime'] = date('Y-m-d H:i:s', time());
                 }
             }
