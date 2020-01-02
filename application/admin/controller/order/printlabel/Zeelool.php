@@ -750,7 +750,6 @@ order by sfoi.order_id desc;";
         $spreadsheet->getActiveSheet()->getColumnDimension('S')->setWidth(16);
         $spreadsheet->getActiveSheet()->getColumnDimension('T')->setWidth(16);
 
-
         //自动换行
         // $spreadsheet->getActiveSheet()->getAlignment()->setWrapText(true);
         // $spreadsheet->getActiveSheet()->getStyle('K1')->getAlignment()->setWrapText(true);
