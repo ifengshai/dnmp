@@ -470,7 +470,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                         { field: 'stock', title: __('实时库存'), operate: false },
                         { field: 'purchase_qty', title: __('在途库存'), operate: false },
                         { field: 'replenish_num', title: __('建议补货量'), operate: false },
-                        { field: 'createtime', title: __('上架时间'), operate: 'RANGE', addclass: 'datetimerange' },
+                        { field: 'created_at', title: __('上架时间'), operate: 'RANGE', addclass: 'datetimerange' },
 
                     ]
                 ]
