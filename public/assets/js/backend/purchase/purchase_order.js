@@ -442,7 +442,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
             table.bootstrapTable({
                 url: $.fn.bootstrapTable.defaults.extend.index_url,
                 pk: 'id',
-                sortName: 'createtime',
+                sortName: 'num',
                 sortOrder: 'desc',
                 columns: [
                     [
