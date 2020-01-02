@@ -136,9 +136,6 @@ class SaleAfterTask extends Backend
             }
             if ($params) {
                 $params = $this->preExcludeFields($params);
-                // echo '<pre>';
-                // var_dump($params);
-                // exit;
                 if ($this->dataLimit && $this->dataLimitFieldAutoFill) {
                     $params[$this->dataLimitField] = $this->auth->id;
                 }
@@ -155,9 +152,14 @@ class SaleAfterTask extends Backend
                     $params['create_person'] = session('admin.nickname'); //创建人
                     $params['create_time']   = date("Y-m-d H:i:s",time());
                     //$result = $this->model->allowField(true)->save($params);
-                    $data = $params;
-                    unset($data['task_remark']);
-                    $resultId = Db::name('sale_after_task')->insertGetId($data);
+                    $taskData = $params;
+                    unset($taskData['task_remark']);
+                    if(0<$taskData['refund_money']){
+                        $taskData['is_refund'] = 2;
+                    }else{
+                        $taskData['is_refund'] = 1;
+                    }
+                    $resultId = Db::name('sale_after_task')->insertGetId($taskData);
                     Db::commit();
                 } catch (ValidateException $e) {
                     Db::rollback();
@@ -210,6 +212,11 @@ class SaleAfterTask extends Backend
             $params = $this->request->post("row/a");
             if ($params) {
                 $params = $this->preExcludeFields($params);
+                if(0<$params['refund_money']){
+                    $params['is_refund'] = 2;
+                }else{
+                    $params['is_refund'] = 1;
+                }
                 $result = false;
                 Db::startTrans();
                 try {
@@ -444,9 +451,6 @@ class SaleAfterTask extends Backend
      */
     public function handle_task($ids=null){
         $row = $this->model->get($ids);
-        // echo '<pre>';
-        // var_dump($row);
-        // exit;
         if (!$row) {
             $this->error(__('No Results were found'));
         }
@@ -465,6 +469,11 @@ class SaleAfterTask extends Backend
             unset($params['id']);
             if ($params) {
                 $params = $this->preExcludeFields($params);
+                if(0<$params['refund_money']){
+                    $params['is_refund'] = 2;
+                }else{
+                    $params['is_refund'] = 1;
+                }
                 $result = false;
                 Db::startTrans();
                 try {

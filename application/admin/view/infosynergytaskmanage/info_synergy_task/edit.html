@@ -170,6 +170,34 @@
         </div> 
     </div>
     <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Refund_money')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-refund_money"  class="form-control" name="row[refund_money]" type="number" value="{$row.refund_money|htmlentities}">
+        </div>
+        <label class="control-label col-xs-12 col-sm-2">{:__('Make_up_price_order')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-make_up_price_order"  data-source="problem/index" class="form-control" name="row[make_up_price_order]" type="text" value="{$row.make_up_price_order|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Refund_way')}:</label>
+            <div class="col-xs-12 col-sm-3">
+                <select  id="c-refund_way" data-rule="required" class="form-control selectpicker" type="text" name="row[refund_way]">
+                    <option value="0">请选择..</option>
+                    {if $row.refund_way eq 'paypal'}
+                    <option value="paypal" selected>paypal</option>
+                    {else/}
+                    <option value="paypal">paypal</option>
+                    {/if}
+                    {if $row.refund_way eq 'credit_card'}
+                    <option value="credit_card" selected>credit_card</option>
+                    {else/}
+                    <option value="credit_card">credit_card</option>
+                    {/if}
+                </select>
+        </div>   
+    </div>
+    <div class="form-group">
         <div class="form-group">
             <label class="control-label col-xs-12 col-sm-2">{:__('Synergy_task_id')}:</label>
         </div>
