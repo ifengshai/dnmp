@@ -968,6 +968,8 @@ class PurchaseOrder extends Backend
                 ->group('PurchaseOrder.id')
                 ->column('PurchaseOrder.id');
 
+            dump($ids);
+
             //查询留样库存
             //查询实际采购信息 查询在途库存 = 采购数量 减去 到货数量
             $check_map['status'] = 2;
@@ -989,9 +991,8 @@ class PurchaseOrder extends Backend
 
 
             dump($purchase_list);
-            dump($check_list);die;
+            dump($check_list);
 
-            
             /**
              * 日均销量：A+ 和 A等级，日均销量变动较大，按照2天日均销量补；
              * B和C，C+等级按照5天的日均销量来补货;
@@ -1031,6 +1032,9 @@ class PurchaseOrder extends Backend
                 //$res[$k]['out_of_stock_num'] = $sku_list[$v['true_sku']]['num'];
 
             }
+            dump($list);
+            die;
+
             unset($v);
 
             $result = array("total" => $total, "rows" => $list);
