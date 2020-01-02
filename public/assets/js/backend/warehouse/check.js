@@ -1,4 +1,4 @@
-define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-select','bootstrap-table-jump-to'], function ($, undefined, Backend, Table, Form) {
+define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-select', 'bootstrap-table-jump-to'], function ($, undefined, Backend, Table, Form) {
 
     var Controller = {
         index: function () {
@@ -30,9 +30,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-se
                         { field: 'id', title: __('Id') },
                         { field: 'check_order_number', title: __('Check_order_number') },
                         { field: 'type', title: __('Type'), custom: { 1: 'success', 2: 'success' }, searchList: { 1: '采购质检', 2: '退货质检' }, formatter: Table.api.formatter.status },
-                        { field: 'purchaseorder.purchase_number', title: __('Purchase_id') },
-                        { field: 'orderreturn.return_order_number', title: __('退货单号') },
-                        { field: 'supplier.supplier_name', title: __('Supplier_id') },
+                        { field: 'purchaseorder.purchase_number', title: __('Purchase_id'), operate: 'like' },
+                        { field: 'orderreturn.return_order_number', title: __('退货单号'), operate: 'like' },
+                        { field: 'supplier.supplier_name', title: __('Supplier_id'), operate: 'like' },
                         { field: 'remark', title: __('Remark'), operate: false },
                         {
                             field: 'status', title: __('Status'), custom: { 0: 'success', 1: 'yellow', 2: 'blue', 3: 'danger', 4: 'gray' },
@@ -46,6 +46,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-se
                         },
                         { field: 'createtime', title: __('Createtime'), operate: 'RANGE', addclass: 'datetimerange' },
                         { field: 'create_person', title: __('Create_person') },
+                        { field: 'sku', title: __('sku'), operate: 'like', visible: false },
                         {
                             field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [
                                 {
@@ -143,7 +144,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-se
                                     },
                                     visible: function (row) {
                                         //返回true时按钮显示,返回false隐藏
-                                        if (row.status == 2 &&　row.is_stock == 0) {
+                                        if (row.status == 2 && row.is_stock == 0) {
                                             return true;
                                         } else {
                                             return false;
@@ -195,7 +196,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-se
             })
         },
         add: function () {
-            Controller.api.bindevent(function(){});
+            Controller.api.bindevent(function () { });
             //上传文件
             $(document).on('click', '.pluploads', function () {
                 var _this = $(this);
@@ -391,19 +392,19 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-se
                         var not_quantity_num = arrivals_num * 1 - quantity_num * 1;
 
                         $(this).parent().next().next().next().find('input').val(not_quantity_num);
-                        if (arrivals_num*1 > 0) {
-                            $(this).parent().next().next().next().next().find('input').val((quantity_num*1 / arrivals_num * 100).toFixed(2));
+                        if (arrivals_num * 1 > 0) {
+                            $(this).parent().next().next().next().next().find('input').val((quantity_num * 1 / arrivals_num * 100).toFixed(2));
                         }
-                        
+
                     } else if (type == 2) {
                         var arrivals_num = $(this).val();
                         var quantity_num = $(this).parent().parent().find('.quantity_num').val();
                         var not_quantity_num = arrivals_num * 1 - quantity_num * 1;
                         $(this).parent().parent().find('.unqualified_num').val(not_quantity_num);
-                        if (arrivals_num*1 > 0) {
-                            $(this).parent().parent().find('.quantity_rate').val((quantity_num*1 / arrivals_num * 100).toFixed(2));
+                        if (arrivals_num * 1 > 0) {
+                            $(this).parent().parent().find('.quantity_rate').val((quantity_num * 1 / arrivals_num * 100).toFixed(2));
                         }
-                       
+
                     }
 
                 })
@@ -419,19 +420,19 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-se
                         var not_quantity_num = arrivals_num * 1 - quantity_num * 1;
 
                         $(this).parent().next().next().find('input').val(not_quantity_num);
-                        if (arrivals_num*1 > 0) {
-                            $(this).parent().next().next().next().find('input').val((quantity_num*1 / arrivals_num * 100).toFixed(2));
+                        if (arrivals_num * 1 > 0) {
+                            $(this).parent().next().next().next().find('input').val((quantity_num * 1 / arrivals_num * 100).toFixed(2));
                         }
-                        
+
                     } else if (type == 2) {
                         var arrivals_num = $(this).parent().parent().find('.arrivals_num').val();
                         var quantity_num = $(this).val();
                         var not_quantity_num = arrivals_num * 1 - quantity_num * 1;
                         $(this).parent().parent().find('.unqualified_num').val(not_quantity_num);
-                        if (arrivals_num*1 > 0) {
-                            $(this).parent().parent().find('.quantity_rate').val((quantity_num*1 / arrivals_num * 100).toFixed(2));
+                        if (arrivals_num * 1 > 0) {
+                            $(this).parent().parent().find('.quantity_rate').val((quantity_num * 1 / arrivals_num * 100).toFixed(2));
                         }
-                        
+
                     }
                 })
 
@@ -444,10 +445,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-se
                     var not_quantity_num = arrivals_num * 1 - quantity_num * 1;
 
                     $(this).parent().next().find('input').val(not_quantity_num);
-                    if (arrivals_num*1 > 0) {
-                        $(this).parent().next().next().find('input').val((quantity_num*1 / arrivals_num * 100).toFixed(2));
+                    if (arrivals_num * 1 > 0) {
+                        $(this).parent().next().next().find('input').val((quantity_num * 1 / arrivals_num * 100).toFixed(2));
                     }
-                   
+
                 })
 
 
@@ -558,7 +559,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-se
                             var shtml = ' <tr><th>SKU</th><th>退货数量</th><th>到货数量</th><th>合格数量</th><th>不合格数量</th><th>合格率</th><th>备注</th><th>上传图片</th><th>操作</th></tr>';
                             $('.caigou table tbody').html('');
                             console.log(data);
-                            for (var i in data) { 
+                            for (var i in data) {
                                 var sku = data[i].return_sku;
                                 if (!sku) {
                                     sku = '';

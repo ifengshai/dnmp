@@ -1,4 +1,4 @@
-define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','bootstrap-table-jump-to'], function ($, undefined, Backend, Table, Form) {
+define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-table-jump-to'], function ($, undefined, Backend, Table, Form) {
 
     var Controller = {
         index: function () {
@@ -28,17 +28,18 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','bootstrap-tab
                     [
                         { checkbox: true },
                         { field: 'id', title: __('Id') },
-                        { field: 'out_stock_number', title: __('Out_stock_number') },
-                        { field: 'outstocktype.name', title: __('Type_id') },
-                        { field: 'order_number', title: __('Order_number') },
-                        { field: 'remark', title: __('Remark') },
+                        { field: 'out_stock_number', title: __('Out_stock_number'), operate: 'like' },
+                        { field: 'outstocktype.name', title: __('Type_id'), operate: 'like' },
+                        { field: 'order_number', title: __('Order_number'), operate: 'like' },
+                        { field: 'remark', title: __('Remark'), operate: false },
                         {
                             field: 'status', title: __('Status'), custom: { 0: 'success', 1: 'yellow', 2: 'blue', 3: 'danger', 4: 'gray' },
                             searchList: { 0: '新建', 1: '待审核', 2: '已审核', 3: '已拒绝', 4: '已取消' },
                             formatter: Table.api.formatter.status
                         },
                         { field: 'createtime', title: __('Createtime'), operate: 'RANGE', addclass: 'datetimerange' },
-                        { field: 'create_person', title: __('Create_person') },
+                        { field: 'create_person', title: __('Create_person'), operate: 'like' },
+                        { field: 'sku', title: __('sku'), operate: 'like', visible: false },
                         {
                             field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [
                                 {
@@ -289,12 +290,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','bootstrap-tab
                             _this.parent().next().next().text(res.stock);
                             _this.parent().next().next().next().text(res.occupy_stock);
                             _this.parent().next().next().next().next().text(res.available_stock);
-                        } 
+                        }
                     });
                 })
             }
         },
-        out_stock_order:function(){
+        out_stock_order: function () {
             // 初始化表格参数配置
             Table.api.init({
                 showJumpto: true,
@@ -326,18 +327,18 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','bootstrap-tab
                 columns: [
                     [
                         { checkbox: true },
-                        { field: 'id', title: __('Id'),operate:false},
+                        { field: 'id', title: __('Id'), operate: false },
                         { field: 'out_stock_number', title: __('Financial_out_stock_number') },
-                        { field: 'outstocktype.name', title: __('Financial_type_id'),operate:false },
-                        { field: 'order_number', title: __('Financial_order_number'),operate:false },
+                        { field: 'outstocktype.name', title: __('Financial_type_id'), operate: false },
+                        { field: 'order_number', title: __('Financial_order_number'), operate: false },
                         //{ field: 'remark', title: __('Remark'),operate:false },
                         {
                             field: 'status', title: __('Status'), custom: { 0: 'success', 1: 'yellow', 2: 'blue', 3: 'danger', 4: 'gray' },
                             searchList: { 0: '新建', 1: '待审核', 2: '已审核', 3: '已拒绝', 4: '已取消' },
-                            operate:false,
+                            operate: false,
                             formatter: Table.api.formatter.status
                         },
-                        {field:'total_money',title:__('Financial_total_money'),operate:false},
+                        { field: 'total_money', title: __('Financial_total_money'), operate: false },
                         { field: 'createtime', title: __('Createtime'), operate: 'RANGE', addclass: 'datetimerange' },
                         //{ field: 'create_person', title: __('Create_person'),operate:false },
                         {
@@ -431,7 +432,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','bootstrap-tab
                 ]
             });
         },
-        out_stock_order_detail:function(){
+        out_stock_order_detail: function () {
             Form.api.bindevent($("form[role=form]"));
         }
     };
