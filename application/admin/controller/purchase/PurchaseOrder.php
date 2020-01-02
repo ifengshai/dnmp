@@ -980,7 +980,6 @@ class PurchaseOrder extends Backend
                 ->group('sku')
                 ->column('sum(arrivals_num) as arrivals_num', 'sku');
 
-
             //查询生产周期
             $supplier_sku = new \app\admin\model\purchase\SupplierSku;
             $supplier_where['sku'] = ['in',$skus];
@@ -989,7 +988,10 @@ class PurchaseOrder extends Backend
             $supplier_res = $supplier_sku->where($supplier_where)->column('product_cycle', 'sku');
 
 
+            dump($purchase_list);
+            dump($check_list);die;
 
+            
             /**
              * 日均销量：A+ 和 A等级，日均销量变动较大，按照2天日均销量补；
              * B和C，C+等级按照5天的日均销量来补货;
