@@ -85,6 +85,11 @@ class InfoSynergyTask extends Backend
                 } else {
                     $params['rep_id'] = $params['rep_id'][0];
                 }
+                if(0<$params['refund_money']){
+                    $params['is_refund'] = 2;
+                }else{
+                    $params['is_refund'] = 1;
+                }
                 if ($this->dataLimit && $this->dataLimitFieldAutoFill) {
                     $params[$this->dataLimitField] = $this->auth->id;
                 }
@@ -224,6 +229,11 @@ class InfoSynergyTask extends Backend
                 $params['rep_id']  = implode('+', $params['rep_id']);
             } else {
                 $params['rep_id'] = $params['rep_id'][0];
+            }
+            if(0<$params['refund_money']){
+                $params['is_refund'] = 2;
+            }else{
+                $params['is_refund'] = 1;
             }
             // echo '<pre>';
             // var_dump($lens);
@@ -556,6 +566,11 @@ class InfoSynergyTask extends Backend
                     $params['rep_id']  = implode('+', $params['rep_id']);
                 } else {
                     $params['rep_id'] = $params['rep_id'][0];
+                }
+                if(0<$params['refund_money']){
+                    $params['is_refund'] = 2;
+                }else{
+                    $params['is_refund'] = 1;
                 }               
                 $result = false;
                 Db::startTrans();
