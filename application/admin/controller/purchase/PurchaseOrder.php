@@ -967,7 +967,7 @@ class PurchaseOrder extends Backend
                 ->where($purchase_map)
                 ->group('PurchaseOrder.id')
                 ->column('PurchaseOrder.id');
-
+            echo $purchase->getLastSql();
             dump($ids);
 
             //查询留样库存
