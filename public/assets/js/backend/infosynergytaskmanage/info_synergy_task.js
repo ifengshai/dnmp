@@ -49,6 +49,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','bootstrap-table-jump-
                             custom: { 0: 'blue', 1: 'yellow', 2: 'success',3:'red'},
                             formatter: Table.api.formatter.status
                         },
+                        { field: 'is_refund',
+                        title:__('Is_refund'),
+                        searchList:{1:'无',2:'有'},
+                        custom: { 1: 'blue', 2: 'red'},
+                        formatter: Table.api.formatter.status
+                        },
                         {field: 'dept', title: __('Dept_id')},
                         {field: 'rep', title: __('Rep_id')},
                         {field: 'prty_id', title: __('Prty_id'),searchList: {0:'未选择',1:'高级',2:'中级',3:'低级'},formatter: Controller.api.formatter.prtyDevice,operate:false},
