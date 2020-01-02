@@ -956,7 +956,7 @@ class PurchaseOrder extends Backend
             $purchase = new \app\admin\model\purchase\PurchaseOrder;
             $hasWhere['sku'] = ['in', $skus];
             $purchase_map['purchase_status'] = ['in', [2, 5, 6, 7]];
-            $purchase_map['stock_status'] = ['in', [0, 1]];
+           
             $purchase_list = $purchase->hasWhere('purchaseOrderItem', $hasWhere)
                 ->where($purchase_map)
                 ->group('sku')
@@ -967,8 +967,7 @@ class PurchaseOrder extends Backend
                 ->where($purchase_map)
                 ->group('PurchaseOrder.id')
                 ->column('PurchaseOrder.id');
-            echo $purchase->getLastSql();
-           
+            
 
             //查询留样库存
             //查询实际采购信息 查询在途库存 = 采购数量 减去 到货数量
@@ -982,18 +981,12 @@ class PurchaseOrder extends Backend
                 ->group('sku')
                 ->column('sum(arrivals_num) as arrivals_num', 'sku');
 
-            echo $check->getLastSql();
-
             //查询生产周期
             $supplier_sku = new \app\admin\model\purchase\SupplierSku;
             $supplier_where['sku'] = ['in',$skus];
             $supplier_where['status'] = 1;
             $supplier_where['label'] = 1;
             $supplier_res = $supplier_sku->where($supplier_where)->column('product_cycle', 'sku');
-
-
-            dump($purchase_list);
-            dump($check_list);
 
             /**
              * 日均销量：A+ 和 A等级，日均销量变动较大，按照2天日均销量补；
@@ -1034,9 +1027,7 @@ class PurchaseOrder extends Backend
                 //$res[$k]['out_of_stock_num'] = $sku_list[$v['true_sku']]['num'];
 
             }
-            dump($list);
-            die;
-
+     
             unset($v);
 
             $result = array("total" => $total, "rows" => $list);
