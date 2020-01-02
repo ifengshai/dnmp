@@ -54,6 +54,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','bootstrap-table-jump-
                         {field: 'prty_id', title: __('Prty_id'),searchList: {0:'未选择',1:'高级',2:'中级',3:'低级'},formatter: Controller.api.formatter.prtyDevice,operate:false},
                         {field: 'synergy_task_id', title: __('Synergy_task_id'),visible:false,operate:false},
                         {field: 'info_synergy_task_category.name', title: __('Synergy_task_id'),operate:false},
+                        {field: 'problem_desc', title: __('problem_desc'),formatter:Controller.api.formatter.getClear,operate:false},
                         {field: 'create_person', title: __('Create_person')},
                         {field: 'create_time', title: __('Create_time'), operate:'RANGE', addclass:'datetimerange'},
                         //{field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate}
@@ -184,6 +185,17 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','bootstrap-table-jump-
             });
             //为表格绑定事件
             Table.api.bindevent(table);
+            $(document).on('click',".problem_desc_info",function(){
+                var problem_desc = $(this).attr('name');
+                //Layer.alert(problem_desc);
+                Layer.open({
+                    closeBtn: 1,
+                    title: '问题描述',
+                    area: ['900px', '500px'],
+                    content:problem_desc
+                });
+                return false;
+            });
             //处理任务
             $(document).on('click','.btn-handle',function(){
                 var ids = Table.api.selectedids(table);
@@ -786,6 +798,27 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','bootstrap-table-jump-
                         str = '低级';
                     }
                     return str;
+                },
+                getClear:function(value){
+                    if (value == null || value == undefined) {
+                        return '';
+                    } else {
+                         var tem = value;
+                            // .replace(/&lt;/g, "<")
+                            // .replace(/&gt;/g, ">")
+                            // .replace(/&quot;/g, "\"")
+                            // .replace(/&apos;/g, "'")
+                            // .replace(/&amp;/g, "&")
+                            // .replace(/&nbsp;/g, '').replace(/<\/?.+?\/?>/g, '').replace(/<[^>]+>/g, "")
+                           //.replace(/<\/?.+?\/?>/g, '').replace(/<[^>]+>/g, "")
+                        if(tem.length<=10){
+                            //console.log(row.id);
+                            return tem;
+                        }else{
+                            return tem.substr(0, 10)+'<span class="problem_desc_info" name = "'+tem+'" style="color:red;">...</span>';
+
+                        }
+                    }
                 },
                 synergyOrderId:function(value){
                     var synergyOrderIdStr = '';

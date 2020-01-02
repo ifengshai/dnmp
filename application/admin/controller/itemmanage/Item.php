@@ -323,6 +323,7 @@ class Item extends Backend
                 $params = $this->preExcludeFields($params);
                 $itemName = $params['name'];
                 $itemColor = $params['color'];
+                $price     = $params['price'];
                 if (count($itemColor) != count(array_unique($itemColor))) {
                     $this->error('同一款商品的颜色值不能相同');
                 }
@@ -371,6 +372,7 @@ class Item extends Backend
                             $data['category_id'] = $params['category_id'];
                             $data['item_status'] = $params['item_status'];
                             $data['brand_id']    = $params['brand_id'];
+                            $data['price']       = $price[$k];
                             $data['frame_is_rimless'] = $params['shape'] == 1 ? 2 : 1;
                             $data['create_person'] = session('admin.nickname');
                             $data['create_time'] = date("Y-m-d H:i:s", time());
@@ -413,7 +415,6 @@ class Item extends Backend
                                 Db::connect('database.db_stock')->name('item_attribute')->insert($itemAttribute);
                             }
                         }
-
                         Db::commit();
                     } catch (ValidateException $e) {
                         Db::rollback();
@@ -574,6 +575,7 @@ class Item extends Backend
                 $params = $this->preExcludeFields($params);
                 $itemName = $params['name'];
                 $itemColor = $params['color'];
+                $price     = $params['price'];
                 if (count($itemColor) != count(array_unique($itemColor))) {
                     $this->error('同一款商品的颜色值不能相同');
                 }
@@ -590,6 +592,7 @@ class Item extends Backend
                     try {
                         foreach ($itemName as $k => $v) {
                             $data['name'] = $v;
+                            $data['price']       = $price[$k];
                             $data['item_status'] = $params['item_status'];
                             $data['create_person'] = session('admin.nickname');
                             $data['create_time'] = date("Y-m-d H:i:s", time());
