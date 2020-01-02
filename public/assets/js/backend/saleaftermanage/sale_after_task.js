@@ -651,7 +651,20 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui','custom-css','b
             Form.api.bindevent($("form[role=form]"));
             $(document).on('click', '.button_complete', function () {
                 $('#c-task_status').val(2);
-            })
+            });
+            //显示/隐藏三级问题
+            $(document).on('click','.issueLevel',function(){
+                var issueId = $(this).attr("id");
+                var vals = $(this).offset().left+10;
+                var node = $('#display-'+issueId);
+                if(node.is(':hidden')){
+                    $('.three_level').hide();
+                    node.css("marginLeft",vals);
+                    node.show();
+                }else{
+                    node.hide();
+                }
+            });
         }
     };
     return Controller;
