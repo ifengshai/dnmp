@@ -427,7 +427,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                 showJumpto: true,
                 searchFormVisible: true,
                 pageSize: 10,
-                pageList: [10, 25, 50, 100],
+                pageList: [10, 25, 50, 100, 500, 2000],
                 extend: {
                     index_url: 'purchase/purchase_order/product_grade_list' + location.search,
                     table: 'product_grade_list',
