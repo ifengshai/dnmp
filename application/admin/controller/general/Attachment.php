@@ -123,7 +123,105 @@ class Attachment extends Backend
         $this->error(__('Parameter %s can not be empty', 'ids'));
     }
 
+    public function test()
+    {
+        $data = session('data_test');
+        $spreadsheet = new Spreadsheet();
+       
+        
+        //常规方式：利用setCellValue()填充数据
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("A1", "仓库SKU")
+            ->setCellValue("B1", "实时库存")
+            ->setCellValue("C1", "参考进价")
+            ->setCellValue("D1", "合计")
+            ->setCellValue("E1", "Zeelool_SKU");   //利用setCellValues()填充数据
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("F1", "Zeelool销量")
+            ->setCellValue("G1", "Voogueme_SKU");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("H1", "Voogueme销量")
+            ->setCellValue("I1", "Nihao_SKU");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("J1", "Nihao销量")
+            ->setCellValue("K1", "汇总销量");
+        // Rename worksheet
+        $spreadsheet->setActiveSheetIndex(0)->setTitle('仓库SKU');
 
+        $item = db('item')->where('is_del',1)->column('available_stock,price','sku');
+
+        foreach ($data as $key => $value) {
+
+            $spreadsheet->getActiveSheet()->setCellValue("A" . ($key * 1 + 2), $value[1]);
+            $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $item[$value[1]]['available_stock']);
+            $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 1 + 2), $item[$value[1]]['price']);
+            $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 1 + 2), $item[$value[1]]['available_stock'] *$item[$value[1]]['price'] );
+            $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), $value[2]);
+            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 1 + 2), $value[3]);
+            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 1 + 2), $value[4]);
+            $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 1 + 2), $value[5]);
+            $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 1 + 2), $value[6]);
+            $spreadsheet->getActiveSheet()->setCellValue("J" . ($key * 1 + 2), $value[7]);
+            $spreadsheet->getActiveSheet()->setCellValue("K" . ($key * 1 + 2), $value[8]);
+           
+        }
+
+        //设置宽度
+        $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('D')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('E')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('F')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('G')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('H')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('I')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('J')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('K')->setWidth(20);
+        
+
+       
+        //设置边框
+        $border = [
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, // 设置border样式
+                    'color'       => ['argb' => 'FF000000'], // 设置border颜色
+                ],
+            ],
+        ];
+
+    
+        $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
+        $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
+
+        // $spreadsheet->getActiveSheet()->getStyle('A1:Z'.$key)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $spreadsheet->getActiveSheet()->getStyle('A1:K' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $spreadsheet->getActiveSheet()->getStyle('A1:K' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+        
+       
+        // Set active sheet index to the first sheet, so Excel opens this as the first sheet
+        $spreadsheet->setActiveSheetIndex(0);
+        // return exportExcel($spreadsheet, 'xls', '登陆日志');
+        $format = 'xlsx';
+        $savename = 'SKU' . date("YmdHis", time());;
+        // dump($spreadsheet);
+
+        // if (!$spreadsheet) return false;
+        if ($format == 'xls') {
+            //输出Excel03版本
+            header('Content-Type:application/vnd.ms-excel');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xls";
+        } elseif ($format == 'xlsx') {
+            //输出07Excel版本
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xlsx";
+        }
+
+        //输出名称
+        header('Content-Disposition: attachment;filename="' . $savename . '.' . $format . '"');
+        //禁止缓存
+        header('Cache-Control: max-age=0');
+        $writer = new $class($spreadsheet);
+       
+        $writer->save('php://output');
+    }
     
     /**
      * 批量导入出库单
@@ -208,91 +306,9 @@ class Attachment extends Backend
             $this->error($exception->getMessage());
         }
 
-        $spreadsheet = new Spreadsheet();
-       
+
+        session('data_test',$data);
+
         
-        //常规方式：利用setCellValue()填充数据
-        $spreadsheet->setActiveSheetIndex(0)->setCellValue("A1", "仓库SKU")
-            ->setCellValue("B1", "实时库存")
-            ->setCellValue("C1", "Zeelool_SKU");   //利用setCellValues()填充数据
-        $spreadsheet->setActiveSheetIndex(0)->setCellValue("D1", "Zeelool销量")
-            ->setCellValue("E1", "Voogueme_SKU");
-        $spreadsheet->setActiveSheetIndex(0)->setCellValue("F1", "Voogueme销量")
-            ->setCellValue("G1", "Nihao_SKU");
-        $spreadsheet->setActiveSheetIndex(0)->setCellValue("H1", "Nihao销量")
-            ->setCellValue("I1", "汇总销量");
-        // Rename worksheet
-        $spreadsheet->setActiveSheetIndex(0)->setTitle('仓库SKU');
-
-        foreach ($data as $key => $value) {
-
-            $spreadsheet->getActiveSheet()->setCellValue("A" . ($key * 2 + 2), $value['created_at']);
-            $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 2 + 2), $value['increment_id']);
-            $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 2 + 2), $value['sku']);
-           
-        }
-
-        //设置宽度
-        $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(12);
-        $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(12);
-        $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(16);
-        $spreadsheet->getActiveSheet()->getColumnDimension('K')->setWidth(32);
-        $spreadsheet->getActiveSheet()->getColumnDimension('L')->setWidth(12);
-        $spreadsheet->getActiveSheet()->getColumnDimension('M')->setWidth(12);
-        $spreadsheet->getActiveSheet()->getColumnDimension('N')->setWidth(12);
-
-        $spreadsheet->getActiveSheet()->getColumnDimension('O')->setWidth(18);
-        $spreadsheet->getActiveSheet()->getColumnDimension('P')->setWidth(14);
-
-        $spreadsheet->getActiveSheet()->getColumnDimension('Q')->setWidth(14);
-        $spreadsheet->getActiveSheet()->getColumnDimension('R')->setWidth(14);
-        $spreadsheet->getActiveSheet()->getColumnDimension('S')->setWidth(16);
-        $spreadsheet->getActiveSheet()->getColumnDimension('T')->setWidth(16);
-
-       
-        //设置边框
-        $border = [
-            'borders' => [
-                'allBorders' => [
-                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, // 设置border样式
-                    'color'       => ['argb' => 'FF000000'], // 设置border颜色
-                ],
-            ],
-        ];
-
-    
-        $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
-        $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
-
-        // $spreadsheet->getActiveSheet()->getStyle('A1:Z'.$key)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-        $spreadsheet->getActiveSheet()->getStyle('A1:Z' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-        $spreadsheet->getActiveSheet()->getStyle('A1:Z' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
-        
-       
-        // Set active sheet index to the first sheet, so Excel opens this as the first sheet
-        $spreadsheet->setActiveSheetIndex(0);
-        // return exportExcel($spreadsheet, 'xls', '登陆日志');
-        $format = 'xlsx';
-        $savename = '订单打印处方' . date("YmdHis", time());;
-        // dump($spreadsheet);
-
-        // if (!$spreadsheet) return false;
-        if ($format == 'xls') {
-            //输出Excel03版本
-            header('Content-Type:application/vnd.ms-excel');
-            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xls";
-        } elseif ($format == 'xlsx') {
-            //输出07Excel版本
-            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xlsx";
-        }
-
-        //输出名称
-        header('Content-Disposition: attachment;filename="' . $savename . '.' . $format . '"');
-        //禁止缓存
-        header('Cache-Control: max-age=0');
-        $writer = new $class($spreadsheet);
-       
-        $writer->save('php://output');
     }
 }
