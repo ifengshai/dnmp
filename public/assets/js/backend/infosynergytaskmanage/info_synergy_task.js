@@ -173,12 +173,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','bootstrap-table-jump-
                      if(field == 'create_person'){
                         delete filter.rep_id;
                         filter[field] = value;
-                        op[field] = 'LIKE';
                     }else if(field == 'rep_id'){
                         delete filter.create_person;
                         filter[field] = value;
                         op[field] = 'LIKE';
                     }else{
+                        delete op.rep_id;
                         delete filter.rep_id;
                         delete filter.create_person;
                     }
