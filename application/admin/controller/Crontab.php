@@ -384,22 +384,22 @@ order by sfoi.item_id asc limit 1000";
                 echo '<br>执行失败';
             }
             //新增镜架是否无框
-            if($frameArr){
-                $whereMap['platform_sku'] = ['in',$frameArr];
+            if ($frameArr) {
+                $whereMap['platform_sku'] = ['in', $frameArr];
                 $whereMap['platform_type'] = 1;
                 $skuType = Db::connect('database.db_stock')->table('fa_item_platform_sku')->where($whereMap)->field('platform_sku,platform_frame_is_rimless')->select();
-                if($skuType){
+                if ($skuType) {
                     $skuType = collection($skuType)->toArray();
                     $frameRimless = [];
-                    foreach($skuType as $k =>$v){
-                        if(2 == $v['platform_frame_is_rimless']){
+                    foreach ($skuType as $k => $v) {
+                        if (2 == $v['platform_frame_is_rimless']) {
                             $frameRimless[] = $v['platform_sku'];
                         }
                     }
                 }
-                $wherePrescription['sku'] = ['in',$frameRimless];
-                $wherePrescription['order_id'] = ['in',$orderArr];
-                Db::connect('database.db_zeelool')->table('sales_flat_order_item_prescription')->where($wherePrescription)->update(['frame_type_is_rimless'=>2]);
+                $wherePrescription['sku'] = ['in', $frameRimless];
+                $wherePrescription['order_id'] = ['in', $orderArr];
+                Db::connect('database.db_zeelool')->table('sales_flat_order_item_prescription')->where($wherePrescription)->update(['frame_type_is_rimless' => 2]);
             }
         } else {
             echo '执行完毕！';
@@ -752,22 +752,22 @@ order by sfoi.item_id asc limit 1000";
                 echo '<br>执行失败';
             }
             //新增镜架是否无框
-            if($frameArr){
-                $whereMap['platform_sku'] = ['in',$frameArr];
+            if ($frameArr) {
+                $whereMap['platform_sku'] = ['in', $frameArr];
                 $whereMap['platform_type'] = 2;
                 $skuType = Db::connect('database.db_stock')->table('fa_item_platform_sku')->where($whereMap)->field('platform_sku,platform_frame_is_rimless')->select();
-                if($skuType){
+                if ($skuType) {
                     $skuType = collection($skuType)->toArray();
                     $frameRimless = [];
-                    foreach($skuType as $k =>$v){
-                        if(2 == $v['platform_frame_is_rimless']){
+                    foreach ($skuType as $k => $v) {
+                        if (2 == $v['platform_frame_is_rimless']) {
                             $frameRimless[] = $v['platform_sku'];
                         }
                     }
                 }
-                $wherePrescription['sku'] = ['in',$frameRimless];
-                $wherePrescription['order_id'] = ['in',$orderArr];
-                Db::connect('database.db_zeelool')->table('sales_flat_order_item_prescription')->where($wherePrescription)->update(['frame_type_is_rimless'=>2]);
+                $wherePrescription['sku'] = ['in', $frameRimless];
+                $wherePrescription['order_id'] = ['in', $orderArr];
+                Db::connect('database.db_zeelool')->table('sales_flat_order_item_prescription')->where($wherePrescription)->update(['frame_type_is_rimless' => 2]);
             }
         } else {
             echo '执行完毕！';
@@ -1120,22 +1120,22 @@ order by sfoi.item_id asc limit 1000";
                 echo '<br>执行失败';
             }
             //新增镜架是否无框
-            if($frameArr){
-                $whereMap['platform_sku'] = ['in',$frameArr];
+            if ($frameArr) {
+                $whereMap['platform_sku'] = ['in', $frameArr];
                 $whereMap['platform_type'] = 3;
                 $skuType = Db::connect('database.db_stock')->table('fa_item_platform_sku')->where($whereMap)->field('platform_sku,platform_frame_is_rimless')->select();
-                if($skuType){
+                if ($skuType) {
                     $skuType = collection($skuType)->toArray();
                     $frameRimless = [];
-                    foreach($skuType as $k =>$v){
-                        if(2 == $v['platform_frame_is_rimless']){
+                    foreach ($skuType as $k => $v) {
+                        if (2 == $v['platform_frame_is_rimless']) {
                             $frameRimless[] = $v['platform_sku'];
                         }
                     }
                 }
-                $wherePrescription['sku'] = ['in',$frameRimless];
-                $wherePrescription['order_id'] = ['in',$orderArr];
-                Db::connect('database.db_zeelool')->table('sales_flat_order_item_prescription')->where($wherePrescription)->update(['frame_type_is_rimless'=>2]);
+                $wherePrescription['sku'] = ['in', $frameRimless];
+                $wherePrescription['order_id'] = ['in', $orderArr];
+                Db::connect('database.db_zeelool')->table('sales_flat_order_item_prescription')->where($wherePrescription)->update(['frame_type_is_rimless' => 2]);
             }
         } else {
             echo '执行完毕！';
@@ -1189,7 +1189,7 @@ order by sfoi.item_id asc limit 1000";
         //查询线上已发货的采购单
         $purchase = new PurchaseOrder();
         $map['purchase_type'] = 2;
-        $map['purchase_status'] = ['>', 6];
+        $map['purchase_status'] = ['in', [6, 7]];
         $map['is_add_logistics'] = 0;
         $map['is_del'] = 1;
         $list = $purchase->where($map)->limit(50)->select();
@@ -1235,7 +1235,7 @@ order by sfoi.item_id asc limit 1000";
     {
         $start = date("Y-m-d", strtotime("-3 month"));
         $end = date("Y-m-d", time());
-        
+
         //$zeelool_model = Db::connect('database.db_zeelool')->table('sales_flat_order');
 
         $zeelool_model = new \app\admin\model\order\order\Zeelool;
@@ -1269,7 +1269,7 @@ order by sfoi.item_id asc limit 1000";
             $voogueme_list[$k]['voogueme_sku'] = $v['sku'];
         }
 
-       // $nihao_model = Db::connect('database.db_nihao')->table('sales_flat_order');
+        // $nihao_model = Db::connect('database.db_nihao')->table('sales_flat_order');
         $nihao_list = $nihao_model->query($intelligent_purchase_query_sql);
         //查询产品库sku
         foreach ($nihao_list as $k => $v) {
@@ -1308,7 +1308,7 @@ order by sfoi.item_id asc limit 1000";
         $supplier = new \app\admin\model\purchase\SupplierSku;
         $supplier_list = $supplier->alias('a')->join(['fa_supplier' => 'b'], 'a.supplier_id=b.id')->column('b.supplier_name', 'a.sku');
 
-       
+
         //删除无用数组 释放内存
         unset($lists);
         unset($zeelool_list);
@@ -1369,7 +1369,7 @@ order by sfoi.item_id asc limit 1000";
         }
         unset($data);
 
-        
+
         $map = [];
         foreach ($list as $k => $v) {
             if ($v['grade'] == 'A+' || $v['grade'] == 'A') {
@@ -1476,10 +1476,10 @@ order by sfoi.item_id asc limit 1000";
         //select*from table where now() >SUBDATE(times,interval -1 day);
         $where['is_new'] = 1;
         $itemId = Db::connect('database.db_stock')->name('item')->where($where)->where("now() >SUBDATE(check_time,interval -15 day)")->column('id');
-        if(false == $itemId){
+        if (false == $itemId) {
             return 'ok';
         }
-        $map['id'] = ['in',$itemId];
-        Db::connect('database.db_stock')->name('item')->where($map)->update(['is_new'=>2]);
+        $map['id'] = ['in', $itemId];
+        Db::connect('database.db_stock')->name('item')->where($map)->update(['is_new' => 2]);
     }
 }

@@ -8,6 +8,7 @@ use think\Config;
 use think\Db;
 use think\Cache;
 
+
 /**
  * 控制台
  *
@@ -783,4 +784,9 @@ class Dashboard extends Backend
         }
         echo 'ok';
     }
+
+
+
+
+
 }
