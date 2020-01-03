@@ -2064,7 +2064,7 @@ class Item extends Backend
                         $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.add' : $name) : $this->modelValidate;
                         $this->model->validateFailException(true)->validate($validate);
                     }
-                    $params['presell_residue_num'] += $row['presell_residue_num'];
+                    $params['presell_residue_num'] += $row['presell_num'];
                     $params['presell_num']         += $row['presell_num'];
                     $now_time =  date("Y-m-d H:i:s", time());
 
