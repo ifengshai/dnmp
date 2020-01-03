@@ -11,6 +11,7 @@ use think\exception\ValidateException;
 use app\admin\model\itemmanage\ItemBrand;
 use app\admin\model\itemmanage\ItemPlatformSku;
 use app\admin\model\itemmanage\attribute\ItemAttribute;
+use app\admin\model\itemmanage\Item_presell_log;
 
 /**
  * 商品管理
@@ -29,7 +30,7 @@ class Item extends Backend
     /**
      * 不需要登陆
      */
-    protected $noNeedLogin = ['pullMagentoProductInfo', 'analyticMagentoField', 'analyticUpdate', 'ceshi', 'optimizeSku', 'pullMagentoProductInfoTwo', 'changeSkuToPlatformSku', 'findSku', 'skuMap', 'skuMapOne'];
+    //protected $noNeedLogin = ['pullMagentoProductInfo', 'analyticMagentoField', 'analyticUpdate', 'ceshi', 'optimizeSku', 'pullMagentoProductInfoTwo', 'changeSkuToPlatformSku', 'findSku', 'skuMap', 'skuMapOne'];
 
     public function _initialize()
     {
@@ -2048,9 +2049,15 @@ class Item extends Backend
                     $this->error('预售开始时间和结束时间不能相等');
                 }
                 $row = $this->model->pass_check_sku($params['sku']);
-                // // if ($row['presell_residue_num'] > 0) {
-                // //     $this->error('SKU剩余预售数量没有扣完,不能添加');
-                // // }
+                if('0000-00-00 00:00:00' != $row['presell_create_time']){
+                    $log['sku'] = $row['sku'];
+                    $log['presell_num'] = $row['presell_num'];
+                    $log['presell_residue_num'] = $row['presell_residue_num'];
+                    $log['virtual_presell_num'] = $row['presell_num'] - $row['presell_residue_num'];
+                    $log['presell_create_time'] = $row['presell_create_time'];
+                    $log['presell_end_time'] = $row['presell_end_time'];
+                    (new Item_presell_log())->allowField(true)->save($log);
+                }
                 if ($this->dataLimit && $this->dataLimitFieldAutoFill) {
                     $params[$this->dataLimitField] = $this->auth->id;
                 }
@@ -2064,8 +2071,7 @@ class Item extends Backend
                         $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.add' : $name) : $this->modelValidate;
                         $this->model->validateFailException(true)->validate($validate);
                     }
-                    $params['presell_residue_num'] = $row['presell_residue_num'] + $params['presell_num'];
-                    $params['presell_num']         = $row['presell_num'] + $params['presell_num'];
+                    $params['presell_residue_num'] = $params['presell_num'];
                     $now_time =  date("Y-m-d H:i:s", time());
                     if ($now_time >= $params['presell_end_time']) { //如果当前时间大于开始时间
                         $params['presell_status'] = 2;
@@ -2174,6 +2180,9 @@ class Item extends Backend
                 if ($params['presell_start_time'] == $params['presell_end_time']) {
                     $this->error('预售开始时间和结束时间不能相等');
                 }
+                $row = $this->model->pass_check_sku($params['sku']);
+                $params['presell_num'] = $row['presell_num'] + $params['presell_change_num'];
+                $params['presell_residue_num'] = $row['presell_residue_num'] + $params['presell_change_num'];
                 if ($this->dataLimit && $this->dataLimitFieldAutoFill) {
                     $params[$this->dataLimitField] = $this->auth->id;
                 }
@@ -2214,5 +2223,12 @@ class Item extends Backend
             $this->view->assign('row',$row);
             return $this->view->fetch();
         }
+    }
+    /***
+     * 预售历史记录
+     */
+    public function presell_history($ids=null)
+    {
+        
     }
 }
