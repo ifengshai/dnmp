@@ -178,7 +178,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','bootstrap-table-jump-
                         filter[field] = value;
                         op[field] = 'LIKE';
                     }else{
-                        delete op.rep_id;
+                        //delete op.rep_id;
                         delete filter.rep_id;
                         delete filter.create_person;
                     }
