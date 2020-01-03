@@ -208,16 +208,14 @@
             <div class="radio">
                 {foreach name="$vo.junior" item="issue"}
                 {if $issue.junior}
-                <label for="row[synergy_task_id]-{$issue.id}"><input disabled="disabled" id="row[synergy_task_id]-{$issue.id}" name="row[synergy_task_id]" type="radio" value="{$issue.id}" {eq name="$issue.id" value="$row.synergy_task_id"}checked{/eq} /> <span style="color:green;" id="{$issue.id}" class="issueLevel">{$issue.name}<span></span></label>
-                {else/}
-                <label for="row[synergy_task_id]-{$issue.id}"><input disabled="disabled" id="row[synergy_task_id]-{$issue.id}" name="row[synergy_task_id]" type="radio" value="{$issue.id}" {in name="$issue.id" value="$row.synergy_task_id"}checked{/in} /> {$issue.name}</label>
-                {/if}
-                {if $issue.junior}
-                <div class="radio" style="margin-left:20%;display:none;" id="display-{$issue.id}" >
+                <label for="row[synergy_task_id]-{$issue.id}"><input  id="row[synergy_task_id]-{$issue.id}" name="row[synergy_task_id]" type="radio" value="{$issue.id}" {eq name="$issue.id" value="$row.synergy_task_id"}checked{/eq} /> <span style="color:green;" id="{$issue.id}" class="issueLevel">{$issue.name}<span></span></label>
+                <div class="radio three_level" style="margin-left:16.8%;float:left;clear:both;display:none;" id="display-{$issue.id}" >
                     {foreach name="$issue.junior" item="finalIssue"}
-                    <label for="row[synergy_task_id]-{$finalIssue.id}"><input disabled="disabled" id="row[synergy_task_id]-{$finalIssue.id}" name="row[synergy_task_id]" type="radio" value="{$finalIssue.id}" {in name="$finalIssue.id" value="$row.synergy_task_id"}checked{/in} />{$finalIssue.name}</label>
+                    <label for="row[synergy_task_id]-{$finalIssue.id}"><input id="row[synergy_task_id]-{$finalIssue.id}" name="row[synergy_task_id]" type="radio" value="{$finalIssue.id}" {in name="$finalIssue.id" value="$row.synergy_task_id"}checked{/in} />{$finalIssue.name}</label>
                     {/foreach}
                 </div>
+                {else/}
+                <label for="row[synergy_task_id]-{$issue.id}"><input  id="row[synergy_task_id]-{$issue.id}" name="row[synergy_task_id]" type="radio" value="{$issue.id}" {in name="$issue.id" value="$row.synergy_task_id"}checked{/in} /> {$issue.name}</label>
                 {/if}
                 {/foreach}
             </div>

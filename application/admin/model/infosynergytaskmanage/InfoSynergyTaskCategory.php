@@ -137,5 +137,12 @@ class InfoSynergyTaskCategory extends Model
         $where['is_del'] = 1;
         return $this->where($where)->value('level');
     }
+    /***
+     * 根据问题ID查找问题分类
+     */
+    public function findTaskCategory($id)
+    {
+        return $this->where(['id'=>$id])->value('name');
+    }
 
 }
