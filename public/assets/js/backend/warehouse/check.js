@@ -31,6 +31,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-se
                         { field: 'check_order_number', title: __('Check_order_number') },
                         { field: 'type', title: __('Type'), custom: { 1: 'success', 2: 'success' }, searchList: { 1: '采购质检', 2: '退货质检' }, formatter: Table.api.formatter.status },
                         { field: 'purchaseorder.purchase_number', title: __('Purchase_id'), operate: 'like' },
+                        { field: 'purchaseorder.create_person', title: __('采购创建人'), operate: 'like' },
                         { field: 'orderreturn.return_order_number', title: __('退货单号'), operate: 'like' },
                         { field: 'supplier.supplier_name', title: __('Supplier_id'), operate: 'like' },
                         { field: 'remark', title: __('Remark'), operate: false },
