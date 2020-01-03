@@ -554,7 +554,7 @@ class Dashboard extends Backend
     /**
      * 处理采购单旧数据
      */
-    public function purchase_test()
+    protected function purchase_test()
     {
         set_time_limit(0);
         
