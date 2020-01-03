@@ -2229,6 +2229,14 @@ class Item extends Backend
      */
     public function presell_history($ids=null)
     {
-        
+        $row = $this->model->get($ids);
+        if(!$row){
+            $this->error(__('此SKU不存在,请重新尝试')); 
+        }
+        $result = (new Item_presell_log())->getHistoryRecord($row['sku']);
+        if($result){
+            $this->view->assign('result',$result);
+        }
+            return $this->view->fetch();
     }
 }

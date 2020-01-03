@@ -30,9 +30,16 @@ class Item_presell_log extends Model
     ];
     
 
-    
+    /***
+     * 根据sku的ID获取预售历史记录
+     * @param sku  预售的SKU
+     */
+    public function getHistoryRecord($sku)
+    {
+        $where['sku'] = $sku;
+        return $this->where($where)->select();
 
-
+    }
 
 
 
