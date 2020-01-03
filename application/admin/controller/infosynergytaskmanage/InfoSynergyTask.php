@@ -602,7 +602,7 @@ class InfoSynergyTask extends Backend
                         $dataRecord = [];
                         $dataRecord['tid'] = $tid;
                         $dataRecord['remark_record'] = strip_tags($params['remark_record']);
-                        $dataRecord['create_person'] = session('admin.username');
+                        $dataRecord['create_person'] = session('admin.nickname');
                         $dataRecord['create_time']   = date("Y-m-d H:i:s", time());
                         (new InfoSynergyTaskRemark())->allowField(true)->save($dataRecord);
                     }
