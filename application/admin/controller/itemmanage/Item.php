@@ -1998,16 +1998,15 @@ class Item extends Backend
                 return $this->selectpage();
             }
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
-            $total = $this->model->where('is_open', '<', 3)
-                ->where(['item_status' => 3])
-                ->where(['presell_create_time','>','0000-00-00 00:00:00'])
+            $whereData['item_status'] = 3;
+            $whereData['is_open'] = ['LT',3];
+            $whereData['presell_create_time'] = ['NEQ','0000-00-00 00:00:00'];
+            $total = $this->model->where($whereData)
                 ->where($where)
                 ->order($sort, $order)
                 ->count();
 
-            $list = $this->model->where('is_open', '<', 3)
-                ->where(['item_status' => 3])
-                ->where(['presell_create_time','>','0000-00-00 00:00:00'])
+            $list = $this->model->where($whereData)
                 ->where($where)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
