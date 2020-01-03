@@ -2000,14 +2000,14 @@ class Item extends Backend
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model->where('is_open', '<', 3)
                 ->where(['item_status' => 3])
-                ->where(['presell_status'=>1])
+                ->where(['presell_create_time','>','0000-00-00 00:00:00'])
                 ->where($where)
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->model->where('is_open', '<', 3)
                 ->where(['item_status' => 3])
-                ->where(['presell_status'=>1])
+                ->where(['presell_create_time','>','0000-00-00 00:00:00'])
                 ->where($where)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
