@@ -63,7 +63,7 @@ class Check extends Backend
 
             //是否存在需要退回产品
             if ($filter['is_process'] || $filter['is_process'] == '0') {
-                
+
                 $smap['unqualified_num'] = $filter['is_process'] == 1 ? ['>', 0] : ['=', 0];
                 $ids = $this->check_item->where($smap)->column('check_id');
                 $map['check.id'] = ['in', $ids];
@@ -85,7 +85,7 @@ class Check extends Backend
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
-            
+
 
             $list = collection($list)->toArray();
             $result = array("total" => $total, "rows" => $list);
@@ -595,8 +595,18 @@ class Check extends Backend
     public function add_return_order()
     {
         $ids = input('ids');
-        //查询质检单
-        
+        if ($this->request->isAjax()) {
+
+            //查询质检单
+            $where['id'] = ['in', $ids];
+            $res = $this->model->where($where)->select();
+            $res = collection($res)->toArray();
+            
+            foreach ($res as $k => $v) {
+            }
+        }
+
+        $this->assign('ids', $ids);
 
         return $this->view->fetch();
     }

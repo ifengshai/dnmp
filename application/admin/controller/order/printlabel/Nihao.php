@@ -66,9 +66,10 @@ class Nihao extends Backend
 
             if ($filter['increment_id']) {
                 $map['status'] = ['in', ['free_processing', 'processing', 'complete']];
-            } else {
+            } elseif (!$filter['status']) {
                 $map['status'] = ['in', ['free_processing', 'processing']];
-            }
+            } 
+
             $total = $this->model
                 ->where($map)
                 ->where($where)
