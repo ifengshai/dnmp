@@ -2047,7 +2047,7 @@ class Item extends Backend
                 if ($params['presell_create_time'] == $params['presell_end_time']) {
                     $this->error('预售开始时间和结束时间不能相等');
                 }
-                // $row = $this->model->pass_check_sku($params['sku']);
+                $row = $this->model->pass_check_sku($params['sku']);
                 // // if ($row['presell_residue_num'] > 0) {
                 // //     $this->error('SKU剩余预售数量没有扣完,不能添加');
                 // // }
@@ -2064,10 +2064,9 @@ class Item extends Backend
                         $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.add' : $name) : $this->modelValidate;
                         $this->model->validateFailException(true)->validate($validate);
                     }
-                    $params['presell_residue_num'] += $params['presell_num'];
-                    $params['presell_num']         += $params['presell_num'];
+                    $params['presell_residue_num'] = $row['presell_residue_num'] + $params['presell_num'];
+                    $params['presell_num']         = $row['presell_num'] + $params['presell_num'];
                     $now_time =  date("Y-m-d H:i:s", time());
-
                     if ($now_time >= $params['presell_end_time']) { //如果当前时间大于开始时间
                         $params['presell_status'] = 2;
                     }
