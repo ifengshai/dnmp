@@ -187,32 +187,10 @@
         </div> 
     </div>
     <div class="form-group">
-        <div class="form-group">
             <label class="control-label col-xs-12 col-sm-2">{:__('Synergy_task_id')}:</label>
-        </div>
-        {foreach name="categoryList" item="vo"}
-        <div class="form-group">
-            <label class="control-label col-xs-12 col-sm-2">{$vo.name}</label>
-            {if $vo.junior}
-            <div class="radio">
-                {foreach name="$vo.junior" item="issue"}
-                {if $issue.junior}
-                <label for="row[synergy_task_id]-{$issue.id}"><input id="row[synergy_task_id]-{$issue.id}" name="row[synergy_task_id]" type="radio" value="{$issue.id}" {eq name="$issue.id" value="$row.synergy_task_id"}checked{/eq} /> <span style="color:green;" id="{$issue.id}" class="issueLevel">{$issue.name}<span></span></label>
-                {else/}
-                <label for="row[synergy_task_id]-{$issue.id}"><input id="row[synergy_task_id]-{$issue.id}" name="row[synergy_task_id]" type="radio" value="{$issue.id}" {in name="$issue.id" value="$row.synergy_task_id"}checked{/in} /> {$issue.name}</label>
-                {/if}
-                {if $issue.junior}
-                <div class="radio" style="margin-left:20%;display:none;" id="display-{$issue.id}" >
-                    {foreach name="$issue.junior" item="finalIssue"}
-                    <label for="row[synergy_task_id]-{$finalIssue.id}"><input id="row[synergy_task_id]-{$finalIssue.id}" name="row[synergy_task_id]" type="radio" value="{$finalIssue.id}" {in name="$finalIssue.id" value="$row.synergy_task_id"}checked{/in} />{$finalIssue.name}</label>
-                    {/foreach}
-                </div>
-                {/if}
-                {/foreach}
+            <div class="col-xs-12 col-sm-3">
+            <input id="c-problem_id" data-rule="required"  class="form-control" name="row[synergy_task_id]" type="text" value="{$categoryName}" disabled="disabled">
             </div>
-            {/if}
-        </div>
-        {/foreach}
     </div>
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">{:__('Problem_desc')}:</label>
