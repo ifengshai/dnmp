@@ -488,6 +488,9 @@ class InfoSynergyTask extends Backend
         $result['problem_desc'] = strip_tags($result['problem_desc']);
         //dump($result);
         $this->view->assign('row', $result);
+        $categoryName = ((new InfoSynergyTaskCategory())->findTaskCategory($result['synergy_task_id']));
+        $categoryName = !empty($categoryName) ? $categoryName :'无此分类';
+        $this->view->assign('categoryName',$categoryName);
         $this->view->assign('categoryList', (new InfoSynergyTaskCategory())->getIssueList(1, 0));
         //订单平台列表
         $this->view->assign("orderPlatformList", (new MagentoPlatform())->getOrderPlatformList());
