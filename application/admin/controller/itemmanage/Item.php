@@ -2048,9 +2048,9 @@ class Item extends Backend
                     $this->error('预售开始时间和结束时间不能相等');
                 }
                 $row = $this->model->pass_check_sku($params['sku']);
-                if ($row['presell_residue_num'] > 0) {
-                    $this->error('SKU剩余预售数量没有扣完,不能添加');
-                }
+                // if ($row['presell_residue_num'] > 0) {
+                //     $this->error('SKU剩余预售数量没有扣完,不能添加');
+                // }
                 if ($this->dataLimit && $this->dataLimitFieldAutoFill) {
                     $params[$this->dataLimitField] = $this->auth->id;
                 }
