@@ -853,6 +853,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                 extend: {
                     index_url: 'itemmanage/item/presell' + location.search,
                     add_url: 'itemmanage/item/add_presell',
+                    edit_url: 'itemmanage/item/edit_presell',
                     table: 'item',
                 }
             });
@@ -954,6 +955,36 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                                             return false;
                                         }
                                     },
+                                },
+                                {
+                                    name: 'edit',
+                                    text: '编辑预售',
+                                    title: __('编辑预售'),
+                                    classname: 'btn btn-xs btn-success btn-dialog',
+                                    icon: 'fa fa-pencil',
+                                    url: Config.moduleurl + '/itemmanage/item/edit_presell',
+                                    //extend: 'data-area = \'["50%","50%"]\'',
+                                    callback: function (data) {
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                    },
+                                    visible: function (row) {
+                                            return true;
+                                    }
+                                },
+                                {
+                                    name: 'history',
+                                    text: '历史记录',
+                                    title: __('历史记录'),
+                                    classname: 'btn btn-xs btn-success btn-dialog',
+                                    icon: 'fa fa-pencil',
+                                    url: Config.moduleurl + '/itemmanage/item/presell_history',
+                                    //extend: 'data-area = \'["50%","50%"]\'',
+                                    callback: function (data) {
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                    },
+                                    visible: function (row) {
+                                            return true;
+                                    }
                                 },
                             ]
                         }
@@ -1070,7 +1101,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                     return false;
                 }
             });
-        }
+        },
+    edit_presell: function(){
+        Controller.api.bindevent();
+        Form.api.bindevent($("form[role=form]"));
+    }  
     };
     return Controller;
 });
