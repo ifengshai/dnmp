@@ -1,0 +1,100 @@
+<style>
+    .caigou {
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+        padding: 10px;
+        width: 98%;
+        margin-left: 20px;
+        margin-bottom: 10px;
+    }
+
+    .caigou #caigou-table {
+        width: 100%;
+        height: 130px;
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+        text-align: center;
+    }
+
+    .caigou #caigou-table tr {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+        line-height: 50px;
+    }
+
+    .caigou #caigou-table tr th {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+        text-align: center;
+        font-size: 14px;
+    }
+
+    .caigou #caigou-table tr td {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+        width: 300px;
+    }
+
+    .caigou #caigou-table tr td input {
+
+        width: 200px;
+    }
+</style>
+
+<form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
+    <style>
+        .plupload-preview li {
+            width: 80px;
+        }
+    </style>
+    <hr>
+    {notempty name="result"}
+    <div class='caigou' style="margin-left:20px;width:98%;">
+        <div style="margin-bottom:20px;">
+            <table id="caigou-table">
+                <tr>
+                    <th>SKU</th>
+                    <th>预售数量</th>
+                    <th>剩余预售数量</th>
+                    <th>实际预售数量</th>
+                    <th>预售开始时间</th>
+                    <th>预售结束时间</th>           
+                </tr>                
+                {foreach $result as $v}
+                <tr>
+                    <td>{$v.sku}</td>
+                    <td>{$v.presell_num}</td>
+                    <td>{$v.presell_residue_num}</td>
+                    <td>{$v.virtual_presell_num}</td>
+                    <td>{$v.presell_create_time}</td>
+                    <td>{$v.presell_end_time}</td>
+                </tr>
+                {/foreach}
+            </table>
+        </div>
+    </div>
+    {else /}
+    <div class='caigou' style="margin-left:20px;width:98%;">
+        <div style="margin-bottom:20px;">
+            <table id="caigou-table">
+                <tr>
+                    <th>暂无数据</th>         
+                </tr>
+            </table>
+        </div>
+    </div>   
+    {/notempty}    
+</form>
