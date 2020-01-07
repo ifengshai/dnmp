@@ -693,7 +693,6 @@ class PurchaseOrder extends Backend
             $this->error(__('No Results were found'));
         }
        
-
         $data['check_status'] = 2;
         $data['stock_status'] = 2;
         $data['return_status'] = 2;
@@ -976,6 +975,7 @@ class PurchaseOrder extends Backend
             $hasWhere['sku'] = ['in', $skus];
             $purchase_map['purchase_status'] = ['in', [2, 5, 6, 7]];
             $purchase_map['check_status'] = ['in', [0, 1]];
+            $purchase_map['is_diff'] = 0;
 
             $purchase_list = $purchase->hasWhere('purchaseOrderItem', $hasWhere)
                 ->where($purchase_map)
