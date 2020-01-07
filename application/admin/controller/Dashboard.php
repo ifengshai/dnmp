@@ -181,7 +181,7 @@ class Dashboard extends Backend
         set_time_limit(0);
         $where['a.is_visable'] = 1;
         $where['a.is_show'] = 0;
-        
+
         $data = Db::table('zeelool_service_collaboration')->alias('a')->field('a.*,b.name')
             ->join(['zeelool_service_collaboration_category' => 'b'], 'a.cate_id=b.id')
             ->where($where)
@@ -313,7 +313,7 @@ class Dashboard extends Backend
         set_time_limit(0);
         $where['a.is_visable'] = 1;
         $where['a.is_show'] = 0;
-   
+
         $data = Db::table('voogueme_service_collaboration')->alias('a')->field('a.*,b.name')
             ->join(['voogueme_service_collaboration_category' => 'b'], 'a.cate_id=b.id')
             ->where($where)
@@ -442,7 +442,7 @@ class Dashboard extends Backend
         set_time_limit(0);
         $where['a.is_visable'] = 1;
         $where['a.is_show'] = 0;
-      
+
         $data = Db::table('nihao_service_collaboration')->alias('a')->field('a.*,b.name')
             ->join(['nihao_service_collaboration_category' => 'b'], 'a.cate_id=b.id')
             ->where($where)
@@ -558,7 +558,7 @@ class Dashboard extends Backend
     protected function purchase_test()
     {
         set_time_limit(0);
-        
+
         $map['a.is_visable'] = 1;
         $map['a.id'] = ['between', [10485, 10803]];
         $res = Db::table('zeelool_purchase')
@@ -579,7 +579,7 @@ class Dashboard extends Backend
                 $list['purchase_type'] = 1;
             }
 
-            $count = Db::table('fa_purchase_order')->where('old_purchase_id',$v['id'])->count();
+            $count = Db::table('fa_purchase_order')->where('old_purchase_id', $v['id'])->count();
             if ($count > 0) {
                 continue;
             }
@@ -660,28 +660,38 @@ class Dashboard extends Backend
     {
         set_time_limit(0);
         //查询采购单数据
-        $res = Db::table('fa_purchase_order')->cache(3600)->select();
-        
+        $where['is_process'] = 0;
+        $res = Db::table('fa_purchase_order')->where($where)->limit(500)->select();
+ 
         foreach ($res as $value) {
+            if (!$value['old_purchase_id']) {
+                continue;
+            }
             //查询明细表
             $item = Db::table('zeelool_hander_input_stock')
                 ->alias('a')
                 ->where(['b.purchase_id' => $value['old_purchase_id']])
                 ->join(['zeelool_hander_input_stock_item' => 'b'], 'a.id=b.input_stock_id')
-                ->select(); 
-            
-            $list = [];
-            foreach($item as $kl => $v) {
-                $list[$v['input_stock_id']]['status'] = $v['status'];        
-                $list[$v['input_stock_id']]['remark'] = $v['remark'];        
-                $list[$v['input_stock_id']]['stock_operator'] = $v['stock_operator'];        
-                $list[$v['input_stock_id']]['stock_created_at'] = $v['stock_created_at'];        
-                $list[$v['input_stock_id']]['created_operator'] = $v['created_operator'];        
-                $list[$v['input_stock_id']]['created_at'] = $v['created_at'];        
-                $list[$v['input_stock_id']]['purchase_order_id'] = $v['purchase_order_id'];        
-                $list[$v['input_stock_id']]['item'][$kl] = $v;        
+                ->select();
+            if (!$item) {
+                continue;
             }
-            
+           
+            $list = [];
+            foreach ($item as $kl => $v) {
+                $list[$v['input_stock_id']]['status'] = $v['status'];
+                $list[$v['input_stock_id']]['remark'] = $v['remark'];
+                $list[$v['input_stock_id']]['stock_operator'] = $v['stock_operator'];
+                $list[$v['input_stock_id']]['stock_created_at'] = $v['stock_created_at'];
+                $list[$v['input_stock_id']]['created_operator'] = $v['created_operator'];
+                $list[$v['input_stock_id']]['created_at'] = $v['created_at'];
+                $list[$v['input_stock_id']]['purchase_order_id'] = $v['purchase_order_id'];
+                $list[$v['input_stock_id']]['item'][$kl] = $v;
+            }
+
+           
+            $params = [];
+            $instock = [];
             foreach ($list as $k => $val) {
                 $params['check_order_number'] = 'QC' . date('YmdHis') . rand(100, 999) . rand(100, 999);
                 $params['type'] = 1;
@@ -704,7 +714,7 @@ class Dashboard extends Backend
                 } elseif ($val['status'] == 'stock') {
                     $instock['status'] = 2;
                 }
-                
+
                 $instock['createtime'] = $val['created_at'];
                 $instock['create_person'] = $val['created_operator'];
                 $instock['check_time'] = $val['stock_created_at'];
@@ -713,22 +723,22 @@ class Dashboard extends Backend
 
                 $info = [];
                 $instocks = [];
-                foreach($val['item'] as $key => $va) {
+                foreach ($val['item'] as $key => $va) {
                     $info[$key]['check_id'] = $id;
                     $info[$key]['sku'] = $va['input_sku'];
                     $info[$key]['supplier_sku'] = $va['supplier_sku'] ?? '';
                     $info[$key]['purchase_id'] = $va['purchase_id'];
-                    $info[$key]['purchase_num'] = $va['purchase_qty'];
-                    $info[$key]['arrivals_num'] = $va['arrival_qty'];
-                    $info[$key]['quantity_num'] = $va['check_qty'];
-                    $info[$key]['sample_num'] = $va['sample_qty'];
+                    $info[$key]['purchase_num'] = $va['purchase_qty'] ?? 0;
+                    $info[$key]['arrivals_num'] = $va['arrival_qty'] ?? 0;
+                    $info[$key]['quantity_num'] = $va['check_qty'] ?? 0;
+                    $info[$key]['sample_num'] = $va['sample_qty'] ?? 0;
                     $info[$key]['unqualified_num'] = $va['arrival_qty'] - $va['check_qty'];
                     if ($va['arrival_qty']) {
-                        $info[$key]['quantity_rate'] = round($va['check_qty']/$va['arrival_qty']*100,2);
+                        $info[$key]['quantity_rate'] = round($va['check_qty'] / $va['arrival_qty'] * 100, 2);
                     } else {
                         $info[$key]['quantity_rate'] = 0;
                     }
-                   
+
                     $info[$key]['remark'] = $va['return_remark'];
 
 
@@ -737,7 +747,7 @@ class Dashboard extends Backend
                     $instocks[$key]['sku'] = $va['input_sku'];
                     $instocks[$key]['in_stock_num'] = $va['input_sku_qty'];
                     $instocks[$key]['purchase_id'] = $value['id'];
-                    $instocks[$key]['sample_num'] = $va['sample_qty'];
+                    $instocks[$key]['sample_num'] = $va['sample_qty'] ?? 0;
                 }
 
                 if ($info) {
@@ -747,10 +757,12 @@ class Dashboard extends Backend
                 if ($instocks) {
                     Db::table('fa_in_stock_item')->insertAll($instocks);
                 }
-               
             }
-            
         }
+
+        $ids = array_column($res, 'id');
+        $map['id'] = ['in', $ids];
+        Db::table('fa_purchase_order')->where($map)->update(['is_process' => 1]);
 
         echo 'ok';
     }
@@ -762,7 +774,7 @@ class Dashboard extends Backend
         set_time_limit(0);
         //查询采购单数据
         $res = Db::table('zeelool_hander_output_stock')->cache(3600)->select();
-        foreach($res as $k => $v) {
+        foreach ($res as $k => $v) {
             $list['out_stock_number'] = 'OUT' . date('YmdHis') . rand(100, 999) . rand(100, 999);
             $list['type_id'] = $v['cate_id'];
             $list['order_number'] = $v['increment_id'];
@@ -771,9 +783,9 @@ class Dashboard extends Backend
             $list['createtime'] = $v['created_at'];
             $list['create_person'] = $v['created_operator'];
             $outid = Db::table('fa_out_stock')->insertGetId($list);
-            $info = Db::table('zeelool_hander_output_stock_item')->where('output_stock_id',$v['id'])->select();
+            $info = Db::table('zeelool_hander_output_stock_item')->where('output_stock_id', $v['id'])->select();
             $params = [];
-            foreach($info as $key => $val) {
+            foreach ($info as $key => $val) {
                 $params[$key]['sku'] = $val['output_sku'];
                 $params[$key]['out_stock_num'] = $val['output_sku_qty'];
                 $params[$key]['out_stock_id'] = $outid;
@@ -784,9 +796,4 @@ class Dashboard extends Backend
         }
         echo 'ok';
     }
-
-
-
-
-
 }

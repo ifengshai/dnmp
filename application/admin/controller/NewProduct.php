@@ -119,6 +119,10 @@ class NewProduct extends Backend
                     $this->error(__('Make sure the original sku code is the correct sku code'));
                 }
 
+                if (!$params['supplier_id']) {
+                    $this->error('供应商不能为空');
+                }
+
                 Db::startTrans();
                 try {
 
@@ -126,6 +130,7 @@ class NewProduct extends Backend
                         throw new Exception('商品名称不能为空！！');
                     }
 
+                
                     foreach (array_filter($itemName) as $k => $v) {
                         $data['name'] = $v;
                         $data['category_id'] = $params['category_id'];
@@ -134,7 +139,7 @@ class NewProduct extends Backend
                         $data['supplier_id']    = $params['supplier_id'];
                         $data['supplier_sku']    = $supplierSku[$k];
                         $data['link']    = $params['link'];
-                        $data['frame_is_rimless'] = $params['shape'] == 1 ? 2 :1;
+                        $data['frame_is_rimless'] = $params['shape'] == 1 ? 2 : 1;
                         $data['price']    = $price[$k];
                         $data['supplier_id']    = $params['supplier_id'];
                         $data['create_person'] = session('admin.nickname');
@@ -464,7 +469,7 @@ class NewProduct extends Backend
             if ($result == 1) {
                 // $item = new \app\admin\model\itemmanage\Item;
                 $row = $this->model->getItemInfo($sku);
-               
+
                 if (!$row) {
                     $this->error(__('此SKU不存在！！'));
                 }
@@ -477,7 +482,7 @@ class NewProduct extends Backend
                 $data = $this->fetch('attribute');
             }
         } else {
-             $this->error(__('404 Not Found'));
+            $this->error(__('404 Not Found'));
         }
     }
 
@@ -567,7 +572,7 @@ class NewProduct extends Backend
             $where['new_product.id'] = ['in', $ids];
             $row = $this->model->where($where)->with(['newproductattribute'])->select();
             $row = collection($row)->toArray();
-            foreach($row as $k => $v) {
+            foreach ($row as $k => $v) {
                 if ($v['item_status'] != 1) {
                     $this->error('此状态不能审核！！');
                 }
@@ -579,7 +584,7 @@ class NewProduct extends Backend
             $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
             if ($res !== false) {
                 if ($row) {
-                    
+
                     foreach ($row as $val) {
                         $params = $val;
                         $params['create_person'] = session('admin.nickname');
@@ -624,13 +629,13 @@ class NewProduct extends Backend
             $where['new_product.id'] = ['in', $ids];
             $row = $this->model->where($where)->with(['newproductattribute'])->select();
             $row = collection($row)->toArray();
-            foreach($row as $k => $v) {
+            foreach ($row as $k => $v) {
                 if ($v['item_status'] != 1) {
                     $this->error('此状态不能审核！！');
                 }
             }
 
-            
+
             $map['item_status'] = 1;
             $data['item_status'] = 3;
             $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
@@ -692,7 +697,7 @@ class NewProduct extends Backend
             $result = Alibaba::getGoodsDetail($goodsId[0]);
             session($path, $result);
         }
-        
+
         $list = [];
         foreach ($result->productInfo->skuInfos as $k => $v) {
             $list[$k]['id'] = $k + 1;
