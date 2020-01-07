@@ -11,6 +11,7 @@ use think\exception\ValidateException;
 use app\admin\model\itemmanage\ItemBrand;
 use app\admin\model\itemmanage\ItemPlatformSku;
 use app\admin\model\itemmanage\attribute\ItemAttribute;
+use app\admin\model\itemmanage\Item_presell_log;
 
 /**
  * 商品管理
@@ -29,7 +30,7 @@ class Item extends Backend
     /**
      * 不需要登陆
      */
-    protected $noNeedLogin = ['pullMagentoProductInfo', 'analyticMagentoField', 'analyticUpdate', 'ceshi', 'optimizeSku', 'pullMagentoProductInfoTwo', 'changeSkuToPlatformSku', 'findSku', 'skuMap', 'skuMapOne'];
+    //protected $noNeedLogin = ['pullMagentoProductInfo', 'analyticMagentoField', 'analyticUpdate', 'ceshi', 'optimizeSku', 'pullMagentoProductInfoTwo', 'changeSkuToPlatformSku', 'findSku', 'skuMap', 'skuMapOne'];
 
     public function _initialize()
     {
@@ -1998,14 +1999,15 @@ class Item extends Backend
                 return $this->selectpage();
             }
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
-            $total = $this->model->where('is_open', '<', 3)
-                ->where(['item_status' => 3])
+            $whereData['item_status'] = 3;
+            $whereData['is_open'] = ['LT',3];
+            $whereData['presell_create_time'] = ['NEQ','0000-00-00 00:00:00'];
+            $total = $this->model->where($whereData)
                 ->where($where)
                 ->order($sort, $order)
                 ->count();
 
-            $list = $this->model->where('is_open', '<', 3)
-                ->where(['item_status' => 3])
+            $list = $this->model->where($whereData)
                 ->where($where)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
@@ -2043,12 +2045,18 @@ class Item extends Backend
                 if (empty($params['presell_num'])) {
                     $this->error(__('SKU pre-order quantity cannot be empty'));
                 }
-                if ($params['presell_start_time'] == $params['presell_end_time']) {
+                if ($params['presell_create_time'] == $params['presell_end_time']) {
                     $this->error('预售开始时间和结束时间不能相等');
                 }
                 $row = $this->model->pass_check_sku($params['sku']);
-                if ($row['presell_residue_num'] > 0) {
-                    $this->error('SKU剩余预售数量没有扣完,不能添加');
+                if('0000-00-00 00:00:00' != $row['presell_create_time']){
+                    $log['sku'] = $row['sku'];
+                    $log['presell_num'] = $row['presell_num'];
+                    $log['presell_residue_num'] = $row['presell_residue_num'];
+                    $log['virtual_presell_num'] = $row['presell_num'] - $row['presell_residue_num'];
+                    $log['presell_create_time'] = $row['presell_create_time'];
+                    $log['presell_end_time'] = $row['presell_end_time'];
+                    (new Item_presell_log())->allowField(true)->save($log);
                 }
                 if ($this->dataLimit && $this->dataLimitFieldAutoFill) {
                     $params[$this->dataLimitField] = $this->auth->id;
@@ -2064,9 +2072,7 @@ class Item extends Backend
                         $this->model->validateFailException(true)->validate($validate);
                     }
                     $params['presell_residue_num'] = $params['presell_num'];
-                    $params['presell_num']         += $row['presell_num'];
-                    $params['presell_create_time'] = $now_time =  date("Y-m-d H:i:s", time());
-
+                    $now_time =  date("Y-m-d H:i:s", time());
                     if ($now_time >= $params['presell_end_time']) { //如果当前时间大于开始时间
                         $params['presell_status'] = 2;
                     }
@@ -2157,5 +2163,80 @@ class Item extends Backend
         } else {
             $this->error('404 Not found');
         }
+    }
+    /***
+     * 编辑预售
+     */
+    public function edit_presell($ids=null)
+    {
+        $row = $this->model->get($ids);
+        if($this->request->isPost()){
+            $params = $this->request->post("row/a");
+            if ($params) {
+                $params = $this->preExcludeFields($params);
+                if (empty($params['sku'])) {
+                    $this->error(__('Platform sku cannot be empty'));
+                }
+                if ($params['presell_start_time'] == $params['presell_end_time']) {
+                    $this->error('预售开始时间和结束时间不能相等');
+                }
+                $row = $this->model->pass_check_sku($params['sku']);
+                $params['presell_num'] = $row['presell_num'] + $params['presell_change_num'];
+                $params['presell_residue_num'] = $row['presell_residue_num'] + $params['presell_change_num'];
+                if ($this->dataLimit && $this->dataLimitFieldAutoFill) {
+                    $params[$this->dataLimitField] = $this->auth->id;
+                }
+
+                $result = false;
+                Db::startTrans();
+                try {
+                    //是否采用模型验证
+                    if ($this->modelValidate) {
+                        $name = str_replace("\\model\\", "\\validate\\", get_class($this->model));
+                        $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.add' : $name) : $this->modelValidate;
+                        $this->model->validateFailException(true)->validate($validate);
+                    }
+                    $now_time =  date("Y-m-d H:i:s", time());
+                    if ($now_time >= $params['presell_end_time']) { //如果当前时间大于开始时间
+                        $params['presell_status'] = 2;
+                    }
+                    $result = $this->model->allowField(true)->isUpdate(true)->save($params, ['sku' => $params['sku']]);
+                    Db::commit();
+                } catch (ValidateException $e) {
+                    Db::rollback();
+                    $this->error($e->getMessage());
+                } catch (PDOException $e) {
+                    Db::rollback();
+                    $this->error($e->getMessage());
+                } catch (Exception $e) {
+                    Db::rollback();
+                    $this->error($e->getMessage());
+                }
+                if ($result !== false) {
+                    $this->success();
+                } else {
+                    $this->error(__('No rows were inserted'));
+                }
+            }
+
+        }else{
+            $this->view->assign('row',$row);
+            return $this->view->fetch();
+        }
+    }
+    /***
+     * 预售历史记录
+     */
+    public function presell_history($ids=null)
+    {
+        $row = $this->model->get($ids);
+        if(!$row){
+            $this->error(__('此SKU不存在,请重新尝试')); 
+        }
+        $result = (new Item_presell_log())->getHistoryRecord($row['sku']);
+        if($result){
+            $this->view->assign('result',$result);
+        }
+            return $this->view->fetch();
     }
 }
