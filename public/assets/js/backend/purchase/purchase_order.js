@@ -211,7 +211,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                                         if (row.purchase_status == 0 || row.purchase_type == 2) {
                                             return true;
                                         } else {
-                                            return false;
+                                            return true;
                                         }
                                     }
                                 },
