@@ -634,6 +634,7 @@ class InfoSynergyTask extends Backend
         //        dump((new InfoSynergyTaskChangeSku())->getChangeSkuList($row['id']));
         //        exit;
         $this->view->assign('taskChangeSku', (new InfoSynergyTaskChangeSku())->getChangeSkuList($row['id']));
+        $this->view->assign('orderReturnRemark', (new InfoSynergyTaskRemark())->getSynergyTaskRemarkById($row['id']));
         return $this->view->fetch();
 
     }
