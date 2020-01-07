@@ -692,6 +692,8 @@ class PurchaseOrder extends Backend
         if (!$row) {
             $this->error(__('No Results were found'));
         }
+       
+
         $data['check_status'] = 2;
         $data['stock_status'] = 2;
         $data['return_status'] = 2;
