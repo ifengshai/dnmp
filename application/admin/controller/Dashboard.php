@@ -670,7 +670,7 @@ class Dashboard extends Backend
             //查询明细表
             $item = Db::table('zeelool_hander_input_stock')
                 ->alias('a')
-                ->where(['b.purchase_id' => $value['old_purchase_id'], 'is_visible' => 1])
+                ->where(['b.purchase_id' => $value['old_purchase_id'], 'a.is_visible' => 1])
                 ->join(['zeelool_hander_input_stock_item' => 'b'], 'a.id=b.input_stock_id')
                 ->select();
             if (!$item) {
