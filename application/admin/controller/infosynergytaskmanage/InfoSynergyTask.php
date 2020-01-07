@@ -519,6 +519,7 @@ class InfoSynergyTask extends Backend
             }
             $map['id'] = ['in', $ids];
             $data['synergy_status'] = 2;
+            $data['complete_time']   = date("Y-m-d H:i:s",time());
             $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
             if ($res !== false) {
                 //如果是修改镜架的话更改库存
