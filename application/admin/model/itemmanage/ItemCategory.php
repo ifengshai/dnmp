@@ -222,11 +222,28 @@ class ItemCategory extends Model
     public function getCategoryTexture($id)
     {
         $where['id'] = $id;
-        $result = $this->where($where)->field('id,texture_value')->find();
+        $result = $this->where($where)->field('id,accessory_texture_value,accessory_color_value')->find();
         if(!$result){
             return false;
         }
-        $textureResult = explode(',',$result['texture_value']);
-        return $textureResult;
+        $textureResult = explode(',',$result['accessory_texture_value']);
+        $colorResult   = explode(',',$result['accessory_color_value']);
+        return ['textureResult'=>$textureResult,'colorResult'=>$colorResult];
+    }
+
+    public function getAccessoryType()
+    {
+        return [
+            '0'       => '无',
+            'ACC-01' => 'ACC-01',
+            'ACC-02' => 'ACC-02',
+            'ACC-03' => 'ACC-03',
+            'CH'     => 'CH',
+            'NL'     => 'NL',
+            'ER'     => 'ER',
+            'BL'     => 'BL',
+            'SF'     => 'SF',
+            'RI'     => 'RI'
+        ];
     }
 }
