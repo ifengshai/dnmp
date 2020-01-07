@@ -604,6 +604,7 @@ class Check extends Backend
 
             //查询质检单
             $where['a.id'] = ['in', $ids];
+            $where['b.unqualified_num'] = ['>', 0];
             $res = $this->model->alias('a')->field('b.check_id,b.id,a.purchase_id,c.purchase_num,c.purchase_price,c.purchase_total,b.supplier_sku,b.sku,b.unqualified_num,b.remark')->where($where)
                 ->join(['fa_check_order_item' => 'b'], 'a.id=b.check_id')
                 ->join(['fa_purchase_order_item' => 'c'], 'a.purchase_id=c.purchase_id and b.sku=c.sku')
@@ -612,8 +613,7 @@ class Check extends Backend
 
             $list = [];
             foreach ($res as $k => $v) {
-                $list[$v['purchase_id']]['item'][$k] = $v;
-                $list[$v['purchase_id']]['check_id'] = $v['check_id'];
+                $list[$v['purchase_id']][$k] = $v;
             }
             unset($res);
             $return_model = new \app\admin\model\purchase\PurchaseReturn;
@@ -623,19 +623,16 @@ class Check extends Backend
             foreach ($list as $k => $v) {
                 $params['return_number'] = 'RO' . date('YmdHis') . rand(100, 999) . rand(100, 999);
                 $params['purchase_id'] = $k;
-
                 $params['create_person'] = session('admin.nickname');
                 $params['createtime'] = date('Y-m-d H:i:s', time());
                 $result = $return_model->allowField(true)->isUpdate(false)->data($params)->save();
-                if ($result !== false) {
-                    $check_id[] = $v['check_id'];
-                }
 
                 $i = 0;
                 $info = [];
                 $return_money = 0;
                 $purchase_total = 0;
-                foreach ($v['item'] as $val) {
+                $check_id_params = [];
+                foreach ($v as $val) {
                     $info[$i]['sku'] = $val['sku'];
                     $info[$i]['return_num'] = $val['unqualified_num'];
                     $info[$i]['return_id'] = $return_model->id;
@@ -644,19 +641,27 @@ class Check extends Backend
 
                     $return_money  += round($val['unqualified_num'] * $val['purchase_price'], 2);
                     $purchase_total += $val['purchase_total'];
+
+                    $check_id[] = $val['check_id'];
+
+                    $check_id_params[] = $val['check_id'];
                 }
                 if ($info) {
                     $return_model_item->allowField(true)->saveAll($info);
+
+                    if ($check_id_params) {
+                        $check_ids = implode(',', array_unique($check_id_params));
+                    }
                     //填充退货金额  采购总金额
-                    $return_model->allowField(true)->isUpdate(true, ['id' => $v['check_id']])->save(['return_money' => $return_money, 'purchase_total' => $purchase_total]);
+                    $return_model->allowField(true)->isUpdate(true, ['id' => $return_model->id])->save(['return_money' => $return_money, 'purchase_total' => $purchase_total, 'check_ids' => $check_ids]);
                 }
             }
 
             if ($result !== false) {
-                //标记为已退
-                $map['id'] = ['in', $check_id];
-                $this->model->allowField(true)->isUpdate(true, $map)->save(['is_return' => 1]);
 
+                //标记为已退
+                $map['id'] = ['in', array_unique($check_id)];
+                $this->model->allowField(true)->isUpdate(true, $map)->save(['is_return' => 1]);
                 $this->success('操作成功');
             } else {
                 $this->success('操作失败');
