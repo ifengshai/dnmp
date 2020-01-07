@@ -766,7 +766,10 @@ class Item extends Backend
             } elseif ($result == 2) { //商品是镜片类型
                 $data = $this->fetch('eyeglass');
             } elseif ($result == 3) { //商品是饰品类型
+                $textureValue = $this->category->getCategoryTexture($categoryId);
+                $this->assign('AllTexture', $textureValue);
                 $data = $this->fetch('decoration');
+
             } else {
                 $data = $this->fetch('attribute');
             }

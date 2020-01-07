@@ -216,4 +216,17 @@ class ItemCategory extends Model
         }
         return $arr;
     }
+    /***
+     * 根据ID获取商品材质
+     */
+    public function getCategoryTexture($id)
+    {
+        $where['id'] = $id;
+        $result = $this->where($where)->field('id,texture_value')->find();
+        if(!$result){
+            return false;
+        }
+        $textureResult = explode(',',$result['texture_value']);
+        return $textureResult;
+    }
 }
