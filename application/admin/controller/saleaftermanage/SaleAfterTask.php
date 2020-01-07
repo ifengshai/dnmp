@@ -408,6 +408,7 @@ class SaleAfterTask extends Backend
             $data = [];
             $data['task_status'] = 2;
             $data['handle_time'] = date("Y-m-d H:i:s",time());
+            $data['complete_time'] = date("Y-m-d H:i:s",time());
             $result = $this->model->where('id',$idss)->update($data);
             if($result !== false){
               return  $this->success('处理成功','saleaftermanage/sale_after_task');
@@ -436,6 +437,7 @@ class SaleAfterTask extends Backend
             $data = [];
             $data['task_status'] = 2;
             $data['handle_time'] = date("Y-m-d H:i:s",time());
+            $data['complete_time'] = date("Y-m-d H:i:s",time());
             $result = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
             if (false !== $result) {
                 return $this->success('处理成功');
