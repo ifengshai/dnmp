@@ -675,6 +675,6 @@ class Check extends Backend
         $data = $supplier->getSupplierData();
         $this->assign('supplier', $data);
 
-        return $this->fetch();
+        return $this->fetch('add_return_order');
     }
 }
