@@ -205,7 +205,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-se
             //批量生成退销单
             $(document).on('click', '.btn-matching', function () {
                 var ids = Table.api.selectedids(table);
-                Backend.api.open('warehouse/check/add_return_order/ids/' + ids, '批量生成退销单', { area: ["80%", "60%"] });
+                Backend.api.open('warehouse/check/add_return_order/ids/' + ids, '批量生成退销单', { area: ["60%", "60%"] });
 
             });
 

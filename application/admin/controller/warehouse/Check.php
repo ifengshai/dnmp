@@ -65,8 +65,12 @@ class Check extends Backend
             if ($filter['is_process'] || $filter['is_process'] == '0') {
 
                 $smap['unqualified_num'] = $filter['is_process'] == 1 ? ['>', 0] : ['=', 0];
+
                 $ids = $this->check_item->where($smap)->column('check_id');
                 $map['check.id'] = ['in', $ids];
+
+                $map['check.is_return'] = $filter['is_process'] == 1 ? 0 : 1;
+
                 unset($filter['is_process']);
                 $this->request->get(['filter' => json_encode($filter)]);
             }
@@ -596,17 +600,75 @@ class Check extends Backend
     {
         $ids = input('ids');
         if ($this->request->isAjax()) {
+            $params = $this->request->post("row/a");
 
             //查询质检单
-            $where['id'] = ['in', $ids];
-            $res = $this->model->where($where)->select();
+            $where['a.id'] = ['in', $ids];
+            $res = $this->model->alias('a')->field('b.check_id,b.id,a.purchase_id,c.purchase_num,c.purchase_price,c.purchase_total,b.supplier_sku,b.sku,b.unqualified_num,b.remark')->where($where)
+                ->join(['fa_check_order_item' => 'b'], 'a.id=b.check_id')
+                ->join(['fa_purchase_order_item' => 'c'], 'a.purchase_id=c.purchase_id and b.sku=c.sku')
+                ->select();
             $res = collection($res)->toArray();
-            
+
+            $list = [];
             foreach ($res as $k => $v) {
+                $list[$v['purchase_id']]['item'][$k] = $v;
+                $list[$v['purchase_id']]['check_id'] = $v['check_id'];
+            }
+            unset($res);
+            $return_model = new \app\admin\model\purchase\PurchaseReturn;
+            $return_model_item = new \app\admin\model\purchase\PurchaseReturnItem;
+
+            $check_id = [];
+            foreach ($list as $k => $v) {
+                $params['return_number'] = 'RO' . date('YmdHis') . rand(100, 999) . rand(100, 999);
+                $params['purchase_id'] = $k;
+
+                $params['create_person'] = session('admin.nickname');
+                $params['createtime'] = date('Y-m-d H:i:s', time());
+                $result = $return_model->allowField(true)->isUpdate(false)->data($params)->save();
+                if ($result !== false) {
+                    $check_id[] = $v['check_id'];
+                }
+
+                $i = 0;
+                $info = [];
+                $return_money = 0;
+                $purchase_total = 0;
+                foreach ($v['item'] as $val) {
+                    $info[$i]['sku'] = $val['sku'];
+                    $info[$i]['return_num'] = $val['unqualified_num'];
+                    $info[$i]['return_id'] = $return_model->id;
+                    $info[$i]['check_item_id'] = $val['id'];
+                    $i++;
+
+                    $return_money  += round($val['unqualified_num'] * $val['purchase_price'], 2);
+                    $purchase_total += $val['purchase_total'];
+                }
+                if ($info) {
+                    $return_model_item->allowField(true)->saveAll($info);
+                    //填充退货金额  采购总金额
+                    $return_model->allowField(true)->isUpdate(true, ['id' => $v['check_id']])->save(['return_money' => $return_money, 'purchase_total' => $purchase_total]);
+                }
+            }
+
+            if ($result !== false) {
+                //标记为已退
+                $map['id'] = ['in', $check_id];
+                $this->model->allowField(true)->isUpdate(true, $map)->save(['is_return' => 1]);
+
+                $this->success('操作成功');
+            } else {
+                $this->success('操作失败');
             }
         }
 
         $this->assign('ids', $ids);
+
+        //查询供应商
+        $supplier = new \app\admin\model\purchase\Supplier;
+        $data = $supplier->getSupplierData();
+        $this->assign('supplier', $data);
 
         return $this->view->fetch();
     }

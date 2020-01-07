@@ -125,7 +125,7 @@ class Attachment extends Backend
 
     public function test()
     {
-        $data = session('data_test');
+        $data = session('data_test001');
         $spreadsheet = new Spreadsheet();
        
         
@@ -307,7 +307,7 @@ class Attachment extends Backend
         }
 
 
-        session('data_test',$data);
+        session('data_test001',$data);
 
         
     }
