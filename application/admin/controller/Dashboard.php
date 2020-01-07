@@ -660,17 +660,23 @@ class Dashboard extends Backend
     {
         set_time_limit(0);
         //查询采购单数据
-        $res = Db::table('fa_purchase_order')->cache(3600)->select();
-      
-
+        $where['is_process'] = 0;
+        $res = Db::table('fa_purchase_order')->where($where)->limit(500)->select();
+ 
         foreach ($res as $value) {
+            if (!$value['old_purchase_id']) {
+                continue;
+            }
             //查询明细表
             $item = Db::table('zeelool_hander_input_stock')
                 ->alias('a')
                 ->where(['b.purchase_id' => $value['old_purchase_id']])
                 ->join(['zeelool_hander_input_stock_item' => 'b'], 'a.id=b.input_stock_id')
                 ->select();
-
+            if (!$item) {
+                continue;
+            }
+           
             $list = [];
             foreach ($item as $kl => $v) {
                 $list[$v['input_stock_id']]['status'] = $v['status'];
@@ -683,6 +689,7 @@ class Dashboard extends Backend
                 $list[$v['input_stock_id']]['item'][$kl] = $v;
             }
 
+           
             $params = [];
             $instock = [];
             foreach ($list as $k => $val) {
@@ -752,6 +759,10 @@ class Dashboard extends Backend
                 }
             }
         }
+
+        $ids = array_column($res, 'id');
+        $map['id'] = ['in', $ids];
+        Db::table('fa_purchase_order')->where($map)->update(['is_process' => 1]);
 
         echo 'ok';
     }
