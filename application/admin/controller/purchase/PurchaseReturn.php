@@ -525,12 +525,15 @@ class PurchaseReturn extends Backend
         $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
         if ($res !== false) {
             //查询处理的质检单明细表id
-            $where['return_id'] = ['in', $ids];
-            $check_item_ids = $this->purchase_return_item->where($where)->column('check_item_id');
+            // $where['return_id'] = ['in', $ids];
+            // $check_item_ids = $this->purchase_return_item->where($where)->column('check_item_id');
 
             //取消退销单时 修改质检单明细表对应状态为未处理
-            $checkItem = new \app\admin\model\warehouse\CheckItem;
-            $checkItem->save(['is_process' => 0], ['id' => ['in', $check_item_ids]]);
+            // $checkItem = new \app\admin\model\warehouse\CheckItem;
+            // $checkItem->save(['is_process' => 0], ['id' => ['in', $check_item_ids]]);
+
+            $check = new \app\admin\model\warehouse\Check;
+            $check->save(['is_return' => 0], ['id' => ['in', $row['check_ids']]]);
 
             $this->success();
         } else {

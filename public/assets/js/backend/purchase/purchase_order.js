@@ -170,7 +170,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                                     visible: function (row) {
                                         //返回true时按钮显示,返回false隐藏
                                         if ((row.purchase_status == 6 || row.purchase_status == 7) && row.check_status > 0) {
-                                            return true;
+                                            return false;
                                         } else {
                                             return false;
                                         }
@@ -211,7 +211,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                                         if (row.purchase_status == 0 || row.purchase_type == 2) {
                                             return true;
                                         } else {
-                                            return false;
+                                            return true;
                                         }
                                     }
                                 },
