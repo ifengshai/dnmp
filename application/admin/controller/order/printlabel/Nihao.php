@@ -160,9 +160,9 @@ class Nihao extends Backend
         if ($entity_ids) {
             //多数据库
             $map['entity_id'] = ['in', $entity_ids];
-            $data['custom_print_label'] = 1;
-            $data['custom_print_label_created_at'] = date('Y-m-d H:i:s', time());
-            $data['custom_print_label_person'] =  session('admin.username');
+            $data['custom_print_label_new'] = 1;
+            $data['custom_print_label_created_at_new'] = date('Y-m-d H:i:s', time());
+            $data['custom_print_label_person_new'] =  session('admin.nickname');
             $connect = Db::connect('database.db_nihao')->table('sales_flat_order');
             $connect->startTrans();
             try {
@@ -203,15 +203,15 @@ class Nihao extends Backend
         $map['entity_id'] = ['in', $entity_ids];
         $res = $this->model->where($map)->select();
         foreach ($res as $v) {
-            if ($status == 1 && $v['custom_is_match_frame'] == 1) {
+            if ($status == 1 && $v['custom_is_match_frame_new'] == 1) {
                 $this->error('存在已配过镜架的订单！！');
             }
 
-            if ($v['custom_is_delivery'] == 1) {
+            if ($v['custom_is_delivery_new'] == 1) {
                 $this->error('存在已质检通过的订单！！');
             }
 
-            if ($status == 4 && $v['custom_is_match_frame'] == 0) {
+            if ($status == 4 && $v['custom_is_match_frame_new'] == 0) {
                 $this->error('存在未配镜架的订单！！');
             }
         }
@@ -221,27 +221,27 @@ class Nihao extends Backend
             switch ($status) {
                 case 1:
                     //配镜架
-                    $data['custom_is_match_frame'] = 1;
-                    $data['custom_match_frame_created_at'] = date('Y-m-d H:i:s', time());
-                    $data['custom_match_frame_person'] = session('admin.username');
+                    $data['custom_is_match_frame_new'] = 1;
+                    $data['custom_match_frame_created_at_new'] = date('Y-m-d H:i:s', time());
+                    $data['custom_match_frame_person_new'] = session('admin.nickname');
                     break;
                 case 2:
                     //配镜片
-                    $data['custom_is_match_lens'] = 1;
-                    $data['custom_match_lens_created_at'] = date('Y-m-d H:i:s', time());
-                    $data['custom_match_lens_person'] = session('admin.username');
+                    $data['custom_is_match_lens_new'] = 1;
+                    $data['custom_match_lens_created_at_new'] = date('Y-m-d H:i:s', time());
+                    $data['custom_match_lens_person_new'] = session('admin.nickname');
                     break;
                 case 3:
                     //移送加工时间
-                    $data['custom_is_send_factory'] = 1;
-                    $data['custom_match_factory_created_at'] = date('Y-m-d H:i:s', time());
-                    $data['custom_match_factory_person'] = session('admin.username');
+                    $data['custom_is_send_factory_new'] = 1;
+                    $data['custom_match_factory_created_at_new'] = date('Y-m-d H:i:s', time());
+                    $data['custom_match_factory_person_new'] = session('admin.nickname');
                     break;
                 case 4:
                     //提货
-                    $data['custom_is_delivery'] = 1;
-                    $data['custom_match_delivery_created_at'] = date('Y-m-d H:i:s', time());
-                    $data['custom_match_delivery_person'] = session('admin.username');
+                    $data['custom_is_delivery_new'] = 1;
+                    $data['custom_match_delivery_created_at_new'] = date('Y-m-d H:i:s', time());
+                    $data['custom_match_delivery_person_new'] = session('admin.nickname');
                     break;
                 default:
             }

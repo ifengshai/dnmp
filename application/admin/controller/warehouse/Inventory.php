@@ -900,7 +900,7 @@ class Inventory extends Backend
             $whereChangeSku['platform_type'] = $order_platform;
             $warehouse_change_sku = $platformSku->where($whereChangeSku)->value('sku');
             //求出订单对应的order_id
-            $order = Db::connect($db)->table('sales_flat_order')->where(['increment_id' => $increment_id])->field('entity_id,custom_is_match_frame')->find();
+            $order = Db::connect($db)->table('sales_flat_order')->where(['increment_id' => $increment_id])->field('entity_id,custom_is_match_frame_new')->find();
             if (!$original_sku || !$original_number || !$change_sku || !$change_number) {
                 continue;
             }
@@ -913,7 +913,7 @@ class Inventory extends Backend
                 $changeData['is_change_frame'] = 2;
                 $updateInfo =Db::connect($db)->table('sales_flat_order_item')->where($whereChange)->update($changeData);
                 if(false != $updateInfo){
-                    if(1 == $order['custom_is_match_frame']){ //如果已经配过镜架需要把原先的配货占用库存扣减，更新的配货占用库存增加
+                    if(1 == $order['custom_is_match_frame_new']){ //如果已经配过镜架需要把原先的配货占用库存扣减，更新的配货占用库存增加
                         //原先sku增加可用库存,减少占用库存
                         $item->where(['sku' => $warehouse_original_sku])->inc('available_stock', $original_number)->dec('distribution_occupy_stock',$original_number)->dec('occupy_stock', $original_number)->update();
                         //更新之后的sku减少可用库存,增加占用库存
@@ -1021,7 +1021,7 @@ class Inventory extends Backend
             $whereOriginSku['platform_type'] = $order_platform;
             $warehouse_original_sku = $platformSku->where($whereOriginSku)->value('sku');
             //求出订单对应的order_id
-            $order = Db::connect($db)->table('sales_flat_order')->where(['increment_id' => $increment_id])->field('entity_id,custom_is_match_frame')->find();
+            $order = Db::connect($db)->table('sales_flat_order')->where(['increment_id' => $increment_id])->field('entity_id,custom_is_match_frame_new')->find();
             if (!$original_sku || !$original_number) {
                 continue;
             }
@@ -1034,7 +1034,7 @@ class Inventory extends Backend
                 $changeData['is_change_frame'] = 3;
                 $updateInfo = Db::connect($db)->table('sales_flat_order_item')->where($whereChange)->update($changeData);
                 if(false != $updateInfo){
-                    if(1 == $order['custom_is_match_frame']){ //如果已经配过镜架需要把原先的配货占用库存扣减
+                    if(1 == $order['custom_is_match_frame_new']){ //如果已经配过镜架需要把原先的配货占用库存扣减
                         //原先sku增加可用库存,减少占用库存
                         $item->where(['sku' => $warehouse_original_sku])->inc('available_stock', $original_number)->dec('distribution_occupy_stock',$original_number)->dec('occupy_stock', $original_number)->update();
                     }else{
