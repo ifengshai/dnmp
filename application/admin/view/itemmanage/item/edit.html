@@ -5,8 +5,6 @@
         <li><a href="{:url('images')}?ids={$row.id}">照片信息</a></li>
     </ul>
 </div>
-{present name="template"}
-{if $template eq 1}
 <style>
     .caigou {
         border-width: 1px;
@@ -61,6 +59,8 @@
         width: 250px;
     }
 </style>
+{present name="template"}
+{if $template eq 1}
 <form id="edit-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
     <div class="form-group" id="item-stock">
         <label class="control-label col-xs-12 col-sm-2">{:__('Category_id')}:</label>
@@ -287,60 +287,6 @@
     </div>
     {elseif $template eq 2 /}
     {elseif $template eq 3 /}
-    <style>
-        .caigou {
-            border-width: 1px;
-            border-style: solid;
-            border-color: rgba(188, 188, 188, 1);
-            border-radius: 6px;
-            padding: 10px;
-            width: 73%;
-            margin-left: 10%;
-            margin-bottom: 10px;
-        }
-    
-        .caigou #caigou-table {
-            width: 100%;
-            height: 130px;
-            border-width: 1px;
-            border-style: solid;
-            border-color: rgba(188, 188, 188, 1);
-            border-radius: 6px;
-            text-align: center;
-        }
-    
-        .caigou #caigou-table tr {
-    
-            border-width: 1px;
-            border-style: solid;
-            border-color: rgba(188, 188, 188, 1);
-            border-radius: 6px;
-            line-height: 50px;
-        }
-    
-        .caigou #caigou-table tr th {
-    
-            border-width: 1px;
-            border-style: solid;
-            border-color: rgba(188, 188, 188, 1);
-            border-radius: 6px;
-            text-align: center;
-            font-size: 14px;
-        }
-    
-        .caigou #caigou-table tr td {
-    
-            border-width: 1px;
-            border-style: solid;
-            border-color: rgba(188, 188, 188, 1);
-            border-radius: 6px;
-        }
-    
-        .caigou #caigou-table tr td input {
-    
-            width: 250px;
-        }
-    </style>
     <form id="edit-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
         <div class="form-group" id="item-stock">
             <input id = "item_type" type="hidden" name="row[item_type]" value="3"/>
