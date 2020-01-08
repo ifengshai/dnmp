@@ -27,6 +27,8 @@ class Nihao extends Backend
      */
     protected $model = null;
 
+    protected $searchFields = 'entity_id';
+
     public function _initialize()
     {
         parent::_initialize();
