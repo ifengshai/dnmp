@@ -1178,9 +1178,6 @@ class Item extends Backend
     public function detail($ids = null)
     {
         $row = $this->model->get($ids, 'itemAttribute');
-        // echo '<pre>';
-        // var_dump($row);
-        // exit;
         if (!$row) {
             $this->error(__('No Results were found'));
         }
@@ -1190,29 +1187,36 @@ class Item extends Backend
                 $this->error(__('You have no permission'));
             }
         }
-        $allShape = $this->itemAttribute->getAllShape();
-        //获取所有材质
-        $allTexture = $this->itemAttribute->getAllTexture();
-        //获取所有镜架形状
-        $allFrameShape = $this->itemAttribute->getAllFrameShape();
-        //获取所有适合性别
-        $allFrameGender = $this->itemAttribute->getFrameGender();
-        //获取所有型号
-        $allFrameSize  = $this->itemAttribute->getFrameSize();
-        //获取所有眼镜类型
-        $allGlassesType = $this->itemAttribute->getGlassesType();
-        //获取所有采购产地
-        $allOrigin      = $this->itemAttribute->getOrigin();
-        //获取配镜类型
-        $allFrameType   = $this->itemAttribute->getFrameType();
-        $this->assign('AllFrameType', $allFrameType);
-        $this->assign('AllOrigin', $allOrigin);
-        $this->assign('AllGlassesType', $allGlassesType);
-        $this->assign('AllFrameSize', $allFrameSize);
-        $this->assign('AllFrameGender', $allFrameGender);
-        $this->assign('AllFrameShape', $allFrameShape);
-        $this->assign('AllShape', $allShape);
-        $this->assign('AllTexture', $allTexture);
+        $result = $this->category->getAttrCategoryById($row['category_id']);
+        if(3 == $result){
+            $info = $this->category->getCategoryTexture($row['category_id']);
+            $this->assign('AllTexture', $info['textureResult']);
+            $this->assign('AllFrameColor',$info['colorResult']);
+        }else{
+            $allShape = $this->itemAttribute->getAllShape();
+            //获取所有材质
+            $allTexture = $this->itemAttribute->getAllTexture();
+            //获取所有镜架形状
+            $allFrameShape = $this->itemAttribute->getAllFrameShape();
+            //获取所有适合性别
+            $allFrameGender = $this->itemAttribute->getFrameGender();
+            //获取所有型号
+            $allFrameSize  = $this->itemAttribute->getFrameSize();
+            //获取所有眼镜类型
+            $allGlassesType = $this->itemAttribute->getGlassesType();
+            //获取所有采购产地
+            $allOrigin      = $this->itemAttribute->getOrigin();
+            //获取配镜类型
+            $allFrameType   = $this->itemAttribute->getFrameType();
+            $this->assign('AllFrameType', $allFrameType);
+            $this->assign('AllOrigin', $allOrigin);
+            $this->assign('AllGlassesType', $allGlassesType);
+            $this->assign('AllFrameSize', $allFrameSize);
+            $this->assign('AllFrameGender', $allFrameGender);
+            $this->assign('AllFrameShape', $allFrameShape);
+            $this->assign('AllShape', $allShape);
+            $this->assign('AllTexture', $allTexture);            
+        }
         $this->view->assign('template', $this->category->getAttrCategoryById($row['category_id']));
         $this->view->assign("row", $row);
         return $this->view->fetch();
