@@ -28,7 +28,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-se
                     [
                         { checkbox: true },
                         { field: 'id', title: __('Id') },
-                        { field: 'check_order_number', title: __('Check_order_number') },
+                        { field: 'check_order_number', title: __('Check_order_number'), operate: 'like' },
                         { field: 'type', title: __('Type'), custom: { 1: 'success', 2: 'success' }, searchList: { 1: '采购质检', 2: '退货质检' }, formatter: Table.api.formatter.status },
                         { field: 'purchaseorder.purchase_number', title: __('Purchase_id'), operate: 'like' },
                         { field: 'purchaseorder.create_person', title: __('采购创建人'), operate: 'like' },

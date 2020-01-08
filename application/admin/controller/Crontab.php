@@ -1194,7 +1194,7 @@ order by sfoi.item_id asc limit 1000";
         $map['is_del'] = 1;
         $list = $purchase->where($map)->limit(50)->select();
         $list = collection($list)->toArray();
-        
+
         foreach ($list as $k => $v) {
             $res = Alibaba::getOrderDetail($v['purchase_number']);
             if (!$res) {
@@ -1394,7 +1394,7 @@ order by sfoi.item_id asc limit 1000";
                     $map['b.sku'] = $v['nihao_sku'];
                     $nihao_num = $nihao_model->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')->group('b.sku')->sum('b.qty_ordered');
                 }
-                $list[$k]['days_sales_num'] = round(($zeelool_num + $voogueme_num + $nihao_num) / 2);
+                $list[$k]['days_sales_num'] = round(($zeelool_num + $voogueme_num + $nihao_num) / 2, 2);
             }
 
             if ($v['grade'] == 'B' || $v['grade'] == 'C' || $v['grade'] == 'C+') {
@@ -1418,7 +1418,7 @@ order by sfoi.item_id asc limit 1000";
                     $map['b.sku'] = $v['nihao_sku'];
                     $nihao_num = $nihao_model->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')->group('b.sku')->sum('b.qty_ordered');
                 }
-                $list[$k]['days_sales_num'] = round(($zeelool_num + $voogueme_num + $nihao_num) / 5);
+                $list[$k]['days_sales_num'] = round(($zeelool_num + $voogueme_num + $nihao_num) / 5, 2);
             }
 
             if ($v['grade'] == 'D' || $v['grade'] == 'E' || $v['grade'] == 'F') {
@@ -1457,7 +1457,7 @@ order by sfoi.item_id asc limit 1000";
 
         foreach ($list as $k => $v) {
             if ($v['grade'] == 'D' || $v['grade'] == 'E' || $v['grade'] == 'F') {
-                $list[$k]['days_sales_num'] = round(($zeelool[$v['zeelool_sku']] + $voogueme[$v['voogueme_sku']] + $nihao[$v['nihao_sku']]) / 30);
+                $list[$k]['days_sales_num'] = round(($zeelool[$v['zeelool_sku']] + $voogueme[$v['voogueme_sku']] + $nihao[$v['nihao_sku']]) / 30, 2);
             }
         }
 
