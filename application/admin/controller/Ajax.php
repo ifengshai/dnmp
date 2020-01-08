@@ -103,7 +103,7 @@ class Ajax extends Backend
             '{.suffix}'  => $suffix ? '.' . $suffix : '',
             '{filemd5}'  => md5_file($fileInfo['tmp_name']),
         ];
-        
+
         $changeDir = $this->request->param('dir');
 
         //        //$savekey = $upload['savekey'];
@@ -291,6 +291,7 @@ class Ajax extends Backend
     public function getSkuList()
     {
         $sku = input('sku');
+        $supplier_id = input('supplier_id');
         if (!$sku) {
             $this->error('参数错误！！');
         }
@@ -304,7 +305,7 @@ class Ajax extends Backend
 
         //查询供应商SKU
         $supplier = new \app\admin\model\purchase\SupplierSku;
-        $sullier_sku = $supplier->getSupplierSkuData($sku);
+        $sullier_sku = $supplier->getSupplierSkuData($sku, $supplier_id);
         if (!$sullier_sku) {
             $this->error('此SKU未绑定供应商SKU！！');
         }
