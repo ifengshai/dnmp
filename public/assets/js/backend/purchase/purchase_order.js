@@ -673,7 +673,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                 //获取sku信息
                 $(document).on('change', '.sku', function () {
                     var sku = $(this).val();
-                    var supplier_id = $('.supplier').val();
+                    var supplier_id = $('.supplier.selectpicker').val();
                     var _this = $(this);
                     if (!sku) {
                         return false;
