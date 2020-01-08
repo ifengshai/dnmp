@@ -336,7 +336,13 @@ class Item extends Backend
                     if(is_array($itemName) && !in_array("",$itemName)){
                         //求出对应的sku编码规则
                        $resultEncode  = $this->category->getCategoryTexture($params['category_id']);
-                       $textureEncode = $resultEncode['typeResult']; 
+                       $textureEncodeInfo = $resultEncode['typeResult'];
+                       if(false !== strpos($textureEncodeInfo, '-')){
+                            $textureArr = explode('-',$textureEncodeInfo);
+                            $textureEncode = $textureArr[0];
+                       }else{
+                            $textureEncode = $textureEncodeInfo;
+                       } 
                        if(!$textureEncode){
                         $this->error(__('The corresponding encoding rule does not exist, please try again'));
                        }
