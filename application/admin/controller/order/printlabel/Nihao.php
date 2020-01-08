@@ -74,14 +74,12 @@ class Nihao extends Backend
                 ->where($map)
                 ->where($where)
                 ->order($sort, $order)
-                ->count();
-            // var_dump($total);die;                                                                            
-            $field = 'custom_order_prescription_type,entity_id,status,increment_id,coupon_code,shipping_description,store_id,customer_id,base_discount_amount,base_grand_total,
-                     total_qty_ordered,quote_id,base_currency_code,customer_email,customer_firstname,customer_lastname,custom_is_match_frame,custom_is_match_lens,
-                     custom_is_send_factory,custom_is_delivery,custom_match_frame_created_at,custom_match_lens_created_at,custom_match_factory_created_at,
-                     custom_match_delivery_created_at,custom_print_label,custom_order_prescription,custom_print_label_created_at,custom_service_name';
+                ->count();                                                                       
+            $field = 'order_type,custom_order_prescription_type,entity_id,status,base_shipping_amount,increment_id,coupon_code,shipping_description,store_id,customer_id,base_discount_amount,base_grand_total,
+                     total_qty_ordered,quote_id,customer_email,customer_firstname,customer_lastname,custom_is_match_frame_new,custom_is_match_lens_new,
+                     custom_is_send_factory_new,custom_is_delivery_new,custom_print_label_new,custom_order_prescription,created_at';
             $list = $this->model
-                // ->field($field)
+                ->field($field)
                 ->where($map)
                 ->where($where)
                 ->order($sort, $order)
