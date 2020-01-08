@@ -331,11 +331,14 @@ class Item extends Backend
                 }
                 //区分是镜架还是配饰
                 $item_type = $params['item_type'];
+                $data = $itemAttribute = [];
                 if(3 == $item_type){ //配饰
-                    
+                    if(is_array($itemName) && !in_array("",$itemName)){
+                        //求出对应的sku编码规则
+                       $textureEncode = $this->category->getCategoryTexture($params['category_id']); 
+                    }
                 }else{ //镜架
-                    if (is_array($itemName) && !in_array("", $itemName)) {
-                        $data = $itemAttribute = [];
+                    if (is_array($itemName) && !in_array("", $itemName)) {                        
                         //求出材质对应的编码
                         if ($params['frame_texture']) {
                             $textureEncode = $this->itemAttribute->getTextureEncode($params['frame_texture']);
