@@ -650,6 +650,7 @@ class PurchaseOrder extends Backend
 
         //查询质检信息
         $check_map['purchase_id'] = $id;
+        $check_map['status'] = 2;
         $check = new \app\admin\model\warehouse\Check;
         $list = $check->with(['checkItem'])
             ->where($check_map)
