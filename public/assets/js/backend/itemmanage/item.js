@@ -338,11 +338,15 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                 //通过审核
                 //多项添加商品名称和颜色
                 $(document).on('click', '.btn-add', function () {
+                    var item_type = $('#item_type').val();
                     $(".selectpicker").selectpicker('refresh');
-                    var content = $('#table-content table tbody').html();
-                    //console.log(content);
-                    $('.caigou table tbody').append(content);
-                    // Form.api.bindevent($("form[role=form]"));
+                    if(3 == item_type){
+                        var content = $('#table-content2 table tbody').html();
+                        $('.caigou table tbody').append(content);
+                    }else{
+                        var content = $('#table-content table tbody').html();
+                        $('.caigou table tbody').append(content);
+                    }
                 });
                 $(document).on('click', '.btn-del', function () {
                     $(this).parent().parent().remove();
@@ -465,12 +469,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                         url: 'itemmanage/item/ajaxItemInfo',
                         data: { categoryId: categoryId, sku: sku }
                     }, function (data, ret) {
-                        //console.log(ret);
                         var resultData = ret.data;
                         if (resultData == -1) {
                             Layer.alert('输入的商品SKU有误，请重新输入');
                         }
-                        if (resultData != false) {
+                        if ((resultData != false) && (resultData.type == 1)) {
                             $('.newAddition').remove();
                             if (resultData.procurement_type) {
                                 $("#c-procurement_type").find("option[value=" + resultData.procurement_type + "]").prop("selected", true);
@@ -518,6 +521,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                                         '<tr>' +
                                         '<th>商品名称</th>' +
                                         '<th>商品颜色</th>' +
+                                        '<th>商品进价</th>'+
                                         '<th>操作</th>' +
                                         '</tr>';
                                     for (var j = 0, len = resultData.itemArr.length; j < len; j++) {
@@ -528,6 +532,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                                         Str += '<select  id="c-color" data-rule="required" class="form-control " name="row[color][]" disabled="disabled">';
                                         Str += '<option value="' + newItem.frame_color + '">' + newItem.frame_color_value + '</option>';
                                         Str += '</select></td>';
+                                        Str += '<td><input id="c-name" class="form-control" name="row[price][] type="text" value="'+ newItem.price +'" disabled="disabled"></td>';
                                         Str += '<td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>删除</a></td>';
                                         Str += '</tr>';
                                     }
@@ -538,7 +543,48 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                                 });
                             }
                             $(".selectpicker").selectpicker('refresh');
-                        } else {
+                        }else if((resultData != false) && (resultData.type == 3)){
+                            console.log(resultData);
+                            //console.log(resultData.accessory_texture);
+                            $("#c-frame_texture").find("option[value="+resultData.accessory_texture+"]").prop("selected", true);
+                            $('#item-count').val(resultData.itemCount);
+                            if (resultData.origin_sku) {
+                                $(".addition").remove();
+                                $(".redact").after(function () {
+                                    var Str = '';
+                                    Str += '<div class="caigou ajax-add newAddition">' +
+                                        '<p style="font-size: 16px;"><b>产品信息</b></p>' +
+                                        '<div>' +
+                                        '<div id="toolbar" class="toolbar">' +
+                                        '<a href="javascript:;" class="btn btn-success btn-add" title="增加"><i class="fa fa-plus"></i> 增加</a>' +
+                                        '</div>' +
+                                        '<table id="caigou-table">' +
+                                        '<tr>' +
+                                        '<th>商品名称</th>' +
+                                        '<th>商品颜色</th>' +
+                                        '<th>商品进价</th>'+
+                                        '<th>操作</th>' +
+                                        '</tr>';
+                                    for (var j = 0, len = resultData.itemArr.length; j < len; j++) {
+                                        var newItem = resultData.itemArr[j];
+                                        Str += '<tr>';
+                                        Str += '<td><input id="c-name" class="form-control" name="row[name][]" type="text" value="' + newItem.name + '" disabled="disabled"></td>';
+                                        Str += '<td><div class="col-xs-12 col-sm-12">';
+                                        Str += '<select  id="c-color" data-rule="required" class="form-control " name="row[color][]" disabled="disabled">';
+                                        Str += '<option value="' + newItem.accessory_color + '">' + newItem.accessory_color + '</option>';
+                                        Str += '</select></td>';
+                                        Str += '<td><input id="c-name" class="form-control" name="row[price][] type="text" value="'+ newItem.price +'" disabled="disabled"></td>';
+                                        Str += '<td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>删除</a></td>';
+                                        Str += '</tr>';
+                                    }
+                                    Str += '</table>' +
+                                        '</div>' +
+                                        '</div>';
+                                    return Str;
+                                });
+                            }
+                            $(".selectpicker").selectpicker('refresh');                            
+                        }else{
                             Layer.alert('旧商品SKU信息暂时没有同步...请耐心等待');
                         }
                         return false;
