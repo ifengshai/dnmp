@@ -106,4 +106,22 @@
         </tr>
     </table>
 </div>
+<div id="table-content2" style="display: none;">
+    <table>
+        <tr>
+            <td><input id="c-name" data-rule="required"  class="form-control c-name" name="row[name][]" type="text"></td>
+            <td><div class="col-xs-12 col-sm-12">
+                    <select  id="c-color" data-rule="required" class="form-control c-color" name="row[color][]">
+                        {foreach name="AllDecorationColor" item="vo"}
+                        <option value="{$vo}">{$vo}</option>
+                        {/foreach}
+                    </select>
+            </div>
+            </td>
+            <td><input  data-rule="required"  class="form-control c-price" name="row[price][]" type="text"></td>
+            <td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>
+                删除</a></td>
+        </tr>
+    </table>
+</div>
 

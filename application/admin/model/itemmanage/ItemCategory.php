@@ -231,5 +231,8 @@ class ItemCategory extends Model
         $colorResult   = explode(',',$result['accessory_color_value']);
         return ['typeResult'=>$typeResult,'textureResult'=>$textureResult,'colorResult'=>$colorResult];
     }
-
+    /***
+     * 获取配饰材质（固定）
+     */
+    
 }

@@ -71,9 +71,10 @@ class Item extends Model
     /***
      * 查询sku信息
      * @param $sku
+     * @param $type 1 镜架  2 镜片  3 配饰
      * @return bool
      */
-    public function getItemInfo($sku)
+    public function getItemInfo($sku,$type=1)
     {
         $info = $this->where('sku','=',$sku)->field('id,sku')->find();
         if(!$info){
@@ -84,15 +85,23 @@ class Item extends Model
             return false;
         }
         if(!empty($result['origin_sku'])){
-            $colorArr = (new ItemAttribute())->getFrameColor();
-            $arr = $this->alias('m')->where('origin_sku', '=', $result['origin_sku'])->join('item_attribute a', 'm.id=a.item_id')->field('m.name,a.frame_color')->select();
-            if (is_array($arr)) {
-                foreach ($arr as $k => $v) {
-                    $arr[$k]['frame_color_value'] = $colorArr[$v['frame_color']];
+            //镜架类型
+            if(1 == $type){
+                $colorArr = (new ItemAttribute())->getFrameColor();
+                $arr = $this->alias('m')->where('origin_sku', '=', $result['origin_sku'])->join('item_attribute a', 'm.id=a.item_id')->field('m.name,m.price,a.frame_color')->select();
+                if (is_array($arr)) {
+                    foreach ($arr as $k => $v) {
+                        $arr[$k]['frame_color_value'] = $colorArr[$v['frame_color']];
+                    }
                 }
+                $result['itemArr'] = $arr;
+            }elseif(3 == $type){ //配饰类型
+                $arr = $this->alias('m')->where('origin_sku', '=', $result['origin_sku'])->join('item_attribute a', 'm.id=a.item_id')->field('m.name,m.price,a.accessory_color')->select();
+                $result['itemArr'] = $arr;
             }
-            $result['itemArr'] = $arr;
-            $result['itemCount'] = $this->where('origin_sku', '=', $result['origin_sku'])->count();
+                $result['itemCount'] = $this->where('origin_sku', '=', $result['origin_sku'])->count();
+                $result['type'] = $type;
+
         }
         return $result ? $result : false;
     }

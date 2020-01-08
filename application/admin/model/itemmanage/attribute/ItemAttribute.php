@@ -107,10 +107,51 @@ class ItemAttribute extends Model
 //    {
 //        return [0=>'请选择',1=>'红', 2=> '橙', 3=>'黄', 4=>'绿', 5=>'蓝', 6=>'紫', 7=>'黑', 8=>'白', 9=>'灰', 10=>'褐'];
 //    }
-    public function getFrameColor()
+    /***
+     * type 类型  1 镜架  2 镜片 3 配饰 默认 1
+     */
+    public function getFrameColor($type=1)
     {
-        return [0=>'请选择',1=>'Black', 2=> 'Blue', 3=>'Brown', 4=>'Crystal', 5=>'Floral', 6=>'Gold', 7=>'Green',
-            8=>'Orange', 9=>'Pink', 10=>'Purple',11=>'Red',12=>'Silver',13=>'Tortoise',14=>'White',15=>'Yellow'];
+        if(1 == $type){
+            return [
+                0=>'请选择',
+                1=>'Black', 
+                2=> 'Blue', 
+                3=>'Brown', 
+                4=>'Crystal', 
+                5=>'Floral', 
+                6=>'Gold', 
+                7=>'Green',
+                8=>'Orange', 
+                9=>'Pink', 
+                10=>'Purple',
+                11=>'Red',
+                12=>'Silver',
+                13=>'Tortoise',
+                14=>'White',
+                15=>'Yellow'
+            ];
+        }elseif(3 == $type){
+            return [
+                'Red'       => 'Red',
+                'Green'     => 'Green',
+                'Tortoise'  => 'Tortoise',
+                'Gold'      => 'Gold',
+                'Pink'      => 'Pink',
+                'Yellow'    => 'Yellow',
+                'Black'     => 'Black',
+                'Floral'    => 'Floral',
+                'Purple'    => 'Purple',
+                'White'     => 'White',
+                'Grey'      => 'Grey',
+                'Brown'     => 'Brown',
+                'Blue'      => 'Blue',
+                'Transparent' => 'Transparent',
+                'Silver'      => 'Silver',
+                'Multicolor'  => 'Multicolor'
+            ];
+        }
+
     }
     /***
      * 获取眼镜类型(原先)
