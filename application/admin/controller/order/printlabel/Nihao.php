@@ -11,6 +11,7 @@ use think\Exception;
 use think\exception\PDOException;
 use Util\NihaoPrescriptionDetailHelper;
 use Util\SKUHelper;
+use app\admin\model\OrderLog;
 
 /**
  * Sales Flat Order
@@ -174,6 +175,13 @@ class Nihao extends Backend
                 $this->error($e->getMessage());
             }
             if ($result) {
+                $params['type'] = 1;
+                $params['num'] = count($entity_ids);
+                $params['order_ids'] = implode(',', $entity_ids);
+                $params['site'] = 3;
+                (new OrderLog())->setOrderLog($params);
+
+
                 //用来判断是否从_list列表页进来
                 if ($label == 'list') {
                     //订单号
@@ -222,24 +230,28 @@ class Nihao extends Backend
                     $data['custom_is_match_frame_new'] = 1;
                     $data['custom_match_frame_created_at_new'] = date('Y-m-d H:i:s', time());
                     $data['custom_match_frame_person_new'] = session('admin.nickname');
+                    $params['type'] = 2;
                     break;
                 case 2:
                     //配镜片
                     $data['custom_is_match_lens_new'] = 1;
                     $data['custom_match_lens_created_at_new'] = date('Y-m-d H:i:s', time());
                     $data['custom_match_lens_person_new'] = session('admin.nickname');
+                    $params['type'] = 3;
                     break;
                 case 3:
                     //移送加工时间
                     $data['custom_is_send_factory_new'] = 1;
                     $data['custom_match_factory_created_at_new'] = date('Y-m-d H:i:s', time());
                     $data['custom_match_factory_person_new'] = session('admin.nickname');
+                    $params['type'] = 4;
                     break;
                 case 4:
                     //提货
                     $data['custom_is_delivery_new'] = 1;
                     $data['custom_match_delivery_created_at_new'] = date('Y-m-d H:i:s', time());
                     $data['custom_match_delivery_person_new'] = session('admin.nickname');
+                    $params['type'] = 5;
                     break;
                 default:
             }
@@ -355,6 +367,12 @@ class Nihao extends Backend
                 $this->error($e->getMessage());
             }
             if ($result) {
+                $params['site'] = 3;
+                $params['num'] = count($entity_ids);
+                $params['order_ids'] = implode(',', $entity_ids);
+                (new OrderLog())->setOrderLog($params);
+
+
                 //用来判断是否从_list列表页进来
                 if ($label == 'list') {
                     //订单号
