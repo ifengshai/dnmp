@@ -53,8 +53,6 @@ class Zeelool extends Backend
                 return $this->selectpage();
             }
 
-            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
-
             $filter = json_decode($this->request->get('filter'), true);
 
             if ($filter['increment_id']) {
@@ -62,6 +60,19 @@ class Zeelool extends Backend
             } elseif (!$filter['status']) {
                 $map['status'] = ['in', ['free_processing', 'processing']];
             }
+
+            $infoSynergyTask = new \app\admin\model\infosynergytaskmanage\InfoSynergyTask;
+            if ($filter['task_label'] == 1 || $filter['task_label'] == '0') {
+                $swhere['is_del'] = 1;
+                $swhere['order_platform'] = 1;
+                $swhere['synergy_order_id'] = 2;
+                $order_arr = $infoSynergyTask->where($swhere)->order('create_time desc')->column('synergy_order_number');
+                $map['increment_id'] = ['in', $order_arr];
+                unset($filter['task_label']);
+                $this->request->get(['filter' => json_encode($filter)]);
+            } 
+
+            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
 
             $total = $this->model
                 ->where($map)
@@ -82,7 +93,6 @@ class Zeelool extends Backend
             $list = collection($list)->toArray();
             //查询订单是否存在协同任务
             $increment_ids = array_column($list, 'increment_id');
-            $infoSynergyTask = new \app\admin\model\infosynergytaskmanage\InfoSynergyTask;
             $swhere['synergy_order_number'] = ['in', $increment_ids];
             $swhere['is_del'] = 1;
             $swhere['order_platform'] = 1;

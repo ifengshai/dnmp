@@ -61,8 +61,6 @@ class Nihao extends Backend
                 return $this->selectpage();
             }
 
-            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
-
             $filter = json_decode($this->request->get('filter'), true);
 
             if ($filter['increment_id']) {
@@ -70,6 +68,19 @@ class Nihao extends Backend
             } elseif (!$filter['status']) {
                 $map['status'] = ['in', ['free_processing', 'processing']];
             } 
+
+            $infoSynergyTask = new \app\admin\model\infosynergytaskmanage\InfoSynergyTask;
+            if ($filter['task_label'] == 1 || $filter['task_label'] == '0') {
+                $swhere['is_del'] = 1;
+                $swhere['order_platform'] = 3;
+                $swhere['synergy_order_id'] = 2;
+                $order_arr = $infoSynergyTask->where($swhere)->order('create_time desc')->column('synergy_order_number');
+                $map['increment_id'] = ['in', $order_arr];
+                unset($filter['task_label']);
+                $this->request->get(['filter' => json_encode($filter)]);
+            } 
+
+            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
 
             $total = $this->model
                 ->where($map)
