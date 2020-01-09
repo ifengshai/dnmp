@@ -57,7 +57,7 @@ class OutstockType extends Backend
                         $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.add' : $name) : $this->modelValidate;
                         $this->model->validateFailException(true)->validate($validate);
                     }
-                    $params['create_person'] = session('admin.username');
+                    $params['create_person'] = session('admin.nickname');
                     $params['createtime'] = date('Y-m-d H:i:s', time());
                     $result = $this->model->allowField(true)->save($params);
                     Db::commit();

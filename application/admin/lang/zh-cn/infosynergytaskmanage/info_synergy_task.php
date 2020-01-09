@@ -23,9 +23,11 @@ return [
     'Refund_way'           => '退款方式', 
     'Make_up_price_order'  => '补差价订单号',
     'Replacement_order'    => '补发订单号', 
-    'Is_refund'            => '是否含有退款',  
+    'Is_refund'            => '是否含有退款',
+    'Refund_money'         => '退款金额',   
     'Please select the task category' => '请选择任务分类',
     'Please select the contractor'=>'请选择承接人',
+    'Order_skus'           => '订单SKU',
     'The collaborative task information has been completed and cannot be processed' => '任务信息已经处理完成，无法处理',
     'The collaborative task information has been completed and cannot be edit' => '任务信息已经处理完成，无法编辑'
 ];

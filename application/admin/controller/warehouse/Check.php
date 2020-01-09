@@ -7,6 +7,7 @@ use think\Db;
 use think\Exception;
 use think\exception\PDOException;
 use think\exception\ValidateException;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
 
 /**
  * 质检单
@@ -50,18 +51,46 @@ class Check extends Backend
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
+
+            //自定义sku搜索
+            $filter = json_decode($this->request->get('filter'), true);
+            if ($filter['sku']) {
+                $smap['sku'] = ['like', '%' . $filter['sku'] . '%'];
+                $ids = $this->check_item->where($smap)->column('check_id');
+                $map['check.id'] = ['in', $ids];
+                unset($filter['sku']);
+                $this->request->get(['filter' => json_encode($filter)]);
+            }
+
+            //是否存在需要退回产品
+            if ($filter['is_process'] || $filter['is_process'] == '0') {
+
+                $smap['unqualified_num'] = $filter['is_process'] == 1 ? ['>', 0] : ['=', 0];
+
+                $ids = $this->check_item->where($smap)->column('check_id');
+                $map['check.id'] = ['in', $ids];
+
+                $map['check.is_return'] = $filter['is_process'] == 1 ? 0 : 1;
+
+                unset($filter['is_process']);
+                $this->request->get(['filter' => json_encode($filter)]);
+            }
+
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
                 ->with(['purchaseorder', 'supplier', 'orderreturn'])
                 ->where($where)
+                ->where($map)
                 ->order($sort, $order)
                 ->count();
             $list = $this->model
                 ->with(['purchaseorder', 'supplier', 'orderreturn'])
                 ->where($where)
+                ->where($map)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
+
 
             $list = collection($list)->toArray();
             $result = array("total" => $total, "rows" => $list);
@@ -180,7 +209,7 @@ class Check extends Backend
             $this->assign('info', $info);
         }
 
-        
+
         //查询供应商
         $supplier = new \app\admin\model\purchase\Supplier;
         $data = $supplier->getSupplierData();
@@ -487,7 +516,7 @@ class Check extends Backend
                         $check = new \app\admin\model\warehouse\Check;
                         //总到货数量
                         $all_arrivals_num = $check->hasWhere('checkItem')->where($check_map)->group('Check.purchase_id')->sum('arrivals_num');
-                       
+
                         //查询总采购数量
                         $purchaseItem = new \app\admin\model\purchase\PurchaseOrderItem;
                         $all_purchase_num = $purchaseItem->where('purchase_id', $v['purchase_id'])->sum('purchase_num');
@@ -563,5 +592,300 @@ class Check extends Backend
         } else {
             $this->error('404 Not found');
         }
+    }
+
+    /**
+     * 批量生成退销单
+     */
+    public function add_return_order()
+    {
+        $ids = input('ids');
+        if ($this->request->isAjax()) {
+            $params = $this->request->post("row/a");
+
+            //查询质检单
+            $where['a.id'] = ['in', $ids];
+            $where['b.unqualified_num'] = ['>', 0];
+            $res = $this->model->alias('a')->field('b.check_id,b.id,a.purchase_id,c.purchase_num,c.purchase_price,c.purchase_total,b.supplier_sku,b.sku,b.unqualified_num,b.remark')->where($where)
+                ->join(['fa_check_order_item' => 'b'], 'a.id=b.check_id')
+                ->join(['fa_purchase_order_item' => 'c'], 'a.purchase_id=c.purchase_id and b.sku=c.sku')
+                ->select();
+            $res = collection($res)->toArray();
+
+            $list = [];
+            foreach ($res as $k => $v) {
+                $list[$v['purchase_id']][$k] = $v;
+            }
+            unset($res);
+            $return_model = new \app\admin\model\purchase\PurchaseReturn;
+            $return_model_item = new \app\admin\model\purchase\PurchaseReturnItem;
+
+            $check_id = [];
+            foreach ($list as $k => $v) {
+                $params['return_number'] = 'RO' . date('YmdHis') . rand(100, 999) . rand(100, 999);
+                $params['purchase_id'] = $k;
+                $params['create_person'] = session('admin.nickname');
+                $params['createtime'] = date('Y-m-d H:i:s', time());
+                $result = $return_model->allowField(true)->isUpdate(false)->data($params)->save();
+
+                $i = 0;
+                $info = [];
+                $return_money = 0;
+                $purchase_total = 0;
+                $check_id_params = [];
+                foreach ($v as $val) {
+                    $info[$i]['sku'] = $val['sku'];
+                    $info[$i]['return_num'] = $val['unqualified_num'];
+                    $info[$i]['return_id'] = $return_model->id;
+                    $info[$i]['check_item_id'] = $val['id'];
+                    $i++;
+
+                    $return_money  += round($val['unqualified_num'] * $val['purchase_price'], 2);
+                    $purchase_total += $val['purchase_total'];
+
+                    $check_id[] = $val['check_id'];
+
+                    $check_id_params[] = $val['check_id'];
+                }
+                if ($info) {
+                    $return_model_item->allowField(true)->saveAll($info);
+
+                    if ($check_id_params) {
+                        $check_ids = implode(',', array_unique($check_id_params));
+                    }
+                    //填充退货金额  采购总金额
+                    $return_model->allowField(true)->isUpdate(true, ['id' => $return_model->id])->save(['return_money' => $return_money, 'purchase_total' => $purchase_total, 'check_ids' => $check_ids]);
+                }
+            }
+
+            if ($result !== false) {
+
+                //标记为已退
+                $map['id'] = ['in', array_unique($check_id)];
+                $this->model->allowField(true)->isUpdate(true, $map)->save(['is_return' => 1]);
+                $this->success('操作成功');
+            } else {
+                $this->success('操作失败');
+            }
+        }
+
+        $this->assign('ids', $ids);
+
+        //查询供应商
+        $supplier = new \app\admin\model\purchase\Supplier;
+        $data = $supplier->getSupplierData();
+        $this->assign('supplier', $data);
+
+        return $this->fetch();
+    }
+
+    /**
+     * 批量导出
+     */
+    public function import_xls()
+    {
+
+    }
+
+    //批量导出xls
+    public function batch_export_xls()
+    {
+        //从数据库查询需要的数据
+        $spreadsheet = new Spreadsheet();
+       
+        //常规方式：利用setCellValue()填充数据
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("A1", "日期")
+            ->setCellValue("B1", "订单号")
+            ->setCellValue("C1", "SKU");   //利用setCellValues()填充数据
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("D1", "眼球")
+            ->setCellValue("E1", "SPH");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("F1", "CYL")
+            ->setCellValue("G1", "AXI");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("H1", "ADD")
+            ->setCellValue("I1", "单PD")
+            ->setCellValue("J1", "PD");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("K1", "镜片")
+            ->setCellValue("L1", "镜框宽度")
+            ->setCellValue("M1", "镜框高度")
+            ->setCellValue("N1", "bridge")
+            ->setCellValue("O1", "处方类型")
+            ->setCellValue("P1", "顾客留言");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("Q1", "Prism\n(out/in)")
+            ->setCellValue("R1", "Direct\n(out/in)")
+            ->setCellValue("S1", "Prism\n(up/down)")
+            ->setCellValue("T1", "Direct\n(up/down)");
+        // Rename worksheet
+        $spreadsheet->setActiveSheetIndex(0)->setTitle('订单处方');
+
+        foreach ($finalResult as $key => $value) {
+
+            $value['prescription_type'] = isset($value['prescription_type']) ? $value['prescription_type'] : '';
+
+            $value['od_sph'] = isset($value['od_sph']) ? $value['od_sph'] : '';
+            $value['os_sph'] = isset($value['os_sph']) ? $value['os_sph'] : '';
+            $value['od_cyl'] = isset($value['od_cyl']) ? $value['od_cyl'] : '';
+            $value['os_cyl'] = isset($value['os_cyl']) ? $value['os_cyl'] : '';
+            $value['od_axis'] = isset($value['od_axis']) ? $value['od_axis'] : '';
+            $value['os_axis'] = isset($value['os_axis']) ? $value['os_axis'] : '';
+
+            $value['od_add'] = isset($value['od_add']) ? $value['od_add'] : '';
+            $value['os_add'] = isset($value['os_add']) ? $value['os_add'] : '';
+
+            $value['pdcheck'] = isset($value['pdcheck']) ? $value['pdcheck'] : '';
+            $value['pd_r'] = isset($value['pd_r']) ? $value['pd_r'] : '';
+            $value['pd_l'] = isset($value['pd_l']) ? $value['pd_l'] : '';
+            $value['pd'] = isset($value['pd']) ? $value['pd'] : '';
+
+            $value['prismcheck'] = isset($value['prismcheck']) ? $value['prismcheck'] : '';
+
+
+            $spreadsheet->getActiveSheet()->setCellValue("A" . ($key * 2 + 2), $value['created_at']);
+            $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 2 + 2), $value['increment_id']);
+            $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 2 + 2), $value['sku']);
+            $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 2 + 2), '右眼');
+            $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 2 + 3), '左眼');
+
+            $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 2 + 2), $value['od_sph'] > 0 ? ' +' . $value['od_sph'] : ' ' . $value['od_sph']);
+            $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 2 + 3), $value['os_sph'] > 0 ? ' +' . $value['os_sph'] : ' ' . $value['os_sph']);
+
+            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 2 + 2), $value['od_cyl'] > 0 ? ' +' . $value['od_cyl'] : ' ' . $value['od_cyl']);
+            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 2 + 3), $value['os_cyl'] > 0 ? ' +' . $value['os_cyl'] : ' ' . $value['os_cyl']);
+
+            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 2 + 2), $value['od_axis']);
+            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 2 + 3), $value['os_axis']);
+
+            if ($value['od_add'] && $value['os_add']) {
+                // 双ADD值时，左右眼互换
+                $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 2 + 2), $value['os_add']);
+                $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 2 + 3), $value['od_add']);
+            } else {
+                //数值在上一行合并有效，数值在下一行合并后为空
+                $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 2 + 2), $value['os_add']);
+                $spreadsheet->getActiveSheet()->mergeCells("H" . ($key * 2 + 2) . ":H" . ($key * 2 + 3));
+            }
+
+            if ($value['pdcheck'] == 'on' && $value['pd_r'] && $value['pd_l']) {
+                $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 2), $value['pd_r']);
+                $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 3), $value['pd_l']);
+            } else {
+                $spreadsheet->getActiveSheet()->setCellValue("J" . ($key * 2 + 2), $value['pd']);
+                $spreadsheet->getActiveSheet()->mergeCells("J" . ($key * 2 + 2) . ":J" . ($key * 2 + 3));
+            }
+
+            $spreadsheet->getActiveSheet()->setCellValue("K" . ($key * 2 + 2), $value['index_type']);
+            $spreadsheet->getActiveSheet()->setCellValue("L" . ($key * 2 + 2), $value['lens_width']);
+            $spreadsheet->getActiveSheet()->setCellValue("M" . ($key * 2 + 2), $value['lens_height']);
+            $spreadsheet->getActiveSheet()->setCellValue("N" . ($key * 2 + 2), $value['bridge']);
+            $spreadsheet->getActiveSheet()->setCellValue("O" . ($key * 2 + 2), $value['prescription_type']);
+
+            if (isset($value['information'])) {
+                $value['information'] = urldecode($value['information']);
+                $value['information'] = urldecode($value['information']);
+                $value['information'] = urldecode($value['information']);
+
+                $value['information'] = str_replace('+', ' ', $value['information']);
+                $spreadsheet->getActiveSheet()->setCellValue("P" . ($key * 2 + 2), $value['information']);
+                $spreadsheet->getActiveSheet()->mergeCells("P" . ($key * 2 + 2) . ":P" . ($key * 2 + 3));
+            }
+
+            $spreadsheet->getActiveSheet()->setCellValue("Q" . ($key * 2 + 2), isset($value['od_pv']) ? $value['od_pv'] : '');
+            $spreadsheet->getActiveSheet()->setCellValue("Q" . ($key * 2 + 3), isset($value['os_pv']) ? $value['os_pv'] : '');
+
+            $spreadsheet->getActiveSheet()->setCellValue("R" . ($key * 2 + 2), isset($value['od_bd']) ? $value['od_bd'] : '');
+            $spreadsheet->getActiveSheet()->setCellValue("R" . ($key * 2 + 3), isset($value['os_bd']) ? $value['os_bd'] : '');
+
+            $spreadsheet->getActiveSheet()->setCellValue("S" . ($key * 2 + 2), isset($value['od_pv_r']) ? $value['od_pv_r'] : '');
+            $spreadsheet->getActiveSheet()->setCellValue("S" . ($key * 2 + 3), isset($value['os_pv_r']) ? $value['os_pv_r'] : '');
+
+            $spreadsheet->getActiveSheet()->setCellValue("T" . ($key * 2 + 2), isset($value['od_bd_r']) ? $value['od_bd_r'] : '');
+            $spreadsheet->getActiveSheet()->setCellValue("T" . ($key * 2 + 3), isset($value['os_bd_r']) ? $value['os_bd_r'] : '');
+
+            //合并单元格
+            $spreadsheet->getActiveSheet()->mergeCells("A" . ($key * 2 + 2) . ":A" . ($key * 2 + 3));
+            $spreadsheet->getActiveSheet()->mergeCells("B" . ($key * 2 + 2) . ":B" . ($key * 2 + 3));
+            $spreadsheet->getActiveSheet()->mergeCells("C" . ($key * 2 + 2) . ":C" . ($key * 2 + 3));
+            $spreadsheet->getActiveSheet()->mergeCells("K" . ($key * 2 + 2) . ":K" . ($key * 2 + 3));
+
+            $spreadsheet->getActiveSheet()->mergeCells("L" . ($key * 2 + 2) . ":L" . ($key * 2 + 3));
+            $spreadsheet->getActiveSheet()->mergeCells("M" . ($key * 2 + 2) . ":M" . ($key * 2 + 3));
+            $spreadsheet->getActiveSheet()->mergeCells("N" . ($key * 2 + 2) . ":N" . ($key * 2 + 3));
+            $spreadsheet->getActiveSheet()->mergeCells("O" . ($key * 2 + 2) . ":O" . ($key * 2 + 3));
+            $spreadsheet->getActiveSheet()->mergeCells("P" . ($key * 2 + 2) . ":P" . ($key * 2 + 3));
+        }
+
+        //设置宽度
+        $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(12);
+        $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(12);
+        $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(16);
+        $spreadsheet->getActiveSheet()->getColumnDimension('K')->setWidth(32);
+        $spreadsheet->getActiveSheet()->getColumnDimension('L')->setWidth(12);
+        $spreadsheet->getActiveSheet()->getColumnDimension('M')->setWidth(12);
+        $spreadsheet->getActiveSheet()->getColumnDimension('N')->setWidth(12);
+
+        $spreadsheet->getActiveSheet()->getColumnDimension('O')->setWidth(18);
+        $spreadsheet->getActiveSheet()->getColumnDimension('P')->setWidth(14);
+
+        $spreadsheet->getActiveSheet()->getColumnDimension('Q')->setWidth(14);
+        $spreadsheet->getActiveSheet()->getColumnDimension('R')->setWidth(14);
+        $spreadsheet->getActiveSheet()->getColumnDimension('S')->setWidth(16);
+        $spreadsheet->getActiveSheet()->getColumnDimension('T')->setWidth(16);
+
+        //自动换行
+        // $spreadsheet->getActiveSheet()->getAlignment()->setWrapText(true);
+        // $spreadsheet->getActiveSheet()->getStyle('K1')->getAlignment()->setWrapText(true);
+
+        //设置边框
+        $border = [
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, // 设置border样式
+                    'color'       => ['argb' => 'FF000000'], // 设置border颜色
+                ],
+            ],
+        ];
+
+        
+
+
+        $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
+        $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
+
+        // $spreadsheet->getActiveSheet()->getStyle('A1:Z'.$key)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $spreadsheet->getActiveSheet()->getStyle('A1:Z' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $spreadsheet->getActiveSheet()->getStyle('A1:Z' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+        
+        
+        //水平垂直居中   
+        // $objSheet->getDefaultStyle()->getAlignment()->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+        // $objSheet->getDefaultStyle()->getAlignment()->setVertical(\PHPExcel_Style_Alignment::VERTICAL_CENTER);
+        // //自动换行
+        // $objSheet->getDefaultStyle()->getAlignment()->setWrapText(true);
+
+        // Set active sheet index to the first sheet, so Excel opens this as the first sheet
+        $spreadsheet->setActiveSheetIndex(0);
+        // return exportExcel($spreadsheet, 'xls', '登陆日志');
+        $format = 'xlsx';
+        $savename = '订单打印处方' . date("YmdHis", time());;
+        // dump($spreadsheet);
+
+        // if (!$spreadsheet) return false;
+        if ($format == 'xls') {
+            //输出Excel03版本
+            header('Content-Type:application/vnd.ms-excel');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xls";
+        } elseif ($format == 'xlsx') {
+            //输出07Excel版本
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xlsx";
+        }
+
+        //输出名称
+        header('Content-Disposition: attachment;filename="' . $savename . '.' . $format . '"');
+        //禁止缓存
+        header('Cache-Control: max-age=0');
+        $writer = new $class($spreadsheet);
+       
+        $writer->save('php://output');
+      
     }
 }

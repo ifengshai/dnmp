@@ -4,6 +4,7 @@ namespace app\admin\model\purchase;
 
 use think\Model;
 use think\Db;
+
 class PurchaseOrder extends Model
 {
 
@@ -50,7 +51,7 @@ class PurchaseOrder extends Model
         if ($return_status) {
             $where['return_status'] = ['in', $return_status];
         }
-        
+
         $where['purchase_status'] = ['in', [6, 7]];
         $where['check_status']  = ['in', $check_status];
         $data = $this->where($where)->order('createtime desc')->column('purchase_number', 'id');
@@ -65,27 +66,26 @@ class PurchaseOrder extends Model
     {
         return $this->hasMany('PurchaseOrderItem', 'purchase_id');
     }
-    /***
-     * 获取采购单供应商表
-     *
-     */
+    
+    //关联模型
     public function supplier()
     {
-        return $this->belongsTo('app\admin\model\purchase\Supplier', 'supplier_id', 'id')->setEagerlyType(0);
+        return $this->belongsTo('supplier', 'supplier_id', '', [], 'left')->setEagerlyType(0);;
     }
+
     /**
      * 获取供应商名称(废弃) create@lsw
      */
     public function fetchSupplierAccountPurchaseOrder($arr = [])
     {
-        $map['id'] = ['in',$arr]; 
+        $map['id'] = ['in', $arr];
         $result = Db::name('supplier')->where($map)->field('id,supplier_name')->select();
         $info = collection($result)->toArray($result);
-        if(!$info){
+        if (!$info) {
             return false;
         }
         $arr = [];
-        foreach($info as $val){
+        foreach ($info as $val) {
             $arr[$val['id']] = $arr[$val['supplier_name']];
         }
         return $arr;
@@ -93,60 +93,60 @@ class PurchaseOrder extends Model
     /***
      * 求出总共的实际采购金额和本页面的实际采购金额 create@lsw
      */
-    public function calculatePurchaseOrderMoney($totalArr = [],$thisPageIdArr = [])
+    public function calculatePurchaseOrderMoney($totalArr = [], $thisPageIdArr = [])
     {
-        if( (0 == count($totalArr)) || (0 == count($thisPageIdArr))){
+        if ((0 == count($totalArr)) || (0 == count($thisPageIdArr))) {
             return 0.00;
         }
         //求出有确认差异的采购单
-        $where['id'] = ['in',$totalArr];
+        $where['id'] = ['in', $totalArr];
         $where['is_diff'] = 1;
         $trueTotalArr = $this->where($where)->column('id');
         //首先求出总的邮费
-        $postAgeMap['id'] = ['in',$totalArr];
+        $postAgeMap['id'] = ['in', $totalArr];
         $totalPostage = $this->where($postAgeMap)->field('sum(purchase_total) purchase_total,sum(purchase_freight) purchase_freight')->select();
         $totalPostage = collection($totalPostage)->toArray();
-        $totalMap['p.purchase_id'] = ['in',$trueTotalArr];
+        $totalMap['p.purchase_id'] = ['in', $trueTotalArr];
         //求出所有的实际采购金额
         $arr = [];
         $arr['total_money'] = 0;
-        $purchaseResult = Db::name('purchase_order_item')->alias('p')->where($totalMap)->join('check_order_item m','p.sku=m.sku and p.purchase_id = m.purchase_id')
-        ->field('p.purchase_id,p.purchase_price,m.quantity_num,m.unqualified_num')->select();
-        if(!$purchaseResult){
+        $purchaseResult = Db::name('purchase_order_item')->alias('p')->where($totalMap)->join('check_order_item m', 'p.sku=m.sku and p.purchase_id = m.purchase_id')
+            ->field('p.purchase_id,p.purchase_price,m.quantity_num,m.unqualified_num')->select();
+        if (!$purchaseResult) {
             $arr['total_money'] = $totalPostage[0]['purchase_total'];
             $arr['thisPageArr'] = [];
             return $arr;
         }
         $purchaseResult = collection($purchaseResult)->toArray();
-        foreach($purchaseResult  as $v){
+        foreach ($purchaseResult  as $v) {
             //$arr['total_money'] += round($v['purchase_price']*($v['quantity_num']+$v['unqualified_num']),2);
-            if(in_array($v['purchase_id'],$thisPageIdArr)){
-                $arr['thisPageArr'][$v['purchase_id']] = round($v['purchase_price']*($v['quantity_num']+$v['unqualified_num']),2);
+            if (in_array($v['purchase_id'], $thisPageIdArr)) {
+                $arr['thisPageArr'][$v['purchase_id']] = round($v['purchase_price'] * ($v['quantity_num'] + $v['unqualified_num']), 2);
             }
-        } 
-        $arr['total_money']=$totalPostage[0]['purchase_total'];
+        }
+        $arr['total_money'] = $totalPostage[0]['purchase_total'];
         return $arr;
     }
     /***
      * 求出总共退款金额和本页面的实际退款金额 create@lsw
      */
-    public function calculatePurchaseReturnMoney($totalArr = [],$thisPageIdArr = [])
+    public function calculatePurchaseReturnMoney($totalArr = [], $thisPageIdArr = [])
     {
-        if( (0 == count($totalArr)) || (0 == count($thisPageIdArr))){
+        if ((0 == count($totalArr)) || (0 == count($thisPageIdArr))) {
             return false;
         }
-        $map['purchase_id'] = ['in',$totalArr];
+        $map['purchase_id'] = ['in', $totalArr];
         $returnResult = Db::name('purchase_return')->where($map)->field('purchase_id,round(sum(return_money),2) return_money')->group('purchase_id')->select();
         $arr = [];
         $arr['return_money'] = 0;
-        if(!$returnResult){
+        if (!$returnResult) {
             $arr['thisPageArr'] = [];
             return $arr;
         }
         $returnResult = collection($returnResult)->toArray();
-        foreach($returnResult as $v){
-            $arr['return_money'] += $v['return_money'];  
-            if(in_array($v['purchase_id'],$thisPageIdArr)){
+        foreach ($returnResult as $v) {
+            $arr['return_money'] += $v['return_money'];
+            if (in_array($v['purchase_id'], $thisPageIdArr)) {
                 $arr['thisPageArr'][$v['purchase_id']] = $v['return_money'];
             }
         }
@@ -161,11 +161,11 @@ class PurchaseOrder extends Model
         $map['purchase_id'] = $id;
         Db::name('purchase_order_pay')->query("set time_zone='+8:00'");
         $info = Db::name('purchase_order_pay')->where($map)->select();
-        if(!$info){
+        if (!$info) {
             return false;
         }
-        foreach($info as $k =>$v){
-            $info[$k]['pay_photos'] = explode(',',$v['pay_photos']);
+        foreach ($info as $k => $v) {
+            $info[$k]['pay_photos'] = explode(',', $v['pay_photos']);
         }
         return $info;
     }

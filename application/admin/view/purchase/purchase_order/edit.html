@@ -165,7 +165,7 @@
             <label class="control-label col-xs-12 col-sm-2">供应商名称:</label>
             <div class="col-xs-12 col-sm-8">
                
-                <select name="row[supplier_id]" class="form-control supplier selectpicker" disabled required data-live-search='true'>
+                <select name="row[supplier_id]" class="form-control supplier selectpicker" data-rule='required' data-live-search='true'>
                     <option value="">请选择</option>
                     {foreach $supplier as $k => $v}
                     <option value="{$k}" {:$row['supplier_id'] == $k ? 'selected' : ''}>{$v}</option>
@@ -206,7 +206,7 @@
                         <input id="c-purchase_remark" class="form-control sku" {:$row['contract_id'] ? 'readonly' : ''} name="sku[]" value="{$v.sku}" type="text">
                     </td>
                     <td><input id="c-purchase_remark" class="form-control product_name" readonly name="product_name[]" value="{$v.product_name}" type="text"></td>
-                    <td><input id="c-purchase_remark" class="form-control supplier_sku" readonly name="supplier_sku[]" value="{$v.supplier_sku}" type="text"></td>
+                    <td><input id="c-purchase_remark" class="form-control supplier_sku" name="supplier_sku[]" value="{$v.supplier_sku}" type="text"></td>
                     <td><input id="c-purchase_remark" class="form-control purchase_num" {:$row['contract_id'] ? 'readonly' : ''} name="purchase_num[]" value="{$v.purchase_num}" type="text"></td>
                     <td><input id="c-purchase_remark" class="form-control purchase_price" {:$row['contract_id'] ? 'readonly' : ''} name="purchase_price[]" value="{$v.purchase_price}" type="text"></td>
                     <td><input id="c-purchase_remark" class="form-control goods_total" name="purchase_total[]" readonly value="{$v.purchase_total}" type="text"></td>

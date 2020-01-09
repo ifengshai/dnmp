@@ -9,6 +9,7 @@ define(['jquery', 'bootstrap', 'backend', 'form', 'table'], function ($, undefin
                     add_url: 'general/attachment/add',
                     edit_url: 'general/attachment/edit',
                     del_url: 'general/attachment/del',
+                    import_url:'general/attachment/import_xls_order',
                     multi_url: 'general/attachment/multi',
                     table: 'attachment'
                 }

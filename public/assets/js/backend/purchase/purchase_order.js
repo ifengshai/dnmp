@@ -40,10 +40,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                         { field: 'id', title: __('Id'), operate: false, visible: false },
                         { field: 'purchase_number', title: __('Purchase_number'), operate: 'like' },
                         { field: 'purchase_name', title: __('Purchase_name'), operate: 'like' },
-                        { field: 'product_total', title: __('Product_total'), operate: 'BETWEEN' },
-                        { field: 'purchase_freight', title: __('Purchase_freight'), operate: 'BETWEEN' },
-                        { field: 'purchase_total', title: __('Purchase_total'), operate: 'BETWEEN' },
+                        { field: 'supplier.supplier_name', title: __('供应商名称'), operate: 'like' },
+                        { field: 'product_total', title: __('Product_total'), operate: false },
+                        { field: 'purchase_freight', title: __('Purchase_freight'), operate: false },
+                        { field: 'purchase_total', title: __('Purchase_total'), operate: false },
                         { field: 'logistics_number', title: __('物流单号'), operate: 'like', visible: false },
+                        { field: 'sku', title: __('sku'), operate: 'like', visible: false },
                         {
                             field: 'purchase_status', title: __('Purchase_status'),
                             custom: { 0: 'success', 1: 'yellow', 2: 'blue', 3: 'danger', 4: 'gray', 5: 'yellow', 6: 'yellow', 7: 'success' },
@@ -168,7 +170,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                                     visible: function (row) {
                                         //返回true时按钮显示,返回false隐藏
                                         if ((row.purchase_status == 6 || row.purchase_status == 7) && row.check_status > 0) {
-                                            return true;
+                                            return false;
                                         } else {
                                             return false;
                                         }
@@ -206,7 +208,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                                     },
                                     visible: function (row) {
                                         //返回true时按钮显示,返回false隐藏
-                                        if (row.purchase_status == 0) {
+                                        if (row.purchase_status == 0 || row.purchase_type == 2) {
                                             return true;
                                         } else {
                                             return false;
@@ -427,7 +429,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                 showJumpto: true,
                 searchFormVisible: true,
                 pageSize: 10,
-                pageList: [10, 25, 50, 100],
+                pageList: [10, 25, 50, 100, 500, 2000],
                 extend: {
                     index_url: 'purchase/purchase_order/product_grade_list' + location.search,
                     table: 'product_grade_list',
@@ -440,7 +442,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
             table.bootstrapTable({
                 url: $.fn.bootstrapTable.defaults.extend.index_url,
                 pk: 'id',
-                sortName: 'createtime',
+                sortName: 'num',
                 sortOrder: 'desc',
                 columns: [
                     [
@@ -470,7 +472,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                         { field: 'stock', title: __('实时库存'), operate: false },
                         { field: 'purchase_qty', title: __('在途库存'), operate: false },
                         { field: 'replenish_num', title: __('建议补货量'), operate: false },
-                        { field: 'createtime', title: __('上架时间'), operate: 'RANGE', addclass: 'datetimerange' },
+                        { field: 'created_at', title: __('上架时间'), operate: 'RANGE', addclass: 'datetimerange' },
 
                     ]
                 ]
@@ -671,13 +673,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                 //获取sku信息
                 $(document).on('change', '.sku', function () {
                     var sku = $(this).val();
+                    var supplier_id = $('.supplier.selectpicker').val();
                     var _this = $(this);
                     if (!sku) {
                         return false;
                     }
                     Backend.api.ajax({
                         url: 'ajax/getSkuList',
-                        data: { sku: sku }
+                        data: { sku: sku, supplier_id: supplier_id }
                     }, function (data, ret) {
                         _this.parent().parent().find('.product_name').val(data.name);
                         _this.parent().parent().find('.supplier_sku').val(data.supplier_sku);

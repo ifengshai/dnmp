@@ -11,6 +11,7 @@ use think\Exception;
 use think\exception\PDOException;
 use Util\ZeeloolPrescriptionDetailHelper;
 use Util\SKUHelper;
+use app\admin\model\OrderLog;
 
 /**
  * Sales Flat Order
@@ -25,6 +26,8 @@ class Zeelool extends Backend
      * @var \app\admin\model\order\Sales_flat_order
      */
     protected $model = null;
+
+    protected $searchFields = 'entity_id';
 
     public function _initialize()
     {
@@ -52,26 +55,35 @@ class Zeelool extends Backend
                 return $this->selectpage();
             }
 
-            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
-
             $filter = json_decode($this->request->get('filter'), true);
 
             if ($filter['increment_id']) {
                 $map['status'] = ['in', ['free_processing', 'processing', 'complete']];
-            } else {
+            } elseif (!$filter['status']) {
                 $map['status'] = ['in', ['free_processing', 'processing']];
             }
+
+            $infoSynergyTask = new \app\admin\model\infosynergytaskmanage\InfoSynergyTask;
+            if ($filter['task_label'] == 1 || $filter['task_label'] == '0') {
+                $swhere['is_del'] = 1;
+                $swhere['order_platform'] = 1;
+                $swhere['synergy_order_id'] = 2;
+                $order_arr = $infoSynergyTask->where($swhere)->order('create_time desc')->column('synergy_order_number');
+                $map['increment_id'] = ['in', $order_arr];
+                unset($filter['task_label']);
+                $this->request->get(['filter' => json_encode($filter)]);
+            } 
+
+            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
 
             $total = $this->model
                 ->where($map)
                 ->where($where)
                 ->order($sort, $order)
                 ->count();
-            // var_dump($total);die;                                                                            
             $field = 'order_type,custom_order_prescription_type,entity_id,status,base_shipping_amount,increment_id,coupon_code,shipping_description,store_id,customer_id,base_discount_amount,base_grand_total,
-                     total_qty_ordered,quote_id,base_currency_code,customer_email,customer_firstname,customer_lastname,custom_is_match_frame,custom_is_match_lens,
-                     custom_is_send_factory,custom_is_delivery,custom_match_frame_created_at,custom_match_lens_created_at,custom_match_factory_created_at,
-                     custom_match_delivery_created_at,custom_print_label,custom_order_prescription,custom_print_label_created_at,custom_service_name,created_at';
+                     total_qty_ordered,quote_id,base_currency_code,customer_email,customer_firstname,customer_lastname,custom_is_match_frame_new,custom_is_match_lens_new,
+                     custom_is_send_factory_new,custom_is_delivery_new,custom_print_label_new,custom_order_prescription,custom_service_name,created_at';
             $list = $this->model
                 ->field($field)
                 ->where($map)
@@ -83,7 +95,6 @@ class Zeelool extends Backend
             $list = collection($list)->toArray();
             //查询订单是否存在协同任务
             $increment_ids = array_column($list, 'increment_id');
-            $infoSynergyTask = new \app\admin\model\infosynergytaskmanage\InfoSynergyTask;
             $swhere['synergy_order_number'] = ['in', $increment_ids];
             $swhere['is_del'] = 1;
             $swhere['order_platform'] = 1;
@@ -163,15 +174,14 @@ class Zeelool extends Backend
      */
     public function tag_printed()
     {
-        // echo 'tag_printed';
         $entity_ids = input('id_params/a');
         $label = input('label');
         if ($entity_ids) {
             //多数据库
             $map['entity_id'] = ['in', $entity_ids];
-            $data['custom_print_label'] = 1;
-            $data['custom_print_label_created_at'] = date('Y-m-d H:i:s', time());
-            $data['custom_print_label_person'] =  session('admin.nickname');
+            $data['custom_print_label_new'] = 1;
+            $data['custom_print_label_created_at_new'] = date('Y-m-d H:i:s', time());
+            $data['custom_print_label_person_new'] =  session('admin.nickname');
             $this->model->startTrans();
             try {
                 $result = $this->model->where($map)->update($data);
@@ -184,6 +194,13 @@ class Zeelool extends Backend
                 $this->error($e->getMessage());
             }
             if ($result) {
+                //操作日志
+                $params['type'] = 1;
+                $params['num'] = count($entity_ids);
+                $params['order_ids'] = implode(',', $entity_ids);
+                $params['site'] = 1;
+                (new OrderLog())->setOrderLog($params);
+
                 //用来判断是否从_list列表页进来
                 if ($label == 'list') {
                     //订单号
@@ -213,14 +230,14 @@ class Zeelool extends Backend
         $map['entity_id'] = ['in', $entity_ids];
         $res = $this->model->where($map)->select();
         foreach ($res as $v) {
-            if ($status == 1 && $v['custom_is_match_frame'] == 1) {
+            if ($status == 1 && $v['custom_is_match_frame_new'] == 1) {
                 $this->error('存在已配过镜架的订单！！');
-             }
-            if ($v['custom_is_delivery'] == 1) {
+            }
+            if ($v['custom_is_delivery_new'] == 1) {
                 $this->error('存在已质检通过的订单！！');
             }
 
-            if ($status == 4 && $v['custom_is_match_frame'] == 0) {
+            if ($status == 4 && $v['custom_is_match_frame_new'] == 0) {
                 $this->error('存在未配镜架的订单！！');
             }
         }
@@ -230,27 +247,31 @@ class Zeelool extends Backend
             switch ($status) {
                 case 1:
                     //配镜架
-                    $data['custom_is_match_frame'] = 1;
-                    $data['custom_match_frame_created_at'] = date('Y-m-d H:i:s', time());
-                    $data['custom_match_frame_person'] = session('admin.nickname');
+                    $data['custom_is_match_frame_new'] = 1;
+                    $data['custom_match_frame_created_at_new'] = date('Y-m-d H:i:s', time());
+                    $data['custom_match_frame_person_new'] = session('admin.nickname');
+                    $params['type'] = 2;
                     break;
                 case 2:
                     //配镜片
-                    $data['custom_is_match_lens'] = 1;
-                    $data['custom_match_lens_created_at'] = date('Y-m-d H:i:s', time());
-                    $data['custom_match_lens_person'] = session('admin.nickname');
+                    $data['custom_is_match_lens_new'] = 1;
+                    $data['custom_match_lens_created_at_new'] = date('Y-m-d H:i:s', time());
+                    $data['custom_match_lens_person_new'] = session('admin.nickname');
+                    $params['type'] = 3;
                     break;
                 case 3:
                     //移送加工时间
-                    $data['custom_is_send_factory'] = 1;
-                    $data['custom_match_factory_created_at'] = date('Y-m-d H:i:s', time());
-                    $data['custom_match_factory_person'] = session('admin.nickname');
+                    $data['custom_is_send_factory_new'] = 1;
+                    $data['custom_match_factory_created_at_new'] = date('Y-m-d H:i:s', time());
+                    $data['custom_match_factory_person_new'] = session('admin.nickname');
+                    $params['type'] = 4;
                     break;
                 case 4:
                     //质检通过
-                    $data['custom_is_delivery'] = 1;
-                    $data['custom_match_delivery_created_at'] = date('Y-m-d H:i:s', time());
-                    $data['custom_match_delivery_person'] = session('admin.nickname');
+                    $data['custom_is_delivery_new'] = 1;
+                    $data['custom_match_delivery_created_at_new'] = date('Y-m-d H:i:s', time());
+                    $data['custom_match_delivery_person_new'] = session('admin.nickname');
+                    $params['type'] = 5;
                     break;
                 default:
             }
@@ -367,6 +388,12 @@ class Zeelool extends Backend
                 $this->error($e->getMessage());
             }
             if ($result) {
+                $params['num'] = count($entity_ids);
+                $params['order_ids'] = implode(',', $entity_ids);
+                $params['site'] = 1;
+                (new OrderLog())->setOrderLog($params);
+
+
                 //用来判断是否从_list列表页进来
                 if ($label == 'list') {
                     //订单号
@@ -401,32 +428,32 @@ class Zeelool extends Backend
                 [
                     'id' => 1,
                     'content' => '打标签',
-                    'createtime' => $row['custom_print_label_created_at'],
-                    'person' => $row['custom_print_label_person']
+                    'createtime' => $row['custom_print_label_created_at_new'],
+                    'person' => $row['custom_print_label_person_new']
                 ],
                 [
                     'id' => 2,
                     'content' => '配镜架',
-                    'createtime' => $row['custom_match_frame_created_at'],
-                    'person' => $row['custom_match_frame_person']
+                    'createtime' => $row['custom_match_frame_created_at_new'],
+                    'person' => $row['custom_match_frame_person_new']
                 ],
                 [
                     'id' => 3,
                     'content' => '配镜片',
-                    'createtime' => $row['custom_match_lens_created_at'],
-                    'person' => $row['custom_match_lens_person']
+                    'createtime' => $row['custom_match_lens_created_at_new'],
+                    'person' => $row['custom_match_lens_person_new']
                 ],
                 [
                     'id' => 4,
                     'content' => '加工',
-                    'createtime' => $row['custom_match_factory_created_at'],
-                    'person' => $row['custom_match_factory_person']
+                    'createtime' => $row['custom_match_factory_created_at_new'],
+                    'person' => $row['custom_match_factory_person_new']
                 ],
                 [
                     'id' => 5,
                     'content' => '提货',
-                    'createtime' => $row['custom_match_delivery_created_at'],
-                    'person' => $row['custom_match_delivery_person']
+                    'createtime' => $row['custom_match_delivery_created_at_new'],
+                    'person' => $row['custom_match_delivery_person_new']
                 ],
             ];
             $total = count($list);
@@ -490,7 +517,7 @@ class Zeelool extends Backend
 
     /**
      * 获取镜架尺寸
-     */ 
+     */
     protected function get_frame_lens_width_height_bridge($product_id)
     {
         if ($product_id) {
@@ -763,12 +790,17 @@ order by sfoi.order_id desc;";
                 ],
             ],
         ];
+
+
+
+
         $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
         $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
 
         // $spreadsheet->getActiveSheet()->getStyle('A1:Z'.$key)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
         $spreadsheet->getActiveSheet()->getStyle('A1:Z' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
         $spreadsheet->getActiveSheet()->getStyle('A1:Z' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+
 
         //水平垂直居中   
         // $objSheet->getDefaultStyle()->getAlignment()->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
@@ -799,9 +831,8 @@ order by sfoi.order_id desc;";
         //禁止缓存
         header('Cache-Control: max-age=0');
         $writer = new $class($spreadsheet);
-       
+
         $writer->save('php://output');
-      
     }
 
     //批量打印标签
@@ -837,13 +868,13 @@ EOF;
 
             //查询产品货位号
             $store_sku = new \app\admin\model\warehouse\StockHouse;
-            $cargo_number = $store_sku->alias('a')->where('status',1)->join(['fa_store_sku' => 'b'],'a.id=b.store_id')->column('coding','sku');
+            $cargo_number = $store_sku->alias('a')->where('status', 1)->join(['fa_store_sku' => 'b'], 'a.id=b.store_id')->column('coding', 'sku');
 
             //查询sku映射表
             $item = new \app\admin\model\itemmanage\ItemPlatformSku;
-            $item_res = $item->cache(3600)->column('sku','platform_sku');
-            
-            
+            $item_res = $item->cache(3600)->column('sku', 'platform_sku');
+
+
             $file_content = '';
             $temp_increment_id = 0;
             foreach ($processing_order_list as $processing_key => $processing_value) {
@@ -997,7 +1028,7 @@ EOF;
             " . $prismcheck_os_value . $os_add . $os_pd .
                     " </tr>
             <tr>
-            <td colspan='2'>" .$cargo_number_str . SKUHelper::sku_filter($processing_value['sku']) . "</td>
+            <td colspan='2'>" . $cargo_number_str . SKUHelper::sku_filter($processing_value['sku']) . "</td>
             <td colspan='8' style=' text-align:center'>Lens：" . $final_print['index_type'] . "</td>
             </tr>  
             </tbody></table></div>";

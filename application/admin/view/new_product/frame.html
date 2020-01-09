@@ -1,7 +1,7 @@
 <div class="form-group ajax-add">
     <label class="control-label col-xs-12 col-sm-2">{:__('供应商')}:</label>
     <div class="col-xs-12 col-sm-3">
-        <select  id="supplier_id" data-rule="required" class="form-control selectpicker" data-live-search='true' name="row[supplier_id]">
+        <select  id="supplier_id" data-rule="required" class="form-control selectpicker"  data-live-search='true' name="row[supplier_id]">
             <option value="">请选择</option>
             {foreach name="AllSupplier" item="vo"}
             <option value="{$key}">{$vo}</option>
