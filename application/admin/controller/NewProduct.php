@@ -409,6 +409,9 @@ class NewProduct extends Backend
             } elseif ($result == 2) { //商品是镜片类型
                 $data = $this->fetch('eyeglass');
             } elseif ($result == 3) { //商品是饰品类型
+                $info = $this->category->getCategoryTexture($categoryId);
+                $this->assign('AllTexture', $info['textureResult']);
+                $this->assign('AllFrameColor',$info['colorResult']);
                 $data = $this->fetch('decoration');
             } else {
                 $data = $this->fetch('attribute');
@@ -449,6 +452,8 @@ class NewProduct extends Backend
             $this->error('404 not found');
         }
     }
+
+
     /***
      * 根据商品分类和sku求出所有的商品
      */
@@ -477,6 +482,10 @@ class NewProduct extends Backend
             } elseif ($result == 2) { //商品是镜片类型
                 $data = $this->fetch('eyeglass');
             } elseif ($result == 3) { //商品是饰品类型
+                $row  = $this->model->getItemInfo($sku,3);
+                $result = $this->category->getCategoryTexture($categoryId);
+                $this->assign('AllTexture', $result['textureResult']);
+                $this->assign('AllFrameColor',$result['colorResult']);
                 $data = $this->fetch('decoration');
             } else {
                 $data = $this->fetch('attribute');
