@@ -23,17 +23,20 @@ class ItemCategory extends Backend
      */
     protected $model = null;
     protected $platform = null;
+    protected $category_value = null;
     public function _initialize()
     {
         parent::_initialize();
         $this->model = new \app\admin\model\itemmanage\ItemCategory;
         $this->platform = new \app\admin\model\platformmanage\MagentoPlatform;
+        $this->category_value = new \app\admin\model\itemmanage\Item_category_value;
         $this->view->assign('PutAway',$this->model->isPutAway());
         $this->view->assign('LevelList',$this->model->getLevelList());
         $this->view->assign('CategoryList',$this->model->getCategoryList());
         //$this->view->assign('PropertyGroup',(new ItemAttributePropertyGroup())->propertyGroupList());
         $this->view->assign('AttrGroup',$this->model->getAttrGroup());
         $this->view->assign('PlatformList',$this->platform->magentoPlatformList());
+        $this->view->assign('AccessoryType',$this->category_value->getAllCodeType());
     }
     
     /**
@@ -80,6 +83,54 @@ class ItemCategory extends Backend
         }
         return $this->view->fetch();
     }
+        /**
+     * 添加
+     */
+    public function add()
+    {
+        if ($this->request->isPost()) {
+            $params = $this->request->post("row/a");
+            if ($params) {
+                $params = $this->preExcludeFields($params);
+                if('0' != $params['accessory_type']){
+                     $info = $this->category_value->getTextureValueAndColor($params['accessory_type']);
+                     $params['accessory_texture_value']  = $info['texture_value'];
+                     $params['accessory_color_value']    = $info['color_value'];
+                }
+                if ($this->dataLimit && $this->dataLimitFieldAutoFill) {
+                    $params[$this->dataLimitField] = $this->auth->id;
+                }
+                $result = false;
+                Db::startTrans();
+                try {
+                    //是否采用模型验证
+                    if ($this->modelValidate) {
+                        $name = str_replace("\\model\\", "\\validate\\", get_class($this->model));
+                        $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.add' : $name) : $this->modelValidate;
+                        $this->model->validateFailException(true)->validate($validate);
+                    }
+                    $result = $this->model->allowField(true)->save($params);
+                    Db::commit();
+                } catch (ValidateException $e) {
+                    Db::rollback();
+                    $this->error($e->getMessage());
+                } catch (PDOException $e) {
+                    Db::rollback();
+                    $this->error($e->getMessage());
+                } catch (Exception $e) {
+                    Db::rollback();
+                    $this->error($e->getMessage());
+                }
+                if ($result !== false) {
+                    $this->success();
+                } else {
+                    $this->error(__('No rows were inserted'));
+                }
+            }
+            $this->error(__('Parameter %s can not be empty', ''));
+        }
+        return $this->view->fetch();
+    }
     /**
      * 编辑
      */
@@ -98,6 +149,11 @@ class ItemCategory extends Backend
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
             if ($params) {
+                if('0' != $params['accessory_type']){
+                    $info = $this->category_value->getTextureValueAndColor($params['accessory_type']);
+                    $params['accessory_texture_value']  = $info['texture_value'];
+                    $params['accessory_color_value']    = $info['color_value'];
+               }
                 $params = $this->preExcludeFields($params);
                 $result = false;
                 Db::startTrans();

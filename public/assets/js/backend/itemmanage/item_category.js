@@ -47,6 +47,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                          formatter:Table.api.formatter.status
                         },
                         {field:'attribute_group_id',title:__('Attribute_group_id')},
+                        {field:'accessory_type',title:__('Accessory_type')},
                         {
                             field:'is_upload_zeelool',
                             title:__('Is_upload_zeelool'),
