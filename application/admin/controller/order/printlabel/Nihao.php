@@ -784,6 +784,8 @@ order by sfoi.order_id desc;";
         // $spreadsheet->getActiveSheet()->getAlignment()->setWrapText(true);
         // $spreadsheet->getActiveSheet()->getStyle('K1')->getAlignment()->setWrapText(true);
 
+        $spreadsheet->getDefaultStyle()->getFont()->setName('微软雅黑')->setSize(12);
+
         //设置边框
         $border = [
             'borders' => [
