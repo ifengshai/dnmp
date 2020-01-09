@@ -592,7 +592,7 @@ order by sfoi.order_id desc;";
             // dump($prescription_params);
             // dump($product_options);
 
-            $finalResult[$key]['prescription_type'] = isset($tmp_lens_params['prescription_type']) ? $tmp_lens_params['prescription_type'] : '';
+            $finalResult[$key]['prescription_type'] = isset($tmp_product_options['info_buyRequest']['tmplens']['prescription_type']) ? $tmp_product_options['info_buyRequest']['tmplens']['prescription_type'] : '';
             $finalResult[$key]['od_sph'] = isset($tmp_lens_params['od_sph']) ? $tmp_lens_params['od_sph'] : '';
             $finalResult[$key]['od_cyl'] = isset($tmp_lens_params['od_cyl']) ? $tmp_lens_params['od_cyl'] : '';
             $finalResult[$key]['od_axis'] = isset($tmp_lens_params['od_axis']) ? $tmp_lens_params['od_axis'] : '';
@@ -676,6 +676,19 @@ order by sfoi.order_id desc;";
             ->setCellValue("W1", "镀膜");
 
         foreach ($finalResult as $key => $value) {
+
+
+            if (isset($value['od_axis']) && $value['od_axis'] !== 'None') {
+                $value['od_axis'] =  $value['od_axis'];
+            } else {
+                $value['od_axis'] = '';
+            }
+
+            if (isset($value['os_axis']) && $value['os_axis'] !== 'None') {
+                $value['os_axis'] =  $value['os_axis'];
+            } else {
+                $value['os_axis'] = '';
+            }
 
             $spreadsheet->getActiveSheet()->setCellValue("A" . ($key * 2 + 2), $value['created_at']);
             $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 2 + 2), $value['increment_id']);

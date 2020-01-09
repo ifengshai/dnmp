@@ -943,9 +943,9 @@ order by sfoi.item_id asc limit 1000";
             $finalResult[$key]['total'] = $tmp_product_options['info_buyRequest']['tmplens']['total'];
 
             $tmp_lens_params = array();
-            $tmp_lens_params = json_decode($tmp_product_options['info_buyRequest']['tmplens']['prescription'], ture);
+            $tmp_lens_params = json_decode($tmp_product_options['info_buyRequest']['tmplens']['prescription'], true);
 
-            $finalResult[$key]['prescription_type'] = $tmp_lens_params['prescription_type'];
+            $finalResult[$key]['prescription_type'] = $tmp_product_options['info_buyRequest']['tmplens']['prescription_type'];
             // dump($tmp_lens_params);
             $finalResult[$key]['year'] = $tmp_lens_params['year'];
             $finalResult[$key]['month'] = $tmp_lens_params['month'];
@@ -1442,17 +1442,18 @@ order by sfoi.item_id asc limit 1000";
         //计算三个站最近30天销量
         if ($zeelool_sku) {
             $map['b.sku'] = ['in', $zeelool_sku];
-            $zeelool = $zeelool_model->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')->group('b.sku')->column('sum(b.qty_ordered) as num,b.sku');
+            $zeelool = $zeelool_model->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')->group('b.sku')->column('sum(b.qty_ordered) as num','b.sku');
+
         }
 
         if ($voogueme_sku) {
             $map['b.sku'] = ['in', $voogueme_sku];
-            $voogueme = $voogueme_model->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')->group('b.sku')->column('sum(b.qty_ordered) as num,b.sku');
+            $voogueme = $voogueme_model->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')->group('b.sku')->column('sum(b.qty_ordered) as num','b.sku');
         }
 
         if ($nihao_sku) {
             $map['b.sku'] = ['in', $nihao_sku];
-            $nihao = $nihao_model->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')->group('b.sku')->column('sum(b.qty_ordered) as num,b.sku');
+            $nihao = $nihao_model->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')->group('b.sku')->column('sum(b.qty_ordered) as num','b.sku');
         }
 
         foreach ($list as $k => $v) {

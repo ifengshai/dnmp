@@ -686,8 +686,17 @@ order by sfoi.order_id desc;";
             $value['os_sph'] = isset($value['os_sph']) ? $value['os_sph'] : '';
             $value['od_cyl'] = isset($value['od_cyl']) ? $value['od_cyl'] : '';
             $value['os_cyl'] = isset($value['os_cyl']) ? $value['os_cyl'] : '';
-            $value['od_axis'] = isset($value['od_axis']) ? $value['od_axis'] : '';
-            $value['os_axis'] = isset($value['os_axis']) ? $value['os_axis'] : '';
+            if (isset($value['od_axis']) && $value['od_axis'] !== 'None') {
+                $value['od_axis'] =  $value['od_axis'];
+            } else {
+                $value['od_axis'] = '';
+            }
+
+            if (isset($value['os_axis']) && $value['os_axis'] !== 'None') {
+                $value['os_axis'] =  $value['os_axis'];
+            } else {
+                $value['os_axis'] = '';
+            }
 
             $value['od_add'] = isset($value['od_add']) ? $value['od_add'] : '';
             $value['os_add'] = isset($value['os_add']) ? $value['os_add'] : '';
@@ -793,7 +802,7 @@ order by sfoi.order_id desc;";
 
 
         $spreadsheet->getDefaultStyle()->getFont()->setName('微软雅黑')->setSize(12);
-        
+
         //自动换行
         // $spreadsheet->getActiveSheet()->getAlignment()->setWrapText(true);
         // $spreadsheet->getActiveSheet()->getStyle('K1')->getAlignment()->setWrapText(true);
