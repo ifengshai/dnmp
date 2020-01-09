@@ -49,7 +49,8 @@ class ItemCategory extends Model
      */
     public function getCategoryList()
     {
-        $result = $this->field('id,pid,name')->select();
+        $where['is_del'] = 1;
+        $result = $this->where($where)->field('id,pid,name')->select();
         if(!$result){
             $finalArr =[];
             $finalArr[0] = '无';

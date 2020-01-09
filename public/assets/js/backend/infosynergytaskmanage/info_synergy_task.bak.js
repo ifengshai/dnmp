@@ -51,7 +51,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {field: 'rep', title: __('Rep_id')},
                         {field: 'prty_id', title: __('Prty_id'),searchList: {0:'未选择',1:'高级',2:'中级',3:'低级'},formatter: Controller.api.formatter.prtyDevice,operate:false},
                         {field: 'synergy_task_id', title: __('Synergy_task_id'),visible:false,operate:false},
-                        {field: 'info_synergy_task_category.name', title: __('Synergy_task_id'),operate:false},
+                        {field: 'info_synergy_task_category_name', title: __('Synergy_task_id'),operate:false},
                         {field: 'create_person', title: __('Create_person')},
                         {field: 'create_time', title: __('Create_time'), operate:'RANGE', addclass:'datetimerange'},
                         //{field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate}
