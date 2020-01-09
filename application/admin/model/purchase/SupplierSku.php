@@ -48,8 +48,12 @@ class SupplierSku extends Model
     }
 
     //根据sku 获取供应商sku
-    public function getSupplierSkuData($sku) 
+    public function getSupplierSkuData($sku, $supplier_id)
     {
-        return $this->where('sku', '=', $sku)->value('supplier_sku');
+        $where['sku'] = $sku;
+        if ($supplier_id) {
+            $where['supplier_id'] = $supplier_id;
+        }
+        return $this->where($where)->value('supplier_sku');
     }
 }

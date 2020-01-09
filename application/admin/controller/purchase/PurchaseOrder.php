@@ -470,8 +470,8 @@ class PurchaseOrder extends Backend
                     $result = $row->allowField(true)->save($params);
 
                     //添加快递100订阅推送服务
-                    $logistics_company_no = explode(',', $params['logistics_company_no']);
-                    $logistics_number = explode(',', $params['logistics_number']);
+                    $logistics_company_no = explode(',', trim($params['logistics_company_no']));
+                    $logistics_number = explode(',', trim($params['logistics_number']));
                     Kuaidi100::setPoll($logistics_company_no[0], $logistics_number[0], $row->id);
 
                     //添加物流汇总表
@@ -650,6 +650,7 @@ class PurchaseOrder extends Backend
 
         //查询质检信息
         $check_map['purchase_id'] = $id;
+        $check_map['status'] = 2;
         $check = new \app\admin\model\warehouse\Check;
         $list = $check->with(['checkItem'])
             ->where($check_map)
@@ -692,6 +693,7 @@ class PurchaseOrder extends Backend
         if (!$row) {
             $this->error(__('No Results were found'));
         }
+       
         $data['check_status'] = 2;
         $data['stock_status'] = 2;
         $data['return_status'] = 2;
@@ -974,6 +976,7 @@ class PurchaseOrder extends Backend
             $hasWhere['sku'] = ['in', $skus];
             $purchase_map['purchase_status'] = ['in', [2, 5, 6, 7]];
             $purchase_map['check_status'] = ['in', [0, 1]];
+            $purchase_map['is_diff'] = 0;
 
             $purchase_list = $purchase->hasWhere('purchaseOrderItem', $hasWhere)
                 ->where($purchase_map)

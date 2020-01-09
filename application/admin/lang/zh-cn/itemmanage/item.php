@@ -55,5 +55,6 @@ return [
     'SKU pre-order quantity cannot be empty' => 'SKU预售数量不能为空',
     'Platform sku cannot be empty' => 'sku不能为空',
     'The closing time has expired, please select again' =>'预售结束时间已过，请重新选择',
-    'Pre-sale on, do not repeat on' =>'预售开启中，请勿重复开启'
+    'Pre-sale on, do not repeat on' =>'预售开启中，请勿重复开启',
+    'The corresponding encoding rule does not exist, please try again' => '对应编码规则不存在,请重新尝试'
 ];
