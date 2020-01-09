@@ -943,9 +943,9 @@ order by sfoi.item_id asc limit 1000";
             $finalResult[$key]['total'] = $tmp_product_options['info_buyRequest']['tmplens']['total'];
 
             $tmp_lens_params = array();
-            $tmp_lens_params = json_decode($tmp_product_options['info_buyRequest']['tmplens']['prescription'], ture);
+            $tmp_lens_params = json_decode($tmp_product_options['info_buyRequest']['tmplens']['prescription'], true);
 
-            $finalResult[$key]['prescription_type'] = $tmp_lens_params['prescription_type'];
+            $finalResult[$key]['prescription_type'] = $tmp_product_options['info_buyRequest']['tmplens']['prescription_type'];
             // dump($tmp_lens_params);
             $finalResult[$key]['year'] = $tmp_lens_params['year'];
             $finalResult[$key]['month'] = $tmp_lens_params['month'];
