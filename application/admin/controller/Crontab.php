@@ -1458,6 +1458,7 @@ order by sfoi.item_id asc limit 1000";
         foreach ($list as $k => $v) {
             if ($v['grade'] == 'D' || $v['grade'] == 'E' || $v['grade'] == 'F') {
                 $list[$k]['days_sales_num'] = round(($zeelool[$v['zeelool_sku']] + $voogueme[$v['voogueme_sku']] + $nihao[$v['nihao_sku']]) / 30, 2);
+                $list[$k]['sales_nums'] = $zeelool[$v['zeelool_sku']] + $voogueme[$v['voogueme_sku']] + $nihao[$v['nihao_sku']];
             }
         }
 
