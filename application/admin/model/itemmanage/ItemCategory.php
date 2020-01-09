@@ -216,4 +216,23 @@ class ItemCategory extends Model
         }
         return $arr;
     }
+    /***
+     * 根据ID获取商品材质
+     */
+    public function getCategoryTexture($id)
+    {
+        $where['id'] = $id;
+        $result = $this->where($where)->field('id,accessory_type,accessory_texture_value,accessory_color_value')->find();
+        if(!$result){
+            return false;
+        }
+        $typeResult    = $result['accessory_type'];
+        $textureResult = explode(',',$result['accessory_texture_value']);
+        $colorResult   = explode(',',$result['accessory_color_value']);
+        return ['typeResult'=>$typeResult,'textureResult'=>$textureResult,'colorResult'=>$colorResult];
+    }
+    /***
+     * 获取配饰材质（固定）
+     */
+    
 }

@@ -59,6 +59,7 @@ class ItemAttribute extends Model
 //    {
 //        return [ 0=>'请选择',1 => '塑料', 2 =>'板材', 3 =>'TR90', 4 =>'金属', 5 =>'钛', 6 =>'尼龙', 7=>'木质',8=>'混合材质',9=>'合金',10=>'其他材质'];
 //    }
+    //镜架材质
     public function getAllTexture()
     {
         return [ 0=>'请选择',1 => 'plastic', 2 =>'acetate', 3 =>'tr90', 4 =>'metal',5=>'titanium',6=>'titanium',7=>'other_material',8=>'mark'];
@@ -106,10 +107,51 @@ class ItemAttribute extends Model
 //    {
 //        return [0=>'请选择',1=>'红', 2=> '橙', 3=>'黄', 4=>'绿', 5=>'蓝', 6=>'紫', 7=>'黑', 8=>'白', 9=>'灰', 10=>'褐'];
 //    }
-    public function getFrameColor()
+    /***
+     * type 类型  1 镜架  2 镜片 3 配饰 默认 1
+     */
+    public function getFrameColor($type=1)
     {
-        return [0=>'请选择',1=>'Black', 2=> 'Blue', 3=>'Brown', 4=>'Crystal', 5=>'Floral', 6=>'Gold', 7=>'Green',
-            8=>'Orange', 9=>'Pink', 10=>'Purple',11=>'Red',12=>'Silver',13=>'Tortoise',14=>'White',15=>'Yellow'];
+        if(1 == $type){
+            return [
+                0=>'请选择',
+                1=>'Black', 
+                2=> 'Blue', 
+                3=>'Brown', 
+                4=>'Crystal', 
+                5=>'Floral', 
+                6=>'Gold', 
+                7=>'Green',
+                8=>'Orange', 
+                9=>'Pink', 
+                10=>'Purple',
+                11=>'Red',
+                12=>'Silver',
+                13=>'Tortoise',
+                14=>'White',
+                15=>'Yellow'
+            ];
+        }elseif(3 == $type){
+            return [
+                'Red'       => 'Red',
+                'Green'     => 'Green',
+                'Tortoise'  => 'Tortoise',
+                'Gold'      => 'Gold',
+                'Pink'      => 'Pink',
+                'Yellow'    => 'Yellow',
+                'Black'     => 'Black',
+                'Floral'    => 'Floral',
+                'Purple'    => 'Purple',
+                'White'     => 'White',
+                'Grey'      => 'Grey',
+                'Brown'     => 'Brown',
+                'Blue'      => 'Blue',
+                'Transparent' => 'Transparent',
+                'Silver'      => 'Silver',
+                'Multicolor'  => 'Multicolor'
+            ];
+        }
+
     }
     /***
      * 获取眼镜类型(原先)
@@ -171,4 +213,63 @@ class ItemAttribute extends Model
             return 1;
         }
     }
+    // /***
+    //  * 饰品材质
+    //  */
+    // public function ornament_Texture()
+    // {
+    //     return [
+    //         1=>'Plastic',
+    //         2=>'Wood',
+    //         3=>'Non-Woven Fabric',
+    //         4=>'PU Leather',
+    //         5=>'Velvet',
+    //         6=>'Other Materials',
+    //         7=>'Synthetic Resin',
+    //         8=>'ABS',
+    //         9=>'PVC',
+    //         10=>'Canvas',
+    //         11=>'Metal',
+    //         12=>'Mixed Materials',
+    //         13=>'Suede',
+    //         14=>'Cotton',
+    //         15=>'Microfiber',
+    //         16=>'Velvet',
+    //         17=>'Acetate',
+    //         18=>'Pearl',
+    //         19=>'Faux Cashmere',
+    //         20=>'Artificial Silk',
+    //         21=>'Wool',
+    //         22=>'Cashmere',
+    //         23=>'Plush',
+    //         24=>'Chiffon',
+    //         25=>'Silk',
+    //         26=>'Acrylic',
+    //         27=>'Twill Cotton',
+    //         28=>'Fur',
+    //         29=>'Polyester',
+    //         30=>'Knit',
+    //         31=>'Satin',
+    //         32=>'Blended',
+    //         33=>'Fabric',
+    //         34=>'Lambswool',
+    //         35=>'Voile',
+    //         36=>'Linen',
+    //         37=>'',
+    //         33=>'Fabric',
+    //         33=>'Fabric',
+    //         33=>'Fabric',
+    //         33=>'Fabric',
+    //         33=>'Fabric',
+    //         33=>'Fabric',
+    //         33=>'Fabric',
+    //         33=>'Fabric',
+    //         33=>'Fabric',
+    //         33=>'Fabric',
+    //         33=>'Fabric',
+    //         33=>'Fabric',
+    //         33=>'Fabric',
+
+    //     ];
+    // }
 }
