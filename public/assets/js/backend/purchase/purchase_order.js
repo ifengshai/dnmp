@@ -469,6 +469,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
 
                         { field: 'num', title: __('30天预估销量'), operate: false },
                         { field: 'days_sales_num', title: __('日均销量'), operate: false },
+                        { field: 'replenish_days', title: __('预估售卖天数'), operate: false },
                         { field: 'stock', title: __('实时库存'), operate: false },
                         { field: 'purchase_qty', title: __('在途库存'), operate: false },
                         { field: 'replenish_num', title: __('建议补货量'), operate: false },
