@@ -1461,6 +1461,8 @@ order by sfoi.item_id asc limit 1000";
             }
         }
 
+        dump($list);die;
+
         if ($list) {
             //清空表
             Db::execute("truncate table fa_product_grade;");
