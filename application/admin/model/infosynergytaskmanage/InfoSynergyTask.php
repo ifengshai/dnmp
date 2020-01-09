@@ -92,7 +92,7 @@ class InfoSynergyTask extends Model
         ];
     }
     public function infoSynergyTaskCategory(){
-        return $this->belongsTo('info_synergy_task_category', 'synergy_task_id')->setEagerlyType(0);
+        return $this->belongsTo('app\admin\model\infosynergytaskmanage\InfoSynergyTaskCategory', 'synergy_task_id','id','','left')->setEagerlyType(0);
     }
 
     /**
