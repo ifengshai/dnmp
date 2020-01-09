@@ -101,7 +101,7 @@ class StockSku extends Backend
                 $map['is_del'] = 1;
                 $count = $this->model->where($map)->count();
                 if ($count > 0) {
-                    $this->error('已存在此绑定关系！！');
+                    $this->error('库位已绑定！！');
                 }
 
                 $result = false;
@@ -172,7 +172,7 @@ class StockSku extends Backend
                 $map['is_del'] = 1;
                 $count = $this->model->where($map)->count();
                 if ($count > 0) {
-                    $this->error('已存在此绑定关系！！');
+                    $this->error('库位已绑定！！');
                 }
 
                 $result = false;
