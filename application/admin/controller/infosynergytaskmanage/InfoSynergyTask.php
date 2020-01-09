@@ -392,13 +392,13 @@ class InfoSynergyTask extends Backend
             //exit;
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
-                ->with(['infoSynergyTaskCategory'])
+                ->with(['infosynergytaskcategory'])
                 ->where($where)->where($addWhere)
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->model
-                ->with(['infoSynergyTaskCategory'])
+                ->with(['infosynergytaskcategory'])
                 ->where($where)->where($addWhere)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
