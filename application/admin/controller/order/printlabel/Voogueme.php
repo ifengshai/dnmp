@@ -1011,7 +1011,7 @@ EOF;
                 $final_print['prescription_type'] = substr($final_print['prescription_type'], 0, 15);
 
                 //判断货号是否存在
-                if ($cargo_number[$item_res[$processing_value['sku']]]) {
+                if ($item_res[$processing_value['sku']] && $cargo_number[$item_res[$processing_value['sku']]]) {
                     $cargo_number_str = "<b>" . $cargo_number[$item_res[$processing_value['sku']]] . "</b><br>";
                 } else {
                     $cargo_number_str = "";
