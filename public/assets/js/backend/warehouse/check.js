@@ -28,7 +28,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-se
                     [
                         { checkbox: true },
                         { field: 'id', title: __('Id') },
-                        { field: 'check_order_number', title: __('Check_order_number') },
+                        { field: 'check_order_number', title: __('Check_order_number'), operate: 'like' },
                         { field: 'type', title: __('Type'), custom: { 1: 'success', 2: 'success' }, searchList: { 1: '采购质检', 2: '退货质检' }, formatter: Table.api.formatter.status },
                         { field: 'purchaseorder.purchase_number', title: __('Purchase_id'), operate: 'like' },
                         { field: 'purchaseorder.create_person', title: __('采购创建人'), operate: 'like' },
@@ -645,13 +645,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-se
                 //获取sku信息
                 $(document).on('change', '.sku', function () {
                     var sku = $(this).val();
+                    var supplier_id = $('.supplier.selectpicker').val();
                     var _this = $(this);
                     if (!sku) {
                         return false;
                     }
                     Backend.api.ajax({
                         url: 'ajax/getSkuList',
-                        data: { sku: sku }
+                        data: { sku: sku, supplier_id: supplier_id }
                     }, function (data, ret) {
 
                     }, function (data, ret) {

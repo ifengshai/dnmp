@@ -11,6 +11,7 @@ use think\Exception;
 use think\exception\PDOException;
 use Util\NihaoPrescriptionDetailHelper;
 use Util\SKUHelper;
+use app\admin\model\OrderLog;
 
 /**
  * Sales Flat Order
@@ -25,6 +26,8 @@ class Nihao extends Backend
      * @var \app\admin\model\order\Sales_flat_order
      */
     protected $model = null;
+
+    protected $searchFields = 'entity_id';
 
     public function _initialize()
     {
@@ -60,8 +63,6 @@ class Nihao extends Backend
                 return $this->selectpage();
             }
 
-            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
-
             $filter = json_decode($this->request->get('filter'), true);
 
             if ($filter['increment_id']) {
@@ -70,18 +71,29 @@ class Nihao extends Backend
                 $map['status'] = ['in', ['free_processing', 'processing']];
             } 
 
+            $infoSynergyTask = new \app\admin\model\infosynergytaskmanage\InfoSynergyTask;
+            if ($filter['task_label'] == 1 || $filter['task_label'] == '0') {
+                $swhere['is_del'] = 1;
+                $swhere['order_platform'] = 3;
+                $swhere['synergy_order_id'] = 2;
+                $order_arr = $infoSynergyTask->where($swhere)->order('create_time desc')->column('synergy_order_number');
+                $map['increment_id'] = ['in', $order_arr];
+                unset($filter['task_label']);
+                $this->request->get(['filter' => json_encode($filter)]);
+            } 
+
+            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+
             $total = $this->model
                 ->where($map)
                 ->where($where)
                 ->order($sort, $order)
-                ->count();
-            // var_dump($total);die;                                                                            
-            $field = 'custom_order_prescription_type,entity_id,status,increment_id,coupon_code,shipping_description,store_id,customer_id,base_discount_amount,base_grand_total,
-                     total_qty_ordered,quote_id,base_currency_code,customer_email,customer_firstname,customer_lastname,custom_is_match_frame,custom_is_match_lens,
-                     custom_is_send_factory,custom_is_delivery,custom_match_frame_created_at,custom_match_lens_created_at,custom_match_factory_created_at,
-                     custom_match_delivery_created_at,custom_print_label,custom_order_prescription,custom_print_label_created_at,custom_service_name';
+                ->count();                                                                       
+            $field = 'order_type,custom_order_prescription_type,entity_id,status,base_shipping_amount,increment_id,coupon_code,shipping_description,store_id,customer_id,base_discount_amount,base_grand_total,
+                     total_qty_ordered,quote_id,customer_email,customer_firstname,customer_lastname,custom_is_match_frame_new,custom_is_match_lens_new,
+                     custom_is_send_factory_new,custom_is_delivery_new,custom_print_label_new,custom_order_prescription,created_at';
             $list = $this->model
-                // ->field($field)
+                ->field($field)
                 ->where($map)
                 ->where($where)
                 ->order($sort, $order)
@@ -160,9 +172,9 @@ class Nihao extends Backend
         if ($entity_ids) {
             //多数据库
             $map['entity_id'] = ['in', $entity_ids];
-            $data['custom_print_label'] = 1;
-            $data['custom_print_label_created_at'] = date('Y-m-d H:i:s', time());
-            $data['custom_print_label_person'] =  session('admin.username');
+            $data['custom_print_label_new'] = 1;
+            $data['custom_print_label_created_at_new'] = date('Y-m-d H:i:s', time());
+            $data['custom_print_label_person_new'] =  session('admin.nickname');
             $connect = Db::connect('database.db_nihao')->table('sales_flat_order');
             $connect->startTrans();
             try {
@@ -176,6 +188,13 @@ class Nihao extends Backend
                 $this->error($e->getMessage());
             }
             if ($result) {
+                $params['type'] = 1;
+                $params['num'] = count($entity_ids);
+                $params['order_ids'] = implode(',', $entity_ids);
+                $params['site'] = 3;
+                (new OrderLog())->setOrderLog($params);
+
+
                 //用来判断是否从_list列表页进来
                 if ($label == 'list') {
                     //订单号
@@ -203,15 +222,15 @@ class Nihao extends Backend
         $map['entity_id'] = ['in', $entity_ids];
         $res = $this->model->where($map)->select();
         foreach ($res as $v) {
-            if ($status == 1 && $v['custom_is_match_frame'] == 1) {
+            if ($status == 1 && $v['custom_is_match_frame_new'] == 1) {
                 $this->error('存在已配过镜架的订单！！');
             }
 
-            if ($v['custom_is_delivery'] == 1) {
+            if ($v['custom_is_delivery_new'] == 1) {
                 $this->error('存在已质检通过的订单！！');
             }
 
-            if ($status == 4 && $v['custom_is_match_frame'] == 0) {
+            if ($status == 4 && $v['custom_is_match_frame_new'] == 0) {
                 $this->error('存在未配镜架的订单！！');
             }
         }
@@ -221,27 +240,31 @@ class Nihao extends Backend
             switch ($status) {
                 case 1:
                     //配镜架
-                    $data['custom_is_match_frame'] = 1;
-                    $data['custom_match_frame_created_at'] = date('Y-m-d H:i:s', time());
-                    $data['custom_match_frame_person'] = session('admin.username');
+                    $data['custom_is_match_frame_new'] = 1;
+                    $data['custom_match_frame_created_at_new'] = date('Y-m-d H:i:s', time());
+                    $data['custom_match_frame_person_new'] = session('admin.nickname');
+                    $params['type'] = 2;
                     break;
                 case 2:
                     //配镜片
-                    $data['custom_is_match_lens'] = 1;
-                    $data['custom_match_lens_created_at'] = date('Y-m-d H:i:s', time());
-                    $data['custom_match_lens_person'] = session('admin.username');
+                    $data['custom_is_match_lens_new'] = 1;
+                    $data['custom_match_lens_created_at_new'] = date('Y-m-d H:i:s', time());
+                    $data['custom_match_lens_person_new'] = session('admin.nickname');
+                    $params['type'] = 3;
                     break;
                 case 3:
                     //移送加工时间
-                    $data['custom_is_send_factory'] = 1;
-                    $data['custom_match_factory_created_at'] = date('Y-m-d H:i:s', time());
-                    $data['custom_match_factory_person'] = session('admin.username');
+                    $data['custom_is_send_factory_new'] = 1;
+                    $data['custom_match_factory_created_at_new'] = date('Y-m-d H:i:s', time());
+                    $data['custom_match_factory_person_new'] = session('admin.nickname');
+                    $params['type'] = 4;
                     break;
                 case 4:
                     //提货
-                    $data['custom_is_delivery'] = 1;
-                    $data['custom_match_delivery_created_at'] = date('Y-m-d H:i:s', time());
-                    $data['custom_match_delivery_person'] = session('admin.username');
+                    $data['custom_is_delivery_new'] = 1;
+                    $data['custom_match_delivery_created_at_new'] = date('Y-m-d H:i:s', time());
+                    $data['custom_match_delivery_person_new'] = session('admin.nickname');
+                    $params['type'] = 5;
                     break;
                 default:
             }
@@ -357,6 +380,12 @@ class Nihao extends Backend
                 $this->error($e->getMessage());
             }
             if ($result) {
+                $params['site'] = 3;
+                $params['num'] = count($entity_ids);
+                $params['order_ids'] = implode(',', $entity_ids);
+                (new OrderLog())->setOrderLog($params);
+
+
                 //用来判断是否从_list列表页进来
                 if ($label == 'list') {
                     //订单号

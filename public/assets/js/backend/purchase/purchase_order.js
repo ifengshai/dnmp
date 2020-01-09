@@ -673,13 +673,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                 //获取sku信息
                 $(document).on('change', '.sku', function () {
                     var sku = $(this).val();
+                    var supplier_id = $('.supplier.selectpicker').val();
                     var _this = $(this);
                     if (!sku) {
                         return false;
                     }
                     Backend.api.ajax({
                         url: 'ajax/getSkuList',
-                        data: { sku: sku }
+                        data: { sku: sku, supplier_id: supplier_id }
                     }, function (data, ret) {
                         _this.parent().parent().find('.product_name').val(data.name);
                         _this.parent().parent().find('.supplier_sku').val(data.supplier_sku);
