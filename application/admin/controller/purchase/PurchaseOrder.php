@@ -700,6 +700,8 @@ class PurchaseOrder extends Backend
         $data['is_diff'] = 1;
         $res = $this->model->allowField(true)->save($data, ['id' => $id]);
         if ($res !== false) {
+            $check = new \app\admin\model\warehouse\Check;
+            $check->allowField(true)->save(['is_return'=>1],['purchase_id' => $id]);
             $this->success('操作成功！！');
         } else {
             $this->error('操作失败！！');

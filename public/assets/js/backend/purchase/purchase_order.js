@@ -44,6 +44,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                         { field: 'product_total', title: __('Product_total'), operate: false },
                         { field: 'purchase_freight', title: __('Purchase_freight'), operate: false },
                         { field: 'purchase_total', title: __('Purchase_total'), operate: false },
+                        { field: 'purchase_remark', title: __('采购备注'), formatter: Controller.api.formatter.getClear, operate: false },
                         { field: 'logistics_number', title: __('物流单号'), operate: 'like', visible: false },
                         { field: 'sku', title: __('sku'), operate: 'like', visible: false },
                         {
@@ -244,6 +245,20 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
 
             // 为表格绑定事件
             Table.api.bindevent(table);
+
+
+            $(document).on('click', ".problem_desc_info", function () {
+                var problem_desc = $(this).attr('name');
+                //Layer.alert(problem_desc);
+                Layer.open({
+                    closeBtn: 1,
+                    title: '问题描述',
+                    area: ['900px', '500px'],
+                    content: problem_desc
+                });
+                return false;
+            });
+
 
 
             //审核通过
@@ -753,7 +768,26 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
 
 
 
+            },
+            formatter: {
+
+                getClear: function (value) {
+                    if (value == null || value == undefined) {
+                        return '';
+                    } else {
+                        var tem = value;
+
+                        if (tem.length <= 20) {
+                            return tem;
+                        } else {
+                            return '<span class="problem_desc_info" name = "' + tem + '" style="">' + tem.substr(0, 20) + '...</span>';
+
+                        }
+                    }
+                },
+
             }
+
 
         },
         account_purchase_order: function () {
