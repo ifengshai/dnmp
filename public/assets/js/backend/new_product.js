@@ -341,6 +341,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast','boots
                     }, function (data, ret) {
                         var resultData = ret.data;
                         if (resultData != false) {
+                            $('.ajax-add').remove();
+                            $('#item-stock').after(resultData);
+                            Form.api.bindevent($("form[role=form]"));
+                            $(".selectpicker").selectpicker('refresh');
+
+                            return false;
+
                             $('.newAddition').remove();
                             if (resultData.procurement_type) {
                                 $("#c-procurement_type").find("option[value=" + resultData.procurement_type + "]").prop("selected", true);
