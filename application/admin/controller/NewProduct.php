@@ -105,6 +105,10 @@ class NewProduct extends Backend
                 $data = $itemAttribute = [];
                 if (3 == $item_type) { //配饰
 
+                    if (!$params['supplier_id']) {
+                        $this->error('供应商不能为空');
+                    }
+                    
                     if (!array_filter($itemName)) {
                         $this->error('商品名称不能为空！！');
                     }
