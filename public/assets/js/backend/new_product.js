@@ -341,55 +341,62 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast','boots
                     }, function (data, ret) {
                         var resultData = ret.data;
                         if (resultData != false) {
-                            $('.newAddition').remove();
-                            if (resultData.procurement_type) {
-                                $("#c-procurement_type").find("option[value=" + resultData.procurement_type + "]").prop("selected", true);
-                            } else {
-                                $("#c-procurement_type").val("");
-                            }
-                            if (resultData.procurement_origin) {
-                                $("#c-procurement_origin").find("option[value=" + resultData.procurement_origin + "]").prop("selected", true);
-                            } else {
-                                $("#c-procurement_origin").val();
-                            }
-                            $("#c-frame_texture").find("option[value=" + resultData.frame_texture + "]").prop("selected", true);
-                            $("#c-shape").find("option[value=" + resultData.shape + "]").prop("selected", true);
-                            $("#c-frame_type").find("option[value=" + resultData.frame_type + "]").prop("selected", true);
-                            $("#c-frame_shape").find("option[value=" + resultData.frame_shape + "]").prop("selected", true);
-                            $("#c-frame_gender").find("option[value=" + resultData.frame_gender + "]").prop("selected", true);
-                            $("#c-frame_size").find("option[value=" + resultData.frame_size + "]").prop("selected", true);
-                            $("#c-glasses_type").find("option[value=" + resultData.glasses_type + "]").prop("selected", true);
-                            $("#c-frame_is_recipe").find("option[value=" + resultData.frame_is_recipe + "]").prop("selected", true);
-                            $("#c-frame_piece").find("option[value=" + resultData.frame_piece + "]").prop("selected", true); $("#c-frame_temple_is_spring").find("option[value=" + resultData.frame_temple_is_spring + "]").prop("selected", true);
-                            $("#c-frame_is_adjust_nose_pad").find("option[value=" + resultData.frame_is_adjust_nose_pad + "]").prop("selected", true);
-                            $("#c-frame_is_advance").find("option[value=" + resultData.frame_is_advance + "]").prop("selected", true);
-                            $('#c-frame_bridge').val(resultData.frame_bridge);
-                            $('#c-frame_height').val(resultData.frame_height);
-                            $('#c-frame_width').val(resultData.frame_width);
-                            $('#c-frame_length').val(resultData.frame_length);
-                            $('#c-frame_temple_length').val(resultData.frame_temple_length);
-                            $('#c-weight').val(resultData.frame_weight);
-                            $('#c-mirror_width').val(resultData.mirror_width);
-                            $('#c-problem_desc').html(resultData.frame_remark);
-                            $('.note-editable').html(resultData.frame_remark);
-                            $('#item-count').val(resultData.itemCount);
-                            //$(".editor").textarea
-                            if (resultData.origin_sku) {
+                            $('.ajax-add').remove();
+                            $('#item-stock').after(resultData);
+                            Form.api.bindevent($("form[role=form]"));
+                            $(".selectpicker").selectpicker('refresh');
+
+                            return false;
+
+                            // $('.newAddition').remove();
+                            // if (resultData.procurement_type) {
+                            //     $("#c-procurement_type").find("option[value=" + resultData.procurement_type + "]").prop("selected", true);
+                            // } else {
+                            //     $("#c-procurement_type").val("");
+                            // }
+                            // if (resultData.procurement_origin) {
+                            //     $("#c-procurement_origin").find("option[value=" + resultData.procurement_origin + "]").prop("selected", true);
+                            // } else {
+                            //     $("#c-procurement_origin").val();
+                            // }
+                            // $("#c-frame_texture").find("option[value=" + resultData.frame_texture + "]").prop("selected", true);
+                            // $("#c-shape").find("option[value=" + resultData.shape + "]").prop("selected", true);
+                            // $("#c-frame_type").find("option[value=" + resultData.frame_type + "]").prop("selected", true);
+                            // $("#c-frame_shape").find("option[value=" + resultData.frame_shape + "]").prop("selected", true);
+                            // $("#c-frame_gender").find("option[value=" + resultData.frame_gender + "]").prop("selected", true);
+                            // $("#c-frame_size").find("option[value=" + resultData.frame_size + "]").prop("selected", true);
+                            // $("#c-glasses_type").find("option[value=" + resultData.glasses_type + "]").prop("selected", true);
+                            // $("#c-frame_is_recipe").find("option[value=" + resultData.frame_is_recipe + "]").prop("selected", true);
+                            // $("#c-frame_piece").find("option[value=" + resultData.frame_piece + "]").prop("selected", true); $("#c-frame_temple_is_spring").find("option[value=" + resultData.frame_temple_is_spring + "]").prop("selected", true);
+                            // $("#c-frame_is_adjust_nose_pad").find("option[value=" + resultData.frame_is_adjust_nose_pad + "]").prop("selected", true);
+                            // $("#c-frame_is_advance").find("option[value=" + resultData.frame_is_advance + "]").prop("selected", true);
+                            // $('#c-frame_bridge').val(resultData.frame_bridge);
+                            // $('#c-frame_height').val(resultData.frame_height);
+                            // $('#c-frame_width').val(resultData.frame_width);
+                            // $('#c-frame_length').val(resultData.frame_length);
+                            // $('#c-frame_temple_length').val(resultData.frame_temple_length);
+                            // $('#c-weight').val(resultData.frame_weight);
+                            // $('#c-mirror_width').val(resultData.mirror_width);
+                            // $('#c-problem_desc').html(resultData.frame_remark);
+                            // $('.note-editable').html(resultData.frame_remark);
+                            // $('#item-count').val(resultData.itemCount);
+                            // //$(".editor").textarea
+                            // if (resultData.origin_sku) {
                                 
-                                var str = '<tr><th>商品名称</th><th>商品颜色</th><th>供应商SKU</th><th>单价</th><th>操作</th></tr>';
-                                console.log(data);
-                                $('#caigou-table tbody').html('');
-                                for (var i in data.itemArr) {
-                                    str += '<tr>'
-                                    str += '<td><input  data-rule="required"  class="form-control c-name" name="row[name][]" disabled value="' + data.itemArr[i].name + '"  type="text"></td>'
-                                    str += '<td><input  data-rule="required"  class="form-control c-color" name="row[color][]" disabled value="' + data.itemArr[i].frame_color + '" type="text"></td>'
-                                    str += '<td><input  data-rule="required"  class="form-control c-supplier_sku" name="row[supplier_sku][]" disabled value="' + data.itemArr[i].supplier_sku + '" type="text"></td>'
-                                    str += '<td><input  data-rule="required"  class="form-control c-price" name="row[price][]" disabled value="' + data.itemArr[i].price + '" type="text"></td>'
-                                    str += '<td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>删除</a></td></tr>'
-                                }
-                                $('#caigou-table tbody').html(str);
+                            //     var str = '<tr><th>商品名称</th><th>商品颜色</th><th>供应商SKU</th><th>单价</th><th>操作</th></tr>';
+                            //     console.log(data);
+                            //     $('#caigou-table tbody').html('');
+                            //     for (var i in data.itemArr) {
+                            //         str += '<tr>'
+                            //         str += '<td><input  data-rule="required"  class="form-control c-name" name="row[name][]" disabled value="' + data.itemArr[i].name + '"  type="text"></td>'
+                            //         str += '<td><input  data-rule="required"  class="form-control c-color" name="row[color][]" disabled value="' + data.itemArr[i].frame_color + '" type="text"></td>'
+                            //         str += '<td><input  data-rule="required"  class="form-control c-supplier_sku" name="row[supplier_sku][]" disabled value="' + data.itemArr[i].supplier_sku + '" type="text"></td>'
+                            //         str += '<td><input  data-rule="required"  class="form-control c-price" name="row[price][]" disabled value="' + data.itemArr[i].price + '" type="text"></td>'
+                            //         str += '<td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>删除</a></td></tr>'
+                            //     }
+                            //     $('#caigou-table tbody').html(str);
                               
-                            }
+                            // }
                          
                         } 
                         return false;

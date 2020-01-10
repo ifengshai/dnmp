@@ -282,7 +282,6 @@ class Item extends Model
         $map['origin_sku'] = $origin_sku;
         $result = $this->where($map)->field('id,origin_sku')->find();
         return $result ? $result : false;
-
     }
     /***
      * 查找一个仓库sku是否存在

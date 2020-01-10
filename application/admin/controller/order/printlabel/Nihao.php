@@ -592,7 +592,7 @@ order by sfoi.order_id desc;";
             // dump($prescription_params);
             // dump($product_options);
 
-            $finalResult[$key]['prescription_type'] = isset($tmp_lens_params['prescription_type']) ? $tmp_lens_params['prescription_type'] : '';
+            $finalResult[$key]['prescription_type'] = isset($tmp_product_options['info_buyRequest']['tmplens']['prescription_type']) ? $tmp_product_options['info_buyRequest']['tmplens']['prescription_type'] : '';
             $finalResult[$key]['od_sph'] = isset($tmp_lens_params['od_sph']) ? $tmp_lens_params['od_sph'] : '';
             $finalResult[$key]['od_cyl'] = isset($tmp_lens_params['od_cyl']) ? $tmp_lens_params['od_cyl'] : '';
             $finalResult[$key]['od_axis'] = isset($tmp_lens_params['od_axis']) ? $tmp_lens_params['od_axis'] : '';
@@ -676,6 +676,19 @@ order by sfoi.order_id desc;";
             ->setCellValue("W1", "镀膜");
 
         foreach ($finalResult as $key => $value) {
+
+
+            if (isset($value['od_axis']) && $value['od_axis'] !== 'None') {
+                $value['od_axis'] =  $value['od_axis'];
+            } else {
+                $value['od_axis'] = '';
+            }
+
+            if (isset($value['os_axis']) && $value['os_axis'] !== 'None') {
+                $value['os_axis'] =  $value['os_axis'];
+            } else {
+                $value['os_axis'] = '';
+            }
 
             $spreadsheet->getActiveSheet()->setCellValue("A" . ($key * 2 + 2), $value['created_at']);
             $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 2 + 2), $value['increment_id']);
@@ -784,6 +797,8 @@ order by sfoi.order_id desc;";
         // $spreadsheet->getActiveSheet()->getAlignment()->setWrapText(true);
         // $spreadsheet->getActiveSheet()->getStyle('K1')->getAlignment()->setWrapText(true);
 
+        $spreadsheet->getDefaultStyle()->getFont()->setName('微软雅黑')->setSize(12);
+
         //设置边框
         $border = [
             'borders' => [
@@ -873,7 +888,7 @@ EOF;
 
             //查询产品货位号
             $store_sku = new \app\admin\model\warehouse\StockHouse;
-            $cargo_number = $store_sku->alias('a')->where('status', 1)->join(['fa_store_sku' => 'b'], 'a.id=b.store_id')->column('coding', 'sku');
+            $cargo_number = $store_sku->alias('a')->where(['status' => 1,'b.is_del' => 1])->join(['fa_store_sku' => 'b'], 'a.id=b.store_id')->column('coding', 'sku');
 
             //查询sku映射表
             $item = new \app\admin\model\itemmanage\ItemPlatformSku;
@@ -1001,7 +1016,7 @@ EOF;
                 $final_print['prescription_type'] = substr($final_print['prescription_type'], 0, 15);
 
                 //判断货号是否存在
-                if ($cargo_number[$item_res[$processing_value['sku']]]) {
+                if ($item_res[$processing_value['sku']] && $cargo_number[$item_res[$processing_value['sku']]]) {
                     $cargo_number_str = "<b>" . $cargo_number[$item_res[$processing_value['sku']]] . "</b><br>";
                 } else {
                     $cargo_number_str = "";

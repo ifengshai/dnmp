@@ -1045,6 +1045,7 @@ class PurchaseOrder extends Backend
                 $v['stock'] = $product[$v['true_sku']];
                 $v['purchase_qty'] = $onway_stock > 0 ? $onway_stock : 0;
                 //$res[$k]['out_of_stock_num'] = $sku_list[$v['true_sku']]['num'];
+                $v['replenish_days'] = $v['days_sales_num'] > 0 ? floor($v['stock']/$v['days_sales_num']) : 0;
 
             }
 
