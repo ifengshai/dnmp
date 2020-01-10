@@ -905,34 +905,10 @@ class Inventory extends Backend
             $warehouse_change_sku = $platformSku->where($whereChangeSku)->value('sku');
             //求出订单对应的order_id
             $order = Db::connect($db)->table('sales_flat_order')->where(['increment_id' => $increment_id])->field('entity_id,custom_is_match_frame_new')->find();
-<<<<<<< HEAD
-            if (!$original_sku || !$original_number || !$change_sku || !$change_number) {
-                continue;
-            }
-=======
-  
->>>>>>> lsw
             //回滚
             Db::startTrans();
             try {
                 //更改sales_flat_order_item表中的sku字段
-<<<<<<< HEAD
-                $whereChange['order_id'] = $order['entity_id'];
-                $whereChange['sku']      = $original_sku;
-                $changeData['is_change_frame'] = 2;
-                $updateInfo =Db::connect($db)->table('sales_flat_order_item')->where($whereChange)->update($changeData);
-                if(false != $updateInfo){
-                    if(1 == $order['custom_is_match_frame_new']){ //如果已经配过镜架需要把原先的配货占用库存扣减，更新的配货占用库存增加
-                        //原先sku增加可用库存,减少占用库存
-                        $item->where(['sku' => $warehouse_original_sku])->inc('available_stock', $original_number)->dec('distribution_occupy_stock',$original_number)->dec('occupy_stock', $original_number)->update();
-                        //更新之后的sku减少可用库存,增加占用库存
-                        $item->where(['sku' => $warehouse_change_sku])->dec('available_stock', $change_number)->inc('distribution_occupy_stock',$change_number)->inc('occupy_stock', $change_number)->update();
-                    }else{ //否则走原先的流程
-                        //原先sku增加可用库存,减少占用库存
-                        $item->where(['sku' => $warehouse_original_sku])->inc('available_stock', $original_number)->dec('occupy_stock', $original_number)->update();
-                        //更新之后的sku减少可用库存,增加占用库存
-                        $item->where(['sku' => $warehouse_change_sku])->dec('available_stock', $change_number)->inc('occupy_stock', $change_number)->update();
-=======
                 if($original_sku && $original_number){ //如果存在原始sku和原始的数量
                     $whereChange['order_id'] = $order['entity_id'];
                     $whereChange['sku']      = $original_sku;
@@ -960,7 +936,6 @@ class Inventory extends Backend
                           }  
 
                         }
->>>>>>> lsw
                     }
                 }else{ //如果不存在原始sku和原始的数量
                         if(1 == $order['custom_is_match_frame']){ //如果已经配过镜架需要把原先的配货占用库存扣减，更新的配货占用库存增加
