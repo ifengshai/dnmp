@@ -860,6 +860,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','bootstrap-table-jump-
         },
         handle_task:function(){
             Form.api.bindevent($("form[role=form]"));
+            $(document).on('click', '.button_complete', function () {
+                $('#c-synergy-status').val(2);
+            });
             //承接部门和承接人二级联动
             $(document).on('change','#choose_dept_id',function(){
                 var arrIds = $(this).val();
