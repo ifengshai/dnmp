@@ -905,7 +905,6 @@ class Inventory extends Backend
             $warehouse_change_sku = $platformSku->where($whereChangeSku)->value('sku');
             //求出订单对应的order_id
             $order = Db::connect($db)->table('sales_flat_order')->where(['increment_id' => $increment_id])->field('entity_id,custom_is_match_frame_new')->find();
-  
             //回滚
             Db::startTrans();
             try {
