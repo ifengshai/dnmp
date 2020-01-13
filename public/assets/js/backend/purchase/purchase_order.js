@@ -1,4 +1,4 @@
-define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-table-jump-to'], function ($, undefined, Backend, Table, Form) {
+define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-table-jump-to', 'toastr'], function ($, undefined, Backend, Table, Form, undefined, undefined, Toastr) {
 
     var Controller = {
         index: function () {
@@ -259,6 +259,18 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                 return false;
             });
 
+            $(document).on('click', ".btn-remark", function () {
+                var ids = Table.api.selectedids(table);
+                if (ids.length > 1) {
+                    Toastr.error('添加备注只能选择一个采购单');
+                    return false;
+                }
+                var url = 'purchase/purchase_order/remark?ids=' + ids;
+                Fast.api.open(url, __('添加备注'), { area: ['900px', '500px'] });
+               
+                return false;
+            });
+
 
 
             //审核通过
@@ -395,6 +407,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
 
         },
         logistics: function () {
+            Controller.api.bindevent();
+        },
+        remark: function () {
             Controller.api.bindevent();
         },
         logisticsDetail: function () {
@@ -767,7 +782,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
 
 
                 //结算方式
-                $(document).on('click','.settlement_method',function(){
+                $(document).on('click', '.settlement_method', function () {
                     var val = $(this).val();
                     if (val == 3) {
                         $('.deposit_amount').removeClass('hidden');
