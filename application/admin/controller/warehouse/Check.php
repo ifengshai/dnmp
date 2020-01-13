@@ -702,105 +702,87 @@ class Check extends Backend
             unset($filter['is_process']);
             $this->request->get(['filter' => json_encode($filter)]);
         }
+
+        if ($ids) {
+            $map['Check.id'] = ['in', $ids];
+        }
+
         list($where) = $this->buildparams();
         $list = $this->model
-            ->with(['purchaseorder' => function($query){
-                $query->withField('purchase_number', 'purchase_name', 'purchase_remark', 'create_person', 'createtime');
-            }, 'supplier' => ['supplier_name'], 'orderreturn'])
+            ->with(['purchaseorder' , 'supplier', 'orderreturn'])
+            ->join(['fa_check_order_item' => 'b'], 'b.check_id=Check.id')
+            ->field('Check.*,b.*')
             ->where($where)
             ->where($map)
-            ->order('id desc')
+            ->order('Check.id desc')
             ->select();
+        
         $list = collection($list)->toArray();
-
-        dump($list);
-        die;
+       
 
         //从数据库查询需要的数据
         $spreadsheet = new Spreadsheet();
 
         //常规方式：利用setCellValue()填充数据
-        $spreadsheet->setActiveSheetIndex(0)->setCellValue("A1", "日期")
-            ->setCellValue("B1", "订单号")
-            ->setCellValue("C1", "SKU");   //利用setCellValues()填充数据
-        $spreadsheet->setActiveSheetIndex(0)->setCellValue("D1", "眼球")
-            ->setCellValue("E1", "SPH");
-        $spreadsheet->setActiveSheetIndex(0)->setCellValue("F1", "CYL")
-            ->setCellValue("G1", "AXI");
-        $spreadsheet->setActiveSheetIndex(0)->setCellValue("H1", "ADD")
-            ->setCellValue("I1", "单PD")
-            ->setCellValue("J1", "PD");
-        $spreadsheet->setActiveSheetIndex(0)->setCellValue("K1", "镜片")
-            ->setCellValue("L1", "镜框宽度")
-            ->setCellValue("M1", "镜框高度")
-            ->setCellValue("N1", "bridge")
-            ->setCellValue("O1", "处方类型")
-            ->setCellValue("P1", "顾客留言");
-        $spreadsheet->setActiveSheetIndex(0)->setCellValue("Q1", "Prism\n(out/in)")
-            ->setCellValue("R1", "Direct\n(out/in)")
-            ->setCellValue("S1", "Prism\n(up/down)")
-            ->setCellValue("T1", "Direct\n(up/down)");
-        // Rename worksheet
-        $spreadsheet->setActiveSheetIndex(0)->setTitle('订单处方');
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("A1", "质检单号")
+            ->setCellValue("B1", "质检单类型")
+            ->setCellValue("C1", "采购单号");   //利用setCellValues()填充数据
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("D1", "采购创建人")
+            ->setCellValue("E1", "退货单号");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("F1", "供应商")
+            ->setCellValue("G1", "采购备注");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("H1", "质检备注")
+            ->setCellValue("I1", "SKU")
+            ->setCellValue("J1", "供应商SKU");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("K1", "采购数量")
+            ->setCellValue("L1", "到货数量")
+            ->setCellValue("M1", "合格数量")
+            ->setCellValue("N1", "不合格数量")
+            ->setCellValue("O1", "创建人")
+            ->setCellValue("P1", "创建时间");
 
-        foreach ($finalResult as $key => $value) {
+        $spreadsheet->setActiveSheetIndex(0)->setTitle('质检单数据');
 
-            $value['prescription_type'] = isset($value['prescription_type']) ? $value['prescription_type'] : '';
+        foreach ($list as $key => $value) {
 
-            $value['od_sph'] = isset($value['od_sph']) ? $value['od_sph'] : '';
-            $value['os_sph'] = isset($value['os_sph']) ? $value['os_sph'] : '';
-            $value['od_cyl'] = isset($value['od_cyl']) ? $value['od_cyl'] : '';
-            $value['os_cyl'] = isset($value['os_cyl']) ? $value['os_cyl'] : '';
-            $value['od_axis'] = isset($value['od_axis']) ? $value['od_axis'] : '';
-            $value['os_axis'] = isset($value['os_axis']) ? $value['os_axis'] : '';
+            $spreadsheet->getActiveSheet()->setCellValue("A" . ($key * 1 + 2), $value['check_order_number']);
+            $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $value['type'] == 1 ? '采购质检' : '退货质检');
+            $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 1 + 2), $value['purchaseorder']['purchase_number']);
+            $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 1 + 2), $value['purchaseorder']['create_person']);
+            $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), $value['orderreturn']['return_order_number']);
+            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 1 + 2), $value['supplier_name']);
+            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 1 + 2), $value['purchaseorder']['purchase_remark']);
+            $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 1 + 2), $value['remark']);
+            $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 1 + 2), $value['sku']);
+            $spreadsheet->getActiveSheet()->setCellValue("J" . ($key * 1 + 2), $value['supplier_sku']);
+            $spreadsheet->getActiveSheet()->setCellValue("K" . ($key * 1 + 2), $value['purchase_num']);
+            $spreadsheet->getActiveSheet()->setCellValue("L" . ($key * 1 + 2), $value['arrivals_num']);
+            $spreadsheet->getActiveSheet()->setCellValue("M" . ($key * 1 + 2), $value['quantity_num']);
+            $spreadsheet->getActiveSheet()->setCellValue("N" . ($key * 1 + 2), $value['unqualified_num']);
+            $spreadsheet->getActiveSheet()->setCellValue("O" . ($key * 1 + 2), $value['create_person']);
+            $spreadsheet->getActiveSheet()->setCellValue("P" . ($key * 1 + 2), $value['createtime']);
 
-            $value['od_add'] = isset($value['od_add']) ? $value['od_add'] : '';
-            $value['os_add'] = isset($value['os_add']) ? $value['os_add'] : '';
-
-            $value['pdcheck'] = isset($value['pdcheck']) ? $value['pdcheck'] : '';
-            $value['pd_r'] = isset($value['pd_r']) ? $value['pd_r'] : '';
-            $value['pd_l'] = isset($value['pd_l']) ? $value['pd_l'] : '';
-            $value['pd'] = isset($value['pd']) ? $value['pd'] : '';
-
-            $value['prismcheck'] = isset($value['prismcheck']) ? $value['prismcheck'] : '';
-
-
-            $spreadsheet->getActiveSheet()->setCellValue("A" . ($key * 2 + 2), $value['created_at']);
-            $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 2 + 2), $value['increment_id']);
-            $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 2 + 2), $value['sku']);
-            $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 2 + 2), '右眼');
-            $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 2 + 3), '左眼');
-
-            $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 2 + 2), $value['od_sph'] > 0 ? ' +' . $value['od_sph'] : ' ' . $value['od_sph']);
-            $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 2 + 3), $value['os_sph'] > 0 ? ' +' . $value['os_sph'] : ' ' . $value['os_sph']);
-
-            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 2 + 2), $value['od_cyl'] > 0 ? ' +' . $value['od_cyl'] : ' ' . $value['od_cyl']);
-            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 2 + 3), $value['os_cyl'] > 0 ? ' +' . $value['os_cyl'] : ' ' . $value['os_cyl']);
-
-            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 2 + 2), $value['od_axis']);
-            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 2 + 3), $value['os_axis']);
         }
 
         //设置宽度
-        $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(12);
+        $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(30);
         $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(12);
-        $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(16);
-        $spreadsheet->getActiveSheet()->getColumnDimension('K')->setWidth(32);
-        $spreadsheet->getActiveSheet()->getColumnDimension('L')->setWidth(12);
-        $spreadsheet->getActiveSheet()->getColumnDimension('M')->setWidth(12);
-        $spreadsheet->getActiveSheet()->getColumnDimension('N')->setWidth(12);
+        $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(30);
+        $spreadsheet->getActiveSheet()->getColumnDimension('D')->setWidth(12);
+        $spreadsheet->getActiveSheet()->getColumnDimension('E')->setWidth(30);
+        $spreadsheet->getActiveSheet()->getColumnDimension('F')->setWidth(12);
+        $spreadsheet->getActiveSheet()->getColumnDimension('G')->setWidth(40);
 
-        $spreadsheet->getActiveSheet()->getColumnDimension('O')->setWidth(18);
-        $spreadsheet->getActiveSheet()->getColumnDimension('P')->setWidth(14);
+        $spreadsheet->getActiveSheet()->getColumnDimension('H')->setWidth(40);
+        $spreadsheet->getActiveSheet()->getColumnDimension('I')->setWidth(20);
 
-        $spreadsheet->getActiveSheet()->getColumnDimension('Q')->setWidth(14);
-        $spreadsheet->getActiveSheet()->getColumnDimension('R')->setWidth(14);
-        $spreadsheet->getActiveSheet()->getColumnDimension('S')->setWidth(16);
-        $spreadsheet->getActiveSheet()->getColumnDimension('T')->setWidth(16);
+        $spreadsheet->getActiveSheet()->getColumnDimension('J')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('K')->setWidth(14);
+        $spreadsheet->getActiveSheet()->getColumnDimension('L')->setWidth(16);
+        $spreadsheet->getActiveSheet()->getColumnDimension('M')->setWidth(16);
+        $spreadsheet->getActiveSheet()->getColumnDimension('P')->setWidth(20);
 
-        //自动换行
-        // $spreadsheet->getActiveSheet()->getAlignment()->setWrapText(true);
-        // $spreadsheet->getActiveSheet()->getStyle('K1')->getAlignment()->setWrapText(true);
+        
 
         //设置边框
         $border = [
@@ -812,28 +794,19 @@ class Check extends Backend
             ],
         ];
 
-
+        $spreadsheet->getDefaultStyle()->getFont()->setName('微软雅黑')->setSize(12);
 
 
         $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
         $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
 
-        // $spreadsheet->getActiveSheet()->getStyle('A1:Z'.$key)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-        $spreadsheet->getActiveSheet()->getStyle('A1:Z' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-        $spreadsheet->getActiveSheet()->getStyle('A1:Z' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+        $spreadsheet->getActiveSheet()->getStyle('A1:P' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+       
 
-
-        //水平垂直居中   
-        // $objSheet->getDefaultStyle()->getAlignment()->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
-        // $objSheet->getDefaultStyle()->getAlignment()->setVertical(\PHPExcel_Style_Alignment::VERTICAL_CENTER);
-        // //自动换行
-        // $objSheet->getDefaultStyle()->getAlignment()->setWrapText(true);
-
-        // Set active sheet index to the first sheet, so Excel opens this as the first sheet
         $spreadsheet->setActiveSheetIndex(0);
         // return exportExcel($spreadsheet, 'xls', '登陆日志');
         $format = 'xlsx';
-        $savename = '订单打印处方' . date("YmdHis", time());;
+        $savename = '质检单数据' . date("YmdHis", time());;
         // dump($spreadsheet);
 
         // if (!$spreadsheet) return false;
