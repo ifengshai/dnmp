@@ -788,7 +788,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
 
             }
 
-
         },
         account_purchase_order: function () {
             // 初始化表格参数配置

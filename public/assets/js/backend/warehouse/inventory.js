@@ -558,7 +558,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'editable', 'bootstra
                         { field: 'available_stock', title: __('可用库存'), operate: false },
                         { field: 'distribution_occupy_stock', title: __('配货占用库存'), operate: false },
                         {
-                            field: 'inventory_qty', title: __('盘点数量'), operate: false, editable: true
+                            field: 'inventory_qty', title: __('盘点数量'), operate: false, editable: {
+                                mode:'inline',
+                                emptytext: "__", 
+                            }
                         },
                         { field: 'error_qty', title: __('误差数量'), operate: false },
                         // {

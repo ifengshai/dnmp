@@ -314,9 +314,12 @@ class Inventory extends Backend
                                 $list[$k]['inventory_id'] = $this->model->id;
                                 $list[$k]['sku'] = $v->sku;
                                 $list[$k]['name'] = $v->name;
-                                $list[$k]['real_time_qty'] = ($v->stock*1 - $v->distribution_occupy_stock*1) ?? 0;
+                                $real_time_qty = ($v->stock*1 - $v->distribution_occupy_stock*1);
+                                $list[$k]['real_time_qty'] = $real_time_qty ?? 0;
                                 $list[$k]['distribution_occupy_stock'] = $v->distribution_occupy_stock;
                                 $list[$k]['available_stock'] = $v->available_stock;
+                                $list[$k]['error_qty'] = (0-$real_time_qty);
+
                             }
                             //添加明细表数据
                             $result = $this->item->allowField(true)->saveAll($list);
@@ -434,9 +437,11 @@ class Inventory extends Backend
                             $list[$k]['inventory_id'] = $ids;
                             $list[$k]['sku'] = $v->sku;
                             $list[$k]['name'] = $v->name;
-                            $list[$k]['real_time_qty'] = $v->stock ?? 0;
+                            $real_time_qty = ($v->stock*1 - $v->distribution_occupy_stock*1);
+                            $list[$k]['real_time_qty'] = $real_time_qty ?? 0;
                             $list[$k]['distribution_occupy_stock'] = $v->distribution_occupy_stock;
                             $list[$k]['available_stock'] = $v->available_stock;
+                            $list[$k]['error_qty'] = (0-$real_time_qty);
                         }
                     }
                     if (!$list) {
