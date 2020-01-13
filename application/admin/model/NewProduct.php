@@ -104,7 +104,7 @@ class NewProduct extends Model
         $item = new \app\admin\model\itemmanage\Item;
         $map['m.is_del'] = 1;
         $map['m.sku'] = $sku;
-        $result = $item->alias('m')->where($map)->join('item_attribute a', 'm.id=a.item_id')->find();
+        $result = $item->alias('m')->where($map)->join('item_attribute a', 'm.id=a.item_id', 'left')->find();
         if (!$result) {
             return false;
         }
