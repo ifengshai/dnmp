@@ -766,6 +766,18 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                 });
 
 
+                //结算方式
+                $(document).on('click','.settlement_method',function(){
+                    var val = $(this).val();
+                    if (val == 3) {
+                        $('.deposit_amount').removeClass('hidden');
+                        $('.final_amount').removeClass('hidden');
+                    } else {
+                        $('.deposit_amount').addClass('hidden');
+                        $('.final_amount').addClass('hidden');
+                    }
+                })
+
 
 
             },
