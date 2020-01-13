@@ -32,7 +32,7 @@ class PurchaseOrder extends Backend
      * @var \app\admin\model\purchase\PurchaseOrder
      */
     protected $model = null;
-    
+
     /**
      * 无需登录的方法,同时也就不需要鉴权了
      * @var array
@@ -58,7 +58,7 @@ class PurchaseOrder extends Backend
     public function index()
     {
         $this->relationSearch = true;
-        
+
         //设置过滤方法
         $this->request->filter(['strip_tags']);
         if ($this->request->isAjax()) {
@@ -75,8 +75,8 @@ class PurchaseOrder extends Backend
                 $map['purchase_order.id'] = ['in', $ids];
                 unset($filter['sku']);
                 $this->request->get(['filter' => json_encode($filter)]);
-            } 
-            
+            }
+
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
                 ->with(['supplier'])
@@ -751,7 +751,7 @@ class PurchaseOrder extends Backend
         if (!$row) {
             $this->error(__('No Results were found'));
         }
-       
+
         $data['check_status'] = 2;
         $data['stock_status'] = 2;
         $data['return_status'] = 2;
@@ -759,7 +759,7 @@ class PurchaseOrder extends Backend
         $res = $this->model->allowField(true)->save($data, ['id' => $id]);
         if ($res !== false) {
             $check = new \app\admin\model\warehouse\Check;
-            $check->allowField(true)->save(['is_return'=>1],['purchase_id' => $id]);
+            $check->allowField(true)->save(['is_return' => 1], ['purchase_id' => $id]);
             $this->success('操作成功！！');
         } else {
             $this->error('操作失败！！');
@@ -776,8 +776,12 @@ class PurchaseOrder extends Backend
         $data = collection($data)->toArray();
         foreach ($data as $k => $v) {
             //匹配SKU
-            $params['sku'] = (new SupplierSku())->getSkuData($v['skuid']);
-            $this->purchase_order_item->allowField(true)->isUpdate(true, ['id' => $v['id']])->data($params)->save();
+            if ($v['skuid']) {
+                $params['sku'] = (new SupplierSku())->getSkuData($v['skuid']);
+            }
+            if ($params['sku']) {
+                $this->purchase_order_item->allowField(true)->isUpdate(true, ['id' => $v['id']])->data($params)->save();
+            }
         }
         $this->success();
     }
@@ -954,8 +958,10 @@ class PurchaseOrder extends Backend
                         $params[$key]['skuid'] = $val->skuID;
 
                         //匹配SKU 供应商SKU
-                        $params[$key]['sku'] = (new SupplierSku())->getSkuData($val->skuID);
-                        $params[$key]['supplier_sku'] = (new SupplierSku())->getSupplierData($val->skuID);
+                        if ($val->skuID) {
+                            $params[$key]['sku'] = (new SupplierSku())->getSkuData($val->skuID);
+                            $params[$key]['supplier_sku'] = (new SupplierSku())->getSupplierData($val->skuID);
+                        }
                     }
                     $this->purchase_order_item->allowField(true)->saveAll($params);
                 }
@@ -1105,8 +1111,7 @@ class PurchaseOrder extends Backend
                 $v['stock'] = $product[$v['true_sku']];
                 $v['purchase_qty'] = $onway_stock > 0 ? $onway_stock : 0;
                 //$res[$k]['out_of_stock_num'] = $sku_list[$v['true_sku']]['num'];
-                $v['replenish_days'] = $v['days_sales_num'] > 0 ? floor($v['stock']/$v['days_sales_num']) : 0;
-
+                $v['replenish_days'] = $v['days_sales_num'] > 0 ? floor($v['stock'] / $v['days_sales_num']) : 0;
             }
 
             unset($v);

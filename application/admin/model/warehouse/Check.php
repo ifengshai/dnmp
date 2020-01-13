@@ -29,7 +29,8 @@ class Check extends Model
     //关联模型
     public function purchaseOrder()
     {
-        return $this->belongsTo('app\admin\model\purchase\PurchaseOrder', 'purchase_id')->setEagerlyType(0)->joinType('left');
+        return $this->belongsTo('app\admin\model\purchase\PurchaseOrder', 'purchase_id')
+        ->setEagerlyType(0)->joinType('left');
     }
 
     //关联模型

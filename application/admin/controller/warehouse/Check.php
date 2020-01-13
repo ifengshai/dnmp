@@ -679,21 +679,46 @@ class Check extends Backend
         return $this->fetch();
     }
 
-    /**
-     * 批量导出
-     */
-    public function import_xls()
-    {
 
-    }
 
     //批量导出xls
     public function batch_export_xls()
     {
-        
+        set_time_limit(0);
+        ini_set('memory_limit', '256M');
+        $ids = input('ids');
+        //自定义sku搜索
+        $filter = json_decode($this->request->get('filter'), true);
+        //是否存在需要退回产品
+        if ($filter['is_process'] || $filter['is_process'] == '0') {
+
+            $smap['unqualified_num'] = $filter['is_process'] == 1 ? ['>', 0] : ['=', 0];
+
+            $ids = $this->check_item->where($smap)->column('check_id');
+            $map['Check.id'] = ['in', $ids];
+
+            $map['Check.is_return'] = $filter['is_process'] == 1 ? 0 : 1;
+
+            unset($filter['is_process']);
+            $this->request->get(['filter' => json_encode($filter)]);
+        }
+        list($where) = $this->buildparams();
+        $list = $this->model
+            ->with(['purchaseorder' => function($query){
+                $query->withField('purchase_number', 'purchase_name', 'purchase_remark', 'create_person', 'createtime');
+            }, 'supplier' => ['supplier_name'], 'orderreturn'])
+            ->where($where)
+            ->where($map)
+            ->order('id desc')
+            ->select();
+        $list = collection($list)->toArray();
+
+        dump($list);
+        die;
+
         //从数据库查询需要的数据
         $spreadsheet = new Spreadsheet();
-       
+
         //常规方式：利用setCellValue()填充数据
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("A1", "日期")
             ->setCellValue("B1", "订单号")
@@ -754,8 +779,6 @@ class Check extends Backend
 
             $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 2 + 2), $value['od_axis']);
             $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 2 + 3), $value['os_axis']);
-
-           
         }
 
         //设置宽度
@@ -789,7 +812,7 @@ class Check extends Backend
             ],
         ];
 
-        
+
 
 
         $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
@@ -798,8 +821,8 @@ class Check extends Backend
         // $spreadsheet->getActiveSheet()->getStyle('A1:Z'.$key)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
         $spreadsheet->getActiveSheet()->getStyle('A1:Z' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
         $spreadsheet->getActiveSheet()->getStyle('A1:Z' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
-        
-        
+
+
         //水平垂直居中   
         // $objSheet->getDefaultStyle()->getAlignment()->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
         // $objSheet->getDefaultStyle()->getAlignment()->setVertical(\PHPExcel_Style_Alignment::VERTICAL_CENTER);
@@ -829,8 +852,7 @@ class Check extends Backend
         //禁止缓存
         header('Cache-Control: max-age=0');
         $writer = new $class($spreadsheet);
-       
+
         $writer->save('php://output');
-      
     }
 }
