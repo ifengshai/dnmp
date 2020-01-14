@@ -638,6 +638,7 @@ class Check extends Backend
                     $info[$i]['return_num'] = $val['unqualified_num'];
                     $info[$i]['return_id'] = $return_model->id;
                     $info[$i]['check_item_id'] = $val['id'];
+                    $info[$i]['return_money'] = round($val['unqualified_num'] * $val['purchase_price'], 2);
                     $i++;
 
                     $return_money  += round($val['unqualified_num'] * $val['purchase_price'], 2);
