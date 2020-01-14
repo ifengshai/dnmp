@@ -572,22 +572,23 @@ class PurchaseReturn extends Backend
         //常规方式：利用setCellValue()填充数据
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("A1", "退销单号")
             ->setCellValue("B1", "采购单号")
-            ->setCellValue("C1", "供应商");   //利用setCellValues()填充数据
-        $spreadsheet->setActiveSheetIndex(0)->setCellValue("D1", "供应商SKU")
-            ->setCellValue("E1", "采购数量")
-            ->setCellValue("F1", "到货数量")
-            ->setCellValue("G1", "合格数量");
-        $spreadsheet->setActiveSheetIndex(0)->setCellValue("H1", "退销数量")
-            ->setCellValue("I1", "退销类型");
+            ->setCellValue("C1", "供应商")  //利用setCellValues()填充数据
+            ->setCellValue("D1", "SKU");   
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("E1", "供应商SKU")
+            ->setCellValue("F1", "采购数量")
+            ->setCellValue("G1", "到货数量")
+            ->setCellValue("H1", "合格数量");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("I1", "退销数量")
+            ->setCellValue("J1", "退销类型");
         $spreadsheet->setActiveSheetIndex(0)
-            ->setCellValue("J1", "退销金额")
-            ->setCellValue("K1", "退销备注")
-            ->setCellValue("L1", "质检备注")
-            ->setCellValue("M1", "联系人");
-        $spreadsheet->setActiveSheetIndex(0)->setCellValue("N1", "联系电话")
-            ->setCellValue("O1", "收货地址")
-            ->setCellValue("P1", "创建时间")
-            ->setCellValue("Q1", "创建人");
+            ->setCellValue("K1", "退销金额")
+            ->setCellValue("L1", "退销备注")
+            ->setCellValue("M1", "质检备注")
+            ->setCellValue("N1", "联系人");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("O1", "联系电话")
+            ->setCellValue("P1", "收货地址")
+            ->setCellValue("Q1", "创建时间")
+            ->setCellValue("R1", "创建人");
 
         $spreadsheet->setActiveSheetIndex(0)->setTitle('退销单数据');
 
@@ -596,11 +597,12 @@ class PurchaseReturn extends Backend
             $spreadsheet->getActiveSheet()->setCellValue("A" . ($key * 1 + 2), $value['return_number']);
             $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $value['purchaseorder']['purchase_number']);
             $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 1 + 2), $value['supplier']['supplier_name']);
-            $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 1 + 2), $value['supplier_sku']);
-            $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), $value['purchase_num']);
-            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 1 + 2), $value['arrivals_num']);
-            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 1 + 2), $value['quantity_num']);
-            $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 1 + 2), $value['return_num']);
+            $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 1 + 2), $value['sku']);
+            $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), $value['supplier_sku']);
+            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 1 + 2), $value['purchase_num']);
+            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 1 + 2), $value['arrivals_num']);
+            $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 1 + 2), $value['quantity_num']);
+            $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 1 + 2), $value['return_num']);
 
             if ($value['return_type'] == 1) {
                 $type = '仅退款';
@@ -609,15 +611,15 @@ class PurchaseReturn extends Backend
             } else {
                 $type = '调换货';
             }
-            $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 1 + 2), $type);
-            $spreadsheet->getActiveSheet()->setCellValue("J" . ($key * 1 + 2), $value['return_money']);
-            $spreadsheet->getActiveSheet()->setCellValue("K" . ($key * 1 + 2), $value['remark']);
-            $spreadsheet->getActiveSheet()->setCellValue("L" . ($key * 1 + 2), $value['check_remark']);
-            $spreadsheet->getActiveSheet()->setCellValue("M" . ($key * 1 + 2), $value['supplier_linkname']);
-            $spreadsheet->getActiveSheet()->setCellValue("N" . ($key * 1 + 2), $value['supplier_linkphone']);
-            $spreadsheet->getActiveSheet()->setCellValue("O" . ($key * 1 + 2), $value['supplier_address']);
-            $spreadsheet->getActiveSheet()->setCellValue("P" . ($key * 1 + 2), $value['createtime']);
-            $spreadsheet->getActiveSheet()->setCellValue("Q" . ($key * 1 + 2), $value['create_person']);
+            $spreadsheet->getActiveSheet()->setCellValue("J" . ($key * 1 + 2), $type);
+            $spreadsheet->getActiveSheet()->setCellValue("K" . ($key * 1 + 2), $value['return_money']);
+            $spreadsheet->getActiveSheet()->setCellValue("L" . ($key * 1 + 2), $value['remark']);
+            $spreadsheet->getActiveSheet()->setCellValue("M" . ($key * 1 + 2), $value['check_remark']);
+            $spreadsheet->getActiveSheet()->setCellValue("N" . ($key * 1 + 2), $value['supplier_linkname']);
+            $spreadsheet->getActiveSheet()->setCellValue("O" . ($key * 1 + 2), $value['supplier_linkphone']);
+            $spreadsheet->getActiveSheet()->setCellValue("P" . ($key * 1 + 2), $value['supplier_address']);
+            $spreadsheet->getActiveSheet()->setCellValue("Q" . ($key * 1 + 2), $value['createtime']);
+            $spreadsheet->getActiveSheet()->setCellValue("R" . ($key * 1 + 2), $value['create_person']);
 
         }
 
@@ -625,7 +627,7 @@ class PurchaseReturn extends Backend
         $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(30);
         $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(30);
         $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(30);
-        $spreadsheet->getActiveSheet()->getColumnDimension('D')->setWidth(12);
+        $spreadsheet->getActiveSheet()->getColumnDimension('D')->setWidth(20);
         $spreadsheet->getActiveSheet()->getColumnDimension('E')->setWidth(12); 
         $spreadsheet->getActiveSheet()->getColumnDimension('F')->setWidth(12);
         $spreadsheet->getActiveSheet()->getColumnDimension('G')->setWidth(12);
@@ -634,13 +636,14 @@ class PurchaseReturn extends Backend
         $spreadsheet->getActiveSheet()->getColumnDimension('I')->setWidth(20);
 
         $spreadsheet->getActiveSheet()->getColumnDimension('J')->setWidth(20);
-        $spreadsheet->getActiveSheet()->getColumnDimension('K')->setWidth(30);
+        $spreadsheet->getActiveSheet()->getColumnDimension('K')->setWidth(20);
         $spreadsheet->getActiveSheet()->getColumnDimension('L')->setWidth(30);
         $spreadsheet->getActiveSheet()->getColumnDimension('M')->setWidth(20);
         $spreadsheet->getActiveSheet()->getColumnDimension('N')->setWidth(30);
         $spreadsheet->getActiveSheet()->getColumnDimension('O')->setWidth(30);
-        $spreadsheet->getActiveSheet()->getColumnDimension('P')->setWidth(25);
+        $spreadsheet->getActiveSheet()->getColumnDimension('P')->setWidth(30);
         $spreadsheet->getActiveSheet()->getColumnDimension('Q')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('R')->setWidth(20);
 
         
 
@@ -660,7 +663,7 @@ class PurchaseReturn extends Backend
         $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
         $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
 
-        $spreadsheet->getActiveSheet()->getStyle('A1:Q' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $spreadsheet->getActiveSheet()->getStyle('A1:R' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
        
 
         $spreadsheet->setActiveSheetIndex(0);
