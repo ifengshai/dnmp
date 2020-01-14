@@ -241,14 +241,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-se
                 }
                 )
             })
-
+            var type = $('.type').val();
             var purchase_id = $('.purchase_id').val();
-            if (purchase_id) {
+            if (purchase_id && type == 1) {
                 $('.purchase_id').change();
             }
 
             var order_return_id = $('.order_return_id').val();
-            if (order_return_id) {
+            if (order_return_id && type == 2) {
                 $('.order_return_id').change();
             }
 
