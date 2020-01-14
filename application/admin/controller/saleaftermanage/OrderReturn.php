@@ -910,6 +910,8 @@ class OrderReturn extends Backend
                 $arr[$k]['create_person']    = $v['created_operator'];
                 $arr[$k]['create_time']    = $v['created_at'];
                 $arr[$k]['order_platform'] = 1;
+                $arr[$k]['final_loss_amount'] = isset($v['final_loss_amount']) ? $v['final_loss_amount'] : 0;
+                $arr[$k]['final_loss_remark'] = isset($v['final_loss_remark']) ? $v['final_loss_remark'] : '';
             if(0 == $v['is_visable']){
                 $arr[$k]['is_del'] = 2;
             }else{
@@ -970,6 +972,8 @@ class OrderReturn extends Backend
                 $arr[$k]['create_person']    = $v['created_operator'];
                 $arr[$k]['create_time']    = $v['created_at'];
                 $arr[$k]['order_platform'] = 2;
+                $arr[$k]['final_loss_amount'] = isset($v['final_loss_amount']) ? $v['final_loss_amount'] : 0;
+                $arr[$k]['final_loss_remark'] = isset($v['final_loss_remark']) ? $v['final_loss_remark'] : '';
             if(0 == $v['is_visable']){
                 $arr[$k]['is_del'] = 2;
             }else{
@@ -1030,6 +1034,8 @@ class OrderReturn extends Backend
                 $arr[$k]['create_person']    = $v['created_operator'];
                 $arr[$k]['create_time']    = $v['created_at'];
                 $arr[$k]['order_platform'] = 3;
+                $arr[$k]['final_loss_amount'] = isset($v['final_loss_amount']) ? $v['final_loss_amount'] : 0;
+                $arr[$k]['final_loss_remark'] = isset($v['final_loss_remark']) ? $v['final_loss_remark'] : '';
             if(0 == $v['is_visable']){
                 $arr[$k]['is_del'] = 2;
             }else{
