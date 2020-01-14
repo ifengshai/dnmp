@@ -217,6 +217,20 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui','custom-css','b
                     }
                 );
             });
+            //批量导出xls 
+            $('.btn-batch-export-xls').click(function () {
+                var ids = Table.api.selectedids(table);
+                if (ids.length > 0) {
+                    window.open(Config.moduleurl + '/saleaftermanage/sale_after_task/batch_export_xls?ids=' + ids, '_blank');
+                } else {
+                    var options = table.bootstrapTable('getOptions');
+                    var search = options.queryParams({});
+                    var filter = search.filter;
+                    var op = search.op;
+                    window.open(Config.moduleurl + '/saleaftermanage/sale_after_task/batch_export_xls?filter=' + filter + '&op=' + op, '_blank');
+                }
+                
+            });
 
         },
         add: function () {
