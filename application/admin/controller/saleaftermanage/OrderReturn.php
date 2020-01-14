@@ -32,11 +32,21 @@ class OrderReturn extends Backend
      */
     protected $model = null;
     protected $zeelool = null;
+    protected $modelItem = null;
     protected $relationSearch = true;
+    protected $noNeedLogin = [
+        'zeelool_order_return',
+        'voogueme_order_return',
+        'nihao_order_return',
+        'zeelool_order_return_item',
+        'voogueme_order_return_item',
+        'nihao_order_return_item'
+    ];
     public function _initialize()
     {
         parent::_initialize();
         $this->model = new \app\admin\model\saleaftermanage\OrderReturn;
+        $this->modelItem = new \app\admin\model\saleaftermanage\OrderReturnItem;
     }
 
     /**
@@ -876,5 +886,187 @@ class OrderReturn extends Backend
             $this->error('参数错误,请重新尝试');
         }
 
+    }
+    /***
+     * 导入退件数据 zeelool
+     */
+    public function zeelool_order_return()
+    {
+        $result = Db::table('zeelool_order_return')->field('id,status,increment_id,customer_email,customer_name,return_shipping_number,return_remark
+        ,check_remark,refund_amount,is_visable,created_operator,created_at')->select();
+        if(!$result){
+            return false;
+        }
+        $arr = [];
+        foreach($result as $k =>$v){
+                $arr[$k]['order_id']        = $v['id'];
+                $arr[$k]['increment_id']    = $v['increment_id'];
+                $arr[$k]['customer_email']  = $v['customer_email'];
+                $arr[$k]['customer_name']   = $v['customer_name'];
+                $arr[$k]['return_shipping_number']    = $v['return_shipping_number'];
+                $arr[$k]['return_remark']    = isset($v['return_remark']) ? $v['return_remark'] : '';
+                $arr[$k]['return_money_remark']    = isset($v['check_remark']) ? $v['check_remark'] : '';
+                $arr[$k]['return_money']    = isset($v['refund_amount']) ? $v['refund_amount'] : 0;
+                $arr[$k]['create_person']    = $v['created_operator'];
+                $arr[$k]['create_time']    = $v['created_at'];
+                $arr[$k]['order_platform'] = 1;
+            if(0 == $v['is_visable']){
+                $arr[$k]['is_del'] = 2;
+            }else{
+                $arr[$k]['is_del'] = 1;
+            }
+            if('new' == $v['status']){
+                $arr[$k]['order_status'] = 1;
+            }elseif('check' == $v['status']){
+                $arr[$k]['order_status'] = 3;
+                $arr[$k]['quality_status'] = 1;
+            }elseif('stock' == $v['status']){
+                $arr[$k]['order_status'] = 3;
+                $arr[$k]['quality_status'] = 1;
+                $arr[$k]['in_stock_status'] = 1;
+            }
+        }
+        $this->model->allowField(true)->saveAll($arr);
+    }
+    //导入退件商品数据 zeelool
+    public function zeelool_order_return_item()
+    {
+        $result = Db::table('zeelool_order_return_item')->alias('m')->join('fa_order_return o','o.order_id=m.order_return_id')->where(['o.order_platform'=>1])->field('m.*,o.id as oid')->select();
+        if(!$result){
+            return false;
+        }
+        $arr = [];
+        foreach($result as $k =>$v){
+            //echo $v['return_sku'].'<br/>';
+            $arr[$k]['order_return_id'] = $v['oid'];
+            $arr[$k]['return_sku']      = isset($v['return_sku']) ? $v['return_sku'] : '';
+            $arr[$k]['return_sku_qty']  = isset($v['return_sku_qty'])  ? $v['return_sku_qty'] : 0;
+            $arr[$k]['arrived_sku_qty'] = isset($v['arrived_sku_qty']) ? $v['arrived_sku_qty'] : 0;
+            $arr[$k]['check_sku_qty']   = isset($v['check_sku_qty']) ? $v['check_sku_qty'] : 0;
+            $arr[$k]['damage_sku_qty']  = isset($v['damage_sku_qty']) ? $v['damage_sku_qty'] : 0;
+            $arr[$k]['create_time']     = $v['created_at'];
+            $arr[$k]['is_visable']      = $v['is_visable'];
+        }
+        $this->modelItem->allowField(true)->saveAll($arr);
+    }
+    //导入退件商品数据 voogueme
+    public function voogueme_order_return()
+    {
+        $result = Db::table('voogueme_order_return')->field('id,status,increment_id,customer_email,customer_name,return_shipping_number,return_remark
+        ,check_remark,refund_amount,is_visable,created_operator,created_at')->select();
+        if(!$result){
+            return false;
+        }
+        $arr = [];
+        foreach($result as $k =>$v){
+                $arr[$k]['order_id']        = $v['id'];
+                $arr[$k]['increment_id']    = $v['increment_id'];
+                $arr[$k]['customer_email']  = $v['customer_email'];
+                $arr[$k]['customer_name']   = $v['customer_name'];
+                $arr[$k]['return_shipping_number']    = $v['return_shipping_number'];
+                $arr[$k]['return_remark']    = isset($v['return_remark']) ? $v['return_remark'] : '';
+                $arr[$k]['return_money_remark']    = isset($v['check_remark']) ? $v['check_remark'] : '';
+                $arr[$k]['return_money']    = isset($v['refund_amount']) ? $v['refund_amount'] : 0;
+                $arr[$k]['create_person']    = $v['created_operator'];
+                $arr[$k]['create_time']    = $v['created_at'];
+                $arr[$k]['order_platform'] = 2;
+            if(0 == $v['is_visable']){
+                $arr[$k]['is_del'] = 2;
+            }else{
+                $arr[$k]['is_del'] = 1;
+            }
+            if('new' == $v['status']){
+                $arr[$k]['order_status'] = 1;
+            }elseif('check' == $v['status']){
+                $arr[$k]['order_status'] = 3;
+                $arr[$k]['quality_status'] = 1;
+            }elseif('stock' == $v['status']){
+                $arr[$k]['order_status'] = 3;
+                $arr[$k]['quality_status'] = 1;
+                $arr[$k]['in_stock_status'] = 1;
+            }
+        }
+        $this->model->allowField(true)->saveAll($arr);       
+    }
+    //导入退件商品数据 voogueme
+    public function voogueme_order_return_item()
+    {
+        $result = Db::table('voogueme_order_return_item')->alias('m')->join('fa_order_return o','o.order_id=m.order_return_id')->where(['o.order_platform'=>2])->field('m.*,o.id as oid')->select();
+        if(!$result){
+            return false;
+        }
+        $arr = [];
+        foreach($result as $k =>$v){
+            //echo $v['return_sku'].'<br/>';
+            $arr[$k]['order_return_id'] = $v['oid'];
+            $arr[$k]['return_sku']      = isset($v['return_sku']) ? $v['return_sku'] : '';
+            $arr[$k]['return_sku_qty']  = isset($v['return_sku_qty'])  ? $v['return_sku_qty'] : 0;
+            $arr[$k]['arrived_sku_qty'] = isset($v['arrived_sku_qty']) ? $v['arrived_sku_qty'] : 0;
+            $arr[$k]['check_sku_qty']   = isset($v['check_sku_qty']) ? $v['check_sku_qty'] : 0;
+            $arr[$k]['damage_sku_qty']  = isset($v['damage_sku_qty']) ? $v['damage_sku_qty'] : 0;
+            $arr[$k]['create_time']     = $v['created_at'];
+            $arr[$k]['is_visable']      = $v['is_visable'];
+        }
+        $this->modelItem->allowField(true)->saveAll($arr);
+    }
+    //导入退件商品数据 nihao
+    public function nihao_order_return()
+    {
+        $result = Db::table('nihao_order_return')->field('id,status,increment_id,customer_email,customer_name,return_shipping_number,return_remark
+        ,check_remark,refund_amount,is_visable,created_operator,created_at')->select();
+        if(!$result){
+            return false;
+        }
+        $arr = [];
+        foreach($result as $k =>$v){
+                $arr[$k]['order_id']        = $v['id'];
+                $arr[$k]['increment_id']    = $v['increment_id'];
+                $arr[$k]['customer_email']  = $v['customer_email'];
+                $arr[$k]['customer_name']   = $v['customer_name'];
+                $arr[$k]['return_shipping_number']    = $v['return_shipping_number'];
+                $arr[$k]['return_remark']    = isset($v['return_remark']) ? $v['return_remark'] : '';
+                $arr[$k]['return_money_remark']    = isset($v['check_remark']) ? $v['check_remark'] : '';
+                $arr[$k]['return_money']    = isset($v['refund_amount']) ? $v['refund_amount'] : 0;
+                $arr[$k]['create_person']    = $v['created_operator'];
+                $arr[$k]['create_time']    = $v['created_at'];
+                $arr[$k]['order_platform'] = 3;
+            if(0 == $v['is_visable']){
+                $arr[$k]['is_del'] = 2;
+            }else{
+                $arr[$k]['is_del'] = 1;
+            }
+            if('new' == $v['status']){
+                $arr[$k]['order_status'] = 1;
+            }elseif('check' == $v['status']){
+                $arr[$k]['order_status'] = 3;
+                $arr[$k]['quality_status'] = 1;
+            }elseif('stock' == $v['status']){
+                $arr[$k]['order_status'] = 3;
+                $arr[$k]['quality_status'] = 1;
+                $arr[$k]['in_stock_status'] = 1;
+            }
+        }
+        $this->model->allowField(true)->saveAll($arr);       
+    }
+    //导入退件商品数据 nihao
+    public function nihao_order_return_item()
+    {
+        $result = Db::table('nihao_order_return_item')->alias('m')->join('fa_order_return o','o.order_id=m.order_return_id')->where(['o.order_platform'=>3])->field('m.*,o.id as oid')->select();
+        if(!$result){
+            return false;
+        }
+        $arr = [];
+        foreach($result as $k =>$v){
+            //echo $v['return_sku'].'<br/>';
+            $arr[$k]['order_return_id'] = $v['oid'];
+            $arr[$k]['return_sku']      = isset($v['return_sku']) ? $v['return_sku'] : '';
+            $arr[$k]['return_sku_qty']  = isset($v['return_sku_qty'])  ? $v['return_sku_qty'] : 0;
+            $arr[$k]['arrived_sku_qty'] = isset($v['arrived_sku_qty']) ? $v['arrived_sku_qty'] : 0;
+            $arr[$k]['check_sku_qty']   = isset($v['check_sku_qty']) ? $v['check_sku_qty'] : 0;
+            $arr[$k]['damage_sku_qty']  = isset($v['damage_sku_qty']) ? $v['damage_sku_qty'] : 0;
+            $arr[$k]['create_time']     = $v['created_at'];
+            $arr[$k]['is_visable']      = $v['is_visable'];
+        }
+        $this->modelItem->allowField(true)->saveAll($arr);
     }
 }
