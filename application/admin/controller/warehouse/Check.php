@@ -704,7 +704,7 @@ class Check extends Backend
         }
 
         if ($ids) {
-            $map['Check.id'] = ['in', $ids];
+            $map['check.id'] = ['in', $ids];
         }
 
         list($where) = $this->buildparams();
