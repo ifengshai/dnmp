@@ -299,10 +299,7 @@ class Ajax extends Backend
         //查询sku 商品名称
         $item = new \app\admin\model\itemmanage\Item;
         $data = $item->getGoodsInfo($sku);
-        if (!$data) {
-            $this->error('此SKU不存在！！');
-        }
-
+        
         //查询供应商SKU
         $supplier = new \app\admin\model\purchase\SupplierSku;
         $sullier_sku = $supplier->getSupplierSkuData($sku, $supplier_id);
@@ -310,7 +307,7 @@ class Ajax extends Backend
             $this->error('此SKU未绑定供应商SKU！！');
         }
 
-        $data->supplier_sku = $sullier_sku;
+        $data['supplier_sku'] = $sullier_sku;
 
         $this->success('', '', $data);
     }
