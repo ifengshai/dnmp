@@ -1,4 +1,4 @@
-define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-table-jump-to'], function ($, undefined, Backend, Table, Form) {
+define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-table-jump-to', 'toastr'], function ($, undefined, Backend, Table, Form, undefined, undefined, Toastr) {
 
     var Controller = {
         index: function () {
@@ -44,6 +44,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                         { field: 'product_total', title: __('Product_total'), operate: false },
                         { field: 'purchase_freight', title: __('Purchase_freight'), operate: false },
                         { field: 'purchase_total', title: __('Purchase_total'), operate: false },
+                        { field: 'purchase_remark', title: __('采购备注'), formatter: Controller.api.formatter.getClear, operate: false },
                         { field: 'logistics_number', title: __('物流单号'), operate: 'like', visible: false },
                         { field: 'sku', title: __('sku'), operate: 'like', visible: false },
                         {
@@ -246,6 +247,32 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
             Table.api.bindevent(table);
 
 
+            $(document).on('click', ".problem_desc_info", function () {
+                var problem_desc = $(this).attr('name');
+                //Layer.alert(problem_desc);
+                Layer.open({
+                    closeBtn: 1,
+                    title: '问题描述',
+                    area: ['900px', '500px'],
+                    content: problem_desc
+                });
+                return false;
+            });
+
+            $(document).on('click', ".btn-remark", function () {
+                var ids = Table.api.selectedids(table);
+                if (ids.length > 1) {
+                    Toastr.error('添加备注只能选择一个采购单');
+                    return false;
+                }
+                var url = 'purchase/purchase_order/remark?ids=' + ids;
+                Fast.api.open(url, __('添加备注'), { area: ['900px', '500px'] });
+               
+                return false;
+            });
+
+
+
             //审核通过
             $(document).on('click', '.btn-open', function () {
                 var ids = Table.api.selectedids(table);
@@ -380,6 +407,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
 
         },
         logistics: function () {
+            Controller.api.bindevent();
+        },
+        remark: function () {
             Controller.api.bindevent();
         },
         logisticsDetail: function () {
@@ -751,7 +781,37 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                 });
 
 
+                //结算方式
+                $(document).on('click', '.settlement_method', function () {
+                    var val = $(this).val();
+                    if (val == 3) {
+                        $('.deposit_amount').removeClass('hidden');
+                        $('.final_amount').removeClass('hidden');
+                    } else {
+                        $('.deposit_amount').addClass('hidden');
+                        $('.final_amount').addClass('hidden');
+                    }
+                })
 
+
+
+            },
+            formatter: {
+
+                getClear: function (value) {
+                    if (value == null || value == undefined) {
+                        return '';
+                    } else {
+                        var tem = value;
+
+                        if (tem.length <= 20) {
+                            return tem;
+                        } else {
+                            return '<span class="problem_desc_info" name = "' + tem + '" style="">' + tem.substr(0, 20) + '...</span>';
+
+                        }
+                    }
+                },
 
             }
 

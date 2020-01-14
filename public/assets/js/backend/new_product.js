@@ -1,4 +1,4 @@
-define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast','bootstrap-table-jump-to'], function ($, undefined, Backend, Table, Form, undefined, Fast) {
+define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'bootstrap-table-jump-to'], function ($, undefined, Backend, Table, Form, undefined, Fast) {
 
     var Controller = {
         index: function () {
@@ -37,15 +37,16 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast','boots
                         },
                         { field: 'id', title: __('Id'), operate: false, visible: false },
                         { field: 'sku', title: __('Sku'), operate: 'like' },
-                        { field: 'name', title: __('Name') , operate: 'like'},
+                        { field: 'name', title: __('Name'), operate: 'like' },
                         { field: 'supplier.supplier_name', title: __('供应商名称'), operate: 'like' },
-                        { field: 'supplier_sku', title: __('供应商SKU') , operate: 'like'},
+                        { field: 'supplier_sku', title: __('供应商SKU'), operate: 'like' },
                         {
                             field: 'item_status', title: __('选品状态'),
                             custom: { 1: 'success', 2: 'blue', 3: 'danger', 4: 'gray' },
                             searchList: { 1: '待选品', 2: '选品通过', 3: '选品拒绝', 4: '已取消' },
                             formatter: Table.api.formatter.status
                         },
+                        { field: 'newproductattribute.frame_remark', title: __('选品备注'), formatter: Controller.api.formatter.getClear, operate: false },
                         { field: 'create_person', title: __('Create_person') },
                         { field: 'create_time', title: __('Create_time'), operate: 'RANGE', addclass: 'datetimerange' },
 
@@ -123,6 +124,18 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast','boots
                 ]
             });
 
+            $(document).on('click', ".problem_desc_info", function () {
+                var problem_desc = $(this).attr('name');
+                //Layer.alert(problem_desc);
+                Layer.open({
+                    closeBtn: 1,
+                    title: '问题描述',
+                    area: ['900px', '500px'],
+                    content: problem_desc
+                });
+                return false;
+            });
+
             // 为表格绑定事件
             Table.api.bindevent(table);
 
@@ -186,6 +199,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast','boots
             //采集1688商品信息
             $(document).on('click', '.btn-caiji', function () {
                 var link = $('#c-link').val();
+                var label = $('#c-link').attr('label');
+
+                var categoryId = $('#choose_category_id').val();
+                if (categoryId == 0) {
+                    return false;
+                }
+
+
                 if (!link) {
                     Layer.alert('请先填写商品链接！！');
                     return false;
@@ -193,21 +214,42 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast','boots
                 Layer.load();
                 Backend.api.ajax({
                     url: 'new_product/ajaxCollectionGoodsDetail',
-                    data: { link: link }
+                    data: { link: link, categoryId: categoryId }
                 }, function (data, ret) {
+
                     Layer.closeAll();
                     //循环展示商品信息
                     var shtml = ' <tr><th>商品名称</th><th>商品颜色</th><th>供应商SKU</th><th>单价</th><th>操作</th></tr>';
                     $('.caigou table tbody').html('');
-                    for (var i in data) {
-                        shtml += '<tr><td><input id="c-name" class="form-control c-name" name="row[name][]" value="' + data[i].title + '" type="text"></td>'
-                        shtml += '<td><input id="c-color" class="form-control" name="row[color][]" value="' + data[i].color + '" type="text"></td>'
-                        shtml += '<td><input id="c-supplier_sku" class="form-control" name="row[supplier_sku][]" value="' + data[i].cargoNumber + '" type="text"></td>'
-                        shtml += '<td><input id="c-price" class="form-control" name="row[price][]" value="' + data[i].price + '" type="text"></td>'
-                        shtml += '<td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i> 删除</a></td>'
-                        shtml += '<input  class="form-control" name="row[skuid][]" value="' + data[i].skuId + '" type="hidden">'
-                        shtml += '</tr>'
+
+                    if (label == 1) {
+                        for (var i in data.list) {
+                            shtml += '<tr><td><input id="c-name" class="form-control c-name" name="row[name][]" value="' + data[i].title + '" type="text"></td>'
+                            shtml += '<td><input id="c-color" class="form-control" name="row[color][]" value="' + data[i].color + '" type="text"></td>'
+
+                            shtml += '<td><input id="c-supplier_sku" class="form-control" name="row[supplier_sku][]" value="' + data[i].cargoNumber + '" type="text"></td>'
+                            shtml += '<td><input id="c-price" class="form-control" name="row[price][]" value="' + data[i].price + '" type="text"></td>'
+                            shtml += '<td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i> 删除</a></td>'
+                            shtml += '<input  class="form-control" name="row[skuid][]" value="' + data[i].skuId + '" type="hidden">'
+                            shtml += '</tr>'
+                        }
+                    } else {
+                        for (var i in data.list) {
+                            shtml += '<tr><td><input id="c-name" class="form-control c-name" name="row[name][]" value="' + data.list[i].title + '" type="text"></td>'
+                            shtml += '<td><div class="col-xs-12 col-sm-12">';
+                            shtml += '<select  id="c-color" data-rule="required" class="form-control " name="row[color][]" >';
+                            for(var z in data.colorResult) {
+                                shtml += '<option value="' + data.colorResult[z] + '">' + data.colorResult[z] + '</option>';
+                            }
+                            shtml += '</select></td>';
+                            shtml += '<td><input id="c-supplier_sku" class="form-control" name="row[supplier_sku][]" value="' + data.list[i].cargoNumber + '" type="text"></td>'
+                            shtml += '<td><input id="c-price" class="form-control" name="row[price][]" value="' + data.list[i].price + '" type="text"></td>'
+                            shtml += '<td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i> 删除</a></td>'
+                            shtml += '<input  class="form-control" name="row[skuid][]" value="' + data.list[i].skuId + '" type="hidden">'
+                            shtml += '</tr>'
+                        }
                     }
+
                     $('.caigou table tbody').append(shtml);
 
                 }, function (data, ret) {
@@ -225,6 +267,32 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast','boots
             Controller.api.bindevent();
         },
         api: {
+
+            formatter: {
+                strip_tags: function (msg) {
+                    var msg = msg.replace(/<\/?[^>]*>/g, ''); //去除HTML Tag
+                    msg = msg.replace(/[|]*\n/, '') //去除行尾空格
+                    msg = msg.replace(/&nbsp;/ig, ''); //去掉nbsp
+                    return msg;
+                },
+                getClear: function (value) {
+
+
+                    if (value == null || value == undefined) {
+                        return '';
+                    } else {
+                        var tem = value;
+
+                        if (tem.length <= 25) {
+                            return tem;
+                        } else {
+                            return '<span class="problem_desc_info" name = "' + tem + '" style="">' + tem.substr(0, 25) + '...</span>';
+
+                        }
+                    }
+                },
+
+            },
             bindevent: function () {
                 Form.api.bindevent($("form[role=form]"));
 
@@ -341,57 +409,64 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast','boots
                     }, function (data, ret) {
                         var resultData = ret.data;
                         if (resultData != false) {
-                            $('.newAddition').remove();
-                            if (resultData.procurement_type) {
-                                $("#c-procurement_type").find("option[value=" + resultData.procurement_type + "]").prop("selected", true);
-                            } else {
-                                $("#c-procurement_type").val("");
-                            }
-                            if (resultData.procurement_origin) {
-                                $("#c-procurement_origin").find("option[value=" + resultData.procurement_origin + "]").prop("selected", true);
-                            } else {
-                                $("#c-procurement_origin").val();
-                            }
-                            $("#c-frame_texture").find("option[value=" + resultData.frame_texture + "]").prop("selected", true);
-                            $("#c-shape").find("option[value=" + resultData.shape + "]").prop("selected", true);
-                            $("#c-frame_type").find("option[value=" + resultData.frame_type + "]").prop("selected", true);
-                            $("#c-frame_shape").find("option[value=" + resultData.frame_shape + "]").prop("selected", true);
-                            $("#c-frame_gender").find("option[value=" + resultData.frame_gender + "]").prop("selected", true);
-                            $("#c-frame_size").find("option[value=" + resultData.frame_size + "]").prop("selected", true);
-                            $("#c-glasses_type").find("option[value=" + resultData.glasses_type + "]").prop("selected", true);
-                            $("#c-frame_is_recipe").find("option[value=" + resultData.frame_is_recipe + "]").prop("selected", true);
-                            $("#c-frame_piece").find("option[value=" + resultData.frame_piece + "]").prop("selected", true); $("#c-frame_temple_is_spring").find("option[value=" + resultData.frame_temple_is_spring + "]").prop("selected", true);
-                            $("#c-frame_is_adjust_nose_pad").find("option[value=" + resultData.frame_is_adjust_nose_pad + "]").prop("selected", true);
-                            $("#c-frame_is_advance").find("option[value=" + resultData.frame_is_advance + "]").prop("selected", true);
-                            $('#c-frame_bridge').val(resultData.frame_bridge);
-                            $('#c-frame_height').val(resultData.frame_height);
-                            $('#c-frame_width').val(resultData.frame_width);
-                            $('#c-frame_length').val(resultData.frame_length);
-                            $('#c-frame_temple_length').val(resultData.frame_temple_length);
-                            $('#c-weight').val(resultData.frame_weight);
-                            $('#c-mirror_width').val(resultData.mirror_width);
-                            $('#c-problem_desc').html(resultData.frame_remark);
-                            $('.note-editable').html(resultData.frame_remark);
-                            $('#item-count').val(resultData.itemCount);
-                            //$(".editor").textarea
-                            if (resultData.origin_sku) {
-                                
-                                var str = '<tr><th>商品名称</th><th>商品颜色</th><th>供应商SKU</th><th>单价</th><th>操作</th></tr>';
-                                console.log(data);
-                                $('#caigou-table tbody').html('');
-                                for (var i in data.itemArr) {
-                                    str += '<tr>'
-                                    str += '<td><input  data-rule="required"  class="form-control c-name" name="row[name][]" disabled value="' + data.itemArr[i].name + '"  type="text"></td>'
-                                    str += '<td><input  data-rule="required"  class="form-control c-color" name="row[color][]" disabled value="' + data.itemArr[i].frame_color + '" type="text"></td>'
-                                    str += '<td><input  data-rule="required"  class="form-control c-supplier_sku" name="row[supplier_sku][]" disabled value="' + data.itemArr[i].supplier_sku + '" type="text"></td>'
-                                    str += '<td><input  data-rule="required"  class="form-control c-price" name="row[price][]" disabled value="' + data.itemArr[i].price + '" type="text"></td>'
-                                    str += '<td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>删除</a></td></tr>'
-                                }
-                                $('#caigou-table tbody').html(str);
-                              
-                            }
-                         
-                        } 
+                            $('.ajax-add').remove();
+                            $('#item-stock').after(resultData);
+                            Form.api.bindevent($("form[role=form]"));
+                            $(".selectpicker").selectpicker('refresh');
+
+                            return false;
+
+                            // $('.newAddition').remove();
+                            // if (resultData.procurement_type) {
+                            //     $("#c-procurement_type").find("option[value=" + resultData.procurement_type + "]").prop("selected", true);
+                            // } else {
+                            //     $("#c-procurement_type").val("");
+                            // }
+                            // if (resultData.procurement_origin) {
+                            //     $("#c-procurement_origin").find("option[value=" + resultData.procurement_origin + "]").prop("selected", true);
+                            // } else {
+                            //     $("#c-procurement_origin").val();
+                            // }
+                            // $("#c-frame_texture").find("option[value=" + resultData.frame_texture + "]").prop("selected", true);
+                            // $("#c-shape").find("option[value=" + resultData.shape + "]").prop("selected", true);
+                            // $("#c-frame_type").find("option[value=" + resultData.frame_type + "]").prop("selected", true);
+                            // $("#c-frame_shape").find("option[value=" + resultData.frame_shape + "]").prop("selected", true);
+                            // $("#c-frame_gender").find("option[value=" + resultData.frame_gender + "]").prop("selected", true);
+                            // $("#c-frame_size").find("option[value=" + resultData.frame_size + "]").prop("selected", true);
+                            // $("#c-glasses_type").find("option[value=" + resultData.glasses_type + "]").prop("selected", true);
+                            // $("#c-frame_is_recipe").find("option[value=" + resultData.frame_is_recipe + "]").prop("selected", true);
+                            // $("#c-frame_piece").find("option[value=" + resultData.frame_piece + "]").prop("selected", true); $("#c-frame_temple_is_spring").find("option[value=" + resultData.frame_temple_is_spring + "]").prop("selected", true);
+                            // $("#c-frame_is_adjust_nose_pad").find("option[value=" + resultData.frame_is_adjust_nose_pad + "]").prop("selected", true);
+                            // $("#c-frame_is_advance").find("option[value=" + resultData.frame_is_advance + "]").prop("selected", true);
+                            // $('#c-frame_bridge').val(resultData.frame_bridge);
+                            // $('#c-frame_height').val(resultData.frame_height);
+                            // $('#c-frame_width').val(resultData.frame_width);
+                            // $('#c-frame_length').val(resultData.frame_length);
+                            // $('#c-frame_temple_length').val(resultData.frame_temple_length);
+                            // $('#c-weight').val(resultData.frame_weight);
+                            // $('#c-mirror_width').val(resultData.mirror_width);
+                            // $('#c-problem_desc').html(resultData.frame_remark);
+                            // $('.note-editable').html(resultData.frame_remark);
+                            // $('#item-count').val(resultData.itemCount);
+                            // //$(".editor").textarea
+                            // if (resultData.origin_sku) {
+
+                            //     var str = '<tr><th>商品名称</th><th>商品颜色</th><th>供应商SKU</th><th>单价</th><th>操作</th></tr>';
+                            //     console.log(data);
+                            //     $('#caigou-table tbody').html('');
+                            //     for (var i in data.itemArr) {
+                            //         str += '<tr>'
+                            //         str += '<td><input  data-rule="required"  class="form-control c-name" name="row[name][]" disabled value="' + data.itemArr[i].name + '"  type="text"></td>'
+                            //         str += '<td><input  data-rule="required"  class="form-control c-color" name="row[color][]" disabled value="' + data.itemArr[i].frame_color + '" type="text"></td>'
+                            //         str += '<td><input  data-rule="required"  class="form-control c-supplier_sku" name="row[supplier_sku][]" disabled value="' + data.itemArr[i].supplier_sku + '" type="text"></td>'
+                            //         str += '<td><input  data-rule="required"  class="form-control c-price" name="row[price][]" disabled value="' + data.itemArr[i].price + '" type="text"></td>'
+                            //         str += '<td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>删除</a></td></tr>'
+                            //     }
+                            //     $('#caigou-table tbody').html(str);
+
+                            // }
+
+                        }
                         return false;
                     }, function (data, ret) {
                         //失败的回调
@@ -399,7 +474,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast','boots
                         return false;
                     });
                 });
-               
+
             }
         },
         frame: function () {

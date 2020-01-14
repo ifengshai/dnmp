@@ -55,13 +55,23 @@ class NewProduct extends Model
         return $result;
     }
 
+    /***
+     * 检测origin_sku是否存在
+     */
+    public function checkIsExistOriginSku($origin_sku)
+    {
+        $map['origin_sku'] = $origin_sku;
+        $map['is_del'] = 1;
+        $result = $this->where($map)->field('id,origin_sku')->find();
+        return $result ? $result : false;
+    }
 
     /***
      * 查询sku信息
      * @param $sku
      * @return bool
      */
-    public function getItemInfo($sku)
+    public function getItemInfoOld($sku)
     {
         $item = new \app\admin\model\itemmanage\Item;
         $map['is_del'] = 1;
@@ -76,10 +86,36 @@ class NewProduct extends Model
         $arr = $item->alias('m')->where($where)->join('item_attribute a', 'm.id=a.item_id', 'left')->field('m.name,a.frame_color,m.price')->select();
         $result['itemArr'] = $arr;
 
-
         //截取掉色号
         $where['m.sku'] = ['like', '%' . substr($result['sku'], 0, strpos($result['sku'], '-')) . '%'];
         $result['itemCount'] = $item->alias('m')->where($where)->count();
         return $result;
+    }
+
+
+    /***
+     * 查询sku信息
+     * @param $sku
+     * @param $type 1 镜架  2 镜片  3 配饰
+     * @return bool
+     */
+    public function getItemInfo($sku, $type = 1)
+    {
+        $item = new \app\admin\model\itemmanage\Item;
+        $map['m.is_del'] = 1;
+        $map['m.sku'] = $sku;
+        $result = $item->alias('m')->where($map)->join('item_attribute a', 'm.id=a.item_id', 'left')->find();
+        if (!$result) {
+            return false;
+        }
+        if (!empty($result['origin_sku'])) {
+            //镜架类型
+            $where['origin_sku'] = $result['origin_sku'];
+            $where['is_del'] = 1;
+            $result['itemCount'] = $item->where($where)->count();
+            $result['type'] = $type;
+        }
+
+        return $result ? $result : false;
     }
 }

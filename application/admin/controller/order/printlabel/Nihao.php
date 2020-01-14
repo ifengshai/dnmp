@@ -431,32 +431,32 @@ class Nihao extends Backend
                 [
                     'id' => 1,
                     'content' => '打标签',
-                    'createtime' => $row['custom_print_label_created_at'],
-                    'person' => $row['custom_print_label_person']
+                    'createtime' => $row['custom_print_label_created_at_new'],
+                    'person' => $row['custom_print_label_person_new']
                 ],
                 [
                     'id' => 2,
                     'content' => '配镜架',
-                    'createtime' => $row['custom_match_frame_created_at'],
-                    'person' => $row['custom_match_frame_person']
+                    'createtime' => $row['custom_match_frame_created_at_new'],
+                    'person' => $row['custom_match_frame_person_new']
                 ],
                 [
                     'id' => 3,
                     'content' => '配镜片',
-                    'createtime' => $row['custom_match_lens_created_at'],
-                    'person' => $row['custom_match_lens_person']
+                    'createtime' => $row['custom_match_lens_created_at_new'],
+                    'person' => $row['custom_match_lens_person_new']
                 ],
                 [
                     'id' => 4,
                     'content' => '加工',
-                    'createtime' => $row['custom_match_factory_created_at'],
-                    'person' => $row['custom_match_factory_person']
+                    'createtime' => $row['custom_match_factory_created_at_new'],
+                    'person' => $row['custom_match_factory_person_new']
                 ],
                 [
                     'id' => 5,
                     'content' => '质检',
-                    'createtime' => $row['custom_match_delivery_created_at'],
-                    'person' => $row['custom_match_delivery_person']
+                    'createtime' => $row['custom_match_delivery_created_at_new'],
+                    'person' => $row['custom_match_delivery_person_new']
                 ],
             ];
             $total = count($list);
