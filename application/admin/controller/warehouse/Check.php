@@ -695,9 +695,9 @@ class Check extends Backend
             $smap['unqualified_num'] = $filter['is_process'] == 1 ? ['>', 0] : ['=', 0];
 
             $ids = $this->check_item->where($smap)->column('check_id');
-            $map['Check.id'] = ['in', $ids];
+            $map['check.id'] = ['in', $ids];
 
-            $map['Check.is_return'] = $filter['is_process'] == 1 ? 0 : 1;
+            $map['check.is_return'] = $filter['is_process'] == 1 ? 0 : 1;
 
             unset($filter['is_process']);
             $this->request->get(['filter' => json_encode($filter)]);
@@ -710,11 +710,11 @@ class Check extends Backend
         list($where) = $this->buildparams();
         $list = $this->model
             ->with(['purchaseorder' , 'supplier', 'orderreturn'])
-            ->join(['fa_check_order_item' => 'b'], 'b.check_id=Check.id')
-            ->field('Check.*,b.*')
+            ->join(['fa_check_order_item' => 'b'], 'b.check_id=check.id')
+            ->field('check.*,b.*')
             ->where($where)
             ->where($map)
-            ->order('Check.id desc')
+            ->order('check.id desc')
             ->select();
         
         $list = collection($list)->toArray();
