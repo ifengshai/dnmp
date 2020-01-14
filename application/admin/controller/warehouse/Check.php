@@ -685,7 +685,7 @@ class Check extends Backend
     public function batch_export_xls()
     {
         set_time_limit(0);
-        ini_set('memory_limit', '256M');
+        ini_set('memory_limit', '512M');
         $ids = input('ids');
         //自定义sku搜索
         $filter = json_decode($this->request->get('filter'), true);
