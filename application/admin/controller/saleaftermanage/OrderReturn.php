@@ -46,7 +46,7 @@ class OrderReturn extends Backend
     {
         parent::_initialize();
         $this->model = new \app\admin\model\saleaftermanage\OrderReturn;
-        $this->modelItem = new \app\admin\model\saleAfterManage\OrderReturnItem;
+        //$this->modelItem = new \app\admin\model\saleAfterManage\OrderReturnItem;
     }
 
     /**
