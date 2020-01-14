@@ -34,7 +34,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-se
                         { field: 'purchaseorder.create_person', title: __('采购创建人'), operate: 'like' },
                         { field: 'orderreturn.return_order_number', title: __('退货单号'), operate: 'like' },
                         { field: 'supplier.supplier_name', title: __('Supplier_id'), operate: 'like' },
-                        { field: 'remark', title: __('Remark'), operate: false },
+                        { field: 'remark', title: __('Remark'), formatter: Controller.api.formatter.getClear, operate: false },
                         {
                             field: 'status', title: __('Status'), custom: { 0: 'success', 1: 'yellow', 2: 'blue', 3: 'danger', 4: 'gray' },
                             searchList: { 0: '新建', 1: '待审核', 2: '已审核', 3: '已拒绝', 4: '已取消' },
@@ -163,6 +163,20 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-se
                     ]
                 ]
             });
+
+
+            $(document).on('click', ".problem_desc_info", function () {
+                var problem_desc = $(this).attr('name');
+                //Layer.alert(problem_desc);
+                Layer.open({
+                    closeBtn: 1,
+                    title: '问题描述',
+                    area: ['900px', '500px'],
+                    content: problem_desc
+                });
+                return false;
+            });
+
 
             // 为表格绑定事件
             Table.api.bindevent(table);
@@ -318,6 +332,21 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-se
         },
         api: {
             formatter: {
+
+                getClear: function (value) {
+                    if (value == null || value == undefined) {
+                        return '';
+                    } else {
+                        var tem = value;
+
+                        if (tem.length <= 20) {
+                            return tem;
+                        } else {
+                            return '<span class="problem_desc_info" name = "' + tem + '" style="">' + tem.substr(0, 20) + '...</span>';
+
+                        }
+                    }
+                },
 
             },
 
