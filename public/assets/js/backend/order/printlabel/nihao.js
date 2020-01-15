@@ -108,22 +108,39 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                 window.open(Config.moduleurl + '/order/printlabel/nihao/batch_print_label/id_params/' + id_params, '_blank');
             });
 
+
             //批量导出xls 
             $('.btn-batch-export-xls').click(function () {
-                console.log('id_params');
                 var ids = Table.api.selectedids(table);
-                // console.log(ids);
-                var id_params = '';
-                $.each(table.bootstrapTable('getSelections'), function (index, row) {
-                    // console.log(row); 
-                    id_params += row['entity_id'] + ',';
-                });
-                console.log(id_params);
-
-                // var ids = Table.api.selectedids(table);
-
-                window.open(Config.moduleurl + '/order/printlabel/nihao/batch_export_xls/id_params/' + id_params, '_blank');
+                if (ids.length > 0) {
+                    window.open(Config.moduleurl + '/order/printlabel/nihao/batch_export_xls?id_params=' + ids, '_blank');
+                } else {
+                    var options = table.bootstrapTable('getOptions');
+                    var search = options.queryParams({});
+                    var filter = search.filter;
+                    var op = search.op;
+                    window.open(Config.moduleurl + '/order/printlabel/nihao/batch_export_xls?filter=' + filter + '&op=' + op, '_blank');
+                }
+                
             });
+
+
+            // //批量导出xls 
+            // $('.btn-batch-export-xls').click(function () {
+            //     console.log('id_params');
+            //     var ids = Table.api.selectedids(table);
+            //     // console.log(ids);
+            //     var id_params = '';
+            //     $.each(table.bootstrapTable('getSelections'), function (index, row) {
+            //         // console.log(row); 
+            //         id_params += row['entity_id'] + ',';
+            //     });
+            //     console.log(id_params);
+
+            //     // var ids = Table.api.selectedids(table);
+
+            //     window.open(Config.moduleurl + '/order/printlabel/nihao/batch_export_xls/id_params/' + id_params, '_blank');
+            // });
 
             //批量标记已打印    
             $('.btn-tag-printed').click(function () {

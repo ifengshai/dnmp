@@ -563,15 +563,58 @@ where cped.attribute_id in(146,147) and cped.store_id=0 and cped.entity_id=$prod
     //批量导出xls
     public function batch_export_xls()
     {
-        $entity_ids = rtrim(input('id_params'), ',');
-        // dump($entity_ids);        
-        $processing_order_querySql = "select sfo.increment_id,sfoi.product_options,sfoi.order_id,sfo.`status`,sfoi.sku,sfoi.product_id,sfoi.qty_ordered,sfo.created_at
-from sales_flat_order_item sfoi
-left join sales_flat_order sfo on  sfoi.order_id=sfo.entity_id 
-where sfo.`status` in ('processing','creditcard_proccessing','free_processing','paypal_reversed','complete') and sfo.entity_id in($entity_ids)
-order by sfoi.order_id desc;";
-        $resultList = Db::connect('database.db_nihao')->query($processing_order_querySql);
+//         $entity_ids = rtrim(input('id_params'), ',');
+//         // dump($entity_ids);        
+//         $processing_order_querySql = "select sfo.increment_id,sfoi.product_options,sfoi.order_id,sfo.`status`,sfoi.sku,sfoi.product_id,sfoi.qty_ordered,sfo.created_at
+// from sales_flat_order_item sfoi
+// left join sales_flat_order sfo on  sfoi.order_id=sfo.entity_id 
+// where sfo.`status` in ('processing','creditcard_proccessing','free_processing','paypal_reversed','complete') and sfo.entity_id in($entity_ids)
+// order by sfoi.order_id desc;";
+//         $resultList = Db::connect('database.db_nihao')->query($processing_order_querySql);
 
+
+        /*************修改为筛选导出****************/
+
+        set_time_limit(0);
+        ini_set('memory_limit', '512M');
+       
+        $ids = input('id_params');
+
+        $filter = json_decode($this->request->get('filter'), true);
+
+        if ($filter['increment_id']) {
+            $map['sfo.status'] = ['in', ['free_processing', 'processing', 'complete']];
+        } elseif (!$filter['status']) {
+            $map['sfo.status'] = ['in', ['free_processing', 'processing']];
+        }
+
+        $infoSynergyTask = new \app\admin\model\infosynergytaskmanage\InfoSynergyTask;
+        if ($filter['task_label'] == 1 || $filter['task_label'] == '0') {
+            $swhere['is_del'] = 1;
+            $swhere['order_platform'] = 1;
+            $swhere['synergy_order_id'] = 2;
+            $order_arr = $infoSynergyTask->where($swhere)->order('create_time desc')->column('synergy_order_number');
+            $map['sfo.increment_id'] = ['in', $order_arr];
+            unset($filter['task_label']);
+            $this->request->get(['filter' => json_encode($filter)]);
+        }
+
+        if ($ids) {
+            $map['sfo.entity_id'] = ['in', $ids];
+        }
+
+        list($where) = $this->buildparams();
+        $field = 'sfo.increment_id,sfoi.product_options,sfoi.order_id,sfo.`status`,sfoi.sku,sfoi.product_id,sfoi.qty_ordered,sfo.created_at';
+        $resultList = $this->model->alias('sfo')
+            ->join(['sales_flat_order_item' => 'sfoi'], 'sfoi.order_id=sfo.entity_id')
+            ->field($field)
+            ->where($map)
+            ->where($where)
+            ->order('sfoi.order_id desc')
+            ->select();
+
+        $resultList = collection($resultList)->toArray();
+        
         $resultList = $this->qty_order_check($resultList);
         // dump($resultList);
 
