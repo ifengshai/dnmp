@@ -614,6 +614,7 @@ where cped.attribute_id in(146,147) and cped.store_id=0 and cped.entity_id=$prod
             ->select();
 
         $resultList = collection($resultList)->toArray();
+        
         $resultList = $this->qty_order_check($resultList);
         // dump($resultList);
 
