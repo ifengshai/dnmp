@@ -1086,10 +1086,15 @@ class SaleAfterTask extends Backend
             ->setCellValue("M1", "任务优先级")
             ->setCellValue("N1", "问题分类")
             ->setCellValue("O1", "问题描述")
-            ->setCellValue("P1", "创建人")
-            ->setCellValue("Q1", "创建时间")
-            ->setCellValue("R1", "处理时间")
-            ->setCellValue("S1", "完成时间");
+            ->setCellValue("P1", "解决方案")
+            ->setCellValue("Q1", "关税")
+            ->setCellValue("R1", "赠送的优惠券")
+            ->setCellValue("S1", "补差价订单号")
+            ->setCellValue("T1", "补发订单号")
+            ->setCellValue("U1", "创建人")
+            ->setCellValue("V1", "创建时间")
+            ->setCellValue("W1", "处理时间")
+            ->setCellValue("X1", "完成时间");
         $spreadsheet->setActiveSheetIndex(0)->setTitle('售后任务数据');
 
         foreach ($list as $key => $value) {
@@ -1157,12 +1162,47 @@ class SaleAfterTask extends Backend
             $spreadsheet->getActiveSheet()->setCellValue("M" . ($key * 1 + 2), $value['prty_id']);
             $spreadsheet->getActiveSheet()->setCellValue("N" . ($key * 1 + 2), $value['sale_after_issue']['name']);
             $spreadsheet->getActiveSheet()->setCellValue("O" . ($key * 1 + 2), $value['problem_desc']);
-            $spreadsheet->getActiveSheet()->setCellValue("P" . ($key * 1 + 2), $value['create_person']);
-            $spreadsheet->getActiveSheet()->setCellValue("Q" . ($key * 1 + 2), $value['create_time']);
-            $spreadsheet->getActiveSheet()->setCellValue("R" . ($key * 1 + 2), $value['handle_time']);
-            $spreadsheet->getActiveSheet()->setCellValue("S" . ($key * 1 + 2), $value['complete_time']);
-
-
+            switch($value['handle_scheme']){
+                case 1:
+                $value['handle_scheme'] = '部分退款';
+                break;
+                case 2:
+                $value['handle_scheme'] = '退全款';
+                break;
+                case 3:
+                $value['handle_scheme'] = '补发';
+                break;
+                case 4:
+                $value['handle_scheme'] = '加钱补发';
+                break;
+                case 5:
+                $value['handle_scheme'] = '退款+补发';
+                break;
+                case 6:
+                $value['handle_scheme'] = '折扣买新';
+                break; 
+                case 7:
+                $value['handle_scheme'] = '发放积分';
+                break;
+                case 8:
+                $value['handle_scheme'] = '安抚';
+                break;
+                case 9:
+                $value['handle_scheme'] = '长时间未回复';
+                break;
+                default:
+                $value['handle_scheme'] = '请选择';
+                break;                                                                                                                                                                      
+            }
+            $spreadsheet->getActiveSheet()->setCellValue("P" . ($key * 1 + 2), $value['handle_scheme']);
+            $spreadsheet->getActiveSheet()->setCellValue("Q" . ($key * 1 + 2), $value['tariff']);
+            $spreadsheet->getActiveSheet()->setCellValue("R" . ($key * 1 + 2), $value['give_coupon']);
+            $spreadsheet->getActiveSheet()->setCellValue("S" . ($key * 1 + 2), $value['make_up_price_order']);
+            $spreadsheet->getActiveSheet()->setCellValue("T" . ($key * 1 + 2), $value['replacement_order']);
+            $spreadsheet->getActiveSheet()->setCellValue("U" . ($key * 1 + 2), $value['create_person']);
+            $spreadsheet->getActiveSheet()->setCellValue("V" . ($key * 1 + 2), $value['create_time']);
+            $spreadsheet->getActiveSheet()->setCellValue("W" . ($key * 1 + 2), $value['handle_time']);
+            $spreadsheet->getActiveSheet()->setCellValue("X" . ($key * 1 + 2), $value['complete_time']);
         }
 
         //设置宽度
@@ -1187,8 +1227,11 @@ class SaleAfterTask extends Backend
         $spreadsheet->getActiveSheet()->getColumnDimension('Q')->setWidth(20);
         $spreadsheet->getActiveSheet()->getColumnDimension('R')->setWidth(20);
         $spreadsheet->getActiveSheet()->getColumnDimension('S')->setWidth(20);
-        
-
+        $spreadsheet->getActiveSheet()->getColumnDimension('T')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('U')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('V')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('W')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('X')->setWidth(20);
         //设置边框
         $border = [
             'borders' => [
