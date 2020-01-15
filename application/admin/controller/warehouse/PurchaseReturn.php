@@ -208,6 +208,14 @@ class PurchaseReturn extends Backend
         return $this->view->fetch();
     }
 
+    /**
+     * 打印
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/01/15 14:25:17 
+     * @return void
+     */
     public function print()
     {
         $ids = $this->request->get("ids");
