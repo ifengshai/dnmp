@@ -1045,7 +1045,7 @@ class SaleAfterTask extends Backend
             $this->model->allowField(true)->saveAll($arr);
         }
 
-            //批量导出xls
+    //批量导出xls
     public function batch_export_xls()
     {
         set_time_limit(0);
@@ -1053,7 +1053,7 @@ class SaleAfterTask extends Backend
         $ids = input('ids');
         $addWhere = '1=1';
         if ($ids) {
-            $addWhere.= ' AND saleaftertask.id IN "{$ids}"';
+            $addWhere.= " AND sale_after_task.id IN ({$ids})";
         }
 
         list($where) = $this->buildparams();
@@ -1062,7 +1062,9 @@ class SaleAfterTask extends Backend
         ->where($where)
         ->where($addWhere)
         ->select();
-        
+        // dump($list);
+        // exit;
+        $repArr  = (new Admin())->getAllStaff();
         $list = collection($list)->toArray();
 
         //从数据库查询需要的数据
@@ -1131,9 +1133,27 @@ class SaleAfterTask extends Backend
             $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 1 + 2), $value['customer_name']);
             $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 1 + 2), $value['customer_email']);
             $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 1 + 2), $value['order_status']);
-            $spreadsheet->getActiveSheet()->setCellValue("J" . ($key * 1 + 2), $value['rep_id']);
+            if($value['rep_id']){
+                //$list[$key]['rep_id'] = $repArr[$value['rep_id']];
+                $spreadsheet->getActiveSheet()->setCellValue("J" . ($key * 1 + 2), $repArr[$value['rep_id']]);
+            }else{
+                $spreadsheet->getActiveSheet()->setCellValue("J" . ($key * 1 + 2), $value['rep_id']);
+            }
+            
             $spreadsheet->getActiveSheet()->setCellValue("K" . ($key * 1 + 2), $value['is_refund'] == 1 ? '无' : '有');
             $spreadsheet->getActiveSheet()->setCellValue("L" . ($key * 1 + 2), $value['refund_money']);
+            switch($value['prty_id']){
+                case 2:
+                $value['prty_id'] = '中级';
+                break;
+                case 3:
+                $value['prty_id'] = '低级';
+                break;
+                default:
+                $value['prty_id'] = '高级';
+                break;        
+
+            }
             $spreadsheet->getActiveSheet()->setCellValue("M" . ($key * 1 + 2), $value['prty_id']);
             $spreadsheet->getActiveSheet()->setCellValue("N" . ($key * 1 + 2), $value['sale_after_issue']['name']);
             $spreadsheet->getActiveSheet()->setCellValue("O" . ($key * 1 + 2), $value['problem_desc']);
@@ -1161,8 +1181,12 @@ class SaleAfterTask extends Backend
         $spreadsheet->getActiveSheet()->getColumnDimension('K')->setWidth(14);
         $spreadsheet->getActiveSheet()->getColumnDimension('L')->setWidth(16);
         $spreadsheet->getActiveSheet()->getColumnDimension('M')->setWidth(16);
+        $spreadsheet->getActiveSheet()->getColumnDimension('N')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('O')->setWidth(50);
         $spreadsheet->getActiveSheet()->getColumnDimension('P')->setWidth(20);
-
+        $spreadsheet->getActiveSheet()->getColumnDimension('Q')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('R')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('S')->setWidth(20);
         
 
         //设置边框
@@ -1187,7 +1211,7 @@ class SaleAfterTask extends Backend
         $spreadsheet->setActiveSheetIndex(0);
         // return exportExcel($spreadsheet, 'xls', '登陆日志');
         $format = 'xlsx';
-        $savename = '质检单数据' . date("YmdHis", time());;
+        $savename = '售后数据' . date("YmdHis", time());;
         // dump($spreadsheet);
 
         // if (!$spreadsheet) return false;
