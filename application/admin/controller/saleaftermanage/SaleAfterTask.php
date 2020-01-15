@@ -1094,7 +1094,8 @@ class SaleAfterTask extends Backend
             ->setCellValue("U1", "创建人")
             ->setCellValue("V1", "创建时间")
             ->setCellValue("W1", "处理时间")
-            ->setCellValue("X1", "完成时间");
+            ->setCellValue("X1", "完成时间")
+            ->setCellValue("Y1", "退款方式");
         $spreadsheet->setActiveSheetIndex(0)->setTitle('售后任务数据');
 
         foreach ($list as $key => $value) {
@@ -1144,7 +1145,6 @@ class SaleAfterTask extends Backend
             }else{
                 $spreadsheet->getActiveSheet()->setCellValue("J" . ($key * 1 + 2), $value['rep_id']);
             }
-            
             $spreadsheet->getActiveSheet()->setCellValue("K" . ($key * 1 + 2), $value['is_refund'] == 1 ? '无' : '有');
             $spreadsheet->getActiveSheet()->setCellValue("L" . ($key * 1 + 2), $value['refund_money']);
             switch($value['prty_id']){
@@ -1203,6 +1203,7 @@ class SaleAfterTask extends Backend
             $spreadsheet->getActiveSheet()->setCellValue("V" . ($key * 1 + 2), $value['create_time']);
             $spreadsheet->getActiveSheet()->setCellValue("W" . ($key * 1 + 2), $value['handle_time']);
             $spreadsheet->getActiveSheet()->setCellValue("X" . ($key * 1 + 2), $value['complete_time']);
+            $spreadsheet->getActiveSheet()->setCellValue("Y" . ($key * 1 + 2), $value['refund_way']);
         }
 
         //设置宽度
@@ -1213,10 +1214,8 @@ class SaleAfterTask extends Backend
         $spreadsheet->getActiveSheet()->getColumnDimension('E')->setWidth(30);
         $spreadsheet->getActiveSheet()->getColumnDimension('F')->setWidth(12);
         $spreadsheet->getActiveSheet()->getColumnDimension('G')->setWidth(40);
-
         $spreadsheet->getActiveSheet()->getColumnDimension('H')->setWidth(40);
         $spreadsheet->getActiveSheet()->getColumnDimension('I')->setWidth(20);
-
         $spreadsheet->getActiveSheet()->getColumnDimension('J')->setWidth(20);
         $spreadsheet->getActiveSheet()->getColumnDimension('K')->setWidth(14);
         $spreadsheet->getActiveSheet()->getColumnDimension('L')->setWidth(16);
@@ -1232,6 +1231,7 @@ class SaleAfterTask extends Backend
         $spreadsheet->getActiveSheet()->getColumnDimension('V')->setWidth(20);
         $spreadsheet->getActiveSheet()->getColumnDimension('W')->setWidth(20);
         $spreadsheet->getActiveSheet()->getColumnDimension('X')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('Y')->setWidth(20);
         //设置边框
         $border = [
             'borders' => [

@@ -722,188 +722,211 @@ class InfoSynergyTask extends Backend
     }
     //批量导出功能
     //批量导出xls
-    // public function batch_export_xls()
-    // {
-    //     set_time_limit(0);
-    //     ini_set('memory_limit', '512M');
-    //     $ids = input('ids');
-    //     $addWhere = '1=1';
-    //     if ($ids) {
-    //         $addWhere.= " AND info_synergy_task.id IN ({$ids})";
-    //     }
-    //     list($where) = $this->buildparams();
-    //     $list = $this->model
-    //     ->with(['infosynergytaskcategory'])
-    //     ->where($where)->where($addWhere)
-    //     ->select();
-    //     $repArr  = (new Admin())->getAllStaff();
-    //     $list = collection($list)->toArray();
+    public function batch_export_xls()
+    {
+        set_time_limit(0);
+        ini_set('memory_limit', '512M');
+        $ids = input('ids');
+        $addWhere = '1=1';
+        if ($ids) {
+            $addWhere.= " AND info_synergy_task.id IN ({$ids})";
+        }
+        list($where) = $this->buildparams();
+        $list = $this->model
+        ->with(['infosynergytaskcategory'])
+        ->where($where)->where($addWhere)
+        ->select();
+        $repArr  = (new Admin())->getAllStaff();
+        $list = collection($list)->toArray();
 
-    //     //从数据库查询需要的数据
-    //     $spreadsheet = new Spreadsheet();
+        //从数据库查询需要的数据
+        $spreadsheet = new Spreadsheet();
 
-    //     //常规方式：利用setCellValue()填充数据
-    //     $spreadsheet->setActiveSheetIndex(0)->setCellValue("A1", "信息协同任务单号")
-    //         ->setCellValue("B1", "关联单据类型")
-    //         ->setCellValue("C1", "关联单号");   //利用setCellValues()填充数据
-    //     $spreadsheet->setActiveSheetIndex(0)->setCellValue("D1", "平台类型")
-    //         ->setCellValue("E1", "任务状态");
-    //     $spreadsheet->setActiveSheetIndex(0)->setCellValue("F1", "是否含有退款")
-    //         ->setCellValue("G1", "退款金额");
-    //     $spreadsheet->setActiveSheetIndex(0)->setCellValue("H1", "客户邮箱")
-    //         ->setCellValue("I1", "订单状态")
-    //         ->setCellValue("J1", "承接人");
-    //     $spreadsheet->setActiveSheetIndex(0)->setCellValue("K1", "是否含有退款")
-    //         ->setCellValue("L1", "退款金额")
-    //         ->setCellValue("M1", "任务优先级")
-    //         ->setCellValue("N1", "问题分类")
-    //         ->setCellValue("O1", "问题描述")
-    //         ->setCellValue("P1", "创建人")
-    //         ->setCellValue("Q1", "创建时间")
-    //         ->setCellValue("R1", "处理时间")
-    //         ->setCellValue("S1", "完成时间");
-    //     $spreadsheet->setActiveSheetIndex(0)->setTitle('售后任务数据');
+        //常规方式：利用setCellValue()填充数据
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("A1", "信息协同任务单号")
+            ->setCellValue("B1", "关联单据类型")
+            ->setCellValue("C1", "关联单号");   //利用setCellValues()填充数据
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("D1", "平台类型")
+            ->setCellValue("E1", "任务状态");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("F1", "是否含有退款")
+            ->setCellValue("G1", "退款金额");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("H1", "退款方式")
+            ->setCellValue("I1", "承接人")
+            ->setCellValue("J1", "任务优先级");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("K1", "任务分类")
+            ->setCellValue("L1", "问题描述")
+            ->setCellValue("M1", "补差价订单号")
+            ->setCellValue("N1", "补发订单号")
+            ->setCellValue("O1","订单SKU")
+            ->setCellValue("P1", "创建人")
+            ->setCellValue("Q1", "创建时间")
+            ->setCellValue("R1", "完成时间");
+        $spreadsheet->setActiveSheetIndex(0)->setTitle('信息协同任务数据');
+        foreach ($list as $key => $value) {
 
-    //     foreach ($list as $key => $value) {
+            $spreadsheet->getActiveSheet()->setCellValue("A" . ($key * 1 + 2), $value['synergy_number']);
+            switch($value['synergy_order_id']){
+                case 1:
+                $value['synergy_order_id'] = '无';
+                break;
+                case 2:
+                $value['synergy_order_id'] = '订单';
+                break;
+                case 3:
+                $value['synergy_order_id'] = '采购单';
+                break;
+                case 4:
+                $value['synergy_order_id'] = '质检单';
+                break;
+                case 5:
+                $value['synergy_order_id'] = '入库单';
+                break;
+                case 6:
+                $value['synergy_order_id'] = '出库单';
+                break;
+                case 7:
+                $value['synergy_order_id'] = '库存盘点单';
+                break;            
+                default:
+                $value['synergy_order_id'] = '请选择';
+                break;            
+            }
+            $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $value['synergy_order_id']);
+            switch($value['order_platform']){
+                case 2:
+                $value['order_platform'] = 'voogueme';
+                break;
+                case 3:
+                $value['order_platform'] = 'nihao';
+                break;
+                case 4:
+                $value['order_platform'] = 'amazon';
+                break;
+                case 5:
+                $value['order_platform'] = 'wesee';
+                break;
+                default:
+                $value['order_platform'] = 'zeelool';
+                break;            
+            }
+            switch($value['synergy_status']){
+                case 1:
+                $value['synergy_status'] = '处理中';
+                break;
+                case 2:
+                $value['synergy_status'] = '处理完成';
+                break;
+                case 3:
+                $value['synergy_status'] = '取消';
+                default:
+                $value['synergy_status'] = '未处理';
+                break;            
+            }
+            $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 1 + 2), $value['synergy_order_number']);
+            $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 1 + 2), $value['order_platform']);
+            $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), $value['synergy_status']);
+            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 1 + 2), $value['is_refund'] == 1 ? '无' : '有');
+            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 1 + 2), $value['refund_money']);
+            $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 1 + 2), $value['refund_way']);
+            if ($value['rep_id']) {
+                $repNumArr = explode('+', $value['rep_id']);
+                $value['rep'] = '';
+                foreach ($repNumArr as $vals) {
+                    $value['rep'] .= $repArr[$vals] . ' ';
+                }
+                $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 1 + 2), $value['rep']);
+            }else{
+                $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 1 + 2), $value['rep_id']);
+            }
+            switch($value['prty_id']){
+                case 2:
+                $value['prty_id'] = '中级';
+                break;
+                case 3:
+                $value['prty_id'] = '低级';
+                break;
+                default:
+                $value['prty_id'] = '高级';
+                break;        
 
-    //         $spreadsheet->getActiveSheet()->setCellValue("A" . ($key * 1 + 2), $value['task_number']);
-    //         switch($value['task_status']){
-    //             case 1:
-    //             $value['task_status'] = '处理中';
-    //             break;
-    //             case 2:
-    //             $value['task_status'] = '处理完成';
-    //             break;
-    //             case 3:
-    //             $value['task_status'] = '取消';
-    //             default:
-    //             $value['task_status'] = '未处理';
-    //             break;            
-    //         }
-    //         $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $value['task_status']);
-    //         switch($value['order_platform']){
-    //             case 2:
-    //             $value['order_platform'] = 'voogueme';
-    //             break;
-    //             case 3:
-    //             $value['order_platform'] = 'nihao';
-    //             break;
-    //             case 4:
-    //             $value['order_platform'] = 'amazon';
-    //             break;
-    //             case 5:
-    //             $value['order_platform'] = 'wesee';
-    //             break;
-    //             default:
-    //             $value['order_platform'] = 'zeelool';
-    //             break;            
-    //         }
-    //         $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 1 + 2), $value['order_platform']);
-    //         $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 1 + 2), $value['order_source'] == 1 ? 'pc端' :'移动端');
-    //         $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), $value['order_number']);
-    //         $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 1 + 2), $value['order_skus']);
-    //         $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 1 + 2), $value['customer_name']);
-    //         $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 1 + 2), $value['customer_email']);
-    //         $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 1 + 2), $value['order_status']);
-    //         if($value['rep_id']){
-    //             //$list[$key]['rep_id'] = $repArr[$value['rep_id']];
-    //             $spreadsheet->getActiveSheet()->setCellValue("J" . ($key * 1 + 2), $repArr[$value['rep_id']]);
-    //         }else{
-    //             $spreadsheet->getActiveSheet()->setCellValue("J" . ($key * 1 + 2), $value['rep_id']);
-    //         }
-            
-    //         $spreadsheet->getActiveSheet()->setCellValue("K" . ($key * 1 + 2), $value['is_refund'] == 1 ? '无' : '有');
-    //         $spreadsheet->getActiveSheet()->setCellValue("L" . ($key * 1 + 2), $value['refund_money']);
-    //         switch($value['prty_id']){
-    //             case 2:
-    //             $value['prty_id'] = '中级';
-    //             break;
-    //             case 3:
-    //             $value['prty_id'] = '低级';
-    //             break;
-    //             default:
-    //             $value['prty_id'] = '高级';
-    //             break;        
-
-    //         }
-    //         $spreadsheet->getActiveSheet()->setCellValue("M" . ($key * 1 + 2), $value['prty_id']);
-    //         $spreadsheet->getActiveSheet()->setCellValue("N" . ($key * 1 + 2), $value['sale_after_issue']['name']);
-    //         $spreadsheet->getActiveSheet()->setCellValue("O" . ($key * 1 + 2), $value['problem_desc']);
-    //         $spreadsheet->getActiveSheet()->setCellValue("P" . ($key * 1 + 2), $value['create_person']);
-    //         $spreadsheet->getActiveSheet()->setCellValue("Q" . ($key * 1 + 2), $value['create_time']);
-    //         $spreadsheet->getActiveSheet()->setCellValue("R" . ($key * 1 + 2), $value['handle_time']);
-    //         $spreadsheet->getActiveSheet()->setCellValue("S" . ($key * 1 + 2), $value['complete_time']);
+            }
+            $spreadsheet->getActiveSheet()->setCellValue("J" . ($key * 1 + 2), $value['prty_id']);
+            $spreadsheet->getActiveSheet()->setCellValue("K" . ($key * 1 + 2), $value['infosynergytaskcategory']['name']);
+            $spreadsheet->getActiveSheet()->setCellValue("L" . ($key * 1 + 2), $value['problem_desc']);
+            $spreadsheet->getActiveSheet()->setCellValue("M" . ($key * 1 + 2), $value['make_up_price_order']);
+            $spreadsheet->getActiveSheet()->setCellValue("N" . ($key * 1 + 2), $value['replacement_order']);
+            $spreadsheet->getActiveSheet()->setCellValue("O" . ($key * 1 + 2), $value['order_skus']);
+            $spreadsheet->getActiveSheet()->setCellValue("P" . ($key * 1 + 2), $value['create_person']);
+            $spreadsheet->getActiveSheet()->setCellValue("Q" . ($key * 1 + 2), $value['create_time']);
+            $spreadsheet->getActiveSheet()->setCellValue("R" . ($key * 1 + 2), $value['complete_time']);
 
 
-    //     }
+        }
 
-    //     //设置宽度
-    //     $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(30);
-    //     $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(12);
-    //     $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(30);
-    //     $spreadsheet->getActiveSheet()->getColumnDimension('D')->setWidth(12);
-    //     $spreadsheet->getActiveSheet()->getColumnDimension('E')->setWidth(30);
-    //     $spreadsheet->getActiveSheet()->getColumnDimension('F')->setWidth(12);
-    //     $spreadsheet->getActiveSheet()->getColumnDimension('G')->setWidth(40);
-
-    //     $spreadsheet->getActiveSheet()->getColumnDimension('H')->setWidth(40);
-    //     $spreadsheet->getActiveSheet()->getColumnDimension('I')->setWidth(20);
-
-    //     $spreadsheet->getActiveSheet()->getColumnDimension('J')->setWidth(20);
-    //     $spreadsheet->getActiveSheet()->getColumnDimension('K')->setWidth(14);
-    //     $spreadsheet->getActiveSheet()->getColumnDimension('L')->setWidth(16);
-    //     $spreadsheet->getActiveSheet()->getColumnDimension('M')->setWidth(16);
-    //     $spreadsheet->getActiveSheet()->getColumnDimension('N')->setWidth(20);
-    //     $spreadsheet->getActiveSheet()->getColumnDimension('O')->setWidth(50);
-    //     $spreadsheet->getActiveSheet()->getColumnDimension('P')->setWidth(20);
-    //     $spreadsheet->getActiveSheet()->getColumnDimension('Q')->setWidth(20);
-    //     $spreadsheet->getActiveSheet()->getColumnDimension('R')->setWidth(20);
-    //     $spreadsheet->getActiveSheet()->getColumnDimension('S')->setWidth(20);
+        //设置宽度
+        $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(30);
+        $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(12);
+        $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(30);
+        $spreadsheet->getActiveSheet()->getColumnDimension('D')->setWidth(12);
+        $spreadsheet->getActiveSheet()->getColumnDimension('E')->setWidth(30);
+        $spreadsheet->getActiveSheet()->getColumnDimension('F')->setWidth(12);
+        $spreadsheet->getActiveSheet()->getColumnDimension('G')->setWidth(40);
+        $spreadsheet->getActiveSheet()->getColumnDimension('H')->setWidth(40);
+        $spreadsheet->getActiveSheet()->getColumnDimension('I')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('J')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('K')->setWidth(14);
+        $spreadsheet->getActiveSheet()->getColumnDimension('L')->setWidth(100);
+        $spreadsheet->getActiveSheet()->getColumnDimension('M')->setWidth(16);
+        $spreadsheet->getActiveSheet()->getColumnDimension('N')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('O')->setWidth(50);
+        $spreadsheet->getActiveSheet()->getColumnDimension('P')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('Q')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('R')->setWidth(20);
         
 
-    //     //设置边框
-    //     $border = [
-    //         'borders' => [
-    //             'allBorders' => [
-    //                 'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, // 设置border样式
-    //                 'color'       => ['argb' => 'FF000000'], // 设置border颜色
-    //             ],
-    //         ],
-    //     ];
+        //设置边框
+        $border = [
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, // 设置border样式
+                    'color'       => ['argb' => 'FF000000'], // 设置border颜色
+                ],
+            ],
+        ];
 
-    //     $spreadsheet->getDefaultStyle()->getFont()->setName('微软雅黑')->setSize(12);
+        $spreadsheet->getDefaultStyle()->getFont()->setName('微软雅黑')->setSize(12);
 
 
-    //     $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
-    //     $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
+        $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
+        $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
 
-    //     $spreadsheet->getActiveSheet()->getStyle('A1:P' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $spreadsheet->getActiveSheet()->getStyle('A1:P' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
        
 
-    //     $spreadsheet->setActiveSheetIndex(0);
-    //     // return exportExcel($spreadsheet, 'xls', '登陆日志');
-    //     $format = 'xlsx';
-    //     $savename = '售后数据' . date("YmdHis", time());;
-    //     // dump($spreadsheet);
+        $spreadsheet->setActiveSheetIndex(0);
+        // return exportExcel($spreadsheet, 'xls', '登陆日志');
+        $format = 'xlsx';
+        $savename = '信息协同数据' . date("YmdHis", time());;
+        // dump($spreadsheet);
 
-    //     // if (!$spreadsheet) return false;
-    //     if ($format == 'xls') {
-    //         //输出Excel03版本
-    //         header('Content-Type:application/vnd.ms-excel');
-    //         $class = "\PhpOffice\PhpSpreadsheet\Writer\Xls";
-    //     } elseif ($format == 'xlsx') {
-    //         //输出07Excel版本
-    //         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-    //         $class = "\PhpOffice\PhpSpreadsheet\Writer\Xlsx";
-    //     }
+        // if (!$spreadsheet) return false;
+        if ($format == 'xls') {
+            //输出Excel03版本
+            header('Content-Type:application/vnd.ms-excel');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xls";
+        } elseif ($format == 'xlsx') {
+            //输出07Excel版本
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xlsx";
+        }
 
-    //     //输出名称
-    //     header('Content-Disposition: attachment;filename="' . $savename . '.' . $format . '"');
-    //     //禁止缓存
-    //     header('Cache-Control: max-age=0');
-    //     $writer = new $class($spreadsheet);
+        //输出名称
+        header('Content-Disposition: attachment;filename="' . $savename . '.' . $format . '"');
+        //禁止缓存
+        header('Cache-Control: max-age=0');
+        $writer = new $class($spreadsheet);
 
-    //     $writer->save('php://output');
-    // }    
+        $writer->save('php://output');
+    }    
 
 }
