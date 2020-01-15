@@ -470,7 +470,8 @@ class Outstock extends Backend
                     }
                 }
             }
-            $result = array("total" => $total, "rows" => $list,"totalPriceInfo"=>$totalPriceInfo['total_money']);
+            $total_money = round($totalPriceInfo['total_money'],2);
+            $result = array("total" => $total, "rows" => $list,"totalPriceInfo"=>$total_money);
 
             return json($result);
         }
