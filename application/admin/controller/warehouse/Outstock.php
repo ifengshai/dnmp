@@ -466,7 +466,7 @@ class Outstock extends Backend
             if(0 != $thisPagePriceInfo){
                 foreach($list as $keys => $vals){
                     if(array_key_exists($vals['id'],$thisPagePriceInfo)){
-                         $list[$keys]['total_money'] = $thisPagePriceInfo[$vals['id']];
+                         $list[$keys]['total_money'] = round($thisPagePriceInfo[$vals['id']],2);
                     }
                 }
             }
