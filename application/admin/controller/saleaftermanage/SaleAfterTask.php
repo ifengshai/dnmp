@@ -1145,7 +1145,6 @@ class SaleAfterTask extends Backend
             }else{
                 $spreadsheet->getActiveSheet()->setCellValue("J" . ($key * 1 + 2), $value['rep_id']);
             }
-            
             $spreadsheet->getActiveSheet()->setCellValue("K" . ($key * 1 + 2), $value['is_refund'] == 1 ? '无' : '有');
             $spreadsheet->getActiveSheet()->setCellValue("L" . ($key * 1 + 2), $value['refund_money']);
             switch($value['prty_id']){
@@ -1215,10 +1214,8 @@ class SaleAfterTask extends Backend
         $spreadsheet->getActiveSheet()->getColumnDimension('E')->setWidth(30);
         $spreadsheet->getActiveSheet()->getColumnDimension('F')->setWidth(12);
         $spreadsheet->getActiveSheet()->getColumnDimension('G')->setWidth(40);
-
         $spreadsheet->getActiveSheet()->getColumnDimension('H')->setWidth(40);
         $spreadsheet->getActiveSheet()->getColumnDimension('I')->setWidth(20);
-
         $spreadsheet->getActiveSheet()->getColumnDimension('J')->setWidth(20);
         $spreadsheet->getActiveSheet()->getColumnDimension('K')->setWidth(14);
         $spreadsheet->getActiveSheet()->getColumnDimension('L')->setWidth(16);

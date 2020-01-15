@@ -871,10 +871,8 @@ class InfoSynergyTask extends Backend
         $spreadsheet->getActiveSheet()->getColumnDimension('E')->setWidth(30);
         $spreadsheet->getActiveSheet()->getColumnDimension('F')->setWidth(12);
         $spreadsheet->getActiveSheet()->getColumnDimension('G')->setWidth(40);
-
         $spreadsheet->getActiveSheet()->getColumnDimension('H')->setWidth(40);
         $spreadsheet->getActiveSheet()->getColumnDimension('I')->setWidth(20);
-
         $spreadsheet->getActiveSheet()->getColumnDimension('J')->setWidth(20);
         $spreadsheet->getActiveSheet()->getColumnDimension('K')->setWidth(14);
         $spreadsheet->getActiveSheet()->getColumnDimension('L')->setWidth(100);
