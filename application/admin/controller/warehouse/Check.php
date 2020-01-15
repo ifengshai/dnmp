@@ -748,7 +748,7 @@ class Check extends Backend
 
             $spreadsheet->getActiveSheet()->setCellValue("A" . ($key * 1 + 2), $value['check_order_number']);
             $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $value['type'] == 1 ? '采购质检' : '退货质检');
-            $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 1 + 2), $value['purchaseorder']['purchase_number']);
+            $spreadsheet->getActiveSheet()->setCellValueExplicit("C" . ($key * 1 + 2), $value['purchaseorder']['purchase_number'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
             $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 1 + 2), $value['purchaseorder']['create_person']);
             $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), $value['orderreturn']['return_order_number']);
             $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 1 + 2), $value['supplier_name']);
