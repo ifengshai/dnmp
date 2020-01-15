@@ -599,6 +599,13 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
             $map['sfo.entity_id'] = ['in', $ids];
         }
 
+        if ($filter['created_at']) {
+            $created_at = explode(' - ', $filter['created_at']);
+            $map['sfo.created_at'] = ['between', [$created_at[0], $created_at[1]]];
+            unset($filter['created_at']);
+            $this->request->get(['filter' => json_encode($filter)]);
+        }
+
         list($where) = $this->buildparams();
         $field = 'sfo.increment_id,sfoi.product_options,sfoi.order_id,sfo.`status`,sfoi.sku,sfoi.product_id,sfoi.qty_ordered,sfo.created_at';
         $resultList = $this->model->alias('sfo')
