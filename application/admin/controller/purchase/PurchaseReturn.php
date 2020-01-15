@@ -594,8 +594,8 @@ class PurchaseReturn extends Backend
 
         foreach ($list as $key => $value) {
 
-            $spreadsheet->getActiveSheet()->setCellValue("A" . ($key * 1 + 2), $value['return_number'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
-            $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $value['purchaseorder']['purchase_number'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+            $spreadsheet->getActiveSheet()->setCellValue("A" . ($key * 1 + 2), $value['return_number']);
+            $spreadsheet->getActiveSheet()->setCellValueExplicit("B" . ($key * 1 + 2), $value['purchaseorder']['purchase_number'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
             $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 1 + 2), $value['supplier']['supplier_name']);
             $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 1 + 2), $value['sku']);
             $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), $value['supplier_sku']);
