@@ -556,16 +556,16 @@ class PurchaseReturn extends Backend
 
         list($where) = $this->buildparams();
         $list = $this->model
-            ->with(['purchaseorder' , 'supplier'])
+            ->with(['purchaseorder', 'supplier'])
             ->join(['fa_purchase_return_item' => 'b'], 'b.return_id=purchase_return.id')
             ->join(['fa_check_order_item' => 'c'], 'b.check_item_id=c.id')
             ->field('purchase_return.*,b.*,c.purchase_num,c.supplier_sku,c.arrivals_num,c.quantity_num,c.remark as check_remark')
             ->where($where)
             ->where($map)
             ->select();
-        
+
         $list = collection($list)->toArray();
-        
+
         //从数据库查询需要的数据
         $spreadsheet = new Spreadsheet();
 
@@ -573,7 +573,7 @@ class PurchaseReturn extends Backend
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("A1", "退销单号")
             ->setCellValue("B1", "采购单号")
             ->setCellValue("C1", "供应商")  //利用setCellValues()填充数据
-            ->setCellValue("D1", "SKU");   
+            ->setCellValue("D1", "SKU");
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("E1", "供应商SKU")
             ->setCellValue("F1", "采购数量")
             ->setCellValue("G1", "到货数量")
@@ -594,7 +594,7 @@ class PurchaseReturn extends Backend
 
         foreach ($list as $key => $value) {
 
-            $spreadsheet->getActiveSheet()->setCellValue("A" . ($key * 1 + 2), $value['return_number']);
+            $spreadsheet->getActiveSheet()->setCellValue("A" . ($key * 1 + 2), $value['return_number'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
             $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $value['purchaseorder']['purchase_number'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
             $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 1 + 2), $value['supplier']['supplier_name']);
             $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 1 + 2), $value['sku']);
@@ -606,7 +606,7 @@ class PurchaseReturn extends Backend
 
             if ($value['return_type'] == 1) {
                 $type = '仅退款';
-            } elseif($value['return_type'] == 2) {
+            } elseif ($value['return_type'] == 2) {
                 $type = '退货退款';
             } else {
                 $type = '调换货';
@@ -620,7 +620,6 @@ class PurchaseReturn extends Backend
             $spreadsheet->getActiveSheet()->setCellValue("P" . ($key * 1 + 2), $value['supplier_address']);
             $spreadsheet->getActiveSheet()->setCellValue("Q" . ($key * 1 + 2), $value['createtime']);
             $spreadsheet->getActiveSheet()->setCellValue("R" . ($key * 1 + 2), $value['create_person']);
-
         }
 
         //设置宽度
@@ -628,7 +627,7 @@ class PurchaseReturn extends Backend
         $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(30);
         $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(30);
         $spreadsheet->getActiveSheet()->getColumnDimension('D')->setWidth(20);
-        $spreadsheet->getActiveSheet()->getColumnDimension('E')->setWidth(12); 
+        $spreadsheet->getActiveSheet()->getColumnDimension('E')->setWidth(12);
         $spreadsheet->getActiveSheet()->getColumnDimension('F')->setWidth(12);
         $spreadsheet->getActiveSheet()->getColumnDimension('G')->setWidth(12);
 
@@ -645,7 +644,7 @@ class PurchaseReturn extends Backend
         $spreadsheet->getActiveSheet()->getColumnDimension('Q')->setWidth(20);
         $spreadsheet->getActiveSheet()->getColumnDimension('R')->setWidth(20);
 
-        
+
 
         //设置边框
         $border = [
@@ -664,13 +663,13 @@ class PurchaseReturn extends Backend
         $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
 
         $spreadsheet->getActiveSheet()->getStyle('A1:R' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-       
+
 
         $spreadsheet->setActiveSheetIndex(0);
         // return exportExcel($spreadsheet, 'xls', '登陆日志');
         $format = 'xlsx';
         $savename = '退销单数据' . date("YmdHis", time());;
-        
+
         if ($format == 'xls') {
             //输出Excel03版本
             header('Content-Type:application/vnd.ms-excel');
