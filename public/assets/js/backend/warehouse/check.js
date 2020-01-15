@@ -352,7 +352,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-se
 
             bindevent: function (success, error) {
 
-
                 Form.api.bindevent($("form[role=form]"), success, error);
 
                 //模糊匹配订单
