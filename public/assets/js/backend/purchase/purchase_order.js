@@ -667,6 +667,26 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                 })
 
 
+                //获取sku信息
+                $(document).on('change', '.sku', function () {
+                    var sku = $(this).val();
+                    var supplier_id = $('.supplier.selectpicker').val();
+                    var _this = $(this);
+                    if (!sku) {
+                        return false;
+                    }
+                    Backend.api.ajax({
+                        url: 'ajax/getSkuList',
+                        data: { sku: sku, supplier_id: supplier_id }
+                    }, function (data, ret) {
+                        _this.parent().parent().find('.product_name').val(data.name);
+                        _this.parent().parent().find('.supplier_sku').val(data.supplier_sku);
+                    }, function (data, ret) {
+                        Fast.api.error(ret.msg);
+                    });
+
+                })
+
                 //模糊匹配订单
                 $('.sku').autocomplete({
                     source: function (request, response) {
@@ -699,29 +719,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                     pagingMore: true,
                     max: 5000
                 });
-
-
-                //获取sku信息
-                $(document).on('change', '.sku', function () {
-                    var sku = $(this).val();
-                    var supplier_id = $('.supplier.selectpicker').val();
-                    var _this = $(this);
-                    if (!sku) {
-                        return false;
-                    }
-                    Backend.api.ajax({
-                        url: 'ajax/getSkuList',
-                        data: { sku: sku, supplier_id: supplier_id }
-                    }, function (data, ret) {
-                        _this.parent().parent().find('.product_name').val(data.name);
-                        _this.parent().parent().find('.supplier_sku').val(data.supplier_sku);
-                    }, function (data, ret) {
-                        Fast.api.error(ret.msg);
-                    });
-
-                })
-
-
 
                 //选中的开始时间和现在的时间比较
                 $(document).on('dp.change', '.delivery_stime', function () {
