@@ -868,8 +868,9 @@ where cped.attribute_id in(146,147) and cped.store_id=0 and cped.entity_id=$prod
         //水平垂直居中   
         // $objSheet->getDefaultStyle()->getAlignment()->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
         // $objSheet->getDefaultStyle()->getAlignment()->setVertical(\PHPExcel_Style_Alignment::VERTICAL_CENTER);
-        // //自动换行
-        // $objSheet->getDefaultStyle()->getAlignment()->setWrapText(true);
+   
+        //自动换行
+        $spreadsheet->getDefaultStyle()->getAlignment()->setWrapText(true);
 
         // Set active sheet index to the first sheet, so Excel opens this as the first sheet
         $spreadsheet->setActiveSheetIndex(0);
