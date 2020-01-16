@@ -466,11 +466,12 @@ class Outstock extends Backend
             if(0 != $thisPagePriceInfo){
                 foreach($list as $keys => $vals){
                     if(array_key_exists($vals['id'],$thisPagePriceInfo)){
-                         $list[$keys]['total_money'] = $thisPagePriceInfo[$vals['id']];
+                         $list[$keys]['total_money'] = round($thisPagePriceInfo[$vals['id']],2);
                     }
                 }
             }
-            $result = array("total" => $total, "rows" => $list,"totalPriceInfo"=>$totalPriceInfo['total_money']);
+            $total_money = round($totalPriceInfo['total_money'],2);
+            $result = array("total" => $total, "rows" => $list,"totalPriceInfo"=>$total_money);
 
             return json($result);
         }
