@@ -34,14 +34,14 @@ class OrderReturn extends Backend
     protected $zeelool = null;
     protected $modelItem = null;
     protected $relationSearch = true;
-    protected $noNeedLogin = [
-        'zeelool_order_return',
-        'voogueme_order_return',
-        'nihao_order_return',
-        'zeelool_order_return_item',
-        'voogueme_order_return_item',
-        'nihao_order_return_item'
-    ];
+    // protected $noNeedLogin = [
+    //     'zeelool_order_return',
+    //     'voogueme_order_return',
+    //     'nihao_order_return',
+    //     'zeelool_order_return_item',
+    //     'voogueme_order_return_item',
+    //     'nihao_order_return_item'
+    // ];
     public function _initialize()
     {
         parent::_initialize();

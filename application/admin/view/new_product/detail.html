@@ -303,7 +303,10 @@
         <div class="col-xs-12 col-sm-3">
             {:Form::select('row[supplier_id]', $AllSupplier, $row.supplier_id, ['class'=>'form-control selectpicker', 'data-rule'=>'required','data-live-search' => true,'disabled'=>'disabled'])}
         </div>
-        
+        <label class="control-label col-xs-12 col-sm-2">{:__('1688链接')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-link"  class="form-control" name="row[link]" type="text" value="{$row['link']}">
+        </div>
     </div>
 
    

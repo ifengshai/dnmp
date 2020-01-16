@@ -67,13 +67,13 @@ class NewProduct extends Backend
             }
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
-                ->with(['supplier'])
+                ->with(['supplier', 'newproductattribute'])
                 ->where($where)
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->model
-                ->with(['supplier'])
+                ->with(['supplier', 'newproductattribute'])
                 ->where($where)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
@@ -100,10 +100,15 @@ class NewProduct extends Backend
                 $itemColor = $params['color'];
                 $supplierSku = $params['supplier_sku'];
                 $price = $params['price'];
+                $skuId = $params['skuid'];
                 //区分是镜架还是配饰
                 $item_type = $params['item_type'];
                 $data = $itemAttribute = [];
                 if (3 == $item_type) { //配饰
+
+                    if (!$params['supplier_id']) {
+                        $this->error('供应商不能为空');
+                    }
 
                     if (!array_filter($itemName)) {
                         $this->error('商品名称不能为空！！');
@@ -156,6 +161,7 @@ class NewProduct extends Backend
                             $data['supplier_sku']    = $supplierSku[$k];
                             $data['create_person'] = session('admin.nickname');
                             $data['create_time'] = date("Y-m-d H:i:s", time());
+                            $data['link']    = $params['link'];
                             //后来添加的商品数据
                             if (!empty($params['origin_skus'])) {
                                 $data['sku'] = $params['origin_sku'] . '-' . sprintf("%02d", $count + 1);
@@ -180,6 +186,9 @@ class NewProduct extends Backend
                                 $supplier_data['supplier_id'] = $data['supplier_id'];
                                 $supplier_data['createtime'] = date("Y-m-d H:i:s", time());
                                 $supplier_data['create_person'] = session('admin.nickname');
+                                $supplier_data['link'] = $data['link'];
+                                $supplier_data['is_matching'] = 1;
+                                $supplier_data['skuid'] = $skuId[$k];
                                 Db::name('supplier_sku')->insert($supplier_data);
                             }
                         }
@@ -201,7 +210,6 @@ class NewProduct extends Backend
                     }
                 } else {
 
-                    $skuId = $params['skuid'];
 
                     //求出材质对应的编码
                     if ($params['frame_texture']) {
@@ -849,8 +857,13 @@ class NewProduct extends Backend
             $list[$k]['price'] = @$v->price ? @$v->price : @$v->consignPrice;
             $list[$k]['skuId'] = $v->skuId;
         }
+
+        $categoryId = input('categoryId');
+        $info = $this->category->getCategoryTexture($categoryId);
         if ($list) {
-            $this->success('采集成功！！', '', $list);
+            $data['list'] = $list;
+            $data['colorResult'] = $info['colorResult'];
+            $this->success('采集成功！！', '', $data);
         } else {
             $this->error('未采集到数据！！', '', $list);
         }

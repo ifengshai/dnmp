@@ -72,7 +72,7 @@ class Zeelool extends Backend
                 $map['increment_id'] = ['in', $order_arr];
                 unset($filter['task_label']);
                 $this->request->get(['filter' => json_encode($filter)]);
-            } 
+            }
 
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
 
@@ -552,15 +552,54 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
     //批量导出xls
     public function batch_export_xls()
     {
-        $entity_ids = rtrim(input('id_params'), ',');
-        // dump($entity_ids);        
-        $processing_order_querySql = "select sfo.increment_id,sfoi.product_options,sfoi.order_id,sfo.`status`,sfoi.sku,sfoi.product_id,sfoi.qty_ordered,sfo.created_at
-from sales_flat_order_item sfoi
-left join sales_flat_order sfo on  sfoi.order_id=sfo.entity_id 
-where sfo.`status` in ('processing','creditcard_proccessing','free_processing','paypal_reversed','complete') and sfo.entity_id in($entity_ids)
-order by sfoi.order_id desc;";
-        $resultList = Db::connect('database.db_zeelool')->query($processing_order_querySql);
+        set_time_limit(0);
+        ini_set('memory_limit', '512M');
+        //         $entity_ids = rtrim(input('id_params'), ',');
+        //         // dump($entity_ids);        
+        //         $processing_order_querySql = "select sfo.increment_id,sfoi.product_options,sfoi.order_id,sfo.`status`,sfoi.sku,sfoi.product_id,sfoi.qty_ordered,sfo.created_at
+        // from sales_flat_order_item sfoi
+        // left join sales_flat_order sfo on  sfoi.order_id=sfo.entity_id 
+        // where sfo.`status` in ('processing','creditcard_proccessing','free_processing','paypal_reversed','complete') and sfo.entity_id in($entity_ids)
+        // order by sfoi.order_id desc;";
+        //         $resultList = Db::connect('database.db_zeelool')->query($processing_order_querySql);
         // dump($resultList);
+
+        $ids = input('id_params');
+
+        $filter = json_decode($this->request->get('filter'), true);
+
+        if ($filter['increment_id']) {
+            $map['sfo.status'] = ['in', ['free_processing', 'processing', 'complete']];
+        } elseif (!$filter['status']) {
+            $map['sfo.status'] = ['in', ['free_processing', 'processing']];
+        }
+
+        $infoSynergyTask = new \app\admin\model\infosynergytaskmanage\InfoSynergyTask;
+        if ($filter['task_label'] == 1 || $filter['task_label'] == '0') {
+            $swhere['is_del'] = 1;
+            $swhere['order_platform'] = 1;
+            $swhere['synergy_order_id'] = 2;
+            $order_arr = $infoSynergyTask->where($swhere)->order('create_time desc')->column('synergy_order_number');
+            $map['sfo.increment_id'] = ['in', $order_arr];
+            unset($filter['task_label']);
+            $this->request->get(['filter' => json_encode($filter)]);
+        }
+
+        if ($ids) {
+            $map['sfo.entity_id'] = ['in', $ids];
+        }
+
+        list($where) = $this->buildparams();
+        $field = 'sfo.increment_id,sfoi.product_options,sfoi.order_id,sfo.`status`,sfoi.sku,sfoi.product_id,sfoi.qty_ordered,sfo.created_at';
+        $resultList = $this->model->alias('sfo')
+            ->join(['sales_flat_order_item' => 'sfoi'], 'sfoi.order_id=sfo.entity_id')
+            ->field($field)
+            ->where($map)
+            ->where($where)
+            ->order('sfoi.order_id desc')
+            ->select();
+
+        $resultList = collection($resultList)->toArray();
 
         $resultList = $this->qty_order_check($resultList);
 
@@ -804,8 +843,6 @@ order by sfoi.order_id desc;";
         ];
 
 
-
-
         $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
         $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
 
@@ -880,7 +917,7 @@ EOF;
 
             //查询产品货位号
             $store_sku = new \app\admin\model\warehouse\StockHouse;
-            $cargo_number = $store_sku->alias('a')->where(['status' => 1,'b.is_del' => 1])->join(['fa_store_sku' => 'b'], 'a.id=b.store_id')->column('coding', 'sku');
+            $cargo_number = $store_sku->alias('a')->where(['status' => 1, 'b.is_del' => 1])->join(['fa_store_sku' => 'b'], 'a.id=b.store_id')->column('coding', 'sku');
 
             //查询sku映射表
             $item = new \app\admin\model\itemmanage\ItemPlatformSku;
