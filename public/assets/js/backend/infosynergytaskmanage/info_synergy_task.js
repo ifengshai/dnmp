@@ -504,10 +504,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','bootstrap-table-jump-
                                          '</div>'+
                                          '<table id="caigou-table-sku">'+
                                          '<tr>'+
-                                         '<th>原始SKU</th>'+
-                                         '<th>原始数量</th>'+
-                                         '<th>变更SKU</th>'+
-                                         '<th>变更数量</th>'+
+                                         '<th>原SKU</th>'+
+                                         '<th>原数量(+增加)</th>'+
+                                         '<th>新SKU/th>'+
+                                         '<th>新数量(-减少)</th>'+
                                          '<th>操作</th>'+
                                          '</tr>';
                                      for(var j = 0,len = item.length; j <len; j++) {

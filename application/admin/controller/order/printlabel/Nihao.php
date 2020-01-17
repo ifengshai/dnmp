@@ -603,6 +603,13 @@ where cped.attribute_id in(146,147) and cped.store_id=0 and cped.entity_id=$prod
             $map['sfo.entity_id'] = ['in', $ids];
         }
 
+        if ($filter['created_at']) {
+            $created_at = explode(' - ', $filter['created_at']);
+            $map['sfo.created_at'] = ['between', [$created_at[0], $created_at[1]]];
+            unset($filter['created_at']);
+            $this->request->get(['filter' => json_encode($filter)]);
+        }
+
         list($where) = $this->buildparams();
         $field = 'sfo.increment_id,sfoi.product_options,sfoi.order_id,sfo.`status`,sfoi.sku,sfoi.product_id,sfoi.qty_ordered,sfo.created_at';
         $resultList = $this->model->alias('sfo')
@@ -861,8 +868,9 @@ where cped.attribute_id in(146,147) and cped.store_id=0 and cped.entity_id=$prod
         //水平垂直居中   
         // $objSheet->getDefaultStyle()->getAlignment()->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
         // $objSheet->getDefaultStyle()->getAlignment()->setVertical(\PHPExcel_Style_Alignment::VERTICAL_CENTER);
-        // //自动换行
-        // $objSheet->getDefaultStyle()->getAlignment()->setWrapText(true);
+   
+        //自动换行
+        $spreadsheet->getDefaultStyle()->getAlignment()->setWrapText(true);
 
         // Set active sheet index to the first sheet, so Excel opens this as the first sheet
         $spreadsheet->setActiveSheetIndex(0);

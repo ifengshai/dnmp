@@ -9,7 +9,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui','custom-css','b
                 pageList: [10, 25, 50, 100],
                 //searchFormTemplate: 'customformtpl',
                 extend: {
-                    index_url: 'saleaftermanage/sale_after_task/index' + location.search,
+                    index_url: 'saleaftermanage/sale_after_task/index' + location.search + '/task_number/' + Config.task_number,
                     add_url: 'saleaftermanage/sale_after_task/add',
                     edit_url: 'saleaftermanage/sale_after_task/edit',
                     //del_url: 'saleaftermanage/sale_after_task/del',

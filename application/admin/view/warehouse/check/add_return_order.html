@@ -5,7 +5,7 @@
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">退销类型:</label>
         <div class="col-xs-12 col-sm-8">
-            <select name="row[return_type]" class="form-control">
+            <select name="row[return_type]" class="form-control" data-rule='required'>
                 <option value="">请选择</option>
                 <option value="1">仅退款</option>
                 <option value="2">退货退款</option>
@@ -18,7 +18,7 @@
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">供应商:</label>
         <div class="col-xs-12 col-sm-8"> 
-            <select name="row[supplier_id]" class="form-control supplier selectpicker" data-live-search='true' required>
+            <select name="row[supplier_id]" class="form-control supplier selectpicker" data-live-search='true'  data-rule='required'>
                 <option value="">请选择</option>
                 {foreach $supplier as $k => $v}
                 <option value="{$k}">{$v}</option>
