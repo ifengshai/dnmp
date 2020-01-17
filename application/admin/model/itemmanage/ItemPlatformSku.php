@@ -55,6 +55,9 @@ class ItemPlatformSku extends Model
                     case 'amazon':
                         $prefix = 'A';
                         break;
+                    case 'wesee':
+                        $prefix = 'W';
+                        break;    
                 }
                 $arr[$k]['sku'] = $row['sku'];
                 $arr[$k]['platform_sku'] = $prefix . $row['sku'];
