@@ -441,11 +441,16 @@ class PurchaseOrder extends Backend
      */
     public function logistics($ids = null)
     {
-        $row = $this->model->get($ids);
-        if (!$row) {
-            $this->error(__('No Results were found'));
+        $ids = $ids ?? input($ids);
+        $ids = explode(',', $ids);
+        if (count($ids) > 1) {
+            $row = $this->model->where(['id' => ['in', $ids]])->select();
+        } else {
+            $row = $this->model->get($ids);
+            if (!$row) {
+                $this->error(__('No Results were found'));
+            }
         }
-
         $adminIds = $this->getDataLimitAdminIds();
         if (is_array($adminIds)) {
             if (!in_array($row[$this->dataLimitField], $adminIds)) {
@@ -467,20 +472,31 @@ class PurchaseOrder extends Backend
                     }
                     $params['is_add_logistics'] = 1;
                     $params['purchase_status'] = 6; //待收货
-                    $result = $row->allowField(true)->save($params);
+                    $result = $this->model->allowField(true)->isUpdate(true, ['id' => ['in', $ids]])->save($params);
 
                     //添加快递100订阅推送服务
                     $logistics_company_no = explode(',', trim($params['logistics_company_no']));
                     $logistics_number = explode(',', trim($params['logistics_number']));
-                    Kuaidi100::setPoll($logistics_company_no[0], $logistics_number[0], $row->id);
+                    Kuaidi100::setPoll($logistics_company_no[0], $logistics_number[0], implode(',', $ids));
 
                     //添加物流汇总表
                     $logistics = new \app\admin\model\LogisticsInfo();
-                    $list['logistics_number'] = $params['logistics_number'];
-                    $list['type'] = 1;
-                    $list['order_number'] = $row['purchase_number'];
-                    $list['purchase_id'] = $ids;
-                    $logistics->addLogisticsInfo($list);
+                    if (count($ids) > 1) {
+                        foreach ($row as $k => $v) {
+                            $list['logistics_number'] = $params['logistics_number'];
+                            $list['type'] = 1;
+                            $list['order_number'] = $v['purchase_number'];
+                            $list['purchase_id'] = $v['id'];
+                            $logistics->addLogisticsInfo($list);
+                        }
+                    } else {
+                        $list['logistics_number'] = $params['logistics_number'];
+                        $list['type'] = 1;
+                        $list['order_number'] = $row['purchase_number'];
+                        $list['purchase_id'] = $row['id'];
+                        $logistics->addLogisticsInfo($list);
+                    }
+
 
                     Db::commit();
                 } catch (ValidateException $e) {
@@ -507,7 +523,8 @@ class PurchaseOrder extends Backend
 
 
     /**
-     * 录入物流单号
+     * 备注
+     * 
      */
     public function remark()
     {
@@ -990,7 +1007,7 @@ class PurchaseOrder extends Backend
         }
         $data['push_time'] = date('Y-m-d H:i:s'); //推送时间
         $data['logistics_info'] = serialize($params);
-        $res = $this->model->allowField(true)->save($data, ['id' => $purchase_id]);
+        $res = $this->model->allowField(true)->save($data, ['id' => ['in', $purchase_id]]);
         if ($res !== false) {
             return json(['result' => true, 'returnCode' => 200, 'message' => '接收成功']);
         } else {

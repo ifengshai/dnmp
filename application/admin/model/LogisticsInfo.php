@@ -30,11 +30,13 @@ class LogisticsInfo extends Model
         $res = $this->where('order_number', $params['order_number'])->find();
         if ($res) {
             $list['id'] = $res['id'];
-            return $this->allowField(true)->save($params, $list);
+            
+            $this->where($list)->update(['logistics_number' => $params['logistics_number']]);
+
         } else {
             $params['createtime'] = date('Y-m-d H:i:s', time());
             $params['create_person'] = session('admin.nickname');
-            return $this->allowField(true)->save($params);
+            $this->allowField(true)->isUpdate(false)->data($params)->save();
         }
     }
 }

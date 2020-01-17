@@ -271,7 +271,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                 return false;
             });
 
-
+            $(document).on('click', ".btn-logistics", function () {
+                var ids = Table.api.selectedids(table);
+                
+                var url = 'purchase/purchase_order/logistics?ids=' + ids;
+                Fast.api.open(url, __('录入物流单号'), { area: ['50%', '60%'] });
+               
+                return false;
+            });
 
             //审核通过
             $(document).on('click', '.btn-open', function () {
@@ -317,7 +324,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                     data: {}
                 }, function (data, ret) {
                     layer.closeAll();
-                    //table.bootstrapTable('refresh');
+                    table.bootstrapTable('refresh');
                 });
             })
         },
