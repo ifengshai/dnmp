@@ -375,6 +375,8 @@ table.altrowstable tr:nth-child(even){
                             <th style="text-align: center; vertical-align: middle;">创建时间</th>
                             <th style="text-align: center; vertical-align: middle;">付款金额</th>
                             <th style="text-align: center; vertical-align: middle;">优惠券</th>
+                            <th style="text-align: center; vertical-align: middle;">优惠码</th>
+
                         </tr>
                         </thead>
                         {notempty name="orderInfoResult"}
@@ -391,6 +393,7 @@ table.altrowstable tr:nth-child(even){
                                  <td style="text-align: center; vertical-align: middle;">{$orderInfoList.created_at}</td>
                                  <td style="text-align: center; vertical-align: middle;">{:round($orderInfoList.base_total_paid+$orderInfoList.base_total_due,2)}</td>
                                  <td style="text-align: center; vertical-align: middle;">{$orderInfoList.coupon_code}</td>
+                                 <td style="text-align: center; vertical-align: middle;">{$orderInfoList.coupon_rule_name}</td>
                              </tr>
                             {/foreach}
                         {/notempty}
@@ -406,8 +409,13 @@ table.altrowstable tr:nth-child(even){
                             <th style="text-align: center; vertical-align: middle;">SKU</th>
                             <th style="text-align: center; vertical-align: middle;">name</th>
                             <th style="text-align: center; vertical-align: middle;">qty_ordered</th>
+                            <th style="text-align: center; vertical-align: middle;">frame_price</th>
+                            <th style="text-align: center; vertical-align: middle;">original_price</th>
+                            <th style="text-align: center; vertical-align: middle;">discount_amount</th>
                             <th style="text-align: center; vertical-align: middle;">coatiing_name</th>
+                            <th style="text-align: center; vertical-align: middle;">coatiing_price</th>
                             <th style="text-align: center; vertical-align: middle;">index_type</th>
+                            <th style="text-align: center; vertical-align: middle;">index_price</th>
                             <th style="text-align: center; vertical-align: middle;">prescription_type</th>
                             <th style="text-align: center; vertical-align: middle;">left/right</th>                            
                             <th style="text-align: center; vertical-align: middle;">SPH</th>
@@ -427,8 +435,13 @@ table.altrowstable tr:nth-child(even){
                             <td style="text-align: center; vertical-align: middle;">{$itemInfoList.sku}</td>
                             <td style="text-align: center; vertical-align: middle;">{$itemInfoList.name}</td>
                             <td style="text-align: center; vertical-align: middle;">{:round($itemInfoList.qty_ordered)}</td>
+                            <td style="text-align: center; vertical-align: middle;">{:round($itemInfoList.frame_price,2)}</td>
+                            <td style="text-align: center; vertical-align: middle;">{:round($itemInfoList.original_price,2)}</td>
+                            <td style="text-align: center; vertical-align: middle;">{:round($itemInfoList.discount_amount,2)}</td>                            
                             <td style="text-align: center; vertical-align: middle;">{$itemInfoList.coatiing_name}</td>
+                            <td style="text-align: center; vertical-align: middle;">{$itemInfoList.coatiing_price}</td>
                             <td style="text-align: center; vertical-align: middle;">{$itemInfoList.index_type}</td>
+                            <td style="text-align: center; vertical-align: middle;">{$itemInfoList.index_price}</td>
                             <td style="text-align: center; vertical-align: middle;">{$itemInfoList.prescription_type}</td>
                             <td style="text-align: center; vertical-align: middle;">right<br>left</td>
                             <td style="text-align: center; vertical-align: middle;">{$itemInfoList.od_sph}<br>{$itemInfoList.os_sph}</td>
