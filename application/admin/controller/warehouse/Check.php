@@ -530,13 +530,13 @@ class Check extends Backend
                         $purchase = new \app\admin\model\purchase\PurchaseOrder;
                         //修改采购单质检状态
                         $purchase_data['check_status'] = $check_status;
-                        $purchase->allowField(true)->save($purchase_data, ['id' => $v['purchase_id']]);
+                        $purchase->where(['id' => $v['purchase_id']])->update($purchase_data);
                     }
 
                     //退货质检
                     if ($v['order_return_id']) {
                         $orderReturn = new \app\admin\model\saleaftermanage\OrderReturn;
-                        $orderReturn->allowField(true)->save(['quality_status' => 1], ['id' => $v['order_return_id']]);
+                        $orderReturn->where(['id' => $v['order_return_id']])->update(['quality_status' => 1]);
                     }
                 }
             }

@@ -772,6 +772,7 @@ class PurchaseOrder extends Backend
         $data['check_status'] = 2;
         $data['stock_status'] = 2;
         $data['return_status'] = 2;
+        $data['purchase_status'] = 7;
         $data['is_diff'] = 1;
         $res = $this->model->allowField(true)->save($data, ['id' => $id]);
         if ($res !== false) {
