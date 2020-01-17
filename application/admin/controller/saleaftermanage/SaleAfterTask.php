@@ -87,6 +87,7 @@ class SaleAfterTask extends Backend
     public function index()
     {
         //设置过滤方法
+        $task_number = input('task_number');
         $this->request->filter(['strip_tags']);
         if ($this->request->isAjax()) {
             //如果发送的来源是Selectpage，则转发到Selectpage
@@ -123,6 +124,7 @@ class SaleAfterTask extends Backend
 
             return json($result);
         }
+        $this->assignconfig('task_number', $task_number ?? '');
         return $this->view->fetch();
     }
     /**
