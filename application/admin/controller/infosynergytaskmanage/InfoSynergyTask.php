@@ -927,6 +927,40 @@ class InfoSynergyTask extends Backend
         $writer = new $class($spreadsheet);
 
         $writer->save('php://output');
-    }    
+    }
+	/***
+	 **任务处理完成之后添加备注功能
+	 */
+	public function add_remark($ids=null)
+	{
+        $row = $this->model->get($ids);
+        if (!$row) {
+            $this->error(__('No Results were found'));
+        }
+        $adminIds = $this->getDataLimitAdminIds();
+        if (is_array($adminIds)) {
+            if (!in_array($row[$this->dataLimitField], $adminIds)) {
+                $this->error(__('You have no permission'));
+            }
+        }
+        if ($this->request->isPost()){
+            $params = $this->request->post("row/a");
+            if ($params) {
+                $params = $this->preExcludeFields($params);                                 
+				if (!empty($params['remark_record'])) {
+					$dataRecord = [];
+					$dataRecord['tid'] = $row['id'];
+					$dataRecord['remark_record'] = strip_tags($params['remark_record']);
+					$dataRecord['create_person'] = session('admin.nickname');
+					$dataRecord['create_time']   = date("Y-m-d H:i:s", time());
+					(new InfoSynergyTaskRemark())->allowField(true)->save($dataRecord);
+				}
+				$this->success();
+            }
+            $this->error(__('Parameter %s can not be empty', ''));
+        }
+		$this->view->assign('orderReturnRemark', (new InfoSynergyTaskRemark())->getSynergyTaskRemarkById($row['id']));
+        return $this->view->fetch();		
+	} 
 
 }
