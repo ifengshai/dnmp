@@ -132,6 +132,24 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','bootstrap-table-jump-
                                             
                                     }
 
+                                },
+								{
+                                    name: 'remark',
+                                    text: '添加备注',
+                                    title: __('添加备注'),
+                                    classname: 'btn btn-xs btn-success btn-dialog',
+                                    icon: 'fa fa-pencil',
+                                    url:  'infosynergytaskmanage/info_synergy_task/add_remark',
+                                    extend: 'data-area = \'["100%","100%"]\'',
+                                    callback: function (data) {
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                    },
+                                    visible: function (row) {
+                                        if(row.synergy_status == 2){
+                                            return true;
+                                        }
+                                            return false;
+                                    }
                                 }
                                 // {
                                 //     name: 'handleComplete',
@@ -1368,7 +1386,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','bootstrap-table-jump-
                     node.hide();
                 }
             });
-        }
+        },
+		add_remark:function(){
+            Form.api.bindevent($("form[role=form]"));
+        },
     };
     return Controller;
 });
