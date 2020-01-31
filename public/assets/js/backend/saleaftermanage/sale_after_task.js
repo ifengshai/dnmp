@@ -9,7 +9,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui','custom-css','b
                 pageList: [10, 25, 50, 100],
                 //searchFormTemplate: 'customformtpl',
                 extend: {
-                    index_url: 'saleaftermanage/sale_after_task/index' + location.search,
+                    index_url: 'saleaftermanage/sale_after_task/index' + location.search + '/task_number/' + Config.task_number,
                     add_url: 'saleaftermanage/sale_after_task/add',
                     edit_url: 'saleaftermanage/sale_after_task/edit',
                     //del_url: 'saleaftermanage/sale_after_task/del',
@@ -91,6 +91,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui','custom-css','b
                         {field: 'problem_desc', title: __('problem_desc'),formatter:Controller.api.formatter.getClear,operate:false},
                         {field: 'create_person', title: __('Create_person')},
                         {field: 'create_time', title: __('Createtime'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime},
+						{field: 'complete_time', title: __('完成时间'), operate:'RANGE', addclass:'datetimerange'},
                         // {field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate,
                         //     buttons:[{
                         //         name:'detail',

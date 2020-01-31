@@ -41,6 +41,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','bootstrap-table-jump-
                         {field: 'synergy_order_id', title: __('Synergy_order_id'),searchList:$.getJSON('infosynergytaskmanage/info_synergy_task/getOrderType'),formatter:Controller.api.formatter.synergyOrderId},
                         // {field: 'synergy_order_id', title: __('哈哈'),searchList:{"1":"haha","2":"呵呵","3":"嘻嘻"},formatter: Table.api.formatter.status},
                         {field: 'synergy_order_number', title: __('Synergy_order_number')},
+						{field:'order_skus',title:__('订单SKU')},
                         {field: 'order_platform', title: __('Order_platform'),searchList:$.getJSON('saleaftermanage/sale_after_task/getAjaxOrderPlatformList'),formatter: Controller.api.formatter.orderDevice},
                         {
                             field: 'synergy_status',
@@ -131,6 +132,24 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','bootstrap-table-jump-
                                             
                                     }
 
+                                },
+								{
+                                    name: 'remark',
+                                    text: '添加备注',
+                                    title: __('添加备注'),
+                                    classname: 'btn btn-xs btn-success btn-dialog',
+                                    icon: 'fa fa-pencil',
+                                    url:  'infosynergytaskmanage/info_synergy_task/add_remark',
+                                    extend: 'data-area = \'["100%","100%"]\'',
+                                    callback: function (data) {
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                    },
+                                    visible: function (row) {
+                                        if(row.synergy_status == 2){
+                                            return true;
+                                        }
+                                            return false;
+                                    }
                                 }
                                 // {
                                 //     name: 'handleComplete',
@@ -1367,7 +1386,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','bootstrap-table-jump-
                     node.hide();
                 }
             });
-        }
+        },
+		add_remark:function(){
+            Form.api.bindevent($("form[role=form]"));
+        },
     };
     return Controller;
 });

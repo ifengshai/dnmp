@@ -603,8 +603,10 @@ class SaleAfterTask extends Model
         }
         if(!empty($customer_email)){
             // return $customer_email;
+            //求出用户的等级
+            $customer_group_code = Db::connect($db)->table('customer_entity c')->join('customer_group g',' c.group_id = g.customer_group_id')->value('g.customer_group_code');
             $result = Db::connect($db)->table('sales_flat_order o')->join('sales_flat_shipment_track s','o.entity_id=s.order_id','left')->join('sales_flat_order_payment p','o.entity_id=p.parent_id','left')->join('sales_flat_order_address a','o.entity_id=a.parent_id')->where('customer_email',$customer_email)->where('a.address_type','shipping')
-                ->field('o.entity_id,o.status,o.coupon_code,o.store_id,o.increment_id,o.customer_email,o.customer_firstname,o.customer_lastname,o.order_currency_code,o.total_item_count,o.base_grand_total,o.base_total_paid,o.base_total_due,o.created_at,s.track_number,s.title,p.base_amount_paid,p.base_amount_ordered,p.base_shipping_amount,p.method,p.last_trans_id,p.additional_information,a.telephone,a.postcode,a.street,a.city,a.region,a.country_id')->order('o.entity_id desc')->select();
+                ->field('o.entity_id,o.status,o.coupon_code,o.coupon_rule_name,o.store_id,o.increment_id,o.customer_email,o.customer_firstname,o.customer_lastname,o.order_currency_code,o.total_item_count,o.base_grand_total,o.base_total_paid,o.base_total_due,o.created_at,o.order_type,s.track_number,s.title,p.base_amount_paid,p.base_amount_ordered,p.base_shipping_amount,p.method,p.last_trans_id,p.additional_information,a.telephone,a.postcode,a.street,a.city,a.region,a.country_id')->order('o.entity_id desc')->select();
             //return $result;
             if(!$result){
                 return false;
@@ -620,6 +622,11 @@ class SaleAfterTask extends Model
                     $result[$k]['item'] = NihaoPrescriptionDetailHelper::get_one_by_increment_id($v['increment_id']);
                 }
                 
+            }
+            if($customer_group_code){
+                $customer['customer_group_code'] = $customer_group_code;
+            }else{
+                $customer['customer_group_code'] = '';
             }
             $customer['customer_email'] = $customer_email;
             $customer['customer_name'] = $result[0]['customer_firstname'].' '.$result[0]['customer_lastname'];

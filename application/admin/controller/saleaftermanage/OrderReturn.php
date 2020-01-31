@@ -447,6 +447,22 @@ class OrderReturn extends Backend
             if (!$customer) {
                 $this->error('找不到订单信息，请重新尝试', 'saleaftermanage/order_return/search?ref=addtabs');
             }
+			foreach($customer as $keys => $vals){
+				switch($vals['order_type']){
+					case 2:
+					$customer[$keys]['order_type'] = '批发';
+					break;
+					case 3:
+					$customer[$keys]['order_type'] = '网红';
+					break;
+					case 4:
+					$customer[$keys]['order_type'] = '补发';
+					break;
+					default:
+					$customer[$keys]['order_type'] = '普通订单';
+					break;
+				}
+			}
             //求出所有的订单号
             $allIncrementOrder = $customer['increment_id'];
             //求出会员的个人信息
@@ -455,6 +471,8 @@ class OrderReturn extends Backend
             unset($customer['increment_id']);
             $infoSynergyTaskResult = Db::name('info_synergy_task')->where('order_platform', $order_platform)->where('synergy_order_number', 'in', $allIncrementOrder)->order('id desc')->select();
             $saleAfterTaskResult = Db::name('sale_after_task')->where('order_platform', $order_platform)->where('order_number', 'in', $allIncrementOrder)->order('id desc')->select();
+            // dump($saleAfterTaskResult);
+            // exit;
             $orderReturnResult = Db::name('order_return')->where('order_platform', $order_platform)->where('increment_id', 'in', $allIncrementOrder)->order('id desc')->select();
             //求出承接部门和承接人
             $deptArr = (new AuthGroup())->getAllGroup();
@@ -497,6 +515,20 @@ class OrderReturn extends Backend
                     if ($v['synergy_order_id']) {
                         $infoSynergyTaskResult[$k]['synergy_order_id'] = $relateOrderType[$v['synergy_order_id']];
                     }
+                    switch($v['synergy_status']){
+                        case 1:
+                        $infoSynergyTaskResult[$k]['synergy_status'] = '处理中';
+                        break;
+                        case 2:
+                        $infoSynergyTaskResult[$k]['synergy_status'] = '处理完成';
+                        break;
+                        case 3:
+                        $infoSynergyTaskResult[$k]['synergy_status'] = '取消';
+                        break;
+                        default:
+                        $infoSynergyTaskResult[$k]['synergy_status'] = '未处理';
+                        break;                                
+                    }
                 }
             }
             if (!empty($saleAfterTaskResult)) {
@@ -514,7 +546,9 @@ class OrderReturn extends Backend
                         $saleAfterTaskResult[$k]['task_status'] = '处理中';
                     } elseif ($v['task_status'] == 2) {
                         $saleAfterTaskResult[$k]['task_status'] = '处理完成';
-                    } else {
+                    } elseif($v['task_status'] == 3){
+                        $saleAfterTaskResult[$k]['task_status'] = '取消';
+                    }else {
                         $saleAfterTaskResult[$k]['task_status'] = '未处理';
                     }
                     if ($v['prty_id']) {
@@ -522,6 +556,38 @@ class OrderReturn extends Backend
                     }
                     if ($v['problem_id']) {
                         $saleAfterTaskResult[$k]['problem_id'] = $issueList[$v['problem_id']];
+                    }
+                    switch($v['handle_scheme']){
+                        case 1:
+                        $saleAfterTaskResult[$k]['handle_scheme'] = '部分退款';
+                        break;
+                        case 2:
+                        $saleAfterTaskResult[$k]['handle_scheme'] = '退全款';
+                        break;
+                        case 3:
+                        $saleAfterTaskResult[$k]['handle_scheme'] = '补发';
+                        break;
+                        case 4:
+                        $saleAfterTaskResult[$k]['handle_scheme'] = '加钱补发';
+                        break;
+                        case 5:
+                        $saleAfterTaskResult[$k]['handle_scheme'] = '退款+补发';
+                        break;
+                        case 6:
+                        $saleAfterTaskResult[$k]['handle_scheme'] = '折扣买新';
+                        break;
+                        case 7:
+                        $saleAfterTaskResult[$k]['handle_scheme'] = '发放积分';
+                        break;
+                        case 8:
+                        $saleAfterTaskResult[$k]['handle_scheme'] = '安抚';
+                        break;
+                        case 9:
+                        $saleAfterTaskResult[$k]['handle_scheme'] = '长时间未回复';
+                        break;
+                        default:
+                        $saleAfterTaskResult[$k]['handle_scheme'] = '请选择';
+                        break;                            
                     }
                 }
             }
