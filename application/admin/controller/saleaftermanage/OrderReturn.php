@@ -447,6 +447,22 @@ class OrderReturn extends Backend
             if (!$customer) {
                 $this->error('找不到订单信息，请重新尝试', 'saleaftermanage/order_return/search?ref=addtabs');
             }
+			foreach($customer as $keys => $vals){
+				switch($vals['order_type']){
+					case 2:
+					$customer[$keys]['order_type'] = '批发';
+					break;
+					case 3:
+					$customer[$keys]['order_type'] = '网红';
+					break;
+					case 4:
+					$customer[$keys]['order_type'] = '补发';
+					break;
+					default:
+					$customer[$keys]['order_type'] = '普通订单';
+					break;
+				}
+			}
             //求出所有的订单号
             $allIncrementOrder = $customer['increment_id'];
             //求出会员的个人信息
