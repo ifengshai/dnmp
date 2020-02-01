@@ -8,6 +8,7 @@ use fast\Trackingmore;
 use Util\NihaoPrescriptionDetailHelper;
 use Util\ZeeloolPrescriptionDetailHelper;
 use Util\VooguemePrescriptionDetailHelper;
+use Util\WeseeopticalPrescriptionDetailHelper;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 use PhpOffice\PhpSpreadsheet\Reader\Xls;
 use PhpOffice\PhpSpreadsheet\Reader\Csv;
@@ -29,6 +30,7 @@ class Index extends Backend
         $this->nihao = new \app\admin\model\order\order\Nihao;
         $this->zeelool = new \app\admin\model\order\order\Zeelool;
         $this->voogueme = new \app\admin\model\order\order\Voogueme;        
+        $this->weseeoptical = new \app\admin\model\order\order\Weseeoptical;        
     }
 
     /**
@@ -59,6 +61,8 @@ class Index extends Backend
                 $model = $this->voogueme;
             } elseif ($label == 3) {
                 $model = $this->nihao;
+            } elseif ($label == 4) {
+                $model = $this->weseeoptical;
             }
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             
@@ -98,6 +102,8 @@ class Index extends Backend
             $model = $this->voogueme;
         } elseif ($label == 3) {
             $model = $this->nihao;
+        } elseif ($label == 4) {
+            $model = $this->weseeoptical;
         }
 
         //查询订单详情
@@ -122,6 +128,8 @@ class Index extends Backend
             $goods = VooguemePrescriptionDetailHelper::get_list_by_entity_ids($ids);
         } elseif ($label == 3) {
             $goods = NihaoPrescriptionDetailHelper::get_list_by_entity_ids($ids);
+        } elseif ($label == 4) {
+            $goods = WeseeopticalPrescriptionDetailHelper::get_list_by_entity_ids($ids);
         }
     
         //获取支付信息
