@@ -1116,8 +1116,10 @@ class InfoSynergyTask extends Backend
 			if(array_key_exists($value['id'],$info)){
 				$value['handle_result'] = $info[$value['id']];
 				$spreadsheet->getActiveSheet()->setCellValue("S" . ($key * 1 + 2), $value['handle_result']);
-			}
+			}else{
 				$spreadsheet->getActiveSheet()->setCellValue("S" . ($key * 1 + 2), '');
+			}
+
 
 
         }
