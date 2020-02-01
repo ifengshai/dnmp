@@ -374,7 +374,8 @@ table.altrowstable tr:nth-child(even){
                             <th style="text-align: center; vertical-align: middle;">国家</th>
                             <th style="text-align: center; vertical-align: middle;">订单状态</th>
                             <th style="text-align: center; vertical-align: middle;">创建时间</th>
-                            <th style="text-align: center; vertical-align: middle;">付款金额</th>
+							<th style="text-align: center; vertical-align: middle;">支付金额</th>
+                            <th style="text-align: center; vertical-align: middle;">订单金额($)</th>
                             <th style="text-align: center; vertical-align: middle;">优惠券</th>
                             <th style="text-align: center; vertical-align: middle;">优惠码</th>
 
@@ -393,7 +394,8 @@ table.altrowstable tr:nth-child(even){
                                  <td style="text-align: center; vertical-align: middle;">{$orderInfoList.order_currency_code}</td>
                                  <td style="text-align: center; vertical-align: middle;">{$orderInfoList.status}</td>
                                  <td style="text-align: center; vertical-align: middle;">{$orderInfoList.created_at}</td>
-                                 <td style="text-align: center; vertical-align: middle;">{:round($orderInfoList.base_total_paid+$orderInfoList.base_total_due,2)}</td>
+                                 <td style="text-align: center; vertical-align: middle;">{:round($orderInfoList.real_papid,3)}</td>
+								 <td style="text-align: center; vertical-align: middle;">{:round($orderInfoList.base_grand_total,2)}</td>
                                  <td style="text-align: center; vertical-align: middle;">{$orderInfoList.coupon_code}</td>
                                  <td style="text-align: center; vertical-align: middle;">{$orderInfoList.coupon_rule_name}</td>
                              </tr>

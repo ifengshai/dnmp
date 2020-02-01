@@ -530,13 +530,13 @@ class Check extends Backend
                         $purchase = new \app\admin\model\purchase\PurchaseOrder;
                         //修改采购单质检状态
                         $purchase_data['check_status'] = $check_status;
-                        $purchase->allowField(true)->save($purchase_data, ['id' => $v['purchase_id']]);
+                        $purchase->where(['id' => $v['purchase_id']])->update($purchase_data);
                     }
 
                     //退货质检
                     if ($v['order_return_id']) {
                         $orderReturn = new \app\admin\model\saleaftermanage\OrderReturn;
-                        $orderReturn->allowField(true)->save(['quality_status' => 1], ['id' => $v['order_return_id']]);
+                        $orderReturn->where(['id' => $v['order_return_id']])->update(['quality_status' => 1]);
                     }
                 }
             }
@@ -751,7 +751,7 @@ class Check extends Backend
             $spreadsheet->getActiveSheet()->setCellValueExplicit("C" . ($key * 1 + 2), $value['purchaseorder']['purchase_number'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
             $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 1 + 2), $value['purchaseorder']['create_person']);
             $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), $value['orderreturn']['return_order_number']);
-            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 1 + 2), $value['supplier_name']);
+            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 1 + 2), $value['supplier']['supplier_name']);
             $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 1 + 2), $value['purchaseorder']['purchase_remark']);
             $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 1 + 2), $value['remark']);
             $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 1 + 2), $value['sku']);
@@ -771,7 +771,7 @@ class Check extends Backend
         $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(30);
         $spreadsheet->getActiveSheet()->getColumnDimension('D')->setWidth(12);
         $spreadsheet->getActiveSheet()->getColumnDimension('E')->setWidth(30);
-        $spreadsheet->getActiveSheet()->getColumnDimension('F')->setWidth(12);
+        $spreadsheet->getActiveSheet()->getColumnDimension('F')->setWidth(30);
         $spreadsheet->getActiveSheet()->getColumnDimension('G')->setWidth(40);
 
         $spreadsheet->getActiveSheet()->getColumnDimension('H')->setWidth(40);
