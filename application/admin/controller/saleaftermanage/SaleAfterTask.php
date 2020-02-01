@@ -1296,12 +1296,15 @@ class SaleAfterTask extends Backend
         ->select();
         $repArr  = (new Admin())->getAllStaff();
         $list = collection($list)->toArray();
+		if(!$list){
+			return false;
+		}
 		$arr = [];
 		foreach($list as $keys => $vals){
 			$arr[] = $vals['id'];
 		}
-		dump($arr);
-		exit;
+		$info = (new SaleAfterTaskRemark())->fetchRelevanceRecord($arr);
+		$info = collection($info)->toArray();
         //从数据库查询需要的数据
         $spreadsheet = new Spreadsheet();
 
@@ -1330,7 +1333,8 @@ class SaleAfterTask extends Backend
             ->setCellValue("V1", "创建时间")
             ->setCellValue("W1", "处理时间")
             ->setCellValue("X1", "完成时间")
-            ->setCellValue("Y1", "退款方式");
+            ->setCellValue("Y1", "退款方式")
+			->setCellValue("Z1","处理备注");
         $spreadsheet->setActiveSheetIndex(0)->setTitle('售后任务数据');
 
         foreach ($list as $key => $value) {
@@ -1439,6 +1443,11 @@ class SaleAfterTask extends Backend
             $spreadsheet->getActiveSheet()->setCellValue("W" . ($key * 1 + 2), $value['handle_time']);
             $spreadsheet->getActiveSheet()->setCellValue("X" . ($key * 1 + 2), $value['complete_time']);
             $spreadsheet->getActiveSheet()->setCellValue("Y" . ($key * 1 + 2), $value['refund_way']);
+			if(array_key_exists($value['id'],$info)){
+				$value['handle_result'] = $info[$value['id']];
+			}
+			$spreadsheet->getActiveSheet()->setCellValue("Z" . ($key * 1 + 2), $value['handle_result']);
+			
         }
 
         //设置宽度
@@ -1467,6 +1476,7 @@ class SaleAfterTask extends Backend
         $spreadsheet->getActiveSheet()->getColumnDimension('W')->setWidth(20);
         $spreadsheet->getActiveSheet()->getColumnDimension('X')->setWidth(20);
         $spreadsheet->getActiveSheet()->getColumnDimension('Y')->setWidth(20);
+		$spreadsheet->getActiveSheet()->getColumnDimension('Z')->setWidth(200);
         //设置边框
         $border = [
             'borders' => [
