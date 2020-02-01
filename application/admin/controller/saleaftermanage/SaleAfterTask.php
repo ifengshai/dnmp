@@ -1303,8 +1303,13 @@ class SaleAfterTask extends Backend
 		foreach($list as $keys => $vals){
 			$arr[] = $vals['id'];
 		}
-		$info = (new SaleAfterTaskRemark())->fetchRelevanceRecord($arr);
-		$info = collection($info)->toArray();
+			$info = (new SaleAfterTaskRemark())->fetchRelevanceRecord($arr);
+	    if($info){
+			$info = collection($info)->toArray();
+		}else{
+			$info = [];	
+		}
+		
         //从数据库查询需要的数据
         $spreadsheet = new Spreadsheet();
 
@@ -1445,8 +1450,11 @@ class SaleAfterTask extends Backend
             $spreadsheet->getActiveSheet()->setCellValue("Y" . ($key * 1 + 2), $value['refund_way']);
 			if(array_key_exists($value['id'],$info)){
 				$value['handle_result'] = $info[$value['id']];
+				$spreadsheet->getActiveSheet()->setCellValue("Z" . ($key * 1 + 2), $value['handle_result']);
+			}else{
+				$spreadsheet->getActiveSheet()->setCellValue("Z" . ($key * 1 + 2), '');
 			}
-			$spreadsheet->getActiveSheet()->setCellValue("Z" . ($key * 1 + 2), $value['handle_result']);
+			
 			
         }
 

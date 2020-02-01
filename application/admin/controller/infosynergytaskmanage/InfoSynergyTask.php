@@ -985,8 +985,13 @@ class InfoSynergyTask extends Backend
 		foreach($list as $keys => $vals){
 			$arr[] = $vals['id'];
 		}
-		$info = (new InfoSynergyTaskRemark())->fetchRelevanceRecord($arr);
-		$info = collection($info)->toArray();
+			$info = (new InfoSynergyTaskRemark())->fetchRelevanceRecord($arr);
+		if($info){
+			$info = collection($info)->toArray();
+		}else{
+			$info = [];
+		}
+		
         //从数据库查询需要的数据
         $spreadsheet = new Spreadsheet();
 
@@ -1110,8 +1115,9 @@ class InfoSynergyTask extends Backend
             $spreadsheet->getActiveSheet()->setCellValue("R" . ($key * 1 + 2), $value['complete_time']);
 			if(array_key_exists($value['id'],$info)){
 				$value['handle_result'] = $info[$value['id']];
+				$spreadsheet->getActiveSheet()->setCellValue("S" . ($key * 1 + 2), $value['handle_result']);
 			}
-			$spreadsheet->getActiveSheet()->setCellValue("S" . ($key * 1 + 2), $value['handle_result']);
+				$spreadsheet->getActiveSheet()->setCellValue("S" . ($key * 1 + 2), '');
 
 
         }
