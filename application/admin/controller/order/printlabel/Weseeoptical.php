@@ -9,7 +9,7 @@ use think\Loader;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use think\Exception;
 use think\exception\PDOException;
-use Util\NihaoPrescriptionDetailHelper;
+use Util\WeseeopticalPrescriptionDetailHelper;
 use Util\SKUHelper;
 use app\admin\model\OrderLog;
 
@@ -18,7 +18,7 @@ use app\admin\model\OrderLog;
  *
  * @icon fa fa-circle-o
  */
-class Nihao extends Backend
+class Weseeoptical extends Backend
 {
 
     /**
@@ -32,7 +32,7 @@ class Nihao extends Backend
     public function _initialize()
     {
         parent::_initialize();
-        $this->model = new \app\admin\model\order\printlabel\Nihao;
+        $this->model = new \app\admin\model\order\printlabel\Weseeoptical;
     }
 
     // public function test(){
@@ -175,7 +175,7 @@ class Nihao extends Backend
             $data['custom_print_label_new'] = 1;
             $data['custom_print_label_created_at_new'] = date('Y-m-d H:i:s', time());
             $data['custom_print_label_person_new'] =  session('admin.nickname');
-            $connect = Db::connect('database.db_nihao')->table('sales_flat_order');
+            $connect = Db::connect('database.db_weseeoptical')->table('sales_flat_order');
             $connect->startTrans();
             try {
                 $result = $connect->where($map)->update($data);
@@ -191,7 +191,7 @@ class Nihao extends Backend
                 $params['type'] = 1;
                 $params['num'] = count($entity_ids);
                 $params['order_ids'] = implode(',', $entity_ids);
-                $params['site'] = 3;
+                $params['site'] = 4;
                 (new OrderLog())->setOrderLog($params);
 
 
@@ -217,6 +217,7 @@ class Nihao extends Backend
     public function setOrderStatus()
     {
         $entity_ids = input('id_params/a');
+        
         $status = input('status');
         $label = input('label');
         $map['entity_id'] = ['in', $entity_ids];
@@ -274,7 +275,6 @@ class Nihao extends Backend
             $item->startTrans();
             try {
                 $result = $this->model->where($map)->update($data);
-
                 if ($status == 1) {
                     //查询出质检通过的订单
                     $res = $this->model->alias('a')->where($map)->field('a.increment_id,b.sku,b.qty_ordered,b.is_change_frame')->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->select();
@@ -283,8 +283,8 @@ class Nihao extends Backend
                     };
 
                     $ItemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku;
-                    //查出订单SKU映射表对应的仓库SKU
                     $error = [];
+                    //查出订单SKU映射表对应的仓库SKU
                     foreach ($res as $k => &$v) {
 
                         //是否为更换镜架 如果为更换镜架 需处理更换之后SKU的库存
@@ -382,7 +382,7 @@ class Nihao extends Backend
                 $this->error($e->getMessage());
             }
             if ($result) {
-                $params['site'] = 3;
+                $params['site'] = 4;
                 $params['num'] = count($entity_ids);
                 $params['order_ids'] = implode(',', $entity_ids);
                 (new OrderLog())->setOrderLog($params);
@@ -414,7 +414,7 @@ class Nihao extends Backend
         }
         //查询订单详情
         // $result = $this->model->getOrderDetail(3, $ids);
-        $result = NihaoPrescriptionDetailHelper::get_one_by_entity_id($ids);
+        $result = WeseeopticalPrescriptionDetailHelper::get_one_by_entity_id($ids);
         $this->assign('result', $result);
         return $this->view->fetch();
     }
@@ -525,13 +525,13 @@ class Nihao extends Backend
             $bridge_querySql = "select cpev.attribute_id,cpev.`value`,cpev.entity_id
 from catalog_product_entity_varchar cpev
 where cpev.attribute_id =149 and cpev.store_id=0 and cpev.entity_id=$product_id";
-            $bridge_resultList = Db::connect('database.db_nihao')->query($bridge_querySql);
+            $bridge_resultList = Db::connect('database.db_weseeoptical')->query($bridge_querySql);
 
             $lens_querySql = "select cped.attribute_id,cped.`value`,cped.entity_id
 from catalog_product_entity_decimal cped 
 where cped.attribute_id in(146,147) and cped.store_id=0 and cped.entity_id=$product_id";
 
-            $lens_resultList = Db::connect('database.db_nihao')->query($lens_querySql);
+            $lens_resultList = Db::connect('database.db_weseeoptical')->query($lens_querySql);
 
             $result = array();
             if ($lens_resultList) {
@@ -921,7 +921,7 @@ from sales_flat_order_item sfoi
 left join sales_flat_order sfo on  sfoi.order_id=sfo.entity_id 
 where sfo.`status` in ('processing','creditcard_proccessing','free_processing','complete','paypal_reversed','paypal_canceled_reversal') and sfo.entity_id in($entity_ids)
 order by sfoi.order_id desc;";
-            $processing_order_list = Db::connect('database.db_nihao')->query($processing_order_querySql);
+            $processing_order_list = Db::connect('database.db_weseeoptical')->query($processing_order_querySql);
 
             $processing_order_list = $this->qty_order_check($processing_order_list);
             // dump($processing_order_list);exit;
@@ -954,16 +954,16 @@ EOF;
                     $temp_increment_id = $processing_value['increment_id'];
 
                     $date = substr($processing_value['created_at'], 0, strpos($processing_value['created_at'], " "));
-                    $fileName = ROOT_PATH . "public" . DS . "uploads" . DS . "printOrder" . DS . "nihao" . DS . "$date" . DS . "$temp_increment_id.png";
+                    $fileName = ROOT_PATH . "public" . DS . "uploads" . DS . "printOrder" . DS . "weseeoptical" . DS . "$date" . DS . "$temp_increment_id.png";
                     // dump($fileName);
-                    $dir = ROOT_PATH . "public" . DS . "uploads" . DS . "printOrder" . DS . "nihao" . DS . "$date";
+                    $dir = ROOT_PATH . "public" . DS . "uploads" . DS . "printOrder" . DS . "weseeoptical" . DS . "$date";
                     if (!file_exists($dir)) {
                         mkdir($dir, 0777, true);
                         // echo '创建文件夹$dir成功';
                     } else {
                         // echo '需创建的文件夹$dir已经存在';
                     }
-                    $img_url = "/uploads/printOrder/nihao/$date/$temp_increment_id.png";
+                    $img_url = "/uploads/printOrder/weseeoptical/$date/$temp_increment_id.png";
                     //生成条形码
                     $this->generate_barcode($temp_increment_id, $fileName);
                     // echo '<br>需要打印'.$temp_increment_id;

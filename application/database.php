@@ -100,6 +100,21 @@ return [
         'charset'     => Env::get('db_nihao.charset'),
         'prefix'      => Env::get('db_nihao.prefix'),
     ],
+    'db_weseeoptical' => [
+        // 数据库类型
+        'type'        => Env::get('db_nihao.type'),
+        // 服务器地址
+        'hostname'    => Env::get('db_nihao.hostname'),
+        // 数据库名
+        'database'    => Env::get('db_nihao.database'),
+        // 数据库用户名
+        'username'    => Env::get('db_nihao.username'),
+        // 密码
+        'password'    => Env::get('db_nihao.password'),
+        // 数据库编码默认采用utf8
+        'charset'     => Env::get('db_nihao.charset'),
+        'prefix'      => Env::get('db_nihao.prefix'),
+    ],
 
     'db_zeelool_online' => [
         // 数据库类型
