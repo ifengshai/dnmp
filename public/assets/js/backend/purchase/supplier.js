@@ -34,6 +34,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'fast','bootstrap-tab
                         { field: 'email', title: __('Email'), operate: false },
                         { field: 'url', title: __('Url'), operate: false, formatter: Table.api.formatter.url },
                         { field: 'telephone', title: __('Telephone'), operate: false },
+                        { field: 'purchase_person', title: __('采购负责人'), operate: 'like' },
                         { field: 'address', title: __('Address'), operate: false },
                         { field: 'linkname', title: __('Linkname'), operate: 'like' },
                         { field: 'linkphone', title: __('Linkphone'), operate: 'like' },
