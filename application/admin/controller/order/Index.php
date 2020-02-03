@@ -157,6 +157,8 @@ class Index extends Backend
             $model = $this->voogueme;
         } elseif ($label == 3) {
             $model = $this->nihao;
+        } elseif ($label == 4) {
+            $model = $this->weseeoptical;
         }
 
         //查询订单详情
