@@ -5,14 +5,14 @@ namespace app\admin\model\order\order;
 use think\Model;
 use think\Db;
 
-class Nihao extends Model
+class Weseeoptical extends Model
 {
 
 
 
     //数据库
     // protected $connection = 'database';
-    protected $connection = 'database.db_nihao';
+    protected $connection = 'database.db_weseeoptical';
 
 
     // 表名
@@ -37,7 +37,7 @@ class Nihao extends Model
 
 
     /**
-     * 获取订单详情 nihao站
+     * 获取订单详情 批发站
      * @param $ordertype 站点
      * @param $entity_id 订单id
      * @return array
