@@ -87,7 +87,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui','custom-css','b
                         },
                         {field: 'prty_id', title: __('Prty_id'),searchList: {1:'高级',2:'中级',3:'低级'},formatter: Controller.api.formatter.device},
                         {field: 'saleAfterIssue.id', title: __('Problem_id'),searchList:$.getJSON('saleaftermanage/sale_after_task/ajaxGetIssueList'),visible:false},
-                        {field: 'sale_after_issue.name', title: __('Problem_id'),operate:false},
+                        /* {field: 'sale_after_issue.name', title: __('Problem_id'),operate:false}, */
+						{field: 'problem', title: __('Problem_id'),operate:false},
                         {field: 'problem_desc', title: __('problem_desc'),formatter:Controller.api.formatter.getClear,operate:false},
                         {field: 'create_person', title: __('Create_person')},
                         {field: 'create_time', title: __('Createtime'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime},

@@ -111,7 +111,15 @@ class SaleAfterTask extends Backend
             $list = collection($list)->toArray();
             $deptArr = (new AuthGroup())->getAllGroup();
             $repArr  = (new Admin())->getAllStaff();
+			$issueArr = (new SaleAfterIssue())->getAjaxIssueList();
             foreach ($list as $key => $val){
+				if ($val['problem_id']) {
+                    $deptNumArr = explode(',', $val['problem_id']);
+                    $list[$key]['problem'] = '';
+                    foreach ($deptNumArr as $values) {
+                        $list[$key]['problem'] .= $issueArr[$values] . ' ';
+                    }
+                }
                 if($val['dept_id']){
                     $list[$key]['dept_id']= $deptArr[$val['dept_id']];
 
@@ -142,6 +150,9 @@ class SaleAfterTask extends Backend
                 if ($this->dataLimit && $this->dataLimitFieldAutoFill) {
                     $params[$this->dataLimitField] = $this->auth->id;
                 }
+				if(1<count($params['problem_id'])){
+					$params['problem_id'] = implode(',',$params['problem_id']);
+				}
                 $result = false;
                 Db::startTrans();
                 try {
@@ -389,7 +400,10 @@ class SaleAfterTask extends Backend
         } elseif (3 == $result['order_platform']) {
             $orderInfo = NihaoPrescriptionDetailHelper::get_one_by_increment_id($result['order_number']);
         }
+		$issueArr = (new SaleAfterIssue())->getAjaxIssueList();
+		$result['problem_id'] = explode(',', $result['problem_id']);
         $this->view->assign('row',$result);
+		$this->view->assign('issueArr',$issueArr);
         $this->view->assign('orderPlatform',$result['order_platform']);
         $this->view->assign('orderInfo',$orderInfo);
         return $this->view->fetch();
