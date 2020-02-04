@@ -1310,6 +1310,7 @@ class SaleAfterTask extends Backend
         ->select();
         $repArr  = (new Admin())->getAllStaff();
         $list = collection($list)->toArray();
+		$issueArr = (new SaleAfterIssue())->getAjaxIssueList();
 		if(!$list){
 			return false;
 		}
@@ -1418,7 +1419,17 @@ class SaleAfterTask extends Backend
 
             }
             $spreadsheet->getActiveSheet()->setCellValue("M" . ($key * 1 + 2), $value['prty_id']);
-            $spreadsheet->getActiveSheet()->setCellValue("N" . ($key * 1 + 2), $value['sale_after_issue']['name']);
+			if ($value['problem_id']) {
+                $repNumArr = explode(',', $value['problem_id']);
+                $value['problem'] = '';
+                foreach ($repNumArr as $vals) {
+                    $value['problem'] .= $issueArr[$vals] . ' ';
+                }
+                $spreadsheet->getActiveSheet()->setCellValue("N" . ($key * 1 + 2), $value['problem']);
+            }else{
+                $spreadsheet->getActiveSheet()->setCellValue("N" . ($key * 1 + 2), $value['problem_id']);
+            }
+            //$spreadsheet->getActiveSheet()->setCellValue("N" . ($key * 1 + 2), $value['sale_after_issue']['name']);
             $spreadsheet->getActiveSheet()->setCellValue("O" . ($key * 1 + 2), $value['problem_desc']);
             switch($value['handle_scheme']){
                 case 1:
@@ -1486,7 +1497,8 @@ class SaleAfterTask extends Backend
         $spreadsheet->getActiveSheet()->getColumnDimension('K')->setWidth(14);
         $spreadsheet->getActiveSheet()->getColumnDimension('L')->setWidth(16);
         $spreadsheet->getActiveSheet()->getColumnDimension('M')->setWidth(16);
-        $spreadsheet->getActiveSheet()->getColumnDimension('N')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('N')->setWidth(50);
+        $spreadsheet->getActiveSheet()->getColumnDimension('N')->setWidth(50);
         $spreadsheet->getActiveSheet()->getColumnDimension('O')->setWidth(50);
         $spreadsheet->getActiveSheet()->getColumnDimension('P')->setWidth(20);
         $spreadsheet->getActiveSheet()->getColumnDimension('Q')->setWidth(20);
