@@ -142,7 +142,7 @@ class SaleAfterTask extends Backend
     {
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
-            if(!isset($params['problem_id'])){
+            if((1==count($params['problem_id'])) && (in_array("",$params['problem_id']))){
                 $this->error(__('Please select the problem category'));
             }
             if ($params) {
@@ -150,7 +150,7 @@ class SaleAfterTask extends Backend
                 if ($this->dataLimit && $this->dataLimitFieldAutoFill) {
                     $params[$this->dataLimitField] = $this->auth->id;
                 }
-				if(1<count($params['problem_id'])){
+				if(1<=count($params['problem_id'])){
 					$params['problem_id'] = implode(',',$params['problem_id']);
 				}
                 $result = false;
@@ -225,6 +225,12 @@ class SaleAfterTask extends Backend
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
             if ($params) {
+			if((1==count($params['problem_id'])) && (in_array("",$params['problem_id']))){
+                $this->error(__('Please select the problem category'));
+            }
+			if(1<=count($params['problem_id'])){
+				$params['problem_id'] = implode(',',$params['problem_id']);
+			}
                 $params = $this->preExcludeFields($params);
                 if(0<$params['refund_money']){
                     $params['is_refund'] = 2;
@@ -484,6 +490,12 @@ class SaleAfterTask extends Backend
         }
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
+			if((1==count($params['problem_id'])) && (in_array("",$params['problem_id']))){
+                $this->error(__('Please select the problem category'));
+            }
+			if(1<=count($params['problem_id'])){
+				$params['problem_id'] = implode(',',$params['problem_id']);
+			}
             $tid = $params['id'];
             unset($params['id']);
             if ($params) {
