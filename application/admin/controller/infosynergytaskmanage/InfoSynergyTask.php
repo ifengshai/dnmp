@@ -61,6 +61,7 @@ class InfoSynergyTask extends Backend
             if(0 == $params['synergy_order_id']){
                 $this->error(__('请选择关联单据类型'));    
             }
+			$params['synergy_order_number'] = trim($params['synergy_order_number']);
             // echo '<pre>';
             // var_dump($params['change_type']);
             // exit;
