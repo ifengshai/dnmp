@@ -104,6 +104,7 @@ class InfoSynergyTask extends Backend
                     }
                     $params['synergy_number'] = 'WO' . date('YmdHis') . rand(100, 999) . rand(100, 999);
                     $params['create_person'] = session('admin.nickname'); //创建人
+                    $params['synergy_order_number'] = trim($params['synergy_order_number']); 
                     $result = $this->model->allowField(true)->save($params);
                     Db::commit();
                 } catch (ValidateException $e) {
@@ -121,7 +122,7 @@ class InfoSynergyTask extends Backend
                         $data = [];
                         foreach ($item as $keys => $arr) {
                             $data[$keys]['tid'] = $this->model->id;
-                            $data[$keys]['increment_id']    = $params['synergy_order_number'] ?: '';
+                            $data[$keys]['increment_id']    = trim($params['synergy_order_number']) ?: '';
                             $data[$keys]['platform_type']   = $params['order_platform'] ?: 0;
                             $data[$keys]['change_type']     = $change_type ?: 2;                                                    
                             $data[$keys]['original_sku']    = !empty($arr['original_sku']) ? $arr['original_sku'] : '';
