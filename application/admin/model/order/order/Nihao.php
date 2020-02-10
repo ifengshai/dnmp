@@ -79,6 +79,26 @@ class Nihao extends Model
         }
         return $result;
     }
+
+    /**
+     * 统计订单SKU销量
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/02/06 16:42:25 
+     * @param [type] $map 筛选条件
+     * @return object
+     */
+    public function getOrderSalesNum($map)
+    {
+        $res = $this->where($map)
+        ->alias('a')
+        ->field('b.sku,round(sum(b.qty_ordered),0) qty_ordered')
+        ->join(['sales_flat_order_item' => 'b'],'a.entity_id=b.order_id')
+        ->select();
+        return $res;
+    }
+    
     /***
      * 获取nihao订单的成本信息  create@lsw
      * @param totalId 所有的
