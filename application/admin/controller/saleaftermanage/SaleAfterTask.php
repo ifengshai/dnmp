@@ -111,7 +111,15 @@ class SaleAfterTask extends Backend
             $list = collection($list)->toArray();
             $deptArr = (new AuthGroup())->getAllGroup();
             $repArr  = (new Admin())->getAllStaff();
+			$issueArr = (new SaleAfterIssue())->getAjaxIssueList();
             foreach ($list as $key => $val){
+				if ($val['problem_id']) {
+                    $deptNumArr = explode(',', $val['problem_id']);
+                    $list[$key]['problem'] = '';
+                    foreach ($deptNumArr as $values) {
+                        $list[$key]['problem'] .= $issueArr[$values] . ' ';
+                    }
+                }
                 if($val['dept_id']){
                     $list[$key]['dept_id']= $deptArr[$val['dept_id']];
 
@@ -134,7 +142,7 @@ class SaleAfterTask extends Backend
     {
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
-            if(!isset($params['problem_id'])){
+            if((1==count($params['problem_id'])) && (in_array("",$params['problem_id']))){
                 $this->error(__('Please select the problem category'));
             }
             if ($params) {
@@ -142,6 +150,9 @@ class SaleAfterTask extends Backend
                 if ($this->dataLimit && $this->dataLimitFieldAutoFill) {
                     $params[$this->dataLimitField] = $this->auth->id;
                 }
+				if(1<=count($params['problem_id'])){
+					$params['problem_id'] = implode(',',$params['problem_id']);
+				}
                 $result = false;
                 Db::startTrans();
                 try {
@@ -214,6 +225,12 @@ class SaleAfterTask extends Backend
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
             if ($params) {
+			if((1==count($params['problem_id'])) && (in_array("",$params['problem_id']))){
+                $this->error(__('Please select the problem category'));
+            }
+			if(1<=count($params['problem_id'])){
+				$params['problem_id'] = implode(',',$params['problem_id']);
+			}
                 $params = $this->preExcludeFields($params);
                 if(0<$params['refund_money']){
                     $params['is_refund'] = 2;
@@ -389,7 +406,10 @@ class SaleAfterTask extends Backend
         } elseif (3 == $result['order_platform']) {
             $orderInfo = NihaoPrescriptionDetailHelper::get_one_by_increment_id($result['order_number']);
         }
+		$issueArr = (new SaleAfterIssue())->getAjaxIssueList();
+		$result['problem_id'] = explode(',', $result['problem_id']);
         $this->view->assign('row',$result);
+		$this->view->assign('issueArr',$issueArr);
         $this->view->assign('orderPlatform',$result['order_platform']);
         $this->view->assign('orderInfo',$orderInfo);
         return $this->view->fetch();
@@ -470,6 +490,12 @@ class SaleAfterTask extends Backend
         }
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
+			if((1==count($params['problem_id'])) && (in_array("",$params['problem_id']))){
+                $this->error(__('Please select the problem category'));
+            }
+			if(1<=count($params['problem_id'])){
+				$params['problem_id'] = implode(',',$params['problem_id']);
+			}
             $tid = $params['id'];
             unset($params['id']);
             if ($params) {
@@ -1048,7 +1074,7 @@ class SaleAfterTask extends Backend
         }
 
     //批量导出xls
-    public function batch_export_xls()
+/*     public function batch_export_xls()
     {
         set_time_limit(0);
         ini_set('memory_limit', '512M');
@@ -1277,6 +1303,269 @@ class SaleAfterTask extends Backend
         $writer = new $class($spreadsheet);
 
         $writer->save('php://output');
-    }
+    } */
+    public function batch_export_xls()
+    {
+        set_time_limit(0);
+        ini_set('memory_limit', '512M');
+        $ids = input('ids');
+        $addWhere = '1=1';
+        if ($ids) {
+            $addWhere.= " AND sale_after_task.id IN ({$ids})";
+        }
+
+        list($where) = $this->buildparams();
+        $list = $this->model
+        ->with(['saleAfterIssue'])
+        ->where($where)
+        ->where($addWhere)
+        ->select();
+        $repArr  = (new Admin())->getAllStaff();
+        $list = collection($list)->toArray();
+		$issueArr = (new SaleAfterIssue())->getAjaxIssueList();
+		if(!$list){
+			return false;
+		}
+		$arr = [];
+		foreach($list as $keys => $vals){
+			$arr[] = $vals['id'];
+		}
+			$info = (new SaleAfterTaskRemark())->fetchRelevanceRecord($arr);
+	    if($info){
+			$info = collection($info)->toArray();
+		}else{
+			$info = [];	
+		}
+		
+        //从数据库查询需要的数据
+        $spreadsheet = new Spreadsheet();
+
+        //常规方式：利用setCellValue()填充数据
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("A1", "任务单号")
+            ->setCellValue("B1", "任务状态")
+            ->setCellValue("C1", "订单平台");   //利用setCellValues()填充数据
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("D1", "订单来源")
+            ->setCellValue("E1", "订单号");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("F1", "订单SKU")
+            ->setCellValue("G1", "客户姓名");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("H1", "客户邮箱")
+            ->setCellValue("I1", "订单状态")
+            ->setCellValue("J1", "承接人");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("K1", "是否含有退款")
+            ->setCellValue("L1", "退款金额")
+            ->setCellValue("M1", "任务优先级")
+            ->setCellValue("N1", "问题分类")
+            ->setCellValue("O1", "问题描述")
+            ->setCellValue("P1", "解决方案")
+            ->setCellValue("Q1", "关税")
+            ->setCellValue("R1", "赠送的优惠券")
+            ->setCellValue("S1", "补差价订单号")
+            ->setCellValue("T1", "补发订单号")
+            ->setCellValue("U1", "创建人")
+            ->setCellValue("V1", "创建时间")
+            ->setCellValue("W1", "处理时间")
+            ->setCellValue("X1", "完成时间")
+            ->setCellValue("Y1", "退款方式")
+			->setCellValue("Z1","处理备注");
+        $spreadsheet->setActiveSheetIndex(0)->setTitle('售后任务数据');
+
+        foreach ($list as $key => $value) {
+
+            $spreadsheet->getActiveSheet()->setCellValue("A" . ($key * 1 + 2), $value['task_number']);
+            switch($value['task_status']){
+                case 1:
+                $value['task_status'] = '处理中';
+                break;
+                case 2:
+                $value['task_status'] = '处理完成';
+                break;
+                case 3:
+                $value['task_status'] = '取消';
+                default:
+                $value['task_status'] = '未处理';
+                break;            
+            }
+            $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $value['task_status']);
+            switch($value['order_platform']){
+                case 2:
+                $value['order_platform'] = 'voogueme';
+                break;
+                case 3:
+                $value['order_platform'] = 'nihao';
+                break;
+                case 4:
+                $value['order_platform'] = 'amazon';
+                break;
+                case 5:
+                $value['order_platform'] = 'wesee';
+                break;
+                default:
+                $value['order_platform'] = 'zeelool';
+                break;            
+            }
+            $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 1 + 2), $value['order_platform']);
+            $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 1 + 2), $value['order_source'] == 1 ? 'pc端' :'移动端');
+            $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), $value['order_number']);
+            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 1 + 2), $value['order_skus']);
+            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 1 + 2), $value['customer_name']);
+            $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 1 + 2), $value['customer_email']);
+            $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 1 + 2), $value['order_status']);
+            if($value['rep_id']){
+                //$list[$key]['rep_id'] = $repArr[$value['rep_id']];
+                $spreadsheet->getActiveSheet()->setCellValue("J" . ($key * 1 + 2), $repArr[$value['rep_id']]);
+            }else{
+                $spreadsheet->getActiveSheet()->setCellValue("J" . ($key * 1 + 2), $value['rep_id']);
+            }
+            $spreadsheet->getActiveSheet()->setCellValue("K" . ($key * 1 + 2), $value['is_refund'] == 1 ? '无' : '有');
+            $spreadsheet->getActiveSheet()->setCellValue("L" . ($key * 1 + 2), $value['refund_money']);
+            switch($value['prty_id']){
+                case 2:
+                $value['prty_id'] = '中级';
+                break;
+                case 3:
+                $value['prty_id'] = '低级';
+                break;
+                default:
+                $value['prty_id'] = '高级';
+                break;        
+
+            }
+            $spreadsheet->getActiveSheet()->setCellValue("M" . ($key * 1 + 2), $value['prty_id']);
+			if ($value['problem_id']) {
+                $repNumArr = explode(',', $value['problem_id']);
+                $value['problem'] = '';
+                foreach ($repNumArr as $vals) {
+                    $value['problem'] .= $issueArr[$vals] . ' ';
+                }
+                $spreadsheet->getActiveSheet()->setCellValue("N" . ($key * 1 + 2), $value['problem']);
+            }else{
+                $spreadsheet->getActiveSheet()->setCellValue("N" . ($key * 1 + 2), $value['problem_id']);
+            }
+            //$spreadsheet->getActiveSheet()->setCellValue("N" . ($key * 1 + 2), $value['sale_after_issue']['name']);
+            $spreadsheet->getActiveSheet()->setCellValue("O" . ($key * 1 + 2), $value['problem_desc']);
+            switch($value['handle_scheme']){
+                case 1:
+                $value['handle_scheme'] = '部分退款';
+                break;
+                case 2:
+                $value['handle_scheme'] = '退全款';
+                break;
+                case 3:
+                $value['handle_scheme'] = '补发';
+                break;
+                case 4:
+                $value['handle_scheme'] = '加钱补发';
+                break;
+                case 5:
+                $value['handle_scheme'] = '退款+补发';
+                break;
+                case 6:
+                $value['handle_scheme'] = '折扣买新';
+                break; 
+                case 7:
+                $value['handle_scheme'] = '发放积分';
+                break;
+                case 8:
+                $value['handle_scheme'] = '安抚';
+                break;
+                case 9:
+                $value['handle_scheme'] = '长时间未回复';
+                break;
+                default:
+                $value['handle_scheme'] = '请选择';
+                break;                                                                                                                                                                      
+            }
+            $spreadsheet->getActiveSheet()->setCellValue("P" . ($key * 1 + 2), $value['handle_scheme']);
+            $spreadsheet->getActiveSheet()->setCellValue("Q" . ($key * 1 + 2), $value['tariff']);
+            $spreadsheet->getActiveSheet()->setCellValue("R" . ($key * 1 + 2), $value['give_coupon']);
+            $spreadsheet->getActiveSheet()->setCellValue("S" . ($key * 1 + 2), $value['make_up_price_order']);
+            $spreadsheet->getActiveSheet()->setCellValue("T" . ($key * 1 + 2), $value['replacement_order']);
+            $spreadsheet->getActiveSheet()->setCellValue("U" . ($key * 1 + 2), $value['create_person']);
+            $spreadsheet->getActiveSheet()->setCellValue("V" . ($key * 1 + 2), $value['create_time']);
+            $spreadsheet->getActiveSheet()->setCellValue("W" . ($key * 1 + 2), $value['handle_time']);
+            $spreadsheet->getActiveSheet()->setCellValue("X" . ($key * 1 + 2), $value['complete_time']);
+            $spreadsheet->getActiveSheet()->setCellValue("Y" . ($key * 1 + 2), $value['refund_way']);
+			if(array_key_exists($value['id'],$info)){
+				$value['handle_result'] = $info[$value['id']];
+				$spreadsheet->getActiveSheet()->setCellValue("Z" . ($key * 1 + 2), $value['handle_result']);
+			}else{
+				$spreadsheet->getActiveSheet()->setCellValue("Z" . ($key * 1 + 2), '');
+			}
+			
+			
+        }
+
+        //设置宽度
+        $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(30);
+        $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(12);
+        $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(30);
+        $spreadsheet->getActiveSheet()->getColumnDimension('D')->setWidth(12);
+        $spreadsheet->getActiveSheet()->getColumnDimension('E')->setWidth(30);
+        $spreadsheet->getActiveSheet()->getColumnDimension('F')->setWidth(12);
+        $spreadsheet->getActiveSheet()->getColumnDimension('G')->setWidth(40);
+        $spreadsheet->getActiveSheet()->getColumnDimension('H')->setWidth(40);
+        $spreadsheet->getActiveSheet()->getColumnDimension('I')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('J')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('K')->setWidth(14);
+        $spreadsheet->getActiveSheet()->getColumnDimension('L')->setWidth(16);
+        $spreadsheet->getActiveSheet()->getColumnDimension('M')->setWidth(16);
+        $spreadsheet->getActiveSheet()->getColumnDimension('N')->setWidth(50);
+        $spreadsheet->getActiveSheet()->getColumnDimension('N')->setWidth(50);
+        $spreadsheet->getActiveSheet()->getColumnDimension('O')->setWidth(50);
+        $spreadsheet->getActiveSheet()->getColumnDimension('P')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('Q')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('R')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('S')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('T')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('U')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('V')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('W')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('X')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('Y')->setWidth(20);
+		$spreadsheet->getActiveSheet()->getColumnDimension('Z')->setWidth(200);
+        //设置边框
+        $border = [
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, // 设置border样式
+                    'color'       => ['argb' => 'FF000000'], // 设置border颜色
+                ],
+            ],
+        ];
+
+        $spreadsheet->getDefaultStyle()->getFont()->setName('微软雅黑')->setSize(12);
+
+
+        $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
+        $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
+
+        $spreadsheet->getActiveSheet()->getStyle('A1:P' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+       
+
+        $spreadsheet->setActiveSheetIndex(0);
+        // return exportExcel($spreadsheet, 'xls', '登陆日志');
+        $format = 'xlsx';
+        $savename = '售后数据' . date("YmdHis", time());;
+        // dump($spreadsheet);
+
+        // if (!$spreadsheet) return false;
+        if ($format == 'xls') {
+            //输出Excel03版本
+            header('Content-Type:application/vnd.ms-excel');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xls";
+        } elseif ($format == 'xlsx') {
+            //输出07Excel版本
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xlsx";
+        }
+
+        //输出名称
+        header('Content-Disposition: attachment;filename="' . $savename . '.' . $format . '"');
+        //禁止缓存
+        header('Cache-Control: max-age=0');
+        $writer = new $class($spreadsheet);
+
+        $writer->save('php://output');
+    }	
 
 }
