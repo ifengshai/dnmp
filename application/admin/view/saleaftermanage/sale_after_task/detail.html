@@ -115,9 +115,13 @@
         </div>
     </div>
     <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">问题分类:</label>
+<!--         <label class="control-label col-xs-12 col-sm-2">问题分类:</label>
         <div class="col-xs-12 col-sm-3">
             <input id="c-problem_id" data-rule="required"  class="form-control" name="row[problem_id]" type="text" value="{$row.name}" disabled="disabled">
+        </div> -->
+		 <label class="control-label col-xs-12 col-sm-2">问题分类:</label>
+        <div class="col-xs-12 col-sm-3">
+            {:build_select('row[problem_id][]', $issueArr, $row.problem_id,['class'=>'form-control selectpicker', 'data-rule'=>'required','data-live-search' => true,'multiple'=>'multiple','id'=>'choose_dept_id'])}
         </div>
         <label class="control-label col-xs-12 col-sm-2">{:__('Prty_id')}:</label>
         <div class="col-xs-12 col-sm-3">
@@ -347,7 +351,7 @@
         <div>
         <table id="caigou-table" class="handle_table1">
             <tr>
-                <td>商品名称</td>
+                <td>name</td>
                 <td style="width:90%;">{$vo.name}</td>
             </tr>
             <tr>
@@ -355,37 +359,37 @@
                 <td style="width:90%;">{$vo.sku}</td>
             </tr>
             <tr>
-                <td>数量</td>
+                <td>qty_ordered</td>
                 <td style="width:90%;">{:round($vo.qty_ordered)}</td>
             </tr>
             <tr>
-                <td>处方类型</td>
+                <td>prescription_type</td>
                 <td style="width:90%;">{$vo.prescription_type}</td>
             </tr>
             {if $orderPlatform ==3}
             <tr>
-                <td>基片类型</td>
+                <td>second_name</td>
                 <td style="width:90%;">{$vo.second_name}</td>
             </tr>
             <tr>
-                <td>镜片类型</td>
+                <td>third_name</td>
                 <td style="width:90%;">{$vo.third_name}</td>
             </tr>
             <tr>
-                <td>折射率</td>
+                <td>zsl</td>
                 <td style="width:90%;">{$vo.zsl}</td>
             </tr>
             <tr>
-                <td>镀膜类型</td>
+                <td>four_name</td>
                 <td style="width:90%;">{$vo.four_name}</td>
             </tr>
             {else/}
             <tr>
-                <td>镜片类型</td>
+                <td>index_type</td>
                 <td style="width:90%;">{$vo.index_type}</td>
                 </tr>
             <tr>
-                <td>镀膜类型</td>
+                <td>coatiing_name</td>
                 <td style="width:90%;">{$vo.coatiing_name}</td>
             </tr>
             {/if}
@@ -395,10 +399,10 @@
         <div class="col-xs-6 col-md-7" style="float:right;">
         <table id="caigou-table" class="handle_table2">
             <tr>
-                <td colspan="10" style="text-align: center;">处方参数</td>
+                <td colspan="10" style="text-align: center;">Prescription</td>
             </tr>
             <tr>
-                <td>参数</td>
+                <td>value</td>
                 <td>SPH</td>
                 <td>CYL</td>
                 <td>AXI</td>

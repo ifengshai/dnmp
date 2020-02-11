@@ -356,7 +356,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','bootstrap-table-jump-
                         '<div class="panel bg-blue">' +
                         '<div class="panel-body">' +
                         '<div class="panel-title">' +
-                        '<label class="control-label col-xs-12 col-sm-3">商品名称:</label>' +
+                        '<label class="control-label col-xs-12 col-sm-3">name:</label>' +
                         '<div class="col-xs-12 col-sm-8">' +
                         '<input  id="c-item_name"  class="form-control" name="row[lens][original_name][]" type="text" value="">' +
                         '</div>' +
@@ -372,7 +372,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','bootstrap-table-jump-
                         '</div>' +
                         '<div class="panel-body">' +
                         '<div class="panel-title">' +
-                        '<label class="control-label col-xs-12 col-sm-3">数量:</label>' +
+                        '<label class="control-label col-xs-12 col-sm-3">qty_ordered:</label>' +
                         '<div class="col-xs-12 col-sm-8">' +
                         '<input  id="c-item_qty_ordered"  class="form-control" name="row[lens][original_number][]"  type="text" value="">' +
                         '</div>' +
@@ -380,7 +380,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','bootstrap-table-jump-
                         '</div>' +
                         '<div class="panel-body">' +
                         '<div class="panel-title">' +
-                        '<label class="control-label col-xs-12 col-sm-3">处方类型:</label>' +
+                        '<label class="control-label col-xs-12 col-sm-3">prescription_type:</label>' +
                         '<div class="col-xs-12 col-sm-8">' +
                         '<input  id="c-recipe_type"  class="form-control" type="text" name="row[lens][recipe_type][]" value="">' +
                         '</div>' +
@@ -388,7 +388,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','bootstrap-table-jump-
                         '</div>' +
                         '<div class="panel-body">' +
                         '<div class="panel-title">' +
-                        '<label class="control-label col-xs-12 col-sm-3">镜片类型:</label>' +
+                        '<label class="control-label col-xs-12 col-sm-3">lens_type:</label>' +
                         '<div class="col-xs-12 col-sm-8">' +
                         '<input  id="c-lens_type"  class="form-control" name="row[lens][lens_type][]" type="text" value="">' +
                         '</div>' +
@@ -396,7 +396,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','bootstrap-table-jump-
                         '</div>' +
                         '<div class="panel-body">' +
                         '<div class="panel-title">' +
-                        '<label class="control-label col-xs-12 col-sm-3">镀膜类型:</label>' +
+                        '<label class="control-label col-xs-12 col-sm-3">coating_type:</label>' +
                         '<div class="col-xs-12 col-sm-8">' +
                         '<input  id="c-coating_film_type"  class="form-control" name="row[lens][coating_type][]"  type="text" value="">' +
                         '</div>' +
@@ -410,10 +410,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','bootstrap-table-jump-
                         '<div class="ibox-title">' +
                         '<table id="caigou-table-lens">' +
                         '<tr>' +
-                        '<td colspan="10" style="text-align: center">处方参数</td>' +
+                        '<td colspan="10" style="text-align: center">Prescription_type</td>' +
                         '</tr>' +
                         '<tr>' +
-                        '<td style="text-align: center">参数</td>' +
+                        '<td style="text-align: center">value</td>' +
                         '<td style="text-align: center">SPH</td>' +
                         '<td style="text-align: center">CYL</td>' +
                         '<td style="text-align: center">AXI</td>' +
