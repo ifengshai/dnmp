@@ -142,7 +142,7 @@ class SaleAfterTask extends Backend
     {
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
-            if(!isset($params['problem_id'])){
+            if((1==count($params['problem_id'])) && (in_array("",$params['problem_id']))){
                 $this->error(__('Please select the problem category'));
             }
             if ($params) {
@@ -150,8 +150,40 @@ class SaleAfterTask extends Backend
                 if ($this->dataLimit && $this->dataLimitFieldAutoFill) {
                     $params[$this->dataLimitField] = $this->auth->id;
                 }
-				if(1<count($params['problem_id'])){
+				if(1<=count($params['problem_id'])){
 					$params['problem_id'] = implode(',',$params['problem_id']);
+				}
+				switch($params['handle_scheme']){
+					case 1:
+					case 2:
+					if(('0' == $params['refund_way'])||(0 == $params['refund_money'])){
+						$this->error(__('请选择退款方式和退款金额'));
+					}
+					break;
+					case 3:
+					if(empty($params['replacement_order'])){
+						$this->error(__('请填写补发单号'));
+					}
+					break;
+					case 4:
+					if(empty($params['replacement_order']) || empty($params['make_up_price_order'])){
+						$this->error(__('请填写补发单号和补差价订单号'));
+					}
+					break;
+					case 5:
+					if(('0' == $params['refund_way']) || (0 == $params['refund_money']) || empty($params['replacement_order']) ){
+						$this->error(__('请填写退款方式,补发单号和补差价订单号'));
+					}
+					case 6:
+					if(empty($params['give_coupon'])){
+						$this->error('请填写赠送的优惠券');
+					}
+					break;
+					case 7:
+					if(0 == $params['integral']){
+						$this->error('请填写发放积分数量');
+					}
+					break;
 				}
                 $result = false;
                 Db::startTrans();
@@ -225,12 +257,50 @@ class SaleAfterTask extends Backend
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
             if ($params) {
+			if((1==count($params['problem_id'])) && (in_array("",$params['problem_id']))){
+                $this->error(__('Please select the problem category'));
+            }
+			if(1<=count($params['problem_id'])){
+				$params['problem_id'] = implode(',',$params['problem_id']);
+			}
                 $params = $this->preExcludeFields($params);
                 if(0<$params['refund_money']){
                     $params['is_refund'] = 2;
                 }else{
                     $params['is_refund'] = 1;
                 }
+				switch($params['handle_scheme']){
+					case 1:
+					case 2:
+					if(('0' == $params['refund_way'])||(0 == $params['refund_money'])){
+						$this->error(__('请选择退款方式和退款金额'));
+					}
+					break;
+					case 3:
+					if(empty($params['replacement_order'])){
+						$this->error(__('请填写补发单号'));
+					}
+					break;
+					case 4:
+					if(empty($params['replacement_order']) || empty($params['make_up_price_order'])){
+						$this->error(__('请填写补发单号和补差价订单号'));
+					}
+					break;
+					case 5:
+					if(('0' == $params['refund_way']) || (0 == $params['refund_money']) || empty($params['replacement_order']) ){
+						$this->error(__('请填写退款方式,补发单号和补差价订单号'));
+					}
+					case 6:
+					if(empty($params['give_coupon'])){
+						$this->error('请填写赠送的优惠券');
+					}
+					break;
+					case 7:
+					if(0 == $params['integral']){
+						$this->error('请填写发放积分数量');
+					}
+					break;
+				}
                 $result = false;
                 Db::startTrans();
                 try {
@@ -484,6 +554,12 @@ class SaleAfterTask extends Backend
         }
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
+			if((1==count($params['problem_id'])) && (in_array("",$params['problem_id']))){
+                $this->error(__('Please select the problem category'));
+            }
+			if(1<=count($params['problem_id'])){
+				$params['problem_id'] = implode(',',$params['problem_id']);
+			}
             $tid = $params['id'];
             unset($params['id']);
             if ($params) {
@@ -493,6 +569,38 @@ class SaleAfterTask extends Backend
                 }else{
                     $params['is_refund'] = 1;
                 }
+								switch($params['handle_scheme']){
+					case 1:
+					case 2:
+					if(('0' == $params['refund_way'])||(0 == $params['refund_money'])){
+						$this->error(__('请选择退款方式和退款金额'));
+					}
+					break;
+					case 3:
+					if(empty($params['replacement_order'])){
+						$this->error(__('请填写补发单号'));
+					}
+					break;
+					case 4:
+					if(empty($params['replacement_order']) || empty($params['make_up_price_order'])){
+						$this->error(__('请填写补发单号和补差价订单号'));
+					}
+					break;
+					case 5:
+					if(('0' == $params['refund_way']) || (0 == $params['refund_money']) || empty($params['replacement_order']) ){
+						$this->error(__('请填写退款方式,补发单号和补差价订单号'));
+					}
+					case 6:
+					if(empty($params['give_coupon'])){
+						$this->error('请填写赠送的优惠券');
+					}
+					break;
+					case 7:
+					if(0 == $params['integral']){
+						$this->error('请填写发放积分数量');
+					}
+					break;
+				}
                 $result = false;
                 Db::startTrans();
                 try {
