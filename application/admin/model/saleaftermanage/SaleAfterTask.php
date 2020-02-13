@@ -217,7 +217,7 @@ class SaleAfterTask extends Model
     {
         $result = $this->alias('t')->join(' sale_after_issue s','t.problem_id = s.id')->where('t.id','=',$id)->field('t.id,task_status,task_number,order_platform,
         order_number,order_status,order_skus,order_source,dept_id,rep_id,prty_id,problem_id,problem_desc,upload_photos,create_person,customer_name,handle_scheme,
-        customer_email,refund_money,refund_way,give_coupon,tariff,make_up_price_order,replacement_order,t.create_time,s.name')->find();
+        customer_email,refund_money,refund_way,give_coupon,tariff,make_up_price_order,replacement_order,integral,t.create_time,s.name')->find();
         if(!$result){
             return false;
         }
