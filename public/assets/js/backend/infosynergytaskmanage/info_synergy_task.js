@@ -697,7 +697,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','bootstrap-table-jump-
                                                  '<td><input id="c-right_AXI" class="form-control"  type="text" name="row[lens][od_axis][]" value="'+ (newItem.od_axis != undefined ? newItem.od_axis : "") + '"></td>';
                                                  if(orderPlatform<3){
                                                     if(newItem.total_add){
-                                                        str+= '<td><input id="c-right_ADD" class="form-control"  type="text" name="row[lens][od_add][]" value="' + (newItem.total_add  != undefined ? newItem.total_add : "") + '"></td>';
+                                                        str+= '<td rowspan="2"><input id="c-right_ADD" class="form-control"  type="text" name="row[lens][od_add][]" value="' + (newItem.total_add  != undefined ? newItem.total_add : "") + '"></td>';
                                                     }else{
                                                         str+= '<td><input id="c-right_ADD" class="form-control"  type="text" name="row[lens][od_add][]" value="' + (newItem.os_add  != undefined ? newItem.os_add : "") + '"></td>';
                                                     }
@@ -1267,7 +1267,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','bootstrap-table-jump-
                                                 '<td><input id="c-right_AXI" class="form-control"  type="text" name="row[lens][od_axis][]" value="'+ (newItem.od_axis != undefined ? newItem.od_axis : "") + '"></td>';
                                                 if(orderPlatform<3){
                                                 if(newItem.total_add){
-                                                    Str+= '<td><input id="c-right_ADD" class="form-control"  type="text" name="row[lens][od_add][]" value="' + (newItem.total_add  != undefined ? newItem.total_add : "") + '"></td>';
+                                                    Str+= '<td rowspan="2"><input id="c-right_ADD" class="form-control"  type="text" name="row[lens][od_add][]" value="' + (newItem.total_add  != undefined ? newItem.total_add : "") + '"></td>';
                                                 }else{
                                                     Str+= '<td><input id="c-right_ADD" class="form-control"  type="text" name="row[lens][od_add][]" value="' + (newItem.os_add  != undefined ? newItem.os_add : "") + '"></td>';
                                                 }
