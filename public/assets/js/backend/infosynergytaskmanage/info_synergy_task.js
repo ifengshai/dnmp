@@ -699,7 +699,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','bootstrap-table-jump-
                                                     if(newItem.total_add){
                                                         str+= '<td><input id="c-right_ADD" class="form-control"  type="text" name="row[lens][od_add][]" value="' + (newItem.total_add  != undefined ? newItem.total_add : "") + '"></td>';
                                                     }else{
-                                                        str+= '<td rowspan="2"><input id="c-right_ADD" class="form-control"  type="text" name="row[lens][od_add][]" value="' + (newItem.os_add  != undefined ? newItem.os_add : "") + '"></td>';
+                                                        str+= '<td rowspan="2"><input style="height:62px;" id="c-right_ADD" class="form-control"  type="text" name="row[lens][od_add][]" value="' + (newItem.os_add  != undefined ? newItem.os_add : "") + '"></td>';
                                                     }
                                                  }else{
                                                     if(newItem.prescription_type == 'Reading Glasses' && newItem.os_add>0 && newItem.od_add>0){
@@ -1269,7 +1269,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','bootstrap-table-jump-
                                                 if(newItem.total_add){
                                                     Str+= '<td><input id="c-right_ADD" class="form-control"  type="text" name="row[lens][od_add][]" value="' + (newItem.total_add  != undefined ? newItem.total_add : "") + '"></td>';
                                                 }else{
-                                                    Str+= '<td rowspan="2"><input id="c-right_ADD" class="form-control"  type="text" name="row[lens][od_add][]" value="' + (newItem.os_add  != undefined ? newItem.os_add : "") + '"></td>';
+                                                    Str+= '<td rowspan="2"><input style="height:62px;" id="c-right_ADD" class="form-control"  type="text" name="row[lens][od_add][]" value="' + (newItem.os_add  != undefined ? newItem.os_add : "") + '"></td>';
                                                 }
                                                 }else{
                                                 if(newItem.prescription_type == 'Reading Glasses' && newItem.os_add>0 && newItem.od_add>0){
