@@ -567,13 +567,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','bootstrap-table-jump-
                                  url:'saleaftermanage/sale_after_task/ajax',
                                  data:{ordertype:orderPlatform,order_number:orderNumber}
                              }, function(data, ret){
-                                $(".frame-info").remove();
+								$(".frame-info").remove();
                                  $(".item_info").empty();
                                  $("#c-change_type").val(2);
                                     var item = ret.data;
                                      $('#customer_info').after(function(){
-                                         var str2 = '';
-                                          str2+= '<div class="row recipe-info item_info" style="margin-top:15px;margin-left:7.6666%;">'+
+                                         var str = '';
+                                          str+= '<div class="row recipe-info item_info" style="margin-top:15px;margin-left:7.6666%;">'+
                                                  '<p style="font-size: 16px;"><b>更改镜片</b></p>'+
                                                  '<div>'+
                                                  '<div id="toolbar" class="toolbar">'+
@@ -581,7 +581,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','bootstrap-table-jump-
                                                  '</div>';
                                          for(var j = 0,len = item.length; j < len; j++) {
                                              var newItem = item[j];
-                                             str2 += '<div class="col-lg-12">' +
+                                             str += '<div class="col-lg-12">' +
                                                  '</div>' +
                                                  '<div class="col-xs-6 col-md-4" style="margin-left:5.6666%;" >' +
                                                  '<div class="panel bg-blue">' +
@@ -618,7 +618,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','bootstrap-table-jump-
                                                  '</div>' +
                                                  '</div>';
                                                  if(orderPlatform == 3){
-                                                    str2+='<div class="panel-body">' +
+                                                    str+='<div class="panel-body">' +
                                                     '<div class="panel-title">' +
                                                     '<label class="control-label col-xs-12 col-sm-3">基片类型:</label>' +
                                                     '<div class="col-xs-12 col-sm-8">' +
@@ -651,7 +651,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','bootstrap-table-jump-
                                                     '</div>' +
                                                     '</div>';
                                                  }else{
-                                                   str2+='<div class="panel-body">' +
+                                                   str+='<div class="panel-body">' +
                                                     '<div class="panel-title">' +
                                                     '<label class="control-label col-xs-12 col-sm-3">镜片类型:</label>' +
                                                     '<div class="col-xs-12 col-sm-8">' +
@@ -668,7 +668,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','bootstrap-table-jump-
                                                     '</div>' +
                                                     '</div>'; 
                                                  }
-                                                 str2+='</div>' +
+                                                 str+='</div>' +
                                                  '</div>' +
                                                  '<div class="col-xs-6 col-md-7">' +
                                                  '<div class="panel bg-aqua-gradient">' +
@@ -697,23 +697,23 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','bootstrap-table-jump-
                                                  '<td><input id="c-right_AXI" class="form-control"  type="text" name="row[lens][od_axis][]" value="'+ (newItem.od_axis != undefined ? newItem.od_axis : "") + '"></td>';
                                                  if(orderPlatform<3){
                                                     if(newItem.total_add){
-                                                        str2+= '<td><input id="c-right_ADD" class="form-control"  type="text" name="row[lens][od_add][]" value="' + (newItem.total_add  != undefined ? newItem.total_add : "") + '"></td>';
+                                                        str+= '<td><input id="c-right_ADD" class="form-control"  type="text" name="row[lens][od_add][]" value="' + (newItem.total_add  != undefined ? newItem.total_add : "") + '"></td>';
                                                     }else{
-                                                        str2+= '<td><input id="c-right_ADD" class="form-control"  type="text" name="row[lens][od_add][]" value="' + (newItem.os_add  != undefined ? newItem.os_add : "") + '"></td>';
+                                                        str+= '<td><input id="c-right_ADD" class="form-control"  type="text" name="row[lens][od_add][]" value="' + (newItem.os_add  != undefined ? newItem.os_add : "") + '"></td>';
                                                     }
                                                  }else{
                                                     if(newItem.prescription_type == 'Reading Glasses' && newItem.os_add>0 && newItem.od_add>0){
-                                                        str2+= '<td><input id="c-right_ADD" class="form-control"  type="text" name="row[lens][od_add][]" value="' + (newItem.od_add  != undefined ? newItem.od_add : "") + '"></td>';
+                                                        str+= '<td><input id="c-right_ADD" class="form-control"  type="text" name="row[lens][od_add][]" value="' + (newItem.od_add  != undefined ? newItem.od_add : "") + '"></td>';
                                                     }else{
-                                                        str2+= '<td rowspan="2"><input style="height:62px;"  id="c-right_ADD" class="form-control"  type="text" name="row[lens][od_add][]" value="' + (newItem.total_add  != undefined ? newItem.total_add : "") + '"></td>';
+                                                        str+= '<td rowspan="2"><input style="height:62px;"  id="c-right_ADD" class="form-control"  type="text" name="row[lens][od_add][]" value="' + (newItem.total_add  != undefined ? newItem.total_add : "") + '"></td>';
                                                     }
                                                  }
                                                  if(newItem.pdcheck == 'on'){
-                                                     str2+= '<td><input id="c-right_PD" class="form-control"  type="text"  name="row[lens][pd_r][]" value="'   + (newItem.pd_r  != undefined ? newItem.pd_r : "") + '"></td>';
+                                                     str+= '<td><input id="c-right_PD" class="form-control"  type="text"  name="row[lens][pd_r][]" value="'   + (newItem.pd_r  != undefined ? newItem.pd_r : "") + '"></td>';
                                                  }else{
-                                                    str2+= '<td rowspan="2"><input style="height:62px;" id="c-right_PD" class="form-control"  type="text"  name="row[lens][pd_r][]" value="'   + (newItem.pd  != undefined ? newItem.pd : "") + '"></td>';
+                                                    str+= '<td rowspan="2"><input style="height:62px;" id="c-right_PD" class="form-control"  type="text"  name="row[lens][pd_r][]" value="'   + (newItem.pd  != undefined ? newItem.pd : "") + '"></td>';
                                                  }   
-                                                 str2+='<td><input id="c-right_Prism_Horizontal" class="form-control" name="row[lens][od_pv][]" type="text" value="' + (newItem.od_pv != undefined ? newItem.od_pv: "") + '"></td>' +
+                                                 str+='<td><input id="c-right_Prism_Horizontal" class="form-control" name="row[lens][od_pv][]" type="text" value="' + (newItem.od_pv != undefined ? newItem.od_pv: "") + '"></td>' +
                                                  '<td><input id="c-right_" class="form-control"  type="text" name="row[lens][od_bd][]" value="' + (newItem.od_bd != undefined ? newItem.od_bd:"")+ '"></td>' +
                                                  '<td><input id="c-purchase_remark" class="form-control"  type="text" name="row[lens][od_pv_r][]" value="' + (newItem.od_pv_r != undefined ? newItem.od_pv_r:"") + '"></td>' +
                                                  '<td><input id="c-purchase_remark" class="form-control"  type="text" name="row[lens][od_bd_r][]" value="' + (newItem.od_bd_r != undefined ? newItem.od_bd_r:"") + '"></td>' +
@@ -725,17 +725,17 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','bootstrap-table-jump-
                                                  '<td><input id="c-purchase_remark" class="form-control"  type="text" name="row[lens][os_axis][]" value="' + (newItem.os_axis != undefined ? newItem.os_axis :"")+ '"></td>';
                                                  if(orderPlatform<3){
                                                     if(!newItem.total_add){
-                                                        str2+='<td><input id="c-purchase_remark" class="form-control"  type="text" name="row[lens][os_add][]" value="' + (newItem.od_add  != undefined ? newItem.od_add : "") + '"></td>';
+                                                        str+='<td><input id="c-purchase_remark" class="form-control"  type="text" name="row[lens][os_add][]" value="' + (newItem.od_add  != undefined ? newItem.od_add : "") + '"></td>';
                                                     }
                                                  }else{
                                                     if(newItem.prescription_type == 'Reading Glasses' && newItem.os_add>0 && newItem.od_add>0){
-                                                        str2+='<td><input id="c-purchase_remark" class="form-control"  type="text" name="row[lens][os_add][]" value="' + (newItem.os_add  != undefined ? newItem.os_add : "") + '"></td>';
+                                                        str+='<td><input id="c-purchase_remark" class="form-control"  type="text" name="row[lens][os_add][]" value="' + (newItem.os_add  != undefined ? newItem.os_add : "") + '"></td>';
                                                     }
                                                  }
                                                  if(newItem.pdcheck == 'on'){
-                                                        str2+='<td><input id="c-purchase_remark" class="form-control"  type="text" name="row[lens][pd_l][]" value="' + (newItem.pd_l  != undefined ? newItem.pd_l : "") + '"></td>';
+                                                        str+='<td><input id="c-purchase_remark" class="form-control"  type="text" name="row[lens][pd_l][]" value="' + (newItem.pd_l  != undefined ? newItem.pd_l : "") + '"></td>';
                                                  }
-                                                 str2+='<td><input id="c-purchase_remark" class="form-control"  type="text" name="row[lens][os_pv][]" value="' + (newItem.os_pv != undefined ? newItem.os_pv : "") + '"></td>' +
+                                                 str+='<td><input id="c-purchase_remark" class="form-control"  type="text" name="row[lens][os_pv][]" value="' + (newItem.os_pv != undefined ? newItem.os_pv : "") + '"></td>' +
                                                  '<td><input id="c-purchase_remark" class="form-control"  type="text" name="row[lens][os_bd][]" value="' + (newItem.os_bd != undefined ? newItem.os_bd : "")+ '"></td>' +
                                                  '<td><input id="c-purchase_remark" class="form-control"  type="text" name="row[lens][os_pv_r][]" value="' + (newItem.os_pv_r!= undefined ? newItem.os_pv_r : "") + '"></td>' +
                                                  '<td><input id="c-purchase_remark" class="form-control"  type="text" name="row[lens][os_bd_r][]" value="' + (newItem.os_bd_r!= undefined ? newItem.os_bd_r : "") + '"></td>' +
@@ -749,8 +749,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','bootstrap-table-jump-
                                                  '</div>'+
                                                  '</div>';
                                          }
-                                         str2+='</div>';
-                                         return str2;
+                                         str+='</div>';
+                                         return str;
                                      });
 
                              }, function(data, ret){
@@ -1077,6 +1077,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','bootstrap-table-jump-
                                 url:'saleaftermanage/sale_after_task/ajax',
                                 data:{ordertype:orderPlatform,order_number:orderNumber}
                             }, function(data, ret){
+							$(".frame-info").remove();	
                             $(".recipe-info").remove();
                             $(".item_info").empty();
                             $("#c-change_type").val(1);
@@ -1135,21 +1136,22 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','bootstrap-table-jump-
                                 url:'saleaftermanage/sale_after_task/ajax',
                                 data:{ordertype:orderPlatform,order_number:orderNumber}
                             }, function(data, ret){
-                            $(".frame-info").remove();
+								$(".recipe-info").remove();
+								$(".frame-info").remove();
                                 $(".item_info").empty();
                                 $("#c-change_type").val(2);
                                 var item = ret.data;
                                     $('#customer_info').after(function(){
-                                        var str2 = '';
-                                        str2+= '<div class="row recipe-info item_info" style="margin-top:15px;margin-left:7.6666%;">'+
+                                        var Str = '';
+                                        Str+= '<div class="row recipe-info item_info" style="margin-top:15px;margin-left:7.6666%;">'+
                                                 '<p style="font-size: 16px;"><b>更改镜片</b></p>'+
                                                 '<div>'+
                                                 '<div id="toolbar" class="toolbar">'+
-                                                '<a href="javascript:;" class="btn btn-success btn-add-lens" title="增加"><i class="fa fa-plus"></i> 增加</a>'+
+                                                '<a href="javascript:;" class="btn btn-success btn-add-lens" title="增加1"><i class="fa fa-plus"></i> 增加</a>'+
                                                 '</div>';
                                         for(var j = 0,len = item.length; j < len; j++) {
                                             var newItem = item[j];
-                                            str2 += '<div class="col-lg-12">' +
+                                            Str += '<div class="col-lg-12">' +
                                                 '</div>' +
                                                 '<div class="col-xs-6 col-md-4" style="margin-left:5.6666%;" >' +
                                                 '<div class="panel bg-blue">' +
@@ -1186,7 +1188,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','bootstrap-table-jump-
                                                 '</div>' +
                                                 '</div>';
                                                 if(orderPlatform == 3){
-                                                str2+='<div class="panel-body">' +
+                                                Str+='<div class="panel-body">' +
                                                 '<div class="panel-title">' +
                                                 '<label class="control-label col-xs-12 col-sm-3">基片类型:</label>' +
                                                 '<div class="col-xs-12 col-sm-8">' +
@@ -1219,7 +1221,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','bootstrap-table-jump-
                                                 '</div>' +
                                                 '</div>';
                                                 }else{
-                                                str2+='<div class="panel-body">' +
+                                                Str+='<div class="panel-body">' +
                                                 '<div class="panel-title">' +
                                                 '<label class="control-label col-xs-12 col-sm-3">镜片类型:</label>' +
                                                 '<div class="col-xs-12 col-sm-8">' +
@@ -1236,7 +1238,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','bootstrap-table-jump-
                                                 '</div>' +
                                                 '</div>'; 
                                                 }
-                                                str2+='</div>' +
+                                                Str+='</div>' +
                                                 '</div>' +
                                                 '<div class="col-xs-6 col-md-7">' +
                                                 '<div class="panel bg-aqua-gradient">' +
@@ -1265,23 +1267,23 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','bootstrap-table-jump-
                                                 '<td><input id="c-right_AXI" class="form-control"  type="text" name="row[lens][od_axis][]" value="'+ (newItem.od_axis != undefined ? newItem.od_axis : "") + '"></td>';
                                                 if(orderPlatform<3){
                                                 if(newItem.total_add){
-                                                    str2+= '<td><input id="c-right_ADD" class="form-control"  type="text" name="row[lens][od_add][]" value="' + (newItem.total_add  != undefined ? newItem.total_add : "") + '"></td>';
+                                                    Str+= '<td><input id="c-right_ADD" class="form-control"  type="text" name="row[lens][od_add][]" value="' + (newItem.total_add  != undefined ? newItem.total_add : "") + '"></td>';
                                                 }else{
-                                                    str2+= '<td><input id="c-right_ADD" class="form-control"  type="text" name="row[lens][od_add][]" value="' + (newItem.os_add  != undefined ? newItem.os_add : "") + '"></td>';
+                                                    Str+= '<td><input id="c-right_ADD" class="form-control"  type="text" name="row[lens][od_add][]" value="' + (newItem.os_add  != undefined ? newItem.os_add : "") + '"></td>';
                                                 }
                                                 }else{
                                                 if(newItem.prescription_type == 'Reading Glasses' && newItem.os_add>0 && newItem.od_add>0){
-                                                    str2+= '<td><input id="c-right_ADD" class="form-control"  type="text" name="row[lens][od_add][]" value="' + (newItem.od_add  != undefined ? newItem.od_add : "") + '"></td>';
+                                                    Str+= '<td><input id="c-right_ADD" class="form-control"  type="text" name="row[lens][od_add][]" value="' + (newItem.od_add  != undefined ? newItem.od_add : "") + '"></td>';
                                                 }else{
-                                                    str2+= '<td rowspan="2"><input style="height:62px;"  id="c-right_ADD" class="form-control"  type="text" name="row[lens][od_add][]" value="' + (newItem.total_add  != undefined ? newItem.total_add : "") + '"></td>';
+                                                    Str+= '<td rowspan="2"><input style="height:62px;"  id="c-right_ADD" class="form-control"  type="text" name="row[lens][od_add][]" value="' + (newItem.total_add  != undefined ? newItem.total_add : "") + '"></td>';
                                                 }
                                                 }
                                                 if(newItem.pdcheck == 'on'){
-                                                    str2+= '<td><input id="c-right_PD" class="form-control"  type="text"  name="row[lens][pd_r][]" value="'   + (newItem.pd_r  != undefined ? newItem.pd_r : "") + '"></td>';
+                                                    Str+= '<td><input id="c-right_PD" class="form-control"  type="text"  name="row[lens][pd_r][]" value="'   + (newItem.pd_r  != undefined ? newItem.pd_r : "") + '"></td>';
                                                 }else{
-                                                str2+= '<td rowspan="2"><input style="height:62px;" id="c-right_PD" class="form-control"  type="text"  name="row[lens][pd_r][]" value="'   + (newItem.pd  != undefined ? newItem.pd : "") + '"></td>';
+                                                Str+= '<td rowspan="2"><input style="height:62px;" id="c-right_PD" class="form-control"  type="text"  name="row[lens][pd_r][]" value="'   + (newItem.pd  != undefined ? newItem.pd : "") + '"></td>';
                                                 }   
-                                                str2+='<td><input id="c-right_Prism_Horizontal" class="form-control" name="row[lens][od_pv][]" type="text" value="' + (newItem.od_pv != undefined ? newItem.od_pv: "") + '"></td>' +
+                                                Str+='<td><input id="c-right_Prism_Horizontal" class="form-control" name="row[lens][od_pv][]" type="text" value="' + (newItem.od_pv != undefined ? newItem.od_pv: "") + '"></td>' +
                                                 '<td><input id="c-right_" class="form-control"  type="text" name="row[lens][od_bd][]" value="' + (newItem.od_bd != undefined ? newItem.od_bd:"")+ '"></td>' +
                                                 '<td><input id="c-purchase_remark" class="form-control"  type="text" name="row[lens][od_pv_r][]" value="' + (newItem.od_pv_r != undefined ? newItem.od_pv_r:"") + '"></td>' +
                                                 '<td><input id="c-purchase_remark" class="form-control"  type="text" name="row[lens][od_bd_r][]" value="' + (newItem.od_bd_r != undefined ? newItem.od_bd_r:"") + '"></td>' +
@@ -1293,17 +1295,17 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','bootstrap-table-jump-
                                                 '<td><input id="c-purchase_remark" class="form-control"  type="text" name="row[lens][os_axis][]" value="' + (newItem.os_axis != undefined ? newItem.os_axis :"")+ '"></td>';
                                                 if(orderPlatform<3){
                                                 if(!newItem.total_add){
-                                                    str2+='<td><input id="c-purchase_remark" class="form-control"  type="text" name="row[lens][os_add][]" value="' + (newItem.od_add  != undefined ? newItem.od_add : "") + '"></td>';
+                                                    Str+='<td><input id="c-purchase_remark" class="form-control"  type="text" name="row[lens][os_add][]" value="' + (newItem.od_add  != undefined ? newItem.od_add : "") + '"></td>';
                                                 }
                                                 }else{
                                                 if(newItem.prescription_type == 'Reading Glasses' && newItem.os_add>0 && newItem.od_add>0){
-                                                    str2+='<td><input id="c-purchase_remark" class="form-control"  type="text" name="row[lens][os_add][]" value="' + (newItem.os_add  != undefined ? newItem.os_add : "") + '"></td>';
+                                                    Str+='<td><input id="c-purchase_remark" class="form-control"  type="text" name="row[lens][os_add][]" value="' + (newItem.os_add  != undefined ? newItem.os_add : "") + '"></td>';
                                                 }
                                                 }
                                                 if(newItem.pdcheck == 'on'){
-                                                    str2+='<td><input id="c-purchase_remark" class="form-control"  type="text" name="row[lens][pd_l][]" value="' + (newItem.pd_l  != undefined ? newItem.pd_l : "") + '"></td>';
+                                                    Str+='<td><input id="c-purchase_remark" class="form-control"  type="text" name="row[lens][pd_l][]" value="' + (newItem.pd_l  != undefined ? newItem.pd_l : "") + '"></td>';
                                                 }
-                                                str2+='<td><input id="c-purchase_remark" class="form-control"  type="text" name="row[lens][os_pv][]" value="' + (newItem.os_pv != undefined ? newItem.os_pv : "") + '"></td>' +
+                                                Str+='<td><input id="c-purchase_remark" class="form-control"  type="text" name="row[lens][os_pv][]" value="' + (newItem.os_pv != undefined ? newItem.os_pv : "") + '"></td>' +
                                                 '<td><input id="c-purchase_remark" class="form-control"  type="text" name="row[lens][os_bd][]" value="' + (newItem.os_bd != undefined ? newItem.os_bd : "")+ '"></td>' +
                                                 '<td><input id="c-purchase_remark" class="form-control"  type="text" name="row[lens][os_pv_r][]" value="' + (newItem.os_pv_r!= undefined ? newItem.os_pv_r : "") + '"></td>' +
                                                 '<td><input id="c-purchase_remark" class="form-control"  type="text" name="row[lens][os_bd_r][]" value="' + (newItem.os_bd_r!= undefined ? newItem.os_bd_r : "") + '"></td>' +
@@ -1317,8 +1319,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','bootstrap-table-jump-
                                                 '</div>'+
                                                 '</div>';
                                         }
-                                        str2+='</div>';
-                                        return str2;
+                                        Str+='</div>';
+                                        return Str;
                                     });
 
                             }, function(data, ret){
@@ -1334,6 +1336,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','bootstrap-table-jump-
                             url:'saleaftermanage/sale_after_task/ajax',
                             data:{ordertype:orderPlatform,order_number:orderNumber}
                         }, function(data, ret){
+							$(".frame-info").remove();
                             $(".recipe-info").remove();
                             $(".item_info").empty();
                             $("#c-change_type").val(3);
@@ -1370,6 +1373,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','bootstrap-table-jump-
                     }
                 }else{
                     //$(".item_info").empty();
+					alert(111);
                     $(".item_info").remove();
                 }
             });
