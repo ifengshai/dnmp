@@ -66,6 +66,7 @@ class InfoSynergyTask extends Backend
             // exit;
             $item = isset($params['item']) ? $params['item']  : '';
             $lens = isset($params['lens']) ? $params['lens']  : '';
+			$params['synergy_order_number'] = trim($params['synergy_order_number']); 
             // echo '<pre>';
             // var_dump($item);
             // exit;
