@@ -819,6 +819,7 @@ class InfoSynergyTask extends Backend
                 break;
                 case 3:
                 $value['synergy_status'] = '取消';
+				break;
                 default:
                 $value['synergy_status'] = '未处理';
                 break;            

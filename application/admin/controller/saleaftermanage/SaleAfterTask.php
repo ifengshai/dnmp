@@ -1477,6 +1477,7 @@ class SaleAfterTask extends Backend
                 break;
                 case 3:
                 $value['task_status'] = '取消';
+				break;
                 default:
                 $value['task_status'] = '未处理';
                 break;            
