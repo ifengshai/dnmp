@@ -76,14 +76,13 @@ class Index extends Backend
 
                 $n_sku = $this->itemplatformsku->getWebSku($filter['sku'], 3);
                 $nmap['sku'] = ['like', '%' . $n_sku . '%'];
-
                 unset($filter['sku']);
                 $this->request->get(['filter' => json_encode($filter)]);
             }
 
-            $zeeloolRes = $this->zeelool->getOrderSalesNum($map);
-            $vooguemeRes = $this->voogueme->getOrderSalesNum($map);
-            $nihaoRes = $this->nihao->getOrderSalesNum($map);
+            $zeeloolRes = $this->zeelool->getOrderSalesNum($zmap);
+            $vooguemeRes = $this->voogueme->getOrderSalesNum($vmap);
+            $nihaoRes = $this->nihao->getOrderSalesNum($nmap);
 
             $total = $this->model
                 ->where($where)

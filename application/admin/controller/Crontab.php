@@ -1484,4 +1484,17 @@ order by sfoi.item_id asc limit 1000";
         $map['id'] = ['in', $itemId];
         Db::connect('database.db_stock')->name('item')->where($map)->update(['is_new' => 2]);
     }
+
+    /**
+     * 定时记录每日库存变化量
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/02/11 14:34:07 
+     * @return void
+     */
+    public function getProductStock()
+    {
+        Db::connect('database.db_stock')->name('item')->where('');
+    }
 }
