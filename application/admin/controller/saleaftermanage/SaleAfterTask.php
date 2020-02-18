@@ -610,6 +610,9 @@ class SaleAfterTask extends Backend
                         $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.edit' : $name) : $this->modelValidate;
                         $row->validateFailException(true)->validate($validate);
                     }
+					if(2 == $params['task_status']){
+						$params['complete_time'] = date("Y-m-d H:i:s",time());
+					}
                     $result = $row->allowField(true)->save($params);
                     Db::commit();
                 } catch (ValidateException $e) {
