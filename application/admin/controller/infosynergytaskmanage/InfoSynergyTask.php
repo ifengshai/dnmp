@@ -91,6 +91,11 @@ class InfoSynergyTask extends Backend
                 }else{
                     $params['is_refund'] = 1;
                 }
+				////检查是否存在已经添加过的订单以及类型
+				$checkInfo = $this->model->checkOrderInfo($params['synergy_order_number'],$params['synergy_task_id']);
+				if($checkInfo){
+					$this->error(__('存在同样任务类型的未处理订单'));
+				}
                 if ($this->dataLimit && $this->dataLimitFieldAutoFill) {
                     $params[$this->dataLimitField] = $this->auth->id;
                 }

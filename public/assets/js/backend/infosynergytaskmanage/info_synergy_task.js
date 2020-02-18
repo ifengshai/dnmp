@@ -1374,7 +1374,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','bootstrap-table-jump-
                     }
                 }else{
                     //$(".item_info").empty();
-					alert(111);
+					//alert(111);
                     $(".item_info").remove();
                 }
             });

@@ -673,7 +673,15 @@ class SaleAfterTask extends Model
 
         return $result;
     }
-
-
+	/***
+	 *检查订单是否重复
+	 */
+	public function checkOrderInfo($order_number,$problem_id)
+	{
+		$where['order_number'] = $order_number;
+		$where['problem_id']   = $problem_id;
+		$result = $this->where($where)->field('id,order_number')->find();
+		return $result ? $result : false;
+	}
 
 }
