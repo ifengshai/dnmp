@@ -36,12 +36,12 @@ class Index extends Backend
     public function _initialize()
     {
         parent::_initialize();
-        $this->model = new \app\admin\model\lens\Index;
-        $this->outorder = new \app\admin\model\lens\LensOutorder;
+
         $this->zeelool = new \app\admin\model\order\order\Zeelool;
         $this->voogueme = new \app\admin\model\order\order\Voogueme;
         $this->nihao = new \app\admin\model\order\order\Nihao;
         $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
+        $this->item = new \app\admin\model\itemmanage\Item;
     }
 
     /**
@@ -55,6 +55,7 @@ class Index extends Backend
      */
     public function index()
     {
+
         //设置过滤方法
         $this->request->filter(['strip_tags']);
         if ($this->request->isAjax()) {
@@ -64,40 +65,50 @@ class Index extends Backend
             }
 
             //统计三个站销量
-            //自定义sku搜索
+            //自定义时间搜索
             $filter = json_decode($this->request->get('filter'), true);
-            if ($filter['sku']) {
-                //sku转换
-                $z_sku = $this->itemplatformsku->getWebSku($filter['sku'], 1);
-                $zmap['sku'] = ['like', '%' . $z_sku . '%'];
-
-                $v_sku = $this->itemplatformsku->getWebSku($filter['sku'], 2);
-                $vmap['sku'] = ['like', '%' . $v_sku . '%'];
-
-                $n_sku = $this->itemplatformsku->getWebSku($filter['sku'], 3);
-                $nmap['sku'] = ['like', '%' . $n_sku . '%'];
-
-                unset($filter['sku']);
+            if ($filter['created_at']) {
+                $createat = explode(' ', $filter['created_at']);
+                $map['a.created_at'] = ['between', [$createat[0], $createat[2]]];
+                unset($filter['created_at']);
                 $this->request->get(['filter' => json_encode($filter)]);
             }
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
 
-            $zeeloolRes = $this->zeelool->getOrderSalesNum($zmap, $where);
-            $vooguemeRes = $this->voogueme->getOrderSalesNum($vmap, $where);
-            $nihaoRes = $this->nihao->getOrderSalesNum($nmap, $where);
+            // $zeeloolRes = $this->zeelool->getOrderSalesNum($zmap, $where);
+            // $vooguemeRes = $this->voogueme->getOrderSalesNum($vmap, $where);
+            // $nihaoRes = $this->nihao->getOrderSalesNum($nmap, $where);
 
+            // dump($zeeloolRes);
+            // dump($vooguemeRes);
+            // dump($nihaoRes);die;
 
-            $total = $this->model
+            $total = $this->item
                 ->where($where)
                 ->order($sort, $order)
                 ->count();
 
-            $list = $this->model
+            $list = $this->item
                 ->where($where)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
 
+            foreach ($list as $k => $v) {
+                //sku转换
+                $z_sku = $this->itemplatformsku->getWebSku($v['sku'], 1);
+                $zmap['sku'] = ['like', '%' . $z_sku . '%'];
+
+                $v_sku = $this->itemplatformsku->getWebSku($v['sku'], 2);
+                $vmap['sku'] = ['like', '%' . $v_sku . '%'];
+
+                $n_sku = $this->itemplatformsku->getWebSku($v['sku'], 3);
+                $nmap['sku'] = ['like', '%' . $n_sku . '%'];
+                
+                $list['z_num'] = $this->zeelool->getOrderSalesNum($zmap, $map);
+                $list['v_num'] = $this->voogueme->getOrderSalesNum($vmap, $map);
+                $list['n_num'] = $this->nihao->getOrderSalesNum($nmap, $map);
+            }
             $list = collection($list)->toArray();
             $result = array("total" => $total, "rows" => $list);
 
