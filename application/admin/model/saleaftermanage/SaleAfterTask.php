@@ -217,7 +217,7 @@ class SaleAfterTask extends Model
     {
         $result = $this->alias('t')->join(' sale_after_issue s','t.problem_id = s.id')->where('t.id','=',$id)->field('t.id,task_status,task_number,order_platform,
         order_number,order_status,order_skus,order_source,dept_id,rep_id,prty_id,problem_id,problem_desc,upload_photos,create_person,customer_name,handle_scheme,
-        customer_email,refund_money,refund_way,give_coupon,tariff,make_up_price_order,replacement_order,t.create_time,s.name')->find();
+        customer_email,refund_money,refund_way,give_coupon,tariff,make_up_price_order,replacement_order,integral,t.create_time,s.name')->find();
         if(!$result){
             return false;
         }
@@ -606,7 +606,7 @@ class SaleAfterTask extends Model
             //求出用户的等级
             $customer_group_code = Db::connect($db)->table('customer_entity c')->join('customer_group g',' c.group_id = g.customer_group_id')->where(['c.email'=>$customer_email])->value('g.customer_group_code');
             $result = Db::connect($db)->table('sales_flat_order o')->join('sales_flat_shipment_track s','o.entity_id=s.order_id','left')->join('sales_flat_order_payment p','o.entity_id=p.parent_id','left')->join('sales_flat_order_address a','o.entity_id=a.parent_id')->where('customer_email',$customer_email)->where('a.address_type','shipping')
-                ->field('o.base_to_order_rate,o.base_total_paid,o.base_total_due,o.entity_id,o.status,o.coupon_code,o.coupon_rule_name,o.store_id,o.increment_id,o.customer_email,o.customer_firstname,o.customer_lastname,o.order_currency_code,o.total_item_count,o.base_grand_total,o.base_total_paid,o.base_total_due,o.created_at,o.order_type,s.track_number,s.title,p.base_amount_paid,p.base_amount_ordered,p.base_shipping_amount,p.method,p.last_trans_id,p.additional_information,a.telephone,a.postcode,a.street,a.city,a.region,a.country_id')->order('o.entity_id desc')->select();
+                ->field('o.base_to_order_rate,o.base_total_paid,o.base_total_due,o.entity_id,o.status,o.coupon_code,o.coupon_rule_name,o.store_id,o.increment_id,o.customer_email,o.customer_firstname,o.customer_lastname,o.order_currency_code,o.total_item_count,o.base_grand_total,o.base_total_paid,o.base_total_due,o.created_at,o.order_type,s.track_number,s.title,p.base_amount_paid,p.base_amount_ordered,p.base_amount_authorized,p.base_shipping_amount,p.method,p.last_trans_id,p.additional_information,a.telephone,a.postcode,a.street,a.city,a.region,a.country_id')->order('o.entity_id desc')->select();
             //return $result;
             if(!$result){
                 return false;
@@ -673,7 +673,15 @@ class SaleAfterTask extends Model
 
         return $result;
     }
-
-
+	/***
+	 *检查订单是否重复
+	 */
+	public function checkOrderInfo($order_number,$problem_id)
+	{
+		$where['order_number'] = $order_number;
+		$where['problem_id']   = $problem_id;
+		$result = $this->where($where)->field('id,order_number')->find();
+		return $result ? $result : false;
+	}
 
 }

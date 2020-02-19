@@ -66,6 +66,7 @@ class InfoSynergyTask extends Backend
             // exit;
             $item = isset($params['item']) ? $params['item']  : '';
             $lens = isset($params['lens']) ? $params['lens']  : '';
+			$params['synergy_order_number'] = trim($params['synergy_order_number']); 
             // echo '<pre>';
             // var_dump($item);
             // exit;
@@ -90,6 +91,11 @@ class InfoSynergyTask extends Backend
                 }else{
                     $params['is_refund'] = 1;
                 }
+				////检查是否存在已经添加过的订单以及类型
+				$checkInfo = $this->model->checkOrderInfo($params['synergy_order_number'],$params['synergy_task_id']);
+				if($checkInfo){
+					$this->error(__('存在同样任务类型的未处理订单'));
+				}
                 if ($this->dataLimit && $this->dataLimitFieldAutoFill) {
                     $params[$this->dataLimitField] = $this->auth->id;
                 }
@@ -818,6 +824,7 @@ class InfoSynergyTask extends Backend
                 break;
                 case 3:
                 $value['synergy_status'] = '取消';
+				break;
                 default:
                 $value['synergy_status'] = '未处理';
                 break;            
