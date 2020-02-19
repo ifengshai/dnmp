@@ -353,6 +353,7 @@ class Voogueme extends Backend
 
                     $ItemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku;
                     //查出订单SKU映射表对应的仓库SKU
+                    $error = [];
                     foreach ($res as $k => &$v) {
 
                         //是否为更换镜架 如果为更换镜架 需处理更换之后SKU的库存
