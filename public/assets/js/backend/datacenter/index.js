@@ -39,6 +39,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','bootstrap-table-jump-
                         { field: 'n_sku', title: __('Nihao_SKU'), operate: false},
                         { field: 'n_num', title: __('Nihao站销量'), operate: false},
                         { field: 'available_stock', title: __('实时库存'), operate: false},
+                        { field: 'all_num', title: __('汇总销量'), operate: false},
                         { field: 'created_at',visible:false, title: __('创建时间'), operate: 'RANGE', addclass: 'datetimerange' },
                         
                     ]

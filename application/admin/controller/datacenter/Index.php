@@ -114,6 +114,8 @@ class Index extends Backend
                 $v['v_num'] = round($voogueme[$v['v_sku']]) ?? 0;
 
                 $v['n_num'] = round($nihao[$v['n_sku']]) ?? 0;
+
+                $v['all_num'] = $v['z_num'] + $v['v_num'] + $v['n_num'];
             }
             unset($v);
 
