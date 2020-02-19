@@ -236,7 +236,7 @@
             {else /}
             <input type="hidden" name="row[change_type]" value="0" id="c-change_type"/>
             {/present}
-            <textarea id="c-problem_desc" disabled="disabled"  class="form-control" rows="10" name="row[problem_desc]" cols="50">{$row.problem_desc|htmlentities}</textarea>
+            <textarea id="c-problem_desc" disabled="disabled"  class="form-control" rows="5" name="row[problem_desc]" cols="50">{$row.problem_desc}</textarea>
         </div>
     </div>
     <div class="form-group" >
@@ -334,7 +334,6 @@
     {elseif condition="$taskChangeSku[0]['change_type'] eq 2"}
     <div class="row item_info" style="margin-top:15px;margin-left:7.6666%;">
         <p style="font-size: 16px;"><b>更改镜片</b></p>
-        <div>
             <!-- <div id="toolbar" class="toolbar">
                 <a href="javascript:;" class="btn btn-success btn-add-lens" title="增加"><i class="fa fa-plus"></i> 增加</a>
             </div> -->
@@ -518,6 +517,7 @@
                 </div> -->
             </div>
      {/foreach}
+	 </div>
     {/if}
     {/present}
     <div class="form-group layer-footer">

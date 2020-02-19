@@ -28,6 +28,7 @@ return [
     'Please select the task category' => '请选择任务分类',
     'Please select the contractor'=>'请选择承接人',
     'Order_skus'           => '订单SKU',
+	'Complete_time'		   => '完成时间',	
     'The collaborative task information has been completed and cannot be processed' => '任务信息已经处理完成，无法处理',
     'The collaborative task information has been completed and cannot be edit' => '任务信息已经处理完成，无法编辑'
 ];
