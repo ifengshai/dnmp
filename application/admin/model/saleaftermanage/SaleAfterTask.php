@@ -680,6 +680,7 @@ class SaleAfterTask extends Model
 	{
 		$where['order_number'] = $order_number;
 		$where['problem_id']   = $problem_id;
+		$where['task_status']  = ['in',[0,1]];
 		$result = $this->where($where)->field('id,order_number')->find();
 		return $result ? $result : false;
 	}

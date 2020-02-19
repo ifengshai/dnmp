@@ -113,6 +113,7 @@ class InfoSynergyTask extends Model
 	{
 		$where['synergy_order_number'] = $synergy_order_number;
 		$where['synergy_task_id']   = $synergy_task_id;
+		$where['synergy_status']  = ['in',[0,1]];
 		$result = $this->where($where)->field('id,synergy_order_number')->find();
 		return $result ? $result : false;
 	}
