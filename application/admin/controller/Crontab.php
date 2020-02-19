@@ -1495,7 +1495,7 @@ order by sfoi.item_id asc limit 1000";
      * @since 2020/02/19 16:23:27 
      * @return void
      */
-    public function getSkuStock()
+    public function get_sku_stock()
     {
         $where['is_del'] = 1;
         $item = Db::connect('database.db_stock')->name('item')->where($where)->field('sku,available_stock as stock_num')->select();
