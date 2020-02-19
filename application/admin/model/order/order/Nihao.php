@@ -86,15 +86,18 @@ class Nihao extends Model
      * @param [type] $map 筛选条件
      * @return object
      */
-    public function getOrderSalesNum($map, $where)
+    public function getOrderSalesNum($sku, $where)
     {
+        if ($sku) {
+            $map['sku'] = ['in', $sku];
+        }
         $res = $this
             ->where($map)
             ->where($where)
             ->alias('a')
-            ->field('b.sku,round(sum(b.qty_ordered),0) qty_ordered')
             ->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')
-            ->select();
+            ->group('sku')
+            ->column('sum(b.qty_ordered)', 'sku');
         return $res;
     }
 

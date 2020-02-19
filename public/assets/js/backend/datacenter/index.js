@@ -32,8 +32,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','bootstrap-table-jump-
                             }, operate: false
                         },
                         { field: 'sku', title: __('SKU'), operate: 'like' },
+                        { field: 'z_sku', title: __('Zeelool_SKU'), operate: false},
+                        { field: 'z_num', title: __('Z站销量'), operate: false},
+                        { field: 'v_sku', title: __('Voogueme_SKU'), operate: false},
+                        { field: 'v_num', title: __('V站销量'), operate: false},
+                        { field: 'n_sku', title: __('Nihao_SKU'), operate: false},
+                        { field: 'n_num', title: __('Nihao站销量'), operate: false},
                         { field: 'available_stock', title: __('实时库存'), operate: false},
-                        { field: 'created_at', title: __('创建时间'), operate: 'RANGE', addclass: 'datetimerange' },
+                        { field: 'created_at',visible:false, title: __('创建时间'), operate: 'RANGE', addclass: 'datetimerange' },
                         
                     ]
                 ]
