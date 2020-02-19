@@ -27,7 +27,7 @@ class Crontab extends Backend
         'nihao_order_item_process',
         'set_purchase_order_logistics',
         'product_grade_list_crontab',
-        'getSkuStock'
+        'get_sku_stock'
     ];
 
 
