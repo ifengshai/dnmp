@@ -224,13 +224,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
 
                     if (label == 1) {
                         for (var i in data.list) {
-                            shtml += '<tr><td><input id="c-name" class="form-control c-name" name="row[name][]" value="' + data[i].title + '" type="text"></td>'
-                            shtml += '<td><input id="c-color" class="form-control" name="row[color][]" value="' + data[i].color + '" type="text"></td>'
+                            shtml += '<tr><td><input id="c-name" class="form-control c-name" name="row[name][]" value="' + data.list[i].title + '" type="text"></td>'
+                            shtml += '<td><input id="c-color" class="form-control" name="row[color][]" value="' + data.list[i].color + '" type="text"></td>'
 
-                            shtml += '<td><input id="c-supplier_sku" class="form-control" name="row[supplier_sku][]" value="' + data[i].cargoNumber + '" type="text"></td>'
-                            shtml += '<td><input id="c-price" class="form-control" name="row[price][]" value="' + data[i].price + '" type="text"></td>'
+                            shtml += '<td><input id="c-supplier_sku" class="form-control" name="row[supplier_sku][]" value="' + data.list[i].cargoNumber + '" type="text"></td>'
+                            shtml += '<td><input id="c-price" class="form-control" name="row[price][]" value="' + data.list[i].price + '" type="text"></td>'
                             shtml += '<td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i> 删除</a></td>'
-                            shtml += '<input  class="form-control" name="row[skuid][]" value="' + data[i].skuId + '" type="hidden">'
+                            shtml += '<input  class="form-control" name="row[skuid][]" value="' + data.list[i].skuId + '" type="hidden">'
                             shtml += '</tr>'
                         }
                     } else {
