@@ -61,9 +61,9 @@ class InfoSynergyTask extends Backend
             if(0 == $params['synergy_order_id']){
                 $this->error(__('请选择关联单据类型'));    
             }
-            // echo '<pre>';
-            // var_dump($params['change_type']);
-            // exit;
+			if(0 == $params['order_platform']){
+				$this->error(__('请选择平台类型'));
+			}			
             $item = isset($params['item']) ? $params['item']  : '';
             $lens = isset($params['lens']) ? $params['lens']  : '';
 			$params['synergy_order_number'] = trim($params['synergy_order_number']); 
