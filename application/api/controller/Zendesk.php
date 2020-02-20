@@ -10,6 +10,8 @@ namespace app\api\controller;
 
 use think\Controller;
 use Zendesk\API\HttpClient as ZendeskAPI;
+use Stringy\Stringy;
+use function Stringy\create as s;
 
 class Zendesk extends Controller
 {
@@ -19,9 +21,10 @@ class Zendesk extends Controller
     protected $token = "wAhNtX3oeeYOJ3RI1i2oUuq0f77B2MiV5upmh11B";
     //客户按要求回复的内容
     protected $auto_answer = [
-        'this is a order',
-        'type order',
-        'shippment or desc'
+        '测试回复1',
+        '测试回复2',
+        '测试回复3',
+        '其他'
     ];
     //匹配自动回复的单词
     protected $preg_word = ['when','deliver','delivery','receive','track','ship','shipping','tracking','status','order','shipment'];
@@ -39,6 +42,7 @@ class Zendesk extends Controller
      */
     public function test()
     {
+        dump(s('str contains foo')->contains('contains foo'));die;
         try {
             // Query Zendesk API to retrieve the ticket details
 
@@ -111,8 +115,62 @@ class Zendesk extends Controller
                 //开始匹配邮件内容
                 //When,deliver,delivery,receive,track,ship,shipping,tracking,status,order,shipment
                 //首先查看是否是自动回复的内容，如果不是，则匹配上述字段自动回
+                if(false){
+                    $answer_key = 0;
+                    foreach($this->auto_answer as $key => $answer){
+                        //回复内容包含自动回复的内容，且相匹配
+                        if(s($body)->contains($answer)){
+                            $answer_key = $key + 1;
+                            break;//匹配到则跳出循环
+                        }
+                    }
+                    switch ($answer_key){
+                        case 1:
+                            break;
+                        case 2:
+                            break;
+                        case 3:
+                            //open，转客服
+                            $params = [
+                                'tags' => ['转客服'],
+                                'status' => 'open'
+                            ];
+                            $this->autoUpdate($id, $params);
+                            break;
+                        case 4:
+                            //open，转客服
+                            $params = [
+                                'tags' => ['转客服'],
+                                'status' => 'open'
+                            ];
+                            $this->autoUpdate($id, $params);
+                            break;
+                        default:  //其他不做处理
+                            break;
+                    }
+                }else{
+                    //匹配到相应的关键字，自动回复消息，修改为pending，回复共客户选择的内容
+                    if(s($body)->containsAny($this->preg_word)){
+                        $params = [
+                            'comment'  => [
+                                'body' => '1、测试的相关回复
+                                2、测试回复2
+                                3、测试回复3
+                                4、其他',
+                                'author_id' => 383342590872
+                            ],
+                            'tags' => ['自动回复'],
+                            'status' => 'pending'
+                        ];
+                        $this->autoUpdate($id, $params);
+                    }
+                }
             }
         }
+    }
+    public function autoUpdate($ticket_id,$params)
+    {
+        $this->client->tickets()->update($ticket_id, $params);
     }
 
     /**
