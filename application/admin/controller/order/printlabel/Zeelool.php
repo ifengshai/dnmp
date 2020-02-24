@@ -556,15 +556,6 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
     {
         set_time_limit(0);
         ini_set('memory_limit', '512M');
-        //         $entity_ids = rtrim(input('id_params'), ',');
-        //         // dump($entity_ids);        
-        //         $processing_order_querySql = "select sfo.increment_id,sfoi.product_options,sfoi.order_id,sfo.`status`,sfoi.sku,sfoi.product_id,sfoi.qty_ordered,sfo.created_at
-        // from sales_flat_order_item sfoi
-        // left join sales_flat_order sfo on  sfoi.order_id=sfo.entity_id 
-        // where sfo.`status` in ('processing','creditcard_proccessing','free_processing','paypal_reversed','complete') and sfo.entity_id in($entity_ids)
-        // order by sfoi.order_id desc;";
-        //         $resultList = Db::connect('database.db_zeelool')->query($processing_order_querySql);
-        // dump($resultList);
 
         $ids = input('id_params');
 
@@ -576,6 +567,7 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
             $map['sfo.status'] = ['in', ['free_processing', 'processing']];
         }
 
+        //是否有协同任务
         $infoSynergyTask = new \app\admin\model\infosynergytaskmanage\InfoSynergyTask;
         if ($filter['task_label'] == 1 || $filter['task_label'] == '0') {
             $swhere['is_del'] = 1;
@@ -691,29 +683,37 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
         //常规方式：利用setCellValue()填充数据
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("A1", "日期")
             ->setCellValue("B1", "订单号")
-            ->setCellValue("C1", "SKU");   //利用setCellValues()填充数据
-        $spreadsheet->setActiveSheetIndex(0)->setCellValue("D1", "眼球")
-            ->setCellValue("E1", "SPH");
-        $spreadsheet->setActiveSheetIndex(0)->setCellValue("F1", "CYL")
-            ->setCellValue("G1", "AXI");
-        $spreadsheet->setActiveSheetIndex(0)->setCellValue("H1", "ADD")
-            ->setCellValue("I1", "单PD")
-            ->setCellValue("J1", "PD");
-        $spreadsheet->setActiveSheetIndex(0)->setCellValue("K1", "镜片")
-            ->setCellValue("L1", "镜框宽度")
-            ->setCellValue("M1", "镜框高度")
-            ->setCellValue("N1", "bridge")
-            ->setCellValue("O1", "处方类型")
-            ->setCellValue("P1", "顾客留言");
-        $spreadsheet->setActiveSheetIndex(0)->setCellValue("Q1", "Prism\n(out/in)")
-            ->setCellValue("R1", "Direct\n(out/in)")
-            ->setCellValue("S1", "Prism\n(up/down)")
-            ->setCellValue("T1", "Direct\n(up/down)");
+            ->setCellValue("C1", "SKUID")
+            ->setCellValue("D1", "SKU");   //利用setCellValues()填充数据
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("E1", "眼球")
+            ->setCellValue("F1", "SPH");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("G1", "CYL")
+            ->setCellValue("H1", "AXI");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("I1", "ADD")
+            ->setCellValue("J1", "单PD")
+            ->setCellValue("K1", "PD");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("L1", "镜片")
+            ->setCellValue("M1", "镜框宽度")
+            ->setCellValue("N1", "镜框高度")
+            ->setCellValue("O1", "bridge")
+            ->setCellValue("P1", "处方类型")
+            ->setCellValue("Q1", "顾客留言");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("R1", "Prism\n(out/in)")
+            ->setCellValue("S1", "Direct\n(out/in)")
+            ->setCellValue("T1", "Prism\n(up/down)")
+            ->setCellValue("U1", "Direct\n(up/down)");
         // Rename worksheet
         $spreadsheet->setActiveSheetIndex(0)->setTitle('订单处方');
 
-        foreach ($finalResult as $key => $value) {
+        $ItemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku;
 
+        //查询商品管理SKU对应ID
+        $item = new \app\admin\model\itemmanage\Item;
+        $itemArr = $item->where('is_del',1)->column('id','sku');
+        
+        foreach ($finalResult as $key => $value) {
+            //网站SKU转换仓库SKU
+            $sku = $ItemPlatformSku->getTrueSku($value['sku'], 1);
             $value['prescription_type'] = isset($value['prescription_type']) ? $value['prescription_type'] : '';
 
             $value['od_sph'] = isset($value['od_sph']) ? $value['od_sph'] : '';
@@ -745,42 +745,43 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
 
             $spreadsheet->getActiveSheet()->setCellValue("A" . ($key * 2 + 2), $value['created_at']);
             $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 2 + 2), $value['increment_id']);
-            $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 2 + 2), $value['sku']);
-            $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 2 + 2), '右眼');
-            $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 2 + 3), '左眼');
+            $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 2 + 2), $itemArr[$sku]);
+            $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 2 + 2), $value['sku']);
+            $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 2 + 2), '右眼');
+            $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 2 + 3), '左眼');
 
-            $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 2 + 2), $value['od_sph'] > 0 ? ' +' . $value['od_sph'] : ' ' . $value['od_sph']);
-            $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 2 + 3), $value['os_sph'] > 0 ? ' +' . $value['os_sph'] : ' ' . $value['os_sph']);
+            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 2 + 2), $value['od_sph'] > 0 ? ' +' . $value['od_sph'] : ' ' . $value['od_sph']);
+            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 2 + 3), $value['os_sph'] > 0 ? ' +' . $value['os_sph'] : ' ' . $value['os_sph']);
 
-            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 2 + 2), $value['od_cyl'] > 0 ? ' +' . $value['od_cyl'] : ' ' . $value['od_cyl']);
-            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 2 + 3), $value['os_cyl'] > 0 ? ' +' . $value['os_cyl'] : ' ' . $value['os_cyl']);
+            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 2 + 2), $value['od_cyl'] > 0 ? ' +' . $value['od_cyl'] : ' ' . $value['od_cyl']);
+            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 2 + 3), $value['os_cyl'] > 0 ? ' +' . $value['os_cyl'] : ' ' . $value['os_cyl']);
 
-            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 2 + 2), $value['od_axis']);
-            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 2 + 3), $value['os_axis']);
+            $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 2 + 2), $value['od_axis']);
+            $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 2 + 3), $value['os_axis']);
 
             if ($value['prescription_type'] == 'Reading Glasses' && strlen($value['os_add']) > 0 && strlen($value['od_add']) > 0) {
                 // 双ADD值时，左右眼互换
-                $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 2 + 2), $value['os_add']);
-                $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 2 + 3), $value['od_add']);
+                $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 2), $value['os_add']);
+                $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 3), $value['od_add']);
             } else {
                 //数值在上一行合并有效，数值在下一行合并后为空
-                $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 2 + 2), $value['os_add']);
-                $spreadsheet->getActiveSheet()->mergeCells("H" . ($key * 2 + 2) . ":H" . ($key * 2 + 3));
+                $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 2), $value['os_add']);
+                $spreadsheet->getActiveSheet()->mergeCells("I" . ($key * 2 + 2) . ":I" . ($key * 2 + 3));
             }
 
             if ($value['pdcheck'] == 'on' && $value['pd_r'] && $value['pd_l']) {
-                $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 2), $value['pd_r']);
-                $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 3), $value['pd_l']);
+                $spreadsheet->getActiveSheet()->setCellValue("J" . ($key * 2 + 2), $value['pd_r']);
+                $spreadsheet->getActiveSheet()->setCellValue("J" . ($key * 2 + 3), $value['pd_l']);
             } else {
-                $spreadsheet->getActiveSheet()->setCellValue("J" . ($key * 2 + 2), $value['pd']);
-                $spreadsheet->getActiveSheet()->mergeCells("J" . ($key * 2 + 2) . ":J" . ($key * 2 + 3));
+                $spreadsheet->getActiveSheet()->setCellValue("K" . ($key * 2 + 2), $value['pd']);
+                $spreadsheet->getActiveSheet()->mergeCells("K" . ($key * 2 + 2) . ":K" . ($key * 2 + 3));
             }
 
-            $spreadsheet->getActiveSheet()->setCellValue("K" . ($key * 2 + 2), $value['index_type']);
-            $spreadsheet->getActiveSheet()->setCellValue("L" . ($key * 2 + 2), $value['lens_width']);
-            $spreadsheet->getActiveSheet()->setCellValue("M" . ($key * 2 + 2), $value['lens_height']);
-            $spreadsheet->getActiveSheet()->setCellValue("N" . ($key * 2 + 2), $value['bridge']);
-            $spreadsheet->getActiveSheet()->setCellValue("O" . ($key * 2 + 2), $value['prescription_type']);
+            $spreadsheet->getActiveSheet()->setCellValue("L" . ($key * 2 + 2), $value['index_type']);
+            $spreadsheet->getActiveSheet()->setCellValue("M" . ($key * 2 + 2), $value['lens_width']);
+            $spreadsheet->getActiveSheet()->setCellValue("N" . ($key * 2 + 2), $value['lens_height']);
+            $spreadsheet->getActiveSheet()->setCellValue("O" . ($key * 2 + 2), $value['bridge']);
+            $spreadsheet->getActiveSheet()->setCellValue("P" . ($key * 2 + 2), $value['prescription_type']);
 
             if (isset($value['information'])) {
                 $value['information'] = urldecode($value['information']);
@@ -788,51 +789,52 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
                 $value['information'] = urldecode($value['information']);
 
                 $value['information'] = str_replace('+', ' ', $value['information']);
-                $spreadsheet->getActiveSheet()->setCellValue("P" . ($key * 2 + 2), $value['information']);
-                $spreadsheet->getActiveSheet()->mergeCells("P" . ($key * 2 + 2) . ":P" . ($key * 2 + 3));
+                $spreadsheet->getActiveSheet()->setCellValue("Q" . ($key * 2 + 2), $value['information']);
+                $spreadsheet->getActiveSheet()->mergeCells("Q" . ($key * 2 + 2) . ":Q" . ($key * 2 + 3));
             }
 
-            $spreadsheet->getActiveSheet()->setCellValue("Q" . ($key * 2 + 2), isset($value['od_pv']) ? $value['od_pv'] : '');
-            $spreadsheet->getActiveSheet()->setCellValue("Q" . ($key * 2 + 3), isset($value['os_pv']) ? $value['os_pv'] : '');
+            $spreadsheet->getActiveSheet()->setCellValue("R" . ($key * 2 + 2), isset($value['od_pv']) ? $value['od_pv'] : '');
+            $spreadsheet->getActiveSheet()->setCellValue("R" . ($key * 2 + 3), isset($value['os_pv']) ? $value['os_pv'] : '');
 
-            $spreadsheet->getActiveSheet()->setCellValue("R" . ($key * 2 + 2), isset($value['od_bd']) ? $value['od_bd'] : '');
-            $spreadsheet->getActiveSheet()->setCellValue("R" . ($key * 2 + 3), isset($value['os_bd']) ? $value['os_bd'] : '');
+            $spreadsheet->getActiveSheet()->setCellValue("S" . ($key * 2 + 2), isset($value['od_bd']) ? $value['od_bd'] : '');
+            $spreadsheet->getActiveSheet()->setCellValue("S" . ($key * 2 + 3), isset($value['os_bd']) ? $value['os_bd'] : '');
 
-            $spreadsheet->getActiveSheet()->setCellValue("S" . ($key * 2 + 2), isset($value['od_pv_r']) ? $value['od_pv_r'] : '');
-            $spreadsheet->getActiveSheet()->setCellValue("S" . ($key * 2 + 3), isset($value['os_pv_r']) ? $value['os_pv_r'] : '');
+            $spreadsheet->getActiveSheet()->setCellValue("T" . ($key * 2 + 2), isset($value['od_pv_r']) ? $value['od_pv_r'] : '');
+            $spreadsheet->getActiveSheet()->setCellValue("T" . ($key * 2 + 3), isset($value['os_pv_r']) ? $value['os_pv_r'] : '');
 
-            $spreadsheet->getActiveSheet()->setCellValue("T" . ($key * 2 + 2), isset($value['od_bd_r']) ? $value['od_bd_r'] : '');
-            $spreadsheet->getActiveSheet()->setCellValue("T" . ($key * 2 + 3), isset($value['os_bd_r']) ? $value['os_bd_r'] : '');
+            $spreadsheet->getActiveSheet()->setCellValue("U" . ($key * 2 + 2), isset($value['od_bd_r']) ? $value['od_bd_r'] : '');
+            $spreadsheet->getActiveSheet()->setCellValue("U" . ($key * 2 + 3), isset($value['os_bd_r']) ? $value['os_bd_r'] : '');
 
             //合并单元格
             $spreadsheet->getActiveSheet()->mergeCells("A" . ($key * 2 + 2) . ":A" . ($key * 2 + 3));
             $spreadsheet->getActiveSheet()->mergeCells("B" . ($key * 2 + 2) . ":B" . ($key * 2 + 3));
             $spreadsheet->getActiveSheet()->mergeCells("C" . ($key * 2 + 2) . ":C" . ($key * 2 + 3));
-            $spreadsheet->getActiveSheet()->mergeCells("K" . ($key * 2 + 2) . ":K" . ($key * 2 + 3));
-
+            $spreadsheet->getActiveSheet()->mergeCells("D" . ($key * 2 + 2) . ":D" . ($key * 2 + 3));
             $spreadsheet->getActiveSheet()->mergeCells("L" . ($key * 2 + 2) . ":L" . ($key * 2 + 3));
+
             $spreadsheet->getActiveSheet()->mergeCells("M" . ($key * 2 + 2) . ":M" . ($key * 2 + 3));
             $spreadsheet->getActiveSheet()->mergeCells("N" . ($key * 2 + 2) . ":N" . ($key * 2 + 3));
             $spreadsheet->getActiveSheet()->mergeCells("O" . ($key * 2 + 2) . ":O" . ($key * 2 + 3));
             $spreadsheet->getActiveSheet()->mergeCells("P" . ($key * 2 + 2) . ":P" . ($key * 2 + 3));
+            $spreadsheet->getActiveSheet()->mergeCells("Q" . ($key * 2 + 2) . ":Q" . ($key * 2 + 3));
         }
 
         //设置宽度
         $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(12);
         $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(12);
-        $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(16);
-        $spreadsheet->getActiveSheet()->getColumnDimension('K')->setWidth(32);
-        $spreadsheet->getActiveSheet()->getColumnDimension('L')->setWidth(12);
+        $spreadsheet->getActiveSheet()->getColumnDimension('D')->setWidth(16);
+        $spreadsheet->getActiveSheet()->getColumnDimension('L')->setWidth(32);
         $spreadsheet->getActiveSheet()->getColumnDimension('M')->setWidth(12);
         $spreadsheet->getActiveSheet()->getColumnDimension('N')->setWidth(12);
+        $spreadsheet->getActiveSheet()->getColumnDimension('O')->setWidth(12);
 
-        $spreadsheet->getActiveSheet()->getColumnDimension('O')->setWidth(18);
-        $spreadsheet->getActiveSheet()->getColumnDimension('P')->setWidth(14);
-
+        $spreadsheet->getActiveSheet()->getColumnDimension('P')->setWidth(18);
         $spreadsheet->getActiveSheet()->getColumnDimension('Q')->setWidth(14);
+
         $spreadsheet->getActiveSheet()->getColumnDimension('R')->setWidth(14);
-        $spreadsheet->getActiveSheet()->getColumnDimension('S')->setWidth(16);
+        $spreadsheet->getActiveSheet()->getColumnDimension('S')->setWidth(14);
         $spreadsheet->getActiveSheet()->getColumnDimension('T')->setWidth(16);
+        $spreadsheet->getActiveSheet()->getColumnDimension('U')->setWidth(16);
 
         $spreadsheet->getDefaultStyle()->getFont()->setName('微软雅黑')->setSize(12);
 
@@ -855,8 +857,8 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
         $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
 
         // $spreadsheet->getActiveSheet()->getStyle('A1:Z'.$key)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-        $spreadsheet->getActiveSheet()->getStyle('A1:Z' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-        $spreadsheet->getActiveSheet()->getStyle('A1:Z' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+        $spreadsheet->getActiveSheet()->getStyle('A1:U' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $spreadsheet->getActiveSheet()->getStyle('A1:U' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
 
 
         //水平垂直居中   
