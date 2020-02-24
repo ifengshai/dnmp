@@ -3,17 +3,9 @@
 namespace app\admin\controller\datacenter;
 
 use app\common\controller\Backend;
-use think\Db;
-use think\Exception;
-use think\exception\PDOException;
-use think\exception\ValidateException;
-use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
-use PhpOffice\PhpSpreadsheet\Reader\Xls;
-use PhpOffice\PhpSpreadsheet\Reader\Csv;
-use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 
 /**
- * 镜片管理管理
+ * 数据中心
  *
  * @icon fa fa-circle-o
  */
@@ -52,6 +44,11 @@ class Index extends Backend
 
     /**
      * 销量统计
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/02/21 14:20:44 
+     * @return void
      */
     public function index()
     {
@@ -124,6 +121,19 @@ class Index extends Backend
 
             return json($result);
         }
+        return $this->view->fetch();
+    }
+
+    /**
+     * 供应链数据大屏
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/02/21 14:23:45 
+     * @return void
+     */
+    public function supply_chain_data()
+    {
         return $this->view->fetch();
     }
 }
