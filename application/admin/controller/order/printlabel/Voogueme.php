@@ -35,13 +35,6 @@ class Voogueme extends Backend
         $this->model = new \app\admin\model\order\printlabel\Voogueme;
     }
 
-    // public function test(){
-    //     // echo '123456';
-    //     $entity_id = 82712;
-    //     dump(VooguemePrescriptionDetailHelper::get_one_by_entity_id($entity_id));
-    //     // $increment_id = '130023358';
-    //     // dump(VooguemePrescriptionDetailHelper::get_one_by_increment_id($increment_id));
-    // }
 
     /**
      * 默认生成的控制器所继承的父类中有index/add/edit/del/multi五个基础方法、destroy/restore/recyclebin三个回收站方法
@@ -72,7 +65,7 @@ class Voogueme extends Backend
             } elseif (!$filter['status']) {
                 $map['status'] = ['in', ['free_processing', 'processing']];
             } 
-
+            //是否有协同任务
             $infoSynergyTask = new \app\admin\model\infosynergytaskmanage\InfoSynergyTask;
             if ($filter['task_label'] == 1 || $filter['task_label'] == '0') {
                 $swhere['is_del'] = 1;
@@ -83,6 +76,16 @@ class Voogueme extends Backend
                 unset($filter['task_label']);
                 $this->request->get(['filter' => json_encode($filter)]);
             } 
+
+            //SKU搜索
+            if ($filter['sku']) {
+                $smap['sku'] = ['like', '%' . $filter['sku'] . '%'];
+                $smap['status'] = $filter['status'] ? ['in', $filter['status']] : $map['status'];
+                $ids = $this->model->getOrderId($smap);
+                $map['entity_id'] = ['in', $ids];
+                unset($filter['sku']);
+                $this->request->get(['filter' => json_encode($filter)]);
+            }
 
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
@@ -595,6 +598,13 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
             $created_at = explode(' - ', $filter['created_at']);
             $map['sfo.created_at'] = ['between', [$created_at[0], $created_at[1]]];
             unset($filter['created_at']);
+            $this->request->get(['filter' => json_encode($filter)]);
+        }
+
+        //SKU搜索
+        if ($filter['sku']) {
+            $map['sku'] = ['like', '%' . $filter['sku'] . '%'];
+            unset($filter['sku']);
             $this->request->get(['filter' => json_encode($filter)]);
         }
 

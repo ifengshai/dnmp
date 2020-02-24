@@ -35,14 +35,6 @@ class Nihao extends Backend
         $this->model = new \app\admin\model\order\printlabel\Nihao;
     }
 
-    // public function test(){
-    //     // echo '123456';
-    //     $entity_id = 1181;
-    //     dump(NihaoPrescriptionDetailHelper::get_one_by_entity_id($entity_id));
-    //     // $increment_id = '130023358';
-    //     // dump(VooguemePrescriptionDetailHelper::get_one_by_increment_id($increment_id));
-    // }
-
     /**
      * 默认生成的控制器所继承的父类中有index/add/edit/del/multi五个基础方法、destroy/restore/recyclebin三个回收站方法
      * 因此在当前控制器中可不用编写增删改查的代码,除非需要自己控制这部分逻辑
@@ -70,7 +62,7 @@ class Nihao extends Backend
             } elseif (!$filter['status']) {
                 $map['status'] = ['in', ['free_processing', 'processing']];
             }
-
+            //是否有协同任务
             $infoSynergyTask = new \app\admin\model\infosynergytaskmanage\InfoSynergyTask;
             if ($filter['task_label'] == 1 || $filter['task_label'] == '0') {
                 $swhere['is_del'] = 1;
@@ -79,6 +71,16 @@ class Nihao extends Backend
                 $order_arr = $infoSynergyTask->where($swhere)->order('create_time desc')->column('synergy_order_number');
                 $map['increment_id'] = ['in', $order_arr];
                 unset($filter['task_label']);
+                $this->request->get(['filter' => json_encode($filter)]);
+            }
+
+            //SKU搜索
+            if ($filter['sku']) {
+                $smap['sku'] = ['like', '%' . $filter['sku'] . '%'];
+                $smap['status'] = $filter['status'] ? ['in', $filter['status']] : $map['status'];
+                $ids = $this->model->getOrderId($smap);
+                $map['entity_id'] = ['in', $ids];
+                unset($filter['sku']);
                 $this->request->get(['filter' => json_encode($filter)]);
             }
 
@@ -602,6 +604,12 @@ where cped.attribute_id in(146,147) and cped.store_id=0 and cped.entity_id=$prod
             unset($filter['created_at']);
             $this->request->get(['filter' => json_encode($filter)]);
         }
+        //SKU搜索
+        if ($filter['sku']) {
+            $map['sku'] = ['like', '%' . $filter['sku'] . '%'];
+            unset($filter['sku']);
+            $this->request->get(['filter' => json_encode($filter)]);
+        }
 
         list($where) = $this->buildparams();
         $field = 'sfo.increment_id,sfoi.product_options,sfoi.order_id,sfo.`status`,sfoi.sku,sfoi.product_id,sfoi.qty_ordered,sfo.created_at';
@@ -799,7 +807,7 @@ where cped.attribute_id in(146,147) and cped.store_id=0 and cped.entity_id=$prod
             $spreadsheet->getActiveSheet()->setCellValue("N" . ($key * 2 + 2), $value['lens_height']);
             $spreadsheet->getActiveSheet()->setCellValue("O" . ($key * 2 + 2), $value['bridge']);
             $spreadsheet->getActiveSheet()->setCellValue("P" . ($key * 2 + 2), $value['prescription_type']);
-         
+
 
             $spreadsheet->getActiveSheet()->mergeCells("A" . ($key * 2 + 2) . ":A" . ($key * 2 + 3));
             $spreadsheet->getActiveSheet()->mergeCells("B" . ($key * 2 + 2) . ":B" . ($key * 2 + 3));
@@ -817,7 +825,7 @@ where cped.attribute_id in(146,147) and cped.store_id=0 and cped.entity_id=$prod
 
             if ($value['information']) {
                 $value['information'] = urldecode($value['information']);
-               
+
                 $value['information'] = str_replace('+', ' ', $value['information']);
                 $spreadsheet->getActiveSheet()->setCellValue("Q" . ($key * 2 + 2), $value['information']);
                 $spreadsheet->getActiveSheet()->mergeCells("Q" . ($key * 2 + 2) . ":Q" . ($key * 2 + 3));
@@ -890,9 +898,8 @@ where cped.attribute_id in(146,147) and cped.store_id=0 and cped.entity_id=$prod
         //禁止缓存
         header('Cache-Control: max-age=0');
         $writer = new $class($spreadsheet);
-       
+
         $writer->save('php://output');
-        
     }
 
     //批量打印标签
