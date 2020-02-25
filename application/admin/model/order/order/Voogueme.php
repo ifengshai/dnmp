@@ -209,7 +209,7 @@ class Voogueme extends Model
         return $arr;
     }
 
-     /**
+    /**
      * 统计订单SKU销量
      *
      * @Description
@@ -224,12 +224,46 @@ class Voogueme extends Model
             $map['sku'] = ['in', $sku];
         }
         $res = $this
-        ->where($map)
-        ->where($where)
-        ->alias('a')
-        ->join(['sales_flat_order_item' => 'b'],'a.entity_id=b.order_id')
-        ->group('sku')
-        ->column('sum(b.qty_ordered)','sku');
+            ->where($map)
+            ->where($where)
+            ->alias('a')
+            ->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')
+            ->group('sku')
+            ->column('sum(b.qty_ordered)', 'sku');
         return $res;
+    }
+
+    /**
+     * 统计未发货订单
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/02/25 14:50:55 
+     * @return void
+     */
+    public function undeliveredOrder($map)
+    {
+        if ($map) {
+            $map['custom_is_delivery_new'] = 0;
+            $map['status'] = ['in', ['processing', 'free_processing']];
+            return $this->alias('a')->where($map)->count(1);
+        }
+    }
+
+    /**
+     * 统计未发货订单SKU副数
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/02/25 14:50:55 
+     * @return void
+     */
+    public function undeliveredOrderNum($map)
+    {
+        if ($map) {
+            $map['custom_is_delivery_new'] = 0;
+            $map['status'] = ['in',['processing','free_processing']];
+            return $this->alias('a')->where($map)->join(['sales_flat_order_item_prescription'=>'b'],'a.entity_id = b.order_id')->sum('b.qty_ordered');
+        }
     }
 }

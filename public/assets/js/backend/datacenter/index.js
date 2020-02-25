@@ -54,7 +54,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'custom-css', 'bootst
             Controller.api.bindevent();
         },
         warehouse_data: function () {
-            Controller.api.bindevent();
+            Form.api.bindevent($("form[role=form]"), function (data) {
+                window.top.location.href = Config.moduleurl + '/datacenter/index/warehouse_data';
+            });
         },
         edit: function () {
             Controller.api.bindevent();
