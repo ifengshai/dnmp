@@ -138,4 +138,17 @@ class Index extends Backend
         $allStock = $this->item->getAllStock();
         return $this->view->fetch();
     }
+
+    /**
+     * 仓库数据
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/02/25 13:52:27 
+     * @return void
+     */
+    public function warehouse_data()
+    {
+        return $this->view->fetch();
+    }
 }

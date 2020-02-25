@@ -1,4 +1,4 @@
-define(['jquery', 'bootstrap', 'backend', 'table', 'form','custom-css','bootstrap-table-jump-to'], function ($, undefined, Backend, Table, Form) {
+define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'custom-css', 'bootstrap-table-jump-to'], function ($, undefined, Backend, Table, Form) {
 
     var Controller = {
         index: function () {
@@ -32,16 +32,16 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','custom-css','bootstra
                             }, operate: false
                         },
                         { field: 'sku', title: __('SKU'), operate: 'like' },
-                        { field: 'z_sku', title: __('Zeelool_SKU'), operate: false},
-                        { field: 'z_num', title: __('Z站销量'), operate: false},
-                        { field: 'v_sku', title: __('Voogueme_SKU'), operate: false},
-                        { field: 'v_num', title: __('V站销量'), operate: false},
-                        { field: 'n_sku', title: __('Nihao_SKU'), operate: false},
-                        { field: 'n_num', title: __('Nihao站销量'), operate: false},
-                        { field: 'available_stock', title: __('实时库存'), operate: false},
-                        { field: 'all_num', title: __('汇总销量'), operate: false},
-                        { field: 'created_at',visible:false, title: __('创建时间'), operate: 'RANGE', addclass: 'datetimerange' },
-                        
+                        { field: 'z_sku', title: __('Zeelool_SKU'), operate: false },
+                        { field: 'z_num', title: __('Z站销量'), operate: false },
+                        { field: 'v_sku', title: __('Voogueme_SKU'), operate: false },
+                        { field: 'v_num', title: __('V站销量'), operate: false },
+                        { field: 'n_sku', title: __('Nihao_SKU'), operate: false },
+                        { field: 'n_num', title: __('Nihao站销量'), operate: false },
+                        { field: 'available_stock', title: __('实时库存'), operate: false },
+                        { field: 'all_num', title: __('汇总销量'), operate: false },
+                        { field: 'created_at', visible: false, title: __('创建时间'), operate: 'RANGE', addclass: 'datetimerange' },
+
                     ]
                 ]
             });
@@ -51,6 +51,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','custom-css','bootstra
 
         },
         supply_chain_data: function () {
+            Controller.api.bindevent();
+        },
+        warehouse_data: function () {
             Controller.api.bindevent();
         },
         edit: function () {
@@ -97,7 +100,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','custom-css','bootstra
                 Form.api.bindevent($("form[role=form]"));
             }
         },
-    
+
     };
     return Controller;
 });
