@@ -2398,6 +2398,8 @@ class Item extends Backend
 			->order($sort, $order)
 			->limit($offset, $limit)
 			->select();
+		//分类列表	
+		$categoryArr = $this->category->getItemCategoryList();	
         $list = collection($list)->toArray();
 		if(!$list){
 			return false;
@@ -2406,17 +2408,78 @@ class Item extends Backend
         $spreadsheet = new Spreadsheet();
         //常规方式：利用setCellValue()填充数据
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("A1", "自增ID")
-            ->setCellValue("B1", "商品SKU");
+            ->setCellValue("B1", "商品名称")
+			->setCellValue("C1", "原始SKU")
+			->setCellValue("D1", "商品SKU")
+			->setCellValue("E1", "参考进价");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("F1", "商品分类")
+            ->setCellValue("G1", "SKU状态")
+			->setCellValue("H1", "商品库存")
+			->setCellValue("I1", "SKU启用状态")
+			->setCellValue("J1", "是否新品");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("K1", "创建人")
+            ->setCellValue("L1", "创建时间");			
         $spreadsheet->setActiveSheetIndex(0)->setTitle('商品SKU数据');
 
         foreach ($list as $key => $value) {
 
             $spreadsheet->getActiveSheet()->setCellValue("A" . ($key * 1 + 2), $value['id']);
-            $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $value['sku']);	
+            $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $value['name']);
+			$spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 1 + 2), $value['origin_sku']);
+			$spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 1 + 2), $value['sku']);
+			$spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), $value['price']);
+			if ($value['category_id']) {
+				$value['category_name'] = $categoryArr[$v['category_id']];
+				$spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 1 + 2), $value['category_name']);
+			}else{
+				$spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 1 + 2), '暂无分类');
+			}
+			switch($value['item_status']){
+                case 1:
+                $value['item_status'] = '新建';
+                break;
+                case 2:
+                $value['item_status'] = '待审核';
+                break;
+                case 3:
+                $value['item_status'] = '审核通过';
+                break;
+                case 4:
+                $value['item_status'] = '审核拒绝';
+                break;
+                case 5:
+                $value['item_status'] = '取消';
+                break;                                                                                                                                                                     
+            }
+            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 1 + 2), $value['item_status']);
+			$spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 1 + 2), $value['stock']);
+		  if(1 == $value['is_open']){
+			$spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 1 + 2),'启用');
+		  }elseif(2 == $value['is_open']){
+			$spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 1 + 2),'禁用');  
+		  }
+		  if(1 == $value['is_new']){
+			 $spreadsheet->getActiveSheet()->setCellValue("J" . ($key * 1 + 2),'是'); 
+		  }else{
+			 $spreadsheet->getActiveSheet()->setCellValue("J" . ($key * 1 + 2),'不是'); 
+		  }
+			 $spreadsheet->getActiveSheet()->setCellValue("K" . ($key * 1 + 2),$value['create_person']);
+			 $spreadsheet->getActiveSheet()->setCellValue("L" . ($key * 1 + 2),$value['create_time']);
+			
         }
         //设置宽度
         $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(30);
-        $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(30);
+        $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(80);
+		$spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(30);
+		$spreadsheet->getActiveSheet()->getColumnDimension('D')->setWidth(30);
+        $spreadsheet->getActiveSheet()->getColumnDimension('E')->setWidth(30);
+        $spreadsheet->getActiveSheet()->getColumnDimension('F')->setWidth(30);
+        $spreadsheet->getActiveSheet()->getColumnDimension('G')->setWidth(30);
+        $spreadsheet->getActiveSheet()->getColumnDimension('H')->setWidth(30);
+        $spreadsheet->getActiveSheet()->getColumnDimension('I')->setWidth(30);
+        $spreadsheet->getActiveSheet()->getColumnDimension('J')->setWidth(30);
+        $spreadsheet->getActiveSheet()->getColumnDimension('K')->setWidth(30);
+        $spreadsheet->getActiveSheet()->getColumnDimension('L')->setWidth(30);		
         //设置边框
         $border = [
             'borders' => [
