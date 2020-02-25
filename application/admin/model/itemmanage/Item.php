@@ -309,4 +309,18 @@ class Item extends Model
         return $result;  
     }
 
+    /**
+     * 获取仓库总库存
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/02/24 16:47:21 
+     * @return void
+     */
+    public function getAllStock()
+    {
+        $where['is_del']  = 1;
+        return $this->where($where)->sum('stock');
+    }
+
 }

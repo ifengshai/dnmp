@@ -134,6 +134,8 @@ class Index extends Backend
      */
     public function supply_chain_data()
     {
+        //仓库总库存
+        $allStock = $this->item->getAllStock();
         return $this->view->fetch();
     }
 }
