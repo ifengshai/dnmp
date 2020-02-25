@@ -453,6 +453,9 @@ class OrderReturn extends Backend
             $customerInfo = $customer['info'];
             unset($customer['info']);
             unset($customer['increment_id']);
+			Db::name('info_synergy_task')->query("set time_zone='+8:00'");
+			Db::name('sale_after_task')->query("set time_zone='+8:00'");
+			Db::name('order_return')->query("set time_zone='+8:00'");
             $infoSynergyTaskResult = Db::name('info_synergy_task')->where('order_platform', $order_platform)->where('synergy_order_number', 'in', $allIncrementOrder)->order('id desc')->select();
             $saleAfterTaskResult = Db::name('sale_after_task')->where('order_platform', $order_platform)->where('order_number', 'in', $allIncrementOrder)->order('id desc')->select();
             // dump($saleAfterTaskResult);
