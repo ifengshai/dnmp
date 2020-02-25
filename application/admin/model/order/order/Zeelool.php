@@ -474,4 +474,24 @@ class Zeelool extends Model
             return $this->alias('a')->where($map)->join(['sales_flat_order_item_prescription' => 'b'], 'a.entity_id = b.order_id')->sum('b.qty_ordered');
         }
     }
+
+    /**
+     * 统计处方镜副数
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/02/25 14:50:55 
+     * @return void
+     */
+    public function getOrderPrescriptionNum($map)
+    {
+        if ($map) {
+            $map['custom_is_delivery_new'] = 0;
+            $map['status'] = ['in', ['processing', 'free_processing']];
+            $map['custom_order_prescription_type'] = [2, 3, 4, 5, 6];
+            
+            
+            return $this->alias('a')->where($map)->whereExp('index_type IS NOT NULL')->join(['sales_flat_order_item_prescription' => 'b'], 'a.entity_id = b.order_id')->sum('b.qty_ordered');
+        }
+    }
 }

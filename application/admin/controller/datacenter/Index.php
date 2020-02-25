@@ -150,34 +150,35 @@ class Index extends Backend
     public function warehouse_data()
     {
         //默认当天
-        if ($this->request->isPost()) {
-            $create_time = input('create_time');
-            if ($create_time) {
-                $time = explode(' ', $create_time);
-                $map['a.created_at'] = ['between', [$time[0] . ' ' . $time[1], $time[3] . ' ' . $time[4]]];
-            } else {
-                $map['a.created_at'] = ['between', [date('Y-m-d 00:00:00'), date('Y-m-d H:i:s', time())]];
-            }
-
-            //统计时间段内未发货订单
-            $zeeloolUnorderNum = $this->zeelool->undeliveredOrder($map);
-            $vooguemeUnorderNum = $this->voogueme->undeliveredOrder($map);
-            $nihaoUnorderNum = $this->nihao->undeliveredOrder($map);
-
-            //统计时间段内未发货订单副数
-            $zeeloolNum = $this->zeelool->undeliveredOrderNum($map);
-            $vooguemeNum = $this->voogueme->undeliveredOrderNum($map);
-            $nihaoNum = $this->nihao->undeliveredOrderNum($map);
-            $this->view->assign('zeeloolUnorderNum', $zeeloolUnorderNum);
-            $this->view->assign('vooguemeUnorderNum', $vooguemeUnorderNum);
-            $this->view->assign('nihaoUnorderNum', $nihaoUnorderNum);
-            $this->view->assign('zeeloolNum', $zeeloolNum);
-            $this->view->assign('vooguemeNum', $vooguemeNum);
-            $this->view->assign('nihaoNum', $nihaoNum);
-
-            
+        $create_time = input('create_time');
+        if ($create_time) {
+            $time = explode(' ', $create_time);
+            $map['a.created_at'] = ['between', [$time[0] . ' ' . $time[1], $time[3] . ' ' . $time[4]]];
+        } else {
+            $map['a.created_at'] = ['between', [date('Y-m-d 00:00:00'), date('Y-m-d H:i:s', time())]];
         }
 
+        //统计时间段内未发货订单
+        $zeeloolUnorderNum = $this->zeelool->undeliveredOrder($map);
+        $vooguemeUnorderNum = $this->voogueme->undeliveredOrder($map);
+        $nihaoUnorderNum = $this->nihao->undeliveredOrder($map);
+
+        //统计时间段内未发货订单副数
+        $zeeloolNum = $this->zeelool->undeliveredOrderNum($map);
+        $vooguemeNum = $this->voogueme->undeliveredOrderNum($map);
+        $nihaoNum = $this->nihao->undeliveredOrderNum($map);
+
+        //统计处方镜
+        $zeeloolNum = $this->zeelool->getOrderPrescriptionNum($map);
+        $vooguemeNum = $this->voogueme->undeliveredOrderNum($map);
+        $nihaoNum = $this->nihao->undeliveredOrderNum($map);
+
+        $this->view->assign('zeeloolUnorderNum', $zeeloolUnorderNum);
+        $this->view->assign('vooguemeUnorderNum', $vooguemeUnorderNum);
+        $this->view->assign('nihaoUnorderNum', $nihaoUnorderNum);
+        $this->view->assign('zeeloolNum', $zeeloolNum);
+        $this->view->assign('vooguemeNum', $vooguemeNum);
+        $this->view->assign('nihaoNum', $nihaoNum);
         return $this->view->fetch();
     }
 }
