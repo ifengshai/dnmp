@@ -62,7 +62,7 @@ class ItemAttribute extends Model
     //镜架材质
     public function getAllTexture()
     {
-        return [ 0=>'请选择',1 => 'plastic', 2 =>'acetate', 3 =>'tr90', 4 =>'metal',5=>'titanium',6=>'titanium',7=>'other_material',8=>'mark'];
+        return [ 0=>'请选择',1 => 'plastic', 2 =>'acetate', 3 =>'tr90', 4 =>'metal',5=>'titanium',6=>'nylon',7=>'wood',8=>'mixed'];
     }
     /***
      * 获取材质对应的编码 和 getAllTexture下标对应
