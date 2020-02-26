@@ -3,17 +3,9 @@
 namespace app\admin\controller\datacenter;
 
 use app\common\controller\Backend;
-use think\Db;
-use think\Exception;
-use think\exception\PDOException;
-use think\exception\ValidateException;
-use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
-use PhpOffice\PhpSpreadsheet\Reader\Xls;
-use PhpOffice\PhpSpreadsheet\Reader\Csv;
-use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 
 /**
- * 镜片管理管理
+ * 数据中心
  *
  * @icon fa fa-circle-o
  */
@@ -52,6 +44,11 @@ class Index extends Backend
 
     /**
      * 销量统计
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/02/21 14:20:44 
+     * @return void
      */
     public function index()
     {
@@ -124,6 +121,92 @@ class Index extends Backend
 
             return json($result);
         }
+        return $this->view->fetch();
+    }
+
+    /**
+     * 供应链数据大屏
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/02/21 14:23:45 
+     * @return void
+     */
+    public function supply_chain_data()
+    {
+        //仓库总库存
+        $allStock = $this->item->getAllStock();
+        return $this->view->fetch();
+    }
+
+    /**
+     * 仓库数据
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/02/25 13:52:27 
+     * @return void
+     */
+    public function warehouse_data()
+    {
+        //默认当天
+        $create_time = input('create_time');
+        if ($create_time) {
+            $time = explode(' ', $create_time);
+            $map['a.created_at'] = ['between', [$time[0] . ' ' . $time[1], $time[3] . ' ' . $time[4]]];
+        } else {
+            $map['a.created_at'] = ['between', [date('Y-m-d 00:00:00'), date('Y-m-d H:i:s', time())]];
+        }
+
+        //统计时间段内未发货订单
+        $zeeloolUnorderNum = $this->zeelool->undeliveredOrder($map);
+        $vooguemeUnorderNum = $this->voogueme->undeliveredOrder($map);
+        $nihaoUnorderNum = $this->nihao->undeliveredOrder($map);
+
+        //统计时间段内未发货订单副数
+        $zeeloolNum = $this->zeelool->undeliveredOrderNum($map);
+        $vooguemeNum = $this->voogueme->undeliveredOrderNum($map);
+        $nihaoNum = $this->nihao->undeliveredOrderNum($map);
+
+        //统计处方镜
+        $zeeloolOrderPrescriptionNum = $this->zeelool->getOrderPrescriptionNum($map);
+        $vooguemeOrderPrescriptionNum = $this->voogueme->getOrderPrescriptionNum($map);
+        $nihaoOrderPrescriptionNum = $this->nihao->getOrderPrescriptionNum($map);
+
+        //统计现货处方镜
+        $zeeloolSpotOrderPrescriptionNum = $this->zeelool->getSpotOrderPrescriptionNum($map);
+        $vooguemeSpotOrderPrescriptionNum = $this->voogueme->getSpotOrderPrescriptionNum($map);
+        $nihaoSpotOrderPrescriptionNum = $this->nihao->getSpotOrderPrescriptionNum($map);
+
+        //统计定制处方镜副数
+        $zeeloolCustomOrderPrescriptionNum = $this->zeelool->getCustomOrderPrescriptionNum($map);
+        $vooguemeCustomOrderPrescriptionNum = $this->voogueme->getCustomOrderPrescriptionNum($map);
+        $nihaoCustomOrderPrescriptionNum = $this->nihao->getCustomOrderPrescriptionNum($map);
+
+        //统计仅镜架订单
+        $zeeloolFrameOrderNum = $this->zeelool->frameOrder($map);
+        $vooguemeFrameOrderNum = $this->voogueme->frameOrder($map);
+        $nihaoFrameOrderNum = $this->nihao->frameOrder($map);
+
+        $this->view->assign('zeeloolUnorderNum', $zeeloolUnorderNum);
+        $this->view->assign('vooguemeUnorderNum', $vooguemeUnorderNum);
+        $this->view->assign('nihaoUnorderNum', $nihaoUnorderNum);
+        $this->view->assign('zeeloolNum', $zeeloolNum);
+        $this->view->assign('vooguemeNum', $vooguemeNum);
+        $this->view->assign('nihaoNum', $nihaoNum);
+        $this->view->assign('zeeloolOrderPrescriptionNum', $zeeloolOrderPrescriptionNum);
+        $this->view->assign('vooguemeOrderPrescriptionNum', $vooguemeOrderPrescriptionNum);
+        $this->view->assign('nihaoOrderPrescriptionNum', $nihaoOrderPrescriptionNum);
+        $this->view->assign('zeeloolSpotOrderPrescriptionNum', $zeeloolSpotOrderPrescriptionNum);
+        $this->view->assign('vooguemeSpotOrderPrescriptionNum', $vooguemeSpotOrderPrescriptionNum);
+        $this->view->assign('nihaoSpotOrderPrescriptionNum', $nihaoSpotOrderPrescriptionNum);
+        $this->view->assign('zeeloolCustomOrderPrescriptionNum', $zeeloolCustomOrderPrescriptionNum);
+        $this->view->assign('vooguemeCustomOrderPrescriptionNum', $vooguemeCustomOrderPrescriptionNum);
+        $this->view->assign('nihaoCustomOrderPrescriptionNum', $nihaoCustomOrderPrescriptionNum);
+        $this->view->assign('zeeloolFrameOrderNum', $zeeloolFrameOrderNum);
+        $this->view->assign('vooguemeFrameOrderNum', $vooguemeFrameOrderNum);
+        $this->view->assign('nihaoFrameOrderNum', $nihaoFrameOrderNum);
+        $this->view->assign('created_at', $create_time);
         return $this->view->fetch();
     }
 }

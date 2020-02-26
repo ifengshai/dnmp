@@ -440,4 +440,133 @@ class Zeelool extends Model
             return true;
         }
     }
+
+    /**
+     * 统计未发货订单
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/02/25 14:50:55 
+     * @return void
+     */
+    public function undeliveredOrder($map)
+    {
+        if ($map) {
+            $map['custom_is_delivery_new'] = 0;
+            $map['status'] = ['in', ['processing', 'free_processing']];
+            return $this->alias('a')->where($map)->count(1);
+        }
+    }
+
+    /**
+     * 统计仅镜架订单
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/02/25 14:50:55 
+     * @return void
+     */
+    public function frameOrder($map)
+    {
+        if ($map) {
+            $map['custom_is_delivery_new'] = 0;
+            $map['status'] = ['in', ['processing', 'free_processing']];
+            $map['custom_order_prescription_type'] = 1;
+            return $this->alias('a')->where($map)->count(1);
+        }
+    }
+
+    /**
+     * 统计未发货订单SKU副数
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/02/25 14:50:55 
+     * @return void
+     */
+    public function undeliveredOrderNum($map)
+    {
+        if ($map) {
+            $map['custom_is_delivery_new'] = 0;
+            $map['status'] = ['in', ['processing', 'free_processing']];
+            return $this->alias('a')->where($map)->join(['sales_flat_order_item_prescription' => 'b'], 'a.entity_id = b.order_id')->sum('b.qty_ordered');
+        }
+    }
+
+    /**
+     * 统计处方镜副数
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/02/25 14:50:55 
+     * @return void
+     */
+    public function getOrderPrescriptionNum($map)
+    {
+        if ($map) {
+            $map['custom_is_delivery_new'] = 0;
+            $map['status'] = ['in', ['processing', 'free_processing']];
+            $map['custom_order_prescription_type'] = ['in', [2, 3, 4, 5, 6]];
+            $map[] = ['exp', Db::raw("index_type NOT IN ( 'Plastic Lenses', 'FRAME ONLY' ) 
+            AND index_type IS NOT NULL 
+            AND index_type != ''")];
+
+            return $this->alias('a')
+                ->where($map)
+                ->join(['sales_flat_order_item_prescription' => 'b'], 'a.entity_id = b.order_id')
+                ->sum('b.qty_ordered');
+        }
+    }
+
+    /**
+     * 统计现货处方镜副数
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/02/25 14:50:55 
+     * @return void
+     */
+    public function getSpotOrderPrescriptionNum($map)
+    {
+        if ($map) {
+            $map['custom_is_delivery_new'] = 0;
+            $map['status'] = ['in', ['processing', 'free_processing']];
+            $map['custom_order_prescription_type'] = ['in', [2, 4, 6]];
+            $map[] = ['exp', Db::raw("index_type NOT IN ( 'Plastic Lenses', 'FRAME ONLY' ) 
+            AND index_type IS NOT NULL 
+            AND index_type != ''")];
+            $map['is_custom_lens'] = 0;
+
+            return $this->alias('a')
+                ->where($map)
+                ->join(['sales_flat_order_item_prescription' => 'b'], 'a.entity_id = b.order_id')
+                ->sum('b.qty_ordered');
+        }
+    }
+
+    /**
+     * 统计定制处方镜副数
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/02/25 14:50:55 
+     * @return void
+     */
+    public function getCustomOrderPrescriptionNum($map)
+    {
+        if ($map) {
+            $map['custom_is_delivery_new'] = 0;
+            $map['status'] = ['in', ['processing', 'free_processing']];
+            $map['custom_order_prescription_type'] = ['in', [3, 5, 6]];
+            $map[] = ['exp', Db::raw("index_type NOT IN ( 'Plastic Lenses', 'FRAME ONLY' ) 
+            AND index_type IS NOT NULL 
+            AND index_type != ''")];
+            $map['is_custom_lens'] = 1;
+
+            return $this->alias('a')
+                ->where($map)
+                ->join(['sales_flat_order_item_prescription' => 'b'], 'a.entity_id = b.order_id')
+                ->sum('b.qty_ordered');
+        }
+    }
 }
