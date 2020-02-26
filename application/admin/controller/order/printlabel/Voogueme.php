@@ -596,11 +596,24 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
         $infoSynergyTask = new \app\admin\model\infosynergytaskmanage\InfoSynergyTask;
         if ($filter['task_label'] == 1 || $filter['task_label'] == '0') {
             $swhere['is_del'] = 1;
-            $swhere['order_platform'] = 1;
+            $swhere['order_platform'] = 2;
             $swhere['synergy_order_id'] = 2;
             $order_arr = $infoSynergyTask->where($swhere)->order('create_time desc')->column('synergy_order_number');
             $map['sfo.increment_id'] = ['in', $order_arr];
             unset($filter['task_label']);
+            $this->request->get(['filter' => json_encode($filter)]);
+        }
+
+        //协同任务分类id搜索
+        if ($filter['category_id'] || $filter['c_id']) {
+            $swhere['is_del'] = 1;
+            $swhere['order_platform'] = 2;
+            $swhere['synergy_order_id'] = 2;
+            $swhere['synergy_task_id'] = $filter['category_id'] ?? $filter['c_id'];
+            $order_arr = $infoSynergyTask->where($swhere)->order('create_time desc')->column('synergy_order_number');
+            $map['increment_id'] = ['in', $order_arr];
+            unset($filter['category_id']);
+            unset($filter['c_id']);
             $this->request->get(['filter' => json_encode($filter)]);
         }
 
