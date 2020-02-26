@@ -23,10 +23,10 @@ class Zendesk extends Controller
     protected $token = "wAhNtX3oeeYOJ3RI1i2oUuq0f77B2MiV5upmh11B";
     //客户按要求回复的内容
     protected $auto_answer = [
-        '测试回复1',
-        '测试回复2',
-        '测试回复3',
-        '其他'
+        'check order information',
+        'track order',
+        'change order information',
+        'others'
     ];
     //匹配自动回复的单词
     protected $preg_word = ['when','deliver','delivery','receive','track','ship','shipping','tracking','status','order','shipment'];
@@ -96,6 +96,10 @@ class Zendesk extends Controller
                 'keytype' => '-',
                 'value' => '转客服'
             ], // -排除此tag
+            'assignee' => [
+                382940274852,
+                'none'
+            ],
             'order_by' => 'updated_at',
             'sort' => 'desc'
         ];
@@ -113,6 +117,7 @@ class Zendesk extends Controller
     protected function getTickets(Array $array)
     {
         $params = $this->parseStr($array);
+        echo $params;die;
         $search = $this->client->search()->find($params);
         $tickets = $search->result;
         $this->findCommentsByTickets($tickets);
@@ -132,6 +137,8 @@ class Zendesk extends Controller
             $id = $ticket->id;
             //发送者的id
             $requester_id = $ticket->requester_id;
+            //所有的tag
+            $tags = $ticket->tags;
             //email
             $requester_email = $ticket->via->source->from->address;
             try{
@@ -146,11 +153,10 @@ class Zendesk extends Controller
             $last_comment = $comments[$count-1];
             if($last_comment->author_id == $requester_id){
                 //邮件的内容
-                $body = $last_comment->body;
+                $body = strtolower($last_comment->body);
                 //开始匹配邮件内容
-                //When,deliver,delivery,receive,track,ship,shipping,tracking,status,order,shipment
-                //首先查看是否是自动回复的内容，如果不是，则匹配上述字段自动回
-                if(false){
+                //查看是否已有自动回复的tag
+                if(in_array('自动回复',$tags)){ //次类是顾客根据要求回复的内容
                     $answer_key = 0;
                     foreach($this->auto_answer as $key => $answer){
                         //回复内容包含自动回复的内容，且相匹配
@@ -160,16 +166,24 @@ class Zendesk extends Controller
                         }
                     }
                     if($answer_key == 1 || $answer_key == 2){
-                        $status = $this->findOrderByEmail($requester_email);
+                        $order = $this->findOrderByEmail($requester_email);
+                        $status = $order['status'];
+                        $order_id = $order['order_id'];
                         if($status == 'pendind' or $status == 'creditcard_failed'){
                             //状态改solved，tag支付失败
                             $params = [
+                                'comment'  => [
+                                    'body' => config('zendesk.t3')
+                                ],
                                 'tags' => ['支付失败'],
                                 'status' => 'solved'
                             ];
                         }elseif($status == 'canceled'){
                             //状态solved，tag取消订单
                             $params = [
+                                'comment'  => [
+                                    'body' => sprintf(config('zendesk.t7'),$order_id)
+                                ],
                                 'tags' => ['取消订单'],
                                 'status' => 'solved'
                             ];
@@ -177,8 +191,7 @@ class Zendesk extends Controller
                             //回复1-7天发货，状态solved，tag查询加工状态
                             $params = [
                                 'comment'  => [
-                                    'body' => '1-7天发货',
-                                    'author_id' => 383342590872
+                                    'body' => config('zendesk.t2')
                                 ],
                                 'tags' => ['查询加工状态'],
                                 'status' => 'solved'
@@ -189,8 +202,7 @@ class Zendesk extends Controller
                             if($res['status'] == 'delivered'){ //已签收
                                 $params = [
                                     'comment'  => [
-                                        'body' => '已签收',
-                                        'author_id' => 383342590872
+                                        'body' => sprintf(config('zendesk.t4'),$res['updated_at'],$res['track_number'],$res['carrier_code'],$res['lastEvent'],$res['lastUpdateTime'])
                                     ],
                                     'tags' => ['已签收','查询物流信息'],
                                     'status' => 'sloved'
@@ -198,19 +210,19 @@ class Zendesk extends Controller
                             }elseif($res['status'] == 'transit' || $res['status'] == 'pickup'){ //判断物流时效
                                 $params = [
                                     'comment'  => [
-                                        'body' => '',
-                                        'author_id' => 383342590872
+                                        'body' => ''
                                     ],
                                     'tags' => [],
                                     'status' => 'pending'
                                 ];
+
                                 $lastUpdateTime = strtotime($res['lastUpdateTime']);
                                 $now = time();
                                 if($now - $lastUpdateTime > 7 * 24 * 3600 ){ //超7天未更新
-                                    $params['comment']['body'] = '超7天';
+                                    $params['comment']['body'] = sprintf(config('zendesk.t6'),$res['updated_at'],$res['track_number'],$res['carrier_code']);
                                     $params['status'] = ['超时','查询物流信息'];
                                 }else{
-                                    $params['comment']['body'] = '正在运送';
+                                    $params['comment']['body'] = sprintf(config('zendesk.t5'),$res['updated_at'],$res['track_number'],$res['carrier_code'],$res['lastEvent'],'([Track Order])(https://www.zeelool.com/ordertrack)','([AfterShip])(https://tools.usps.com/go/TrackConfirmAction_input)');
                                     $params['status'] = ['查询物流信息'];
                                 }
                             }else{ //转客服，状态open
@@ -235,15 +247,13 @@ class Zendesk extends Controller
                         ];
                     }
                 }else{
+                    //When,deliver,delivery,receive,track,ship,shipping,tracking,status,order,shipment
                     //匹配到相应的关键字，自动回复消息，修改为pending，回复共客户选择的内容
                     if(s($body)->containsAny($this->preg_word)){
+                        //回复模板1：状态pending，增加tag自动回复
                         $params = [
                             'comment'  => [
-                                'body' => '1、测试的相关回复
-                                2、测试回复2
-                                3、测试回复3
-                                4、其他',
-                                'author_id' => 383342590872
+                                'body' => config('zendesk.t1')
                             ],
                             'tags' => ['自动回复'],
                             'status' => 'pending'
@@ -251,6 +261,10 @@ class Zendesk extends Controller
                     }
                 }
                 if(!empty($params)){
+                    //tag合并
+                    $params['tags'] = array_unique(array_merge($tags,$params['tags']));
+                    $params['comment']['author_id'] = 382940274852;
+                    $params['assignee_id'] = 382940274852;
                     $this->autoUpdate($id, $params);
                 }
             }
@@ -287,7 +301,7 @@ class Zendesk extends Controller
         $db = Db::connect('database.db_zeelool');
         $order = $db->table('sales_flat_order')->where('customer_email',$email)->field('entity_id,state,status,increment_id')->order('entity desc')->find();
         $status = isset($order['status']) ? $order['status'] : '';
-        return $status;
+        return ['status' => $status, 'order_id' => $order['increment_id']];
     }
 
     /**
@@ -304,7 +318,7 @@ class Zendesk extends Controller
 
         $track_result = Db::connect('database.db_zeelool')
             ->table('sales_flat_shipment_track')
-            ->field('track_number,title')
+            ->field('track_number,title,updated_at')
             ->where('order_id',$order_id)
             ->find();
         //查询物流信息
@@ -313,7 +327,16 @@ class Zendesk extends Controller
         $result = $track->getRealtimeTrackingResults($title, $track_result['track_number']);
         $data = $result['data']['items'][0];
         $lastUpdateTime = $data['lastUpdateTime']; //物流最新跟新时间
-        return ['status' => $data['status'], 'lastUpdateTime' => $lastUpdateTime];
+        $lastEvent = $data['lastEvent'];
+        $res = [
+            'status' => $data['status'],
+            'lastUpdateTime' => $lastUpdateTime,
+            'lastEvent' => $lastEvent,
+            'carrier_code' => $data['carrier_code'],
+            'updated_at' => $track_result['updated_at'],
+            'track_number' => $track_result['track_number']
+        ];
+        return $res;
 
     }
 

@@ -21,15 +21,11 @@ class Test extends Controller
         try {
         	// Query Zendesk API to retrieve the ticket details
         
-        	$id = 73887;
-            $id = 76909;
-        	$tickets = $client->tickets($id)->comments()->findAll();
+        	//$id = 73887;
+            $id = 82308;
+        	$tickets = $client->tickets()->find($id);
         	
-        		// Show the results
-        	$comments = $tickets->comments;
-        		foreach( $comments as $comment){
-        		echo $comment->body.'</br>';
-        	}
+        	dump($tickets);
         } catch (\Zendesk\API\Exceptions\ApiResponseException $e) {
         	echo $e->getMessage().'</br>';
         }
