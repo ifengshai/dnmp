@@ -141,11 +141,14 @@ class Index extends Backend
         //镜架库存统计
         $frameStock = $this->item->getFrameStock();
 
+        //镜架总金额
+        
+
         //镜片库存
         $lensStock = $this->lens->getLensStock();
         //镜片库存总金额
         $lensStockPrice = $this->lens->getLensStockPrice();
-        
+
         return $this->view->fetch();
     }
 

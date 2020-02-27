@@ -27,7 +27,7 @@ class Crontab extends Backend
         'nihao_order_item_process',
         'set_purchase_order_logistics',
         'product_grade_list_crontab',
-		'changeItemNewToOld',
+        'changeItemNewToOld',
         'get_sku_stock'
     ];
 
@@ -1444,18 +1444,17 @@ order by sfoi.item_id asc limit 1000";
         //计算三个站最近30天销量
         if ($zeelool_sku) {
             $map['b.sku'] = ['in', $zeelool_sku];
-            $zeelool = $zeelool_model->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')->group('b.sku')->column('sum(b.qty_ordered) as num','b.sku');
-
+            $zeelool = $zeelool_model->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')->group('b.sku')->column('sum(b.qty_ordered) as num', 'b.sku');
         }
 
         if ($voogueme_sku) {
             $map['b.sku'] = ['in', $voogueme_sku];
-            $voogueme = $voogueme_model->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')->group('b.sku')->column('sum(b.qty_ordered) as num','b.sku');
+            $voogueme = $voogueme_model->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')->group('b.sku')->column('sum(b.qty_ordered) as num', 'b.sku');
         }
 
         if ($nihao_sku) {
             $map['b.sku'] = ['in', $nihao_sku];
-            $nihao = $nihao_model->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')->group('b.sku')->column('sum(b.qty_ordered) as num','b.sku');
+            $nihao = $nihao_model->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')->group('b.sku')->column('sum(b.qty_ordered) as num', 'b.sku');
         }
 
         foreach ($list as $k => $v) {
@@ -1487,7 +1486,7 @@ order by sfoi.item_id asc limit 1000";
         $map['id'] = ['in', $itemId];
         Db::connect('database.db_stock')->name('item')->where($map)->update(['is_new' => 2]);
     }
-    
+
     /**
      * 记录每天商品库存变化日志
      *
@@ -1505,5 +1504,34 @@ order by sfoi.item_id asc limit 1000";
             Db::name('goods_stock_log')->insertAll($item);
             echo 'ok';
         }
+    }
+
+    /**
+     * 获取SKU最新的采购单价
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/02/19 16:23:27 
+     * @return void
+     */
+    public function get_sku_price()
+    {
+        $purchase = new \app\admin\model\purchase\PurchaseOrder;
+        $result = $purchase->alias('a')
+            ->where('a.is_del', 1)
+            ->field('sku,purchase_price,createtime')
+            ->join(['fa_purchase_order_item' => 'b'], 'a.id=b.purchase_id')
+            ->order('createtime desc')
+            ->select();
+        $arr = [];
+        foreach($result as $v) {
+            if (!isset($arr[$v['sku']])) {
+                $arr[$v['sku']] = $v['purchase_price'];
+            } else {
+                continue;
+            }
+        }
+        dump($arr);die;
+        
     }
 }

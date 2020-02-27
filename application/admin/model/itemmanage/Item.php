@@ -74,19 +74,19 @@ class Item extends Model
      * @param $type 1 镜架  2 镜片  3 配饰
      * @return bool
      */
-    public function getItemInfo($sku,$type=1)
+    public function getItemInfo($sku, $type = 1)
     {
-        $info = $this->where('sku','=',$sku)->field('id,sku')->find();
-        if(!$info){
+        $info = $this->where('sku', '=', $sku)->field('id,sku')->find();
+        if (!$info) {
             return -1;
         }
         $result = $this->alias('m')->where('sku', '=', $sku)->join('item_attribute a', 'm.id=a.item_id')->find();
         if (!$result) {
             return false;
         }
-        if(!empty($result['origin_sku'])){
+        if (!empty($result['origin_sku'])) {
             //镜架类型
-            if(1 == $type){
+            if (1 == $type) {
                 $colorArr = (new ItemAttribute())->getFrameColor();
                 $arr = $this->alias('m')->where('origin_sku', '=', $result['origin_sku'])->join('item_attribute a', 'm.id=a.item_id')->field('m.name,m.price,a.frame_color')->select();
                 if (is_array($arr)) {
@@ -95,13 +95,12 @@ class Item extends Model
                     }
                 }
                 $result['itemArr'] = $arr;
-            }elseif(3 == $type){ //配饰类型
+            } elseif (3 == $type) { //配饰类型
                 $arr = $this->alias('m')->where('origin_sku', '=', $result['origin_sku'])->join('item_attribute a', 'm.id=a.item_id')->field('m.name,m.price,a.accessory_color')->select();
                 $result['itemArr'] = $arr;
             }
-                $result['itemCount'] = $this->where('origin_sku', '=', $result['origin_sku'])->count();
-                $result['type'] = $type;
-
+            $result['itemCount'] = $this->where('origin_sku', '=', $result['origin_sku'])->count();
+            $result['type'] = $type;
         }
         return $result ? $result : false;
     }
@@ -293,7 +292,7 @@ class Item extends Model
         $where['is_del']  = 1;
         $where['sku']     = $sku;
         $result = $this->where($where)->field('id,sku,available_stock')->find();
-        return $result;  
+        return $result;
     }
     /**
      * 查询一个通过审核之后的仓库sku是否存在
@@ -306,7 +305,7 @@ class Item extends Model
         $where['item_status'] = 3;
         $where['sku']     = $sku;
         $result = $this->where($where)->field('id,sku,available_stock,presell_residue_num,presell_num,presell_create_time,presell_end_time')->find();
-        return $result;  
+        return $result;
     }
 
     /**
@@ -324,7 +323,7 @@ class Item extends Model
     }
 
     /**
-     * 获取仓库总库存
+     * 获取仓库镜架总库存
      *
      * @Description
      * @author wpl
@@ -333,8 +332,14 @@ class Item extends Model
      */
     public function getFrameStock()
     {
+        //查询镜框分类有哪些
+        $category = new \app\admin\model\itemmanage\ItemCategory;
+        $map['attribute_group_id'] = 1;
+        $map['is_del'] = 1;
+        $ids = $category->where($map)->column('id');
+
+        $where['category_id']  = ['in', $ids];
         $where['is_del']  = 1;
         return $this->where($where)->sum('stock');
     }
-
 }
