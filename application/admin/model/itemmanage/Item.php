@@ -323,6 +323,32 @@ class Item extends Model
     }
 
     /**
+     * 获取仓库总库存总金额
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/02/24 16:47:21 
+     * @return void
+     */
+    public function getAllStockPrice()
+    {
+        $sku_pirce = new \app\admin\model\SkuPrice;
+        $arr = $sku_pirce->getAllData();
+        $where['is_del']  = 1;
+        $res = $this->where($where)->field('sku,stock,price')->select();
+        $allprice = 0;
+        foreach($res as $v) {
+            if ($arr[$v['sku']]) {
+                $allprice += $v['stock'] * $arr[$v['sku']];
+            } else {
+                $allprice += $v['stock'] * $v['price'];
+            }
+            
+        }
+        return $allprice;
+    }
+
+    /**
      * 获取仓库镜架总库存
      *
      * @Description
@@ -341,5 +367,41 @@ class Item extends Model
         $where['category_id']  = ['in', $ids];
         $where['is_del']  = 1;
         return $this->where($where)->sum('stock');
+    }
+
+    /**
+     * 获取仓库镜架总库存总金额
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/02/24 16:47:21 
+     * @return void
+     */
+    public function getFrameStockPrice()
+    {
+        //查询镜框分类有哪些
+        $category = new \app\admin\model\itemmanage\ItemCategory;
+        $map['attribute_group_id'] = 1;
+        $map['is_del'] = 1;
+        $ids = $category->where($map)->column('id');
+
+        //SKU实时进价
+        $sku_pirce = new \app\admin\model\SkuPrice;
+        $arr = $sku_pirce->getAllData();
+
+
+        $where['category_id']  = ['in', $ids];
+        $where['is_del']  = 1;
+        $res = $this->where($where)->field('sku,stock,price')->select();
+        $allprice = 0;
+        foreach($res as $v) {
+            if ($arr[$v['sku']]) {
+                $allprice += $v['stock'] * $arr[$v['sku']];
+            } else {
+                $allprice += $v['stock'] * $v['price'];
+            }
+            
+        }
+        return $allprice;
     }
 }

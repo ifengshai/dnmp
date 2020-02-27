@@ -138,16 +138,26 @@ class Index extends Backend
         //仓库总库存
         $allStock = $this->item->getAllStock();
 
+        //仓库库存总金额
+        $allStockPrice = $this->item->getAllStockPrice();
+
         //镜架库存统计
         $frameStock = $this->item->getFrameStock();
 
         //镜架总金额
-        
+        $frameStockPrice = $this->item->getFrameStockPrice();
 
         //镜片库存
         $lensStock = $this->lens->getLensStock();
         //镜片库存总金额
         $lensStockPrice = $this->lens->getLensStockPrice();
+
+        $this->view->assign('allStock', $allStock);
+        $this->view->assign('allStockPrice', $allStockPrice);
+        $this->view->assign('frameStock', $frameStock);
+        $this->view->assign('frameStockPrice', $frameStockPrice);
+        $this->view->assign('lensStock', $lensStock);
+        $this->view->assign('lensStockPrice', $lensStockPrice);
 
         return $this->view->fetch();
     }

@@ -76,7 +76,7 @@
                                     <div class="btn btn-div">
 
                                         <span class="extend">
-                                            仓库总库存（个）：<span style="color: red;" id="totalPayInfo">0</span>
+                                            仓库总库存（个）：<span style="color: red;" id="totalPayInfo">{$allStock}</span>
 
                                         </span>
                                     </div>
@@ -85,7 +85,7 @@
 
                                         <span class="extend">
                                             仓库库存总金额（<i class="fa fa-cny"></i>）：<span style="color: red;"
-                                                id="totalFramePrice">0</span>
+                                                id="totalFramePrice">{$allStockPrice}</span>
                                         </span>
                                     </div>
 
@@ -130,9 +130,9 @@
                                         </tr>
                                         <tr>
                                             <td>镜架库存</td>
-                                            <td>0</td>
+                                            <td>{$frameStock}</td>
                                             <td>镜架库存总金额（￥）</td>
-                                            <td>0</td>
+                                            <td>{$frameStockPrice}</td>
                                         </tr>
                                         <tr>
                                             <td>饰品库存</td>
@@ -142,9 +142,9 @@
                                         </tr>
                                         <tr>
                                             <td>镜片库存</td>
-                                            <td>0</td>
+                                            <td>{$lensStock}</td>
                                             <td>镜片库存总金额（￥）</td>
-                                            <td>0</td>
+                                            <td>{$lensStockPrice}</td>
                                         </tr>
                                         <tr>
                                             <td>辅料总库存</td>
