@@ -24,6 +24,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                 url: $.fn.bootstrapTable.defaults.extend.index_url,
                 pk: 'id',
                 sortName: 'id',
+                escape: false,
                 columns: [
                     [
                         { checkbox: true },
@@ -238,7 +239,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                             shtml += '<tr><td><input id="c-name" class="form-control c-name" name="row[name][]" value="' + data.list[i].title + '" type="text"></td>'
                             shtml += '<td><div class="col-xs-12 col-sm-12">';
                             shtml += '<select  id="c-color" data-rule="required" class="form-control " name="row[color][]" >';
-                            for(var z in data.colorResult) {
+                            for (var z in data.colorResult) {
                                 shtml += '<option value="' + data.colorResult[z] + '">' + data.colorResult[z] + '</option>';
                             }
                             shtml += '</select></td>';
@@ -277,7 +278,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                 },
                 getClear: function (value) {
 
-
+                    console.log(value);
                     if (value == null || value == undefined) {
                         return '';
                     } else {

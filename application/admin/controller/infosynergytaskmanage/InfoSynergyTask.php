@@ -935,6 +935,7 @@ class InfoSynergyTask extends Backend
 
         $writer->save('php://output');
     }
+    
 	/***
 	 **任务处理完成之后添加备注功能
 	 */
