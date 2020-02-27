@@ -132,7 +132,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                         "white-space": "nowrap",
                         "text-overflow": "ellipsis",
                         "overflow": "hidden",
-                        "max-width": "60px"
+                        "max-width": "200px"
                     }
                 }
             }         
