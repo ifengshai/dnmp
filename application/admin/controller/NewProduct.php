@@ -850,7 +850,11 @@ class NewProduct extends Backend
         foreach ($result->productInfo->skuInfos as $k => $v) {
             $list[$k]['id'] = $k + 1;
             $list[$k]['title'] = $result->productInfo->subject;
-            $list[$k]['color'] = $v->attributes[0]->attributeValue;
+            if (count($v->attributes) > 1) {
+                $list[$k]['color'] = $v->attributes[0]->attributeValue . ':' .$v->attributes[1]->attributeValue;
+            } else {
+                $list[$k]['color'] = $v->attributes[0]->attributeValue;
+            }
             $list[$k]['cargoNumber'] = $v->cargoNumber;
             $list[$k]['price'] = @$v->price ? @$v->price : @$v->consignPrice;
             $list[$k]['skuId'] = $v->skuId;
