@@ -79,10 +79,6 @@ class NewProduct extends Backend
                 ->limit($offset, $limit)
                 ->select();
             $list = collection($list)->toArray();
-            foreach($list as &$v) {
-                $v['newproductattribute']['frame_remark'] = htmlspecialchars_decode($v['newproductattribute']['frame_remark'],ENT_QUOTES);
-            }
-            
             $result = array("total" => $total, "rows" => $list);
 
             return json($result);

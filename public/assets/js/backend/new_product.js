@@ -24,7 +24,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                 url: $.fn.bootstrapTable.defaults.extend.index_url,
                 pk: 'id',
                 sortName: 'id',
-                // escape: false,
+                escape: false,
                 columns: [
                     [
                         { checkbox: true },
@@ -47,7 +47,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                             searchList: { 1: '待选品', 2: '选品通过', 3: '选品拒绝', 4: '已取消' },
                             formatter: Table.api.formatter.status
                         },
-                        { field: 'newproductattribute.frame_remark', title: __('选品备注'), formatter: Controller.api.formatter.getClear, operate: false },
+                        { field: 'newproductattribute.frame_remark', title: __('选品备注'), cellStyle: formatTableUnit, formatter: Controller.api.formatter.getClear, operate: false },
                         { field: 'create_person', title: __('Create_person') },
                         { field: 'create_time', title: __('Create_time'), operate: 'RANGE', addclass: 'datetimerange' },
 
@@ -125,14 +125,33 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                 ]
             });
 
+            //td宽度以及内容超过宽度隐藏
+            function formatTableUnit(value, row, index) {
+                return {
+                    css: {
+                        "white-space": "nowrap",
+                        "text-overflow": "ellipsis",
+                        "overflow": "hidden",
+                        "max-width": "60px"
+                    }
+                }
+            }         
+
+            //表格超出宽度鼠标悬停显示td内容
+            function paramsMatter(value, row, index) {
+                var span = document.createElement("span");
+                span.setAttribute("title", value);
+                span.innerHTML = value;
+                return span.outerHTML;
+            }
+            
             $(document).on('click', ".problem_desc_info", function () {
-                var problem_desc = $(this).attr('name');
-                //Layer.alert(problem_desc);
+                var problem_desc = $(this).attr('data');
                 Layer.open({
                     closeBtn: 1,
                     title: '问题描述',
                     area: ['900px', '500px'],
-                    content: problem_desc
+                    content: decodeURIComponent(problem_desc)
                 });
                 return false;
             });
@@ -287,7 +306,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                         if (tem.length <= 25) {
                             return tem;
                         } else {
-                            return '<span class="problem_desc_info" name = "' + tem + '" style="">' + tem.substr(0, 25) + '...</span>';
+                            return '<div class="problem_desc_info" data = "' + encodeURIComponent(tem) + '"' + '>' + tem + '</div>';
 
                         }
                     }
