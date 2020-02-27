@@ -153,9 +153,9 @@ class Index extends Backend
         $lensStockPrice = $this->lens->getLensStockPrice();
 
         //饰品库存
-        $ornamentsStock = $this->lens->getOrnamentsStock();
+        $ornamentsStock = $this->item->getOrnamentsStock();
         //饰品库存总金额
-        $ornamentsStockPrice = $this->lens->getOrnamentsStockPrice();
+        $ornamentsStockPrice = $this->item->getOrnamentsStockPrice();
 
         $this->view->assign('allStock', $allStock);
         $this->view->assign('allStockPrice', $allStockPrice);
