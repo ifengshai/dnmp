@@ -42,6 +42,7 @@ class ItemCategory extends Model
     {
         return [1 => '镜框', 2 => '虚拟产品', 3 => '饰品'];
     }
+    
     /***
      * 获取分类列表
      */

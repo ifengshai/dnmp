@@ -319,6 +319,7 @@ class Item extends Model
     public function getAllStock()
     {
         $where['is_del']  = 1;
+        $where['category_id']  = ['<>', 43];
         return $this->where($where)->sum('stock');
     }
 
@@ -335,15 +336,15 @@ class Item extends Model
         $sku_pirce = new \app\admin\model\SkuPrice;
         $arr = $sku_pirce->getAllData();
         $where['is_del']  = 1;
+        $where['category_id']  = ['<>', 43];
         $res = $this->where($where)->field('sku,stock,price')->select();
         $allprice = 0;
-        foreach($res as $v) {
+        foreach ($res as $v) {
             if ($arr[$v['sku']]) {
                 $allprice += $v['stock'] * $arr[$v['sku']];
             } else {
                 $allprice += $v['stock'] * $v['price'];
             }
-            
         }
         return $allprice;
     }
@@ -394,13 +395,12 @@ class Item extends Model
         $where['is_del']  = 1;
         $res = $this->where($where)->field('sku,stock,price')->select();
         $allprice = 0;
-        foreach($res as $v) {
+        foreach ($res as $v) {
             if ($arr[$v['sku']]) {
                 $allprice += $v['stock'] * $arr[$v['sku']];
             } else {
                 $allprice += $v['stock'] * $v['price'];
             }
-            
         }
         return $allprice;
     }
