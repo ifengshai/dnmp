@@ -28,7 +28,8 @@ class Crontab extends Backend
         'set_purchase_order_logistics',
         'product_grade_list_crontab',
         'changeItemNewToOld',
-        'get_sku_stock'
+        'get_sku_stock',
+        'get_sku_price'
     ];
 
 
@@ -1524,7 +1525,7 @@ order by sfoi.item_id asc limit 1000";
             ->order('createtime desc')
             ->select();
         $arr = [];
-        foreach($result as $v) {
+        foreach ($result as $v) {
             if (!isset($arr[$v['sku']])) {
                 $arr[$v['sku']] = $v['purchase_price'];
             } else {
@@ -1534,10 +1535,10 @@ order by sfoi.item_id asc limit 1000";
         if ($arr) {
             $list = [];
             $i = 0;
-            foreach($arr as $k => $v) {
+            foreach ($arr as $k => $v) {
                 $list[$i]['sku'] = $k;
                 $list[$i]['price'] = $v;
-                $list[$i]['createtime'] = date('Y-m-d H:i:s',time());
+                $list[$i]['createtime'] = date('Y-m-d H:i:s', time());
                 $i++;
             }
             unset($arr);
@@ -1550,6 +1551,5 @@ order by sfoi.item_id asc limit 1000";
             $res = Db::table('fa_sku_price')->insertAll($list);
         }
         echo 'ok';
-
     }
 }
