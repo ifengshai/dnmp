@@ -1507,7 +1507,7 @@ order by sfoi.item_id asc limit 1000";
     }
 
     /**
-     * 获取SKU最新的采购单价
+     * 定时获取SKU最新的采购单价
      *
      * @Description
      * @author wpl
@@ -1531,7 +1531,25 @@ order by sfoi.item_id asc limit 1000";
                 continue;
             }
         }
-        dump($arr);die;
-        
+        if ($arr) {
+            $list = [];
+            $i = 0;
+            foreach($arr as $k => $v) {
+                $list[$i]['sku'] = $k;
+                $list[$i]['price'] = $v;
+                $list[$i]['createtime'] = date('Y-m-d H:i:s',time());
+                $i++;
+            }
+            unset($arr);
+        }
+
+        if ($list) {
+            //清空表
+            Db::execute("truncate table fa_sku_price;");
+            //批量添加
+            $res = Db::table('fa_sku_price')->insertAll($list);
+        }
+        echo 'ok';
+
     }
 }
