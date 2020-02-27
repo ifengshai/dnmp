@@ -24,7 +24,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                 url: $.fn.bootstrapTable.defaults.extend.index_url,
                 pk: 'id',
                 sortName: 'id',
-                escape: false,
+                // escape: false,
                 columns: [
                     [
                         { checkbox: true },
