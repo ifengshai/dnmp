@@ -38,7 +38,7 @@ We hope this response helps. Please do not hesitate to reach out to us if you ha
     //已签收
     't4' => 'Hi there, 
 
-Thank you for bringing this matter to our attention. We want to inform you that we shipped out your order on %s, with tracking number #%s by %s.
+Thank you for bringing this matter to our attention. We want to inform you that we shipped out your order on %s, with tracking number %s by %s.
 
 Here is the latest update on the shipping status: %s
 
@@ -70,7 +70,7 @@ We sincerely appreciate your understanding and patience. Have a nice day. ',
     //7、取消订单
     't7' => 'Hi there,
 
-Thank you for contacting us about this matter. We have canceled your order #%s per your request. 
+Thank you for contacting us about this matter. We have canceled your order %s per your request. 
 
 We will initiate the refund process in 48 hours. The refund to your credit card (or original method of payment like PayPal) will appear in your statement in 3-7 business days, depending on the card issuer\'s policies.
 
