@@ -34,6 +34,7 @@ class Index extends Backend
         $this->nihao = new \app\admin\model\order\order\Nihao;
         $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
         $this->item = new \app\admin\model\itemmanage\Item;
+        $this->lens = new \app\admin\model\lens\Index;
     }
 
     /**
@@ -136,6 +137,15 @@ class Index extends Backend
     {
         //仓库总库存
         $allStock = $this->item->getAllStock();
+
+        //镜架库存统计
+        $frameStock = $this->item->getFrameStock();
+
+        //镜片库存
+        $lensStock = $this->lens->getLensStock();
+        //镜片库存总金额
+        $lensStockPrice = $this->lens->getLensStockPrice();
+        
         return $this->view->fetch();
     }
 

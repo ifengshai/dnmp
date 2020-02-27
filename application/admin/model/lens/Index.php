@@ -24,7 +24,31 @@ class Index extends Model
 
     ];
     
+    /**
+     * 统计镜片库存
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/02/26 17:36:58 
+     * @return void
+     */
+    public function getLensStock()
+    {
+       return $this->sum('stock_num');
+    }
 
+    /**
+     * 统计镜片库存总金额
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/02/26 17:36:58 
+     * @return void
+     */
+    public function getLensStockPrice()
+    {
+       return $this->sum('stock_num*price');
+    }
     
 
 
