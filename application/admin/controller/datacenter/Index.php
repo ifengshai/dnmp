@@ -198,6 +198,21 @@ class Index extends Backend
             cache($cachename, $ornamentsStockPrice, 86400);
         }
 
+        //样品库存
+        $cachename = 'supply_chain_data_' . 'SampleNumStock';
+        $sampleNumStock = cache($cachename);
+        if (!$sampleNumStock) {
+            $sampleNumStock = $this->item->getSampleNumStock();
+            cache($cachename, $sampleNumStock, 86400);
+        }
+        //样品库存总金额
+        $cachename = 'supply_chain_data_' . 'SampleNumStockPrice';
+        $sampleNumStockPrice = cache($cachename);
+        if (!$sampleNumStockPrice) {
+            $sampleNumStockPrice = $this->item->getSampleNumStockPrice();
+            cache($cachename, $sampleNumStockPrice, 86400);
+        }
+
         $this->view->assign('allStock', $allStock);
         $this->view->assign('allStockPrice', $allStockPrice);
         $this->view->assign('frameStock', $frameStock);
@@ -206,6 +221,8 @@ class Index extends Backend
         $this->view->assign('lensStockPrice', $lensStockPrice);
         $this->view->assign('ornamentsStock', $ornamentsStock);
         $this->view->assign('ornamentsStockPrice', $ornamentsStockPrice);
+        $this->view->assign('sampleNumStock', $sampleNumStock);
+        $this->view->assign('sampleNumStockPrice', $sampleNumStockPrice);
 
         return $this->view->fetch();
     }
