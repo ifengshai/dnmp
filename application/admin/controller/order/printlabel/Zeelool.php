@@ -58,7 +58,7 @@ class Zeelool extends Backend
             $filter = json_decode($this->request->get('filter'), true);
 
             if ($filter['increment_id']) {
-                $map['status'] = ['in', ['free_processing', 'processing', 'complete','paypal_reversed']];
+                $map['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal']];
             } elseif (!$filter['status']) {
                 $map['status'] = ['in', ['free_processing', 'processing']];
             }
@@ -946,13 +946,13 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
 
         set_time_limit(0);
         ini_set('memory_limit', '512M');
-        
+
         $str = '
         ';
         $str = explode('
-        ',$str);
-        
-        $map['sfo.increment_id'] = ['in',$str];
+        ', $str);
+
+        $map['sfo.increment_id'] = ['in', $str];
 
         list($where) = $this->buildparams();
         $field = 'sfo.increment_id,sfoi.product_options,sfoi.order_id,sfo.`status`,sfoi.sku,sfoi.product_id,sfoi.qty_ordered,sfo.created_at';
@@ -969,7 +969,7 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
         $resultList = $this->qty_order_check($resultList);
 
         $finalResult = array();
-        
+
         foreach ($resultList as $key => $value) {
             $finalResult[$key]['increment_id'] = $value['increment_id'];
             $finalResult[$key]['sku'] = $value['sku'];
@@ -1074,7 +1074,7 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
 
         //查询商品管理SKU对应ID
         $item = new \app\admin\model\itemmanage\Item;
-        $itemArr = $item->where('is_del',1)->column('id','sku');
+        $itemArr = $item->where('is_del', 1)->column('id', 'sku');
 
         foreach ($finalResult as $key => $value) {
 
@@ -1113,7 +1113,7 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
             $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 2 + 2), $value['increment_id']);
             $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 2 + 2), $itemArr[$sku]);
             $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 2 + 2), $value['sku']);
-            
+
             $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 2 + 2), '右眼');
             $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 2 + 3), '左眼');
 
