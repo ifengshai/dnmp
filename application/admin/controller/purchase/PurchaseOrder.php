@@ -1280,12 +1280,12 @@ class PurchaseOrder extends Backend
         $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(40);
         $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(30);
         $spreadsheet->getActiveSheet()->getColumnDimension('D')->setWidth(20);
-        $spreadsheet->getActiveSheet()->getColumnDimension('E')->setWidth(30);
-        $spreadsheet->getActiveSheet()->getColumnDimension('F')->setWidth(30);
-        $spreadsheet->getActiveSheet()->getColumnDimension('G')->setWidth(40);
+        $spreadsheet->getActiveSheet()->getColumnDimension('E')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('F')->setWidth(15);
+        $spreadsheet->getActiveSheet()->getColumnDimension('G')->setWidth(15);
 
         $spreadsheet->getActiveSheet()->getColumnDimension('H')->setWidth(40);
-        $spreadsheet->getActiveSheet()->getColumnDimension('I')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('I')->setWidth(15);
 
         $spreadsheet->getActiveSheet()->getColumnDimension('J')->setWidth(20);
         $spreadsheet->getActiveSheet()->getColumnDimension('K')->setWidth(20);
