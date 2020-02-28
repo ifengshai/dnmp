@@ -136,26 +136,67 @@ class Index extends Backend
     public function supply_chain_data()
     {
         //仓库总库存
-        $allStock = $this->item->getAllStock();
+        $cachename = 'supply_chain_data_' . 'allStock';
+        $allStock = cache($cachename);
+        if (!$allStock) {
+            $allStock = $this->item->getAllStock();
+            cache($cachename, $allStock, 86400);
+        }
 
-        //仓库库存总金额
-        $allStockPrice = $this->item->getAllStockPrice();
+        //仓库库存总金额       
+        $cachename = 'supply_chain_data_' . 'allStockPrice';
+        $allStockPrice = cache($cachename);
+        if (!$allStockPrice) {
+            $allStockPrice = $this->item->getAllStockPrice();
+            cache($cachename, $allStockPrice, 86400);
+        }
 
         //镜架库存统计
-        $frameStock = $this->item->getFrameStock();
+        $cachename = 'supply_chain_data_' . 'frameStock';
+        $frameStock = cache($cachename);
+        if (!$frameStock) {
+            $frameStock = $this->item->getFrameStock();
+            cache($cachename, $frameStock, 86400);
+        }
 
-        //镜架总金额
-        $frameStockPrice = $this->item->getFrameStockPrice();
+        //镜架总金额 
+        $cachename = 'supply_chain_data_' . 'frameStockPrice';
+        $frameStockPrice = cache($cachename);
+        if (!$frameStockPrice) {
+            $frameStockPrice = $this->item->getFrameStockPrice();
+            cache($cachename, $frameStockPrice, 86400);
+        }
 
         //镜片库存
-        $lensStock = $this->lens->getLensStock();
+        $cachename = 'supply_chain_data_' . 'lensStock';
+        $lensStock = cache($cachename);
+        if (!$lensStock) {
+            $lensStock = $this->lens->getLensStock();
+            cache($cachename, $lensStock, 86400);
+        }
+
         //镜片库存总金额
-        $lensStockPrice = $this->lens->getLensStockPrice();
+        $cachename = 'supply_chain_data_' . 'lensStockPrice';
+        $lensStockPrice = cache($cachename);
+        if (!$lensStockPrice) {
+            $lensStockPrice = $this->lens->getLensStockPrice();
+            cache($cachename, $lensStockPrice, 86400);
+        }
 
         //饰品库存
-        $ornamentsStock = $this->item->getOrnamentsStock();
+        $cachename = 'supply_chain_data_' . 'ornamentsStock';
+        $ornamentsStock = cache($cachename);
+        if (!$ornamentsStock) {
+            $ornamentsStock = $this->item->getOrnamentsStock();
+            cache($cachename, $ornamentsStock, 86400);
+        }
         //饰品库存总金额
-        $ornamentsStockPrice = $this->item->getOrnamentsStockPrice();
+        $cachename = 'supply_chain_data_' . 'ornamentsStockPrice';
+        $ornamentsStockPrice = cache($cachename);
+        if (!$ornamentsStockPrice) {
+            $ornamentsStockPrice = $this->item->getOrnamentsStockPrice();
+            cache($cachename, $ornamentsStockPrice, 86400);
+        }
 
         $this->view->assign('allStock', $allStock);
         $this->view->assign('allStockPrice', $allStockPrice);
