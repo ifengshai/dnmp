@@ -36,7 +36,7 @@ class PurchaseOrder extends Backend
      * 无需登录的方法,同时也就不需要鉴权了
      * @var array
      */
-    protected $noNeedLogin = ['getAlibabaPurchaseOrder', 'callback'];
+    protected $noNeedLogin = ['getAlibabaPurchaseOrder', 'callback', 'batch_export_xls'];
 
     public function _initialize()
     {
@@ -1242,7 +1242,7 @@ class PurchaseOrder extends Backend
             ->select();
 
         $list = collection($list)->toArray();
-        
+
 
         //从数据库查询需要的数据
         $spreadsheet = new Spreadsheet();
@@ -1311,7 +1311,7 @@ class PurchaseOrder extends Backend
 
         $format = 'xlsx';
         $savename = '采购单数据' . date("YmdHis", time());;
-       
+
         if ($format == 'xls') {
             //输出Excel03版本
             header('Content-Type:application/vnd.ms-excel');
