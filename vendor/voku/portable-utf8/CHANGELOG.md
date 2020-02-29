@@ -1,5 +1,9 @@
 # Changelog
 
+### 5.4.40 (2020-02-23)
+
+- fix php notices (run all tests with E_ALL ^ E_USER_WARNING)
+
 ### 5.4.39 (2020-01-30)
 
 - "GRAPHEME_CLUSTER_RX" -> is not used anymore and is now deprecated
@@ -10,6 +14,7 @@
 - fix phpdoc for "UTF8::split()" & "UTF8::str_split()"
 - add "UTF8::str_split_array()"
 - add "UTF8::stripos_in_byte()"
+- add "UTF8::emoji_from_country_code()"
 - add many new tests
 - optimize "UTF8::is_url()" + fix deprecated php (>= 7.3) constants
 - optimize "UTF8::str_limit_after_word()" -> optimize the regex

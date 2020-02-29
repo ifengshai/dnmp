@@ -27,7 +27,8 @@
         "phpoffice/phpspreadsheet": "^1.2",
         "mpdf/mpdf": "^8.0",
         "zendesk/zendesk_api_client_php": "^2.2",
-        "voku/stringy": "^6.2"
+        "voku/stringy": "^6.2",
+        "topthink/think-migration": "1.*"
     },
     "config": {
         "preferred-install": "dist"

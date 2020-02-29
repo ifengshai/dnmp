@@ -8,6 +8,8 @@
 
 namespace app\api\controller;
 
+use app\admin\model\zendesk\ZendeskReply;
+use app\admin\model\zendesk\ZendeskReplyDetail;
 use think\Controller;
 use think\Db;
 use think\Exception;
@@ -21,6 +23,7 @@ class Zendesk extends Controller
     protected $subdomain = "zeelooloptical";
     protected $username = "complaint@zeelool.com";
     protected $token = "wAhNtX3oeeYOJ3RI1i2oUuq0f77B2MiV5upmh11B";
+    protected $count = 1;
     //客户按要求回复的内容
     protected $auto_answer = [
         'check order information',
@@ -52,22 +55,21 @@ class Zendesk extends Controller
      */
     public function test()
     {
-        $title = 'USPS';
-        $title = str_replace(' ', '-', $title);
-        $track_number = '92748902348242002000808424';
-        $track = new Trackingmore();
-        $result = $track->getRealtimeTrackingResults($title, $track_number);
-        ///$track2 = $track->getSingleTrackingResult($title, $track_number,'en');
-        dump($result);
-        //dump($track2);
-        die;
+//        $title = 'USPS';
+//        $title = str_replace(' ', '-', $title);
+//        $track_number = '92748902348242002000808424';
+//        $track = new Trackingmore();
+//        $result = $track->getRealtimeTrackingResults($title, $track_number);
+//        ///$track2 = $track->getSingleTrackingResult($title, $track_number,'en');
+//        //dump($track2);
+//        die;
         //dump(s('str contains foo')->contains('contains foo'));die;
         try {
             // Query Zendesk API to retrieve the ticket details
 
             $id = 73887;
             $id = 78710;
-           // dump($this->client->tickets()->findMany([$id]));die;
+            $ticket = $this->client->tickets()->find($id);
             $tickets = $this->client->tickets($id)->comments()->findAll();
             // Show the results
             $comments = $tickets->comments;
@@ -104,7 +106,28 @@ class Zendesk extends Controller
             'order_by' => 'updated_at',
             'sort' => 'desc'
         ];
-        $this->getTickets($search);
+        //临时使用只处理new的
+        $search2 = [
+            'type' => 'ticket',
+            'via' => 'mail',
+//            'updated_at' => [
+//                'valuetype' => '>=',
+//                'value'   => '90minutes',
+//            ],//>=意思是3分钟之内，<=是三分钟之外
+            'status' => ['new'],
+            'tag' => [
+                'keytype' => '-',
+                'value' => '转客服'
+            ], // -排除此tag
+//            'assignee' => [
+//                382940274852,
+//                'none'
+//            ],
+            //'requester' => 393708243591,
+            'order_by' => 'updated_at',
+            'sort' => 'desc'
+        ];
+        $this->getTickets($search2);
     }
 
     /**
@@ -120,7 +143,18 @@ class Zendesk extends Controller
         $params = $this->parseStr($array);
         $search = $this->client->search()->find($params);
         $tickets = $search->results;
+        $page = ceil($search->count / 100 );
+        //先获取第一页的
         $this->findCommentsByTickets($tickets);
+        if($page > 1){
+            //获取后续的
+            for($i=2;$i<= $page;$i++){
+                $search = $this->client->search()->find($params,['page' => $i]);
+                $tickets = $search->results;
+                $this->findCommentsByTickets($tickets);
+            }
+        }
+
     }
 
     /**
@@ -152,6 +186,7 @@ class Zendesk extends Controller
             //判断，如果最后一条为发送着的评论，则需要回复，如果为客服或自动回复的，则不需要回复
             $last_comment = $comments[$count-1];
             if($requester_id == 393708243591) {
+                $reply_detail_data = [];
                 if ($last_comment->author_id == $requester_id) {
                     //邮件的内容
                     $body = strtolower($last_comment->body);
@@ -227,6 +262,7 @@ class Zendesk extends Controller
                                         'status' => 'pending'
                                     ];
 
+
                                     $lastUpdateTime = strtotime($res['lastUpdateTime']);
                                     $now = time();
                                     if ($now - $lastUpdateTime > 7 * 24 * 3600) { //超7天未更新
@@ -257,6 +293,28 @@ class Zendesk extends Controller
                                 'status' => 'open'
                             ];
                         }
+                        //添加用户的评论，新增客服的回复
+                        //判断是否有主评论，无则不新增
+                        if($zendesk_reply = ZendeskReply::get(['email_id' => $ticket->id])){
+                            //添加用户的评论
+                            ZendeskReplyDetail::create([
+                                'reply_id' => $zendesk_reply->id,
+                                'body' => $last_comment->body,
+                                'html_body' => $last_comment->html_body,
+                                'tags' => join(',',$tags),
+                                'status' => $ticket->status,
+                                'assignee_id' => 382940274852
+                            ]);
+                            //回复评论
+                            $reply_detail_data = [
+                                'reply_id' => $zendesk_reply->id,
+                                'body' => $params['comment']['body'] ? $params['comment']['body'] : '',
+                                'html_body' => $params['comment']['body'] ? $params['comment']['body'] : '',
+                                'tags' => join(',',array_unique(array_merge($tags, $params['tags']))),
+                                'status' => $params['status'],
+                                'assignee_id' => 382940274852,
+                            ];
+                        }
                     } else {
                         //When,deliver,delivery,receive,track,ship,shipping,tracking,status,order,shipment
                         //匹配到相应的关键字，自动回复消息，修改为pending，回复共客户选择的内容
@@ -269,6 +327,32 @@ class Zendesk extends Controller
                                 'tags' => ['自动回复'],
                                 'status' => 'pending'
                             ];
+                            //如果是第一条评论，则把对应的客户内容插入主表，回复内容插入附表，其余不做处理
+                            if($count == 1){
+                                //主email
+                                $reply_data = [
+                                    'email' => $requester_email,
+                                    'email_id' => $ticket->id,
+                                    'body' => $last_comment->body,
+                                    'html_body' => $last_comment->html_body,
+                                    'tags' => join(',',$tags),
+                                    'status' => $ticket->status,
+                                    'requester_id' => $requester_id,
+                                    'assignee_id' => $ticket->assignee_id ? $ticket->assignee_id : 0
+
+                                ];
+                                //添加主评论
+                                $zendesk_reply = ZendeskReply::create($reply_data);
+                                //回复评论
+                                $reply_detail_data = [
+                                    'reply_id' => $zendesk_reply->id,
+                                    'body' => $params['comment']['body'],
+                                    'html_body' => $params['comment']['body'],
+                                    'tags' => join(',',array_unique(array_merge($tags, $params['tags']))),
+                                    'status' => $params['status'],
+                                    'assignee_id' => 382940274852,
+                                ];
+                            }
                         }
                     }
                     if (!empty($params)) {
@@ -276,7 +360,17 @@ class Zendesk extends Controller
                         $params['tags'] = array_unique(array_merge($tags, $params['tags']));
                         $params['comment']['author_id'] = 382940274852;
                         $params['assignee_id'] = 382940274852;
-                        $this->autoUpdate($id, $params);
+                        $res = $this->autoUpdate($id, $params);
+                        if($res){
+                            if(!empty($reply_detail_data)){
+                                $reply_detail_res = ZendeskReplyDetail::create($reply_detail_data);
+                                if($reply_detail_res){
+                                    //更新主表状态
+                                    ZendeskReply::where('id',$zendesk_reply->id)->setField('status',$reply_detail_data['status']);
+                                }
+
+                            }
+                        }
                     }
                 }
             }
@@ -294,8 +388,10 @@ class Zendesk extends Controller
         try{
             $this->client->tickets()->update($ticket_id, $params);
         }catch (\Exception $e){
-            exception($e->getMessage(), 10001);
+            return false;
+            //exception($e->getMessage(), 10001);
         }
+        return true;
 
     }
 
