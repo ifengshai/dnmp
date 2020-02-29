@@ -1569,6 +1569,6 @@ order by sfoi.item_id asc limit 1000";
         $num = $item->getAllStock();
         $data['allnum'] = $num;
         $data['createtime'] = date('Y-m-d H:i:s');
-        $res = Db::table('fa_product_allstock_log')->insert($$data);
+        $res = Db::table('fa_product_allstock_log')->insert($data);
     }
 }
