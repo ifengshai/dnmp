@@ -507,6 +507,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                             }, operate: false
                         },
                         { field: 'supplier_name', title: __('供应商名称'), operate: 'like' },
+                        { field: 'purchase_person', title: __('供应商名称'), operate: 'like' },
                         { field: 'true_sku', title: __('SKU'), operate: 'like' },
                         { field: 'grade', title: __('等级'), operate: 'like' },
                         { field: 'zeelool_sku', title: __('Zeelool_Sku'), operate: 'like' },

@@ -1312,7 +1312,7 @@ order by sfoi.item_id asc limit 1000";
 
         //查询供货商
         $supplier = new \app\admin\model\purchase\SupplierSku;
-        $supplier_list = $supplier->alias('a')->join(['fa_supplier' => 'b'], 'a.supplier_id=b.id')->column('b.supplier_name', 'a.sku');
+        $supplier_list = $supplier->alias('a')->join(['fa_supplier' => 'b'], 'a.supplier_id=b.id')->column('b.supplier_name,b.purchase_person', 'a.sku');
 
 
         //删除无用数组 释放内存
@@ -1343,7 +1343,8 @@ order by sfoi.item_id asc limit 1000";
             //分等级产品
             $num = round($val['counter'] * 1 / $val['days'] * 1 * 30);
             $list[$k]['num'] = $num;
-            $list[$k]['supplier_name'] =  $supplier_list[$val['true_sku']];
+            $list[$k]['supplier_name'] =  $supplier_list[$val['true_sku']]['supplier_name'];
+            $list[$k]['purchase_person'] =  $supplier_list[$val['true_sku']]['purchase_person'];
 
 
             if ($num >= 300) {
