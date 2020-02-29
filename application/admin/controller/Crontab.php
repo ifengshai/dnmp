@@ -1665,7 +1665,7 @@ order by sfoi.item_id asc limit 1000";
         ', $str);
 
         $map['id'] = ['in', $str];
-        $res = Db::table('fa_product_allstock_log')->update(['purchase_person' => '任萍']);
+        $res = Db::table('fa_supplier')->update(['purchase_person' => '任萍']);
         
     }
 }
