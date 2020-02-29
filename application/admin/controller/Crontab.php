@@ -29,7 +29,9 @@ class Crontab extends Backend
         'product_grade_list_crontab',
         'changeItemNewToOld',
         'get_sku_stock',
-        'get_sku_price'
+        'get_sku_price',
+        'get_sku_allstock'
+
     ];
 
 
@@ -1551,5 +1553,22 @@ order by sfoi.item_id asc limit 1000";
             $res = Db::table('fa_sku_price')->insertAll($list);
         }
         echo 'ok';
+    }
+
+    /**
+     * 记录每天总库存数
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/02/29 16:13:16 
+     * @return void
+     */
+    public function get_sku_allstock()
+    {
+        $item = new \app\admin\model\itemmanage\Item;
+        $num = $item->getAllStock();
+        $data['allnum'] = $num;
+        $data['createtime'] = date('Y-m-d H:i:s');
+        $res = Db::table('fa_product_allstock_log')->insertAll($$data);
     }
 }
