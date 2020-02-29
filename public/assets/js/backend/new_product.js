@@ -38,6 +38,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                         },
                         { field: 'id', title: __('Id'), operate: false, visible: false },
                         { field: 'sku', title: __('Sku'), operate: 'like' },
+                        { field: 'price', title: __('单价'), operate: false },
                         { field: 'name', title: __('Name'), operate: 'like' },
                         { field: 'supplier.supplier_name', title: __('供应商名称'), operate: 'like' },
                         { field: 'supplier_sku', title: __('供应商SKU'), operate: 'like' },
