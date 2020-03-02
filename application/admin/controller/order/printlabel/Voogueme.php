@@ -57,14 +57,14 @@ class Voogueme extends Backend
                 return $this->selectpage();
             }
 
-            
+
             $filter = json_decode($this->request->get('filter'), true);
 
             if ($filter['increment_id']) {
                 $map['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal']];
             } elseif (!$filter['status']) {
                 $map['status'] = ['in', ['free_processing', 'processing']];
-            } 
+            }
             //是否有协同任务
             $infoSynergyTask = new \app\admin\model\infosynergytaskmanage\InfoSynergyTask;
             if ($filter['task_label'] == 1 || $filter['task_label'] == '0') {
@@ -75,7 +75,7 @@ class Voogueme extends Backend
                 $map['increment_id'] = ['in', $order_arr];
                 unset($filter['task_label']);
                 $this->request->get(['filter' => json_encode($filter)]);
-            } 
+            }
 
             //协同任务分类id搜索
             if ($filter['category_id'] || $filter['c_id']) {
@@ -106,7 +106,7 @@ class Voogueme extends Backend
                 ->where($map)
                 ->where($where)
                 ->order($sort, $order)
-                ->count();                                                                        
+                ->count();
             $field = 'order_type,custom_order_prescription_type,entity_id,status,base_shipping_amount,increment_id,coupon_code,shipping_description,store_id,customer_id,base_discount_amount,base_grand_total,
                      total_qty_ordered,quote_id,base_currency_code,customer_email,customer_firstname,customer_lastname,custom_is_match_frame_new,custom_is_match_lens_new,
                      custom_is_send_factory_new,custom_is_delivery_new,custom_print_label_new,custom_order_prescription,custom_service_name,created_at';
@@ -582,7 +582,7 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
 
         set_time_limit(0);
         ini_set('memory_limit', '512M');
-       
+
         $ids = input('id_params');
 
         $filter = json_decode($this->request->get('filter'), true);
@@ -650,7 +650,7 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
         $resultList = $this->qty_order_check($resultList);
 
         $finalResult = array();
-        
+
         foreach ($resultList as $key => $value) {
             $finalResult[$key]['increment_id'] = $value['increment_id'];
             $finalResult[$key]['sku'] = $value['sku'];
@@ -755,7 +755,7 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
 
         //查询商品管理SKU对应ID
         $item = new \app\admin\model\itemmanage\Item;
-        $itemArr = $item->where('is_del',1)->column('id','sku');
+        $itemArr = $item->where('is_del', 1)->column('id', 'sku');
 
         foreach ($finalResult as $key => $value) {
 
@@ -794,7 +794,7 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
             $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 2 + 2), $value['increment_id']);
             $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 2 + 2), $itemArr[$sku]);
             $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 2 + 2), $value['sku']);
-            
+
             $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 2 + 2), '右眼');
             $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 2 + 3), '左眼');
 
@@ -953,13 +953,55 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
 
         set_time_limit(0);
         ini_set('memory_limit', '512M');
-        
-        $str = '430091226
+
+        $str = '430092843
+        430092832
+        430092846
+        430092864
+        430092827
+        430092833
+        430092823
+        430092813
+        130033983
+        430092835
+        130034016
+        430092777
+        130034014
+        130034009
+        130034001
+        130034022
+        130033984
+        130034021
+        130033984
+        130033979
+        430092835
+        430092961
+        430092879
+        130033996
+        430092970
+        430092920
+        430092960
+        430092937
+        430092932
+        430092940
+        430092936
+        430092925
+        130033985
+        130033994
+        130033997
+        430092945
+        430092938
+        430092948
+        430092927
+        430092881
+        430092919
+        430092894
+        430092901        
         ';
         $str = explode('
-        ',$str);
-        
-        $map['sfo.increment_id'] = ['in',$str];
+        ', $str);
+
+        $map['sfo.increment_id'] = ['in', $str];
 
         list($where) = $this->buildparams();
         $field = 'sfo.increment_id,sfoi.product_options,sfoi.order_id,sfo.`status`,sfoi.sku,sfoi.product_id,sfoi.qty_ordered,sfo.created_at';
@@ -976,14 +1018,13 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
         $resultList = $this->qty_order_check($resultList);
 
         $finalResult = array();
-        
+
         foreach ($resultList as $key => $value) {
             $finalResult[$key]['increment_id'] = $value['increment_id'];
             $finalResult[$key]['sku'] = $value['sku'];
             $finalResult[$key]['created_at'] = substr($value['created_at'], 0, 10);
 
             $tmp_product_options = unserialize($value['product_options']);
-            // dump($product_options);
             $finalResult[$key]['coatiing_name'] = $tmp_product_options['info_buyRequest']['tmplens']['coatiing_name'];
             $finalResult[$key]['index_type'] = $tmp_product_options['info_buyRequest']['tmplens']['index_type'];
 
@@ -1037,20 +1078,9 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
             $finalResult[$key]['lens_height'] = $tmp_bridge['lens_height'];
             $finalResult[$key]['bridge'] = $tmp_bridge['bridge'];
         }
-        // dump($finalResult);
-        // exit;
-        //从数据库查询需要的数据
-        // $data = model('admin/Loginlog')->where($where)->order('id','desc')->select();
+
         // Create new Spreadsheet object
         $spreadsheet = new Spreadsheet();
-        // Add title
-        // $spreadsheet->setActiveSheetIndex(0)
-        // ->setCellValue('A1', 'ID')
-        // ->setCellValue('B1', '用户')
-        // ->setCellValue('C1', '详情')
-        // ->setCellValue('D1', '结果')
-        // ->setCellValue('E1', '时间')
-        // ->setCellValue('F1', 'IP');
 
         //常规方式：利用setCellValue()填充数据
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("A1", "日期")
@@ -1080,8 +1110,8 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
         $ItemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku;
 
         //查询商品管理SKU对应ID
-        $item = new \app\admin\model\itemmanage\Item;
-        $itemArr = $item->where('is_del',1)->column('id','sku');
+        $item = new \app\admin\model\itemmanage\ItemPlatformSku;
+        $itemArr = $item->where('platform_type', 2)->cache(3600)->column('id', 'platform_sku');
 
         foreach ($finalResult as $key => $value) {
 
@@ -1120,7 +1150,7 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
             $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 2 + 2), $value['increment_id']);
             $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 2 + 2), $itemArr[$sku]);
             $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 2 + 2), $value['sku']);
-            
+
             $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 2 + 2), '右眼');
             $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 2 + 3), '左眼');
 
@@ -1288,7 +1318,7 @@ order by sfoi.order_id desc;";
             $processing_order_list = Db::connect('database.db_voogueme')->query($processing_order_querySql);
             // dump($processing_order_list);
             $processing_order_list = $this->qty_order_check($processing_order_list);
-            
+
             $file_header = <<<EOF
                 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <style>
@@ -1304,7 +1334,7 @@ EOF;
 
             //查询产品货位号
             $store_sku = new \app\admin\model\warehouse\StockHouse;
-            $cargo_number = $store_sku->alias('a')->where(['status' => 1,'b.is_del' => 1])->join(['fa_store_sku' => 'b'], 'a.id=b.store_id')->column('coding', 'sku');
+            $cargo_number = $store_sku->alias('a')->where(['status' => 1, 'b.is_del' => 1])->join(['fa_store_sku' => 'b'], 'a.id=b.store_id')->column('coding', 'sku');
 
             //查询sku映射表
             $item = new \app\admin\model\itemmanage\ItemPlatformSku;
