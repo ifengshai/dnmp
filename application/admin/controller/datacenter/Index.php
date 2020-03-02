@@ -34,6 +34,7 @@ class Index extends Backend
         $this->nihao = new \app\admin\model\order\order\Nihao;
         $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
         $this->item = new \app\admin\model\itemmanage\Item;
+        $this->lens = new \app\admin\model\lens\Index;
     }
 
     /**
@@ -135,7 +136,145 @@ class Index extends Backend
     public function supply_chain_data()
     {
         //仓库总库存
-        $allStock = $this->item->getAllStock();
+        $cachename = 'supply_chain_data_' . 'allStock';
+        $allStock = cache($cachename);
+        if (!$allStock) {
+            $allStock = $this->item->getAllStock();
+            cache($cachename, $allStock, 86400);
+        }
+
+        //仓库库存总金额       
+        $cachename = 'supply_chain_data_' . 'allStockPrice';
+        $allStockPrice = cache($cachename);
+        if (!$allStockPrice) {
+            $allStockPrice = $this->item->getAllStockPrice();
+            cache($cachename, $allStockPrice, 86400);
+        }
+
+        //镜架库存统计
+        $cachename = 'supply_chain_data_' . 'frameStock';
+        $frameStock = cache($cachename);
+        if (!$frameStock) {
+            $frameStock = $this->item->getFrameStock();
+            cache($cachename, $frameStock, 86400);
+        }
+
+        //镜架总金额 
+        $cachename = 'supply_chain_data_' . 'frameStockPrice';
+        $frameStockPrice = cache($cachename);
+        if (!$frameStockPrice) {
+            $frameStockPrice = $this->item->getFrameStockPrice();
+            cache($cachename, $frameStockPrice, 86400);
+        }
+
+        //镜片库存
+        $cachename = 'supply_chain_data_' . 'lensStock';
+        $lensStock = cache($cachename);
+        if (!$lensStock) {
+            $lensStock = $this->lens->getLensStock();
+            cache($cachename, $lensStock, 86400);
+        }
+
+        //镜片库存总金额
+        $cachename = 'supply_chain_data_' . 'lensStockPrice';
+        $lensStockPrice = cache($cachename);
+        if (!$lensStockPrice) {
+            $lensStockPrice = $this->lens->getLensStockPrice();
+            cache($cachename, $lensStockPrice, 86400);
+        }
+
+        //饰品库存
+        $cachename = 'supply_chain_data_' . 'ornamentsStock';
+        $ornamentsStock = cache($cachename);
+        if (!$ornamentsStock) {
+            $ornamentsStock = $this->item->getOrnamentsStock();
+            cache($cachename, $ornamentsStock, 86400);
+        }
+        //饰品库存总金额
+        $cachename = 'supply_chain_data_' . 'ornamentsStockPrice';
+        $ornamentsStockPrice = cache($cachename);
+        if (!$ornamentsStockPrice) {
+            $ornamentsStockPrice = $this->item->getOrnamentsStockPrice();
+            cache($cachename, $ornamentsStockPrice, 86400);
+        }
+
+        //样品库存
+        $cachename = 'supply_chain_data_' . 'SampleNumStock';
+        $sampleNumStock = cache($cachename);
+        if (!$sampleNumStock) {
+            $sampleNumStock = $this->item->getSampleNumStock();
+            cache($cachename, $sampleNumStock, 86400);
+        }
+        //样品库存总金额
+        $cachename = 'supply_chain_data_' . 'SampleNumStockPrice';
+        $sampleNumStockPrice = cache($cachename);
+        if (!$sampleNumStockPrice) {
+            $sampleNumStockPrice = $this->item->getSampleNumStockPrice();
+            cache($cachename, $sampleNumStockPrice, 86400);
+        }
+
+        //查询总SKU数
+        $cachename = 'supply_chain_data_' . 'SkuNum';
+        $skuNum = cache($cachename);
+        if (!$skuNum) {
+            $skuNum = $this->item->getSkuNum();
+            cache($cachename, $skuNum, 86400);
+        }
+
+        //查询待处理事件 售后未处理 + 协同未处理
+        $cachename = 'supply_chain_data_' . 'taskAllNum';
+        $taskAllNum = cache($cachename);
+        if (!$taskAllNum) {
+            //售后事件个数
+            $saleTask = new \app\admin\model\saleaftermanage\SaleAfterTask;
+            $salesNum = $saleTask->getTaskNum();
+
+            //查询协同任务待处理事件
+            $infoTask = new \app\admin\model\infosynergytaskmanage\InfoSynergyTask();
+            $infoNum = $infoTask->getTaskNum();
+            $taskAllNum = $salesNum + $infoNum;
+            cache($cachename, $taskAllNum, 3600);
+        }
+
+        //三个站待处理订单
+        $cachename = 'supply_chain_data_' . 'allPendingOrderNum';
+        $allPendingOrderNum = cache($cachename);
+        if (!$allPendingOrderNum) {
+            $zeelool_num = $this->zeelool->getPendingOrderNum();
+            $voogueme_num = $this->voogueme->getPendingOrderNum();
+            $nihao_num = $this->nihao->getPendingOrderNum();
+            $allPendingOrderNum = $zeelool_num + $voogueme_num + $nihao_num;
+            cache($cachename, $allPendingOrderNum, 14400);
+        }
+
+        /***
+         * 库存周转天数 库存周转率
+         * 库存周转天数 = 7*(期初总库存+期末总库存)/2/7天总销量
+         * 库存周转率 =  360/库存周转天数
+         */
+
+        //查询最近7天总销量
+        $orderStatistics = new \app\admin\model\OrderStatistics();
+        $stime = date("Y-m-d", strtotime("-7 day"));
+        $etime = date("Y-m-d", strtotime("-1 day"));
+        $map['create_date'] = ['between', [$stime, $etime]];
+        $all_sales_num = $orderStatistics->where($map)->sum('all_sales_num');
+
+
+        $this->view->assign('allStock', $allStock);
+        $this->view->assign('allStockPrice', $allStockPrice);
+        $this->view->assign('frameStock', $frameStock);
+        $this->view->assign('frameStockPrice', $frameStockPrice);
+        $this->view->assign('lensStock', $lensStock);
+        $this->view->assign('lensStockPrice', $lensStockPrice);
+        $this->view->assign('ornamentsStock', $ornamentsStock);
+        $this->view->assign('ornamentsStockPrice', $ornamentsStockPrice);
+        $this->view->assign('sampleNumStock', $sampleNumStock);
+        $this->view->assign('sampleNumStockPrice', $sampleNumStockPrice);
+        $this->view->assign('skuNum', $skuNum);
+        $this->view->assign('taskAllNum', $taskAllNum);
+        $this->view->assign('allPendingOrderNum', $allPendingOrderNum);
+
         return $this->view->fetch();
     }
 

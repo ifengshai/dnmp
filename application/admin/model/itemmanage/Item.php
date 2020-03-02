@@ -74,19 +74,19 @@ class Item extends Model
      * @param $type 1 镜架  2 镜片  3 配饰
      * @return bool
      */
-    public function getItemInfo($sku,$type=1)
+    public function getItemInfo($sku, $type = 1)
     {
-        $info = $this->where('sku','=',$sku)->field('id,sku')->find();
-        if(!$info){
+        $info = $this->where('sku', '=', $sku)->field('id,sku')->find();
+        if (!$info) {
             return -1;
         }
         $result = $this->alias('m')->where('sku', '=', $sku)->join('item_attribute a', 'm.id=a.item_id')->find();
         if (!$result) {
             return false;
         }
-        if(!empty($result['origin_sku'])){
+        if (!empty($result['origin_sku'])) {
             //镜架类型
-            if(1 == $type){
+            if (1 == $type) {
                 $colorArr = (new ItemAttribute())->getFrameColor();
                 $arr = $this->alias('m')->where('origin_sku', '=', $result['origin_sku'])->join('item_attribute a', 'm.id=a.item_id')->field('m.name,m.price,a.frame_color')->select();
                 if (is_array($arr)) {
@@ -95,13 +95,12 @@ class Item extends Model
                     }
                 }
                 $result['itemArr'] = $arr;
-            }elseif(3 == $type){ //配饰类型
+            } elseif (3 == $type) { //配饰类型
                 $arr = $this->alias('m')->where('origin_sku', '=', $result['origin_sku'])->join('item_attribute a', 'm.id=a.item_id')->field('m.name,m.price,a.accessory_color')->select();
                 $result['itemArr'] = $arr;
             }
-                $result['itemCount'] = $this->where('origin_sku', '=', $result['origin_sku'])->count();
-                $result['type'] = $type;
-
+            $result['itemCount'] = $this->where('origin_sku', '=', $result['origin_sku'])->count();
+            $result['type'] = $type;
         }
         return $result ? $result : false;
     }
@@ -293,7 +292,7 @@ class Item extends Model
         $where['is_del']  = 1;
         $where['sku']     = $sku;
         $result = $this->where($where)->field('id,sku,available_stock')->find();
-        return $result;  
+        return $result;
     }
     /**
      * 查询一个通过审核之后的仓库sku是否存在
@@ -306,7 +305,7 @@ class Item extends Model
         $where['item_status'] = 3;
         $where['sku']     = $sku;
         $result = $this->where($where)->field('id,sku,available_stock,presell_residue_num,presell_num,presell_create_time,presell_end_time')->find();
-        return $result;  
+        return $result;
     }
 
     /**
@@ -320,7 +319,203 @@ class Item extends Model
     public function getAllStock()
     {
         $where['is_del']  = 1;
+        $where['category_id']  = ['<>', 43];
         return $this->where($where)->sum('stock');
     }
 
+    /**
+     * 获取仓库总SKU个数
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/02/24 16:47:21 
+     * @return void
+     */
+    public function getSkuNum()
+    {
+        $where['is_del']  = 1;
+        $where['is_open']  = 1;
+        return $this->where($where)->count(1);
+    }
+
+    /**
+     * 获取仓库总库存总金额
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/02/24 16:47:21 
+     * @return void
+     */
+    public function getAllStockPrice()
+    {
+        $sku_pirce = new \app\admin\model\SkuPrice;
+        $arr = $sku_pirce->getAllData();
+        $where['is_del']  = 1;
+        $where['category_id']  = ['<>', 43];
+        $res = $this->where($where)->field('sku,stock,price')->select();
+        $allprice = 0;
+        foreach ($res as $v) {
+            if ($arr[$v['sku']]) {
+                $allprice += $v['stock'] * $arr[$v['sku']];
+            } else {
+                $allprice += $v['stock'] * $v['price'];
+            }
+        }
+        return $allprice;
+    }
+
+    /**
+     * 获取仓库镜架总库存
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/02/24 16:47:21 
+     * @return void
+     */
+    public function getFrameStock()
+    {
+        //查询镜框分类有哪些
+        $category = new \app\admin\model\itemmanage\ItemCategory;
+        $map['attribute_group_id'] = 1;
+        $map['is_del'] = 1;
+        $ids = $category->where($map)->column('id');
+
+        $where['category_id']  = ['in', $ids];
+        $where['is_del']  = 1;
+        return $this->where($where)->sum('stock');
+    }
+
+    /**
+     * 获取仓库镜架总库存总金额
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/02/24 16:47:21 
+     * @return void
+     */
+    public function getFrameStockPrice()
+    {
+        //查询镜框分类有哪些
+        $category = new \app\admin\model\itemmanage\ItemCategory;
+        $map['attribute_group_id'] = 1;
+        $map['is_del'] = 1;
+        $ids = $category->where($map)->column('id');
+
+        //SKU实时进价
+        $sku_pirce = new \app\admin\model\SkuPrice;
+        $arr = $sku_pirce->getAllData();
+
+
+        $where['category_id']  = ['in', $ids];
+        $where['is_del']  = 1;
+        $res = $this->where($where)->field('sku,stock,price')->select();
+        $allprice = 0;
+        foreach ($res as $v) {
+            if ($arr[$v['sku']]) {
+                $allprice += $v['stock'] * $arr[$v['sku']];
+            } else {
+                $allprice += $v['stock'] * $v['price'];
+            }
+        }
+        return $allprice;
+    }
+
+    /**
+     * 获取仓库饰品总库存
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/02/24 16:47:21 
+     * @return void
+     */
+    public function getOrnamentsStock()
+    {
+        //查询镜框分类有哪些
+        $category = new \app\admin\model\itemmanage\ItemCategory;
+        $map['attribute_group_id'] = 3;
+        $map['is_del'] = 1;
+        $ids = $category->where($map)->column('id');
+
+        $where['category_id']  = ['in', $ids];
+        $where['is_del']  = 1;
+        return $this->where($where)->sum('stock');
+    }
+
+    /**
+     * 获取仓库饰品总库存总金额
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/02/24 16:47:21 
+     * @return void
+     */
+    public function getOrnamentsStockPrice()
+    {
+        //查询镜框分类有哪些
+        $category = new \app\admin\model\itemmanage\ItemCategory;
+        $map['attribute_group_id'] = 3;
+        $map['is_del'] = 1;
+        $ids = $category->where($map)->column('id');
+
+        //SKU实时进价
+        $sku_pirce = new \app\admin\model\SkuPrice;
+        $arr = $sku_pirce->getAllData();
+
+
+        $where['category_id']  = ['in', $ids];
+        $where['is_del']  = 1;
+        $res = $this->where($where)->field('sku,stock,price')->select();
+        $allprice = 0;
+        foreach ($res as $v) {
+            if ($arr[$v['sku']]) {
+                $allprice += $v['stock'] * $arr[$v['sku']];
+            } else {
+                $allprice += $v['stock'] * $v['price'];
+            }
+        }
+        return $allprice;
+    }
+
+
+    /**
+     * 获取仓库样品总库存
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/02/24 16:47:21 
+     * @return void
+     */
+    public function getSampleNumStock()
+    {
+        $where['is_del']  = 1;
+        return $this->where($where)->sum('sample_num');
+
+    }
+
+    /**
+     * 获取仓库样品总库存总金额
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/02/24 16:47:21 
+     * @return void
+     */
+    public function getSampleNumStockPrice()
+    {
+        //SKU实时进价
+        $sku_pirce = new \app\admin\model\SkuPrice;
+        $arr = $sku_pirce->getAllData();
+
+        $where['is_del']  = 1;
+        $res = $this->where($where)->field('sku,sample_num,price')->select();
+        $allprice = 0;
+        foreach ($res as $v) {
+            if ($arr[$v['sku']]) {
+                $allprice += $v['sample_num'] * $arr[$v['sku']];
+            } else {
+                $allprice += $v['sample_num'] * $v['price'];
+            }
+        }
+        return $allprice;
+    }
 }

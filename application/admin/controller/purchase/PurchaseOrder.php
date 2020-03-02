@@ -2,14 +2,12 @@
 
 namespace app\admin\controller\purchase;
 
-use app\admin\model\LogisticsInfo;
 use app\common\controller\Backend;
 use think\Db;
 use think\Exception;
 use think\exception\PDOException;
 use think\exception\ValidateException;
 use think\Hook;
-use fast\Http;
 use fast\Alibaba;
 use app\admin\model\NewProduct;
 use app\admin\model\purchase\Supplier;
@@ -17,6 +15,7 @@ use app\admin\model\purchase\SupplierSku;
 use think\Cache;
 use fast\Kuaidi100;
 use app\admin\model\purchase\Purchase_order_pay;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
 
 
 /**
@@ -37,7 +36,7 @@ class PurchaseOrder extends Backend
      * 无需登录的方法,同时也就不需要鉴权了
      * @var array
      */
-    protected $noNeedLogin = ['getAlibabaPurchaseOrder', 'callback'];
+    protected $noNeedLogin = ['getAlibabaPurchaseOrder', 'callback', 'batch_export_xls'];
 
     public function _initialize()
     {
@@ -58,7 +57,6 @@ class PurchaseOrder extends Backend
     public function index()
     {
         $this->relationSearch = true;
-
         //设置过滤方法
         $this->request->filter(['strip_tags']);
         if ($this->request->isAjax()) {
@@ -1104,7 +1102,6 @@ class PurchaseOrder extends Backend
              * 补货量=日均销量*生产入库周期+日均销量*计划售卖周期-实时库存-库存在途
              */
 
-
             foreach ($list as &$v) {
                 $product_cycle = $supplier_res[$v['true_sku']]['product_cycle'] ? $supplier_res[$v['true_sku']]['product_cycle'] : 7;
                 $onway_stock = $purchase_list[$v['true_sku']] - ($check_list[$v['true_sku']] ?? 0);
@@ -1205,6 +1202,135 @@ class PurchaseOrder extends Backend
     }
 
     /**
+     * 批量导出xls
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/02/28 14:45:39 
+     * @return void
+     */
+    public function batch_export_xls()
+    {
+        set_time_limit(0);
+        ini_set('memory_limit', '512M');
+        $ids = input('ids');
+        $this->relationSearch = true;
+
+        if ($ids) {
+            $map['purchase_order.id'] = ['in', $ids];
+        }
+
+        //自定义sku搜索
+        $filter = json_decode($this->request->get('filter'), true);
+        if ($filter['sku']) {
+            $smap['sku'] = ['like', '%' . $filter['sku'] . '%'];
+            $ids = $this->purchase_order_item->where($smap)->column('purchase_id');
+            $map['purchase_order.id'] = ['in', $ids];
+            unset($filter['sku']);
+            $this->request->get(['filter' => json_encode($filter)]);
+        }
+
+        list($where) = $this->buildparams();
+        $list = $this->model->alias('purchase_order')
+            ->field('purchase_number,purchase_name,supplier_name,sku,supplier_sku,purchase_num,purchase_price,purchase_remark,b.purchase_total,purchase_order.create_person,purchase_order.createtime')
+            ->join(['fa_purchase_order_item' => 'b'], 'b.purchase_id=purchase_order.id')
+            ->join(['fa_supplier' => 'c'], 'c.id=purchase_order.supplier_id')
+            ->where($where)
+            ->where($map)
+            ->order('purchase_order.id desc')
+            ->select();
+
+        $list = collection($list)->toArray();
+
+
+        //从数据库查询需要的数据
+        $spreadsheet = new Spreadsheet();
+
+        //常规方式：利用setCellValue()填充数据
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("A1", "采购单号")
+            ->setCellValue("B1", "采购单名称")
+            ->setCellValue("C1", "供应商名称");   //利用setCellValues()填充数据
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("D1", "SKU")
+            ->setCellValue("E1", "供应商SKU");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("F1", "采购数量")
+            ->setCellValue("G1", "采购单价");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("H1", "采购备注")
+            ->setCellValue("I1", "采购总价")
+            ->setCellValue("J1", "创建人");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("K1", "创建时间");
+
+        foreach ($list as $key => $value) {
+
+            $spreadsheet->getActiveSheet()->setCellValueExplicit("A" . ($key * 1 + 2), $value['purchase_number'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+            $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $value['purchase_name']);
+            $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 1 + 2), $value['supplier_name']);
+            $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 1 + 2), $value['sku']);
+            $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), $value['supplier_sku']);
+            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 1 + 2), $value['purchase_num']);
+            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 1 + 2), $value['purchase_price']);
+            $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 1 + 2), $value['purchase_remark']);
+            $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 1 + 2), $value['purchase_total']);
+            $spreadsheet->getActiveSheet()->setCellValue("J" . ($key * 1 + 2), $value['create_person']);
+            $spreadsheet->getActiveSheet()->setCellValue("K" . ($key * 1 + 2), $value['createtime']);
+        }
+
+        //设置宽度
+        $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(30);
+        $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(40);
+        $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(30);
+        $spreadsheet->getActiveSheet()->getColumnDimension('D')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('E')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('F')->setWidth(15);
+        $spreadsheet->getActiveSheet()->getColumnDimension('G')->setWidth(15);
+
+        $spreadsheet->getActiveSheet()->getColumnDimension('H')->setWidth(40);
+        $spreadsheet->getActiveSheet()->getColumnDimension('I')->setWidth(15);
+
+        $spreadsheet->getActiveSheet()->getColumnDimension('J')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('K')->setWidth(20);
+
+        //设置边框
+        $border = [
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, // 设置border样式
+                    'color'       => ['argb' => 'FF000000'], // 设置border颜色
+                ],
+            ],
+        ];
+
+        $spreadsheet->getDefaultStyle()->getFont()->setName('微软雅黑')->setSize(12);
+
+
+        $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
+        $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
+
+        $spreadsheet->getActiveSheet()->getStyle('A1:K' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $spreadsheet->setActiveSheetIndex(0);
+
+        $format = 'xlsx';
+        $savename = '采购单数据' . date("YmdHis", time());;
+
+        if ($format == 'xls') {
+            //输出Excel03版本
+            header('Content-Type:application/vnd.ms-excel');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xls";
+        } elseif ($format == 'xlsx') {
+            //输出07Excel版本
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xlsx";
+        }
+
+        //输出名称
+        header('Content-Disposition: attachment;filename="' . $savename . '.' . $format . '"');
+        //禁止缓存
+        header('Cache-Control: max-age=0');
+        $writer = new $class($spreadsheet);
+
+        $writer->save('php://output');
+    }
+
+    /**
      * 核算采购单成本 create@lsw
      */
     public function account_purchase_order()
@@ -1282,6 +1408,7 @@ class PurchaseOrder extends Backend
         }
         return $this->view->fetch();
     }
+
     /***
      * 采购单成本核算详情 create@lsw 
      */
@@ -1308,6 +1435,7 @@ class PurchaseOrder extends Backend
         $this->view->assign("purchase_virtual_total", $purchase_virtual_total);
         return $this->view->fetch();
     }
+
     /***
      * 核算采购单付款  create@lsw
      */

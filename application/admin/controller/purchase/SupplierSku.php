@@ -455,7 +455,7 @@ class SupplierSku extends Backend
                 $list[$k]['id'] = $k + 1;
                 $list[$k]['title'] = $result->productInfo->subject;
                 if (count($v->attributes) > 1) {
-                    $list[$k]['color'] = $v->attributes[1]->attributeValue;
+                    $list[$k]['color'] = $v->attributes[0]->attributeValue . ':' .$v->attributes[1]->attributeValue;
                 } else {
                     $list[$k]['color'] = $v->attributes[0]->attributeValue;
                 }

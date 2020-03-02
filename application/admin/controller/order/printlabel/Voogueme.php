@@ -57,14 +57,14 @@ class Voogueme extends Backend
                 return $this->selectpage();
             }
 
-            
+
             $filter = json_decode($this->request->get('filter'), true);
 
             if ($filter['increment_id']) {
-                $map['status'] = ['in', ['free_processing', 'processing', 'complete']];
+                $map['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal']];
             } elseif (!$filter['status']) {
                 $map['status'] = ['in', ['free_processing', 'processing']];
-            } 
+            }
             //是否有协同任务
             $infoSynergyTask = new \app\admin\model\infosynergytaskmanage\InfoSynergyTask;
             if ($filter['task_label'] == 1 || $filter['task_label'] == '0') {
@@ -75,7 +75,21 @@ class Voogueme extends Backend
                 $map['increment_id'] = ['in', $order_arr];
                 unset($filter['task_label']);
                 $this->request->get(['filter' => json_encode($filter)]);
-            } 
+            }
+
+            //协同任务分类id搜索
+            if ($filter['category_id'] || $filter['c_id']) {
+                $swhere['is_del'] = 1;
+                $swhere['order_platform'] = 2;
+                $swhere['synergy_order_id'] = 2;
+                $swhere['synergy_task_id'] = $filter['category_id'] ?? $filter['c_id'];
+
+                $order_arr = $infoSynergyTask->where($swhere)->order('create_time desc')->column('synergy_order_number');
+                $map['increment_id'] = ['in', $order_arr];
+                unset($filter['category_id']);
+                unset($filter['c_id']);
+                $this->request->get(['filter' => json_encode($filter)]);
+            }
 
             //SKU搜索
             if ($filter['sku']) {
@@ -92,7 +106,7 @@ class Voogueme extends Backend
                 ->where($map)
                 ->where($where)
                 ->order($sort, $order)
-                ->count();                                                                        
+                ->count();
             $field = 'order_type,custom_order_prescription_type,entity_id,status,base_shipping_amount,increment_id,coupon_code,shipping_description,store_id,customer_id,base_discount_amount,base_grand_total,
                      total_qty_ordered,quote_id,base_currency_code,customer_email,customer_firstname,customer_lastname,custom_is_match_frame_new,custom_is_match_lens_new,
                      custom_is_send_factory_new,custom_is_delivery_new,custom_print_label_new,custom_order_prescription,custom_service_name,created_at';
@@ -568,7 +582,7 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
 
         set_time_limit(0);
         ini_set('memory_limit', '512M');
-       
+
         $ids = input('id_params');
 
         $filter = json_decode($this->request->get('filter'), true);
@@ -582,11 +596,24 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
         $infoSynergyTask = new \app\admin\model\infosynergytaskmanage\InfoSynergyTask;
         if ($filter['task_label'] == 1 || $filter['task_label'] == '0') {
             $swhere['is_del'] = 1;
-            $swhere['order_platform'] = 1;
+            $swhere['order_platform'] = 2;
             $swhere['synergy_order_id'] = 2;
             $order_arr = $infoSynergyTask->where($swhere)->order('create_time desc')->column('synergy_order_number');
             $map['sfo.increment_id'] = ['in', $order_arr];
             unset($filter['task_label']);
+            $this->request->get(['filter' => json_encode($filter)]);
+        }
+
+        //协同任务分类id搜索
+        if ($filter['category_id'] || $filter['c_id']) {
+            $swhere['is_del'] = 1;
+            $swhere['order_platform'] = 2;
+            $swhere['synergy_order_id'] = 2;
+            $swhere['synergy_task_id'] = $filter['category_id'] ?? $filter['c_id'];
+            $order_arr = $infoSynergyTask->where($swhere)->order('create_time desc')->column('synergy_order_number');
+            $map['increment_id'] = ['in', $order_arr];
+            unset($filter['category_id']);
+            unset($filter['c_id']);
             $this->request->get(['filter' => json_encode($filter)]);
         }
 
@@ -623,7 +650,7 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
         $resultList = $this->qty_order_check($resultList);
 
         $finalResult = array();
-        
+
         foreach ($resultList as $key => $value) {
             $finalResult[$key]['increment_id'] = $value['increment_id'];
             $finalResult[$key]['sku'] = $value['sku'];
@@ -728,7 +755,7 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
 
         //查询商品管理SKU对应ID
         $item = new \app\admin\model\itemmanage\Item;
-        $itemArr = $item->where('is_del',1)->column('id','sku');
+        $itemArr = $item->where('is_del', 1)->column('id', 'sku');
 
         foreach ($finalResult as $key => $value) {
 
@@ -767,7 +794,7 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
             $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 2 + 2), $value['increment_id']);
             $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 2 + 2), $itemArr[$sku]);
             $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 2 + 2), $value['sku']);
-            
+
             $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 2 + 2), '右眼');
             $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 2 + 3), '左眼');
 
@@ -926,566 +953,13 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
 
         set_time_limit(0);
         ini_set('memory_limit', '512M');
-        
-        $str = '130033493
-        130033462
-        130033467
-        130033484
-        130033461
-        130033468
-        130033406
-        130033421
-        130033410
-        130033336
-        130033451
-        130033368
-        130033405
-        130033320
-        430091111
-        130033487
-        430091025
-        130033500
-        130033415
-        130033470
-        130033381
-        130033498
-        130033491
-        130033059
-        130033488
-        130033433
-        130033387
-        130033411
-        430091099
-        430091024
-        130033363
-        130033346
-        130033503
-        130033471
-        130033420
-        130033416
-        130033507
-        130033497
-        130033304
-        430091085
-        430091076
-        430091045
-        130033323
-        130033388
-        130033369
-        130033522
-        430090898
-        430090896
-        430090830
-        430090711
-        430091033
-        430091098
-        430091017
-        430091003
-        430090938
-        430090835
-        430091100
-        430091050
-        430090919
-        430090692
-        430091106
-        430091028
-        130033390
-        430090954
-        430091004
-        430090667
-        430090893
-        430090884
-        130033394
-        430090967
-        430091011
-        430090957
-        430090765
-        430090694
-        430090921
-        430090612
-        430090594
-        430090909
-        430091056
-        430090688
-        430090922
-        430090789
-        130033362
-        130033480
-        430090610
-        430090839
-        430090613
-        430090609
-        430090580
-        430090589
-        130033432
-        430090419
-        430090996
-        130033499
-        130033465
-        130033331
-        430090970
-        430091096
-        430090924
-        430090718
-        430090621
-        130033309
-        430090978
-        430091079
-        430090863
-        130033441
-        430090973
-        430090861
-        430090905
-        430091095
-        430090866
-        430090833
-        430090614
-        430090907
-        430090982
-        430090512
-        430090521
-        430090528
-        130033439
-        430089860
-        130033430
-        430090805
-        430091008
-        430090785
-        430090751
-        430091108
-        430091080
-        430091065
-        130033431
-        430090794
-        430090756
-        430090729
-        430090766
-        430090702
-        430090605
-        430090516
-        430090992
-        430090646
-        430090495
-        130033328
-        430090430
-        430090760
-        430090428
-        430090433
-        430090844
-        130033345
-        430090771
-        430090514
-        430090742
-        430091867
-        430091789
-        430090413
-        130033294
-        430091861
-        430090466
-        430091854
-        130033423
-        130033463
-        430090531
-        430090719
-        430090487
-        430090478
-        430090445
-        430091653
-        430090541
-        430091103
-        130033389
-        430090326
-        430090336
-        430091856
-        430090501
-        430091026
-        130033472
-        430090821
-        430090857
-        430090647
-        430090792
-        430090748
-        430090858
-        430090658
-        430090563
-        430091046
-        430090347
-        430091871
-        430090400
-        430090684
-        130033412
-        430091620
-        430091855
-        430091624
-        430090918
-        430090935
-        430090758
-        430090674
-        130033519
-        430090676
-        430090801
-        130033337
-        130033437
-        130033454
-        130033313
-        430090850
-        430090929
-        430090959
-        430090606
-        430090508
-        130033377
-        430091052
-        430090948
-        430090911
-        430090735
-        430090953
-        430090741
-        430090818
-        430090664
-        430090619
-        430090474
-        430090414
-        430091882
-        430090966
-        430091074
-        430090356
-        130033322
-        430090476
-        430091783
-        430090554
-        430090418
-        130033297
-        430090537
-        430091814
-        430091746
-        430091626
-        430090384
-        430091721
-        430091640
-        430090576
-        430091550
-        430090724
-        430090403
-        430090399
-        430090823
-        430090599
-        130033444
-        130033380
-        130033401
-        430091668
-        130033310
-        430090990
-        430091070
-        430090637
-        430090577
-        430090379
-        430090380
-        430090371
-        430091712
-        430091555
-        430091578
-        430090456
-        430090513
-        430090562
-        130033314
-        430090452
-        430090717
-        430090639
-        430090653
-        430090663
-        430090349
-        430090335
-        430090462
-        430090341
-        430090338
-        430091893
-        430091899
-        430091650
-        430091804
-        430090342
-        430091577
-        430091566
-        430091432
-        430091738
-        430091507
-        430091639
-        430091551
-        430091486
-        430091825
-        430091522
-        430091517
-        430091717
-        430091655
-        130033298
-        430091661
-        430090708
-        430091719
-        430091691
-        430090540
-        430090871
-        430090543
-        430090351
-        130033366
-        430091885
-        430091863
-        430091864
-        430090405
-        430090360
-        430090550
-        430091054
-        430090557
-        430090649
-        430090353
-        430090358
-        430091598
-        430090560
-        430091060
-        430090683
-        430091870
-        430091898
-        430091627
-        430090449
-        430090697
-        430088856
-        430090319
-        130033408
-        430091539
-        430090607
-        430090544
-        430091403
-        430091537
-        430091638
-        430091796
-        130033296
-        430090334
-        430091467
-        430091675
-        430091490
-        430091549
-        430091792
-        430091852
-        430091901
-        430091493
-        430091515
-        430091429
-        430091447
-        430091480
-        430091582
-        430091658
-        430091677
-        430091376
-        430091810
-        430091618
-        430091708
-        430091819
-        430091646
-        430090650
-        430090366
-        430090386
-        430091408
-        430091565
-        430091409
-        430090855
-        430091769
-        430090705
-        430091412
-        430091635
-        430091665
-        430091739
-        430091790
-        430091744
-        430091662
-        430091736
-        430091829
-        430091091
-        430091832
-        430091648
-        430091521
-        430091465
-        430091538
-        430091767
-        430091453
-        430090368
-        430091788
-        430091390
-        430091436
-        430091414
-        430091667
-        430091449
-        430091474
-        430091535
-        430091727
-        430091803
-        430091589
-        430091827
-        430091800
-        430091742
-        430091427
-        430091367
-        430091362
-        430091350
-        430091362
-        430091399
-        430091805
-        430091775
-        430091895
-        430091636
-        430091559
-        430090673
-        430091385
-        430091509
-        430091670
-        430091772
-        430091713
-        430091753
-        430091762
-        430091630
-        430091526
-        430090573
-        430090443
-        430091647
-        430091476
-        430091710
-        430091520
-        430091381
-        430091370
-        430092462
-        430092476
-        430092478
-        430092470
-        430092396
-        430092487
-        430092512
-        430092441
-        430092474
-        430092355
-        430092292
-        430092451
-        430092440
-        430092306
-        430092256
-        430092468
-        430091234
-        430092417
-        430092266
-        430092351
-        430092326
-        430092379
-        430092293
-        430092359
-        430092389
-        430092459
-        430092348
-        430092197
-        430092273
-        430092248
-        430092286
-        430092238
-        430092312
-        430092472
-        430092424
-        430092192
-        430092350
-        430092202
-        430092338
-        430092373
-        430092450
-        430091300
-        430091261
-        430091244
-        430092307
-        430092276
-        430092264
-        430091338
-        430092308
-        430091247
-        430091146
-        430091137
-        430091144
-        430092447
-        430092471
-        430092457
-        430092358
-        430091130
-        430091270
-        430092207
-        430092240
-        430092242
-        130033594
-        430091282
-        130033568
-        130033729
-        430092394
-        430092407
-        430091280
-        430091266
-        430092198
-        430091153
-        430092363
-        430092212
-        430091245
-        430092241
-        430092199
-        430092205
-        430091329
-        430092243
-        430091115
-        430091119
-        430091215
-        430092486
-        430092452
-        430092412
-        430092449
-        430092235
-        430092203
-        430091318
-        430091207
-        430091296
-        430091228
-        430091149
-        430091294
-        430091254
-        430091216
-        430091272
-        430091197
-        130033583
-        430092261
-        430091163
-        130033735
-        130033550
-        130033715
-        130033574
-        130033605
-        130033585
-        430092353
-        430092280
-        430092399
-        130033528
-        130033604
-        130033572
-        430091259
-        430091235
-        130033737
-        130033673
-        130033706
-        130033693
-        130033602
-        130033667
-        430092464
-        430092497
-        430091208
-        130033571
-        430092316
-        130033543
-        430092385
-        430092375
-        430091164
-        430092220        
+
+        $str = '430091226
         ';
         $str = explode('
-        ',$str);
-        
-        $map['sfo.increment_id'] = ['in',$str];
+        ', $str);
+
+        $map['sfo.increment_id'] = ['in', $str];
 
         list($where) = $this->buildparams();
         $field = 'sfo.increment_id,sfoi.product_options,sfoi.order_id,sfo.`status`,sfoi.sku,sfoi.product_id,sfoi.qty_ordered,sfo.created_at';
@@ -1502,14 +976,13 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
         $resultList = $this->qty_order_check($resultList);
 
         $finalResult = array();
-        
+
         foreach ($resultList as $key => $value) {
             $finalResult[$key]['increment_id'] = $value['increment_id'];
             $finalResult[$key]['sku'] = $value['sku'];
             $finalResult[$key]['created_at'] = substr($value['created_at'], 0, 10);
 
             $tmp_product_options = unserialize($value['product_options']);
-            // dump($product_options);
             $finalResult[$key]['coatiing_name'] = $tmp_product_options['info_buyRequest']['tmplens']['coatiing_name'];
             $finalResult[$key]['index_type'] = $tmp_product_options['info_buyRequest']['tmplens']['index_type'];
 
@@ -1563,20 +1036,9 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
             $finalResult[$key]['lens_height'] = $tmp_bridge['lens_height'];
             $finalResult[$key]['bridge'] = $tmp_bridge['bridge'];
         }
-        // dump($finalResult);
-        // exit;
-        //从数据库查询需要的数据
-        // $data = model('admin/Loginlog')->where($where)->order('id','desc')->select();
+
         // Create new Spreadsheet object
         $spreadsheet = new Spreadsheet();
-        // Add title
-        // $spreadsheet->setActiveSheetIndex(0)
-        // ->setCellValue('A1', 'ID')
-        // ->setCellValue('B1', '用户')
-        // ->setCellValue('C1', '详情')
-        // ->setCellValue('D1', '结果')
-        // ->setCellValue('E1', '时间')
-        // ->setCellValue('F1', 'IP');
 
         //常规方式：利用setCellValue()填充数据
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("A1", "日期")
@@ -1603,16 +1065,12 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
         // Rename worksheet
         $spreadsheet->setActiveSheetIndex(0)->setTitle('订单处方');
 
-        $ItemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku;
-
         //查询商品管理SKU对应ID
-        $item = new \app\admin\model\itemmanage\Item;
-        $itemArr = $item->where('is_del',1)->column('id','sku');
+        $item = new \app\admin\model\itemmanage\ItemPlatformSku;
+        $itemArr = $item->where('platform_type', 2)->cache(3600)->column('id', 'platform_sku');
 
         foreach ($finalResult as $key => $value) {
 
-            //网站SKU转换仓库SKU
-            $sku = $ItemPlatformSku->getTrueSku($value['sku'], 2);
             $value['prescription_type'] = isset($value['prescription_type']) ? $value['prescription_type'] : '';
 
             $value['od_sph'] = isset($value['od_sph']) ? $value['od_sph'] : '';
@@ -1644,9 +1102,9 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
 
             $spreadsheet->getActiveSheet()->setCellValue("A" . ($key * 2 + 2), $value['created_at']);
             $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 2 + 2), $value['increment_id']);
-            $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 2 + 2), $itemArr[$sku]);
+            $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 2 + 2), $itemArr[$value['sku']]);
             $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 2 + 2), $value['sku']);
-            
+
             $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 2 + 2), '右眼');
             $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 2 + 3), '左眼');
 
@@ -1797,7 +1255,6 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
         // unlink($filePath);
     }
 
-
     //批量打印标签
     public function batch_print_label()
     {
@@ -1814,7 +1271,7 @@ order by sfoi.order_id desc;";
             $processing_order_list = Db::connect('database.db_voogueme')->query($processing_order_querySql);
             // dump($processing_order_list);
             $processing_order_list = $this->qty_order_check($processing_order_list);
-            
+
             $file_header = <<<EOF
                 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <style>
@@ -1830,7 +1287,7 @@ EOF;
 
             //查询产品货位号
             $store_sku = new \app\admin\model\warehouse\StockHouse;
-            $cargo_number = $store_sku->alias('a')->where(['status' => 1,'b.is_del' => 1])->join(['fa_store_sku' => 'b'], 'a.id=b.store_id')->column('coding', 'sku');
+            $cargo_number = $store_sku->alias('a')->where(['status' => 1, 'b.is_del' => 1])->join(['fa_store_sku' => 'b'], 'a.id=b.store_id')->column('coding', 'sku');
 
             //查询sku映射表
             $item = new \app\admin\model\itemmanage\ItemPlatformSku;

@@ -20,6 +20,18 @@ class Auth extends \fast\Auth
     public function __construct()
     {
         parent::__construct();
+        Session::init([
+            'id'             => '',
+            // SESSION_ID的提交变量,解决flash上传跨域
+            'var_session_id' => '',
+            // SESSION 前缀
+            'prefix'         => 'think',
+            // 驱动方式 支持redis memcache memcached
+            'type'           => '',
+            // 是否自动开启 SESSION
+            'auto_start'     => true,
+            'expire'         => 14400,
+        ]);
     }
 
     public function __get($name)
@@ -240,7 +252,7 @@ class Auth extends \fast\Auth
         $groups = $this->getGroups($uid);
         $groupIds = [];
         foreach ($groups as $K => $v) {
-            $groupIds[] = (int)$v['group_id'];
+            $groupIds[] = (int) $v['group_id'];
         }
         return $groupIds;
     }
@@ -291,8 +303,7 @@ class Auth extends \fast\Auth
         $childrenAdminIds = [];
         if (!$this->isSuperAdmin()) {
             $groupIds = $this->getChildrenGroupIds(false);
-            $authGroupList = \app\admin\model\AuthGroupAccess::
-            field('uid,group_id')
+            $authGroupList = \app\admin\model\AuthGroupAccess::field('uid,group_id')
                 ->where('group_id', 'in', $groupIds)
                 ->select();
 
