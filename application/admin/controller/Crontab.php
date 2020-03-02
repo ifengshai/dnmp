@@ -1585,7 +1585,9 @@ order by sfoi.item_id asc limit 1000";
     {
         $order_status = $this->order_status;
         //昨日销售额
-        $yesterday_sales_money_sql = "SELECT round(sum(base_grand_total),2) base_grand_total FROM sales_flat_order WHERE DATEDIFF('created_at',NOW())=-1 and status in $order_status";
+        $yesterday_sales_money_sql = "SELECT round(sum(base_grand_total),2) base_grand_total FROM sales_flat_order WHERE DATEDIFF('created_at',NOW())=-1 and status in {$order_status}";
+        echo $yesterday_sales_money_sql;
+        exit;
         $result = Db::connect('database.db_zeelool')->query($yesterday_sales_money_sql);
         dump($result);
     }    
