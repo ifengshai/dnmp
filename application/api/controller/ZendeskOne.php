@@ -15,7 +15,6 @@ use think\Db;
 use think\Exception;
 use Zendesk\API\HttpClient as ZendeskAPI;
 use function Stringy\create as s;
-use fast\Trackingmore;
 
 /**
  * 临时使用的只处理processing的方法
@@ -39,6 +38,7 @@ class ZendeskOne extends Controller
     //匹配自动回复的单词
     protected $preg_word = ['deliver','delivery','receive','track','ship','shipping','tracking','status','shipment','where','where is','find','update','eta','expected'];
     public $client = null;
+    //public $testId = [383401621551,383402124271,383347471012,393708243591,383347496492,394745643811,394627403612,394627403852,394745654451,394627408052,383402007531,394627410752,394745679291];
 
     /**
      * 方法初始化
@@ -64,7 +64,7 @@ class ZendeskOne extends Controller
             'type' => 'ticket',
             'via' => 'mail',
             'status' => ['new','open'],
-            'tag' => [
+            'tags' => [
                 'keytype' => '-',
                 'value' => '转客服'
             ], // -排除此tag
@@ -72,7 +72,7 @@ class ZendeskOne extends Controller
                 382940274852,
                 'none'
             ],
-            'requester' => 393708243591,
+            //'requester' => $this->testId,
             'order_by' => 'updated_at',
             'sort' => 'desc'
         ];
@@ -90,6 +90,7 @@ class ZendeskOne extends Controller
     protected function getTickets(Array $array)
     {
         $params = $this->parseStr($array);
+        //echo $params;die;
         $search = $this->client->search()->find($params);
         $tickets = $search->results;
         $page = ceil($search->count / 100 );
@@ -116,7 +117,6 @@ class ZendeskOne extends Controller
      */
     public function findCommentsByTickets($tickets)
     {
-        //dump($tickets);die;
         foreach($tickets as $ticket){
             $id = $ticket->id;
             //发送者的id
@@ -135,7 +135,7 @@ class ZendeskOne extends Controller
             $comments = $result->comments;
             //判断，如果最后一条为发送着的评论，则需要回复，如果为客服或自动回复的，则不需要回复
             $last_comment = $comments[$count-1];
-            if($requester_id == 393708243591) {
+            //if(in_array($requester_id,$this->testId)) {
                 $reply_detail_data = [];
                 if ($last_comment->author_id == $requester_id) {
                     //邮件的内容
@@ -152,6 +152,7 @@ class ZendeskOne extends Controller
                             }
                         }
                         if ($answer_key == 1 || $answer_key == 2) {
+                            //dump($last_comment);die;
                             $order = $this->findOrderByEmail($requester_email);
                             $status = $order['status'];
                             if($status == 'processing') {
@@ -193,9 +194,10 @@ class ZendeskOne extends Controller
                                 //添加用户的评论
                                 ZendeskReplyDetail::create([
                                     'reply_id' => $zendesk_reply->id,
+                                    'title' => $last_comment->subject,
                                     'body' => $last_comment->body,
                                     'html_body' => $last_comment->html_body,
-                                    'tags' => join(',',$tags),
+                                    'tags' => join(',',array_unique(array_merge($tags, $params['tags']))),
                                     'status' => $ticket->status,
                                     'assignee_id' => 382940274852
                                 ]);
@@ -227,6 +229,7 @@ class ZendeskOne extends Controller
                                 //主email
                                 $reply_data = [
                                     'email' => $requester_email,
+                                    'title' => $last_comment->subject,
                                     'email_id' => $ticket->id,
                                     'body' => $last_comment->body,
                                     'html_body' => $last_comment->html_body,
@@ -267,7 +270,7 @@ class ZendeskOne extends Controller
                         }
                     }
                 }
-            }
+           // }
         }
     }
 
@@ -307,17 +310,17 @@ class ZendeskOne extends Controller
             ->order('entity_id desc')
             ->find();
         if(!empty($order)){
-            //判断是否发货
-            $track = Db::connect('database.db_zeelool')
-                ->table('sales_flat_shipment_track')
-                ->where('order_id',$order['entity_id'])
-                ->find();
+//            //判断是否发货
+//            $track = Db::connect('database.db_zeelool')
+//                ->table('sales_flat_shipment_track')
+//                ->where('order_id',$order['entity_id'])
+//                ->find();
             $res = [
                 'status' => $order['status'],
                 'increment_id' => $order['increment_id'],
                 'order_id' => $order['entity_id'],
                 'created_at' => $order['created_at'],
-                'ship' => empty($track) ? 0 : 1
+                'ship' => 0
             ];
 
         }else{

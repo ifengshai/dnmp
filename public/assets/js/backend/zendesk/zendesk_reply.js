@@ -23,6 +23,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {checkbox: true},
                         {field: 'id', title: __('Id')},
                         {field: 'email', title: __('Email')},
+                        {field: 'title', title: __('主题')},
+                        {field: 'email_id', title: __('Ticket id')},
                         {field: 'body', title: __('内容')},
                         {field: 'tags', title: __('Tags')},
                         {field: 'status', title: __('Status'), formatter: Table.api.formatter.status},

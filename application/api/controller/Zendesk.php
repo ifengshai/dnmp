@@ -94,7 +94,7 @@ class Zendesk extends Controller
                 'value'   => '90minutes',
             ],//>=意思是3分钟之内，<=是三分钟之外
             'status' => ['new','open','solved'],
-            'tag' => [
+            'tags' => [
                 'keytype' => '-',
                 'value' => '转客服'
             ], // -排除此tag
