@@ -406,4 +406,19 @@ class Nihao extends Model
                 ->sum('b.qty_ordered');
         }
     }
+
+    /**
+     * 统计待处理订单 即未打印标签的订单
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/03/02 14:57:47 
+     * @return void
+     */
+    public function getPendingOrderNum()
+    {
+        $where['custom_print_label_new'] = 0;
+        $where['status'] = ['in', ['processing', 'free_processing']];
+        return $this->where($where)->count(1);
+    }
 }

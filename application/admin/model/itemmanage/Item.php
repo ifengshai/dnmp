@@ -324,6 +324,21 @@ class Item extends Model
     }
 
     /**
+     * 获取仓库总SKU个数
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/02/24 16:47:21 
+     * @return void
+     */
+    public function getSkuNum()
+    {
+        $where['is_del']  = 1;
+        $where['is_open']  = 1;
+        return $this->where($where)->count(1);
+    }
+
+    /**
      * 获取仓库总库存总金额
      *
      * @Description

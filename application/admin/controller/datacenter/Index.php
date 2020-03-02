@@ -213,6 +213,39 @@ class Index extends Backend
             cache($cachename, $sampleNumStockPrice, 86400);
         }
 
+        //查询总SKU数
+        $cachename = 'supply_chain_data_' . 'SkuNum';
+        $skuNum = cache($cachename);
+        if (!$skuNum) {
+            $skuNum = $this->item->getSkuNum();
+            cache($cachename, $skuNum, 86400);
+        }
+
+        //查询待处理事件 售后未处理 + 协同未处理
+        $cachename = 'supply_chain_data_' . 'taskAllNum';
+        $taskAllNum = cache($cachename);
+        if (!$taskAllNum) {
+            //售后事件个数
+            $saleTask = new \app\admin\model\saleaftermanage\SaleAfterTask;
+            $salesNum = $saleTask->getTaskNum();
+
+            //查询协同任务待处理事件
+            $infoTask = new \app\admin\model\infosynergytaskmanage\InfoSynergyTask();
+            $infoNum = $infoTask->getTaskNum();
+            $taskAllNum = $salesNum + $infoNum;
+            cache($cachename, $taskAllNum, 3600);
+        }
+
+        //三个站待处理订单
+        $cachename = 'supply_chain_data_' . 'allPendingOrderNum';
+        $allPendingOrderNum = cache($cachename);
+        if (!$allPendingOrderNum) {
+            $zeelool_num = $this->zeelool->getPendingOrderNum();
+            $voogueme_num = $this->voogueme->getPendingOrderNum();
+            $nihao_num = $this->nihao->getPendingOrderNum();
+            $allPendingOrderNum = $zeelool_num + $voogueme_num + $nihao_num;
+            cache($cachename, $allPendingOrderNum, 14400);
+        }
         $this->view->assign('allStock', $allStock);
         $this->view->assign('allStockPrice', $allStockPrice);
         $this->view->assign('frameStock', $frameStock);
@@ -223,6 +256,9 @@ class Index extends Backend
         $this->view->assign('ornamentsStockPrice', $ornamentsStockPrice);
         $this->view->assign('sampleNumStock', $sampleNumStock);
         $this->view->assign('sampleNumStockPrice', $sampleNumStockPrice);
+        $this->view->assign('skuNum', $skuNum);
+        $this->view->assign('taskAllNum', $taskAllNum);
+        $this->view->assign('allPendingOrderNum', $allPendingOrderNum);
 
         return $this->view->fetch();
     }
