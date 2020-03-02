@@ -246,6 +246,21 @@ class Index extends Backend
             $allPendingOrderNum = $zeelool_num + $voogueme_num + $nihao_num;
             cache($cachename, $allPendingOrderNum, 14400);
         }
+
+        /***
+         * 库存周转天数 库存周转率
+         * 库存周转天数 = 7*(期初总库存+期末总库存)/2/7天总销量
+         * 库存周转率 =  360/库存周转天数
+         */
+
+        //查询最近7天总销量
+        $orderStatistics = new \app\admin\model\OrderStatistics();
+        $stime = date("Y-m-d", strtotime("-7 day"));
+        $etime = date("Y-m-d", strtotime("-1 day"));
+        $map['create_date'] = ['between', [$stime, $etime]];
+        $all_sales_num = $orderStatistics->where($map)->sum('all_sales_num');
+
+
         $this->view->assign('allStock', $allStock);
         $this->view->assign('allStockPrice', $allStockPrice);
         $this->view->assign('frameStock', $frameStock);
