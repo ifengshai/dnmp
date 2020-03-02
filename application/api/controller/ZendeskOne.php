@@ -72,6 +72,7 @@ class ZendeskOne extends Controller
                 382940274852,
                 'none'
             ],
+            'requester' => 393708243591,
             'order_by' => 'updated_at',
             'sort' => 'desc'
         ];
@@ -115,6 +116,7 @@ class ZendeskOne extends Controller
      */
     public function findCommentsByTickets($tickets)
     {
+        //dump($tickets);die;
         foreach($tickets as $ticket){
             $id = $ticket->id;
             //发送者的id
@@ -261,7 +263,6 @@ class ZendeskOne extends Controller
                                     //更新主表状态
                                     ZendeskReply::where('id',$zendesk_reply->id)->setField('status',$reply_detail_data['status']);
                                 }
-
                             }
                         }
                     }
