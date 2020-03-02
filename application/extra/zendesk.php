@@ -74,5 +74,15 @@ Thank you for contacting us about this matter. We have canceled your order %s pe
 
 We will initiate the refund process in 48 hours. The refund to your credit card (or original method of payment like PayPal) will appear in your statement in 3-7 business days, depending on the card issuer\'s policies.
 
-If you have any further questions, please feel free to let us know. We are always here to help. Thank you very much. Have a good day.'
+If you have any further questions, please feel free to let us know. We are always here to help. Thank you very much. Have a good day.',
+   't8' => 'Hi there,
+
+We are very regretful for not being able to ship out your order on time. We would like to let you know that the logistics services in China are being heavily affected by the novel coronavirus containment program.
+
+In such a case, would you please kindly wait some time for your order? If you would like to wait, we will expedite your order so that it can be shipped out within 7 business days from today. We will pay great attention to your order and notify you as soon as we ship it out. You will receive a shipping notification email and an SMS message to track the package.
+
+As our appreciation for your kind waiting, you may enjoy a 20% off coupon for your next purchase. You can enter COM20 on the shopping cart page, and then 20% off will automatically apply to the order.
+
+We sincerely appreciate your understanding and patience in this harsh time. If you have any further questions, please feel free to let us know. We are always here to help. Thank you very much. Have a good day.
+'
 ];
