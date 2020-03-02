@@ -33,7 +33,7 @@ class Crontab extends Backend
         'get_sku_allstock'
 
     ];
-    protected $order_status = ['processing','complete','creditcard_proccessing','free_processing'];
+    protected $order_status =  "and status in ('processing','complete','creditcard_proccessing','free_processing')";
 
     /**
      * 定时处理 订单列表分类
@@ -1585,9 +1585,7 @@ order by sfoi.item_id asc limit 1000";
     {
         $order_status = $this->order_status;
         //昨日销售额
-        $yesterday_sales_money_sql = "SELECT round(sum(base_grand_total),2) base_grand_total FROM sales_flat_order WHERE DATEDIFF('created_at',NOW())=-1 and status in {$order_status}";
-        echo $yesterday_sales_money_sql;
-        exit;
+        $yesterday_sales_money_sql = "SELECT round(sum(base_grand_total),2) base_grand_total FROM sales_flat_order WHERE DATEDIFF('created_at',NOW())=-1 $order_status";
         $result = Db::connect('database.db_zeelool')->query($yesterday_sales_money_sql);
         dump($result);
     }    
