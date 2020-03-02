@@ -240,10 +240,10 @@ class Index extends Backend
         $cachename = 'supply_chain_data_' . 'allPendingOrderNum';
         $allPendingOrderNum = cache($cachename);
         if (!$allPendingOrderNum) {
-            $zeelool_num = $this->zeelool->getPendingOrderNum();
-            $voogueme_num = $this->voogueme->getPendingOrderNum();
-            $nihao_num = $this->nihao->getPendingOrderNum();
-            $allPendingOrderNum = $zeelool_num + $voogueme_num + $nihao_num;
+            $zeeloolNum = $this->zeelool->getPendingOrderNum();
+            $vooguemeNum = $this->voogueme->getPendingOrderNum();
+            $nihaoNum = $this->nihao->getPendingOrderNum();
+            $allPendingOrderNum = $zeeloolNum + $vooguemeNum + $nihaoNum;
             cache($cachename, $allPendingOrderNum, 14400);
         }
 
@@ -258,8 +258,18 @@ class Index extends Backend
         $stime = date("Y-m-d", strtotime("-7 day"));
         $etime = date("Y-m-d", strtotime("-1 day"));
         $map['create_date'] = ['between', [$stime, $etime]];
-        $all_sales_num = $orderStatistics->where($map)->sum('all_sales_num');
+        $allSalesNum = $orderStatistics->where($map)->sum('all_sales_num');
 
+        //期初总库存
+        $productAllStockLog = new \app\admin\model\ProductAllStock();
+        $start7days = $productAllStockLog->where('createtime', 'like', $stime . '%')->value('allnum');
+        $end7days = $productAllStockLog->where('createtime', 'like', $etime . '%')->value('allnum');
+        //库存周转天数
+        $stock7days = round(7 * ($start7days + $end7days) / 2 / $allSalesNum, 2);
+        //库存周转率
+        $stock7daysPercent = round(360 / $stock7days, 2);
+
+        $onway_all_stock = $this->onway_all_stock();
 
         $this->view->assign('allStock', $allStock);
         $this->view->assign('allStockPrice', $allStockPrice);
@@ -274,8 +284,42 @@ class Index extends Backend
         $this->view->assign('skuNum', $skuNum);
         $this->view->assign('taskAllNum', $taskAllNum);
         $this->view->assign('allPendingOrderNum', $allPendingOrderNum);
+        $this->view->assign('stock7days', $stock7days);
+        $this->view->assign('stock7daysPercent', $stock7daysPercent);
+        $this->view->assign('onway_all_stock', $onway_all_stock);
 
         return $this->view->fetch();
+    }
+
+    /**
+     * 在途库存
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/03/02 17:20:21 
+     * @return void
+     */
+    protected function onway_all_stock()
+    {
+        //计算SKU总采购数量
+        $purchase = new \app\admin\model\purchase\PurchaseOrder;
+        $purchase_map['purchase_status'] = ['in', [2, 5, 6, 7]];
+        $purchase_map['stock_status'] = ['in', [0, 1]];
+        $purchase_num = $purchase->alias('a')->join(['fa_purchase_order_item' => 'b'], 'a.id=b.purchase_id')
+            ->where($purchase_map)
+            ->sum('purchase_num');
+
+        $check_map['a.status'] = 2;
+        $check_map['a.type'] = 1;
+        $check_map['b.purchase_status'] = ['in', [2, 5, 6, 7]];
+        $check_map['b.stock_status'] = ['in', [0, 1]];
+        $check = new \app\admin\model\warehouse\Check;
+        $arrivals_num = $check->alias('a')
+            ->where($check_map)
+            ->join(['fa_purchase_order' => 'b'], 'b.id=a.purchase_id')
+            ->join(['fa_check_order_item' => 'c'], 'a.id=c.check_id')
+            ->sum('arrivals_num');
+        return $purchase_num - $arrivals_num;
     }
 
     /**
