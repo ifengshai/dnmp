@@ -40,8 +40,9 @@ class ItemCategory extends Model
     }
     public function getAttrGroup()
     {
-        return [1 => '镜框', 2 => '镜片', 3 => '饰品'];
+        return [1 => '镜框', 2 => '虚拟产品', 3 => '饰品'];
     }
+    
     /***
      * 获取分类列表
      */

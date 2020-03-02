@@ -73,39 +73,39 @@
                                 <div id="toolbar" class="toolbar">
 
 
-                                    <div class="btn btn-div">
+                                    <div class="btn btn-div" style="width: 300px;">
 
                                         <span class="extend">
-                                            仓库总库存（个）：<span style="color: red;" id="totalPayInfo">0</span>
+                                            仓库总库存（个）：<span style="color: red;" id="totalPayInfo">{$allStock+$sampleNumStock}</span>
 
                                         </span>
                                     </div>
 
-                                    <div class="btn btn-div">
+                                    <div class="btn btn-div" style="width: 300px;">
 
                                         <span class="extend">
                                             仓库库存总金额（<i class="fa fa-cny"></i>）：<span style="color: red;"
-                                                id="totalFramePrice">0</span>
+                                                id="totalFramePrice">{$allStockPrice+$sampleNumStockPrice}</span>
                                         </span>
                                     </div>
 
                                     <div class="btn btn-div">
                                         <span class="extend">
-                                            待处理订单（个）：<span style="color: red;" id="totalLensPrice">0</span>
+                                            待处理订单（个）：<span style="color: red;" id="totalLensPrice">{$allPendingOrderNum}</span>
                                         </span>
                                     </div>
 
                                     <div class="btn btn-div">
 
                                         <span class="extend">
-                                            总SKU（个）：<span style="color: red;" id="totalPostageMoney">0</span>
+                                            总SKU（个）：<span style="color: red;" id="totalPostageMoney">{$skuNum}</span>
 
                                         </span>
                                     </div>
 
-                                    <div class="btn btn-div">
+                                    <div class="btn btn-div" style="width: 250px;">
                                         <span class="extend">
-                                            客服总待处理事件（个）：<span style="color: red;" id="totalRefundMoney">0</span>
+                                            客服总待处理事件（个）：<span style="color: red;" id="totalRefundMoney">{$taskAllNum}</span>
 
                                         </span>
                                     </div>
@@ -130,21 +130,21 @@
                                         </tr>
                                         <tr>
                                             <td>镜架库存</td>
-                                            <td>0</td>
+                                            <td>{$frameStock}</td>
                                             <td>镜架库存总金额（￥）</td>
-                                            <td>0</td>
+                                            <td>{$frameStockPrice}</td>
                                         </tr>
                                         <tr>
                                             <td>饰品库存</td>
-                                            <td>0</td>
+                                            <td>{$ornamentsStock}</td>
                                             <td>饰品库存总金额（￥）</td>
-                                            <td>0</td>
+                                            <td>{$ornamentsStockPrice}</td>
                                         </tr>
                                         <tr>
                                             <td>镜片库存</td>
-                                            <td>0</td>
+                                            <td>{$lensStock}</td>
                                             <td>镜片库存总金额（￥）</td>
-                                            <td>0</td>
+                                            <td>{$lensStockPrice}</td>
                                         </tr>
                                         <tr>
                                             <td>辅料总库存</td>
@@ -154,9 +154,9 @@
                                         </tr>
                                         <tr>
                                             <td>镜架均价（￥）</td>
-                                            <td>0</td>
+                                            <td>{:round($frameStockPrice/$frameStock,2)}</td>
                                             <td>饰品均价（￥）</td>
-                                            <td>0</td>
+                                            <td>{:round($ornamentsStockPrice/$ornamentsStock,2)}</td>
                                         </tr>
                                         <tr>
                                             <td>在途库存</td>
@@ -178,9 +178,9 @@
                                         </tr>
                                         <tr>
                                             <td>留样库存</td>
-                                            <td>0</td>
+                                            <td>{$sampleNumStock}</td>
                                             <td>留样库存总金额（￥）</td>
-                                            <td>0</td>
+                                            <td>{$sampleNumStockPrice}</td>
                                         </tr>
                                         <tr>
                                             <td>库存周转天数</td>

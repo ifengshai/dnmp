@@ -49,6 +49,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                         { field: 'created_at', title: __('创建时间'), operate: 'RANGE', addclass: 'datetimerange' },
                         { field: 'sku',title: __('SKU'),  operate: 'like', visible:false},
                         {
+                            field: 'category_id', title: __('任务分类'), searchList: function (column) {
+                                return Template('categorytpl', {});
+                            }, formatter: function (value, row, index) {
+                                return '无';
+                            }, visible: false
+                        },
+                        {
                             field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [
                                 {
                                     name: 'detail',
@@ -91,6 +98,16 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
 
             // 为表格绑定事件
             Table.api.bindevent(table);
+
+            // 监听下拉列表改变的事件
+            $(document).on('change', 'select[name=c_id]', function () {
+                $("input[name='category_id']").val($(this).val());
+            });
+
+            // 监听下拉列表改变的事件
+            $(document).on('change', 'select[name=category_id]', function () {
+                $("input[name='category_id']").val($(this).val());
+            });
 
             //批量打印标签    
             $('.btn-batch-printed').click(function () {
