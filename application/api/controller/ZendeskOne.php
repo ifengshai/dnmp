@@ -194,7 +194,6 @@ class ZendeskOne extends Controller
                                 //添加用户的评论
                                 ZendeskReplyDetail::create([
                                     'reply_id' => $zendesk_reply->id,
-                                    'title' => $last_comment->subject,
                                     'body' => $last_comment->body,
                                     'html_body' => $last_comment->html_body,
                                     'tags' => join(',',array_unique(array_merge($tags, $params['tags']))),

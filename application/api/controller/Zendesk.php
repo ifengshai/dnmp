@@ -311,10 +311,11 @@ class Zendesk extends Controller
                                 //主email
                                 $reply_data = [
                                     'email' => $requester_email,
+                                    'title' => $last_comment->subject,
                                     'email_id' => $ticket->id,
                                     'body' => $last_comment->body,
                                     'html_body' => $last_comment->html_body,
-                                    'tags' => join(',',$tags),
+                                    'tags' => join(',',array_unique(array_merge($tags, $params['tags']))),
                                     'status' => $ticket->status,
                                     'requester_id' => $requester_id,
                                     'assignee_id' => $ticket->assignee_id ? $ticket->assignee_id : 0
