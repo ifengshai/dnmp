@@ -61,11 +61,12 @@ class InfoSynergyTask extends Backend
             if(0 == $params['synergy_order_id']){
                 $this->error(__('请选择关联单据类型'));    
             }
-            // echo '<pre>';
-            // var_dump($params['change_type']);
-            // exit;
+			if(0 == $params['order_platform']){
+				$this->error(__('请选择平台类型'));
+			}			
             $item = isset($params['item']) ? $params['item']  : '';
             $lens = isset($params['lens']) ? $params['lens']  : '';
+			$params['synergy_order_number'] = trim($params['synergy_order_number']); 
             // echo '<pre>';
             // var_dump($item);
             // exit;
@@ -90,6 +91,11 @@ class InfoSynergyTask extends Backend
                 }else{
                     $params['is_refund'] = 1;
                 }
+				////检查是否存在已经添加过的订单以及类型
+				$checkInfo = $this->model->checkOrderInfo($params['synergy_order_number'],$params['synergy_task_id']);
+				if($checkInfo){
+					$this->error(__('存在同样任务类型的未处理订单'));
+				}
                 if ($this->dataLimit && $this->dataLimitFieldAutoFill) {
                     $params[$this->dataLimitField] = $this->auth->id;
                 }
@@ -818,6 +824,7 @@ class InfoSynergyTask extends Backend
                 break;
                 case 3:
                 $value['synergy_status'] = '取消';
+				break;
                 default:
                 $value['synergy_status'] = '未处理';
                 break;            
@@ -927,6 +934,40 @@ class InfoSynergyTask extends Backend
         $writer = new $class($spreadsheet);
 
         $writer->save('php://output');
-    }    
+    }
+	/***
+	 **任务处理完成之后添加备注功能
+	 */
+	public function add_remark($ids=null)
+	{
+        $row = $this->model->get($ids);
+        if (!$row) {
+            $this->error(__('No Results were found'));
+        }
+        $adminIds = $this->getDataLimitAdminIds();
+        if (is_array($adminIds)) {
+            if (!in_array($row[$this->dataLimitField], $adminIds)) {
+                $this->error(__('You have no permission'));
+            }
+        }
+        if ($this->request->isPost()){
+            $params = $this->request->post("row/a");
+            if ($params) {
+                $params = $this->preExcludeFields($params);                                 
+				if (!empty($params['remark_record'])) {
+					$dataRecord = [];
+					$dataRecord['tid'] = $row['id'];
+					$dataRecord['remark_record'] = strip_tags($params['remark_record']);
+					$dataRecord['create_person'] = session('admin.nickname');
+					$dataRecord['create_time']   = date("Y-m-d H:i:s", time());
+					(new InfoSynergyTaskRemark())->allowField(true)->save($dataRecord);
+				}
+				$this->success();
+            }
+            $this->error(__('Parameter %s can not be empty', ''));
+        }
+		$this->view->assign('orderReturnRemark', (new InfoSynergyTaskRemark())->getSynergyTaskRemarkById($row['id']));
+        return $this->view->fetch();		
+	} 
 
 }

@@ -36,8 +36,24 @@ class SaleAfterTaskRemark extends Model
     {
         return $this->where('tid','=',$id)->select();
     }
-
-    
+	/**
+	 *获取任务关联记录
+	 */	
+    public function fetchRelevanceRecord($arr=[])
+	{
+		$where['tid'] = ['in',$arr];
+		$result = $this->where($where)->select();
+		if(!$result){
+			return false;
+		}
+		$arrInfo = [];
+		foreach($result as $k =>$v){
+			if(in_array($v['tid'],$arr)){
+				$arrInfo[$v['tid']].= $v['remark_record'].' '.$v['create_person'].' '.$v['create_time'].' | ';
+			}
+		}
+		return $arrInfo;
+	}
 
 
 

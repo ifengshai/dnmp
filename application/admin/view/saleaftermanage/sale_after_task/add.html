@@ -123,6 +123,10 @@
         <div class="col-xs-12 col-sm-3">
             <input id="c-tariff"  class="form-control" name="row[replacement_order]" type="number" value="{$row.replacement_order|htmlentities}">
         </div>
+		<label class="control-label col-xs-12 col-sm-2">{:__('Integral')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-integral"  class="form-control" name="row[integral]" type="number" value="{$row.integral|htmlentities}">
+        </div>
     </div>
     <div class="form-group">
         <div class="form-group">
@@ -135,14 +139,14 @@
             <div class="radio">
                 {foreach name="$vo.junior" item="issue" key="k"}
                 {if $issue.junior}
-                <label for="row[problem_id]-{$issue.id}"><input data-rule="required" id="row[problem_id]-{$issue.id}" name="row[problem_id]" type="radio" value="{$issue.id}" {in name="key" value="$vo.junior"}checked{/in} /> <span style="color:green;" id="{$issue.id}" class="issueLevel">{$issue.name}</span></label>
+                <label for="row[problem_id]-{$issue.id}"><input data-rule="required" id="row[problem_id]-{$issue.id}" name="row[problem_id][]" type="checkbox" value="{$issue.id}" {in name="key" value="$vo.junior"}checked{/in} /> <span style="color:green;" id="{$issue.id}" class="issueLevel">{$issue.name}</span></label>
                 <div class="radio three_level"  style="margin-left:16.8%;float:left;clear:both;display:none;" id="display-{$issue.id}" >
                     {foreach name="$issue.junior" item="finalIssue"}
-                    <label for="row[problem_id]-{$finalIssue.id}"><input data-rule="required" id="row[problem_id]-{$finalIssue.id}" name="row[problem_id]" type="radio" value="{$finalIssue.id}" {in name="key" value="$issue.junior"}checked{/in} /> {$finalIssue.name}</label>
+                    <label for="row[problem_id]-{$finalIssue.id}"><input data-rule="required" id="row[problem_id]-{$finalIssue.id}" name="row[problem_id][]" type="checkbox" value="{$finalIssue.id}" {in name="key" value="$issue.junior"}checked{/in} /> {$finalIssue.name}</label>
                     {/foreach}
                 </div>
                 {else/}
-                <label for="row[problem_id]-{$issue.id}"><input data-rule="required" id="row[problem_id]-{$issue.id}" name="row[problem_id]" type="radio" value="{$issue.id}" {in name="key" value="$vo.junior"}checked{/in} /> {$issue.name}</label>
+                <label for="row[problem_id]-{$issue.id}"><input data-rule="required" id="row[problem_id]-{$issue.id}" name="row[problem_id][]" type="checkbox" value="{$issue.id}" {in name="key" value="$vo.junior"}checked{/in} /> {$issue.name}</label>
                 {/if}
                 {/foreach}
             </div>

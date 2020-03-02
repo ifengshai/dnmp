@@ -26,7 +26,9 @@ class Crontab extends Backend
         'nihao_order_custom_order_prescription',
         'nihao_order_item_process',
         'set_purchase_order_logistics',
-        'product_grade_list_crontab'
+        'product_grade_list_crontab',
+		'changeItemNewToOld',
+        'get_sku_stock'
     ];
 
 
@@ -1470,6 +1472,7 @@ order by sfoi.item_id asc limit 1000";
         }
         echo 'ok';
     }
+
     /***
      * 定时把新品sku变成老品
      */
@@ -1483,5 +1486,24 @@ order by sfoi.item_id asc limit 1000";
         }
         $map['id'] = ['in', $itemId];
         Db::connect('database.db_stock')->name('item')->where($map)->update(['is_new' => 2]);
+    }
+    
+    /**
+     * 记录每天商品库存变化日志
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/02/19 16:23:27 
+     * @return void
+     */
+    public function get_sku_stock()
+    {
+        $where['is_del'] = 1;
+        $item = Db::connect('database.db_stock')->name('item')->where($where)->field('sku,available_stock as stock_num')->select();
+
+        if ($item) {
+            Db::name('goods_stock_log')->insertAll($item);
+            echo 'ok';
+        }
     }
 }

@@ -475,12 +475,12 @@ class Instock extends Backend
                         }
                         //修改采购单入库状态
                         $purchase_data['stock_status'] = $stock_status;
-                        $this->purchase->allowField(true)->save($purchase_data, ['id' => $check_res['purchase_id']]);
+                        $this->purchase->where(['id' => $check_res['purchase_id']])->update($purchase_data);
                     }
                     //如果为退货单 修改退货单状态为入库
                     if ($check_res['order_return_id']) {
                         $orderReturn = new \app\admin\model\saleaftermanage\OrderReturn;
-                        $orderReturn->allowField(true)->save(['in_stock_status' => 1], ['id' => $check_res['order_return_id']]);
+                        $orderReturn->where(['id' => $check_res['order_return_id']])->update(['in_stock_status' => 1]);
                     }
                 }
 

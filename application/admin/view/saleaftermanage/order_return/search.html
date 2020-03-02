@@ -364,6 +364,7 @@ table.altrowstable tr:nth-child(even){
                         <thead>
                             <tr><th colspan="16" style="font-size:16px;text-align: center; vertical-align: middle;">订单信息列表</th></tr>                     
                         <tr>
+							<th style="text-align: center; vertical-align: middle;">订单类型</th>
                             <th style="text-align: center; vertical-align: middle;">序号</th>
                             <th style="text-align: center; vertical-align: middle;">订单号</th>
                             <th style="text-align: center; vertical-align: middle;">快递单号</th>
@@ -373,15 +374,19 @@ table.altrowstable tr:nth-child(even){
                             <th style="text-align: center; vertical-align: middle;">国家</th>
                             <th style="text-align: center; vertical-align: middle;">订单状态</th>
                             <th style="text-align: center; vertical-align: middle;">创建时间</th>
-                            <th style="text-align: center; vertical-align: middle;">付款金额</th>
+							<th style="text-align: center; vertical-align: middle;">支付金额</th>
+                            <th style="text-align: center; vertical-align: middle;">订单金额($)</th>
                             <th style="text-align: center; vertical-align: middle;">优惠券</th>
                             <th style="text-align: center; vertical-align: middle;">优惠码</th>
+							<th style="text-align: center; vertical-align: middle;">运费</th>
+							<th style="text-align: center; vertical-align: middle;">快递方式</th>
 
                         </tr>
                         </thead>
                         {notempty name="orderInfoResult"}
                             {foreach name="orderInfoResult" item="orderInfoList"}
                              <tr>
+								 <td style="text-align: center; vertical-align: middle;">{$orderInfoList.order_type}</td>
                                  <td style="text-align: center; vertical-align: middle;">{$orderInfoList.entity_id}</td>
                                  <td style="text-align: center; vertical-align: middle;">{$orderInfoList.increment_id}</td>
                                  <td style="text-align: center; vertical-align: middle;"><a href="javascript:void(0)" class="track-number">{$orderInfoList.track_number}</a></td>
@@ -391,9 +396,12 @@ table.altrowstable tr:nth-child(even){
                                  <td style="text-align: center; vertical-align: middle;">{$orderInfoList.order_currency_code}</td>
                                  <td style="text-align: center; vertical-align: middle;">{$orderInfoList.status}</td>
                                  <td style="text-align: center; vertical-align: middle;">{$orderInfoList.created_at}</td>
-                                 <td style="text-align: center; vertical-align: middle;">{:round($orderInfoList.base_total_paid+$orderInfoList.base_total_due,2)}</td>
+                                 <td style="text-align: center; vertical-align: middle;">{:round($orderInfoList.real_papid,3)}</td>
+								 <td style="text-align: center; vertical-align: middle;">{:round($orderInfoList.base_grand_total,2)}</td>
                                  <td style="text-align: center; vertical-align: middle;">{$orderInfoList.coupon_code}</td>
                                  <td style="text-align: center; vertical-align: middle;">{$orderInfoList.coupon_rule_name}</td>
+								 <td style="text-align: center; vertical-align: middle;">{:round($orderInfoList.base_shipping_amount,2)}</td>
+								 <td style="text-align: center; vertical-align: middle;">{$orderInfoList.shipping_description}</td>
                              </tr>
                             {/foreach}
                         {/notempty}
@@ -403,26 +411,28 @@ table.altrowstable tr:nth-child(even){
                            data-operate-del="{:$auth->check('saleaftermanage/order_return/del')}"
                            width="100%">
                         <thead>
-                            <tr><th colspan="16" style="font-size:16px;text-align: center; vertical-align: middle;">订单商品信息列表</th></tr> 
+                            <tr><th colspan="20" style="font-size:16px;text-align: center; vertical-align: middle;">订单商品信息列表</th></tr> 
                         <tr>
-                            <th style="text-align: center; vertical-align: middle;">increment_id</th>
+                            <th style="text-align: center; vertical-align: middle;">increment<br/>_id</th>
                             <th style="text-align: center; vertical-align: middle;">SKU</th>
                             <th style="text-align: center; vertical-align: middle;">name</th>
-                            <th style="text-align: center; vertical-align: middle;">qty_ordered</th>
-                            <th style="text-align: center; vertical-align: middle;">frame_price</th>
-                            <th style="text-align: center; vertical-align: middle;">original_price</th>
-                            <th style="text-align: center; vertical-align: middle;">original_price</th>
-                            <th style="text-align: center; vertical-align: middle;">coatiing_name</th>
-                            <th style="text-align: center; vertical-align: middle;">index_type</th>
-                            <th style="text-align: center; vertical-align: middle;">prescription_type</th>
+                            <th style="text-align: center; vertical-align: middle;">q<br/>ty<br/>_ord<br/>ered</th>
+                            <th style="text-align: center; vertical-align: middle;">fra<br/>me<br/>_price</th>
+                            <th style="text-align: center; vertical-align: middle;">ori<br/>ginal<br/>_price</th>
+                            <th style="text-align: center; vertical-align: middle;">dis<br/>count<br/>_amount</th>
+                            <th style="text-align: center; vertical-align: middle;">coatiing<br/>_name</th>
+                            <th style="text-align: center; vertical-align: middle;">coat<br/>iing<br/>_price</th>
+                            <th style="text-align: center; vertical-align: middle;">index<br/>_type</th>
+                            <th style="text-align: center; vertical-align: middle;">ind<br/>ex<br/>_price</th>
+                            <th style="text-align: center; vertical-align: middle;">prescription<br/>_type</th>
                             <th style="text-align: center; vertical-align: middle;">left/right</th>                            
                             <th style="text-align: center; vertical-align: middle;">SPH</th>
                             <th style="text-align: center; vertical-align: middle;">CYL</th>
                             <th style="text-align: center; vertical-align: middle;">AXI</th>
                             <th style="text-align: center; vertical-align: middle;">ADD</th>
                             <th style="text-align: center; vertical-align: middle;">PD</th>
-                            <th style="text-align: center; vertical-align: middle;">Prism<br>(out/in)</th>
-                            <th style="text-align: center; vertical-align: middle;">Prism<br>(up/down)</th>
+                            <th style="text-align: center; vertical-align: middle;">PrismHorizontal<br>(out/in)</th>
+                            <th style="text-align: center; vertical-align: middle;">PrismVertical<br>(up/down)</th>
                         </tr>
                         </thead>  
                         {notempty name="orderInfoResult"}
@@ -432,8 +442,10 @@ table.altrowstable tr:nth-child(even){
                             <td style="text-align: center; vertical-align: middle;">{$orderInfoList.increment_id}</td>
                             <td style="text-align: center; vertical-align: middle;">{$itemInfoList.sku}</td>
                             <td style="text-align: center; vertical-align: middle;">{$itemInfoList.name}</td>
-                            <td style="text-align: center; vertical-align: middle;">{:round($itemInfoList.qty_ordered)}</td>
-                            <td style="text-align: center; vertical-align: middle;">{:round($itemInfoList.frame_price)}</td>                            
+                            <td style="width:20px;">{:round($itemInfoList.qty_ordered)}</td>
+                            <td style="text-align: center; vertical-align: middle;">{:round($itemInfoList.frame_price,2)}</td>
+                            <td style="text-align: center; vertical-align: middle;">{:round($itemInfoList.original_price,2)}</td>
+                            <td style="text-align: center; vertical-align: middle;">{:round($itemInfoList.discount_amount,2)}</td>                            
                             <td style="text-align: center; vertical-align: middle;">{$itemInfoList.coatiing_name}</td>
                             <td style="text-align: center; vertical-align: middle;">{$itemInfoList.index_type}</td>
                             <td style="text-align: center; vertical-align: middle;">{$itemInfoList.prescription_type}</td>
@@ -460,8 +472,8 @@ table.altrowstable tr:nth-child(even){
                             <td style="text-align: center; vertical-align: middle;">{$itemInfoList.pd}</td>
                             {/if}
                             
-                            <td style="text-align: center; vertical-align: middle;">{$itemInfoList.od_pv_r}<br>{$itemInfoList.os_pv_r}</td>
-                            <td style="text-align: center; vertical-align: middle;">{$itemInfoList.od_bd_r}<br>{$itemInfoList.os_bd_r}</td>
+                            <td style="text-align: center; vertical-align: middle;">{$itemInfoList.od_pv}({$itemInfoList.od_bd})<br>{$itemInfoList.od_pv_r}({$itemInfoList.od_bd_r})</td>
+                            <td style="text-align: center; vertical-align: middle;">{$itemInfoList.os_pv}({$itemInfoList.os_bd})<br>{$itemInfoList.os_pv_r}({$itemInfoList.os_bd_r})</td>
                         </tr>
                         {/foreach}
                         {/foreach}
@@ -477,7 +489,6 @@ table.altrowstable tr:nth-child(even){
                                 <th style="text-align: center; vertical-align: middle;">订单号</th>
                                 <th style="text-align: center; vertical-align: middle;">支付金额</th>
                                 <th style="text-align: center; vertical-align: middle;">订单金额</th>
-                                <th style="text-align: center; vertical-align: middle;">运费</th>
                                 <th style="text-align: center; vertical-align: middle;">支付方式</th>
                                 <th style="text-align: center; vertical-align: middle;">last_trans_id</th>
                                 <th style="text-align: center; vertical-align: middle;">paypal_payer_email</th>
@@ -490,9 +501,8 @@ table.altrowstable tr:nth-child(even){
                         {foreach name="orderInfoResult" item="orderInfoList"}
                         <tr>
                             <td style="text-align: center; vertical-align: middle;">{$orderInfoList.increment_id}</td>
-                            <td style="text-align: center; vertical-align: middle;">{:round($orderInfoList.base_amount_paid,2)}</td>
-                            <td style="text-align: center; vertical-align: middle;">{:round($orderInfoList.base_amount_ordered,2)}</td>
-                            <td style="text-align: center; vertical-align: middle;">{:round($orderInfoList.base_shipping_amount,2)}</td>
+                            <td style="text-align: center; vertical-align: middle;">{:round($orderInfoList.real_papid,3)}</td>
+                            <td style="text-align: center; vertical-align: middle;">{:round($orderInfoList.base_grand_total,2)}</td>
                             <td style="text-align: center; vertical-align: middle;">{$orderInfoList.method}</td>
                             <td style="text-align: center; vertical-align: middle;">{$orderInfoList.last_trans_id}</td>
                             <td style="text-align: center; vertical-align: middle;">{$orderInfoList.additional_information.paypal_payer_email}</td>
@@ -503,7 +513,7 @@ table.altrowstable tr:nth-child(even){
                         {/foreach}
                         {/notempty}
                     </table>
-                    <table id="order-address-list" class="altrowstable"
+<!--                     <table id="order-address-list" class="altrowstable"
                            data-operate-edit="{:$auth->check('saleaftermanage/order_return/edit')}"
                            data-operate-del="{:$auth->check('saleaftermanage/order_return/del')}"
                            width="100%">
@@ -534,7 +544,7 @@ table.altrowstable tr:nth-child(even){
                         </tr>
                         {/foreach}
                         {/notempty}
-                    </table>
+                    </table> -->
                 </div>
             </div>
 

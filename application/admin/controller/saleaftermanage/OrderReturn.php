@@ -442,8 +442,8 @@ class OrderReturn extends Backend
             }
             //求出用户的所有订单信息
             $customer = (new SaleAfterTask())->getCustomerEmail($order_platform, $increment_id, $customer_name, $customer_phone, $track_number, $customer_email);
-                    //    dump($customer);
-                    //    exit;
+            //dump($customer);
+            //exit;
             if (!$customer) {
                 $this->error('找不到订单信息，请重新尝试', 'saleaftermanage/order_return/search?ref=addtabs');
             }
@@ -453,6 +453,9 @@ class OrderReturn extends Backend
             $customerInfo = $customer['info'];
             unset($customer['info']);
             unset($customer['increment_id']);
+			Db::name('info_synergy_task')->query("set time_zone='+8:00'");
+			Db::name('sale_after_task')->query("set time_zone='+8:00'");
+			Db::name('order_return')->query("set time_zone='+8:00'");
             $infoSynergyTaskResult = Db::name('info_synergy_task')->where('order_platform', $order_platform)->where('synergy_order_number', 'in', $allIncrementOrder)->order('id desc')->select();
             $saleAfterTaskResult = Db::name('sale_after_task')->where('order_platform', $order_platform)->where('order_number', 'in', $allIncrementOrder)->order('id desc')->select();
             // dump($saleAfterTaskResult);

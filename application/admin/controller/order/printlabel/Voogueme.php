@@ -35,13 +35,6 @@ class Voogueme extends Backend
         $this->model = new \app\admin\model\order\printlabel\Voogueme;
     }
 
-    // public function test(){
-    //     // echo '123456';
-    //     $entity_id = 82712;
-    //     dump(VooguemePrescriptionDetailHelper::get_one_by_entity_id($entity_id));
-    //     // $increment_id = '130023358';
-    //     // dump(VooguemePrescriptionDetailHelper::get_one_by_increment_id($increment_id));
-    // }
 
     /**
      * 默认生成的控制器所继承的父类中有index/add/edit/del/multi五个基础方法、destroy/restore/recyclebin三个回收站方法
@@ -72,7 +65,7 @@ class Voogueme extends Backend
             } elseif (!$filter['status']) {
                 $map['status'] = ['in', ['free_processing', 'processing']];
             } 
-
+            //是否有协同任务
             $infoSynergyTask = new \app\admin\model\infosynergytaskmanage\InfoSynergyTask;
             if ($filter['task_label'] == 1 || $filter['task_label'] == '0') {
                 $swhere['is_del'] = 1;
@@ -83,6 +76,16 @@ class Voogueme extends Backend
                 unset($filter['task_label']);
                 $this->request->get(['filter' => json_encode($filter)]);
             } 
+
+            //SKU搜索
+            if ($filter['sku']) {
+                $smap['sku'] = ['like', '%' . $filter['sku'] . '%'];
+                $smap['status'] = $filter['status'] ? ['in', $filter['status']] : $map['status'];
+                $ids = $this->model->getOrderId($smap);
+                $map['entity_id'] = ['in', $ids];
+                unset($filter['sku']);
+                $this->request->get(['filter' => json_encode($filter)]);
+            }
 
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
@@ -353,6 +356,7 @@ class Voogueme extends Backend
 
                     $ItemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku;
                     //查出订单SKU映射表对应的仓库SKU
+                    $error = [];
                     foreach ($res as $k => &$v) {
 
                         //是否为更换镜架 如果为更换镜架 需处理更换之后SKU的库存
@@ -396,6 +400,7 @@ class Voogueme extends Backend
 
                     $ItemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku;
                     //查出订单SKU映射表对应的仓库SKU
+                    $error = [];
                     foreach ($res as $k => &$v) {
 
                         //是否为更换镜架 如果为更换镜架 需处理更换之后SKU的库存
@@ -558,16 +563,6 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
     //批量导出xls
     public function batch_export_xls()
     {
-//         $entity_ids = rtrim(input('id_params'), ',');
-//         // dump($entity_ids);        
-//         $processing_order_querySql = "select sfo.increment_id,sfoi.product_options,sfoi.order_id,sfo.`status`,sfoi.sku,sfoi.product_id,sfoi.qty_ordered,sfo.created_at
-// from sales_flat_order_item sfoi
-// left join sales_flat_order sfo on  sfoi.order_id=sfo.entity_id 
-// where sfo.`status` in ('processing','creditcard_proccessing','free_processing','paypal_reversed','complete') and sfo.entity_id in($entity_ids)
-// order by sfoi.order_id desc;";
-//         $resultList = Db::connect('database.db_voogueme')->query($processing_order_querySql);
-        // dump($resultList);
-
 
         /*************修改为筛选导出****************/
 
@@ -606,6 +601,13 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
             $this->request->get(['filter' => json_encode($filter)]);
         }
 
+        //SKU搜索
+        if ($filter['sku']) {
+            $map['sku'] = ['like', '%' . $filter['sku'] . '%'];
+            unset($filter['sku']);
+            $this->request->get(['filter' => json_encode($filter)]);
+        }
+
         list($where) = $this->buildparams();
         $field = 'sfo.increment_id,sfoi.product_options,sfoi.order_id,sfo.`status`,sfoi.sku,sfoi.product_id,sfoi.qty_ordered,sfo.created_at';
         $resultList = $this->model->alias('sfo')
@@ -621,6 +623,7 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
         $resultList = $this->qty_order_check($resultList);
 
         $finalResult = array();
+        
         foreach ($resultList as $key => $value) {
             $finalResult[$key]['increment_id'] = $value['increment_id'];
             $finalResult[$key]['sku'] = $value['sku'];
@@ -699,37 +702,38 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
         //常规方式：利用setCellValue()填充数据
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("A1", "日期")
             ->setCellValue("B1", "订单号")
-            ->setCellValue("C1", "SKU");   //利用setCellValues()填充数据
-        $spreadsheet->setActiveSheetIndex(0)->setCellValue("D1", "眼球")
-            ->setCellValue("E1", "SPH");
-        $spreadsheet->setActiveSheetIndex(0)->setCellValue("F1", "CYL")
-            ->setCellValue("G1", "AXI");
-        $spreadsheet->setActiveSheetIndex(0)->setCellValue("H1", "ADD")
-            ->setCellValue("I1", "单PD")
-            ->setCellValue("J1", "PD");
-        $spreadsheet->setActiveSheetIndex(0)->setCellValue("K1", "镜片")
-            ->setCellValue("L1", "镜框宽度")
-            ->setCellValue("M1", "镜框高度")
-            ->setCellValue("N1", "bridge")
-            ->setCellValue("O1", "处方类型")
-            ->setCellValue("P1", "顾客留言");
-        $spreadsheet->setActiveSheetIndex(0)->setCellValue("Q1", "Prism\n(out/in)")
-            ->setCellValue("R1", "Direct\n(out/in)")
-            ->setCellValue("S1", "Prism\n(up/down)")
-            ->setCellValue("T1", "Direct\n(up/down)");
+            ->setCellValue("C1", "SKUID")
+            ->setCellValue("D1", "SKU");   //利用setCellValues()填充数据
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("E1", "眼球")
+            ->setCellValue("F1", "SPH");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("G1", "CYL")
+            ->setCellValue("H1", "AXI");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("I1", "ADD")
+            ->setCellValue("J1", "单PD")
+            ->setCellValue("K1", "PD");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("L1", "镜片")
+            ->setCellValue("M1", "镜框宽度")
+            ->setCellValue("N1", "镜框高度")
+            ->setCellValue("O1", "bridge")
+            ->setCellValue("P1", "处方类型")
+            ->setCellValue("Q1", "顾客留言");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("R1", "Prism\n(out/in)")
+            ->setCellValue("S1", "Direct\n(out/in)")
+            ->setCellValue("T1", "Prism\n(up/down)")
+            ->setCellValue("U1", "Direct\n(up/down)");
         // Rename worksheet
         $spreadsheet->setActiveSheetIndex(0)->setTitle('订单处方');
 
-        //处方类型列表
-        // $data =  array( 
-        //                     array('id'=>'Sunglasses','name'=>'Sunglasses'),
-        //                     array('id'=>'Progressive','name'=>'Progressive'),
-        //                     array('id'=>'NonPrescription','name'=>'NonPrescription'),
-        //                     array('id'=>'SingleVision','name'=>'SingleVision'),
-        //                     array('id'=>'Readingglasses','name'=>'Readingglasses'));
+        $ItemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku;
+
+        //查询商品管理SKU对应ID
+        $item = new \app\admin\model\itemmanage\Item;
+        $itemArr = $item->where('is_del',1)->column('id','sku');
 
         foreach ($finalResult as $key => $value) {
 
+            //网站SKU转换仓库SKU
+            $sku = $ItemPlatformSku->getTrueSku($value['sku'], 2);
             $value['prescription_type'] = isset($value['prescription_type']) ? $value['prescription_type'] : '';
 
             $value['od_sph'] = isset($value['od_sph']) ? $value['od_sph'] : '';
@@ -761,42 +765,44 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
 
             $spreadsheet->getActiveSheet()->setCellValue("A" . ($key * 2 + 2), $value['created_at']);
             $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 2 + 2), $value['increment_id']);
-            $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 2 + 2), $value['sku']);
-            $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 2 + 2), '右眼');
-            $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 2 + 3), '左眼');
+            $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 2 + 2), $itemArr[$sku]);
+            $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 2 + 2), $value['sku']);
+            
+            $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 2 + 2), '右眼');
+            $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 2 + 3), '左眼');
 
-            $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 2 + 2), $value['od_sph'] > 0 ? ' +' . $value['od_sph'] : ' ' . $value['od_sph']);
-            $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 2 + 3), $value['os_sph'] > 0 ? ' +' . $value['os_sph'] : ' ' . $value['os_sph']);
+            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 2 + 2), $value['od_sph'] > 0 ? ' +' . $value['od_sph'] : ' ' . $value['od_sph']);
+            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 2 + 3), $value['os_sph'] > 0 ? ' +' . $value['os_sph'] : ' ' . $value['os_sph']);
 
-            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 2 + 2), $value['od_cyl'] > 0 ? ' +' . $value['od_cyl'] : ' ' . $value['od_cyl']);
-            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 2 + 3), $value['os_cyl'] > 0 ? ' +' . $value['os_cyl'] : ' ' . $value['os_cyl']);
+            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 2 + 2), $value['od_cyl'] > 0 ? ' +' . $value['od_cyl'] : ' ' . $value['od_cyl']);
+            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 2 + 3), $value['os_cyl'] > 0 ? ' +' . $value['os_cyl'] : ' ' . $value['os_cyl']);
 
-            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 2 + 2), $value['od_axis']);
-            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 2 + 3), $value['os_axis']);
+            $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 2 + 2), $value['od_axis']);
+            $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 2 + 3), $value['os_axis']);
 
             if ($value['prescription_type'] == 'Reading Glasses' && strlen($value['os_add']) > 0 && strlen($value['od_add']) > 0) {
                 // 双ADD值时，左右眼互换
-                $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 2 + 2), $value['os_add']);
-                $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 2 + 3), $value['od_add']);
+                $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 2), $value['os_add']);
+                $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 3), $value['od_add']);
             } else {
                 //数值在上一行合并有效，数值在下一行合并后为空
-                $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 2 + 2), $value['os_add']);
-                $spreadsheet->getActiveSheet()->mergeCells("H" . ($key * 2 + 2) . ":H" . ($key * 2 + 3));
+                $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 2), $value['os_add']);
+                $spreadsheet->getActiveSheet()->mergeCells("I" . ($key * 2 + 2) . ":I" . ($key * 2 + 3));
             }
 
             if ($value['pdcheck'] == 'on' && $value['pd_r'] && $value['pd_l']) {
-                $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 2), $value['pd_r']);
-                $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 3), $value['pd_l']);
+                $spreadsheet->getActiveSheet()->setCellValue("J" . ($key * 2 + 2), $value['pd_r']);
+                $spreadsheet->getActiveSheet()->setCellValue("J" . ($key * 2 + 3), $value['pd_l']);
             } else {
-                $spreadsheet->getActiveSheet()->setCellValue("J" . ($key * 2 + 2), $value['pd']);
-                $spreadsheet->getActiveSheet()->mergeCells("J" . ($key * 2 + 2) . ":J" . ($key * 2 + 3));
+                $spreadsheet->getActiveSheet()->setCellValue("K" . ($key * 2 + 2), $value['pd']);
+                $spreadsheet->getActiveSheet()->mergeCells("K" . ($key * 2 + 2) . ":K" . ($key * 2 + 3));
             }
 
-            $spreadsheet->getActiveSheet()->setCellValue("K" . ($key * 2 + 2), $value['index_type']);
-            $spreadsheet->getActiveSheet()->setCellValue("L" . ($key * 2 + 2), $value['lens_width']);
-            $spreadsheet->getActiveSheet()->setCellValue("M" . ($key * 2 + 2), $value['lens_height']);
-            $spreadsheet->getActiveSheet()->setCellValue("N" . ($key * 2 + 2), $value['bridge']);
-            $spreadsheet->getActiveSheet()->setCellValue("O" . ($key * 2 + 2), $value['prescription_type']);
+            $spreadsheet->getActiveSheet()->setCellValue("L" . ($key * 2 + 2), $value['index_type']);
+            $spreadsheet->getActiveSheet()->setCellValue("M" . ($key * 2 + 2), $value['lens_width']);
+            $spreadsheet->getActiveSheet()->setCellValue("N" . ($key * 2 + 2), $value['lens_height']);
+            $spreadsheet->getActiveSheet()->setCellValue("O" . ($key * 2 + 2), $value['bridge']);
+            $spreadsheet->getActiveSheet()->setCellValue("P" . ($key * 2 + 2), $value['prescription_type']);
 
             if (isset($value['information'])) {
                 $value['information'] = urldecode($value['information']);
@@ -804,51 +810,52 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
                 $value['information'] = urldecode($value['information']);
 
                 $value['information'] = str_replace('+', ' ', $value['information']);
-                $spreadsheet->getActiveSheet()->setCellValue("P" . ($key * 2 + 2), $value['information']);
-                $spreadsheet->getActiveSheet()->mergeCells("P" . ($key * 2 + 2) . ":P" . ($key * 2 + 3));
+                $spreadsheet->getActiveSheet()->setCellValue("Q" . ($key * 2 + 2), $value['information']);
+                $spreadsheet->getActiveSheet()->mergeCells("Q" . ($key * 2 + 2) . ":Q" . ($key * 2 + 3));
             }
 
-            $spreadsheet->getActiveSheet()->setCellValue("Q" . ($key * 2 + 2), isset($value['od_pv']) ? $value['od_pv'] : '');
-            $spreadsheet->getActiveSheet()->setCellValue("Q" . ($key * 2 + 3), isset($value['os_pv']) ? $value['os_pv'] : '');
+            $spreadsheet->getActiveSheet()->setCellValue("R" . ($key * 2 + 2), isset($value['od_pv']) ? $value['od_pv'] : '');
+            $spreadsheet->getActiveSheet()->setCellValue("R" . ($key * 2 + 3), isset($value['os_pv']) ? $value['os_pv'] : '');
 
-            $spreadsheet->getActiveSheet()->setCellValue("R" . ($key * 2 + 2), isset($value['od_bd']) ? $value['od_bd'] : '');
-            $spreadsheet->getActiveSheet()->setCellValue("R" . ($key * 2 + 3), isset($value['os_bd']) ? $value['os_bd'] : '');
+            $spreadsheet->getActiveSheet()->setCellValue("S" . ($key * 2 + 2), isset($value['od_bd']) ? $value['od_bd'] : '');
+            $spreadsheet->getActiveSheet()->setCellValue("S" . ($key * 2 + 3), isset($value['os_bd']) ? $value['os_bd'] : '');
 
-            $spreadsheet->getActiveSheet()->setCellValue("S" . ($key * 2 + 2), isset($value['od_pv_r']) ? $value['od_pv_r'] : '');
-            $spreadsheet->getActiveSheet()->setCellValue("S" . ($key * 2 + 3), isset($value['os_pv_r']) ? $value['os_pv_r'] : '');
+            $spreadsheet->getActiveSheet()->setCellValue("T" . ($key * 2 + 2), isset($value['od_pv_r']) ? $value['od_pv_r'] : '');
+            $spreadsheet->getActiveSheet()->setCellValue("T" . ($key * 2 + 3), isset($value['os_pv_r']) ? $value['os_pv_r'] : '');
 
-            $spreadsheet->getActiveSheet()->setCellValue("T" . ($key * 2 + 2), isset($value['od_bd_r']) ? $value['od_bd_r'] : '');
-            $spreadsheet->getActiveSheet()->setCellValue("T" . ($key * 2 + 3), isset($value['os_bd_r']) ? $value['os_bd_r'] : '');
+            $spreadsheet->getActiveSheet()->setCellValue("U" . ($key * 2 + 2), isset($value['od_bd_r']) ? $value['od_bd_r'] : '');
+            $spreadsheet->getActiveSheet()->setCellValue("U" . ($key * 2 + 3), isset($value['os_bd_r']) ? $value['os_bd_r'] : '');
 
             //合并单元格
             $spreadsheet->getActiveSheet()->mergeCells("A" . ($key * 2 + 2) . ":A" . ($key * 2 + 3));
             $spreadsheet->getActiveSheet()->mergeCells("B" . ($key * 2 + 2) . ":B" . ($key * 2 + 3));
             $spreadsheet->getActiveSheet()->mergeCells("C" . ($key * 2 + 2) . ":C" . ($key * 2 + 3));
-            $spreadsheet->getActiveSheet()->mergeCells("K" . ($key * 2 + 2) . ":K" . ($key * 2 + 3));
-
+            $spreadsheet->getActiveSheet()->mergeCells("D" . ($key * 2 + 2) . ":D" . ($key * 2 + 3));
             $spreadsheet->getActiveSheet()->mergeCells("L" . ($key * 2 + 2) . ":L" . ($key * 2 + 3));
+
             $spreadsheet->getActiveSheet()->mergeCells("M" . ($key * 2 + 2) . ":M" . ($key * 2 + 3));
             $spreadsheet->getActiveSheet()->mergeCells("N" . ($key * 2 + 2) . ":N" . ($key * 2 + 3));
             $spreadsheet->getActiveSheet()->mergeCells("O" . ($key * 2 + 2) . ":O" . ($key * 2 + 3));
             $spreadsheet->getActiveSheet()->mergeCells("P" . ($key * 2 + 2) . ":P" . ($key * 2 + 3));
+            $spreadsheet->getActiveSheet()->mergeCells("Q" . ($key * 2 + 2) . ":Q" . ($key * 2 + 3));
         }
 
         //设置宽度
         $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(12);
         $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(12);
-        $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(16);
-        $spreadsheet->getActiveSheet()->getColumnDimension('K')->setWidth(32);
-        $spreadsheet->getActiveSheet()->getColumnDimension('L')->setWidth(12);
+        $spreadsheet->getActiveSheet()->getColumnDimension('D')->setWidth(16);
+        $spreadsheet->getActiveSheet()->getColumnDimension('L')->setWidth(32);
         $spreadsheet->getActiveSheet()->getColumnDimension('M')->setWidth(12);
         $spreadsheet->getActiveSheet()->getColumnDimension('N')->setWidth(12);
+        $spreadsheet->getActiveSheet()->getColumnDimension('O')->setWidth(12);
 
-        $spreadsheet->getActiveSheet()->getColumnDimension('O')->setWidth(18);
-        $spreadsheet->getActiveSheet()->getColumnDimension('P')->setWidth(14);
-
+        $spreadsheet->getActiveSheet()->getColumnDimension('P')->setWidth(18);
         $spreadsheet->getActiveSheet()->getColumnDimension('Q')->setWidth(14);
+
         $spreadsheet->getActiveSheet()->getColumnDimension('R')->setWidth(14);
-        $spreadsheet->getActiveSheet()->getColumnDimension('S')->setWidth(16);
+        $spreadsheet->getActiveSheet()->getColumnDimension('S')->setWidth(14);
         $spreadsheet->getActiveSheet()->getColumnDimension('T')->setWidth(16);
+        $spreadsheet->getActiveSheet()->getColumnDimension('U')->setWidth(16);
 
 
         $spreadsheet->getDefaultStyle()->getFont()->setName('微软雅黑')->setSize(12);
@@ -869,8 +876,8 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
         $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
 
         // $spreadsheet->getActiveSheet()->getStyle('A1:Z'.$key)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-        $spreadsheet->getActiveSheet()->getStyle('A1:Z' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-        $spreadsheet->getActiveSheet()->getStyle('A1:Z' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+        $spreadsheet->getActiveSheet()->getStyle('A1:U' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $spreadsheet->getActiveSheet()->getStyle('A1:U' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
 
         //水平垂直居中   
         // $objSheet->getDefaultStyle()->getAlignment()->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
@@ -910,6 +917,886 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
         // readfile($filePath);
         // unlink($filePath);
     }
+
+    //批量导出xls
+    public function batch_export_xls_test()
+    {
+
+        /*************修改为筛选导出****************/
+
+        set_time_limit(0);
+        ini_set('memory_limit', '512M');
+        
+        $str = '130033493
+        130033462
+        130033467
+        130033484
+        130033461
+        130033468
+        130033406
+        130033421
+        130033410
+        130033336
+        130033451
+        130033368
+        130033405
+        130033320
+        430091111
+        130033487
+        430091025
+        130033500
+        130033415
+        130033470
+        130033381
+        130033498
+        130033491
+        130033059
+        130033488
+        130033433
+        130033387
+        130033411
+        430091099
+        430091024
+        130033363
+        130033346
+        130033503
+        130033471
+        130033420
+        130033416
+        130033507
+        130033497
+        130033304
+        430091085
+        430091076
+        430091045
+        130033323
+        130033388
+        130033369
+        130033522
+        430090898
+        430090896
+        430090830
+        430090711
+        430091033
+        430091098
+        430091017
+        430091003
+        430090938
+        430090835
+        430091100
+        430091050
+        430090919
+        430090692
+        430091106
+        430091028
+        130033390
+        430090954
+        430091004
+        430090667
+        430090893
+        430090884
+        130033394
+        430090967
+        430091011
+        430090957
+        430090765
+        430090694
+        430090921
+        430090612
+        430090594
+        430090909
+        430091056
+        430090688
+        430090922
+        430090789
+        130033362
+        130033480
+        430090610
+        430090839
+        430090613
+        430090609
+        430090580
+        430090589
+        130033432
+        430090419
+        430090996
+        130033499
+        130033465
+        130033331
+        430090970
+        430091096
+        430090924
+        430090718
+        430090621
+        130033309
+        430090978
+        430091079
+        430090863
+        130033441
+        430090973
+        430090861
+        430090905
+        430091095
+        430090866
+        430090833
+        430090614
+        430090907
+        430090982
+        430090512
+        430090521
+        430090528
+        130033439
+        430089860
+        130033430
+        430090805
+        430091008
+        430090785
+        430090751
+        430091108
+        430091080
+        430091065
+        130033431
+        430090794
+        430090756
+        430090729
+        430090766
+        430090702
+        430090605
+        430090516
+        430090992
+        430090646
+        430090495
+        130033328
+        430090430
+        430090760
+        430090428
+        430090433
+        430090844
+        130033345
+        430090771
+        430090514
+        430090742
+        430091867
+        430091789
+        430090413
+        130033294
+        430091861
+        430090466
+        430091854
+        130033423
+        130033463
+        430090531
+        430090719
+        430090487
+        430090478
+        430090445
+        430091653
+        430090541
+        430091103
+        130033389
+        430090326
+        430090336
+        430091856
+        430090501
+        430091026
+        130033472
+        430090821
+        430090857
+        430090647
+        430090792
+        430090748
+        430090858
+        430090658
+        430090563
+        430091046
+        430090347
+        430091871
+        430090400
+        430090684
+        130033412
+        430091620
+        430091855
+        430091624
+        430090918
+        430090935
+        430090758
+        430090674
+        130033519
+        430090676
+        430090801
+        130033337
+        130033437
+        130033454
+        130033313
+        430090850
+        430090929
+        430090959
+        430090606
+        430090508
+        130033377
+        430091052
+        430090948
+        430090911
+        430090735
+        430090953
+        430090741
+        430090818
+        430090664
+        430090619
+        430090474
+        430090414
+        430091882
+        430090966
+        430091074
+        430090356
+        130033322
+        430090476
+        430091783
+        430090554
+        430090418
+        130033297
+        430090537
+        430091814
+        430091746
+        430091626
+        430090384
+        430091721
+        430091640
+        430090576
+        430091550
+        430090724
+        430090403
+        430090399
+        430090823
+        430090599
+        130033444
+        130033380
+        130033401
+        430091668
+        130033310
+        430090990
+        430091070
+        430090637
+        430090577
+        430090379
+        430090380
+        430090371
+        430091712
+        430091555
+        430091578
+        430090456
+        430090513
+        430090562
+        130033314
+        430090452
+        430090717
+        430090639
+        430090653
+        430090663
+        430090349
+        430090335
+        430090462
+        430090341
+        430090338
+        430091893
+        430091899
+        430091650
+        430091804
+        430090342
+        430091577
+        430091566
+        430091432
+        430091738
+        430091507
+        430091639
+        430091551
+        430091486
+        430091825
+        430091522
+        430091517
+        430091717
+        430091655
+        130033298
+        430091661
+        430090708
+        430091719
+        430091691
+        430090540
+        430090871
+        430090543
+        430090351
+        130033366
+        430091885
+        430091863
+        430091864
+        430090405
+        430090360
+        430090550
+        430091054
+        430090557
+        430090649
+        430090353
+        430090358
+        430091598
+        430090560
+        430091060
+        430090683
+        430091870
+        430091898
+        430091627
+        430090449
+        430090697
+        430088856
+        430090319
+        130033408
+        430091539
+        430090607
+        430090544
+        430091403
+        430091537
+        430091638
+        430091796
+        130033296
+        430090334
+        430091467
+        430091675
+        430091490
+        430091549
+        430091792
+        430091852
+        430091901
+        430091493
+        430091515
+        430091429
+        430091447
+        430091480
+        430091582
+        430091658
+        430091677
+        430091376
+        430091810
+        430091618
+        430091708
+        430091819
+        430091646
+        430090650
+        430090366
+        430090386
+        430091408
+        430091565
+        430091409
+        430090855
+        430091769
+        430090705
+        430091412
+        430091635
+        430091665
+        430091739
+        430091790
+        430091744
+        430091662
+        430091736
+        430091829
+        430091091
+        430091832
+        430091648
+        430091521
+        430091465
+        430091538
+        430091767
+        430091453
+        430090368
+        430091788
+        430091390
+        430091436
+        430091414
+        430091667
+        430091449
+        430091474
+        430091535
+        430091727
+        430091803
+        430091589
+        430091827
+        430091800
+        430091742
+        430091427
+        430091367
+        430091362
+        430091350
+        430091362
+        430091399
+        430091805
+        430091775
+        430091895
+        430091636
+        430091559
+        430090673
+        430091385
+        430091509
+        430091670
+        430091772
+        430091713
+        430091753
+        430091762
+        430091630
+        430091526
+        430090573
+        430090443
+        430091647
+        430091476
+        430091710
+        430091520
+        430091381
+        430091370
+        430092462
+        430092476
+        430092478
+        430092470
+        430092396
+        430092487
+        430092512
+        430092441
+        430092474
+        430092355
+        430092292
+        430092451
+        430092440
+        430092306
+        430092256
+        430092468
+        430091234
+        430092417
+        430092266
+        430092351
+        430092326
+        430092379
+        430092293
+        430092359
+        430092389
+        430092459
+        430092348
+        430092197
+        430092273
+        430092248
+        430092286
+        430092238
+        430092312
+        430092472
+        430092424
+        430092192
+        430092350
+        430092202
+        430092338
+        430092373
+        430092450
+        430091300
+        430091261
+        430091244
+        430092307
+        430092276
+        430092264
+        430091338
+        430092308
+        430091247
+        430091146
+        430091137
+        430091144
+        430092447
+        430092471
+        430092457
+        430092358
+        430091130
+        430091270
+        430092207
+        430092240
+        430092242
+        130033594
+        430091282
+        130033568
+        130033729
+        430092394
+        430092407
+        430091280
+        430091266
+        430092198
+        430091153
+        430092363
+        430092212
+        430091245
+        430092241
+        430092199
+        430092205
+        430091329
+        430092243
+        430091115
+        430091119
+        430091215
+        430092486
+        430092452
+        430092412
+        430092449
+        430092235
+        430092203
+        430091318
+        430091207
+        430091296
+        430091228
+        430091149
+        430091294
+        430091254
+        430091216
+        430091272
+        430091197
+        130033583
+        430092261
+        430091163
+        130033735
+        130033550
+        130033715
+        130033574
+        130033605
+        130033585
+        430092353
+        430092280
+        430092399
+        130033528
+        130033604
+        130033572
+        430091259
+        430091235
+        130033737
+        130033673
+        130033706
+        130033693
+        130033602
+        130033667
+        430092464
+        430092497
+        430091208
+        130033571
+        430092316
+        130033543
+        430092385
+        430092375
+        430091164
+        430092220        
+        ';
+        $str = explode('
+        ',$str);
+        
+        $map['sfo.increment_id'] = ['in',$str];
+
+        list($where) = $this->buildparams();
+        $field = 'sfo.increment_id,sfoi.product_options,sfoi.order_id,sfo.`status`,sfoi.sku,sfoi.product_id,sfoi.qty_ordered,sfo.created_at';
+        $resultList = $this->model->alias('sfo')
+            ->join(['sales_flat_order_item' => 'sfoi'], 'sfoi.order_id=sfo.entity_id')
+            ->field($field)
+            ->where($map)
+            ->where($where)
+            ->order('sfoi.order_id desc')
+            ->select();
+
+        $resultList = collection($resultList)->toArray();
+
+        $resultList = $this->qty_order_check($resultList);
+
+        $finalResult = array();
+        
+        foreach ($resultList as $key => $value) {
+            $finalResult[$key]['increment_id'] = $value['increment_id'];
+            $finalResult[$key]['sku'] = $value['sku'];
+            $finalResult[$key]['created_at'] = substr($value['created_at'], 0, 10);
+
+            $tmp_product_options = unserialize($value['product_options']);
+            // dump($product_options);
+            $finalResult[$key]['coatiing_name'] = $tmp_product_options['info_buyRequest']['tmplens']['coatiing_name'];
+            $finalResult[$key]['index_type'] = $tmp_product_options['info_buyRequest']['tmplens']['index_type'];
+
+            $tmp_prescription_params = $tmp_product_options['info_buyRequest']['tmplens']['prescription'];
+            if (isset($tmp_prescription_params)) {
+                $tmp_prescription_params = explode("&", $tmp_prescription_params);
+                $tmp_lens_params = array();
+                foreach ($tmp_prescription_params as $tmp_key => $tmp_value) {
+                    // dump($value);
+                    $arr_value = explode("=", $tmp_value);
+                    if (isset($arr_value[1])) {
+                        $tmp_lens_params[$arr_value[0]] = $arr_value[1];
+                    }
+                }
+            }
+
+            $finalResult[$key]['prescription_type'] = isset($tmp_lens_params['prescription_type']) ? $tmp_lens_params['prescription_type'] : '';
+            $finalResult[$key]['od_sph'] = isset($tmp_lens_params['od_sph']) ? $tmp_lens_params['od_sph'] : '';
+            $finalResult[$key]['od_cyl'] = isset($tmp_lens_params['od_cyl']) ? $tmp_lens_params['od_cyl'] : '';
+            $finalResult[$key]['od_axis'] = isset($tmp_lens_params['od_axis']) ? $tmp_lens_params['od_axis'] : '';
+            $finalResult[$key]['od_add'] = isset($tmp_lens_params['od_add']) ? $tmp_lens_params['od_add'] : '';
+
+            $finalResult[$key]['os_sph'] = isset($tmp_lens_params['os_sph']) ? $tmp_lens_params['os_sph'] : '';
+            $finalResult[$key]['os_cyl'] = isset($tmp_lens_params['os_cyl']) ? $tmp_lens_params['os_cyl'] : '';
+            $finalResult[$key]['os_axis'] = isset($tmp_lens_params['os_axis']) ? $tmp_lens_params['os_axis'] : '';
+            $finalResult[$key]['os_add'] = isset($tmp_lens_params['os_add']) ? $tmp_lens_params['os_add'] : '';
+
+            $finalResult[$key]['pd_r'] = isset($tmp_lens_params['pd_r']) ? $tmp_lens_params['pd_r'] : '';
+            $finalResult[$key]['pd_l'] = isset($tmp_lens_params['pd_l']) ? $tmp_lens_params['pd_l'] : '';
+            $finalResult[$key]['pd'] = isset($tmp_lens_params['pd']) ? $tmp_lens_params['pd'] : '';
+            $finalResult[$key]['pdcheck'] = isset($tmp_lens_params['pdcheck']) ? $tmp_lens_params['pdcheck'] : '';
+
+            //斜视值
+            if (isset($tmp_lens_params['prismcheck']) && $tmp_lens_params['prismcheck'] == 'on') {
+                $finalResult[$key]['od_bd'] = $tmp_lens_params['od_bd'];
+                $finalResult[$key]['od_pv'] = $tmp_lens_params['od_pv'];
+                $finalResult[$key]['os_pv'] = $tmp_lens_params['os_pv'];
+                $finalResult[$key]['os_bd'] = $tmp_lens_params['os_bd'];
+
+                $finalResult[$key]['od_pv_r'] = $tmp_lens_params['od_pv_r'];
+                $finalResult[$key]['od_bd_r'] = $tmp_lens_params['od_bd_r'];
+                $finalResult[$key]['os_pv_r'] = $tmp_lens_params['os_pv_r'];
+                $finalResult[$key]['os_bd_r'] = $tmp_lens_params['os_bd_r'];
+            }
+
+            //用户留言
+            $finalResult[$key]['information'] = isset($tmp_lens_params['information']) ? $tmp_lens_params['information'] : '';
+
+            $tmp_bridge = $this->get_frame_lens_width_height_bridge($value['product_id']);
+            $finalResult[$key]['lens_width'] = $tmp_bridge['lens_width'];
+            $finalResult[$key]['lens_height'] = $tmp_bridge['lens_height'];
+            $finalResult[$key]['bridge'] = $tmp_bridge['bridge'];
+        }
+        // dump($finalResult);
+        // exit;
+        //从数据库查询需要的数据
+        // $data = model('admin/Loginlog')->where($where)->order('id','desc')->select();
+        // Create new Spreadsheet object
+        $spreadsheet = new Spreadsheet();
+        // Add title
+        // $spreadsheet->setActiveSheetIndex(0)
+        // ->setCellValue('A1', 'ID')
+        // ->setCellValue('B1', '用户')
+        // ->setCellValue('C1', '详情')
+        // ->setCellValue('D1', '结果')
+        // ->setCellValue('E1', '时间')
+        // ->setCellValue('F1', 'IP');
+
+        //常规方式：利用setCellValue()填充数据
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("A1", "日期")
+            ->setCellValue("B1", "订单号")
+            ->setCellValue("C1", "SKUID")
+            ->setCellValue("D1", "SKU");   //利用setCellValues()填充数据
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("E1", "眼球")
+            ->setCellValue("F1", "SPH");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("G1", "CYL")
+            ->setCellValue("H1", "AXI");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("I1", "ADD")
+            ->setCellValue("J1", "单PD")
+            ->setCellValue("K1", "PD");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("L1", "镜片")
+            ->setCellValue("M1", "镜框宽度")
+            ->setCellValue("N1", "镜框高度")
+            ->setCellValue("O1", "bridge")
+            ->setCellValue("P1", "处方类型")
+            ->setCellValue("Q1", "顾客留言");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("R1", "Prism\n(out/in)")
+            ->setCellValue("S1", "Direct\n(out/in)")
+            ->setCellValue("T1", "Prism\n(up/down)")
+            ->setCellValue("U1", "Direct\n(up/down)");
+        // Rename worksheet
+        $spreadsheet->setActiveSheetIndex(0)->setTitle('订单处方');
+
+        $ItemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku;
+
+        //查询商品管理SKU对应ID
+        $item = new \app\admin\model\itemmanage\Item;
+        $itemArr = $item->where('is_del',1)->column('id','sku');
+
+        foreach ($finalResult as $key => $value) {
+
+            //网站SKU转换仓库SKU
+            $sku = $ItemPlatformSku->getTrueSku($value['sku'], 2);
+            $value['prescription_type'] = isset($value['prescription_type']) ? $value['prescription_type'] : '';
+
+            $value['od_sph'] = isset($value['od_sph']) ? $value['od_sph'] : '';
+            $value['os_sph'] = isset($value['os_sph']) ? $value['os_sph'] : '';
+            $value['od_cyl'] = isset($value['od_cyl']) ? $value['od_cyl'] : '';
+            $value['os_cyl'] = isset($value['os_cyl']) ? $value['os_cyl'] : '';
+            if (isset($value['od_axis']) && $value['od_axis'] !== 'None') {
+                $value['od_axis'] =  $value['od_axis'];
+            } else {
+                $value['od_axis'] = '';
+            }
+
+            if (isset($value['os_axis']) && $value['os_axis'] !== 'None') {
+                $value['os_axis'] =  $value['os_axis'];
+            } else {
+                $value['os_axis'] = '';
+            }
+
+            $value['od_add'] = isset($value['od_add']) ? $value['od_add'] : '';
+            $value['os_add'] = isset($value['os_add']) ? $value['os_add'] : '';
+
+            $value['pdcheck'] = isset($value['pdcheck']) ? $value['pdcheck'] : '';
+            $value['pd_r'] = isset($value['pd_r']) ? $value['pd_r'] : '';
+            $value['pd_l'] = isset($value['pd_l']) ? $value['pd_l'] : '';
+            $value['pd'] = isset($value['pd']) ? $value['pd'] : '';
+
+            $value['prismcheck'] = isset($value['prismcheck']) ? $value['prismcheck'] : '';
+
+
+            $spreadsheet->getActiveSheet()->setCellValue("A" . ($key * 2 + 2), $value['created_at']);
+            $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 2 + 2), $value['increment_id']);
+            $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 2 + 2), $itemArr[$sku]);
+            $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 2 + 2), $value['sku']);
+            
+            $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 2 + 2), '右眼');
+            $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 2 + 3), '左眼');
+
+            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 2 + 2), $value['od_sph'] > 0 ? ' +' . $value['od_sph'] : ' ' . $value['od_sph']);
+            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 2 + 3), $value['os_sph'] > 0 ? ' +' . $value['os_sph'] : ' ' . $value['os_sph']);
+
+            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 2 + 2), $value['od_cyl'] > 0 ? ' +' . $value['od_cyl'] : ' ' . $value['od_cyl']);
+            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 2 + 3), $value['os_cyl'] > 0 ? ' +' . $value['os_cyl'] : ' ' . $value['os_cyl']);
+
+            $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 2 + 2), $value['od_axis']);
+            $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 2 + 3), $value['os_axis']);
+
+            if ($value['prescription_type'] == 'Reading Glasses' && strlen($value['os_add']) > 0 && strlen($value['od_add']) > 0) {
+                // 双ADD值时，左右眼互换
+                $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 2), $value['os_add']);
+                $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 3), $value['od_add']);
+            } else {
+                //数值在上一行合并有效，数值在下一行合并后为空
+                $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 2), $value['os_add']);
+                $spreadsheet->getActiveSheet()->mergeCells("I" . ($key * 2 + 2) . ":I" . ($key * 2 + 3));
+            }
+
+            if ($value['pdcheck'] == 'on' && $value['pd_r'] && $value['pd_l']) {
+                $spreadsheet->getActiveSheet()->setCellValue("J" . ($key * 2 + 2), $value['pd_r']);
+                $spreadsheet->getActiveSheet()->setCellValue("J" . ($key * 2 + 3), $value['pd_l']);
+            } else {
+                $spreadsheet->getActiveSheet()->setCellValue("K" . ($key * 2 + 2), $value['pd']);
+                $spreadsheet->getActiveSheet()->mergeCells("K" . ($key * 2 + 2) . ":K" . ($key * 2 + 3));
+            }
+
+            $spreadsheet->getActiveSheet()->setCellValue("L" . ($key * 2 + 2), $value['index_type']);
+            $spreadsheet->getActiveSheet()->setCellValue("M" . ($key * 2 + 2), $value['lens_width']);
+            $spreadsheet->getActiveSheet()->setCellValue("N" . ($key * 2 + 2), $value['lens_height']);
+            $spreadsheet->getActiveSheet()->setCellValue("O" . ($key * 2 + 2), $value['bridge']);
+            $spreadsheet->getActiveSheet()->setCellValue("P" . ($key * 2 + 2), $value['prescription_type']);
+
+            if (isset($value['information'])) {
+                $value['information'] = urldecode($value['information']);
+                $value['information'] = urldecode($value['information']);
+                $value['information'] = urldecode($value['information']);
+
+                $value['information'] = str_replace('+', ' ', $value['information']);
+                $spreadsheet->getActiveSheet()->setCellValue("Q" . ($key * 2 + 2), $value['information']);
+                $spreadsheet->getActiveSheet()->mergeCells("Q" . ($key * 2 + 2) . ":Q" . ($key * 2 + 3));
+            }
+
+            $spreadsheet->getActiveSheet()->setCellValue("R" . ($key * 2 + 2), isset($value['od_pv']) ? $value['od_pv'] : '');
+            $spreadsheet->getActiveSheet()->setCellValue("R" . ($key * 2 + 3), isset($value['os_pv']) ? $value['os_pv'] : '');
+
+            $spreadsheet->getActiveSheet()->setCellValue("S" . ($key * 2 + 2), isset($value['od_bd']) ? $value['od_bd'] : '');
+            $spreadsheet->getActiveSheet()->setCellValue("S" . ($key * 2 + 3), isset($value['os_bd']) ? $value['os_bd'] : '');
+
+            $spreadsheet->getActiveSheet()->setCellValue("T" . ($key * 2 + 2), isset($value['od_pv_r']) ? $value['od_pv_r'] : '');
+            $spreadsheet->getActiveSheet()->setCellValue("T" . ($key * 2 + 3), isset($value['os_pv_r']) ? $value['os_pv_r'] : '');
+
+            $spreadsheet->getActiveSheet()->setCellValue("U" . ($key * 2 + 2), isset($value['od_bd_r']) ? $value['od_bd_r'] : '');
+            $spreadsheet->getActiveSheet()->setCellValue("U" . ($key * 2 + 3), isset($value['os_bd_r']) ? $value['os_bd_r'] : '');
+
+            //合并单元格
+            $spreadsheet->getActiveSheet()->mergeCells("A" . ($key * 2 + 2) . ":A" . ($key * 2 + 3));
+            $spreadsheet->getActiveSheet()->mergeCells("B" . ($key * 2 + 2) . ":B" . ($key * 2 + 3));
+            $spreadsheet->getActiveSheet()->mergeCells("C" . ($key * 2 + 2) . ":C" . ($key * 2 + 3));
+            $spreadsheet->getActiveSheet()->mergeCells("D" . ($key * 2 + 2) . ":D" . ($key * 2 + 3));
+            $spreadsheet->getActiveSheet()->mergeCells("L" . ($key * 2 + 2) . ":L" . ($key * 2 + 3));
+
+            $spreadsheet->getActiveSheet()->mergeCells("M" . ($key * 2 + 2) . ":M" . ($key * 2 + 3));
+            $spreadsheet->getActiveSheet()->mergeCells("N" . ($key * 2 + 2) . ":N" . ($key * 2 + 3));
+            $spreadsheet->getActiveSheet()->mergeCells("O" . ($key * 2 + 2) . ":O" . ($key * 2 + 3));
+            $spreadsheet->getActiveSheet()->mergeCells("P" . ($key * 2 + 2) . ":P" . ($key * 2 + 3));
+            $spreadsheet->getActiveSheet()->mergeCells("Q" . ($key * 2 + 2) . ":Q" . ($key * 2 + 3));
+        }
+
+        //设置宽度
+        $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(12);
+        $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(12);
+        $spreadsheet->getActiveSheet()->getColumnDimension('D')->setWidth(16);
+        $spreadsheet->getActiveSheet()->getColumnDimension('L')->setWidth(32);
+        $spreadsheet->getActiveSheet()->getColumnDimension('M')->setWidth(12);
+        $spreadsheet->getActiveSheet()->getColumnDimension('N')->setWidth(12);
+        $spreadsheet->getActiveSheet()->getColumnDimension('O')->setWidth(12);
+
+        $spreadsheet->getActiveSheet()->getColumnDimension('P')->setWidth(18);
+        $spreadsheet->getActiveSheet()->getColumnDimension('Q')->setWidth(14);
+
+        $spreadsheet->getActiveSheet()->getColumnDimension('R')->setWidth(14);
+        $spreadsheet->getActiveSheet()->getColumnDimension('S')->setWidth(14);
+        $spreadsheet->getActiveSheet()->getColumnDimension('T')->setWidth(16);
+        $spreadsheet->getActiveSheet()->getColumnDimension('U')->setWidth(16);
+
+
+        $spreadsheet->getDefaultStyle()->getFont()->setName('微软雅黑')->setSize(12);
+
+        //自动换行
+        $spreadsheet->getDefaultStyle()->getAlignment()->setWrapText(true);
+
+        //设置边框
+        $border = [
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, // 设置border样式
+                    'color'       => ['argb' => 'FF000000'], // 设置border颜色
+                ],
+            ],
+        ];
+        $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
+        $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
+
+        // $spreadsheet->getActiveSheet()->getStyle('A1:Z'.$key)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $spreadsheet->getActiveSheet()->getStyle('A1:U' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $spreadsheet->getActiveSheet()->getStyle('A1:U' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+
+        //水平垂直居中   
+        // $objSheet->getDefaultStyle()->getAlignment()->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+        // $objSheet->getDefaultStyle()->getAlignment()->setVertical(\PHPExcel_Style_Alignment::VERTICAL_CENTER);
+        // //自动换行
+        // $objSheet->getDefaultStyle()->getAlignment()->setWrapText(true);
+
+        // Set active sheet index to the first sheet, so Excel opens this as the first sheet
+        $spreadsheet->setActiveSheetIndex(0);
+        // return exportExcel($spreadsheet, 'xls', '登陆日志');
+        $format = 'xlsx';
+        $savename = '订单打印处方' . date("YmdHis", time());;
+        // dump($spreadsheet);
+
+        // if (!$spreadsheet) return false;
+        if ($format == 'xls') {
+            //输出Excel03版本
+            header('Content-Type:application/vnd.ms-excel');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xls";
+        } elseif ($format == 'xlsx') {
+            //输出07Excel版本
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xlsx";
+        }
+
+        //输出名称
+        header('Content-Disposition: attachment;filename="' . $savename . '.' . $format . '"');
+        //禁止缓存
+        header('Cache-Control: max-age=0');
+        $writer = new $class($spreadsheet);
+        // exit;
+        // $filePath = env('runtime_path')."temp/".time().microtime(true).".tmp";
+        // $writer->save($filePath);
+        $writer->save('php://output');
+        // $writer->save('file.xlsx');
+
+        // readfile($filePath);
+        // unlink($filePath);
+    }
+
 
     //批量打印标签
     public function batch_print_label()

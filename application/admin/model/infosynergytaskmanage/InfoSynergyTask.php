@@ -108,5 +108,14 @@ class InfoSynergyTask extends Model
 //        $result['info_synergy_task_change_sku'] = (new InfoSynergyTaskChangeSku())->getChangeSkuList($id);
         return $result;
     }
+	//检测是否存在任务单号
+	public function checkOrderInfo($synergy_order_number,$synergy_task_id)
+	{
+		$where['synergy_order_number'] = $synergy_order_number;
+		$where['synergy_task_id']   = $synergy_task_id;
+		$where['synergy_status']  = ['in',[0,1]];
+		$result = $this->where($where)->field('id,synergy_order_number')->find();
+		return $result ? $result : false;
+	}
 
 }

@@ -160,4 +160,21 @@ class ItemPlatformSku extends Model
         $map['platform_type'] = $platform_type;
         return $this->where($map)->value('sku');
     }
+
+    /**
+     * 根据仓库SKU查询各平台SKU
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/02/06 17:19:53 
+     * @param string $sku
+     * @param string $platform_type 对应平台1 Zeelool 2 Voogueme 3 Nihao
+     * @return void
+     */
+    public function getWebSku($sku = '', $platform_type = '')
+    { 
+        $map['sku'] = $sku;
+        $map['platform_type'] = $platform_type;
+        return $this->where($map)->value('platform_sku');
+    }
 }
