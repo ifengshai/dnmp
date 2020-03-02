@@ -214,15 +214,6 @@ class Zendesk extends Controller
                                 ];
                             } elseif ($status == 'complete') {
                                 $res = $this->getTrackMsg($order_id);
-                                //模拟状态测试
-//                                $res = [
-//                                    'status' => 'transit',
-//                                    'lastUpdateTime' => '2020-02-20 15:35:30',
-//                                    'lastEvent' => 'adde ddae ',
-//                                    'carrier_code' => 'dhl',
-//                                    'updated_at' => '2020-01-20 12:11:12',
-//                                    'track_number' => '54455aad2122'
-//                                ];
                                 //判断是否签收
                                 if ($res['status'] == 'delivered') { //已签收
                                     $params = [
