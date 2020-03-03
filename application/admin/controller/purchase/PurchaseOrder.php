@@ -788,12 +788,16 @@ class PurchaseOrder extends Backend
     public function matching()
     {
         //查询SKU为空的采购单
-        $data = $this->purchase_order_item->where('sku', 'exp', 'is null')->select();
+        
+        $data = $this->purchase_order_item->whereExp('','LENGTH(trim(sku))=0','xor')->whereOr('sku', 'exp', 'is null')->select();
         $data = collection($data)->toArray();
+       
         foreach ($data as $k => $v) {
             //匹配SKU
             if ($v['skuid']) {
                 $params['sku'] = (new SupplierSku())->getSkuData($v['skuid']);
+
+                $params['supplier_sku'] = (new SupplierSku())->getSupplierData($v['skuid']);
             }
             if ($params['sku']) {
                 $this->purchase_order_item->allowField(true)->isUpdate(true, ['id' => $v['id']])->data($params)->save();

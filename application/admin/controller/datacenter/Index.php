@@ -307,8 +307,9 @@ class Index extends Backend
         $purchase_map['stock_status'] = ['in', [0, 1]];
         $purchase_num = $purchase->alias('a')->join(['fa_purchase_order_item' => 'b'], 'a.id=b.purchase_id')
             ->where($purchase_map)
+            ->whereExp('sku', 'is not null')
             ->sum('purchase_num');
-
+        
         $check_map['a.status'] = 2;
         $check_map['a.type'] = 1;
         $check_map['b.purchase_status'] = ['in', [2, 5, 6, 7]];
