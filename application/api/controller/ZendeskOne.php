@@ -65,7 +65,7 @@ class ZendeskOne extends Controller
         $search = [
             'type' => 'ticket',
             'via' => ['mail','web'],
-            'status' => ['new'],
+            'status' => ['new','open'],
             'tags' => [
                 'keytype' => '-',
                 'value' => '转客服'
@@ -125,6 +125,7 @@ class ZendeskOne extends Controller
      */
     public function findCommentsByTickets($tickets)
     {
+        dump($tickets);die;
         foreach($tickets as $key => $ticket){
 //            if($key >= 50){
 //                break;
