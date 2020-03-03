@@ -218,6 +218,20 @@ class ZendeskOne extends Controller
                                     'assignee_id' => 382940274852,
                                 ];
                             }
+                            //tag合并
+                            $params['tags'] = array_unique(array_merge($tags, $params['tags']));
+                            $params['comment']['author_id'] = 382940274852;
+                            $params['assignee_id'] = 382940274852;
+                            $res = $this->autoUpdate($id, $params);
+                            if($res){
+                                if(!empty($reply_detail_data)){
+                                    $reply_detail_res = ZendeskReplyDetail::create($reply_detail_data);
+                                    if($reply_detail_res){
+                                        //更新主表状态
+                                        ZendeskReply::where('id',$zendesk_reply->id)->setField('status',$reply_detail_data['status']);
+                                    }
+                                }
+                            }
                         }
 
                     } else {
@@ -228,7 +242,7 @@ class ZendeskOne extends Controller
                                 'comment' => [
                                     'body' => config('zendesk.t1')
                                 ],
-                                'tags' => ['自动回复'],
+                                'tags' => ['自动回复','自动回复50测'],
                                 'status' => 'pending'
                             ];
                             file_put_contents('./zendesk.txt',$ticket->id,FILE_APPEND);
@@ -250,6 +264,9 @@ class ZendeskOne extends Controller
                                 //添加主评论
                                 $zendesk_reply = ZendeskReply::create($reply_data);
                                 file_put_contents('./zendeskreply.txt',$zendesk_reply->email_id,FILE_APPEND);
+                                if(!$zendesk_reply->email_id){
+                                    file_put_contents('./zendeskreply2.txt',$zendesk_reply->email_id,FILE_APPEND);
+                                }
                                 //回复评论
                                 $reply_detail_data = [
                                     'reply_id' => $zendesk_reply->id,
@@ -260,24 +277,25 @@ class ZendeskOne extends Controller
                                     'assignee_id' => 382940274852,
                                 ];
                             }
-                        }
-                    }
-                    if (!empty($params)) {
-                        //tag合并
-                        $params['tags'] = array_unique(array_merge($tags, $params['tags']));
-                        $params['comment']['author_id'] = 382940274852;
-                        $params['assignee_id'] = 382940274852;
-                        $res = $this->autoUpdate($id, $params);
-                        if($res){
-                            if(!empty($reply_detail_data)){
-                                $reply_detail_res = ZendeskReplyDetail::create($reply_detail_data);
-                                if($reply_detail_res){
-                                    //更新主表状态
-                                    ZendeskReply::where('id',$zendesk_reply->id)->setField('status',$reply_detail_data['status']);
+                            if (!empty($params)) {
+                                //tag合并
+                                $params['tags'] = array_unique(array_merge($tags, $params['tags']));
+                                $params['comment']['author_id'] = 382940274852;
+                                $params['assignee_id'] = 382940274852;
+                                $res = $this->autoUpdate($id, $params);
+                                if($res){
+                                    if(!empty($reply_detail_data)){
+                                        $reply_detail_res = ZendeskReplyDetail::create($reply_detail_data);
+                                        if($reply_detail_res){
+                                            //更新主表状态
+                                            ZendeskReply::where('id',$zendesk_reply->id)->setField('status',$reply_detail_data['status']);
+                                        }
+                                    }
                                 }
                             }
                         }
                     }
+
                 }
            // }
         }
