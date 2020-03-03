@@ -1588,6 +1588,5 @@ order by sfoi.item_id asc limit 1000";
         $yesterday_sales_money_sql = "SELECT round(sum(base_grand_total),2) base_grand_total FROM sales_flat_order WHERE DATEDIFF('created_at',NOW())=-1 $order_status";
         $result = Db::connect('database.db_zeelool')->query($yesterday_sales_money_sql);
         dump($result);
-    }    
-
+    }
 }
