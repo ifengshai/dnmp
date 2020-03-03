@@ -97,7 +97,6 @@ class ZendeskOne extends Controller
         //echo $params;die;
         $search = $this->client->search()->find($params);
         $tickets = $search->results;
-        dump($search->count);die;
         $page = ceil($search->count / 100 );
         //先获取第一页的
         $this->findCommentsByTickets($tickets);
@@ -122,7 +121,10 @@ class ZendeskOne extends Controller
      */
     public function findCommentsByTickets($tickets)
     {
-        foreach($tickets as $ticket){
+        foreach($tickets as $key => $ticket){
+            if($key >= 50){
+                break;
+            }
             $id = $ticket->id;
             //发送者的id
             $requester_id = $ticket->requester_id;
@@ -290,6 +292,7 @@ class ZendeskOne extends Controller
     {
         try{
             $this->client->tickets()->update($ticket_id, $params);
+            echo $ticket_id . "\n";
             sleep(1);
         }catch (\Exception $e){
             return false;
