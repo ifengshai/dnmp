@@ -1419,13 +1419,8 @@ class Dashboard extends Backend
         if ($str) {
             $map['check_order_number'] = ['in', $str];
             $check = new \app\admin\model\warehouse\Check();
-            $ids = $check->where($map)->column('id');
+            $check->save(['is_return' => 1], $map);
         }
-        
-        $checkItem = new \app\admin\model\warehouse\CheckItem();
-        if ($ids) {
-            $where['check_id'] = ['in', $ids];
-            $checkItem->save(['is_process' => 1], $where);
-        }
+       
     }
 }
