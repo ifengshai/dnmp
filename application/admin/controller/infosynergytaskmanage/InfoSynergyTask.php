@@ -63,7 +63,14 @@ class InfoSynergyTask extends Backend
             }
 			if(0 == $params['order_platform']){
 				$this->error(__('请选择平台类型'));
-			}			
+            }
+            //如果是VIP订单监测VIP订单是否存在
+            if(8 == $params['synergy_order_id']){
+                $checkResult = $this->model->checkVipOrder($params['order_platform'],$params['synergy_order_number']);
+                if(!$checkResult){
+                    return $this->error(__('此VIP订单不存在,请核对后重新填写'));
+                }
+            }			
             $item = isset($params['item']) ? $params['item']  : '';
             $lens = isset($params['lens']) ? $params['lens']  : '';
 			$params['synergy_order_number'] = trim($params['synergy_order_number']); 
