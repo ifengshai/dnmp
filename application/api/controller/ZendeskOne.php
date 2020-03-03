@@ -129,8 +129,6 @@ class ZendeskOne extends Controller
             $tags = $ticket->tags;
             //email
             $requester_email = $ticket->via->source->from->address;
-            echo $requester_email;
-            dump($ticket);die;
             try{
                 $result = $this->client->tickets($id)->comments()->findAll();
             }catch (\Exception $e){
