@@ -343,6 +343,21 @@ class ZendeskOne extends Controller
             ->where('customer_email',$email)
             ->order('entity_id desc')
             ->find();
+        if(empty($order)){
+            //无email，查询用户
+            $customer = Db::connect('database.db_zeelool')
+                ->table('customer_entity')
+                ->where('email',$email)
+                ->find();
+            if(!empty($customer)){
+                $order = Db::connect('database.db_zeelool')
+                    ->table('sales_flat_order')
+                    ->field('entity_id,state,status,increment_id,created_at')
+                    ->where('customer_id',$customer['entity_id'])
+                    ->order('entity_id desc')
+                    ->find();
+            }
+        }
         if(!empty($order)){
             $res = [
                 'status' => $order['status'],
@@ -353,6 +368,7 @@ class ZendeskOne extends Controller
             ];
 
         }else{
+
             $res = [
                 'status' => '',
                 'increment_id' => '',
