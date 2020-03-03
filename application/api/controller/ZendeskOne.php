@@ -75,6 +75,10 @@ class ZendeskOne extends Controller
                 'none'
             ],
             //'requester' => $this->testId,
+            'updated_at' => [
+                'valuetype' => '>=',
+                'value'   => '2020-03-03T00:00:55Z',
+            ],//>=意思是3分钟之内，<=是三分钟之外
             'order_by' => 'updated_at',
             'sort' => 'desc'
         ];
@@ -97,7 +101,7 @@ class ZendeskOne extends Controller
         //echo $params;die;
         $search = $this->client->search()->find($params);
         $tickets = $search->results;
-        $page = ceil($search->count / 100 );
+        //$page = ceil($search->count / 100 );
         //先获取第一页的
         $this->findCommentsByTickets($tickets);
 //        if($page > 1){
@@ -242,7 +246,7 @@ class ZendeskOne extends Controller
                                 'comment' => [
                                     'body' => config('zendesk.t1')
                                 ],
-                                'tags' => ['自动回复','自动回复50测'],
+                                'tags' => ['自动回复'],
                                 'status' => 'pending'
                             ];
                             file_put_contents('/www/wwwroot/mojing/runtime/log/zendesk.txt',$ticket->id.'\n',FILE_APPEND);
