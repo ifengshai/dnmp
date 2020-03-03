@@ -54,7 +54,7 @@ class ZendeskOne extends Controller
             exception('zendesk链接失败', 100006);
         }
 
-        set_time_limit(0);
+
 
     }
     /**
@@ -97,17 +97,18 @@ class ZendeskOne extends Controller
         //echo $params;die;
         $search = $this->client->search()->find($params);
         $tickets = $search->results;
+        dump($search->count);die;
         $page = ceil($search->count / 100 );
         //先获取第一页的
         $this->findCommentsByTickets($tickets);
-        if($page > 1){
-            //获取后续的
-            for($i=2;$i<= $page;$i++){
-                $search = $this->client->search()->find($params,['page' => $i]);
-                $tickets = $search->results;
-                $this->findCommentsByTickets($tickets);
-            }
-        }
+//        if($page > 1){
+//            //获取后续的
+//            for($i=2;$i<= $page;$i++){
+//                $search = $this->client->search()->find($params,['page' => $i]);
+//                $tickets = $search->results;
+//                $this->findCommentsByTickets($tickets);
+//            }
+//        }
 
     }
 
@@ -218,7 +219,7 @@ class ZendeskOne extends Controller
 
                     } else {
                         //匹配到相应的关键字，自动回复消息，修改为pending，回复共客户选择的内容
-                        if (s($body)->containsAny($this->preg_word)) {
+                        if (s($body)->containsAny($this->preg_word) === true) {
                             //回复模板1：状态pending，增加tag自动回复
                             $params = [
                                 'comment' => [
@@ -287,6 +288,7 @@ class ZendeskOne extends Controller
     {
         try{
             $this->client->tickets()->update($ticket_id, $params);
+            sleep(1);
         }catch (\Exception $e){
             return false;
             //exception($e->getMessage(), 10001);
