@@ -567,12 +567,15 @@ class SaleAfterTask extends Model
         switch ($order_platform){
             case 1:
                 $db = 'database.db_zeelool';
+                $db_online = 'database.db_zeelool_online';
                 break;
             case 2:
                 $db = 'database.db_voogueme';
+                $db_online = 'database.db_voogueme_online';
                 break;
             case 3:
                 $db = 'database.db_nihao';
+                $db_online = '';
                 break;
             default:
                 return false;
@@ -606,6 +609,10 @@ class SaleAfterTask extends Model
             // return $customer_email;
             //求出用户的等级
             $customer_group_code = Db::connect($db)->table('customer_entity c')->join('customer_group g',' c.group_id = g.customer_group_id')->where(['c.email'=>$customer_email])->value('g.customer_group_code');
+            //如果是z站或者v站的话求出是否存在VIP订单
+            if($db_online){
+                $order_vip = Db::connect($db_online)->table('oc_vip_order')->where(['customer_email'=>$customer_email])->field('id,customer_email,order_number,order_amount,order_status,order_type,start_time,end_time,is_active_status,admin_name')->select();
+            }
             $result = Db::connect($db)->table('sales_flat_order o')->join('sales_flat_shipment_track s','o.entity_id=s.order_id','left')->join('sales_flat_order_payment p','o.entity_id=p.parent_id','left')->join('sales_flat_order_address a','o.entity_id=a.parent_id')->where('customer_email',$customer_email)->where('a.address_type','shipping')
                 ->field('o.base_to_order_rate,o.base_total_paid,o.base_total_due,o.entity_id,o.status,o.coupon_code,o.coupon_rule_name,o.store_id,o.increment_id,o.customer_email,o.customer_firstname,o.customer_lastname,o.order_currency_code,o.total_item_count,o.base_grand_total,o.base_shipping_amount,o.shipping_description,o.base_total_paid,o.base_total_due,o.created_at,o.order_type,s.track_number,s.title,p.base_amount_paid,p.base_amount_ordered,p.base_amount_authorized,p.method,p.last_trans_id,p.additional_information,a.telephone,a.postcode,a.street,a.city,a.region,a.country_id')->order('o.entity_id desc')->select();
             //return $result;
@@ -639,10 +646,17 @@ class SaleAfterTask extends Model
 				$result[$k]['real_papid'] = round(($v['base_total_paid'] + $v['base_total_due'])*$v['base_to_order_rate'],3);
                 
             }
+            //用户的等级
             if($customer_group_code){
                 $customer['customer_group_code'] = $customer_group_code;
             }else{
                 $customer['customer_group_code'] = '';
+            }
+            //用户的vip订单
+            if($order_vip){
+                $customer['order_vip'] = $order_vip;
+            }else{
+                $customer['order_vip'] = '';
             }
             $customer['customer_email'] = $customer_email;
             $customer['customer_name'] = $result[0]['customer_firstname'].' '.$result[0]['customer_lastname'];
