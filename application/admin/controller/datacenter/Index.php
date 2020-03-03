@@ -281,6 +281,12 @@ class Index extends Backend
         //在途镜架库存总金额
         $onwayFrameAllStockPrice = $this->onway_frame_all_stock_price();
 
+        //在途饰品库存
+        $onwayOrnamentAllStock = $this->onway_ornament_all_stock();
+
+        //在途饰品库存总金额
+        $onwayOrnamentAllStockPrice = $this->onway_ornament_all_stock_price();
+
         $this->view->assign('allStock', $allStock);
         $this->view->assign('allStockPrice', $allStockPrice);
         $this->view->assign('frameStock', $frameStock);
@@ -300,6 +306,8 @@ class Index extends Backend
         $this->view->assign('onway_all_stock_price', $onwayAllStockPrice);
         $this->view->assign('onway_frame_all_stock', $onwayFrameAllStock);
         $this->view->assign('onway_frame_all_stock_price', $onwayFrameAllStockPrice);
+        $this->view->assign('onway_ornament_all_stock', $onwayOrnamentAllStock);
+        $this->view->assign('onway_ornament_all_stock_price', $onwayOrnamentAllStockPrice);
 
         return $this->view->fetch();
     }
@@ -464,10 +472,10 @@ class Index extends Backend
      * @since 2020/03/02 17:20:21 
      * @return void
      */
-    protected function onway_frame_all_stock()
+    protected function onway_ornament_all_stock()
     {
         //镜架SKU
-        $skus = $this->item->getFrameSku();
+        $skus = $this->item->getOrnamentsSku();
         if ($skus) {
             $purchase_map['sku'] = ['in', $skus];
             //计算SKU总采购数量
@@ -504,10 +512,10 @@ class Index extends Backend
      * @since 2020/03/02 17:20:21 
      * @return void
      */
-    protected function onway_frame_all_stock_price()
+    protected function onway_ornament_all_stock_price()
     {
         //镜架SKU
-        $skus = $this->item->getFrameSku();
+        $skus = $this->item->getOrnamentsSku();
         if ($skus) {
             $purchase_map['sku'] = ['in', $skus];
             //计算SKU总采购金额
