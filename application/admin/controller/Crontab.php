@@ -1585,9 +1585,38 @@ order by sfoi.item_id asc limit 1000";
     {
         $order_status = $this->order_status;
         //昨日销售额
-        $yesterday_sales_money_sql = "SELECT round(sum(base_grand_total),2) base_grand_total FROM sales_flat_order WHERE DATEDIFF('created_at',NOW())=-1 $order_status";
+        $yesterday_sales_money_sql = "SELECT round(sum(base_grand_total),2) base_grand_total FROM sales_flat_order WHERE DATEDIFF(created_at,NOW())=-1 $order_status";
+        //过去7天销售额
+        $pastsevenday_sales_money_sql = "SELECT round(sum(base_grand_total),2) base_grand_total FROM sales_flat_order WHERE DATEDIFF(created_at,NOW())=-7 $order_status";
+        //过去30天销售额
+        $pastthirtyday_sales_money_sql = "SELECT round(sum(base_grand_total),2) base_grand_total FROM sales_flat_order WHERE DATEDIFF(created_at,NOW())=-30 $order_status";
+        //当月销售额
+        $thismonth_sales_money_sql     = "SELECT round(sum(base_grand_total),2) base_grand_total FROM sales_flat_order WHERE DATE_FORMAT(created_at,'%Y%m') = DATE_FORMAT(CURDATE(),'%Y%m') $order_status";
+        //上月销售额
+        $lastmonth_sales_money_sql     = "SELECT round(sum(base_grand_total),2) base_grand_total FROM sales_flat_order WHERE PERIOD_DIFF(date_format(now(),'%Y%m'),date_format(created_at,'%Y%m')) =1 $order_status";
+        //今年销售额
+        $thisyear_sales_money_sql      = "SELECT round(sum(base_grand_total),2) base_grand_total FROM sales_flat_order WHERE YEAR(created_at)=YEAR(NOW()) $order_status";
+        //总共的销售额
+        $total_sales_money_sql         = "SELECT round(sum(base_grand_total),2) base_grand_total FROM sales_flat_order WHERE 1 $order_status";
+        //昨天订单数
+        $yesterday_order_num_sql       = "SELECT count(*) counter FROM sales_flat_order WHERE DATEDIFF(created_at,NOW())=-1";
+        //过去7天订单数
+        $pastsevenday_order_num_sql    = "SELECT count(*) counter FROM sales_flat_order WHERE DATEDIFF(created_at,NOW())=-7";
+        //过去30天订单数
+        $pastthirtyday_order_num_sql   = "SELECT count(*) counter FROM sales_flat_order WHERE DATEDIFF(created_at,NOW())=-30";
+        //当月订单数数
+        $thismonth_order_num_sql       = "SELECT count(*) counter FROM sales_flat_order WHERE DATE_FORMAT(created_at,'%Y%m') = DATE_FORMAT(CURDATE(),'%Y%m')" ;
+        //上月订单数
+        $lastmonth_order_num_sql       = "SELECT count(*) counter FROM sales_flat_order WHERE PERIOD_DIFF(date_format(now(),'%Y%m'),date_format(created_at,'%Y%m')) =1";
+        //今年订单数
+        $thisyear_order_num_sql        = "SELECT count(*) counter FROM sales_flat_order WHERE YEAR(created_at)=YEAR(NOW())"; 
+        //总共的订单数
+        $total_order_num_sql           = "SELECT count(*) counter FROM sales_flat_order";
+        //昨天订单支付成功数
+        $yesterday_order_success_sql   = "SELECT count(*) counter FROM sales_flat_order WHERE DATEDIFF(created_at,NOW())=-1 $order_status";
+        //过去7天订单支付成功数
+        $pastsevenday_order_success    = "SELECT count(*) counter FROM sales_flat_order WHERE DATEDIFF(created_at,NOW())=-7 $order_status";
         $result = Db::connect('database.db_zeelool')->query($yesterday_sales_money_sql);
         dump($result);
-    }    
-
+    }
 }
