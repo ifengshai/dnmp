@@ -794,6 +794,8 @@ class PurchaseOrder extends Backend
             //匹配SKU
             if ($v['skuid']) {
                 $params['sku'] = (new SupplierSku())->getSkuData($v['skuid']);
+
+                $params['supplier_sku'] = (new SupplierSku())->getSupplierData($v['skuid']);
             }
             if ($params['sku']) {
                 $this->purchase_order_item->allowField(true)->isUpdate(true, ['id' => $v['id']])->data($params)->save();
