@@ -1655,19 +1655,19 @@ order by sfoi.item_id asc limit 1000";
         //总共购物车总数
         $total_shoppingcart_total_sql         = "SELECT count(*) counter from sales_flat_quote where base_grand_total>0";
         // //昨天购物车转化率
-        // $yesterday_shoppingcart_conversion_sql = round(($yesterday_order_success_rs/$yesterday_shoppingcart_total_rs),2);
+        // $yesterday_shoppingcart_conversion_rs = round(($yesterday_order_success_rs/$yesterday_shoppingcart_total_rs),2);
         // //过去7天购物车转化率
-        // $pastsevenday_shoppingcart_conversion_sql = round(($pastsevenday_order_success_rs/$pastsevenday_shoppingcart_total_rs),2);
+        // $pastsevenday_shoppingcart_conversion_rs = round(($pastsevenday_order_success_rs/$pastsevenday_shoppingcart_total_rs),2);
         // //过去30天购物车转化率
-        // $pastthirtyday_shoppingcart_conversion_sql = round(($pastthirtyday_order_success_rs/$pastthirtyday_shoppingcart_total_rs),2);
+        // $pastthirtyday_shoppingcart_conversion_rs = round(($pastthirtyday_order_success_rs/$pastthirtyday_shoppingcart_total_rs),2);
         // //当月购物车转化率
-        // $thismonth_shoppingcart_conversion_sql = round(($thismonth_order_success_rs/$thismonth_shoppingcart_total_rs),2);
+        // $thismonth_shoppingcart_conversion_rs = round(($thismonth_order_success_rs/$thismonth_shoppingcart_total_rs),2);
         // //上月购物车转化率
-        // $lastmonth_shoppingcart_conversion_sql = round(($lastmonth_order_success_rs/$lastmonth_shoppingcart_total_rs),2);
+        // $lastmonth_shoppingcart_conversion_rs = round(($lastmonth_order_success_rs/$lastmonth_shoppingcart_total_rs),2);
         // //今年购物车转化率
-        // $thisyear_shoppingcart_conversion_sql = round(($thisyear_order_success_rs/$thisyear_shoppingcart_total_rs),2);
+        // $thisyear_shoppingcart_conversion_rs = round(($thisyear_order_success_rs/$thisyear_shoppingcart_total_rs),2);
         // //总共购物车转化率
-        // $total_shoppingcart_conversion_sql = round(($total_order_success_rs/$total_shoppingcart_total_rs),2); 
+        // $total_shoppingcart_conversion_rs = round(($total_order_success_rs/$total_shoppingcart_total_rs),2); 
         //昨天新增购物车总数
         $yesterday_shoppingcart_new_sql = "SELECT count(*) counter from sales_flat_quote where base_grand_total>0 AND DATEDIFF(updated_at,NOW())=-1";
         //过去7天新增购物车总数
@@ -1675,14 +1675,41 @@ order by sfoi.item_id asc limit 1000";
         //过去30天新增购物车总数
         $pastthirtyday_shoppingcart_new_sql = "SELECT count(*) counter from sales_flat_quote where base_grand_total>0 AND DATEDIFF(updated_at,NOW())=-30";
         //当月新增购物车总数
-        $yesterday_shoppingcart_new_sql = "SELECT count(*) counter from sales_flat_quote where base_grand_total>0 AND  DATE_FORMAT(created_at,'%Y%m') = DATE_FORMAT(CURDATE(),'%Y%m')";
+        $thismonth_shoppingcart_new_sql = "SELECT count(*) counter from sales_flat_quote where base_grand_total>0 AND  DATE_FORMAT(updated_at,'%Y%m') = DATE_FORMAT(CURDATE(),'%Y%m')";
         //上月新增购物车总数
-        $yesterday_shoppingcart_new_sql = "SELECT count(*) counter from sales_flat_quote where base_grand_total>0 AND PERIOD_DIFF(date_format(now(),'%Y%m'),date_format(created_at,'%Y%m')) =1";
+        $lastmonth_shoppingcart_new_sql = "SELECT count(*) counter from sales_flat_quote where base_grand_total>0 AND PERIOD_DIFF(date_format(now(),'%Y%m'),date_format(updated_at,'%Y%m')) =1";
         //今年新增购物车总数
-        $yesterday_shoppingcart_new_sql = "SELECT count(*) counter from sales_flat_quote where base_grand_total>0 AND YEAR(created_at)=YEAR(NOW())";
+        $thisyear_shoppingcart_new_sql = "SELECT count(*) counter from sales_flat_quote where base_grand_total>0 AND YEAR(updated_at)=YEAR(NOW())";
         //总共新增购物车总数
-        $yesterday_shoppingcart_new_sql = "SELECT count(*) counter from sales_flat_quote where base_grand_total>0";
-                                                              
+        $total_shoppingcart_new_sql = "SELECT count(*) counter from sales_flat_quote where base_grand_total>0";
+        //昨天新增购物车转化率
+        $yesterday_shoppingcart_newconversion_rs = round(($yesterday_order_success_rs/$yesterday_shoppingcart_new_rs),2);
+        //过去7天新增购物车转化率
+        $pastsevenday_shoppingcart_newconversion_rs = round(($pastsevenday_order_success_rs/$pastsevenday_shoppingcart_new_rs),2);
+        //过去30天新增购物车转化率
+        $pastthirtyday_shoppingcart_newconversion_rs = round(($pastthirtyday_order_success_rs/$pastthirtyday_shoppingcart_new_rs),2);
+        //当月新增购物车转化率
+        $thismonth_shoppingcart_newconversion_rs = round(($thismonth_order_success_rs/$thismonth_shoppingcart_new_rs),2);                
+        //上月新增购物车转化率
+        $lastmonth_shoppingcart_newconversion_rs = round(($lastmonth_order_success_rs/$lastmonth_shoppingcart_new_rs),2);
+        //今年新增购物车转化率
+        $thisyear_shoppingcart_newconversion_rs = round(($thisyear_order_success_rs/$thisyear_shoppingcart_new_rs),2);
+        //总共新增购物车转化率
+        $total_shoppingcart_newconversion_rs = round(($total_order_success_rs/$total_shoppingcart_new_rs),2);
+        //昨天新增注册用户数
+        $yesterday_register_customer_sql       = "SELECT count(*) counter from customer_entity where DATEDIFF(created_at,NOW())=-1";
+        //过去7天新增注册用户数
+        $pastsevenday_register_customer_sql    = "SELECT count(*) counter from customer_entity where DATEDIFF(created_at,NOW())=-7";
+        //过去30天新增注册用户数
+        $pastthirtyday_register_customer_sql   = "SELECT count(*) counter from customer_entity where DATEDIFF(created_at,NOW())=-30";
+        //当月新增注册用户数
+        $thismonth_register_customer_sql       = "SELECT count(*) counter from customer_entity where DATE_FORMAT(created_at,'%Y%m') = DATE_FORMAT(CURDATE(),'%Y%m')";
+        //上月新增注册用户数
+        $lastmonth_register_customer           = "SELECT count(*) counter from customer_entity where PERIOD_DIFF(date_format(now(),'%Y%m'),date_format(created_at,'%Y%m')) =1";
+        //今年新增注册用户数
+        $thisyear_register_customer            = "SELECT count(*) counter from customer_entity where YEAR(updated_at)=YEAR(NOW())";
+        //总共新增注册用户数
+        $total_register_customer               = "SELECT count(*) counter from customer_entity";                                                           
         $result = Db::connect('database.db_zeelool')->query($yesterday_sales_money_sql);
         dump($result);
     }
