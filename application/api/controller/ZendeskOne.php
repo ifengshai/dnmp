@@ -125,7 +125,7 @@ class ZendeskOne extends Controller
      */
     public function findCommentsByTickets($tickets)
     {
-        dump($tickets);die;
+        //dump($tickets);die;
         foreach($tickets as $key => $ticket){
 //            if($key >= 50){
 //                break;
