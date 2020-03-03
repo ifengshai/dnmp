@@ -33,7 +33,7 @@ class Crontab extends Backend
         'get_sku_allstock'
 
     ];
-
+    protected $order_status =  "and status in ('processing','complete','creditcard_proccessing','free_processing')";
 
     /**
      * 定时处理 订单列表分类
@@ -1572,5 +1572,22 @@ order by sfoi.item_id asc limit 1000";
         $data['createtime'] = date('Y-m-d H:i:s');
         $res = Db::table('fa_product_allstock_log')->insert($data);
     }
+    /**
+     * 更新zeelool站仪表盘数据
+     *
+     * z站今天的销售额($) 订单数	订单支付成功数	客单价($)	购物车总数	购物车总转化率(%)	新增购物车数	新增购物车转化率	新增注册用户数
+     * @Description created by lsw
+     * @author lsw
+     * @since 2020/03/02 17:39:31 
+     * @return void
+     */
+    public function update_zeelool_ashboard_data()
+    {
+        $order_status = $this->order_status;
+        //昨日销售额
+        $yesterday_sales_money_sql = "SELECT round(sum(base_grand_total),2) base_grand_total FROM sales_flat_order WHERE DATEDIFF('created_at',NOW())=-1 $order_status";
+        $result = Db::connect('database.db_zeelool')->query($yesterday_sales_money_sql);
+        dump($result);
+    }    
 
 }
