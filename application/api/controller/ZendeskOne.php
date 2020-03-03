@@ -54,6 +54,8 @@ class ZendeskOne extends Controller
             exception('zendesk链接失败', 100006);
         }
 
+        set_time_limit(0);
+
     }
     /**
      * 查询tickets
