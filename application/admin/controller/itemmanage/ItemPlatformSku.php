@@ -55,7 +55,6 @@ class ItemPlatformSku extends Backend
                 ->where($where)
                 ->order($sort, $order)
                 ->count();
-
             $list = $this->model
                 ->with(['item' => ['item_status']])
                 ->where($where)

@@ -27,10 +27,13 @@ class Crontab extends Backend
         'nihao_order_item_process',
         'set_purchase_order_logistics',
         'product_grade_list_crontab',
-		'changeItemNewToOld',
-        'get_sku_stock'
-    ];
+        'changeItemNewToOld',
+        'get_sku_stock',
+        'get_sku_price',
+        'get_sku_allstock'
 
+    ];
+    protected $order_status =  "and status in ('processing','complete','creditcard_proccessing','free_processing')";
 
     /**
      * 定时处理 订单列表分类
@@ -1309,7 +1312,7 @@ order by sfoi.item_id asc limit 1000";
 
         //查询供货商
         $supplier = new \app\admin\model\purchase\SupplierSku;
-        $supplier_list = $supplier->alias('a')->join(['fa_supplier' => 'b'], 'a.supplier_id=b.id')->column('b.supplier_name', 'a.sku');
+        $supplier_list = $supplier->alias('a')->join(['fa_supplier' => 'b'], 'a.supplier_id=b.id')->column('b.supplier_name,b.purchase_person', 'a.sku');
 
 
         //删除无用数组 释放内存
@@ -1340,7 +1343,8 @@ order by sfoi.item_id asc limit 1000";
             //分等级产品
             $num = round($val['counter'] * 1 / $val['days'] * 1 * 30);
             $list[$k]['num'] = $num;
-            $list[$k]['supplier_name'] =  $supplier_list[$val['true_sku']];
+            $list[$k]['supplier_name'] =  $supplier_list[$val['true_sku']]['supplier_name'];
+            $list[$k]['purchase_person'] =  $supplier_list[$val['true_sku']]['purchase_person'];
 
 
             if ($num >= 300) {
@@ -1444,18 +1448,17 @@ order by sfoi.item_id asc limit 1000";
         //计算三个站最近30天销量
         if ($zeelool_sku) {
             $map['b.sku'] = ['in', $zeelool_sku];
-            $zeelool = $zeelool_model->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')->group('b.sku')->column('sum(b.qty_ordered) as num','b.sku');
-
+            $zeelool = $zeelool_model->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')->group('b.sku')->column('sum(b.qty_ordered) as num', 'b.sku');
         }
 
         if ($voogueme_sku) {
             $map['b.sku'] = ['in', $voogueme_sku];
-            $voogueme = $voogueme_model->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')->group('b.sku')->column('sum(b.qty_ordered) as num','b.sku');
+            $voogueme = $voogueme_model->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')->group('b.sku')->column('sum(b.qty_ordered) as num', 'b.sku');
         }
 
         if ($nihao_sku) {
             $map['b.sku'] = ['in', $nihao_sku];
-            $nihao = $nihao_model->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')->group('b.sku')->column('sum(b.qty_ordered) as num','b.sku');
+            $nihao = $nihao_model->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')->group('b.sku')->column('sum(b.qty_ordered) as num', 'b.sku');
         }
 
         foreach ($list as $k => $v) {
@@ -1487,7 +1490,7 @@ order by sfoi.item_id asc limit 1000";
         $map['id'] = ['in', $itemId];
         Db::connect('database.db_stock')->name('item')->where($map)->update(['is_new' => 2]);
     }
-    
+
     /**
      * 记录每天商品库存变化日志
      *
@@ -1505,5 +1508,182 @@ order by sfoi.item_id asc limit 1000";
             Db::name('goods_stock_log')->insertAll($item);
             echo 'ok';
         }
+    }
+
+    /**
+     * 定时获取SKU最新的采购单价
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/02/19 16:23:27 
+     * @return void
+     */
+    public function get_sku_price()
+    {
+        $purchase = new \app\admin\model\purchase\PurchaseOrder;
+        $result = $purchase->alias('a')
+            ->where('a.is_del', 1)
+            ->field('sku,purchase_price,createtime')
+            ->join(['fa_purchase_order_item' => 'b'], 'a.id=b.purchase_id')
+            ->order('createtime desc')
+            ->select();
+        $arr = [];
+        foreach ($result as $v) {
+            if (!isset($arr[$v['sku']])) {
+                $arr[$v['sku']] = $v['purchase_price'];
+            } else {
+                continue;
+            }
+        }
+        if ($arr) {
+            $list = [];
+            $i = 0;
+            foreach ($arr as $k => $v) {
+                $list[$i]['sku'] = $k;
+                $list[$i]['price'] = $v;
+                $list[$i]['createtime'] = date('Y-m-d H:i:s', time());
+                $i++;
+            }
+            unset($arr);
+        }
+
+        if ($list) {
+            //清空表
+            Db::execute("truncate table fa_sku_price;");
+            //批量添加
+            $res = Db::table('fa_sku_price')->insertAll($list);
+        }
+        echo 'ok';
+    }
+
+    /**
+     * 记录每天总库存数
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/02/29 16:13:16 
+     * @return void
+     */
+    public function get_sku_allstock()
+    {
+        $item = new \app\admin\model\itemmanage\Item;
+        $num = $item->getAllStock();
+        $data['allnum'] = $num;
+        $data['createtime'] = date('Y-m-d H:i:s');
+        $res = Db::table('fa_product_allstock_log')->insert($data);
+    }
+    /**
+     * 更新zeelool站仪表盘数据
+     *
+     * z站今天的销售额($) 订单数	订单支付成功数	客单价($)	购物车总数	购物车总转化率(%)	新增购物车数	新增购物车转化率	新增注册用户数
+     * @Description created by lsw
+     * @author lsw
+     * @since 2020/03/02 17:39:31 
+     * @return void
+     */
+    public function update_zeelool_ashboard_data()
+    {
+        $order_status = $this->order_status;
+        //昨日销售额
+        $yesterday_sales_money_sql = "SELECT round(sum(base_grand_total),2) base_grand_total FROM sales_flat_order WHERE DATEDIFF(created_at,NOW())=-1 $order_status";
+        //过去7天销售额
+        $pastsevenday_sales_money_sql = "SELECT round(sum(base_grand_total),2) base_grand_total FROM sales_flat_order WHERE DATEDIFF(created_at,NOW())=-7 $order_status";
+        //过去30天销售额
+        $pastthirtyday_sales_money_sql = "SELECT round(sum(base_grand_total),2) base_grand_total FROM sales_flat_order WHERE DATEDIFF(created_at,NOW())=-30 $order_status";
+        //当月销售额
+        $thismonth_sales_money_sql     = "SELECT round(sum(base_grand_total),2) base_grand_total FROM sales_flat_order WHERE DATE_FORMAT(created_at,'%Y%m') = DATE_FORMAT(CURDATE(),'%Y%m') $order_status";
+        //上月销售额
+        $lastmonth_sales_money_sql     = "SELECT round(sum(base_grand_total),2) base_grand_total FROM sales_flat_order WHERE PERIOD_DIFF(date_format(now(),'%Y%m'),date_format(created_at,'%Y%m')) =1 $order_status";
+        //今年销售额
+        $thisyear_sales_money_sql      = "SELECT round(sum(base_grand_total),2) base_grand_total FROM sales_flat_order WHERE YEAR(created_at)=YEAR(NOW()) $order_status";
+        //总共的销售额
+        $total_sales_money_sql         = "SELECT round(sum(base_grand_total),2) base_grand_total FROM sales_flat_order WHERE 1 $order_status";
+        //昨天订单数
+        $yesterday_order_num_sql       = "SELECT count(*) counter FROM sales_flat_order WHERE DATEDIFF(created_at,NOW())=-1";
+        //过去7天订单数
+        $pastsevenday_order_num_sql    = "SELECT count(*) counter FROM sales_flat_order WHERE DATEDIFF(created_at,NOW())=-7";
+        //过去30天订单数
+        $pastthirtyday_order_num_sql   = "SELECT count(*) counter FROM sales_flat_order WHERE DATEDIFF(created_at,NOW())=-30";
+        //当月订单数
+        $thismonth_order_num_sql       = "SELECT count(*) counter FROM sales_flat_order WHERE DATE_FORMAT(created_at,'%Y%m') = DATE_FORMAT(CURDATE(),'%Y%m')" ;
+        //上月订单数
+        $lastmonth_order_num_sql       = "SELECT count(*) counter FROM sales_flat_order WHERE PERIOD_DIFF(date_format(now(),'%Y%m'),date_format(created_at,'%Y%m')) =1";
+        //今年订单数
+        $thisyear_order_num_sql        = "SELECT count(*) counter FROM sales_flat_order WHERE YEAR(created_at)=YEAR(NOW())"; 
+        //总共的订单数
+        $total_order_num_sql           = "SELECT count(*) counter FROM sales_flat_order";
+        //昨天订单支付成功数
+        $yesterday_order_success_sql   = "SELECT count(*) counter FROM sales_flat_order WHERE DATEDIFF(created_at,NOW())=-1 $order_status";
+        //过去7天订单支付成功数
+        $pastsevenday_order_success_sql    = "SELECT count(*) counter FROM sales_flat_order WHERE DATEDIFF(created_at,NOW())=-7 $order_status";
+        //过去30天订单支付成功数
+        $pastthirtyday_order_success_sql   = "SELECT count(*) counter FROM sales_flat_order WHERE DATEDIFF(created_at,NOW())=-30 $order_status";
+        //当月订单支付成功数
+        $thismonth_order_success_sql       = "SELECT count(*) counter FROM sales_flat_order WHERE DATE_FORMAT(created_at,'%Y%m') = DATE_FORMAT(CURDATE(),'%Y%m') $order_status";
+        //上月订单支付成功数
+        $lastmonth_order_success_sql       = "SELECT count(*) counter FROM sales_flat_order WHERE PERIOD_DIFF(date_format(now(),'%Y%m'),date_format(created_at,'%Y%m')) =1 $order_status";
+        //今年订单支付成功数
+        $thisyear_order_success_sql        = "SELECT count(*) counter FROM sales_flat_order WHERE YEAR(created_at)=YEAR(NOW()) $order_status";
+        //总共订单支付成功数
+        $total_order_success_sql           = "SELECT count(*) counter FROM sales_flat_order $order_status";
+        //昨日客单价
+        // $yesterday_unit_price_rs              = round(($yesterday_sales_money_rs/$yesterday_order_success_rs),2);
+        // //过去7天客单价
+        // $pastsevenday_unit_price_rs           = round(($pastsevenday_sales_money_rs/$pastsevenday_order_success_rs),2);
+        // //过去30天客单价
+        // $pastthirtyday_unit_price_rs          = round(($pastthirtyday_sales_money_rs/$pastthirtyday_order_success_rs),2);
+        // //当月客单价
+        // $thismonth_unit_price_rs           = round(($thismonth_sales_money_rs/$thismonth_order_num_rs),2);
+        // //上月客单价
+        // $lastmonth_unit_price_rs              = round(($lastmonth_sales_money_rs/$lastmonth_order_success_rs),2);
+        // //今年客单价
+        // $thisyear_unit_price_rs           = round(($thisyear_sales_money_rs/$thisyear_sales_money_rs),2);
+        // //总共客单价
+        // $total_unit_price_rs              = round(($total_sales_money_rs/$total_order_success_rs),2);
+        //昨天购物车总数
+        $yesterday_shoppingcart_total_sql     = "SELECT count(*) counter from sales_flat_quote where base_grand_total>0 AND DATEDIFF(created_at,NOW())=-1";
+        //过去7天购物车总数
+        $pastsevenday_shoppingcart_total_sql  = "SELECT count(*) counter from sales_flat_quote where base_grand_total>0 AND DATEDIFF(created_at,NOW())=-7";
+        //过去30天购物车总数
+        $pastthirtyday_shoppingcart_total_sql = "SELECT count(*) counter from sales_flat_quote where base_grand_total>0 AND DATEDIFF(created_at,NOW())=-30";
+        //当月购物车总数
+        $thismonth_shoppingcart_total_sql     = "SELECT count(*) counter from sales_flat_quote where base_grand_total>0 AND DATE_FORMAT(created_at,'%Y%m') = DATE_FORMAT(CURDATE(),'%Y%m')";
+        //上月购物车总数
+        $lastmonth_shoppingcart_total_sql     = "SELECT count(*) counter from sales_flat_quote where base_grand_total>0 AND PERIOD_DIFF(date_format(now(),'%Y%m'),date_format(created_at,'%Y%m')) =1";
+        //今年购物车总数
+        $thisyear_shoppingcart_total_sql      = "SELECT count(*) counter from sales_flat_quote where base_grand_total>0 AND YEAR(created_at)=YEAR(NOW())";
+        //总共购物车总数
+        $total_shoppingcart_total_sql         = "SELECT count(*) counter from sales_flat_quote where base_grand_total>0";
+        // //昨天购物车转化率
+        // $yesterday_shoppingcart_conversion_sql = round(($yesterday_order_success_rs/$yesterday_shoppingcart_total_rs),2);
+        // //过去7天购物车转化率
+        // $pastsevenday_shoppingcart_conversion_sql = round(($pastsevenday_order_success_rs/$pastsevenday_shoppingcart_total_rs),2);
+        // //过去30天购物车转化率
+        // $pastthirtyday_shoppingcart_conversion_sql = round(($pastthirtyday_order_success_rs/$pastthirtyday_shoppingcart_total_rs),2);
+        // //当月购物车转化率
+        // $thismonth_shoppingcart_conversion_sql = round(($thismonth_order_success_rs/$thismonth_shoppingcart_total_rs),2);
+        // //上月购物车转化率
+        // $lastmonth_shoppingcart_conversion_sql = round(($lastmonth_order_success_rs/$lastmonth_shoppingcart_total_rs),2);
+        // //今年购物车转化率
+        // $thisyear_shoppingcart_conversion_sql = round(($thisyear_order_success_rs/$thisyear_shoppingcart_total_rs),2);
+        // //总共购物车转化率
+        // $total_shoppingcart_conversion_sql = round(($total_order_success_rs/$total_shoppingcart_total_rs),2); 
+        //昨天新增购物车总数
+        $yesterday_shoppingcart_new_sql = "SELECT count(*) counter from sales_flat_quote where base_grand_total>0 AND DATEDIFF(updated_at,NOW())=-1";
+        //过去7天新增购物车总数
+        $pastsevenday_shoppingcart_new_sql = "SELECT count(*) counter from sales_flat_quote where base_grand_total>0 AND DATEDIFF(updated_at,NOW())=-7";
+        //过去30天新增购物车总数
+        $pastthirtyday_shoppingcart_new_sql = "SELECT count(*) counter from sales_flat_quote where base_grand_total>0 AND DATEDIFF(updated_at,NOW())=-30";
+        //当月新增购物车总数
+        $yesterday_shoppingcart_new_sql = "SELECT count(*) counter from sales_flat_quote where base_grand_total>0 AND  DATE_FORMAT(created_at,'%Y%m') = DATE_FORMAT(CURDATE(),'%Y%m')";
+        //上月新增购物车总数
+        $yesterday_shoppingcart_new_sql = "SELECT count(*) counter from sales_flat_quote where base_grand_total>0 AND PERIOD_DIFF(date_format(now(),'%Y%m'),date_format(created_at,'%Y%m')) =1";
+        //今年新增购物车总数
+        $yesterday_shoppingcart_new_sql = "SELECT count(*) counter from sales_flat_quote where base_grand_total>0 AND YEAR(created_at)=YEAR(NOW())";
+        //总共新增购物车总数
+        $yesterday_shoppingcart_new_sql = "SELECT count(*) counter from sales_flat_quote where base_grand_total>0";
+                                                              
+        $result = Db::connect('database.db_zeelool')->query($yesterday_sales_money_sql);
+        dump($result);
     }
 }

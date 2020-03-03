@@ -39,6 +39,40 @@ class Supplier extends Backend
      * 需要将application/admin/library/traits/Backend.php中对应的方法复制到当前控制器,然后进行修改
      */
 
+    /**
+     * 查看
+     */
+    public function index()
+    {
+        //设置过滤方法
+        $this->request->filter(['strip_tags']);
+        if ($this->request->isAjax()) {
+            //如果发送的来源是Selectpage，则转发到Selectpage
+            if ($this->request->request('keyField')) {
+                return $this->selectpage();
+            }
+            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            $total = $this->model
+                ->where($where)
+                ->where('status', 1)
+                ->order($sort, $order)
+                ->count();
+
+            $list = $this->model
+                ->where($where)
+                ->where('status', 1)
+                ->order($sort, $order)
+                ->limit($offset, $limit)
+                ->select();
+
+            $list = collection($list)->toArray();
+
+            $result = array("total" => $total, "rows" => $list);
+
+            return json($result);
+        }
+        return $this->view->fetch();
+    }
 
     /**
      * 重构添加方法
@@ -62,6 +96,13 @@ class Supplier extends Backend
                         $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.add' : $name) : $this->modelValidate;
                         $this->model->validateFailException(true)->validate($validate);
                     }
+                    $where['supplier_name'] = ['like', '%' . trim($params['supplier_name']) . '%'];
+                    $where['status'] = 1;
+                    $count = $this->model->where($where)->count();
+                    if ($count > 0) {
+                        $this->error('此供应商已存在！！');
+                    }
+                    $params['supplier_name'] = trim($params['supplier_name']);
                     $params['create_person'] = session('admin.nickname');
                     $params['createtime'] = date('Y-m-d H:i:s', time());
                     $result = $this->model->allowField(true)->save($params);
@@ -115,6 +156,15 @@ class Supplier extends Backend
                         $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.edit' : $name) : $this->modelValidate;
                         $row->validateFailException(true)->validate($validate);
                     }
+
+                    $where['supplier_name'] = ['like', '%' . trim($params['supplier_name']) . '%'];
+                    $where['status'] = 1;
+                    $where['id'] = ['<>', $row->id];
+                    $count = $this->model->where($where)->count();
+                    if ($count > 0) {
+                        $this->error('此供应商已存在！！');
+                    }
+                    $params['supplier_name'] = trim($params['supplier_name']);
                     $result = $row->allowField(true)->save($params);
                     Db::commit();
                 } catch (ValidateException $e) {
@@ -346,13 +396,13 @@ class Supplier extends Backend
         $data = db('zeelool_product')->alias('a')->field('a.*,b.name')->where('a.is_visable=1')->join(['zeelool_supplier' => 'b'], 'a.supplier_id=b.id')->select();
 
         //查询供应商id
-        $supplier = db('supplier')->column('id','supplier_name');
+        $supplier = db('supplier')->column('id', 'supplier_name');
         $list = [];
         foreach ($data as $k => $v) {
             $list[$k]['sku'] = $v['magento_sku'];
             $list[$k]['supplier_sku'] = $v['sku'];
             $list[$k]['supplier_id'] = $supplier[$v['name']];
-            $list[$k]['createtime'] = date('Y-m-d H:i:s',time());
+            $list[$k]['createtime'] = date('Y-m-d H:i:s', time());
             $list[$k]['create_person'] = session('admin.nickname');
             $list[$k]['link'] = $v['website'];
         }

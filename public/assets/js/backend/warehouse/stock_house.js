@@ -1,4 +1,4 @@
-define(['jquery', 'bootstrap', 'backend', 'table', 'form','bootstrap-table-jump-to'], function ($, undefined, Backend, Table, Form) {
+define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump-to'], function ($, undefined, Backend, Table, Form) {
 
     var Controller = {
         index: function () {
@@ -28,7 +28,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','bootstrap-table-jump-
                     [
                         { checkbox: true },
                         { field: 'id', title: __('Id') },
-                        { field: 'coding', title: __('Coding') },
+                        { field: 'coding', title: __('Coding'), operate: 'like' },
                         { field: 'library_name', title: __('Library_name') },
                         {
                             field: 'status', title: __('Status'), custom: { 1: 'success', 2: 'danger' },

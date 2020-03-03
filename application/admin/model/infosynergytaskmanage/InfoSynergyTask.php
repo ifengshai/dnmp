@@ -1,7 +1,7 @@
 <?php
 
 namespace app\admin\model\infosynergytaskmanage;
-
+use think\Db;
 use think\Model;
 use app\admin\model\infosynergytaskmanage\InfoSynergyTaskRemark;
 use app\admin\model\infosynergytaskmanage\InfoSynergyTaskChangeSku;
@@ -42,7 +42,8 @@ class InfoSynergyTask extends Model
             4=>'质检单',
             5=>'入库单',
             6=>'出库单',
-            7=>'库存盘点单'
+            7=>'库存盘点单',
+            8=>'VIP订单'
         ];
     }
     /***
@@ -57,7 +58,8 @@ class InfoSynergyTask extends Model
             4=>'质检单',
             5=>'入库单',
             6=>'出库单',
-            7=>'库存盘点单'
+            7=>'库存盘点单',
+            8=>'VIP订单'
         ];
         return $arr[$id];
     }
@@ -116,6 +118,41 @@ class InfoSynergyTask extends Model
 		$where['synergy_status']  = ['in',[0,1]];
 		$result = $this->where($where)->field('id,synergy_order_number')->find();
 		return $result ? $result : false;
-	}
+    }
+    
 
+    /**
+     * 获取未处理协同事件数量
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/03/02 14:27:30 
+     * @return void
+     */
+    public function getTaskNum()
+    {
+        $map['is_del'] = 1;
+        $map['synergy_status'] = 0;
+        return $this->where($map)->count(1);
+    }
+    /**
+     * 检查VIP订单是否正确
+     * @author lsw
+     * @param order_plaftorm 平台
+     * @param synergy_order_number 订单号
+     */
+    public function checkVipOrder($order_platform,$synergy_order_number)
+    {
+        switch($order_platform){
+            case 1:
+                $db='database.db_zeelool_online';
+            break;
+            case 2:
+                $db='database.db_voogueme_online';
+            break;    
+        }
+        $where['order_number'] = $synergy_order_number;
+        $result = Db::connect($db)->name('oc_vip_order')->where($where)->field('id,order_number')->find();
+        return $result ? $result : false;
+    } 
 }

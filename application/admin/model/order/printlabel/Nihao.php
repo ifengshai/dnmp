@@ -8,14 +8,14 @@ use think\Db;
 
 class Nihao extends Model
 {
-    
+
     //数据库
     // protected $connection = 'database.db_nihao_online';
     protected $connection = 'database.db_nihao';
-    
+
     // 表名
     protected $table = 'sales_flat_order';
-    
+
     // 自动写入时间戳字段
     protected $autoWriteTimestamp = false;
 
@@ -25,10 +25,8 @@ class Nihao extends Model
     protected $deleteTime = false;
 
     // 追加属性
-    protected $append = [
+    protected $append = [];
 
-    ];
-    
     /**
      * 获取订单详情 nihao站
      * @param $ordertype 站点
@@ -60,7 +58,7 @@ class Nihao extends Model
         foreach ($result as $k => &$v) {
             $v['product_options'] = unserialize($v['product_options']);
             $v['prescription'] = json_decode($v['product_options']['info_buyRequest']['tmplens']['prescription'], true);
-            $v['prescription'] = array_merge($v['prescription'],$v['product_options']['info_buyRequest']['tmplens']);
+            $v['prescription'] = array_merge($v['prescription'], $v['product_options']['info_buyRequest']['tmplens']);
             unset($v['product_options']);
         }
         unset($v);
@@ -70,5 +68,25 @@ class Nihao extends Model
         return $result;
     }
 
-
+    /**
+     * 根据SKU查询订单号ID
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/02/24 14:51:20 
+     * @return void
+     */
+    public function getOrderId($map)
+    {
+        if ($map) {
+            $result = Db::connect('database.db_nihao')
+                ->table('sales_flat_order_item')
+                ->alias('a')
+                ->join(['sales_flat_order' => 'b'], 'a.order_id=b.entity_id')
+                ->where($map)
+                ->column('order_id');
+            return $result;
+        }
+        return false;
+    }
 }
