@@ -150,7 +150,7 @@ class ZendeskOne extends Controller
                     //开始匹配邮件内容
                     //查看是否已有自动回复的tag
                     if (in_array('自动回复', $tags)) { //次类是顾客根据要求回复的内容
-                        file_put_contents('./zendesk2.txt',$ticket->id,FILE_APPEND);
+                        file_put_contents('/www/wwwroot/mojing/runtime/log/zendesk2.txt',$ticket->id,FILE_APPEND);
                         $answer_key = 0;
                         foreach ($this->auto_answer as $key => $answer) {
                             //回复内容包含自动回复的内容，且相匹配
@@ -245,7 +245,7 @@ class ZendeskOne extends Controller
                                 'tags' => ['自动回复','自动回复50测'],
                                 'status' => 'pending'
                             ];
-                            file_put_contents('./zendesk.txt',$ticket->id,FILE_APPEND);
+                            file_put_contents('/www/wwwroot/mojing/runtime/log/zendesk.txt',$ticket->id,FILE_APPEND);
                             //如果是第一条评论，则把对应的客户内容插入主表，回复内容插入附表，其余不做处理
                             if($count == 1){
                                 //主email
@@ -263,9 +263,9 @@ class ZendeskOne extends Controller
                                 ];
                                 //添加主评论
                                 $zendesk_reply = ZendeskReply::create($reply_data);
-                                file_put_contents('./zendeskreply.txt',$zendesk_reply->email_id,FILE_APPEND);
+                                file_put_contents('/www/wwwroot/mojing/runtime/log/zendeskreply.txt',$zendesk_reply->email_id,FILE_APPEND);
                                 if(!$zendesk_reply->email_id){
-                                    file_put_contents('./zendeskreply2.txt',$zendesk_reply->email_id,FILE_APPEND);
+                                    file_put_contents('/www/wwwroot/mojing/runtime/log/zendeskreply2.txt',$zendesk_reply->email_id,FILE_APPEND);
                                 }
                                 //回复评论
                                 $reply_detail_data = [
