@@ -65,7 +65,7 @@ class ZendeskOne extends Controller
         $search = [
             'type' => 'ticket',
             'via' => ['mail','web'],
-            'status' => ['new'],
+            'status' => ['new','open'],
             'tags' => [
                 'keytype' => '-',
                 'value' => '转客服'
@@ -77,7 +77,7 @@ class ZendeskOne extends Controller
             //'requester' => $this->testId,
             'updated_at' => [
                 'valuetype' => '>=',
-                'value'   => '2020-03-03T00:00:55Z',
+                'value'   => '20minutes',
             ],//>=意思是3分钟之内，<=是三分钟之外
             'order_by' => 'updated_at',
             'sort' => 'desc'
@@ -125,6 +125,7 @@ class ZendeskOne extends Controller
      */
     public function findCommentsByTickets($tickets)
     {
+        //dump($tickets);die;
         foreach($tickets as $key => $ticket){
 //            if($key >= 50){
 //                break;
@@ -342,6 +343,21 @@ class ZendeskOne extends Controller
             ->where('customer_email',$email)
             ->order('entity_id desc')
             ->find();
+        if(empty($order)){
+            //无email，查询用户
+            $customer = Db::connect('database.db_zeelool')
+                ->table('customer_entity')
+                ->where('email',$email)
+                ->find();
+            if(!empty($customer)){
+                $order = Db::connect('database.db_zeelool')
+                    ->table('sales_flat_order')
+                    ->field('entity_id,state,status,increment_id,created_at')
+                    ->where('customer_id',$customer['entity_id'])
+                    ->order('entity_id desc')
+                    ->find();
+            }
+        }
         if(!empty($order)){
             $res = [
                 'status' => $order['status'],
@@ -352,6 +368,7 @@ class ZendeskOne extends Controller
             ];
 
         }else{
+
             $res = [
                 'status' => '',
                 'increment_id' => '',
