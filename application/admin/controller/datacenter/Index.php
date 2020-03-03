@@ -307,9 +307,9 @@ class Index extends Backend
         $purchase_map['stock_status'] = ['in', [0, 1]];
         $purchase_num = $purchase->alias('a')->join(['fa_purchase_order_item' => 'b'], 'a.id=b.purchase_id')
             ->where($purchase_map)
+            ->whereExp('sku', 'is not null')
             ->sum('purchase_num');
-        dump($purchase_num);
-
+        
         $check_map['a.status'] = 2;
         $check_map['a.type'] = 1;
         $check_map['b.purchase_status'] = ['in', [2, 5, 6, 7]];
@@ -317,7 +317,6 @@ class Index extends Backend
         $check = new \app\admin\model\warehouse\Check;
         $arrivals_num = $check->alias('a')
             ->where($check_map)
-            ->whereExp($check_map)
             ->join(['fa_purchase_order' => 'b'], 'b.id=a.purchase_id')
             ->join(['fa_check_order_item' => 'c'], 'a.id=c.check_id')
             ->sum('arrivals_num');
