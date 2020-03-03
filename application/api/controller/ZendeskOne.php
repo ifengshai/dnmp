@@ -309,11 +309,6 @@ class ZendeskOne extends Controller
             ->order('entity_id desc')
             ->find();
         if(!empty($order)){
-//            //判断是否发货
-//            $track = Db::connect('database.db_zeelool')
-//                ->table('sales_flat_shipment_track')
-//                ->where('order_id',$order['entity_id'])
-//                ->find();
             $res = [
                 'status' => $order['status'],
                 'increment_id' => $order['increment_id'],
