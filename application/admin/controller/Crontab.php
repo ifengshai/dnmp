@@ -1683,19 +1683,19 @@ order by sfoi.item_id asc limit 1000";
         //总共新增购物车总数
         $total_shoppingcart_new_sql = "SELECT count(*) counter from sales_flat_quote where base_grand_total>0";
         //昨天新增购物车转化率
-        $yesterday_shoppingcart_newconversion_rs = round(($yesterday_order_success_rs/$yesterday_shoppingcart_new_rs),2);
-        //过去7天新增购物车转化率
-        $pastsevenday_shoppingcart_newconversion_rs = round(($pastsevenday_order_success_rs/$pastsevenday_shoppingcart_new_rs),2);
-        //过去30天新增购物车转化率
-        $pastthirtyday_shoppingcart_newconversion_rs = round(($pastthirtyday_order_success_rs/$pastthirtyday_shoppingcart_new_rs),2);
-        //当月新增购物车转化率
-        $thismonth_shoppingcart_newconversion_rs = round(($thismonth_order_success_rs/$thismonth_shoppingcart_new_rs),2);                
-        //上月新增购物车转化率
-        $lastmonth_shoppingcart_newconversion_rs = round(($lastmonth_order_success_rs/$lastmonth_shoppingcart_new_rs),2);
-        //今年新增购物车转化率
-        $thisyear_shoppingcart_newconversion_rs = round(($thisyear_order_success_rs/$thisyear_shoppingcart_new_rs),2);
-        //总共新增购物车转化率
-        $total_shoppingcart_newconversion_rs = round(($total_order_success_rs/$total_shoppingcart_new_rs),2);
+        // $yesterday_shoppingcart_newconversion_rs = round(($yesterday_order_success_rs/$yesterday_shoppingcart_new_rs),2);
+        // //过去7天新增购物车转化率
+        // $pastsevenday_shoppingcart_newconversion_rs = round(($pastsevenday_order_success_rs/$pastsevenday_shoppingcart_new_rs),2);
+        // //过去30天新增购物车转化率
+        // $pastthirtyday_shoppingcart_newconversion_rs = round(($pastthirtyday_order_success_rs/$pastthirtyday_shoppingcart_new_rs),2);
+        // //当月新增购物车转化率
+        // $thismonth_shoppingcart_newconversion_rs = round(($thismonth_order_success_rs/$thismonth_shoppingcart_new_rs),2);                
+        // //上月新增购物车转化率
+        // $lastmonth_shoppingcart_newconversion_rs = round(($lastmonth_order_success_rs/$lastmonth_shoppingcart_new_rs),2);
+        // //今年新增购物车转化率
+        // $thisyear_shoppingcart_newconversion_rs = round(($thisyear_order_success_rs/$thisyear_shoppingcart_new_rs),2);
+        // //总共新增购物车转化率
+        // $total_shoppingcart_newconversion_rs = round(($total_order_success_rs/$total_shoppingcart_new_rs),2);
         //昨天新增注册用户数
         $yesterday_register_customer_sql       = "SELECT count(*) counter from customer_entity where DATEDIFF(created_at,NOW())=-1";
         //过去7天新增注册用户数
