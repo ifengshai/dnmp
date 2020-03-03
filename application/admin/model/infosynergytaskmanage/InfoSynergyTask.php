@@ -145,10 +145,10 @@ class InfoSynergyTask extends Model
     {
         switch($order_platform){
             case 1:
-                $db='db_zeelool_online';
+                $db='database.db_zeelool_online';
             break;
             case 2:
-                $db='db_voogueme_online';
+                $db='database.db_voogueme_online';
             break;    
         }
         $where['order_number'] = $synergy_order_number;
