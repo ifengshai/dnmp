@@ -228,6 +228,7 @@ class ZendeskOne extends Controller
                                 'tags' => ['自动回复'],
                                 'status' => 'pending'
                             ];
+                            file_put_contents('./zendesk.txt',$ticket->id,FILE_APPEND);
                             //如果是第一条评论，则把对应的客户内容插入主表，回复内容插入附表，其余不做处理
                             if($count == 1){
                                 //主email
@@ -245,6 +246,7 @@ class ZendeskOne extends Controller
                                 ];
                                 //添加主评论
                                 $zendesk_reply = ZendeskReply::create($reply_data);
+                                file_put_contents('./zendeskreply.txt',$zendesk_reply->email_id,FILE_APPEND);
                                 //回复评论
                                 $reply_detail_data = [
                                     'reply_id' => $zendesk_reply->id,
