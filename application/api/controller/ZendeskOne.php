@@ -62,16 +62,16 @@ class ZendeskOne extends Controller
     {
         $search = [
             'type' => 'ticket',
-            'via' => 'mail',
+            'via' => ['mail','web'],
             'status' => ['new'],
             'tags' => [
                 'keytype' => '-',
                 'value' => '转客服'
             ], // -排除此tag
-            // 'assignee' => [
-            //     382940274852,
-            //     'none'
-            // ],
+            'assignee' => [
+                382940274852,
+                'none'
+            ],
             //'requester' => $this->testId,
             'order_by' => 'updated_at',
             'sort' => 'desc'
