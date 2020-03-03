@@ -617,4 +617,19 @@ class Index extends Backend
         $this->view->assign('created_at', $create_time);
         return $this->view->fetch();
     }
+    
+    /**
+     * 根据处方范围统计SKU副数
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/03/03 18:05:00 
+     * @return void
+     */
+    public function order_sku_num()
+    {
+        
+    }
+    
+    
 }
