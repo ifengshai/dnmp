@@ -275,6 +275,12 @@ class Index extends Backend
         //在途库存总金额
         $onwayAllStockPrice = $this->onway_all_stock_price();
 
+        //在途镜架库存
+        $onwayFrameAllStock = $this->onway_frame_all_stock();
+
+        //在途镜架库存总金额
+        $onwayFrameAllStockPrice = $this->onway_frame_all_stock_price();
+
         $this->view->assign('allStock', $allStock);
         $this->view->assign('allStockPrice', $allStockPrice);
         $this->view->assign('frameStock', $frameStock);
@@ -292,6 +298,8 @@ class Index extends Backend
         $this->view->assign('stock7daysPercent', $stock7daysPercent);
         $this->view->assign('onway_all_stock', $onwayAllStock);
         $this->view->assign('onway_all_stock_price', $onwayAllStockPrice);
+        $this->view->assign('onway_frame_all_stock', $onwayFrameAllStock);
+        $this->view->assign('onway_frame_all_stock_price', $onwayFrameAllStockPrice);
 
         return $this->view->fetch();
     }
@@ -340,7 +348,7 @@ class Index extends Backend
      */
     protected function onway_all_stock_price()
     {
-        //计算SKU总采购数量
+        //计算SKU总采购金额
         $purchase = new \app\admin\model\purchase\PurchaseOrder;
         $purchase_map['purchase_status'] = ['in', [2, 5, 6, 7]];
         $purchase_map['stock_status'] = ['in', [0, 1]];
@@ -362,6 +370,89 @@ class Index extends Backend
             ->join(['fa_purchase_order_item' => 'd'], 'd.purchase_id=c.purchase_id and c.sku=d.sku', 'left')
             ->cache(86400)
             ->sum('arrivals_num*purchase_price');
+        return $purchase_price - $arrivals_price;
+    }
+
+    /**
+     * 在途镜架库存
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/03/02 17:20:21 
+     * @return void
+     */
+    protected function onway_frame_all_stock()
+    {
+        //镜架SKU
+        $skus = $this->item->getFrameSku();
+        if ($skus) {
+            $purchase_map['sku'] = ['in', $skus];
+            //计算SKU总采购数量
+            $purchase = new \app\admin\model\purchase\PurchaseOrder;
+            $purchase_map['purchase_status'] = ['in', [2, 5, 6, 7]];
+            $purchase_map['stock_status'] = ['in', [0, 1]];
+            $purchase_num = $purchase->alias('a')->join(['fa_purchase_order_item' => 'b'], 'a.id=b.purchase_id')
+                ->where($purchase_map)
+                ->whereExp('sku', 'is not null')
+                ->cache(86400)
+                ->sum('purchase_num');
+
+            $check_map['c.sku'] = ['in', $skus];
+            $check_map['a.status'] = 2;
+            $check_map['a.type'] = 1;
+            $check_map['b.purchase_status'] = ['in', [2, 5, 6, 7]];
+            $check_map['b.stock_status'] = ['in', [0, 1]];
+            $check = new \app\admin\model\warehouse\Check;
+            $arrivals_num = $check->alias('a')
+                ->where($check_map)
+                ->join(['fa_purchase_order' => 'b'], 'b.id=a.purchase_id')
+                ->join(['fa_check_order_item' => 'c'], 'a.id=c.check_id')
+                ->cache(86400)
+                ->sum('arrivals_num');
+        }
+        return $purchase_num - $arrivals_num;
+    }
+
+    /**
+     * 在途镜架库存总金额
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/03/02 17:20:21 
+     * @return void
+     */
+    protected function onway_frame_all_stock_price()
+    {
+        //镜架SKU
+        $skus = $this->item->getFrameSku();
+        if ($skus) {
+            $purchase_map['sku'] = ['in', $skus];
+            //计算SKU总采购金额
+            $purchase = new \app\admin\model\purchase\PurchaseOrder;
+            $purchase_map['purchase_status'] = ['in', [2, 5, 6, 7]];
+            $purchase_map['stock_status'] = ['in', [0, 1]];
+            $purchase_price = $purchase->alias('a')->join(['fa_purchase_order_item' => 'b'], 'a.id=b.purchase_id')
+                ->where($purchase_map)
+                ->whereExp('sku', 'is not null')
+                ->cache(86400)
+                ->sum('purchase_num*purchase_price');
+
+            //计算到货sku总金额
+            $check_map['c.sku'] = ['in', $skus];
+            $check_map['a.status'] = 2;
+            $check_map['a.type'] = 1;
+            $check_map['b.purchase_status'] = ['in', [2, 5, 6, 7]];
+            $check_map['b.stock_status'] = ['in', [0, 1]];
+            $check = new \app\admin\model\warehouse\Check;
+            $arrivals_price = $check->alias('a')
+                ->where($check_map)
+                ->join(['fa_purchase_order' => 'b'], 'b.id=a.purchase_id')
+                ->join(['fa_check_order_item' => 'c'], 'a.id=c.check_id')
+                ->join(['fa_purchase_order_item' => 'd'], 'd.purchase_id=c.purchase_id and c.sku=d.sku', 'left')
+                ->cache(86400)
+                ->sum('arrivals_num*purchase_price');
+        }
+
         return $purchase_price - $arrivals_price;
     }
 
