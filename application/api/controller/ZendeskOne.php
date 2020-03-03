@@ -77,7 +77,7 @@ class ZendeskOne extends Controller
             //'requester' => $this->testId,
             'updated_at' => [
                 'valuetype' => '>=',
-                'value'   => '2020-03-03T00:00:55Z',
+                'value'   => '20minutes',
             ],//>=意思是3分钟之内，<=是三分钟之外
             'order_by' => 'updated_at',
             'sort' => 'desc'
