@@ -230,7 +230,7 @@ class ZendeskOne extends Controller
                                 //主email
                                 $reply_data = [
                                     'email' => $requester_email,
-                                    'title' => $last_comment->subject,
+                                    'title' => $ticket->subject,
                                     'email_id' => $ticket->id,
                                     'body' => $last_comment->body,
                                     'html_body' => $last_comment->html_body,
