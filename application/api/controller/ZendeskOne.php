@@ -77,6 +77,7 @@ class ZendeskOne extends Controller
             'sort' => 'desc'
         ];
         $this->getTickets($search);
+        exit;
     }
 
     /**
