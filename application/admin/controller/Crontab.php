@@ -26,9 +26,14 @@ class Crontab extends Backend
         'nihao_order_custom_order_prescription',
         'nihao_order_item_process',
         'set_purchase_order_logistics',
-        'product_grade_list_crontab'
-    ];
+        'product_grade_list_crontab',
+        'changeItemNewToOld',
+        'get_sku_stock',
+        'get_sku_price',
+        'get_sku_allstock'
 
+    ];
+    protected $order_status =  "and status in ('processing','complete','creditcard_proccessing','free_processing')";
 
     /**
      * 定时处理 订单列表分类
@@ -1307,7 +1312,7 @@ order by sfoi.item_id asc limit 1000";
 
         //查询供货商
         $supplier = new \app\admin\model\purchase\SupplierSku;
-        $supplier_list = $supplier->alias('a')->join(['fa_supplier' => 'b'], 'a.supplier_id=b.id')->column('b.supplier_name', 'a.sku');
+        $supplier_list = $supplier->alias('a')->join(['fa_supplier' => 'b'], 'a.supplier_id=b.id')->column('b.supplier_name,b.purchase_person', 'a.sku');
 
 
         //删除无用数组 释放内存
@@ -1338,7 +1343,8 @@ order by sfoi.item_id asc limit 1000";
             //分等级产品
             $num = round($val['counter'] * 1 / $val['days'] * 1 * 30);
             $list[$k]['num'] = $num;
-            $list[$k]['supplier_name'] =  $supplier_list[$val['true_sku']];
+            $list[$k]['supplier_name'] =  $supplier_list[$val['true_sku']]['supplier_name'];
+            $list[$k]['purchase_person'] =  $supplier_list[$val['true_sku']]['purchase_person'];
 
 
             if ($num >= 300) {
@@ -1442,18 +1448,17 @@ order by sfoi.item_id asc limit 1000";
         //计算三个站最近30天销量
         if ($zeelool_sku) {
             $map['b.sku'] = ['in', $zeelool_sku];
-            $zeelool = $zeelool_model->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')->group('b.sku')->column('sum(b.qty_ordered) as num','b.sku');
-
+            $zeelool = $zeelool_model->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')->group('b.sku')->column('sum(b.qty_ordered) as num', 'b.sku');
         }
 
         if ($voogueme_sku) {
             $map['b.sku'] = ['in', $voogueme_sku];
-            $voogueme = $voogueme_model->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')->group('b.sku')->column('sum(b.qty_ordered) as num','b.sku');
+            $voogueme = $voogueme_model->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')->group('b.sku')->column('sum(b.qty_ordered) as num', 'b.sku');
         }
 
         if ($nihao_sku) {
             $map['b.sku'] = ['in', $nihao_sku];
-            $nihao = $nihao_model->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')->group('b.sku')->column('sum(b.qty_ordered) as num','b.sku');
+            $nihao = $nihao_model->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')->group('b.sku')->column('sum(b.qty_ordered) as num', 'b.sku');
         }
 
         foreach ($list as $k => $v) {
@@ -1470,6 +1475,7 @@ order by sfoi.item_id asc limit 1000";
         }
         echo 'ok';
     }
+
     /***
      * 定时把新品sku变成老品
      */
@@ -1484,4 +1490,104 @@ order by sfoi.item_id asc limit 1000";
         $map['id'] = ['in', $itemId];
         Db::connect('database.db_stock')->name('item')->where($map)->update(['is_new' => 2]);
     }
+
+    /**
+     * 记录每天商品库存变化日志
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/02/19 16:23:27 
+     * @return void
+     */
+    public function get_sku_stock()
+    {
+        $where['is_del'] = 1;
+        $item = Db::connect('database.db_stock')->name('item')->where($where)->field('sku,available_stock as stock_num')->select();
+
+        if ($item) {
+            Db::name('goods_stock_log')->insertAll($item);
+            echo 'ok';
+        }
+    }
+
+    /**
+     * 定时获取SKU最新的采购单价
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/02/19 16:23:27 
+     * @return void
+     */
+    public function get_sku_price()
+    {
+        $purchase = new \app\admin\model\purchase\PurchaseOrder;
+        $result = $purchase->alias('a')
+            ->where('a.is_del', 1)
+            ->field('sku,purchase_price,createtime')
+            ->join(['fa_purchase_order_item' => 'b'], 'a.id=b.purchase_id')
+            ->order('createtime desc')
+            ->select();
+        $arr = [];
+        foreach ($result as $v) {
+            if (!isset($arr[$v['sku']])) {
+                $arr[$v['sku']] = $v['purchase_price'];
+            } else {
+                continue;
+            }
+        }
+        if ($arr) {
+            $list = [];
+            $i = 0;
+            foreach ($arr as $k => $v) {
+                $list[$i]['sku'] = $k;
+                $list[$i]['price'] = $v;
+                $list[$i]['createtime'] = date('Y-m-d H:i:s', time());
+                $i++;
+            }
+            unset($arr);
+        }
+
+        if ($list) {
+            //清空表
+            Db::execute("truncate table fa_sku_price;");
+            //批量添加
+            $res = Db::table('fa_sku_price')->insertAll($list);
+        }
+        echo 'ok';
+    }
+
+    /**
+     * 记录每天总库存数
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/02/29 16:13:16 
+     * @return void
+     */
+    public function get_sku_allstock()
+    {
+        $item = new \app\admin\model\itemmanage\Item;
+        $num = $item->getAllStock();
+        $data['allnum'] = $num;
+        $data['createtime'] = date('Y-m-d H:i:s');
+        $res = Db::table('fa_product_allstock_log')->insert($data);
+    }
+    /**
+     * 更新zeelool站仪表盘数据
+     *
+     * z站今天的销售额($) 订单数	订单支付成功数	客单价($)	购物车总数	购物车总转化率(%)	新增购物车数	新增购物车转化率	新增注册用户数
+     * @Description created by lsw
+     * @author lsw
+     * @since 2020/03/02 17:39:31 
+     * @return void
+     */
+    public function update_zeelool_ashboard_data()
+    {
+        $order_status = $this->order_status;
+        //昨日销售额
+        $yesterday_sales_money_sql = "SELECT round(sum(base_grand_total),2) base_grand_total FROM sales_flat_order WHERE DATEDIFF('created_at',NOW())=-1 $order_status";
+        $result = Db::connect('database.db_zeelool')->query($yesterday_sales_money_sql);
+        dump($result);
+    }    
+
 }

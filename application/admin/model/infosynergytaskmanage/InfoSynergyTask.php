@@ -116,6 +116,22 @@ class InfoSynergyTask extends Model
 		$where['synergy_status']  = ['in',[0,1]];
 		$result = $this->where($where)->field('id,synergy_order_number')->find();
 		return $result ? $result : false;
-	}
+    }
+    
+
+    /**
+     * 获取未处理协同事件数量
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/03/02 14:27:30 
+     * @return void
+     */
+    public function getTaskNum()
+    {
+        $map['is_del'] = 1;
+        $map['synergy_status'] = 0;
+        return $this->where($map)->count(1);
+    }
 
 }

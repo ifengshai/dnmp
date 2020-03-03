@@ -29,7 +29,7 @@ class Zeelool extends Model
     // 追加属性
     protected $append = [];
 
-    
+
     //名称获取器
     public function getCustomerFirstnameAttr($value, $data)
     {
@@ -147,6 +147,31 @@ class Zeelool extends Model
 
 
     /**
+     * 统计订单SKU销量
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/02/06 16:42:25 
+     * @param [type] $sku 筛选条件
+     * @return object
+     */
+    public function getOrderSalesNum($sku, $where)
+    {
+        if ($sku) {
+            $map['sku'] = ['in', $sku];
+        }
+        $res = $this
+            ->where($map)
+            ->where($where)
+            ->alias('a')
+            ->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')
+            ->group('sku')
+            ->column('sum(b.qty_ordered)', 'sku');
+        return $res;
+    }
+
+
+    /**
      * 获取订单支付详情 多站公用方法
      * @param $ordertype 站点
      * @param $entity_id 订单id
@@ -218,11 +243,11 @@ class Zeelool extends Model
      * @param totalId 所有的
      * @param thisPageId 当前页面的ID 
      */
-    public function getOrderCostInfo($totalId,$thisPageId)
+    public function getOrderCostInfo($totalId, $thisPageId)
     {
 
         $arr = [];
-        if(!$totalId || !$thisPageId){
+        if (!$totalId || !$thisPageId) {
             return $arr;
         }
         //原先逻辑已经废弃(总付款金额)
@@ -239,39 +264,39 @@ class Zeelool extends Model
         //         $arr['thisPagePayPrice'][$v['parent_id']] = round($v['base_amount_paid'],2);
         // }
         //求出总付款金额
-        $totalMap['entity_id'] = ['in',$totalId];
-        $totalMap['status']    = ['in',['processing','complete','creditcard_proccessing','free_processing']];
+        $totalMap['entity_id'] = ['in', $totalId];
+        $totalMap['status']    = ['in', ['processing', 'complete', 'creditcard_proccessing', 'free_processing']];
         $payInfo = $this->where($totalMap)->field('entity_id,base_total_paid,base_total_due,postage_money')->select();
-        if($payInfo){
-            foreach($payInfo as $v){
-                $arr['totalPayInfo'] +=round($v['base_total_paid']+$v['base_total_due'],2);
-                $arr['totalPostageMoney'] += round($v['postage_money'],2);
+        if ($payInfo) {
+            foreach ($payInfo as $v) {
+                $arr['totalPayInfo'] += round($v['base_total_paid'] + $v['base_total_due'], 2);
+                $arr['totalPostageMoney'] += round($v['postage_money'], 2);
             }
         }
 
         //求出镜架成本start
         //1.求出所有的订单号
-        $frameTotalMap['entity_id'] = ['in',$totalId];
-        $frameThisPageMap['entity_id'] = ['in',$thisPageId];
+        $frameTotalMap['entity_id'] = ['in', $totalId];
+        $frameThisPageMap['entity_id'] = ['in', $thisPageId];
         $order['increment_id'] = Db::connect($this->connection)->table('sales_flat_order')->where($frameTotalMap)->column('increment_id');
-        if(!$order['increment_id']){
+        if (!$order['increment_id']) {
             return $arr;
         }
         //2.求出本页面的订单号
         $order['this_increment_id'] = Db::connect($this->connection)->table('sales_flat_order')->where($frameThisPageMap)->column('increment_id');
-        if(!$order['this_increment_id']){
+        if (!$order['this_increment_id']) {
             return $arr;
         }
         //求出镜架成本start
         $arr['totalFramePrice'] = $arr['totalLensPrice'] = 0;
-        $outStockMap['order_number'] = ['in',$order['increment_id']];
-        $frameInfo = Db::table('fa_outstock_log')->alias('g')->where($outStockMap)->join('purchase_order_item m','g.purchase_id=m.purchase_id and g.sku=m.sku')
-        ->field('g.sku,g.order_number,g.out_stock_num,g.purchase_id,m.purchase_price')->select(); 
-        if($frameInfo){
-            foreach($frameInfo as $fv){
-                 $arr['totalFramePrice'] +=round($fv['out_stock_num']*$fv['purchase_price'],2);
-                if(in_array($fv['order_number'],$order['this_increment_id'])){
-                    $arr['thispageFramePrice'][$fv['order_number']] = round($fv['out_stock_num']*$fv['purchase_price'],2);
+        $outStockMap['order_number'] = ['in', $order['increment_id']];
+        $frameInfo = Db::table('fa_outstock_log')->alias('g')->where($outStockMap)->join('purchase_order_item m', 'g.purchase_id=m.purchase_id and g.sku=m.sku')
+            ->field('g.sku,g.order_number,g.out_stock_num,g.purchase_id,m.purchase_price')->select();
+        if ($frameInfo) {
+            foreach ($frameInfo as $fv) {
+                $arr['totalFramePrice'] += round($fv['out_stock_num'] * $fv['purchase_price'], 2);
+                if (in_array($fv['order_number'], $order['this_increment_id'])) {
+                    $arr['thispageFramePrice'][$fv['order_number']] = round($fv['out_stock_num'] * $fv['purchase_price'], 2);
                 }
             }
         }
@@ -279,50 +304,50 @@ class Zeelool extends Model
         //求出镜架成本end
         //求出镜片成本start
         $lensInfo = Db::table('fa_lens_outorder')->where($outStockMap)->field('order_number,num,price')->select();
-        if($lensInfo){
-            foreach($lensInfo as  $lv){
-                $arr['totalLensPrice'] += round($lv['num']*$lv['price'],2);
-                if(in_array($lv['order_number'],$order['this_increment_id'])){
-                    $arr['thispageLensPrice'][$lv['order_number']] = round($lv['num']*$lv['price'],2);
+        if ($lensInfo) {
+            foreach ($lensInfo as  $lv) {
+                $arr['totalLensPrice'] += round($lv['num'] * $lv['price'], 2);
+                if (in_array($lv['order_number'], $order['this_increment_id'])) {
+                    $arr['thispageLensPrice'][$lv['order_number']] = round($lv['num'] * $lv['price'], 2);
                 }
             }
         }
         //求出镜片成本end
         //求出退款金额和补差价金额start
-        $saleMap['order_number'] = ['in',$order['increment_id']];
+        $saleMap['order_number'] = ['in', $order['increment_id']];
         $saleMap['task_status']  = 2;
         $synergyMap['synergy_status'] = 2;
-        $synergyMap['synergy_order_number'] = ['in',$order['increment_id']];
+        $synergyMap['synergy_order_number'] = ['in', $order['increment_id']];
         $synergyMap['synergy_order_id'] = 2;
         $arr['totalRefundMoney'] = $arr['totalFullPostMoney'] = 0;
-        $saleAfterInfo = Db::name('sale_after_task')->where($saleMap)->field('order_number,refund_money,make_up_price_order')->select(); 
+        $saleAfterInfo = Db::name('sale_after_task')->where($saleMap)->field('order_number,refund_money,make_up_price_order')->select();
         $infoSynergyInfo = Db::name('info_synergy_task')->where($synergyMap)->field('synergy_order_number,refund_money,make_up_price_order')->select();
         //求出退款金额
         //把补差价订单号存起来
         $fullPostOrderTask = $fullPostOrderSynergy = [];
-        if($saleAfterInfo){
-            foreach($saleAfterInfo as $sv){
-                $arr['totalRefundMoney'] += round($sv['refund_money'],2);
-                if(in_array($sv['order_number'],$order['this_increment_id'])){
-                    $arr['thispageRefundMoney'][$sv['order_number']] = round($sv['refund_money'],2);
+        if ($saleAfterInfo) {
+            foreach ($saleAfterInfo as $sv) {
+                $arr['totalRefundMoney'] += round($sv['refund_money'], 2);
+                if (in_array($sv['order_number'], $order['this_increment_id'])) {
+                    $arr['thispageRefundMoney'][$sv['order_number']] = round($sv['refund_money'], 2);
                 }
                 //如果补差价订单存在的话,把补差价订单存起来
-                if($sv['make_up_price_order']){
+                if ($sv['make_up_price_order']) {
                     $fullPostOrderTask[$sv['order_number']] = $sv['make_up_price_order'];
                 }
             }
         }
-        if($infoSynergyInfo){
-            foreach($infoSynergyInfo as $vs){
-                $arr['totalRefundMoney'] += round($vs['refund_money'],2);
-                if(in_array($vs['synergy_order_number'],$order['this_increment_id'])){
-                    if(isset($arr['thispageRefundMoney'][$vs['synergy_order_number']])){
-                        $arr['thispageRefundMoney'][$vs['synergy_order_number']] += round($vs['refund_money'],2);
-                    }else{
-                        $arr['thispageRefundMoney'][$vs['synergy_order_number']] = round($vs['refund_money'],2);
+        if ($infoSynergyInfo) {
+            foreach ($infoSynergyInfo as $vs) {
+                $arr['totalRefundMoney'] += round($vs['refund_money'], 2);
+                if (in_array($vs['synergy_order_number'], $order['this_increment_id'])) {
+                    if (isset($arr['thispageRefundMoney'][$vs['synergy_order_number']])) {
+                        $arr['thispageRefundMoney'][$vs['synergy_order_number']] += round($vs['refund_money'], 2);
+                    } else {
+                        $arr['thispageRefundMoney'][$vs['synergy_order_number']] = round($vs['refund_money'], 2);
                     }
                 }
-                if($vs['make_up_price_order']){
+                if ($vs['make_up_price_order']) {
                     $fullPostOrderSynergy[$vs['synergy_order_number']] = $vs['make_up_price_order'];
                 }
             }
@@ -332,64 +357,60 @@ class Zeelool extends Model
         //去掉重复的补差价订单号
         //$fullPostOrder = array_unique($fullPostOrder);
         //搜索订单条件
-        $fullPostMap['status']       = ['in',['processing','complete','creditcard_proccessing','free_processing']];
-        $fullPostMap['increment_id'] = ['in',$fullPostOrderTask];
+        $fullPostMap['status']       = ['in', ['processing', 'complete', 'creditcard_proccessing', 'free_processing']];
+        $fullPostMap['increment_id'] = ['in', $fullPostOrderTask];
         $fullPostResult = $this->where($fullPostMap)->field('increment_id,base_total_paid,base_total_due')->select();
-        if($fullPostResult){
-            foreach($fullPostResult as $vf){
-                $arr['totalFullPostMoney'] +=round($vf['base_total_paid']+$vf['base_total_due'],2);
+        if ($fullPostResult) {
+            foreach ($fullPostResult as $vf) {
+                $arr['totalFullPostMoney'] += round($vf['base_total_paid'] + $vf['base_total_due'], 2);
                 //求出订单号
-                $originOrder = array_search($vf['increment_id'],$fullPostOrderTask);
-                if(in_array($originOrder,$order['this_increment_id'])){
-                    $arr['thispageFullPostMoney'][$originOrder] = round($vf['base_total_paid']+$vf['base_total_due'],2);
+                $originOrder = array_search($vf['increment_id'], $fullPostOrderTask);
+                if (in_array($originOrder, $order['this_increment_id'])) {
+                    $arr['thispageFullPostMoney'][$originOrder] = round($vf['base_total_paid'] + $vf['base_total_due'], 2);
                 }
-
             }
-            
         }
         //求出补差价订单(信息协同补差价订单)
-        $synergyFullPostMap['status']       = ['in',['processing','complete','creditcard_proccessing','free_processing']];
-        $synergyFullPostMap['increment_id'] = ['in',$fullPostOrderSynergy];
+        $synergyFullPostMap['status']       = ['in', ['processing', 'complete', 'creditcard_proccessing', 'free_processing']];
+        $synergyFullPostMap['increment_id'] = ['in', $fullPostOrderSynergy];
         $synergyPostResult = $this->where($synergyFullPostMap)->field('increment_id,base_total_paid,base_total_due')->select();
-        if($synergyPostResult){
-            foreach($synergyPostResult as $svf){
-                $arr['totalFullPostMoney'] +=round($svf['base_total_paid']+$svf['base_total_due'],2);
+        if ($synergyPostResult) {
+            foreach ($synergyPostResult as $svf) {
+                $arr['totalFullPostMoney'] += round($svf['base_total_paid'] + $svf['base_total_due'], 2);
                 //求出订单号
-                $originOrder = array_search($svf['increment_id'],$fullPostOrderSynergy);
-                if(in_array($originOrder,$order['this_increment_id'])){
-                    $arr['thispageFullPostMoney'][$originOrder] += round($svf['base_total_paid']+$svf['base_total_due'],2);
+                $originOrder = array_search($svf['increment_id'], $fullPostOrderSynergy);
+                if (in_array($originOrder, $order['this_increment_id'])) {
+                    $arr['thispageFullPostMoney'][$originOrder] += round($svf['base_total_paid'] + $svf['base_total_due'], 2);
                 }
-
             }
-            
         }
 
 
         //求出加工费
         $arr['totalProcessCost'] = 0;
-        $totalprocessMap['order_id'] = ['in',$totalId];
+        $totalprocessMap['order_id'] = ['in', $totalId];
         $processResult = Db::connect($this->connection)->table('sales_flat_order_item_prescription')->where($totalprocessMap)->field('order_id,sku,prescription_type,index_type,frame_type_is_rimless,qty_ordered')->select();
-        if($processResult){
-            foreach($processResult as $pv){
+        if ($processResult) {
+            foreach ($processResult as $pv) {
                 //1.处方类型为渐进镜,或者镜架是无框的都是8 元
-                if(('Progressive' == $pv['prescription_type']) || ('Bifocal' == $pv['prescription_type']) ||((2 ==  $pv['frame_type_is_rimless']))){
+                if (('Progressive' == $pv['prescription_type']) || ('Bifocal' == $pv['prescription_type']) || ((2 ==  $pv['frame_type_is_rimless']))) {
                     $process_price = 8;
-                //2.处方类型为单光并且折射率比较高的话是8元    
-                }elseif((false !== strpos($pv['index_type'],'1.67')) || (false !== strpos($pv['index_type'],'1.71') || (false !== strpos($pv['index_type'],'1.74')))){
+                    //2.处方类型为单光并且折射率比较高的话是8元    
+                } elseif ((false !== strpos($pv['index_type'], '1.67')) || (false !== strpos($pv['index_type'], '1.71') || (false !== strpos($pv['index_type'], '1.74')))) {
                     $process_price = 8;
-                //其他的不是Plastic Lens的类型 5元   
-                }elseif((!empty($pv['index_type']) && ('Plastic Lens' !=$pv['index_type']))){
+                    //其他的不是Plastic Lens的类型 5元   
+                } elseif ((!empty($pv['index_type']) && ('Plastic Lens' != $pv['index_type']))) {
                     $process_price = 5;
-                }else{
+                } else {
                     $process_price = 0;
                 }
-                $arr['totalProcessCost'] += round($pv['qty_ordered']*$process_price,2);
-                if(in_array($pv['order_id'],$thisPageId)){
-                    $arr['thisPageProcessCost'][$pv['order_id']] += round($pv['qty_ordered']*$process_price,2);
+                $arr['totalProcessCost'] += round($pv['qty_ordered'] * $process_price, 2);
+                if (in_array($pv['order_id'], $thisPageId)) {
+                    $arr['thisPageProcessCost'][$pv['order_id']] += round($pv['qty_ordered'] * $process_price, 2);
                 }
-            } 
+            }
         }
-        
+
         return $arr;
     }
     /***
@@ -398,7 +419,6 @@ class Zeelool extends Model
      */
     public function getOrderRefundMoney()
     {
-
     }
 
     /***
@@ -406,18 +426,162 @@ class Zeelool extends Model
      * @param increment_id 订单号
      * @param postage_money 邮费 
      */
-    public function updatePostageMoney($increment_id,$postage_money)
+    public function updatePostageMoney($increment_id, $postage_money)
     {
         $where['increment_id'] = $increment_id;
         $data['postage_money'] = $postage_money;
-        $data['postage_create_time'] = date("Y-m-d H:i:s",time());
+        $data['postage_create_time'] = date("Y-m-d H:i:s", time());
         $rs1 = Db::connect('database.db_zeelool')->table('sales_flat_order')->where($where)->update($data);
         $rs2 = Db::connect('database.db_voogueme')->table('sales_flat_order')->where($where)->update($data);
         $rs3 = Db::connect('database.db_nihao')->table('sales_flat_order')->where($where)->update($data);
-        if(($rs1 === false) && ($rs2 === false) && ($rs3 === false)){
+        if (($rs1 === false) && ($rs2 === false) && ($rs3 === false)) {
             return false;
-        }else{
+        } else {
             return true;
         }
+    }
+
+    /**
+     * 统计未发货订单
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/02/25 14:50:55 
+     * @return void
+     */
+    public function undeliveredOrder($map)
+    {
+        if ($map) {
+            $map['custom_is_delivery_new'] = 0;
+            $map['status'] = ['in', ['processing', 'free_processing']];
+            return $this->alias('a')->where($map)->count(1);
+        }
+    }
+
+    /**
+     * 统计仅镜架订单
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/02/25 14:50:55 
+     * @return void
+     */
+    public function frameOrder($map)
+    {
+        if ($map) {
+            $map['custom_is_delivery_new'] = 0;
+            $map['status'] = ['in', ['processing', 'free_processing']];
+            $map['custom_order_prescription_type'] = 1;
+            return $this->alias('a')->where($map)->count(1);
+        }
+    }
+
+    /**
+     * 统计未发货订单SKU副数
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/02/25 14:50:55 
+     * @return void
+     */
+    public function undeliveredOrderNum($map)
+    {
+        if ($map) {
+            $map['custom_is_delivery_new'] = 0;
+            $map['status'] = ['in', ['processing', 'free_processing']];
+            return $this->alias('a')->where($map)->join(['sales_flat_order_item_prescription' => 'b'], 'a.entity_id = b.order_id')->sum('b.qty_ordered');
+        }
+    }
+
+    /**
+     * 统计处方镜副数
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/02/25 14:50:55 
+     * @return void
+     */
+    public function getOrderPrescriptionNum($map)
+    {
+        if ($map) {
+            $map['custom_is_delivery_new'] = 0;
+            $map['status'] = ['in', ['processing', 'free_processing']];
+            $map['custom_order_prescription_type'] = ['in', [2, 3, 4, 5, 6]];
+            $map[] = ['exp', Db::raw("index_type NOT IN ( 'Plastic Lenses', 'FRAME ONLY' ) 
+            AND index_type IS NOT NULL 
+            AND index_type != ''")];
+
+            return $this->alias('a')
+                ->where($map)
+                ->join(['sales_flat_order_item_prescription' => 'b'], 'a.entity_id = b.order_id')
+                ->sum('b.qty_ordered');
+        }
+    }
+
+    /**
+     * 统计现货处方镜副数
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/02/25 14:50:55 
+     * @return void
+     */
+    public function getSpotOrderPrescriptionNum($map)
+    {
+        if ($map) {
+            $map['custom_is_delivery_new'] = 0;
+            $map['status'] = ['in', ['processing', 'free_processing']];
+            $map['custom_order_prescription_type'] = ['in', [2, 4, 6]];
+            $map[] = ['exp', Db::raw("index_type NOT IN ( 'Plastic Lenses', 'FRAME ONLY' ) 
+            AND index_type IS NOT NULL 
+            AND index_type != ''")];
+            $map['is_custom_lens'] = 0;
+
+            return $this->alias('a')
+                ->where($map)
+                ->join(['sales_flat_order_item_prescription' => 'b'], 'a.entity_id = b.order_id')
+                ->sum('b.qty_ordered');
+        }
+    }
+
+    /**
+     * 统计定制处方镜副数
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/02/25 14:50:55 
+     * @return void
+     */
+    public function getCustomOrderPrescriptionNum($map)
+    {
+        if ($map) {
+            $map['custom_is_delivery_new'] = 0;
+            $map['status'] = ['in', ['processing', 'free_processing']];
+            $map['custom_order_prescription_type'] = ['in', [3, 5, 6]];
+            $map[] = ['exp', Db::raw("index_type NOT IN ( 'Plastic Lenses', 'FRAME ONLY' ) 
+            AND index_type IS NOT NULL 
+            AND index_type != ''")];
+            $map['is_custom_lens'] = 1;
+
+            return $this->alias('a')
+                ->where($map)
+                ->join(['sales_flat_order_item_prescription' => 'b'], 'a.entity_id = b.order_id')
+                ->sum('b.qty_ordered');
+        }
+    }
+
+    /**
+     * 统计待处理订单 即未打印标签的订单
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/03/02 14:57:47 
+     * @return void
+     */
+    public function getPendingOrderNum()
+    {
+        $where['custom_print_label_new'] = 0;
+        $where['status'] = ['in', ['processing', 'free_processing']];
+        return $this->where($where)->count(1);
     }
 }

@@ -246,6 +246,20 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
             // 为表格绑定事件
             Table.api.bindevent(table);
 
+            //批量导出xls 
+            $('.btn-batch-export-xls').click(function () {
+                var ids = Table.api.selectedids(table);
+                if (ids.length > 0) {
+                    window.open(Config.moduleurl + '/purchase/purchase_order/batch_export_xls?ids=' + ids, '_blank');
+                } else {
+                    var options = table.bootstrapTable('getOptions');
+                    var search = options.queryParams({});
+                    var filter = search.filter;
+                    var op = search.op;
+                    window.open(Config.moduleurl + '/purchase/purchase_order/batch_export_xls?filter=' + filter + '&op=' + op, '_blank');
+                }
+                
+            });
 
             $(document).on('click', ".problem_desc_info", function () {
                 var problem_desc = $(this).attr('name');
@@ -493,6 +507,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                             }, operate: false
                         },
                         { field: 'supplier_name', title: __('供应商名称'), operate: 'like' },
+                        { field: 'purchase_person', title: __('采购创建人'), operate: 'like' },
                         { field: 'true_sku', title: __('SKU'), operate: 'like' },
                         { field: 'grade', title: __('等级'), operate: 'like' },
                         { field: 'zeelool_sku', title: __('Zeelool_Sku'), operate: 'like' },
