@@ -1090,10 +1090,16 @@ class Dashboard extends Backend
         ', $str);
 
         if ($str) {
-            $map['check_order_number'] = ['in', $str];
-            $check = new \app\admin\model\warehouse\Check();
-            $res = $check->save(['is_return' => 1], $map);
+            $map['purchase_number'] = ['in', $str];
+            $check = new \app\admin\model\purchase\PurchaseOrder();
+            $res = $check->save(['return_status' => 2], $map);
         }
+
+        // if ($str) {
+        //     $map['check_order_number'] = ['in', $str];
+        //     $check = new \app\admin\model\warehouse\Check();
+        //     $res = $check->save(['is_return' => 1], $map);
+        // }
 
         echo $res;
        
