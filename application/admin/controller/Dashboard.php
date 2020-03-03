@@ -662,7 +662,7 @@ class Dashboard extends Backend
         //查询采购单数据
         $where['is_process'] = 0;
         $res = Db::table('fa_purchase_order')->where($where)->limit(500)->select();
- 
+
         foreach ($res as $value) {
             if (!$value['old_purchase_id']) {
                 continue;
@@ -676,7 +676,7 @@ class Dashboard extends Backend
             if (!$item) {
                 continue;
             }
-           
+
             $list = [];
             foreach ($item as $kl => $v) {
                 $list[$v['input_stock_id']]['status'] = $v['status'];
@@ -689,7 +689,7 @@ class Dashboard extends Backend
                 $list[$v['input_stock_id']]['item'][$kl] = $v;
             }
 
-           
+
             $params = [];
             $instock = [];
             foreach ($list as $k => $val) {
@@ -800,9 +800,36 @@ class Dashboard extends Backend
 
     public function test()
     {
-        $str = 'a:2:{s:15:"info_buyRequest";a:6:{s:7:"product";s:3:"411";s:8:"form_key";s:16:"EsFwFRQTCxV5JjHg";s:3:"qty";i:1;s:7:"options";a:1:{i:405;s:3:"933";}s:13:"cart_currency";s:3:"GBP";s:7:"tmplens";a:19:{s:13:"is_frame_only";s:1:"1";s:12:"prescription";s:296:"{"customer_rx":"0","od_sph":"2.25","od_cyl":"-1.00","od_axis":"90","od_add":"1.25","os_sph":"2.00","os_cyl":"-0.50","os_axis":"60","os_add":"0.00","pd_r":"31.00","pd_l":"32.00","pdcheck":"on","od_pv":"0.00","od_pv_r":"0.00","os_pv":"0.00","os_pv_r":"0.00","year":"Year","month":"Month","save":""}";s:17:"prescription_type";s:11:"Progressive";s:11:"frame_price";d:12.15;s:19:"frame_regural_price";d:17.489999999999998;s:9:"second_id";s:6:"base-1";s:11:"second_name";s:12:"Resin Lenses";s:12:"second_price";i:0;s:16:"is_special_price";s:1:"1";s:8:"third_id";s:13:"refractive_21";s:10:"third_type";s:0:"";s:10:"third_name";s:58:"1.61 Digital Free Form Progressive Beyond UV Blue Blockers";s:11:"third_price";d:45.340000000000003;s:7:"four_id";s:10:"coatings-2";s:9:"four_name";s:25:"Super Hydrophobic Coating";s:10:"four_price";d:5.2999999999999998;s:10:"lens_price";d:50.640000000000001;s:3:"zsl";s:0:"";s:5:"total";d:62.789999999999999;}}s:7:"options";a:1:{i:0;a:7:{s:5:"label";s:5:"Color";s:5:"value";s:7:"Crystal";s:11:"print_value";s:7:"Crystal";s:9:"option_id";s:3:"405";s:11:"option_type";s:9:"drop_down";s:12:"option_value";s:3:"933";s:11:"custom_view";b:0;}}}';
-        $arr = unserialize($str);
-        dump($arr);die;
+        $str = 'QC20200106171408398873
+        QC20200105151440582812
+        QC20200104120551758851
+        QC20200113095256903538
+        QC20200229141531940453
+        QC20200109163144596667
+        QC20200109173631920225
+        QC20200109170143124960
+        QC20200109164721434183
+        QC20200105115423269593
+        QC20200106092048362186
+        QC20200106091635738456
+        QC20200105154347548287
+        QC20200105093326273782';
+        $str = explode('
+        ', $str);
+
+        // if ($str) {
+        //     $map['purchase_number'] = ['in', $str];
+        //     $check = new \app\admin\model\purchase\PurchaseOrder();
+        //     $res = $check->save(['return_status' => 2], $map);
+        // }
+
+        if ($str) {
+            $map['check_order_number'] = ['in', $str];
+            $check = new \app\admin\model\warehouse\Check();
+            $res = $check->save(['is_return' => 0], $map);
+        }
+
+        echo $res;
+       
     }
-    
 }
