@@ -2398,8 +2398,6 @@ class Item extends Backend
 		$list = $this->model->where('is_open', '<', 3)
 			->where($addWhere)
 			->where($where)
-			->order($sort, $order)
-			->limit($offset, $limit)
 			->select();
 		//分类列表	
 		$categoryArr = $this->category->getItemCategoryList();	
