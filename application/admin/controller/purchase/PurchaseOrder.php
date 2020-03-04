@@ -791,21 +791,18 @@ class PurchaseOrder extends Backend
 
         $data = $this->purchase_order_item->whereExp('', 'LENGTH(trim(sku))=0')->whereOr('sku', 'exp', 'is null')->select();
         $data = collection($data)->toArray();
-        dump($data);
         foreach ($data as $k => $v) {
             //匹配SKU
-            dump($v['skuid']);
             if ($v['skuid']) {
                 $params['sku'] = (new SupplierSku())->getSkuData($v['skuid']);
 
                 $params['supplier_sku'] = (new SupplierSku())->getSupplierData($v['skuid']);
             }
-            dump($params);
             if ($params['sku']) {
-               // $this->purchase_order_item->allowField(true)->isUpdate(true, ['id' => $v['id']])->data($params)->save();
+               $this->purchase_order_item->allowField(true)->isUpdate(true, ['id' => $v['id']])->data($params)->save();
             }
         }
-        die;
+
         $this->success();
     }
 
