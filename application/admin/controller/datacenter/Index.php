@@ -266,9 +266,14 @@ class Index extends Backend
         $start7days = $productAllStockLog->where('createtime', 'like', $stime . '%')->value('allnum');
         $end7days = $productAllStockLog->where('createtime', 'like', $etime . '%')->value('allnum');
         //库存周转天数
-        $stock7days = round(7 * ($start7days + $end7days) / 2 / $allSalesNum, 2);
+        if ($allSalesNum) {
+            $stock7days = round(7 * ($start7days + $end7days) / 2 / $allSalesNum, 2);
+        }
+
         //库存周转率
-        $stock7daysPercent = round(360 / $stock7days, 2);
+        if ($stock7days) {
+            $stock7daysPercent = round(360 / $stock7days, 2);
+        }
 
         //在途库存
         $onwayAllStock = $this->onway_all_stock();
@@ -309,6 +314,7 @@ class Index extends Backend
         $this->view->assign('onway_frame_all_stock_price', $onwayFrameAllStockPrice);
         $this->view->assign('onway_ornament_all_stock', $onwayOrnamentAllStock);
         $this->view->assign('onway_ornament_all_stock_price', $onwayOrnamentAllStockPrice);
+        $this->view->assign('allSalesNum', $allSalesNum);
 
         return $this->view->fetch();
     }
@@ -549,7 +555,58 @@ class Index extends Backend
     }
 
     /**
-     * 仓库数据
+     * 仓库订单数据统计
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/03/04 17:05:15 
+     * @return void
+     */
+    protected function warehouse_order_data()
+    {
+        //当月总单量
+        $orderStatistics = new \app\admin\model\OrderStatistics();
+        $stime = date("Y-m-01 00:00:00");
+        $etime = date("Y-m-d H:i:s", time());
+        $map['create_date'] = ['between', [$stime, $etime]];
+        $allSalesNum = $orderStatistics->where($map)->sum('all_sales_num');
+
+        //未出库订单总数
+        $cachename = 'warehouse_order_data' . 'allUnorderNum';
+        $allUnorderNum = cache($cachename);
+        if (!$allUnorderNum) {
+            $zeeloolUnorderNum = $this->zeelool->undeliveredOrder([]);
+            $vooguemeUnorderNum = $this->voogueme->undeliveredOrder([]);
+            $nihaoUnorderNum = $this->nihao->undeliveredOrder([]);
+            $allUnorderNum = $zeeloolUnorderNum + $vooguemeUnorderNum + $nihaoUnorderNum;
+            cache($cachename, $allUnorderNum, 86400);
+        }
+
+
+        //7天未出库订单总数
+        $cachename = 'warehouse_order_data' . 'days7UnorderNum';
+        $days7UnorderNum = cache($cachename);
+        if (!$days7UnorderNum) {
+            $stime = date("Y-m-d H:i:s", strtotime("-7 day"));
+            $etime = date("Y-m-d H:i:s", time());
+            $map['a.created_at'] = ['between', [$stime, $etime]];
+            $zeeloolUnorderNum = $this->zeelool->undeliveredOrder($map);
+            $vooguemeUnorderNum = $this->voogueme->undeliveredOrder($map);
+            $nihaoUnorderNum = $this->nihao->undeliveredOrder($map);
+            $days7UnorderNum = $zeeloolUnorderNum + $vooguemeUnorderNum + $nihaoUnorderNum;
+            cache($cachename, $days7UnorderNum, 36400);
+        }
+
+
+        
+        
+
+    }
+
+
+
+    /**
+     * 数据统计
      *
      * @Description
      * @author wpl
@@ -658,7 +715,6 @@ class Index extends Backend
         (select if (od_sph>os_sph,od_sph,os_sph) as sph,if(od_cyl>os_cyl,od_cyl,os_cyl) as cyl 
         from sales_flat_order_item_prescription where $where ) b where sph != '' and cyl != '' limit 1";
         $res = Db::connect('database.db_zeelool')->table('sales_flat_order_item_prescription')->query($sql);
-
         return $res;
     }
 }
