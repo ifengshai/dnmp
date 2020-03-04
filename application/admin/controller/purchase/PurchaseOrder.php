@@ -788,11 +788,9 @@ class PurchaseOrder extends Backend
     public function matching()
     {
         //查询SKU为空的采购单
-        
-        $data = $this->purchase_order_item->whereExp('','LENGTH(trim(sku))=0')->whereOr('sku', 'exp', 'is null')->select();
-        $data = collection($data)->toArray();
 
-        dump($data);die;
+        $data = $this->purchase_order_item->where('purchase_id', 4544)->whereExp('', 'LENGTH(trim(sku))=0')->whereOr('sku', 'exp', 'is null')->select();
+        $data = collection($data)->toArray();
 
         foreach ($data as $k => $v) {
             //匹配SKU
@@ -801,6 +799,7 @@ class PurchaseOrder extends Backend
 
                 $params['supplier_sku'] = (new SupplierSku())->getSupplierData($v['skuid']);
             }
+            dump($params);die;
             if ($params['sku']) {
                 $this->purchase_order_item->allowField(true)->isUpdate(true, ['id' => $v['id']])->data($params)->save();
             }
