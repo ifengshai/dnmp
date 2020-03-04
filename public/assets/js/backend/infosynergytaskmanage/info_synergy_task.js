@@ -885,6 +885,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','bootstrap-table-jump-
                         case 7:
                             synergyOrderIdStr = '库存盘点单';
                             break;
+                        case 8:
+                            synergyOrderIdStr = 'VIP订单';
+                            break;    
                         default:
                             synergyOrderIdStr = '无';
                             break;
