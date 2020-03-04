@@ -2192,6 +2192,9 @@ class Item extends Backend
                     $this->error('预售开始时间和结束时间不能相等');
                 }
                 $row = $this->model->pass_check_sku($params['sku']);
+                if(!$row['sku']){
+                    $this->error('商品sku不存在,请重新尝试');
+                }
                 if('0000-00-00 00:00:00' != $row['presell_create_time']){
                     $log['sku'] = $row['sku'];
                     $log['presell_num'] = $row['presell_num'];

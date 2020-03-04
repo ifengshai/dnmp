@@ -1774,5 +1774,7 @@ order by sfoi.item_id asc limit 1000";
         $thisyear_order_success_rs                  = $model->query($thisyear_order_success_sql);
         //总共支付成功数
         $total_order_success_rs                     = $model->query($total_order_success_sql);
+        //昨天购物车总数
+        
     }
 }
