@@ -1732,6 +1732,9 @@ order by sfoi.item_id asc limit 1000";
         $thisyear_register_customer_sql        = "SELECT count(*) counter from customer_entity where YEAR(updated_at)=YEAR(NOW())";
         //总共新增注册用户数sql
         $total_register_customer_sql           = "SELECT count(*) counter from customer_entity";
+        $model->table('sales_flat_order')->query("set time_zone='+8:00'");
+        $model->table('sales_flat_quote')->query("set time_zone='+8:00'");
+        $model->table('customer_entity')->query("set time_zone='+8:00'");
         //昨天销售额
         $yesterday_sales_money_rs                   = $model->query($yesterday_sales_money_sql);
         //过去7天销售额
