@@ -584,8 +584,13 @@ class SaleAfterTask extends Model
         //求出用户的邮箱
         $customer_email = '';
         if($increment_id){
+            //如果输入的是订单号
             $customer_email = Db::connect($db)->table('sales_flat_order')->where('increment_id',$increment_id)->
             value('customer_email');
+            //如果输入的是vip订单号
+            if(!$customer_email){
+                $customer_email = Db::connect($db_online)->table('oc_vip_order')->where('order_number',$increment_id)->value('customer_email');
+            }
         }
         if(!empty($customer_name)){
             $customer_email = Db::connect($db)->table('sales_flat_order')->where('customer_firstname',$customer_name[0])
@@ -654,9 +659,16 @@ class SaleAfterTask extends Model
             }
             //用户的vip订单
             if($order_vip){
+                //把vip订单查询出来放到数组当中
+                $arr_order_vip = [];
+                foreach($order_vip as $v){
+                    $arr_order_vip[] = $v['order_number'];
+                }                
                 $customer['order_vip'] = $order_vip;
+                $customer['arr_order_vip'] = $arr_order_vip;
             }else{
                 $customer['order_vip'] = '';
+                $customer['arr_order_vip'] = '';
             }
             $customer['customer_email'] = $customer_email;
             $customer['customer_name'] = $result[0]['customer_firstname'].' '.$result[0]['customer_lastname'];
