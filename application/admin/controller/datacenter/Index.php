@@ -597,6 +597,9 @@ class Index extends Backend
         $vooguemeFrameOrderNum = $this->voogueme->frameOrder($map);
         $nihaoFrameOrderNum = $this->nihao->frameOrder($map);
 
+        //统计处方度数范围数据
+        $skuRes = $this->order_sku_num($create_time);
+
         $this->view->assign('zeeloolUnorderNum', $zeeloolUnorderNum);
         $this->view->assign('vooguemeUnorderNum', $vooguemeUnorderNum);
         $this->view->assign('nihaoUnorderNum', $nihaoUnorderNum);
@@ -616,6 +619,7 @@ class Index extends Backend
         $this->view->assign('vooguemeFrameOrderNum', $vooguemeFrameOrderNum);
         $this->view->assign('nihaoFrameOrderNum', $nihaoFrameOrderNum);
         $this->view->assign('created_at', $create_time);
+        $this->view->assign('skuRes', $skuRes);
         return $this->view->fetch();
     }
 
@@ -624,10 +628,11 @@ class Index extends Backend
      *
      * @Description
      * @author wpl
+     * @param mixed $create_time 时间筛选
      * @since 2020/03/03 18:05:00 
      * @return void
      */
-    public function order_sku_num()
+    protected function order_sku_num($create_time)
     {
         /**
          * 原：A SPH(0-300) and CYL<200
@@ -638,13 +643,21 @@ class Index extends Backend
          * C (sph < -3.00 and sph > -6.00 AND cyl > 2.00) OR ( sph > -6.00 AND cyl > 0)
          */
 
-        $sql = "select count(1) from 
+        //默认当天
+        if ($create_time) {
+            $time = explode(' ', $create_time);
+            $where = "created_at between '" . $time[0] . ' ' . $time[1] . "' and '" . $time[3] . ' ' . $time[4] . "'";
+        } else {
+            $stime = date('Y-m-d 00:00:00');
+            $etime = date('Y-m-d H:i:s', time());
+            $where = "created_at between '" . $stime . "' and '" . $etime . "'";
+        }
+        $sql = "select SUM(IF((b.sph > - 3 AND b.sph < 0 ) AND b.cyl < 2, 1, 0 )) AS A,
+        SUM(IF(( sph > - 3.00 AND sph < 0 AND cyl > 2.00 ) OR ( sph < - 3.00 AND sph > - 6.00 AND cyl < 2.00 ),1, 0 )) AS B,
+        SUM(IF(( sph < - 3.00 AND sph > - 6.00 AND cyl > 2.00 ) OR ( sph > - 6.00 AND cyl > 0 ),1, 0)) AS C from
         (select if((od_sph-os_sph) > 0,od_sph,os_sph) as sph,if((od_cyl-os_cyl) > 0,od_cyl,os_cyl) as cyl 
-        from sales_flat_order_item_prescription where created_at 
-        between '2020-03-01 00:00:00' and '2020-03-04 12:00:00' 
-        and ((od_sph > -3 and od_sph < 0) or (os_sph > -3 and os_sph < 0)) 
-        and (od_cyl < 2 or os_cyl < 2)) b 
-        where (b.sph > -3 and b.sph < 0 ) and b.cyl < 2 ";
-        Db::connect('database.db_zeelool')->table('sales_flat_order_item_prescription')->where($where)->select($data);
+        from sales_flat_order_item_prescription where $where ) b where sph != '' and cyl != '' ";
+        $res = Db::connect('database.db_zeelool')->table('sales_flat_order_item_prescription')->query($sql);
+        return $res;
     }
 }
