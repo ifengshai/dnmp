@@ -565,8 +565,6 @@ class InfoSynergyTask extends Backend
                 unset($params['id']);
                 $item = isset($params['item']) ? $params['item']  : '';
                 $lens = isset($params['lens']) ? $params['lens']  : '';
-                dump($lens);
-                exit;
                 $synergy_status =  $params['synergy_status'] ?: 1;
                 $params = $this->preExcludeFields($params);
                  //承接部门和承接人写入数据库
