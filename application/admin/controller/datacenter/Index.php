@@ -3,6 +3,7 @@
 namespace app\admin\controller\datacenter;
 
 use app\common\controller\Backend;
+use think\Db;
 
 /**
  * 数据中心
@@ -617,7 +618,7 @@ class Index extends Backend
         $this->view->assign('created_at', $create_time);
         return $this->view->fetch();
     }
-    
+
     /**
      * 根据处方范围统计SKU副数
      *
@@ -628,8 +629,22 @@ class Index extends Backend
      */
     public function order_sku_num()
     {
-        
+        /**
+         * 原：A SPH(0-300) and CYL<200
+         * 原：B (SPH(0-300) and CYL>200) or (SPH(300-600) and CYL<200)
+         * 原：C (SPH(300-600) and CYL>200) or (SPH>600 and CYL>0)
+         * A sph > -3.00 and sph < 0 and cyl < 2.00
+         * B (sph > -3.00 and sph < 0 AND cyl > 2.00) OR (sph < -3.00 and sph > -6.00 AND cyl < 2.00)
+         * C (sph < -3.00 and sph > -6.00 AND cyl > 2.00) OR ( sph > -6.00 AND cyl > 0)
+         */
+
+        $sql = "select count(1) from 
+        (select if((od_sph-os_sph) > 0,od_sph,os_sph) as sph,if((od_cyl-os_cyl) > 0,od_cyl,os_cyl) as cyl 
+        from sales_flat_order_item_prescription where created_at 
+        between '2020-03-01 00:00:00' and '2020-03-04 12:00:00' 
+        and ((od_sph > -3 and od_sph < 0) or (os_sph > -3 and os_sph < 0)) 
+        and (od_cyl < 2 or os_cyl < 2)) b 
+        where (b.sph > -3 and b.sph < 0 ) and b.cyl < 2 ";
+        Db::connect('database.db_zeelool')->table('sales_flat_order_item_prescription')->where($where)->select($data);
     }
-    
-    
 }
