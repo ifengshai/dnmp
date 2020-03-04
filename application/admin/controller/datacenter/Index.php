@@ -656,8 +656,9 @@ class Index extends Backend
         SUM(IF(( sph > - 3.00 AND sph < 0 AND cyl > 2.00 ) OR ( sph < - 3.00 AND sph > - 6.00 AND cyl < 2.00 ),1, 0 )) AS B,
         SUM(IF(( sph < - 3.00 AND sph > - 6.00 AND cyl > 2.00 ) OR ( sph > - 6.00 AND cyl > 0 ),1, 0)) AS C from
         (select if((od_sph-os_sph) > 0,od_sph,os_sph) as sph,if((od_cyl-os_cyl) > 0,od_cyl,os_cyl) as cyl 
-        from sales_flat_order_item_prescription where $where ) b where sph != '' and cyl != '' ";
+        from sales_flat_order_item_prescription where $where ) b where sph != '' and cyl != '' limit 1";
         $res = Db::connect('database.db_zeelool')->table('sales_flat_order_item_prescription')->query($sql);
+
         return $res;
     }
 }
