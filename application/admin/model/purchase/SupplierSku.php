@@ -36,8 +36,6 @@ class SupplierSku extends Model
     {
         $map['skuid'] = $skuid;
         $map['status'] = 1;
-        $this->where($map)->value('sku');
-        echo $this->getLastSql();die;
         return $this->where($map)->value('sku');
     }
 

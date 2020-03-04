@@ -791,7 +791,7 @@ class PurchaseOrder extends Backend
 
         $data = $this->purchase_order_item->where('purchase_id', 4544)->whereExp('', 'LENGTH(trim(sku))=0')->whereOr('sku', 'exp', 'is null')->select();
         $data = collection($data)->toArray();
-
+        dump($data);
         foreach ($data as $k => $v) {
             //匹配SKU
             dump($v['skuid']);
