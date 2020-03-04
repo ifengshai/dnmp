@@ -1607,7 +1607,7 @@ order by sfoi.item_id asc limit 1000";
         }
         $order_status = $this->order_status;
         //昨日销售额sql
-        $yesterday_sales_money_sql = "SELECT round(sum(base_grand_total),2) base_grand_total FROM sales_flat_order WHERE DATEDIFF(created_at,NOW())=-1 $order_status";
+        $yesterday_sales_money_sql = "SELECT round(sum(base_grand_total),2)  FROM sales_flat_order WHERE DATEDIFF(created_at,NOW())=-1 $order_status";
         //过去7天销售额sql
         $pastsevenday_sales_money_sql = "SELECT round(sum(base_grand_total),2) base_grand_total FROM sales_flat_order WHERE DATE_SUB(CURDATE(),INTERVAL 7 DAY) <= date(created_at) and created_at< curdate() $order_status";
         //过去30天销售额sql
