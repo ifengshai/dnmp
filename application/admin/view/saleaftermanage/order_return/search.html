@@ -377,9 +377,9 @@ table.altrowstable tr:nth-child(even){
                             <th style="text-align: center; vertical-align: middle;">订单金额($)</th>
                             <th style="text-align: center; vertical-align: middle;">优惠券</th>
                             <th style="text-align: center; vertical-align: middle;">优惠码</th>
-                            <th style="text-align: center; vertical-align: middle;">运费</th>
                             <th style="text-align: center; vertical-align: middle;">积分(参考)</th>
-                            <th style="text-align: center; vertical-align: middle;">抵扣金额(参考)</th>                            
+                            <th style="text-align: center; vertical-align: middle;">抵扣金额(参考)</th> 
+                            <th style="text-align: center; vertical-align: middle;">运费</th>
                             <th style="text-align: center; vertical-align: middle;">快递方式</th>
                             <th style="text-align: center; vertical-align: middle;">购买数量</th>
                             <th style="text-align: center; vertical-align: middle;">创建时间</th>
@@ -402,9 +402,9 @@ table.altrowstable tr:nth-child(even){
 								 <td style="text-align: center; vertical-align: middle;">{:round($orderInfoList.base_grand_total,2)}</td>
                                  <td style="text-align: center; vertical-align: middle;">{$orderInfoList.coupon_code}</td>
                                  <td style="text-align: center; vertical-align: middle;">{$orderInfoList.coupon_rule_name}</td>
-                                 <td style="text-align: center; vertical-align: middle;">{:round($orderInfoList.base_shipping_amount,2)}</td>
                                  <td style="text-align: center; vertical-align: middle;">{:round($orderInfoList.mw_rewardpoint,2)}</td>
                                  <td style="text-align: center; vertical-align: middle;">{:round($orderInfoList.mw_rewardpoint_discount_show,2)}</td>
+                                 <td style="text-align: center; vertical-align: middle;">{:round($orderInfoList.base_shipping_amount,2)}</td>
                                  <td style="text-align: center; vertical-align: middle;">{$orderInfoList.shipping_description}</td>
                                  <td style="text-align: center; vertical-align: middle;">{$orderInfoList.total_qty_ordered}</td>
                                  <td style="text-align: center; vertical-align: middle;">{$orderInfoList.created_at}</td>
