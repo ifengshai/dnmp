@@ -588,7 +588,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','bootstrap-table-jump-
                                                  '<div class="panel bg-blue">' +
                                                  '<div class="panel-body">' +
                                                  '<div class="panel-title">' +
-                                                 '<label class="control-label col-xs-12 col-sm-3">商品名称:</label>' +
+                                                 '<label class="control-label col-xs-12 col-sm-3">name:</label>' +
                                                  '<div class="col-xs-12 col-sm-8">' +
                                                  '<input  id="c-item_name"  class="form-control"  type="text" name="row[lens][original_name][]" value="' + newItem.name + '">' +
                                                  '</div>' +
@@ -604,7 +604,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','bootstrap-table-jump-
                                                  '</div>' +
                                                  '<div class="panel-body">' +
                                                  '<div class="panel-title">' +
-                                                 '<label class="control-label col-xs-12 col-sm-3">数量:</label>' +
+                                                 '<label class="control-label col-xs-12 col-sm-3">qty_ordered:</label>' +
                                                  '<div class="col-xs-12 col-sm-8">' +
                                                  '<input  id="c-item_qty_ordered"  class="form-control"  type="text" name="row[lens][original_number][]" value="' + Math.round(newItem.qty_ordered) + '">' +
                                                  '</div>' +
@@ -612,7 +612,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','bootstrap-table-jump-
                                                  '</div>' +
                                                  '<div class="panel-body">' +
                                                  '<div class="panel-title">' +
-                                                 '<label class="control-label col-xs-12 col-sm-3">处方类型:</label>' +
+                                                 '<label class="control-label col-xs-12 col-sm-3">prescription_type:</label>' +
                                                  '<div class="col-xs-12 col-sm-8">' +
                                                  '<input  id="c-recipe_type"  class="form-control" type="text" name="row[lens][recipe_type][]" value="' + (newItem.prescription_type !=undefined ? newItem.prescription_type : "") + '">' +
                                                  '</div>' +
@@ -621,7 +621,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','bootstrap-table-jump-
                                                  if(orderPlatform == 3){
                                                     str+='<div class="panel-body">' +
                                                     '<div class="panel-title">' +
-                                                    '<label class="control-label col-xs-12 col-sm-3">基片类型:</label>' +
+                                                    '<label class="control-label col-xs-12 col-sm-3">second_name:</label>' +
                                                     '<div class="col-xs-12 col-sm-8">' +
                                                     '<input  id="c-lens_type"  class="form-control"  type="text" name="row[lens][second_name][]" value="' + (newItem.second_name !=undefined ? newItem.second_name : "")+ '">' +
                                                     '</div>' +
@@ -629,7 +629,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','bootstrap-table-jump-
                                                     '</div>' +
                                                     '<div class="panel-body">' +
                                                     '<div class="panel-title">' +
-                                                    '<label class="control-label col-xs-12 col-sm-3">镜片类型:</label>' +
+                                                    '<label class="control-label col-xs-12 col-sm-3">lens_type:</label>' +
                                                     '<div class="col-xs-12 col-sm-8">' +
                                                     '<input  id="c-lens_type"  class="form-control"  type="text" name="row[lens][lens_type][]" value="' + (newItem.third_name !=undefined ? newItem.third_name : "")+ '">' +
                                                     '</div>' +
@@ -637,7 +637,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','bootstrap-table-jump-
                                                     '</div>' +
                                                     '<div class="panel-body">' +
                                                     '<div class="panel-title">' +
-                                                    '<label class="control-label col-xs-12 col-sm-3">折射率:</label>' +
+                                                    '<label class="control-label col-xs-12 col-sm-3">zsl:</label>' +
                                                     '<div class="col-xs-12 col-sm-8">' +
                                                     '<input  id="c-lens_type"  class="form-control"  type="text" name="row[lens][zsl][]" value="' + (newItem.zsl !=undefined ? newItem.zsl : "")+ '">' +
                                                     '</div>' +
@@ -645,7 +645,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','bootstrap-table-jump-
                                                     '</div>' +
                                                     '<div class="panel-body">' +
                                                     '<div class="panel-title">' +
-                                                    '<label class="control-label col-xs-12 col-sm-3">镀膜类型:</label>' +
+                                                    '<label class="control-label col-xs-12 col-sm-3">coating_type:</label>' +
                                                     '<div class="col-xs-12 col-sm-8">' +
                                                     '<input  id="c-lens_type"  class="form-control"  type="text" name="row[lens][coating_type][]" value="' + (newItem.four_name !=undefined ? newItem.four_name : "")+ '">' +
                                                     '</div>' +
@@ -654,7 +654,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','bootstrap-table-jump-
                                                  }else{
                                                    str+='<div class="panel-body">' +
                                                     '<div class="panel-title">' +
-                                                    '<label class="control-label col-xs-12 col-sm-3">镜片类型:</label>' +
+                                                    '<label class="control-label col-xs-12 col-sm-3">lens_type:</label>' +
                                                     '<div class="col-xs-12 col-sm-8">' +
                                                     '<input  id="c-lens_type"  class="form-control"  type="text" name="row[lens][lens_type][]" value="' + (newItem.index_type !=undefined ? newItem.index_type : "")+ '">' +
                                                     '</div>' +
@@ -662,7 +662,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','bootstrap-table-jump-
                                                     '</div>'+
                                                     '<div class="panel-body">' +
                                                     '<div class="panel-title">' +
-                                                    '<label class="control-label col-xs-12 col-sm-3">镀膜类型:</label>' +
+                                                    '<label class="control-label col-xs-12 col-sm-3">coating_type:</label>' +
                                                     '<div class="col-xs-12 col-sm-8">' +
                                                     '<input  id="c-coating_film_type"  class="form-control"  type="text" name="row[lens][coating_type][]" value="' + (newItem.coatiing_name!=undefined ? newItem.coatiing_name : "") + '">' +
                                                     '</div>' +
@@ -677,10 +677,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','bootstrap-table-jump-
                                                  '<div class="ibox-title">' +
                                                  '<table id="caigou-table-lens">' +
                                                  '<tr>' +
-                                                 '<td colspan="10" style="text-align: center">处方参数</td>' +
+                                                 '<td colspan="10" style="text-align: center">Prescription</td>' +
                                                  '</tr>' +
                                                  '<tr>' +
-                                                 '<td style="text-align: center">参数</td>' +
+                                                 '<td style="text-align: center">value</td>' +
                                                  '<td style="text-align: center">SPH</td>' +
                                                  '<td style="text-align: center">CYL</td>' +
                                                  '<td style="text-align: center">AXI</td>' +
@@ -885,6 +885,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','bootstrap-table-jump-
                         case 7:
                             synergyOrderIdStr = '库存盘点单';
                             break;
+                        case 8:
+                            synergyOrderIdStr = 'VIP订单';
+                            break;    
                         default:
                             synergyOrderIdStr = '无';
                             break;
@@ -1158,7 +1161,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','bootstrap-table-jump-
                                                 '<div class="panel bg-blue">' +
                                                 '<div class="panel-body">' +
                                                 '<div class="panel-title">' +
-                                                '<label class="control-label col-xs-12 col-sm-3">商品名称:</label>' +
+                                                '<label class="control-label col-xs-12 col-sm-3">name:</label>' +
                                                 '<div class="col-xs-12 col-sm-8">' +
                                                 '<input  id="c-item_name"  class="form-control"  type="text" name="row[lens][original_name][]" value="' + newItem.name + '">' +
                                                 '</div>' +
@@ -1174,7 +1177,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','bootstrap-table-jump-
                                                 '</div>' +
                                                 '<div class="panel-body">' +
                                                 '<div class="panel-title">' +
-                                                '<label class="control-label col-xs-12 col-sm-3">数量:</label>' +
+                                                '<label class="control-label col-xs-12 col-sm-3">qty_ordered:</label>' +
                                                 '<div class="col-xs-12 col-sm-8">' +
                                                 '<input  id="c-item_qty_ordered"  class="form-control"  type="text" name="row[lens][original_number][]" value="' + Math.round(newItem.qty_ordered) + '">' +
                                                 '</div>' +
@@ -1182,7 +1185,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','bootstrap-table-jump-
                                                 '</div>' +
                                                 '<div class="panel-body">' +
                                                 '<div class="panel-title">' +
-                                                '<label class="control-label col-xs-12 col-sm-3">处方类型:</label>' +
+                                                '<label class="control-label col-xs-12 col-sm-3">prescription_type:</label>' +
                                                 '<div class="col-xs-12 col-sm-8">' +
                                                 '<input  id="c-recipe_type"  class="form-control" type="text" name="row[lens][recipe_type][]" value="' + (newItem.prescription_type !=undefined ? newItem.prescription_type : "") + '">' +
                                                 '</div>' +
@@ -1191,7 +1194,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','bootstrap-table-jump-
                                                 if(orderPlatform == 3){
                                                 Str+='<div class="panel-body">' +
                                                 '<div class="panel-title">' +
-                                                '<label class="control-label col-xs-12 col-sm-3">基片类型:</label>' +
+                                                '<label class="control-label col-xs-12 col-sm-3">second_name:</label>' +
                                                 '<div class="col-xs-12 col-sm-8">' +
                                                 '<input  id="c-lens_type"  class="form-control"  type="text" name="row[lens][second_name][]" value="' + (newItem.second_name !=undefined ? newItem.second_name : "")+ '">' +
                                                 '</div>' +
@@ -1199,7 +1202,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','bootstrap-table-jump-
                                                 '</div>' +
                                                 '<div class="panel-body">' +
                                                 '<div class="panel-title">' +
-                                                '<label class="control-label col-xs-12 col-sm-3">镜片类型:</label>' +
+                                                '<label class="control-label col-xs-12 col-sm-3">lens_type:</label>' +
                                                 '<div class="col-xs-12 col-sm-8">' +
                                                 '<input  id="c-lens_type"  class="form-control"  type="text" name="row[lens][lens_type][]" value="' + (newItem.third_name !=undefined ? newItem.third_name : "")+ '">' +
                                                 '</div>' +
@@ -1207,7 +1210,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','bootstrap-table-jump-
                                                 '</div>' +
                                                 '<div class="panel-body">' +
                                                 '<div class="panel-title">' +
-                                                '<label class="control-label col-xs-12 col-sm-3">折射率:</label>' +
+                                                '<label class="control-label col-xs-12 col-sm-3">zsl:</label>' +
                                                 '<div class="col-xs-12 col-sm-8">' +
                                                 '<input  id="c-lens_type"  class="form-control"  type="text" name="row[lens][zsl][]" value="' + (newItem.zsl !=undefined ? newItem.zsl : "")+ '">' +
                                                 '</div>' +
@@ -1215,7 +1218,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','bootstrap-table-jump-
                                                 '</div>' +
                                                 '<div class="panel-body">' +
                                                 '<div class="panel-title">' +
-                                                '<label class="control-label col-xs-12 col-sm-3">镀膜类型:</label>' +
+                                                '<label class="control-label col-xs-12 col-sm-3">coating_type:</label>' +
                                                 '<div class="col-xs-12 col-sm-8">' +
                                                 '<input  id="c-lens_type"  class="form-control"  type="text" name="row[lens][coating_type][]" value="' + (newItem.four_name !=undefined ? newItem.four_name : "")+ '">' +
                                                 '</div>' +
@@ -1224,7 +1227,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','bootstrap-table-jump-
                                                 }else{
                                                 Str+='<div class="panel-body">' +
                                                 '<div class="panel-title">' +
-                                                '<label class="control-label col-xs-12 col-sm-3">镜片类型:</label>' +
+                                                '<label class="control-label col-xs-12 col-sm-3">lens_type:</label>' +
                                                 '<div class="col-xs-12 col-sm-8">' +
                                                 '<input  id="c-lens_type"  class="form-control"  type="text" name="row[lens][lens_type][]" value="' + (newItem.index_type !=undefined ? newItem.index_type : "")+ '">' +
                                                 '</div>' +
@@ -1232,7 +1235,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','bootstrap-table-jump-
                                                 '</div>'+
                                                 '<div class="panel-body">' +
                                                 '<div class="panel-title">' +
-                                                '<label class="control-label col-xs-12 col-sm-3">镀膜类型:</label>' +
+                                                '<label class="control-label col-xs-12 col-sm-3">coating_type:</label>' +
                                                 '<div class="col-xs-12 col-sm-8">' +
                                                 '<input  id="c-coating_film_type"  class="form-control"  type="text" name="row[lens][coating_type][]" value="' + (newItem.coatiing_name!=undefined ? newItem.coatiing_name : "") + '">' +
                                                 '</div>' +
@@ -1247,10 +1250,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','bootstrap-table-jump-
                                                 '<div class="ibox-title">' +
                                                 '<table id="caigou-table-lens">' +
                                                 '<tr>' +
-                                                '<td colspan="10" style="text-align: center">处方参数</td>' +
+                                                '<td colspan="10" style="text-align: center">Prescription</td>' +
                                                 '</tr>' +
                                                 '<tr>' +
-                                                '<td style="text-align: center">参数</td>' +
+                                                '<td style="text-align: center">value</td>' +
                                                 '<td style="text-align: center">SPH</td>' +
                                                 '<td style="text-align: center">CYL</td>' +
                                                 '<td style="text-align: center">AXI</td>' +

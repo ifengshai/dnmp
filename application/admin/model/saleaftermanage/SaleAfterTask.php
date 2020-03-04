@@ -654,9 +654,16 @@ class SaleAfterTask extends Model
             }
             //用户的vip订单
             if($order_vip){
+                //把vip订单查询出来放到数组当中
+                $arr_order_vip = [];
+                foreach($order_vip as $v){
+                    $arr_order_vip[] = $v['order_number'];
+                }                
                 $customer['order_vip'] = $order_vip;
+                $customer['arr_order_vip'] = $arr_order_vip;
             }else{
                 $customer['order_vip'] = '';
+                $customer['arr_order_vip'] = '';
             }
             $customer['customer_email'] = $customer_email;
             $customer['customer_name'] = $result[0]['customer_firstname'].' '.$result[0]['customer_lastname'];

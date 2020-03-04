@@ -1647,7 +1647,7 @@ order by sfoi.item_id asc limit 1000";
         //今年订单支付成功数sql
         $thisyear_order_success_sql        = "SELECT count(*) counter FROM sales_flat_order WHERE YEAR(created_at)=YEAR(NOW()) $order_status";
         //总共订单支付成功数sql
-        $total_order_success_sql           = "SELECT count(*) counter FROM sales_flat_order $order_status";
+        $total_order_success_sql           = "SELECT count(*) counter FROM sales_flat_order WHERE 1 $order_status";
         //昨日客单价
         // $yesterday_unit_price_rs              = round(($yesterday_sales_money_rs/$yesterday_order_success_rs),2);
         // //过去7天客单价
@@ -1727,11 +1727,11 @@ order by sfoi.item_id asc limit 1000";
         //当月新增注册用户数sql
         $thismonth_register_customer_sql       = "SELECT count(*) counter from customer_entity where DATE_FORMAT(created_at,'%Y%m') = DATE_FORMAT(CURDATE(),'%Y%m')";
         //上月新增注册用户数sql
-        $lastmonth_register_customer           = "SELECT count(*) counter from customer_entity where PERIOD_DIFF(date_format(now(),'%Y%m'),date_format(created_at,'%Y%m')) =1";
+        $lastmonth_register_customer_sql       = "SELECT count(*) counter from customer_entity where PERIOD_DIFF(date_format(now(),'%Y%m'),date_format(created_at,'%Y%m')) =1";
         //今年新增注册用户数sql
-        $thisyear_register_customer            = "SELECT count(*) counter from customer_entity where YEAR(updated_at)=YEAR(NOW())";
+        $thisyear_register_customer_sql        = "SELECT count(*) counter from customer_entity where YEAR(updated_at)=YEAR(NOW())";
         //总共新增注册用户数sql
-        $total_register_customer               = "SELECT count(*) counter from customer_entity";
+        $total_register_customer_sql           = "SELECT count(*) counter from customer_entity";
         //昨天销售额
         $yesterday_sales_money_rs                   = $model->query($yesterday_sales_money_sql);
         //过去7天销售额
@@ -1775,6 +1775,48 @@ order by sfoi.item_id asc limit 1000";
         //总共支付成功数
         $total_order_success_rs                     = $model->query($total_order_success_sql);
         //昨天购物车总数
-        
+        $yesterday_shoppingcart_total_rs            = $model->query($yesterday_shoppingcart_total_sql);
+        //过去7天购物车总数
+        $pastsevenday_shoppingcart_total_rs         = $model->query($pastsevenday_shoppingcart_total_sql);
+        //过去30天购物车总数
+        $pastthirtyday_shoppingcart_total_rs        = $model->query($pastthirtyday_shoppingcart_total_sql);
+        //当月购物车总数
+        $thismonth_shoppingcart_total_rs            = $model->query($thismonth_shoppingcart_total_sql);
+        //上月购物车总数
+        $lastmonth_shoppingcart_total_rs            = $model->query($lastmonth_shoppingcart_total_sql);
+        //今年购物车总数
+        $thisyear_shoppingcart_total_rs             = $model->query($thisyear_shoppingcart_total_sql);
+        //总共购物车总数
+        $total_shoppingcart_total_rs                = $model->query($total_shoppingcart_total_sql);
+        //昨天新增购物车总数
+        $yesterday_shoppingcart_new_rs              = $model->query($yesterday_shoppingcart_new_sql);
+        //过去7天新增购物车总数
+        $pastsevenday_shoppingcart_new_rs           = $model->query($pastsevenday_shoppingcart_new_sql);
+        //过去30天新增购物车总数
+        $pastthirtyday_shoppingcart_new_rs          = $model->query($pastthirtyday_shoppingcart_new_sql);
+        //当月新增购物车总数
+        $thismonth_shoppingcart_new_rs              = $model->query($thismonth_shoppingcart_new_sql);
+        //上月新增购物车总数
+        $lastmonth_shoppingcart_new_rs              = $model->query($lastmonth_shoppingcart_new_sql);
+        //今年新增购物车总数
+        $thisyear_shoppingcart_new_rs               = $model->query($thisyear_shoppingcart_new_sql);
+        //总共新增购物车总数
+        $total_shoppingcart_new_rs                  = $model->query($total_shoppingcart_new_sql);
+        //昨天新增注册人数
+        $yesterday_register_customer_rs             = $model->query($yesterday_register_customer_sql);
+        //过去7天新增注册人数
+        $pastsevenday_register_customer_rs          = $model->query($pastsevenday_register_customer_sql);
+        //过去30天新增注册人数
+        $pastthirtyday_register_customer_rs         = $model->query($pastthirtyday_register_customer_sql);
+        //当月新增注册人数
+        $thismonth_register_customer_rs             = $model->query($thismonth_register_customer_sql);
+        //上月新增注册人数
+        $lastmonth_register_customer_rs             = $model->query($lastmonth_register_customer_sql);
+        //今年新增注册人数
+        $thisyear_register_customer_rs              = $model->query($thisyear_register_customer_sql);
+        //总共新增注册人数
+        $total_register_customer_rs                 = $model->query($total_register_customer_sql);
+        dump($yesterday_sales_money_rs);
+        dump($pastsevenday_sales_money_rs);                                                                        
     }
 }
