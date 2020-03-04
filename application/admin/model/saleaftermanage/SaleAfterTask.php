@@ -584,8 +584,13 @@ class SaleAfterTask extends Model
         //求出用户的邮箱
         $customer_email = '';
         if($increment_id){
+            //如果输入的是订单号
             $customer_email = Db::connect($db)->table('sales_flat_order')->where('increment_id',$increment_id)->
             value('customer_email');
+            //如果输入的是vip订单号
+            if(!$customer_email){
+                $customer_email = Db::connect($db_online)->table('oc_vip_order')->where('order_number',$increment_id)->value('customer_email');
+            }
         }
         if(!empty($customer_name)){
             $customer_email = Db::connect($db)->table('sales_flat_order')->where('customer_firstname',$customer_name[0])
