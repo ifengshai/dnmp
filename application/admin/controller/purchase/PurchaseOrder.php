@@ -794,6 +794,7 @@ class PurchaseOrder extends Backend
 
         foreach ($data as $k => $v) {
             //匹配SKU
+            dump($v['skuid']);
             if ($v['skuid']) {
                 $params['sku'] = (new SupplierSku())->getSkuData($v['skuid']);
 
