@@ -81,8 +81,9 @@
                                 </div>
                                 <div class="form-group col-xs-12 col-sm-6 col-md-4 col-lg-3">
                                     <div class="col-sm-8 col-xs-offset-4"><input type="submit" class="btn btn-success"
-                                           value="提交"><button type="reset"
-                                            class="btn btn-default">重置</button> </div>
+                                           value="提交"> 
+                                           <input type="reset"
+                                            class="btn btn-default reset" value="重置" ></div>
                                 </div>
 
                             </div>
@@ -179,6 +180,17 @@
                                         <tr>
                                             <td colspan="6" style="font-size: 16px;font-weight:1000">运营数据</td>
                                         </tr>
+
+                                        <tr>
+                                            <td>A逻辑</td>
+                                            <td style="color: red;">sph > -3.00 and sph < 0 and cyl < 2.00</td>
+                                            <td>B逻辑</td>
+                                            <td style="color: red;">(sph > -3.00 and sph < 0 AND cyl > 2.00) OR (sph < -3.00 and sph > -6.00 AND cyl < 2.00)</td>
+                                            <td>C逻辑</td>
+                                            <td style="color: red;">(sph < -3.00 and sph > -6.00 AND cyl > 2.00) OR ( sph > -6.00 AND cyl > 0)</td>
+                                         
+                                        </tr>
+                                        
                                         <tr>
                                             <td>A</td>
                                             <td>{$skuRes[0]['A']}</td>
