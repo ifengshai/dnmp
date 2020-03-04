@@ -790,7 +790,6 @@ class PurchaseOrder extends Backend
         //查询SKU为空的采购单
 
         $data = $this->purchase_order_item->whereExp('', 'LENGTH(trim(sku))=0')->whereOr('sku', 'exp', 'is null')->select();
-        echo $this->purchase_order_item->getLastSql();
         $data = collection($data)->toArray();
         dump($data);
         foreach ($data as $k => $v) {
