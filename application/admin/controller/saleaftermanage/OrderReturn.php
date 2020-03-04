@@ -421,19 +421,19 @@ class OrderReturn extends Backend
     {
         if ($request->isPost()) {
             //获取输入的订单号
-            $increment_id = $request->post('increment_id');
+            $increment_id = trim($request->post('increment_id'));
             //            dump($increment_id);
             //            exit;
             //获取输入的平台
-            $order_platform = $request->post('order_platform');
+            $order_platform = trim($request->post('order_platform'));
             //获取客户邮箱地址
-            $customer_email = $request->post('customer_email');
+            $customer_email = trim($request->post('customer_email'));
             //获取客户姓名
-            $customer_name  = $request->post('customer_name');
+            $customer_name  = trim($request->post('customer_name'));
             //获取客户电话
-            $customer_phone = $request->post('customer_phone');
+            $customer_phone = trim($request->post('customer_phone'));
             //获取运单号
-            $track_number   = $request->post('track_number');
+            $track_number   = trim($request->post('track_number'));
             if ($order_platform < 1) {
                 return $this->error('请选择正确的订单平台');
             }
