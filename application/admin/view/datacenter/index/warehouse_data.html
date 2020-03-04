@@ -188,17 +188,35 @@
                                             <td style="color: red;">(sph > -3.00 and sph < 0 AND cyl > 2.00) OR (sph < -3.00 and sph > -6.00 AND cyl < 2.00)</td>
                                             <td>C逻辑</td>
                                             <td style="color: red;">(sph < -3.00 and sph > -6.00 AND cyl > 2.00) OR ( sph > -6.00 AND cyl > 0)</td>
+                                            <td>D逻辑</td>
+                                            <td style="color: red;">(其余处方镜)</td>
                                          
                                         </tr>
-                                        
+                                        {php}
+                                            $allnum = ($skuRes[0]['A'] + $skuRes[0]['B'] + $skuRes[0]['C']);
+                                            if ($zeeloolOrderPrescriptionNum > 0) {
+                                                $A_persent = round($skuRes[0]['A']/$zeeloolOrderPrescriptionNum*100,1);
+                                                $B_persent = round($skuRes[0]['B']/$zeeloolOrderPrescriptionNum*100,1);
+                                                $C_persent = round($skuRes[0]['C']/$zeeloolOrderPrescriptionNum*100,1);
+                                                $D_persent = round(($zeeloolOrderPrescriptionNum-$allnum)/$zeeloolOrderPrescriptionNum*100,1);
+                                            } else {
+                                                $A_persent = 0;
+                                                $B_persent = 0;
+                                                $C_persent = 0;
+                                                $D_persent = 0;
+                                            }
+                                            
+                                        {/php}
                                         <tr>
                                             <td>A</td>
-                                            <td>{$skuRes[0]['A']}</td>
+                                            <td>{$skuRes[0]['A']}({$A_persent}%)</td>
                                             <td>B</td>
-                                            <td>{$skuRes[0]['B']}</td>
+                                            <td>{$skuRes[0]['B']}({$B_persent}%)</td>
                                             <td>C</td>
-                                            <td>{$skuRes[0]['C']}</td>
-                                         
+                                            <td>{$skuRes[0]['C']}({$C_persent}%)</td>
+                                            <td>D</td>
+                                            <td>{$zeeloolOrderPrescriptionNum-$allnum}({$D_persent}%)</td>
+                                        
                                         </tr>
                                      
                                        
