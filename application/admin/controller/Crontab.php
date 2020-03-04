@@ -1607,11 +1607,11 @@ order by sfoi.item_id asc limit 1000";
         }
         $order_status = $this->order_status;
         //昨日销售额sql
-        $yesterday_sales_money_sql = "SELECT round(sum(base_grand_total),2) base_grand_total FROM sales_flat_order WHERE DATEDIFF(created_at,NOW())=-1 $order_status";
+        $yesterday_sales_money_sql = "SELECT round(sum(base_grand_total),2)  FROM sales_flat_order WHERE DATEDIFF(created_at,NOW())=-1 $order_status";
         //过去7天销售额sql
-        $pastsevenday_sales_money_sql = "SELECT round(sum(base_grand_total),2) base_grand_total FROM sales_flat_order WHERE DATEDIFF(created_at,NOW())=-7 $order_status";
+        $pastsevenday_sales_money_sql = "SELECT round(sum(base_grand_total),2) base_grand_total FROM sales_flat_order WHERE DATE_SUB(CURDATE(),INTERVAL 7 DAY) <= date(created_at) and created_at< curdate() $order_status";
         //过去30天销售额sql
-        $pastthirtyday_sales_money_sql = "SELECT round(sum(base_grand_total),2) base_grand_total FROM sales_flat_order WHERE DATEDIFF(created_at,NOW())=-30 $order_status";
+        $pastthirtyday_sales_money_sql = "SELECT round(sum(base_grand_total),2) base_grand_total FROM sales_flat_order WHERE DATE_SUB(CURDATE(),INTERVAL 30 DAY) <= date(created_at) and created_at< curdate() $order_status";
         //当月销售额sql
         $thismonth_sales_money_sql     = "SELECT round(sum(base_grand_total),2) base_grand_total FROM sales_flat_order WHERE DATE_FORMAT(created_at,'%Y%m') = DATE_FORMAT(CURDATE(),'%Y%m') $order_status";
         //上月销售额sql
@@ -1623,9 +1623,9 @@ order by sfoi.item_id asc limit 1000";
         //昨天订单数sql
         $yesterday_order_num_sql       = "SELECT count(*) counter FROM sales_flat_order WHERE DATEDIFF(created_at,NOW())=-1";
         //过去7天订单数sql
-        $pastsevenday_order_num_sql    = "SELECT count(*) counter FROM sales_flat_order WHERE DATEDIFF(created_at,NOW())=-7";
+        $pastsevenday_order_num_sql    = "SELECT count(*) counter FROM sales_flat_order WHERE DATE_SUB(CURDATE(),INTERVAL 7 DAY) <= date(created_at) and created_at< curdate()";
         //过去30天订单数sql
-        $pastthirtyday_order_num_sql   = "SELECT count(*) counter FROM sales_flat_order WHERE DATEDIFF(created_at,NOW())=-30";
+        $pastthirtyday_order_num_sql   = "SELECT count(*) counter FROM sales_flat_order WHERE DATE_SUB(CURDATE(),INTERVAL 30 DAY) <= date(created_at) and created_at< curdate()";
         //当月订单数sql
         $thismonth_order_num_sql       = "SELECT count(*) counter FROM sales_flat_order WHERE DATE_FORMAT(created_at,'%Y%m') = DATE_FORMAT(CURDATE(),'%Y%m')" ;
         //上月订单数sql
@@ -1637,9 +1637,9 @@ order by sfoi.item_id asc limit 1000";
         //昨天订单支付成功数sql
         $yesterday_order_success_sql   = "SELECT count(*) counter FROM sales_flat_order WHERE DATEDIFF(created_at,NOW())=-1 $order_status";
         //过去7天订单支付成功数sql
-        $pastsevenday_order_success_sql    = "SELECT count(*) counter FROM sales_flat_order WHERE DATEDIFF(created_at,NOW())=-7 $order_status";
+        $pastsevenday_order_success_sql    = "SELECT count(*) counter FROM sales_flat_order WHERE DATE_SUB(CURDATE(),INTERVAL 7 DAY) <= date(created_at) and created_at< curdate() $order_status";
         //过去30天订单支付成功数sql
-        $pastthirtyday_order_success_sql   = "SELECT count(*) counter FROM sales_flat_order WHERE DATEDIFF(created_at,NOW())=-30 $order_status";
+        $pastthirtyday_order_success_sql   = "SELECT count(*) counter FROM sales_flat_order WHERE DATE_SUB(CURDATE(),INTERVAL 30 DAY) <= date(created_at) and created_at< curdate() $order_status";
         //当月订单支付成功数sql
         $thismonth_order_success_sql       = "SELECT count(*) counter FROM sales_flat_order WHERE DATE_FORMAT(created_at,'%Y%m') = DATE_FORMAT(CURDATE(),'%Y%m') $order_status";
         //上月订单支付成功数sql
@@ -1665,9 +1665,9 @@ order by sfoi.item_id asc limit 1000";
         //昨天购物车总数sql
         $yesterday_shoppingcart_total_sql     = "SELECT count(*) counter from sales_flat_quote where base_grand_total>0 AND DATEDIFF(created_at,NOW())=-1";
         //过去7天购物车总数sql
-        $pastsevenday_shoppingcart_total_sql  = "SELECT count(*) counter from sales_flat_quote where base_grand_total>0 AND DATEDIFF(created_at,NOW())=-7";
+        $pastsevenday_shoppingcart_total_sql  = "SELECT count(*) counter from sales_flat_quote where base_grand_total>0 AND DATE_SUB(CURDATE(),INTERVAL 7 DAY) <= date(created_at) and created_at< curdate()";
         //过去30天购物车总数sql
-        $pastthirtyday_shoppingcart_total_sql = "SELECT count(*) counter from sales_flat_quote where base_grand_total>0 AND DATEDIFF(created_at,NOW())=-30";
+        $pastthirtyday_shoppingcart_total_sql = "SELECT count(*) counter from sales_flat_quote where base_grand_total>0 AND DATE_SUB(CURDATE(),INTERVAL 30 DAY) <= date(created_at) and created_at< curdate()";
         //当月购物车总数sql
         $thismonth_shoppingcart_total_sql     = "SELECT count(*) counter from sales_flat_quote where base_grand_total>0 AND DATE_FORMAT(created_at,'%Y%m') = DATE_FORMAT(CURDATE(),'%Y%m')";
         //上月购物车总数sql
@@ -1693,9 +1693,9 @@ order by sfoi.item_id asc limit 1000";
         //昨天新增购物车总数sql
         $yesterday_shoppingcart_new_sql = "SELECT count(*) counter from sales_flat_quote where base_grand_total>0 AND DATEDIFF(updated_at,NOW())=-1";
         //过去7天新增购物车总数sql
-        $pastsevenday_shoppingcart_new_sql = "SELECT count(*) counter from sales_flat_quote where base_grand_total>0 AND DATEDIFF(updated_at,NOW())=-7";
+        $pastsevenday_shoppingcart_new_sql = "SELECT count(*) counter from sales_flat_quote where base_grand_total>0 AND DATE_SUB(CURDATE(),INTERVAL 7 DAY) <= date(updated_at) and created_at< curdate()";
         //过去30天新增购物车总数sql
-        $pastthirtyday_shoppingcart_new_sql = "SELECT count(*) counter from sales_flat_quote where base_grand_total>0 AND DATEDIFF(updated_at,NOW())=-30";
+        $pastthirtyday_shoppingcart_new_sql = "SELECT count(*) counter from sales_flat_quote where base_grand_total>0 AND DATE_SUB(CURDATE(),INTERVAL 30 DAY) <= date(updated_at) and created_at< curdate()";
         //当月新增购物车总数sql
         $thismonth_shoppingcart_new_sql = "SELECT count(*) counter from sales_flat_quote where base_grand_total>0 AND  DATE_FORMAT(updated_at,'%Y%m') = DATE_FORMAT(CURDATE(),'%Y%m')";
         //上月新增购物车总数sql
@@ -1721,9 +1721,9 @@ order by sfoi.item_id asc limit 1000";
         //昨天新增注册用户数sql
         $yesterday_register_customer_sql       = "SELECT count(*) counter from customer_entity where DATEDIFF(created_at,NOW())=-1";
         //过去7天新增注册用户数sql
-        $pastsevenday_register_customer_sql    = "SELECT count(*) counter from customer_entity where DATEDIFF(created_at,NOW())=-7";
+        $pastsevenday_register_customer_sql    = "SELECT count(*) counter from customer_entity where DATE_SUB(CURDATE(),INTERVAL 7 DAY) <= date(created_at) and created_at< curdate()";
         //过去30天新增注册用户数sql
-        $pastthirtyday_register_customer_sql   = "SELECT count(*) counter from customer_entity where DATEDIFF(created_at,NOW())=-30";
+        $pastthirtyday_register_customer_sql   = "SELECT count(*) counter from customer_entity where DATE_SUB(CURDATE(),INTERVAL 30 DAY) <= date(created_at) and created_at< curdate()";
         //当月新增注册用户数sql
         $thismonth_register_customer_sql       = "SELECT count(*) counter from customer_entity where DATE_FORMAT(created_at,'%Y%m') = DATE_FORMAT(CURDATE(),'%Y%m')";
         //上月新增注册用户数sql
@@ -1732,6 +1732,9 @@ order by sfoi.item_id asc limit 1000";
         $thisyear_register_customer_sql        = "SELECT count(*) counter from customer_entity where YEAR(updated_at)=YEAR(NOW())";
         //总共新增注册用户数sql
         $total_register_customer_sql           = "SELECT count(*) counter from customer_entity";
+        $model->table('sales_flat_order')->query("set time_zone='+8:00'");
+        $model->table('sales_flat_quote')->query("set time_zone='+8:00'");
+        $model->table('customer_entity')->query("set time_zone='+8:00'");
         //昨天销售额
         $yesterday_sales_money_rs                   = $model->query($yesterday_sales_money_sql);
         //过去7天销售额
@@ -1817,6 +1820,11 @@ order by sfoi.item_id asc limit 1000";
         //总共新增注册人数
         $total_register_customer_rs                 = $model->query($total_register_customer_sql);
         dump($yesterday_sales_money_rs);
-        dump($pastsevenday_sales_money_rs);                                                                        
+        dump($pastsevenday_sales_money_rs);
+        dump($pastthirtyday_sales_money_rs);
+        dump($thismonth_sales_money_rs);
+        dump($lastmonth_sales_money_rs);
+        dump($thisyear_sales_money_rs);
+        dump($total_sales_money_rs);                                                                        
     }
 }
