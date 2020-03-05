@@ -2274,52 +2274,64 @@ order by sfoi.item_id asc limit 1000";
         $lastyear_register_customer_data            = $lastyear_register_customer_rs[0]['counter'];
         //总共新增注册人数
         $total_register_customer_data               = $total_register_customer_rs[0]['counter'];
-        dump($yesterday_sales_money_data);
-        dump($pastsevenday_sales_money_data);
-        dump($pastthirtyday_sales_money_data);
-        dump($thismonth_sales_money_data);
-        dump($lastmonth_sales_money_data);
-        dump($thisyear_sales_money_data);
-        dump($lastyear_sales_money_data);
-        dump($total_sales_money_data);
-        
-        dump($yesterday_order_num_data);
-        dump($pastsevenday_order_num_data);
-        dump($pastthirtyday_order_num_data);
-        dump($thismonth_order_num_data);
-        dump($lastmonth_order_num_data);
-        dump($thisyear_order_num_data);
-        dump($lastyear_order_num_data);
-        dump($total_order_num_data);
+        echo date('Y-m-d h:i:s', time()); 
+        $updateData['yesterday_sales_money']        = $yesterday_sales_money_data;
+        $updateData['pastsevenday_sales_money']     = $pastsevenday_sales_money_data;
+        $updateData['pastthirtyday_sales_money']    = $pastthirtyday_sales_money_data;
+        $updateData['thismonth_sales_money']        = $thismonth_sales_money_data;
+        $updateData['lastmonth_sales_money']        = $lastmonth_sales_money_data;
+        $updateData['thisyear_sales_money']         = $thisyear_sales_money_data;
+        $updateData['lastyear_sales_money']         = $lastyear_sales_money_data;
+        $updateData['total_sales_money']            = $total_sales_money_data;
 
-        dump($yesterday_order_success_data);
-        dump($pastsevenday_order_success_data);
-        dump($pastthirtyday_order_success_data);
-        dump($thismonth_order_success_data);
-        dump($lastmonth_order_success_data);
-        dump($thisyear_order_success_data);
-        dump($lastyear_order_success_data);
-        dump($total_order_success_data);        
-   
-        dump($yesterday_unit_price_data);
-        dump($pastsevenday_unit_price_data);
-        dump($pastthirtyday_unit_price_data);
-        dump($thismonth_unit_price_data);
-        dump($lastmonth_unit_price_data);
-        dump($thisyear_unit_price_data);
-        dump($lastyear_unit_price_data);
-        dump($total_unit_price_data);
-        
-        dump($yesterday_register_customer_data);
-        dump($pastsevenday_register_customer_data);
-        dump($pastthirtyday_register_customer_data);
-        dump($thismonth_register_customer_data);
-        dump($lastmonth_register_customer_data);
-        dump($thisyear_register_customer_data);
-        dump($lastyear_register_customer_data);
-        dump($total_register_customer_data);
-        echo date('Y-m-d h:i:s', time());  
+        $updateData['yesterday_order_num']         = $yesterday_order_num_data;
+        $updateData['pastsevenday_order_num']      = $pastsevenday_order_num_data;
+        $updateData['pastthirtyday_order_num']     = $pastthirtyday_order_num_data;
+        $updateData['thismonth_order_num']         = $thismonth_order_num_data;
+        $updateData['lastmonth_order_num']         = $lastmonth_order_num_data;
+        $updateData['thisyear_order_num']          = $thisyear_order_num_data;
+        $updateData['lastyear_order_num']          = $lastyear_order_num_data;
+        $updateData['total_order_num']             = $yesterday_order_num_data;
 
+        $updateData['yesterday_order_success']      = $yesterday_order_success_data;
+        $updateData['pastsevenday_order_success']   = $pastsevenday_order_success_data;
+        $updateData['pastthirtyday_order_success']  = $pastthirtyday_order_success_data;
+        $updateData['thismonth_order_success']      = $thismonth_order_success_data;
+        $updateData['lastmonth_order_success']      = $lastmonth_order_success_data;
+        $updateData['thisyear_order_success']       = $thisyear_order_success_data;
+        $updateData['lastyear_order_success']       = $lastyear_order_success_data;
+        $updateData['total_order_success']          = $total_order_success_data;
+
+        $updateData['yesterday_unit_price']         = $yesterday_unit_price_data;
+        $updateData['pastsevenday_unit_price']      = $pastsevenday_unit_price_data;
+        $updateData['pastthirtyday_unit_price']     = $pastthirtyday_unit_price_data;
+        $updateData['thismonth_unit_price']         = $thismonth_unit_price_data;
+        $updateData['lastmonth_unit_price']         = $lastmonth_unit_price_data;
+        $updateData['thisyear_unit_price']          = $thisyear_unit_price_data;
+        $updateData['lastyear_unit_price']          = $lastyear_unit_price_data;
+        $updateData['total_unit_price']             = $total_unit_price_data;
+
+        $updateData['yesterday_register_customer']      = $yesterday_register_customer_data;
+        $updateData['pastsevenday_register_customer']   = $pastsevenday_register_customer_data;
+        $updateData['pastthirtyday_register_customer']  = $pastthirtyday_register_customer_data;
+        $updateData['thismonth_register_customer']      = $thismonth_register_customer_data;
+        $updateData['lastmonth_register_customer']      = $lastmonth_register_customer_data;
+        $updateData['thisyear_register_customer']       = $thisyear_register_customer_data;
+        $updateData['lastyear_register_customer']       = $lastyear_register_customer_data;
+        $updateData['total_register_customer']          = $total_register_customer_data;
+        //查找是否存在的记录
+        $result = Db::name('operation_analysis')->where(['order_platform'=>$platform])->field('id,order_platform')->find();
+        if(!$result){
+            $updateData['order_platform'] = $platform;
+            $info=Db::name('operation_analysis')->insert($updateData);
+        }else{
+            $info=Db::name('operation_analysis')->where(['order_platform'=>$platform])->update($updateData);
+        }
+        if($info){
+            echo 'ok'; 
+        }else{
+            echo 'error';
+        }
     }
     /**
      * 更新zeelool站仪表盘数据
@@ -2534,52 +2546,55 @@ order by sfoi.item_id asc limit 1000";
         $lastyear_shoppingcart_newconversion_data  = round(($lastyear_order_success_data/$lastyear_shoppingcart_new_data),4)*100;
         //总共新增购物车转化率
         $total_shoppingcart_newconversion_data     = round(($total_order_success_data/$total_shoppingcart_new_data),4)*100;
+        
+        $updateData['yesterday_shoppingcart_total']        = $yesterday_shoppingcart_total_data;
+        $updateData['pastsevenday_shoppingcart_total']     = $pastsevenday_shoppingcart_total_data;
+        $updateData['pastthirtyday_shoppingcart_total']    = $pastthirtyday_shoppingcart_total_data;
+        $updateData['thismonth_shoppingcart_total']        = $thismonth_shoppingcart_total_data;
+        $updateData['lastmonth_shoppingcart_total']        = $lastmonth_shoppingcart_total_data;
+        $updateData['thisyear_shoppingcart_total']         = $thisyear_shoppingcart_total_data;
+        $updateData['lastyear_shoppingcart_total']         = $lastyear_shoppingcart_total_data;
+        $updateData['total_shoppingcart_total']            = $total_shoppingcart_total_data;
 
-        dump($yesterday_order_success_data);
-        dump($pastsevenday_order_success_data);
-        dump($pastthirtyday_order_success_data);
-        dump($thismonth_order_success_data);
-        dump($lastmonth_order_success_data);
-        dump($thisyear_order_success_data);
-        dump($lastyear_order_success_data);
-        dump($total_order_success_data);
-             
-        dump($yesterday_shoppingcart_total_data);
-        dump($pastsevenday_shoppingcart_total_data);
-        dump($pastthirtyday_shoppingcart_total_data);
-        dump($thismonth_shoppingcart_total_data);
-        dump($lastmonth_shoppingcart_total_data);
-        dump($thisyear_shoppingcart_total_data);
-        dump($lastyear_shoppingcart_total_data);
-        dump($total_shoppingcart_total_data);
-        
-        dump($yesterday_shoppingcart_conversion_data);
-        dump($pastsevenday_shoppingcart_conversion_data);
-        dump($pastthirtyday_shoppingcart_conversion_data);
-        dump($thismonth_shoppingcart_conversion_data);
-        dump($lastmonth_shoppingcart_conversion_data);
-        dump($thisyear_shoppingcart_conversion_data);
-        dump($lastyear_shoppingcart_conversion_data);
-        dump($total_shoppingcart_conversion_data);
-        
-        dump($yesterday_shoppingcart_new_data);
-        dump($pastsevenday_shoppingcart_new_data);
-        dump($pastthirtyday_shoppingcart_new_data);
-        dump($thismonth_shoppingcart_new_data);
-        dump($lastmonth_shoppingcart_new_data);
-        dump($thisyear_shoppingcart_new_data);
-        dump($lastyear_shoppingcart_new_data);
-        dump($total_shoppingcart_new_data);
-        
-        dump($yesterday_shoppingcart_newconversion_data);
-        dump($pastsevenday_shoppingcart_newconversion_data);
-        dump($pastthirtyday_shoppingcart_newconversion_data);
-        dump($thismonth_shoppingcart_newconversion_data);
-        dump($lastmonth_shoppingcart_newconversion_data);
-        dump($thisyear_shoppingcart_newconversion_data);
-        dump($lastyear_shoppingcart_newconversion_data);
-        dump($total_shoppingcart_newconversion_data);
-        echo date('Y-m-d h:i:s', time());        
+        $updateData['yesterday_shoppingcart_conversion']         = $yesterday_shoppingcart_conversion_data;
+        $updateData['pastsevenday_shoppingcart_conversion']      = $pastsevenday_shoppingcart_conversion_data;
+        $updateData['pastthirtyday_shoppingcart_conversion']     = $pastthirtyday_shoppingcart_conversion_data;
+        $updateData['thismonth_shoppingcart_conversion']         = $thismonth_shoppingcart_conversion_data;
+        $updateData['lastmonth_shoppingcart_conversion']         = $lastmonth_shoppingcart_conversion_data;
+        $updateData['thisyear_shoppingcart_conversion']          = $thisyear_shoppingcart_conversion_data;
+        $updateData['lastyear_shoppingcart_conversion']          = $lastyear_shoppingcart_conversion_data;
+        $updateData['total_shoppingcart_conversion']             = $yesterday_shoppingcart_conversion_data;
 
+        $updateData['yesterday_shoppingcart_new']         = $yesterday_shoppingcart_new_data;
+        $updateData['pastsevenday_shoppingcart_new']      = $pastsevenday_shoppingcart_new_data;
+        $updateData['pastthirtyday_shoppingcart_new']     = $pastthirtyday_shoppingcart_new_data;
+        $updateData['thismonth_shoppingcart_new']         = $thismonth_shoppingcart_new_data;
+        $updateData['lastmonth_shoppingcart_new']         = $lastmonth_shoppingcart_new_data;
+        $updateData['thisyear_shoppingcart_new']          = $thisyear_shoppingcart_new_data;
+        $updateData['lastyear_shoppingcart_new']          = $lastyear_shoppingcart_new_data;
+        $updateData['total_shoppingcart_new']             = $total_shoppingcart_new_data;
+
+        $updateData['yesterday_shoppingcart_newconversion']      = $yesterday_shoppingcart_newconversion_data;
+        $updateData['pastsevenday_shoppingcart_newconversion']   = $pastsevenday_shoppingcart_newconversion_data;
+        $updateData['pastthirtyday_shoppingcart_newconversion']  = $pastthirtyday_shoppingcart_newconversion_data;
+        $updateData['thismonth_shoppingcart_newconversion']      = $thismonth_shoppingcart_newconversion_data;
+        $updateData['lastmonth_shoppingcart_newconversion']      = $lastmonth_shoppingcart_newconversion_data;
+        $updateData['thisyear_shoppingcart_newconversion']       = $thisyear_shoppingcart_newconversion_data;
+        $updateData['lastyear_shoppingcart_newconversion']       = $lastyear_shoppingcart_newconversion_data;
+        $updateData['total_shoppingcart_newconversion']          = $total_shoppingcart_newconversion_data;
+        //查找是否存在的记录
+        $result = Db::name('operation_analysis')->where(['order_platform'=>$platform])->field('id,order_platform')->find();
+        if(!$result){
+            $updateData['order_platform'] = $platform;
+            $info=Db::name('operation_analysis')->insert($updateData);
+        }else{
+            $info=Db::name('operation_analysis')->where(['order_platform'=>$platform])->update($updateData);
+        }
+        if($info){
+            echo 'ok'; 
+        }else{
+            echo 'error';
+        }        
+        
     }    
 }
