@@ -245,7 +245,8 @@ class SaleAfterTask extends Model
                 $db = 'database.db_nihao';
                 break;
             case 5:
-                $db = 'database.db_weseeoptical';    
+                $db = 'database.db_weseeoptical'; 
+                break;   
             default:
                 return false;
                 break;
