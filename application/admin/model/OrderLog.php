@@ -3,6 +3,7 @@
 namespace app\admin\model;
 
 use think\Model;
+use think\Db;
 
 
 class OrderLog extends Model
@@ -34,5 +35,21 @@ class OrderLog extends Model
         return false;
     }
 
-    
+    /**
+     * 获取当月质检总数
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/03/05 10:09:08 
+     * @return void
+     */
+    public function getOrderCheckNum()
+    {
+        $where['createtime'] = ['between', [date('Y-m-01 00:00:00', time()), date('Y-m-01 H:i:s', time())]];
+        $where['type'] = 5; //质检通过
+        $ids = $this->where($where)->column('order_ids');
+        $ids = implode(',', $ids);
+        $num = Db::connect('database.db_zeelool')->table('sales_flat_order_item')->where('order_id', 'in', $ids)->sum('qty_ordered');
+        return $num;
+    }
 }
