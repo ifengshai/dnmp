@@ -254,7 +254,7 @@ class Zeelool extends Model
      * @param [type] $map 筛选条件
      * @return object
      */
-    public function getOrderSalesNum($map)
+    public function getOrderSalesNum123($map)
     {
         $res = $this->where($map)
         ->alias('a')
