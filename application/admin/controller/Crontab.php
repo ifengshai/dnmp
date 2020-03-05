@@ -1850,21 +1850,21 @@ order by sfoi.item_id asc limit 1000";
         //总共支付成功数data
         $total_order_success_data                   = $total_order_success_rs[0]['counter'];                                                
         //昨日客单价data
-        $yesterday_unit_price_data                  = round(($yesterday_sales_money_data/$yesterday_order_success_data),4)*100;
+        $yesterday_unit_price_data                  = round(($yesterday_sales_money_data/$yesterday_order_success_data),2);
          //过去7天客单价data
-        $pastsevenday_unit_price_data               = round(($pastsevenday_sales_money_data/$pastsevenday_order_success_data),4)*100;
+        $pastsevenday_unit_price_data               = round(($pastsevenday_sales_money_data/$pastsevenday_order_success_data),2);
         //过去30天客单价data
-        $pastthirtyday_unit_price_data              = round(($pastthirtyday_sales_money_data/$pastthirtyday_order_success_data),4)*100;
+        $pastthirtyday_unit_price_data              = round(($pastthirtyday_sales_money_data/$pastthirtyday_order_success_data),2);
         //当月客单价data
-        $thismonth_unit_price_data                  = round(($thismonth_sales_money_data/$thismonth_order_success_data),4)*100;
+        $thismonth_unit_price_data                  = round(($thismonth_sales_money_data/$thismonth_order_success_data),2);
         //上月客单价data
-        $lastmonth_unit_price_data                  = round(($lastmonth_sales_money_data/$lastmonth_order_success_data),4)*100;
+        $lastmonth_unit_price_data                  = round(($lastmonth_sales_money_data/$lastmonth_order_success_data),2);
         //今年客单价data
-        $thisyear_unit_price_data                   = round(($thisyear_sales_money_data/$thisyear_order_success_data),4)*100;
+        $thisyear_unit_price_data                   = round(($thisyear_sales_money_data/$thisyear_order_success_data),2);
         //上一年客单价data
-        $lastyear_unit_price_data                   = round(($lastyear_sales_money_data/$lastyear_order_success_data),4)*100;
+        $lastyear_unit_price_data                   = round(($lastyear_sales_money_data/$lastyear_order_success_data),2);
         //总共客单价data
-        $total_unit_price_data                      = round(($total_sales_money_data/$total_order_success_data),4)*100;
+        $total_unit_price_data                      = round(($total_sales_money_data/$total_order_success_data),2);
         //昨天购物车总数data
         $yesterday_shoppingcart_total_data          = $yesterday_shoppingcart_total_rs[0]['counter'];
         //过去7天购物车总数data
