@@ -17,6 +17,7 @@ use app\admin\model\saleaftermanage\SaleAfterTaskRemark;
 use Util\NihaoPrescriptionDetailHelper;
 use Util\ZeeloolPrescriptionDetailHelper;
 use Util\VooguemePrescriptionDetailHelper;
+use Util\WeseeopticalPrescriptionDetailHelper;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 
 
@@ -409,6 +410,8 @@ class SaleAfterTask extends Backend
                     $result = VooguemePrescriptionDetailHelper::get_one_by_increment_id($order_number);
                 } elseif ($ordertype == 3) {
                     $result = NihaoPrescriptionDetailHelper::get_one_by_increment_id($order_number);
+                }elseif(5 == $ordertype){
+                    $result = WeseeopticalPrescriptionDetailHelper::get_one_by_increment_id($order_number);
                 }
                 if(!$result){
                     return $this->error('找不到这个订单,请重新尝试','','error',0);
@@ -474,6 +477,8 @@ class SaleAfterTask extends Backend
             $orderInfo = VooguemePrescriptionDetailHelper::get_one_by_increment_id($result['order_number']);
         } elseif (3 == $result['order_platform']) {
             $orderInfo = NihaoPrescriptionDetailHelper::get_one_by_increment_id($result['order_number']);
+        } elseif( 5 == $result['order_platform']){
+            $orderInfo = WeseeopticalPrescriptionDetailHelper::get_one_by_increment_id($result['order_number']);
         }
 		$issueArr = (new SaleAfterIssue())->getAjaxIssueList();
 		$result['problem_id'] = explode(',', $result['problem_id']);
