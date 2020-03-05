@@ -1584,6 +1584,7 @@ order by sfoi.item_id asc limit 1000";
     public function update_ashboard_data_yuan()
     {
         //求出平台
+        echo date('Y-m-d h:i:s', time()); 
         $platform = $this->request->get('platform');
         if(!$platform){
             return false;
@@ -2024,7 +2025,8 @@ order by sfoi.item_id asc limit 1000";
         dump($lastmonth_register_customer_data);
         dump($thisyear_register_customer_data);
         dump($lastyear_register_customer_data);
-        dump($total_register_customer_data);         
+        dump($total_register_customer_data);
+        echo date('Y-m-d h:i:s', time());          
 
     }    
     /**
@@ -2039,6 +2041,7 @@ order by sfoi.item_id asc limit 1000";
     public function update_ashboard_data_one()
     {
         //求出平台
+        echo date('Y-m-d h:i:s', time()); 
         $platform = $this->request->get('platform');
         if(!$platform){
             return false;
@@ -2314,7 +2317,8 @@ order by sfoi.item_id asc limit 1000";
         dump($lastmonth_register_customer_data);
         dump($thisyear_register_customer_data);
         dump($lastyear_register_customer_data);
-        dump($total_register_customer_data); 
+        dump($total_register_customer_data);
+        echo date('Y-m-d h:i:s', time());  
 
     }
     /**
@@ -2329,6 +2333,7 @@ order by sfoi.item_id asc limit 1000";
     public function update_ashboard_data_two()
     {
         //求出平台
+        echo date('Y-m-d h:i:s', time());
         $platform = $this->request->get('platform');
         if(!$platform){
             return false;
@@ -2573,7 +2578,8 @@ order by sfoi.item_id asc limit 1000";
         dump($lastmonth_shoppingcart_newconversion_data);
         dump($thisyear_shoppingcart_newconversion_data);
         dump($lastyear_shoppingcart_newconversion_data);
-        dump($total_shoppingcart_newconversion_data);       
+        dump($total_shoppingcart_newconversion_data);
+        echo date('Y-m-d h:i:s', time());        
 
     }    
 }
