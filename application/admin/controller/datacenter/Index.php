@@ -597,12 +597,51 @@ class Index extends Backend
             cache($cachename, $days7UnorderNum, 36400);
         }
 
+        //当月质检总数
+        $orderLog = new \app\admin\model\OrderLog();
+        $orderCheckNum = $orderLog->getOrderCheckNum();
+
+        //当日配镜架总数
+        
 
         
         
 
     }
 
+
+    //处理三站质检订单数据 统计订单SKU副数
+    protected function processDistributionLog($site = 'DB_Zeelool')
+    {
+        //查询未处理过的数据
+        $map['is_process'] = 0;
+        $map['type'] = ['in', [3, 4]];
+        $data = M('distribution_log', 'zeelool_', $site)->field("*,DATE_FORMAT(createtime,'%Y-%m-%d') as date")->where($map)->select();
+        if ($data) {
+            $ids = [];
+            foreach ($data as $k => $v) {
+                if ($ids[$v['create_person']][$v['date']]) {
+                    $ids[$v['create_person']][$v['date']] = array_unique(array_merge(explode(',', $v['order_ids']), $ids[$v['create_person']][$v['date']]));
+                } else {
+                    $ids[$v['create_person']][$v['date']] = array_unique(explode(',', $v['order_ids']));
+                }
+            }
+
+            foreach ($data as $k => $v) {
+
+                $where['order_id'] = ['in', $ids[$v['create_person']][$v['date']]];
+                if ($site == 'DB_Nihao') {
+                    $where['third_name'] = ['not in', ['Plastic Lenses', 'FRAME ONLY', '']];
+                } else {
+                    $where['index_type'] = ['not in', ['Plastic Lenses', 'FRAME ONLY', '']];
+                }
+
+                $qty = M('flat_order_item_prescription', 'sales_', $site)->where($where)->sum('qty_ordered');
+
+                M('distribution_log', 'zeelool_', $site)->where('id=' . $v['id'])->save(['is_process' => 1, 'num' => $qty ? $qty : 0]);
+            }
+        }
+    }
 
 
     /**
