@@ -1849,13 +1849,29 @@ order by sfoi.item_id asc limit 1000";
         $lastyear_register_customer_rs              = $model->query($lastyear_register_customer_sql);
         //总共新增注册人数
         $total_register_customer_rs                 = $model->query($total_register_customer_sql);
-        dump($yesterday_sales_money_rs);
-        dump($pastsevenday_sales_money_rs);
-        dump($pastthirtyday_sales_money_rs);
-        dump($thismonth_sales_money_rs);
-        dump($lastmonth_sales_money_rs);
-        dump($thisyear_sales_money_rs);
-        dump($lastyear_sales_money_rs);
-        dump($total_sales_money_rs);                                                                        
+        //昨天销售额data
+        $yesterday_sales_money_data                 = $yesterday_sales_money_rs[0]['base_grand_total'];
+        //过去7天销售额data
+        $pastsevenday_sales_money_data              = $pastsevenday_sales_money_rs[0]['base_grand_total'];
+        //过去30天销售额
+        $pastthirtyday_sales_money_data             = $pastthirtyday_sales_money_rs[0]['base_grand_total'];
+        //当月销售额
+        $thismonth_sales_money_data                 = $thismonth_sales_money_rs[0]['base_grand_total'];
+        //上月销售额
+        $lastmonth_sales_money_data                 = $lastmonth_sales_money_rs[0]['base_grand_total'];
+        //今年销售额
+        $thisyear_sales_money_data                  = $thisyear_sales_money_rs[0]['base_grand_total'];
+        //去年销售额
+        $lastyear_sales_money_data                  = $lastyear_sales_money_rs[0]['base_grand_total'];
+        //总计销售额
+        $total_sales_money_data                     = $total_sales_money_rs[0]['base_grand_total'];
+        dump($yesterday_sales_money_data);
+        dump($pastsevenday_sales_money_data);
+        dump($pastthirtyday_sales_money_data);
+        dump($thismonth_sales_money_data);
+        dump($lastmonth_sales_money_data);
+        dump($thisyear_sales_money_data);
+        dump($lastyear_sales_money_data);
+        dump($total_sales_money_data);                                                                        
     }
 }
