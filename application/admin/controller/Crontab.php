@@ -1715,7 +1715,7 @@ order by sfoi.item_id asc limit 1000";
         //今年新增购物车总数sql
         $thisyear_shoppingcart_new_sql = "SELECT count(*) counter from sales_flat_quote where base_grand_total>0 AND YEAR(updated_at)=YEAR(NOW())";
         //上年新增购物车总数sql
-        $lastyear_shoppingcart_new_sql = "SELECT count(*) counter FROM sales_flat_quoter WHERE base_grand_total>0 AND year(updated_at)=year(date_sub(now(),interval 1 year))";
+        $lastyear_shoppingcart_new_sql = "SELECT count(*) counter FROM sales_flat_quote WHERE base_grand_total>0 AND year(updated_at)=year(date_sub(now(),interval 1 year))";
         //总共新增购物车总数sql
         $total_shoppingcart_new_sql = "SELECT count(*) counter from sales_flat_quote where base_grand_total>0";
         //昨天新增购物车转化率
