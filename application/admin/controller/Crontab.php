@@ -2291,7 +2291,7 @@ order by sfoi.item_id asc limit 1000";
         $updateData['lastmonth_order_num']         = $lastmonth_order_num_data;
         $updateData['thisyear_order_num']          = $thisyear_order_num_data;
         $updateData['lastyear_order_num']          = $lastyear_order_num_data;
-        $updateData['total_order_num']             = $yesterday_order_num_data;
+        $updateData['total_order_num']             = $total_order_num_data;
 
         $updateData['yesterday_order_success']      = $yesterday_order_success_data;
         $updateData['pastsevenday_order_success']   = $pastsevenday_order_success_data;
@@ -2565,7 +2565,7 @@ order by sfoi.item_id asc limit 1000";
         $updateData['lastmonth_shoppingcart_conversion']         = $lastmonth_shoppingcart_conversion_data;
         $updateData['thisyear_shoppingcart_conversion']          = $thisyear_shoppingcart_conversion_data;
         $updateData['lastyear_shoppingcart_conversion']          = $lastyear_shoppingcart_conversion_data;
-        $updateData['total_shoppingcart_conversion']             = $yesterday_shoppingcart_conversion_data;
+        $updateData['total_shoppingcart_conversion']             = $total_shoppingcart_conversion_data;
 
         $updateData['yesterday_shoppingcart_new']         = $yesterday_shoppingcart_new_data;
         $updateData['pastsevenday_shoppingcart_new']      = $pastsevenday_shoppingcart_new_data;
