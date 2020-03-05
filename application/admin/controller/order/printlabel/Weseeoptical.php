@@ -968,10 +968,10 @@ EOF;
                 $final_print['index_type'] = $final_print['zsl'] . ' ' . $final_print['third_name'];
 
                 $prescription_params = json_decode($product_options['info_buyRequest']['tmplens']['prescription'], true);
+                if ($prescription_params) {
+                    $final_print = array_merge($final_print, $prescription_params);
 
-                $final_print = array_merge($final_print, $prescription_params);
-
-                // dump($final_print);
+                }
 
                 $final_print['prescription_type'] = isset($final_print['prescription_type']) ? $final_print['prescription_type'] : '';
 
