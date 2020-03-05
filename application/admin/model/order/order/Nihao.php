@@ -54,6 +54,9 @@ class Nihao extends Model
             case 3:
                 $db = 'database.db_nihao';
                 break;
+            case 4:
+                $db = 'database.db_weseeoptical';
+                break;
             default:
                 return false;
                 break;

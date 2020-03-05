@@ -2384,6 +2384,8 @@ class Item extends Backend
         }
             return $this->view->fetch();
     }
+
+    
 	public function batch_export_xls()
     {
         set_time_limit(0);
