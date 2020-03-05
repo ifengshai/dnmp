@@ -2330,7 +2330,8 @@ order by sfoi.item_id asc limit 1000";
             $info=Db::name('operation_analysis')->where(['order_platform'=>$platform])->update($updateData);
         }
         if($info){
-            echo 'ok'; 
+            echo 'ok';
+            echo  $total_order_num_data;  
         }else{
             echo 'error';
         }
