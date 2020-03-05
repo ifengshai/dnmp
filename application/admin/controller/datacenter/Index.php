@@ -292,6 +292,9 @@ class Index extends Backend
         //在途饰品库存总金额
         $onwayOrnamentAllStockPrice = $this->onway_ornament_all_stock_price();
 
+        $data = $this->warehouse_order_data();
+        //仓库数据
+        $this->view->assign('data', $data);
         $this->view->assign('allStock', $allStock);
         $this->view->assign('allStockPrice', $allStockPrice);
         $this->view->assign('frameStock', $frameStock);
@@ -568,7 +571,7 @@ class Index extends Backend
         $stime = date("Y-m-01 00:00:00");
         $etime = date("Y-m-d H:i:s", time());
         $map['create_date'] = ['between', [$stime, $etime]];
-        $allSalesNum = $orderStatistics->where($map)->sum('all_sales_num');
+        $lastMonthAllSalesNum = $orderStatistics->where($map)->cache(86400)->sum('all_sales_num');
 
         //未出库订单总数
         $cachename = 'warehouse_order_data' . 'allUnorderNum';
@@ -586,6 +589,7 @@ class Index extends Backend
         $cachename = 'warehouse_order_data' . 'days7UnorderNum';
         $days7UnorderNum = cache($cachename);
         if (!$days7UnorderNum) {
+            $map = [];
             $stime = date("Y-m-d H:i:s", strtotime("-7 day"));
             $etime = date("Y-m-d H:i:s", time());
             $map['a.created_at'] = ['between', [$stime, $etime]];
@@ -601,11 +605,39 @@ class Index extends Backend
         $orderCheckNum = $orderLog->getOrderCheckNum();
 
         //当日配镜架总数
-        
+        $orderFrameNum = $orderLog->getOrderFrameNum();
 
-        
-        
+        //当日配镜片总数
+        $orderLensNum = $orderLog->getOrderLensNum();
 
+        //当日加工总数
+        $orderFactoryNum = $orderLog->getOrderFactoryNum();
+
+        //当日质检总数
+        $orderCheckNewNum = $orderLog->getOrderCheckNewNum();
+
+        //当日出库总数
+        $outStock = new \app\admin\model\warehouse\Outstock();
+        $outStockNum = $outStock->getOutStockNum();
+
+        //当日质检入库总数
+        $inStock = new \app\admin\model\warehouse\Instock();
+        $inStockNum = $inStock->getInStockNum();
+
+        $data = [
+            'lastMonthAllSalesNum' => $lastMonthAllSalesNum,//当月总单量
+            'allUnorderNum'        => $allUnorderNum,//未出库总数
+            'days7UnorderNum'      => $days7UnorderNum,//7天未出库总数
+            'orderCheckNum'        => $orderCheckNum,//订单当月质检总数
+            'orderFrameNum'        => $orderFrameNum,//当日配镜架总数
+            'orderLensNum'         => $orderLensNum,//当日配镜片总数
+            'orderFactoryNum'      => $orderFactoryNum,//当日加工总数
+            'orderCheckNewNum'     => $orderCheckNewNum,//当日质检总数
+            'outStockNum'          => $outStockNum,//当日出库总数
+            'inStockNum'           => $inStockNum,//当日入库总数
+        ];
+
+        return $data;
     }
 
 

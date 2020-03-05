@@ -50,4 +50,20 @@ class Instock extends Model
         return $this->hasMany('InstockItem', 'in_stock_id');
     }
 
+
+    /**
+     * 获取当日入库总数
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/03/05 16:04:57 
+     * @return void
+     */
+    public function getInStockNum()
+    {
+        $where['createtime'] = ['between', [date('Y-m-d 00:00:00', time()), date('Y-m-d H:i:s', time())]];
+        $where['status'] = 2;
+        return $this->where($where)->alias('a')->join(['fa_in_stock_item' => 'b'], 'a.id=b.in_stock_id')->cache(3600)->sum('in_stock_num');
+    }
+
 }
