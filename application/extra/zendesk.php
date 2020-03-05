@@ -11,10 +11,9 @@ return [
 We have received your request.
 
 Please kindly reply with the words below (without the beginning number) for a fast response.
-1.Check Order Information
-2.Track Order
-3.Change Order Information
-4.Others
+1.Order Status
+2.Change Information
+3.Others
 
 Thank you very much for your cooperation. If you have any further questions, please feel free to let us know. We are always at your service. Have a good day.',
     //Processing状态
@@ -30,7 +29,7 @@ We really appreciate your patience and kind understanding. Please feel free to c
 
 Thank you for reaching out to Zeelool.com.
 
-We noticed that your payment didn’t go through. We suggest you try to pay again if you want to get these glasses. Once you placed your order successfully, the system will sent you a confirmation email automatically.
+We noticed that your payment didn’t go through. We suggest you try to pay again if you want to get these glasses. Once you placed your order successfully, the system will send you a confirmation email automatically.
 
 If you see a charge on the statement but the order reads as failed, we recommend you call the card issuer for assistance with this matter. 
 
