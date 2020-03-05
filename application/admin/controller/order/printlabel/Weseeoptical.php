@@ -461,7 +461,7 @@ class Weseeoptical extends Backend
         return $this->view->fetch();
     }
 
-    public function generate_barcode($text, $fileName)
+    protected function generate_barcode($text, $fileName)
     {
         // 引用barcode文件夹对应的类
         Loader::import('BCode.BCGFontFile', EXTEND_PATH);
@@ -557,16 +557,6 @@ where cped.attribute_id in(146,147) and cped.store_id=0 and cped.entity_id=$prod
     //批量导出xls
     public function batch_export_xls()
     {
-//         $entity_ids = rtrim(input('id_params'), ',');
-//         // dump($entity_ids);        
-//         $processing_order_querySql = "select sfo.increment_id,sfoi.product_options,sfoi.order_id,sfo.`status`,sfoi.sku,sfoi.product_id,sfoi.qty_ordered,sfo.created_at
-// from sales_flat_order_item sfoi
-// left join sales_flat_order sfo on  sfoi.order_id=sfo.entity_id 
-// where sfo.`status` in ('processing','creditcard_proccessing','free_processing','paypal_reversed','complete') and sfo.entity_id in($entity_ids)
-// order by sfoi.order_id desc;";
-//         $resultList = Db::connect('database.db_nihao')->query($processing_order_querySql);
-
-
         /*************修改为筛选导出****************/
 
         set_time_limit(0);
@@ -904,7 +894,6 @@ where cped.attribute_id in(146,147) and cped.store_id=0 and cped.entity_id=$prod
     {
         ob_start();
         // echo 'batch_print_label';
-
         $entity_ids = rtrim(input('id_params'), ',');
         // dump($entity_ids);
         if ($entity_ids) {
@@ -916,7 +905,7 @@ order by sfoi.order_id desc;";
             $processing_order_list = Db::connect('database.db_weseeoptical')->query($processing_order_querySql);
 
             $processing_order_list = $this->qty_order_check($processing_order_list);
-            // dump($processing_order_list);exit;
+            // dump($processing_order_list);
 
             $file_header = <<<EOF
                 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
@@ -933,11 +922,12 @@ EOF;
 
             //查询产品货位号
             $store_sku = new \app\admin\model\warehouse\StockHouse;
-            $cargo_number = $store_sku->alias('a')->where(['status' => 1,'b.is_del' => 1])->join(['fa_store_sku' => 'b'], 'a.id=b.store_id')->column('coding', 'sku');
+            $cargo_number = $store_sku->alias('a')->where(['status' => 1, 'b.is_del' => 1])->join(['fa_store_sku' => 'b'], 'a.id=b.store_id')->column('coding', 'sku');
 
             //查询sku映射表
             $item = new \app\admin\model\itemmanage\ItemPlatformSku;
             $item_res = $item->cache(3600)->column('sku', 'platform_sku');
+
 
             $file_content = '';
             $temp_increment_id = 0;
@@ -946,16 +936,16 @@ EOF;
                     $temp_increment_id = $processing_value['increment_id'];
 
                     $date = substr($processing_value['created_at'], 0, strpos($processing_value['created_at'], " "));
-                    $fileName = ROOT_PATH . "public" . DS . "uploads" . DS . "printOrder" . DS . "weseeoptical" . DS . "$date" . DS . "$temp_increment_id.png";
+                    $fileName = ROOT_PATH . "public" . DS . "uploads" . DS . "printOrder" . DS . "wesee" . DS . "$date" . DS . "$temp_increment_id.png";
                     // dump($fileName);
-                    $dir = ROOT_PATH . "public" . DS . "uploads" . DS . "printOrder" . DS . "weseeoptical" . DS . "$date";
+                    $dir = ROOT_PATH . "public" . DS . "uploads" . DS . "printOrder" . DS . "wesee" . DS . "$date";
                     if (!file_exists($dir)) {
                         mkdir($dir, 0777, true);
                         // echo '创建文件夹$dir成功';
                     } else {
                         // echo '需创建的文件夹$dir已经存在';
                     }
-                    $img_url = "/uploads/printOrder/weseeoptical/$date/$temp_increment_id.png";
+                    $img_url = "/uploads/printOrder/wesee/$date/$temp_increment_id.png";
                     //生成条形码
                     $this->generate_barcode($temp_increment_id, $fileName);
                     // echo '<br>需要打印'.$temp_increment_id;
@@ -969,19 +959,22 @@ EOF;
                 $final_print = array();
                 $product_options = unserialize($processing_value['product_options']);
                 // dump($product_options);
+                $final_print['coatiing_name'] = substr($product_options['info_buyRequest']['tmplens']['coatiing_name'], 0, 60);
+                // $final_print['index_type'] = substr($product_options['info_buyRequest']['tmplens']['index_type'],0,60);
+                $final_print['index_type'] = $product_options['info_buyRequest']['tmplens']['index_type'];
 
-                $final_print['second_name'] = $product_options['info_buyRequest']['tmplens']['second_name'];
-                $final_print['third_name'] = $product_options['info_buyRequest']['tmplens']['third_name'];
-                $final_print['four_name'] = $product_options['info_buyRequest']['tmplens']['four_name'];
-                $final_print['zsl'] = $product_options['info_buyRequest']['tmplens']['zsl'];
+                $prescription_params = $product_options['info_buyRequest']['tmplens']['prescription'];
+                if ($prescription_params) {
+                    $prescription_params = explode("&", $prescription_params);
+                    $lens_params = array();
+                    foreach ($prescription_params as $key => $value) {
+                        // dump($value);
+                        $arr_value = explode("=", $value);
+                        $lens_params[$arr_value[0]] = $arr_value[1];
+                    }
+                    $final_print = array_merge($lens_params, $final_print);
+                }
 
-                $final_print['index_type'] = $final_print['zsl'] . ' ' . $final_print['third_name'];
-
-                $prescription_params = json_decode($product_options['info_buyRequest']['tmplens']['prescription'], true);
-
-                $final_print = array_merge($final_print, $prescription_params);
-
-                // dump($final_print);
 
                 $final_print['prescription_type'] = isset($final_print['prescription_type']) ? $final_print['prescription_type'] : '';
 
@@ -1003,32 +996,16 @@ EOF;
                 $final_print['prismcheck'] = isset($final_print['prismcheck']) ? $final_print['prismcheck'] : '';
 
 
-                $final_print['second_name'] = $product_options['info_buyRequest']['tmplens']['second_name'];
-                $final_print['third_name'] = $product_options['info_buyRequest']['tmplens']['third_name'];
-                $final_print['four_name'] = $product_options['info_buyRequest']['tmplens']['four_name'];
-                $final_print['zsl'] = $product_options['info_buyRequest']['tmplens']['zsl'];
-
-                $final_print['index_type'] = $final_print['zsl'] . ' ' . $final_print['third_name'];
-
-                $prescription_params = json_decode($product_options['info_buyRequest']['tmplens']['prescription'], true);
-
-                $final_print = array_merge($final_print, $prescription_params);
-                // dump($final_print);
-                // exit;
-
-                //处理ADD  当ReadingGlasses时 是 双PD值
-                if ($final_print['prescription_type'] == 'Reading Glasses' &&  strlen($final_print['os_add']) > 0 && strlen($final_print['od_add']) > 0) {
-                    // echo '双PD值';
-                    $od_add = "<td>" . $final_print['od_add'] . "</td> ";
-                    $os_add = "<td>" . $final_print['os_add'] . "</td> ";
+                //处理ADD  当ReadingGlasses时 是 双ADD值
+                if ($final_print['prescription_type'] == 'Reading Glasses' && strlen($final_print['os_add']) > 0 && strlen($final_print['od_add']) > 0) {
+                    // echo '双ADD值';
+                    $os_add = "<td>" . $final_print['od_add'] . "</td> ";
+                    $od_add = "<td>" . $final_print['os_add'] . "</td> ";
                 } else {
                     // echo '单ADD值';
-                    $od_add = "<td rowspan='2'>" . $final_print['od_add'] . "</td>";
+                    $od_add = "<td rowspan='2'>" . $final_print['os_add'] . "</td>";
                     $os_add = "";
                 }
-
-                // dump($os_add);
-                // dump($od_add);
 
                 //处理PD值
                 if ($final_print['pdcheck'] && strlen($final_print['pd_r']) > 0 && strlen($final_print['pd_l']) > 0) {
@@ -1041,8 +1018,8 @@ EOF;
                     $os_pd = "";
                 }
 
-                // dump($od_pd);
-                // dump($os_pd);
+                // dump($os_add);
+                // dump($od_add);
 
                 //处理斜视参数
                 if ($final_print['prismcheck'] == 'on') {
@@ -1054,7 +1031,7 @@ EOF;
                     $prismcheck_title = '';
                     $prismcheck_od_value = '';
                     $prismcheck_os_value = '';
-                    $coatiing_name = "<td colspan='4' rowspan='3' style='background-color:#fff;word-break: break-word;line-height: 12px;'>" .  $final_print['second_name'] . '<br>' . $final_print['four_name'] . "</td>";
+                    $coatiing_name = "<td colspan='4' rowspan='3' style='background-color:#fff;word-break: break-word;line-height: 12px;'>" . $final_print['coatiing_name'] . "</td>";
                 }
 
                 //处方字符串截取
@@ -1069,45 +1046,44 @@ EOF;
 
                 $file_content .= "<div  class = 'single_box'>
             <table width='400mm' height='102px' border='0' cellspacing='0' cellpadding='0' class='addpro' style='margin:0px auto;margin-top:0px;' >
-                        <tbody cellpadding='0'>
-                            <tr>
-                              <td colspan='10' style=' text-align:center;padding:0px 0px 0px 0px;'>                              
-                                  <span>" . $final_print['prescription_type'] . "</span>
-                                  &nbsp;&nbsp;Order:" . $processing_value['increment_id'] . "
-                                  <span style=' margin-left:8px;'>SKU:" . $processing_value['sku'] . "</span>
-                                  <span style=' margin-left:8px;'>Num:<strong>" . $processing_order_list[$processing_key]['NUM'] . "</strong></span>
-                              </td>
-                            </tr>  
-                            <tr class='title'>      
-                                <td></td>  
-                                <td>SPH</td>
-                                <td>CYL</td>
-                                <td>AXI</td>
-                                " . $prismcheck_title . "
-                                <td>ADD</td>
-                                <td>PD</td> 
-                                " . $coatiing_name . "
-                            </tr>   
-                            <tr>  
-                                <td>Right</td>      
-                                <td>" . $final_print['od_sph'] . "</td> 
-                                <td>" . $final_print['od_cyl'] . "</td>
-                                <td>" . $final_print['od_axis'] . "</td>    
-                                " . $prismcheck_od_value . $od_add .
-                    $od_pd . "   
-                            </tr>
-                            <tr>
-                                <td>Left</td> 
-                                <td>" . $final_print['os_sph'] . "</td>    
-                                <td>" . $final_print['os_cyl'] . "</td>  
-                                <td>" . $final_print['os_axis'] . "</td> 
-                                 " . $prismcheck_os_value . $os_add . $os_pd . " 
-                            </tr>
-                            <tr>
-                              <td colspan='2'>" . $cargo_number_str . SKUHelper::sku_filter($processing_value['sku']) . "</td>
-                              <td colspan='8' style=' text-align:center'>Lens：" . $final_print['index_type'] . "</td>
-                            </tr>  
-                            </tbody></table></div>";
+            <tbody cellpadding='0'>
+            <tr>
+            <td colspan='10' style=' text-align:center;padding:0px 0px 0px 0px;'>                              
+            <span>" . $final_print['prescription_type'] . "</span>
+            &nbsp;&nbsp;Order:" . $processing_value['increment_id'] . "
+            <span style=' margin-left:5px;'>SKU:" . $processing_value['sku'] . "</span>
+            <span style=' margin-left:5px;'>Num:<strong>" . $processing_order_list[$processing_key]['NUM'] . "</strong></span>
+            </td>
+            </tr>  
+            <tr class='title'>      
+            <td></td>  
+            <td>SPH</td>
+            <td>CYL</td>
+            <td>AXI</td>
+            " . $prismcheck_title . "
+            <td>ADD</td>
+            <td>PD</td> 
+            " . $coatiing_name . "
+            </tr>   
+            <tr>  
+            <td>Right</td>      
+            <td>" . $final_print['od_sph'] . "</td> 
+            <td>" . $final_print['od_cyl'] . "</td>
+            <td>" . $final_print['od_axis'] . "</td>    
+            " . $prismcheck_od_value . $od_add . $od_pd .
+                    "</tr>
+            <tr>
+            <td>Left</td> 
+            <td>" . $final_print['os_sph'] . "</td>    
+            <td>" . $final_print['os_cyl'] . "</td>  
+            <td>" . $final_print['os_axis'] . "</td> 
+            " . $prismcheck_os_value . $os_add . $os_pd .
+                    " </tr>
+            <tr>
+            <td colspan='2'>" . $cargo_number_str . SKUHelper::sku_filter($processing_value['sku']) . "</td>
+            <td colspan='8' style=' text-align:center'>Lens：" . $final_print['index_type'] . "</td>
+            </tr>  
+            </tbody></table></div>";
             }
             echo $file_header . $file_content;
         }
