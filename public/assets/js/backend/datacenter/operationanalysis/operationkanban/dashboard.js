@@ -193,6 +193,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                     $('#thismonth_sales_money').text(0);
                     $('#lastmonth_sales_money').text(0);
                     $('#thisyear_sales_money').text(0);
+                    $('#lastyear_sales_money').text(0);
                     $('#total_sales_money').text(0);
                     $('#yesterday_order_num').text(0);
                     $('#pastsevenday_order_num').text(0);
@@ -200,6 +201,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                     $('#thismonth_order_num').text(0);
                     $('#lastmonth_order_num').text(0);
                     $('#thisyear_order_num').text(0);
+                    $('#lastyear_order_num').text(0);
                     $('#total_order_num').text(0);
                     $('#yesterday_order_success').text(0);
                     $('#pastsevenday_order_success').text(0);
@@ -207,6 +209,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                     $('#thismonth_order_success').text(0);
                     $('#lastmonth_order_success').text(0);
                     $('#thisyear_order_success').text(0);
+                    $('#lastyear_order_success').text(0);
                     $('#total_order_success').text(0);
                     $('#yesterday_unit_price').text(0);
                     $('#pastsevenday_unit_price').text(0);
@@ -214,6 +217,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                     $('#thismonth_unit_price').text(0);
                     $('#lastmonth_unit_price').text(0);
                     $('#thisyear_unit_price').text(0);
+                    $('#lastyear_unit_price').text(0);
                     $('#total_unit_price').text(0);
                     $('#yesterday_shoppingcart_total').text(0);
                     $('#pastsevenday_shoppingcart_total').text(0);
@@ -221,6 +225,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                     $('#thismonth_shoppingcart_total').text(0);
                     $('#lastmonth_shoppingcart_total').text(0);
                     $('#thisyear_shoppingcart_total').text(0);
+                    $('#lastyear_shoppingcart_total').text(0);
                     $('#total_shoppingcart_total').text(0);
                     $('#yesterday_shoppingcart_conversion').text(0);
                     $('#pastsevenday_shoppingcart_conversion').text(0);
@@ -228,6 +233,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                     $('#thismonth_shoppingcart_conversion').text(0);
                     $('#lastmonth_shoppingcart_conversion').text(0);
                     $('#thisyear_shoppingcart_conversion').text(0);
+                    $('#lastyear_shoppingcart_conversion').text(0);
                     $('#total_shoppingcart_conversion').text(0);
                     $('#yesterday_shoppingcart_new').text(0);
                     $('#pastsevenday_shoppingcart_new').text(0);
@@ -235,6 +241,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                     $('#thismonth_shoppingcart_new').text(0);
                     $('#lastmonth_shoppingcart_new').text(0);
                     $('#thisyear_shoppingcart_new').text(0);
+                    $('#lastyear_shoppingcart_new').text(0);
                     $('#total_shoppingcart_new').text(0);
                     $('#yesterday_shoppingcart_newconversion').text(0);
                     $('#pastsevenday_shoppingcart_newconversion').text(0);
@@ -242,6 +249,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                     $('#thismonth_shoppingcart_newconversion').text(0);
                     $('#lastmonth_shoppingcart_newconversion').text(0);
                     $('#thisyear_shoppingcart_newconversion').text(0);
+                    $('#lastyear_shoppingcart_newconversion').text(0);
                     $('#total_shoppingcart_newconversion').text(0);
                     $('#yesterday_register_customer').text(0);
                     $('#pastsevenday_register_customer').text(0);
@@ -249,6 +257,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                     $('#thismonth_register_customer').text(0);
                     $('#lastmonth_register_customer').text(0);
                     $('#thisyear_register_customer').text(0);
+                    $('#lastyear_register_customer').text(0);
                     $('#total_register_customer').text(0);
                     Layer.alert(ret.msg);
                     return false;
