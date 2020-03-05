@@ -902,7 +902,7 @@ from sales_flat_order_item sfoi
 left join sales_flat_order sfo on  sfoi.order_id=sfo.entity_id 
 where sfo.`status` in ('processing','creditcard_proccessing','free_processing','complete','paypal_reversed','paypal_canceled_reversal') and sfo.entity_id in($entity_ids)
 order by sfoi.order_id desc;";
-            $processing_order_list = Db::connect('database.db_zeelool')->query($processing_order_querySql);
+            $processing_order_list = Db::connect('database.db_weseeoptical')->query($processing_order_querySql);
 
             $processing_order_list = $this->qty_order_check($processing_order_list);
             // dump($processing_order_list);
