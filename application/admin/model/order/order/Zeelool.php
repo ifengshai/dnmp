@@ -449,13 +449,11 @@ class Zeelool extends Model
      * @since 2020/02/25 14:50:55 
      * @return void
      */
-    public function undeliveredOrder($map)
+    public function undeliveredOrder($map = [])
     {
-        if ($map) {
-            $map['custom_is_delivery_new'] = 0;
-            $map['status'] = ['in', ['processing', 'free_processing']];
-            return $this->alias('a')->where($map)->count(1);
-        }
+        $map['custom_is_delivery_new'] = 0;
+        $map['status'] = ['in', ['processing', 'free_processing']];
+        return $this->alias('a')->where($map)->count(1);
     }
 
     /**

@@ -1096,8 +1096,7 @@ class Item extends Backend
         $supplier_where['status'] = 1;
         $supplier_where['label'] = 1;
         $product_cycle = $supplier_sku->where($supplier_where)->value('product_cycle');
-
-
+        
         $num = 0;
         $check = new \app\admin\model\warehouse\Check;
         foreach ($info as $k => $v) {
