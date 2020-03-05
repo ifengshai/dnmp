@@ -637,9 +637,6 @@ class Index extends Backend
             'outStockNum'          => $outStockNum,//当日出库总数
             'inStockNum'           => $inStockNum,//当日入库总数
         ];
-
-        dump($data);die;
-
         return $data;
     }
 
