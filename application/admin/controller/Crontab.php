@@ -2323,8 +2323,10 @@ order by sfoi.item_id asc limit 1000";
         $result = Db::name('operation_analysis')->where(['order_platform'=>$platform])->field('id,order_platform')->find();
         if(!$result){
             $updateData['order_platform'] = $platform;
+            $updateData['create_time']    = date('Y-m-d h:i:s', time()); 
             $info=Db::name('operation_analysis')->insert($updateData);
         }else{
+            $updateData['update_time']    = date('Y-m-d h:i:s', time()); 
             $info=Db::name('operation_analysis')->where(['order_platform'=>$platform])->update($updateData);
         }
         if($info){
@@ -2586,8 +2588,10 @@ order by sfoi.item_id asc limit 1000";
         $result = Db::name('operation_analysis')->where(['order_platform'=>$platform])->field('id,order_platform')->find();
         if(!$result){
             $updateData['order_platform'] = $platform;
+            $updateData['create_time']    = date('Y-m-d h:i:s', time());  
             $info=Db::name('operation_analysis')->insert($updateData);
         }else{
+            $updateData['update_time']    = date('Y-m-d h:i:s', time());   
             $info=Db::name('operation_analysis')->where(['order_platform'=>$platform])->update($updateData);
         }
         if($info){
