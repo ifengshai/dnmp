@@ -136,7 +136,9 @@ class ZendeskOne extends Controller
         $params = $this->parseStr($array);
         $search = $this->client->search()->find($params);
         $tickets = $search->results;
-        //dump($search);die;
+        if(!$search->count){
+            return true;
+        }
         //$page = ceil($search->count / 100 );
         //先获取第一页的,一次100条
         $this->findCommentsByTickets($tickets);
