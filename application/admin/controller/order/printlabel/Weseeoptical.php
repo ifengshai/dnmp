@@ -557,16 +557,6 @@ where cped.attribute_id in(146,147) and cped.store_id=0 and cped.entity_id=$prod
     //批量导出xls
     public function batch_export_xls()
     {
-//         $entity_ids = rtrim(input('id_params'), ',');
-//         // dump($entity_ids);        
-//         $processing_order_querySql = "select sfo.increment_id,sfoi.product_options,sfoi.order_id,sfo.`status`,sfoi.sku,sfoi.product_id,sfoi.qty_ordered,sfo.created_at
-// from sales_flat_order_item sfoi
-// left join sales_flat_order sfo on  sfoi.order_id=sfo.entity_id 
-// where sfo.`status` in ('processing','creditcard_proccessing','free_processing','paypal_reversed','complete') and sfo.entity_id in($entity_ids)
-// order by sfoi.order_id desc;";
-//         $resultList = Db::connect('database.db_nihao')->query($processing_order_querySql);
-
-
         /*************修改为筛选导出****************/
 
         set_time_limit(0);
@@ -1012,9 +1002,9 @@ EOF;
 
                 $prescription_params = json_decode($product_options['info_buyRequest']['tmplens']['prescription'], true);
 
-                $final_print = array_merge($final_print, $prescription_params);
-                // dump($final_print);
-                // exit;
+                if ($prescription_params) {
+                    $final_print = array_merge($final_print, $prescription_params);
+                }
 
                 //处理ADD  当ReadingGlasses时 是 双PD值
                 if ($final_print['prescription_type'] == 'Reading Glasses' &&  strlen($final_print['os_add']) > 0 && strlen($final_print['od_add']) > 0) {
@@ -1027,9 +1017,6 @@ EOF;
                     $os_add = "";
                 }
 
-                // dump($os_add);
-                // dump($od_add);
-
                 //处理PD值
                 if ($final_print['pdcheck'] && strlen($final_print['pd_r']) > 0 && strlen($final_print['pd_l']) > 0) {
                     // echo '双PD值';
@@ -1041,8 +1028,6 @@ EOF;
                     $os_pd = "";
                 }
 
-                // dump($od_pd);
-                // dump($os_pd);
 
                 //处理斜视参数
                 if ($final_print['prismcheck'] == 'on') {
