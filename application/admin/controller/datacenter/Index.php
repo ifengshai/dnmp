@@ -3,6 +3,7 @@
 namespace app\admin\controller\datacenter;
 
 use app\common\controller\Backend;
+use think\Db;
 
 /**
  * 数据中心
@@ -28,7 +29,6 @@ class Index extends Backend
     public function _initialize()
     {
         parent::_initialize();
-
         $this->zeelool = new \app\admin\model\order\order\Zeelool;
         $this->voogueme = new \app\admin\model\order\order\Voogueme;
         $this->nihao = new \app\admin\model\order\order\Nihao;
@@ -265,9 +265,14 @@ class Index extends Backend
         $start7days = $productAllStockLog->where('createtime', 'like', $stime . '%')->value('allnum');
         $end7days = $productAllStockLog->where('createtime', 'like', $etime . '%')->value('allnum');
         //库存周转天数
-        $stock7days = round(7 * ($start7days + $end7days) / 2 / $allSalesNum, 2);
+        if ($allSalesNum) {
+            $stock7days = round(7 * ($start7days + $end7days) / 2 / $allSalesNum, 2);
+        }
+
         //库存周转率
-        $stock7daysPercent = round(360 / $stock7days, 2);
+        if ($stock7days) {
+            $stock7daysPercent = round(360 / $stock7days, 2);
+        }
 
         //在途库存
         $onwayAllStock = $this->onway_all_stock();
@@ -287,6 +292,8 @@ class Index extends Backend
         //在途饰品库存总金额
         $onwayOrnamentAllStockPrice = $this->onway_ornament_all_stock_price();
 
+        //仓库数据
+        $this->view->assign('data', $this->warehouse_order_data());
         $this->view->assign('allStock', $allStock);
         $this->view->assign('allStockPrice', $allStockPrice);
         $this->view->assign('frameStock', $frameStock);
@@ -308,6 +315,7 @@ class Index extends Backend
         $this->view->assign('onway_frame_all_stock_price', $onwayFrameAllStockPrice);
         $this->view->assign('onway_ornament_all_stock', $onwayOrnamentAllStock);
         $this->view->assign('onway_ornament_all_stock_price', $onwayOrnamentAllStockPrice);
+        $this->view->assign('allSalesNum', $allSalesNum);
 
         return $this->view->fetch();
     }
@@ -548,7 +556,92 @@ class Index extends Backend
     }
 
     /**
-     * 仓库数据
+     * 仓库订单数据统计
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/03/04 17:05:15 
+     * @return void
+     */
+    protected function warehouse_order_data()
+    {
+        //当月总单量
+        $orderStatistics = new \app\admin\model\OrderStatistics();
+        $stime = date("Y-m-01 00:00:00");
+        $etime = date("Y-m-d H:i:s", time());
+        $map['create_date'] = ['between', [$stime, $etime]];
+        $lastMonthAllSalesNum = $orderStatistics->where($map)->cache(86400)->sum('all_sales_num');
+
+        //未出库订单总数
+        $cachename = 'warehouse_order_data' . 'allUnorderNum';
+        $allUnorderNum = cache($cachename);
+        if (!$allUnorderNum) {
+            $zeeloolUnorderNum = $this->zeelool->undeliveredOrder([]);
+            $vooguemeUnorderNum = $this->voogueme->undeliveredOrder([]);
+            $nihaoUnorderNum = $this->nihao->undeliveredOrder([]);
+            $allUnorderNum = $zeeloolUnorderNum + $vooguemeUnorderNum + $nihaoUnorderNum;
+            cache($cachename, $allUnorderNum, 86400);
+        }
+
+
+        //7天未出库订单总数
+        $cachename = 'warehouse_order_data' . 'days7UnorderNum';
+        $days7UnorderNum = cache($cachename);
+        if (!$days7UnorderNum) {
+            $map = [];
+            $stime = date("Y-m-d H:i:s", strtotime("-7 day"));
+            $etime = date("Y-m-d H:i:s", time());
+            $map['a.created_at'] = ['between', [$stime, $etime]];
+            $zeeloolUnorderNum = $this->zeelool->undeliveredOrder($map);
+            $vooguemeUnorderNum = $this->voogueme->undeliveredOrder($map);
+            $nihaoUnorderNum = $this->nihao->undeliveredOrder($map);
+            $days7UnorderNum = $zeeloolUnorderNum + $vooguemeUnorderNum + $nihaoUnorderNum;
+            cache($cachename, $days7UnorderNum, 36400);
+        }
+
+        //当月质检总数
+        $orderLog = new \app\admin\model\OrderLog();
+        $orderCheckNum = $orderLog->getOrderCheckNum();
+
+        //当日配镜架总数
+        $orderFrameNum = $orderLog->getOrderFrameNum();
+
+        //当日配镜片总数
+        $orderLensNum = $orderLog->getOrderLensNum();
+
+        //当日加工总数
+        $orderFactoryNum = $orderLog->getOrderFactoryNum();
+
+        //当日质检总数
+        $orderCheckNewNum = $orderLog->getOrderCheckNewNum();
+
+        //当日出库总数
+        $outStock = new \app\admin\model\warehouse\Outstock();
+        $outStockNum = $outStock->getOutStockNum();
+
+        //当日质检入库总数
+        $inStock = new \app\admin\model\warehouse\Instock();
+        $inStockNum = $inStock->getInStockNum();
+
+        $data = [
+            'lastMonthAllSalesNum' => $lastMonthAllSalesNum,//当月总单量
+            'allUnorderNum'        => $allUnorderNum,//未出库总数
+            'days7UnorderNum'      => $days7UnorderNum,//7天未出库总数
+            'orderCheckNum'        => $orderCheckNum,//订单当月质检总数
+            'orderFrameNum'        => $orderFrameNum,//当日配镜架总数
+            'orderLensNum'         => $orderLensNum,//当日配镜片总数
+            'orderFactoryNum'      => $orderFactoryNum,//当日加工总数
+            'orderCheckNewNum'     => $orderCheckNewNum,//当日质检总数
+            'outStockNum'          => $outStockNum,//当日出库总数
+            'inStockNum'           => $inStockNum,//当日入库总数
+        ];
+
+        return $data;
+    }
+
+
+    /**
+     * 数据统计
      *
      * @Description
      * @author wpl
@@ -596,6 +689,9 @@ class Index extends Backend
         $vooguemeFrameOrderNum = $this->voogueme->frameOrder($map);
         $nihaoFrameOrderNum = $this->nihao->frameOrder($map);
 
+        //统计处方度数范围数据
+        $skuRes = $this->order_sku_num($create_time);
+
         $this->view->assign('zeeloolUnorderNum', $zeeloolUnorderNum);
         $this->view->assign('vooguemeUnorderNum', $vooguemeUnorderNum);
         $this->view->assign('nihaoUnorderNum', $nihaoUnorderNum);
@@ -615,6 +711,45 @@ class Index extends Backend
         $this->view->assign('vooguemeFrameOrderNum', $vooguemeFrameOrderNum);
         $this->view->assign('nihaoFrameOrderNum', $nihaoFrameOrderNum);
         $this->view->assign('created_at', $create_time);
+        $this->view->assign('skuRes', $skuRes);
         return $this->view->fetch();
+    }
+
+    /**
+     * 根据处方范围统计SKU副数
+     *
+     * @Description
+     * @author wpl
+     * @param mixed $create_time 时间筛选
+     * @since 2020/03/03 18:05:00 
+     * @return void
+     */
+    protected function order_sku_num($create_time)
+    {
+        /**
+         * 原：A SPH(0-300) and CYL<200
+         * 原：B (SPH(0-300) and CYL>200) or (SPH(300-600) and CYL<200)
+         * 原：C (SPH(300-600) and CYL>200) or (SPH>600 and CYL>0)
+         * A sph > -3.00 and sph < 0 and cyl < 2.00
+         * B (sph > -3.00 and sph < 0 AND cyl > 2.00) OR (sph < -3.00 and sph > -6.00 AND cyl < 2.00)
+         * C (sph < -3.00 and sph > -6.00 AND cyl > 2.00) OR ( sph > -6.00 AND cyl > 0)
+         */
+
+        //默认当天
+        if ($create_time) {
+            $time = explode(' ', $create_time);
+            $where = "created_at between '" . $time[0] . ' ' . $time[1] . "' and '" . $time[3] . ' ' . $time[4] . "'";
+        } else {
+            $stime = date('Y-m-d 00:00:00');
+            $etime = date('Y-m-d H:i:s', time());
+            $where = "created_at between '" . $stime . "' and '" . $etime . "'";
+        }
+        $sql = "select SUM(IF((b.sph > - 3 AND b.sph < 0 ) AND b.cyl < 2, 1, 0 )) AS A,
+        SUM(IF(( sph > - 3.00 AND sph < 0 AND cyl > 2.00 ) OR ( sph < - 3.00 AND sph > - 6.00 AND cyl < 2.00 ),1, 0 )) AS B,
+        SUM(IF(( sph < - 3.00 AND sph > - 6.00 AND cyl > 2.00 ) OR ( sph > - 6.00 AND cyl > 0 ),1, 0)) AS C from
+        (select if (od_sph>os_sph,od_sph,os_sph) as sph,if(od_cyl>os_cyl,od_cyl,os_cyl) as cyl 
+        from sales_flat_order_item_prescription where $where ) b where sph != '' and cyl != '' limit 1";
+        $res = Db::connect('database.db_zeelool')->table('sales_flat_order_item_prescription')->query($sql);
+        return $res;
     }
 }

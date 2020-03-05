@@ -628,7 +628,7 @@ class InfoSynergyTask extends Backend
                     }
                     if ($lens) {
                         $dataLens = [];
-                        foreach ($lens['id'] as $k=> $v) {
+                        foreach ($lens['original_sku'] as $k=> $v) {
                             //镜架数据
                             $dataLens[$k]['tid'] = $row['id'];
                             $dataLens[$k]['increment_id']    = $params['synergy_order_number'] ?: '';

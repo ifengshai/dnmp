@@ -584,8 +584,13 @@ class SaleAfterTask extends Model
         //求出用户的邮箱
         $customer_email = '';
         if($increment_id){
+            //如果输入的是订单号
             $customer_email = Db::connect($db)->table('sales_flat_order')->where('increment_id',$increment_id)->
             value('customer_email');
+            //如果输入的是vip订单号
+            if(!$customer_email){
+                $customer_email = Db::connect($db_online)->table('oc_vip_order')->where('order_number',$increment_id)->value('customer_email');
+            }
         }
         if(!empty($customer_name)){
             $customer_email = Db::connect($db)->table('sales_flat_order')->where('customer_firstname',$customer_name[0])
@@ -614,7 +619,7 @@ class SaleAfterTask extends Model
                 $order_vip = Db::connect($db_online)->table('oc_vip_order')->where(['customer_email'=>$customer_email])->field('id,customer_email,order_number,order_amount,order_status,order_type,start_time,end_time,is_active_status,admin_name')->select();
             }
             $result = Db::connect($db)->table('sales_flat_order o')->join('sales_flat_shipment_track s','o.entity_id=s.order_id','left')->join('sales_flat_order_payment p','o.entity_id=p.parent_id','left')->join('sales_flat_order_address a','o.entity_id=a.parent_id')->where('customer_email',$customer_email)->where('a.address_type','shipping')
-                ->field('o.base_to_order_rate,o.base_total_paid,o.base_total_due,o.entity_id,o.status,o.coupon_code,o.coupon_rule_name,o.store_id,o.increment_id,o.customer_email,o.customer_firstname,o.customer_lastname,o.order_currency_code,o.total_item_count,o.base_grand_total,o.base_shipping_amount,o.shipping_description,o.base_total_paid,o.base_total_due,o.created_at,o.order_type,s.track_number,s.title,p.base_amount_paid,p.base_amount_ordered,p.base_amount_authorized,p.method,p.last_trans_id,p.additional_information,a.telephone,a.postcode,a.street,a.city,a.region,a.country_id')->order('o.entity_id desc')->select();
+                ->field('o.base_to_order_rate,o.base_total_paid,o.base_total_due,o.entity_id,o.mw_rewardpoint,o.mw_rewardpoint_discount_show,o.status,o.coupon_code,o.coupon_rule_name,o.store_id,o.increment_id,o.customer_email,o.customer_firstname,o.customer_lastname,o.order_currency_code,o.total_item_count,o.base_grand_total,o.base_shipping_amount,o.shipping_description,o.base_total_paid,o.base_total_due,o.created_at,round(o.total_qty_ordered,0) total_qty_ordered,o.order_type,s.track_number,s.title,p.base_amount_paid,p.base_amount_ordered,p.base_amount_authorized,p.method,p.last_trans_id,p.additional_information,a.telephone,a.postcode,a.street,a.city,a.region,a.country_id')->order('o.entity_id desc')->select();
             //return $result;
             if(!$result){
                 return false;
@@ -654,9 +659,16 @@ class SaleAfterTask extends Model
             }
             //用户的vip订单
             if($order_vip){
+                //把vip订单查询出来放到数组当中
+                $arr_order_vip = [];
+                foreach($order_vip as $v){
+                    $arr_order_vip[] = $v['order_number'];
+                }                
                 $customer['order_vip'] = $order_vip;
+                $customer['arr_order_vip'] = $arr_order_vip;
             }else{
                 $customer['order_vip'] = '';
+                $customer['arr_order_vip'] = '';
             }
             $customer['customer_email'] = $customer_email;
             $customer['customer_name'] = $result[0]['customer_firstname'].' '.$result[0]['customer_lastname'];
