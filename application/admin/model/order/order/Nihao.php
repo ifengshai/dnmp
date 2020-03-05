@@ -89,16 +89,22 @@ class Nihao extends Model
      * @param [type] $map 筛选条件
      * @return object
      */
-    public function getOrderSalesNum($map)
+    public function getOrderSalesNum($sku, $where)
     {
-        $res = $this->where($map)
-        ->alias('a')
-        ->field('b.sku,round(sum(b.qty_ordered),0) qty_ordered')
-        ->join(['sales_flat_order_item' => 'b'],'a.entity_id=b.order_id')
-        ->select();
+        if ($sku) {
+            $map['sku'] = ['in', $sku];
+        }
+        $res = $this
+            ->where($map)
+            ->where($where)
+            ->alias('a')
+            ->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')
+            ->group('sku')
+            ->column('sum(b.qty_ordered)', 'sku');
         return $res;
     }
-    
+
+
     /***
      * 获取nihao订单的成本信息  create@lsw
      * @param totalId 所有的
@@ -273,5 +279,147 @@ class Nihao extends Model
             }
         }
         return $arr;
+    }
+
+    /**
+     * 统计未发货订单
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/02/25 14:50:55 
+     * @return void
+     */
+    public function undeliveredOrder($map = [])
+    {
+        $map['custom_is_delivery_new'] = 0;
+        $map['status'] = ['in', ['processing', 'free_processing']];
+        return $this->alias('a')->where($map)->count(1);
+    }
+
+    /**
+     * 统计未发货订单SKU副数
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/02/25 14:50:55 
+     * @return void
+     */
+    public function undeliveredOrderNum($map)
+    {
+        if ($map) {
+            $map['custom_is_delivery_new'] = 0;
+            $map['status'] = ['in', ['processing', 'free_processing']];
+            return $this->alias('a')->where($map)->join(['sales_flat_order_item_prescription' => 'b'], 'a.entity_id = b.order_id')->sum('b.qty_ordered');
+        }
+    }
+
+    /**
+     * 统计仅镜架订单
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/02/25 14:50:55 
+     * @return void
+     */
+    public function frameOrder($map)
+    {
+        if ($map) {
+            $map['custom_is_delivery_new'] = 0;
+            $map['status'] = ['in', ['processing', 'free_processing']];
+            $map['custom_order_prescription_type'] = 1;
+            return $this->alias('a')->where($map)->count(1);
+        }
+    }
+
+    /**
+     * 统计处方镜副数
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/02/25 14:50:55 
+     * @return void
+     */
+    public function getOrderPrescriptionNum($map)
+    {
+        if ($map) {
+            $map['custom_is_delivery_new'] = 0;
+            $map['status'] = ['in', ['processing', 'free_processing']];
+            $map['custom_order_prescription_type'] = ['in', [2, 3, 4, 5, 6]];
+            $map[] = ['exp', Db::raw("third_name NOT IN ( 'Plastic Lenses', 'FRAME ONLY' ) 
+            AND third_name  IS NOT NULL 
+            AND third_name  != ''")];
+
+            return $this->alias('a')
+                ->where($map)
+                ->join(['sales_flat_order_item_prescription' => 'b'], 'a.entity_id = b.order_id')
+                ->sum('b.qty_ordered');
+        }
+    }
+
+    /**
+     * 统计现货处方镜副数
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/02/25 14:50:55 
+     * @return void
+     */
+    public function getSpotOrderPrescriptionNum($map)
+    {
+        if ($map) {
+            $map['custom_is_delivery_new'] = 0;
+            $map['status'] = ['in', ['processing', 'free_processing']];
+            $map['custom_order_prescription_type'] = ['in', [2, 4, 6]];
+            $map[] = ['exp', Db::raw("third_name NOT IN ( 'Plastic Lenses', 'FRAME ONLY' ) 
+            AND third_name IS NOT NULL 
+            AND third_name != ''")];
+            $map['is_custom_lens'] = 0;
+
+            return $this->alias('a')
+                ->where($map)
+                ->join(['sales_flat_order_item_prescription' => 'b'], 'a.entity_id = b.order_id')
+                ->sum('b.qty_ordered');
+        }
+    }
+
+    /**
+     * 统计定制处方镜副数
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/02/25 14:50:55 
+     * @return void
+     */
+    public function getCustomOrderPrescriptionNum($map)
+    {
+        if ($map) {
+            $map['custom_is_delivery_new'] = 0;
+            $map['status'] = ['in', ['processing', 'free_processing']];
+            $map['custom_order_prescription_type'] = ['in', [3, 5, 6]];
+            $map[] = ['exp', Db::raw("third_name NOT IN ( 'Plastic Lenses', 'FRAME ONLY' ) 
+            AND third_name IS NOT NULL 
+            AND third_name != ''")];
+            $map['is_custom_lens'] = 1;
+
+            return $this->alias('a')
+                ->where($map)
+                ->join(['sales_flat_order_item_prescription' => 'b'], 'a.entity_id = b.order_id')
+                ->sum('b.qty_ordered');
+        }
+    }
+
+    /**
+     * 统计待处理订单 即未打印标签的订单
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/03/02 14:57:47 
+     * @return void
+     */
+    public function getPendingOrderNum()
+    {
+        $where['custom_print_label_new'] = 0;
+        $where['status'] = ['in', ['processing', 'free_processing']];
+        return $this->where($where)->count(1);
     }
 }

@@ -54,6 +54,7 @@ class SupplierSku extends Model
         if ($supplier_id) {
             $where['supplier_id'] = $supplier_id;
         }
+        $where['status'] = 1;
         return $this->where($where)->value('supplier_sku');
     }
 }

@@ -25,9 +25,18 @@
         "karsonzhang/fastadmin-addons": "~1.1.9",
         "overtrue/pinyin": "~3.0",
         "phpoffice/phpspreadsheet": "^1.2",
-        "mpdf/mpdf": "^8.0"
+        "mpdf/mpdf": "^8.0",
+        "zendesk/zendesk_api_client_php": "^2.2",
+        "voku/stringy": "^6.2",
+        "topthink/think-migration": "1.*"
     },
     "config": {
         "preferred-install": "dist"
+    },
+    "repositories": {
+        "packagist": {
+            "type": "composer",
+            "url": "https://mirrors.aliyun.com/composer/"
+        }
     }
 }

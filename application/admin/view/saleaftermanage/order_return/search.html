@@ -362,7 +362,7 @@ table.altrowstable tr:nth-child(even){
                            data-operate-del="{:$auth->check('saleaftermanage/order_return/del')}"
                            width="100%">
                         <thead>
-                            <tr><th colspan="16" style="font-size:16px;text-align: center; vertical-align: middle;">订单信息列表</th></tr>                     
+                            <tr><th colspan="19" style="font-size:16px;text-align: center; vertical-align: middle;">订单信息列表</th></tr>                     
                         <tr>
 							<th style="text-align: center; vertical-align: middle;">订单类型</th>
                             <th style="text-align: center; vertical-align: middle;">序号</th>
@@ -373,11 +373,16 @@ table.altrowstable tr:nth-child(even){
                             <th style="text-align: center; vertical-align: middle;">客户邮箱</th>
                             <th style="text-align: center; vertical-align: middle;">国家</th>
                             <th style="text-align: center; vertical-align: middle;">订单状态</th>
-                            <th style="text-align: center; vertical-align: middle;">创建时间</th>
 							<th style="text-align: center; vertical-align: middle;">支付金额</th>
                             <th style="text-align: center; vertical-align: middle;">订单金额($)</th>
                             <th style="text-align: center; vertical-align: middle;">优惠券</th>
                             <th style="text-align: center; vertical-align: middle;">优惠码</th>
+                            <th style="text-align: center; vertical-align: middle;">积分(参考)</th>
+                            <th style="text-align: center; vertical-align: middle;">抵扣金额(参考)</th> 
+                            <th style="text-align: center; vertical-align: middle;">运费</th>
+                            <th style="text-align: center; vertical-align: middle;">快递方式</th>
+                            <th style="text-align: center; vertical-align: middle;">购买数量</th>
+                            <th style="text-align: center; vertical-align: middle;">创建时间</th>
 
                         </tr>
                         </thead>
@@ -393,11 +398,16 @@ table.altrowstable tr:nth-child(even){
                                  <td style="text-align: center; vertical-align: middle;">{$orderInfoList.customer_email}</td>
                                  <td style="text-align: center; vertical-align: middle;">{$orderInfoList.order_currency_code}</td>
                                  <td style="text-align: center; vertical-align: middle;">{$orderInfoList.status}</td>
-                                 <td style="text-align: center; vertical-align: middle;">{$orderInfoList.created_at}</td>
                                  <td style="text-align: center; vertical-align: middle;">{:round($orderInfoList.real_papid,3)}</td>
 								 <td style="text-align: center; vertical-align: middle;">{:round($orderInfoList.base_grand_total,2)}</td>
                                  <td style="text-align: center; vertical-align: middle;">{$orderInfoList.coupon_code}</td>
                                  <td style="text-align: center; vertical-align: middle;">{$orderInfoList.coupon_rule_name}</td>
+                                 <td style="text-align: center; vertical-align: middle;">{:round($orderInfoList.mw_rewardpoint,2)}</td>
+                                 <td style="text-align: center; vertical-align: middle;">{:round($orderInfoList.mw_rewardpoint_discount_show,2)}</td>
+                                 <td style="text-align: center; vertical-align: middle;">{:round($orderInfoList.base_shipping_amount,2)}</td>
+                                 <td style="text-align: center; vertical-align: middle;">{$orderInfoList.shipping_description}</td>
+                                 <td style="text-align: center; vertical-align: middle;">{$orderInfoList.total_qty_ordered}</td>
+                                 <td style="text-align: center; vertical-align: middle;">{$orderInfoList.created_at}</td>
                              </tr>
                             {/foreach}
                         {/notempty}
@@ -427,8 +437,8 @@ table.altrowstable tr:nth-child(even){
                             <th style="text-align: center; vertical-align: middle;">AXI</th>
                             <th style="text-align: center; vertical-align: middle;">ADD</th>
                             <th style="text-align: center; vertical-align: middle;">PD</th>
-                            <th style="text-align: center; vertical-align: middle;">Prism<br>(out/in)</th>
-                            <th style="text-align: center; vertical-align: middle;">Prism<br>(up/down)</th>
+                            <th style="text-align: center; vertical-align: middle;">PrismHorizontal<br>(out/in)</th>
+                            <th style="text-align: center; vertical-align: middle;">PrismVertical<br>(up/down)</th>
                         </tr>
                         </thead>  
                         {notempty name="orderInfoResult"}
@@ -470,8 +480,8 @@ table.altrowstable tr:nth-child(even){
                             <td style="text-align: center; vertical-align: middle;">{$itemInfoList.pd}</td>
                             {/if}
                             
-                            <td style="text-align: center; vertical-align: middle;">{$itemInfoList.od_pv_r}<br>{$itemInfoList.os_pv_r}</td>
-                            <td style="text-align: center; vertical-align: middle;">{$itemInfoList.od_bd_r}<br>{$itemInfoList.os_bd_r}</td>
+                            <td style="text-align: center; vertical-align: middle;">{$itemInfoList.od_pv}({$itemInfoList.od_bd})<br>{$itemInfoList.od_pv_r}({$itemInfoList.od_bd_r})</td>
+                            <td style="text-align: center; vertical-align: middle;">{$itemInfoList.os_pv}({$itemInfoList.os_bd})<br>{$itemInfoList.os_pv_r}({$itemInfoList.os_bd_r})</td>
                         </tr>
                         {/foreach}
                         {/foreach}
@@ -487,7 +497,6 @@ table.altrowstable tr:nth-child(even){
                                 <th style="text-align: center; vertical-align: middle;">订单号</th>
                                 <th style="text-align: center; vertical-align: middle;">支付金额</th>
                                 <th style="text-align: center; vertical-align: middle;">订单金额</th>
-                                <th style="text-align: center; vertical-align: middle;">运费</th>
                                 <th style="text-align: center; vertical-align: middle;">支付方式</th>
                                 <th style="text-align: center; vertical-align: middle;">last_trans_id</th>
                                 <th style="text-align: center; vertical-align: middle;">paypal_payer_email</th>
@@ -500,9 +509,8 @@ table.altrowstable tr:nth-child(even){
                         {foreach name="orderInfoResult" item="orderInfoList"}
                         <tr>
                             <td style="text-align: center; vertical-align: middle;">{$orderInfoList.increment_id}</td>
-                            <td style="text-align: center; vertical-align: middle;">{:round($orderInfoList.base_amount_paid,2)}</td>
-                            <td style="text-align: center; vertical-align: middle;">{:round($orderInfoList.base_amount_ordered,2)}</td>
-                            <td style="text-align: center; vertical-align: middle;">{:round($orderInfoList.base_shipping_amount,2)}</td>
+                            <td style="text-align: center; vertical-align: middle;">{:round($orderInfoList.real_papid,3)}</td>
+                            <td style="text-align: center; vertical-align: middle;">{:round($orderInfoList.base_grand_total,2)}</td>
                             <td style="text-align: center; vertical-align: middle;">{$orderInfoList.method}</td>
                             <td style="text-align: center; vertical-align: middle;">{$orderInfoList.last_trans_id}</td>
                             <td style="text-align: center; vertical-align: middle;">{$orderInfoList.additional_information.paypal_payer_email}</td>
@@ -513,34 +521,38 @@ table.altrowstable tr:nth-child(even){
                         {/foreach}
                         {/notempty}
                     </table>
-                    <table id="order-address-list" class="altrowstable"
+                         <table id="order-address-list" class="altrowstable"
                            data-operate-edit="{:$auth->check('saleaftermanage/order_return/edit')}"
                            data-operate-del="{:$auth->check('saleaftermanage/order_return/del')}"
                            width="100%">
                            <thead>
-                            <tr><th colspan="10" style="font-size:16px;text-align: center; vertical-align: middle;">地址信息列表</th></tr>
+                            <tr><th colspan="10" style="font-size:16px;text-align: center; vertical-align: middle;">vip订单信息列表</th></tr>
                             <tr>
-                                <th style="text-align: center; vertical-align: middle;">订单号</th>
-                                <th style="text-align: center; vertical-align: middle;">name</th>
-                                <th style="text-align: center; vertical-align: middle;">telephone</th>
-                                <th style="text-align: center; vertical-align: middle;">postcode</th>
-                                <th style="text-align: center; vertical-align: middle;">street</th>
-                                <th style="text-align: center; vertical-align: middle;">city</th>
-                                <th style="text-align: center; vertical-align: middle;">region</th>
-                                <th style="text-align: center; vertical-align: middle;">country_id</th>
+                                <th style="text-align: center; vertical-align: middle;">id</th>
+                                <th style="text-align: center; vertical-align: middle;">customer_email</th>
+                                <th style="text-align: center; vertical-align: middle;">order_number</th>
+                                <th style="text-align: center; vertical-align: middle;">order_amount</th>
+                                <th style="text-align: center; vertical-align: middle;">order_status</th>
+                                <th style="text-align: center; vertical-align: middle;">order_type</th>
+                                <th style="text-align: center; vertical-align: middle;">start_time</th>
+                                <th style="text-align: center; vertical-align: middle;">end_time</th>
+                                <th style="text-align: center; vertical-align: middle;">is_active_status</th>
+                                <th style="text-align: center; vertical-align: middle;">admin_name</th>
                             </tr>
                         </thead> 
-                        {notempty name="orderInfoResult"}
-                        {foreach name="orderInfoResult" item="orderInfoList"}
+                        {notempty name="customerInfo.order_vip"}
+                        {foreach name="customerInfo.order_vip" item="order_vip"}
                         <tr>
-                            <td style="text-align: center; vertical-align: middle;">{$orderInfoList.increment_id}</td>
-                            <td style="text-align: center; vertical-align: middle;">{$orderInfoList.customer_firstname} {$orderInfoList.customer_lastname}</td>
-                            <td style="text-align: center; vertical-align: middle;">{$orderInfoList.telephone}</td>
-                            <td style="text-align: center; vertical-align: middle;">{$orderInfoList.postcode}</td>
-                            <td style="text-align: center; vertical-align: middle;">{$orderInfoList.street}</td>
-                            <td style="text-align: center; vertical-align: middle;">{$orderInfoList.city}</td>
-                            <td style="text-align: center; vertical-align: middle;">{$orderInfoList.region}</td>
-                            <td style="text-align: center; vertical-align: middle;">{$orderInfoList.country_id}</td>
+                            <td style="text-align: center; vertical-align: middle;">{$order_vip.id}</td>
+                            <td style="text-align: center; vertical-align: middle;">{$order_vip.customer_email}</td>
+                            <td style="text-align: center; vertical-align: middle;">{$order_vip.order_number}</td>
+                            <td style="text-align: center; vertical-align: middle;">{$order_vip.order_amount}</td>
+                            <td style="text-align: center; vertical-align: middle;">{$order_vip.order_status}</td>
+                            <td style="text-align: center; vertical-align: middle;">{$order_vip.order_type}</td>
+                            <td style="text-align: center; vertical-align: middle;">{$order_vip.start_time}</td>
+                            <td style="text-align: center; vertical-align: middle;">{$order_vip.end_time}</td>
+                            <td style="text-align: center; vertical-align: middle;">{$order_vip.is_active_status}</td>
+                            <td style="text-align: center; vertical-align: middle;">{$order_vip.admin_name}</td>
                         </tr>
                         {/foreach}
                         {/notempty}

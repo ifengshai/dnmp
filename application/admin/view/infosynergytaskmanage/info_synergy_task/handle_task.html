@@ -236,7 +236,7 @@
             {else /}
             <input type="hidden" name="row[change_type]" value="0" id="c-change_type"/>
             {/present}
-            <textarea id="c-problem_desc" disabled="disabled"  class="form-control" rows="10" name="row[problem_desc]" cols="50">{$row.problem_desc|htmlentities}</textarea>
+            <textarea id="c-problem_desc" disabled="disabled"  class="form-control" rows="5" name="row[problem_desc]" cols="50">{$row.problem_desc}</textarea>
         </div>
     </div>
     <div class="form-group" >
@@ -334,7 +334,6 @@
     {elseif condition="$taskChangeSku[0]['change_type'] eq 2"}
     <div class="row item_info" style="margin-top:15px;margin-left:7.6666%;">
         <p style="font-size: 16px;"><b>更改镜片</b></p>
-        <div>
             <!-- <div id="toolbar" class="toolbar">
                 <a href="javascript:;" class="btn btn-success btn-add-lens" title="增加"><i class="fa fa-plus"></i> 增加</a>
             </div> -->
@@ -345,7 +344,7 @@
                 <div class="panel bg-blue">
                     <div class="panel-body">
                         <div class="panel-title">
-                            <label class="control-label col-xs-12 col-sm-3">商品名称:</label>
+                            <label class="control-label col-xs-12 col-sm-3">name:</label>
                             <div class="col-xs-12 col-sm-8">
                                 <input type="hidden" name="row[lens][id][]" value="{$sku['id']}">
                                 <input  id="c-item_name"  class="form-control"  type="text" name="row[lens][original_name][]" value="{$sku['original_name']}">
@@ -362,7 +361,7 @@
                     </div>
                     <div class="panel-body">
                         <div class="panel-title">
-                            <label class="control-label col-xs-12 col-sm-3">数量:</label>
+                            <label class="control-label col-xs-12 col-sm-3">qty_ordered:</label>
                             <div class="col-xs-12 col-sm-8">
                                 <input  id="c-item_qty_ordered"  class="form-control"  type="text" name="row[lens][original_number][]" value="{$sku['original_number']}">
                             </div>
@@ -370,7 +369,7 @@
                     </div>
                     <div class="panel-body">
                         <div class="panel-title">
-                            <label class="control-label col-xs-12 col-sm-3">处方类型:</label>
+                            <label class="control-label col-xs-12 col-sm-3">prescription_type:</label>
                             <div class="col-xs-12 col-sm-8">
                                 <input  id="c-recipe_type"  class="form-control" type="text" name="row[lens][recipe_type][]" value="{$sku['recipe_type']}">
                             </div>
@@ -379,7 +378,7 @@
                     {if $sku.platform_type eq 3}
                     <div class="panel-body">
                         <div class="panel-title">
-                            <label class="control-label col-xs-12 col-sm-3">基片类型:</label>
+                            <label class="control-label col-xs-12 col-sm-3">second_name:</label>
                             <div class="col-xs-12 col-sm-8">
                                 <input  id="c-lens_type"  class="form-control"  type="text" name="row[lens][second_name][]" value="{$sku['second_name']}">
                             </div>
@@ -387,7 +386,7 @@
                     </div>
                     <div class="panel-body">
                         <div class="panel-title">
-                            <label class="control-label col-xs-12 col-sm-3">镜片类型:</label>
+                            <label class="control-label col-xs-12 col-sm-3">lens_type:</label>
                             <div class="col-xs-12 col-sm-8">
                                 <input  id="c-coating_film_type"  class="form-control"  type="text" name="row[lens][lens_type][]" value="{$sku['lens_type']}">
                             </div>
@@ -395,7 +394,7 @@
                     </div>
                     <div class="panel-body">
                         <div class="panel-title">
-                            <label class="control-label col-xs-12 col-sm-3">折射率:</label>
+                            <label class="control-label col-xs-12 col-sm-3">zsl:</label>
                             <div class="col-xs-12 col-sm-8">
                                 <input  id="c-coating_film_type"  class="form-control"  type="text" name="row[lens][zsl][]" value="{$sku['zsl']}">
                             </div>
@@ -403,7 +402,7 @@
                     </div>
                     <div class="panel-body">
                         <div class="panel-title">
-                            <label class="control-label col-xs-12 col-sm-3">镀膜类型:</label>
+                            <label class="control-label col-xs-12 col-sm-3">coating_type:</label>
                             <div class="col-xs-12 col-sm-8">
                                 <input  id="c-coating_film_type"  class="form-control"  type="text" name="row[lens][coating_type][]" value="{$sku['coating_type']}">
                             </div>
@@ -412,7 +411,7 @@
                     {else/}
                     <div class="panel-body">
                         <div class="panel-title">
-                            <label class="control-label col-xs-12 col-sm-3">镜片类型:</label>
+                            <label class="control-label col-xs-12 col-sm-3">lens_type:</label>
                             <div class="col-xs-12 col-sm-8">
                                 <input  id="c-lens_type"  class="form-control"  type="text" name="row[lens][lens_type][]" value="{$sku['lens_type']}">
                             </div>
@@ -420,7 +419,7 @@
                     </div>
                     <div class="panel-body">
                         <div class="panel-title">
-                            <label class="control-label col-xs-12 col-sm-3">镀膜类型:</label>
+                            <label class="control-label col-xs-12 col-sm-3">coating_type:</label>
                             <div class="col-xs-12 col-sm-8">
                                 <input  id="c-coating_film_type"  class="form-control"  type="text" name="row[lens][coating_type][]" value="{$sku['coating_type']}">
                             </div>
@@ -435,10 +434,10 @@
                         <div class="ibox-title">
                             <table id="caigou-table-lens">
                                 <tr>
-                                    <td colspan="10" style="text-align: center">处方参数</td>
+                                    <td colspan="10" style="text-align: center">Prescription</td>
                                 </tr>
                                 <tr>
-                                    <td style="text-align: center">参数</td>
+                                    <td style="text-align: center">value</td>
                                     <td style="text-align: center">SPH</td>
                                     <td style="text-align: center">CYL</td>
                                     <td style="text-align: center">AXI</td>
@@ -518,6 +517,7 @@
                 </div> -->
             </div>
      {/foreach}
+	 </div>
     {/if}
     {/present}
     <div class="form-group layer-footer">

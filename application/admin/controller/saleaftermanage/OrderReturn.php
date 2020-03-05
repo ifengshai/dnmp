@@ -421,19 +421,19 @@ class OrderReturn extends Backend
     {
         if ($request->isPost()) {
             //获取输入的订单号
-            $increment_id = $request->post('increment_id');
+            $increment_id = trim($request->post('increment_id'));
             //            dump($increment_id);
             //            exit;
             //获取输入的平台
-            $order_platform = $request->post('order_platform');
+            $order_platform = trim($request->post('order_platform'));
             //获取客户邮箱地址
-            $customer_email = $request->post('customer_email');
+            $customer_email = trim($request->post('customer_email'));
             //获取客户姓名
-            $customer_name  = $request->post('customer_name');
+            $customer_name  = trim($request->post('customer_name'));
             //获取客户电话
-            $customer_phone = $request->post('customer_phone');
+            $customer_phone = trim($request->post('customer_phone'));
             //获取运单号
-            $track_number   = $request->post('track_number');
+            $track_number   = trim($request->post('track_number'));
             if ($order_platform < 1) {
                 return $this->error('请选择正确的订单平台');
             }
@@ -453,7 +453,16 @@ class OrderReturn extends Backend
             $customerInfo = $customer['info'];
             unset($customer['info']);
             unset($customer['increment_id']);
-            $infoSynergyTaskResult = Db::name('info_synergy_task')->where('order_platform', $order_platform)->where('synergy_order_number', 'in', $allIncrementOrder)->order('id desc')->select();
+			Db::name('info_synergy_task')->query("set time_zone='+8:00'");
+			Db::name('sale_after_task')->query("set time_zone='+8:00'");
+            Db::name('order_return')->query("set time_zone='+8:00'");
+             //如果存在vip订单的话查询这个订单是否在协同任务当中
+            if($customerInfo['arr_order_vip']){
+                $infoSynergyTaskResult = Db::name('info_synergy_task')->where('order_platform', $order_platform)->where('synergy_order_number', 'in', $allIncrementOrder)->whereOr('synergy_order_number', 'in', $customerInfo['arr_order_vip'])->order('id desc')->select();
+            }else{
+                $infoSynergyTaskResult = Db::name('info_synergy_task')->where('order_platform', $order_platform)->where('synergy_order_number', 'in', $allIncrementOrder)->order('id desc')->select();
+            }
+            
             $saleAfterTaskResult = Db::name('sale_after_task')->where('order_platform', $order_platform)->where('order_number', 'in', $allIncrementOrder)->order('id desc')->select();
             // dump($saleAfterTaskResult);
             // exit;

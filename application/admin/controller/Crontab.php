@@ -26,9 +26,14 @@ class Crontab extends Backend
         'nihao_order_custom_order_prescription',
         'nihao_order_item_process',
         'set_purchase_order_logistics',
-        'product_grade_list_crontab'
-    ];
+        'product_grade_list_crontab',
+        'changeItemNewToOld',
+        'get_sku_stock',
+        'get_sku_price',
+        'get_sku_allstock'
 
+    ];
+    protected $order_status =  "and status in ('processing','complete','creditcard_proccessing','free_processing')";
 
     /**
      * 定时处理 订单列表分类
@@ -1307,7 +1312,7 @@ order by sfoi.item_id asc limit 1000";
 
         //查询供货商
         $supplier = new \app\admin\model\purchase\SupplierSku;
-        $supplier_list = $supplier->alias('a')->join(['fa_supplier' => 'b'], 'a.supplier_id=b.id')->column('b.supplier_name', 'a.sku');
+        $supplier_list = $supplier->alias('a')->join(['fa_supplier' => 'b'], 'a.supplier_id=b.id')->column('b.supplier_name,b.purchase_person', 'a.sku');
 
 
         //删除无用数组 释放内存
@@ -1338,7 +1343,8 @@ order by sfoi.item_id asc limit 1000";
             //分等级产品
             $num = round($val['counter'] * 1 / $val['days'] * 1 * 30);
             $list[$k]['num'] = $num;
-            $list[$k]['supplier_name'] =  $supplier_list[$val['true_sku']];
+            $list[$k]['supplier_name'] =  $supplier_list[$val['true_sku']]['supplier_name'];
+            $list[$k]['purchase_person'] =  $supplier_list[$val['true_sku']]['purchase_person'];
 
 
             if ($num >= 300) {
@@ -1442,18 +1448,17 @@ order by sfoi.item_id asc limit 1000";
         //计算三个站最近30天销量
         if ($zeelool_sku) {
             $map['b.sku'] = ['in', $zeelool_sku];
-            $zeelool = $zeelool_model->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')->group('b.sku')->column('sum(b.qty_ordered) as num','b.sku');
-
+            $zeelool = $zeelool_model->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')->group('b.sku')->column('sum(b.qty_ordered) as num', 'b.sku');
         }
 
         if ($voogueme_sku) {
             $map['b.sku'] = ['in', $voogueme_sku];
-            $voogueme = $voogueme_model->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')->group('b.sku')->column('sum(b.qty_ordered) as num','b.sku');
+            $voogueme = $voogueme_model->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')->group('b.sku')->column('sum(b.qty_ordered) as num', 'b.sku');
         }
 
         if ($nihao_sku) {
             $map['b.sku'] = ['in', $nihao_sku];
-            $nihao = $nihao_model->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')->group('b.sku')->column('sum(b.qty_ordered) as num','b.sku');
+            $nihao = $nihao_model->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')->group('b.sku')->column('sum(b.qty_ordered) as num', 'b.sku');
         }
 
         foreach ($list as $k => $v) {
@@ -1470,6 +1475,7 @@ order by sfoi.item_id asc limit 1000";
         }
         echo 'ok';
     }
+
     /***
      * 定时把新品sku变成老品
      */
@@ -1486,15 +1492,386 @@ order by sfoi.item_id asc limit 1000";
     }
 
     /**
-     * 定时记录每日库存变化量
+     * 记录每天商品库存变化日志
      *
      * @Description
      * @author wpl
-     * @since 2020/02/11 14:34:07 
+     * @since 2020/02/19 16:23:27 
      * @return void
      */
-    public function getProductStock()
+    public function get_sku_stock()
     {
-        Db::connect('database.db_stock')->name('item')->where('');
+        $where['is_del'] = 1;
+        $item = Db::connect('database.db_stock')->name('item')->where($where)->field('sku,available_stock as stock_num')->select();
+
+        if ($item) {
+            Db::name('goods_stock_log')->insertAll($item);
+            echo 'ok';
+        }
+    }
+
+    /**
+     * 定时获取SKU最新的采购单价
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/02/19 16:23:27 
+     * @return void
+     */
+    public function get_sku_price()
+    {
+        $purchase = new \app\admin\model\purchase\PurchaseOrder;
+        $result = $purchase->alias('a')
+            ->where('a.is_del', 1)
+            ->field('sku,purchase_price,createtime')
+            ->join(['fa_purchase_order_item' => 'b'], 'a.id=b.purchase_id')
+            ->order('createtime desc')
+            ->select();
+        $arr = [];
+        foreach ($result as $v) {
+            if (!isset($arr[$v['sku']])) {
+                $arr[$v['sku']] = $v['purchase_price'];
+            } else {
+                continue;
+            }
+        }
+        if ($arr) {
+            $list = [];
+            $i = 0;
+            foreach ($arr as $k => $v) {
+                $list[$i]['sku'] = $k;
+                $list[$i]['price'] = $v;
+                $list[$i]['createtime'] = date('Y-m-d H:i:s', time());
+                $i++;
+            }
+            unset($arr);
+        }
+
+        if ($list) {
+            //清空表
+            Db::execute("truncate table fa_sku_price;");
+            //批量添加
+            $res = Db::table('fa_sku_price')->insertAll($list);
+        }
+        echo 'ok';
+    }
+
+    /**
+     * 记录每天总库存数
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/02/29 16:13:16 
+     * @return void
+     */
+    public function get_sku_allstock()
+    {
+        $item = new \app\admin\model\itemmanage\Item;
+        $num = $item->getAllStock();
+        $data['allnum'] = $num;
+        $data['createtime'] = date('Y-m-d H:i:s');
+        $res = Db::table('fa_product_allstock_log')->insert($data);
+    }
+    /**
+     * 更新zeelool站仪表盘数据
+     *
+     * z站今天的销售额($) 订单数	订单支付成功数	客单价($)	购物车总数	购物车总转化率(%)	新增购物车数	新增购物车转化率	新增注册用户数
+     * @Description created by lsw
+     * @author lsw
+     * @since 2020/03/02 17:39:31 
+     * @return void
+     */
+    public function update_ashboard_data()
+    {
+        //求出平台
+        $platform = $this->request->get('platform');
+        if(!$platform){
+            return false;
+        }
+        switch($platform){
+            case 1:
+            $model = Db::connect('database.db_zeelool');
+            break;
+            case 2:
+            $model = Db::connect('database.db_voogueme');
+            break;
+            case 3:
+            $model = Db::connect('database.db_nihao');
+            break;
+            default:
+            $model = false;
+            break;            
+        }
+        if(false === $model){
+            return false;
+        }
+        $order_status = $this->order_status;
+        //昨日销售额sql
+        $yesterday_sales_money_sql = "SELECT round(sum(base_grand_total),2)  base_grand_total   FROM sales_flat_order WHERE DATEDIFF(created_at,NOW())=-1 $order_status";
+        //过去7天销售额sql
+        $pastsevenday_sales_money_sql = "SELECT round(sum(base_grand_total),2) base_grand_total FROM sales_flat_order WHERE DATE_SUB(CURDATE(),INTERVAL 7 DAY) <= date(created_at) and created_at< curdate() $order_status";
+        //过去30天销售额sql
+        $pastthirtyday_sales_money_sql = "SELECT round(sum(base_grand_total),2) base_grand_total FROM sales_flat_order WHERE DATE_SUB(CURDATE(),INTERVAL 30 DAY) <= date(created_at) and created_at< curdate() $order_status";
+        //当月销售额sql
+        $thismonth_sales_money_sql     = "SELECT round(sum(base_grand_total),2) base_grand_total FROM sales_flat_order WHERE DATE_FORMAT(created_at,'%Y%m') = DATE_FORMAT(CURDATE(),'%Y%m') $order_status";
+        //上月销售额sql
+        $lastmonth_sales_money_sql     = "SELECT round(sum(base_grand_total),2) base_grand_total FROM sales_flat_order WHERE PERIOD_DIFF(date_format(now(),'%Y%m'),date_format(created_at,'%Y%m')) =1 $order_status";
+        //今年销售额sql
+        $thisyear_sales_money_sql      = "SELECT round(sum(base_grand_total),2) base_grand_total FROM sales_flat_order WHERE YEAR(created_at)=YEAR(NOW()) $order_status";
+        //上一年销售额sql
+        $lastyear_sales_money_sql      = "SELECT round(sum(base_grand_total),2) base_grand_total FROM sales_flat_order WHERE year(created_at)=year(date_sub(now(),interval 1 year)) $order_status"; 
+        //总共的销售额sql
+        $total_sales_money_sql         = "SELECT round(sum(base_grand_total),2) base_grand_total FROM sales_flat_order WHERE 1 $order_status";
+        //昨天订单数sql
+        $yesterday_order_num_sql       = "SELECT count(*) counter FROM sales_flat_order WHERE DATEDIFF(created_at,NOW())=-1";
+        //过去7天订单数sql
+        $pastsevenday_order_num_sql    = "SELECT count(*) counter FROM sales_flat_order WHERE DATE_SUB(CURDATE(),INTERVAL 7 DAY) <= date(created_at) and created_at< curdate()";
+        //过去30天订单数sql
+        $pastthirtyday_order_num_sql   = "SELECT count(*) counter FROM sales_flat_order WHERE DATE_SUB(CURDATE(),INTERVAL 30 DAY) <= date(created_at) and created_at< curdate()";
+        //当月订单数sql
+        $thismonth_order_num_sql       = "SELECT count(*) counter FROM sales_flat_order WHERE DATE_FORMAT(created_at,'%Y%m') = DATE_FORMAT(CURDATE(),'%Y%m')" ;
+        //上月订单数sql
+        $lastmonth_order_num_sql       = "SELECT count(*) counter FROM sales_flat_order WHERE PERIOD_DIFF(date_format(now(),'%Y%m'),date_format(created_at,'%Y%m')) =1";
+        //今年订单数sql
+        $thisyear_order_num_sql        = "SELECT count(*) counter FROM sales_flat_order WHERE YEAR(created_at)=YEAR(NOW())";
+        //上一年的订单数sql
+        $lastyear_order_num_sql        = "SELECT count(*) counter FROM sales_flat_order WHERE year(created_at)=year(date_sub(now(),interval 1 year))";  
+        //总共的订单数sql
+        $total_order_num_sql           = "SELECT count(*) counter FROM sales_flat_order";
+        //昨天订单支付成功数sql
+        $yesterday_order_success_sql   = "SELECT count(*) counter FROM sales_flat_order WHERE DATEDIFF(created_at,NOW())=-1 $order_status";
+        //过去7天订单支付成功数sql
+        $pastsevenday_order_success_sql    = "SELECT count(*) counter FROM sales_flat_order WHERE DATE_SUB(CURDATE(),INTERVAL 7 DAY) <= date(created_at) and created_at< curdate() $order_status";
+        //过去30天订单支付成功数sql
+        $pastthirtyday_order_success_sql   = "SELECT count(*) counter FROM sales_flat_order WHERE DATE_SUB(CURDATE(),INTERVAL 30 DAY) <= date(created_at) and created_at< curdate() $order_status";
+        //当月订单支付成功数sql
+        $thismonth_order_success_sql       = "SELECT count(*) counter FROM sales_flat_order WHERE DATE_FORMAT(created_at,'%Y%m') = DATE_FORMAT(CURDATE(),'%Y%m') $order_status";
+        //上月订单支付成功数sql
+        $lastmonth_order_success_sql       = "SELECT count(*) counter FROM sales_flat_order WHERE PERIOD_DIFF(date_format(now(),'%Y%m'),date_format(created_at,'%Y%m')) =1 $order_status";
+        //今年订单支付成功数sql
+        $thisyear_order_success_sql        = "SELECT count(*) counter FROM sales_flat_order WHERE YEAR(created_at)=YEAR(NOW()) $order_status";
+        //上一年订单支付成功数sql
+        $lastyear_order_success_sql        = "SELECT count(*) counter FROM sales_flat_order WHERE year(created_at)=year(date_sub(now(),interval 1 year)) $order_status";
+        //总共订单支付成功数sql
+        $total_order_success_sql           = "SELECT count(*) counter FROM sales_flat_order WHERE 1 $order_status";
+        //昨日客单价
+        // $yesterday_unit_price_rs              = round(($yesterday_sales_money_rs/$yesterday_order_success_rs),2);
+        // //过去7天客单价
+        // $pastsevenday_unit_price_rs           = round(($pastsevenday_sales_money_rs/$pastsevenday_order_success_rs),2);
+        // //过去30天客单价
+        // $pastthirtyday_unit_price_rs          = round(($pastthirtyday_sales_money_rs/$pastthirtyday_order_success_rs),2);
+        // //当月客单价
+        // $thismonth_unit_price_rs           = round(($thismonth_sales_money_rs/$thismonth_order_success_rs),2);
+        // //上月客单价
+        // $lastmonth_unit_price_rs              = round(($lastmonth_sales_money_rs/$lastmonth_order_success_rs),2);
+        // //今年客单价
+        // $thisyear_unit_price_rs           = round(($thisyear_sales_money_rs/$thisyear_order_success_rs),2);
+        //上一年客单价
+        // $lastyear_unit_price_rs           = round(($lastyear_sales_money_rs/$lastyear_order_success_rs),2);
+        //总共客单价
+        // $total_unit_price_rs              = round(($total_sales_money_rs/$total_order_success_rs),2);
+        //昨天购物车总数sql
+        $yesterday_shoppingcart_total_sql     = "SELECT count(*) counter from sales_flat_quote where base_grand_total>0 AND DATEDIFF(created_at,NOW())=-1";
+        //过去7天购物车总数sql
+        $pastsevenday_shoppingcart_total_sql  = "SELECT count(*) counter from sales_flat_quote where base_grand_total>0 AND DATE_SUB(CURDATE(),INTERVAL 7 DAY) <= date(created_at) and created_at< curdate()";
+        //过去30天购物车总数sql
+        $pastthirtyday_shoppingcart_total_sql = "SELECT count(*) counter from sales_flat_quote where base_grand_total>0 AND DATE_SUB(CURDATE(),INTERVAL 30 DAY) <= date(created_at) and created_at< curdate()";
+        //当月购物车总数sql
+        $thismonth_shoppingcart_total_sql     = "SELECT count(*) counter from sales_flat_quote where base_grand_total>0 AND DATE_FORMAT(created_at,'%Y%m') = DATE_FORMAT(CURDATE(),'%Y%m')";
+        //上月购物车总数sql
+        $lastmonth_shoppingcart_total_sql     = "SELECT count(*) counter from sales_flat_quote where base_grand_total>0 AND PERIOD_DIFF(date_format(now(),'%Y%m'),date_format(created_at,'%Y%m')) =1";
+        //今年购物车总数sql
+        $thisyear_shoppingcart_total_sql      = "SELECT count(*) counter from sales_flat_quote where base_grand_total>0 AND YEAR(created_at)=YEAR(NOW())";
+        //上年购物车总数sql
+        $lastyear_shoppingcart_total_sql      = "SELECT count(*) counter FROM sales_flat_quote WHERE year(created_at)=year(date_sub(now(),interval 1 year))";
+        //总共购物车总数sql
+        $total_shoppingcart_total_sql         = "SELECT count(*) counter from sales_flat_quote where base_grand_total>0";
+        // //昨天购物车转化率
+        // $yesterday_shoppingcart_conversion_rs = round(($yesterday_order_success_rs/$yesterday_shoppingcart_total_rs),2);
+        // //过去7天购物车转化率
+        // $pastsevenday_shoppingcart_conversion_rs = round(($pastsevenday_order_success_rs/$pastsevenday_shoppingcart_total_rs),2);
+        // //过去30天购物车转化率
+        // $pastthirtyday_shoppingcart_conversion_rs = round(($pastthirtyday_order_success_rs/$pastthirtyday_shoppingcart_total_rs),2);
+        // //当月购物车转化率
+        // $thismonth_shoppingcart_conversion_rs = round(($thismonth_order_success_rs/$thismonth_shoppingcart_total_rs),2);
+        // //上月购物车转化率
+        // $lastmonth_shoppingcart_conversion_rs = round(($lastmonth_order_success_rs/$lastmonth_shoppingcart_total_rs),2);
+        // //今年购物车转化率
+        // $thisyear_shoppingcart_conversion_rs = round(($thisyear_order_success_rs/$thisyear_shoppingcart_total_rs),2);
+        //上年购物车总数sql
+        // $lastyear_shoppingcart_conversion_rs = round(($lastyear_order_success_rs/$lastyear_shoppingcart_total_rs),2);
+        // //总共购物车转化率
+        // $total_shoppingcart_conversion_rs = round(($total_order_success_rs/$total_shoppingcart_total_rs),2); 
+        //昨天新增购物车总数sql
+        $yesterday_shoppingcart_new_sql = "SELECT count(*) counter from sales_flat_quote where base_grand_total>0 AND DATEDIFF(updated_at,NOW())=-1";
+        //过去7天新增购物车总数sql
+        $pastsevenday_shoppingcart_new_sql = "SELECT count(*) counter from sales_flat_quote where base_grand_total>0 AND DATE_SUB(CURDATE(),INTERVAL 7 DAY) <= date(updated_at) and created_at< curdate()";
+        //过去30天新增购物车总数sql
+        $pastthirtyday_shoppingcart_new_sql = "SELECT count(*) counter from sales_flat_quote where base_grand_total>0 AND DATE_SUB(CURDATE(),INTERVAL 30 DAY) <= date(updated_at) and created_at< curdate()";
+        //当月新增购物车总数sql
+        $thismonth_shoppingcart_new_sql = "SELECT count(*) counter from sales_flat_quote where base_grand_total>0 AND  DATE_FORMAT(updated_at,'%Y%m') = DATE_FORMAT(CURDATE(),'%Y%m')";
+        //上月新增购物车总数sql
+        $lastmonth_shoppingcart_new_sql = "SELECT count(*) counter from sales_flat_quote where base_grand_total>0 AND PERIOD_DIFF(date_format(now(),'%Y%m'),date_format(updated_at,'%Y%m')) =1";
+        //今年新增购物车总数sql
+        $thisyear_shoppingcart_new_sql = "SELECT count(*) counter from sales_flat_quote where base_grand_total>0 AND YEAR(updated_at)=YEAR(NOW())";
+        //上年新增购物车总数sql
+        $lastyear_shoppingcart_new_sql = "SELECT count(*) counter FROM sales_flat_quote WHERE base_grand_total>0 AND year(updated_at)=year(date_sub(now(),interval 1 year))";
+        //总共新增购物车总数sql
+        $total_shoppingcart_new_sql = "SELECT count(*) counter from sales_flat_quote where base_grand_total>0";
+        //昨天新增购物车转化率
+        // $yesterday_shoppingcart_newconversion_rs = round(($yesterday_order_success_rs/$yesterday_shoppingcart_new_rs),2);
+        // //过去7天新增购物车转化率
+        // $pastsevenday_shoppingcart_newconversion_rs = round(($pastsevenday_order_success_rs/$pastsevenday_shoppingcart_new_rs),2);
+        // //过去30天新增购物车转化率
+        // $pastthirtyday_shoppingcart_newconversion_rs = round(($pastthirtyday_order_success_rs/$pastthirtyday_shoppingcart_new_rs),2);
+        // //当月新增购物车转化率
+        // $thismonth_shoppingcart_newconversion_rs = round(($thismonth_order_success_rs/$thismonth_shoppingcart_new_rs),2);                
+        // //上月新增购物车转化率
+        // $lastmonth_shoppingcart_newconversion_rs = round(($lastmonth_order_success_rs/$lastmonth_shoppingcart_new_rs),2);
+        // //今年新增购物车转化率
+        // $thisyear_shoppingcart_newconversion_rs = round(($thisyear_order_success_rs/$thisyear_shoppingcart_new_rs),2);
+        //上年新增购物车总数sql
+        // $lastyear_shoppingcart_newconversion_rs = round(($lastyear_order_success_rs/$lastyear_shoppingcart_new_rs),2);
+        // //总共新增购物车转化率
+        // $total_shoppingcart_newconversion_rs = round(($total_order_success_rs/$total_shoppingcart_new_rs),2);
+        //昨天新增注册用户数sql
+        $yesterday_register_customer_sql       = "SELECT count(*) counter from customer_entity where DATEDIFF(created_at,NOW())=-1";
+        //过去7天新增注册用户数sql
+        $pastsevenday_register_customer_sql    = "SELECT count(*) counter from customer_entity where DATE_SUB(CURDATE(),INTERVAL 7 DAY) <= date(created_at) and created_at< curdate()";
+        //过去30天新增注册用户数sql
+        $pastthirtyday_register_customer_sql   = "SELECT count(*) counter from customer_entity where DATE_SUB(CURDATE(),INTERVAL 30 DAY) <= date(created_at) and created_at< curdate()";
+        //当月新增注册用户数sql
+        $thismonth_register_customer_sql       = "SELECT count(*) counter from customer_entity where DATE_FORMAT(created_at,'%Y%m') = DATE_FORMAT(CURDATE(),'%Y%m')";
+        //上月新增注册用户数sql
+        $lastmonth_register_customer_sql       = "SELECT count(*) counter from customer_entity where PERIOD_DIFF(date_format(now(),'%Y%m'),date_format(created_at,'%Y%m')) =1";
+        //今年新增注册用户数sql
+        $thisyear_register_customer_sql        = "SELECT count(*) counter from customer_entity where YEAR(created_at)=YEAR(NOW())";
+        //上年新增注册用户数sql
+        $lastyear_register_customer_sql        = "SELECT count(*) counter FROM customer_entity WHERE year(created_at)=year(date_sub(now(),interval 1 year))";
+        //总共新增注册用户数sql
+        $total_register_customer_sql           = "SELECT count(*) counter from customer_entity";
+        $model->table('sales_flat_order')->query("set time_zone='+8:00'");
+        $model->table('sales_flat_quote')->query("set time_zone='+8:00'");
+        $model->table('customer_entity')->query("set time_zone='+8:00'");
+        //昨天销售额
+        $yesterday_sales_money_rs                   = $model->query($yesterday_sales_money_sql);
+        //过去7天销售额
+        $pastsevenday_sales_money_rs                = $model->query($pastsevenday_sales_money_sql);
+        //过去30天销售额
+        $pastthirtyday_sales_money_rs               = $model->query($pastthirtyday_sales_money_sql);
+        //当月销售额
+        $thismonth_sales_money_rs                   = $model->query($thismonth_sales_money_sql);
+        //上月销售额
+        $lastmonth_sales_money_rs                   = $model->query($lastmonth_sales_money_sql);
+        //今年销售额
+        $thisyear_sales_money_rs                    = $model->query($thisyear_sales_money_sql);
+        //上年销售额
+        $lastyear_sales_money_rs                    = $model->query($lastyear_sales_money_sql);
+        //总共销售额
+        $total_sales_money_rs                       = $model->query($total_sales_money_sql);
+        //昨天订单数
+        $yesterday_order_num_rs                     = $model->query($yesterday_order_num_sql);
+        //过去7天订单数
+        $pastsevenday_order_num_rs                  = $model->query($pastsevenday_order_num_sql);
+        //过去30天订单数
+        $pastthirtyday_order_num_rs                 = $model->query($pastthirtyday_order_num_sql);
+        //当月订单数
+        $thismonth_order_num_rs                     = $model->query($thismonth_order_num_sql);
+        //上月订单数
+        $lastmonth_order_num_rs                     = $model->query($lastmonth_order_num_sql);
+        //今年订单数
+        $thisyear_order_num_rs                      = $model->query($thisyear_order_num_sql);
+        //去年订单数
+        $lastyear_order_num_rs                      = $model->query($lastyear_order_num_sql);
+        //总共订单数
+        $total_order_num_rs                         = $model->query($total_order_num_sql);
+        //昨天支付成功数
+        $yesterday_order_success_rs                 = $model->query($yesterday_order_success_sql);
+        //过去7天支付成功数
+        $pastsevenday_order_success_rs              = $model->query($pastsevenday_order_success_sql);
+        //过去30天支付成功数
+        $pastthirtyday_order_success_rs             = $model->query($pastthirtyday_order_success_sql);
+        //当月支付成功数
+        $thismonth_order_success_rs                 = $model->query($thismonth_order_success_sql);
+        //上月支付成功数
+        $lastmonth_order_success_rs                 = $model->query($lastmonth_order_success_sql);
+        //今年支付成功数
+        $thisyear_order_success_rs                  = $model->query($thisyear_order_success_sql);
+        //上年支付成功数
+        $lastyear_order_success_rs                  = $model->query($lastyear_order_success_sql);
+        //总共支付成功数
+        $total_order_success_rs                     = $model->query($total_order_success_sql);
+        //昨天购物车总数
+        $yesterday_shoppingcart_total_rs            = $model->query($yesterday_shoppingcart_total_sql);
+        //过去7天购物车总数
+        $pastsevenday_shoppingcart_total_rs         = $model->query($pastsevenday_shoppingcart_total_sql);
+        //过去30天购物车总数
+        $pastthirtyday_shoppingcart_total_rs        = $model->query($pastthirtyday_shoppingcart_total_sql);
+        //当月购物车总数
+        $thismonth_shoppingcart_total_rs            = $model->query($thismonth_shoppingcart_total_sql);
+        //上月购物车总数
+        $lastmonth_shoppingcart_total_rs            = $model->query($lastmonth_shoppingcart_total_sql);
+        //今年购物车总数
+        $thisyear_shoppingcart_total_rs             = $model->query($thisyear_shoppingcart_total_sql);
+        //上年购物车总数
+        $lastyear_shoppingcart_total_rs             = $model->query($lastyear_shoppingcart_total_sql);
+        //总共购物车总数
+        $total_shoppingcart_total_rs                = $model->query($total_shoppingcart_total_sql);
+        //昨天新增购物车总数
+        $yesterday_shoppingcart_new_rs              = $model->query($yesterday_shoppingcart_new_sql);
+        //过去7天新增购物车总数
+        $pastsevenday_shoppingcart_new_rs           = $model->query($pastsevenday_shoppingcart_new_sql);
+        //过去30天新增购物车总数
+        $pastthirtyday_shoppingcart_new_rs          = $model->query($pastthirtyday_shoppingcart_new_sql);
+        //当月新增购物车总数
+        $thismonth_shoppingcart_new_rs              = $model->query($thismonth_shoppingcart_new_sql);
+        //上月新增购物车总数
+        $lastmonth_shoppingcart_new_rs              = $model->query($lastmonth_shoppingcart_new_sql);
+        //今年新增购物车总数
+        $thisyear_shoppingcart_new_rs               = $model->query($thisyear_shoppingcart_new_sql);
+        //上年新增购物车总数
+        $lastyear_shoppingcart_new_rs               = $model->query($lastyear_shoppingcart_new_sql);
+        //总共新增购物车总数
+        $total_shoppingcart_new_rs                  = $model->query($total_shoppingcart_new_sql);
+        //昨天新增注册人数
+        $yesterday_register_customer_rs             = $model->query($yesterday_register_customer_sql);
+        //过去7天新增注册人数
+        $pastsevenday_register_customer_rs          = $model->query($pastsevenday_register_customer_sql);
+        //过去30天新增注册人数
+        $pastthirtyday_register_customer_rs         = $model->query($pastthirtyday_register_customer_sql);
+        //当月新增注册人数
+        $thismonth_register_customer_rs             = $model->query($thismonth_register_customer_sql);
+        //上月新增注册人数
+        $lastmonth_register_customer_rs             = $model->query($lastmonth_register_customer_sql);
+        //今年新增注册人数
+        $thisyear_register_customer_rs              = $model->query($thisyear_register_customer_sql);
+        //去年新增注册人数
+        $lastyear_register_customer_rs              = $model->query($lastyear_register_customer_sql);
+        //总共新增注册人数
+        $total_register_customer_rs                 = $model->query($total_register_customer_sql);
+        //昨天销售额data
+        $yesterday_sales_money_data                 = $yesterday_sales_money_rs[0]['base_grand_total'];
+        //过去7天销售额data
+        $pastsevenday_sales_money_data              = $pastsevenday_sales_money_rs[0]['base_grand_total'];
+        //过去30天销售额
+        $pastthirtyday_sales_money_data             = $pastthirtyday_sales_money_rs[0]['base_grand_total'];
+        //当月销售额
+        $thismonth_sales_money_data                 = $thismonth_sales_money_rs[0]['base_grand_total'];
+        //上月销售额
+        $lastmonth_sales_money_data                 = $lastmonth_sales_money_rs[0]['base_grand_total'];
+        //今年销售额
+        $thisyear_sales_money_data                  = $thisyear_sales_money_rs[0]['base_grand_total'];
+        //去年销售额
+        $lastyear_sales_money_data                  = $lastyear_sales_money_rs[0]['base_grand_total'];
+        //总计销售额
+        $total_sales_money_data                     = $total_sales_money_rs[0]['base_grand_total'];
+        dump($yesterday_sales_money_data);
+        dump($pastsevenday_sales_money_data);
+        dump($pastthirtyday_sales_money_data);
+        dump($thismonth_sales_money_data);
+        dump($lastmonth_sales_money_data);
+        dump($thisyear_sales_money_data);
+        dump($lastyear_sales_money_data);
+        dump($total_sales_money_data);                                                                        
     }
 }

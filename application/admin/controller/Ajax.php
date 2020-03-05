@@ -299,7 +299,7 @@ class Ajax extends Backend
         //查询sku 商品名称
         $item = new \app\admin\model\itemmanage\Item;
         $data = $item->getGoodsInfo($sku);
-        
+
         //查询供应商SKU
         $supplier = new \app\admin\model\purchase\SupplierSku;
         $sullier_sku = $supplier->getSupplierSkuData($sku, $supplier_id);
@@ -329,5 +329,22 @@ class Ajax extends Backend
         } else {
             $this->error('404 not found');
         }
+    }
+
+    /**
+     * 获取协同任务分类联动
+     */
+    public function cxselect()
+    {
+        $pid = $this->request->get('pid', 0);
+        $c_id = $this->request->get('c_id');
+        $pid = $c_id ?? $pid;
+    
+        $list = null;
+        if ($pid !== '') {
+            $list = \app\admin\model\infosynergytaskmanage\InfoSynergyTaskCategory::where('pid', '=', $pid)->field('id as value, name')->select();
+        }
+        
+        $this->success('', null, $list);
     }
 }

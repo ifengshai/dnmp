@@ -1,0 +1,381 @@
+<style>
+    .content {
+        max-width: 100%;
+    }
+</style>
+
+<style type="text/css">
+    table.altrowstable {
+        margin: 0 auto;
+        width: 45%;
+        font-family: verdana, arial, sans-serif;
+        font-size: 11px;
+        color: #333333;
+        border-width: 1px;
+        border-color: #247692;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+    }
+
+    table.altrowstable th {
+        border-width: 1px;
+        padding: 8px;
+        font-size: 14px;
+        border-style: solid;
+        border-color: #d2d6de;
+    }
+
+    table.altrowstable td {
+        border-width: 1px;
+        padding: 8px;
+        text-align: center;
+        font-size: 12px;
+        border-style: solid;
+        border-color: #ddd;
+    }
+
+    table.altrowstable tr:nth-child(odd) {
+        background: #E9F1F4;
+        background: #F5F5F5;
+    }
+
+    table.altrowstable tr:nth-child(even) {
+        background: #fff;
+        background: #eee;
+    }
+
+    .btn-div {
+        font-size: 14px;
+        line-height: 50px;
+        background: inherit;
+        background-color: rgba(255, 255, 255, 1);
+        border: none;
+        border-radius: 4px;
+        box-shadow: 0px 0px 7px rgba(0, 0, 0, 0.349019607843137);
+        border-width: 0px;
+        font-family: 'Arial Negreta', 'Arial';
+        font-weight: 700;
+        font-style: normal;
+        margin-right: 20px;
+        width: 200px;
+    }
+</style>
+<div class="panel panel-default panel-intro">
+    {:build_heading()}
+
+    <div class="panel-body">
+        <div id="myTabContent" class="tab-content">
+            <div class="tab-pane fade active in" id="one">
+                <div class="widget-body no-padding">
+                    <form id="form1" class="form-commonsearch form-horizontal" method="post">
+                        <div style="border-radius:2px;margin-bottom:10px;background:#f5f5f5;padding:20px;">
+                            <div class="row">
+                                <div id="toolbar" class="toolbar">
+
+
+                                    <div class="btn btn-div" style="width: 300px;">
+
+                                        <span class="extend">
+                                            仓库总库存（个）：<span style="color: red;" id="totalPayInfo">{$allStock+$sampleNumStock}</span>
+
+                                        </span>
+                                    </div>
+
+                                    <div class="btn btn-div" style="width: 300px;">
+
+                                        <span class="extend">
+                                            仓库库存总金额（<i class="fa fa-cny"></i>）：<span style="color: red;"
+                                                id="totalFramePrice">{$allStockPrice+$sampleNumStockPrice}</span>
+                                        </span>
+                                    </div>
+
+                                    <div class="btn btn-div">
+                                        <span class="extend">
+                                            待处理订单（个）：<span style="color: red;" id="totalLensPrice">{$allPendingOrderNum}</span>
+                                        </span>
+                                    </div>
+
+                                    <div class="btn btn-div">
+
+                                        <span class="extend">
+                                            总SKU（个）：<span style="color: red;" id="totalPostageMoney">{$skuNum}</span>
+
+                                        </span>
+                                    </div>
+
+                                    <div class="btn btn-div" style="width: 250px;">
+                                        <span class="extend">
+                                            客服总待处理事件（个）：<span style="color: red;" id="totalRefundMoney">{$taskAllNum}</span>
+
+                                        </span>
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </form>
+                    <div style="width: 100%;float: left;">
+                        <div class="row item_info" style="background:#f5f5f5;float: left;">
+                            <div class="col-lg-12">
+                            </div>
+                            <div class="col-xs-6 col-md-4">
+                                <div>
+                                    <table id="caigou-table" class="handle_table1" style="width: 650px;">
+                                        <tr>
+                                            <td colspan="4" style="font-size: 16px;font-weight:1000">库存数据</td>
+                                        </tr>
+                                        <tr>
+                                            <td>镜架库存</td>
+                                            <td>{$frameStock}</td>
+                                            <td>镜架库存总金额（￥）</td>
+                                            <td>{$frameStockPrice}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>饰品库存</td>
+                                            <td>{$ornamentsStock}</td>
+                                            <td>饰品库存总金额（￥）</td>
+                                            <td>{$ornamentsStockPrice}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>镜片库存</td>
+                                            <td>{$lensStock}</td>
+                                            <td>镜片库存总金额（￥）</td>
+                                            <td>{$lensStockPrice}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>辅料总库存</td>
+                                            <td>0</td>
+                                            <td>辅料库存总金额（￥）</td>
+                                            <td>0</td>
+                                        </tr>
+                                        <tr>
+                                            <td>镜架均价（￥）</td>
+                                            <td>{:round($frameStockPrice/$frameStock,2)}</td>
+                                            <td>饰品均价（￥）</td>
+                                            <td>{:round($ornamentsStockPrice/$ornamentsStock,2)}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>在途库存</td>
+                                            <td>{$onway_all_stock}</td>
+                                            <td>在途库存总金额（￥）</td>
+                                            <td>{$onway_all_stock_price}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>在途镜架库存</td>
+                                            <td>{$onway_frame_all_stock}</td>
+                                            <td>在途镜架总金额（￥）</td>
+                                            <td>{$onway_frame_all_stock_price}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>在途饰品库存</td>
+                                            <td>{$onway_ornament_all_stock}</td>
+                                            <td>在途饰品总金额（￥）</td>
+                                            <td>{$onway_ornament_all_stock_price}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>留样库存</td>
+                                            <td>{$sampleNumStock}</td>
+                                            <td>留样库存总金额（￥）</td>
+                                            <td>{$sampleNumStockPrice}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>库存周转天数</td>
+                                            <td>{$stock7days}</td>
+                                            <td>库存周转率</td>
+                                            <td>{$stock7daysPercent}</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+    
+                        </div>
+    
+                        <div class="row item_info" style="background:#f5f5f5;float: left;margin-left: 50px;">
+                            <div class="col-lg-12">
+                            </div>
+                            <div class="col-xs-6 col-md-4">
+                                <div>
+                                    <table id="caigou-table" class="handle_table1" style="width: 650px;">
+                                        <tr>
+                                            <td colspan="4" style="font-size: 16px;font-weight:1000">仓库数据</td>
+                                        </tr>
+                                        <tr>
+                                            <td>当月总单量</td>
+                                            <td></td>
+                                            <td>7天总单量</td>
+                                            <td></td>
+                                        </tr>
+                                        <tr>
+                                            <td>未出库订单总数</td>
+                                            <td></td>
+                                            <td>7天未出库总数</td>
+                                            <td></td>
+                                        </tr>
+                                        <tr>
+                                            <td>总压单率</td>
+                                            <td></td>
+                                            <td>7天压单率</td>
+                                            <td></td>
+                                        </tr>
+                                        <tr>
+                                            <td>当月妥投总量</td>
+                                            <td></td>
+                                            <td>当月妥投占比</td>
+                                            <td></td>
+                                        </tr>
+                                        <tr>
+                                            <td>超时订单总数</td>
+                                            <td></td>
+                                            <td>当月质检总数</td>
+                                            <td></td>
+                                        </tr>
+                                        <tr>
+                                            <td>当日出库总数</td>
+                                            <td></td>
+                                            <td>当日质检入库总数</td>
+                                            <td></td>
+                                        </tr>
+                                        <tr>
+                                            <td>当日配镜架总数</td>
+                                            <td></td>
+                                            <td>当日配镜片总数</td>
+                                            <td></td>
+                                        </tr>
+                                        <tr>
+                                            <td>当日加工总数</td>
+                                            <td></td>
+                                            <td>当日质检总数</td>
+                                            <td></td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+    
+                        </div>
+                    </div>
+
+                    <div style="width: 100%;margin-top: 30px;float: left;">
+                        <div class="row item_info" style="background:#f5f5f5;float: left;">
+                            <div class="col-lg-12">
+                            </div>
+                            <div class="col-xs-6 col-md-4">
+                                <div>
+                                    <table id="caigou-table" class="handle_table1" style="width: 650px;">
+                                        <tr>
+                                            <td colspan="4" style="font-size: 16px;font-weight:1000">采购数据</td>
+                                        </tr>
+                                        <tr>
+                                            <td>当月采购总数</td>
+                                            <td>0</td>
+                                            <td>当月采购总金额</td>
+                                            <td>0</td>
+                                        </tr>
+                                        <tr>
+                                            <td>当月采购镜架总数</td>
+                                            <td>0</td>
+                                            <td>当月采购总SKU数</td>
+                                            <td>0</td>
+                                        </tr>
+                                        <tr>
+                                            <td>当月采购平均单价（￥）</td>
+                                            <td>0</td>
+                                            <td>当月到货总数</td>
+                                            <td>0</td>
+                                        </tr>
+                                        <tr>
+                                            <td>当月销售总数</td>
+                                            <td>0</td>
+                                            <td>当月销售总成本（￥）</td>
+                                            <td>0</td>
+                                        </tr>
+                                        <tr>
+                                            <td>当月质检合格总数</td>
+                                            <td>0</td>
+                                            <td>当月品检合格率</td>
+                                            <td>0</td>
+                                        </tr>
+                                        <tr>
+                                            <td>当月定做总数</td>
+                                            <td>0</td>
+                                            <td>当月定做总金额（￥）</td>
+                                            <td>0</td>
+                                        </tr>
+                                        <tr>
+                                            <td>当月定做SKU数</td>
+                                            <td>0</td>
+                                            <td>当月定做平均单价（￥）</td>
+                                            <td>0</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+    
+                        </div>
+    
+                        <div class="row item_info" style="background:#f5f5f5;float: left;margin-left: 50px;">
+                            <div class="col-lg-12">
+                            </div>
+                            <div class="col-xs-6 col-md-4">
+                                <div>
+                                    <table id="caigou-table" class="handle_table1" style="width: 650px;">
+                                        <tr>
+                                            <td colspan="4" style="font-size: 16px;font-weight:1000">仓库数据</td>
+                                        </tr>
+                                        <tr>
+                                            <td>当月总单量</td>
+                                            <td></td>
+                                            <td>7天总单量</td>
+                                            <td></td>
+                                        </tr>
+                                        <tr>
+                                            <td>未出库订单总数</td>
+                                            <td></td>
+                                            <td>7天未出库总数</td>
+                                            <td></td>
+                                        </tr>
+                                        <tr>
+                                            <td>总压单率</td>
+                                            <td></td>
+                                            <td>7天压单率</td>
+                                            <td></td>
+                                        </tr>
+                                        <tr>
+                                            <td>超时订单总数</td>
+                                            <td></td>
+                                            <td>当月质检总数</td>
+                                            <td></td>
+                                        </tr>
+                                        <tr>
+                                            <td>当日出库总数</td>
+                                            <td></td>
+                                            <td>当日质检入库总数</td>
+                                            <td></td>
+                                        </tr>
+                                        <tr>
+                                            <td>当日配镜架总数</td>
+                                            <td></td>
+                                            <td>当日配镜片总数</td>
+                                            <td></td>
+                                        </tr>
+                                        <tr>
+                                            <td>当日加工总数</td>
+                                            <td></td>
+                                            <td>当日质检总数</td>
+                                            <td></td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+    
+                        </div>
+                    </div>
+                    
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
