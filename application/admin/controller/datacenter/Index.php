@@ -585,6 +585,7 @@ class Index extends Backend
         }
 
 
+
         //7天未出库订单总数
         $cachename = 'warehouse_order_data' . 'days7UnorderNum';
         $days7UnorderNum = cache($cachename);
@@ -636,6 +637,8 @@ class Index extends Backend
             'outStockNum'          => $outStockNum,//当日出库总数
             'inStockNum'           => $inStockNum,//当日入库总数
         ];
+
+        dump($data);die;
 
         return $data;
     }
