@@ -1973,13 +1973,58 @@ order by sfoi.item_id asc limit 1000";
         dump($total_order_success_data);        
    
         dump($yesterday_unit_price_data);
-        dump($pastsevenday_order_success_data);
-        dump($pastthirtyday_order_success_data);
-        dump($thismonth_order_success_data);
-        dump($lastmonth_order_success_data);
-        dump($thisyear_order_success_data);
-        dump($lastyear_order_success_data);
-        dump($total_order_success_data);        
+        dump($pastsevenday_unit_price_data);
+        dump($pastthirtyday_unit_price_data);
+        dump($thismonth_unit_price_data);
+        dump($lastmonth_unit_price_data);
+        dump($thisyear_unit_price_data);
+        dump($lastyear_unit_price_data);
+        dump($total_unit_price_data);
+     
+        dump($yesterday_shoppingcart_total_data);
+        dump($pastsevenday_shoppingcart_total_data);
+        dump($pastthirtyday_shoppingcart_total_data);
+        dump($thismonth_shoppingcart_total_data);
+        dump($lastmonth_shoppingcart_total_data);
+        dump($thisyear_shoppingcart_total_data);
+        dump($lastyear_shoppingcart_total_data);
+        dump($total_shoppingcart_total_data);
+        
+        dump($yesterday_shoppingcart_conversion_data);
+        dump($pastsevenday_shoppingcart_conversion_data);
+        dump($pastthirtyday_shoppingcart_conversion_data);
+        dump($thismonth_shoppingcart_conversion_data);
+        dump($lastmonth_shoppingcart_conversion_data);
+        dump($thisyear_shoppingcart_conversion_data);
+        dump($lastyear_shoppingcart_conversion_data);
+        dump($total_shoppingcart_conversion_data);
+        
+        dump($yesterday_shoppingcart_new_data);
+        dump($pastsevenday_shoppingcart_new_data);
+        dump($pastthirtyday_shoppingcart_new_data);
+        dump($thismonth_shoppingcart_new_data);
+        dump($lastmonth_shoppingcart_new_data);
+        dump($thisyear_shoppingcart_new_data);
+        dump($lastyear_shoppingcart_new_data);
+        dump($total_shoppingcart_new_data);
+        
+        dump($yesterday_shoppingcart_newconversion_data);
+        dump($pastsevenday_shoppingcart_newconversion_data);
+        dump($pastthirtyday_shoppingcart_newconversion_data);
+        dump($thismonth_shoppingcart_newconversion_data);
+        dump($lastmonth_shoppingcart_newconversion_data);
+        dump($thisyear_shoppingcart_newconversion_data);
+        dump($lastyear_shoppingcart_newconversion_data);
+        dump($total_shoppingcart_newconversion_data);  
+        
+        dump($yesterday_register_customer_data);
+        dump($pastsevenday_register_customer_data);
+        dump($pastthirtyday_register_customer_data);
+        dump($thismonth_register_customer_data);
+        dump($lastmonth_register_customer_data);
+        dump($thisyear_register_customer_data);
+        dump($lastyear_register_customer_data);
+        dump($total_register_customer_data);         
 
     }
 }
