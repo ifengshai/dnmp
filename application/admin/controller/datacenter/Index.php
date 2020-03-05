@@ -292,8 +292,9 @@ class Index extends Backend
         //在途饰品库存总金额
         $onwayOrnamentAllStockPrice = $this->onway_ornament_all_stock_price();
 
+        $data = $this->warehouse_order_data();
         //仓库数据
-        $this->view->assign('data', $this->warehouse_order_data());
+        $this->view->assign('data', $data);
         $this->view->assign('allStock', $allStock);
         $this->view->assign('allStockPrice', $allStockPrice);
         $this->view->assign('frameStock', $frameStock);
