@@ -107,10 +107,10 @@ class ZendeskOne extends Controller
                 'none'
             ],
             //'requester' => $this->testId,
-            // 'updated_at' => [
-            //     'valuetype' => '>=',
-            //     'value'   => '10minutes',
-            // ],//>=意思是3分钟之内，<=是三分钟之外
+             'updated_at' => [
+                 'valuetype' => '>=',
+                 'value'   => '20minutes',
+             ],//>=意思是3分钟之内，<=是三分钟之外
             'created_at' => [
                 'valuetype' => '>=',
                 'value'   => '2020-03-03T16:00:00Z'
@@ -162,9 +162,9 @@ class ZendeskOne extends Controller
     public function findCommentsByTickets($tickets)
     {
         foreach($tickets as $key => $ticket){
-           if($key >= 50){
-               break;
-           }
+//           if($key >= 50){
+//               break;
+//           }
             $id = $ticket->id;
             //发送者的id
             $requester_id = $ticket->requester_id;
