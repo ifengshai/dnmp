@@ -92,8 +92,8 @@ class OperationAnalysis extends Model
             $result['today_shoppingcart_total']         = $today_shoppingcart_total_data;
             $result['today_shoppingcart_new']           = $today_shoppingcart_new_data;
             $result['today_register_customer']          = $today_register_customer_data;
-            $result['today_shoppingcart_conversion']    = $today_shoppingcart_conversion_data;
-            $result['today_shoppingcart_newconversion'] = $today_shoppingcart_newconversion_data;
+            $result['today_shoppingcart_conversion']    = round($today_shoppingcart_conversion_data,2);
+            $result['today_shoppingcart_newconversion'] = round($today_shoppingcart_newconversion_data,2);
         }
 		return $result;
     }
