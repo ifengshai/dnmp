@@ -277,6 +277,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                     $('#thisyear_register_customer').text(0);
                     $('#lastyear_register_customer').text(0);
                     $('#total_register_customer').text(0);
+                    console.log(ret);
                     Layer.alert(ret.msg);
                     return false;
                 });
