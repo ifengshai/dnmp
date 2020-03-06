@@ -2140,5 +2140,17 @@ order by sfoi.item_id asc limit 1000";
             echo 'error';
         }        
         
+    }
+    /**
+     * 更新批发站的数据，依据亚马逊的数据
+     *
+     * @Description created by lsw
+     * @author lsw
+     * @since 2020/03/06 15:05:05 
+     * @return void
+     */
+    public function update_wesee_data()
+    {
+        
     }    
 }
