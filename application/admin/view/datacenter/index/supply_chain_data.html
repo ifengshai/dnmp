@@ -280,7 +280,7 @@
                                         </tr>
                                         <tr>
                                             <td>当月采购平均单价（￥）</td>
-                                            <td>0</td>
+                                            <td>{:round($purchase_data['purchasePrice']/$purchase_data['purchaseNum'],2)}</td>
                                             <td>当月到货总数</td>
                                             <td>{$purchase_data.arrivalsNum}</td>
                                         </tr>
