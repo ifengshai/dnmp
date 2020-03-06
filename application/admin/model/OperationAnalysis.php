@@ -190,13 +190,38 @@ class OperationAnalysis extends Model
         }
         $model = $this->get_model_by_id($id);
         //今日新增注册用户数
-        $today_register_customer_sql  = "SELECT count(*) counter from customer_entity where TO_DAYS(updated_at) = TO_DAYS(NOW())";
+        $today_register_customer_sql  = "SELECT count(*) counter from customer_entity where TO_DAYS(created_at) = TO_DAYS(NOW())";
         $model->table('customer_entity')->query("set time_zone='+8:00'");
         //今日新增注册用户数
         $today_register_customer_rs    = $model->query($today_register_customer_sql);
         $today_register_customer_data           = $today_register_customer_rs[0]['counter'];
         Cache::set('operationAnalysis_get_today_register_customer_'.$id,$today_register_customer_data,3600);
         return $today_register_customer_data;         
+    }
+    /**
+     * 根据站点获取今日登录用户数
+     *
+     * @Description created by lsw
+     * @author lsw
+     * @since 2020/03/06 17:30:51 
+     * @param [type] $id
+     * @return void
+     */
+    public function get_today_sign_customer($id)
+    {
+        $cacheData = Cache::get('operationAnalysis_get_today_sign_customer_'.$id);
+        if($cacheData){
+            return $cacheData;
+        }
+        $model = $this->get_model_by_id($id);
+        //今日新增登录用户数
+        $today_sign_customer_sql = "SELECT count(*) counter from customer_entity where TO_DAYS(updated_at) = TO_DAYS(NOW())";
+        $model->table('customer_entity')->query("set time_zone='+8:00'");
+        //今日登录用户数
+        $today_sign_customer_rs  = $model->query($today_sign_customer_sql);
+        $today_sign_customer_data = $today_sign_customer_rs[0]['counter'];
+        Cache::set('operationAnalysis_get_today_sign_customer_'.$id,$today_sign_customer_data,3600);
+        return $today_sign_customer_data;  
     }             
 	/***
 	 *获取数据
@@ -204,7 +229,10 @@ class OperationAnalysis extends Model
 	 */
 	public function getList($id)
 	{
-
+        $model = $this->get_model_by_id($id);
+        if(false == $model){
+            return false;
+        }
         $where['order_platform'] = $id;
         //求出本站点的今天所有的数据
         $today_sales_money_data                 = $this->get_today_sales_money($id);
@@ -213,6 +241,7 @@ class OperationAnalysis extends Model
         $today_shoppingcart_total_data          = $this->get_today_shoppingcart_total($id);
         $today_shoppingcart_new_data            = $this->get_today_shoppingcart_new($id);
         $today_register_customer_data           = $this->get_today_register_customer($id);
+        $today_sign_customer_data               = $this->get_today_sign_customer($id);
         if(false != $today_order_success_data){
             $today_unit_price_data              = round(($today_sales_money_data/$today_order_success_data),2);
         }else{
@@ -237,6 +266,7 @@ class OperationAnalysis extends Model
             $result['today_shoppingcart_total']         = $today_shoppingcart_total_data;
             $result['today_shoppingcart_new']           = $today_shoppingcart_new_data;
             $result['today_register_customer']          = $today_register_customer_data;
+            $result['today_sign_customer']              = $today_sign_customer_data;
             $result['today_shoppingcart_conversion']    = round($today_shoppingcart_conversion_data,2);
             $result['today_shoppingcart_newconversion'] = round($today_shoppingcart_newconversion_data,2);
         }

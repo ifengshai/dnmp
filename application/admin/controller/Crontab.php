@@ -1670,6 +1670,22 @@ order by sfoi.item_id asc limit 1000";
         $lastyear_register_customer_sql        = "SELECT count(*) counter FROM customer_entity WHERE year(created_at)=year(date_sub(now(),interval 1 year))";
         //总共新增注册用户数sql
         $total_register_customer_sql           = "SELECT count(*) counter from customer_entity";
+        //昨天新增登录用户数sql
+        $yesterday_sign_customer_sql           = "SELECT count(*) counter from customer_entity where DATEDIFF(updated_at,NOW())=-1";
+        //过去7天新增登录用户数sql
+        $pastsevenday_sign_customer_sql        = "SELECT count(*) counter from customer_entity where DATE_SUB(CURDATE(),INTERVAL 7 DAY) <= date(updated_at) and updated_at< curdate()";
+        //过去30天新增注册用户数sql
+        $pastthirtyday_sign_customer_sql   = "SELECT count(*) counter from customer_entity where DATE_SUB(CURDATE(),INTERVAL 30 DAY) <= date(updated_at) and updated_at< curdate()";
+        //当月新增注册用户数sql
+        $thismonth_sign_customer_sql       = "SELECT count(*) counter from customer_entity where DATE_FORMAT(updated_at,'%Y%m') = DATE_FORMAT(CURDATE(),'%Y%m')";
+        //上月新增注册用户数sql
+        $lastmonth_sign_customer_sql       = "SELECT count(*) counter from customer_entity where PERIOD_DIFF(date_format(now(),'%Y%m'),date_format(updated_at,'%Y%m')) =1";
+        //今年新增注册用户数sql
+        $thisyear_sign_customer_sql        = "SELECT count(*) counter from customer_entity where YEAR(updated_at)=YEAR(NOW())";
+        //上年新增注册用户数sql
+        $lastyear_sign_customer_sql        = "SELECT count(*) counter FROM customer_entity WHERE year(updated_at)=year(date_sub(now(),interval 1 year))";
+        //总共新增注册用户数sql
+        $total_sign_customer_sql           = "SELECT count(*) counter from customer_entity";        
         $model->table('sales_flat_order')->query("set time_zone='+8:00'");
         $model->table('customer_entity')->query("set time_zone='+8:00'");
         //昨天销售额
@@ -1735,7 +1751,23 @@ order by sfoi.item_id asc limit 1000";
         //去年新增注册人数
         $lastyear_register_customer_rs              = $model->query($lastyear_register_customer_sql);
         //总共新增注册人数
-        $total_register_customer_rs                 = $model->query($total_register_customer_sql);        
+        $total_register_customer_rs                 = $model->query($total_register_customer_sql);
+        //昨天新增登录人数
+        $yesterday_sign_customer_rs                 = $model->query($yesterday_sign_customer_sql);
+        //过去7天新增登录人数
+        $pastsevenday_sign_customer_rs              = $model->query($pastsevenday_sign_customer_sql);
+        //过去30天新增登录人数
+        $pastthirtyday_sign_customer_rs             = $model->query($pastthirtyday_sign_customer_sql);
+        //当月新增登录人数
+        $thismonth_sign_customer_rs                 = $model->query($thismonth_sign_customer_sql);
+        //上月新增登录人数
+        $lastmonth_sign_customer_rs                 = $model->query($lastmonth_sign_customer_sql);
+        //今年新增登录人数
+        $thisyear_sign_customer_rs                  = $model->query($thisyear_sign_customer_sql);
+        //去年新增登录人数
+        $lastyear_sign_customer_rs                  = $model->query($lastyear_sign_customer_sql);
+        //总共新增登录人数
+        $total_sign_customer_rs                     = $model->query($total_sign_customer_sql);                  
         //昨天销售额data
         $yesterday_sales_money_data                 = $yesterday_sales_money_rs[0]['base_grand_total'];
         //过去7天销售额data
@@ -1816,6 +1848,22 @@ order by sfoi.item_id asc limit 1000";
         $lastyear_register_customer_data            = $lastyear_register_customer_rs[0]['counter'];
         //总共新增注册人数
         $total_register_customer_data               = $total_register_customer_rs[0]['counter'];
+        //昨天新增登录人数
+        $yesterday_sign_customer_data               = $yesterday_sign_customer_rs[0]['counter'];
+        //过去7天新增登录人数
+        $pastsevenday_sign_customer_data            = $pastsevenday_sign_customer_rs[0]['counter'];
+        //过去30天新增登录人数
+        $pastthirtyday_sign_customer_data           = $pastthirtyday_sign_customer_rs[0]['counter'];
+        //当月新增登录人数
+        $thismonth_sign_customer_data               = $thismonth_sign_customer_rs[0]['counter'];
+        //上月新增登录人数
+        $lastmonth_sign_customer_data               = $lastmonth_sign_customer_rs[0]['counter'];
+        //今年新增登录人数
+        $thisyear_sign_customer_data                = $thisyear_sign_customer_rs[0]['counter'];
+        //上年新增登录人数
+        $lastyear_sign_customer_data                = $lastyear_sign_customer_rs[0]['counter'];
+        //总共新增登录人数
+        $total_sign_customer_data                   = $total_sign_customer_rs[0]['counter'];        
         $updateData['yesterday_sales_money']        = $yesterday_sales_money_data;
         $updateData['pastsevenday_sales_money']     = $pastsevenday_sales_money_data;
         $updateData['pastthirtyday_sales_money']    = $pastthirtyday_sales_money_data;
@@ -1860,6 +1908,15 @@ order by sfoi.item_id asc limit 1000";
         $updateData['thisyear_register_customer']       = $thisyear_register_customer_data;
         $updateData['lastyear_register_customer']       = $lastyear_register_customer_data;
         $updateData['total_register_customer']          = $total_register_customer_data;
+
+        $updateData['yesterday_sign_customer']      = $yesterday_sign_customer_data;
+        $updateData['pastsevenday_sign_customer']   = $pastsevenday_sign_customer_data;
+        $updateData['pastthirtyday_sign_customer']  = $pastthirtyday_sign_customer_data;
+        $updateData['thismonth_sign_customer']      = $thismonth_sign_customer_data;
+        $updateData['lastmonth_sign_customer']      = $lastmonth_sign_customer_data;
+        $updateData['thisyear_sign_customer']       = $thisyear_sign_customer_data;
+        $updateData['lastyear_sign_customer']       = $lastyear_sign_customer_data;
+        $updateData['total_sign_customer']          = $total_sign_customer_data;        
         //查找是否存在的记录
         $result = Db::name('operation_analysis')->where(['order_platform'=>$platform])->field('id,order_platform')->find();
         if(!$result){
