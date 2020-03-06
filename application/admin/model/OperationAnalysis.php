@@ -21,14 +21,80 @@ class OperationAnalysis extends Model
 
     // 追加属性
     protected $append = [];
+    protected $order_status =  "and status in ('processing','complete','creditcard_proccessing','free_processing')";
 	/***
 	 *获取数据
 	 *@param id 平台ID
 	 */
 	public function getList($id)
 	{
+        $order_status = $this->order_status;
+        switch($id){
+            case 1:
+            $model = Db::connect('database.db_zeelool');
+            break;
+            case 2:
+            $model = Db::connect('database.db_voogueme');
+            break;
+            case 3:
+            $model = Db::connect('database.db_nihao');
+            break;
+            default:
+            $model = false;
+            break;            
+        }
         $where['order_platform'] = $id;
-		$result = Db::name('operation_analysis')->where($where)->find();
+        //求出本站点的今天所有的数据
+        //今日销售额sql
+        $today_sales_money_sql   = "SELECT round(sum(base_grand_total),2)  base_grand_total FROM sales_flat_order WHERE TO_DAYS(created_at) = TO_DAYS(NOW()) $order_status";
+        //今日订单数sql
+        $today_order_num_sql     = "SELECT count(*) counter FROM sales_flat_order WHERE TO_DAYS(created_at) = TO_DAYS(NOW())";
+        //今日订单支付成功数sql
+        $today_order_success_sql = "SELECT count(*) counter FROM sales_flat_order WHERE TO_DAYS(created_at) = TO_DAYS(NOW()) $order_status";
+        //今日客单价
+        //今日购物车总数sql
+        $today_shoppingcart_total_sql = "SELECT count(*) counter from sales_flat_quote where base_grand_total>0 AND TO_DAYS(created_at) = TO_DAYS(NOW())";
+        //今日新增购物车sql
+        $today_shoppingcart_new_sql   = "SELECT count(*) counter from sales_flat_quote where base_grand_total>0 AND TO_DAYS(updated_at) = TO_DAYS(NOW())";
+        //今日新增注册用户数
+        $today_register_customer_sql  = "SELECT count(*) counter from customer_entity where TO_DAYS(updated_at) = TO_DAYS(NOW())";   
+        $model->table('sales_flat_order')->query("set time_zone='+8:00'");
+        $model->table('customer_entity')->query("set time_zone='+8:00'");
+        $model->table('sales_flat_quote')->query("set time_zone='+8:00'");
+        //今日销售额
+        $today_sales_money_rs                   = $model->query($today_sales_money_sql);
+        //今日订单数
+        $today_order_num_rs                     = $model->query($today_order_num_sql);
+        //今日订单支付成功数
+        $today_order_success_rs                 = $model->query($today_order_success_sql);
+        //今日购物车总数
+        $today_shoppingcart_total_rs            = $model->query($today_shoppingcart_total_sql);
+        //今日新增购物车总数
+        $today_shoppingcart_new_rs              = $model->query($today_shoppingcart_new_sql);
+        //今日新增注册用户数
+        $today_register_customer_rs             = $model->query($today_register_customer_sql);
+        $today_sales_money_data                 = $today_sales_money_rs[0]['base_grand_total'];
+        $today_order_num_data                   = $today_order_num_rs[0]['counter'];
+        $today_order_success_data               = $today_order_success_rs[0]['counter'];
+        $today_unit_price_data                  = round(($today_sales_money_data/$today_order_success_data),2);
+        $today_shoppingcart_total_data          = $today_shoppingcart_total_rs[0]['counter'];
+        $today_shoppingcart_new_data            = $today_shoppingcart_new_rs[0]['counter'];
+        $today_register_customer_data           = $today_register_customer_rs[0]['counter'];
+        $today_shoppingcart_conversion_data     = round(($today_order_success_data/$today_shoppingcart_total_data),4)*100;
+        $today_shoppingcart_newconversion_data  = round(($today_order_success_data/$today_shoppingcart_new_data),4)*100;
+
+        $result = Db::name('operation_analysis')->where($where)->find();
+        if($result){
+            $result['today_sales_money']                = $today_sales_money_data;
+            $result['today_order_num']                  = $today_order_num_data ;
+            $result['today_order_success']              = $today_order_success_data;
+            $result['today_unit_price']                 = $today_unit_price_data;
+            $result['today_shoppingcart_total']         = $today_shoppingcart_total_data;
+            $result['today_shoppingcart_new']           = $today_shoppingcart_new_data;
+            $result['today_register_customer']          = $today_register_customer_data;
+            $result['today_shoppingcart_conversion']    = $today_shoppingcart_conversion_data;
+            $result['today_shoppingcart_newconversion'] = $today_shoppingcart_newconversion_data;
+        }
 		return $result;
     }
     /***
