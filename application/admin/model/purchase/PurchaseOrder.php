@@ -182,6 +182,55 @@ class PurchaseOrder extends Model
     {
         $where['createtime'] = ['between', [date('Y-m-01 00:00:00', time()), date('Y-m-d H:i:s', time())]];
         $where['is_del'] = 1;
-        return $this->alias('a')->where($where)->join(['fa_purchase_order_item' => 'b'], 'a.id=b.purchase_id')->sum('purchasae_num');
+        return $this->alias('a')->where($where)->join(['fa_purchase_order_item' => 'b'], 'a.id=b.purchase_id')->sum('purchase_num');
+    }
+
+    /**
+     * 当月采购总金额
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/03/05 17:08:36 
+     * @return void
+     */
+    public function getPurchasePrice()
+    {
+        $where['createtime'] = ['between', [date('Y-m-01 00:00:00', time()), date('Y-m-d H:i:s', time())]];
+        $where['is_del'] = 1;
+        return $this->alias('a')->where($where)->join(['fa_purchase_order_item' => 'b'], 'a.id=b.purchase_id')->sum('purchase_num*purchase_price');
+    }
+
+    /**
+     * 当月采购总数
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/03/05 17:08:36 
+     * @return void
+     */
+    public function getPurchaseFrameNum()
+    {
+        //查询镜架SKU
+        $item = new \app\admin\model\itemmanage\Item();
+        $skus = $item->getFrameSku();
+        $where['createtime'] = ['between', [date('Y-m-01 00:00:00', time()), date('Y-m-d H:i:s', time())]];
+        $where['is_del'] = 1;
+        $where['sku'] = ['in', $skus];
+        return $this->alias('a')->where($where)->join(['fa_purchase_order_item' => 'b'], 'a.id=b.purchase_id')->sum('purchase_num');
+    }
+
+    /**
+     * 当月采购总SKU数
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/03/05 17:08:36 
+     * @return void
+     */
+    public function getPurchaseSkuNum()
+    {
+        $where['createtime'] = ['between', [date('Y-m-01 00:00:00', time()), date('Y-m-d H:i:s', time())]];
+        $where['is_del'] = 1;
+        return $this->alias('a')->where($where)->join(['fa_purchase_order_item' => 'b'], 'a.id=b.purchase_id')->group('sku')->count(1);
     }
 }

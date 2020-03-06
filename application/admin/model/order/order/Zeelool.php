@@ -590,4 +590,21 @@ class Zeelool extends Model
         $where['status'] = ['in', ['processing', 'free_processing']];
         return $this->where($where)->count(1);
     }
+
+    /**
+     * 统计当月销售总数
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/03/06 16:08:44 
+     * @return void
+     */
+    public function getOrderSkuNum()
+    {
+        $where['a.created_at'] = ['between', [date('Y-m-01 00:00:00', time()), date('Y-m-d H:i:s', time())]];
+        return $this->alias('a')
+        ->where($where)
+        ->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')
+        ->sum('b.qty_ordered');
+    }
 }
