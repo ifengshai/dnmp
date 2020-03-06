@@ -111,6 +111,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                     url:'datacenter/operationanalysis/operationkanban/dashboard/async_data',
                     data:{order_platform:order_platform}
                 }, function(data, ret){
+                    $('#today_sales_money').text(ret.data.today_sales_money);
                     $('#yesterday_sales_money').text(ret.data.yesterday_sales_money);
                     $('#pastsevenday_sales_money').text(ret.data.pastsevenday_sales_money);
                     $('#pastthirtyday_sales_money').text(ret.data.pastthirtyday_sales_money);
@@ -119,6 +120,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                     $('#thisyear_sales_money').text(ret.data.thisyear_sales_money);
                     $('#lastyear_sales_money').text(ret.data.lastyear_sales_money);
                     $('#total_sales_money').text(ret.data.total_sales_money);
+                    $('#today_order_num').text(ret.data.today_order_num);
                     $('#yesterday_order_num').text(ret.data.yesterday_order_num);
                     $('#pastsevenday_order_num').text(ret.data.pastsevenday_order_num);
                     $('#pastthirtyday_order_num').text(ret.data.pastthirtyday_order_num);
@@ -127,6 +129,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                     $('#thisyear_order_num').text(ret.data.thisyear_order_num);
                     $('#lastyear_order_num').text(ret.data.lastyear_order_num);
                     $('#total_order_num').text(ret.data.total_order_num);
+                    $('#today_order_success').text(ret.data.today_order_success);
                     $('#yesterday_order_success').text(ret.data.yesterday_order_success);
                     $('#pastsevenday_order_success').text(ret.data.pastsevenday_order_success);
                     $('#pastthirtyday_order_success').text(ret.data.pastthirtyday_order_success);
@@ -135,6 +138,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                     $('#thisyear_order_success').text(ret.data.thisyear_order_success);
                     $('#lastyear_order_success').text(ret.data.lastyear_order_success);
                     $('#total_order_success').text(ret.data.total_order_success);
+                    $('#today_unit_price').text(ret.data.today_unit_price);
                     $('#yesterday_unit_price').text(ret.data.yesterday_unit_price);
                     $('#pastsevenday_unit_price').text(ret.data.pastsevenday_unit_price);
                     $('#pastthirtyday_unit_price').text(ret.data.pastthirtyday_unit_price);
@@ -143,6 +147,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                     $('#thisyear_unit_price').text(ret.data.thisyear_unit_price);
                     $('#lastyear_unit_price').text(ret.data.lastyear_unit_price);
                     $('#total_unit_price').text(ret.data.total_unit_price);
+                    $('#today_shoppingcart_total').text(ret.data.today_shoppingcart_total);
                     $('#yesterday_shoppingcart_total').text(ret.data.yesterday_shoppingcart_total);
                     $('#pastsevenday_shoppingcart_total').text(ret.data.pastsevenday_shoppingcart_total);
                     $('#pastthirtyday_shoppingcart_total').text(ret.data.pastthirtyday_shoppingcart_total);
@@ -151,6 +156,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                     $('#thisyear_shoppingcart_total').text(ret.data.thisyear_shoppingcart_total);
                     $('#lastyear_shoppingcart_total').text(ret.data.lastyear_shoppingcart_total);
                     $('#total_shoppingcart_total').text(ret.data.total_shoppingcart_total);
+                    $('#today_shoppingcart_conversion').text(ret.data.today_shoppingcart_conversion);
                     $('#yesterday_shoppingcart_conversion').text(ret.data.yesterday_shoppingcart_conversion);
                     $('#pastsevenday_shoppingcart_conversion').text(ret.data.pastsevenday_shoppingcart_conversion);
                     $('#pastthirtyday_shoppingcart_conversion').text(ret.data.pastthirtyday_shoppingcart_conversion);
@@ -159,6 +165,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                     $('#thisyear_shoppingcart_conversion').text(ret.data.thisyear_shoppingcart_conversion);
                     $('#lastyear_shoppingcart_conversion').text(ret.data.lastyear_shoppingcart_conversion);
                     $('#total_shoppingcart_conversion').text(ret.data.total_shoppingcart_conversion);
+                    $('#today_shoppingcart_new').text(ret.data.today_shoppingcart_new);
                     $('#yesterday_shoppingcart_new').text(ret.data.yesterday_shoppingcart_new);
                     $('#pastsevenday_shoppingcart_new').text(ret.data.pastsevenday_shoppingcart_new);
                     $('#pastthirtyday_shoppingcart_new').text(ret.data.pastthirtyday_shoppingcart_new);
@@ -167,6 +174,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                     $('#thisyear_shoppingcart_new').text(ret.data.thisyear_shoppingcart_new);
                     $('#lastyear_shoppingcart_new').text(ret.data.lastyear_shoppingcart_new);
                     $('#total_shoppingcart_new').text(ret.data.total_shoppingcart_new);
+                    $('#today_shoppingcart_newconversion').text(ret.data.today_shoppingcart_newconversion);
                     $('#yesterday_shoppingcart_newconversion').text(ret.data.yesterday_shoppingcart_newconversion);
                     $('#pastsevenday_shoppingcart_newconversion').text(ret.data.pastsevenday_shoppingcart_newconversion);
                     $('#pastthirtyday_shoppingcart_newconversion').text(ret.data.pastthirtyday_shoppingcart_newconversion);
@@ -175,6 +183,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                     $('#thisyear_shoppingcart_newconversion').text(ret.data.thisyear_shoppingcart_newconversion);
                     $('#lastyear_shoppingcart_newconversion').text(ret.data.lastyear_shoppingcart_newconversion);
                     $('#total_shoppingcart_newconversion').text(ret.data.total_shoppingcart_newconversion);
+                    $('#today_register_customer').text(ret.data.today_register_customer);
                     $('#yesterday_register_customer').text(ret.data.yesterday_register_customer);
                     $('#pastsevenday_register_customer').text(ret.data.pastsevenday_register_customer);
                     $('#pastthirtyday_register_customer').text(ret.data.pastthirtyday_register_customer);
@@ -187,6 +196,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                     return false;
                 }, function(data, ret){
                     //失败的回调
+                    $('#today_sales_money').text(0);
                     $('#yesterday_sales_money').text(0);
                     $('#pastsevenday_sales_money').text(0);
                     $('#pastthirtyday_sales_money').text(0);
@@ -195,6 +205,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                     $('#thisyear_sales_money').text(0);
                     $('#lastyear_sales_money').text(0);
                     $('#total_sales_money').text(0);
+                    $('#today_order_num').text(0);
                     $('#yesterday_order_num').text(0);
                     $('#pastsevenday_order_num').text(0);
                     $('#pastthirtyday_order_num').text(0);
@@ -203,6 +214,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                     $('#thisyear_order_num').text(0);
                     $('#lastyear_order_num').text(0);
                     $('#total_order_num').text(0);
+                    $('#today_order_success').text(0);
                     $('#yesterday_order_success').text(0);
                     $('#pastsevenday_order_success').text(0);
                     $('#pastthirtyday_order_success').text(0);
@@ -211,6 +223,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                     $('#thisyear_order_success').text(0);
                     $('#lastyear_order_success').text(0);
                     $('#total_order_success').text(0);
+                    $('#today_unit_price').text(0);
                     $('#yesterday_unit_price').text(0);
                     $('#pastsevenday_unit_price').text(0);
                     $('#pastthirtyday_unit_price').text(0);
@@ -219,6 +232,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                     $('#thisyear_unit_price').text(0);
                     $('#lastyear_unit_price').text(0);
                     $('#total_unit_price').text(0);
+                    $('#today_shoppingcart_total').text(0);
                     $('#yesterday_shoppingcart_total').text(0);
                     $('#pastsevenday_shoppingcart_total').text(0);
                     $('#pastthirtyday_shoppingcart_total').text(0);
@@ -227,6 +241,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                     $('#thisyear_shoppingcart_total').text(0);
                     $('#lastyear_shoppingcart_total').text(0);
                     $('#total_shoppingcart_total').text(0);
+                    $('#today_shoppingcart_conversion').text(0);
                     $('#yesterday_shoppingcart_conversion').text(0);
                     $('#pastsevenday_shoppingcart_conversion').text(0);
                     $('#pastthirtyday_shoppingcart_conversion').text(0);
@@ -235,6 +250,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                     $('#thisyear_shoppingcart_conversion').text(0);
                     $('#lastyear_shoppingcart_conversion').text(0);
                     $('#total_shoppingcart_conversion').text(0);
+                    $('#today_shoppingcart_new').text(0);
                     $('#yesterday_shoppingcart_new').text(0);
                     $('#pastsevenday_shoppingcart_new').text(0);
                     $('#pastthirtyday_shoppingcart_new').text(0);
@@ -243,6 +259,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                     $('#thisyear_shoppingcart_new').text(0);
                     $('#lastyear_shoppingcart_new').text(0);
                     $('#total_shoppingcart_new').text(0);
+                    $('#today_shoppingcart_newconversion').text(0);
                     $('#yesterday_shoppingcart_newconversion').text(0);
                     $('#pastsevenday_shoppingcart_newconversion').text(0);
                     $('#pastthirtyday_shoppingcart_newconversion').text(0);
@@ -251,6 +268,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                     $('#thisyear_shoppingcart_newconversion').text(0);
                     $('#lastyear_shoppingcart_newconversion').text(0);
                     $('#total_shoppingcart_newconversion').text(0);
+                    $('#today_register_customer').text(0);
                     $('#yesterday_register_customer').text(0);
                     $('#pastsevenday_register_customer').text(0);
                     $('#pastthirtyday_register_customer').text(0);
@@ -259,6 +277,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                     $('#thisyear_register_customer').text(0);
                     $('#lastyear_register_customer').text(0);
                     $('#total_register_customer').text(0);
+                    console.log(ret);
                     Layer.alert(ret.msg);
                     return false;
                 });
