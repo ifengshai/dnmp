@@ -129,7 +129,6 @@ class Weseeoptical extends Backend
                 $map['increment_id'] = $increment_id;
                 $map['status'] = ['in', ['free_processing', 'processing', 'complete']];
                 $list = $this->model
-                    // ->field($field)
                     ->where($map)
                     ->find();
                 if ($list) {
@@ -137,7 +136,7 @@ class Weseeoptical extends Backend
                     $infoSynergyTask = new \app\admin\model\infosynergytaskmanage\InfoSynergyTask;
                     $swhere['synergy_order_number'] = $increment_id;
                     $swhere['is_del'] = 1;
-                    $swhere['order_platform'] = 3;
+                    $swhere['order_platform'] = 5;
                     $swhere['synergy_order_id'] = 2;
                     $count = $infoSynergyTask->where($swhere)->count();
                     //查询是否存在协同任务
@@ -158,7 +157,6 @@ class Weseeoptical extends Backend
     //标记为已打印标签
     public function tag_printed()
     {
-        // echo 'tag_printed';
         $entity_ids = input('id_params/a');
         $label = input('label');
         if ($entity_ids) {
@@ -183,9 +181,8 @@ class Weseeoptical extends Backend
                 $params['type'] = 1;
                 $params['num'] = count($entity_ids);
                 $params['order_ids'] = implode(',', $entity_ids);
-                $params['site'] = 4;
+                $params['site'] = 5;
                 (new OrderLog())->setOrderLog($params);
-
 
                 //用来判断是否从_list列表页进来
                 if ($label == 'list') {
@@ -374,7 +371,7 @@ class Weseeoptical extends Backend
                 $this->error($e->getMessage());
             }
             if ($result) {
-                $params['site'] = 4;
+                $params['site'] = 5;
                 $params['num'] = count($entity_ids);
                 $params['order_ids'] = implode(',', $entity_ids);
                 (new OrderLog())->setOrderLog($params);
