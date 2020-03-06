@@ -640,6 +640,20 @@ class Index extends Backend
         return $data;
     }
 
+    /**
+     * 采购数据
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/03/05 17:05:27 
+     * @return void
+     */
+    public function purchase_data()
+    {   
+        //当月采购总数
+        
+    }
+
 
     /**
      * 数据统计

@@ -169,4 +169,18 @@ class PurchaseOrder extends Model
         }
         return $info;
     }
+
+    /**
+     * 当月采购总数
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/03/05 17:08:36 
+     * @return void
+     */
+    public function getPurchaseNum()
+    {
+        $where['createtime'] = ['between', [date('Y-m-01 00:00:00', time()), date('Y-m-d H:i:s', time())]];
+
+    }
 }
