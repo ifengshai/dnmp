@@ -651,7 +651,11 @@ class Index extends Backend
     public function purchase_data()
     {   
         //当月采购总数
+        $purchase = new \app\admin\model\purchase\PurchaseOrder();
+        $purchase_num = $purchase->getPurchaseNum();
+
         
+
     }
 
 

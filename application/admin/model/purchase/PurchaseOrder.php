@@ -66,7 +66,7 @@ class PurchaseOrder extends Model
     {
         return $this->hasMany('PurchaseOrderItem', 'purchase_id');
     }
-    
+
     //关联模型
     public function supplier()
     {
@@ -181,6 +181,7 @@ class PurchaseOrder extends Model
     public function getPurchaseNum()
     {
         $where['createtime'] = ['between', [date('Y-m-01 00:00:00', time()), date('Y-m-d H:i:s', time())]];
-
+        $where['is_del'] = 1;
+        return $this->alias('a')->where($where)->join(['fa_purchase_order_item' => 'b'], 'a.id=b.purchase_id')->sum('purchasae_num');
     }
 }

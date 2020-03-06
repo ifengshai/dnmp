@@ -286,7 +286,7 @@ class Weseeoptical extends Backend
                             $v['qty_ordered'] = $infoTaskRes['change_number'];
                         }
 
-                        $trueSku = $ItemPlatformSku->getTrueSku($v['sku'], 3);
+                        $trueSku = $ItemPlatformSku->getTrueSku($v['sku'], 5);
                         //总库存
                         $item_map['sku'] = $trueSku;
                         $item_map['is_del'] = 1;
@@ -330,7 +330,7 @@ class Weseeoptical extends Backend
                             $v['qty_ordered'] = $infoTaskRes['change_number'];
                         }
 
-                        $trueSku = $ItemPlatformSku->getTrueSku($v['sku'], 3);
+                        $trueSku = $ItemPlatformSku->getTrueSku($v['sku'], 5);
                         //总库存
                         $item_map['sku'] = $trueSku;
                         $item_map['is_del'] = 1;
