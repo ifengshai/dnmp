@@ -1232,7 +1232,7 @@ order by sfoi.item_id asc limit 1000";
         //zeelool购物车数 SELECT count(*) counter from sales_flat_quote where base_grand_total>0
         $zeelool_shoppingcart_total = $zeelool_model->table('sales_flat_quote')->where($date)->where('base_grand_total','GT',0)->count('*');
         //zeelool购物车转化率
-        $zeelool_shoppingcart_conversion = @round(($zeelool_count/$zeelool_shoppingcart_total),2);
+        $zeelool_shoppingcart_conversion = @round(($zeelool_count/$zeelool_shoppingcart_total)*100,2);
         //zeelool注册用户数SELECT count(*) counter from customer_entity
         $zeelool_register_customer = $zeelool_model->table('customer_entity')->where($date)->count('*');
         $voogueme_count = $voogueme_model->table('sales_flat_order')->where($map)->count(1);
@@ -1242,7 +1242,7 @@ order by sfoi.item_id asc limit 1000";
         //voogueme购物车数
         $voogueme_shoppingcart_total = $voogueme_model->table('sales_flat_quote')->where($date)->where('base_grand_total','GT',0)->count('*');
         //voogueme购物车转化率
-        $voogueme_shoppingcart_conversion = @round(($voogueme_count/$voogueme_shoppingcart_total),2);
+        $voogueme_shoppingcart_conversion = @round(($voogueme_count/$voogueme_shoppingcart_total)*100,2);
         //voogueme注册用户数
         $voogueme_register_customer = $voogueme_model->table('customer_entity')->where($date)->count('*');
         $nihao_count = $nihao_model->table('sales_flat_order')->where($map)->count(1);
@@ -1252,9 +1252,9 @@ order by sfoi.item_id asc limit 1000";
         //nihao购物车数
         $nihao_shoppingcart_total = $nihao_model->table('sales_flat_quote')->where($date)->where('base_grand_total','GT',0)->count('*');
         //nihao购物车转化率
-        $nihao_shoppingcart_conversion = @round(($nihao_count/$nihao_shoppingcart_total),2);
+        $nihao_shoppingcart_conversion = @round(($nihao_count/$nihao_shoppingcart_total)*100,2);
         //nihao注册用户数
-        $nihao_register_customer = $voogueme_model->table('customer_entity')->where($date)->count('*');
+        $nihao_register_customer = $nihao_model->table('customer_entity')->where($date)->count('*');
         $data['zeelool_sales_num']                = $zeelool_count;
         $data['voogueme_sales_num']               = $voogueme_count;
         $data['nihao_sales_num']                  = $nihao_count;
@@ -1274,7 +1274,7 @@ order by sfoi.item_id asc limit 1000";
         $data['zeelool_shoppingcart_conversion']  = $zeelool_shoppingcart_conversion;
         $data['voogueme_shoppingcart_conversion'] = $voogueme_shoppingcart_conversion;
         $data['nihao_shoppingcart_conversion']    = $nihao_shoppingcart_conversion;
-        $data['all_shoppingcart_conversion']      = @round(($zeelool_shoppingcart_conversion+$voogueme_shoppingcart_conversion+$nihao_shoppingcart_conversion),3);
+        $data['all_shoppingcart_conversion']      = @round(($zeelool_shoppingcart_conversion+$voogueme_shoppingcart_conversion+$nihao_shoppingcart_conversion)/3*100,2);
         $data['zeelool_register_customer']        = $zeelool_register_customer;
         $data['voogueme_register_customer']       = $voogueme_register_customer;
         $data['nihao_register_customer']          = $nihao_register_customer;
