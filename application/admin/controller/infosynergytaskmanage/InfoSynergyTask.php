@@ -951,6 +951,7 @@ class InfoSynergyTask extends Backend
         $rep    = $this->request->get('filter');
         $repArr  = (new Admin())->getAllStaff();
         $deptArr = (new AuthGroup())->getAllGroup();
+        $addWhere = '1=1';
         if($rep != '{}'){
             $whereArr = json_decode($rep,true);
             foreach($whereArr as $key => $whereval){
@@ -974,7 +975,6 @@ class InfoSynergyTask extends Backend
             $this->request->get(['filter'=>json_encode($whereArr)]);
         }
         $ids = input('ids');
-        $addWhere = '1=1';
         if ($ids) {
             $addWhere.= " AND info_synergy_task.id IN ({$ids})";
         }
