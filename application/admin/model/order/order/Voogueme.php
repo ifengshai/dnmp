@@ -405,7 +405,7 @@ class Voogueme extends Model
         $where['a.created_at'] = ['between', [date('Y-m-01 00:00:00', time()), date('Y-m-d H:i:s', time())]];
         $data = $this->alias('a')
             ->where($where)
-            ->field("sum('qty_ordered') as num,sku")
+            ->field("sum(qty_ordered) as num,sku")
             ->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')
             ->group('sku')
             ->select();
