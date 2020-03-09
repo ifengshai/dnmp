@@ -1162,7 +1162,7 @@ order by sfoi.item_id asc limit 1000";
 
 
     /**
-     * 定时统计每天的销量(原先)
+     * 定时统计每天的销量(弃用)
      */
     public function get_sales_order_num()
     {
@@ -1198,6 +1198,7 @@ order by sfoi.item_id asc limit 1000";
         echo 'ok';
         die;
     }
+
     /**
      * 定时统计每天的销量等数据
      *之后修改添加
@@ -1228,31 +1229,31 @@ order by sfoi.item_id asc limit 1000";
         $zeelool_count = $zeelool_model->table('sales_flat_order')->where($map)->count(1);
         $zeelool_total = $zeelool_model->table('sales_flat_order')->where($map)->sum('base_grand_total');
         //zeelool客单价
-        $zeelool_unit_price = @round(($zeelool_total/$zeelool_count),2);
+        $zeelool_unit_price = @round(($zeelool_total / $zeelool_count), 2);
         //zeelool购物车数 SELECT count(*) counter from sales_flat_quote where base_grand_total>0
-        $zeelool_shoppingcart_total = $zeelool_model->table('sales_flat_quote')->where($date)->where('base_grand_total','GT',0)->count('*');
+        $zeelool_shoppingcart_total = $zeelool_model->table('sales_flat_quote')->where($date)->where('base_grand_total', 'GT', 0)->count('*');
         //zeelool购物车转化率
-        $zeelool_shoppingcart_conversion = @round(($zeelool_count/$zeelool_shoppingcart_total),2);
+        $zeelool_shoppingcart_conversion = @round(($zeelool_count / $zeelool_shoppingcart_total), 2);
         //zeelool注册用户数SELECT count(*) counter from customer_entity
         $zeelool_register_customer = $zeelool_model->table('customer_entity')->where($date)->count('*');
         $voogueme_count = $voogueme_model->table('sales_flat_order')->where($map)->count(1);
         $voogueme_total = $voogueme_model->table('sales_flat_order')->where($map)->sum('base_grand_total');
         //voogueme客单价
-        $voogueme_unit_price = @round(($voogueme_total/$voogueme_count),2);
+        $voogueme_unit_price = @round(($voogueme_total / $voogueme_count), 2);
         //voogueme购物车数
-        $voogueme_shoppingcart_total = $voogueme_model->table('sales_flat_quote')->where($date)->where('base_grand_total','GT',0)->count('*');
+        $voogueme_shoppingcart_total = $voogueme_model->table('sales_flat_quote')->where($date)->where('base_grand_total', 'GT', 0)->count('*');
         //voogueme购物车转化率
-        $voogueme_shoppingcart_conversion = @round(($voogueme_count/$voogueme_shoppingcart_total),2);
+        $voogueme_shoppingcart_conversion = @round(($voogueme_count / $voogueme_shoppingcart_total), 2);
         //voogueme注册用户数
         $voogueme_register_customer = $voogueme_model->table('customer_entity')->where($date)->count('*');
         $nihao_count = $nihao_model->table('sales_flat_order')->where($map)->count(1);
         $nihao_total = $nihao_model->table('sales_flat_order')->where($map)->sum('base_grand_total');
         //nihao客单价
-        $nihao_unit_price = @round(($nihao_total/$nihao_count),2);
+        $nihao_unit_price = @round(($nihao_total / $nihao_count), 2);
         //nihao购物车数
-        $nihao_shoppingcart_total = $nihao_model->table('sales_flat_quote')->where($date)->where('base_grand_total','GT',0)->count('*');
+        $nihao_shoppingcart_total = $nihao_model->table('sales_flat_quote')->where($date)->where('base_grand_total', 'GT', 0)->count('*');
         //nihao购物车转化率
-        $nihao_shoppingcart_conversion = @round(($nihao_count/$nihao_shoppingcart_total),2);
+        $nihao_shoppingcart_conversion = @round(($nihao_count / $nihao_shoppingcart_total), 2);
         //nihao注册用户数
         $nihao_register_customer = $voogueme_model->table('customer_entity')->where($date)->count('*');
         $data['zeelool_sales_num']                = $zeelool_count;
@@ -1266,7 +1267,7 @@ order by sfoi.item_id asc limit 1000";
         $data['zeelool_unit_price']               = $zeelool_unit_price;
         $data['voogueme_unit_price']              = $voogueme_unit_price;
         $data['nihao_unit_price']                 = $nihao_unit_price;
-        $data['all_unit_price']                   = @round(($zeelool_unit_price+$voogueme_unit_price+$nihao_unit_price)/3,2);
+        $data['all_unit_price']                   = @round(($zeelool_unit_price + $voogueme_unit_price + $nihao_unit_price) / 3, 2);
         $data['zeelool_shoppingcart_total']       = $zeelool_shoppingcart_total;
         $data['voogueme_shoppingcart_total']      = $voogueme_shoppingcart_total;
         $data['nihao_shoppingcart_total']         = $nihao_shoppingcart_total;
@@ -1274,17 +1275,17 @@ order by sfoi.item_id asc limit 1000";
         $data['zeelool_shoppingcart_conversion']  = $zeelool_shoppingcart_conversion;
         $data['voogueme_shoppingcart_conversion'] = $voogueme_shoppingcart_conversion;
         $data['nihao_shoppingcart_conversion']    = $nihao_shoppingcart_conversion;
-        $data['all_shoppingcart_conversion']      = @round(($zeelool_shoppingcart_conversion+$voogueme_shoppingcart_conversion+$nihao_shoppingcart_conversion),3);
+        $data['all_shoppingcart_conversion']      = @round(($zeelool_shoppingcart_conversion + $voogueme_shoppingcart_conversion + $nihao_shoppingcart_conversion), 3);
         $data['zeelool_register_customer']        = $zeelool_register_customer;
         $data['voogueme_register_customer']       = $voogueme_register_customer;
         $data['nihao_register_customer']          = $nihao_register_customer;
-        $data['all_register_customer']            = $zeelool_register_customer + $voogueme_register_customer + $nihao_register_customer;     
+        $data['all_register_customer']            = $zeelool_register_customer + $voogueme_register_customer + $nihao_register_customer;
         $data['create_date'] = date("Y-m-d", strtotime("-1 day"));
         $data['createtime'] = date("Y-m-d H:i:s");
         Db::name('order_statistics')->insert($data);
         echo 'ok';
         die;
-    }    
+    }
 
     /**
      * 定时获取1688发货采购单 生成物流单绑定关系
@@ -1785,7 +1786,7 @@ order by sfoi.item_id asc limit 1000";
         //上年新增注册用户数sql
         $lastyear_sign_customer_sql        = "SELECT count(*) counter FROM customer_entity WHERE year(updated_at)=year(date_sub(now(),interval 1 year))";
         //总共新增注册用户数sql
-        $total_sign_customer_sql           = "SELECT count(*) counter from customer_entity";        
+        $total_sign_customer_sql           = "SELECT count(*) counter from customer_entity";
         $model->table('sales_flat_order')->query("set time_zone='+8:00'");
         $model->table('customer_entity')->query("set time_zone='+8:00'");
         //昨天销售额
@@ -1867,7 +1868,7 @@ order by sfoi.item_id asc limit 1000";
         //去年新增登录人数
         $lastyear_sign_customer_rs                  = $model->query($lastyear_sign_customer_sql);
         //总共新增登录人数
-        $total_sign_customer_rs                     = $model->query($total_sign_customer_sql);                  
+        $total_sign_customer_rs                     = $model->query($total_sign_customer_sql);
         //昨天销售额data
         $yesterday_sales_money_data                 = $yesterday_sales_money_rs[0]['base_grand_total'];
         //过去7天销售额data
@@ -1963,7 +1964,7 @@ order by sfoi.item_id asc limit 1000";
         //上年新增登录人数
         $lastyear_sign_customer_data                = $lastyear_sign_customer_rs[0]['counter'];
         //总共新增登录人数
-        $total_sign_customer_data                   = $total_sign_customer_rs[0]['counter'];        
+        $total_sign_customer_data                   = $total_sign_customer_rs[0]['counter'];
         $updateData['yesterday_sales_money']        = $yesterday_sales_money_data;
         $updateData['pastsevenday_sales_money']     = $pastsevenday_sales_money_data;
         $updateData['pastthirtyday_sales_money']    = $pastthirtyday_sales_money_data;
@@ -2016,7 +2017,7 @@ order by sfoi.item_id asc limit 1000";
         $updateData['lastmonth_sign_customer']      = $lastmonth_sign_customer_data;
         $updateData['thisyear_sign_customer']       = $thisyear_sign_customer_data;
         $updateData['lastyear_sign_customer']       = $lastyear_sign_customer_data;
-        $updateData['total_sign_customer']          = $total_sign_customer_data;        
+        $updateData['total_sign_customer']          = $total_sign_customer_data;
         //查找是否存在的记录
         $result = Db::name('operation_analysis')->where(['order_platform' => $platform])->field('id,order_platform')->find();
         if (!$result) {
@@ -2438,38 +2439,72 @@ order by sfoi.item_id asc limit 1000";
      */
     public function stock_data()
     {
+        $dataConfig = new \app\admin\model\DataConfig();
         //仓库总库存
         $allStock = $this->item->getAllStock();
+        $data['value'] = $allStock;
+        $data['updatetime'] = date('Y-m-d H:i:s', time());
+        $dataConfig->where('key', 'allStock')->update($data);
 
         //仓库库存总金额
         $allStockPrice = $this->item->getAllStockPrice();
+        $data['value'] = $allStockPrice;
+        $data['updatetime'] = date('Y-m-d H:i:s', time());
+        $dataConfig->where('key', 'allStockPrice')->update($data);
 
         //镜架库存统计
         $frameStock = $this->item->getFrameStock();
+        $data['value'] = $frameStock;
+        $data['updatetime'] = date('Y-m-d H:i:s', time());
+        $dataConfig->where('key', 'frameStock')->update($data);
 
         //镜架总金额 
         $frameStockPrice = $this->item->getFrameStockPrice();
+        $data['value'] = $frameStockPrice;
+        $data['updatetime'] = date('Y-m-d H:i:s', time());
+        $dataConfig->where('key', 'frameStockPrice')->update($data);
 
         //镜片库存
         $lensStock = $this->lens->getLensStock();
+        $data['value'] = $lensStock;
+        $data['updatetime'] = date('Y-m-d H:i:s', time());
+        $dataConfig->where('key', 'lensStock')->update($data);
 
         //镜片库存总金额
         $lensStockPrice = $this->lens->getLensStockPrice();
+        $data['value'] = $lensStockPrice;
+        $data['updatetime'] = date('Y-m-d H:i:s', time());
+        $dataConfig->where('key', 'lensStockPrice')->update($data);
 
         //饰品库存
         $ornamentsStock = $this->item->getOrnamentsStock();
+        $data['value'] = $ornamentsStock;
+        $data['updatetime'] = date('Y-m-d H:i:s', time());
+        $dataConfig->where('key', 'ornamentsStock')->update($data);
 
         //饰品库存总金额
         $ornamentsStockPrice = $this->item->getOrnamentsStockPrice();
+        $data['value'] = $ornamentsStockPrice;
+        $data['updatetime'] = date('Y-m-d H:i:s', time());
+        $dataConfig->where('key', 'ornamentsStockPrice')->update($data);
 
         //样品库存
         $sampleNumStock = $this->item->getSampleNumStock();
+        $data['value'] = $sampleNumStock;
+        $data['updatetime'] = date('Y-m-d H:i:s', time());
+        $dataConfig->where('key', 'sampleNumStock')->update($data);
 
         //样品库存总金额
         $sampleNumStockPrice = $this->item->getSampleNumStockPrice();
+        $data['value'] = $sampleNumStockPrice;
+        $data['updatetime'] = date('Y-m-d H:i:s', time());
+        $dataConfig->where('key', 'sampleNumStockPrice')->update($data);
 
         //查询总SKU数
         $skuNum = $this->item->getSkuNum();
+        $data['value'] = $skuNum;
+        $data['updatetime'] = date('Y-m-d H:i:s', time());
+        $dataConfig->where('key', 'skuNum')->update($data);
 
         //查询待处理事件 售后未处理 + 协同未处理
         //售后事件个数
@@ -2480,12 +2515,18 @@ order by sfoi.item_id asc limit 1000";
         $infoTask = new \app\admin\model\infosynergytaskmanage\InfoSynergyTask();
         $infoNum = $infoTask->getTaskNum();
         $taskAllNum = $salesNum + $infoNum;
+        $data['value'] = $taskAllNum;
+        $data['updatetime'] = date('Y-m-d H:i:s', time());
+        $dataConfig->where('key', 'taskAllNum')->update($data);
 
         //三个站待处理订单
         $zeeloolNum = $this->zeelool->getPendingOrderNum();
         $vooguemeNum = $this->voogueme->getPendingOrderNum();
         $nihaoNum = $this->nihao->getPendingOrderNum();
         $allPendingOrderNum = $zeeloolNum + $vooguemeNum + $nihaoNum;
+        $data['value'] = $allPendingOrderNum;
+        $data['updatetime'] = date('Y-m-d H:i:s', time());
+        $dataConfig->where('key', 'allPendingOrderNum')->update($data);
 
         /***
          * 库存周转天数 库存周转率
@@ -2499,6 +2540,9 @@ order by sfoi.item_id asc limit 1000";
         $etime = date("Y-m-d", strtotime("-1 day"));
         $map['create_date'] = ['between', [$stime, $etime]];
         $allSalesNum = $orderStatistics->where($map)->sum('all_sales_num');
+        $data['value'] = $allSalesNum;
+        $data['updatetime'] = date('Y-m-d H:i:s', time());
+        $dataConfig->where('key', 'allSalesNum')->update($data);
 
         //期初总库存
         $productAllStockLog = new \app\admin\model\ProductAllStock();
@@ -2507,32 +2551,54 @@ order by sfoi.item_id asc limit 1000";
         //库存周转天数
         if ($allSalesNum) {
             $stock7days = round(7 * ($start7days + $end7days) / 2 / $allSalesNum, 2);
+            $data['value'] = $stock7days;
+            $data['updatetime'] = date('Y-m-d H:i:s', time());
+            $dataConfig->where('key', 'stock7days')->update($data);
         }
 
         //库存周转率
         if ($stock7days) {
             $stock7daysPercent = round(360 / $stock7days, 2);
+            $data['value'] = $stock7daysPercent;
+            $data['updatetime'] = date('Y-m-d H:i:s', time());
+            $dataConfig->where('key', 'stock7daysPercent')->update($data);
         }
 
         //在途库存
         $onwayAllStock = $this->onway_all_stock();
+        $data['value'] = $onwayAllStock;
+        $data['updatetime'] = date('Y-m-d H:i:s', time());
+        $dataConfig->where('key', 'onwayAllStock')->update($data);
 
         //在途库存总金额
         $onwayAllStockPrice = $this->onway_all_stock_price();
+        $data['value'] = $onwayAllStockPrice;
+        $data['updatetime'] = date('Y-m-d H:i:s', time());
+        $dataConfig->where('key', 'onwayAllStockPrice')->update($data);
 
         //在途镜架库存
         $onwayFrameAllStock = $this->onway_frame_all_stock();
+        $data['value'] = $onwayFrameAllStock;
+        $data['updatetime'] = date('Y-m-d H:i:s', time());
+        $dataConfig->where('key', 'onwayFrameAllStock')->update($data);
 
         //在途镜架库存总金额
         $onwayFrameAllStockPrice = $this->onway_frame_all_stock_price();
+        $data['value'] = $onwayFrameAllStockPrice;
+        $data['updatetime'] = date('Y-m-d H:i:s', time());
+        $dataConfig->where('key', 'onwayFrameAllStockPrice')->update($data);
 
         //在途饰品库存
         $onwayOrnamentAllStock = $this->onway_ornament_all_stock();
+        $data['value'] = $onwayOrnamentAllStock;
+        $data['updatetime'] = date('Y-m-d H:i:s', time());
+        $dataConfig->where('key', 'onwayOrnamentAllStock')->update($data);
 
         //在途饰品库存总金额
         $onwayOrnamentAllStockPrice = $this->onway_ornament_all_stock_price();
-
-
+        $data['value'] = $onwayOrnamentAllStockPrice;
+        $data['updatetime'] = date('Y-m-d H:i:s', time());
+        $dataConfig->where('key', 'onwayOrnamentAllStockPrice')->update($data);
     }
 
 
