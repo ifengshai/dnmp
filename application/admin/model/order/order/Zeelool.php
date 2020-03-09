@@ -625,7 +625,7 @@ class Zeelool extends Model
             ->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')
             ->group('sku')
             ->select();
-
+        $data = collection($data)->toArray();
         //SKU实时进价
         $sku_pirce = new \app\admin\model\SkuPrice;
         $arr = $sku_pirce->getAllData();
@@ -648,7 +648,8 @@ class Zeelool extends Model
         dump($data);
         dump($arr);
         dump($item_price);
-        dump($all_price);die;
+        dump($all_price);
+        die;
         return $all_price;
     }
 }
