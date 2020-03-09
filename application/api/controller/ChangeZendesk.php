@@ -61,5 +61,4 @@ class ChangeZendesk extends Controller
         }
         echo 'success';
     }
-
 }
