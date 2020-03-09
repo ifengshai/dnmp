@@ -30,7 +30,9 @@ class Crontab extends Backend
         'changeItemNewToOld',
         'get_sku_stock',
         'get_sku_price',
-        'get_sku_allstock'
+        'get_sku_allstock',
+        'purchase_data',
+        'stock_data'
 
     ];
 
@@ -2312,7 +2314,7 @@ order by sfoi.item_id asc limit 1000";
 
 
     /**
-     * 定时更新供应链打拼-采购数据
+     * 定时更新供应链大屏-采购数据
      *
      * @Description
      * @author wpl
@@ -2430,7 +2432,7 @@ order by sfoi.item_id asc limit 1000";
     }
 
     /**
-     * 库存数据
+     * 定时更新供应链大屏-库存数据
      *
      * @Description
      * @author wpl
