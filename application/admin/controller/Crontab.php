@@ -1214,6 +1214,9 @@ order by sfoi.item_id asc limit 1000";
         $map['status'] = ['in', ['processing', 'complete', 'creditcard_proccessing']];
         $zeelool_count = $zeelool_model->table('sales_flat_order')->where($map)->count(1);
         $zeelool_total = $zeelool_model->table('sales_flat_order')->where($map)->sum('base_grand_total');
+        dump($zeelool_total);
+        dump($zeelool_count);
+        exit;
         //zeelool客单价
         $zeelool_unit_price = round(($zeelool_total/$zeelool_count),2);
         //zeelool购物车数 SELECT count(*) counter from sales_flat_quote where base_grand_total>0
