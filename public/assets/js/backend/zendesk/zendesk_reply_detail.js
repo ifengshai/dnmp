@@ -22,7 +22,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {checkbox: true},
                         {field: 'id', title: __('Id')},
                         {field: 'tags', title: __('Tags')},
-                        {field: 'body', title: __('内容')},
+                        // {field: 'body', title: __('内容')},
                         {field: 'status', title: __('Status'), formatter: Table.api.formatter.status},
                         {field: 'update_time', title: __('Update_time'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime},
                     ]
