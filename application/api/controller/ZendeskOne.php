@@ -226,7 +226,8 @@ class ZendeskOne extends Controller
                                     'html_body' => $last_comment->html_body,
                                     'tags' => join(',',array_unique(array_merge($tags, $params['tags']))),
                                     'status' => $ticket->status,
-                                    'assignee_id' => 382940274852
+                                    'assignee_id' => 382940274852,
+                                    'is_admin' => 2
                                 ]);
                                 //回复评论
                                 $reply_detail_data = [
@@ -236,6 +237,7 @@ class ZendeskOne extends Controller
                                     'tags' => join(',',array_unique(array_merge($tags, $params['tags']))),
                                     'status' => $params['status'],
                                     'assignee_id' => 382940274852,
+                                    'is_admin' => 1
                                 ];
                             }
                             //tag合并
@@ -298,6 +300,7 @@ class ZendeskOne extends Controller
                                     'tags' => join(',',array_unique(array_merge($tags, $params['tags']))),
                                     'status' => $params['status'],
                                     'assignee_id' => 382940274852,
+                                    'is_admin' => 1
                                 ];
                             }
                             if (!empty($params)) {
