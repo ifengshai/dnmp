@@ -135,117 +135,48 @@ class Index extends Backend
      */
     public function supply_chain_data()
     {
+        $dataConfig = new \app\admin\model\DataConfig();
+
         //仓库总库存
-        $cachename = 'supply_chain_data_' . 'allStock';
-        $allStock = cache($cachename);
-        if (!$allStock) {
-            $allStock = $this->item->getAllStock();
-            cache($cachename, $allStock, 86400);
-        }
+        $allStock = $dataConfig->where('key', 'allStock')->value('value');
 
         //仓库库存总金额       
-        $cachename = 'supply_chain_data_' . 'allStockPrice';
-        $allStockPrice = cache($cachename);
-        if (!$allStockPrice) {
-            $allStockPrice = $this->item->getAllStockPrice();
-            cache($cachename, $allStockPrice, 86400);
-        }
+        $allStockPrice = $dataConfig->where('key', 'allStockPrice')->value('value');
 
         //镜架库存统计
-        $cachename = 'supply_chain_data_' . 'frameStock';
-        $frameStock = cache($cachename);
-        if (!$frameStock) {
-            $frameStock = $this->item->getFrameStock();
-            cache($cachename, $frameStock, 86400);
-        }
+        $frameStock = $dataConfig->where('key', 'frameStock')->value('value');
 
         //镜架总金额 
-        $cachename = 'supply_chain_data_' . 'frameStockPrice';
-        $frameStockPrice = cache($cachename);
-        if (!$frameStockPrice) {
-            $frameStockPrice = $this->item->getFrameStockPrice();
-            cache($cachename, $frameStockPrice, 86400);
-        }
+        $frameStockPrice = $dataConfig->where('key', 'frameStockPrice')->value('value');
 
         //镜片库存
-        $cachename = 'supply_chain_data_' . 'lensStock';
-        $lensStock = cache($cachename);
-        if (!$lensStock) {
-            $lensStock = $this->lens->getLensStock();
-            cache($cachename, $lensStock, 86400);
-        }
+        $lensStock = $dataConfig->where('key', 'lensStock')->value('value');
 
         //镜片库存总金额
-        $cachename = 'supply_chain_data_' . 'lensStockPrice';
-        $lensStockPrice = cache($cachename);
-        if (!$lensStockPrice) {
-            $lensStockPrice = $this->lens->getLensStockPrice();
-            cache($cachename, $lensStockPrice, 86400);
-        }
+        $lensStockPrice = $dataConfig->where('key', 'lensStockPrice')->value('value');
 
         //饰品库存
-        $cachename = 'supply_chain_data_' . 'ornamentsStock';
-        $ornamentsStock = cache($cachename);
-        if (!$ornamentsStock) {
-            $ornamentsStock = $this->item->getOrnamentsStock();
-            cache($cachename, $ornamentsStock, 86400);
-        }
+        $ornamentsStock = $dataConfig->where('key', 'ornamentsStock')->value('value');
+
         //饰品库存总金额
-        $cachename = 'supply_chain_data_' . 'ornamentsStockPrice';
-        $ornamentsStockPrice = cache($cachename);
-        if (!$ornamentsStockPrice) {
-            $ornamentsStockPrice = $this->item->getOrnamentsStockPrice();
-            cache($cachename, $ornamentsStockPrice, 86400);
-        }
+        $ornamentsStockPrice = $dataConfig->where('key', 'ornamentsStockPrice')->value('value');
 
         //样品库存
-        $cachename = 'supply_chain_data_' . 'SampleNumStock';
-        $sampleNumStock = cache($cachename);
-        if (!$sampleNumStock) {
-            $sampleNumStock = $this->item->getSampleNumStock();
-            cache($cachename, $sampleNumStock, 86400);
-        }
+        $sampleNumStock = $dataConfig->where('key', 'sampleNumStock')->value('value');
+
         //样品库存总金额
-        $cachename = 'supply_chain_data_' . 'SampleNumStockPrice';
-        $sampleNumStockPrice = cache($cachename);
-        if (!$sampleNumStockPrice) {
-            $sampleNumStockPrice = $this->item->getSampleNumStockPrice();
-            cache($cachename, $sampleNumStockPrice, 86400);
-        }
+        $sampleNumStockPrice = $dataConfig->where('key', 'sampleNumStockPrice')->value('value');
+
 
         //查询总SKU数
-        $cachename = 'supply_chain_data_' . 'SkuNum';
-        $skuNum = cache($cachename);
-        if (!$skuNum) {
-            $skuNum = $this->item->getSkuNum();
-            cache($cachename, $skuNum, 86400);
-        }
+        $skuNum = $dataConfig->where('key', 'skuNum')->value('value');
 
         //查询待处理事件 售后未处理 + 协同未处理
-        $cachename = 'supply_chain_data_' . 'taskAllNum';
-        $taskAllNum = cache($cachename);
-        if (!$taskAllNum) {
-            //售后事件个数
-            $saleTask = new \app\admin\model\saleaftermanage\SaleAfterTask;
-            $salesNum = $saleTask->getTaskNum();
+        $taskAllNum = $dataConfig->where('key', 'taskAllNum')->value('value');
 
-            //查询协同任务待处理事件
-            $infoTask = new \app\admin\model\infosynergytaskmanage\InfoSynergyTask();
-            $infoNum = $infoTask->getTaskNum();
-            $taskAllNum = $salesNum + $infoNum;
-            cache($cachename, $taskAllNum, 3600);
-        }
 
         //三个站待处理订单
-        $cachename = 'supply_chain_data_' . 'allPendingOrderNum';
-        $allPendingOrderNum = cache($cachename);
-        if (!$allPendingOrderNum) {
-            $zeeloolNum = $this->zeelool->getPendingOrderNum();
-            $vooguemeNum = $this->voogueme->getPendingOrderNum();
-            $nihaoNum = $this->nihao->getPendingOrderNum();
-            $allPendingOrderNum = $zeeloolNum + $vooguemeNum + $nihaoNum;
-            cache($cachename, $allPendingOrderNum, 14400);
-        }
+        $allPendingOrderNum = $dataConfig->where('key', 'allPendingOrderNum')->value('value');
 
         /***
          * 库存周转天数 库存周转率
@@ -254,49 +185,93 @@ class Index extends Backend
          */
 
         //查询最近7天总销量
-        $orderStatistics = new \app\admin\model\OrderStatistics();
-        $stime = date("Y-m-d", strtotime("-7 day"));
-        $etime = date("Y-m-d", strtotime("-1 day"));
-        $map['create_date'] = ['between', [$stime, $etime]];
-        $allSalesNum = $orderStatistics->where($map)->sum('all_sales_num');
+        $allSalesNum = $dataConfig->where('key', 'allSalesNum')->value('value');
 
-        //期初总库存
-        $productAllStockLog = new \app\admin\model\ProductAllStock();
-        $start7days = $productAllStockLog->where('createtime', 'like', $stime . '%')->value('allnum');
-        $end7days = $productAllStockLog->where('createtime', 'like', $etime . '%')->value('allnum');
         //库存周转天数
-        if ($allSalesNum) {
-            $stock7days = round(7 * ($start7days + $end7days) / 2 / $allSalesNum, 2);
-        }
+        $stock7days = $dataConfig->where('key', 'stock7days')->value('value');
 
         //库存周转率
-        if ($stock7days) {
-            $stock7daysPercent = round(360 / $stock7days, 2);
-        }
+        $stock7daysPercent = $dataConfig->where('key', 'stock7daysPercent')->value('value');
 
         //在途库存
-        $onwayAllStock = $this->onway_all_stock();
+        $onwayAllStock = $dataConfig->where('key', 'onwayAllStock')->value('value');
 
         //在途库存总金额
-        $onwayAllStockPrice = $this->onway_all_stock_price();
+        $onwayAllStockPrice = $dataConfig->where('key', 'onwayAllStockPrice')->value('value');
 
         //在途镜架库存
-        $onwayFrameAllStock = $this->onway_frame_all_stock();
+        $onwayFrameAllStock = $dataConfig->where('key', 'onwayFrameAllStock')->value('value');
 
         //在途镜架库存总金额
-        $onwayFrameAllStockPrice = $this->onway_frame_all_stock_price();
+        $onwayFrameAllStockPrice = $dataConfig->where('key', 'onwayFrameAllStockPrice')->value('value');
 
         //在途饰品库存
-        $onwayOrnamentAllStock = $this->onway_ornament_all_stock();
+        $onwayOrnamentAllStock = $dataConfig->where('key', 'onwayOrnamentAllStock')->value('value');
 
         //在途饰品库存总金额
-        $onwayOrnamentAllStockPrice = $this->onway_ornament_all_stock_price();
+        $onwayOrnamentAllStockPrice = $dataConfig->where('key', 'onwayOrnamentAllStockPrice')->value('value');
+
+        /**********************************采购数据***************************************/
+        //当月采购总数
+        $purchaseNum = $dataConfig->where('key', 'purchaseNum')->value('value');
+
+        //当月采购总金额
+        $purchasePrice = $dataConfig->where('key', 'purchasePrice')->value('value');
+
+        //当月采购镜架总数
+        $purchaseFrameNum = $dataConfig->where('key', 'purchaseFrameNum')->value('value');
+
+        //当月采购总SKU数
+        $purchaseSkuNum = $dataConfig->where('key', 'purchaseSkuNum')->value('value');
+
+        //当月销售总数
+        $salesNum = $dataConfig->where('key', 'salesNum')->value('value');
+       
+        //当月到货总数
+        $arrivalsNum = $dataConfig->where('key', 'arrivalsNum')->value('value');
+
+        //当月质检合格数量
+        $quantityNum = $dataConfig->where('key', 'quantityNum')->value('value');
+
+        //合格率
+        $quantityPercent = $dataConfig->where('key', 'quantityPercent')->value('value');
+
+        //采购平均单价
+        $purchaseAveragePrice = $dataConfig->where('key', 'purchaseAveragePrice')->value('value');
+
+        //当月销售总成本
+        $salesCost = $dataConfig->where('key', 'salesCost')->value('value');
+
+        //当月定做总数
+        $customSkuNum = $dataConfig->where('key', 'customSkuNum')->value('value');
+
+        //当月定做总金额
+        $customSkuNumMoney = $dataConfig->where('key', 'customSkuNumMoney')->value('value');
+
+        //当月定做SKU数
+        $customSkuQty = $dataConfig->where('key', 'customSkuQty')->value('value');
+
+        //当月定做平均单价
+        $customSkuPrice = $dataConfig->where('key', 'customSkuPrice')->value('value');
 
         $data = $this->warehouse_order_data();
         //仓库数据
         $this->view->assign('data', $data);
         //采购数据
-        $this->view->assign('purchase_data', $this->purchase_data());
+        $this->view->assign('purchaseNum', $purchaseNum);
+        $this->view->assign('purchasePrice', $purchasePrice);
+        $this->view->assign('purchaseFrameNum', $purchaseFrameNum);
+        $this->view->assign('purchaseSkuNum', $purchaseSkuNum);
+        $this->view->assign('salesNum', $salesNum);
+        $this->view->assign('arrivalsNum', $arrivalsNum);
+        $this->view->assign('quantityNum', $quantityNum);
+        $this->view->assign('quantityPercent', $quantityPercent);
+        $this->view->assign('purchaseAveragePrice', $purchaseAveragePrice);
+        $this->view->assign('salesCost', $salesCost);
+        $this->view->assign('customSkuNum', $customSkuNum);
+        $this->view->assign('customSkuNumMoney', $customSkuNumMoney);
+        $this->view->assign('customSkuQty', $customSkuQty);
+        $this->view->assign('customSkuPrice', $customSkuPrice);
         $this->view->assign('allStock', $allStock);
         $this->view->assign('allStockPrice', $allStockPrice);
         $this->view->assign('frameStock', $frameStock);
@@ -323,240 +298,6 @@ class Index extends Backend
         return $this->view->fetch();
     }
 
-    /**
-     * 在途库存
-     *
-     * @Description
-     * @author wpl
-     * @since 2020/03/02 17:20:21 
-     * @return void
-     */
-    protected function onway_all_stock()
-    {
-        //计算SKU总采购数量
-        $purchase = new \app\admin\model\purchase\PurchaseOrder;
-        $purchase_map['purchase_status'] = ['in', [2, 5, 6, 7]];
-        $purchase_map['stock_status'] = ['in', [0, 1]];
-        $purchase_num = $purchase->alias('a')->join(['fa_purchase_order_item' => 'b'], 'a.id=b.purchase_id')
-            ->where($purchase_map)
-            ->whereExp('sku', 'is not null')
-            ->cache(86400)
-            ->sum('purchase_num');
-
-        $check_map['a.status'] = 2;
-        $check_map['a.type'] = 1;
-        $check_map['b.purchase_status'] = ['in', [2, 5, 6, 7]];
-        $check_map['b.stock_status'] = ['in', [0, 1]];
-        $check = new \app\admin\model\warehouse\Check;
-        $arrivals_num = $check->alias('a')
-            ->where($check_map)
-            ->join(['fa_purchase_order' => 'b'], 'b.id=a.purchase_id')
-            ->join(['fa_check_order_item' => 'c'], 'a.id=c.check_id')
-            ->cache(86400)
-            ->sum('arrivals_num');
-        return $purchase_num - $arrivals_num;
-    }
-
-    /**
-     * 在途库存总金额
-     *
-     * @Description
-     * @author wpl
-     * @since 2020/03/02 17:20:21 
-     * @return void
-     */
-    protected function onway_all_stock_price()
-    {
-        //计算SKU总采购金额
-        $purchase = new \app\admin\model\purchase\PurchaseOrder;
-        $purchase_map['purchase_status'] = ['in', [2, 5, 6, 7]];
-        $purchase_map['stock_status'] = ['in', [0, 1]];
-        $purchase_price = $purchase->alias('a')->join(['fa_purchase_order_item' => 'b'], 'a.id=b.purchase_id')
-            ->where($purchase_map)
-            ->whereExp('sku', 'is not null')
-            ->cache(86400)
-            ->sum('purchase_num*purchase_price');
-
-        $check_map['a.status'] = 2;
-        $check_map['a.type'] = 1;
-        $check_map['b.purchase_status'] = ['in', [2, 5, 6, 7]];
-        $check_map['b.stock_status'] = ['in', [0, 1]];
-        $check = new \app\admin\model\warehouse\Check;
-        $arrivals_price = $check->alias('a')
-            ->where($check_map)
-            ->join(['fa_purchase_order' => 'b'], 'b.id=a.purchase_id')
-            ->join(['fa_check_order_item' => 'c'], 'a.id=c.check_id')
-            ->join(['fa_purchase_order_item' => 'd'], 'd.purchase_id=c.purchase_id and c.sku=d.sku', 'left')
-            ->cache(86400)
-            ->sum('arrivals_num*purchase_price');
-        return $purchase_price - $arrivals_price;
-    }
-
-    /**
-     * 在途镜架库存
-     *
-     * @Description
-     * @author wpl
-     * @since 2020/03/02 17:20:21 
-     * @return void
-     */
-    protected function onway_frame_all_stock()
-    {
-        //镜架SKU
-        $skus = $this->item->getFrameSku();
-        if ($skus) {
-            $purchase_map['sku'] = ['in', $skus];
-            //计算SKU总采购数量
-            $purchase = new \app\admin\model\purchase\PurchaseOrder;
-            $purchase_map['purchase_status'] = ['in', [2, 5, 6, 7]];
-            $purchase_map['stock_status'] = ['in', [0, 1]];
-            $purchase_num = $purchase->alias('a')->join(['fa_purchase_order_item' => 'b'], 'a.id=b.purchase_id')
-                ->where($purchase_map)
-                ->whereExp('sku', 'is not null')
-                ->cache(86400)
-                ->sum('purchase_num');
-
-            $check_map['c.sku'] = ['in', $skus];
-            $check_map['a.status'] = 2;
-            $check_map['a.type'] = 1;
-            $check_map['b.purchase_status'] = ['in', [2, 5, 6, 7]];
-            $check_map['b.stock_status'] = ['in', [0, 1]];
-            $check = new \app\admin\model\warehouse\Check;
-            $arrivals_num = $check->alias('a')
-                ->where($check_map)
-                ->join(['fa_purchase_order' => 'b'], 'b.id=a.purchase_id')
-                ->join(['fa_check_order_item' => 'c'], 'a.id=c.check_id')
-                ->cache(86400)
-                ->sum('arrivals_num');
-        }
-        return $purchase_num - $arrivals_num;
-    }
-
-    /**
-     * 在途镜架库存总金额
-     *
-     * @Description
-     * @author wpl
-     * @since 2020/03/02 17:20:21 
-     * @return void
-     */
-    protected function onway_frame_all_stock_price()
-    {
-        //镜架SKU
-        $skus = $this->item->getFrameSku();
-        if ($skus) {
-            $purchase_map['sku'] = ['in', $skus];
-            //计算SKU总采购金额
-            $purchase = new \app\admin\model\purchase\PurchaseOrder;
-            $purchase_map['purchase_status'] = ['in', [2, 5, 6, 7]];
-            $purchase_map['stock_status'] = ['in', [0, 1]];
-            $purchase_price = $purchase->alias('a')->join(['fa_purchase_order_item' => 'b'], 'a.id=b.purchase_id')
-                ->where($purchase_map)
-                ->whereExp('sku', 'is not null')
-                ->cache(86400)
-                ->sum('purchase_num*purchase_price');
-
-            //计算到货sku总金额
-            $check_map['c.sku'] = ['in', $skus];
-            $check_map['a.status'] = 2;
-            $check_map['a.type'] = 1;
-            $check_map['b.purchase_status'] = ['in', [2, 5, 6, 7]];
-            $check_map['b.stock_status'] = ['in', [0, 1]];
-            $check = new \app\admin\model\warehouse\Check;
-            $arrivals_price = $check->alias('a')
-                ->where($check_map)
-                ->join(['fa_purchase_order' => 'b'], 'b.id=a.purchase_id')
-                ->join(['fa_check_order_item' => 'c'], 'a.id=c.check_id')
-                ->join(['fa_purchase_order_item' => 'd'], 'd.purchase_id=c.purchase_id and c.sku=d.sku', 'left')
-                ->cache(86400)
-                ->sum('arrivals_num*purchase_price');
-        }
-
-        return $purchase_price - $arrivals_price;
-    }
-
-    /**
-     * 在途镜架库存
-     *
-     * @Description
-     * @author wpl
-     * @since 2020/03/02 17:20:21 
-     * @return void
-     */
-    protected function onway_ornament_all_stock()
-    {
-        //镜架SKU
-        $skus = $this->item->getOrnamentsSku();
-        if ($skus) {
-            $purchase_map['sku'] = ['in', $skus];
-            //计算SKU总采购数量
-            $purchase = new \app\admin\model\purchase\PurchaseOrder;
-            $purchase_map['purchase_status'] = ['in', [2, 5, 6, 7]];
-            $purchase_map['stock_status'] = ['in', [0, 1]];
-            $purchase_num = $purchase->alias('a')->join(['fa_purchase_order_item' => 'b'], 'a.id=b.purchase_id')
-                ->where($purchase_map)
-                ->whereExp('sku', 'is not null')
-                ->cache(86400)
-                ->sum('purchase_num');
-
-            $check_map['c.sku'] = ['in', $skus];
-            $check_map['a.status'] = 2;
-            $check_map['a.type'] = 1;
-            $check_map['b.purchase_status'] = ['in', [2, 5, 6, 7]];
-            $check_map['b.stock_status'] = ['in', [0, 1]];
-            $check = new \app\admin\model\warehouse\Check;
-            $arrivals_num = $check->alias('a')
-                ->where($check_map)
-                ->join(['fa_purchase_order' => 'b'], 'b.id=a.purchase_id')
-                ->join(['fa_check_order_item' => 'c'], 'a.id=c.check_id')
-                ->cache(86400)
-                ->sum('arrivals_num');
-        }
-        return $purchase_num - $arrivals_num;
-    }
-
-    /**
-     * 在途镜架库存总金额
-     *
-     * @Description
-     * @author wpl
-     * @since 2020/03/02 17:20:21 
-     * @return void
-     */
-    protected function onway_ornament_all_stock_price()
-    {
-        //镜架SKU
-        $skus = $this->item->getOrnamentsSku();
-        if ($skus) {
-            $purchase_map['sku'] = ['in', $skus];
-            //计算SKU总采购金额
-            $purchase = new \app\admin\model\purchase\PurchaseOrder;
-            $purchase_map['purchase_status'] = ['in', [2, 5, 6, 7]];
-            $purchase_map['stock_status'] = ['in', [0, 1]];
-            $purchase_price = $purchase->alias('a')->join(['fa_purchase_order_item' => 'b'], 'a.id=b.purchase_id')
-                ->where($purchase_map)
-                ->whereExp('sku', 'is not null')
-                ->cache(86400)
-                ->sum('purchase_num*purchase_price');
-
-            //计算到货sku总金额
-            $check_map['c.sku'] = ['in', $skus];
-            $check_map['a.status'] = 2;
-            $check_map['a.type'] = 1;
-            $check_map['b.purchase_status'] = ['in', [2, 5, 6, 7]];
-            $check_map['b.stock_status'] = ['in', [0, 1]];
-            $check = new \app\admin\model\warehouse\Check;
-            $arrivals_price = $check->alias('a')
-                ->where($check_map)
-                ->join(['fa_purchase_order' => 'b'], 'b.id=a.purchase_id')
-                ->join(['fa_check_order_item' => 'c'], 'a.id=c.check_id')
-                ->join(['fa_purchase_order_item' => 'd'], 'd.purchase_id=c.purchase_id and c.sku=d.sku', 'left')
-                ->cache(86400)
-                ->sum('arrivals_num*purchase_price');
-        }
-
-        return $purchase_price - $arrivals_price;
-    }
 
     /**
      * 仓库订单数据统计
@@ -585,8 +326,6 @@ class Index extends Backend
             $allUnorderNum = $zeeloolUnorderNum + $vooguemeUnorderNum + $nihaoUnorderNum;
             cache($cachename, $allUnorderNum, 86400);
         }
-
-
 
         //7天未出库订单总数
         $cachename = 'warehouse_order_data' . 'days7UnorderNum';
@@ -642,66 +381,7 @@ class Index extends Backend
         return $data;
     }
 
-    /**
-     * 采购数据
-     *
-     * @Description
-     * @author wpl
-     * @since 2020/03/05 17:05:27 
-     * @return void
-     */
-    protected function purchase_data()
-    {
-        //当月采购总数
-        $purchase = new \app\admin\model\purchase\PurchaseOrder();
-        $purchaseNum = $purchase->getPurchaseNum();
-
-        //当月采购总金额
-        $purchasePrice = $purchase->getPurchasePrice();
-
-        //当月采购镜架总数
-        $purchaseFrameNum = $purchase->getPurchaseFrameNum();
-
-        //当月采购总SKU数
-        $purchaseSkuNum = $purchase->getPurchaseSkuNum();
-
-        //当月销售总数
-        $salesNum = cache('purchase_data_' . 'salesNum');
-        if (!$salesNum) {
-            $zeeloolSkuNum = $this->zeelool->getOrderSkuNum();
-            $vooguemeSkuNum = $this->voogueme->getOrderSkuNum();
-            $nihaoSkuNum = $this->nihao->getOrderSkuNum();
-            $salesNum = $zeeloolSkuNum + $vooguemeSkuNum + $nihaoSkuNum;
-            cache('purchase_data_' . 'salesNum', $salesNum);
-        }
-
-        //当月到货总数
-        $check = new \app\admin\model\warehouse\Check();
-        $arrivalsNum = $check->getArrivalsNum();
-
-        //当月质检合格数量
-        $quantityNum = $check->getQuantityNum();
-
-        //合格率
-        if ($arrivalsNum > 0) {
-            $quantityPercent = round($quantityNum / $arrivalsNum * 100, 2);
-        }
-        
-
-        $data = [
-            'purchaseNum'           => $purchaseNum, //当月采购总数
-            'purchasePrice'         => $purchasePrice, //当月采购总金额
-            'purchaseFrameNum'      => $purchaseFrameNum, //当月采购镜架总数
-            'purchaseSkuNum'        => $purchaseSkuNum, //当月采购总SKU数
-            'salesNum'              => $salesNum, //当月销售总数
-            'arrivalsNum'           => $arrivalsNum, //当月到货总数
-            'quantityNum'           => $quantityNum, //当月质检合格数量
-            'quantityPercent'       => $quantityPercent, //合格率
-        ];
-        return $data;
-    }
-
-
+  
     /**
      * 数据统计
      *

@@ -268,45 +268,45 @@
                                         </tr>
                                         <tr>
                                             <td>当月采购总数</td>
-                                            <td>{$purchase_data.purchaseNum}</td>
+                                            <td>{$purchaseNum}</td>
                                             <td>当月采购总金额</td>
-                                            <td>{$purchase_data.purchasePrice}</td>
+                                            <td>{$purchasePrice}</td>
                                         </tr>
                                         <tr>
                                             <td>当月采购镜架总数</td>
-                                            <td>{$purchase_data.purchaseFrameNum}</td>
+                                            <td>{$purchaseFrameNum}</td>
                                             <td>当月采购总SKU数</td>
-                                            <td>{$purchase_data.purchaseSkuNum}</td>
+                                            <td>{$purchaseSkuNum}</td>
                                         </tr>
                                         <tr>
                                             <td>当月采购平均单价（￥）</td>
-                                            <td>{:$purchase_data['purchaseNum'] ? round($purchase_data['purchasePrice']/$purchase_data['purchaseNum'],2) : 0}</td>
+                                            <td>{$purchaseAveragePrice}</td>
                                             <td>当月到货总数</td>
-                                            <td>{$purchase_data.arrivalsNum}</td>
+                                            <td>{$arrivalsNum}</td>
                                         </tr>
                                         <tr>
                                             <td>当月销售总数</td>
-                                            <td>{$purchase_data.salesNum}</td>
+                                            <td>{$salesNum}</td>
                                             <td>当月销售总成本（￥）</td>
-                                            <td>0</td>
+                                            <td>{$salesCost}</td>
                                         </tr>
                                         <tr>
                                             <td>当月质检合格总数</td>
-                                            <td>{$purchase_data.quantityNum}</td>
+                                            <td>{$quantityNum}</td>
                                             <td>当月品检合格率</td>
-                                            <td>{$purchase_data.quantityPercent}</td>
+                                            <td>{$quantityPercent}</td>
                                         </tr>
                                         <tr>
                                             <td>当月定做总数</td>
-                                            <td>0</td>
+                                            <td>{$customSkuNum}</td>
                                             <td>当月定做总金额（￥）</td>
-                                            <td>0</td>
+                                            <td>{$customSkuNumMoney}</td>
                                         </tr>
                                         <tr>
                                             <td>当月定做SKU数</td>
-                                            <td>0</td>
+                                            <td>{$customSkuQty}</td>
                                             <td>当月定做平均单价（￥）</td>
-                                            <td>0</td>
+                                            <td>{$customSkuPrice}</td>
                                         </tr>
                                     </table>
                                 </div>
