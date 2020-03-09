@@ -33,36 +33,11 @@ class ZendeskReplyDetail extends Backend
     /**
      * 查看
      */
-    public function index($ids = null)
+    public function detail($ids = null)
     {
-        //设置过滤方法
-        $this->request->filter(['strip_tags']);
-        if ($this->request->isAjax()) {
-            //如果发送的来源是Selectpage，则转发到Selectpage
-            if ($this->request->request('keyField')) {
-                return $this->selectpage();
-            }
-            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
-            $total = $this->model
-                ->where($where)
-                ->where('reply_id',$ids)
-                ->order($sort, $order)
-                ->count();
-
-            $list = $this->model
-                ->where($where)
-                ->where('reply_id',$ids)
-                ->order('id', 'asc')
-                ->limit($offset, $limit)
-                ->select();
-
-            $list = collection($list)->toArray();
-            $result = array("total" => $total, "rows" => $list);
-
-            return json($result);
-        }
-        $this->assignconfig('ids',$ids);
-        return $this->view->fetch();
+        $detail = \app\admin\model\zendesk\ZendeskReply::get($ids);
+        $this->assign('detail',$detail);
+        return $this->fetch();
     }
 
 }

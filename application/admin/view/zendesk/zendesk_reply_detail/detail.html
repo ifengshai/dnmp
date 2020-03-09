@@ -1,0 +1,56 @@
+<div class="content">
+    <div class="row">
+        <div class="tab-content">
+            <div class="tab-pane active" id="activity">
+                <!-- Post -->
+
+                <div class="post">
+                    <div class="user-block">
+                        <img class="img-circle img-bordered-sm" src="/assets/img/avatar.png" alt="user image">
+                        <span class="username">
+                          <a href="javascript:voin(0);">{$detail->email}</a>
+                          <a href="javascript:voin(0);" class="pull-right btn-box-tool"><i class="fa fa-times"></i></a>
+                        </span>
+                        <span class="description">{$detail->create_time}</span>
+                    </div>
+                    <!-- /.user-block -->
+                    <p>
+
+                       {$detail->html_body}
+                    </p>
+                    <ul class="list-inline">
+                        <li><a href="javascript:voin(0);" class="link-black text-sm"><i class="fa fa-share margin-r-5"></i> {$detail->tags}</a></li>
+                        <li class="pull-right">
+                            <a href="javascript:voin(0);" class="link-black text-sm"><i class="fa fa-comments-o margin-r-5"></i>1楼</a></li>
+                    </ul>
+                </div>
+                <hr>
+                {foreach name="$detail->details" item="vo" key="i"}
+                <div class="post">
+                    <div class="user-block">
+                        <img class="img-circle img-bordered-sm" src="/assets/img/avatar.png" alt="user image">
+                        <span class="username">
+                          <a href="javascript:voin(0);">{$detail->email}</a>
+                          <a href="javascript:voin(0);" class="pull-right btn-box-tool"><i class="fa fa-times"></i></a>
+                        </span>
+                        <span class="description">{$vo->create_time}</span>
+                    </div>
+                    <!-- /.user-block -->
+                    <p>
+                        {$vo->html_body}
+                    </p>
+                    <ul class="list-inline">
+                        <li><a href="javascript:voin(0);" class="link-black text-sm"><i class="fa fa-share margin-r-5"></i> {$vo->tags}</a></li>
+                        <li class="pull-right">
+                            <a href="javascript:voin(0);" class="link-black text-sm"><i class="fa fa-comments-o margin-r-5"></i>{++$i+1}楼</a></li>
+                    </ul>
+                </div>
+                <hr>
+                {/foreach}
+                <!-- /.post -->
+            </div>
+        </div>
+
+    </div>
+</div>
+
