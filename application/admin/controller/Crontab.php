@@ -1274,7 +1274,7 @@ order by sfoi.item_id asc limit 1000";
         $data['zeelool_shoppingcart_conversion']  = $zeelool_shoppingcart_conversion;
         $data['voogueme_shoppingcart_conversion'] = $voogueme_shoppingcart_conversion;
         $data['nihao_shoppingcart_conversion']    = $nihao_shoppingcart_conversion;
-        $data['all_shoppingcart_conversion']      = @round(($zeelool_shoppingcart_conversion+$voogueme_shoppingcart_conversion+$nihao_shoppingcart_conversion)/3*100,2);
+        $data['all_shoppingcart_conversion']      = @round(($zeelool_shoppingcart_conversion+$voogueme_shoppingcart_conversion+$nihao_shoppingcart_conversion)/3,2);
         $data['zeelool_register_customer']        = $zeelool_register_customer;
         $data['voogueme_register_customer']       = $voogueme_register_customer;
         $data['nihao_register_customer']          = $nihao_register_customer;
