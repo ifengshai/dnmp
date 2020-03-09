@@ -420,7 +420,7 @@ class Voogueme extends Model
         $all_price = 0;
         foreach ($data as $k => $v) {
             //sku转换
-            $sku = $this->itemplatformsku->getWebSku($v['sku'], 2);
+            $sku = $itemplatformsku->getWebSku($v['sku'], 2);
             if ($arr[$sku]) {
                 $all_price += $arr[$sku] * $v['num'];
             } else {
