@@ -630,6 +630,7 @@ class Zeelool extends Model
         $sku_pirce = new \app\admin\model\SkuPrice;
         $arr = $sku_pirce->getAllData();
 
+        $itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku();
         //SKU参考进价
         $item = new \app\admin\model\itemmanage\Item();
         $item_price = $item->getSkuPrice();

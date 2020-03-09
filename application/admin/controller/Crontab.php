@@ -2323,10 +2323,7 @@ order by sfoi.item_id asc limit 1000";
      */
     public function purchase_data()
     {
-        $this->zeelool = new \app\admin\model\order\order\Zeelool;
-        $this->voogueme = new \app\admin\model\order\order\Voogueme;
-        $this->nihao = new \app\admin\model\order\order\Nihao;
-
+    
         //当月采购总数
         $purchase = new \app\admin\model\purchase\PurchaseOrder();
         $purchaseNum = $purchase->getPurchaseNum();
