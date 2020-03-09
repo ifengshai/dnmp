@@ -1230,7 +1230,7 @@ order by sfoi.item_id asc limit 1000";
         //zeelool客单价
         $zeelool_unit_price = @round(($zeelool_total/$zeelool_count),2);
         //zeelool购物车数 SELECT count(*) counter from sales_flat_quote where base_grand_total>0
-        $zeelool_shoppingcart_total = $zeelool_model->table('sales_flat_quote')->where($date)->where(['base_grand_total','GT',0])->count('*');
+        $zeelool_shoppingcart_total = $zeelool_model->table('sales_flat_quote')->where($date)->where('base_grand_total','GT',0)->count('*');
         //zeelool购物车转化率
         $zeelool_shoppingcart_conversion = @round(($zeelool_count/$zeelool_shoppingcart_total),2);
         //zeelool注册用户数SELECT count(*) counter from customer_entity
@@ -1240,7 +1240,7 @@ order by sfoi.item_id asc limit 1000";
         //voogueme客单价
         $voogueme_unit_price = @round(($voogueme_total/$voogueme_count),2);
         //voogueme购物车数
-        $voogueme_shoppingcart_total = $voogueme_model->table('sales_flat_quote')->where($date)->where(['base_grand_total','GT',0])->count('*');
+        $voogueme_shoppingcart_total = $voogueme_model->table('sales_flat_quote')->where($date)->where('base_grand_total','GT',0)->count('*');
         //voogueme购物车转化率
         $voogueme_shoppingcart_conversion = @round(($voogueme_count/$voogueme_shoppingcart_total),2);
         //voogueme注册用户数
@@ -1250,7 +1250,7 @@ order by sfoi.item_id asc limit 1000";
         //nihao客单价
         $nihao_unit_price = @round(($nihao_total/$nihao_count),2);
         //nihao购物车数
-        $nihao_shoppingcart_total = $nihao_model->table('sales_flat_quote')->where($date)->where(['base_grand_total','GT',0])->count('*');
+        $nihao_shoppingcart_total = $nihao_model->table('sales_flat_quote')->where($date)->where('base_grand_total','GT',0)->count('*');
         //nihao购物车转化率
         $nihao_shoppingcart_conversion = @round(($nihao_count/$nihao_shoppingcart_total),2);
         //nihao注册用户数
