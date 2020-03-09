@@ -2710,6 +2710,48 @@ order by sfoi.item_id asc limit 1000";
 
     }
 
+    public function select_product_data()
+    {
+        $dataConfig = new \app\admin\model\DataConfig();
+        //在售SKU总数
+        $onSaleSkuNum = $this->itemplatformsku->onSaleSkuNum();
+        $data['value'] = $onSaleSkuNum;
+        $data['updatetime'] = date('Y-m-d H:i:s', time());
+        $dataConfig->where('key', 'onSaleSkuNum')->update($data);
+
+        //在售镜架总数
+        $onSaleFrameNum = $this->itemplatformsku->onSaleFrameNum();
+        $data['value'] = $onSaleFrameNum;
+        $data['updatetime'] = date('Y-m-d H:i:s', time());
+        $dataConfig->where('key', 'onSaleFrameNum')->update($data);
+
+        //在售饰品总数
+        $onSaleOrnamentsNum = $this->itemplatformsku->onSaleOrnamentsNum();
+        $data['value'] = $onSaleOrnamentsNum;
+        $data['updatetime'] = date('Y-m-d H:i:s', time());
+        $dataConfig->where('key', 'onSaleOrnamentsNum')->update($data);
+
+
+        //当月选品总数
+        $new_product = new \app\admin\model\NewProduct();
+        $selectProductNum = $new_product->selectProductNum();
+        $data['value'] = $selectProductNum;
+        $data['updatetime'] = date('Y-m-d H:i:s', time());
+        $dataConfig->where('key', 'selectProductNum')->update($data);
+
+        //当月新品上线总数
+        $new_product = new \app\admin\model\NewProduct();
+        $selectProductAdoptNum = $new_product->selectProductAdoptNum();
+        $data['value'] = $selectProductAdoptNum;
+        $data['updatetime'] = date('Y-m-d H:i:s', time());
+        $dataConfig->where('key', 'selectProductAdoptNum')->update($data);
+
+        //新品十天内的销量
+        
+        
+
+    }
+
     /**
      * 在途库存
      *

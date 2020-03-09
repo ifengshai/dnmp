@@ -24,7 +24,7 @@ class ItemPlatformSku extends Model
 
     // 追加属性
     protected $append = [];
-    
+
     //关联item
     public function item()
     {
@@ -34,8 +34,8 @@ class ItemPlatformSku extends Model
     //添加商品平台sku
     public function addPlatformSku($row)
     {
-        $res = $this->where('sku',$row['sku'])->field('sku,name')->find();
-        if($res){
+        $res = $this->where('sku', $row['sku'])->field('sku,name')->find();
+        if ($res) {
             return false;
         }
         $platform = (new MagentoPlatform())->getOrderPlatformList();
@@ -57,7 +57,7 @@ class ItemPlatformSku extends Model
                         break;
                     case 'wesee':
                         $prefix = 'W';
-                        break;    
+                        break;
                 }
                 $arr[$k]['sku'] = $row['sku'];
                 $arr[$k]['platform_sku'] = $prefix . $row['sku'];
@@ -95,7 +95,7 @@ class ItemPlatformSku extends Model
     public function getPlatformSku($platform_sku)
     {
         $result = $this->where('platform_sku', 'eq', $platform_sku)->field('id,platform_sku,presell_num')->find();
-        if($result['presell_num']>0){
+        if ($result['presell_num'] > 0) {
             return -1;
         }
         return $result ? $result : false;
@@ -138,13 +138,13 @@ class ItemPlatformSku extends Model
     /**
      * 查询平台sku库存是否充足
      */
-    public function check_platform_sku_qty($change_sku,$order_platform)
+    public function check_platform_sku_qty($change_sku, $order_platform)
     {
         $where['platform_sku'] = $change_sku;
         $where['platform_type'] = $order_platform;
         $where['is_open'] = 1;
         $where['is_del']  = 1;
-        $result = $this->alias('g')->join('item m','g.sku=m.sku')->where($where)->field('m.id,m.sku,m.available_stock')->find();
+        $result = $this->alias('g')->join('item m', 'g.sku=m.sku')->where($where)->field('m.id,m.sku,m.available_stock')->find();
         return $result;
     }
 
@@ -155,7 +155,7 @@ class ItemPlatformSku extends Model
      * @return string
      */
     public function getTrueSku($sku = '', $platform_type = '')
-    { 
+    {
         $map['platform_sku'] = $sku;
         $map['platform_type'] = $platform_type;
         return $this->where($map)->value('sku');
@@ -172,9 +172,57 @@ class ItemPlatformSku extends Model
      * @return void
      */
     public function getWebSku($sku = '', $platform_type = '')
-    { 
+    {
         $map['sku'] = $sku;
         $map['platform_type'] = $platform_type;
         return $this->where($map)->value('platform_sku');
+    }
+
+    /**
+     * 统计在售SKU数量
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/03/09 17:28:21 
+     * @return void
+     */
+    public function onSaleSkuNum()
+    {
+        $map['outer_sku_status'] = 1;
+        return $this->where($map)->group('sku')->count(1);
+    }
+
+    /**
+     * 统计在售镜架SKU数量
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/03/09 17:36:49 
+     * @return void
+     */
+    public function onSaleFrameNum()
+    {
+        $item = new \app\admin\model\itemmanage\Item();
+        $skus = $item->getFrameSku();
+        $map['outer_sku_status'] = 1;
+        $map['sku'] = ['in', $skus];
+        return $this->where($map)->group('sku')->count(1);
+    }
+
+    /**
+     * 统计在售饰品数量
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/03/09 17:36:49 
+     * @return void
+     */
+    public function onSaleOrnamentsNum()
+    {
+        $item = new \app\admin\model\itemmanage\Item();
+        $skus = $item->getOrnamentsSku();
+        $map['outer_sku_status'] = 1;
+        $map['sku'] = ['in', $skus];
+        return $this->where($map)->group('sku')->count(1);
     }
 }
