@@ -948,6 +948,31 @@ class InfoSynergyTask extends Backend
     {
         set_time_limit(0);
         ini_set('memory_limit', '512M');
+        $rep    = $this->request->get('filter');
+        $repArr  = (new Admin())->getAllStaff();
+        $deptArr = (new AuthGroup())->getAllGroup();
+        if($rep != '{}'){
+            $whereArr = json_decode($rep,true);
+            foreach($whereArr as $key => $whereval){
+                if(($key == 'dept') && (in_array($whereval,$deptArr))){
+                    $dept_id = array_search($whereval,$deptArr);
+                    $addWhere  .= " AND FIND_IN_SET($dept_id,dept_id)";
+                    unset($whereArr['dept']);                 
+                }elseif($key == 'dept'){
+                    $addWhere  .= " AND dept_id=''";
+                    unset($whereArr['dept']);
+                }
+                if(($key == 'rep') && (in_array($whereval,$repArr))){
+                    $rep_id  = array_search($whereval,$repArr);
+                    $addWhere .= " AND FIND_IN_SET($rep_id,rep_id)";
+                    unset($whereArr['rep']);
+                }elseif($key == 'rep'){
+                    $addWhere .= " AND rep_id=''";
+                    unset($whereArr['rep']);
+                }
+            }
+            $this->request->get(['filter'=>json_encode($whereArr)]);
+        }
         $ids = input('ids');
         $addWhere = '1=1';
         if ($ids) {
@@ -968,7 +993,7 @@ class InfoSynergyTask extends Backend
 		}else{
 			$info = [];	
 		}
-        $repArr  = (new Admin())->getAllStaff();
+        
         $list = collection($list)->toArray();
 
         //从数据库查询需要的数据
