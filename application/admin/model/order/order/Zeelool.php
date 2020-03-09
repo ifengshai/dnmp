@@ -643,7 +643,12 @@ class Zeelool extends Model
             } else {
                 $all_price += $item_price[$sku] * $v['num'];
             }
+            $data[$k]['true_sku'] = $sku;
         }
+        dump($data);
+        dump($arr);
+        dump($item_price);
+        dump($all_price);die;
         return $all_price;
     }
 }

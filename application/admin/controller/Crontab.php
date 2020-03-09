@@ -2323,7 +2323,6 @@ order by sfoi.item_id asc limit 1000";
      */
     public function purchase_data()
     {
-
         //当月采购总数
         $purchase = new \app\admin\model\purchase\PurchaseOrder();
         $purchaseNum = $purchase->getPurchaseNum();
