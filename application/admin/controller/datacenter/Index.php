@@ -258,10 +258,70 @@ class Index extends Backend
         $customSkuPrice = $dataConfig->where('key', 'customSkuPrice')->value('value');
 
         /**********************************END************************************************/
+        /*********************************仓库数据***************************************/
+        //当月总单量
+        $lastMonthAllSalesNum = $dataConfig->where('key', 'lastMonthAllSalesNum')->value('value');
 
-        $data = $this->warehouse_order_data();
+        //未出库订单总数
+        $allUnorderNum = $dataConfig->where('key', 'allUnorderNum')->value('value');
+       
+
+        //7天未出库订单总数
+        $days7UnorderNum = $dataConfig->where('key', 'days7UnorderNum')->value('value');
+        
+
+        //当月质检总数
+        $orderCheckNum = $dataConfig->where('key', 'orderCheckNum')->value('value');
+        
+        //当日配镜架总数
+        $orderFrameNum = $dataConfig->where('key', 'orderFrameNum')->value('value');
+
+        //当日配镜片总数
+        $orderLensNum = $dataConfig->where('key', 'orderLensNum')->value('value');
+
+        //当日加工总数
+        $orderFactoryNum = $dataConfig->where('key', 'orderFactoryNum')->value('value');
+
+        //当日质检总数
+        $orderCheckNewNum = $dataConfig->where('key', 'orderCheckNewNum')->value('value');
+
+        //当日出库总数
+        $outStockNum = $dataConfig->where('key', 'outStockNum')->value('value');
+
+        //当日质检入库总数
+        $inStockNum = $dataConfig->where('key', 'inStockNum')->value('value');
+
+        //总压单率
+        $pressureRate = $dataConfig->where('key', 'pressureRate')->value('value');
+
+        //7天压单率
+        $pressureRate7days = $dataConfig->where('key', 'pressureRate7days')->value('value');
+
+        //当月妥投总量
+        $monthAppropriate = $dataConfig->where('key', 'monthAppropriate')->value('value');
+
+        //当月妥投占比
+        $monthAppropriatePercent = $dataConfig->where('key', 'monthAppropriatePercent')->value('value');
+        
+        //超时订单总数
+        $overtimeOrder = $dataConfig->where('key', 'overtimeOrder')->value('value');
+     
         //仓库数据
-        $this->view->assign('data', $data);
+        $this->view->assign('lastMonthAllSalesNum', $lastMonthAllSalesNum);
+        $this->view->assign('allUnorderNum', $allUnorderNum);
+        $this->view->assign('days7UnorderNum', $days7UnorderNum);
+        $this->view->assign('orderCheckNum', $orderCheckNum);
+        $this->view->assign('orderFrameNum', $orderFrameNum);
+        $this->view->assign('orderLensNum', $orderLensNum);
+        $this->view->assign('orderFactoryNum', $orderFactoryNum);
+        $this->view->assign('orderCheckNewNum', $orderCheckNewNum);
+        $this->view->assign('outStockNum', $outStockNum);
+        $this->view->assign('inStockNum', $inStockNum);
+        $this->view->assign('pressureRate', $pressureRate);
+        $this->view->assign('pressureRate7days', $pressureRate7days);
+        $this->view->assign('monthAppropriate', $monthAppropriate);
+        $this->view->assign('monthAppropriatePercent', $monthAppropriatePercent);
+        $this->view->assign('overtimeOrder', $overtimeOrder);
         //采购数据
         $this->view->assign('purchaseNum', $purchaseNum);
         $this->view->assign('purchasePrice', $purchasePrice);
