@@ -27,6 +27,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {field: 'email_id', title: __('Ticket id')},
                         {field: 'key_preg', title: __('关键字')},
                         // {field: 'body', title: __('内容')},
+                        {field: 'source', title: __('来源')},
                         {field: 'tags', title: __('Tags')},
                         {field: 'status', title: __('Status'), formatter: Table.api.formatter.status},
                         {field: 'create_time', title: __('Create_time'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime},

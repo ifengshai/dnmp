@@ -283,7 +283,8 @@ class ZendeskOne extends Controller
                                     'tags' => join(',',$tags),
                                     'status' => $ticket->status,
                                     'requester_id' => $requester_id,
-                                    'assignee_id' => $ticket->assignee_id ? $ticket->assignee_id : 0
+                                    'assignee_id' => $ticket->assignee_id ? $ticket->assignee_id : 0,
+                                    'source' => $ticket->via->channel
 
                                 ];
                                 //添加主评论
