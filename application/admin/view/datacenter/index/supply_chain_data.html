@@ -280,7 +280,7 @@
                                         </tr>
                                         <tr>
                                             <td>当月采购平均单价（￥）</td>
-                                            <td>{:round($purchase_data['purchasePrice']/$purchase_data['purchaseNum'],2)}</td>
+                                            <td>{:$purchase_data['purchaseNum'] ? round($purchase_data['purchasePrice']/$purchase_data['purchaseNum'],2) : 0}</td>
                                             <td>当月到货总数</td>
                                             <td>{$purchase_data.arrivalsNum}</td>
                                         </tr>
@@ -324,47 +324,30 @@
                                             <td colspan="4" style="font-size: 16px;font-weight:1000">选品数据</td>
                                         </tr>
                                         <tr>
-                                            <td>当月总单量</td>
-                                            <td></td>
-                                            <td>7天总单量</td>
-                                            <td></td>
-                                        </tr>
-                                        <tr>
-                                            <td>未出库订单总数</td>
-                                            <td></td>
-                                            <td>7天未出库总数</td>
+                                            <td>在售SKU总数</td>
+                                            <td>0</td>
+                                            <td>在售镜架总数</td>
                                             <td></td>
                                         </tr>
                                         <tr>
-                                            <td>总压单率</td>
+                                            <td>在售饰品总数</td>
                                             <td></td>
-                                            <td>7天压单率</td>
-                                            <td></td>
-                                        </tr>
-                                        <tr>
-                                            <td>超时订单总数</td>
-                                            <td></td>
-                                            <td>当月质检总数</td>
+                                            <td>当月选品总数</td>
                                             <td></td>
                                         </tr>
                                         <tr>
-                                            <td>当日出库总数</td>
+                                            <td>当月新品上线总数</td>
                                             <td></td>
-                                            <td>当日质检入库总数</td>
-                                            <td></td>
-                                        </tr>
-                                        <tr>
-                                            <td>当日配镜架总数</td>
-                                            <td></td>
-                                            <td>当日配镜片总数</td>
+                                            <td>新品满十天销量总数</td>
                                             <td></td>
                                         </tr>
                                         <tr>
-                                            <td>当日加工总数</td>
+                                            <td>新品十天销量占比</td>
                                             <td></td>
-                                            <td>当日质检总数</td>
+                                            <td>新品销量等级明细</td>
                                             <td></td>
                                         </tr>
+                                        
                                     </table>
                                 </div>
                             </div>
