@@ -137,6 +137,7 @@ class Index extends Backend
     {
         $dataConfig = new \app\admin\model\DataConfig();
 
+        /*******************************库存数据***********************************/
         //仓库总库存
         $allStock = $dataConfig->where('key', 'allStock')->value('value');
 
@@ -211,7 +212,9 @@ class Index extends Backend
         //在途饰品库存总金额
         $onwayOrnamentAllStockPrice = $dataConfig->where('key', 'onwayOrnamentAllStockPrice')->value('value');
 
-        /**********************************采购数据***************************************/
+        /*******************************END****************************************/
+
+        /*******************************采购数据***************************************/
         //当月采购总数
         $purchaseNum = $dataConfig->where('key', 'purchaseNum')->value('value');
 
@@ -253,6 +256,8 @@ class Index extends Backend
 
         //当月定做平均单价
         $customSkuPrice = $dataConfig->where('key', 'customSkuPrice')->value('value');
+
+        /**********************************END************************************************/
 
         $data = $this->warehouse_order_data();
         //仓库数据
