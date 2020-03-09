@@ -295,6 +295,8 @@ class Index extends Backend
         $data = $this->warehouse_order_data();
         //仓库数据
         $this->view->assign('data', $data);
+        //采购数据
+        $this->view->assign('purchase_data', $this->purchase_data());
         $this->view->assign('allStock', $allStock);
         $this->view->assign('allStockPrice', $allStockPrice);
         $this->view->assign('frameStock', $frameStock);
@@ -626,16 +628,75 @@ class Index extends Backend
         $inStockNum = $inStock->getInStockNum();
 
         $data = [
-            'lastMonthAllSalesNum' => $lastMonthAllSalesNum,//当月总单量
-            'allUnorderNum'        => $allUnorderNum,//未出库总数
-            'days7UnorderNum'      => $days7UnorderNum,//7天未出库总数
-            'orderCheckNum'        => $orderCheckNum,//订单当月质检总数
-            'orderFrameNum'        => $orderFrameNum,//当日配镜架总数
-            'orderLensNum'         => $orderLensNum,//当日配镜片总数
-            'orderFactoryNum'      => $orderFactoryNum,//当日加工总数
-            'orderCheckNewNum'     => $orderCheckNewNum,//当日质检总数
-            'outStockNum'          => $outStockNum,//当日出库总数
-            'inStockNum'           => $inStockNum,//当日入库总数
+            'lastMonthAllSalesNum' => $lastMonthAllSalesNum, //当月总单量
+            'allUnorderNum'        => $allUnorderNum, //未出库总数
+            'days7UnorderNum'      => $days7UnorderNum, //7天未出库总数
+            'orderCheckNum'        => $orderCheckNum, //订单当月质检总数
+            'orderFrameNum'        => $orderFrameNum, //当日配镜架总数
+            'orderLensNum'         => $orderLensNum, //当日配镜片总数
+            'orderFactoryNum'      => $orderFactoryNum, //当日加工总数
+            'orderCheckNewNum'     => $orderCheckNewNum, //当日质检总数
+            'outStockNum'          => $outStockNum, //当日出库总数
+            'inStockNum'           => $inStockNum, //当日入库总数
+        ];
+        return $data;
+    }
+
+    /**
+     * 采购数据
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/03/05 17:05:27 
+     * @return void
+     */
+    protected function purchase_data()
+    {
+        //当月采购总数
+        $purchase = new \app\admin\model\purchase\PurchaseOrder();
+        $purchaseNum = $purchase->getPurchaseNum();
+
+        //当月采购总金额
+        $purchasePrice = $purchase->getPurchasePrice();
+
+        //当月采购镜架总数
+        $purchaseFrameNum = $purchase->getPurchaseFrameNum();
+
+        //当月采购总SKU数
+        $purchaseSkuNum = $purchase->getPurchaseSkuNum();
+
+        //当月销售总数
+        $salesNum = cache('purchase_data_' . 'salesNum');
+        if (!$salesNum) {
+            $zeeloolSkuNum = $this->zeelool->getOrderSkuNum();
+            $vooguemeSkuNum = $this->voogueme->getOrderSkuNum();
+            $nihaoSkuNum = $this->nihao->getOrderSkuNum();
+            $salesNum = $zeeloolSkuNum + $vooguemeSkuNum + $nihaoSkuNum;
+            cache('purchase_data_' . 'salesNum', $salesNum);
+        }
+
+        //当月到货总数
+        $check = new \app\admin\model\warehouse\Check();
+        $arrivalsNum = $check->getArrivalsNum();
+
+        //当月质检合格数量
+        $quantityNum = $check->getQuantityNum();
+
+        //合格率
+        if ($arrivalsNum > 0) {
+            $quantityPercent = round($quantityNum / $arrivalsNum * 100, 2);
+        }
+        
+
+        $data = [
+            'purchaseNum'           => $purchaseNum, //当月采购总数
+            'purchasePrice'         => $purchasePrice, //当月采购总金额
+            'purchaseFrameNum'      => $purchaseFrameNum, //当月采购镜架总数
+            'purchaseSkuNum'        => $purchaseSkuNum, //当月采购总SKU数
+            'salesNum'              => $salesNum, //当月销售总数
+            'arrivalsNum'           => $arrivalsNum, //当月到货总数
+            'quantityNum'           => $quantityNum, //当月质检合格数量
+            'quantityPercent'       => $quantityPercent, //合格率
         ];
         return $data;
     }

@@ -82,7 +82,9 @@ class ZendeskOne extends Controller
             // ];
             // $get_order_id = $this->getOrderId($customr_comment_all);
             // $order = $this->findOrderByEmail($requester_email,$get_order_id);
-            $res = $this->getTrackMsg(41);
+            // $res = $this->getTrackMsg(41);
+            $track = new Trackingmore();
+            $res = $track->getRealtimeTrackingResults('china-post', 'LW545013382CN');            
             echo json_encode($res);
             die;
         } catch (\Zendesk\API\Exceptions\ApiResponseException $e) {
@@ -224,7 +226,8 @@ class ZendeskOne extends Controller
                                     'html_body' => $last_comment->html_body,
                                     'tags' => join(',',array_unique(array_merge($tags, $params['tags']))),
                                     'status' => $ticket->status,
-                                    'assignee_id' => 382940274852
+                                    'assignee_id' => 382940274852,
+                                    'is_admin' => 2
                                 ]);
                                 //回复评论
                                 $reply_detail_data = [
@@ -234,6 +237,7 @@ class ZendeskOne extends Controller
                                     'tags' => join(',',array_unique(array_merge($tags, $params['tags']))),
                                     'status' => $params['status'],
                                     'assignee_id' => 382940274852,
+                                    'is_admin' => 1
                                 ];
                             }
                             //tag合并
@@ -279,7 +283,8 @@ class ZendeskOne extends Controller
                                     'tags' => join(',',$tags),
                                     'status' => $ticket->status,
                                     'requester_id' => $requester_id,
-                                    'assignee_id' => $ticket->assignee_id ? $ticket->assignee_id : 0
+                                    'assignee_id' => $ticket->assignee_id ? $ticket->assignee_id : 0,
+                                    'source' => $ticket->via->channel
 
                                 ];
                                 //添加主评论
@@ -296,6 +301,7 @@ class ZendeskOne extends Controller
                                     'tags' => join(',',array_unique(array_merge($tags, $params['tags']))),
                                     'status' => $params['status'],
                                     'assignee_id' => 382940274852,
+                                    'is_admin' => 1
                                 ];
                             }
                             if (!empty($params)) {
@@ -434,7 +440,7 @@ class ZendeskOne extends Controller
                     $params['comment']['body'] = sprintf(config('zendesk.t6'), $res['updated_at'], $res['track_number'], $res['carrier_code']);
                     $params['tags'] = ['超时', '查询物流信息'];
                 } else {
-                    $params['comment']['body'] = sprintf(config('zendesk.t5'), $res['updated_at'], $res['track_number'], $res['carrier_code'], $res['lastEvent'], 'https://www.zeelool.com/ordertrack', 'https://tools.usps.com/go/TrackConfirmAction_input');
+                    $params['comment']['body'] = sprintf(config('zendesk.t5'), $res['updated_at'], $res['track_number'], $res['carrier_code'], '【In Transit】 '.$res['lastEvent'], 'https://www.zeelool.com/ordertrack', 'https://tools.usps.com/go/TrackConfirmAction_input');
                     $params['tags'] = ['查询物流信息'];
                 }
             } else { //转客服，状态open
@@ -472,6 +478,9 @@ class ZendeskOne extends Controller
             ->find();
         //查询物流信息
         $title = strtolower(str_replace(' ', '-', $track_result['title']));
+        if($title == 'china-post'){
+            $title = 'china-ems';
+        }
         $track = new Trackingmore();
         $result = $track->getRealtimeTrackingResults($title, $track_result['track_number']);
         //dump($result);die;
@@ -482,7 +491,7 @@ class ZendeskOne extends Controller
         $res = [
             'status' => $data['status'],
             'lastUpdateTime' => $lastUpdateTime,
-            'lastEvent' => '【In Transit】 '.$lastEvent,
+            'lastEvent' => $lastEvent,
             'carrier_code' => $data['carrier_code'],
             'updated_at' => $track_result['updated_at'],
             'track_number' => $track_result['track_number']

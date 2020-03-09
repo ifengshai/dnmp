@@ -25,7 +25,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {field: 'email', title: __('Email')},
                         {field: 'title', title: __('主题')},
                         {field: 'email_id', title: __('Ticket id')},
-                        {field: 'body', title: __('内容')},
+                        {field: 'key_preg', title: __('关键字')},
+                        // {field: 'body', title: __('内容')},
+                        {field: 'source', title: __('来源')},
                         {field: 'tags', title: __('Tags')},
                         {field: 'status', title: __('Status'), formatter: Table.api.formatter.status},
                         {field: 'create_time', title: __('Create_time'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime},
@@ -37,7 +39,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     title: '邮件详情',
                                     classname: 'btn btn-xs btn-primary btn-dialog',
                                     icon: 'fa fa-list',
-                                    url: 'zendesk/zendesk_reply_detail/index',
+                                    url: 'zendesk/zendesk_reply_detail/detail',
                                     callback: function (data) {
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), {title: "回传数据"});
                                     },

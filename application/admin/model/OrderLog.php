@@ -45,7 +45,7 @@ class OrderLog extends Model
      */
     public function getOrderCheckNum()
     {
-        $where['createtime'] = ['between', [date('Y-m-01 00:00:00', time()), date('Y-m-01 H:i:s', time())]];
+        $where['createtime'] = ['between', [date('Y-m-01 00:00:00', time()), date('Y-m-d H:i:s', time())]];
         $where['type'] = 5; //质检通过
         $ids = $this->where($where)->column('order_ids');
         $ids = implode(',', $ids);

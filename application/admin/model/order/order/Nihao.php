@@ -422,4 +422,60 @@ class Nihao extends Model
         $where['status'] = ['in', ['processing', 'free_processing']];
         return $this->where($where)->count(1);
     }
+
+
+    /**
+     * 统计当月销售总数
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/03/06 16:08:44 
+     * @return void
+     */
+    public function getOrderSkuNum()
+    {
+        $where['a.created_at'] = ['between', [date('Y-m-01 00:00:00', time()), date('Y-m-d H:i:s', time())]];
+        return $this->alias('a')
+        ->where($where)
+        ->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')
+        ->sum('b.qty_ordered');
+    }
+
+    /**
+     * 统计当月销售总成本
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/03/06 16:08:44 
+     * @return void
+     */
+    public function getOrderSalesCost()
+    {
+        $where['a.created_at'] = ['between', [date('Y-m-01 00:00:00', time()), date('Y-m-d H:i:s', time())]];
+        $data = $this->alias('a')
+            ->where($where)
+            ->field("sum('qty_ordered') as num,sku")
+            ->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')
+            ->group('sku')
+            ->select();
+
+        //SKU实时进价
+        $sku_pirce = new \app\admin\model\SkuPrice;
+        $arr = $sku_pirce->getAllData();
+
+        //SKU参考进价
+        $item = new \app\admin\model\itemmanage\Item();
+        $item_price = $item->getSkuPrice();
+        $all_price = 0;
+        foreach ($data as $k => $v) {
+            //sku转换
+            $sku = $this->itemplatformsku->getWebSku($v['sku'], 3);
+            if ($arr[$sku]) {
+                $all_price += $arr[$sku] * $v['num'];
+            } else {
+                $all_price += $item_price[$sku] * $v['num'];
+            }
+        }
+        return $all_price;
+    }
 }
