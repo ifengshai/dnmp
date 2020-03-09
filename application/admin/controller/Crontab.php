@@ -32,7 +32,8 @@ class Crontab extends Backend
         'get_sku_price',
         'get_sku_allstock',
         'purchase_data',
-        'stock_data'
+        'stock_data',
+        'warehouse_data'
 
     ];
 
@@ -2535,6 +2536,8 @@ order by sfoi.item_id asc limit 1000";
         $data['updatetime'] = date('Y-m-d H:i:s', time());
         $dataConfig->where('key', 'allSalesNum')->update($data);
 
+
+
         //期初总库存
         $productAllStockLog = new \app\admin\model\ProductAllStock();
         $start7days = $productAllStockLog->where('createtime', 'like', $stime . '%')->value('allnum');
@@ -2592,6 +2595,120 @@ order by sfoi.item_id asc limit 1000";
         $dataConfig->where('key', 'onwayOrnamentAllStockPrice')->update($data);
     }
 
+    /**
+     * 定时更新供应链大屏-仓库数据
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/03/04 17:05:15 
+     * @return void
+     */
+    public function warehouse_data()
+    {
+        $dataConfig = new \app\admin\model\DataConfig();
+        //当月总单量
+        $orderStatistics = new \app\admin\model\OrderStatistics();
+        $stime = date("Y-m-01 00:00:00");
+        $etime = date("Y-m-d H:i:s", time());
+        $map['create_date'] = ['between', [$stime, $etime]];
+        $lastMonthAllSalesNum = $orderStatistics->where($map)->sum('all_sales_num');
+        $data['value'] = $lastMonthAllSalesNum;
+        $data['updatetime'] = date('Y-m-d H:i:s', time());
+        $dataConfig->where('key', 'lastMonthAllSalesNum')->update($data);
+
+        //未出库订单总数
+        $zeeloolUnorderNum = $this->zeelool->undeliveredOrder([]);
+        $vooguemeUnorderNum = $this->voogueme->undeliveredOrder([]);
+        $nihaoUnorderNum = $this->nihao->undeliveredOrder([]);
+        $allUnorderNum = $zeeloolUnorderNum + $vooguemeUnorderNum + $nihaoUnorderNum;
+        $data['value'] = $allUnorderNum;
+        $data['updatetime'] = date('Y-m-d H:i:s', time());
+        $dataConfig->where('key', 'allUnorderNum')->update($data);
+
+        //7天未出库订单总数
+        $map = [];
+        $stime = date("Y-m-d H:i:s", strtotime("-7 day"));
+        $etime = date("Y-m-d H:i:s", time());
+        $map['a.created_at'] = ['between', [$stime, $etime]];
+        $zeeloolUnorderNum = $this->zeelool->undeliveredOrder($map);
+        $vooguemeUnorderNum = $this->voogueme->undeliveredOrder($map);
+        $nihaoUnorderNum = $this->nihao->undeliveredOrder($map);
+        $days7UnorderNum = $zeeloolUnorderNum + $vooguemeUnorderNum + $nihaoUnorderNum;
+        $data['value'] = $days7UnorderNum;
+        $data['updatetime'] = date('Y-m-d H:i:s', time());
+        $dataConfig->where('key', 'days7UnorderNum')->update($data);
+
+        //当月质检总数
+        $orderLog = new \app\admin\model\OrderLog();
+        $orderCheckNum = $orderLog->getOrderCheckNum();
+        $data['value'] = $orderCheckNum;
+        $data['updatetime'] = date('Y-m-d H:i:s', time());
+        $dataConfig->where('key', 'orderCheckNum')->update($data);
+
+        //当日配镜架总数
+        $orderFrameNum = $orderLog->getOrderFrameNum();
+        $data['value'] = $orderFrameNum;
+        $data['updatetime'] = date('Y-m-d H:i:s', time());
+        $dataConfig->where('key', 'orderFrameNum')->update($data);
+
+        //当日配镜片总数
+        $orderLensNum = $orderLog->getOrderLensNum();
+        $data['value'] = $orderLensNum;
+        $data['updatetime'] = date('Y-m-d H:i:s', time());
+        $dataConfig->where('key', 'orderLensNum')->update($data);
+
+        //当日加工总数
+        $orderFactoryNum = $orderLog->getOrderFactoryNum();
+        $data['value'] = $orderFactoryNum;
+        $data['updatetime'] = date('Y-m-d H:i:s', time());
+        $dataConfig->where('key', 'orderFactoryNum')->update($data);
+
+        //当日质检总数
+        $orderCheckNewNum = $orderLog->getOrderCheckNewNum();
+        $data['value'] = $orderCheckNewNum;
+        $data['updatetime'] = date('Y-m-d H:i:s', time());
+        $dataConfig->where('key', 'orderCheckNewNum')->update($data);
+
+        //当日出库总数
+        $outStock = new \app\admin\model\warehouse\Outstock();
+        $outStockNum = $outStock->getOutStockNum();
+        $data['value'] = $outStockNum;
+        $data['updatetime'] = date('Y-m-d H:i:s', time());
+        $dataConfig->where('key', 'outStockNum')->update($data);
+
+        //当日质检入库总数
+        $inStock = new \app\admin\model\warehouse\Instock();
+        $inStockNum = $inStock->getInStockNum();
+        $data['value'] = $inStockNum;
+        $data['updatetime'] = date('Y-m-d H:i:s', time());
+        $dataConfig->where('key', 'inStockNum')->update($data);
+
+        //总压单率
+        $data['value'] = $pressureRate ?? 0;
+        $data['updatetime'] = date('Y-m-d H:i:s', time());
+        $dataConfig->where('key', 'pressureRate')->update($data);
+
+        //7天压单率
+        $data['value'] = $pressureRate7days ?? 0;
+        $data['updatetime'] = date('Y-m-d H:i:s', time());
+        $dataConfig->where('key', 'pressureRate7days')->update($data);
+
+        //当月妥投总量
+        $data['value'] = $monthAppropriate ?? 0;
+        $data['updatetime'] = date('Y-m-d H:i:s', time());
+        $dataConfig->where('key', 'monthAppropriate')->update($data);
+
+        //当月妥投占比
+        $data['value'] = $monthAppropriatePercent ?? 0;
+        $data['updatetime'] = date('Y-m-d H:i:s', time());
+        $dataConfig->where('key', 'monthAppropriatePercent')->update($data);
+
+        //超时订单总数
+        $data['value'] = $overtimeOrder ?? 0;
+        $data['updatetime'] = date('Y-m-d H:i:s', time());
+        $dataConfig->where('key', 'overtimeOrder')->update($data);
+
+    }
 
     /**
      * 在途库存
