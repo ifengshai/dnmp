@@ -23,6 +23,7 @@ class SKUHelper{
         $target_sku = str_replace('I', '', $target_sku);
         $target_sku = str_replace('O', '', $target_sku);
         $target_sku = str_replace('G', '', $target_sku);
+        $target_sku = str_replace('W', '', $target_sku);
         return $target_sku;
     }
     

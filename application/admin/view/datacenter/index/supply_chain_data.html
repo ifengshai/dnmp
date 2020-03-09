@@ -268,33 +268,33 @@
                                         </tr>
                                         <tr>
                                             <td>当月采购总数</td>
-                                            <td>0</td>
+                                            <td>{$purchase_data.purchaseNum}</td>
                                             <td>当月采购总金额</td>
-                                            <td>0</td>
+                                            <td>{$purchase_data.purchasePrice}</td>
                                         </tr>
                                         <tr>
                                             <td>当月采购镜架总数</td>
-                                            <td>0</td>
+                                            <td>{$purchase_data.purchaseFrameNum}</td>
                                             <td>当月采购总SKU数</td>
-                                            <td>0</td>
+                                            <td>{$purchase_data.purchaseSkuNum}</td>
                                         </tr>
                                         <tr>
                                             <td>当月采购平均单价（￥）</td>
-                                            <td>0</td>
+                                            <td>{:round($purchase_data['purchasePrice']/$purchase_data['purchaseNum'],2)}</td>
                                             <td>当月到货总数</td>
-                                            <td>0</td>
+                                            <td>{$purchase_data.arrivalsNum}</td>
                                         </tr>
                                         <tr>
                                             <td>当月销售总数</td>
-                                            <td>0</td>
+                                            <td>{$purchase_data.salesNum}</td>
                                             <td>当月销售总成本（￥）</td>
                                             <td>0</td>
                                         </tr>
                                         <tr>
                                             <td>当月质检合格总数</td>
-                                            <td>0</td>
+                                            <td>{$purchase_data.quantityNum}</td>
                                             <td>当月品检合格率</td>
-                                            <td>0</td>
+                                            <td>{$purchase_data.quantityPercent}</td>
                                         </tr>
                                         <tr>
                                             <td>当月定做总数</td>
@@ -321,7 +321,7 @@
                                 <div>
                                     <table id="caigou-table" class="handle_table1" style="width: 650px;">
                                         <tr>
-                                            <td colspan="4" style="font-size: 16px;font-weight:1000">仓库数据</td>
+                                            <td colspan="4" style="font-size: 16px;font-weight:1000">选品数据</td>
                                         </tr>
                                         <tr>
                                             <td>当月总单量</td>
