@@ -33,6 +33,19 @@ class Crontab extends Backend
         'get_sku_allstock'
 
     ];
+
+    public function _initialize()
+    {
+        parent::_initialize();
+        $this->zeelool = new \app\admin\model\order\order\Zeelool;
+        $this->voogueme = new \app\admin\model\order\order\Voogueme;
+        $this->nihao = new \app\admin\model\order\order\Nihao;
+        $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
+        $this->item = new \app\admin\model\itemmanage\Item;
+        $this->lens = new \app\admin\model\lens\Index;
+    }
+
+
     protected $order_status =  "and status in ('processing','complete','creditcard_proccessing','free_processing')";
 
     /**
@@ -1571,7 +1584,7 @@ order by sfoi.item_id asc limit 1000";
         $data['allnum'] = $num;
         $data['createtime'] = date('Y-m-d H:i:s');
         $res = Db::table('fa_product_allstock_log')->insert($data);
-    }   
+    }
     /**
      * 更新zeelool站仪表盘数据
      *
@@ -1585,24 +1598,24 @@ order by sfoi.item_id asc limit 1000";
     {
         //求出平台
         $platform = $this->request->get('platform');
-        if(!$platform){
+        if (!$platform) {
             return false;
         }
-        switch($platform){
+        switch ($platform) {
             case 1:
-            $model = Db::connect('database.db_zeelool');
-            break;
+                $model = Db::connect('database.db_zeelool');
+                break;
             case 2:
-            $model = Db::connect('database.db_voogueme');
-            break;
+                $model = Db::connect('database.db_voogueme');
+                break;
             case 3:
-            $model = Db::connect('database.db_nihao');
-            break;
+                $model = Db::connect('database.db_nihao');
+                break;
             default:
-            $model = false;
-            break;            
+                $model = false;
+                break;
         }
-        if(false === $model){
+        if (false === $model) {
             return false;
         }
         $order_status = $this->order_status;
@@ -1619,7 +1632,7 @@ order by sfoi.item_id asc limit 1000";
         //今年销售额sql
         $thisyear_sales_money_sql      = "SELECT round(sum(base_grand_total),2) base_grand_total FROM sales_flat_order WHERE YEAR(created_at)=YEAR(NOW()) $order_status";
         //上一年销售额sql
-        $lastyear_sales_money_sql      = "SELECT round(sum(base_grand_total),2) base_grand_total FROM sales_flat_order WHERE year(created_at)=year(date_sub(now(),interval 1 year)) $order_status"; 
+        $lastyear_sales_money_sql      = "SELECT round(sum(base_grand_total),2) base_grand_total FROM sales_flat_order WHERE year(created_at)=year(date_sub(now(),interval 1 year)) $order_status";
         //总共的销售额sql
         $total_sales_money_sql         = "SELECT round(sum(base_grand_total),2) base_grand_total FROM sales_flat_order WHERE 1 $order_status";
         //昨天订单数sql
@@ -1629,13 +1642,13 @@ order by sfoi.item_id asc limit 1000";
         //过去30天订单数sql
         $pastthirtyday_order_num_sql   = "SELECT count(*) counter FROM sales_flat_order WHERE DATE_SUB(CURDATE(),INTERVAL 30 DAY) <= date(created_at) and created_at< curdate()";
         //当月订单数sql
-        $thismonth_order_num_sql       = "SELECT count(*) counter FROM sales_flat_order WHERE DATE_FORMAT(created_at,'%Y%m') = DATE_FORMAT(CURDATE(),'%Y%m')" ;
+        $thismonth_order_num_sql       = "SELECT count(*) counter FROM sales_flat_order WHERE DATE_FORMAT(created_at,'%Y%m') = DATE_FORMAT(CURDATE(),'%Y%m')";
         //上月订单数sql
         $lastmonth_order_num_sql       = "SELECT count(*) counter FROM sales_flat_order WHERE PERIOD_DIFF(date_format(now(),'%Y%m'),date_format(created_at,'%Y%m')) =1";
         //今年订单数sql
         $thisyear_order_num_sql        = "SELECT count(*) counter FROM sales_flat_order WHERE YEAR(created_at)=YEAR(NOW())";
         //上一年的订单数sql
-        $lastyear_order_num_sql        = "SELECT count(*) counter FROM sales_flat_order WHERE year(created_at)=year(date_sub(now(),interval 1 year))";  
+        $lastyear_order_num_sql        = "SELECT count(*) counter FROM sales_flat_order WHERE year(created_at)=year(date_sub(now(),interval 1 year))";
         //总共的订单数sql
         $total_order_num_sql           = "SELECT count(*) counter FROM sales_flat_order";
         //昨天订单支付成功数sql
@@ -1735,7 +1748,7 @@ order by sfoi.item_id asc limit 1000";
         //去年新增注册人数
         $lastyear_register_customer_rs              = $model->query($lastyear_register_customer_sql);
         //总共新增注册人数
-        $total_register_customer_rs                 = $model->query($total_register_customer_sql);        
+        $total_register_customer_rs                 = $model->query($total_register_customer_sql);
         //昨天销售额data
         $yesterday_sales_money_data                 = $yesterday_sales_money_rs[0]['base_grand_total'];
         //过去7天销售额data
@@ -1783,23 +1796,23 @@ order by sfoi.item_id asc limit 1000";
         //去年支付成功数data
         $lastyear_order_success_data                = $lastyear_order_success_rs[0]['counter'];
         //总共支付成功数data
-        $total_order_success_data                   = $total_order_success_rs[0]['counter'];                                                
+        $total_order_success_data                   = $total_order_success_rs[0]['counter'];
         //昨日客单价data
-        $yesterday_unit_price_data                  = round(($yesterday_sales_money_data/$yesterday_order_success_data),2);
-         //过去7天客单价data
-        $pastsevenday_unit_price_data               = round(($pastsevenday_sales_money_data/$pastsevenday_order_success_data),2);
+        $yesterday_unit_price_data                  = round(($yesterday_sales_money_data / $yesterday_order_success_data), 2);
+        //过去7天客单价data
+        $pastsevenday_unit_price_data               = round(($pastsevenday_sales_money_data / $pastsevenday_order_success_data), 2);
         //过去30天客单价data
-        $pastthirtyday_unit_price_data              = round(($pastthirtyday_sales_money_data/$pastthirtyday_order_success_data),2);
+        $pastthirtyday_unit_price_data              = round(($pastthirtyday_sales_money_data / $pastthirtyday_order_success_data), 2);
         //当月客单价data
-        $thismonth_unit_price_data                  = round(($thismonth_sales_money_data/$thismonth_order_success_data),2);
+        $thismonth_unit_price_data                  = round(($thismonth_sales_money_data / $thismonth_order_success_data), 2);
         //上月客单价data
-        $lastmonth_unit_price_data                  = round(($lastmonth_sales_money_data/$lastmonth_order_success_data),2);
+        $lastmonth_unit_price_data                  = round(($lastmonth_sales_money_data / $lastmonth_order_success_data), 2);
         //今年客单价data
-        $thisyear_unit_price_data                   = round(($thisyear_sales_money_data/$thisyear_order_success_data),2);
+        $thisyear_unit_price_data                   = round(($thisyear_sales_money_data / $thisyear_order_success_data), 2);
         //上一年客单价data
-        $lastyear_unit_price_data                   = round(($lastyear_sales_money_data/$lastyear_order_success_data),2);
+        $lastyear_unit_price_data                   = round(($lastyear_sales_money_data / $lastyear_order_success_data), 2);
         //总共客单价data
-        $total_unit_price_data                      = round(($total_sales_money_data/$total_order_success_data),2);
+        $total_unit_price_data                      = round(($total_sales_money_data / $total_order_success_data), 2);
         //昨天新增注册人数
         $yesterday_register_customer_data           = $yesterday_register_customer_rs[0]['counter'];
         //过去7天新增注册人数
@@ -1861,18 +1874,18 @@ order by sfoi.item_id asc limit 1000";
         $updateData['lastyear_register_customer']       = $lastyear_register_customer_data;
         $updateData['total_register_customer']          = $total_register_customer_data;
         //查找是否存在的记录
-        $result = Db::name('operation_analysis')->where(['order_platform'=>$platform])->field('id,order_platform')->find();
-        if(!$result){
+        $result = Db::name('operation_analysis')->where(['order_platform' => $platform])->field('id,order_platform')->find();
+        if (!$result) {
             $updateData['order_platform'] = $platform;
-            $updateData['create_time']    = date('Y-m-d h:i:s', time()); 
-            $info=Db::name('operation_analysis')->insert($updateData);
-        }else{
-            $updateData['update_time']    = date('Y-m-d h:i:s', time()); 
-            $info=Db::name('operation_analysis')->where(['order_platform'=>$platform])->update($updateData);
+            $updateData['create_time']    = date('Y-m-d h:i:s', time());
+            $info = Db::name('operation_analysis')->insert($updateData);
+        } else {
+            $updateData['update_time']    = date('Y-m-d h:i:s', time());
+            $info = Db::name('operation_analysis')->where(['order_platform' => $platform])->update($updateData);
         }
-        if($info){
-            echo 'ok'; 
-        }else{
+        if ($info) {
+            echo 'ok';
+        } else {
             echo 'error';
         }
     }
@@ -1889,24 +1902,24 @@ order by sfoi.item_id asc limit 1000";
     {
         //求出平台
         $platform = $this->request->get('platform');
-        if(!$platform){
+        if (!$platform) {
             return false;
         }
-        switch($platform){
+        switch ($platform) {
             case 1:
-            $model = Db::connect('database.db_zeelool');
-            break;
+                $model = Db::connect('database.db_zeelool');
+                break;
             case 2:
-            $model = Db::connect('database.db_voogueme');
-            break;
+                $model = Db::connect('database.db_voogueme');
+                break;
             case 3:
-            $model = Db::connect('database.db_nihao');
-            break;
+                $model = Db::connect('database.db_nihao');
+                break;
             default:
-            $model = false;
-            break;            
+                $model = false;
+                break;
         }
-        if(false === $model){
+        if (false === $model) {
             return false;
         }
         $order_status = $this->order_status;
@@ -1941,7 +1954,7 @@ order by sfoi.item_id asc limit 1000";
         //上年购物车总数sql
         $lastyear_shoppingcart_total_sql      = "SELECT count(*) counter FROM sales_flat_quote WHERE year(created_at)=year(date_sub(now(),interval 1 year))";
         //总共购物车总数sql
-        $total_shoppingcart_total_sql         = "SELECT count(*) counter from sales_flat_quote where base_grand_total>0"; 
+        $total_shoppingcart_total_sql         = "SELECT count(*) counter from sales_flat_quote where base_grand_total>0";
         //昨天新增购物车总数sql
         $yesterday_shoppingcart_new_sql = "SELECT count(*) counter from sales_flat_quote where base_grand_total>0 AND DATEDIFF(updated_at,NOW())=-1";
         //过去7天新增购物车总数sql
@@ -2041,21 +2054,21 @@ order by sfoi.item_id asc limit 1000";
         //总共购物车总数data
         $total_shoppingcart_total_data              = $total_shoppingcart_total_rs[0]['counter'];
         //昨天购物车转化率data
-        $yesterday_shoppingcart_conversion_data     = round(($yesterday_order_success_data/$yesterday_shoppingcart_total_data),4)*100;
+        $yesterday_shoppingcart_conversion_data     = round(($yesterday_order_success_data / $yesterday_shoppingcart_total_data), 4) * 100;
         //过去7天购物车转化率data
-        $pastsevenday_shoppingcart_conversion_data  = round(($pastsevenday_order_success_data/$pastsevenday_shoppingcart_total_data),4)*100;
+        $pastsevenday_shoppingcart_conversion_data  = round(($pastsevenday_order_success_data / $pastsevenday_shoppingcart_total_data), 4) * 100;
         //过去30天购物车转化率data
-        $pastthirtyday_shoppingcart_conversion_data = round(($pastthirtyday_order_success_data/$pastthirtyday_shoppingcart_total_data),4)*100;
+        $pastthirtyday_shoppingcart_conversion_data = round(($pastthirtyday_order_success_data / $pastthirtyday_shoppingcart_total_data), 4) * 100;
         //当月购物车转化率data
-        $thismonth_shoppingcart_conversion_data     = round(($thismonth_order_success_data/$thismonth_shoppingcart_total_data),4)*100;
+        $thismonth_shoppingcart_conversion_data     = round(($thismonth_order_success_data / $thismonth_shoppingcart_total_data), 4) * 100;
         //上月购物车转化率data
-        $lastmonth_shoppingcart_conversion_data     = round(($lastmonth_order_success_data/$lastmonth_shoppingcart_total_data),4)*100;
+        $lastmonth_shoppingcart_conversion_data     = round(($lastmonth_order_success_data / $lastmonth_shoppingcart_total_data), 4) * 100;
         //今年购物车转化率
-        $thisyear_shoppingcart_conversion_data      = round(($thisyear_order_success_data/$thisyear_shoppingcart_total_data),4)*100;
+        $thisyear_shoppingcart_conversion_data      = round(($thisyear_order_success_data / $thisyear_shoppingcart_total_data), 4) * 100;
         //上年购物车总数sql
-        $lastyear_shoppingcart_conversion_data      = round(($lastyear_order_success_data/$lastyear_shoppingcart_total_data),4)*100;
+        $lastyear_shoppingcart_conversion_data      = round(($lastyear_order_success_data / $lastyear_shoppingcart_total_data), 4) * 100;
         //总共购物车转化率
-        $total_shoppingcart_conversion_data         = round(($total_order_success_data/$total_shoppingcart_total_data),4)*100;
+        $total_shoppingcart_conversion_data         = round(($total_order_success_data / $total_shoppingcart_total_data), 4) * 100;
         //昨天新增购物车数
         $yesterday_shoppingcart_new_data            = $yesterday_shoppingcart_new_rs[0]['counter'];
         //过去7天新增购物车数
@@ -2073,22 +2086,22 @@ order by sfoi.item_id asc limit 1000";
         //总共新增购物车数
         $total_shoppingcart_new_data                = $total_shoppingcart_new_rs[0]['counter'];
         //昨天新增购物车转化率
-        $yesterday_shoppingcart_newconversion_data  = round(($yesterday_order_success_data/$yesterday_shoppingcart_new_data),4)*100;
+        $yesterday_shoppingcart_newconversion_data  = round(($yesterday_order_success_data / $yesterday_shoppingcart_new_data), 4) * 100;
         //过去7天新增购物车转化率
-        $pastsevenday_shoppingcart_newconversion_data = round(($pastsevenday_order_success_data/$pastsevenday_shoppingcart_new_data),4)*100;
+        $pastsevenday_shoppingcart_newconversion_data = round(($pastsevenday_order_success_data / $pastsevenday_shoppingcart_new_data), 4) * 100;
         //过去30天新增购物车转化率
-        $pastthirtyday_shoppingcart_newconversion_data = round(($pastthirtyday_order_success_data/$pastthirtyday_shoppingcart_new_data),4)*100;
+        $pastthirtyday_shoppingcart_newconversion_data = round(($pastthirtyday_order_success_data / $pastthirtyday_shoppingcart_new_data), 4) * 100;
         //当月新增购物车转化率
-        $thismonth_shoppingcart_newconversion_data = round(($thismonth_order_success_data/$thismonth_shoppingcart_new_data),4)*100;                
+        $thismonth_shoppingcart_newconversion_data = round(($thismonth_order_success_data / $thismonth_shoppingcart_new_data), 4) * 100;
         //上月新增购物车转化率
-        $lastmonth_shoppingcart_newconversion_data = round(($lastmonth_order_success_data/$lastmonth_shoppingcart_new_data),4)*100;
+        $lastmonth_shoppingcart_newconversion_data = round(($lastmonth_order_success_data / $lastmonth_shoppingcart_new_data), 4) * 100;
         //今年新增购物车转化率
-        $thisyear_shoppingcart_newconversion_data  = round(($thisyear_order_success_data/$thisyear_shoppingcart_new_data),4)*100;
+        $thisyear_shoppingcart_newconversion_data  = round(($thisyear_order_success_data / $thisyear_shoppingcart_new_data), 4) * 100;
         //上年新增购物车总数sql
-        $lastyear_shoppingcart_newconversion_data  = round(($lastyear_order_success_data/$lastyear_shoppingcart_new_data),4)*100;
+        $lastyear_shoppingcart_newconversion_data  = round(($lastyear_order_success_data / $lastyear_shoppingcart_new_data), 4) * 100;
         //总共新增购物车转化率
-        $total_shoppingcart_newconversion_data     = round(($total_order_success_data/$total_shoppingcart_new_data),4)*100;
-        
+        $total_shoppingcart_newconversion_data     = round(($total_order_success_data / $total_shoppingcart_new_data), 4) * 100;
+
         $updateData['yesterday_shoppingcart_total']        = $yesterday_shoppingcart_total_data;
         $updateData['pastsevenday_shoppingcart_total']     = $pastsevenday_shoppingcart_total_data;
         $updateData['pastthirtyday_shoppingcart_total']    = $pastthirtyday_shoppingcart_total_data;
@@ -2125,21 +2138,20 @@ order by sfoi.item_id asc limit 1000";
         $updateData['lastyear_shoppingcart_newconversion']       = $lastyear_shoppingcart_newconversion_data;
         $updateData['total_shoppingcart_newconversion']          = $total_shoppingcart_newconversion_data;
         //查找是否存在的记录
-        $result = Db::name('operation_analysis')->where(['order_platform'=>$platform])->field('id,order_platform')->find();
-        if(!$result){
+        $result = Db::name('operation_analysis')->where(['order_platform' => $platform])->field('id,order_platform')->find();
+        if (!$result) {
             $updateData['order_platform'] = $platform;
-            $updateData['create_time']    = date('Y-m-d h:i:s', time());  
-            $info=Db::name('operation_analysis')->insert($updateData);
-        }else{
-            $updateData['update_time']    = date('Y-m-d h:i:s', time());   
-            $info=Db::name('operation_analysis')->where(['order_platform'=>$platform])->update($updateData);
+            $updateData['create_time']    = date('Y-m-d h:i:s', time());
+            $info = Db::name('operation_analysis')->insert($updateData);
+        } else {
+            $updateData['update_time']    = date('Y-m-d h:i:s', time());
+            $info = Db::name('operation_analysis')->where(['order_platform' => $platform])->update($updateData);
         }
-        if($info){
-            echo 'ok'; 
-        }else{
+        if ($info) {
+            echo 'ok';
+        } else {
             echo 'error';
-        }        
-        
+        }
     }
     /**
      * 更新批发站的数据，依据亚马逊的数据
@@ -2151,6 +2163,467 @@ order by sfoi.item_id asc limit 1000";
      */
     public function update_wesee_data()
     {
-        
-    }    
+    }
+
+
+    /**
+     * 定时更新供应链打拼-采购数据
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/03/09 11:35:05 
+     * @return void
+     */
+    public function purchase_data()
+    {
+        $this->zeelool = new \app\admin\model\order\order\Zeelool;
+        $this->voogueme = new \app\admin\model\order\order\Voogueme;
+        $this->nihao = new \app\admin\model\order\order\Nihao;
+
+        //当月采购总数
+        $purchase = new \app\admin\model\purchase\PurchaseOrder();
+        $purchaseNum = $purchase->getPurchaseNum();
+
+        //当月采购总金额
+        $purchasePrice = $purchase->getPurchasePrice();
+
+        //当月采购镜架总数
+        $purchaseFrameNum = $purchase->getPurchaseFrameNum();
+
+        //当月采购总SKU数
+        $purchaseSkuNum = $purchase->getPurchaseSkuNum();
+
+        //当月销售总数
+        $salesNum = cache('purchase_data_' . 'salesNum');
+        if (!$salesNum) {
+            $zeeloolSkuNum = $this->zeelool->getOrderSkuNum();
+            $vooguemeSkuNum = $this->voogueme->getOrderSkuNum();
+            $nihaoSkuNum = $this->nihao->getOrderSkuNum();
+            $salesNum = $zeeloolSkuNum + $vooguemeSkuNum + $nihaoSkuNum;
+            cache('purchase_data_' . 'salesNum', $salesNum);
+        }
+
+        //当月销售总成本
+        $salesCost = cache('purchase_data_orderSalesCost');
+        if (!$salesCost) {
+            $zeeloolSalesCost = $this->zeelool->getOrderSalesCost();
+            $vooguemeSalesCost = $this->voogueme->getOrderSalesCost();
+            $nihaoSalesCost = $this->nihao->getOrderSalesCost();
+            $salesCost = $zeeloolSalesCost + $vooguemeSalesCost + $nihaoSalesCost;
+            cache('purchase_data_orderSalesCost', $salesCost);
+        }
+
+        //当月到货总数
+        $check = new \app\admin\model\warehouse\Check();
+        $arrivalsNum = $check->getArrivalsNum();
+
+        //当月质检合格数量
+        $quantityNum = $check->getQuantityNum();
+
+        //合格率
+        if ($arrivalsNum > 0) {
+            $quantityPercent = round($quantityNum / $arrivalsNum * 100, 2);
+        }
+
+        $dataConfig = new \app\admin\model\DataConfig();
+
+        $data['value'] = $purchaseNum;
+        $data['updatetime'] = date('Y-m-d H:i:s', time());
+        $dataConfig->where('key', 'purchaseNum')->update($data);
+
+        $data['value'] = $purchasePrice;
+        $data['updatetime'] = date('Y-m-d H:i:s', time());
+        $dataConfig->where('key', 'purchasePrice')->update($data);
+
+        $data['value'] = $purchaseFrameNum;
+        $data['updatetime'] = date('Y-m-d H:i:s', time());
+        $dataConfig->where('key', 'purchaseFrameNum')->update($data);
+
+        $data['value'] = $purchaseSkuNum;
+        $data['updatetime'] = date('Y-m-d H:i:s', time());
+        $dataConfig->where('key', 'purchaseSkuNum')->update($data);
+
+        $data['value'] = $arrivalsNum;
+        $data['updatetime'] = date('Y-m-d H:i:s', time());
+        $dataConfig->where('key', 'arrivalsNum')->update($data);
+
+        $data['value'] = $salesNum;
+        $data['updatetime'] = date('Y-m-d H:i:s', time());
+        $dataConfig->where('key', 'salesNum')->update($data);
+
+        $data['value'] = $quantityNum;
+        $data['updatetime'] = date('Y-m-d H:i:s', time());
+        $dataConfig->where('key', 'quantityNum')->update($data);
+
+        $data['value'] = $quantityPercent ?? 0;
+        $data['updatetime'] = date('Y-m-d H:i:s', time());
+        $dataConfig->where('key', 'quantityPercent')->update($data);
+
+        $data['value'] = $purchaseNum ? round($purchasePrice / $purchaseNum, 2) : 0;
+        $data['updatetime'] = date('Y-m-d H:i:s', time());
+        $dataConfig->where('key', 'purchaseAveragePrice')->update($data);
+
+        $data['value'] = $salesCost;
+        $data['updatetime'] = date('Y-m-d H:i:s', time());
+        $dataConfig->where('key', 'salesCost')->update($data);
+
+        $data['value'] = $customSkuNum ?? 0;
+        $data['updatetime'] = date('Y-m-d H:i:s', time());
+        $dataConfig->where('key', 'customSkuNum')->update($data);
+
+        $data['value'] = $customSkuNumMoney ?? 0;
+        $data['updatetime'] = date('Y-m-d H:i:s', time());
+        $dataConfig->where('key', 'customSkuNumMoney')->update($data);
+
+        $data['value'] = $customSkuQty ?? 0;
+        $data['updatetime'] = date('Y-m-d H:i:s', time());
+        $dataConfig->where('key', 'customSkuQty')->update($data);
+
+        $data['value'] = $customSkuPrice ?? 0;
+        $data['updatetime'] = date('Y-m-d H:i:s', time());
+        $dataConfig->where('key', 'customSkuPrice')->update($data);
+    }
+
+    /**
+     * 库存数据
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/03/09 11:42:50 
+     * @return void
+     */
+    public function stock_data()
+    {
+        //仓库总库存
+        $allStock = $this->item->getAllStock();
+
+        //仓库库存总金额
+        $allStockPrice = $this->item->getAllStockPrice();
+
+        //镜架库存统计
+        $frameStock = $this->item->getFrameStock();
+
+        //镜架总金额 
+        $frameStockPrice = $this->item->getFrameStockPrice();
+
+        //镜片库存
+        $lensStock = $this->lens->getLensStock();
+
+        //镜片库存总金额
+        $lensStockPrice = $this->lens->getLensStockPrice();
+
+        //饰品库存
+        $ornamentsStock = $this->item->getOrnamentsStock();
+
+        //饰品库存总金额
+        $ornamentsStockPrice = $this->item->getOrnamentsStockPrice();
+
+        //样品库存
+        $sampleNumStock = $this->item->getSampleNumStock();
+
+        //样品库存总金额
+        $sampleNumStockPrice = $this->item->getSampleNumStockPrice();
+
+        //查询总SKU数
+        $skuNum = $this->item->getSkuNum();
+
+        //查询待处理事件 售后未处理 + 协同未处理
+        //售后事件个数
+        $saleTask = new \app\admin\model\saleaftermanage\SaleAfterTask;
+        $salesNum = $saleTask->getTaskNum();
+
+        //查询协同任务待处理事件
+        $infoTask = new \app\admin\model\infosynergytaskmanage\InfoSynergyTask();
+        $infoNum = $infoTask->getTaskNum();
+        $taskAllNum = $salesNum + $infoNum;
+
+        //三个站待处理订单
+        $zeeloolNum = $this->zeelool->getPendingOrderNum();
+        $vooguemeNum = $this->voogueme->getPendingOrderNum();
+        $nihaoNum = $this->nihao->getPendingOrderNum();
+        $allPendingOrderNum = $zeeloolNum + $vooguemeNum + $nihaoNum;
+
+        /***
+         * 库存周转天数 库存周转率
+         * 库存周转天数 = 7*(期初总库存+期末总库存)/2/7天总销量
+         * 库存周转率 =  360/库存周转天数
+         */
+
+        //查询最近7天总销量
+        $orderStatistics = new \app\admin\model\OrderStatistics();
+        $stime = date("Y-m-d", strtotime("-7 day"));
+        $etime = date("Y-m-d", strtotime("-1 day"));
+        $map['create_date'] = ['between', [$stime, $etime]];
+        $allSalesNum = $orderStatistics->where($map)->sum('all_sales_num');
+
+        //期初总库存
+        $productAllStockLog = new \app\admin\model\ProductAllStock();
+        $start7days = $productAllStockLog->where('createtime', 'like', $stime . '%')->value('allnum');
+        $end7days = $productAllStockLog->where('createtime', 'like', $etime . '%')->value('allnum');
+        //库存周转天数
+        if ($allSalesNum) {
+            $stock7days = round(7 * ($start7days + $end7days) / 2 / $allSalesNum, 2);
+        }
+
+        //库存周转率
+        if ($stock7days) {
+            $stock7daysPercent = round(360 / $stock7days, 2);
+        }
+
+        //在途库存
+        $onwayAllStock = $this->onway_all_stock();
+
+        //在途库存总金额
+        $onwayAllStockPrice = $this->onway_all_stock_price();
+
+        //在途镜架库存
+        $onwayFrameAllStock = $this->onway_frame_all_stock();
+
+        //在途镜架库存总金额
+        $onwayFrameAllStockPrice = $this->onway_frame_all_stock_price();
+
+        //在途饰品库存
+        $onwayOrnamentAllStock = $this->onway_ornament_all_stock();
+
+        //在途饰品库存总金额
+        $onwayOrnamentAllStockPrice = $this->onway_ornament_all_stock_price();
+
+
+    }
+
+
+    /**
+     * 在途库存
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/03/02 17:20:21 
+     * @return void
+     */
+    protected function onway_all_stock()
+    {
+        //计算SKU总采购数量
+        $purchase = new \app\admin\model\purchase\PurchaseOrder;
+        $purchase_map['purchase_status'] = ['in', [2, 5, 6, 7]];
+        $purchase_map['stock_status'] = ['in', [0, 1]];
+        $purchase_num = $purchase->alias('a')->join(['fa_purchase_order_item' => 'b'], 'a.id=b.purchase_id')
+            ->where($purchase_map)
+            ->whereExp('sku', 'is not null')
+            ->cache(86400)
+            ->sum('purchase_num');
+
+        $check_map['a.status'] = 2;
+        $check_map['a.type'] = 1;
+        $check_map['b.purchase_status'] = ['in', [2, 5, 6, 7]];
+        $check_map['b.stock_status'] = ['in', [0, 1]];
+        $check = new \app\admin\model\warehouse\Check;
+        $arrivals_num = $check->alias('a')
+            ->where($check_map)
+            ->join(['fa_purchase_order' => 'b'], 'b.id=a.purchase_id')
+            ->join(['fa_check_order_item' => 'c'], 'a.id=c.check_id')
+            ->cache(86400)
+            ->sum('arrivals_num');
+        return $purchase_num - $arrivals_num;
+    }
+
+    /**
+     * 在途库存总金额
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/03/02 17:20:21 
+     * @return void
+     */
+    protected function onway_all_stock_price()
+    {
+        //计算SKU总采购金额
+        $purchase = new \app\admin\model\purchase\PurchaseOrder;
+        $purchase_map['purchase_status'] = ['in', [2, 5, 6, 7]];
+        $purchase_map['stock_status'] = ['in', [0, 1]];
+        $purchase_price = $purchase->alias('a')->join(['fa_purchase_order_item' => 'b'], 'a.id=b.purchase_id')
+            ->where($purchase_map)
+            ->whereExp('sku', 'is not null')
+            ->cache(86400)
+            ->sum('purchase_num*purchase_price');
+
+        $check_map['a.status'] = 2;
+        $check_map['a.type'] = 1;
+        $check_map['b.purchase_status'] = ['in', [2, 5, 6, 7]];
+        $check_map['b.stock_status'] = ['in', [0, 1]];
+        $check = new \app\admin\model\warehouse\Check;
+        $arrivals_price = $check->alias('a')
+            ->where($check_map)
+            ->join(['fa_purchase_order' => 'b'], 'b.id=a.purchase_id')
+            ->join(['fa_check_order_item' => 'c'], 'a.id=c.check_id')
+            ->join(['fa_purchase_order_item' => 'd'], 'd.purchase_id=c.purchase_id and c.sku=d.sku', 'left')
+            ->cache(86400)
+            ->sum('arrivals_num*purchase_price');
+        return $purchase_price - $arrivals_price;
+    }
+
+    /**
+     * 在途镜架库存
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/03/02 17:20:21 
+     * @return void
+     */
+    protected function onway_frame_all_stock()
+    {
+        //镜架SKU
+        $skus = $this->item->getFrameSku();
+        if ($skus) {
+            $purchase_map['sku'] = ['in', $skus];
+            //计算SKU总采购数量
+            $purchase = new \app\admin\model\purchase\PurchaseOrder;
+            $purchase_map['purchase_status'] = ['in', [2, 5, 6, 7]];
+            $purchase_map['stock_status'] = ['in', [0, 1]];
+            $purchase_num = $purchase->alias('a')->join(['fa_purchase_order_item' => 'b'], 'a.id=b.purchase_id')
+                ->where($purchase_map)
+                ->whereExp('sku', 'is not null')
+                ->cache(86400)
+                ->sum('purchase_num');
+
+            $check_map['c.sku'] = ['in', $skus];
+            $check_map['a.status'] = 2;
+            $check_map['a.type'] = 1;
+            $check_map['b.purchase_status'] = ['in', [2, 5, 6, 7]];
+            $check_map['b.stock_status'] = ['in', [0, 1]];
+            $check = new \app\admin\model\warehouse\Check;
+            $arrivals_num = $check->alias('a')
+                ->where($check_map)
+                ->join(['fa_purchase_order' => 'b'], 'b.id=a.purchase_id')
+                ->join(['fa_check_order_item' => 'c'], 'a.id=c.check_id')
+                ->cache(86400)
+                ->sum('arrivals_num');
+        }
+        return $purchase_num - $arrivals_num;
+    }
+
+    /**
+     * 在途镜架库存总金额
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/03/02 17:20:21 
+     * @return void
+     */
+    protected function onway_frame_all_stock_price()
+    {
+        //镜架SKU
+        $skus = $this->item->getFrameSku();
+        if ($skus) {
+            $purchase_map['sku'] = ['in', $skus];
+            //计算SKU总采购金额
+            $purchase = new \app\admin\model\purchase\PurchaseOrder;
+            $purchase_map['purchase_status'] = ['in', [2, 5, 6, 7]];
+            $purchase_map['stock_status'] = ['in', [0, 1]];
+            $purchase_price = $purchase->alias('a')->join(['fa_purchase_order_item' => 'b'], 'a.id=b.purchase_id')
+                ->where($purchase_map)
+                ->whereExp('sku', 'is not null')
+                ->cache(86400)
+                ->sum('purchase_num*purchase_price');
+
+            //计算到货sku总金额
+            $check_map['c.sku'] = ['in', $skus];
+            $check_map['a.status'] = 2;
+            $check_map['a.type'] = 1;
+            $check_map['b.purchase_status'] = ['in', [2, 5, 6, 7]];
+            $check_map['b.stock_status'] = ['in', [0, 1]];
+            $check = new \app\admin\model\warehouse\Check;
+            $arrivals_price = $check->alias('a')
+                ->where($check_map)
+                ->join(['fa_purchase_order' => 'b'], 'b.id=a.purchase_id')
+                ->join(['fa_check_order_item' => 'c'], 'a.id=c.check_id')
+                ->join(['fa_purchase_order_item' => 'd'], 'd.purchase_id=c.purchase_id and c.sku=d.sku', 'left')
+                ->cache(86400)
+                ->sum('arrivals_num*purchase_price');
+        }
+
+        return $purchase_price - $arrivals_price;
+    }
+
+    /**
+     * 在途镜架库存
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/03/02 17:20:21 
+     * @return void
+     */
+    protected function onway_ornament_all_stock()
+    {
+        //镜架SKU
+        $skus = $this->item->getOrnamentsSku();
+        if ($skus) {
+            $purchase_map['sku'] = ['in', $skus];
+            //计算SKU总采购数量
+            $purchase = new \app\admin\model\purchase\PurchaseOrder;
+            $purchase_map['purchase_status'] = ['in', [2, 5, 6, 7]];
+            $purchase_map['stock_status'] = ['in', [0, 1]];
+            $purchase_num = $purchase->alias('a')->join(['fa_purchase_order_item' => 'b'], 'a.id=b.purchase_id')
+                ->where($purchase_map)
+                ->whereExp('sku', 'is not null')
+                ->cache(86400)
+                ->sum('purchase_num');
+
+            $check_map['c.sku'] = ['in', $skus];
+            $check_map['a.status'] = 2;
+            $check_map['a.type'] = 1;
+            $check_map['b.purchase_status'] = ['in', [2, 5, 6, 7]];
+            $check_map['b.stock_status'] = ['in', [0, 1]];
+            $check = new \app\admin\model\warehouse\Check;
+            $arrivals_num = $check->alias('a')
+                ->where($check_map)
+                ->join(['fa_purchase_order' => 'b'], 'b.id=a.purchase_id')
+                ->join(['fa_check_order_item' => 'c'], 'a.id=c.check_id')
+                ->cache(86400)
+                ->sum('arrivals_num');
+        }
+        return $purchase_num - $arrivals_num;
+    }
+
+    /**
+     * 在途镜架库存总金额
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/03/02 17:20:21 
+     * @return void
+     */
+    protected function onway_ornament_all_stock_price()
+    {
+        //镜架SKU
+        $skus = $this->item->getOrnamentsSku();
+        if ($skus) {
+            $purchase_map['sku'] = ['in', $skus];
+            //计算SKU总采购金额
+            $purchase = new \app\admin\model\purchase\PurchaseOrder;
+            $purchase_map['purchase_status'] = ['in', [2, 5, 6, 7]];
+            $purchase_map['stock_status'] = ['in', [0, 1]];
+            $purchase_price = $purchase->alias('a')->join(['fa_purchase_order_item' => 'b'], 'a.id=b.purchase_id')
+                ->where($purchase_map)
+                ->whereExp('sku', 'is not null')
+                ->cache(86400)
+                ->sum('purchase_num*purchase_price');
+
+            //计算到货sku总金额
+            $check_map['c.sku'] = ['in', $skus];
+            $check_map['a.status'] = 2;
+            $check_map['a.type'] = 1;
+            $check_map['b.purchase_status'] = ['in', [2, 5, 6, 7]];
+            $check_map['b.stock_status'] = ['in', [0, 1]];
+            $check = new \app\admin\model\warehouse\Check;
+            $arrivals_price = $check->alias('a')
+                ->where($check_map)
+                ->join(['fa_purchase_order' => 'b'], 'b.id=a.purchase_id')
+                ->join(['fa_check_order_item' => 'c'], 'a.id=c.check_id')
+                ->join(['fa_purchase_order_item' => 'd'], 'd.purchase_id=c.purchase_id and c.sku=d.sku', 'left')
+                ->cache(86400)
+                ->sum('arrivals_num*purchase_price');
+        }
+
+        return $purchase_price - $arrivals_price;
+    }
 }

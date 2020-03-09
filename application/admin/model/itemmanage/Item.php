@@ -532,7 +532,6 @@ class Item extends Model
     {
         $where['is_del']  = 1;
         return $this->where($where)->sum('sample_num');
-
     }
 
     /**
@@ -560,5 +559,19 @@ class Item extends Model
             }
         }
         return $allprice;
+    }
+
+    /**
+     * 获取SKU单价
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/03/09 10:47:11 
+     * @return void
+     */
+    public function getSkuPrice()
+    {
+        $where['is_del']  = 1;
+        return $this->where($where)->column('price', 'sku');
     }
 }
