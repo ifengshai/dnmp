@@ -110,11 +110,9 @@
                                         </span>
                                     </div>
 
-
                                 </div>
 
                             </div>
-
 
                         </div>
                     </form>
@@ -160,21 +158,21 @@
                                         </tr>
                                         <tr>
                                             <td>在途库存</td>
-                                            <td>0</td>
+                                            <td>{$onway_all_stock}</td>
                                             <td>在途库存总金额（￥）</td>
-                                            <td>0</td>
+                                            <td>{$onway_all_stock_price}</td>
                                         </tr>
                                         <tr>
                                             <td>在途镜架库存</td>
-                                            <td>0</td>
+                                            <td>{$onway_frame_all_stock}</td>
                                             <td>在途镜架总金额（￥）</td>
-                                            <td>0</td>
+                                            <td>{$onway_frame_all_stock_price}</td>
                                         </tr>
                                         <tr>
                                             <td>在途饰品库存</td>
-                                            <td>0</td>
+                                            <td>{$onway_ornament_all_stock}</td>
                                             <td>在途饰品总金额（￥）</td>
-                                            <td>0</td>
+                                            <td>{$onway_ornament_all_stock_price}</td>
                                         </tr>
                                         <tr>
                                             <td>留样库存</td>
@@ -184,9 +182,9 @@
                                         </tr>
                                         <tr>
                                             <td>库存周转天数</td>
-                                            <td>0</td>
+                                            <td>{$stock7days}</td>
                                             <td>库存周转率</td>
-                                            <td>0</td>
+                                            <td>{$stock7daysPercent}</td>
                                         </tr>
                                     </table>
                                 </div>
@@ -205,15 +203,15 @@
                                         </tr>
                                         <tr>
                                             <td>当月总单量</td>
-                                            <td></td>
+                                            <td>{$data.lastMonthAllSalesNum}</td>
                                             <td>7天总单量</td>
-                                            <td></td>
+                                            <td>{$allSalesNum}</td>
                                         </tr>
                                         <tr>
                                             <td>未出库订单总数</td>
-                                            <td></td>
+                                            <td>{$data.allUnorderNum}</td>
                                             <td>7天未出库总数</td>
-                                            <td></td>
+                                            <td>{$data.days7UnorderNum}</td>
                                         </tr>
                                         <tr>
                                             <td>总压单率</td>
@@ -222,28 +220,34 @@
                                             <td></td>
                                         </tr>
                                         <tr>
+                                            <td>当月妥投总量</td>
+                                            <td></td>
+                                            <td>当月妥投占比</td>
+                                            <td></td>
+                                        </tr>
+                                        <tr>
                                             <td>超时订单总数</td>
                                             <td></td>
                                             <td>当月质检总数</td>
-                                            <td></td>
+                                            <td>{$data.orderCheckNum}</td>
                                         </tr>
                                         <tr>
                                             <td>当日出库总数</td>
-                                            <td></td>
+                                            <td>{$data.outStockNum}</td>
                                             <td>当日质检入库总数</td>
-                                            <td></td>
+                                            <td>{$data.inStockNum}</td>
                                         </tr>
                                         <tr>
                                             <td>当日配镜架总数</td>
-                                            <td></td>
+                                            <td>{$data.orderFrameNum}</td>
                                             <td>当日配镜片总数</td>
-                                            <td></td>
+                                            <td>{$data.orderLensNum}</td>
                                         </tr>
                                         <tr>
                                             <td>当日加工总数</td>
-                                            <td></td>
+                                            <td>{$data.orderFactoryNum}</td>
                                             <td>当日质检总数</td>
-                                            <td></td>
+                                            <td>{$data.orderCheckNewNum}</td>
                                         </tr>
                                     </table>
                                 </div>

@@ -4,7 +4,7 @@ namespace app\admin\model;
 
 use think\Model;
 use think\Db;
-
+use think\Cache;
 
 class OperationAnalysis extends Model
 {
@@ -21,14 +21,255 @@ class OperationAnalysis extends Model
 
     // 追加属性
     protected $append = [];
+    protected $order_status =  "and status in ('processing','complete','creditcard_proccessing','free_processing')";
+    /**
+     * 通过id判断需要传递的model
+     *
+     * @Description created by lsw
+     * @author lsw
+     * @since 2020/03/06 16:34:22 
+     * @param [type] $id
+     * @return void
+     */
+    public function get_model_by_id($id)
+    {
+        switch($id){
+            case 1:
+            $model = Db::connect('database.db_zeelool');
+            break;
+            case 2:
+            $model = Db::connect('database.db_voogueme');
+            break;
+            case 3:
+            $model = Db::connect('database.db_nihao');
+            break;
+            default:
+            $model = false;
+            break;            
+        }
+        return $model;
+    }
+    /**
+     * 根据站点获取今天销售额
+     *
+     * @Description created by lsw
+     * @author lsw
+     * @since 2020/03/06 15:26:02 
+     * @return void
+     */
+    public function get_today_sales_money($id)
+    {
+        $cacheData = Cache::get('operationAnalysis_get_today_sales_money_'.$id);
+        if($cacheData){
+            return $cacheData;
+        }
+        $order_status = $this->order_status;
+        $model = $this->get_model_by_id($id);
+        $where['order_platform'] = $id;
+        //今日销售额sql
+        $today_sales_money_sql   = "SELECT round(sum(base_grand_total),2)  base_grand_total FROM sales_flat_order WHERE TO_DAYS(created_at) = TO_DAYS(NOW()) $order_status";
+        $model->table('sales_flat_order')->query("set time_zone='+8:00'");
+        //今日销售额
+        $today_sales_money_rs    = $model->query($today_sales_money_sql);
+        $today_sales_money_data  = $today_sales_money_rs[0]['base_grand_total'];
+        Cache::set('operationAnalysis_get_today_sales_money_'.$id,$today_sales_money_data,3600);
+        return $today_sales_money_data;
+    }
+    /**
+     * 根据站点获取今天订单数
+     *
+     * @Description created by lsw
+     * @author lsw
+     * @since 2020/03/06 15:27:22 
+     * @return void
+     */
+    public function get_today_order_num($id)
+    {
+        $cacheData = Cache::get('operationAnalysis_get_today_order_num_'.$id);
+        if($cacheData){
+            return $cacheData;
+        }
+        $model = $this->get_model_by_id($id);
+        //今日订单数sql
+        $today_order_num_sql     = "SELECT count(*) counter FROM sales_flat_order WHERE TO_DAYS(created_at) = TO_DAYS(NOW())";
+        $model->table('sales_flat_order')->query("set time_zone='+8:00'");
+        //今日订单数
+        $today_order_num_rs      = $model->query($today_order_num_sql);
+        $today_order_num_data    = $today_order_num_rs[0]['counter'];
+        Cache::set('operationAnalysis_get_today_order_num_'.$id,$today_order_num_data,3600);
+        return $today_order_num_data;
+    }
+    /**
+     * 根据站点获取今日订单支付成功数
+     *
+     * @Description created by lsw
+     * @author lsw
+     * @since 2020/03/06 15:28:50 
+     * @param [type] $id
+     * @return void
+     */
+    public function get_today_order_success($id)
+    {
+        $cacheData = Cache::get('operationAnalysis_get_today_order_success_'.$id);
+        if($cacheData){
+            return $cacheData;
+        }
+        $order_status = $this->order_status;
+        $model = $this->get_model_by_id($id);
+        //今日订单支付成功数sql
+        $today_order_success_sql = "SELECT count(*) counter FROM sales_flat_order WHERE TO_DAYS(created_at) = TO_DAYS(NOW()) $order_status";
+        $model->table('sales_flat_order')->query("set time_zone='+8:00'");
+        //今日订单支付成功数
+        $today_order_success_rs       = $model->query($today_order_success_sql);
+        $today_order_success_data     = $today_order_success_rs[0]['counter'];
+        Cache::set('operationAnalysis_get_today_order_success_'.$id,$today_order_success_data,3600);
+        return $today_order_success_data;
+    }
+     /**
+     * 根据站点获取今日购物车总数
+     *
+     * @Description created by lsw
+     * @author lsw
+     * @since 2020/03/06 16:11:26 
+     * @return void
+     */
+    public function get_today_shoppingcart_total($id)
+    {
+        $cacheData = Cache::get('operationAnalysis_get_today_shoppingcart_total_'.$id);
+        if($cacheData){
+           return $cacheData; 
+        }
+        $model = $this->get_model_by_id($id);
+        //今日购物车总数sql
+        $today_shoppingcart_total_sql = "SELECT count(*) counter from sales_flat_quote where base_grand_total>0 AND TO_DAYS(created_at) = TO_DAYS(NOW())";
+        $model->table('sales_flat_quote')->query("set time_zone='+8:00'");
+        //今日购物车总数
+        $today_shoppingcart_total_rs    = $model->query($today_shoppingcart_total_sql);
+        $today_shoppingcart_total_data  = $today_shoppingcart_total_rs[0]['counter'];
+        Cache::set('operationAnalysis_get_today_shoppingcart_total_'.$id,$today_shoppingcart_total_data,3600);
+        return $today_shoppingcart_total_data;
+
+    }
+    /**
+     * 根据站点获取今日购物车新增总数
+     *
+     * @Description created by lsw
+     * @author lsw
+     * @since 2020/03/06 16:11:26 
+     * @return void
+     */
+    public function get_today_shoppingcart_new($id)
+    {
+        $cacheData = Cache::get('operationAnalysis_get_today_shoppingcart_new_'.$id);
+        if($cacheData){
+            return $cacheData;
+        }
+        $model = $this->get_model_by_id($id);
+        //今日新增购物车sql
+        $today_shoppingcart_new_sql   = "SELECT count(*) counter from sales_flat_quote where base_grand_total>0 AND TO_DAYS(updated_at) = TO_DAYS(NOW())";
+        $model->table('sales_flat_quote')->query("set time_zone='+8:00'");
+        //今日新增购物车总数
+        $today_shoppingcart_new_rs     = $model->query($today_shoppingcart_new_sql);
+        $today_shoppingcart_new_data   = $today_shoppingcart_new_rs[0]['counter'];
+        Cache::set('operationAnalysis_get_today_shoppingcart_new_'.$id,$today_shoppingcart_new_data,3600);
+        return $today_shoppingcart_new_data;
+    }   
+    /**
+     * 根据站点获取今日注册总数
+     *
+     * @Description created by lsw
+     * @author lsw
+     * @since 2020/03/06 16:11:26 
+     * @return void
+     */
+    public function get_today_register_customer($id)
+    {
+        $cacheData = Cache::get('operationAnalysis_get_today_register_customer_'.$id);
+        if($cacheData){
+            return $cacheData;
+        }
+        $model = $this->get_model_by_id($id);
+        //今日新增注册用户数
+        $today_register_customer_sql  = "SELECT count(*) counter from customer_entity where TO_DAYS(created_at) = TO_DAYS(NOW())";
+        $model->table('customer_entity')->query("set time_zone='+8:00'");
+        //今日新增注册用户数
+        $today_register_customer_rs    = $model->query($today_register_customer_sql);
+        $today_register_customer_data           = $today_register_customer_rs[0]['counter'];
+        Cache::set('operationAnalysis_get_today_register_customer_'.$id,$today_register_customer_data,3600);
+        return $today_register_customer_data;         
+    }
+    /**
+     * 根据站点获取今日登录用户数
+     *
+     * @Description created by lsw
+     * @author lsw
+     * @since 2020/03/06 17:30:51 
+     * @param [type] $id
+     * @return void
+     */
+    public function get_today_sign_customer($id)
+    {
+        $cacheData = Cache::get('operationAnalysis_get_today_sign_customer_'.$id);
+        if($cacheData){
+            return $cacheData;
+        }
+        $model = $this->get_model_by_id($id);
+        //今日新增登录用户数
+        $today_sign_customer_sql = "SELECT count(*) counter from customer_entity where TO_DAYS(updated_at) = TO_DAYS(NOW())";
+        $model->table('customer_entity')->query("set time_zone='+8:00'");
+        //今日登录用户数
+        $today_sign_customer_rs  = $model->query($today_sign_customer_sql);
+        $today_sign_customer_data = $today_sign_customer_rs[0]['counter'];
+        Cache::set('operationAnalysis_get_today_sign_customer_'.$id,$today_sign_customer_data,3600);
+        return $today_sign_customer_data;  
+    }             
 	/***
 	 *获取数据
 	 *@param id 平台ID
 	 */
 	public function getList($id)
 	{
+        $model = $this->get_model_by_id($id);
+        if(false == $model){
+            return false;
+        }
         $where['order_platform'] = $id;
-		$result = Db::name('operation_analysis')->where($where)->find();
+        //求出本站点的今天所有的数据
+        $today_sales_money_data                 = $this->get_today_sales_money($id);
+        $today_order_num_data                   = $this->get_today_order_num($id);
+        $today_order_success_data               = $this->get_today_order_success($id);
+        $today_shoppingcart_total_data          = $this->get_today_shoppingcart_total($id);
+        $today_shoppingcart_new_data            = $this->get_today_shoppingcart_new($id);
+        $today_register_customer_data           = $this->get_today_register_customer($id);
+        $today_sign_customer_data               = $this->get_today_sign_customer($id);
+        if(false != $today_order_success_data){
+            $today_unit_price_data              = round(($today_sales_money_data/$today_order_success_data),2);
+        }else{
+            $today_unit_price_data = 0;
+        }
+        if(false != $today_shoppingcart_total_data){
+            $today_shoppingcart_conversion_data     = round(($today_order_success_data/$today_shoppingcart_total_data),4)*100;
+        }else{
+            $today_shoppingcart_conversion_data = 0;
+        }
+        if(false != $today_shoppingcart_new_data){
+            $today_shoppingcart_newconversion_data  = round(($today_order_success_data/$today_shoppingcart_new_data),4)*100;
+        }else{
+            $today_shoppingcart_newconversion_data  = 0;
+        } 
+        $result = Db::name('operation_analysis')->where($where)->find();
+        if($result){
+            $result['today_sales_money']                = $today_sales_money_data;
+            $result['today_order_num']                  = $today_order_num_data;
+            $result['today_order_success']              = $today_order_success_data;
+            $result['today_unit_price']                 = $today_unit_price_data;
+            $result['today_shoppingcart_total']         = $today_shoppingcart_total_data;
+            $result['today_shoppingcart_new']           = $today_shoppingcart_new_data;
+            $result['today_register_customer']          = $today_register_customer_data;
+            $result['today_sign_customer']              = $today_sign_customer_data;
+            $result['today_shoppingcart_conversion']    = round($today_shoppingcart_conversion_data,2);
+            $result['today_shoppingcart_newconversion'] = round($today_shoppingcart_newconversion_data,2);
+        }
 		return $result;
     }
     /***

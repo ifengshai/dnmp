@@ -386,6 +386,28 @@ class Item extends Model
     }
 
     /**
+     * 获取仓库镜架SKU
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/02/24 16:47:21 
+     * @return void
+     */
+    public function getFrameSku()
+    {
+        //查询镜框分类有哪些
+        $category = new \app\admin\model\itemmanage\ItemCategory;
+        $map['attribute_group_id'] = 1;
+        $map['is_del'] = 1;
+        $ids = $category->where($map)->column('id');
+
+        $where['category_id']  = ['in', $ids];
+        $where['is_del']  = 1;
+        return $this->where($where)->column('sku');
+    }
+
+
+    /**
      * 获取仓库镜架总库存总金额
      *
      * @Description
@@ -439,6 +461,27 @@ class Item extends Model
         $where['category_id']  = ['in', $ids];
         $where['is_del']  = 1;
         return $this->where($where)->sum('stock');
+    }
+
+    /**
+     * 获取仓库饰品sku
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/02/24 16:47:21 
+     * @return void
+     */
+    public function getOrnamentsSku()
+    {
+        //查询镜框分类有哪些
+        $category = new \app\admin\model\itemmanage\ItemCategory;
+        $map['attribute_group_id'] = 3;
+        $map['is_del'] = 1;
+        $ids = $category->where($map)->column('id');
+
+        $where['category_id']  = ['in', $ids];
+        $where['is_del']  = 1;
+        return $this->where($where)->column('sku');
     }
 
     /**

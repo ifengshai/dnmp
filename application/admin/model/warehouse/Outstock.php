@@ -7,11 +7,6 @@ use think\Model;
 
 class Outstock extends Model
 {
-
-
-
-
-
     // 表名
     protected $name = 'out_stock';
 
@@ -42,5 +37,18 @@ class Outstock extends Model
         return $this->belongsTo('OutStockItem', 'id', 'out_stock_id', [], 'LEFT')->setEagerlyType(0);
     }
 
-    
+    /**
+     * 获取当日出库总数
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/03/05 16:04:57 
+     * @return void
+     */
+    public function getOutStockNum()
+    {
+        $where['createtime'] = ['between', [date('Y-m-d 00:00:00', time()), date('Y-m-d H:i:s', time())]];
+        $where['status'] = 2;
+        return $this->where($where)->alias('a')->join(['fa_out_stock_item' => 'b'], 'a.id=b.out_stock_id')->cache(3600)->sum('out_stock_num');
+    }
 }
