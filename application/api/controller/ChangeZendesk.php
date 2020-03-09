@@ -25,6 +25,10 @@ class ChangeZendesk extends Controller
                 Detail::where('id',$val->id)->setField('is_admin',1);
                 //dump($res);die;
             }
+            if(!$val->body){
+                Detail::where('id',$val->id)->setField('is_admin',1);
+                //dump($res);die;
+            }
         }
     }
 
