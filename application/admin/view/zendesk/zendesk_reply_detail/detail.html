@@ -28,9 +28,9 @@
                 {foreach name="$detail->details" item="vo" key="i"}
                 <div class="post">
                     <div class="user-block">
-                        <img class="img-circle img-bordered-sm" src="/assets/img/avatar.png" alt="user image">
+                        <img class="img-circle img-bordered-sm" src="/assets/img/{$vo->is_admin == 1 ? 'qrcode.png' : 'avatar.png'}" alt="user image">
                         <span class="username">
-                          <a href="javascript:voin(0);">{$detail->email}</a>
+                          <a href="javascript:voin(0);">{$vo->is_admin == 1 ? 'Stefan' : $detail->email}</a>
                           <a href="javascript:voin(0);" class="pull-right btn-box-tool"><i class="fa fa-times"></i></a>
                         </span>
                         <span class="description">{$vo->create_time}</span>
