@@ -954,25 +954,27 @@ class InfoSynergyTask extends Backend
         $addWhere = '1=1';
         if($rep != '{}'){
             $whereArr = json_decode($rep,true);
-            foreach($whereArr as $key => $whereval){
-                if(($key == 'dept') && (in_array($whereval,$deptArr))){
-                    $dept_id = array_search($whereval,$deptArr);
-                    $addWhere  .= " AND FIND_IN_SET($dept_id,dept_id)";
-                    unset($whereArr['dept']);                 
-                }elseif($key == 'dept'){
-                    $addWhere  .= " AND dept_id=''";
-                    unset($whereArr['dept']);
+            if(!empty($whereArr)){
+                foreach($whereArr as $key => $whereval){
+                    if(($key == 'dept') && (in_array($whereval,$deptArr))){
+                        $dept_id = array_search($whereval,$deptArr);
+                        $addWhere  .= " AND FIND_IN_SET($dept_id,dept_id)";
+                        unset($whereArr['dept']);                 
+                    }elseif($key == 'dept'){
+                        $addWhere  .= " AND dept_id=''";
+                        unset($whereArr['dept']);
+                    }
+                    if(($key == 'rep') && (in_array($whereval,$repArr))){
+                        $rep_id  = array_search($whereval,$repArr);
+                        $addWhere .= " AND FIND_IN_SET($rep_id,rep_id)";
+                        unset($whereArr['rep']);
+                    }elseif($key == 'rep'){
+                        $addWhere .= " AND rep_id=''";
+                        unset($whereArr['rep']);
+                    }
                 }
-                if(($key == 'rep') && (in_array($whereval,$repArr))){
-                    $rep_id  = array_search($whereval,$repArr);
-                    $addWhere .= " AND FIND_IN_SET($rep_id,rep_id)";
-                    unset($whereArr['rep']);
-                }elseif($key == 'rep'){
-                    $addWhere .= " AND rep_id=''";
-                    unset($whereArr['rep']);
-                }
+                $this->request->get(['filter'=>json_encode($whereArr)]);
             }
-            $this->request->get(['filter'=>json_encode($whereArr)]);
         }
         $ids = input('ids');
         if ($ids) {
@@ -1111,7 +1113,7 @@ class InfoSynergyTask extends Backend
             }
             $spreadsheet->getActiveSheet()->setCellValue("J" . ($key * 1 + 2), $value['prty_id']);
             $spreadsheet->getActiveSheet()->setCellValue("K" . ($key * 1 + 2), $value['infosynergytaskcategory']['name']);
-            $spreadsheet->getActiveSheet()->setCellValue("L" . ($key * 1 + 2), strip_tags($value['problem_desc']));
+            $spreadsheet->getActiveSheet()->setCellValue("L" . ($key * 1 + 2), str_replace('&nbsp;','',strip_tags($value['problem_desc'])));
             $spreadsheet->getActiveSheet()->setCellValue("M" . ($key * 1 + 2), $value['make_up_price_order']);
             $spreadsheet->getActiveSheet()->setCellValue("N" . ($key * 1 + 2), $value['replacement_order']);
             $spreadsheet->getActiveSheet()->setCellValue("O" . ($key * 1 + 2), $value['order_skus']);
