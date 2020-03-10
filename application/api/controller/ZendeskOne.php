@@ -530,15 +530,28 @@ class ZendeskOne extends Controller
      */
     public function findOrderByEmail($email,$order_id = '')
     {
+        //先查订单号
+        if($order_id){
+            $order = Db::connect('database.db_zeelool')
+                ->table('sales_flat_order')
+                ->field('entity_id,state,status,increment_id,created_at')
+                ->where('increment_id',$order_id)
+                ->order('entity_id desc')
+                ->find();
+        }
 
-        //先用email
-        $order = Db::connect('database.db_zeelool')
-            ->table('sales_flat_order')
-            ->field('entity_id,state,status,increment_id,created_at')
-            ->where('customer_email',$email)
-            ->order('entity_id desc')
-            ->find();
         //查询不到查询用户email
+        if(empty($order)){
+            //先用email
+            $order = Db::connect('database.db_zeelool')
+                ->table('sales_flat_order')
+                ->field('entity_id,state,status,increment_id,created_at')
+                ->where('customer_email',$email)
+                ->order('entity_id desc')
+                ->find();
+        }
+
+        //都查不到的话，只用订单号
         if(empty($order)){
             $customer = Db::connect('database.db_zeelool')
                 ->table('customer_entity')
@@ -549,19 +562,6 @@ class ZendeskOne extends Controller
                     ->table('sales_flat_order')
                     ->field('entity_id,state,status,increment_id,created_at')
                     ->where('customer_id',$customer['entity_id'])
-                    ->order('entity_id desc')
-                    ->find();
-            }
-        }
-
-        //都查不到的话，只用订单号
-        if(empty($order)){
-            //先查订单号
-            if($order_id){
-                $order = Db::connect('database.db_zeelool')
-                    ->table('sales_flat_order')
-                    ->field('entity_id,state,status,increment_id,created_at')
-                    ->where('increment_id',$order_id)
                     ->order('entity_id desc')
                     ->find();
             }
