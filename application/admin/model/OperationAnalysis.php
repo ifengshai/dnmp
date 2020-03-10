@@ -369,7 +369,7 @@ class OperationAnalysis extends Model
         //求出voogueme今天的总和
         $voogueme_data = $this->getList(2);
         //求出nihao今天的总和
-        $nihao_data    = $this->gitList(3);
+        $nihao_data    = $this->getList(3);
         //总和
         $arr['today_sales_money']                           = @($zeelool_data['today_sales_money'] + $voogueme_data['today_sales_money'] + $nihao_data['today_sales_money']);
         $arr['today_order_num']                             = @($zeelool_data['today_order_num'] + $voogueme_data['today_order_num'] + $nihao_data['today_order_num']);
