@@ -32,10 +32,15 @@ class ProductGrade extends Model
     public function getSkuStock()
     {
         $item = new \app\admin\model\itemmanage\Item();
+
         //A+等级
         $where['grade'] = 'A+';
         $skus = $this->where($where)->column('true_sku');
         $data['aa_stock_num'] = $item->where(['sku' => ['in', $skus], 'is_del' => 1])->sum('stock');
+        
+        $data['aa_stock_num'] = $item->where(['sku' => ['in', $skus], 'is_del' => 1])->sum('stock');
+
+
 
         //A等级
         $where['grade'] = 'A';

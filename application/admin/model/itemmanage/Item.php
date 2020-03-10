@@ -351,7 +351,7 @@ class Item extends Model
         $sku_pirce = new \app\admin\model\SkuPrice;
         $arr = $sku_pirce->getAllData();
         $where['is_del']  = 1;
-        $where['category_id']  = ['<>', 43];
+        $where['category_id']  = ['<>', 43]; //不等于虚拟产品
         $res = $this->where($where)->field('sku,stock,price')->select();
         $allprice = 0;
         foreach ($res as $v) {

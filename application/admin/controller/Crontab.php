@@ -1644,10 +1644,14 @@ order by sfoi.item_id asc limit 1000";
                 continue;
             }
         }
+
+        $item = new \app\admin\model\itemmanage\Item();
         if ($arr) {
             $list = [];
             $i = 0;
             foreach ($arr as $k => $v) {
+                $item->where('sku', $k)->update(['purchase_price' => $v]);
+
                 $list[$i]['sku'] = $k;
                 $list[$i]['price'] = $v;
                 $list[$i]['createtime'] = date('Y-m-d H:i:s', time());
