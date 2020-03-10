@@ -47,9 +47,18 @@ class ChangeZendesk extends Controller
             $res = ZendeskReply::where('id',$reply->id)->setField('source',$source);
         }
         echo 'success';
-
-
-
     }
-
+    public function tags()
+    {
+        $client = new ZendeskAPI($this->subdomain);
+        $client->setAuth('basic', ['username' => $this->username, 'token' => $this->token]);
+        $replys = ZendeskReply::where('tags','')->select();
+        //根据id获取类型
+        foreach($replys as $reply){
+            $ticket = $client->tickets()->find($reply->email_id);
+            $tags = join(',',$ticket->ticket->tags);
+            $res = ZendeskReply::where('id',$reply->id)->setField('tags',$tags);
+        }
+        echo 'success';
+    }
 }

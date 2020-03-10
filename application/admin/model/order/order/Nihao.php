@@ -454,7 +454,7 @@ class Nihao extends Model
         $where['a.created_at'] = ['between', [date('Y-m-01 00:00:00', time()), date('Y-m-d H:i:s', time())]];
         $data = $this->alias('a')
             ->where($where)
-            ->field("sum('qty_ordered') as num,sku")
+            ->field("sum(qty_ordered) as num,sku")
             ->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')
             ->group('sku')
             ->select();
@@ -462,14 +462,14 @@ class Nihao extends Model
         //SKU实时进价
         $sku_pirce = new \app\admin\model\SkuPrice;
         $arr = $sku_pirce->getAllData();
-
+        $itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku();
         //SKU参考进价
         $item = new \app\admin\model\itemmanage\Item();
         $item_price = $item->getSkuPrice();
         $all_price = 0;
         foreach ($data as $k => $v) {
             //sku转换
-            $sku = $this->itemplatformsku->getWebSku($v['sku'], 3);
+            $sku = $itemplatformsku->getWebSku($v['sku'], 3);
             if ($arr[$sku]) {
                 $all_price += $arr[$sku] * $v['num'];
             } else {

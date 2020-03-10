@@ -413,8 +413,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
             })
 
             //搜索
-            $(document).on('input', '#search_val', function (events) {
-                if (event.target.value.length == 9) {
+            $(document).on('keyup', '#search_val', function (event) {
+                if (event.keyCode == 13 && event.target.value.length == 9) {
                     Backend.api.ajax({
                         url: Config.moduleurl + '/order/printlabel/zeelool/_list',
                         data: { increment_id: event.target.value },

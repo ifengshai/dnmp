@@ -118,4 +118,35 @@ class NewProduct extends Model
 
         return $result ? $result : false;
     }
+
+    /**
+     * 当月选品总数
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/03/09 17:45:19 
+     * @return void
+     */
+    public function selectProductNum()
+    {
+        $where['create_time'] = ['between', [date('Y-m-01 00:00:00', time()), date('Y-m-d H:i:s', time())]];
+        $where['is_del'] = 1;
+        return $this->where($where)->count(1);
+    }
+
+    /**
+     * 当月新品上线总数
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/03/09 17:45:19 
+     * @return void
+     */
+    public function selectProductAdoptNum()
+    {
+        $where['create_time'] = ['between', [date('Y-m-01 00:00:00', time()), date('Y-m-d H:i:s', time())]];
+        $where['is_del'] = 1;
+        $where['item_status'] = 2;
+        return $this->where($where)->count(1);
+    }
 }
