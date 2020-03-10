@@ -151,7 +151,11 @@ class Zeelool extends Backend
             if ($increment_id) {
                 $map['increment_id'] = $increment_id;
                 $map['status'] = ['in', ['free_processing', 'processing', 'complete']];
+                $field = 'order_type,custom_order_prescription_type,entity_id,status,base_shipping_amount,increment_id,coupon_code,shipping_description,store_id,customer_id,base_discount_amount,base_grand_total,
+                     total_qty_ordered,quote_id,base_currency_code,customer_email,customer_firstname,customer_lastname,custom_is_match_frame_new,custom_is_match_lens_new,
+                     custom_is_send_factory_new,custom_is_delivery_new,custom_print_label_new,custom_order_prescription,custom_service_name,created_at';
                 $list = $this->model
+                    ->field($field)
                     ->where($map)
                     ->find();
                 if ($list) {
@@ -1108,9 +1112,9 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
             $finalResult[$key]['lens_height'] = $tmp_bridge['lens_height'];
             $finalResult[$key]['bridge'] = $tmp_bridge['bridge'];
         }
-        
+
         $spreadsheet = new Spreadsheet();
-       
+
         //常规方式：利用setCellValue()填充数据
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("A1", "日期")
             ->setCellValue("B1", "订单号")

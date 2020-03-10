@@ -203,51 +203,51 @@
                                         </tr>
                                         <tr>
                                             <td>当月总单量</td>
-                                            <td>{$data.lastMonthAllSalesNum}</td>
+                                            <td>{$lastMonthAllSalesNum}</td>
                                             <td>7天总单量</td>
                                             <td>{$allSalesNum}</td>
                                         </tr>
                                         <tr>
                                             <td>未出库订单总数</td>
-                                            <td>{$data.allUnorderNum}</td>
+                                            <td>{$allUnorderNum}</td>
                                             <td>7天未出库总数</td>
-                                            <td>{$data.days7UnorderNum}</td>
+                                            <td>{$days7UnorderNum}</td>
                                         </tr>
                                         <tr>
                                             <td>总压单率</td>
-                                            <td></td>
+                                            <td>{$pressureRate}</td>
                                             <td>7天压单率</td>
-                                            <td></td>
+                                            <td>{$pressureRate7days}</td>
                                         </tr>
                                         <tr>
                                             <td>当月妥投总量</td>
-                                            <td></td>
+                                            <td>{$monthAppropriate}</td>
                                             <td>当月妥投占比</td>
-                                            <td></td>
+                                            <td>{$monthAppropriatePercent}</td>
                                         </tr>
                                         <tr>
                                             <td>超时订单总数</td>
-                                            <td></td>
+                                            <td>{$overtimeOrder}</td>
                                             <td>当月质检总数</td>
-                                            <td>{$data.orderCheckNum}</td>
+                                            <td>{$orderCheckNum}</td>
                                         </tr>
                                         <tr>
                                             <td>当日出库总数</td>
-                                            <td>{$data.outStockNum}</td>
+                                            <td>{$outStockNum}</td>
                                             <td>当日质检入库总数</td>
-                                            <td>{$data.inStockNum}</td>
+                                            <td>{$inStockNum}</td>
                                         </tr>
                                         <tr>
                                             <td>当日配镜架总数</td>
-                                            <td>{$data.orderFrameNum}</td>
+                                            <td>{$orderFrameNum}</td>
                                             <td>当日配镜片总数</td>
-                                            <td>{$data.orderLensNum}</td>
+                                            <td>{$orderLensNum}</td>
                                         </tr>
                                         <tr>
                                             <td>当日加工总数</td>
-                                            <td>{$data.orderFactoryNum}</td>
+                                            <td>{$orderFactoryNum}</td>
                                             <td>当日质检总数</td>
-                                            <td>{$data.orderCheckNewNum}</td>
+                                            <td>{$orderCheckNewNum}</td>
                                         </tr>
                                     </table>
                                 </div>
@@ -268,45 +268,45 @@
                                         </tr>
                                         <tr>
                                             <td>当月采购总数</td>
-                                            <td>{$purchase_data.purchaseNum}</td>
+                                            <td>{$purchaseNum}</td>
                                             <td>当月采购总金额</td>
-                                            <td>{$purchase_data.purchasePrice}</td>
+                                            <td>{$purchasePrice}</td>
                                         </tr>
                                         <tr>
                                             <td>当月采购镜架总数</td>
-                                            <td>{$purchase_data.purchaseFrameNum}</td>
+                                            <td>{$purchaseFrameNum}</td>
                                             <td>当月采购总SKU数</td>
-                                            <td>{$purchase_data.purchaseSkuNum}</td>
+                                            <td>{$purchaseSkuNum}</td>
                                         </tr>
                                         <tr>
                                             <td>当月采购平均单价（￥）</td>
-                                            <td>{:$purchase_data['purchaseNum'] ? round($purchase_data['purchasePrice']/$purchase_data['purchaseNum'],2) : 0}</td>
+                                            <td>{$purchaseAveragePrice}</td>
                                             <td>当月到货总数</td>
-                                            <td>{$purchase_data.arrivalsNum}</td>
+                                            <td>{$arrivalsNum}</td>
                                         </tr>
                                         <tr>
                                             <td>当月销售总数</td>
-                                            <td>{$purchase_data.salesNum}</td>
+                                            <td>{$salesNum}</td>
                                             <td>当月销售总成本（￥）</td>
-                                            <td>0</td>
+                                            <td>{$salesCost}</td>
                                         </tr>
                                         <tr>
                                             <td>当月质检合格总数</td>
-                                            <td>{$purchase_data.quantityNum}</td>
+                                            <td>{$quantityNum}</td>
                                             <td>当月品检合格率</td>
-                                            <td>{$purchase_data.quantityPercent}</td>
+                                            <td>{$quantityPercent}</td>
                                         </tr>
                                         <tr>
                                             <td>当月定做总数</td>
-                                            <td>0</td>
+                                            <td>{$customSkuNum}</td>
                                             <td>当月定做总金额（￥）</td>
-                                            <td>0</td>
+                                            <td>{$customSkuNumMoney}</td>
                                         </tr>
                                         <tr>
                                             <td>当月定做SKU数</td>
-                                            <td>0</td>
+                                            <td>{$customSkuQty}</td>
                                             <td>当月定做平均单价（￥）</td>
-                                            <td>0</td>
+                                            <td>{$customSkuPrice}</td>
                                         </tr>
                                     </table>
                                 </div>
@@ -325,7 +325,7 @@
                                         </tr>
                                         <tr>
                                             <td>在售SKU总数</td>
-                                            <td>0</td>
+                                            <td>{}</td>
                                             <td>在售镜架总数</td>
                                             <td></td>
                                         </tr>
