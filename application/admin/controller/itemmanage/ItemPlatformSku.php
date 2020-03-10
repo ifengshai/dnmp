@@ -716,8 +716,13 @@ class ItemPlatformSku extends Backend
     }
     public function ceshi()
     {
-        $result = $this->model->check_platform_sku_qty('ZOM000780-04',1);
-        echo '<pre>';
-        var_dump($result);
+        $where['platform_type'] = 4;
+        $result = Db::connect('database.db_stock')->name('item_platform_sku')->where($where)->select();
+        $info   = Db::connect('database.db_stock')->name('item_platform_sku_bak')->insertAll($result);
+        if($info){
+            echo 'ok';
+        }else{
+            echo 'error';
+        }
     }
 }
