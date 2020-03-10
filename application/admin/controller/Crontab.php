@@ -36,7 +36,8 @@ class Crontab extends Backend
         'update_ashboard_data_two',
         'purchase_data',
         'stock_data',
-        'warehouse_data'
+        'warehouse_data',
+        'select_product_data'
 
     ];
 
@@ -1589,6 +1590,7 @@ order by sfoi.item_id asc limit 1000";
     public function changeItemNewToOld()
     {
         //select*from table where now() >SUBDATE(times,interval -1 day);
+        Db::connect('database.db_stock')->name('item')->query("set time_zone='+8:00'");
         $where['is_new'] = 1;
         $itemId = Db::connect('database.db_stock')->name('item')->where($where)->where("now() >SUBDATE(check_time,interval -15 day)")->column('id');
         if (false == $itemId) {
@@ -2713,6 +2715,14 @@ order by sfoi.item_id asc limit 1000";
 
     }
 
+    /**
+     * 定时更新供应链大屏-选品数据
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/03/10 09:56:39 
+     * @return void
+     */
     public function select_product_data()
     {
         $dataConfig = new \app\admin\model\DataConfig();
@@ -2750,7 +2760,14 @@ order by sfoi.item_id asc limit 1000";
         $dataConfig->where('key', 'selectProductAdoptNum')->update($data);
 
         //新品十天内的销量
-        
+        $data['value'] = $days10SalesNum ?? 0;
+        $data['updatetime'] = date('Y-m-d H:i:s', time());
+        $dataConfig->where('key', 'days10SalesNum')->update($data);
+
+        //新品十天内的销量占比
+        $data['value'] = $days10SalesNumPercent ?? 0;
+        $data['updatetime'] = date('Y-m-d H:i:s', time());
+        $dataConfig->where('key', 'days10SalesNumPercent')->update($data);
         
 
     }

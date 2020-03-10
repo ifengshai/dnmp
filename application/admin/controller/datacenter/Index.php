@@ -229,7 +229,7 @@ class Index extends Backend
 
         //当月销售总数
         $salesNum = $dataConfig->where('key', 'salesNum')->value('value');
-       
+
         //当月到货总数
         $arrivalsNum = $dataConfig->where('key', 'arrivalsNum')->value('value');
 
@@ -264,15 +264,15 @@ class Index extends Backend
 
         //未出库订单总数
         $allUnorderNum = $dataConfig->where('key', 'allUnorderNum')->value('value');
-       
+
 
         //7天未出库订单总数
         $days7UnorderNum = $dataConfig->where('key', 'days7UnorderNum')->value('value');
-        
+
 
         //当月质检总数
         $orderCheckNum = $dataConfig->where('key', 'orderCheckNum')->value('value');
-        
+
         //当日配镜架总数
         $orderFrameNum = $dataConfig->where('key', 'orderFrameNum')->value('value');
 
@@ -302,10 +302,90 @@ class Index extends Backend
 
         //当月妥投占比
         $monthAppropriatePercent = $dataConfig->where('key', 'monthAppropriatePercent')->value('value');
-        
+
         //超时订单总数
         $overtimeOrder = $dataConfig->where('key', 'overtimeOrder')->value('value');
-     
+
+        //在售SKU数
+        $onSaleSkuNum = $dataConfig->where('key', 'onSaleSkuNum')->value('value');
+
+        //在售镜架总数
+        $onSaleFrameNum = $dataConfig->where('key', 'onSaleFrameNum')->value('value');
+
+        //在售饰品总数
+        $onSaleOrnamentsNum = $dataConfig->where('key', 'onSaleOrnamentsNum')->value('value');
+
+        //当月选品总数
+        $selectProductNum = $dataConfig->where('key', 'selectProductNum')->value('value');
+
+        //当月新品上线总数
+        $selectProductAdoptNum = $dataConfig->where('key', 'selectProductAdoptNum')->value('value');
+
+        //新品10天的销量
+        $days10SalesNum = $dataConfig->where('key', 'days10SalesNum')->value('value');
+
+        //新品10天的销量占比
+        $days10SalesNumPercent = $dataConfig->where('key', 'days10SalesNumPercent')->value('value');
+
+        //计算产品等级的数量
+        $productGrade = new \app\admin\model\ProductGrade();
+        $where = [];
+        $where['grade'] = 'A+';
+        $AA_num = $productGrade->where($where)->count();
+
+        $where['grade'] = 'A';
+        $A_num = $productGrade->where($where)->count();
+
+        $where['grade'] = 'B';
+        $B_num = $productGrade->where($where)->count();
+
+        $where['grade'] = 'C+';
+        $CA_num = $productGrade->where($where)->count();
+
+        $where['grade'] = 'C';
+        $C_num = $productGrade->where($where)->count();
+
+        $where['grade'] = 'D';
+        $D_num = $productGrade->where($where)->count();
+
+        $where['grade'] = 'E';
+        $E_num = $productGrade->where($where)->count();
+
+        $where['grade'] = 'F';
+        $F_num = $productGrade->where($where)->count();
+
+        //总数
+        $all_num = $AA_num + $A_num + $B_num + $CA_num + $C_num + $D_num + $E_num + $F_num;
+        //A级数量即总占比
+        $res['AA_num'] = $AA_num;
+        $res['AA_percent'] = round($AA_num / $all_num * 100, 2);
+        $res['A_num'] = $A_num;
+        $res['A_percent'] = round($A_num / $all_num * 100, 2);
+        $res['B_num'] = $B_num;
+        $res['B_percent'] = round($B_num / $all_num * 100, 2);
+        $res['CA_num'] = $CA_num;
+        $res['CA_percent'] = round($CA_num / $all_num * 100, 2);
+        $res['C_num'] = $C_num;
+        $res['C_percent'] = round($C_num / $all_num * 100, 2);
+        $res['D_num'] = $D_num;
+        $res['D_percent'] = round($D_num / $all_num * 100, 2);
+        $res['E_num'] = $E_num;
+        $res['E_percent'] = round($E_num / $all_num * 100, 2);
+        $res['F_num'] = $F_num;
+        $res['F_percent'] = round($F_num / $all_num * 100, 2);
+
+        $this->view->assign('gradeSkuStock', $productGrade->getSkuStock());
+        $this->view->assign('res', $res);
+
+        //选品数据
+        $this->view->assign('onSaleSkuNum', $onSaleSkuNum);
+        $this->view->assign('onSaleFrameNum', $onSaleFrameNum);
+        $this->view->assign('onSaleOrnamentsNum', $onSaleOrnamentsNum);
+        $this->view->assign('selectProductNum', $selectProductNum);
+        $this->view->assign('selectProductAdoptNum', $selectProductAdoptNum);
+        $this->view->assign('days10SalesNum', $days10SalesNum);
+        $this->view->assign('days10SalesNumPercent', $days10SalesNumPercent);
+
         //仓库数据
         $this->view->assign('lastMonthAllSalesNum', $lastMonthAllSalesNum);
         $this->view->assign('allUnorderNum', $allUnorderNum);
@@ -322,6 +402,7 @@ class Index extends Backend
         $this->view->assign('monthAppropriate', $monthAppropriate);
         $this->view->assign('monthAppropriatePercent', $monthAppropriatePercent);
         $this->view->assign('overtimeOrder', $overtimeOrder);
+
         //采购数据
         $this->view->assign('purchaseNum', $purchaseNum);
         $this->view->assign('purchasePrice', $purchasePrice);
@@ -364,89 +445,6 @@ class Index extends Backend
     }
 
 
-    /**
-     * 仓库订单数据统计
-     *
-     * @Description
-     * @author wpl
-     * @since 2020/03/04 17:05:15 
-     * @return void
-     */
-    protected function warehouse_order_data()
-    {
-        //当月总单量
-        $orderStatistics = new \app\admin\model\OrderStatistics();
-        $stime = date("Y-m-01 00:00:00");
-        $etime = date("Y-m-d H:i:s", time());
-        $map['create_date'] = ['between', [$stime, $etime]];
-        $lastMonthAllSalesNum = $orderStatistics->where($map)->cache(86400)->sum('all_sales_num');
-
-        //未出库订单总数
-        $cachename = 'warehouse_order_data' . 'allUnorderNum';
-        $allUnorderNum = cache($cachename);
-        if (!$allUnorderNum) {
-            $zeeloolUnorderNum = $this->zeelool->undeliveredOrder([]);
-            $vooguemeUnorderNum = $this->voogueme->undeliveredOrder([]);
-            $nihaoUnorderNum = $this->nihao->undeliveredOrder([]);
-            $allUnorderNum = $zeeloolUnorderNum + $vooguemeUnorderNum + $nihaoUnorderNum;
-            cache($cachename, $allUnorderNum, 86400);
-        }
-
-        //7天未出库订单总数
-        $cachename = 'warehouse_order_data' . 'days7UnorderNum';
-        $days7UnorderNum = cache($cachename);
-        if (!$days7UnorderNum) {
-            $map = [];
-            $stime = date("Y-m-d H:i:s", strtotime("-7 day"));
-            $etime = date("Y-m-d H:i:s", time());
-            $map['a.created_at'] = ['between', [$stime, $etime]];
-            $zeeloolUnorderNum = $this->zeelool->undeliveredOrder($map);
-            $vooguemeUnorderNum = $this->voogueme->undeliveredOrder($map);
-            $nihaoUnorderNum = $this->nihao->undeliveredOrder($map);
-            $days7UnorderNum = $zeeloolUnorderNum + $vooguemeUnorderNum + $nihaoUnorderNum;
-            cache($cachename, $days7UnorderNum, 36400);
-        }
-
-        //当月质检总数
-        $orderLog = new \app\admin\model\OrderLog();
-        $orderCheckNum = $orderLog->getOrderCheckNum();
-
-        //当日配镜架总数
-        $orderFrameNum = $orderLog->getOrderFrameNum();
-
-        //当日配镜片总数
-        $orderLensNum = $orderLog->getOrderLensNum();
-
-        //当日加工总数
-        $orderFactoryNum = $orderLog->getOrderFactoryNum();
-
-        //当日质检总数
-        $orderCheckNewNum = $orderLog->getOrderCheckNewNum();
-
-        //当日出库总数
-        $outStock = new \app\admin\model\warehouse\Outstock();
-        $outStockNum = $outStock->getOutStockNum();
-
-        //当日质检入库总数
-        $inStock = new \app\admin\model\warehouse\Instock();
-        $inStockNum = $inStock->getInStockNum();
-
-        $data = [
-            'lastMonthAllSalesNum' => $lastMonthAllSalesNum, //当月总单量
-            'allUnorderNum'        => $allUnorderNum, //未出库总数
-            'days7UnorderNum'      => $days7UnorderNum, //7天未出库总数
-            'orderCheckNum'        => $orderCheckNum, //订单当月质检总数
-            'orderFrameNum'        => $orderFrameNum, //当日配镜架总数
-            'orderLensNum'         => $orderLensNum, //当日配镜片总数
-            'orderFactoryNum'      => $orderFactoryNum, //当日加工总数
-            'orderCheckNewNum'     => $orderCheckNewNum, //当日质检总数
-            'outStockNum'          => $outStockNum, //当日出库总数
-            'inStockNum'           => $inStockNum, //当日入库总数
-        ];
-        return $data;
-    }
-
-  
     /**
      * 数据统计
      *
