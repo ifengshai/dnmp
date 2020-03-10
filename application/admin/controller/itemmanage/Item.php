@@ -721,8 +721,6 @@ class Item extends Backend
                                 $data['name'] = $v;
                                 $data['price']       = $price[$k];
                                 $data['item_status'] = $params['item_status'];
-                                $data['create_person'] = session('admin.nickname');
-                                $data['create_time'] = date("Y-m-d H:i:s", time());
                                 $data['frame_is_rimless'] = $params['shape'] == 1 ? 2 : 1;
                                 $item = Db::connect('database.db_stock')->name('item')->where('id', '=', $row['id'])->update($data);
                                 $itemAttribute['attribute_type'] = $params['attribute_type'];
