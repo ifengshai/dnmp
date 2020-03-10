@@ -1360,7 +1360,7 @@ order by sfoi.item_id asc limit 1000";
  from sales_flat_order_item sfoi
  left join sales_flat_order sfo on sfo.entity_id=sfoi.order_id
  left join catalog_product_entity cpe on cpe.entity_id=sfoi.product_id
- where sfo.status in('complete','processing','creditcard_proccessing','paypal_reversed') and if (datediff(now(),cpe.created_at) > 90,sfo.created_at between '$start' and '$end',sfo.created_at between cpe.created_at and '$end')
+ where sfoi.sku not like 'Price' and sfo.status in('complete','processing','creditcard_proccessing','paypal_reversed') and if (datediff(now(),cpe.created_at) > 90,sfo.created_at between '$start' and '$end',sfo.created_at between cpe.created_at and '$end')
  GROUP BY sfoi.sku order by counter desc";
         $zeelool_list = $zeelool_model->query($intelligent_purchase_query_sql);
         //查询sku映射关系表 
@@ -1644,10 +1644,14 @@ order by sfoi.item_id asc limit 1000";
                 continue;
             }
         }
+
+        $item = new \app\admin\model\itemmanage\Item();
         if ($arr) {
             $list = [];
             $i = 0;
             foreach ($arr as $k => $v) {
+                $item->where('sku', $k)->update(['purchase_price' => $v]);
+
                 $list[$i]['sku'] = $k;
                 $list[$i]['price'] = $v;
                 $list[$i]['createtime'] = date('Y-m-d H:i:s', time());
