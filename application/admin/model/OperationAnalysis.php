@@ -282,13 +282,14 @@ class OperationAnalysis extends Model
             return false;
         }
         $arr = [];
-        foreach($result as $k=>$v){
+        foreach($result as $v){
             $arr['yesterday_sales_money']                       += $v['yesterday_sales_money'];
             $arr['pastsevenday_sales_money']                    += $v['pastsevenday_sales_money'];
             $arr['pastthirtyday_sales_money']                   += $v['pastthirtyday_sales_money'];
             $arr['thismonth_sales_money']                       += $v['thismonth_sales_money'];
             $arr['lastmonth_sales_money']                       += $v['lastmonth_sales_money'];
             $arr['thisyear_sales_money']                        += $v['thisyear_sales_money'];
+            $arr['lastyear_sales_money']                        += $v['lastyear_sales_money'];
             $arr['total_sales_money']                           += $v['total_sales_money'];
             $arr['yesterday_order_num']                         += $v['yesterday_order_num'];
             $arr['pastsevenday_order_num']                      += $v['pastsevenday_order_num'];
@@ -296,6 +297,7 @@ class OperationAnalysis extends Model
             $arr['thismonth_order_num']                         += $v['thismonth_order_num'];
             $arr['lastmonth_order_num']                         += $v['lastmonth_order_num'];
             $arr['thisyear_order_num']                          += $v['thisyear_order_num'];
+            $arr['lastyear_order_num']                          += $v['lastyear_order_num'];
             $arr['total_order_num']                             += $v['total_order_num'];
             $arr['yesterday_order_success']                     += $v['yesterday_order_success'];
             $arr['pastsevenday_order_success']                  += $v['pastsevenday_order_success'];
@@ -303,6 +305,7 @@ class OperationAnalysis extends Model
             $arr['thismonth_order_success']                     += $v['thismonth_order_success'];
             $arr['lastmonth_order_success']                     += $v['lastmonth_order_success'];
             $arr['thisyear_order_success']                      += $v['thisyear_order_success'];
+            $arr['lastyear_order_success']                      += $v['lastyear_order_success'];
             $arr['total_order_success']                         += $v['total_order_success'];
             $arr['yesterday_unit_price']                        += $v['yesterday_unit_price'];
             $arr['pastsevenday_unit_price']                     += $v['pastsevenday_unit_price'];
@@ -310,6 +313,7 @@ class OperationAnalysis extends Model
             $arr['thismonth_unit_price']                        += $v['thismonth_unit_price'];
             $arr['lastmonth_unit_price']                        += $v['lastmonth_unit_price'];
             $arr['thisyear_unit_price']                         += $v['thisyear_unit_price'];
+            $arr['lastyear_unit_price']                         += $v['lastyear_unit_price'];
             $arr['total_unit_price']                            += $v['total_unit_price'];
             $arr['yesterday_shoppingcart_total']                += $v['yesterday_shoppingcart_total'];
             $arr['pastsevenday_shoppingcart_total']             += $v['pastsevenday_shoppingcart_total'];
@@ -317,36 +321,91 @@ class OperationAnalysis extends Model
             $arr['thismonth_shoppingcart_total']                += $v['thismonth_shoppingcart_total'];
             $arr['lastmonth_shoppingcart_total']                += $v['lastmonth_shoppingcart_total'];
             $arr['thisyear_shoppingcart_total']                 += $v['thisyear_shoppingcart_total'];
+            $arr['lastyear_shoppingcart_total']                 += $v['lastyear_shoppingcart_total'];
             $arr['total_shoppingcart_total']                    += $v['total_shoppingcart_total'];
             $arr['yesterday_shoppingcart_conversion']           += $v['yesterday_shoppingcart_conversion'];
             $arr['pastsevenday_shoppingcart_conversion']        += $v['pastsevenday_shoppingcart_conversion'];
             $arr['pastthirtyday_shoppingcart_conversion']       += $v['pastthirtyday_shoppingcart_conversion'];
             $arr['thismonth_shoppingcart_conversion']           += $v['thismonth_shoppingcart_conversion'];
             $arr['lastmonth_shoppingcart_conversion']           += $v['lastmonth_shoppingcart_conversion'];  
-            $arr['thisyear_shoppingcart_conversion']            += $v['thisyear_shoppingcart_conversion']; 
+            $arr['thisyear_shoppingcart_conversion']            += $v['thisyear_shoppingcart_conversion'];
+            $arr['lastyear_shoppingcart_conversion']            += $v['lastyear_shoppingcart_conversion']; 
             $arr['total_shoppingcart_conversion']               += $v['total_shoppingcart_conversion']; 
             $arr['yesterday_shoppingcart_new']                  += $v['yesterday_shoppingcart_new'];
             $arr['pastsevenday_shoppingcart_new']               += $v['pastsevenday_shoppingcart_new'];
             $arr['pastthirtyday_shoppingcart_new']              += $v['pastthirtyday_shoppingcart_new'];
             $arr['thismonth_shoppingcart_new']                  += $v['thismonth_shoppingcart_new'];
             $arr['lastmonth_shoppingcart_new']                  += $v['lastmonth_shoppingcart_new'];  
-            $arr['thisyear_shoppingcart_new']                   += $v['thisyear_shoppingcart_new']; 
+            $arr['thisyear_shoppingcart_new']                   += $v['thisyear_shoppingcart_new'];
+            $arr['lastyear_shoppingcart_new']                   += $v['lastyear_shoppingcart_new'];  
             $arr['total_shoppingcart_new']                      += $v['total_shoppingcart_new']; 
             $arr['yesterday_shoppingcart_newconversion']        += $v['yesterday_shoppingcart_newconversion'];
             $arr['pastsevenday_shoppingcart_newconversion']     += $v['pastsevenday_shoppingcart_newconversion'];
             $arr['pastthirtyday_shoppingcart_newconversion']    += $v['pastthirtyday_shoppingcart_newconversion'];
             $arr['thismonth_shoppingcart_newconversion']        += $v['thismonth_shoppingcart_newconversion'];
             $arr['lastmonth_shoppingcart_newconversion']        += $v['lastmonth_shoppingcart_newconversion'];  
-            $arr['thisyear_shoppingcart_newconversion']         += $v['thisyear_shoppingcart_newconversion']; 
+            $arr['thisyear_shoppingcart_newconversion']         += $v['thisyear_shoppingcart_newconversion'];
+            $arr['lastyear_shoppingcart_newconversion']         += $v['lastyear_shoppingcart_newconversion']; 
             $arr['total_shoppingcart_newconversion']            += $v['total_shoppingcart_newconversion']; 
             $arr['yesterday_register_customer']                 += $v['yesterday_register_customer'];
             $arr['pastsevenday_register_customer']              += $v['pastsevenday_register_customer'];
             $arr['pastthirtyday_register_customer']             += $v['pastthirtyday_register_customer'];
             $arr['thismonth_register_customer']                 += $v['thismonth_register_customer'];
             $arr['lastmonth_register_customer']                 += $v['lastmonth_register_customer'];  
-            $arr['thisyear_register_customer']                  += $v['thisyear_register_customer']; 
-            $arr['total_register_customer']                     += $v['total_register_customer']; 
+            $arr['thisyear_register_customer']                  += $v['thisyear_register_customer'];
+            $arr['lastyear_register_customer']                  += $v['lastyear_register_customer']; 
+            $arr['total_register_customer']                     += $v['total_register_customer'];
+            $arr['yesterday_sign_customer']                     += $v['yesterday_sign_customer'];
+            $arr['pastsevenday_sign_customer']                  += $v['pastsevenday_sign_customer'];
+            $arr['pastthirtyday_sign_customer']                 += $v['pastthirtyday_sign_customer'];
+            $arr['thismonth_sign_customer']                     += $v['thismonth_sign_customer'];
+            $arr['lastmonth_sign_customer']                     += $v['lastmonth_sign_customer'];  
+            $arr['thisyear_sign_customer']                      += $v['thisyear_sign_customer'];
+            $arr['lastyear_sign_customer']                      += $v['lastyear_sign_customer']; 
+            $arr['total_sign_customer']                         += $v['total_sign_customer'];             
         }
+        //求出zeelool今天的总和
+        $zeelool_data = $this->getList(1);
+        //求出voogueme今天的总和
+        $voogueme_data = $this->getList(2);
+        //求出nihao今天的总和
+        $nihao_data    = $this->gitList(3);
+        //总和
+        $arr['today_sales_money']                           = @($zeelool_data['today_sales_money'] + $voogueme_data['today_sales_money'] + $nihao_data['today_sales_money']);
+        $arr['today_order_num']                             = @($zeelool_data['today_order_num'] + $voogueme_data['today_order_num'] + $nihao_data['today_order_num']);
+        $arr['today_order_success']                         = @($zeelool_data['today_order_success'] + $voogueme_data['today_order_success'] + $nihao_data['today_order_success']);
+        $arr['today_unit_price']                            = @($zeelool_data['today_unit_price'] + $voogueme_data['today_unit_price'] + $nihao_data['today_unit_price']);
+        $arr['today_shoppingcart_total']                    = @($zeelool_data['today_shoppingcart_total'] + $voogueme_data['today_shoppingcart_total'] + $nihao_data['today_shoppingcart_total']);
+        $arr['today_shoppingcart_new']                      = @($zeelool_data['today_shoppingcart_new'] + $voogueme_data['today_shoppingcart_new'] + $nihao_data['today_shoppingcart_new']);
+        $arr['today_register_customer']                     = @($zeelool_data['today_register_customer'] + $voogueme_data['today_register_customer'] + $nihao_data['today_register_customer']);
+        $arr['today_sign_customer']                         = @($zeelool_data['today_sign_customer'] + $voogueme_data['today_sign_customer'] + $nihao_data['today_sign_customer']);
+        $arr['today_shoppingcart_conversion']               = @($zeelool_data['today_shoppingcart_conversion'] + $voogueme_data['today_shoppingcart_conversion'] + $nihao_data['today_shoppingcart_conversion']);
+        $arr['today_shoppingcart_newconversion']            = @($zeelool_data['today_shoppingcart_newconversion'] + $voogueme_data['today_shoppingcart_newconversion'] + $nihao_data['today_shoppingcart_newconversion']);
+        //保留2位小数点
+        $arr['yesterday_unit_price']                        = round($arr['yesterday_unit_price'],2);
+        $arr['pastsevenday_unit_price']                     = round($arr['pastsevenday_unit_price'],2);
+        $arr['pastthirtyday_unit_price']                    = round($arr['pastthirtyday_unit_price'],2);
+        $arr['thismonth_unit_price']                        = round($arr['thismonth_unit_price'],2);
+        $arr['lastmonth_unit_price']                        = round($arr['lastmonth_unit_price'],2);
+        $arr['thisyear_unit_price']                         = round($arr['thisyear_unit_price'],2);
+        $arr['lastyear_unit_price']                         = round($arr['lastyear_unit_price'],2);
+        $arr['total_unit_price']                            = round($arr['total_unit_price'] ,2);
+        $arr['yesterday_shoppingcart_conversion']           = round($arr['yesterday_shoppingcart_conversion'],2);
+        $arr['pastsevenday_shoppingcart_conversion']        = round($arr['pastsevenday_shoppingcart_conversion'],2);
+        $arr['pastthirtyday_shoppingcart_conversion']       = round($arr['pastthirtyday_shoppingcart_conversion'],2);
+        $arr['thismonth_shoppingcart_conversion']           = round($arr['thismonth_shoppingcart_conversion'],2);
+        $arr['lastmonth_shoppingcart_conversion']           = round($arr['lastmonth_shoppingcart_conversion'],2);  
+        $arr['thisyear_shoppingcart_conversion']            = round($arr['thisyear_shoppingcart_conversion'],2);
+        $arr['lastyear_shoppingcart_conversion']            = round($arr['lastyear_shoppingcart_conversion'],2); 
+        $arr['total_shoppingcart_conversion']               = round($arr['total_shoppingcart_conversion'],2);
+        $arr['yesterday_shoppingcart_newconversion']        = round($arr['yesterday_shoppingcart_newconversion'],2);
+        $arr['pastsevenday_shoppingcart_newconversion']     = round($arr['pastsevenday_shoppingcart_newconversion'],2);
+        $arr['pastthirtyday_shoppingcart_newconversion']    = round($arr['pastthirtyday_shoppingcart_newconversion'],2);
+        $arr['thismonth_shoppingcart_newconversion']        = round($arr['thismonth_shoppingcart_newconversion'],2);
+        $arr['lastmonth_shoppingcart_newconversion']        = round($arr['lastmonth_shoppingcart_newconversion'],2);  
+        $arr['thisyear_shoppingcart_newconversion']         = round($arr['thisyear_shoppingcart_newconversion'],2);
+        $arr['lastyear_shoppingcart_newconversion']         = round($arr['lastyear_shoppingcart_newconversion'],2); 
+        $arr['total_shoppingcart_newconversion']            = round($arr['total_shoppingcart_newconversion'],2);        
         return $arr;
     }
 }
