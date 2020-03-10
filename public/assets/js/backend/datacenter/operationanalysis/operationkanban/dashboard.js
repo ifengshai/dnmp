@@ -111,6 +111,8 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                     url:'datacenter/operationanalysis/operationkanban/dashboard/async_data',
                     data:{order_platform:order_platform}
                 }, function(data, ret){
+                    console.log(ret.data.pastsevenday_sales_money);
+                    console.log(ret.data.pastsevenday_sales_money.toFixed(2));
                     $('#today_sales_money').text(ret.data.today_sales_money.toFixed(2));
                     $('#yesterday_sales_money').text(ret.data.yesterday_sales_money.toFixed(2));
                     $('#pastsevenday_sales_money').text(ret.data.pastsevenday_sales_money.toFixed(2));
