@@ -1552,7 +1552,7 @@ class SaleAfterTask extends Backend
                 $spreadsheet->getActiveSheet()->setCellValue("N" . ($key * 1 + 2), $value['problem_id']);
             }
             //$spreadsheet->getActiveSheet()->setCellValue("N" . ($key * 1 + 2), $value['sale_after_issue']['name']);
-            $spreadsheet->getActiveSheet()->setCellValue("O" . ($key * 1 + 2), strip_tags($value['problem_desc']));
+            $spreadsheet->getActiveSheet()->setCellValue("O" . ($key * 1 + 2), str_replace('&nbsp;','',strip_tags($value['problem_desc'])));
             switch($value['handle_scheme']){
                 case 1:
                 $value['handle_scheme'] = '部分退款';
