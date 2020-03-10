@@ -30,7 +30,10 @@ class Crontab extends Backend
         'changeItemNewToOld',
         'get_sku_stock',
         'get_sku_price',
-        'get_sku_allstock'
+        'get_sku_allstock',
+        'get_sales_order_data',
+        'update_ashboard_data_one',
+        'update_ashboard_data_two'
 
     ];
 
