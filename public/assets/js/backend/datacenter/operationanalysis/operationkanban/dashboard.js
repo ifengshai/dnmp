@@ -191,7 +191,16 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                     $('#lastmonth_register_customer').text(ret.data.lastmonth_register_customer);
                     $('#thisyear_register_customer').text(ret.data.thisyear_register_customer);
                     $('#lastyear_register_customer').text(ret.data.lastyear_register_customer);
-                    $('#total_register_customer').text(ret.data.total_register_customer);                                                              
+                    $('#total_register_customer').text(ret.data.total_register_customer);
+                    $('#today_sign_customer').text(ret.data.today_sign_customer);
+                    $('#yesterday_sign_customer').text(ret.data.yesterday_sign_customer);
+                    $('#pastsevenday_sign_customer').text(ret.data.pastsevenday_sign_customer);
+                    $('#pastthirtyday_sign_customer').text(ret.data.pastthirtyday_sign_customer);
+                    $('#thismonth_sign_customer').text(ret.data.thismonth_sign_customer);
+                    $('#lastmonth_sign_customer').text(ret.data.lastmonth_sign_customer);
+                    $('#thisyear_sign_customer').text(ret.data.thisyear_sign_customer);
+                    $('#lastyear_sign_customer').text(ret.data.lastyear_sign_customer);
+                    $('#total_sign_customer').text(ret.data.total_sign_customer);                                                                                    
                     //console.log(ret.data);
                     return false;
                 }, function(data, ret){
@@ -277,6 +286,15 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                     $('#thisyear_register_customer').text(0);
                     $('#lastyear_register_customer').text(0);
                     $('#total_register_customer').text(0);
+                    $('#today_sign_customer').text(0);
+                    $('#yesterday_sign_customer').text(0);
+                    $('#pastsevenday_sign_customer').text(0);
+                    $('#pastthirtyday_sign_customer').text(0);
+                    $('#thismonth_sign_customer').text(0);
+                    $('#lastmonth_sign_customer').text(0);
+                    $('#thisyear_sign_customer').text(0);
+                    $('#lastyear_sign_customer').text(0);
+                    $('#total_sign_customer').text(0);                      
                     //console.log(ret);
                     Layer.alert(ret.msg);
                     return false;
