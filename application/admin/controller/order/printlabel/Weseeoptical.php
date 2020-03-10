@@ -58,10 +58,10 @@ class Weseeoptical extends Backend
             $filter = json_decode($this->request->get('filter'), true);
 
             if ($filter['increment_id']) {
-                $map['status'] = ['in', ['free_processing', 'processing', 'complete']];
+                $map['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal']];
             } elseif (!$filter['status']) {
-                $map['status'] = ['in', ['free_processing', 'processing']];
-            } 
+                $map['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed']];
+            }
 
             $infoSynergyTask = new \app\admin\model\infosynergytaskmanage\InfoSynergyTask;
             if ($filter['task_label'] == 1 || $filter['task_label'] == '0') {
@@ -72,7 +72,7 @@ class Weseeoptical extends Backend
                 $map['increment_id'] = ['in', $order_arr];
                 unset($filter['task_label']);
                 $this->request->get(['filter' => json_encode($filter)]);
-            } 
+            }
 
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
 
@@ -80,7 +80,7 @@ class Weseeoptical extends Backend
                 ->where($map)
                 ->where($where)
                 ->order($sort, $order)
-                ->count();                                                                       
+                ->count();
             $field = 'order_type,custom_order_prescription_type,entity_id,status,base_shipping_amount,increment_id,coupon_code,shipping_description,store_id,customer_id,base_discount_amount,base_grand_total,
                      total_qty_ordered,quote_id,customer_email,customer_firstname,customer_lastname,custom_is_match_frame_new,custom_is_match_lens_new,
                      custom_is_send_factory_new,custom_is_delivery_new,custom_print_label_new,custom_order_prescription,created_at';
@@ -127,7 +127,7 @@ class Weseeoptical extends Backend
             $increment_id = $this->request->post('increment_id');
             if ($increment_id) {
                 $map['increment_id'] = $increment_id;
-                $map['status'] = ['in', ['free_processing', 'processing', 'complete']];
+                $map['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed']];
                 $list = $this->model
                     ->where($map)
                     ->find();
@@ -206,7 +206,7 @@ class Weseeoptical extends Backend
     public function setOrderStatus()
     {
         $entity_ids = input('id_params/a');
-        
+
         $status = input('status');
         $label = input('label');
         $map['entity_id'] = ['in', $entity_ids];
@@ -558,15 +558,15 @@ where cped.attribute_id in(146,147) and cped.store_id=0 and cped.entity_id=$prod
 
         set_time_limit(0);
         ini_set('memory_limit', '512M');
-       
+
         $ids = input('id_params');
 
         $filter = json_decode($this->request->get('filter'), true);
 
         if ($filter['increment_id']) {
-            $map['sfo.status'] = ['in', ['free_processing', 'processing', 'complete']];
+            $map['sfo.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal']];
         } elseif (!$filter['status']) {
-            $map['sfo.status'] = ['in', ['free_processing', 'processing']];
+            $map['sfo.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed']];
         }
 
         $infoSynergyTask = new \app\admin\model\infosynergytaskmanage\InfoSynergyTask;
@@ -602,7 +602,7 @@ where cped.attribute_id in(146,147) and cped.store_id=0 and cped.entity_id=$prod
             ->select();
 
         $resultList = collection($resultList)->toArray();
-        
+
         $resultList = $this->qty_order_check($resultList);
         // dump($resultList);
 
@@ -849,7 +849,7 @@ where cped.attribute_id in(146,147) and cped.store_id=0 and cped.entity_id=$prod
         //水平垂直居中   
         // $objSheet->getDefaultStyle()->getAlignment()->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
         // $objSheet->getDefaultStyle()->getAlignment()->setVertical(\PHPExcel_Style_Alignment::VERTICAL_CENTER);
-   
+
         //自动换行
         $spreadsheet->getDefaultStyle()->getAlignment()->setWrapText(true);
 
