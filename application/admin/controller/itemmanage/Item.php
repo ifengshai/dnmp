@@ -684,7 +684,6 @@ class Item extends Backend
                                 $data['name'] = $v;
                                 $data['price']       = $price[$k];
                                 $data['item_status'] = $params['item_status'];
-                                $data['create_person'] = session('admin.nickname');
                                 $item = Db::connect('database.db_stock')->name('item')->where('id', '=', $row['id'])->update($data);
                                 $itemAttribute['attribute_type'] = 3;
                                 $itemAttribute['accessory_color'] = $itemColor[$k];
