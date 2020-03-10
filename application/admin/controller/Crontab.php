@@ -1592,6 +1592,8 @@ order by sfoi.item_id asc limit 1000";
         //select*from table where now() >SUBDATE(times,interval -1 day);
         $where['is_new'] = 1;
         $itemId = Db::connect('database.db_stock')->name('item')->where($where)->where("now() >SUBDATE(check_time,interval -15 day)")->column('id');
+        dump($itemId);
+        exit;
         if (false == $itemId) {
             return 'ok';
         }

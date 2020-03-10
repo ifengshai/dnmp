@@ -58,6 +58,15 @@ class ZendeskReply extends Backend
             $data = collection($list)->toArray();
             foreach ($list as $key => &$v) {
                 $data[$key]['key_preg'] = $v->key_preg;
+                //获取客户详情里第一次回复的内容
+                $details = $v->details;
+                $data[$key]['answer_preg'] = '';
+                foreach($details as $detail){
+                    if($detail->is_admin == 2){ //客户第一次回复
+                        $data[$key]['answer_preg'] = $detail->key_preg;
+                        break;
+                    }
+                }
             }
             $result = array("total" => $total, "rows" => $data);
 

@@ -26,6 +26,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {field: 'title', title: __('主题')},
                         {field: 'email_id', title: __('Ticket id')},
                         {field: 'key_preg', title: __('关键字')},
+                        {field: 'answer_preg', title: __('回复关键字')},
                         // {field: 'body', title: __('内容')},
                         {field: 'source', title: __('来源')},
                         {field: 'tags', title: __('Tags')},

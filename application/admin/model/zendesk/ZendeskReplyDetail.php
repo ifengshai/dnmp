@@ -3,6 +3,7 @@
 namespace app\admin\model\zendesk;
 
 use think\Model;
+use function Stringy\create as s;
 
 
 class ZendeskReplyDetail extends Model
@@ -19,6 +20,20 @@ class ZendeskReplyDetail extends Model
     protected $append = [
 
     ];
+    protected $auto_answer = [
+        'order status',
+        'change information',
+        'others'
+    ];
+    public function getKeyPregAttr($value,$data)
+    {
+        $body = $data['body'];
+        foreach($this->auto_answer as $key){
+            if(s($body)->contains($key,false)){
+                return $key;
+            }
+        }
+    }
     
 
     
