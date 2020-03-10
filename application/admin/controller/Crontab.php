@@ -1398,6 +1398,10 @@ order by sfoi.item_id asc limit 1000";
 
         $data = [];
         foreach ($lists as $k => $v) {
+
+            if ($v['true_sku'] == 'Express Shipping') {
+                continue;
+            }
             if ($data[$v['true_sku']]) {
                 if ($v['voogueme_sku']) {
                     $data[$v['true_sku']]['voogueme_sku'] = $v['voogueme_sku'];
