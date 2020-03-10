@@ -1111,7 +1111,7 @@ class InfoSynergyTask extends Backend
             }
             $spreadsheet->getActiveSheet()->setCellValue("J" . ($key * 1 + 2), $value['prty_id']);
             $spreadsheet->getActiveSheet()->setCellValue("K" . ($key * 1 + 2), $value['infosynergytaskcategory']['name']);
-            $spreadsheet->getActiveSheet()->setCellValue("L" . ($key * 1 + 2), strip_tags($value['problem_desc']));
+            $spreadsheet->getActiveSheet()->setCellValue("L" . ($key * 1 + 2), str_replace('&nbsp;','',strip_tags($value['problem_desc'])));
             $spreadsheet->getActiveSheet()->setCellValue("M" . ($key * 1 + 2), $value['make_up_price_order']);
             $spreadsheet->getActiveSheet()->setCellValue("N" . ($key * 1 + 2), $value['replacement_order']);
             $spreadsheet->getActiveSheet()->setCellValue("O" . ($key * 1 + 2), $value['order_skus']);
