@@ -19,7 +19,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
             table.bootstrapTable({
                 url: $.fn.bootstrapTable.defaults.extend.index_url,
                 pk: 'entity_id',
-                sortName: 'entity_id',
+                sortName: 'total_qty_ordered',
+                sortOrder: 'asc',
                 columns: [
                     [
                         { checkbox: true },

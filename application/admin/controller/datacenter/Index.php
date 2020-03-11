@@ -557,4 +557,33 @@ class Index extends Backend
         $res = Db::connect('database.db_zeelool')->table('sales_flat_order_item_prescription')->query($sql);
         return $res;
     }
+
+    /**
+     * 销量排行榜
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/03/11 16:14:50 
+     * @return void
+     */
+    public function top_sale_list()
+    {
+        //查询三个站数据
+        $orderStatistics = new \app\admin\model\OrderStatistics();
+        $list = $orderStatistics->getAllData();
+        
+        $zeeloolSalesNumList = $vooguemeSalesNumList = $nihaoSalesNumList = [];
+        foreach ($list as $k => $v) {
+            $zeeloolSalesNumList[$v['create_date']] = $v['zeelool_sales_num'];
+            $vooguemeSalesNumList[$v['create_date']] = $v['voogueme_sales_num'];
+            $nihaoSalesNumList[$v['create_date']] = $v['nihao_sales_num'];
+        }
+
+        $this->view->assign([
+            'zeeloolSalesNumList'       => $zeeloolSalesNumList, //折线图数据
+            'vooguemeSalesNumList'      => $vooguemeSalesNumList,
+            'nihaoSalesNumList'         => $nihaoSalesNumList,
+        ]);
+        return $this->view->fetch();
+    }
 }
