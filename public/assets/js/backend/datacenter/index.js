@@ -1,4 +1,4 @@
-define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj', 'custom-css', 'bootstrap-table-jump-to'], function ($, undefined, Backend, Table, Form, EchartsObj) {
+define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj', 'custom-css', 'bootstrap-table-jump-to'], function ($, undefined, Backend, Table, Form, EchartObj) {
 
     var Controller = {
         index: function () {
@@ -59,124 +59,108 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj', 'custom
         top_sale_list: function () {
             Controller.api.formatter.daterangepicker($("form[role=form1]"));
 
-            // 基于准备好的dom，初始化echarts实例
-            var myChart = EchartsObj.init(document.getElementById('echart'), 'walden');
+            // // 基于准备好的dom，初始化echarts实例
+            // var myChart = EchartsObj.init(document.getElementById('echart'), 'walden');
 
 
 
-            // 指定图表的配置项和数据
-            var option = {
-                title: {
-                    text: '',
-                    subtext: ''
-                },
-                tooltip: {
-                    trigger: 'axis'
-                },
-                legend: {
-                    data: [__('Z站销量'), __('V站销量'), __('Nihao站销量')]
-                },
-                toolbox: {
-                    show: false,
-                    feature: {
-                        magicType: { show: true, type: ['stack', 'tiled'] },
-                        saveAsImage: { show: true }
-                    }
-                },
-                xAxis: {
-                    type: 'category',
-                    boundaryGap: false,
-                    data: Orderdata.column
-                },
-                yAxis: {},
-                grid: [{
-                    left: 'left',
-                    top: 'top',
-                    right: '10',
-                    bottom: 30
-                }],
-                series: [{
-                    name: __('Z站销量'),
-                    type: 'line',
-                    smooth: true,
-                    areaStyle: {
-                        normal: {}
-                    },
-                    lineStyle: {
-                        normal: {
-                            width: 1.5
-                        }
-                    },
-                    data: Orderdata.zeeloolSalesNumList
-                },
-                {
-                    name: __('V站销量'),
-                    type: 'line',
-                    smooth: true,
-                    areaStyle: {
-                        normal: {}
-                    },
-                    lineStyle: {
-                        normal: {
-                            width: 1.5
-                        }
-                    },
-                    data: Orderdata.vooguemeSalesNumList
-                },
-                {
-                    name: __('Nihao站销量'),
-                    type: 'line',
-                    smooth: true,
-                    areaStyle: {
-                        normal: {}
-                    },
-                    lineStyle: {
-                        normal: {
-                            width: 1.5
-                        }
-                    },
-                    data: Orderdata.nihaoSalesNumList
-                }
-                ]
-            };
-
-
-            
-             //男女比例
-             var options = {
-                url: '/admin/portrait/index',
-                data: {
-                    time: _this.time,
-                    day: _this.day,
-                    key: 'sex',
-                }
-            };
-            if (_this.day == 'zidingyi') {
-                options.data.day = '-1';
-            }
-            _this.options = options; //便于其他方法中使用
+            // // 指定图表的配置项和数据
+            // var option = {
+            //     title: {
+            //         text: '',
+            //         subtext: ''
+            //     },
+            //     tooltip: {
+            //         trigger: 'axis'
+            //     },
+            //     legend: {
+            //         data: [__('Z站销量'), __('V站销量'), __('Nihao站销量')]
+            //     },
+            //     toolbox: {
+            //         show: false,
+            //         feature: {
+            //             magicType: { show: true, type: ['stack', 'tiled'] },
+            //             saveAsImage: { show: true }
+            //         }
+            //     },
+            //     xAxis: {
+            //         type: 'category',
+            //         boundaryGap: false,
+            //         data: Orderdata.column
+            //     },
+            //     yAxis: {},
+            //     grid: [{
+            //         left: 'left',
+            //         top: 'top',
+            //         right: '10',
+            //         bottom: 30
+            //     }],
+            //     series: [{
+            //         name: __('Z站销量'),
+            //         type: 'line',
+            //         smooth: true,
+            //         areaStyle: {
+            //             normal: {}
+            //         },
+            //         lineStyle: {
+            //             normal: {
+            //                 width: 1.5
+            //             }
+            //         },
+            //         data: Orderdata.zeeloolSalesNumList
+            //     },
+            //     {
+            //         name: __('V站销量'),
+            //         type: 'line',
+            //         smooth: true,
+            //         areaStyle: {
+            //             normal: {}
+            //         },
+            //         lineStyle: {
+            //             normal: {
+            //                 width: 1.5
+            //             }
+            //         },
+            //         data: Orderdata.vooguemeSalesNumList
+            //     },
+            //     {
+            //         name: __('Nihao站销量'),
+            //         type: 'line',
+            //         smooth: true,
+            //         areaStyle: {
+            //             normal: {}
+            //         },
+            //         lineStyle: {
+            //             normal: {
+            //                 width: 1.5
+            //             }
+            //         },
+            //         data: Orderdata.nihaoSalesNumList
+            //     }
+            //     ]
+            // };
 
             var chart1Options = {
-                targetId: 'chart1',
-                downLoadID: "#nnbl",
-                downLoadTitle: '男女比例',
-                type: 'pie',
-                pie: {
-                    series: [{
-                        name: '性别'
-                    }]
-                }
+                targetId: 'echart',
+                downLoadTitle: '图表',
+                type: 'line'
             };
+
+            var options = {
+                type: 'get',
+                url: 'datacenter/index/top_sale_list'
+            }
+
             EchartObj.api.ajax(options, chart1Options)
 
-            
-            // 使用刚指定的配置项和数据显示图表。
-            myChart.setOption(option);
+
+            // // 使用刚指定的配置项和数据显示图表。
+            // myChart.setOption(option);
 
 
-            $(window).resize(function () {
-                myChart.resize();
-            });
+            // $(window).resize(function () {
+            //     myChart.resize();
+            // });
 
         },
 

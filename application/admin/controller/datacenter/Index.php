@@ -568,22 +568,34 @@ class Index extends Backend
      */
     public function top_sale_list()
     {
-        //查询三个站数据
-        $orderStatistics = new \app\admin\model\OrderStatistics();
-        $list = $orderStatistics->getAllData();
-        
-        $zeeloolSalesNumList = $vooguemeSalesNumList = $nihaoSalesNumList = [];
-        foreach ($list as $k => $v) {
-            $zeeloolSalesNumList[$v['create_date']] = $v['zeelool_sales_num'];
-            $vooguemeSalesNumList[$v['create_date']] = $v['voogueme_sales_num'];
-            $nihaoSalesNumList[$v['create_date']] = $v['nihao_sales_num'];
+        if ($this->request->isAjax()) {
+            //查询三个站数据
+            $orderStatistics = new \app\admin\model\OrderStatistics();
+            $list = $orderStatistics->getAllData();
+          
+            $dataJson = [];
+            $date = [];
+            $dataJson[0]['type'] = 'line';
+            $dataJson[0]['name'] = 'Z站销量';
+            $dataJson[1]['type'] = 'line';
+            $dataJson[1]['name'] = 'V站销量';
+            $dataJson[2]['type'] = 'line';
+            $dataJson[2]['name'] = 'Nihao站销量';
+            foreach ($list as $k => $v) {
+                $date[$k] = $v['create_date'];
+                
+                $dataJson[0]['data'][$k] = $v['zeelool_sales_num'];
+                $dataJson[1]['data'][$k] = $v['voogueme_sales_num'];
+                $dataJson[2]['data'][$k] = $v['nihao_sales_num'];
+            }
+
+            $json['column'] = ['Z站销量', 'V站销量', 'Nihao站销量'];
+            $json['xcolumnData'] = $date;
+            $json['columnData'] = $dataJson;
+
+            return json(['code' => 1, 'data' => $json]);
         }
 
-        $this->view->assign([
-            'zeeloolSalesNumList'       => $zeeloolSalesNumList, //折线图数据
-            'vooguemeSalesNumList'      => $vooguemeSalesNumList,
-            'nihaoSalesNumList'         => $nihaoSalesNumList,
-        ]);
         return $this->view->fetch();
     }
 }
