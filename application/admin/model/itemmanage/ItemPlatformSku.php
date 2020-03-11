@@ -59,8 +59,7 @@ class ItemPlatformSku extends Model
                         $prefix = 'W';
                         break;
                     default:
-                        continue;
-                    break;    
+                        break;    
                 }
                 //监测平台sku是否存在
                 $platformSkuExists =$this->getTrueSku($prefix.$row['sku'],$k);
