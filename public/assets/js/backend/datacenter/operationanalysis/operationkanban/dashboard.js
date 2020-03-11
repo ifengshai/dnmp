@@ -3,12 +3,18 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
     var Controller = {
         index: function () {
             // 基于准备好的dom，初始化echarts实例
+            //销售额
             var myChart  = Echarts.init(document.getElementById('echart'), 'walden');
-			var myChart2 = Echarts.init(document.getElementById('echart2'),'walden');
-			var myChart3 = Echarts.init(document.getElementById('echart3'),'walden');
-			var myChart4 = Echarts.init(document.getElementById('echart4'),'walden');
-			var myChart5 = Echarts.init(document.getElementById('echart5'),'walden');
-			var myChart6 = Echarts.init(document.getElementById('echart6'),'walden');
+            //订单支付成功数
+            var myChart2 = Echarts.init(document.getElementById('echart2'),'walden');
+            //客单价
+            var myChart3 = Echarts.init(document.getElementById('echart3'),'walden');
+            //购物车数
+            var myChart4 = Echarts.init(document.getElementById('echart4'),'walden');
+            //购物车转化率
+            var myChart5 = Echarts.init(document.getElementById('echart5'),'walden');
+            //注册用户数
+            var myChart6 = Echarts.init(document.getElementById('echart6'),'walden');
             // 指定图表的配置项和数据
             var option = {
                 title: {
@@ -19,7 +25,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                     trigger: 'axis'
                 },
                 legend: {
-                    data: [__('Z站销量'), __('V站销量'), __('Nihao站销量')]
+                    data: [__('Z站销量额'), __('V站销量额'), __('Nihao站销量额')]
                 },
                 toolbox: {
                     show: false,
@@ -31,8 +37,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                 xAxis: {
                     type: 'category',
                     boundaryGap: false,
-                    //data: Orderdata.column
-					data:[1,2,3]
+                    data: Orderdata.column
                 },
                 yAxis: {},
                 grid: [{
@@ -53,8 +58,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                             width: 1.5
                         }
                     },
-                    //data: Orderdata.zeeloolSalesNumList
-					data: [1,2,3,4,5]
+                    data: Orderdata.zeeloolSalesMoneyList
                 },
                 {
                     name: __('V站销量'),
@@ -68,8 +72,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                             width: 1.5
                         }
                     },
-                    //data: Orderdata.vooguemeSalesNumList
-					data:[6,7,8,9,10]
+                    data: Orderdata.vooguemeSalesMoneyList
                 },
                 {
                     name: __('Nihao站销量'),
@@ -83,15 +86,88 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                             width: 1.5
                         }
                     },
-                    //data: Orderdata.nihaoSalesNumList
-					data:[11,12,13,14,15]
+                    data: Orderdata.nihaoSalesMoneyList
                 }
                 ]
             };
+            var option2 = {
+                title: {
+                    text: '',
+                    subtext: ''
+                },
+                tooltip: {
+                    trigger: 'axis'
+                },
+                legend: {
+                    data: [__('Z站订单支付成功数'), __('V站订单支付成功数'), __('Nihao站订单支付成功数')]
+                },
+                toolbox: {
+                    show: false,
+                    feature: {
+                        magicType: { show: true, type: ['stack', 'tiled'] },
+                        saveAsImage: { show: true }
+                    }
+                },
+                xAxis: {
+                    type: 'category',
+                    boundaryGap: false,
+                    data: Orderdata.column
+                },
+                yAxis: {},
+                grid: [{
+                    left: 'left',
+                    top: 'top',
+                    right: '10',
+                    bottom: 30
+                }],
+                series: [{
+                    name: __('Z站销量'),
+                    type: 'line',
+                    smooth: true,
+                    areaStyle: {
+                        normal: {}
+                    },
+                    lineStyle: {
+                        normal: {
+                            width: 1.5
+                        }
+                    },
+                    data: Orderdata.zeeloolSalesNumList
+                },
+                {
+                    name: __('V站销量'),
+                    type: 'line',
+                    smooth: true,
+                    areaStyle: {
+                        normal: {}
+                    },
+                    lineStyle: {
+                        normal: {
+                            width: 1.5
+                        }
+                    },
+                    data: Orderdata.vooguemeSalesNumList
+                },
+                {
+                    name: __('Nihao站销量'),
+                    type: 'line',
+                    smooth: true,
+                    areaStyle: {
+                        normal: {}
+                    },
+                    lineStyle: {
+                        normal: {
+                            width: 1.5
+                        }
+                    },
+                    data: Orderdata.nihaoSalesNumList
+                }
+                ]
+            };            
 
             // 使用刚指定的配置项和数据显示图表。
             myChart.setOption(option);
-			myChart2.setOption(option);
+			myChart2.setOption(option2);
 			myChart3.setOption(option);
             myChart4.setOption(option);
 			myChart5.setOption(option);
@@ -111,15 +187,15 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                     url:'datacenter/operationanalysis/operationkanban/dashboard/async_data',
                     data:{order_platform:order_platform}
                 }, function(data, ret){
-                    $('#today_sales_money').text(ret.data.today_sales_money).toFixed(2);
-                    $('#yesterday_sales_money').text(ret.data.yesterday_sales_money).toFixed(2);
-                    $('#pastsevenday_sales_money').text(ret.data.pastsevenday_sales_money).toFixed(2);
-                    $('#pastthirtyday_sales_money').text(ret.data.pastthirtyday_sales_money).toFixed(2);
-                    $('#thismonth_sales_money').text(ret.data.thismonth_sales_money).toFixed(2);
-                    $('#lastmonth_sales_money').text(ret.data.lastmonth_sales_money).toFixed(2);
-                    $('#thisyear_sales_money').text(ret.data.thisyear_sales_money).toFixed(2);
-                    $('#lastyear_sales_money').text(ret.data.lastyear_sales_money).toFixed(2);
-                    $('#total_sales_money').text(ret.data.total_sales_money).toFixed(2);
+                    $('#today_sales_money').text(ret.data.today_sales_money);
+                    $('#yesterday_sales_money').text(ret.data.yesterday_sales_money);
+                    $('#pastsevenday_sales_money').text(ret.data.pastsevenday_sales_money);
+                    $('#pastthirtyday_sales_money').text(ret.data.pastthirtyday_sales_money);
+                    $('#thismonth_sales_money').text(ret.data.thismonth_sales_money);
+                    $('#lastmonth_sales_money').text(ret.data.lastmonth_sales_money);
+                    $('#thisyear_sales_money').text(ret.data.thisyear_sales_money);
+                    $('#lastyear_sales_money').text(ret.data.lastyear_sales_money);
+                    $('#total_sales_money').text(ret.data.total_sales_money);
                     $('#today_order_num').text(ret.data.today_order_num);
                     $('#yesterday_order_num').text(ret.data.yesterday_order_num);
                     $('#pastsevenday_order_num').text(ret.data.pastsevenday_order_num);
@@ -138,15 +214,15 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                     $('#thisyear_order_success').text(ret.data.thisyear_order_success);
                     $('#lastyear_order_success').text(ret.data.lastyear_order_success);
                     $('#total_order_success').text(ret.data.total_order_success);
-                    $('#today_unit_price').text(ret.data.today_unit_price).toFixed(2);
-                    $('#yesterday_unit_price').text(ret.data.yesterday_unit_price).toFixed(2);
-                    $('#pastsevenday_unit_price').text(ret.data.pastsevenday_unit_price).toFixed(2);
-                    $('#pastthirtyday_unit_price').text(ret.data.pastthirtyday_unit_price).toFixed(2);
-                    $('#thismonth_unit_price').text(ret.data.thismonth_unit_price).toFixed(2);
-                    $('#lastmonth_unit_price').text(ret.data.lastmonth_unit_price).toFixed(2);
-                    $('#thisyear_unit_price').text(ret.data.thisyear_unit_price).toFixed(2);
-                    $('#lastyear_unit_price').text(ret.data.lastyear_unit_price).toFixed(2);
-                    $('#total_unit_price').text(ret.data.total_unit_price).toFixed(2);
+                    $('#today_unit_price').text(ret.data.today_unit_price);
+                    $('#yesterday_unit_price').text(ret.data.yesterday_unit_price);
+                    $('#pastsevenday_unit_price').text(ret.data.pastsevenday_unit_price);
+                    $('#pastthirtyday_unit_price').text(ret.data.pastthirtyday_unit_price);
+                    $('#thismonth_unit_price').text(ret.data.thismonth_unit_price);
+                    $('#lastmonth_unit_price').text(ret.data.lastmonth_unit_price);
+                    $('#thisyear_unit_price').text(ret.data.thisyear_unit_price);
+                    $('#lastyear_unit_price').text(ret.data.lastyear_unit_price);
+                    $('#total_unit_price').text(ret.data.total_unit_price);
                     $('#today_shoppingcart_total').text(ret.data.today_shoppingcart_total);
                     $('#yesterday_shoppingcart_total').text(ret.data.yesterday_shoppingcart_total);
                     $('#pastsevenday_shoppingcart_total').text(ret.data.pastsevenday_shoppingcart_total);
@@ -156,15 +232,15 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                     $('#thisyear_shoppingcart_total').text(ret.data.thisyear_shoppingcart_total);
                     $('#lastyear_shoppingcart_total').text(ret.data.lastyear_shoppingcart_total);
                     $('#total_shoppingcart_total').text(ret.data.total_shoppingcart_total);
-                    $('#today_shoppingcart_conversion').text(ret.data.today_shoppingcart_conversion).toFixed(2);
-                    $('#yesterday_shoppingcart_conversion').text(ret.data.yesterday_shoppingcart_conversion).toFixed(2);
-                    $('#pastsevenday_shoppingcart_conversion').text(ret.data.pastsevenday_shoppingcart_conversion).toFixed(2);
-                    $('#pastthirtyday_shoppingcart_conversion').text(ret.data.pastthirtyday_shoppingcart_conversion).toFixed(2);
-                    $('#thismonth_shoppingcart_conversion').text(ret.data.thismonth_shoppingcart_conversion).toFixed(2);
-                    $('#lastmonth_shoppingcart_conversion').text(ret.data.lastmonth_shoppingcart_conversion).toFixed(2);
-                    $('#thisyear_shoppingcart_conversion').text(ret.data.thisyear_shoppingcart_conversion).toFixed(2);
-                    $('#lastyear_shoppingcart_conversion').text(ret.data.lastyear_shoppingcart_conversion).toFixed(2);
-                    $('#total_shoppingcart_conversion').text(ret.data.total_shoppingcart_conversion).toFixed(2);
+                    $('#today_shoppingcart_conversion').text(ret.data.today_shoppingcart_conversion);
+                    $('#yesterday_shoppingcart_conversion').text(ret.data.yesterday_shoppingcart_conversion);
+                    $('#pastsevenday_shoppingcart_conversion').text(ret.data.pastsevenday_shoppingcart_conversion);
+                    $('#pastthirtyday_shoppingcart_conversion').text(ret.data.pastthirtyday_shoppingcart_conversion);
+                    $('#thismonth_shoppingcart_conversion').text(ret.data.thismonth_shoppingcart_conversion);
+                    $('#lastmonth_shoppingcart_conversion').text(ret.data.lastmonth_shoppingcart_conversion);
+                    $('#thisyear_shoppingcart_conversion').text(ret.data.thisyear_shoppingcart_conversion);
+                    $('#lastyear_shoppingcart_conversion').text(ret.data.lastyear_shoppingcart_conversion);
+                    $('#total_shoppingcart_conversion').text(ret.data.total_shoppingcart_conversion);
                     $('#today_shoppingcart_new').text(ret.data.today_shoppingcart_new);
                     $('#yesterday_shoppingcart_new').text(ret.data.yesterday_shoppingcart_new);
                     $('#pastsevenday_shoppingcart_new').text(ret.data.pastsevenday_shoppingcart_new);
@@ -174,15 +250,15 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                     $('#thisyear_shoppingcart_new').text(ret.data.thisyear_shoppingcart_new);
                     $('#lastyear_shoppingcart_new').text(ret.data.lastyear_shoppingcart_new);
                     $('#total_shoppingcart_new').text(ret.data.total_shoppingcart_new);
-                    $('#today_shoppingcart_newconversion').text(ret.data.today_shoppingcart_newconversion).toFixed(2);
-                    $('#yesterday_shoppingcart_newconversion').text(ret.data.yesterday_shoppingcart_newconversion).toFixed(2);
-                    $('#pastsevenday_shoppingcart_newconversion').text(ret.data.pastsevenday_shoppingcart_newconversion).toFixed(2);
-                    $('#pastthirtyday_shoppingcart_newconversion').text(ret.data.pastthirtyday_shoppingcart_newconversion).toFixed(2);
-                    $('#thismonth_shoppingcart_newconversion').text(ret.data.thismonth_shoppingcart_newconversion).toFixed(2);
-                    $('#lastmonth_shoppingcart_newconversion').text(ret.data.lastmonth_shoppingcart_newconversion).toFixed(2);
-                    $('#thisyear_shoppingcart_newconversion').text(ret.data.thisyear_shoppingcart_newconversion).toFixed(2);
-                    $('#lastyear_shoppingcart_newconversion').text(ret.data.lastyear_shoppingcart_newconversion).toFixed(2);
-                    $('#total_shoppingcart_newconversion').text(ret.data.total_shoppingcart_newconversion).toFixed(2);
+                    $('#today_shoppingcart_newconversion').text(ret.data.today_shoppingcart_newconversion);
+                    $('#yesterday_shoppingcart_newconversion').text(ret.data.yesterday_shoppingcart_newconversion);
+                    $('#pastsevenday_shoppingcart_newconversion').text(ret.data.pastsevenday_shoppingcart_newconversion);
+                    $('#pastthirtyday_shoppingcart_newconversion').text(ret.data.pastthirtyday_shoppingcart_newconversion);
+                    $('#thismonth_shoppingcart_newconversion').text(ret.data.thismonth_shoppingcart_newconversion);
+                    $('#lastmonth_shoppingcart_newconversion').text(ret.data.lastmonth_shoppingcart_newconversion);
+                    $('#thisyear_shoppingcart_newconversion').text(ret.data.thisyear_shoppingcart_newconversion);
+                    $('#lastyear_shoppingcart_newconversion').text(ret.data.lastyear_shoppingcart_newconversion);
+                    $('#total_shoppingcart_newconversion').text(ret.data.total_shoppingcart_newconversion);
                     $('#today_register_customer').text(ret.data.today_register_customer);
                     $('#yesterday_register_customer').text(ret.data.yesterday_register_customer);
                     $('#pastsevenday_register_customer').text(ret.data.pastsevenday_register_customer);

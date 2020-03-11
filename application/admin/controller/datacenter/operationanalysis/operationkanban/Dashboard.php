@@ -1,5 +1,6 @@
 <?php
 namespace app\admin\controller\datacenter\operationanalysis\operationkanban;
+use app\admin\model\OrderStatistics;
 use app\common\controller\Backend;
 use think\Db;
 use think\Exception;
@@ -26,15 +27,38 @@ class Dashboard extends Backend{
 	 * 仪表盘首页
 	 */
 	public function index(){
+		//查询三个站数据
+		$orderStatistics = new OrderStatistics();
+		$list = $orderStatistics->getAllData();
+		$zeeloolSalesNumList = $vooguemeSalesNumList = $nihaoSalesNumList = [];
+		foreach ($list as $k => $v) {
+			$zeeloolSalesNumList[$v['create_date']]  	= $v['zeelool_sales_num'];
+			$vooguemeSalesNumList[$v['create_date']] 	= $v['voogueme_sales_num'];
+			$nihaoSalesNumList[$v['create_date']]    	= $v['nihao_sales_num'];
+			$zeeloolSalesMoneyList[$v['create_date']] 	= $v['zeelool_sales_money'];
+			$vooguemeSalesMoneyList[$v['create_date']]	= $v['voogueme_sales_money'];
+			$nihaoSalesMoneyList[$v['create_date']]		= $v['nihao_sales_money'];
+		}
 		//默认zeelool站数据
 		$platform = (new MagentoPlatform())->getOrderPlatformList();
 		$zeelool_data = $this->model->getList(1);
 		//z站今天的销售额($) 订单数	订单支付成功数	客单价($)	购物车总数	购物车总转化率(%)	新增购物车数	新增购物车转化率	新增注册用户数
 		//z站的历史数据  昨天、过去7天、过去30天、当月、上月、今年、总计
 		$zeelool_data = collection($zeelool_data)->toArray();
-		$this->view->assign("orderPlatformList", $platform);
-		$this->view->assign("zeelool_data",$zeelool_data);
-		$this->view->assign("date",$this->date());
+		$this->view->assign([
+			'orderPlatformList'			=> $platform,
+			'zeelool_data'				=> $zeelool_data,
+			'date'						=> $this->date(),
+			'zeeloolSalesNumList'       => $zeeloolSalesNumList, //折线图数据
+            'vooguemeSalesNumList'      => $vooguemeSalesNumList,
+			'nihaoSalesNumList'         => $nihaoSalesNumList,
+			'zeeloolSalesMoneyList'		=> $zeeloolSalesMoneyList,
+			'vooguemeSalesMoneyList'	=> $vooguemeSalesMoneyList,
+			'nihaoSalesMoneyList'		=> $nihaoSalesMoneyList
+		]);
+		// $this->view->assign("orderPlatformList", $platform);
+		// $this->view->assign("zeelool_data",$zeelool_data);
+		// $this->view->assign("date",$this->date());
 		return $this->view->fetch();
 	}
 	/***
