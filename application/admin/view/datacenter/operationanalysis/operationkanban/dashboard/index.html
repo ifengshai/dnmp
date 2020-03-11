@@ -357,3 +357,11 @@ table.altrowstable tr:nth-child(even){
         </div>
     </div>
 </div>
+<script>
+    var Orderdata = {
+        column: {:json_encode(array_keys($zeeloolSalesNumList))},
+        zeeloolSalesNumList: {:json_encode(array_values($zeeloolSalesNumList))},
+        vooguemeSalesNumList: {:json_encode(array_values($vooguemeSalesNumList))},
+        nihaoSalesNumList: {:json_encode(array_values($nihaoSalesNumList))},
+    };
+</script>

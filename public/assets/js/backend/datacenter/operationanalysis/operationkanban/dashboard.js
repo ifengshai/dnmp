@@ -31,8 +31,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                 xAxis: {
                     type: 'category',
                     boundaryGap: false,
-                    //data: Orderdata.column
-					data:[1,2,3]
+                    data: Orderdata.column
                 },
                 yAxis: {},
                 grid: [{
@@ -53,8 +52,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                             width: 1.5
                         }
                     },
-                    //data: Orderdata.zeeloolSalesNumList
-					data: [1,2,3,4,5]
+                    data: Orderdata.zeeloolSalesNumList
                 },
                 {
                     name: __('V站销量'),
@@ -68,8 +66,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                             width: 1.5
                         }
                     },
-                    //data: Orderdata.vooguemeSalesNumList
-					data:[6,7,8,9,10]
+                    data: Orderdata.vooguemeSalesNumList
                 },
                 {
                     name: __('Nihao站销量'),
@@ -83,8 +80,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                             width: 1.5
                         }
                     },
-                    //data: Orderdata.nihaoSalesNumList
-					data:[11,12,13,14,15]
+                    data: Orderdata.nihaoSalesNumList
                 }
                 ]
             };
