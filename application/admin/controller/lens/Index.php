@@ -507,6 +507,11 @@ class Index extends Backend
             }
 
             //模板文件不正确
+            if ($allRow > 1000) {
+                throw new Exception("表格行数过大");
+            }
+
+            //模板文件不正确
             if ($listName !== array_filter($fields)) {
                 throw new Exception("模板文件不正确！！");
             }
