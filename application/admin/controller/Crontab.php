@@ -3040,20 +3040,23 @@ order by sfoi.item_id asc limit 1000";
             $itemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku();
             $map['is_del'] = 1;
             $data = $this->item->where($map)->field('sku')->select();
-            dump($data);die;
+            $data = collection($data)->toArray();
+            
             foreach ($data as  &$v) {
                 $v['zeelool_sku'] = $itemPlatformSku->getWebSku($v['sku'], 1);
-                $v['zeelool_sales_num'] = $zeelool_res[$v['zeelool_sku']]; //zeelool销量
+                $v['zeelool_sales_num'] = $zeelool_res[$v['zeelool_sku']] ?? 0; //zeelool销量
                 $v['voogueme_sku'] = $itemPlatformSku->getWebSku($v['sku'], 2);
-                $v['voogueme_sales_num'] = $voogueme_res[$v['voogueme_sku']]; //voogueme销量
+                $v['voogueme_sales_num'] = $voogueme_res[$v['voogueme_sku']] ?? 0; //voogueme销量
                 $v['nihao_sku'] = $itemPlatformSku->getWebSku($v['sku'], 3);
-                $v['nihao_sales_num'] = $nihao_res[$v['nihao_sku']]; //nihao销量
+                $v['nihao_sales_num'] = $nihao_res[$v['nihao_sku']] ?? 0; //nihao销量
                 $v['all_sales_num'] = $v['zeelool_sales_num'] + $v['voogueme_sales_num'] + $v['nihao_sales_num']; //汇总销量
                 $v['createtime'] = date('Y-m-d H:i:s', time());
             }
-    
+            dump($data);
             $salesSkuNum = new \app\admin\model\SkuSalesNum();
-            $salesSkuNum->saveAll($data);
+
+            dump($data);die;
+            $salesSkuNum->insertAll($data);
         }
        
     }
