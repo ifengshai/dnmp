@@ -557,4 +557,45 @@ class Index extends Backend
         $res = Db::connect('database.db_zeelool')->table('sales_flat_order_item_prescription')->query($sql);
         return $res;
     }
+
+    /**
+     * 销量排行榜
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/03/11 16:14:50 
+     * @return void
+     */
+    public function top_sale_list()
+    {
+        if ($this->request->isAjax()) {
+            //查询三个站数据
+            $orderStatistics = new \app\admin\model\OrderStatistics();
+            $list = $orderStatistics->getAllData();
+          
+            $dataJson = [];
+            $date = [];
+            $dataJson[0]['type'] = 'line';
+            $dataJson[0]['name'] = 'Z站销量';
+            $dataJson[1]['type'] = 'line';
+            $dataJson[1]['name'] = 'V站销量';
+            $dataJson[2]['type'] = 'line';
+            $dataJson[2]['name'] = 'Nihao站销量';
+            foreach ($list as $k => $v) {
+                $date[$k] = $v['create_date'];
+                
+                $dataJson[0]['data'][$k] = $v['zeelool_sales_num'];
+                $dataJson[1]['data'][$k] = $v['voogueme_sales_num'];
+                $dataJson[2]['data'][$k] = $v['nihao_sales_num'];
+            }
+
+            $json['column'] = ['Z站销量', 'V站销量', 'Nihao站销量'];
+            $json['xcolumnData'] = $date;
+            $json['columnData'] = $dataJson;
+
+            return json(['code' => 1, 'data' => $json]);
+        }
+
+        return $this->view->fetch();
+    }
 }
