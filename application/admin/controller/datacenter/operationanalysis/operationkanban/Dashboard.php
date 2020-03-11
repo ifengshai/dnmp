@@ -30,6 +30,8 @@ class Dashboard extends Backend{
 		//查询三个站数据
 		$orderStatistics = new OrderStatistics();
 		$list = $orderStatistics->getAllData();
+		dump($list);
+		exit;
 		$zeeloolSalesNumList = $vooguemeSalesNumList = $nihaoSalesNumList = [];
 		foreach ($list as $k => $v) {
 			$zeeloolSalesNumList[$v['create_date']] = $v['zeelool_sales_num'];
