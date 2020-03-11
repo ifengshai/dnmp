@@ -3006,4 +3006,102 @@ order by sfoi.item_id asc limit 1000";
 
         return $purchase_price - $arrivals_price;
     }
+    /**
+     * 更新order_statistics表字段
+     *
+     * @Description created by lsw
+     * @author lsw
+     * @since 2020/03/11 17:11:21 
+     * @return void
+     */
+    public function get_sales_order_update()
+    {
+        // $zeelool_model  = Db::connect('database.db_zeelool');
+        // $voogueme_model = Db::connect('database.db_voogueme');
+        // $nihao_model    = Db::connect('database.db_nihao');
+        // $zeelool_model->table('sales_flat_order')->query("set time_zone='+8:00'");
+        // $zeelool_model->table('sales_flat_quote')->query("set time_zone='+8:00'");
+        // $zeelool_model->table('customer_entity')->query("set time_zone='+8:00'");
+        // $voogueme_model->table('sales_flat_order')->query("set time_zone='+8:00'");
+        // $voogueme_model->table('sales_flat_quote')->query("set time_zone='+8:00'");
+        // $voogueme_model->table('customer_entity')->query("set time_zone='+8:00'");
+        // $nihao_model->table('sales_flat_order')->query("set time_zone='+8:00'");
+        // $nihao_model->table('sales_flat_quote')->query("set time_zone='+8:00'");
+        // $nihao_model->table('customer_entity')->query("set time_zone='+8:00'");
+        // //计算前一天的销量
+        // $stime = date("Y-m-d 00:00:00", strtotime("-1 day"));
+        // $etime = date("Y-m-d 23:59:59", strtotime("-1 day"));
+        // $map['created_at'] = $date['created_at'] = ['between', [$stime, $etime]];
+        // $map['status'] = ['in', ['processing', 'complete', 'creditcard_proccessing']];
+        // $zeelool_count = $zeelool_model->table('sales_flat_order')->where($map)->count(1);
+        // $zeelool_total = $zeelool_model->table('sales_flat_order')->where($map)->sum('base_grand_total');
+        // //zeelool客单价
+        // $zeelool_unit_price = @round(($zeelool_total / $zeelool_count), 2);
+        // //zeelool购物车数 SELECT count(*) counter from sales_flat_quote where base_grand_total>0
+        // $zeelool_shoppingcart_total = $zeelool_model->table('sales_flat_quote')->where($date)->where('base_grand_total', 'GT', 0)->count('*');
+        // //zeelool购物车转化率
+        // $zeelool_shoppingcart_conversion = @round(($zeelool_count / $zeelool_shoppingcart_total) * 100, 2);
+        // //zeelool注册用户数SELECT count(*) counter from customer_entity
+        // $zeelool_register_customer = $zeelool_model->table('customer_entity')->where($date)->count('*');
+        // $voogueme_count = $voogueme_model->table('sales_flat_order')->where($map)->count(1);
+        // $voogueme_total = $voogueme_model->table('sales_flat_order')->where($map)->sum('base_grand_total');
+        // //voogueme客单价
+        // $voogueme_unit_price = @round(($voogueme_total / $voogueme_count), 2);
+        // //voogueme购物车数
+        // $voogueme_shoppingcart_total = $voogueme_model->table('sales_flat_quote')->where($date)->where('base_grand_total', 'GT', 0)->count('*');
+        // //voogueme购物车转化率
+        // $voogueme_shoppingcart_conversion = @round(($voogueme_count / $voogueme_shoppingcart_total) * 100, 2);
+        // //voogueme注册用户数
+        // $voogueme_register_customer = $voogueme_model->table('customer_entity')->where($date)->count('*');
+        // $nihao_count = $nihao_model->table('sales_flat_order')->where($map)->count(1);
+        // $nihao_total = $nihao_model->table('sales_flat_order')->where($map)->sum('base_grand_total');
+        // //nihao客单价
+        // $nihao_unit_price = @round(($nihao_total / $nihao_count), 2);
+        // //nihao购物车数
+        // $nihao_shoppingcart_total = $nihao_model->table('sales_flat_quote')->where($date)->where('base_grand_total', 'GT', 0)->count('*');
+        // //nihao购物车转化率
+        // $nihao_shoppingcart_conversion = @round(($nihao_count / $nihao_shoppingcart_total) * 100, 2);
+        // //nihao注册用户数
+        // $nihao_register_customer = $nihao_model->table('customer_entity')->where($date)->count('*');
+        // $data['zeelool_sales_num']                = $zeelool_count;
+        // $data['voogueme_sales_num']               = $voogueme_count;
+        // $data['nihao_sales_num']                  = $nihao_count;
+        // $data['all_sales_num']                    = $zeelool_count + $voogueme_count + $nihao_count;
+        // $data['zeelool_sales_money']              = $zeelool_total;
+        // $data['voogueme_sales_money']             = $voogueme_total;
+        // $data['nihao_sales_money']                = $nihao_total;
+        // $data['all_sales_money']                  = $zeelool_total + $voogueme_total + $nihao_total;
+        // $data['zeelool_unit_price']               = $zeelool_unit_price;
+        // $data['voogueme_unit_price']              = $voogueme_unit_price;
+        // $data['nihao_unit_price']                 = $nihao_unit_price;
+        // $data['all_unit_price']                   = @round(($zeelool_unit_price + $voogueme_unit_price + $nihao_unit_price) / 3, 2);
+        // $data['zeelool_shoppingcart_total']       = $zeelool_shoppingcart_total;
+        // $data['voogueme_shoppingcart_total']      = $voogueme_shoppingcart_total;
+        // $data['nihao_shoppingcart_total']         = $nihao_shoppingcart_total;
+        // $data['all_shoppingcart_total']           = $zeelool_shoppingcart_total + $voogueme_shoppingcart_total + $nihao_shoppingcart_total;
+        // $data['zeelool_shoppingcart_conversion']  = $zeelool_shoppingcart_conversion;
+        // $data['voogueme_shoppingcart_conversion'] = $voogueme_shoppingcart_conversion;
+        // $data['nihao_shoppingcart_conversion']    = $nihao_shoppingcart_conversion;
+        // $data['all_shoppingcart_conversion']      = @round(($zeelool_shoppingcart_conversion + $voogueme_shoppingcart_conversion + $nihao_shoppingcart_conversion) / 3, 2);
+        // $data['zeelool_register_customer']        = $zeelool_register_customer;
+        // $data['voogueme_register_customer']       = $voogueme_register_customer;
+        // $data['nihao_register_customer']          = $nihao_register_customer;
+        // $data['all_register_customer']            = $zeelool_register_customer + $voogueme_register_customer + $nihao_register_customer;
+        // $data['create_date'] = date("Y-m-d", strtotime("-1 day"));
+        // $data['createtime'] = date("Y-m-d H:i:s");
+        $where['zeelool_shoppingcart_total'] = 0;
+        $result = Db::name('order_statistics')->where($where)->field('id,create_date')->select();
+        if(!$result){
+            echo 'ok2';
+            exit;
+        }
+        foreach($result as $v){
+            echo $v['create_date'].'<br/>';
+            echo $v['create_date'].' '.'23:59:59'.'<br/>';
+        }  
+        //Db::name('order_statistics')->insert($data);
+        echo 'ok';
+        die;
+    }
+    
 }
