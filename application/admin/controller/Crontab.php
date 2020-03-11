@@ -2766,6 +2766,21 @@ order by sfoi.item_id asc limit 1000";
         $data['updatetime'] = date('Y-m-d H:i:s', time());
         $dataConfig->where('key', 'selectProductAdoptNum')->update($data);
 
+        // //查询新品SKU 待定
+        // $newSkus = $this->item->getNewProductSku();
+        // $where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed']];
+        // $stime = date("Y-m-d 00:00:00", strtotime("-10 day"));
+        // $etime = date("Y-m-d H:i:s", time());
+        // $where['a.created_at'] = ['between', [$stime, $etime]];
+
+        // //Zeelool
+        // $zeelool_res = $this->zeelool->alias('a')->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')->where($where)->group('b.sku')->column("sum(qty_ordered)", 'b.sku');
+        // //Voogueme
+        // $voogueme_res = $this->voogueme->alias('a')->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')->where($where)->group('b.sku')->column("sum(qty_ordered)", 'b.sku');
+        // //Nihao
+        // $nihao_res = $this->nihao->alias('a')->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')->where($where)->group('b.sku')->column("sum(qty_ordered)", 'b.sku');
+
+
         //新品十天内的销量
         $data['value'] = $days10SalesNum ?? 0;
         $data['updatetime'] = date('Y-m-d H:i:s', time());
@@ -3023,7 +3038,9 @@ order by sfoi.item_id asc limit 1000";
      */
     public function getSkuSalesNum()
     {
-        for ($i = 1; $i <= 1; $i++) {
+        set_time_limit(0);
+        for ($i = 1; $i <= 10; $i++) {
+            echo $i;echo "<br>";
             $data = [];
             $where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed']];
             $stime = date("Y-m-d 00:00:00", strtotime("-$i day"));
@@ -3039,7 +3056,8 @@ order by sfoi.item_id asc limit 1000";
     
             $itemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku();
             $map['is_del'] = 1;
-            $data = $this->item->where($map)->field('sku')->select();
+            $map['is_open'] = 1;
+            $data = $this->item->where($map)->field('sku')->cache(3600)->select();
             $data = collection($data)->toArray();
             
             foreach ($data as  &$v) {
@@ -3050,13 +3068,11 @@ order by sfoi.item_id asc limit 1000";
                 $v['nihao_sku'] = $itemPlatformSku->getWebSku($v['sku'], 3);
                 $v['nihao_sales_num'] = $nihao_res[$v['nihao_sku']] ?? 0; //nihao销量
                 $v['all_sales_num'] = $v['zeelool_sales_num'] + $v['voogueme_sales_num'] + $v['nihao_sales_num']; //汇总销量
-                $v['createtime'] = date('Y-m-d H:i:s', time());
+                $v['createtime'] = date('Y-m-d H:i:s', strtotime("-$i day"));
             }
-            dump($data);
             $salesSkuNum = new \app\admin\model\SkuSalesNum();
 
-            dump($data);die;
-            $salesSkuNum->insertAll($data);
+            $salesSkuNum->saveAll($data);
         }
        
     }
