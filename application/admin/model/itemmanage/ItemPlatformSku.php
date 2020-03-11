@@ -58,6 +58,9 @@ class ItemPlatformSku extends Model
                     case 'wesee':
                         $prefix = 'W';
                         break;
+                    default:
+                        continue;
+                    break;    
                 }
                 //监测平台sku是否存在
                 $platformSkuExists =$this->getTrueSku($prefix.$row['sku'],$k);
