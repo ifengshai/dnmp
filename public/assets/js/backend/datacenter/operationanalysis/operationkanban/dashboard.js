@@ -3,12 +3,18 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
     var Controller = {
         index: function () {
             // 基于准备好的dom，初始化echarts实例
+            //销售额
             var myChart  = Echarts.init(document.getElementById('echart'), 'walden');
-			var myChart2 = Echarts.init(document.getElementById('echart2'),'walden');
-			var myChart3 = Echarts.init(document.getElementById('echart3'),'walden');
-			var myChart4 = Echarts.init(document.getElementById('echart4'),'walden');
-			var myChart5 = Echarts.init(document.getElementById('echart5'),'walden');
-			var myChart6 = Echarts.init(document.getElementById('echart6'),'walden');
+            //订单支付成功数
+            var myChart2 = Echarts.init(document.getElementById('echart2'),'walden');
+            //客单价
+            var myChart3 = Echarts.init(document.getElementById('echart3'),'walden');
+            //购物车数
+            var myChart4 = Echarts.init(document.getElementById('echart4'),'walden');
+            //购物车转化率
+            var myChart5 = Echarts.init(document.getElementById('echart5'),'walden');
+            //注册用户数
+            var myChart6 = Echarts.init(document.getElementById('echart6'),'walden');
             // 指定图表的配置项和数据
             var option = {
                 title: {
@@ -19,7 +25,81 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                     trigger: 'axis'
                 },
                 legend: {
-                    data: [__('Z站销量'), __('V站销量'), __('Nihao站销量')]
+                    data: [__('Z站销量额'), __('V站销量额'), __('Nihao站销量额')]
+                },
+                toolbox: {
+                    show: false,
+                    feature: {
+                        magicType: { show: true, type: ['stack', 'tiled'] },
+                        saveAsImage: { show: true }
+                    }
+                },
+                xAxis: {
+                    type: 'category',
+                    boundaryGap: false,
+                    data: Orderdata.column
+                },
+                yAxis: {},
+                grid: [{
+                    left: 'left',
+                    top: 'top',
+                    right: '10',
+                    bottom: 30
+                }],
+                series: [{
+                    name: __('Z站销量'),
+                    type: 'line',
+                    smooth: true,
+                    areaStyle: {
+                        normal: {}
+                    },
+                    lineStyle: {
+                        normal: {
+                            width: 1.5
+                        }
+                    },
+                    data: Orderdata.zeeloolSalesMoneyList
+                },
+                {
+                    name: __('V站销量'),
+                    type: 'line',
+                    smooth: true,
+                    areaStyle: {
+                        normal: {}
+                    },
+                    lineStyle: {
+                        normal: {
+                            width: 1.5
+                        }
+                    },
+                    data: Orderdata.vooguemeSalesMoneyList
+                },
+                {
+                    name: __('Nihao站销量'),
+                    type: 'line',
+                    smooth: true,
+                    areaStyle: {
+                        normal: {}
+                    },
+                    lineStyle: {
+                        normal: {
+                            width: 1.5
+                        }
+                    },
+                    data: Orderdata.nihaoSalesMoneyList
+                }
+                ]
+            };
+            var option2 = {
+                title: {
+                    text: '',
+                    subtext: ''
+                },
+                tooltip: {
+                    trigger: 'axis'
+                },
+                legend: {
+                    data: [__('Z站订单支付成功数'), __('V站订单支付成功数'), __('Nihao站订单支付成功数')]
                 },
                 toolbox: {
                     show: false,
@@ -83,11 +163,11 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                     data: Orderdata.nihaoSalesNumList
                 }
                 ]
-            };
+            };            
 
             // 使用刚指定的配置项和数据显示图表。
             myChart.setOption(option);
-			myChart2.setOption(option);
+			myChart2.setOption(option2);
 			myChart3.setOption(option);
             myChart4.setOption(option);
 			myChart5.setOption(option);
