@@ -32,9 +32,12 @@ class Dashboard extends Backend{
 		$list = $orderStatistics->getAllData();
 		$zeeloolSalesNumList = $vooguemeSalesNumList = $nihaoSalesNumList = [];
 		foreach ($list as $k => $v) {
-			$zeeloolSalesNumList[$v['create_date']] = $v['zeelool_sales_num'];
-			$vooguemeSalesNumList[$v['create_date']] = $v['voogueme_sales_num'];
-			$nihaoSalesNumList[$v['create_date']] = $v['nihao_sales_num'];
+			$zeeloolSalesNumList[$v['create_date']]  	= $v['zeelool_sales_num'];
+			$vooguemeSalesNumList[$v['create_date']] 	= $v['voogueme_sales_num'];
+			$nihaoSalesNumList[$v['create_date']]    	= $v['nihao_sales_num'];
+			$zeeloolSalesMoneyList[$v['create_date']] 	= $v['zeelool_sales_money'];
+			$vooguemeSalesMoneyList[$v['create_date']]	= $v['voogueme_sales_money'];
+			$nihaoSalesMoneyList[$v['create_date']]		= $v['nihao_sales_money'];
 		}
 		//默认zeelool站数据
 		$platform = (new MagentoPlatform())->getOrderPlatformList();
@@ -48,7 +51,10 @@ class Dashboard extends Backend{
 			'date'						=> $this->date(),
 			'zeeloolSalesNumList'       => $zeeloolSalesNumList, //折线图数据
             'vooguemeSalesNumList'      => $vooguemeSalesNumList,
-            'nihaoSalesNumList'         => $nihaoSalesNumList,
+			'nihaoSalesNumList'         => $nihaoSalesNumList,
+			'zeeloolSalesMoneyList'		=> $zeeloolSalesMoneyList,
+			'vooguemeSalesMoneyList'	=> $vooguemeSalesMoneyList,
+			'nihaoSalesMoneyList'		=> $nihaoSalesMoneyList
 		]);
 		// $this->view->assign("orderPlatformList", $platform);
 		// $this->view->assign("zeelool_data",$zeelool_data);
