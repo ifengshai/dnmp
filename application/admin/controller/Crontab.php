@@ -3096,7 +3096,7 @@ order by sfoi.item_id asc limit 1000";
         $nihao_model->table('sales_flat_quote')->query("set time_zone='+8:00'");
         $nihao_model->table('customer_entity')->query("set time_zone='+8:00'");
         $where['zeelool_shoppingcart_total'] = 0;
-        $result = Db::name('order_statistics')->where($where)->limit(10)->select();
+        $result = Db::name('order_statistics')->where($where)->limit(1)->select();
         if(!$result){
             echo 'ok2';
             exit;
@@ -3129,6 +3129,7 @@ order by sfoi.item_id asc limit 1000";
             $data[$k]['all_shoppingcart_total']  = $zeelool_shoppingcart_total + $voogueme_shoppingcart_total + $nihao_shoppingcart_total;
             $data[$k]['all_shoppingcart_conversion'] = @round(($zeelool_shoppingcart_conversion + $voogueme_shoppingcart_conversion + $nihao_shoppingcart_conversion) / 3, 2);
             $data[$k]['all_register_customer']   = $zeelool_register_customer + $voogueme_register_customer + $nihao_register_customer;
+            Db::name('order_statistics')->where(['id'=>$v['id']])->update($data);
         }
         dump($data);  
         //Db::name('order_statistics')->insert($data);
