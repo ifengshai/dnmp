@@ -66,8 +66,8 @@ class ZendeskOne extends Controller
     {
         try {
             // Query Zendesk API to retrieve the ticket details
-            // $id = 86205;
-            // $ticket = $this->client->tickets()->find($id);
+             $id = 86205;
+             $ticket = $this->client->tickets()->find($id);
             // $result = $this->client->tickets($id)->comments()->findAll();
             // $requester_email = $ticket->via->source->from->address;
             // $count = $result->count;
@@ -269,8 +269,8 @@ class ZendeskOne extends Controller
                                 ->count();
                             if($recent_reply_count >= 2){
                                 $params = [
-                                    'tags' => ['转客服', '多次发送'],
-                                    'status' => 'open'
+                                    'tags' => ['自动回复','转客服', '多次发送'],
+                                    //'status' => 'open'
                                 ];
                             }else{
                                 //回复模板1：状态pending，增加tag自动回复
@@ -313,7 +313,7 @@ class ZendeskOne extends Controller
                                         'body' => $params['comment']['body'],
                                         'html_body' => $params['comment']['body'],
                                         'tags' => join(',',array_unique(array_merge($tags, $params['tags']))),
-                                        'status' => $params['status'],
+                                        'status' => isset($params['status']) ? $params['status'] : $ticket->status,
                                         'assignee_id' => 382940274852,
                                         'is_admin' => 1
                                     ];
