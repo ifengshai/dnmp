@@ -357,3 +357,26 @@ table.altrowstable tr:nth-child(even){
         </div>
     </div>
 </div>
+<script>
+    var Orderdata = {
+        column: {:json_encode(array_keys($zeeloolSalesNumList))},
+        zeeloolSalesNumList: {:json_encode(array_values($zeeloolSalesNumList))},
+        vooguemeSalesNumList: {:json_encode(array_values($vooguemeSalesNumList))},
+        nihaoSalesNumList: {:json_encode(array_values($nihaoSalesNumList))},
+        zeeloolSalesMoneyList : {:json_encode(array_values($zeeloolSalesMoneyList))},
+        vooguemeSalesMoneyList : {:json_encode(array_values($vooguemeSalesMoneyList))},
+        nihaoSalesMoneyList :{:json_encode(array_values($nihaoSalesMoneyList))},
+        zeeloolUnitPriceList :{:json_encode(array_values($zeeloolUnitPriceList))},
+        vooguemeUnitPriceList :{:json_encode(array_values($vooguemeUnitPriceList))},
+        nihaoUnitPriceList :{:json_encode(array_values($nihaoUnitPriceList))},
+        zeeloolShoppingcartTotal :{:json_encode(array_values($zeeloolShoppingcartTotal))},
+        vooguemeShoppingcartTotal :{:json_encode(array_values($vooguemeShoppingcartTotal))},
+        nihaoShoppingcartTotal :{:json_encode(array_values($nihaoShoppingcartTotal))},
+        zeeloolShoppingcartConversion :{:json_encode(array_values($zeeloolShoppingcartConversion))},
+        vooguemeShoppingcartConversion :{:json_encode(array_values($vooguemeShoppingcartConversion))},
+        nihaoShoppingcartConversion :{:json_encode(array_values($nihaoShoppingcartConversion))},
+        zeeloolRegisterCustomer :{:json_encode(array_values($zeeloolRegisterCustomer))},
+        vooguemeRegisterCustomer :{:json_encode(array_values($vooguemeRegisterCustomer))},
+        nihaoRegisterCustomer :{:json_encode(array_values($nihaoRegisterCustomer))}        
+    };
+</script>

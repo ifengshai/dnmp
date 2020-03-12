@@ -3006,4 +3006,65 @@ order by sfoi.item_id asc limit 1000";
 
         return $purchase_price - $arrivals_price;
     }
+    /**
+     * 更新order_statistics表字段
+     *
+     * @Description created by lsw
+     * @author lsw
+     * @since 2020/03/11 17:11:21 
+     * @return void
+     */
+    public function get_sales_order_update()
+    {
+        $zeelool_model  = Db::connect('database.db_zeelool');
+        $voogueme_model = Db::connect('database.db_voogueme');
+        $nihao_model    = Db::connect('database.db_nihao');        
+        $zeelool_model->table('sales_flat_quote')->query("set time_zone='+8:00'");
+        $zeelool_model->table('customer_entity')->query("set time_zone='+8:00'");
+        $voogueme_model->table('sales_flat_quote')->query("set time_zone='+8:00'");
+        $voogueme_model->table('customer_entity')->query("set time_zone='+8:00'");
+        $nihao_model->table('sales_flat_quote')->query("set time_zone='+8:00'");
+        $nihao_model->table('customer_entity')->query("set time_zone='+8:00'");
+        $where['zeelool_shoppingcart_total'] = 0;
+        $result = Db::name('order_statistics')->where($where)->limit(1)->select();
+        if(!$result){
+            echo 'ok2';
+            exit;
+        }
+        $data = [];
+        foreach($result as $k=> $v){
+            $starttime          = $v['create_date'].' '.'00:00:00';
+            $endtime            = $v['create_date'].' '.'23:59:59';
+            $map['created_at']  = $date['created_at'] = ['between', [$starttime, $endtime]];
+            $map['status']      = ['in', ['processing', 'complete', 'creditcard_proccessing']];
+            $data[$k]['all_unit_price'] = @round(($v['zeelool_unit_price'] + $v['voogueme_unit_price'] + $v['nihao_unit_price']) / 3, 2);
+            //zeelool的购物车总数
+            $data[$k]['zeelool_shoppingcart_total'] =  $zeelool_shoppingcart_total= $zeelool_model->table('sales_flat_quote')->where($date)->where('base_grand_total', 'GT', 0)->count('*');
+            //zeelool购物车转化率
+            $data[$k]['zeelool_shoppingcart_conversion'] = $zeelool_shoppingcart_conversion = @round(($v['zeelool_sales_num'] / $zeelool_shoppingcart_total) * 100, 2);
+            //zeelool的注册人数
+            $data[$k]['zeelool_register_customer'] = $zeelool_register_customer= $zeelool_model->table('customer_entity')->where($date)->count('*');
+            //voogueme的购物车总数
+            $data[$k]['voogueme_shoppingcart_total'] =  $voogueme_shoppingcart_total= $voogueme_model->table('sales_flat_quote')->where($date)->where('base_grand_total', 'GT', 0)->count('*');
+            //voogueme的购物车转化率
+            $data[$k]['voogueme_shoppingcart_conversion'] = $voogueme_shoppingcart_conversion= @round(($v['voogueme_sales_num']/$voogueme_shoppingcart_total) * 100,2);
+            //voogueme的注册人数
+            $data[$k]['voogueme_register_customer'] = $voogueme_register_customer = $voogueme_model->table('customer_entity')->where($date)->count('*');
+            //nihao的购物车总数
+            $data[$k]['nihao_shoppingcart_total']   = $nihao_shoppingcart_total = $nihao_model->table('sales_flat_quote')->where($date)->where('base_grand_total', 'GT', 0)->count('*');
+            //nihao的购物车转化率
+            $data[$k]['nihao_shoppingcart_conversion'] = $nihao_shoppingcart_conversion= @round(($v['nihao_sales_num']/$nihao_shoppingcart_total) * 100,2);
+            //nihao的注册人数
+            $data[$k]['nihao_register_customer'] = $nihao_register_customer = $nihao_model->table('customer_entity')->where($date)->count('*');
+            $data[$k]['all_shoppingcart_total']  = $zeelool_shoppingcart_total + $voogueme_shoppingcart_total + $nihao_shoppingcart_total;
+            $data[$k]['all_shoppingcart_conversion'] = @round(($zeelool_shoppingcart_conversion + $voogueme_shoppingcart_conversion + $nihao_shoppingcart_conversion) / 3, 2);
+            $data[$k]['all_register_customer']   = $zeelool_register_customer + $voogueme_register_customer + $nihao_register_customer;
+            Db::name('order_statistics')->where(['id'=>$v['id']])->update($data);
+        }
+        dump($data);  
+        //Db::name('order_statistics')->insert($data);
+        echo 'ok';
+        die;
+    }
+    
 }
