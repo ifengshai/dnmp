@@ -72,9 +72,9 @@ define(['echarts', 'echarts-theme', Config.store_enname], function (Echarts, und
                 },
                 grid: { //直角坐标系内绘图网格
                     top: '5%', //grid 组件离容器上侧的距离。
-                    left: '10%', //grid 组件离容器左侧的距离。
+                    left: '5%', //grid 组件离容器左侧的距离。
                     right: '10%', //grid 组件离容器右侧的距离。
-                    bottom: '20%', //grid 组件离容器下侧的距离。
+                    bottom: '5%', //grid 组件离容器下侧的距离。
                     containLabel: true //grid 区域是否包含坐标轴的刻度标签。
                 },
                 xAxis: [ //直角坐标系 grid 中的 x 轴

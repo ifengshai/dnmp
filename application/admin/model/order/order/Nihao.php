@@ -86,23 +86,28 @@ class Nihao extends Model
      * @Description
      * @author wpl
      * @since 2020/02/06 16:42:25 
-     * @param [type] $map 筛选条件
+     * @param [type] $sku 筛选条件
      * @return object
      */
     public function getOrderSalesNum($sku, $where)
     {
         if ($sku) {
             $map['sku'] = ['in', $sku];
+        } else {
+            $map['sku'] = ['not like', '%Price%'];
         }
+
         $res = $this
             ->where($map)
             ->where($where)
             ->alias('a')
             ->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')
             ->group('sku')
-            ->column('sum(b.qty_ordered)', 'sku');
+            ->order('num desc')
+            ->column('round(sum(b.qty_ordered)) as num', 'sku');
         return $res;
     }
+
 
 
     /***

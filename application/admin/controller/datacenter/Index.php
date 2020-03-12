@@ -579,9 +579,10 @@ class Index extends Backend
             } else {
                 $map['a.created_at'] = ['between', [date('Y-m-d 00:00:00', strtotime('-7 day')), date('Y-m-d H:i:s', time())]];
             }
+
+            /***********图表*************/
             $cachename = 'top_sale_list_' . md5(serialize($map)) . '_' . $params['site'];
             $res = cache($cachename);
-           
             if (!$res) {
                 if ($params['site'] == 1) {
                     $res = $this->zeelool->getOrderSalesNumTop30([], $map);
@@ -596,18 +597,55 @@ class Index extends Backend
             if ($res) {
                 array_multisort($res, SORT_ASC, $res);
             }
-            
-            $json['firtColumnName'] = array_keys($res);
+
+            $json['firtColumnName'] = $res ? array_keys($res) : [];
             $json['columnData'] = [
                 'type' => 'bar',
-                'data' => array_values($res),
+                'data' => $res ? array_values($res) : [],
                 'name' => '销售排行榜'
             ];
+            /***********END*************/
+            //列表
+            $result = [];
+            if ($params['type'] == 'list') {
+                $itemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku();
+                if ($params['site'] == 1) {
+                    //查询对应平台销量
+                    $list = $this->zeelool->getOrderSalesNum([], $map);
+                    //查询对应平台商品SKU
+                    $skus = $itemPlatformSku->getWebSkuAll(1);
+                } elseif ($params['site'] == 2) {
+                    //查询对应平台销量
+                    $list = $this->voogueme->getOrderSalesNum([], $map);
+                    //查询对应平台商品SKU
+                    $skus = $itemPlatformSku->getWebSkuAll(2);
+                } elseif ($params['site'] == 3) {
+                    //查询对应平台销量
+                    $list = $this->nihao->getOrderSalesNum([], $map);
+                    //查询对应平台商品SKU
+                    $skus = $itemPlatformSku->getWebSkuAll(3);
+                }
+                $productInfo = $this->item->getSkuInfo();
+                $list = $list ?? [];
+                $i = 0;
+                foreach ($list as $k => $v) {
+                    $result[$i]['platformsku'] = $k;
+                    $result[$i]['sales_num'] = $v;
+                    $result[$i]['sku'] = $skus[$k]['sku'];
+                    $result[$i]['is_up'] = $skus[$k]['outer_sku_status'];
+                    $result[$i]['available_stock'] = $productInfo[$skus[$k]['sku']]['available_stock'];
+                    $result[$i]['name'] = $productInfo[$skus[$k]['sku']]['name'];
+                    $result[$i]['type_name'] = $productInfo[$skus[$k]['sku']]['type_name'];
+                    $i++;
+                }
+            }
 
-            return json(['code' => 1, 'data' => $json]);
+            return json(['code' => 1, 'data' => $json, 'rows' => $result]);
         }
         $this->assign('create_time', $create_time);
         $this->assign('label', $label);
+        $this->assignconfig('create_time', $create_time);
+        $this->assignconfig('label', $label);
         return $this->view->fetch();
     }
 }
