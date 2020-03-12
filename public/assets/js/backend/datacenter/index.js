@@ -143,7 +143,17 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj', 'custom
             var chart1Options = {
                 targetId: 'echart',
                 downLoadTitle: '图表',
-                type: 'line'
+                type: 'bar',
+                bar: {
+                    xAxis: {
+                        type: 'value',
+                        boundaryGap: [0, 0.01]
+                    },
+                    yAxis: {
+                        type: 'category',
+                        data: []
+                    }
+                }
             };
 
             var options = {
