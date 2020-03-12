@@ -307,7 +307,6 @@ class Index extends Backend
                 "totalProcessCost"  =>  round($costInfo['totalProcessCost'], 2)
 
             );
-
             return json($result);
         }
         $this->assign('label', $label);
