@@ -685,11 +685,11 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
             });
 			$('#c-order_date').on('change',function(){
                 var id = $('#c-order_date').val();
-                console.log(id);
                 Backend.api.ajax({
                     url:'datacenter/operationanalysis/operationkanban/dashboard/async_bottom_data',
                     data:{id:id}
                 }, function(data, ret){
+                    console.log(ret);
                     $('#zeelool_pc_sales_money').text(ret.data.zeelool_pc_sales_money);
                     $('#zeelool_pc_sales_num').text(ret.data.zeelool_pc_sales_num);
                     $('#zeelool_pc_unit_price').text(ret.data.zeelool_pc_unit_price);
