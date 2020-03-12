@@ -941,7 +941,7 @@ where cped.attribute_id in(146,147) and cped.store_id=0 and cped.entity_id=$prod
 from sales_flat_order_item sfoi
 left join sales_flat_order sfo on  sfoi.order_id=sfo.entity_id 
 where sfo.`status` in ('processing','creditcard_proccessing','free_processing','complete','paypal_reversed','paypal_canceled_reversal') and sfo.entity_id in($entity_ids)
-order by sfoi.order_id desc;";
+order by NUM asc;";
             $processing_order_list = Db::connect('database.db_nihao')->query($processing_order_querySql);
 
             $processing_order_list = $this->qty_order_check($processing_order_list);
@@ -1158,12 +1158,12 @@ EOF;
                 unset($tmp_order_value);
             }
         }
-        $origin_order_item = $this->arraySequence($origin_order_item, 'increment_id');
+        $origin_order_item = $this->arraySequence($origin_order_item, 'NUM');
         return array_values($origin_order_item);
     }
 
     //  二维数组排序
-    protected function arraySequence($array, $field, $sort = 'SORT_DESC')
+    protected function arraySequence($array, $field, $sort = 'SORT_ASC')
     {
         $arrSort = array();
         foreach ($array as $uniqid => $row) {
