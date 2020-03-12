@@ -580,16 +580,19 @@ class Index extends Backend
                 $map['a.created_at'] = ['between', [date('Y-m-d 00:00:00', strtotime('-7 day')), date('Y-m-d H:i:s', time())]];
             }
             if ($params['site'] == 1) {
-                $zeelool_res = $this->zeelool->getOrderSalesNumTop30([], $map);
+                $res = $this->zeelool->getOrderSalesNumTop30([], $map);
+            } elseif ($params['site'] == 2) {
+                $res = $this->voogueme->getOrderSalesNumTop30([], $map);
+            } elseif ($params['site'] == 3) {
+                $res = $this->nihao->getOrderSalesNumTop30([], $map);
             }
            
-            array_multisort($zeelool_res, SORT_ASC, $zeelool_res);
+            array_multisort($res, SORT_ASC, $res);
 
-            
-            $json['firtColumnName'] = array_keys($zeelool_res);
+            $json['firtColumnName'] = array_keys($res);
             $json['columnData'] = [
                 'type' => 'bar',
-                'data' => array_values($zeelool_res),
+                'data' => array_values($res),
                 'name' => '销售排行榜'
             ];
 

@@ -429,4 +429,33 @@ class Voogueme extends Model
         }
         return $all_price;
     }
+
+    /**
+     * 统计订单SKU销量
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/02/06 16:42:25 
+     * @param [type] $sku 筛选条件
+     * @return object
+     */
+    public function getOrderSalesNumTop30($sku, $where)
+    {
+        if ($sku) {
+            $map['sku'] = ['in', $sku];
+        }
+        $map['sku'] = ['not like', '%Price%'];
+        $res = $this
+            ->where($map)
+            ->where($where)
+            ->alias('a')
+            ->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')
+            ->group('sku')
+            ->order('num desc')
+            ->limit(15)
+            ->cache(7200)
+            ->column('round(sum(b.qty_ordered)) as num', 'sku');
+
+        return $res;
+    }
 }
