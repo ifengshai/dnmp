@@ -118,6 +118,28 @@ class Dashboard extends Backend
 		}
 	}
 	/**
+	 * 异步获取仪表盘首页下部分数据
+	 *
+	 * @Description created by lsw
+	 * @author lsw
+	 * @since 2020/03/12 15:37:42 
+	 * @param [type] $id
+	 * @return void
+	 */
+	public function async_bottom_data($id)
+	{
+		if($this->request->isAjax()){
+			if(!$id){
+				return $this->error('参数不存在，请重新尝试');
+			}
+			$data = $this->get_platform_data($id);
+			if(false == $data){
+				return $this->error('没有对应的时间数据，请重新尝试');
+			}
+				return $this->error('','',$data,0);
+		}
+	}	
+	/**
 	 * 获取平台数据来源
 	 * @param $id  date 中的ID
 	 * @Description created by lsw
