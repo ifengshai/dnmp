@@ -573,22 +573,30 @@ class Index extends Backend
         if ($this->request->isAjax()) {
             $params = $this->request->param();
             //默认当天
-            if ($params['create_time']) {
-                $time = explode(' ', $params['create_time']);
+            if ($params['time']) {
+                $time = explode(' ', $params['time']);
                 $map['a.created_at'] = ['between', [$time[0] . ' ' . $time[1], $time[3] . ' ' . $time[4]]];
             } else {
                 $map['a.created_at'] = ['between', [date('Y-m-d 00:00:00', strtotime('-7 day')), date('Y-m-d H:i:s', time())]];
             }
-            if ($params['site'] == 1) {
-                $res = $this->zeelool->getOrderSalesNumTop30([], $map);
-            } elseif ($params['site'] == 2) {
-                $res = $this->voogueme->getOrderSalesNumTop30([], $map);
-            } elseif ($params['site'] == 3) {
-                $res = $this->nihao->getOrderSalesNumTop30([], $map);
-            }
+            $cachename = 'top_sale_list_' . md5(serialize($map)) . '_' . $params['site'];
+            $res = cache($cachename);
            
-            array_multisort($res, SORT_ASC, $res);
+            if (!$res) {
+                if ($params['site'] == 1) {
+                    $res = $this->zeelool->getOrderSalesNumTop30([], $map);
+                } elseif ($params['site'] == 2) {
+                    $res = $this->voogueme->getOrderSalesNumTop30([], $map);
+                } elseif ($params['site'] == 3) {
+                    $res = $this->nihao->getOrderSalesNumTop30([], $map);
+                }
+                cache($cachename, $res, 7200);
+            }
 
+            if ($res) {
+                array_multisort($res, SORT_ASC, $res);
+            }
+            
             $json['firtColumnName'] = array_keys($res);
             $json['columnData'] = [
                 'type' => 'bar',
