@@ -84,7 +84,7 @@ class ZendeskOne extends Controller
             // $order = $this->findOrderByEmail($requester_email,$get_order_id);
             // $res = $this->getTrackMsg(41);
             $track = new Trackingmore();
-            $res = $track->getRealtimeTrackingResults('china-post', 'LW545013382CN');            
+            $res = $track->getRealtimeTrackingResults('usps', '92748902348247002004895036');
             echo json_encode($res);
             die;
         } catch (\Zendesk\API\Exceptions\ApiResponseException $e) {
