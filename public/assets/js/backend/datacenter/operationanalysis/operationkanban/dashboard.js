@@ -3,12 +3,18 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
     var Controller = {
         index: function () {
             // 基于准备好的dom，初始化echarts实例
+            //销售额
             var myChart  = Echarts.init(document.getElementById('echart'), 'walden');
-			var myChart2 = Echarts.init(document.getElementById('echart2'),'walden');
-			var myChart3 = Echarts.init(document.getElementById('echart3'),'walden');
-			var myChart4 = Echarts.init(document.getElementById('echart4'),'walden');
-			var myChart5 = Echarts.init(document.getElementById('echart5'),'walden');
-			var myChart6 = Echarts.init(document.getElementById('echart6'),'walden');
+            //订单支付成功数
+            var myChart2 = Echarts.init(document.getElementById('echart2'),'walden');
+            //客单价
+            var myChart3 = Echarts.init(document.getElementById('echart3'),'walden');
+            //购物车数
+            var myChart4 = Echarts.init(document.getElementById('echart4'),'walden');
+            //购物车转化率
+            var myChart5 = Echarts.init(document.getElementById('echart5'),'walden');
+            //注册用户数
+            var myChart6 = Echarts.init(document.getElementById('echart6'),'walden');
             // 指定图表的配置项和数据
             var option = {
                 title: {
@@ -19,7 +25,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                     trigger: 'axis'
                 },
                 legend: {
-                    data: [__('Z站销量'), __('V站销量'), __('Nihao站销量')]
+                    data: [__('Z站销量额'), __('V站销量额'), __('Nihao站销量额')]
                 },
                 toolbox: {
                     show: false,
@@ -31,8 +37,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                 xAxis: {
                     type: 'category',
                     boundaryGap: false,
-                    //data: Orderdata.column
-					data:[1,2,3]
+                    data: Orderdata.column
                 },
                 yAxis: {},
                 grid: [{
@@ -42,7 +47,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                     bottom: 30
                 }],
                 series: [{
-                    name: __('Z站销量'),
+                    name: __('Z站销售额'),
                     type: 'line',
                     smooth: true,
                     areaStyle: {
@@ -53,11 +58,10 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                             width: 1.5
                         }
                     },
-                    //data: Orderdata.zeeloolSalesNumList
-					data: [1,2,3,4,5]
+                    data: Orderdata.zeeloolSalesMoneyList
                 },
                 {
-                    name: __('V站销量'),
+                    name: __('V站销售额'),
                     type: 'line',
                     smooth: true,
                     areaStyle: {
@@ -68,11 +72,10 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                             width: 1.5
                         }
                     },
-                    //data: Orderdata.vooguemeSalesNumList
-					data:[6,7,8,9,10]
+                    data: Orderdata.vooguemeSalesMoneyList
                 },
                 {
-                    name: __('Nihao站销量'),
+                    name: __('Nihao站销售额'),
                     type: 'line',
                     smooth: true,
                     areaStyle: {
@@ -83,19 +86,387 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                             width: 1.5
                         }
                     },
-                    //data: Orderdata.nihaoSalesNumList
-					data:[11,12,13,14,15]
+                    data: Orderdata.nihaoSalesMoneyList
                 }
                 ]
             };
-
+            var option2 = {
+                title: {
+                    text: '',
+                    subtext: ''
+                },
+                tooltip: {
+                    trigger: 'axis'
+                },
+                legend: {
+                    data: [__('Z站订单支付成功数'), __('V站订单支付成功数'), __('Nihao站订单支付成功数')]
+                },
+                toolbox: {
+                    show: false,
+                    feature: {
+                        magicType: { show: true, type: ['stack', 'tiled'] },
+                        saveAsImage: { show: true }
+                    }
+                },
+                xAxis: {
+                    type: 'category',
+                    boundaryGap: false,
+                    data: Orderdata.column
+                },
+                yAxis: {},
+                grid: [{
+                    left: 'left',
+                    top: 'top',
+                    right: '10',
+                    bottom: 30
+                }],
+                series: [{
+                    name: __('Z站订单支付成功数'),
+                    type: 'line',
+                    smooth: true,
+                    areaStyle: {
+                        normal: {}
+                    },
+                    lineStyle: {
+                        normal: {
+                            width: 1.5
+                        }
+                    },
+                    data: Orderdata.zeeloolSalesNumList
+                },
+                {
+                    name: __('V站销量V站订单支付成功数'),
+                    type: 'line',
+                    smooth: true,
+                    areaStyle: {
+                        normal: {}
+                    },
+                    lineStyle: {
+                        normal: {
+                            width: 1.5
+                        }
+                    },
+                    data: Orderdata.vooguemeSalesNumList
+                },
+                {
+                    name: __('Nihao站订单支付成功数'),
+                    type: 'line',
+                    smooth: true,
+                    areaStyle: {
+                        normal: {}
+                    },
+                    lineStyle: {
+                        normal: {
+                            width: 1.5
+                        }
+                    },
+                    data: Orderdata.nihaoSalesNumList
+                }
+                ]
+            };            
+            var option3 = {
+                title: {
+                    text: '',
+                    subtext: ''
+                },
+                tooltip: {
+                    trigger: 'axis'
+                },
+                legend: {
+                    data: [__('Z站客单价'), __('V站客单价'), __('Nihao站客单价')]
+                },
+                toolbox: {
+                    show: false,
+                    feature: {
+                        magicType: { show: true, type: ['stack', 'tiled'] },
+                        saveAsImage: { show: true }
+                    }
+                },
+                xAxis: {
+                    type: 'category',
+                    boundaryGap: false,
+                    data: Orderdata.column
+                },
+                yAxis: {},
+                grid: [{
+                    left: 'left',
+                    top: 'top',
+                    right: '10',
+                    bottom: 30
+                }],
+                series: [{
+                    name: __('Z站客单价'),
+                    type: 'line',
+                    smooth: true,
+                    areaStyle: {
+                        normal: {}
+                    },
+                    lineStyle: {
+                        normal: {
+                            width: 1.5
+                        }
+                    },
+                    data: Orderdata.zeeloolUnitPriceList
+                },
+                {
+                    name: __('V站客单价'),
+                    type: 'line',
+                    smooth: true,
+                    areaStyle: {
+                        normal: {}
+                    },
+                    lineStyle: {
+                        normal: {
+                            width: 1.5
+                        }
+                    },
+                    data: Orderdata.vooguemeUnitPriceList
+                },
+                {
+                    name: __('Nihao站客单价'),
+                    type: 'line',
+                    smooth: true,
+                    areaStyle: {
+                        normal: {}
+                    },
+                    lineStyle: {
+                        normal: {
+                            width: 1.5
+                        }
+                    },
+                    data: Orderdata.nihaoUnitPriceList
+                }
+                ]
+            };
+            var option4 = {
+                title: {
+                    text: '',
+                    subtext: ''
+                },
+                tooltip: {
+                    trigger: 'axis'
+                },
+                legend: {
+                    data: [__('Z站购物车数'), __('V站购物车数'), __('Nihao站购物车数')]
+                },
+                toolbox: {
+                    show: false,
+                    feature: {
+                        magicType: { show: true, type: ['stack', 'tiled'] },
+                        saveAsImage: { show: true }
+                    }
+                },
+                xAxis: {
+                    type: 'category',
+                    boundaryGap: false,
+                    data: Orderdata.column
+                },
+                yAxis: {},
+                grid: [{
+                    left: 'left',
+                    top: 'top',
+                    right: '10',
+                    bottom: 30
+                }],
+                series: [{
+                    name: __('Z站购物车数'),
+                    type: 'line',
+                    smooth: true,
+                    areaStyle: {
+                        normal: {}
+                    },
+                    lineStyle: {
+                        normal: {
+                            width: 1.5
+                        }
+                    },
+                    data: Orderdata.zeeloolShoppingcartTotal
+                },
+                {
+                    name: __('V站购物车数'),
+                    type: 'line',
+                    smooth: true,
+                    areaStyle: {
+                        normal: {}
+                    },
+                    lineStyle: {
+                        normal: {
+                            width: 1.5
+                        }
+                    },
+                    data: Orderdata.vooguemeShoppingcartTotal
+                },
+                {
+                    name: __('Nihao站购物车数'),
+                    type: 'line',
+                    smooth: true,
+                    areaStyle: {
+                        normal: {}
+                    },
+                    lineStyle: {
+                        normal: {
+                            width: 1.5
+                        }
+                    },
+                    data: Orderdata.nihaoShoppingcartTotal
+                }
+                ]
+            };
+            var option5 = {
+                title: {
+                    text: '',
+                    subtext: ''
+                },
+                tooltip: {
+                    trigger: 'axis'
+                },
+                legend: {
+                    data: [__('Z站购物车转化率'), __('V站购物车数转化率'), __('Nihao站购物车数转化率')]
+                },
+                toolbox: {
+                    show: false,
+                    feature: {
+                        magicType: { show: true, type: ['stack', 'tiled'] },
+                        saveAsImage: { show: true }
+                    }
+                },
+                xAxis: {
+                    type: 'category',
+                    boundaryGap: false,
+                    data: Orderdata.column
+                },
+                yAxis: {},
+                grid: [{
+                    left: 'left',
+                    top: 'top',
+                    right: '10',
+                    bottom: 30
+                }],
+                series: [{
+                    name: __('Z站购物车转化率'),
+                    type: 'line',
+                    smooth: true,
+                    areaStyle: {
+                        normal: {}
+                    },
+                    lineStyle: {
+                        normal: {
+                            width: 1.5
+                        }
+                    },
+                    data: Orderdata.zeeloolShoppingcartConversion
+                },
+                {
+                    name: __('V站购物车数转化率'),
+                    type: 'line',
+                    smooth: true,
+                    areaStyle: {
+                        normal: {}
+                    },
+                    lineStyle: {
+                        normal: {
+                            width: 1.5
+                        }
+                    },
+                    data: Orderdata.vooguemeShoppingcartConversion
+                },
+                {
+                    name: __('Nihao站购物车数转化率'),
+                    type: 'line',
+                    smooth: true,
+                    areaStyle: {
+                        normal: {}
+                    },
+                    lineStyle: {
+                        normal: {
+                            width: 1.5
+                        }
+                    },
+                    data: Orderdata.nihaoShoppingcartConversion
+                }
+                ]
+            };
+            var option6 = {
+                title: {
+                    text: '',
+                    subtext: ''
+                },
+                tooltip: {
+                    trigger: 'axis'
+                },
+                legend: {
+                    data: [__('Z站注册用户数'), __('V站注册用户数'), __('Nihao站注册用户数')]
+                },
+                toolbox: {
+                    show: false,
+                    feature: {
+                        magicType: { show: true, type: ['stack', 'tiled'] },
+                        saveAsImage: { show: true }
+                    }
+                },
+                xAxis: {
+                    type: 'category',
+                    boundaryGap: false,
+                    data: Orderdata.column
+                },
+                yAxis: {},
+                grid: [{
+                    left: 'left',
+                    top: 'top',
+                    right: '10',
+                    bottom: 30
+                }],
+                series: [{
+                    name: __('Z站注册用户数'),
+                    type: 'line',
+                    smooth: true,
+                    areaStyle: {
+                        normal: {}
+                    },
+                    lineStyle: {
+                        normal: {
+                            width: 1.5
+                        }
+                    },
+                    data: Orderdata.zeeloolRegisterCustomer
+                },
+                {
+                    name: __('V站注册用户数'),
+                    type: 'line',
+                    smooth: true,
+                    areaStyle: {
+                        normal: {}
+                    },
+                    lineStyle: {
+                        normal: {
+                            width: 1.5
+                        }
+                    },
+                    data: Orderdata.vooguemeRegisterCustomer
+                },
+                {
+                    name: __('Nihao站注册用户数'),
+                    type: 'line',
+                    smooth: true,
+                    areaStyle: {
+                        normal: {}
+                    },
+                    lineStyle: {
+                        normal: {
+                            width: 1.5
+                        }
+                    },
+                    data: Orderdata.nihaoRegisterCustomer
+                }
+                ]
+            };                                     
             // 使用刚指定的配置项和数据显示图表。
             myChart.setOption(option);
-			myChart2.setOption(option);
-			myChart3.setOption(option);
-            myChart4.setOption(option);
-			myChart5.setOption(option);
-			myChart6.setOption(option);
+			myChart2.setOption(option2);
+			myChart3.setOption(option3);
+            myChart4.setOption(option4);
+			myChart5.setOption(option5);
+			myChart6.setOption(option6);
             $(window).resize(function () {
                 myChart.resize();
 				myChart2.resize();
@@ -191,7 +562,16 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                     $('#lastmonth_register_customer').text(ret.data.lastmonth_register_customer);
                     $('#thisyear_register_customer').text(ret.data.thisyear_register_customer);
                     $('#lastyear_register_customer').text(ret.data.lastyear_register_customer);
-                    $('#total_register_customer').text(ret.data.total_register_customer);                                                              
+                    $('#total_register_customer').text(ret.data.total_register_customer);
+                    $('#today_sign_customer').text(ret.data.today_sign_customer);
+                    $('#yesterday_sign_customer').text(ret.data.yesterday_sign_customer);
+                    $('#pastsevenday_sign_customer').text(ret.data.pastsevenday_sign_customer);
+                    $('#pastthirtyday_sign_customer').text(ret.data.pastthirtyday_sign_customer);
+                    $('#thismonth_sign_customer').text(ret.data.thismonth_sign_customer);
+                    $('#lastmonth_sign_customer').text(ret.data.lastmonth_sign_customer);
+                    $('#thisyear_sign_customer').text(ret.data.thisyear_sign_customer);
+                    $('#lastyear_sign_customer').text(ret.data.lastyear_sign_customer);
+                    $('#total_sign_customer').text(ret.data.total_sign_customer);                                                                                    
                     //console.log(ret.data);
                     return false;
                 }, function(data, ret){
@@ -277,6 +657,15 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                     $('#thisyear_register_customer').text(0);
                     $('#lastyear_register_customer').text(0);
                     $('#total_register_customer').text(0);
+                    $('#today_sign_customer').text(0);
+                    $('#yesterday_sign_customer').text(0);
+                    $('#pastsevenday_sign_customer').text(0);
+                    $('#pastthirtyday_sign_customer').text(0);
+                    $('#thismonth_sign_customer').text(0);
+                    $('#lastmonth_sign_customer').text(0);
+                    $('#thisyear_sign_customer').text(0);
+                    $('#lastyear_sign_customer').text(0);
+                    $('#total_sign_customer').text(0);                      
                     //console.log(ret);
                     Layer.alert(ret.msg);
                     return false;

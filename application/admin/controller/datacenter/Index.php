@@ -327,6 +327,56 @@ class Index extends Backend
         //新品10天的销量占比
         $days10SalesNumPercent = $dataConfig->where('key', 'days10SalesNumPercent')->value('value');
 
+        //计算产品等级的数量
+        $productGrade = new \app\admin\model\ProductGrade();
+        $where = [];
+        $where['grade'] = 'A+';
+        $AA_num = $productGrade->where($where)->count();
+
+        $where['grade'] = 'A';
+        $A_num = $productGrade->where($where)->count();
+
+        $where['grade'] = 'B';
+        $B_num = $productGrade->where($where)->count();
+
+        $where['grade'] = 'C+';
+        $CA_num = $productGrade->where($where)->count();
+
+        $where['grade'] = 'C';
+        $C_num = $productGrade->where($where)->count();
+
+        $where['grade'] = 'D';
+        $D_num = $productGrade->where($where)->count();
+
+        $where['grade'] = 'E';
+        $E_num = $productGrade->where($where)->count();
+
+        $where['grade'] = 'F';
+        $F_num = $productGrade->where($where)->count();
+
+        //总数
+        $all_num = $AA_num + $A_num + $B_num + $CA_num + $C_num + $D_num + $E_num + $F_num;
+        //A级数量即总占比
+        $res['AA_num'] = $AA_num;
+        $res['AA_percent'] = round($AA_num / $all_num * 100, 2);
+        $res['A_num'] = $A_num;
+        $res['A_percent'] = round($A_num / $all_num * 100, 2);
+        $res['B_num'] = $B_num;
+        $res['B_percent'] = round($B_num / $all_num * 100, 2);
+        $res['CA_num'] = $CA_num;
+        $res['CA_percent'] = round($CA_num / $all_num * 100, 2);
+        $res['C_num'] = $C_num;
+        $res['C_percent'] = round($C_num / $all_num * 100, 2);
+        $res['D_num'] = $D_num;
+        $res['D_percent'] = round($D_num / $all_num * 100, 2);
+        $res['E_num'] = $E_num;
+        $res['E_percent'] = round($E_num / $all_num * 100, 2);
+        $res['F_num'] = $F_num;
+        $res['F_percent'] = round($F_num / $all_num * 100, 2);
+
+        $this->view->assign('gradeSkuStock', $productGrade->getSkuStock());
+        $this->view->assign('res', $res);
+
         //选品数据
         $this->view->assign('onSaleSkuNum', $onSaleSkuNum);
         $this->view->assign('onSaleFrameNum', $onSaleFrameNum);
@@ -352,6 +402,7 @@ class Index extends Backend
         $this->view->assign('monthAppropriate', $monthAppropriate);
         $this->view->assign('monthAppropriatePercent', $monthAppropriatePercent);
         $this->view->assign('overtimeOrder', $overtimeOrder);
+
         //采购数据
         $this->view->assign('purchaseNum', $purchaseNum);
         $this->view->assign('purchasePrice', $purchasePrice);
@@ -505,5 +556,55 @@ class Index extends Backend
         from sales_flat_order_item_prescription where $where ) b where sph != '' and cyl != '' limit 1";
         $res = Db::connect('database.db_zeelool')->table('sales_flat_order_item_prescription')->query($sql);
         return $res;
+    }
+
+    /**
+     * 销量排行榜
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/03/11 16:14:50 
+     * @return void
+     */
+    public function top_sale_list()
+    {
+        if ($this->request->isAjax()) {
+            //查询三个站数据
+            $orderStatistics = new \app\admin\model\OrderStatistics();
+            $list = $orderStatistics->getAllData();
+
+            $dataJson = [];
+            $date = [];
+            $dataJson[0]['type'] = 'line';
+            $dataJson[0]['name'] = 'Z站销量';
+            $dataJson[0]['smooth'] = true;//平滑曲线
+            $dataJson[0]['areaStyle'] = ['normal' => []];
+            $dataJson[0]['lineStyle'] = ['normal' => ['width' => 1.5]];
+            $dataJson[1]['type'] = 'line';
+            $dataJson[1]['name'] = 'V站销量';
+            $dataJson[1]['smooth'] = true;
+            $dataJson[1]['areaStyle'] = ['normal' => []];
+            $dataJson[1]['lineStyle'] = ['normal' => ['width' => 1.5]];
+            $dataJson[2]['type'] = 'line';
+            $dataJson[2]['name'] = 'Nihao站销量';
+            $dataJson[2]['smooth'] = true;
+            $dataJson[2]['areaStyle'] = ['normal' => []];
+            $dataJson[2]['lineStyle'] = ['normal' => ['width' => 1.5]];
+            foreach ($list as $k => $v) {
+                $date[$k] = $v['create_date'];
+
+                $dataJson[0]['data'][$k] = $v['zeelool_sales_num'];
+                $dataJson[1]['data'][$k] = $v['voogueme_sales_num'];
+                $dataJson[2]['data'][$k] = $v['nihao_sales_num'];
+            }
+
+            $json['column'] = ['Z站销量', 'V站销量', 'Nihao站销量'];
+            $json['xcolumnData'] = $date;
+            $json['columnData'] = $dataJson;
+
+            return json(['code' => 1, 'data' => $json]);
+        }
+
+        return $this->view->fetch();
     }
 }

@@ -1360,7 +1360,7 @@ order by sfoi.item_id asc limit 1000";
  from sales_flat_order_item sfoi
  left join sales_flat_order sfo on sfo.entity_id=sfoi.order_id
  left join catalog_product_entity cpe on cpe.entity_id=sfoi.product_id
- where sfo.status in('complete','processing','creditcard_proccessing') and if (datediff(now(),cpe.created_at) > 90,sfo.created_at between '$start' and '$end',sfo.created_at between cpe.created_at and '$end')
+ where sfoi.sku not like '%Price%' and sfo.status in('complete','processing','creditcard_proccessing','paypal_reversed') and if (datediff(now(),cpe.created_at) > 90,sfo.created_at between '$start' and '$end',sfo.created_at between cpe.created_at and '$end')
  GROUP BY sfoi.sku order by counter desc";
         $zeelool_list = $zeelool_model->query($intelligent_purchase_query_sql);
         //查询sku映射关系表 
@@ -1398,6 +1398,10 @@ order by sfoi.item_id asc limit 1000";
 
         $data = [];
         foreach ($lists as $k => $v) {
+
+            if ($v['true_sku'] == 'Express Shipping') {
+                continue;
+            }
             if ($data[$v['true_sku']]) {
                 if ($v['voogueme_sku']) {
                     $data[$v['true_sku']]['voogueme_sku'] = $v['voogueme_sku'];
@@ -1590,6 +1594,7 @@ order by sfoi.item_id asc limit 1000";
     public function changeItemNewToOld()
     {
         //select*from table where now() >SUBDATE(times,interval -1 day);
+        Db::connect('database.db_stock')->name('item')->query("set time_zone='+8:00'");
         $where['is_new'] = 1;
         $itemId = Db::connect('database.db_stock')->name('item')->where($where)->where("now() >SUBDATE(check_time,interval -15 day)")->column('id');
         if (false == $itemId) {
@@ -1643,10 +1648,14 @@ order by sfoi.item_id asc limit 1000";
                 continue;
             }
         }
+
+        $item = new \app\admin\model\itemmanage\Item();
         if ($arr) {
             $list = [];
             $i = 0;
             foreach ($arr as $k => $v) {
+                $item->where('sku', $k)->update(['purchase_price' => $v]);
+
                 $list[$i]['sku'] = $k;
                 $list[$i]['price'] = $v;
                 $list[$i]['createtime'] = date('Y-m-d H:i:s', time());
@@ -2711,7 +2720,6 @@ order by sfoi.item_id asc limit 1000";
         $data['value'] = $overtimeOrder ?? 0;
         $data['updatetime'] = date('Y-m-d H:i:s', time());
         $dataConfig->where('key', 'overtimeOrder')->update($data);
-
     }
 
     /**
@@ -2758,6 +2766,21 @@ order by sfoi.item_id asc limit 1000";
         $data['updatetime'] = date('Y-m-d H:i:s', time());
         $dataConfig->where('key', 'selectProductAdoptNum')->update($data);
 
+        // //查询新品SKU 待定
+        // $newSkus = $this->item->getNewProductSku();
+        // $where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed']];
+        // $stime = date("Y-m-d 00:00:00", strtotime("-10 day"));
+        // $etime = date("Y-m-d H:i:s", time());
+        // $where['a.created_at'] = ['between', [$stime, $etime]];
+
+        // //Zeelool
+        // $zeelool_res = $this->zeelool->alias('a')->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')->where($where)->group('b.sku')->column("sum(qty_ordered)", 'b.sku');
+        // //Voogueme
+        // $voogueme_res = $this->voogueme->alias('a')->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')->where($where)->group('b.sku')->column("sum(qty_ordered)", 'b.sku');
+        // //Nihao
+        // $nihao_res = $this->nihao->alias('a')->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')->where($where)->group('b.sku')->column("sum(qty_ordered)", 'b.sku');
+
+
         //新品十天内的销量
         $data['value'] = $days10SalesNum ?? 0;
         $data['updatetime'] = date('Y-m-d H:i:s', time());
@@ -2767,8 +2790,6 @@ order by sfoi.item_id asc limit 1000";
         $data['value'] = $days10SalesNumPercent ?? 0;
         $data['updatetime'] = date('Y-m-d H:i:s', time());
         $dataConfig->where('key', 'days10SalesNumPercent')->update($data);
-        
-
     }
 
     /**
@@ -3005,4 +3026,117 @@ order by sfoi.item_id asc limit 1000";
 
         return $purchase_price - $arrivals_price;
     }
+
+
+    /**
+     * 统计SKU每天的销售数量
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/03/10 17:16:04 
+     * @return void
+     */
+    public function getSkuSalesNum()
+    {
+        set_time_limit(0);
+        for ($i = 1; $i <= 10; $i++) {
+            echo $i;echo "<br>";
+            $data = [];
+            $where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed']];
+            $stime = date("Y-m-d 00:00:00", strtotime("-$i day"));
+            $etime = date("Y-m-d 23:59:59", strtotime("-$i day"));
+            $where['a.created_at'] = ['between', [$stime, $etime]];
+
+            //Zeelool
+            $zeelool_res = $this->zeelool->alias('a')->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')->where($where)->group('b.sku')->column("sum(qty_ordered)", 'b.sku');
+            //Voogueme
+            $voogueme_res = $this->voogueme->alias('a')->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')->where($where)->group('b.sku')->column("sum(qty_ordered)", 'b.sku');
+            //Nihao
+            $nihao_res = $this->nihao->alias('a')->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')->where($where)->group('b.sku')->column("sum(qty_ordered)", 'b.sku');
+    
+            $itemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku();
+            $map['is_del'] = 1;
+            $map['is_open'] = 1;
+            $data = $this->item->where($map)->field('sku')->cache(3600)->select();
+            $data = collection($data)->toArray();
+            
+            foreach ($data as  &$v) {
+                $v['zeelool_sku'] = $itemPlatformSku->getWebSku($v['sku'], 1);
+                $v['zeelool_sales_num'] = $zeelool_res[$v['zeelool_sku']] ?? 0; //zeelool销量
+                $v['voogueme_sku'] = $itemPlatformSku->getWebSku($v['sku'], 2);
+                $v['voogueme_sales_num'] = $voogueme_res[$v['voogueme_sku']] ?? 0; //voogueme销量
+                $v['nihao_sku'] = $itemPlatformSku->getWebSku($v['sku'], 3);
+                $v['nihao_sales_num'] = $nihao_res[$v['nihao_sku']] ?? 0; //nihao销量
+                $v['all_sales_num'] = $v['zeelool_sales_num'] + $v['voogueme_sales_num'] + $v['nihao_sales_num']; //汇总销量
+                $v['createtime'] = date('Y-m-d H:i:s', strtotime("-$i day"));
+            }
+            $salesSkuNum = new \app\admin\model\SkuSalesNum();
+
+            $salesSkuNum->saveAll($data);
+        }
+       
+    }
+    /**
+     * 更新order_statistics表字段
+     *
+     * @Description created by lsw
+     * @author lsw
+     * @since 2020/03/11 17:11:21 
+     * @return void
+     */
+    public function get_sales_order_update()
+    {
+        $zeelool_model  = Db::connect('database.db_zeelool');
+        $voogueme_model = Db::connect('database.db_voogueme');
+        $nihao_model    = Db::connect('database.db_nihao');        
+        $zeelool_model->table('sales_flat_quote')->query("set time_zone='+8:00'");
+        $zeelool_model->table('customer_entity')->query("set time_zone='+8:00'");
+        $voogueme_model->table('sales_flat_quote')->query("set time_zone='+8:00'");
+        $voogueme_model->table('customer_entity')->query("set time_zone='+8:00'");
+        $nihao_model->table('sales_flat_quote')->query("set time_zone='+8:00'");
+        $nihao_model->table('customer_entity')->query("set time_zone='+8:00'");
+        $where['zeelool_shoppingcart_total'] = 0;
+        $result = Db::name('order_statistics')->where($where)->limit(1)->select();
+        if(!$result){
+            echo 'ok2';
+            exit;
+        }
+        $data = [];
+        foreach($result as $k=> $v){
+            $starttime          = $v['create_date'].' '.'00:00:00';
+            $endtime            = $v['create_date'].' '.'23:59:59';
+            $map['created_at']  = $date['created_at'] = ['between', [$starttime, $endtime]];
+            $map['status']      = ['in', ['processing', 'complete', 'creditcard_proccessing']];
+            $data[$k]['all_unit_price'] = @round(($v['zeelool_unit_price'] + $v['voogueme_unit_price'] + $v['nihao_unit_price']) / 3, 2);
+            //zeelool的购物车总数
+            $data[$k]['zeelool_shoppingcart_total'] =  $zeelool_shoppingcart_total= $zeelool_model->table('sales_flat_quote')->where($date)->where('base_grand_total', 'GT', 0)->count('*');
+            //zeelool购物车转化率
+            $data[$k]['zeelool_shoppingcart_conversion'] = $zeelool_shoppingcart_conversion = @round(($v['zeelool_sales_num'] / $zeelool_shoppingcart_total) * 100, 2);
+            //zeelool的注册人数
+            $data[$k]['zeelool_register_customer'] = $zeelool_register_customer= $zeelool_model->table('customer_entity')->where($date)->count('*');
+            //voogueme的购物车总数
+            $data[$k]['voogueme_shoppingcart_total'] =  $voogueme_shoppingcart_total= $voogueme_model->table('sales_flat_quote')->where($date)->where('base_grand_total', 'GT', 0)->count('*');
+            //voogueme的购物车转化率
+            $data[$k]['voogueme_shoppingcart_conversion'] = $voogueme_shoppingcart_conversion= @round(($v['voogueme_sales_num']/$voogueme_shoppingcart_total) * 100,2);
+            //voogueme的注册人数
+            $data[$k]['voogueme_register_customer'] = $voogueme_register_customer = $voogueme_model->table('customer_entity')->where($date)->count('*');
+            //nihao的购物车总数
+            $data[$k]['nihao_shoppingcart_total']   = $nihao_shoppingcart_total = $nihao_model->table('sales_flat_quote')->where($date)->where('base_grand_total', 'GT', 0)->count('*');
+            //nihao的购物车转化率
+            $data[$k]['nihao_shoppingcart_conversion'] = $nihao_shoppingcart_conversion= @round(($v['nihao_sales_num']/$nihao_shoppingcart_total) * 100,2);
+            //nihao的注册人数
+            $data[$k]['nihao_register_customer'] = $nihao_register_customer = $nihao_model->table('customer_entity')->where($date)->count('*');
+            $data[$k]['all_shoppingcart_total']  = $zeelool_shoppingcart_total + $voogueme_shoppingcart_total + $nihao_shoppingcart_total;
+            $data[$k]['all_shoppingcart_conversion'] = @round(($zeelool_shoppingcart_conversion + $voogueme_shoppingcart_conversion + $nihao_shoppingcart_conversion) / 3, 2);
+            $data[$k]['all_register_customer']   = $zeelool_register_customer + $voogueme_register_customer + $nihao_register_customer;
+            //Db::name('order_statistics')->where(['id'=>$v['id']])->update($data);
+            dump($data);
+            exit;
+        }
+        dump($data);  
+        //Db::name('order_statistics')->insert($data);
+        echo 'ok';
+        die;
+    }
+    
 }

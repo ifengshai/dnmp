@@ -684,8 +684,6 @@ class Item extends Backend
                                 $data['name'] = $v;
                                 $data['price']       = $price[$k];
                                 $data['item_status'] = $params['item_status'];
-                                $data['create_person'] = session('admin.nickname');
-                                $data['create_time'] = date("Y-m-d H:i:s", time());
                                 $item = Db::connect('database.db_stock')->name('item')->where('id', '=', $row['id'])->update($data);
                                 $itemAttribute['attribute_type'] = 3;
                                 $itemAttribute['accessory_color'] = $itemColor[$k];
@@ -723,8 +721,6 @@ class Item extends Backend
                                 $data['name'] = $v;
                                 $data['price']       = $price[$k];
                                 $data['item_status'] = $params['item_status'];
-                                $data['create_person'] = session('admin.nickname');
-                                $data['create_time'] = date("Y-m-d H:i:s", time());
                                 $data['frame_is_rimless'] = $params['shape'] == 1 ? 2 : 1;
                                 $item = Db::connect('database.db_stock')->name('item')->where('id', '=', $row['id'])->update($data);
                                 $itemAttribute['attribute_type'] = $params['attribute_type'];
@@ -1290,9 +1286,9 @@ class Item extends Backend
             if ($row['item_status'] != 1) {
                 $this->error('此商品状态不能提交审核');
             }
-            if (false == $row['itemAttribute']['frame_images']) {
-                $this->error('请先上传商品图片');
-            }
+            // if (false == $row['itemAttribute']['frame_images']) {
+            //     $this->error('请先上传商品图片');
+            // }
             $map['id'] = $id;
             $data['item_status'] = 2;
             $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
