@@ -3096,9 +3096,7 @@ order by sfoi.item_id asc limit 1000";
         $nihao_model->table('sales_flat_quote')->query("set time_zone='+8:00'");
         $nihao_model->table('customer_entity')->query("set time_zone='+8:00'");
         $where['zeelool_shoppingcart_total'] = 0;
-        $result = Db::name('order_statistics')->where($where)->limit(30)->select();
-        dump($result);
-        exit;
+        $result = Db::name('order_statistics')->where($where)->limit(10)->select();
         if(!$result){
             echo 'ok2';
             exit;
