@@ -1342,7 +1342,7 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
 from sales_flat_order_item sfoi
 left join sales_flat_order sfo on  sfoi.order_id=sfo.entity_id 
 where sfo.`status` in ('processing','creditcard_proccessing','free_processing','complete','paypal_reversed','paypal_canceled_reversal') and sfo.entity_id in($entity_ids)
-order by sfoi.order_id desc;";
+order by sfo.total_qty_ordered asc;";
             $processing_order_list = Db::connect('database.db_zeelool')->query($processing_order_querySql);
 
             $processing_order_list = $this->qty_order_check($processing_order_list);
