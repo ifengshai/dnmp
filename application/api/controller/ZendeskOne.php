@@ -307,7 +307,7 @@ class ZendeskOne extends Controller
                                     file_put_contents('/www/wwwroot/mojing/runtime/log/zendeskreply2.txt',$zendesk_reply->email_id."\r\n",FILE_APPEND);
                                 }
                                 //回复评论
-                                if($recent_reply_count < 2 && $zendesk_reply->id){
+                                if($zendesk_reply->id){
                                     $reply_detail_data = [
                                         'reply_id' => $zendesk_reply->id,
                                         'body' => $params['comment']['body'],
