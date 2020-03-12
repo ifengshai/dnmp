@@ -126,7 +126,7 @@ class Dashboard extends Backend
 	 * @param [type] $id
 	 * @return void
 	 */
-	public function async_bottom_data($id)
+	public function async_bottom_data($id=null)
 	{
 		if($this->request->isAjax()){
 			if(!$id){
