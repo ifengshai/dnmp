@@ -3129,7 +3129,9 @@ order by sfoi.item_id asc limit 1000";
             $data[$k]['all_shoppingcart_total']  = $zeelool_shoppingcart_total + $voogueme_shoppingcart_total + $nihao_shoppingcart_total;
             $data[$k]['all_shoppingcart_conversion'] = @round(($zeelool_shoppingcart_conversion + $voogueme_shoppingcart_conversion + $nihao_shoppingcart_conversion) / 3, 2);
             $data[$k]['all_register_customer']   = $zeelool_register_customer + $voogueme_register_customer + $nihao_register_customer;
-            Db::name('order_statistics')->where(['id'=>$v['id']])->update($data);
+            //Db::name('order_statistics')->where(['id'=>$v['id']])->update($data);
+            dump($data);
+            exit;
         }
         dump($data);  
         //Db::name('order_statistics')->insert($data);
