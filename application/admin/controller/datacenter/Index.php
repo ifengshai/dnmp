@@ -633,9 +633,9 @@ class Index extends Backend
                     $result[$i]['sales_num'] = $v;
                     $result[$i]['sku'] = $skus[$k]['sku'];
                     $result[$i]['is_up'] = $skus[$k]['outer_sku_status'];
-                    $result[$i]['available_stock'] = $productInfo[$k]['available_stock'];
-                    $result[$i]['name'] = $productInfo[$k]['name'];
-                    $result[$i]['type_name'] = $productInfo[$k]['type_name'];
+                    $result[$i]['available_stock'] = $productInfo[$skus[$k]['sku']]['available_stock'];
+                    $result[$i]['name'] = $productInfo[$skus[$k]['sku']]['name'];
+                    $result[$i]['type_name'] = $productInfo[$skus[$k]['sku']]['type_name'];
                     $i++;
                 }
             }
