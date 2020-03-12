@@ -682,7 +682,64 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                     Layer.alert(ret.msg);
                     return false;
                 });
-			});
+            });
+			$('#c-order_date').on('change',function(){
+                var id = $('#c-order_date').val();
+                Backend.api.ajax({
+                    url:'datacenter/operationanalysis/operationkanban/dashboard/async_bottom_data',
+                    data:{id:id}
+                }, function(data, ret){
+                    $('#zeelool_pc_sales_money').text(ret.data.zeelool_pc_sales_money);
+                    $('#zeelool_pc_sales_num').text(ret.data.zeelool_pc_sales_num);
+                    $('#zeelool_pc_unit_price').text(ret.data.zeelool_pc_unit_price);
+                    $('#zeelool_wap_sales_money').text(ret.data.zeelool_wap_sales_money);
+                    $('#zeelool_wap_sales_num').text(ret.data.zeelool_wap_sales_num);
+                    $('#zeelool_wap_unit_price').text(ret.data.zeelool_wap_unit_price);
+                    $('#zeelool_app_sales_money').text(ret.data.zeelool_app_sales_money);
+                    $('#zeelool_app_sales_num').text(ret.data.zeelool_app_sales_num);
+                    $('#zeelool_app_unit_price').text(ret.data.zeelool_app_unit_price);
+                    $('#voogueme_pc_sales_money').text(ret.data.voogueme_pc_sales_money);
+                    $('#voogueme_pc_sales_num').text(ret.data.voogueme_pc_sales_num);
+                    $('#voogueme_pc_unit_price').text(ret.data.voogueme_pc_unit_price);
+                    $('#voogueme_wap_sales_money').text(ret.data.voogueme_wap_sales_money);
+                    $('#voogueme_wap_sales_num').text(ret.data.voogueme_wap_sales_num);
+                    $('#voogueme_wap_unit_price').text(ret.data.voogueme_wap_unit_price);
+                    $('#nihao_pc_sales_money').text(ret.data.nihao_pc_sales_money);
+                    $('#nihao_pc_sales_num').text(ret.data.nihao_pc_sales_num);
+                    $('#nihao_pc_unit_price').text(ret.data.nihao_pc_unit_price);
+                    $('#nihao_wap_sales_money').text(ret.data.nihao_wap_sales_money);
+                    $('#nihao_wap_sales_num').text(ret.data.nihao_wap_sales_num);
+                    $('#nihao_wap_unit_price').text(ret.data.nihao_wap_unit_price);                                                                                  
+                    //console.log(ret.data);
+                    return false;
+                }, function(data, ret){
+                    //失败的回调
+                    $('#zeelool_pc_sales_money').text(0);
+                    $('#zeelool_pc_sales_num').text(0);
+                    $('#zeelool_pc_unit_price').text(0);
+                    $('#zeelool_wap_sales_money').text(0);
+                    $('#zeelool_wap_sales_num').text(0);
+                    $('#zeelool_wap_unit_price').text(0);
+                    $('#zeelool_app_sales_money').text(0);
+                    $('#zeelool_app_sales_num').text(0);
+                    $('#zeelool_app_unit_price').text(0);
+                    $('#voogueme_pc_sales_money').text(0);
+                    $('#voogueme_pc_sales_num').text(0);
+                    $('#voogueme_pc_unit_price').text(0);
+                    $('#voogueme_wap_sales_money').text(0);
+                    $('#voogueme_wap_sales_num').text(0);
+                    $('#voogueme_wap_unit_price').text(0);
+                    $('#nihao_pc_sales_money').text(0);
+                    $('#nihao_pc_sales_num').text(0);
+                    $('#nihao_pc_unit_price').text(0);
+                    $('#nihao_wap_sales_money').text(0);
+                    $('#nihao_wap_sales_num').text(0);
+                    $('#nihao_wap_unit_price').text(0);                    
+                    //console.log(ret);
+                    Layer.alert(ret.msg);
+                    return false;
+                });
+			});            
         }
     };
     return Controller;
