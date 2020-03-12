@@ -1063,6 +1063,7 @@ class PurchaseOrder extends Backend
             $purchase_map['purchase_status'] = ['in', [2, 5, 6, 7]];
             $purchase_map['check_status'] = ['in', [0, 1]];
             $purchase_map['is_diff'] = 0;
+            $purchase_map['is_del'] = 1;
 
             $purchase_list = $purchase->hasWhere('purchaseOrderItem', $hasWhere)
                 ->where($purchase_map)
