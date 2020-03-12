@@ -200,7 +200,6 @@ class Zeelool extends Model
             ->order('num desc')
             ->limit(15)
             ->column('round(sum(b.qty_ordered)) as num', 'sku');
-
         return $res;
     }
 
