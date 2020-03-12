@@ -1015,6 +1015,7 @@ class Item extends Backend
             $hasWhere['sku'] = ['in', $skus];
             $purchase_map['purchase_status'] = ['in', [2, 5, 6, 7]];
             $purchase_map['stock_status'] = ['in', [0, 1]];
+            $purchase_map['is_del'] = 1;
             $purchase_list = $purchase->hasWhere('purchaseOrderItem', $hasWhere)
                 ->where($purchase_map)
                 ->group('sku')
@@ -1060,6 +1061,7 @@ class Item extends Backend
 
         //查询此sku采购单库存情况
         $purchase_map['stock_status'] = ['in', [1, 2]];
+        $purchase_map['is_del'] = 1;
         $purchase = new \app\admin\model\purchase\PurchaseOrder;
         $hasWhere['sku'] = $row['sku'];
         $hasWhere['instock_num'] = ['>', 0];
@@ -1079,6 +1081,7 @@ class Item extends Backend
         $purchase = new \app\admin\model\purchase\PurchaseOrder;
         $where['a.purchase_status'] = ['in', [2, 5, 6, 7]];
         $where['a.stock_status'] = ['in', [0, 1]];
+        $where['a.is_del'] = 1;
         $where['b.sku'] = $row['sku'];
 
         $info = $purchase->alias('a')->where($where)->field('a.id,a.purchase_number,b.sku,a.purchase_status,a.receiving_time,a.create_person,a.createtime,b.purchase_num')

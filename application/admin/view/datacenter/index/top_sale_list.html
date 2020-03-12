@@ -64,9 +64,9 @@
     <div class="panel-heading">
         {:build_heading()}
         <ul class="nav nav-tabs">
-            <li class="{:$label == 1 ? 'active' : ''}"><a href="label=1">Zeelool</a></li>
-            <li class="{:$label == 2 ? 'active' : ''}"><a href="label=2">Voogueme</a></li>
-            <li class="{:$label == 3 ? 'active' : ''}"><a href="label=3">Nihao</a></li>
+            <li data="1" class="{:$label == 1 ? 'active' : ''}"><a href="{:url('top_sale_list')}?label=1">Zeelool</a></li>
+            <li data="2" class="{:$label == 2 ? 'active' : ''}"><a href="{:url('top_sale_list')}?label=2">Voogueme</a></li>
+            <li data="3" class="{:$label == 3 ? 'active' : ''}"><a href="{:url('top_sale_list')}?label=3">Nihao</a></li>
         </ul>
     </div>
 
@@ -74,7 +74,7 @@
         <div id="myTabContent" class="tab-content">
             <div class="tab-pane fade active in" id="one">
                 <div class="widget-body no-padding">
-                    <form id="form1" class="form-commonsearch form-horizontal" action="{:url('warehouse_data')}"
+                    <form id="form1" class="form-commonsearch form-horizontal" action="{:url('top_sale_list')}"
                         role="form1" method="post">
                         <div style="border-radius:2px;margin-bottom:10px;background:#f5f5f5;padding:20px;">
                             <div class="row">
@@ -84,7 +84,7 @@
                                             name="create_time-operate" data-name="create_time" value="RANGE"
                                             readonly=""><input type="text" autocomplete="off"
                                             class="form-control datetimerange" name="create_time" 
-                                            placeholder="创建时间" id="create_time" value="{$created_at}" data-index="14"></div>
+                                            placeholder="创建时间" id="create_time" value="{$create_time}" data-index="14"></div>
                                 </div>
                                 <div class="form-group col-xs-12 col-sm-6 col-md-4 col-lg-3">
                                     <div class="col-sm-8 col-xs-offset-4"><input type="submit" class="btn btn-success"
@@ -104,7 +104,7 @@
 
                         <div class="row item_info" style="background:#f5f5f5;float: left;width: 100%;">
                             <div class="col-lg-8">
-                                <div id="echart" style="height:400px;width:100%;"></div>
+                                <div id="echart" style="height:600px;width:100%;"></div>
                             </div>
 
                         </div>

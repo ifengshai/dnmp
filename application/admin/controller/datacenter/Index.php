@@ -568,43 +568,32 @@ class Index extends Backend
      */
     public function top_sale_list()
     {
+        $create_time = input('create_time');
+        $label = input('label', 1);
         if ($this->request->isAjax()) {
-            //查询三个站数据
-            $orderStatistics = new \app\admin\model\OrderStatistics();
-            $list = $orderStatistics->getAllData();
-
-            $dataJson = [];
-            $date = [];
-            $dataJson[0]['type'] = 'line';
-            $dataJson[0]['name'] = 'Z站销量';
-            $dataJson[0]['smooth'] = true;//平滑曲线
-            $dataJson[0]['areaStyle'] = ['normal' => []];
-            $dataJson[0]['lineStyle'] = ['normal' => ['width' => 1.5]];
-            $dataJson[1]['type'] = 'line';
-            $dataJson[1]['name'] = 'V站销量';
-            $dataJson[1]['smooth'] = true;
-            $dataJson[1]['areaStyle'] = ['normal' => []];
-            $dataJson[1]['lineStyle'] = ['normal' => ['width' => 1.5]];
-            $dataJson[2]['type'] = 'line';
-            $dataJson[2]['name'] = 'Nihao站销量';
-            $dataJson[2]['smooth'] = true;
-            $dataJson[2]['areaStyle'] = ['normal' => []];
-            $dataJson[2]['lineStyle'] = ['normal' => ['width' => 1.5]];
-            foreach ($list as $k => $v) {
-                $date[$k] = $v['create_date'];
-
-                $dataJson[0]['data'][$k] = $v['zeelool_sales_num'];
-                $dataJson[1]['data'][$k] = $v['voogueme_sales_num'];
-                $dataJson[2]['data'][$k] = $v['nihao_sales_num'];
+            $params = $this->request->param();
+            //默认当天
+            if ($params['create_time']) {
+                $time = explode(' ', $params['create_time']);
+                $map['a.created_at'] = ['between', [$time[0] . ' ' . $time[1], $time[3] . ' ' . $time[4]]];
+            } else {
+                $map['a.created_at'] = ['between', [date('Y-m-d 00:00:00', strtotime('-7 day')), date('Y-m-d H:i:s', time())]];
+            }
+            if ($params['site'] == 1) {
+                $zeelool_res = $this->zeelool->getOrderSalesNum([], $map);
             }
 
-            $json['column'] = ['Z站销量', 'V站销量', 'Nihao站销量'];
-            $json['xcolumnData'] = $date;
-            $json['columnData'] = $dataJson;
+            $json['firtColumnName'] = array_keys($zeelool_res);
+            $json['columnData'] = [
+                'type' => 'bar',
+                'data' => array_values($zeelool_res),
+                'name' => '销售排行榜'
+            ];
 
             return json(['code' => 1, 'data' => $json]);
         }
-
+        $this->assign('create_time', $create_time);
+        $this->assign('label', $label);
         return $this->view->fetch();
     }
 }

@@ -59,108 +59,33 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj', 'custom
         top_sale_list: function () {
             Controller.api.formatter.daterangepicker($("form[role=form1]"));
 
-            // // 基于准备好的dom，初始化echarts实例
-            // var myChart = EchartsObj.init(document.getElementById('echart'), 'walden');
-
-
-
-            // // 指定图表的配置项和数据
-            // var option = {
-            //     title: {
-            //         text: '',
-            //         subtext: ''
-            //     },
-            //     tooltip: {
-            //         trigger: 'axis'
-            //     },
-            //     legend: {
-            //         data: [__('Z站销量'), __('V站销量'), __('Nihao站销量')]
-            //     },
-            //     toolbox: {
-            //         show: false,
-            //         feature: {
-            //             magicType: { show: true, type: ['stack', 'tiled'] },
-            //             saveAsImage: { show: true }
-            //         }
-            //     },
-            //     xAxis: {
-            //         type: 'category',
-            //         boundaryGap: false,
-            //         data: Orderdata.column
-            //     },
-            //     yAxis: {},
-            //     grid: [{
-            //         left: 'left',
-            //         top: 'top',
-            //         right: '10',
-            //         bottom: 30
-            //     }],
-            //     series: [{
-            //         name: __('Z站销量'),
-            //         type: 'line',
-            //         smooth: true,
-            //         areaStyle: {
-            //             normal: {}
-            //         },
-            //         lineStyle: {
-            //             normal: {
-            //                 width: 1.5
-            //             }
-            //         },
-            //         data: Orderdata.zeeloolSalesNumList
-            //     },
-            //     {
-            //         name: __('V站销量'),
-            //         type: 'line',
-            //         smooth: true,
-            //         areaStyle: {
-            //             normal: {}
-            //         },
-            //         lineStyle: {
-            //             normal: {
-            //                 width: 1.5
-            //             }
-            //         },
-            //         data: Orderdata.vooguemeSalesNumList
-            //     },
-            //     {
-            //         name: __('Nihao站销量'),
-            //         type: 'line',
-            //         smooth: true,
-            //         areaStyle: {
-            //             normal: {}
-            //         },
-            //         lineStyle: {
-            //             normal: {
-            //                 width: 1.5
-            //             }
-            //         },
-            //         data: Orderdata.nihaoSalesNumList
-            //     }
-            //     ]
-            // };
-
-            var chart1Options = {
+            //销售排行榜图表
+            var chartOptions = {
                 targetId: 'echart',
                 downLoadTitle: '图表',
-                type: 'line'
+                type: 'bar',
+                bar: {
+                    xAxis: {
+                        type: 'value',
+                        boundaryGap: [0, 0.01]
+                    },
+                    yAxis: {
+                        type: 'category',
+                        data: []
+                    }
+                }
             };
-
+            var time = $('#create_time').val();
+            var site = $('.active').attr('data');
             var options = {
-                type: 'get',
-                url: 'datacenter/index/top_sale_list'
+                type: 'post',
+                url: 'datacenter/index/top_sale_list',
+                data: {
+                    'time': time,
+                    'site': site
+                }
             }
-
-            EchartObj.api.ajax(options, chart1Options)
-
-
-            // // 使用刚指定的配置项和数据显示图表。
-            // myChart.setOption(option);
-
-
-            // $(window).resize(function () {
-            //     myChart.resize();
-            // });
+            EchartObj.api.ajax(options, chartOptions)
 
         },
 

@@ -638,7 +638,7 @@ where cped.attribute_id in(146,147) and cped.store_id=0 and cped.entity_id=$prod
         }
 
         list($where) = $this->buildparams();
-        $field = 'sfo.increment_id,sfoi.product_options,sfoi.order_id,sfo.`status`,sfoi.sku,sfoi.product_id,sfoi.qty_ordered,sfo.created_at';
+        $field = 'sfo.increment_id,sfoi.product_options,total_qty_ordered as NUM,sfoi.order_id,sfo.`status`,sfoi.sku,sfoi.product_id,sfoi.qty_ordered,sfo.created_at';
         $resultList = $this->model->alias('sfo')
             ->join(['sales_flat_order_item' => 'sfoi'], 'sfoi.order_id=sfo.entity_id')
             ->field($field)

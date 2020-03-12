@@ -11,7 +11,7 @@ define(['echarts', 'echarts-theme', Config.store_enname], function (Echarts, und
             //下载图表标题,
             downLoadTitle: "",
             //图表可选颜色
-            echarsColors: ['#ff8259', '#ffad7a', '#ffcc76', '#ffa5f3', '#ffa1b7', '#e6e1da', '#d1b19d', '#dfecd4', '#d0afe1', '#f2d3c7'],
+            echarsColors: ['#3fb1e3', '#6be6c1', '#626c91', '#a0a7e6', '#c4ebad', '#96dee8', '#d1b19d', '#dfecd4', '#d0afe1', '#f2d3c7'],
             //后台返回数据格式
             /*
              *  单分类图表试用
@@ -62,13 +62,7 @@ define(['echarts', 'echarts-theme', Config.store_enname], function (Echarts, und
                         type: 'shadow' //指示器类型。可选项'line' 直线指示器。'shadow' 阴影指示器。'cross' 十字准星指示器。其实是种简写，表示启用两个正交的轴的 axisPointer。
                     },
                     formatter: function (param) { //格式化提示信息
-                        console.log(param);
-                        if (typeof (param.data.number) == 'number') {
-                            return param[0].seriesName + ':' + param[0].name + '<br/>人数：' + EchartObj.api.formatter.toThousands(param[0].data.number) + '<br/> 占比：' + param[0].data.value + '%';
-                        } else {
-                            return param[0].seriesName + ':' + param[0].name + '<br/>人数：' + param[0].data.number + '<br/> 占比：' + param[0].data.value + '%';
-                        }
-
+                        return param[0].seriesName + '<br/>' + param[0].name + '：' + param[0].value;
                     }
                 },
                 legend: { //图例配置
@@ -77,7 +71,7 @@ define(['echarts', 'echarts-theme', Config.store_enname], function (Echarts, und
                     data: []
                 },
                 grid: { //直角坐标系内绘图网格
-                    top: '15%', //grid 组件离容器上侧的距离。
+                    top: '5%', //grid 组件离容器上侧的距离。
                     left: '10%', //grid 组件离容器左侧的距离。
                     right: '10%', //grid 组件离容器右侧的距离。
                     bottom: '20%', //grid 组件离容器下侧的距离。
@@ -144,7 +138,7 @@ define(['echarts', 'echarts-theme', Config.store_enname], function (Echarts, und
                         name: '', //系列名称，用于tooltip的显示，legend 的图例筛选
                         type: 'bar', //类型
                         barWidth: '60%', //柱条的宽度，不设时自适应。支持设置成相对于类目宽度的百分比。
-                        barMaxWidth: 25, //柱条的最大宽度，不设时自适应。支持设置成相对于类目宽度的百分比。
+                        barMaxWidth: 100, //柱条的最大宽度，不设时自适应。支持设置成相对于类目宽度的百分比。
                         itemStyle: {
                             normal: {
                                 color: function (params) { //柱条的颜色。
@@ -878,19 +872,19 @@ define(['echarts', 'echarts-theme', Config.store_enname], function (Echarts, und
             },
             formatter: {
                 toThousands: function (num) {
-                    num = num.toString().replace(/\$|\,/g,'');
-                    if(isNaN(num))
-                    num = "0";
+                    num = num.toString().replace(/\$|\,/g, '');
+                    if (isNaN(num))
+                        num = "0";
                     sign = (num == (num = Math.abs(num)));
-                    num = Math.floor(num*100+0.50000000001);
-                    cents = num%100;
-                    num = Math.floor(num/100).toString();
-                    if(cents<10)
-                    cents = "0" + cents;
-                    for (var i = 0; i < Math.floor((num.length-(1+i))/3); i++)
-                    num = num.substring(0,num.length-(4*i+3))+','+
-                    num.substring(num.length-(4*i+3));
-                    return (((sign)?'':'-') + num + '.' + cents);
+                    num = Math.floor(num * 100 + 0.50000000001);
+                    cents = num % 100;
+                    num = Math.floor(num / 100).toString();
+                    if (cents < 10)
+                        cents = "0" + cents;
+                    for (var i = 0; i < Math.floor((num.length - (1 + i)) / 3); i++)
+                        num = num.substring(0, num.length - (4 * i + 3)) + ',' +
+                            num.substring(num.length - (4 * i + 3));
+                    return (((sign) ? '' : '-') + num + '.' + cents);
                 },
                 p: [],
             },
@@ -976,7 +970,7 @@ define(['echarts', 'echarts-theme', Config.store_enname], function (Echarts, und
                         }
 
                     } else if (chartOptions.type == 'bar') {
-                        
+
                         EchartObj.api.barConfig = EchartObj.config.bar;
                         //置空数据配置，独立没个图表的配置，防止初始配置被污染
                         console.log(EchartObj.api.barConfig)
@@ -1016,8 +1010,7 @@ define(['echarts', 'echarts-theme', Config.store_enname], function (Echarts, und
                                 tooltip: {
                                     trigger: 'item',
                                     formatter: function (param, re) { //格式化提示信息
-                                        console.log(param);
-                                        //                                      console.log(chartOptions.bar.series)
+
                                         return chartOptions.bar.series[0].name + ': ' + param.seriesName + '<br/>人数：' + EchartObj.api.formatter.toThousands(ss[param.seriesName]) + '<br/> 占比：' + param.data.toFixed(2) + '%';
                                     }
                                 },
@@ -1031,9 +1024,9 @@ define(['echarts', 'echarts-theme', Config.store_enname], function (Echarts, und
                             });
 
                         } else {
-                            console.log(res.columnName)
+                            console.log(res.firtColumnName);
                             if (res.firtColumnName) {
-                                chartOptions.bar.yAxis.data = res.firtColumnName
+                                chartOptions.bar.yAxis.data = res.firtColumnName;
                             }
                             $.extend(true, EchartObj.api.barConfig, chartOptions.bar, {
                                 targetId: chartOptions.targetId,
