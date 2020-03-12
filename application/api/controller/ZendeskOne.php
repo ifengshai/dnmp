@@ -269,7 +269,7 @@ class ZendeskOne extends Controller
                                 ->count();
                             if($recent_reply_count >= 2){
                                 $params = [
-                                    'tags' => ['转客服', '多次发送'],
+                                    'tags' => ['自动回复','转客服', '多次发送'],
                                     //'status' => 'open'
                                 ];
                             }else{
