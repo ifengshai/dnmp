@@ -11,7 +11,7 @@ define(['echarts', 'echarts-theme', Config.store_enname], function (Echarts, und
             //下载图表标题,
             downLoadTitle: "",
             //图表可选颜色
-            echarsColors: ['#ff8259', '#ffad7a', '#ffcc76', '#ffa5f3', '#ffa1b7', '#e6e1da', '#d1b19d', '#dfecd4', '#d0afe1', '#f2d3c7'],
+            echarsColors: ['#3fb1e3', '#6be6c1', '#626c91', '#a0a7e6', '#c4ebad', '#96dee8', '#d1b19d', '#dfecd4', '#d0afe1', '#f2d3c7'],
             //后台返回数据格式
             /*
              *  单分类图表试用
