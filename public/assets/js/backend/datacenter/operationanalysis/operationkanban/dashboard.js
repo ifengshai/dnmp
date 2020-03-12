@@ -40,17 +40,11 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                     data: Orderdata.column
                 },
                 yAxis: [{
-                    type:'value',
-                    max:function(value){
-                        return value.max + 200;
-                    },
-                    min:0
                 }],
                 grid: [{
-                    left: 'left',
-                    top: 'top',
-                    right: '10',
-                    bottom: 30
+                    left: '10%',
+                    top: '10',
+                    right: '10'
                 }],
                 series: [{
                     name: __('Z站销售额'),
@@ -127,10 +121,9 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                     min:0
                 }],
                 grid: [{
-                    left: 'left',
-                    top: 'top',
-                    right: '10',
-                    bottom: 30
+                    left: '10%',
+                    top: '10',
+                    right: '10'
                 }],
                 series: [{
                     name: __('Z站订单支付成功数'),
@@ -201,10 +194,9 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                 },
                 yAxis: {},
                 grid: [{
-                    left: 'left',
-                    top: 'top',
-                    right: '10',
-                    bottom: 30
+                    left: '10%',
+                    top: '10',
+                    right: '10'
                 }],
                 series: [{
                     name: __('Z站客单价'),
@@ -275,10 +267,9 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                 },
                 yAxis: {},
                 grid: [{
-                    left: 'left',
-                    top: 'top',
-                    right: '10',
-                    bottom: 30
+                    left: '10%',
+                    top: '10',
+                    right: '10'
                 }],
                 series: [{
                     name: __('Z站购物车数'),
@@ -349,10 +340,9 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                 },
                 yAxis: {},
                 grid: [{
-                    left: 'left',
-                    top: 'top',
-                    right: '10',
-                    bottom: 30
+                    left: '10%',
+                    top: '10',
+                    right: '10'
                 }],
                 series: [{
                     name: __('Z站购物车转化率'),
@@ -423,10 +413,9 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                 },
                 yAxis: {},
                 grid: [{
-                    left: 'left',
-                    top: 'top',
-                    right: '10',
-                    bottom: 30
+                    left: '10%',
+                    top: '10',
+                    right: '10'
                 }],
                 series: [{
                     name: __('Z站注册用户数'),
