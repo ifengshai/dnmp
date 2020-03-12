@@ -689,7 +689,6 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                     url:'datacenter/operationanalysis/operationkanban/dashboard/async_bottom_data',
                     data:{id:id}
                 }, function(data, ret){
-                    console.log(ret);
                     $('#zeelool_pc_sales_money').text(ret.data.zeelool_pc_sales_money);
                     $('#zeelool_pc_sales_num').text(ret.data.zeelool_pc_sales_num);
                     $('#zeelool_pc_unit_price').text(ret.data.zeelool_pc_unit_price);

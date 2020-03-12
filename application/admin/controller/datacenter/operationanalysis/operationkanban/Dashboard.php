@@ -136,7 +136,7 @@ class Dashboard extends Backend
 			if(false == $data){
 				return $this->error('没有对应的时间数据，请重新尝试');
 			}
-				return $this->error('','',$data,0);
+				return $this->success('','',$data,0);
 		}
 	}	
 	/**
