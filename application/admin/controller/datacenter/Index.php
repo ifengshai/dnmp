@@ -579,9 +579,10 @@ class Index extends Backend
             } else {
                 $map['a.created_at'] = ['between', [date('Y-m-d 00:00:00', strtotime('-7 day')), date('Y-m-d H:i:s', time())]];
             }
+
+            /***********图表*************/
             $cachename = 'top_sale_list_' . md5(serialize($map)) . '_' . $params['site'];
             $res = cache($cachename);
-           
             if (!$res) {
                 if ($params['site'] == 1) {
                     $res = $this->zeelool->getOrderSalesNumTop30([], $map);
@@ -596,18 +597,36 @@ class Index extends Backend
             if ($res) {
                 array_multisort($res, SORT_ASC, $res);
             }
-            
-            $json['firtColumnName'] = array_keys($res);
+
+            $json['firtColumnName'] = $res ? array_keys($res) : [];
             $json['columnData'] = [
                 'type' => 'bar',
-                'data' => array_values($res),
+                'data' => $res ? array_values($res) : [],
                 'name' => '销售排行榜'
             ];
+            /***********END*************/
+            if ($params['site'] == 1) {
+                $list = $this->zeelool->getOrderSalesNum([], $map);
+            } elseif ($params['site'] == 2) {
+                $list = $this->voogueme->getOrderSalesNum([], $map);
+            } elseif ($params['site'] == 3) {
+                $list = $this->nihao->getOrderSalesNum([], $map);
+            }
+            $list = $list ?? [];
+            $result = [];
+            $i = 0;
+            foreach ($list as $k => $v) {
+                $result[$i]['sku'] = $k;
+                $result[$i]['sales_num'] = $v;
+                $i++;
+            }
 
-            return json(['code' => 1, 'data' => $json]);
+            return json(['code' => 1, 'data' => $json, 'rows' => $result]);
         }
         $this->assign('create_time', $create_time);
         $this->assign('label', $label);
+        $this->assignconfig('create_time', $create_time);
+        $this->assignconfig('label', $label);
         return $this->view->fetch();
     }
 }

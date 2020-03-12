@@ -87,6 +87,46 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj', 'custom
             }
             EchartObj.api.ajax(options, chartOptions)
 
+
+
+            // 初始化表格参数配置
+            Table.api.init({
+                showJumpto: false,
+                searchFormVisible: false,
+                showExport: false,
+                extend: {
+                    index_url: 'datacenter/index/top_sale_list' + location.search + '?time=' + Config.create_time + '?label=' + Config.label,
+                }
+            });
+
+            var table = $("#table");
+
+            // 初始化表格
+            table.bootstrapTable({
+                url: $.fn.bootstrapTable.defaults.extend.index_url,
+                pk: 'id',
+                sortName: 'id',
+                columns: [
+                    [
+                        { checkbox: true },
+                        {
+                            field: '', title: __('序号'), formatter: function (value, row, index) {
+                                var options = table.bootstrapTable('getOptions');
+                                var pageNumber = options.pageNumber;
+                                var pageSize = options.pageSize;
+                                return (pageNumber - 1) * pageSize + 1 + index;
+                            }, operate: false
+                        },
+                        { field: 'sku', title: __('SKU'), operate: 'like' },
+                        { field: 'sales_num', title: __('销量'), operate: false }
+
+                    ]
+                ]
+            });
+
+            // 为表格绑定事件
+            Table.api.bindevent(table);
+
         },
 
         edit: function () {
