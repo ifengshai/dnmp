@@ -684,7 +684,8 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                 });
             });
 			$('#c-order_date').on('change',function(){
-				var id = $('#c-order_date').val();
+                var id = $('#c-order_date').val();
+                console.log(id);
                 Backend.api.ajax({
                     url:'datacenter/operationanalysis/operationkanban/dashboard/async_bottom_data',
                     data:{id:id}
