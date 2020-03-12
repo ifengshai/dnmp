@@ -568,19 +568,32 @@ class Index extends Backend
      */
     public function top_sale_list()
     {
+        $create_time = input('create_time');
+        $label = input('label', 1);
         if ($this->request->isAjax()) {
+            $params = $this->request->param();
+            //默认当天
+            if ($params['create_time']) {
+                $time = explode(' ', $params['create_time']);
+                $map['a.created_at'] = ['between', [$time[0] . ' ' . $time[1], $time[3] . ' ' . $time[4]]];
+            } else {
+                $map['a.created_at'] = ['between', [date('Y-m-d 00:00:00', strtotime('-7 day')), date('Y-m-d H:i:s', time())]];
+            }
+            if ($params['site'] == 1) {
+                $zeelool_res = $this->zeelool->getOrderSalesNum([], $map);
+            }
 
-            $json['firtColumnName'] = ['ZFA0457-01', 'ZFA0457-02', 'ZFA0457-03', 'ZFA0457-04', 'ZFA0457-05', 'ZFA0457-06', 'ZFA0457-07', 'ZFA0457-08', 'ZFA0457-09', 'ZFA0457-09', 'ZFA0457-09', 'ZFA0457-09', 'ZFA0457-09', 'ZFA0457-09'];
-
+            $json['firtColumnName'] = array_keys($zeelool_res);
             $json['columnData'] = [
                 'type' => 'bar',
-                'data' => [19325, 23438, 31000, 121594, 134141, 281807, 123456, 132324, 423432, 423432, 423432, 423432, 423432, 423432],
+                'data' => array_values($zeelool_res),
                 'name' => '销售排行榜'
             ];
 
             return json(['code' => 1, 'data' => $json]);
         }
-
+        $this->assign('create_time', $create_time);
+        $this->assign('label', $label);
         return $this->view->fetch();
     }
 }
