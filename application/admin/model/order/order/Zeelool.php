@@ -191,7 +191,6 @@ class Zeelool extends Model
             $map['sku'] = ['in', $sku];
         }
         $map['sku'] = ['not like', '%Price%'];
-        $cachename = md5(serialize($where));
         $res = $this
             ->where($map)
             ->where($where)
@@ -200,7 +199,6 @@ class Zeelool extends Model
             ->group('sku')
             ->order('num desc')
             ->limit(15)
-            ->cache($cachename, 7200)
             ->column('round(sum(b.qty_ordered)) as num', 'sku');
 
         return $res;
