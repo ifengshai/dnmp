@@ -91,11 +91,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj', 'custom
 
             // 初始化表格参数配置
             Table.api.init({
-                showJumpto: false,
-                searchFormVisible: false,
-                showExport: false,
+                commonSearch: false,
+                search: false,
+                showExport: true,
+                showColumns: true,
+                showToggle: true,
+                pagination: false,
                 extend: {
-                    index_url: 'datacenter/index/top_sale_list' + location.search + '?time=' + Config.create_time + '?label=' + Config.label,
+                    index_url: 'datacenter/index/top_sale_list' + location.search + '?time=' + Config.create_time + '&site=' + Config.label + '&type=list',
                 }
             });
 
@@ -117,8 +120,19 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj', 'custom
                                 return (pageNumber - 1) * pageSize + 1 + index;
                             }, operate: false
                         },
-                        { field: 'sku', title: __('SKU'), operate: 'like' },
-                        { field: 'sales_num', title: __('销量'), operate: false }
+                        { field: 'platformsku', title: __('平台SKU'), operate: false },
+                        { field: 'sku', title: __('SKU'), operate: false },
+                        { field: 'name', title: __('商品名称'), operate: false },
+                        { field: 'type_name', title: __('分类'), operate: false },
+                        { field: 'available_stock', title: __('实时库存'), operate: false },
+                        { field: 'sales_num', title: __('销量'), operate: false },
+                        {
+                            field: 'is_up', title: __('平台上下架状态'), operate: false,
+                            custom: { 1: 'success', 2: 'danger' },
+                            searchList: { 1: '上架', 2: '下架' },
+                            formatter: Table.api.formatter.status
+                        },
+
 
                     ]
                 ]

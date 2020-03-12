@@ -165,14 +165,18 @@ class Zeelool extends Model
     {
         if ($sku) {
             $map['sku'] = ['in', $sku];
+        } else {
+            $map['sku'] = ['not like', '%Price%'];
         }
+
         $res = $this
             ->where($map)
             ->where($where)
             ->alias('a')
             ->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')
             ->group('sku')
-            ->column('sum(b.qty_ordered)', 'sku');
+            ->order('num desc')
+            ->column('round(sum(b.qty_ordered)) as num', 'sku');
         return $res;
     }
 

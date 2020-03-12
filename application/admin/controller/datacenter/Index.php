@@ -605,20 +605,39 @@ class Index extends Backend
                 'name' => '销售排行榜'
             ];
             /***********END*************/
-            if ($params['site'] == 1) {
-                $list = $this->zeelool->getOrderSalesNum([], $map);
-            } elseif ($params['site'] == 2) {
-                $list = $this->voogueme->getOrderSalesNum([], $map);
-            } elseif ($params['site'] == 3) {
-                $list = $this->nihao->getOrderSalesNum([], $map);
-            }
-            $list = $list ?? [];
+            //列表
             $result = [];
-            $i = 0;
-            foreach ($list as $k => $v) {
-                $result[$i]['sku'] = $k;
-                $result[$i]['sales_num'] = $v;
-                $i++;
+            if ($params['type'] == 'list') {
+                $itemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku();
+                if ($params['site'] == 1) {
+                    //查询对应平台销量
+                    $list = $this->zeelool->getOrderSalesNum([], $map);
+                    //查询对应平台商品SKU
+                    $skus = $itemPlatformSku->getWebSkuAll(1);
+                } elseif ($params['site'] == 2) {
+                    //查询对应平台销量
+                    $list = $this->voogueme->getOrderSalesNum([], $map);
+                    //查询对应平台商品SKU
+                    $skus = $itemPlatformSku->getWebSkuAll(2);
+                } elseif ($params['site'] == 3) {
+                    //查询对应平台销量
+                    $list = $this->nihao->getOrderSalesNum([], $map);
+                    //查询对应平台商品SKU
+                    $skus = $itemPlatformSku->getWebSkuAll(3);
+                }
+                $productInfo = $this->item->getSkuInfo();
+                $list = $list ?? [];
+                $i = 0;
+                foreach ($list as $k => $v) {
+                    $result[$i]['platformsku'] = $k;
+                    $result[$i]['sales_num'] = $v;
+                    $result[$i]['sku'] = $skus[$k]['sku'];
+                    $result[$i]['is_up'] = $skus[$k]['outer_sku_status'];
+                    $result[$i]['available_stock'] = $productInfo[$k]['available_stock'];
+                    $result[$i]['name'] = $productInfo[$k]['name'];
+                    $result[$i]['type_name'] = $productInfo[$k]['type_name'];
+                    $i++;
+                }
             }
 
             return json(['code' => 1, 'data' => $json, 'rows' => $result]);
