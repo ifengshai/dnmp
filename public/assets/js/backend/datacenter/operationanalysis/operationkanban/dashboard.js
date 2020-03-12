@@ -39,7 +39,13 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                     boundaryGap: false,
                     data: Orderdata.column
                 },
-                yAxis: {},
+                yAxis: [{
+                    type:'value',
+                    max:function(value){
+                        return value.max + 200;
+                    },
+                    min:0
+                }],
                 grid: [{
                     left: 'left',
                     top: 'top',
@@ -113,7 +119,13 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                     boundaryGap: false,
                     data: Orderdata.column
                 },
-                yAxis: {},
+                yAxis: [{
+                    type:'value',
+                    max:function(value){
+                        return value.max + 200;
+                    },
+                    min:0
+                }],
                 grid: [{
                     left: 'left',
                     top: 'top',
