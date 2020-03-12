@@ -1346,8 +1346,8 @@ order by NUM asc;";
             $processing_order_list = Db::connect('database.db_zeelool')->query($processing_order_querySql);
 
             $processing_order_list = $this->qty_order_check($processing_order_list);
-            // dump($processing_order_list);
-
+            
+            
             $file_header = <<<EOF
                 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <style>
@@ -1538,7 +1538,6 @@ EOF;
         foreach ($origin_order_item as $origin_order_key => $origin_order_value) {
             if ($origin_order_value['qty_ordered'] > 1 && strpos($origin_order_value['sku'], 'Price') === false) {
                 unset($origin_order_item[$origin_order_key]);
-                // array_splice($origin_order_item,$origin_order_key,1);
                 for ($i = 0; $i < $origin_order_value['qty_ordered']; $i++) {
                     $tmp_order_value = $origin_order_value;
                     $tmp_order_value['qty_ordered'] = 1;
@@ -1547,12 +1546,13 @@ EOF;
                 unset($tmp_order_value);
             }
         }
-        $origin_order_item = $this->arraySequence($origin_order_item, 'increment_id');
+
+        $origin_order_item = $this->arraySequence($origin_order_item, 'NUM');
         return array_values($origin_order_item);
     }
 
     //  二维数组排序
-    protected function arraySequence($array, $field, $sort = 'SORT_DESC')
+    protected function arraySequence($array, $field, $sort = 'SORT_ASC')
     {
         $arrSort = array();
         foreach ($array as $uniqid => $row) {
