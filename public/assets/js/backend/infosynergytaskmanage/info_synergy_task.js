@@ -193,7 +193,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','bootstrap-table-jump-
                 options.queryParams = function (params) {
                     var params = queryParams(params);
                     var filter = params.filter ? JSON.parse(params.filter) : {};
-                    var op     = {};
+                    var op     = params.op ? JSON.parse(params.op) : {};
                      if(field == 'create_person'){
                         delete filter.rep_id;
                         filter[field] = value;
