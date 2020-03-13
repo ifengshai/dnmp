@@ -205,9 +205,12 @@ class ZendeskOne extends Controller
                                 break;//匹配到则跳出循环
                             }
                         }
-
+                        //web时无email时获取最后一条评论里的email，都无email则转客服
+                        if(!$requester_email){
+                            $requester_email = $last_comment->via->source->from->address;
+                        }
                         //查询订单状态的
-                        if ($answer_key == 1) {
+                        if ($answer_key == 1 && $requester_email) {
                             $params = $this->sendByOrder($ticket,$comments,$body,$requester_email);
                         } else{
                             //open，转客服
