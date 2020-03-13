@@ -1531,8 +1531,6 @@ order by sfoi.item_id asc limit 1000";
         }
         unset($data);
 
-        dump($list);die;
-
         $map = [];
         foreach ($list as $k => $v) {
             if ($v['grade'] == 'A+' || $v['grade'] == 'A') {
