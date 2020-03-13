@@ -153,7 +153,10 @@ class SaleAfterTask extends Backend
                 }
 				if(1<=count($params['problem_id'])){
 					$params['problem_id'] = implode(',',$params['problem_id']);
-				}
+                }
+                if(1<=count($params['handle_scheme'])){
+                    $params['handle_scheme'] = implode(',',$params['handle_scheme']);
+                }
 				//检查是否存在已经添加过的订单以及类型
 				$checkInfo = $this->model->checkOrderInfo($params['order_number'],$params['problem_id']);
 				if($checkInfo){
