@@ -1438,6 +1438,8 @@ order by sfoi.item_id asc limit 1000";
         //合并数组
         $lists = array_merge($zeelool_list, $voogueme_list, $nihao_list);
 
+        dump($lists);die;
+
 
         $data = [];
         foreach ($lists as $k => $v) {
