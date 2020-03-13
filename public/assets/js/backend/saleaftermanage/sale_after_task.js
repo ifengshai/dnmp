@@ -179,6 +179,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui','custom-css','b
                 options.queryParams = function (params) {
                     var params = queryParams(params);
                     var filter = params.filter ? JSON.parse(params.filter) : {};
+                    var op     = params.op ? JSON.parse(params.op) : {};
                     if(field == 'create_person'){
                         delete filter.rep_id;
                         filter[field] = value;
@@ -190,6 +191,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui','custom-css','b
                         delete filter.create_person;
                     }
                     params.filter = JSON.stringify(filter);
+                    params.op     = JSON.stringify(op);
                     return params;
                 };
                 table.bootstrapTable('refresh', {});
