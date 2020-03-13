@@ -1373,6 +1373,7 @@ order by sfoi.item_id asc limit 1000";
      */
     public function product_grade_list_crontab()
     {
+        set_time_limit(0);
         $start = date("Y-m-d", strtotime("-3 month"));
         $end = date("Y-m-d", time());
 
