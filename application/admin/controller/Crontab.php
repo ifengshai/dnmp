@@ -1471,7 +1471,7 @@ order by sfoi.item_id asc limit 1000";
         $list = [];
         foreach ($data as $k => $val) {
             $list[$k]['counter'] = $val['counter'] ?? 0;
-            $list[$k]['days'] = $val['days'] ?? 1;
+            $list[$k]['days'] = $val['days'] == 0 ? 1 : $val['days'];
             $list[$k]['created_at'] = $val['created_at'];
             $list[$k]['true_sku'] = $val['true_sku'];
             $list[$k]['zeelool_sku'] = $val['zeelool_sku'] ? $val['zeelool_sku'] : '';
@@ -1479,7 +1479,7 @@ order by sfoi.item_id asc limit 1000";
             $list[$k]['nihao_sku'] = $val['nihao_sku'] ? $val['nihao_sku'] : '';
 
             //分等级产品
-            $days = $val['days'] ?? 1;
+            $days = $val['days'] == 0 ? 1 : $val['days'];
             $num = round($val['counter'] * 1 / $days * 1 * 30);
             $list[$k]['num'] = $num;
             $list[$k]['supplier_name'] =  $supplier_list[$val['true_sku']]['supplier_name'];
