@@ -1382,30 +1382,14 @@ order by sfoi.item_id asc limit 1000";
         $zeelool_model = new \app\admin\model\order\order\Zeelool;
         $voogueme_model = new \app\admin\model\order\order\Voogueme;
         $nihao_model = new \app\admin\model\order\order\Nihao;
-        $intelligent_purchase_query_sql = "SELECT
-        cpe.sku,
-        round( sum( b.qty_ordered ) ) counter,
-    IF
-        ( datediff( now( ), cpe.created_at ) > 90, 90, datediff( now( ), cpe.created_at ) ) days,
-        cpe.created_at 
-    FROM
-        catalog_product_entity cpe
-        LEFT JOIN (
-        SELECT
-            sku,
-            qty_ordered 
-        FROM
-            sales_flat_order_item sfoi
-            INNER JOIN sales_flat_order sfo ON sfo.entity_id = sfoi.order_id 
-        WHERE
-            sfo.STATUS IN ( 'complete', 'processing', 'free_proccessing', 'paypal_reversed' ) 
-            AND sfo.created_at BETWEEN '$start' and '$end'
-            AND sfoi.sku NOT LIKE '%Price%' 
-        ) b ON cpe.sku = b.sku 
-    GROUP BY
-        cpe.sku 
-    ORDER BY
-        counter DESC";
+        $intelligent_purchase_query_sql = "SELECT a.sku, if(counter,counter,0) as counter, 
+        IF ( datediff( now( ), a.created_at ) > 90, 90, datediff( now( ), a.created_at ) ) days, a.created_at 
+        FROM catalog_product_entity a 
+        LEFT JOIN ( SELECT sku, round( sum( qty_ordered ) ) as counter FROM sales_flat_order_item sfoi 
+        INNER JOIN sales_flat_order sfo ON sfo.entity_id = sfoi.order_id 
+        WHERE sfo.STATUS IN ( 'complete', 'processing', 'free_proccessing', 'paypal_reversed' ) 
+        AND sfo.created_at BETWEEN '$start' AND '$end' GROUP BY sku ) b ON a.sku = b.sku where a.sku NOT LIKE '%Price%' ORDER BY counter DESC";
+
         $zeelool_list = $zeelool_model->query($intelligent_purchase_query_sql);
         //查询sku映射关系表 
         $itemPlatFormSku = new \app\admin\model\itemmanage\ItemPlatformSku;
@@ -1437,9 +1421,6 @@ order by sfoi.item_id asc limit 1000";
 
         //合并数组
         $lists = array_merge($zeelool_list, $voogueme_list, $nihao_list);
-
-        dump($lists);die;
-
 
         $data = [];
         foreach ($lists as $k => $v) {
@@ -1490,7 +1471,7 @@ order by sfoi.item_id asc limit 1000";
         $list = [];
         foreach ($data as $k => $val) {
             $list[$k]['counter'] = $val['counter'] ?? 0;
-            $list[$k]['days'] = $val['days'];
+            $list[$k]['days'] = $val['days'] == 0 ? 1 : $val['days'];
             $list[$k]['created_at'] = $val['created_at'];
             $list[$k]['true_sku'] = $val['true_sku'];
             $list[$k]['zeelool_sku'] = $val['zeelool_sku'] ? $val['zeelool_sku'] : '';
@@ -1498,7 +1479,8 @@ order by sfoi.item_id asc limit 1000";
             $list[$k]['nihao_sku'] = $val['nihao_sku'] ? $val['nihao_sku'] : '';
 
             //分等级产品
-            $num = round($val['counter'] * 1 / $val['days'] * 1 * 30);
+            $days = $val['days'] == 0 ? 1 : $val['days'];
+            $num = round($val['counter'] * 1 / $days * 1 * 30);
             $list[$k]['num'] = $num;
             $list[$k]['supplier_name'] =  $supplier_list[$val['true_sku']]['supplier_name'];
             $list[$k]['purchase_person'] =  $supplier_list[$val['true_sku']]['purchase_person'];
