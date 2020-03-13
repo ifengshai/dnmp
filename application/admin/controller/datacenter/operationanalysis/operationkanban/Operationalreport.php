@@ -1,6 +1,7 @@
 <?php
 namespace app\admin\controller\datacenter\operationanalysis\operationkanban;
 use app\common\controller\Backend;
+use app\admin\model\platformmanage\MagentoPlatform;
 class Operationalreport extends Backend{
     /**
      * 运营报告首页数据
@@ -12,6 +13,12 @@ class Operationalreport extends Backend{
      */
     public function index ()
     {
-        echo 123;
+        $platform = (new MagentoPlatform())->getOrderPlatformList();
+        $this->view->assign(
+            [
+                'orderPlatformList'	=> $platform
+            ]
+        );
+        return  $this->view->fetch();
     }
 }
