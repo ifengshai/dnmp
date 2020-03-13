@@ -22,9 +22,7 @@ class Item extends Model
     protected $deleteTime = false;
 
     // 追加属性
-    protected $append = [
-        
-    ];
+    protected $append = [];
 
     public function itemAttribute()
     {
@@ -603,4 +601,21 @@ class Item extends Model
         return $this->where($where)->column('sku');
     }
 
+    /**
+     * 查询商品名称、分类
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/03/12 16:51:07 
+     * @return void
+     */
+    public function getSkuInfo()
+    {
+        $where['a.is_del']  = 1;
+        $where['a.is_open']  = 1;
+        $where['b.is_del']  = 1;
+        return $this->where($where)->alias('a')
+        ->join(['fa_item_category' => 'b'], 'a.category_id=b.id')
+        ->cache(86400)->column('a.available_stock,a.name,b.name as type_name', 'sku');
+    }
 }

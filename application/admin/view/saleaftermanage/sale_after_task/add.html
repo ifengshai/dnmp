@@ -65,7 +65,7 @@
         </div> -->
         <label class="control-label col-xs-12 col-sm-2">{:__('Rep_id')}:</label>
         <div class="col-xs-12 col-sm-3">
-            {:build_select('row[rep_id]', $staffList, null, ['class'=>'form-control selectpicker', 'data-rule'=>'required','data-live-search' => true])}
+            {:build_select('row[rep_id]', $staffList, $userId, ['class'=>'form-control selectpicker', 'data-rule'=>'required','data-live-search' => true])}
         </div>
         <label class="control-label col-xs-12 col-sm-2">{:__('Refund_way')}:</label>
         <div class="col-xs-12 col-sm-3">
