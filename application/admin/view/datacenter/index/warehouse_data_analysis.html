@@ -130,7 +130,7 @@
                         </div>
                     </form>
 
-                    <div style="width: 100%;float: left;">
+                    <div style="width: 100%;">
 
                         <div class="row item_info" style="background:#f5f5f5;float: left;width: 60%;">
                             <div class="col-lg-12">
@@ -181,6 +181,109 @@
                         </div>
 
                         <div class="row item_info" style="background:#f5f5f5;float: left;width: 40%;margin-left: 25px;">
+                            <div class="col-xs-6 col-md-4">
+                                <div>
+                                    <table id="caigou-table" class="handle_table1" style="width: 600px;height:400px;">
+                                        <tr>
+                                            <td colspan="5" style="font-size: 16px;font-weight:1000">加工时效</td>
+                                        </tr>
+                                        <tr>
+                                            <td>类型</td>
+                                            <td>未超时未处理</td>
+                                            <td>超时未处理</td>
+                                            <td>未超时已处理</td>
+                                            <td>超时已处理</td>
+                                   
+                                        </tr>
+                                        <tr>
+                                            <td>打印标签（24h）</td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                          
+                                        </tr>
+                                   
+                                        <tr>
+                                            <td>配镜架（48h）</td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            
+                                        </tr>
+                                       
+                                        <tr>
+                                            <td>配镜片（7*24h）</td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            
+                                        </tr>
+
+                                        <tr>
+                                            <td>加工（24h）</td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                           
+                                        </tr>
+                                        <tr>
+                                            <td>成品质检（24h）</td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                           
+                                        </tr>
+                                    
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+
+                    </div>
+
+
+                    <div style="width: 100%;">
+
+                        <div class="row item_info" style="background:#f5f5f5;float: left;width: 100%;margin-top: 20px;">
+                            <div class="col-lg-12">
+                                <div id="echart2" style="float: left;height:400px;width:70%;margin-top: 20px;"></div>
+
+                                <div style="float: left;">
+                                    <table id="caigou-table" class="handle_table1" style="border-width:0px;width: 300px;margin-top: 80px;">
+                                        <tr >
+                                            <td>30天总单量</td>
+                                            <td>{$frameStock}</td>
+                                           
+                                        </tr>
+                                        <tr >
+                                            <td>未出库订单</td>
+                                            <td>{$ornamentsStock}</td>
+                                           
+                                        </tr>
+                                        <tr >
+                                            <td>超时订单</td>
+                                            <td>{$ornamentsStock}</td>
+                                           
+                                        </tr>
+                                        <tr >
+                                            <td>处理订单</td>
+                                            <td>{$ornamentsStock}</td>
+                                           
+                                        </tr>
+                                    
+                                    </table>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="row item_info" style="background:#f5f5f5;float: left;width: 40%;margin-left: 25px;margin-top: 20px;">
                             <div class="col-xs-6 col-md-4">
                                 <div>
                                     <table id="caigou-table" class="handle_table1" style="width: 600px;height:400px;">
