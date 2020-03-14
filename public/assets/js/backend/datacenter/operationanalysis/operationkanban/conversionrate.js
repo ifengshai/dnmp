@@ -1,9 +1,48 @@
-define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 'echarts-theme', 'template','custom-css'], function ($, undefined, Backend, Datatable, Table,Form, Echarts, undefined, Template) {
+define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form','echartsobj', 'echarts', 'echarts-theme', 'template','custom-css'], function ($, undefined, Backend, Datatable, Table,Form, EchartObj, undefined, Template) {
 
     var Controller = {
         index: function () {            
             Controller.api.formatter.daterangepicker($("form[role=form1]"));
-            Form.api.bindevent($("form[role=form]"));           
+            Form.api.bindevent($("form[role=form]"));
+                //购物车图表
+                var chartOptions = {
+                    targetId: 'echart',
+                    downLoadTitle: '图表',
+                    type: 'line',
+                    line: {
+                        xAxis: {
+                            type: 'value',
+                            boundaryGap: [0, 0.01]
+                        },
+                        yAxis: [
+                            {
+                                type: 'value',
+                                name: '数量',
+                                axisLabel: {
+                                    formatter: '{value}'
+                                }
+                            },
+                            {
+                                type: 'value',
+                                name: '百分比',
+                                axisLabel: {
+                                    formatter: '{value} %'
+                                }
+                            }
+                        ],
+                    }
+                };
+                //var time = $('#create_time').val();
+                //var site = $('.active').attr('data');
+                var options = {
+                    type: 'post',
+                    url: 'datacenter/operationanalysis/operationkanban/conversionrate/index',
+                    // data: {
+                    //     'time': time,
+                    //     'site': site
+                    // }
+                }
+                EchartObj.api.ajax(options, chartOptions)           
         },
         api: {
             formatter: {
