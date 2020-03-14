@@ -957,8 +957,7 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
         set_time_limit(0);
         ini_set('memory_limit', '512M');
 
-        $str = '
-        600079372
+        $str = '       
         ';
         $str = explode('
         ', $str);

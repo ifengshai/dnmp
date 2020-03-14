@@ -33,6 +33,7 @@ class PurchaseOrder extends Model
     public function getPurchaseData()
     {
         $where['purchase_status'] = ['in', [6, 7]];
+        $where['is_del'] = 1;
         $data = $this->where($where)->order('createtime desc')->column('purchase_number', 'id');
         return $data;
     }

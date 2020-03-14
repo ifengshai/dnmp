@@ -648,4 +648,120 @@ class Index extends Backend
         $this->assignconfig('label', $label);
         return $this->view->fetch();
     }
+
+    /**
+     * 仓库数据分析
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/03/13 16:35:07 
+     * @return void
+     */
+    public function warehouse_data_analysis()
+    {
+        $dataConfig = new \app\admin\model\DataConfig();
+        if ($this->request->isAjax()) {
+            //镜架库存统计
+            $frameStock = $dataConfig->where('key', 'frameStock')->value('value');
+
+            //镜架总金额 
+            $frameStockPrice = $dataConfig->where('key', 'frameStockPrice')->value('value');
+
+            //饰品库存
+            $ornamentsStock = $dataConfig->where('key', 'ornamentsStock')->value('value');
+
+            //饰品库存总金额
+            $ornamentsStockPrice = $dataConfig->where('key', 'ornamentsStockPrice')->value('value');
+
+            //样品库存
+            $sampleNumStock = $dataConfig->where('key', 'sampleNumStock')->value('value');
+
+            //样品库存总金额
+            $sampleNumStockPrice = $dataConfig->where('key', 'sampleNumStockPrice')->value('value');
+
+
+
+            $json['column'] = ['镜架库存', '饰品库存', '辅料库存', '留样库存'];
+            $json['columnData'] = [
+                [
+                    'name' => '镜架库存',
+                    'value' => $frameStock,
+                ],
+                [
+                    'name' => '饰品库存',
+                    'value' => $ornamentsStock,
+                ],
+                [
+                    'name' => '辅料库存',
+                    'value' => 0,
+                ],
+                [
+                    'name' => '留样库存',
+                    'value' => $sampleNumStock,
+                ]
+            ];
+
+            return json(['code' => 1, 'data' => $json]);
+        }
+
+
+        /*******************************库存数据***********************************/
+        //仓库总库存
+        $allStock = $dataConfig->where('key', 'allStock')->value('value');
+
+        //仓库库存总金额       
+        $allStockPrice = $dataConfig->where('key', 'allStockPrice')->value('value');
+
+        //在途库存
+        $onwayAllStock = $dataConfig->where('key', 'onwayAllStock')->value('value');
+
+        //在途库存总金额
+        $onwayAllStockPrice = $dataConfig->where('key', 'onwayAllStockPrice')->value('value');
+
+        //库存周转天数
+        $stock7days = $dataConfig->where('key', 'stock7days')->value('value');
+
+        //可用库存
+        $available_stock = $this->item->getAllAvailableStock();
+
+        //样品库存
+        $sampleNumStock = $dataConfig->where('key', 'sampleNumStock')->value('value');
+
+        //样品库存总金额
+        $sampleNumStockPrice = $dataConfig->where('key', 'sampleNumStockPrice')->value('value');
+
+        //镜架库存统计
+        $frameStock = $dataConfig->where('key', 'frameStock')->value('value');
+
+        //镜架总金额 
+        $frameStockPrice = $dataConfig->where('key', 'frameStockPrice')->value('value');
+
+        //镜片库存
+        $lensStock = $dataConfig->where('key', 'lensStock')->value('value');
+
+        //镜片库存总金额
+        $lensStockPrice = $dataConfig->where('key', 'lensStockPrice')->value('value');
+
+        //饰品库存
+        $ornamentsStock = $dataConfig->where('key', 'ornamentsStock')->value('value');
+
+        //饰品库存总金额
+        $ornamentsStockPrice = $dataConfig->where('key', 'ornamentsStockPrice')->value('value');
+
+        $this->view->assign('allStock', $allStock);
+        $this->view->assign('allStockPrice', $allStockPrice);
+        $this->view->assign('onwayAllStock', $onwayAllStock);
+        $this->view->assign('onwayAllStockPrice', $onwayAllStockPrice);
+        $this->view->assign('stock7days', $stock7days);
+        $this->view->assign('available_stock', $available_stock);
+        $this->view->assign('sampleNumStock', $sampleNumStock);
+        $this->view->assign('sampleNumStockPrice', $sampleNumStockPrice);
+        $this->view->assign('frameStock', $frameStock);
+        $this->view->assign('frameStockPrice', $frameStockPrice);
+        $this->view->assign('lensStock', $lensStock);
+        $this->view->assign('lensStockPrice', $lensStockPrice);
+        $this->view->assign('ornamentsStock', $ornamentsStock);
+        $this->view->assign('ornamentsStockPrice', $ornamentsStockPrice);
+        return $this->view->fetch();
+    }
 }

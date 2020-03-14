@@ -324,6 +324,22 @@ class Item extends Model
     }
 
     /**
+     * 获取仓库可用库存
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/02/24 16:47:21 
+     * @return void
+     */
+    public function getAllAvailableStock()
+    {
+        $where['is_del']  = 1;
+        $where['is_open']  = 1;
+        $where['category_id']  = ['<>', 43];
+        return $this->where($where)->sum('available_stock');
+    }
+
+    /**
      * 获取仓库总SKU个数
      *
      * @Description
