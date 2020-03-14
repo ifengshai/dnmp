@@ -24,7 +24,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {field: 'id', title: __('Id')},
                         {field: 'email', title: __('Email'), operate: 'like'},
                         {field: 'title', title: __('主题')},
-                        {field: 'email_id', title: __('Ticket id'), operate: false},
+                        {field: 'email_id', title: __('Ticket id')},
                         {field: 'key_preg', title: __('关键字'), operate: false},
                         {field: 'answer_preg', title: __('回复关键字'), operate: false},
                         // {field: 'body', title: __('内容')},
