@@ -18,14 +18,14 @@ class Conversionrate extends Backend{
         //头部数据
         if($this->request->isAjax()){
             $orderStatistics = new OrderStatistics();
-            $list = $orderStatistics->getAllData();
+            $list = $orderStatistics->getDataBySite(1);
             foreach ($list as $v) {
-                $zeeloolShoppingCartUpdateTotal[$v['create_date']]              = $v['zeelool_shoppingcart_update_total'];
-                $zeeloolShoppingCartUpdateConversion[$v['create_date']] 	    = $v['zeelool_shoppingcart_update_conversion'];
+                $shoppingCartUpdateTotal[$v['create_date']]        = $v['zeelool_shoppingcart_update_total'];
+                $shoppingCartUpdateConversion[$v['create_date']]   = $v['zeelool_shoppingcart_update_conversion'];
             }
             $json['columnData'] = [
                 'type' => 'line',
-                'data' => $zeeloolShoppingCartUpdateTotal ?: [],
+                'data' => $shoppingCartUpdateTotal ?: [],
                 'name' => '购物车数量、购物车转化率线图'
             ];
             return json(['code' => 1, 'data' => $json]);
