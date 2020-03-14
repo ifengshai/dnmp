@@ -9,7 +9,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form','echartsobj'
                     targetId: 'echart',
                     downLoadTitle: '图表',
                     type: 'line',
-                    line: {
+                    bar: {
                         xAxis: {
                             type: 'value',
                             boundaryGap: [0, 0.01]

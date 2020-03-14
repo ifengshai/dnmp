@@ -28,6 +28,7 @@ class Conversionrate extends Backend{
                 'data' => $zeeloolShoppingCartUpdateTotal ?: [],
                 'name' => '购物车数量、购物车转化率线图'
             ];
+            return json(['code' => 1, 'data' => $json]);
         }
 
         $this->view->assign(
