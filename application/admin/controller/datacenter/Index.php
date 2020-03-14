@@ -648,4 +648,86 @@ class Index extends Backend
         $this->assignconfig('label', $label);
         return $this->view->fetch();
     }
+
+    /**
+     * 仓库数据分析
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/03/13 16:35:07 
+     * @return void
+     */
+    public function warehouse_data_analysis()
+    {
+        if ($this->request->isAjax()) {
+            $params = $this->request->param();
+            //默认当天
+            if ($params['time']) {
+                $time = explode(' ', $params['time']);
+                $map['a.created_at'] = ['between', [$time[0] . ' ' . $time[1], $time[3] . ' ' . $time[4]]];
+            } else {
+                $map['a.created_at'] = ['between', [date('Y-m-d 00:00:00', strtotime('-7 day')), date('Y-m-d H:i:s', time())]];
+            }
+
+            /***********图表*************/
+            $cachename = 'top_sale_list_' . md5(serialize($map)) . '_' . $params['site'];
+            $res = cache($cachename);
+            if (!$res) {
+                if ($params['site'] == 1) {
+                    $res = $this->zeelool->getOrderSalesNumTop30([], $map);
+                } elseif ($params['site'] == 2) {
+                    $res = $this->voogueme->getOrderSalesNumTop30([], $map);
+                } elseif ($params['site'] == 3) {
+                    $res = $this->nihao->getOrderSalesNumTop30([], $map);
+                }
+                cache($cachename, $res, 7200);
+            }
+
+            if ($res) {
+                array_multisort($res, SORT_ASC, $res);
+            }
+
+            $json['firtColumnName'] = $res ? array_keys($res) : [];
+            $json['columnData'] = [
+                'type' => 'bar',
+                'data' => $res ? array_values($res) : [],
+                'name' => '销售排行榜'
+            ];
+            
+            return json(['code' => 1, 'data' => $json]);
+        }
+
+        $dataConfig = new \app\admin\model\DataConfig();
+
+        /*******************************库存数据***********************************/
+        //仓库总库存
+        $allStock = $dataConfig->where('key', 'allStock')->value('value');
+
+        //仓库库存总金额       
+        $allStockPrice = $dataConfig->where('key', 'allStockPrice')->value('value');
+
+        //在途库存
+        $onwayAllStock = $dataConfig->where('key', 'onwayAllStock')->value('value');
+
+        //库存周转天数
+        $stock7days = $dataConfig->where('key', 'stock7days')->value('value');
+
+        //可用库存
+        $available_stock = $this->item->where(['is_del' => 1, 'is_open' => 1])->sum('available_stock');
+
+        //样品库存
+        $sampleNumStock = $dataConfig->where('key', 'sampleNumStock')->value('value');
+
+        //样品库存总金额
+        $sampleNumStockPrice = $dataConfig->where('key', 'sampleNumStockPrice')->value('value');
+
+        $this->view->assign('allStock', $allStock);
+        $this->view->assign('allStockPrice', $allStockPrice);
+        $this->view->assign('onwayAllStock', $onwayAllStock);
+        $this->view->assign('stock7days', $stock7days);
+        $this->view->assign('available_stock', $available_stock);
+        $this->view->assign('sampleNumStock', $sampleNumStock);
+        $this->view->assign('sampleNumStockPrice', $sampleNumStockPrice);
+        return $this->view->fetch();
+    }
 }
