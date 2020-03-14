@@ -38,7 +38,8 @@ class Crontab extends Backend
         'stock_data',
         'warehouse_data',
         'select_product_data',
-        'get_sales_order_update'
+        'get_sales_order_update',
+        'get_sales_order_update_two'
 
     ];
 
@@ -3160,4 +3161,53 @@ order by sfoi.item_id asc limit 1000";
         echo 'ok';
         die;
     }
+    /**
+     * 更新order_statistics表字段
+     *
+     * @Description created by lsw
+     * @author lsw
+     * @since 2020/03/11 17:11:21 
+     * @return void
+     */
+    public function get_sales_order_update_two()
+    {
+        $zeelool_model  = Db::connect('database.db_zeelool');
+        $voogueme_model = Db::connect('database.db_voogueme');
+        $nihao_model    = Db::connect('database.db_nihao');
+        $zeelool_model->table('sales_flat_quote')->query("set time_zone='+8:00'");
+        $zeelool_model->table('customer_entity')->query("set time_zone='+8:00'");
+        $voogueme_model->table('sales_flat_quote')->query("set time_zone='+8:00'");
+        $voogueme_model->table('customer_entity')->query("set time_zone='+8:00'");
+        $nihao_model->table('sales_flat_quote')->query("set time_zone='+8:00'");
+        $nihao_model->table('customer_entity')->query("set time_zone='+8:00'");
+        $where['zeelool_shoppingcart_update_total'] = 0;
+        $result = Db::name('order_statistics')->where($where)->limit(1)->select();
+        if (!$result) {
+            echo 'ok2';
+            exit;
+        }
+        $data = [];
+        foreach ($result as $v) {
+            $starttime          = $v['create_date'] . ' ' . '00:00:00';
+            $endtime            = $v['create_date'] . ' ' . '23:59:59';
+            $date['updated_at'] = ['between', [$starttime, $endtime]];
+            //zeelool的购物车总数
+            $data['zeelool_shoppingcart_update_total'] =  $zeelool_shoppingcart_update_total = $zeelool_model->table('sales_flat_quote')->where($date)->where('base_grand_total', 'GT', 0)->count('*');
+            //zeelool购物车转化率
+            $data['zeelool_shoppingcart_update_conversion'] = $zeelool_shoppingcart_update_conversion = @round(($v['zeelool_sales_num'] / $zeelool_shoppingcart_update_total) * 100, 2);
+            //voogueme的购物车总数
+            $data['voogueme_shoppingcart_update_total'] =  $voogueme_shoppingcart_update_total = $voogueme_model->table('sales_flat_quote')->where($date)->where('base_grand_total', 'GT', 0)->count('*');
+            //voogueme的购物车转化率
+            $data['voogueme_shoppingcart_update_conversion'] = $voogueme_shoppingcart_update_conversion = @round(($v['voogueme_sales_num'] / $voogueme_shoppingcart_update_total) * 100, 2);
+            //nihao的购物车总数
+            $data['nihao_shoppingcart_update_total']   = $nihao_shoppingcart_update_total = $nihao_model->table('sales_flat_quote')->where($date)->where('base_grand_total', 'GT', 0)->count('*');
+            //nihao的购物车转化率
+            $data['nihao_shoppingcart_update_conversion'] = $nihao_shoppingcart_update_conversion = @round(($v['nihao_sales_num'] / $nihao_shoppingcart_update_total) * 100, 2);
+            $data['all_shoppingcart_update_total']  = $zeelool_shoppingcart_update_total + $voogueme_shoppingcart_update_total + $nihao_shoppingcart_update_total;
+            $data['all_shoppingcart_conversion'] = @round(($zeelool_shoppingcart_update_conversion + $voogueme_shoppingcart_update_conversion + $nihao_shoppingcart_update_conversion) / 3, 2);
+            Db::name('order_statistics')->where(['id' => $v['id']])->update($data);
+        }
+        echo 'ok';
+        die;
+    }    
 }
