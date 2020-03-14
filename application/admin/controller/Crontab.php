@@ -1341,33 +1341,7 @@ order by sfoi.item_id asc limit 1000";
         echo 'ok';
     }
 
-    public function product_grade_list_test()
-    {
-        $start = date("Y-m-d", strtotime("-3 month"));
-        $end = date("Y-m-d", time());
-
-        //$zeelool_model = Db::connect('database.db_zeelool')->table('sales_flat_order');
-
-        $zeelool_model = new \app\admin\model\order\order\Zeelool;
-        $voogueme_model = new \app\admin\model\order\order\Voogueme;
-        $nihao_model = new \app\admin\model\order\order\Nihao;
-
-
-
-        $intelligent_purchase_query_sql = "select sfoi.sku,round(sum(sfoi.qty_ordered),0) counter,IF
-        ( datediff( now(),cpe.created_at) > 90, 90, datediff( now(),cpe.created_at ) ) days,cpe.created_at
- from sales_flat_order_item sfoi
- left join sales_flat_order sfo on sfo.entity_id=sfoi.order_id
- left join catalog_product_entity cpe on cpe.entity_id=sfoi.product_id
- where sfoi.sku not like '%Price%' and sfo.status in('complete','processing','free_proccessing','paypal_reversed') and if (datediff(now(),cpe.created_at) > 90,sfo.created_at between '$start' and '$end',sfo.created_at between cpe.created_at and '$end')
- GROUP BY sfoi.sku order by counter desc";
-        $zeelool_list = $zeelool_model->query($intelligent_purchase_query_sql);
-        //查询sku映射关系表 
-        $itemPlatFormSku = new \app\admin\model\itemmanage\ItemPlatformSku;
-        $sku_list = $itemPlatFormSku->column('sku', 'platform_sku');
-    }
-
-
+    
     /**
      * 每天9点 根据销量计算产品分级
      */

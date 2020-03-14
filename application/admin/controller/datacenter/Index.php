@@ -722,7 +722,7 @@ class Index extends Backend
         $stock7days = $dataConfig->where('key', 'stock7days')->value('value');
 
         //可用库存
-        $available_stock = $this->item->where(['is_del' => 1, 'is_open' => 1])->sum('available_stock');
+        $available_stock = $this->item->getAllAvailableStock();
 
         //样品库存
         $sampleNumStock = $dataConfig->where('key', 'sampleNumStock')->value('value');
