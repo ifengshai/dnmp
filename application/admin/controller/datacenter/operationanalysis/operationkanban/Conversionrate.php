@@ -27,9 +27,17 @@ class Conversionrate extends Backend{
             }
             $json['xcolumnData'] = $create_date ?: [];
             $json['columnData'] = [
-                'type' => 'line',
-                'data' => $create_date ?: [],
-                'name' => '购物车数量、购物车转化率线图'
+                [
+                    'type' => 'line',
+                    'data' => $shoppingCartUpdateTotal ?: [],
+                    'name' => '购物车数量'
+                ],
+                [
+                    'type' => 'line',
+                    'data' => $shoppingCartUpdateConversion ?: [],
+                    'name' => '购物车转化率'                    
+                ]
+
             ];
             return json(['code' => 1, 'data' => $json]);
         }

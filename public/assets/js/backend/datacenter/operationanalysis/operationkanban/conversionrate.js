@@ -17,14 +17,14 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form','echartsobj'
                         yAxis: [
                             {
                                 type: 'value',
-                                name: '数量',
+                                name: '购物车数量',
                                 axisLabel: {
                                     formatter: '{value}'
                                 }
                             },
                             {
                                 type: 'value',
-                                name: '百分比',
+                                name: '购物车转化率',
                                 axisLabel: {
                                     formatter: '{value} %'
                                 }
