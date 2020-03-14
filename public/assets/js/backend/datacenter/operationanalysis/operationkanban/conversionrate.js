@@ -9,15 +9,33 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form','echartsobj'
                     targetId: 'echart',
                     downLoadTitle: '图表',
                     type: 'line',
-                    bar: {
+                    line: {
                         xAxis: {
                             type: 'value',
                             boundaryGap: [0, 0.01]
                         },
-                        yAxis: {
-                            type: 'category',
-                            data: []
-                        }
+                        yAxis: [
+                            {
+                                type: 'value',
+                                name: '水量',
+                                min: 0,
+                                max: 250,
+                                interval: 50,
+                                axisLabel: {
+                                    formatter: '{value} ml'
+                                }
+                            },
+                            {
+                                type: 'value',
+                                name: '温度',
+                                min: 0,
+                                max: 25,
+                                interval: 5,
+                                axisLabel: {
+                                    formatter: '{value} °C'
+                                }
+                            }
+                        ],
                     }
                 };
                 //var time = $('#create_time').val();

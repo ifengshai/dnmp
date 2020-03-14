@@ -19,12 +19,13 @@ class Conversionrate extends Backend{
         if($this->request->isAjax()){
             $orderStatistics = new OrderStatistics();
             $list = $orderStatistics->getDataBySite(1);
-            $shoppingCartUpdateTotal = $shoppingCartUpdateConversion = [];
+            $create_date = $shoppingCartUpdateTotal = $shoppingCartUpdateConversion = [];
             foreach ($list as $v) {
                 $shoppingCartUpdateTotal[]        = $v['zeelool_shoppingcart_update_total'];
                 $shoppingCartUpdateConversion[]   = $v['zeelool_shoppingcart_update_conversion'];
+                $create_date[]                    = $v['create_date'];  
             }
-            $json['firtColumnName'] = $shoppingCartUpdateTotal ?: [];
+            $json['xcolumnData'] = $create_date ?: [];
             $json['columnData'] = [
                 'type' => 'line',
                 'data' => $shoppingCartUpdateConversion ?: [],
