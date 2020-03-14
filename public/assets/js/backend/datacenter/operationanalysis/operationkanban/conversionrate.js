@@ -17,22 +17,16 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form','echartsobj'
                         yAxis: [
                             {
                                 type: 'value',
-                                name: '水量',
-                                min: 0,
-                                max: 250,
-                                interval: 50,
+                                name: '数量',
                                 axisLabel: {
-                                    formatter: '{value} ml'
+                                    formatter: '{value}'
                                 }
                             },
                             {
                                 type: 'value',
-                                name: '温度',
-                                min: 0,
-                                max: 25,
-                                interval: 5,
+                                name: '百分比',
                                 axisLabel: {
-                                    formatter: '{value} °C'
+                                    formatter: '{value} %'
                                 }
                             }
                         ],
