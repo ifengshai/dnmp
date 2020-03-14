@@ -2793,6 +2793,20 @@ order by sfoi.item_id asc limit 1000";
     }
 
     /**
+     * 定时更新供应链分析-加工时效
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/03/14 14:15:37 
+     * @return void
+     */
+    public function processing_aging()
+    {
+        $dataConfig = new \app\admin\model\DataConfig();
+        
+    }
+
+    /**
      * 在途库存
      *
      * @Description
