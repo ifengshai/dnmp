@@ -23,14 +23,14 @@ class Conversionrate extends Backend{
                 $shoppingCartUpdateTotal[$v['create_date']]        = $v['zeelool_shoppingcart_update_total'];
                 $shoppingCartUpdateConversion[$v['create_date']]   = $v['zeelool_shoppingcart_update_conversion'];
             }
+            $json['firtColumnName'] = $shoppingCartUpdateTotal ?: [];
             $json['columnData'] = [
                 'type' => 'line',
-                'data' => $shoppingCartUpdateTotal ?: [],
+                'data' => $shoppingCartUpdateConversion ?: [],
                 'name' => '购物车数量、购物车转化率线图'
             ];
             return json(['code' => 1, 'data' => $json]);
         }
-
         $this->view->assign(
             [
 
