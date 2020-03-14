@@ -3178,7 +3178,7 @@ order by sfoi.item_id asc limit 1000";
             //nihao的购物车转化率
             $data['nihao_shoppingcart_update_conversion'] = $nihao_shoppingcart_update_conversion = @round(($v['nihao_sales_num'] / $nihao_shoppingcart_update_total) * 100, 2);
             $data['all_shoppingcart_update_total']  = $zeelool_shoppingcart_update_total + $voogueme_shoppingcart_update_total + $nihao_shoppingcart_update_total;
-            $data['all_shoppingcart_conversion'] = @round(($zeelool_shoppingcart_update_conversion + $voogueme_shoppingcart_update_conversion + $nihao_shoppingcart_update_conversion) / 3, 2);
+            $data['all_shoppingcart_update_conversion'] = @round(($zeelool_shoppingcart_update_conversion + $voogueme_shoppingcart_update_conversion + $nihao_shoppingcart_update_conversion) / 3, 2);
             Db::name('order_statistics')->where(['id' => $v['id']])->update($data);
         }
         echo 'ok';
