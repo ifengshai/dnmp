@@ -29,12 +29,12 @@ class Conversionrate extends Backend{
             $json['columnData'] = [
                 [
                     'type' => 'line',
-                    'data' => $shoppingCartUpdateTotal ? $shoppingCartUpdateTotal : [],
+                    'data' => [1,2,3,4,5,6],
                     'name' => '购物车数量'
                 ],
                 [
                     'type' => 'line',
-                    'data' => $shoppingCartUpdateConversion ? $shoppingCartUpdateConversion : [],
+                    'data' => [1.2,2.2,3.2,4.2,5.2],
                     'name' => '购物车转化率'                    
                 ]
 
