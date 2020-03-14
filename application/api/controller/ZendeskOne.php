@@ -266,10 +266,13 @@ class ZendeskOne extends Controller
                         //匹配到相应的关键字，自动回复消息，修改为pending，回复共客户选择的内容
                         if (s($body)->containsAny($this->preg_word) === true) {
                             $reply_detail_data = [];
+                            $recent_reply_count = 0;
                             //判断最近12小时发送的第几封，超过2封，超过2封直接转客服+tag-》多次发送
-                            $recent_reply_count = ZendeskReply::where('email',$requester_email)
-                                ->whereTime('create_time','-12 hours')
-                                ->count();
+                            if($requester_email){
+                                $recent_reply_count = ZendeskReply::where('email',$requester_email)
+                                    ->whereTime('create_time','-12 hours')
+                                    ->count();
+                            }
                             if($recent_reply_count >= 2){
                                 $params = [
                                     'tags' => ['自动回复','转客服', '多次发送'],
