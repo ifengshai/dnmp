@@ -659,45 +659,51 @@ class Index extends Backend
      */
     public function warehouse_data_analysis()
     {
+        $dataConfig = new \app\admin\model\DataConfig();
         if ($this->request->isAjax()) {
-            $params = $this->request->param();
-            //默认当天
-            if ($params['time']) {
-                $time = explode(' ', $params['time']);
-                $map['a.created_at'] = ['between', [$time[0] . ' ' . $time[1], $time[3] . ' ' . $time[4]]];
-            } else {
-                $map['a.created_at'] = ['between', [date('Y-m-d 00:00:00', strtotime('-7 day')), date('Y-m-d H:i:s', time())]];
-            }
+            //镜架库存统计
+            $frameStock = $dataConfig->where('key', 'frameStock')->value('value');
 
-            /***********图表*************/
-            $cachename = 'top_sale_list_' . md5(serialize($map)) . '_' . $params['site'];
-            $res = cache($cachename);
-            if (!$res) {
-                if ($params['site'] == 1) {
-                    $res = $this->zeelool->getOrderSalesNumTop30([], $map);
-                } elseif ($params['site'] == 2) {
-                    $res = $this->voogueme->getOrderSalesNumTop30([], $map);
-                } elseif ($params['site'] == 3) {
-                    $res = $this->nihao->getOrderSalesNumTop30([], $map);
-                }
-                cache($cachename, $res, 7200);
-            }
+            //镜架总金额 
+            $frameStockPrice = $dataConfig->where('key', 'frameStockPrice')->value('value');
 
-            if ($res) {
-                array_multisort($res, SORT_ASC, $res);
-            }
+            //饰品库存
+            $ornamentsStock = $dataConfig->where('key', 'ornamentsStock')->value('value');
 
-            $json['firtColumnName'] = $res ? array_keys($res) : [];
+            //饰品库存总金额
+            $ornamentsStockPrice = $dataConfig->where('key', 'ornamentsStockPrice')->value('value');
+
+            //样品库存
+            $sampleNumStock = $dataConfig->where('key', 'sampleNumStock')->value('value');
+
+            //样品库存总金额
+            $sampleNumStockPrice = $dataConfig->where('key', 'sampleNumStockPrice')->value('value');
+
+
+
+            $json['column'] = ['镜架库存', '饰品库存', '辅料库存', '留样库存'];
             $json['columnData'] = [
-                'type' => 'bar',
-                'data' => $res ? array_values($res) : [],
-                'name' => '销售排行榜'
+                [
+                    'name' => '镜架库存',
+                    'value' => $frameStock,
+                ],
+                [
+                    'name' => '饰品库存',
+                    'value' => $ornamentsStock,
+                ],
+                [
+                    'name' => '辅料库存',
+                    'value' => 0,
+                ],
+                [
+                    'name' => '留样库存',
+                    'value' => $sampleNumStock,
+                ]
             ];
-            
+
             return json(['code' => 1, 'data' => $json]);
         }
 
-        $dataConfig = new \app\admin\model\DataConfig();
 
         /*******************************库存数据***********************************/
         //仓库总库存
@@ -708,6 +714,9 @@ class Index extends Backend
 
         //在途库存
         $onwayAllStock = $dataConfig->where('key', 'onwayAllStock')->value('value');
+
+        //在途库存总金额
+        $onwayAllStockPrice = $dataConfig->where('key', 'onwayAllStockPrice')->value('value');
 
         //库存周转天数
         $stock7days = $dataConfig->where('key', 'stock7days')->value('value');
@@ -721,13 +730,38 @@ class Index extends Backend
         //样品库存总金额
         $sampleNumStockPrice = $dataConfig->where('key', 'sampleNumStockPrice')->value('value');
 
+        //镜架库存统计
+        $frameStock = $dataConfig->where('key', 'frameStock')->value('value');
+
+        //镜架总金额 
+        $frameStockPrice = $dataConfig->where('key', 'frameStockPrice')->value('value');
+
+        //镜片库存
+        $lensStock = $dataConfig->where('key', 'lensStock')->value('value');
+
+        //镜片库存总金额
+        $lensStockPrice = $dataConfig->where('key', 'lensStockPrice')->value('value');
+
+        //饰品库存
+        $ornamentsStock = $dataConfig->where('key', 'ornamentsStock')->value('value');
+
+        //饰品库存总金额
+        $ornamentsStockPrice = $dataConfig->where('key', 'ornamentsStockPrice')->value('value');
+
         $this->view->assign('allStock', $allStock);
         $this->view->assign('allStockPrice', $allStockPrice);
         $this->view->assign('onwayAllStock', $onwayAllStock);
+        $this->view->assign('onwayAllStockPrice', $onwayAllStockPrice);
         $this->view->assign('stock7days', $stock7days);
         $this->view->assign('available_stock', $available_stock);
         $this->view->assign('sampleNumStock', $sampleNumStock);
         $this->view->assign('sampleNumStockPrice', $sampleNumStockPrice);
+        $this->view->assign('frameStock', $frameStock);
+        $this->view->assign('frameStockPrice', $frameStockPrice);
+        $this->view->assign('lensStock', $lensStock);
+        $this->view->assign('lensStockPrice', $lensStockPrice);
+        $this->view->assign('ornamentsStock', $ornamentsStock);
+        $this->view->assign('ornamentsStockPrice', $ornamentsStockPrice);
         return $this->view->fetch();
     }
 }

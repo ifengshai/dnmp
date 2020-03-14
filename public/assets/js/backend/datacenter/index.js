@@ -142,7 +142,21 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj', 'custom
             Table.api.bindevent(table);
 
         },
-
+        warehouse_data_analysis: function () {
+            //销售排行榜图表
+            var chartOptions = {
+                targetId: 'echart',
+                downLoadTitle: '图表',
+                type: 'pie'
+            };
+      
+            var options = {
+                type: 'post',
+                url: 'datacenter/index/warehouse_data_analysis'
+               
+            }
+            EchartObj.api.ajax(options, chartOptions)
+        },
         edit: function () {
             Controller.api.bindevent();
         },

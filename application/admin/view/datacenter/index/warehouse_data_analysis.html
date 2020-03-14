@@ -1,0 +1,249 @@
+<style>
+    .content {
+        max-width: 100%;
+    }
+</style>
+
+<style type="text/css">
+    table.altrowstable {
+        margin: 0 auto;
+        width: 45%;
+        font-family: verdana, arial, sans-serif;
+        font-size: 11px;
+        color: #333333;
+        border-width: 1px;
+        border-color: #247692;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+    }
+
+    table.altrowstable th {
+        border-width: 1px;
+        padding: 8px;
+        font-size: 14px;
+        border-style: solid;
+        border-color: #d2d6de;
+    }
+
+    table.altrowstable td {
+        border-width: 1px;
+        padding: 8px;
+        text-align: center;
+        font-size: 12px;
+        border-style: solid;
+        border-color: #ddd;
+    }
+
+    table.altrowstable tr:nth-child(odd) {
+        background: #E9F1F4;
+        background: #F5F5F5;
+    }
+
+    table.altrowstable tr:nth-child(even) {
+        background: #fff;
+        background: #eee;
+    }
+
+    .btn-div {
+        font-size: 14px;
+        line-height: 50px;
+        background: inherit;
+        background-color: rgba(255, 255, 255, 1);
+        border: none;
+        border-radius: 4px;
+        box-shadow: 0px 0px 7px rgba(0, 0, 0, 0.349019607843137);
+        border-width: 0px;
+        font-family: 'Arial Negreta', 'Arial';
+        font-weight: 700;
+        font-style: normal;
+        margin-right: 20px;
+        width: 200px;
+    }
+    /* #caigou-table {
+        border-width: 0px;
+    }
+    #caigou-table th{
+        border-width: 0px;
+    }
+    #caigou-table td{
+        border-width: 0px;
+    } */
+</style>
+<div class="panel panel-default panel-intro">
+    {:build_heading()}
+
+    <div class="panel-body">
+        <div id="myTabContent" class="tab-content">
+            <div class="tab-pane fade active in" id="one">
+                <div class="widget-body no-padding">
+                    <form id="form1" class="form-commonsearch form-horizontal" method="post">
+                        <div style="border-radius:2px;margin-bottom:10px;background:#f5f5f5;padding:20px;">
+                            <div class="row">
+                                <div id="toolbar" class="toolbar">
+
+
+                                    <div class="btn btn-div" style="width: 300px;">
+
+                                        <span class="extend">
+                                            仓库总库存（个）：<span style="color: red;"
+                                                id="totalPayInfo">{$allStock+$sampleNumStock}</span>
+
+                                        </span>
+                                    </div>
+
+                                    <div class="btn btn-div" style="width: 300px;">
+
+                                        <span class="extend">
+                                            仓库库存总金额（<i class="fa fa-cny"></i>）：<span style="color: red;"
+                                                id="totalFramePrice">{$allStockPrice+$sampleNumStockPrice}</span>
+                                        </span>
+                                    </div>
+
+                                    <div class="btn btn-div">
+                                        <span class="extend">
+                                            可用库存（个）：<span style="color: red;"
+                                                id="totalLensPrice">{$available_stock}</span>
+                                        </span>
+                                    </div>
+
+                                    <div class="btn btn-div">
+
+                                        <span class="extend">
+                                            在途库存（个）：<span style="color: red;"
+                                                id="totalPostageMoney">{$onwayAllStock}</span>
+
+                                        </span>
+                                    </div>
+
+                                    <div class="btn btn-div" style="width: 250px;">
+                                        <span class="extend">
+                                            库存周转天数：<span style="color: red;"
+                                                id="totalRefundMoney">{$stock7days}</span>
+
+                                        </span>
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </form>
+
+                    <div style="width: 100%;float: left;">
+
+                        <div class="row item_info" style="background:#f5f5f5;float: left;width: 60%;">
+                            <div class="col-lg-12">
+                                <div id="echart" style="float: left;height:400px;width:50%;"></div>
+
+                                <div style="float: left;">
+                                    <table id="caigou-table" class="handle_table1" style="border-width:0px;width: 450px;margin-top: 80px;">
+                                        <tr >
+                                            <td>镜架库存</td>
+                                            <td>{$frameStock}</td>
+                                            <td>镜架库存总金额（￥）</td>
+                                            <td>{$frameStockPrice}</td>
+                                        </tr>
+                                        <tr >
+                                            <td>饰品库存</td>
+                                            <td>{$ornamentsStock}</td>
+                                            <td>饰品库存总金额（￥）</td>
+                                            <td>{$ornamentsStockPrice}</td>
+                                        </tr>
+                                        <tr >
+                                            <td>镜片库存</td>
+                                            <td>{$lensStock}</td>
+                                            <td>镜片库存总金额（￥）</td>
+                                            <td>{$lensStockPrice}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>辅料库存</td>
+                                            <td>0</td>
+                                            <td>辅料库存总金额（￥）</td>
+                                            <td>0</td>
+                                        </tr>
+                                        <tr>
+                                            <td>在途库存</td>
+                                            <td>{$onwayAllStock}</td>
+                                            <td>在途库存总金额（￥）</td>
+                                            <td>{$onwayAllStockPrice}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>留样库存</td>
+                                            <td>{$sampleNumStock}</td>
+                                            <td>留样库存总金额（￥）</td>
+                                            <td>{$sampleNumStockPrice}</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="row item_info" style="background:#f5f5f5;float: left;width: 40%;margin-left: 25px;">
+                            <div class="col-xs-6 col-md-4">
+                                <div>
+                                    <table id="caigou-table" class="handle_table1" style="width: 600px;height:400px;">
+                                        <tr>
+                                            <td colspan="7" style="font-size: 16px;font-weight:1000">加工时效</td>
+                                        </tr>
+                                        <tr>
+                                            <td>类型</td>
+                                            <td>打印标签（24h）</td>
+                                            <td>仅镜架（48h）</td>
+                                            <td>配镜架（48h）</td>
+                                            <td>配镜片（7*24h）</td>
+                                            <td>加工（24h）</td>
+                                            <td>成品质检（24h）</td>
+                                        </tr>
+                                        <tr>
+                                            <td>未超时未处理</td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                        </tr>
+                                        <tr>
+                                            <td>超时未处理</td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                        </tr>
+                                        <tr>
+                                            <td>未超时已处理</td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                        </tr>
+                                       
+                                        <tr>
+                                            <td>超时已处理</td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                        </tr>
+                                    
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>

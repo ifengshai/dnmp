@@ -222,13 +222,7 @@ define(['echarts', 'echarts-theme', Config.store_enname], function (Echarts, und
                 tooltip: { //提示框组件。
                     trigger: 'item',
                     formatter: function (param) {
-                        console.log(param);
-                        if (typeof (param.data.number) == 'number') {
-                            return param.seriesName + ': ' + param.data.name + '<br/>人数：' + EchartObj.api.formatter.toThousands(param.data.number) + '<br/> 占比：' + param.data.value.toFixed(2) + '%';
-                        } else {
-                            return param.seriesName + ': ' + param.data.name + '<br/>人数：' + param.data.number + '<br/> 占比：' + param.data.value.toFixed(2) + '%';
-                        }
-
+                        return param.data.name + '<br/>库存：' + param.data.value + '<br/> 占比：' + param.percent.toFixed(2) + '%';
                     }
                 },
                 legend: { //图例配置
@@ -252,7 +246,7 @@ define(['echarts', 'echarts-theme', Config.store_enname], function (Echarts, und
                                 show: true,
                                 formatter: function (param) {
                                     // console.log(param);
-                                    return param.data.name + '，' + param.value.toFixed(2) + '%';
+                                    return param.data.name + '，' + param.percent.toFixed(2) + '%';
                                 },
                                 textStyle: {
                                     color: '#000'
