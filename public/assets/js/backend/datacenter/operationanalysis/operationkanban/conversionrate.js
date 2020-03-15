@@ -11,13 +11,14 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form','echartsobj'
                     type: 'line',
                     line: {
                         xAxis: {
-                            type: 'value',
+                            type: 'category',
                             boundaryGap: [0, 0.01]
                         },
                         yAxis: [
                             {
                                 type: 'value',
                                 name: '购物车数量',
+								position: 'left',
                                 axisLabel: {
                                     formatter: '{value}'
                                 }
@@ -25,6 +26,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form','echartsobj'
                             {
                                 type: 'value',
                                 name: '购物车转化率',
+								position: 'right',
                                 axisLabel: {
                                     formatter: '{value} %'
                                 }
