@@ -661,47 +661,82 @@ class Index extends Backend
     {
         $dataConfig = new \app\admin\model\DataConfig();
         if ($this->request->isAjax()) {
-            //镜架库存统计
-            $frameStock = $dataConfig->where('key', 'frameStock')->value('value');
+            $key = input('key');
+            if ($key == 'pie') {
+                //镜架库存统计
+                $frameStock = $dataConfig->where('key', 'frameStock')->value('value');
 
-            //镜架总金额 
-            $frameStockPrice = $dataConfig->where('key', 'frameStockPrice')->value('value');
+                //镜架总金额 
+                $frameStockPrice = $dataConfig->where('key', 'frameStockPrice')->value('value');
 
-            //饰品库存
-            $ornamentsStock = $dataConfig->where('key', 'ornamentsStock')->value('value');
+                //饰品库存
+                $ornamentsStock = $dataConfig->where('key', 'ornamentsStock')->value('value');
 
-            //饰品库存总金额
-            $ornamentsStockPrice = $dataConfig->where('key', 'ornamentsStockPrice')->value('value');
+                //饰品库存总金额
+                $ornamentsStockPrice = $dataConfig->where('key', 'ornamentsStockPrice')->value('value');
 
-            //样品库存
-            $sampleNumStock = $dataConfig->where('key', 'sampleNumStock')->value('value');
+                //样品库存
+                $sampleNumStock = $dataConfig->where('key', 'sampleNumStock')->value('value');
 
-            //样品库存总金额
-            $sampleNumStockPrice = $dataConfig->where('key', 'sampleNumStockPrice')->value('value');
+                //样品库存总金额
+                $sampleNumStockPrice = $dataConfig->where('key', 'sampleNumStockPrice')->value('value');
 
+                $json['column'] = ['镜架库存', '饰品库存', '辅料库存', '留样库存'];
+                $json['columnData'] = [
+                    [
+                        'name' => '镜架库存',
+                        'value' => $frameStock,
+                    ],
+                    [
+                        'name' => '饰品库存',
+                        'value' => $ornamentsStock,
+                    ],
+                    [
+                        'name' => '辅料库存',
+                        'value' => 0,
+                    ],
+                    [
+                        'name' => '留样库存',
+                        'value' => $sampleNumStock,
+                    ]
+                ];
 
+                return json(['code' => 1, 'data' => $json]);
+            } elseif ($key == 'line') {
+                //查询三个站数据
+                $orderStatistics = new \app\admin\model\OrderStatistics();
+                $list = $orderStatistics->getAllData();
 
-            $json['column'] = ['镜架库存', '饰品库存', '辅料库存', '留样库存'];
-            $json['columnData'] = [
-                [
-                    'name' => '镜架库存',
-                    'value' => $frameStock,
-                ],
-                [
-                    'name' => '饰品库存',
-                    'value' => $ornamentsStock,
-                ],
-                [
-                    'name' => '辅料库存',
-                    'value' => 0,
-                ],
-                [
-                    'name' => '留样库存',
-                    'value' => $sampleNumStock,
-                ]
-            ];
+                //查询每天处理的订单
+                $orderLog = new \app\admin\model\OrderLog();
+                $order_process_res = $orderLog->getOrderProcessNum();
+                
+                $all_sales_num  = [];
+                $order_process_num  = [];
+                foreach ($list as $k => $v) {
+                    $all_sales_num[$v['create_date']] = $v['all_sales_num'];
+                    $order_process_num[$v['create_date']] = $order_process_res[$v['create_date']] ?? 0;
+                }
 
-            return json(['code' => 1, 'data' => $json]);
+                $json['xcolumnData'] = array_keys($all_sales_num);
+                $json['column'] = ['每天订单量', '每天处理订单量'];
+                $json['columnData'] = [
+                    [
+                        'name' => '每天订单量',
+                        'type' => 'line',
+                        'smooth' => true,
+                        'data' =>  array_values($all_sales_num)
+                    ],
+                    [
+                        'name' => '每天处理订单量',
+                        'type' => 'line',
+                        'smooth' => true,
+                        'data' => array_values($order_process_num)
+                    ],
+
+                ];
+                return json(['code' => 1, 'data' => $json]);
+            }
         }
 
 

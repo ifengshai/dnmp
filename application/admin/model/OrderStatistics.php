@@ -31,4 +31,21 @@ class OrderStatistics extends Model
         $map['create_date'] = ['between', [$stime, $etime]];
         return $this->where($map)->select();
     }
+    /**
+     * 获取某个站点的购物车数量和购物车转化率
+     *
+     * @Description created by lsw
+     * @author lsw
+     * @since 2020/03/14 17:08:18 
+     * @return void
+     */
+    public function getDataBySite($id=1)
+    {
+        $stime = date("Y-m-d", strtotime("-30 day"));
+        $etime = date("Y-m-d", strtotime("-1 day"));
+        $map['create_date'] = ['between', [$stime, $etime]];        
+        if(1 == $id){
+            return $this->where($map)->field('zeelool_shoppingcart_update_total,zeelool_shoppingcart_update_conversion,create_date')->select();
+        }
+    }
 }

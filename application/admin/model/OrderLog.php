@@ -124,4 +124,21 @@ class OrderLog extends Model
         $num = Db::connect('database.db_zeelool')->table('sales_flat_order_item')->where('order_id', 'in', $ids)->cache(3600)->sum('qty_ordered');
         return $num;
     }
+
+    /**
+     * 获取每天处理的订单数量
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/03/14 17:29:08 
+     * @return void
+     */
+    public function getOrderProcessNum()
+    {
+        $stime = date("Y-m-d", strtotime("-30 day"));
+        $etime = date("Y-m-d", strtotime("-1 day"));
+        $map['createtime'] = ['between', [$stime, $etime]];
+        $map['type'] = 5;
+        return $this->where($map)->group("date_format(createtime, '%Y-%m-%d')")->column('sum(num)',"date_format(createtime, '%Y-%m-%d')");
+    }
 }
