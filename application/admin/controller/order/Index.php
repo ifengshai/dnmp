@@ -83,11 +83,13 @@ class Index extends Backend
 
             $total = $model
                 ->where($where)
+                ->where($map)
                 ->order($sort, $order)
                 ->count();
 
             $list = $model
                 ->where($where)
+                ->where($map)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
