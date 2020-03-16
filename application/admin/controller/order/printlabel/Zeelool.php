@@ -69,7 +69,11 @@ class Zeelool extends Backend
                 $swhere['order_platform'] = 1;
                 $swhere['synergy_order_id'] = 2;
                 $order_arr = $infoSynergyTask->where($swhere)->order('create_time desc')->column('synergy_order_number');
-                $map['increment_id'] = ['in', $order_arr];
+                if ($filter['task_label'] == 1) {
+                    $map['increment_id'] = ['in', $order_arr];
+                } elseif ($filter['task_label'] == '0') {
+                    $map['increment_id'] = ['not in', $order_arr];
+                }
                 unset($filter['task_label']);
                 $this->request->get(['filter' => json_encode($filter)]);
             }
@@ -601,7 +605,11 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
             $swhere['order_platform'] = 1;
             $swhere['synergy_order_id'] = 2;
             $order_arr = $infoSynergyTask->where($swhere)->order('create_time desc')->column('synergy_order_number');
-            $map['sfo.increment_id'] = ['in', $order_arr];
+            if ($filter['task_label'] == 1) {
+                $map['sfo.increment_id'] = ['in', $order_arr];
+            } elseif ($filter['task_label'] == '0') {
+                $map['sfo.increment_id'] = ['not in', $order_arr];
+            }
             unset($filter['task_label']);
             $this->request->get(['filter' => json_encode($filter)]);
         }
@@ -1268,8 +1276,8 @@ order by NUM asc;";
             $processing_order_list = Db::connect('database.db_zeelool')->query($processing_order_querySql);
 
             $processing_order_list = $this->qty_order_check($processing_order_list);
-            
-            
+
+
             $file_header = <<<EOF
                 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <style>
