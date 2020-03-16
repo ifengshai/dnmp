@@ -11,13 +11,14 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form','echartsobj'
                     type: 'line',
                     line: {
                         xAxis: {
-                            type: 'value',
+                            type: 'category',
                             boundaryGap: [0, 0.01]
                         },
                         yAxis: [
                             {
                                 type: 'value',
                                 name: '购物车数量',
+								position: 'left',
                                 axisLabel: {
                                     formatter: '{value}'
                                 }
@@ -25,6 +26,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form','echartsobj'
                             {
                                 type: 'value',
                                 name: '购物车转化率',
+								position: 'right',
                                 axisLabel: {
                                     formatter: '{value} %'
                                 }
@@ -32,17 +34,58 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form','echartsobj'
                         ],
                     }
                 };
-                //var time = $('#create_time').val();
-                //var site = $('.active').attr('data');
+                var time = $('#create_time').val();
+                var platform = $('#c-order_platform').val();
                 var options = {
                     type: 'post',
                     url: 'datacenter/operationanalysis/operationkanban/conversionrate/index',
-                    // data: {
-                    //     'time': time,
-                    //     'site': site
-                    // }
+                    data: {
+                        'time': time,
+                        'platform': platform
+                    }
                 }
-                EchartObj.api.ajax(options, chartOptions)           
+                EchartObj.api.ajax(options, chartOptions)
+            // 初始化表格参数配置
+            Table.api.init({
+                commonSearch: false,
+                search: false,
+                showExport: true,
+                showColumns: true,
+                showToggle: true,
+                pagination: false,
+                extend: {
+                    index_url: 'datacenter/operationanalysis/operationkanban/conversionrate/index' + location.search + '?time=' + Config.create_time + '&platform=' + Config.platform + '&type=list',
+                }
+            });
+            var table = $("#table");
+            // 初始化表格
+            table.bootstrapTable({
+                url: $.fn.bootstrapTable.defaults.extend.index_url,
+                pk: 'id',
+                sortName: 'id',
+                columns: [
+                    [
+                        { checkbox: true },
+                        {
+                            field: '', title: __('序号'), formatter: function (value, row, index) {
+                                var options = table.bootstrapTable('getOptions');
+                                var pageNumber = options.pageNumber;
+                                var pageSize = options.pageSize;
+                                return (pageNumber - 1) * pageSize + 1 + index;
+                            }, operate: false
+                        },
+                        { field: 'create_date', title: __('时间'), operate: false },
+                        { field: 'sales_money', title: __('销售额（$）'), operate: false },
+                        { field: 'unit_price', title: __('客单价'), operate: false },
+                        { field: 'shoppingcart_update_total', title: __('购物车数量'), operate: false },
+                        { field: 'sales_num', title: __('订单数量'), operate: false },
+                        { field: 'shoppingcart_update_conversion', title: __('购物车转化率'), operate: false },
+                    ]
+                ]
+            });
+
+            // 为表格绑定事件
+            Table.api.bindevent(table);                           
         },
         api: {
             formatter: {
