@@ -174,6 +174,7 @@ class ZendeskOne extends Controller
             $requester_id = $ticket->requester_id;
             //所有的tag
             $tags = $ticket->tags;
+
             //email
             $requester_email = $ticket->via->source->from->address;
             try{
