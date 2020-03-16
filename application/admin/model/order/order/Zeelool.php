@@ -168,7 +168,7 @@ class Zeelool extends Model
         } else {
             $map['sku'] = ['not like', '%Price%'];
         }
-
+        $map['a.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
         $res = $this
             ->where($map)
             ->where($where)
@@ -195,6 +195,7 @@ class Zeelool extends Model
             $map['sku'] = ['in', $sku];
         }
         $map['sku'] = ['not like', '%Price%'];
+        $map['a.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
         $res = $this
             ->where($map)
             ->where($where)
@@ -633,6 +634,7 @@ class Zeelool extends Model
      */
     public function getOrderSkuNum()
     {
+        $where['a.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
         $where['a.created_at'] = ['between', [date('Y-m-01 00:00:00', time()), date('Y-m-d H:i:s', time())]];
         return $this->alias('a')
             ->where($where)
@@ -651,6 +653,7 @@ class Zeelool extends Model
     public function getOrderSalesCost()
     {
         $where['a.created_at'] = ['between', [date('Y-m-01 00:00:00', time()), date('Y-m-d H:i:s', time())]];
+        $where['a.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
         $data = $this->alias('a')
             ->where($where)
             ->field("sum(qty_ordered) as num,sku")
