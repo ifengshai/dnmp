@@ -417,8 +417,8 @@ class ZendeskOne extends Controller
                 'status' => 'solved'
             ];
         } elseif($status == 'processing') {
-            //判断商品下单时间，1月31日前，8,9.2月1日后，转客服
-            if($order['created_at'] >= '2020-02-01 00:00:00'){
+            //判断商品下单时间，3月8日前，8,9.3月8日后，转客服
+            if($order['created_at'] >= '2020-03-09 00:00:00'){
                 $params = [
                     'tags' => ['转客服'],
                     'status' => 'open'
