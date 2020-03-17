@@ -77,7 +77,7 @@ class Operationalreport extends Backend{
             return 1111;
             return false;
         }
-        return 2222;
+        return $platform;
         return $model;
         $model->table('sales_flat_order')->query("set time_zone='+8:00'");
         $where = " status in ('processing','complete','creditcard_proccessing','free_processing')";
