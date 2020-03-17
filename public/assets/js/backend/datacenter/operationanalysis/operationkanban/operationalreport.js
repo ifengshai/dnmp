@@ -67,6 +67,26 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echartsobj
                     $('#celebrity_order_percent').text(ret.rows.celebrity_order_percent);
                     $('#reissue_order_percent').text(ret.rows.reissue_order_percent);
                     $('#fill_post_order_percent').text(ret.rows.fill_post_order_percent);
+                    $('#usd_order_num').text(ret.rows.usd_order_num);
+                    $('#usd_order_percent').text(ret.rows.usd_order_percent);
+                    $('#usd_order_money').text(ret.rows.usd_order_money);
+                    $('#usd_order_average_amount').text(ret.rows.usd_order_average_amount);
+                    $('#cad_order_num').text(ret.rows.cad_order_num);
+                    $('#cad_order_percent').text(ret.rows.cad_order_percent);
+                    $('#cad_order_money').text(ret.rows.cad_order_money);
+                    $('#cad_order_average_amount').text(ret.rows.cad_order_average_amount);
+                    $('#aud_order_num').text(ret.rows.aud_order_num);
+                    $('#aud_order_percent').text(ret.rows.aud_order_percent);
+                    $('#aud_order_money').text(ret.rows.aud_order_money);
+                    $('#aud_order_average_amount').text(ret.rows.aud_order_average_amount);
+                    $('#eur_order_num').text(ret.rows.eur_order_num);
+                    $('#eur_order_percent').text(ret.rows.eur_order_percent);
+                    $('#eur_order_money').text(ret.rows.eur_order_money);
+                    $('#eur_order_average_amount').text(ret.rows.eur_order_average_amount);
+                    $('#gbp_order_num').text(ret.rows.gbp_order_num);
+                    $('#gbp_order_percent').text(ret.rows.gbp_order_percent);
+                    $('#gbp_order_money').text(ret.rows.gbp_order_money);
+                    $('#gbp_order_average_amount').text(ret.rows.gbp_order_average_amount);
                 },function(data,ret){
                     alert(ret.msg);
                     return false;
