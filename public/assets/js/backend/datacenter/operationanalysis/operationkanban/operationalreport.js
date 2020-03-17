@@ -52,23 +52,21 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echartsobj
                         'platform': platform    
                     }
                 },function (data, ret) {
-                    console.log(ret.rows.general_money);
-                    console.log(ret.rows.general_order);
-                    $('#general_order').val(ret.rows.general_order);
-                    $('#general_money').val(ret.rows.general_money);
-                    $('#wholesale_order').val(ret.rows.wholesale_order);
-                    $('#wholesale_money').val(ret.rows.wholesale_money);
-                    $('#celebrity_order').val(ret.rows.celebrity_order);
-                    $('#celebrity_money').val(ret.rows.celebrity_money);
-                    $('#reissue_order').val(ret.rows.reissue_order);
-                    $('#reissue_money').val(ret.rows.reissue_money);
-                    $('#fill_post_order').val(ret.rows.fill_post_order);
-                    $('#fill_post_money').val(ret.rows.fill_post_money);
-                    $('#general_order_percent').val(ret.rows.general_order_percent);
-                    $('#wholesale_order_percent').val(ret.rows.wholesale_order_percent);
-                    $('#celebrity_order_percent').val(ret.rows.celebrity_order_percent);
-                    $('#reissue_order_percent').val(ret.rows.reissue_order_percent);
-                    $('#fill_post_order_percent').val(ret.rows.fill_post_order_percent);
+                    $('#general_order').text(ret.rows.general_order);
+                    $('#general_money').text(ret.rows.general_money);
+                    $('#wholesale_order').text(ret.rows.wholesale_order);
+                    $('#wholesale_money').text(ret.rows.wholesale_money);
+                    $('#celebrity_order').text(ret.rows.celebrity_order);
+                    $('#celebrity_money').text(ret.rows.celebrity_money);
+                    $('#reissue_order').text(ret.rows.reissue_order);
+                    $('#reissue_money').text(ret.rows.reissue_money);
+                    $('#fill_post_order').text(ret.rows.fill_post_order);
+                    $('#fill_post_money').text(ret.rows.fill_post_money);
+                    $('#general_order_percent').text(ret.rows.general_order_percent);
+                    $('#wholesale_order_percent').text(ret.rows.wholesale_order_percent);
+                    $('#celebrity_order_percent').text(ret.rows.celebrity_order_percent);
+                    $('#reissue_order_percent').text(ret.rows.reissue_order_percent);
+                    $('#fill_post_order_percent').text(ret.rows.fill_post_order_percent);
                 },function(data,ret){
                     alert(ret.msg);
                     return false;
