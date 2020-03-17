@@ -27,6 +27,7 @@ class Operationalreport extends Backend{
                 $map['created_at'] = ['between', [date('Y-m-d 00:00:00', strtotime('-7 day')), date('Y-m-d H:i:s', time())]];
             }
             $order_platform = $params['platform'];
+            return json(['code' =>1,'order_platform'=>$order_platform]);
             if(4<=$order_platform){
                 return $this->error('该平台暂时没有数据');
             }
