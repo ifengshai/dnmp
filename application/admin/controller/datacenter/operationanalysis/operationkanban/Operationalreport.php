@@ -31,6 +31,7 @@ class Operationalreport extends Backend{
                 return $this->error('该平台暂时没有数据');
             }
             $result = $this->platformOrderInfo(2,$map);
+            return $this->success('ok','',$result);
             if(!$result){
                 return $this->error('暂无数据');
             }
@@ -74,11 +75,8 @@ class Operationalreport extends Backend{
             break;            
         }
         if(false == $model){
-            return 1111;
             return false;
         }
-        return $platform;
-        return $model;
         $model->table('sales_flat_order')->query("set time_zone='+8:00'");
         $where = " status in ('processing','complete','creditcard_proccessing','free_processing')";
         //订单类型数据统计
