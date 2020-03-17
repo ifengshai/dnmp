@@ -60,7 +60,7 @@ class Nihao extends Backend
             if ($filter['increment_id']) {
                 $map['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal']];
             } elseif (!$filter['status']) {
-                $map['status'] = ['in', ['free_processing', 'processing']];
+                $map['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed']];
             }
             //是否有协同任务
             $infoSynergyTask = new \app\admin\model\infosynergytaskmanage\InfoSynergyTask;
@@ -150,7 +150,7 @@ class Nihao extends Backend
             $increment_id = $this->request->post('increment_id');
             if ($increment_id) {
                 $map['increment_id'] = $increment_id;
-                $map['status'] = ['in', ['free_processing', 'processing', 'complete']];
+                $map['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed']];
                 $list = $this->model
                     // ->field($field)
                     ->where($map)
@@ -591,9 +591,9 @@ where cped.attribute_id in(146,147) and cped.store_id=0 and cped.entity_id=$prod
         $filter = json_decode($this->request->get('filter'), true);
 
         if ($filter['increment_id']) {
-            $map['sfo.status'] = ['in', ['free_processing', 'processing', 'complete']];
+            $map['sfo.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal']];
         } elseif (!$filter['status']) {
-            $map['sfo.status'] = ['in', ['free_processing', 'processing']];
+            $map['sfo.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed']];
         }
 
         $infoSynergyTask = new \app\admin\model\infosynergytaskmanage\InfoSynergyTask;
@@ -638,7 +638,7 @@ where cped.attribute_id in(146,147) and cped.store_id=0 and cped.entity_id=$prod
         }
 
         list($where) = $this->buildparams();
-        $field = 'sfo.increment_id,sfoi.product_options,sfoi.order_id,sfo.`status`,sfoi.sku,sfoi.product_id,sfoi.qty_ordered,sfo.created_at';
+        $field = 'sfo.increment_id,sfoi.product_options,total_qty_ordered as NUM,sfoi.order_id,sfo.`status`,sfoi.sku,sfoi.product_id,sfoi.qty_ordered,sfo.created_at';
         $resultList = $this->model->alias('sfo')
             ->join(['sales_flat_order_item' => 'sfoi'], 'sfoi.order_id=sfo.entity_id')
             ->field($field)
@@ -941,7 +941,7 @@ where cped.attribute_id in(146,147) and cped.store_id=0 and cped.entity_id=$prod
 from sales_flat_order_item sfoi
 left join sales_flat_order sfo on  sfoi.order_id=sfo.entity_id 
 where sfo.`status` in ('processing','creditcard_proccessing','free_processing','complete','paypal_reversed','paypal_canceled_reversal') and sfo.entity_id in($entity_ids)
-order by sfoi.order_id desc;";
+order by NUM asc;";
             $processing_order_list = Db::connect('database.db_nihao')->query($processing_order_querySql);
 
             $processing_order_list = $this->qty_order_check($processing_order_list);
@@ -1158,12 +1158,12 @@ EOF;
                 unset($tmp_order_value);
             }
         }
-        $origin_order_item = $this->arraySequence($origin_order_item, 'increment_id');
+        $origin_order_item = $this->arraySequence($origin_order_item, 'NUM');
         return array_values($origin_order_item);
     }
 
     //  二维数组排序
-    protected function arraySequence($array, $field, $sort = 'SORT_DESC')
+    protected function arraySequence($array, $field, $sort = 'SORT_ASC')
     {
         $arrSort = array();
         foreach ($array as $uniqid => $row) {

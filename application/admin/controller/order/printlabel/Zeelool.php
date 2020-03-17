@@ -60,7 +60,7 @@ class Zeelool extends Backend
             if ($filter['increment_id']) {
                 $map['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal']];
             } elseif (!$filter['status']) {
-                $map['status'] = ['in', ['free_processing', 'processing']];
+                $map['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed']];
             }
             //是否有协同任务
             $infoSynergyTask = new \app\admin\model\infosynergytaskmanage\InfoSynergyTask;
@@ -150,7 +150,7 @@ class Zeelool extends Backend
             $increment_id = $this->request->post('increment_id');
             if ($increment_id) {
                 $map['increment_id'] = $increment_id;
-                $map['status'] = ['in', ['free_processing', 'processing', 'complete']];
+                $map['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed']];
                 $field = 'order_type,custom_order_prescription_type,entity_id,status,base_shipping_amount,increment_id,coupon_code,shipping_description,store_id,customer_id,base_discount_amount,base_grand_total,
                      total_qty_ordered,quote_id,base_currency_code,customer_email,customer_firstname,customer_lastname,custom_is_match_frame_new,custom_is_match_lens_new,
                      custom_is_send_factory_new,custom_is_delivery_new,custom_print_label_new,custom_order_prescription,custom_service_name,created_at';
@@ -589,9 +589,9 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
         $filter = json_decode($this->request->get('filter'), true);
 
         if ($filter['increment_id']) {
-            $map['sfo.status'] = ['in', ['free_processing', 'processing', 'complete']];
+            $map['sfo.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal']];
         } elseif (!$filter['status']) {
-            $map['sfo.status'] = ['in', ['free_processing', 'processing']];
+            $map['sfo.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed']];
         }
 
         //是否有协同任务
@@ -639,7 +639,7 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
         }
 
         list($where) = $this->buildparams();
-        $field = 'sfo.increment_id,sfoi.product_options,sfoi.order_id,sfo.`status`,sfoi.sku,sfoi.product_id,sfoi.qty_ordered,sfo.created_at';
+        $field = 'sfo.increment_id,sfoi.product_options,total_qty_ordered as NUM,sfoi.order_id,sfo.`status`,sfoi.sku,sfoi.product_id,sfoi.qty_ordered,sfo.created_at';
         $resultList = $this->model->alias('sfo')
             ->join(['sales_flat_order_item' => 'sfoi'], 'sfoi.order_id=sfo.entity_id')
             ->field($field)
@@ -951,85 +951,13 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
         set_time_limit(0);
         ini_set('memory_limit', '512M');
 
-        $str = '400190173
-        400190218
-        100094228
-        100093861
-        100094892
-        100093566
-        100094138
-        400190148
-        400191607
-        400189562
-        400191848
-        100094909
-        400190765
-        400189094
-        400192098
-        100094870
-        400191602
-        400190952
-        100093361
-        400191929
-        400192622
-        100094303
-        100095380
-        100095167
-        100093961
-        400192399
-        400192244
-        400192047
-        400192389
-        400192769
-        400192440
-        400192760
-        100094105
-        400191242
-        100094352
-        400193178
-        100093895
-        100095138
-        400190429
-        400190011
-        100096268
-        100095234
-        100094963
-        400192091
-        400190682
-        100093793
-        400192760
-        400195120
-        400194223
-        100095102
-        100094370
-        400191406
-        400191197
-        400192809
-        100094683
-        400191965
-        400192187
-        400193613
-        400189210
-        400190936
-        100094932
-        400192141
-        400193617
-        400192452
-        400191923
-        100094064
-        400192504
-        400193033
-        400192946
-        400192513
-        400193698
-        400193152
-        100094330
-        100095698
-        100095471
-        400194637
-        400195002
-        100095422
-        400195243
+        $str = '
+        
+        400197692
+        400196785
+        100096558
+        400196682
+        400197338
         ';
         $str = explode('
         ', $str);
@@ -1037,7 +965,7 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
         $map['sfo.increment_id'] = ['in', $str];
 
         list($where) = $this->buildparams();
-        $field = 'sfo.increment_id,sfoi.product_options,sfoi.order_id,sfo.`status`,sfoi.sku,sfoi.product_id,sfoi.qty_ordered,sfo.created_at';
+        $field = 'sfo.increment_id,sfoi.product_options,total_qty_ordered as NUM,sfoi.order_id,sfo.`status`,sfoi.sku,sfoi.product_id,sfoi.qty_ordered,sfo.created_at';
         $resultList = $this->model->alias('sfo')
             ->join(['sales_flat_order_item' => 'sfoi'], 'sfoi.order_id=sfo.entity_id')
             ->field($field)
@@ -1342,12 +1270,12 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
 from sales_flat_order_item sfoi
 left join sales_flat_order sfo on  sfoi.order_id=sfo.entity_id 
 where sfo.`status` in ('processing','creditcard_proccessing','free_processing','complete','paypal_reversed','paypal_canceled_reversal') and sfo.entity_id in($entity_ids)
-order by sfoi.order_id desc;";
+order by NUM asc;";
             $processing_order_list = Db::connect('database.db_zeelool')->query($processing_order_querySql);
 
             $processing_order_list = $this->qty_order_check($processing_order_list);
-            // dump($processing_order_list);
-
+            
+            
             $file_header = <<<EOF
                 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <style>
@@ -1538,7 +1466,6 @@ EOF;
         foreach ($origin_order_item as $origin_order_key => $origin_order_value) {
             if ($origin_order_value['qty_ordered'] > 1 && strpos($origin_order_value['sku'], 'Price') === false) {
                 unset($origin_order_item[$origin_order_key]);
-                // array_splice($origin_order_item,$origin_order_key,1);
                 for ($i = 0; $i < $origin_order_value['qty_ordered']; $i++) {
                     $tmp_order_value = $origin_order_value;
                     $tmp_order_value['qty_ordered'] = 1;
@@ -1547,12 +1474,13 @@ EOF;
                 unset($tmp_order_value);
             }
         }
-        $origin_order_item = $this->arraySequence($origin_order_item, 'increment_id');
+
+        $origin_order_item = $this->arraySequence($origin_order_item, 'NUM');
         return array_values($origin_order_item);
     }
 
     //  二维数组排序
-    protected function arraySequence($array, $field, $sort = 'SORT_DESC')
+    protected function arraySequence($array, $field, $sort = 'SORT_ASC')
     {
         $arrSort = array();
         foreach ($array as $uniqid => $row) {

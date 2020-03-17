@@ -1,4 +1,4 @@
-define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'custom-css', 'bootstrap-table-jump-to'], function ($, undefined, Backend, Table, Form) {
+define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj', 'custom-css', 'bootstrap-table-jump-to'], function ($, undefined, Backend, Table, Form, EchartObj) {
 
     var Controller = {
         index: function () {
@@ -56,6 +56,93 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'custom-css', 'bootst
         warehouse_data: function () {
             Controller.api.formatter.daterangepicker($("form[role=form1]"));
         },
+        top_sale_list: function () {
+            Controller.api.formatter.daterangepicker($("form[role=form1]"));
+
+            //销售排行榜图表
+            var chartOptions = {
+                targetId: 'echart',
+                downLoadTitle: '图表',
+                type: 'bar',
+                bar: {
+                    xAxis: {
+                        type: 'value',
+                        boundaryGap: [0, 0.01]
+                    },
+                    yAxis: {
+                        type: 'category',
+                        data: []
+                    }
+                }
+            };
+            var time = $('#create_time').val();
+            var site = $('.active').attr('data');
+            var options = {
+                type: 'post',
+                url: 'datacenter/index/top_sale_list',
+                data: {
+                    'time': time,
+                    'site': site
+                }
+            }
+            EchartObj.api.ajax(options, chartOptions)
+
+
+
+            // 初始化表格参数配置
+            Table.api.init({
+                commonSearch: false,
+                search: false,
+                showExport: true,
+                showColumns: true,
+                showToggle: true,
+                pagination: false,
+                extend: {
+                    index_url: 'datacenter/index/top_sale_list' + location.search + '?time=' + Config.create_time + '&site=' + Config.label + '&type=list',
+                }
+            });
+
+            var table = $("#table");
+
+            // 初始化表格
+            table.bootstrapTable({
+                url: $.fn.bootstrapTable.defaults.extend.index_url,
+                pk: 'id',
+                sortName: 'id',
+                columns: [
+                    [
+                        { checkbox: true },
+                        {
+                            field: '', title: __('序号'), formatter: function (value, row, index) {
+                                var options = table.bootstrapTable('getOptions');
+                                var pageNumber = options.pageNumber;
+                                var pageSize = options.pageSize;
+                                return (pageNumber - 1) * pageSize + 1 + index;
+                            }, operate: false
+                        },
+                        { field: 'platformsku', title: __('平台SKU'), operate: false },
+                        { field: 'sku', title: __('SKU'), operate: false },
+                        { field: 'name', title: __('商品名称'), operate: false },
+                        { field: 'type_name', title: __('分类'), operate: false },
+                        { field: 'available_stock', title: __('实时库存'), operate: false },
+                        { field: 'sales_num', title: __('销量'), operate: false },
+                        {
+                            field: 'is_up', title: __('平台上下架状态'), operate: false,
+                            custom: { 1: 'success', 2: 'danger' },
+                            searchList: { 1: '上架', 2: '下架' },
+                            formatter: Table.api.formatter.status
+                        },
+
+
+                    ]
+                ]
+            });
+
+            // 为表格绑定事件
+            Table.api.bindevent(table);
+
+        },
+
         edit: function () {
             Controller.api.bindevent();
         },
@@ -119,8 +206,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'custom-css', 'bootst
                                     cancelLabel: __("Clear"),
                                 },
                                 ranges: ranges,
-                                timePicker : true,
-                                timePickerIncrement : 1
+                                timePicker: true,
+                                timePickerIncrement: 1
                             };
                             var origincallback = function (start, end) {
                                 $(this.element).val(start.format(this.locale.format) + " - " + end.format(this.locale.format));

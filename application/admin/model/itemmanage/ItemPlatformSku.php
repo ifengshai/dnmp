@@ -60,15 +60,15 @@ class ItemPlatformSku extends Model
                         break;
                     default:
                         $prefix = false;
-                        break;    
+                        break;
                 }
                 //判断前缀是否存在
-                if(false == $prefix){
+                if (false == $prefix) {
                     continue;
                 }
                 //监测平台sku是否存在
-                $platformSkuExists =$this->getTrueSku($prefix.$row['sku'],$k);
-                if(false === $platformSkuExists){
+                $platformSkuExists = $this->getTrueSku($prefix . $row['sku'], $k);
+                if (false === $platformSkuExists) {
                     continue;
                 }
                 $arr[$k]['sku'] = $row['sku'];
@@ -189,6 +189,23 @@ class ItemPlatformSku extends Model
         $map['platform_type'] = $platform_type;
         return $this->where($map)->value('platform_sku');
     }
+
+    /**
+     * 查询各平台对应商品SKU
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/02/06 17:19:53 
+     * @param string $sku
+     * @param string $platform_type 对应平台1 Zeelool 2 Voogueme 3 Nihao
+     * @return void
+     */
+    public function getWebSkuAll($platform_type = '')
+    {
+        $map['platform_type'] = $platform_type;
+        return $this->where($map)->column('sku,outer_sku_status', 'platform_sku');
+    }
+
 
     /**
      * 统计在售SKU数量

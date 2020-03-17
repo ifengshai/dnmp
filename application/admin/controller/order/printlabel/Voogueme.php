@@ -63,7 +63,7 @@ class Voogueme extends Backend
             if ($filter['increment_id']) {
                 $map['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal']];
             } elseif (!$filter['status']) {
-                $map['status'] = ['in', ['free_processing', 'processing']];
+                $map['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed']];
             }
             //是否有协同任务
             $infoSynergyTask = new \app\admin\model\infosynergytaskmanage\InfoSynergyTask;
@@ -154,7 +154,7 @@ class Voogueme extends Backend
             $increment_id = $this->request->post('increment_id');
             if ($increment_id) {
                 $map['increment_id'] = $increment_id;
-                $map['status'] = ['in', ['free_processing', 'processing', 'complete']];
+                $map['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed']];
                 $field = 'order_type,custom_order_prescription_type,entity_id,status,base_shipping_amount,increment_id,coupon_code,shipping_description,store_id,customer_id,base_discount_amount,base_grand_total,
                 total_qty_ordered,quote_id,base_currency_code,customer_email,customer_firstname,customer_lastname,custom_is_match_frame_new,custom_is_match_lens_new,
                 custom_is_send_factory_new,custom_is_delivery_new,custom_print_label_new,custom_order_prescription,custom_service_name,created_at';
@@ -591,9 +591,9 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
         $filter = json_decode($this->request->get('filter'), true);
 
         if ($filter['increment_id']) {
-            $map['sfo.status'] = ['in', ['free_processing', 'processing', 'complete']];
+            $map['sfo.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal']];
         } elseif (!$filter['status']) {
-            $map['sfo.status'] = ['in', ['free_processing', 'processing']];
+            $map['sfo.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed']];
         }
 
         $infoSynergyTask = new \app\admin\model\infosynergytaskmanage\InfoSynergyTask;
@@ -639,7 +639,7 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
         }
 
         list($where) = $this->buildparams();
-        $field = 'sfo.increment_id,sfoi.product_options,sfoi.order_id,sfo.`status`,sfoi.sku,sfoi.product_id,sfoi.qty_ordered,sfo.created_at';
+        $field = 'sfo.increment_id,sfoi.product_options,total_qty_ordered as NUM,sfoi.order_id,sfo.`status`,sfoi.sku,sfoi.product_id,sfoi.qty_ordered,sfo.created_at';
         $resultList = $this->model->alias('sfo')
             ->join(['sales_flat_order_item' => 'sfoi'], 'sfoi.order_id=sfo.entity_id')
             ->field($field)
@@ -957,47 +957,8 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
         set_time_limit(0);
         ini_set('memory_limit', '512M');
 
-        $str = '430097064
-        430097003
-        430096833
-        430096846
-        130035495
-        130035509
-        430096841
-        130035408
-        130035411
-        430096909
-        430096858
-        430096862
-        430096945
-        130035482
-        130035457
-        430096847
-        430097055
-        430096859
-        430096860
-        130035484
-        430097037
-        430096854
-        430096772
-        430096757
-        430097034
-        430096743
-        430096837
-        430096890
-        430096984
-        430096829
-        430097070
-        130035504
-        130035494
-        130035417
-        130035514
-        430096982
-        430096970
-        430096892
-        130035502
-        130035449
-        430096762
+        $str = '
+        600079372
         ';
         $str = explode('
         ', $str);
@@ -1005,7 +966,7 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
         $map['sfo.increment_id'] = ['in', $str];
 
         list($where) = $this->buildparams();
-        $field = 'sfo.increment_id,sfoi.product_options,sfoi.order_id,sfo.`status`,sfoi.sku,sfoi.product_id,sfoi.qty_ordered,sfo.created_at';
+        $field = 'sfo.increment_id,sfoi.product_options,total_qty_ordered as NUM,sfoi.order_id,sfo.`status`,sfoi.sku,sfoi.product_id,sfoi.qty_ordered,sfo.created_at';
         $resultList = $this->model->alias('sfo')
             ->join(['sales_flat_order_item' => 'sfoi'], 'sfoi.order_id=sfo.entity_id')
             ->field($field)
@@ -1310,7 +1271,7 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
 from sales_flat_order_item sfoi
 left join sales_flat_order sfo on  sfoi.order_id=sfo.entity_id 
 where sfo.`status` in ('processing','creditcard_proccessing','free_processing','complete','paypal_reversed','paypal_canceled_reversal') and sfo.entity_id in($entity_ids)
-order by sfoi.order_id desc;";
+order by NUM asc;";
             $processing_order_list = Db::connect('database.db_voogueme')->query($processing_order_querySql);
             // dump($processing_order_list);
             $processing_order_list = $this->qty_order_check($processing_order_list);
@@ -1514,12 +1475,12 @@ EOF;
                 unset($tmp_order_value);
             }
         }
-        $origin_order_item = $this->arraySequence($origin_order_item, 'increment_id');
+        $origin_order_item = $this->arraySequence($origin_order_item, 'NUM');
         return array_values($origin_order_item);
     }
 
     //  二维数组排序
-    protected function arraySequence($array, $field, $sort = 'SORT_DESC')
+    protected function arraySequence($array, $field, $sort = 'SORT_ASC')
     {
         $arrSort = array();
         foreach ($array as $uniqid => $row) {

@@ -66,8 +66,8 @@ class ZendeskOne extends Controller
     {
         try {
             // Query Zendesk API to retrieve the ticket details
-            // $id = 86205;
-            // $ticket = $this->client->tickets()->find($id);
+             $id = 86205;
+             $ticket = $this->client->tickets()->find($id);
             // $result = $this->client->tickets($id)->comments()->findAll();
             // $requester_email = $ticket->via->source->from->address;
             // $count = $result->count;
@@ -84,7 +84,7 @@ class ZendeskOne extends Controller
             // $order = $this->findOrderByEmail($requester_email,$get_order_id);
             // $res = $this->getTrackMsg(41);
             $track = new Trackingmore();
-            $res = $track->getRealtimeTrackingResults('china-post', 'LW545013382CN');            
+            $res = $track->getRealtimeTrackingResults('usps', '92748902348247002004895036');
             echo json_encode($res);
             die;
         } catch (\Zendesk\API\Exceptions\ApiResponseException $e) {
@@ -205,9 +205,12 @@ class ZendeskOne extends Controller
                                 break;//匹配到则跳出循环
                             }
                         }
-
+                        //web时无email时获取最后一条评论里的email，都无email则转客服
+                        if(!$requester_email){
+                            $requester_email = $last_comment->via->source->from->address;
+                        }
                         //查询订单状态的
-                        if ($answer_key == 1) {
+                        if ($answer_key == 1 && $requester_email) {
                             $params = $this->sendByOrder($ticket,$comments,$body,$requester_email);
                         } else{
                             //open，转客服
@@ -262,14 +265,27 @@ class ZendeskOne extends Controller
                     } else {
                         //匹配到相应的关键字，自动回复消息，修改为pending，回复共客户选择的内容
                         if (s($body)->containsAny($this->preg_word) === true) {
-                            //回复模板1：状态pending，增加tag自动回复
-                            $params = [
-                                'comment' => [
-                                    'body' => config('zendesk.t1')
-                                ],
-                                'tags' => ['自动回复'],
-                                'status' => 'pending'
-                            ];
+                            $reply_detail_data = [];
+                            //判断最近12小时发送的第几封，超过2封，超过2封直接转客服+tag-》多次发送
+                            $recent_reply_count = ZendeskReply::where('email',$requester_email)
+                                ->whereTime('create_time','-12 hours')
+                                ->count();
+                            if($recent_reply_count >= 2){
+                                $params = [
+                                    'tags' => ['自动回复','转客服', '多次发送'],
+                                    //'status' => 'open'
+                                ];
+                            }else{
+                                //回复模板1：状态pending，增加tag自动回复
+                                $params = [
+                                    'comment' => [
+                                        'body' => config('zendesk.t1')
+                                    ],
+                                    'tags' => ['自动回复'],
+                                    'status' => 'pending'
+                                ];
+                            }
+
                             file_put_contents('/www/wwwroot/mojing/runtime/log/zendesk.txt',$ticket->id."\r\n",FILE_APPEND);
                             //如果是第一条评论，则把对应的客户内容插入主表，回复内容插入附表，其余不做处理
                             if($count == 1){
@@ -294,15 +310,18 @@ class ZendeskOne extends Controller
                                     file_put_contents('/www/wwwroot/mojing/runtime/log/zendeskreply2.txt',$zendesk_reply->email_id."\r\n",FILE_APPEND);
                                 }
                                 //回复评论
-                                $reply_detail_data = [
-                                    'reply_id' => $zendesk_reply->id,
-                                    'body' => $params['comment']['body'],
-                                    'html_body' => $params['comment']['body'],
-                                    'tags' => join(',',array_unique(array_merge($tags, $params['tags']))),
-                                    'status' => $params['status'],
-                                    'assignee_id' => 382940274852,
-                                    'is_admin' => 1
-                                ];
+                                if($zendesk_reply->id){
+                                    $reply_detail_data = [
+                                        'reply_id' => $zendesk_reply->id,
+                                        'body' => $params['comment']['body'],
+                                        'html_body' => $params['comment']['body'],
+                                        'tags' => join(',',array_unique(array_merge($tags, $params['tags']))),
+                                        'status' => isset($params['status']) ? $params['status'] : $ticket->status,
+                                        'assignee_id' => 382940274852,
+                                        'is_admin' => 1
+                                    ];
+                                }
+
                             }
                             if (!empty($params)) {
                                 //tag合并

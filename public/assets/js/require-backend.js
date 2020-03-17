@@ -18,6 +18,7 @@ require.config({
         'drop': 'jquery.drop.min',
         'echarts': 'echarts.min',
         'echarts-theme': 'echarts-theme',
+        'echartsobj': 'require-echarts',
         'adminlte': 'adminlte',
         'bootstrap-table-commonsearch': 'bootstrap-table-commonsearch',
         'bootstrap-table-template': 'bootstrap-table-template',

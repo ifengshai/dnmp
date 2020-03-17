@@ -19,13 +19,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
             table.bootstrapTable({
                 url: $.fn.bootstrapTable.defaults.extend.index_url,
                 pk: 'entity_id',
-                sortName: 'entity_id',
+                sortName: 'total_qty_ordered',
+                sortOrder: 'asc',
                 columns: [
                     [
                         { checkbox: true },
                         { field: 'entity_id', title: __('记录标识'), operate: false },
                         { field: 'increment_id', title: __('订单号'), operate: 'like' },
-                        { field: 'status', title: __('状态'), addClass: 'selectpicker', data: 'multiple', operate: 'IN', searchList: { "processing": __('processing'), "free_processing": __('free_processing'), "creditcard_proccessing": "creditcard_proccessing", 'complete': 'complete' } },
+                        { field: 'status', title: __('状态'), addClass: 'selectpicker', data: 'multiple', operate: 'IN', searchList: { "processing": __('processing'), "free_processing": __('free_processing'), "paypal_reversed": "paypal_reversed","creditcard_proccessing": "creditcard_proccessing", "paypal_canceled_reversal": "paypal_canceled_reversal",'complete': 'complete' } },
                         { field: 'base_grand_total', title: __('订单金额'), operate: false, formatter: Controller.api.formatter.float_format },
                         { field: 'base_shipping_amount', title: __('运费'), operate: false, formatter: Controller.api.formatter.float_format },
 
@@ -98,7 +99,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
             // 为表格绑定事件
             Table.api.bindevent(table);
 
-            
+
             // 监听下拉列表改变的事件
             $(document).on('change', 'select[name=c_id]', function () {
                 $("input[name='category_id']").val($(this).val());
@@ -243,7 +244,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                         { checkbox: true },
                         { field: 'entity_id', title: __('记录标识'), operate: false },
                         { field: 'increment_id', title: __('订单号') },
-                        { field: 'status', title: __('状态'), searchList: { "processing": __('processing'), "free_processing": __('free_processing'), "creditcard_proccessing": "creditcard_proccessing" } },
+                        { field: 'status', title: __('状态'), searchList: { "processing": __('processing'), "free_processing": __('free_processing'), "paypal_reversed": "paypal_reversed", "creditcard_proccessing": "creditcard_proccessing",'complete': 'complete' } },
                         { field: 'base_grand_total', title: __('订单金额'), operate: false, formatter: Controller.api.formatter.float_format },
                         { field: 'base_shipping_amount', title: __('运费'), operate: false, formatter: Controller.api.formatter.float_format },
 

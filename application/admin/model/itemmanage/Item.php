@@ -22,9 +22,7 @@ class Item extends Model
     protected $deleteTime = false;
 
     // 追加属性
-    protected $append = [
-        'create_time_text'
-    ];
+    protected $append = [];
 
     public function itemAttribute()
     {
@@ -269,6 +267,7 @@ class Item extends Model
     public function getGoodsInfo($sku)
     {
         $map['is_del'] = 1;
+        $map['is_open']  = 1;
         $map['sku'] = $sku;
         $result = $this->where($map)->field('name,stock,occupy_stock,available_stock')->find();
         return $result;
@@ -319,6 +318,7 @@ class Item extends Model
     public function getAllStock()
     {
         $where['is_del']  = 1;
+        $where['is_open']  = 1;
         $where['category_id']  = ['<>', 43];
         return $this->where($where)->sum('stock');
     }
@@ -351,7 +351,8 @@ class Item extends Model
         $sku_pirce = new \app\admin\model\SkuPrice;
         $arr = $sku_pirce->getAllData();
         $where['is_del']  = 1;
-        $where['category_id']  = ['<>', 43];
+        $where['is_open']  = 1;
+        $where['category_id']  = ['<>', 43]; //不等于虚拟产品
         $res = $this->where($where)->field('sku,stock,price')->select();
         $allprice = 0;
         foreach ($res as $v) {
@@ -382,6 +383,7 @@ class Item extends Model
 
         $where['category_id']  = ['in', $ids];
         $where['is_del']  = 1;
+        $where['is_open']  = 1;
         return $this->where($where)->sum('stock');
     }
 
@@ -403,6 +405,7 @@ class Item extends Model
 
         $where['category_id']  = ['in', $ids];
         $where['is_del']  = 1;
+        $where['is_open']  = 1;
         return $this->where($where)->column('sku');
     }
 
@@ -430,6 +433,7 @@ class Item extends Model
 
         $where['category_id']  = ['in', $ids];
         $where['is_del']  = 1;
+        $where['is_open']  = 1;
         $res = $this->where($where)->field('sku,stock,price')->select();
         $allprice = 0;
         foreach ($res as $v) {
@@ -460,6 +464,7 @@ class Item extends Model
 
         $where['category_id']  = ['in', $ids];
         $where['is_del']  = 1;
+        $where['is_open']  = 1;
         return $this->where($where)->sum('stock');
     }
 
@@ -481,6 +486,7 @@ class Item extends Model
 
         $where['category_id']  = ['in', $ids];
         $where['is_del']  = 1;
+        $where['is_open']  = 1;
         return $this->where($where)->column('sku');
     }
 
@@ -507,6 +513,7 @@ class Item extends Model
 
         $where['category_id']  = ['in', $ids];
         $where['is_del']  = 1;
+        $where['is_open']  = 1;
         $res = $this->where($where)->field('sku,stock,price')->select();
         $allprice = 0;
         foreach ($res as $v) {
@@ -531,6 +538,7 @@ class Item extends Model
     public function getSampleNumStock()
     {
         $where['is_del']  = 1;
+        $where['is_open']  = 1;
         return $this->where($where)->sum('sample_num');
     }
 
@@ -549,6 +557,7 @@ class Item extends Model
         $arr = $sku_pirce->getAllData();
 
         $where['is_del']  = 1;
+        $where['is_open']  = 1;
         $res = $this->where($where)->field('sku,sample_num,price')->select();
         $allprice = 0;
         foreach ($res as $v) {
@@ -572,6 +581,41 @@ class Item extends Model
     public function getSkuPrice()
     {
         $where['is_del']  = 1;
-        return $this->where($where)->column('price', 'sku');
+        $where['is_open']  = 1;
+        return $this->where($where)->column('purchase_price', 'sku');
+    }
+
+    /**
+     * 获取新品SKU
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/03/11 14:48:41 
+     * @return void
+     */
+    public function getNewProductSku()
+    {
+        $where['is_del']  = 1;
+        $where['is_open']  = 1;
+        $where['is_new']  = 1;
+        return $this->where($where)->column('sku');
+    }
+
+    /**
+     * 查询商品名称、分类
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/03/12 16:51:07 
+     * @return void
+     */
+    public function getSkuInfo()
+    {
+        $where['a.is_del']  = 1;
+        $where['a.is_open']  = 1;
+        $where['b.is_del']  = 1;
+        return $this->where($where)->alias('a')
+        ->join(['fa_item_category' => 'b'], 'a.category_id=b.id')
+        ->cache(86400)->column('a.available_stock,a.name,b.name as type_name', 'sku');
     }
 }
