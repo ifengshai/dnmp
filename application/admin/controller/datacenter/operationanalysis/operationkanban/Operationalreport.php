@@ -109,6 +109,46 @@ class Operationalreport extends Backend{
         $reissue_order_percent      = @round(($reissue_order/($general_order + $wholesale_order + $celebrity_order + $reissue_order + $fill_post_order))*100,2);
         //补差价订单占比
         $fill_post_order_percent    = @round(($fill_post_order/($general_order + $wholesale_order + $celebrity_order + $reissue_order + $fill_post_order))*100,2);
+        //美元订单数量
+        $usd_order_num              = $model->table('sales_flat_order')->where($where)->where(['order_currency_code'=>'USD'])->where($map)->count('*');
+        //美元订单金额
+        $usd_order_money            = $model->table('sales_flat_order')->where($where)->where(['order_currency_code'=>'USD'])->where($map)->sum('base_grand_total');
+        //美元订单的平均金额
+        $usd_order_average_amount   = @round($usd_order_money/$usd_order_num,2);
+        //CAD订单数量
+        $cad_order_num              = $model->table('sales_flat_order')->where($where)->where(['order_currency_code'=>'CAD'])->where($map)->count('*');
+        //CAD订单金额
+        $cad_order_money            = $model->table('sales_flat_order')->where($where)->where(['order_currency_code'=>'CAD'])->where($map)->sum('base_grand_total');
+        //CAD订单的平均金额
+        $cad_order_average_amount   = @round($cad_order_money/$cad_order_num,2);
+        //AUD订单数量
+        $aud_order_num              = $model->table('sales_flat_order')->where($where)->where(['order_currency_code'=>'AUD'])->where($map)->count('*');
+        //AUD订单金额
+        $aud_order_money            = $model->table('sales_flat_order')->where($where)->where(['order_currency_code'=>'AUD'])->where($map)->sum('base_grand_total');
+        //AUD订单平均金额
+        $aud_order_average_amount   = @round($aud_order_money/$aud_order_num,2);
+        //EUR订单数量
+        $eur_order_num              = $model->table('sales_flat_order')->where($where)->where(['order_currency_code'=>'EUR'])->where($map)->count('*');
+        //EUR订单金额
+        $eur_order_money            = $model->table('sales_flat_order')->where($where)->where(['order_currency_code'=>'EUR'])->where($map)->sum('base_grand_total');
+        //EUR订单平均金额
+        $eur_order_average_amount   = @round($eur_order_money/$eur_order_num,2);
+        //GBP订单数量
+        $gbp_order_num              = $model->table('sales_flat_order')->where($where)->where(['order_currency_code'=>'GBP'])->where($map)->count('*');
+        //GBP订单金额
+        $gbp_order_money            = $model->table('sales_flat_order')->where($where)->where(['order_currency_code'=>'GBP'])->where($map)->sum('base_grand_total');
+        //GBP订单平均金额
+        $gbp_order_average_amount   = @round($gbp_order_money/$gbp_order_num,2);
+        //usd订单百分比
+        $usd_order_percent          = @round(($usd_order_num/($usd_order_num + $cad_order_num + $aud_order_num + $eur_order_num + $gbp_order_num))*100,2);                 
+        //cad订单百分比
+        $cad_order_percent          = @round(($cad_order_num/($usd_order_num + $cad_order_num + $aud_order_num + $eur_order_num + $gbp_order_num))*100,2);
+        //aud订单百分比
+        $aud_order_percent          = @round(($aud_order_num/($usd_order_num + $cad_order_num + $aud_order_num + $eur_order_num + $gbp_order_num))*100,2);
+        //eur订单百分比
+        $eur_order_percent          = @round(($eur_order_num/($usd_order_num + $cad_order_num + $aud_order_num + $eur_order_num + $gbp_order_num))*100,2);
+        //gbp订单百分比
+        $gbp_order_percent          = @round(($gbp_order_num/($usd_order_num + $cad_order_num + $aud_order_num + $eur_order_num + $gbp_order_num))*100,2);
         return [
             'general_order'                     => $general_order,
             'general_money'                     => $general_money,
@@ -124,7 +164,27 @@ class Operationalreport extends Backend{
             'wholesale_order_percent'           => $wholesale_order_percent,
             'celebrity_order_percent'           => $celebrity_order_percent,
             'reissue_order_percent'             => $reissue_order_percent,
-            'fill_post_order_percent'           => $fill_post_order_percent
+            'fill_post_order_percent'           => $fill_post_order_percent,
+            'usd_order_num'                     => $usd_order_num,
+            'usd_order_money'                   => $usd_order_money,
+            'usd_order_average_amount'          => $usd_order_average_amount,
+            'usd_order_percent'                 => $usd_order_percent,
+            'cad_order_num'                     => $cad_order_num,
+            'cad_order_money'                   => $cad_order_money,
+            'cad_order_average_amount'          => $cad_order_average_amount,
+            'cad_order_percent'                 => $cad_order_percent,
+            'aud_order_num'                     => $aud_order_num,
+            'aud_order_money'                   => $aud_order_money,
+            'aud_order_average_amount'          => $aud_order_average_amount,
+            'aud_order_percent'                 => $aud_order_percent,
+            'eur_order_num'                     => $eur_order_num,
+            'eur_order_money'                   => $eur_order_money,
+            'eur_order_average_amount'          => $eur_order_average_amount,
+            'eur_order_percent'                 => $eur_order_percent,
+            'gbp_order_num'                     => $gbp_order_num,
+            'gbp_order_money'                   => $gbp_order_money,
+            'gbp_order_average_amount'          => $gbp_order_average_amount,
+            'gbp_order_percent'                 => $gbp_order_percent,
         ];
     }
 }
