@@ -31,6 +31,8 @@ class Operationalreport extends Backend{
                 return $this->error('该平台暂时没有数据');
             }
             $result = $this->platformOrderInfo(2,$map);
+            dump($result);
+            exit;
             return $this->success('ok','',$result);
             if(!$result){
                 return $this->error('暂无数据');
