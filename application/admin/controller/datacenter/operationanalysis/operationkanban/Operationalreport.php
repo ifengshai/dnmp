@@ -34,7 +34,7 @@ class Operationalreport extends Backend{
             if(!$result){
                 return $this->error('暂无数据');
             }
-            return json(['code' => 1, 'rows' => $result]);
+            return json(['code' => 1, 'data'=>[1,2,3],'rows' => $result]);
 
         }	
         $this->view->assign(
@@ -76,7 +76,55 @@ class Operationalreport extends Backend{
         if(false == $model){
             return false;
         }
+        $model->table('sales_flat_order')->query("set time_zone='+8:00'");
+        $where = " status in ('processing','complete','creditcard_proccessing','free_processing')";
         //订单类型数据统计
-        
+        //1.普通订单数量
+        $general_order              = $model->table('sales_flat_order')->where($where)->where(['order_type'=>1])->where($map)->count('*');
+        //2.普通订单金额
+        $general_money              = $model->table('sales_flat_order')->where($where)->where(['order_type'=>1])->where($map)->sum('base_grand_total');
+        //3.批发订单数量
+        $wholesale_order            = $model->table('sales_flat_order')->where($where)->where(['order_type'=>2])->where($map)->count('*');
+        //4.批发订单金额
+        $wholesale_money            = $model->table('sales_flat_order')->where($where)->where(['order_type'=>2])->where($map)->sum('base_grand_total');
+        //5.网红订单数量
+        $celebrity_order            = $model->table('sales_flat_order')->where($where)->where(['order_type'=>3])->where($map)->count('*');
+        //6.网红订单金额
+        $celebrity_money            = $model->table('sales_flat_order')->where($where)->where(['order_type'=>3])->where($map)->sum('base_grand_total');
+        //补发订单数量
+        $reissue_order              = $model->table('sales_flat_order')->where($where)->where(['order_type'=>4])->where($map)->count('*');
+        //补发订单金额
+        $reissue_money              = $model->table('sales_flat_order')->where($where)->where(['order_type'=>4])->where($map)->sum('base_grand_total');
+        //补差价订单数量
+        $fill_post_order            = $model->table('sales_flat_order')->where($where)->where(['order_type'=>5])->where($map)->count('*');
+        //补差价订单金额
+        $fill_post_money            = $model->table('sales_flat_order')->where($where)->where(['order_type'=>5])->where($map)->sum('base_grand_total');
+        //普通订单占比
+        $general_order_percent      = @round(($general_order/($general_order + $wholesale_order + $celebrity_order + $reissue_order + $fill_post_order))*100,2);
+        //批发订单占比
+        $wholesale_order_percent    = @round(($wholesale_order/($general_order + $wholesale_order + $celebrity_order + $reissue_order + $fill_post_order))*100,2);
+        //网红订单占比
+        $celebrity_order_percent    = @round(($celebrity_order/($general_order + $wholesale_order + $celebrity_order + $reissue_order + $fill_post_order))*100,2);
+        //补发订单占比
+        $reissue_order_percent      = @round(($reissue_order/($general_order + $wholesale_order + $celebrity_order + $reissue_order + $fill_post_order))*100,2);
+        //补差价订单占比
+        $fill_post_order_percent    = @round(($fill_post_order/($general_order + $wholesale_order + $celebrity_order + $reissue_order + $fill_post_order))*100,2);
+        return [
+            'general_order'                     => $general_order,
+            'general_money'                     => $general_money,
+            'wholesale_order'                   => $wholesale_order,
+            'wholesale_money'                   => $wholesale_money,
+            'celebrity_order'                   => $celebrity_order,
+            'celebrity_money'                   => $celebrity_money,
+            'reissue_order'                     => $reissue_order,
+            'reissue_money'                     => $reissue_money,
+            'fill_post_order'                   => $fill_post_order,
+            'fill_post_money'                   => $fill_post_money,
+            'general_order_percent'             => $general_order_percent,
+            'wholesale_order_percent'           => $wholesale_order_percent,
+            'celebrity_order_percent'           => $celebrity_order_percent,
+            'reissue_order_percent'             => $reissue_order_percent,
+            'fill_post_order_percent'           => $fill_post_order_percent
+        ];
     }
 }

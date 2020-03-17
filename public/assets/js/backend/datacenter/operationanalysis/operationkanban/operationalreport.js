@@ -1,9 +1,77 @@
-define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 'echarts-theme', 'template','custom-css'], function ($, undefined, Backend, Datatable, Table,Form, Echarts, undefined, Template) {
+define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echartsobj', 'echarts-theme', 'template','custom-css'], function ($, undefined, Backend, Datatable, Table,Form, EchartObj, undefined, Template) {
 
     var Controller = {
         index: function () {            
             Controller.api.formatter.daterangepicker($("form[role=form1]"));
-            Form.api.bindevent($("form[role=form]"));           
+            Form.api.bindevent($("form[role=form]"));
+                //购物车图表
+                var chartOptions = {
+                    targetId: 'echart',
+                    downLoadTitle: '图表',
+                    type: 'line',
+                    line: {
+                        xAxis: {
+                            type: 'category',
+                            boundaryGap: [0, 0.01]
+                        },
+                        yAxis: [
+                            {
+                                type: 'value',
+                                name: '购物车数量',
+								position: 'left',
+                                axisLabel: {
+                                    formatter: '{value}'
+                                }
+                            },
+                            {
+                                type: 'value',
+                                name: '购物车转化率',
+								position: 'right',
+                                axisLabel: {
+                                    formatter: '{value} %'
+                                }
+                            }
+                        ],
+                    }
+                };
+                var time = $('#create_time').val();
+                var platform = $('#c-order_platform').val();
+                var options = {
+                    type: 'post',
+                    url: 'datacenter/operationanalysis/operationkanban/operationalreport/index',
+                    data: {
+                        'time': time,
+                        'platform': platform
+                    }
+                }
+                EchartObj.api.ajax(options, chartOptions)
+                Backend.api.ajax({
+                    url: "datacenter/operationanalysis/operationkanban/operationalreport/index",
+                    data: { 
+                        'time': time,
+                        'platform': platform    
+                    }
+                },function (data, ret) {
+                    console.log(ret);
+                    $('#general_order').val(ret.rows.general_order);
+                    $('#general_money').val(ret.rows.general_money);
+                    $('#wholesale_order').val(ret.rows.wholesale_order);
+                    $('#wholesale_money').val(ret.rows.wholesale_money);
+                    $('#celebrity_order').val(ret.rows.celebrity_order);
+                    $('#celebrity_money').val(ret.rows.celebrity_money);
+                    $('#reissue_order').val(ret.rows.reissue_order);
+                    $('#reissue_money').val(ret.rows.reissue_money);
+                    $('#fill_post_order').val(ret.rows.fill_post_order);
+                    $('#fill_post_money').val(ret.rows.fill_post_money);
+                    $('#general_order_percent').val(ret.rows.general_order_percent);
+                    $('#wholesale_order_percent').val(ret.rows.wholesale_order_percent);
+                    $('#celebrity_order_percent').val(ret.rows.celebrity_order_percent);
+                    $('#reissue_order_percent').val(ret.rows.reissue_order_percent);
+                    $('#fill_post_order_percent').val(ret.rows.fill_post_order_percent);
+                },function(data,ret){
+                    alert(ret.msg);
+                    return false;
+                });                       
         },
         api: {
             formatter: {
