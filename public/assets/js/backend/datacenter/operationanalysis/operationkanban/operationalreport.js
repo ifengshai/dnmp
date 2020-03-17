@@ -36,15 +36,15 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echartsobj
                 };
                 var time = $('#create_time').val();
                 var platform = $('#c-order_platform').val();
-                var options = {
-                    type: 'post',
-                    url: 'datacenter/operationanalysis/operationkanban/operationalreport/index',
-                    data: {
-                        'time': time,
-                        'platform': platform
-                    }
-                }
-                EchartObj.api.ajax(options, chartOptions)
+                // var options = {
+                //     type: 'post',
+                //     url: 'datacenter/operationanalysis/operationkanban/operationalreport/index',
+                //     data: {
+                //         'time': time,
+                //         'platform': platform
+                //     }
+                // }
+                // EchartObj.api.ajax(options, chartOptions)
                 Backend.api.ajax({
                     url: "datacenter/operationanalysis/operationkanban/operationalreport/index",
                     data: { 
