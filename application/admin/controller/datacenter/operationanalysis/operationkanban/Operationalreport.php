@@ -30,7 +30,7 @@ class Operationalreport extends Backend{
             if(4<=$order_platform){
                 return $this->error('该平台暂时没有数据');
             }
-            $result = $this->platformOrderInfo($order_platform,$map);
+            $result = $this->platformOrderInfo(2,$map);
             if(!$result){
                 return $this->error('暂无数据');
             }
