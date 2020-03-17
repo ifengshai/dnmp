@@ -30,10 +30,7 @@ class Operationalreport extends Backend{
             if(4<=$order_platform){
                 return $this->error('该平台暂时没有数据');
             }
-            $result = $this->platformOrderInfo(2,$map);
-            dump($result);
-            exit;
-            return $this->success('ok','',$result);
+            $result = $this->platformOrderInfo($order_platform,$map);
             if(!$result){
                 return $this->error('暂无数据');
             }
@@ -103,45 +100,70 @@ class Operationalreport extends Backend{
         //补差价订单金额
         $fill_post_money            = $model->table('sales_flat_order')->where($where)->where(['order_type'=>5])->where($map)->sum('base_grand_total');
         //普通订单占比
-        $general_order_percent      = @round(($general_order/($general_order + $wholesale_order + $celebrity_order + $reissue_order + $fill_post_order))*100,2);
+        $general_order_percent      = round(($general_order/($general_order + $wholesale_order + $celebrity_order + $reissue_order + $fill_post_order))*100,2);
         //批发订单占比
-        $wholesale_order_percent    = @round(($wholesale_order/($general_order + $wholesale_order + $celebrity_order + $reissue_order + $fill_post_order))*100,2);
+        $wholesale_order_percent    = round(($wholesale_order/($general_order + $wholesale_order + $celebrity_order + $reissue_order + $fill_post_order))*100,2);
         //网红订单占比
-        $celebrity_order_percent    = @round(($celebrity_order/($general_order + $wholesale_order + $celebrity_order + $reissue_order + $fill_post_order))*100,2);
+        $celebrity_order_percent    = round(($celebrity_order/($general_order + $wholesale_order + $celebrity_order + $reissue_order + $fill_post_order))*100,2);
         //补发订单占比
-        $reissue_order_percent      = @round(($reissue_order/($general_order + $wholesale_order + $celebrity_order + $reissue_order + $fill_post_order))*100,2);
+        $reissue_order_percent      = round(($reissue_order/($general_order + $wholesale_order + $celebrity_order + $reissue_order + $fill_post_order))*100,2);
         //补差价订单占比
-        $fill_post_order_percent    = @round(($fill_post_order/($general_order + $wholesale_order + $celebrity_order + $reissue_order + $fill_post_order))*100,2);
+        $fill_post_order_percent    = round(($fill_post_order/($general_order + $wholesale_order + $celebrity_order + $reissue_order + $fill_post_order))*100,2);
         //美元订单数量
         $usd_order_num              = $model->table('sales_flat_order')->where($where)->where(['order_currency_code'=>'USD'])->where($map)->count('*');
         //美元订单金额
         $usd_order_money            = $model->table('sales_flat_order')->where($where)->where(['order_currency_code'=>'USD'])->where($map)->sum('base_grand_total');
         //美元订单的平均金额
-        $usd_order_average_amount   = @round($usd_order_money/$usd_order_num,2);
+        if(0<$usd_order_num){
+            $usd_order_average_amount = round($usd_order_money/$usd_order_num,2);
+        }else{
+            $usd_order_average_amount = 0;
+        }
+        
         //CAD订单数量
         $cad_order_num              = $model->table('sales_flat_order')->where($where)->where(['order_currency_code'=>'CAD'])->where($map)->count('*');
         //CAD订单金额
         $cad_order_money            = $model->table('sales_flat_order')->where($where)->where(['order_currency_code'=>'CAD'])->where($map)->sum('base_grand_total');
         //CAD订单的平均金额
-        $cad_order_average_amount   = @round($cad_order_money/$cad_order_num,2);
+        if(0<$cad_order_num){
+            $cad_order_average_amount = round($cad_order_money/$cad_order_num,2);
+        }else{
+            $cad_order_average_amount = 0;
+        }
+        
         //AUD订单数量
         $aud_order_num              = $model->table('sales_flat_order')->where($where)->where(['order_currency_code'=>'AUD'])->where($map)->count('*');
         //AUD订单金额
         $aud_order_money            = $model->table('sales_flat_order')->where($where)->where(['order_currency_code'=>'AUD'])->where($map)->sum('base_grand_total');
         //AUD订单平均金额
-        $aud_order_average_amount   = @round($aud_order_money/$aud_order_num,2);
+        if(0<$aud_order_num){
+            $aud_order_average_amount = round($aud_order_money/$aud_order_num,2);
+        }else{
+            $aud_order_average_amount = 0;
+        }
+        
         //EUR订单数量
         $eur_order_num              = $model->table('sales_flat_order')->where($where)->where(['order_currency_code'=>'EUR'])->where($map)->count('*');
         //EUR订单金额
         $eur_order_money            = $model->table('sales_flat_order')->where($where)->where(['order_currency_code'=>'EUR'])->where($map)->sum('base_grand_total');
         //EUR订单平均金额
-        $eur_order_average_amount   = @round($eur_order_money/$eur_order_num,2);
+        if(0<$eur_order_num){
+            $eur_order_average_amount = round($eur_order_money/$eur_order_num,2);
+        }else{
+            $eur_order_average_amount = 0;
+        }
+        
         //GBP订单数量
         $gbp_order_num              = $model->table('sales_flat_order')->where($where)->where(['order_currency_code'=>'GBP'])->where($map)->count('*');
         //GBP订单金额
         $gbp_order_money            = $model->table('sales_flat_order')->where($where)->where(['order_currency_code'=>'GBP'])->where($map)->sum('base_grand_total');
         //GBP订单平均金额
-        $gbp_order_average_amount   = @round($gbp_order_money/$gbp_order_num,2);
+        if(0<$gbp_order_num){
+            $gbp_order_average_amount   = round($gbp_order_money/$gbp_order_num,2);
+        }else{
+            $gbp_order_average_amount   = 0;
+        }
+        
         //usd订单百分比
         $usd_order_percent          = @round(($usd_order_num/($usd_order_num + $cad_order_num + $aud_order_num + $eur_order_num + $gbp_order_num))*100,2);                 
         //cad订单百分比
@@ -189,5 +211,9 @@ class Operationalreport extends Backend{
             'gbp_order_average_amount'          => $gbp_order_average_amount,
             'gbp_order_percent'                 => $gbp_order_percent,
         ];
+    }
+    public function ceshi(){
+        $a = @(0/0);
+        dump($a);
     }
 }
