@@ -793,10 +793,18 @@ class Index extends Backend
         //超时订单总数
         $overtimeOrder = $dataConfig->where('key', 'overtimeOrder')->value('value');
 
+        //总SKU数
+        $skuNum = $dataConfig->where('key', 'skuNum')->value('value');
+
         //30天处理订单
         $orderLog = new \app\admin\model\OrderLog();
         $days30OrderProcessNum = $orderLog->get30daysOrderProcessNum();
 
+        //统计库存分级
+        $stockData = $this->item->stockClass();
+
+        $this->view->assign('skuNum', $skuNum);
+        $this->view->assign('stockData', $stockData);
         $this->view->assign('days30OrderProcessNum', $days30OrderProcessNum);
         $this->view->assign('overtimeOrder', $overtimeOrder);
         $this->view->assign('days30Num', $days30Num);
