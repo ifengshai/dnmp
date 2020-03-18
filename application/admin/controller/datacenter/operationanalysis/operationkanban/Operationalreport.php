@@ -4,6 +4,8 @@ use think\Db;
 use app\common\controller\Backend;
 use app\admin\model\platformmanage\MagentoPlatform;
 class Operationalreport extends Backend{
+    //订单类型数据统计
+    protected $success_order = ['processing','complete','creditcard_proccessing','free_processing'];
     /**
      * 运营报告首页数据
      *
@@ -179,7 +181,9 @@ class Operationalreport extends Backend{
         $order_status_arr           = [];
         if($order_status){
             foreach($order_status as $v){
-                $order_status_arr[] = $v['status'];
+                $order_status_arr['status'][] = $v['status'];
+                $order_status_arr['money'][]  = $model->table('sales_flat_order')->where($map)->where(['status'=>$v['status']])->sum('base_grand_total');
+                $order_status_arr['num'][]    = $model->table('sales_flat_order')->where($map)->where(['status'=>$v['status']])->count('*');   
             }
         }
         return [
