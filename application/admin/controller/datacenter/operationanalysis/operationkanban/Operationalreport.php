@@ -175,7 +175,7 @@ class Operationalreport extends Backend{
         //gbp订单百分比
         $gbp_order_percent          = @round(($gbp_order_num/($usd_order_num + $cad_order_num + $aud_order_num + $eur_order_num + $gbp_order_num))*100,2);
         //所有的订单状态
-        $order_status               = $model->distinct(true)->field('status')->select();
+        $order_status               = $model->table('sales_flat_order')->distinct(true)->field('status')->select();
         $order_status_arr           = [];
         if($order_status){
             foreach($order_status as $v){
