@@ -2,6 +2,7 @@
 
 namespace app\admin\model;
 
+use fast\Random;
 use think\Model;
 use think\Session;
 
@@ -79,5 +80,88 @@ class Admin extends Model
             $allStaff[$val['id']] = $val['nickname'];
         }
         return $result ? $allStaff : false;
+    }
+
+    /**
+     * 钉钉添加用户并绑定关系
+     * @param $user
+     * @param string $departmentId
+     * @return mixed
+     */
+    public static function userAdd($user,$departmentId = '')
+    {
+        //判断有无部门，有则去第一个
+        if(!$departmentId && !empty($user['department'])){
+            $departmentId = $user['department'][0];
+        }
+        $username = str_replace(' ','',pinyin($user['name']));
+        //排除用户名拼音一样的问题
+        $count = self::where('username',$username)->count();
+        $count = $count ?: '';
+        $salt = Random::alnum();
+        $password = md5(md5($username) . $salt);
+        $data = [
+            'username' => $username.$count,
+            'nickname' => $user['name'],
+            'password' => $password,
+            'salt' => $salt,
+            'avatar' => $user['avatar'] ?: '/assets/img/avatar.png',
+            'email' => $user['email'] ?? '',
+            'status' => 'normal',
+            'position' => $user['position'],
+            'mobile' => $user['mobile'],
+            'department_id' => $departmentId,
+            'userid' => $user['userid'],
+            'unionid' => $user['unionid']
+        ];
+        $userAdd = self::create($data);
+        //存在部门id则绑定角色
+        if($departmentId){
+            $groupId = AuthGroup::where('department_id',$departmentId)->value('id');
+            AuthGroupAccess::create([
+                'uid' => $userAdd->id,
+                'group_id' => $groupId
+            ]);
+        }
+        return $userAdd->id;
+    }
+
+    /**
+     * 钉钉修改用户信息同步
+     * @param $user
+     * @param string $id
+     * @return string
+     */
+    public static function userUpdate($user,$id = '')
+    {
+        $departmentId = '';
+        //判断有无部门，有则去第一个
+        if(!empty($user['department'])){
+            $departmentId = $user['department'][0];
+        }
+        $data = [
+            'avatar' => $user['avatar'] ?: '/assets/img/avatar.png',
+            'email' => $user['email'] ?? '',
+            'position' => $user['position'],
+            'mobile' => $user['mobile'],
+            'department_id' => $departmentId,
+            'userid' => $user['userid'],
+            'unionid' => $user['unionid']
+        ];
+        self::update($data,['id' => $id]);
+        //获取用户原始的departmentId
+        $preGroupId = AuthGroupAccess::where('uid',$id)->value('group_id');
+        $groupId = AuthGroup::where('department_id',$departmentId)->value('id');
+        if($preGroupId != $groupId){
+            if($preGroupId){ //修改
+                AuthGroupAccess::where('uid',$id)->setField('group_id',$groupId);
+            }else{
+                AuthGroupAccess::create([
+                    'uid' => $id,
+                    'group_id' => $groupId
+                ]);
+            }
+        }
+        return $id;
     }
 }

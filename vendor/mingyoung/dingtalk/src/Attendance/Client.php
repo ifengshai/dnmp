@@ -30,6 +30,34 @@ class Client extends BaseClient
             'workDate' => $date, 'offset' => $offset, 'size' => $size,
         ]);
     }
+    /**
+     * 查询排班打卡结果
+     * 
+     * @param  string $opUserId
+     * @param  string $userids 
+     * @param  string $fromData
+     * @param  string $endData 
+     * @return mixed
+     */
+    public function listByUsers($opUserId, $userids, $fromData, $endData)
+    {
+        return $this->client->postJson('topapi/attendance/schedule/listbyusers', [
+            'op_user_id' => $opUserId, 'userids' => $userids, 'from_date_time' => $fromData, 'to_date_time' => $endData,
+        ]);
+    }
+    /**
+     * 查询某人某天的排班信息
+     * @param  string $opUserId
+     * @param  string $userId  
+     * @param  string $dateTime
+     * @return mixed
+     */
+    public function listByDay($opUserId, $userId, $dateTime)
+    {
+        return $this->client->postJson('topapi/attendance/schedule/listbyday', [
+            'op_user_id' => $opUserId, 'user_id' => $userId, 'date_time' => $dateTime,
+        ]);
+    }
 
     /**
      * 企业考勤组详情
