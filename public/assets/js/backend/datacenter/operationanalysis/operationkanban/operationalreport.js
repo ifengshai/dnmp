@@ -54,6 +54,13 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echartsobj
                 },function (data, ret) {
                     console.log(ret.rows);
                     console.log(ret.rows.order_status.status.length);
+                    var order_status_length = ret.rows.order_status.status.length;
+                    for(var j=0;j<order_status_length;j++){
+                        var order_status = ret.rows.order_status.status;
+                        var order_num    = ret.rows.order_status.num;
+                        var order_money  = ret.rows.order_status.money;
+                        $("#order-table tbody").append('<tr><td>'+order_status[j]+'</td><td>'+order_num[j]+'</td><td>'+order_money[j]+'</td></tr>');
+                    }
                     $('#general_order').text(ret.rows.general_order);
                     $('#general_money').text(ret.rows.general_money);
                     $('#wholesale_order').text(ret.rows.wholesale_order);
