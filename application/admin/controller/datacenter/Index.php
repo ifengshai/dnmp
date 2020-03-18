@@ -783,6 +783,24 @@ class Index extends Backend
         //饰品库存总金额
         $ornamentsStockPrice = $dataConfig->where('key', 'ornamentsStockPrice')->value('value');
 
+        //统计30天总销量
+        $orderStatistics = new \app\admin\model\OrderStatistics();
+        $days30Num = $orderStatistics->get30daysNum();
+
+        //未出库总订单
+        $allUnorderNum = $dataConfig->where('key', 'allUnorderNum')->value('value');
+
+        //超时订单总数
+        $overtimeOrder = $dataConfig->where('key', 'overtimeOrder')->value('value');
+
+        //30天处理订单
+        $orderLog = new \app\admin\model\OrderLog();
+        $days30OrderProcessNum = $orderLog->get30daysOrderProcessNum();
+
+        $this->view->assign('days30OrderProcessNum', $days30OrderProcessNum);
+        $this->view->assign('overtimeOrder', $overtimeOrder);
+        $this->view->assign('days30Num', $days30Num);
+        $this->view->assign('allUnorderNum', $allUnorderNum);
         $this->view->assign('allStock', $allStock);
         $this->view->assign('allStockPrice', $allStockPrice);
         $this->view->assign('onwayAllStock', $onwayAllStock);

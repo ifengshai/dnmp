@@ -314,6 +314,15 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'editable', 'bootstra
                         table1.bootstrapTable('refresh');
                     });
                 })
+
+                //批量导出xls 
+                $('.btn-batch-export-xls').click(function () {
+                    var options = table1.bootstrapTable('getOptions');
+                    var search = options.queryParams({});
+                    var filter = search.filter;
+                    var op = search.op;
+                    window.open(Config.moduleurl + '/warehouse/inventory/batch_export_xls?filter=' + filter + '&op=' + op, '_blank');
+                });
             },
             second: function () {
                 Table.api.init({
@@ -334,6 +343,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'editable', 'bootstra
                         add_url: '',
                         edit_url: '',
                         del_url: 'warehouse/inventory/tempdel',
+                        import_url: 'warehouse/inventory/import',
                         multi_url: '',
                         table: '',
                     },
@@ -530,6 +540,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'editable', 'bootstra
                 extend: {
                     index_url: 'warehouse/inventory/start' + location.search + '&inventory_id=' + Config.inventory_id,
                     edit_url: 'warehouse/inventory/startEdit',
+                    import_url: 'warehouse/inventory/importXls' + '?inventory_id=' + Config.inventory_id,
                     table: 'inventory_item',
                 }
             });
@@ -559,15 +570,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'editable', 'bootstra
                         { field: 'distribution_occupy_stock', title: __('配货占用库存'), operate: false },
                         {
                             field: 'inventory_qty', title: __('盘点数量'), operate: false, editable: {
-                                emptytext: "__", 
+                                emptytext: "__",
                             }
                         },
-                        { field: 'error_qty', title: __('误差数量'), operate: false },
-                        // {
-                        //     field: 'remark', title: __('备注'), operate: false, editable: {
-                        //         emptytext: '-'
-                        //     }
-                        // },
+                        { field: 'error_qty', title: __('误差数量'), operate: false }
 
                     ]
                 ]
