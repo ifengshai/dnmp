@@ -52,7 +52,8 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echartsobj
                         'platform': platform    
                     }
                 },function (data, ret) {
-                    console.log(ret);
+                    console.log(ret.rows);
+                    console.log(ret.rows.order_status.status.length);
                     $('#general_order').text(ret.rows.general_order);
                     $('#general_money').text(ret.rows.general_money);
                     $('#wholesale_order').text(ret.rows.wholesale_order);
@@ -88,6 +89,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echartsobj
                     $('#gbp_order_percent').text(ret.rows.gbp_order_percent);
                     $('#gbp_order_money').text(ret.rows.gbp_order_money);
                     $('#gbp_order_average_amount').text(ret.rows.gbp_order_average_amount);
+
                 },function(data,ret){
                     alert(ret.msg);
                     return false;
