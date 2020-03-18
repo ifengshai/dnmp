@@ -292,7 +292,7 @@ table.altrowstable tr:nth-child(even){
                         <div>
                             <table id="caigou-table" class="handle_table1" style="width: 650px;">
                                 <tr>
-                                    <td colspan="4" style="font-size: 16px;font-weight:1000">未成功订单状态统计</td>
+                                    <td colspan="4" style="font-size: 16px;font-weight:1000">订单状态统计</td>
                                 </tr>
                                 <tr>
                                     <td>状态</td>
@@ -350,39 +350,39 @@ table.altrowstable tr:nth-child(even){
                                     <td>平均金额（$）</td>
                                 </tr>
                                 <tr>
-                                    <td>1</td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
+                                    <td>USD</td>
+                                    <td id='usd_order_num'></td>
+                                    <td id='usd_order_percent'></td>
+                                    <td id='usd_order_money'></td>
+                                    <td id='usd_order_average_amount'></td>
                                 </tr>
                                 <tr>
-                                    <td>2</td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
+                                    <td>CAD</td>
+                                    <td id='cad_order_num'></td>
+                                    <td id='cad_order_percent'></td>
+                                    <td id='cad_order_money'></td>
+                                    <td id='cad_order_average_amount'></td>
                                 </tr>
                                 <tr>
-                                    <td>3</td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
+                                    <td>AUD</td>
+                                    <td id='aud_order_num'></td>
+                                    <td id='aud_order_percent'></td>
+                                    <td id='aud_order_money'></td>
+                                    <td id='aud_order_average_amount'></td>
                                 </tr>
                                 <tr>
-                                    <td>4</td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
+                                    <td>EUR</td>
+                                    <td id='eur_order_num'></td>
+                                    <td id='eur_order_percent'></td>
+                                    <td id='eur_order_money'></td>
+                                    <td id='eur_order_average_amount'></td>
                                 </tr>
                                 <tr>
-                                    <td>5</td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
+                                    <td>GBP</td>
+                                    <td id='gbp_order_num'></td>
+                                    <td id='gbp_order_percent'></td>
+                                    <td id='gbp_order_money'></td>
+                                    <td id='gbp_order_average_amount'></td>
                                 </tr>
                             </table>
                         </div>
@@ -400,38 +400,40 @@ table.altrowstable tr:nth-child(even){
                                 <tr>
                                     <td>订单类型</td>
                                     <td>订单数量</td>
-                                    <td>占比</td>
+                                    <td>占比(%)</td>
                                     <td>金额（$）</td>
                                 </tr>
                                 <tr>
-                                    <td>1</td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
+                                    <td>普通单</td>
+                                    <td id='general_order'>0</td>
+                                    <td id='general_order_percent'>0</td>
+                                    <td id='general_money'>0</td>
                                 </tr>
                                 <tr>
-                                    <td>2</td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
+                                    <td>网红单</td>
+                                    <td id='celebrity_order'>0</td>
+                                    <td id='celebrity_order_percent'>0</td>
+                                    <td id='celebrity_money'>0</td>
                                 </tr>
                                 <tr>
-                                    <td>3</td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
+                                    <td>批发单</td>
+                                    <td id='wholesale_order'>0</td>
+                                    <td id='wholesale_order_percent'>0</td>                                    
+                                    <td id='wholesale_money'>0</td>
+
                                 </tr>
                                 <tr>
-                                    <td>4</td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
+                                    <td>补发单</td>
+                                    <td id='reissue_order'>0</td>
+                                    <td id='reissue_order_percent'>0</td>                                    
+                                    <td id='reissue_money'>0</td>
+
                                 </tr>
                                 <tr>
-                                    <td>5</td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
+                                    <td>补差价单</td>
+                                    <td id='fill_post_order'>0</td>
+                                    <td id='fill_post_order_percent'>0</td>                                    
+                                    <td id='fill_post_money'>0</td>
                                 </tr>
                             </table>
                         </div>
