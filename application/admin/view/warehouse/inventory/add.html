@@ -14,6 +14,9 @@
                             class="fa fa-refresh"></i> </a>
                     <a href="javascript:;" class="btn btn-success btn-adds btn-disabled disabled"
                         title="{:__('Add')}"><i class="fa fa-plus"></i> {:__('Add')}</a>
+                    <a href="javascript:;"
+                        class="btn btn-danger btn-batch-export-xls"
+                        title="{:__('批量导出')}"><i class="fa fa-upload"></i> {:__('批量导出')}</a>
                 </div>
                 <table id="table1" class="table table-striped table-bordered table-hover" width="100%">
                 </table>
@@ -28,6 +31,7 @@
                     <a href="javascript:;"
                         class="btn btn-danger btn-del btn-disabled disabled {:$auth->check('warehouse/inventory/del')?'':'hide'}"
                         title="{:__('Delete')}"><i class="fa fa-trash"></i> {:__('Delete')}</a>
+                    <a href="javascript:;" class="btn btn-danger btn-import" title="{:__('Import')}" id="btn-import-file" data-url="ajax/upload" data-mimetype="csv,xls,xlsx" data-multipart={"dir":"warehouse/inventory"} data-multiple="false"><i class="fa fa-upload"></i> {:__('Import')}</a>
                 </div>
                 <table id="table2" class="table table-striped table-bordered table-hover" width="100%">
                 </table>

@@ -7,6 +7,11 @@ use think\Db;
 use think\Exception;
 use think\exception\PDOException;
 use think\exception\ValidateException;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
+use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
+use PhpOffice\PhpSpreadsheet\Reader\Xls;
+use PhpOffice\PhpSpreadsheet\Reader\Csv;
 
 /**
  * 库存盘点单
@@ -100,7 +105,7 @@ class Inventory extends Backend
             $skus = $temp->column('sku');
 
             $inventoryItem = new \app\admin\model\warehouse\InventoryItem;
-            $itemSkus = $inventoryItem->where('is_add',0)->column('sku');
+            $itemSkus = $inventoryItem->where('is_add', 0)->column('sku');
 
             $skus = array_unique(array_merge($skus, $itemSkus));
             $map['is_open'] = ['in', [1, 2]];
@@ -120,20 +125,6 @@ class Inventory extends Backend
 
             $list = collection($list)->toArray();
 
-            $skus = array_column($list, 'sku');
-            //查询留样库存
-            //查询实际采购信息 查询在途库存
-            $purchase_map['stock_status'] = ['in', [0, 1]];
-            $purchase = new \app\admin\model\purchase\PurchaseOrder;
-            $hasWhere['sku'] = ['in', $skus];
-            $purchase_list = $purchase->hasWhere('purchaseOrderItem', $hasWhere)
-                ->where($purchase_map)
-                ->group('sku')
-                ->column('sum(purchase_num) as purchase_num,sum(instock_num) as instock_num', 'sku');
-            foreach ($list as &$v) {
-                $v['on_way_stock'] = @$purchase_list[$v['sku']]['purchase_num'] - @$purchase_list[$v['sku']]['instock_num'];
-            }
-            unset($v);
             $result = array("total" => $total, "rows" => $list);
 
             return json($result);
@@ -194,12 +185,9 @@ class Inventory extends Backend
                                 continue;
                             }
                             $list[$k]['sku'] = $v->sku;
-                            $list[$k]['name'] = $v->name;
                             $list[$k]['stock'] = $v->stock;
                             $list[$k]['distribution_occupy_stock'] = $v->distribution_occupy_stock;
                             $list[$k]['available_stock'] = $v->available_stock;
-                            $list[$k]['on_way_stock'] = $v->on_way_stock;
-                            $list[$k]['sample_stock'] = $v->sample_stock ?? 0;
                         }
                     }
 
@@ -314,12 +302,11 @@ class Inventory extends Backend
                                 $list[$k]['inventory_id'] = $this->model->id;
                                 $list[$k]['sku'] = $v->sku;
                                 $list[$k]['name'] = $v->name;
-                                $real_time_qty = ($v->stock*1 - $v->distribution_occupy_stock*1);
+                                $real_time_qty = ($v->stock * 1 - $v->distribution_occupy_stock * 1);
                                 $list[$k]['real_time_qty'] = $real_time_qty ?? 0;
                                 $list[$k]['distribution_occupy_stock'] = $v->distribution_occupy_stock;
                                 $list[$k]['available_stock'] = $v->available_stock;
-                                $list[$k]['error_qty'] = (0-$real_time_qty);
-
+                                $list[$k]['error_qty'] = (0 - $real_time_qty);
                             }
                             //添加明细表数据
                             $result = $this->item->allowField(true)->saveAll($list);
@@ -437,11 +424,11 @@ class Inventory extends Backend
                             $list[$k]['inventory_id'] = $ids;
                             $list[$k]['sku'] = $v->sku;
                             $list[$k]['name'] = $v->name;
-                            $real_time_qty = ($v->stock*1 - $v->distribution_occupy_stock*1);
+                            $real_time_qty = ($v->stock * 1 - $v->distribution_occupy_stock * 1);
                             $list[$k]['real_time_qty'] = $real_time_qty ?? 0;
                             $list[$k]['distribution_occupy_stock'] = $v->distribution_occupy_stock;
                             $list[$k]['available_stock'] = $v->available_stock;
-                            $list[$k]['error_qty'] = (0-$real_time_qty);
+                            $list[$k]['error_qty'] = (0 - $real_time_qty);
                         }
                     }
                     if (!$list) {
@@ -853,6 +840,281 @@ class Inventory extends Backend
         return $this->view->fetch();
     }
 
+    /**
+     * 批量导出xls
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/02/28 14:45:39 
+     * @return void
+     */
+    public function batch_export_xls()
+    {
+        set_time_limit(0);
+        list($where) = $this->buildparams();
+        //查询SKU库存
+        $item = new \app\admin\model\itemmanage\Item();
+        $map['is_del'] = 1;
+        $map['is_open'] = 1;
+        $list = $item->where($where)->where($map)->field('sku,stock,available_stock,distribution_occupy_stock')->select();
+        $list = collection($list)->toArray();
+
+        //查询产品货位号
+        $store_sku = new \app\admin\model\warehouse\StockHouse;
+        $cargo_number = $store_sku->alias('a')->where(['status' => 1, 'b.is_del' => 1])->join(['fa_store_sku' => 'b'], 'a.id=b.store_id')->column('coding', 'sku');
+
+        //从数据库查询需要的数据
+        $spreadsheet = new Spreadsheet();
+
+        //常规方式：利用setCellValue()填充数据
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("A1", "SKU")
+            ->setCellValue("B1", "货位号")
+            ->setCellValue("C1", "实时库存")
+            ->setCellValue("D1", "盘点数");
+        foreach ($list as $key => $value) {
+            $spreadsheet->getActiveSheet()->setCellValue("A" . ($key * 1 + 2), $value['sku']);
+            $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $cargo_number[$value['sku']]);
+            $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 1 + 2), ($value['stock'] - $value['distribution_occupy_stock']));
+        }
+
+        //设置宽度
+        $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(20);
+
+        //设置边框
+        $border = [
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, // 设置border样式
+                    'color'       => ['argb' => 'FF000000'], // 设置border颜色
+                ],
+            ],
+        ];
+
+        $spreadsheet->getDefaultStyle()->getFont()->setName('微软雅黑')->setSize(12);
+
+
+        $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
+        $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
+
+        $spreadsheet->getActiveSheet()->getStyle('A1:D' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $spreadsheet->setActiveSheetIndex(0);
+
+        $format = 'xls';
+        $savename = 'SKU数据' . date("YmdHis", time());;
+
+        if ($format == 'xls') {
+            //输出Excel03版本
+            header('Content-Type:application/vnd.ms-excel');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xls";
+        } elseif ($format == 'xlsx') {
+            //输出07Excel版本
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xlsx";
+        }
+
+        //输出名称
+        header('Content-Disposition: attachment;filename="' . $savename . '.' . $format . '"');
+        //禁止缓存
+        header('Cache-Control: max-age=0');
+        $writer = new $class($spreadsheet);
+
+        $writer->save('php://output');
+    }
+
+    /**
+     * 批量导入
+     */
+    public function import()
+    {
+        $file = $this->request->request('file');
+        if (!$file) {
+            $this->error(__('Parameter %s can not be empty', 'file'));
+        }
+        $filePath = ROOT_PATH . DS . 'public' . DS . $file;
+        if (!is_file($filePath)) {
+            $this->error(__('No results were found'));
+        }
+        //实例化reader
+        $ext = pathinfo($filePath, PATHINFO_EXTENSION);
+
+        if (!in_array($ext, ['csv', 'xls', 'xlsx'])) {
+            $this->error(__('Unknown data format'));
+        }
+        if ($ext === 'csv') {
+            $file = fopen($filePath, 'r');
+            $filePath = tempnam(sys_get_temp_dir(), 'import_csv');
+            $fp = fopen($filePath, "w");
+            $n = 0;
+            while ($line = fgets($file)) {
+                $line = rtrim($line, "\n\r\0");
+                $encoding = mb_detect_encoding($line, ['utf-8', 'gbk', 'latin1', 'big5']);
+                if ($encoding != 'utf-8') {
+                    $line = mb_convert_encoding($line, 'utf-8', $encoding);
+                }
+                if ($n == 0 || preg_match('/^".*"$/', $line)) {
+                    fwrite($fp, $line . "\n");
+                } else {
+                    fwrite($fp, '"' . str_replace(['"', ','], ['""', '","'], $line) . "\"\n");
+                }
+                $n++;
+            }
+            fclose($file) || fclose($fp);
+
+            $reader = new Csv();
+        } elseif ($ext === 'xls') {
+            $reader = new Xls();
+        } else {
+            $reader = new Xlsx();
+        }
+
+        //导入文件首行类型,默认是注释,如果需要使用字段名称请使用name
+        //$importHeadType = isset($this->importHeadType) ? $this->importHeadType : 'comment';
+        //模板文件列名
+        try {
+            if (!$PHPExcel = $reader->load($filePath)) {
+                $this->error(__('Unknown data format'));
+            }
+            $currentSheet = $PHPExcel->getSheet(0);  //读取文件中的第一个工作表
+            $allColumn = $currentSheet->getHighestDataColumn(); //取得最大的列号
+            $allRow = $currentSheet->getHighestRow(); //取得一共有多少行
+            $maxColumnNumber = Coordinate::columnIndexFromString($allColumn);
+
+
+            $fields = [];
+            for ($currentRow = 1; $currentRow <= 1; $currentRow++) {
+                for ($currentColumn = 1; $currentColumn <= $maxColumnNumber; $currentColumn++) {
+                    $val = $currentSheet->getCellByColumnAndRow($currentColumn, $currentRow)->getValue();
+                    $fields[] = $val;
+                }
+            }
+
+            $data = [];
+            for ($currentRow = 2; $currentRow <= $allRow; $currentRow++) {
+                for ($currentColumn = 1; $currentColumn <= $maxColumnNumber; $currentColumn++) {
+                    $val = $currentSheet->getCellByColumnAndRow($currentColumn, $currentRow)->getValue();
+                    $data[$currentRow - 2][$currentColumn - 1] = is_null($val) ? '' : $val;
+                }
+            }
+        } catch (Exception $exception) {
+            $this->error($exception->getMessage());
+        }
+
+        $map['is_del'] = 1;
+        $map['is_open'] = 1;
+        $list = $this->product->where($map)->column('stock,available_stock,distribution_occupy_stock', 'sku');
+        $this->model = new \app\admin\model\warehouse\TempProduct;
+        $params = [];
+        foreach ($data as $k => $v) {
+            $params[$k]['sku'] = $v[0];
+            $params[$k]['stock'] = $list[$v[0]]['stock'];
+            $params[$k]['available_stock'] = $list[$v[0]]['available_stock'];
+            $params[$k]['distribution_occupy_stock'] = $list[$v[0]]['distribution_occupy_stock'];
+        }
+        if ($params) {
+            $this->model->saveAll($params);
+        }
+
+        return json(['code' => 1, 'msg' => '导入成功！！']);
+    }
+
+    /**
+     * 批量导入盘点数据
+     */
+    public function importXls()
+    {
+        $file = $this->request->request('file');
+        $inventory_id = $this->request->request('inventory_id');
+        if (!$file) {
+            $this->error(__('Parameter %s can not be empty', 'file'));
+        }
+        $filePath = ROOT_PATH . DS . 'public' . DS . $file;
+        if (!is_file($filePath)) {
+            $this->error(__('No results were found'));
+        }
+        //实例化reader
+        $ext = pathinfo($filePath, PATHINFO_EXTENSION);
+
+        if (!in_array($ext, ['csv', 'xls', 'xlsx'])) {
+            $this->error(__('Unknown data format'));
+        }
+        if ($ext === 'csv') {
+            $file = fopen($filePath, 'r');
+            $filePath = tempnam(sys_get_temp_dir(), 'import_csv');
+            $fp = fopen($filePath, "w");
+            $n = 0;
+            while ($line = fgets($file)) {
+                $line = rtrim($line, "\n\r\0");
+                $encoding = mb_detect_encoding($line, ['utf-8', 'gbk', 'latin1', 'big5']);
+                if ($encoding != 'utf-8') {
+                    $line = mb_convert_encoding($line, 'utf-8', $encoding);
+                }
+                if ($n == 0 || preg_match('/^".*"$/', $line)) {
+                    fwrite($fp, $line . "\n");
+                } else {
+                    fwrite($fp, '"' . str_replace(['"', ','], ['""', '","'], $line) . "\"\n");
+                }
+                $n++;
+            }
+            fclose($file) || fclose($fp);
+
+            $reader = new Csv();
+        } elseif ($ext === 'xls') {
+            $reader = new Xls();
+        } else {
+            $reader = new Xlsx();
+        }
+
+        //导入文件首行类型,默认是注释,如果需要使用字段名称请使用name
+        //$importHeadType = isset($this->importHeadType) ? $this->importHeadType : 'comment';
+        //模板文件列名
+        try {
+            if (!$PHPExcel = $reader->load($filePath)) {
+                $this->error(__('Unknown data format'));
+            }
+            $currentSheet = $PHPExcel->getSheet(0);  //读取文件中的第一个工作表
+            $allColumn = $currentSheet->getHighestDataColumn(); //取得最大的列号
+            $allRow = $currentSheet->getHighestRow(); //取得一共有多少行
+            $maxColumnNumber = Coordinate::columnIndexFromString($allColumn);
+
+
+            $fields = [];
+            for ($currentRow = 1; $currentRow <= 1; $currentRow++) {
+                for ($currentColumn = 1; $currentColumn <= $maxColumnNumber; $currentColumn++) {
+                    $val = $currentSheet->getCellByColumnAndRow($currentColumn, $currentRow)->getValue();
+                    $fields[] = $val;
+                }
+            }
+
+            $data = [];
+            for ($currentRow = 2; $currentRow <= $allRow; $currentRow++) {
+                for ($currentColumn = 1; $currentColumn <= $maxColumnNumber; $currentColumn++) {
+                    $val = $currentSheet->getCellByColumnAndRow($currentColumn, $currentRow)->getValue();
+                    $data[$currentRow - 2][$currentColumn - 1] = is_null($val) ? '' : $val;
+                }
+            }
+        } catch (Exception $exception) {
+            $this->error($exception->getMessage());
+        }
+
+        $map['is_del'] = 1;
+        $map['is_open'] = 1;
+        $list = $this->product->where($map)->column('stock,available_stock,distribution_occupy_stock', 'sku');
+        $this->model = new \app\admin\model\warehouse\TempProduct;
+        foreach ($data as $k => $v) {
+            $map = [];
+            $map['inventory_id'] = $inventory_id;
+            $map['sku'] = $v[0];
+            $params['error_qty'] = $v[3] - ($list[$v[0]]['stock'] - $list[$v[0]]['distribution_occupy_stock']);
+            $params['inventory_qty'] = $v[3];
+
+            $this->item->where($map)->update($params);
+
+        }
+
+        return json(['code' => 1, 'msg' => '导入成功！！']);
+    }
 
     /***
      * 更改镜架逻辑
@@ -914,52 +1176,48 @@ class Inventory extends Backend
             Db::startTrans();
             try {
                 //更改sales_flat_order_item表中的sku字段
-                if($original_sku && $original_number){ //如果存在原始sku和原始的数量
+                if ($original_sku && $original_number) { //如果存在原始sku和原始的数量
                     $whereChange['order_id'] = $order['entity_id'];
                     $whereChange['sku']      = $original_sku;
                     $changeData['is_change_frame'] = 2;
-                    $updateInfo =Db::connect($db)->table('sales_flat_order_item')->where($whereChange)->update($changeData);
-                    if(false != $updateInfo){
-                        if(1 == $order['custom_is_match_frame']){ //如果已经配过镜架需要把原先的配货占用库存扣减，更新的配货占用库存增加
+                    $updateInfo = Db::connect($db)->table('sales_flat_order_item')->where($whereChange)->update($changeData);
+                    if (false != $updateInfo) {
+                        if (1 == $order['custom_is_match_frame_new']) { //如果已经配过镜架需要把原先的配货占用库存扣减，更新的配货占用库存增加
                             //原先sku增加可用库存,减少占用库存
-                          if($warehouse_original_sku && $original_number){
-                            $item->where(['sku' => $warehouse_original_sku])->inc('available_stock', $original_number)->dec('distribution_occupy_stock',$original_number)->dec('occupy_stock', $original_number)->update();
-                          }   
-                            //更新之后的sku减少可用库存,增加占用库存
-                          if($warehouse_change_sku && $change_number){
-                            $item->where(['sku' => $warehouse_change_sku])->dec('available_stock', $change_number)->inc('distribution_occupy_stock',$change_number)->inc('occupy_stock', $change_number)->update();     
-                          }
-                            
-                        }else{ //否则走原先的流程
-                            //原先sku增加可用库存,减少占用库存
-                          if($warehouse_original_sku && $original_number){
-                            $item->where(['sku' => $warehouse_original_sku])->inc('available_stock', $original_number)->dec('occupy_stock', $original_number)->update();
-                          }
-                            //更新之后的sku减少可用库存,增加占用库存
-                          if($warehouse_change_sku && $change_number){
-                            $item->where(['sku' => $warehouse_change_sku])->dec('available_stock', $change_number)->inc('occupy_stock', $change_number)->update();
-                          }  
-
-                        }
-                    }
-                }else{ //如果不存在原始sku和原始的数量
-                        if(1 == $order['custom_is_match_frame']){ //如果已经配过镜架需要把原先的配货占用库存扣减，更新的配货占用库存增加
-                            //原先sku增加可用库存,减少占用库存
-                            //$item->where(['sku' => $warehouse_original_sku])->inc('available_stock', $original_number)->dec('distribution_occupy_stock',$original_number)->dec('occupy_stock', $original_number)->update();
-                            //更新之后的sku减少可用库存,增加占用库存
-                            if($warehouse_change_sku && $change_number){
-                                $item->where(['sku' => $warehouse_change_sku])->dec('available_stock', $change_number)->inc('distribution_occupy_stock',$change_number)->inc('occupy_stock', $change_number)->update();
+                            if ($warehouse_original_sku && $original_number) {
+                                $item->where(['sku' => $warehouse_original_sku])->inc('available_stock', $original_number)->dec('distribution_occupy_stock', $original_number)->dec('occupy_stock', $original_number)->update();
                             }
-
-                        }else{ //否则走原先的流程
-                            //原先sku增加可用库存,减少占用库存
-                            //$item->where(['sku' => $warehouse_original_sku])->inc('available_stock', $original_number)->dec('occupy_stock', $original_number)->update();
                             //更新之后的sku减少可用库存,增加占用库存
-                            if($warehouse_change_sku && $change_number){
+                            if ($warehouse_change_sku && $change_number) {
+                                $item->where(['sku' => $warehouse_change_sku])->dec('available_stock', $change_number)->inc('distribution_occupy_stock', $change_number)->inc('occupy_stock', $change_number)->update();
+                            }
+                        } else { //否则走原先的流程
+                            //原先sku增加可用库存,减少占用库存
+                            if ($warehouse_original_sku && $original_number) {
+                                $item->where(['sku' => $warehouse_original_sku])->inc('available_stock', $original_number)->dec('occupy_stock', $original_number)->update();
+                            }
+                            //更新之后的sku减少可用库存,增加占用库存
+                            if ($warehouse_change_sku && $change_number) {
                                 $item->where(['sku' => $warehouse_change_sku])->dec('available_stock', $change_number)->inc('occupy_stock', $change_number)->update();
                             }
-
-                        }                    
+                        }
+                    }
+                } else { //如果不存在原始sku和原始的数量
+                    if (1 == $order['custom_is_match_frame_new']) { //如果已经配过镜架需要把原先的配货占用库存扣减，更新的配货占用库存增加
+                        //原先sku增加可用库存,减少占用库存
+                        //$item->where(['sku' => $warehouse_original_sku])->inc('available_stock', $original_number)->dec('distribution_occupy_stock',$original_number)->dec('occupy_stock', $original_number)->update();
+                        //更新之后的sku减少可用库存,增加占用库存
+                        if ($warehouse_change_sku && $change_number) {
+                            $item->where(['sku' => $warehouse_change_sku])->dec('available_stock', $change_number)->inc('distribution_occupy_stock', $change_number)->inc('occupy_stock', $change_number)->update();
+                        }
+                    } else { //否则走原先的流程
+                        //原先sku增加可用库存,减少占用库存
+                        //$item->where(['sku' => $warehouse_original_sku])->inc('available_stock', $original_number)->dec('occupy_stock', $original_number)->update();
+                        //更新之后的sku减少可用库存,增加占用库存
+                        if ($warehouse_change_sku && $change_number) {
+                            $item->where(['sku' => $warehouse_change_sku])->dec('available_stock', $change_number)->inc('occupy_stock', $change_number)->update();
+                        }
+                    }
                 }
 
                 //不需要添加出入库逻辑(主要针对总库存)
@@ -1070,11 +1328,11 @@ class Inventory extends Backend
                 $whereChange['sku']      = $original_sku;
                 $changeData['is_change_frame'] = 3;
                 $updateInfo = Db::connect($db)->table('sales_flat_order_item')->where($whereChange)->update($changeData);
-                if(false != $updateInfo){
-                    if(1 == $order['custom_is_match_frame_new']){ //如果已经配过镜架需要把原先的配货占用库存扣减
+                if (false != $updateInfo) {
+                    if (1 == $order['custom_is_match_frame_new']) { //如果已经配过镜架需要把原先的配货占用库存扣减
                         //原先sku增加可用库存,减少占用库存
-                        $item->where(['sku' => $warehouse_original_sku])->inc('available_stock', $original_number)->dec('distribution_occupy_stock',$original_number)->dec('occupy_stock', $original_number)->update();
-                    }else{
+                        $item->where(['sku' => $warehouse_original_sku])->inc('available_stock', $original_number)->dec('distribution_occupy_stock', $original_number)->dec('occupy_stock', $original_number)->update();
+                    } else {
                         $item->where(['sku' => $warehouse_original_sku])->inc('available_stock', $original_number)->dec('occupy_stock', $original_number)->update();
                     }
                 }
@@ -1118,4 +1376,4 @@ class Inventory extends Backend
             }
         }
     }
-  }
+}
