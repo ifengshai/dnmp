@@ -174,6 +174,8 @@ class Operationalreport extends Backend{
         $eur_order_percent          = @round(($eur_order_num/($usd_order_num + $cad_order_num + $aud_order_num + $eur_order_num + $gbp_order_num))*100,2);
         //gbp订单百分比
         $gbp_order_percent          = @round(($gbp_order_num/($usd_order_num + $cad_order_num + $aud_order_num + $eur_order_num + $gbp_order_num))*100,2);
+        //所有的订单状态
+        
         return [
             'general_order'                     => $general_order,
             'general_money'                     => $general_money,
