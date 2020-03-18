@@ -175,7 +175,13 @@ class Operationalreport extends Backend{
         //gbp订单百分比
         $gbp_order_percent          = @round(($gbp_order_num/($usd_order_num + $cad_order_num + $aud_order_num + $eur_order_num + $gbp_order_num))*100,2);
         //所有的订单状态
-        Db::table('think_user')->distinct(true)->field('user_login')->select();
+        $order_status               = $model->distinct(true)->field('status')->select();
+        $order_status_arr           = [];
+        if($order_status){
+            foreach($order_status as $v){
+                $order_status_arr[] = $v['status'];
+            }
+        }
         return [
             'general_order'                     => $general_order,
             'general_money'                     => $general_money,
@@ -212,10 +218,7 @@ class Operationalreport extends Backend{
             'gbp_order_money'                   => $gbp_order_money,
             'gbp_order_average_amount'          => $gbp_order_average_amount,
             'gbp_order_percent'                 => $gbp_order_percent,
+            'order_status'                      => $order_status_arr
         ];
-    }
-    public function ceshi(){
-        $a = @(0/0);
-        dump($a);
     }
 }

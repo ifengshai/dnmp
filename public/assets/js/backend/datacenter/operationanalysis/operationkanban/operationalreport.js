@@ -52,6 +52,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echartsobj
                         'platform': platform    
                     }
                 },function (data, ret) {
+                    console.log(ret);
                     $('#general_order').text(ret.rows.general_order);
                     $('#general_money').text(ret.rows.general_money);
                     $('#wholesale_order').text(ret.rows.wholesale_order);
