@@ -178,12 +178,21 @@ class Operationalreport extends Backend{
         $gbp_order_percent          = @round(($gbp_order_num/($usd_order_num + $cad_order_num + $aud_order_num + $eur_order_num + $gbp_order_num))*100,2);
         //所有的订单状态
         $order_status               = $model->table('sales_flat_order')->distinct(true)->field('status')->select();
-        $order_status_arr           = [];
+        $order_status_arr           = $all_shipping_amount_arr = [];
         if($order_status){
             foreach($order_status as $v){
                 $order_status_arr['status'][] = $v['status'];
                 $order_status_arr['money'][]  = $model->table('sales_flat_order')->where($map)->where(['status'=>$v['status']])->sum('base_grand_total');
                 $order_status_arr['num'][]    = $model->table('sales_flat_order')->where($map)->where(['status'=>$v['status']])->count('*');   
+            }
+        }
+        //所有的运费
+        $all_shipping_amount      = $model->table('sales_flat_order')->distinct(true)->field('base_shipping_amount')->order('base_shipping_amount')->select();
+        if($all_shipping_amount){
+            foreach($all_shipping_amount as $av){
+                $all_shipping_amount_arr['shipping_amount'][] = $av['base_shipping_amount'];
+                $all_shipping_amount_arr['num'][]             = $num = $model->table('sales_flat_order')->where($map)->where(['base_shipping_amount'=>$av['base_shipping_amount']])->count('*');
+                $all_shipping_amount_arr['money'][]           = round($av['base_shipping_amount']*$num,2);         
             }
         }
         return [
@@ -222,7 +231,8 @@ class Operationalreport extends Backend{
             'gbp_order_money'                   => $gbp_order_money,
             'gbp_order_average_amount'          => $gbp_order_average_amount,
             'gbp_order_percent'                 => $gbp_order_percent,
-            'order_status'                      => $order_status_arr
+            'order_status'                      => $order_status_arr,
+            'base_shipping_amount'              => $all_shipping_amount_arr
         ];
     }
 }
