@@ -36,15 +36,15 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echartsobj
                 };
                 var time = $('#create_time').val();
                 var platform = $('#c-order_platform').val();
-                var options = {
-                    type: 'post',
-                    url: 'datacenter/operationanalysis/operationkanban/operationalreport/index',
-                    data: {
-                        'time': time,
-                        'platform': platform
-                    }
-                }
-                EchartObj.api.ajax(options, chartOptions)
+                // var options = {
+                //     type: 'post',
+                //     url: 'datacenter/operationanalysis/operationkanban/operationalreport/index',
+                //     data: {
+                //         'time': time,
+                //         'platform': platform
+                //     }
+                // }
+                // EchartObj.api.ajax(options, chartOptions)
                 Backend.api.ajax({
                     url: "datacenter/operationanalysis/operationkanban/operationalreport/index",
                     data: { 
@@ -52,6 +52,21 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echartsobj
                         'platform': platform    
                     }
                 },function (data, ret) {
+                    console.log(ret.rows);
+                    var order_status_length = ret.rows.order_status.status.length;
+                    for(var j=0;j<order_status_length;j++){
+                        var order_status = ret.rows.order_status.status;
+                        var order_num    = ret.rows.order_status.num;
+                        var order_money  = ret.rows.order_status.money;
+                        $("#order-table tbody").append('<tr><td>'+order_status[j]+'</td><td>'+order_num[j]+'</td><td>'+order_money[j]+'</td></tr>');
+                    }
+                    var shipping_amount_length = ret.rows.base_shipping_amount.shipping_amount.length;
+                    for(var n=0;n<shipping_amount_length;n++){
+                        var shipping_amount         = ret.rows.base_shipping_amount.shipping_amount;
+                        var shipping_amount_num     = ret.rows.base_shipping_amount.num;
+                        var shipping_amount_money   = ret.rows.base_shipping_amount.money;
+                        $("#shipping_amount_table tbody").append('<tr><td>'+shipping_amount[n]+'</td><td>'+shipping_amount_num[n]+'</td><td>'+shipping_amount_money[n]+'</td></tr>');
+                    }
                     $('#general_order').text(ret.rows.general_order);
                     $('#general_money').text(ret.rows.general_money);
                     $('#wholesale_order').text(ret.rows.wholesale_order);
@@ -87,6 +102,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echartsobj
                     $('#gbp_order_percent').text(ret.rows.gbp_order_percent);
                     $('#gbp_order_money').text(ret.rows.gbp_order_money);
                     $('#gbp_order_average_amount').text(ret.rows.gbp_order_average_amount);
+
                 },function(data,ret){
                     alert(ret.msg);
                     return false;

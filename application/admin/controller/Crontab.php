@@ -1308,7 +1308,7 @@ order by sfoi.item_id asc limit 1000";
         $data['zeelool_shoppingcart_update_conversion']     = $zeelool_shoppingcart_update_conversion;
         $data['voogueme_shoppingcart_update_conversion']    = $voogueme_shoppingcart_update_conversion;
         $data['nihao_shoppingcart_update_conversion']       = $nihao_shoppingcart_update_conversion;
-        $data['nihao_shoppingcart_update_conversion']       = @round(($zeelool_shoppingcart_update_conversion + $voogueme_shoppingcart_update_conversion + $nihao_shoppingcart_update_conversion) / 3, 2);
+        $data['all_shoppingcart_update_conversion']       = @round(($zeelool_shoppingcart_update_conversion + $voogueme_shoppingcart_update_conversion + $nihao_shoppingcart_update_conversion) / 3, 2);
         $data['create_date'] = date("Y-m-d", strtotime("-1 day"));
         $data['createtime'] = date("Y-m-d H:i:s");
         Db::name('order_statistics')->insert($data);
@@ -1362,33 +1362,7 @@ order by sfoi.item_id asc limit 1000";
         echo 'ok';
     }
 
-    public function product_grade_list_test()
-    {
-        $start = date("Y-m-d", strtotime("-3 month"));
-        $end = date("Y-m-d", time());
-
-        //$zeelool_model = Db::connect('database.db_zeelool')->table('sales_flat_order');
-
-        $zeelool_model = new \app\admin\model\order\order\Zeelool;
-        $voogueme_model = new \app\admin\model\order\order\Voogueme;
-        $nihao_model = new \app\admin\model\order\order\Nihao;
-
-
-
-        $intelligent_purchase_query_sql = "select sfoi.sku,round(sum(sfoi.qty_ordered),0) counter,IF
-        ( datediff( now(),cpe.created_at) > 90, 90, datediff( now(),cpe.created_at ) ) days,cpe.created_at
- from sales_flat_order_item sfoi
- left join sales_flat_order sfo on sfo.entity_id=sfoi.order_id
- left join catalog_product_entity cpe on cpe.entity_id=sfoi.product_id
- where sfoi.sku not like '%Price%' and sfo.status in('complete','processing','free_proccessing','paypal_reversed') and if (datediff(now(),cpe.created_at) > 90,sfo.created_at between '$start' and '$end',sfo.created_at between cpe.created_at and '$end')
- GROUP BY sfoi.sku order by counter desc";
-        $zeelool_list = $zeelool_model->query($intelligent_purchase_query_sql);
-        //查询sku映射关系表 
-        $itemPlatFormSku = new \app\admin\model\itemmanage\ItemPlatformSku;
-        $sku_list = $itemPlatFormSku->column('sku', 'platform_sku');
-    }
-
-
+    
     /**
      * 每天9点 根据销量计算产品分级
      */
@@ -1662,7 +1636,7 @@ order by sfoi.item_id asc limit 1000";
     public function get_sku_stock()
     {
         $where['is_del'] = 1;
-        $item = Db::connect('database.db_stock')->name('item')->where($where)->field('sku,available_stock as stock_num')->select();
+        $item = Db::connect('database.db_stock')->name('item')->where($where)->field('sku,available_stock as stock_num,stock,occupy_stock,distribution_occupy_stock')->select();
 
         if ($item) {
             Db::name('goods_stock_log')->insertAll($item);
@@ -2837,6 +2811,20 @@ order by sfoi.item_id asc limit 1000";
         $data['value'] = $days10SalesNumPercent ?? 0;
         $data['updatetime'] = date('Y-m-d H:i:s', time());
         $dataConfig->where('key', 'days10SalesNumPercent')->update($data);
+    }
+
+    /**
+     * 定时更新供应链分析-加工时效
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/03/14 14:15:37 
+     * @return void
+     */
+    public function processing_aging()
+    {
+        $dataConfig = new \app\admin\model\DataConfig();
+        
     }
 
     /**
