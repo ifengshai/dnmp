@@ -204,9 +204,9 @@ class Operationalreport extends Backend{
         //求出饰品的所有sku
         $decoration_sku = $this->item->getDifferenceSku(3);
         //求出眼镜的销售额 base_price  base_discount_amount
-        $frame_money_price    = $model->table('sales_flat_order_item m')->join('sales_flat_order o','m.order_id=o.entity_id','left')->where($whereItem)->where($itemMap)->where('m.sku','in',$frame_sku)->sum('base_price');
+        $frame_money_price    = $model->table('sales_flat_order_item m')->join('sales_flat_order o','m.order_id=o.entity_id','left')->where($whereItem)->where($itemMap)->where('m.sku','in',$frame_sku)->sum('m.base_price');
         //眼镜的折扣价格
-        $frame_money_discount = $model->table('sales_flat_order_item m')->join('sales_flat_order o','m.order_id=o.entity_id','left')->where($whereItem)->where($itemMap)->where('m.sku','in',$frame_sku)->sum('base_discount_amount');
+        $frame_money_discount = $model->table('sales_flat_order_item m')->join('sales_flat_order o','m.order_id=o.entity_id','left')->where($whereItem)->where($itemMap)->where('m.sku','in',$frame_sku)->sum('m.base_discount_amount');
         //眼镜的实际销售额
         $frame_money          = round(($frame_money_price - $frame_money_discount),2);
         //眼镜的销售副数
@@ -218,9 +218,9 @@ class Operationalreport extends Backend{
             $frame_avg_money  = 0;
         }
         //求出配饰的销售额
-        $decoration_money_price    = $model->table('sales_flat_order_item m')->join('sales_flat_order o','m.order_id=o.entity_id','left')->where($whereItem)->where($itemMap)->where('m.sku','in',$decoration_sku)->sum('base_price');
+        $decoration_money_price    = $model->table('sales_flat_order_item m')->join('sales_flat_order o','m.order_id=o.entity_id','left')->where($whereItem)->where($itemMap)->where('m.sku','in',$decoration_sku)->sum('m.base_price');
         //配饰的折扣价格
-        $decoration_money_discount = $model->table('sales_flat_order_item m')->join('sales_flat_order o','m.order_id=o.entity_id','left')->where($whereItem)->where($itemMap)->where('m.sku','in',$decoration_sku)->sum('base_discount_amount');
+        $decoration_money_discount = $model->table('sales_flat_order_item m')->join('sales_flat_order o','m.order_id=o.entity_id','left')->where($whereItem)->where($itemMap)->where('m.sku','in',$decoration_sku)->sum('m.base_discount_amount');
         //配饰的实际销售额
         $decoration_money          = round(($decoration_money_price - $decoration_money_discount),2);
         //配饰的销售副数
