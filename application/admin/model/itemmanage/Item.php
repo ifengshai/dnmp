@@ -631,7 +631,52 @@ class Item extends Model
         $where['a.is_open']  = 1;
         $where['b.is_del']  = 1;
         return $this->where($where)->alias('a')
-        ->join(['fa_item_category' => 'b'], 'a.category_id=b.id')
-        ->cache(86400)->column('a.available_stock,a.name,b.name as type_name', 'sku');
+            ->join(['fa_item_category' => 'b'], 'a.category_id=b.id')
+            ->cache(86400)->column('a.available_stock,a.name,b.name as type_name', 'sku');
+    }
+
+    /**
+     * 产品库存分级
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/03/18 15:38:11 
+     * @return void
+     */
+    public function stockClass()
+    {
+        $where['is_del']  = 1;
+        $where['is_open']  = 1;
+        $where['category_id']  = ['<>', 43];
+        $data = $this->field('sum(if(stock<0,1,0)) as a,
+        sum(if(stock=0,1,0)) as b,
+        sum(if(stock>=1 and stock<=10,1,0)) as c,
+        sum(if(stock>=11 and stock<=30,1,0)) as d,
+        sum(if(stock>=31 and stock<=50,1,0)) as e,
+        sum(if(stock>=51 and stock<=70,1,0)) as f,
+        sum(if(stock>=71 and stock<=100,1,0)) as g,
+        sum(if(stock>=101,1,0)) as h
+        ')->where($where)->select();
+        $data = collection($data)->toArray();
+        return $data;
+    }
+    /**
+     * 获取不同分类的sku
+     * param id 1 眼镜 3 配饰
+     * @Description created by lsw
+     * @author lsw
+     * @since 2020/03/18 17:37:02 
+     * @param [type] $id
+     * @return void
+     */
+    public function getDifferenceSku($id)
+    {
+        //查询镜框分类有哪些
+        $category = new \app\admin\model\itemmanage\ItemCategory;
+        $map['attribute_group_id'] = $id;
+        $ids = $category->where($map)->column('id');
+
+        $where['category_id']  = ['in', $ids];
+        return $this->where($where)->column('sku');
     }
 }

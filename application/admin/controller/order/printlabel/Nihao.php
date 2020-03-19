@@ -69,7 +69,11 @@ class Nihao extends Backend
                 $swhere['order_platform'] = 3;
                 $swhere['synergy_order_id'] = 2;
                 $order_arr = $infoSynergyTask->where($swhere)->order('create_time desc')->column('synergy_order_number');
-                $map['increment_id'] = ['in', $order_arr];
+                if ($filter['task_label'] == 1) {
+                    $map['increment_id'] = ['in', $order_arr];
+                } elseif ($filter['task_label'] == '0') {
+                    $map['increment_id'] = ['not in', $order_arr];
+                }
                 unset($filter['task_label']);
                 $this->request->get(['filter' => json_encode($filter)]);
             }
@@ -602,7 +606,11 @@ where cped.attribute_id in(146,147) and cped.store_id=0 and cped.entity_id=$prod
             $swhere['order_platform'] = 3;
             $swhere['synergy_order_id'] = 2;
             $order_arr = $infoSynergyTask->where($swhere)->order('create_time desc')->column('synergy_order_number');
-            $map['sfo.increment_id'] = ['in', $order_arr];
+            if ($filter['task_label'] == 1) {
+                $map['sfo.increment_id'] = ['in', $order_arr];
+            } elseif ($filter['task_label'] == '0') {
+                $map['sfo.increment_id'] = ['not in', $order_arr];
+            }
             unset($filter['task_label']);
             $this->request->get(['filter' => json_encode($filter)]);
         }

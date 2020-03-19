@@ -258,22 +258,22 @@
                                     <table id="caigou-table" class="handle_table1" style="border-width:0px;width: 300px;margin-top: 80px;">
                                         <tr >
                                             <td>30天总单量</td>
-                                            <td>{$frameStock}</td>
+                                            <td>{$days30Num}</td>
                                            
                                         </tr>
                                         <tr >
                                             <td>未出库订单</td>
-                                            <td>{$ornamentsStock}</td>
+                                            <td>{$allUnorderNum}</td>
                                            
                                         </tr>
                                         <tr >
                                             <td>超时订单</td>
-                                            <td>{$ornamentsStock}</td>
+                                            <td>{$overtimeOrder}</td>
                                            
                                         </tr>
                                         <tr >
                                             <td>处理订单</td>
-                                            <td>{$ornamentsStock}</td>
+                                            <td>{$days30OrderProcessNum}</td>
                                            
                                         </tr>
                                     
@@ -288,57 +288,73 @@
                                 <div>
                                     <table id="caigou-table" class="handle_table1" style="width: 600px;height:400px;">
                                         <tr>
-                                            <td colspan="5" style="font-size: 16px;font-weight:1000">加工时效</td>
+                                            <td colspan="4" style="font-size: 16px;font-weight:1000">库存分级</td>
                                         </tr>
                                         <tr>
-                                            <td>类型</td>
-                                            <td>未超时未处理</td>
-                                            <td>超时未处理</td>
-                                            <td>未超时已处理</td>
-                                            <td>超时已处理</td>
+                                            <td>序号</td>
+                                            <td>级别</td>
+                                            <td>数量</td>
+                                            <td>百分比</td>
                                    
                                         </tr>
+                                      
                                         <tr>
-                                            <td>打印标签（24h）</td>
-                                            <td></td>
-                                            <td></td>
-                                            <td></td>
-                                            <td></td>
+                                            <td>1</td>
+                                            <td>库存 < 0</td>
+                                            <td>{$stockData[0]['a']}</td>
+                                            <td>{:round($stockData[0]['a']/$skuNum*100,2)}</td>
                                           
                                         </tr>
                                    
                                         <tr>
-                                            <td>配镜架（48h）</td>
-                                            <td></td>
-                                            <td></td>
-                                            <td></td>
-                                            <td></td>
+                                            <td>2</td>
+                                            <td>库存 = 0</td>
+                                            <td>{$stockData[0]['b']}</td>
+                                            <td>{:round($stockData[0]['b']/$skuNum*100,2)}</td>
                                             
                                         </tr>
                                        
                                         <tr>
-                                            <td>配镜片（7*24h）</td>
-                                            <td></td>
-                                            <td></td>
-                                            <td></td>
-                                            <td></td>
+                                            <td>3</td>
+                                            <td>1 <= 库存 <= 10</td>
+                                            <td>{$stockData[0]['c']}</td>
+                                            <td>{:round($stockData[0]['c']/$skuNum*100,2)}</td>
                                             
                                         </tr>
 
                                         <tr>
-                                            <td>加工（24h）</td>
-                                            <td></td>
-                                            <td></td>
-                                            <td></td>
-                                            <td></td>
+                                            <td>4</td>
+                                            <td>11 <= 库存 <= 30</td>
+                                            <td>{$stockData[0]['d']}</td>
+                                            <td>{:round($stockData[0]['d']/$skuNum*100,2)}</td>
                                            
                                         </tr>
                                         <tr>
-                                            <td>成品质检（24h）</td>
-                                            <td></td>
-                                            <td></td>
-                                            <td></td>
-                                            <td></td>
+                                            <td>5</td>
+                                            <td>31 <= 库存 <= 50</td>
+                                            <td>{$stockData[0]['e']}</td>
+                                            <td>{:round($stockData[0]['e']/$skuNum*100,2)}</td>
+                                           
+                                        </tr>
+                                        <tr>
+                                            <td>6</td>
+                                            <td>51 <= 库存 <= 70</td>
+                                            <td>{$stockData[0]['f']}</td>
+                                            <td>{:round($stockData[0]['f']/$skuNum*100,2)}</td>
+                                           
+                                        </tr>
+                                        <tr>
+                                            <td>7</td>
+                                            <td>71 <= 库存 <= 100</td>
+                                            <td>{$stockData[0]['g']}</td>
+                                            <td>{:round($stockData[0]['g']/$skuNum*100,2)}</td>
+                                           
+                                        </tr>
+                                        <tr>
+                                            <td>8</td>
+                                            <td>101 <= 库存</td>
+                                            <td>{$stockData[0]['h']}</td>
+                                            <td>{:round($stockData[0]['h']/$skuNum*100,2)}</td>
                                            
                                         </tr>
                                     

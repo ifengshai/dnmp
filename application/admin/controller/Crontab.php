@@ -1308,7 +1308,7 @@ order by sfoi.item_id asc limit 1000";
         $data['zeelool_shoppingcart_update_conversion']     = $zeelool_shoppingcart_update_conversion;
         $data['voogueme_shoppingcart_update_conversion']    = $voogueme_shoppingcart_update_conversion;
         $data['nihao_shoppingcart_update_conversion']       = $nihao_shoppingcart_update_conversion;
-        $data['nihao_shoppingcart_update_conversion']       = @round(($zeelool_shoppingcart_update_conversion + $voogueme_shoppingcart_update_conversion + $nihao_shoppingcart_update_conversion) / 3, 2);
+        $data['all_shoppingcart_update_conversion']       = @round(($zeelool_shoppingcart_update_conversion + $voogueme_shoppingcart_update_conversion + $nihao_shoppingcart_update_conversion) / 3, 2);
         $data['create_date'] = date("Y-m-d", strtotime("-1 day"));
         $data['createtime'] = date("Y-m-d H:i:s");
         Db::name('order_statistics')->insert($data);
@@ -1636,7 +1636,7 @@ order by sfoi.item_id asc limit 1000";
     public function get_sku_stock()
     {
         $where['is_del'] = 1;
-        $item = Db::connect('database.db_stock')->name('item')->where($where)->field('sku,available_stock as stock_num')->select();
+        $item = Db::connect('database.db_stock')->name('item')->where($where)->field('sku,available_stock as stock_num,stock,occupy_stock,distribution_occupy_stock')->select();
 
         if ($item) {
             Db::name('goods_stock_log')->insertAll($item);

@@ -495,16 +495,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','custom-css','
             Form.api.bindevent($("form[role=form]"), function (data) {
                 window.top.location.href = Config.moduleurl + '/saleaftermanage/order_return/search';
             });
-            // //点击重置按钮
-            // $(document).on('click','.btn-default',function(){
-            //     var increment_id = $('#increment_id').val();
-            //     console.log(increment_id)
-            //     $('#increment_id').val('8888888888')
-            //     // $('#customer_email').val("");
-            //     // $('#customer_name').val("");
-            //     // $('#customer_phone').val("");
-            //     // $('#track_number').val(""); 
-            // });
+            //点击重置按钮
+            $(document).on('click','.btn-default',function(){
+                $('#increment_id').attr({"value": ""});
+                $('#customer_email').attr({"value": ""});
+                $('#customer_name').attr({"value": ""});
+                $('#customer_phone').attr({"value": ""});
+                $('#track_number').attr({"value": ""});
+            });
             //模糊匹配订单
             $('#increment_id').autocomplete({
                 source: function (request, response) {

@@ -168,7 +168,7 @@ class Zeelool extends Model
         } else {
             $map['sku'] = ['not like', '%Price%'];
         }
-
+        $map['a.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
         $res = $this
             ->where($map)
             ->where($where)
@@ -195,6 +195,7 @@ class Zeelool extends Model
             $map['sku'] = ['in', $sku];
         }
         $map['sku'] = ['not like', '%Price%'];
+        $map['a.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
         $res = $this
             ->where($map)
             ->where($where)
@@ -633,6 +634,7 @@ class Zeelool extends Model
      */
     public function getOrderSkuNum()
     {
+        $where['a.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
         $where['a.created_at'] = ['between', [date('Y-m-01 00:00:00', time()), date('Y-m-d H:i:s', time())]];
         return $this->alias('a')
             ->where($where)
@@ -651,6 +653,7 @@ class Zeelool extends Model
     public function getOrderSalesCost()
     {
         $where['a.created_at'] = ['between', [date('Y-m-01 00:00:00', time()), date('Y-m-d H:i:s', time())]];
+        $where['a.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
         $data = $this->alias('a')
             ->where($where)
             ->field("sum(qty_ordered) as num,sku")
@@ -709,6 +712,28 @@ class Zeelool extends Model
         $FrameNotOvertime = $this->where($map)->count(1);
     }
 
+
+    /**
+     * 根据SKU查询订单号ID
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/02/24 14:51:20 
+     * @return void
+     */
+    public function getOrderId($map)
+    {
+        if ($map) {
+            $result = Db::connect('database.db_zeelool')
+                ->table('sales_flat_order_item')
+                ->alias('a')
+                ->join(['sales_flat_order' => 'b'],'a.order_id=b.entity_id')
+                ->where($map)
+                ->column('order_id');
+            return $result;
+        }
+        return false;
+    }
 
      
 }

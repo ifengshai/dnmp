@@ -225,7 +225,7 @@ class Voogueme extends Model
         } else {
             $map['sku'] = ['not like', '%Price%'];
         }
-
+        $map['a.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
         $res = $this
             ->where($map)
             ->where($where)
@@ -391,6 +391,7 @@ class Voogueme extends Model
     public function getOrderSkuNum()
     {
         $where['a.created_at'] = ['between', [date('Y-m-01 00:00:00', time()), date('Y-m-d H:i:s', time())]];
+        $where['a.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
         return $this->alias('a')
         ->where($where)
         ->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')
@@ -408,6 +409,7 @@ class Voogueme extends Model
     public function getOrderSalesCost()
     {
         $where['a.created_at'] = ['between', [date('Y-m-01 00:00:00', time()), date('Y-m-d H:i:s', time())]];
+        $where['a.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
         $data = $this->alias('a')
             ->where($where)
             ->field("sum(qty_ordered) as num,sku")
@@ -450,6 +452,7 @@ class Voogueme extends Model
             $map['sku'] = ['in', $sku];
         }
         $map['sku'] = ['not like', '%Price%'];
+        $map['a.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
         $res = $this
             ->where($map)
             ->where($where)
@@ -461,6 +464,28 @@ class Voogueme extends Model
             ->column('round(sum(b.qty_ordered)) as num', 'sku');
 
         return $res;
+    }
+
+    /**
+     * 根据SKU查询订单号ID
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/02/24 14:51:20 
+     * @return void
+     */
+    public function getOrderId($map)
+    {
+        if ($map) {
+            $result = Db::connect('database.db_voogueme')
+                ->table('sales_flat_order_item')
+                ->alias('a')
+                ->join(['sales_flat_order' => 'b'],'a.order_id=b.entity_id')
+                ->where($map)
+                ->column('order_id');
+            return $result;
+        }
+        return false;
     }
 
 }

@@ -84,7 +84,7 @@
             <input id="c-createtime" data-rule="required" class = "form-control" name="row[create_time]" value="{$row.create_time}" disabled="disabled" >
         </div>
         <label class="control-label col-xs-12 col-sm-2">{:__('Handle_scheme')}:</label>
-        <div class="col-xs-12 col-sm-3">
+        <!-- <div class="col-xs-12 col-sm-3">
             {if $row.handle_scheme eq 1}
             <input id="c-handle_scheme" data-rule="required" class = "form-control" name="row[handle_scheme]" value="部分退款" disabled="disabled" >
             {elseif $row.handle_scheme eq 2 /}
@@ -102,6 +102,9 @@
             {else /}
             <input id="c-handle_scheme" data-rule="required" class = "form-control" name="row[handle_scheme]" value="未选择" disabled="disabled" >
             {/if}
+        </div> -->
+        <div class="col-xs-12 col-sm-3">
+            {:build_select('row[handle_scheme][]', $SolveScheme, $row.handle_scheme,['class'=>'form-control selectpicker', 'data-rule'=>'required','data-live-search' => true,'multiple'=>'multiple','id'=>'choose_dept_id'])}
         </div>
     </div>
     <div class="form-group">
