@@ -175,12 +175,12 @@ define(['echarts', 'echarts-theme', Config.store_enname], function (Echarts, und
                 },
                 tooltip: { //提示框组件。
                     trigger: 'axis',
-                    axisPointer: {
-                        type: 'cross',
-                        label: {
-                            backgroundColor: '#6a7985'
-                        }
-                    }
+                    // axisPointer: {
+                    //     type: 'cross',
+                    //     label: {
+                    //         backgroundColor: '#6a7985'
+                    //     }
+                    // }
                 },
                 legend: { //图例设置
                     data: []
@@ -209,7 +209,7 @@ define(['echarts', 'echarts-theme', Config.store_enname], function (Echarts, und
                     type: 'value'
                 },
                 grid: [{ //画布大小
-                    left: '12%',
+                    left: '5%',
                     top: '20%',
                     right: '12%',
                     bottom: '10%'

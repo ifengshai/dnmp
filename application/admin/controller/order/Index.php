@@ -64,15 +64,32 @@ class Index extends Backend
             } elseif ($label == 4) {
                 $model = $this->weseeoptical;
             }
+
+            $filter = json_decode($this->request->get('filter'), true);
+            //SKU搜索
+            if ($filter['sku']) {
+                $smap['sku'] = ['like', '%' . $filter['sku'] . '%'];
+                if ($filter['status']) {
+                    $smap['status'] = ['in', $filter['status']];
+                }
+                $ids = $model->getOrderId($smap);
+                $map['entity_id'] = ['in', $ids];
+                unset($filter['sku']);
+                $this->request->get(['filter' => json_encode($filter)]);
+            }
+
+
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
 
             $total = $model
                 ->where($where)
+                ->where($map)
                 ->order($sort, $order)
                 ->count();
 
             $list = $model
                 ->where($where)
+                ->where($map)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();

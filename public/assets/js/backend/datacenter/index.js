@@ -143,17 +143,38 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj', 'custom
 
         },
         warehouse_data_analysis: function () {
-            //销售排行榜图表
+            //库存分布
             var chartOptions = {
                 targetId: 'echart',
                 downLoadTitle: '图表',
                 type: 'pie'
             };
-      
+
             var options = {
                 type: 'post',
-                url: 'datacenter/index/warehouse_data_analysis'
-               
+                url: 'datacenter/index/warehouse_data_analysis',
+                data: {
+                    'key': 'pie'
+                }
+
+            }
+            EchartObj.api.ajax(options, chartOptions)
+
+
+            //订单处理
+            var chartOptions = {
+                targetId: 'echart2',
+                downLoadTitle: '图表',
+                type: 'line'
+            };
+
+            var options = {
+                type: 'post',
+                url: 'datacenter/index/warehouse_data_analysis',
+                data: {
+                    'key': 'line'
+                }
+
             }
             EchartObj.api.ajax(options, chartOptions)
         },

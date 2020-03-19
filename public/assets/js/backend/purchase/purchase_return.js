@@ -1,4 +1,4 @@
-define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','bootstrap-table-jump-to'], function ($, undefined, Backend, Table, Form) {
+define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-table-jump-to'], function ($, undefined, Backend, Table, Form) {
 
     var Controller = {
         index: function () {
@@ -31,7 +31,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','bootstrap-tab
                         { field: 'return_number', title: __('Return_number'), operate: 'like' },
                         { field: 'purchaseorder.purchase_number', title: __('Purchase_id'), operate: 'like' },
                         { field: 'supplier.supplier_name', title: __('Supplier_id'), operate: 'like' },
-                        { field: 'return_type', title: __('Return_type'), custom: { 1: 'success', 2: 'success', 3: 'success' }, searchList: { 1: '仅退款', 2: '退货退款', 3: '调换货' }, formatter: Table.api.formatter.status },
+                        { field: 'return_type', title: __('Return_type'), custom: { 1: 'success', 2: 'success', 3: 'success', 4: 'success' }, searchList: { 1: '仅退款', 2: '退货退款', 3: '调换货', 4: '仅退货' }, formatter: Table.api.formatter.status },
                         {
                             field: 'status', title: __('status'),
                             custom: { 0: 'success', 1: 'yellow', 2: 'blue', 3: 'blue', 4: 'green', 5: 'gray' },
@@ -160,7 +160,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','bootstrap-tab
                     var op = search.op;
                     window.open(Config.moduleurl + '/purchase/purchase_return/batch_export_xls?filter=' + filter + '&op=' + op, '_blank');
                 }
-                
+
             });
         },
         add: function () {
@@ -168,7 +168,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','bootstrap-tab
             //移除
             $(document).on('click', '.btn-del', function () {
                 $(this).parent().parent().remove();
-                
+
                 var all_price = 0;
                 $('.return_num').each(function () {
                     var num = $(this).val();
@@ -230,7 +230,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','bootstrap-tab
                             $('.caigou table tbody').html('');
                             var return_money = 0;
                             for (var i in data.item) {
-                                return_money += data.item[i].purchase_price*data.item[i].unqualified_num;
+                                return_money += data.item[i].purchase_price * data.item[i].unqualified_num;
 
                                 var sku = data.item[i].sku;
                                 if (!sku) {
@@ -239,11 +239,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','bootstrap-tab
 
                                 // var num = data.item[i].purchase_num * 1 - data.item[i].arrivals_num * 1;
 
-                                var supplier_sku = data.item[i].supplier_sku ?　data.item[i].supplier_sku : '';
+                                var supplier_sku = data.item[i].supplier_sku ? data.item[i].supplier_sku : '';
                                 var percent = data.item[i].arrivals_num > 0 ? Math.round(data.item[i].quantity_num / data.item[i].arrivals_num * 100) : 0;
                                 shtml += '<tr><input  class="form-control" name="item_id[]" type="hidden" readonly value="' + data.item[i].ids + '">'
                                 shtml += ' <td><input id="c-purchase_remark" class="form-control sku" name="sku[]" type="text" readonly value="' + sku + '"></td>'
-                               
+
                                 shtml += ' <td><input id="c-purchase_remark" class="form-control" disabled  type="text" value="' + data.item[i].purchase_price + '"></td>'
                                 shtml += ' <td><input id="c-purchase_remark" class="form-control" disabled type="text" value="' + supplier_sku + '"></td>'
                                 shtml += ' <td><input id="c-purchase_remark" class="form-control purchase_num" disabled type="text" redeonly value="' + data.item[i].purchase_num + '"></td>'
@@ -347,7 +347,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','bootstrap-tab
                     }
                     Backend.api.ajax({
                         url: 'ajax/getSkuList',
-                        data: { sku: sku,supplier_id:supplier_id}
+                        data: { sku: sku, supplier_id: supplier_id }
                     }, function (data, ret) {
                         _this.parent().parent().find('.product_name').val(data.name);
                         _this.parent().parent().find('.supplier_sku').val(data.supplier_sku);
