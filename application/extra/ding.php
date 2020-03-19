@@ -14,14 +14,14 @@ return [
     | 【必填】应用 AppKey
     |-----------------------------------------------------------
     */
-    'app_key' => 'dingualdghgy6bzjm8z5',
+    'app_key' => 'dinge51fl8wubuih963a',
 
     /*
     |-----------------------------------------------------------
     | 【必填】应用 AppSecret
     |-----------------------------------------------------------
     */
-    'app_secret' => 'YpMwwsDVMRGbBsttNRLULtOmqC7FK8WeocpoQPZlwvMsql68YdxXHaZzaeX6mJEK',
+    'app_secret' => 'qZwUg-d_aaiQY8ez0XXCfsZYI2AlH5wg9f1JtZIK4LG9832IzZp_CtW7EbYKVWfm',
     'token' => 'uhl3CZbtsmf93bFPanmMenhWwrqbSwPc',
     'aes_key' => 'qZEOmHU2qYYk6n6vqLfi3FAhcp9bGA2kgbfnsXDrGgN',
 ];

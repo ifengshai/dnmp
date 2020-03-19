@@ -220,6 +220,7 @@ class Ding extends Controller
 
     public function test()
     {
+        dump($this->app->callback->list());die;
         $depart_ids = [144092586, 144052776, 102054298];
         $userIds = [];
         //获取所有客服的id
