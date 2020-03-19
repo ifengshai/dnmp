@@ -849,7 +849,7 @@ class Zeelool extends Model
         $map[] = ['exp', Db::raw("custom_match_lens_created_at_new >= (custom_match_factory_created_at_new - interval 24 hour) and custom_is_send_factory_new = 1 and custom_is_match_lens_new = 1")];
         $map['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
         $map['created_at'] = $created_at;
-        $data['machiningNotOvertimeProcess'] = $this->where($map)->count(1);
+        $data['machiningNotOvertimeProcess'] = $this->where($map)->cache(10800)->count(1);
 
         //成品质检(24h）两种情况 1 仅镜架不许要点击加工  2 含处方需要点击加工
         //仅镜架情况 以配镜架为时间节点
@@ -905,7 +905,7 @@ class Zeelool extends Model
         $map['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
         $map[] = ['exp', Db::raw("custom_match_lens_created_at_new < (custom_match_factory_created_at_new - interval 24 hour) and custom_is_send_factory_new = 1 and custom_is_match_lens_new = 1")];
         $map['created_at'] = $created_at;
-        $data['machiningOvertimeProcess'] = $this->where($map)->count(1);
+        $data['machiningOvertimeProcess'] = $this->where($map)->cache(10800)->count(1);
 
         //成品质检(24h）两种情况 1 仅镜架不许要点击加工  2 含处方需要点击加工
         //仅镜架情况 以配镜架为时间节点

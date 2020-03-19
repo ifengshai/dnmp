@@ -488,7 +488,7 @@ class Voogueme extends Model
         return false;
     }
 
-    /**
+     /**
      * 统计加工时效
      *
      * @Description
