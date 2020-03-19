@@ -39,6 +39,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {
                             field: 'content',
                             title: __('content'),
+                            events: Controller.api.events.getcontent,
                             formatter: Controller.api.formatter.getcontent,
                         },
                         {field: 'hope_time', title: __('Hope_time'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime},
@@ -127,16 +128,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             // 为表格绑定事件
             Table.api.bindevent(table);
             //需求详情
-            $(document).on('click', '.check_demand_content', function () {
-                var problem_desc = $(this).attr('data');
-                Layer.open({
-                    closeBtn: 1,
-                    title: '问题描述',
-
-                    content: problem_desc
-                });
-                return false;
-            });
+            
         },
         add: function () {
             Controller.api.bindevent();
@@ -155,7 +147,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     if (value == null || value == undefined) {
                         value = '';
                     }
-                    return '<span class="check_demand_content" data = "' + value + '" style="">查 看</span>';
+                    return '<span class="btn-getcontent check_demand_content" data = "' + value + '" style="">查 看</span>';
                 },
 
                 getClear: function (value) {
@@ -174,7 +166,20 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     }
                 }
 
-            }
+            },
+            events: {//绑定事件的方法
+                getcontent: {
+                    //格式为：方法名+空格+DOM元素
+                    'click .btn-getcontent': function (e, value, row, index) {
+                       Layer.open({
+                            closeBtn: 1,
+                            title: '问题描述',
+
+                            content: value
+                        });
+                    }
+                }
+            }            
         }
     };
     return Controller;
