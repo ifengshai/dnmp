@@ -100,7 +100,23 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                             return false;
                                         }
                                     }
-                                }
+                                },
+                                {
+                                    name: 'click',
+                                    title: __('点击执行事件'),
+                                    classname: 'btn btn-xs btn-info btn-click',
+                                    icon: 'fa fa-leaf',
+                                    click: function (data) {
+                                        Layer.alert("点击按钮执行的事件");
+                                    },
+                                    visible: function(row){
+                                        if(row.id == 4){
+                                            return true;
+                                        }else{
+                                            return false;
+                                        }
+                                    }
+                                },                                
                             ],
                             formatter: Table.api.formatter.operate
                         },                       
