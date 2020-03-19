@@ -803,6 +803,10 @@ class Index extends Backend
         //统计库存分级
         $stockData = $this->item->stockClass();
 
+        //加工时效
+        $processingAgingData = $this->processing_aging_data();
+
+        $this->view->assign('processingAgingData', $processingAgingData);
         $this->view->assign('skuNum', $skuNum);
         $this->view->assign('stockData', $stockData);
         $this->view->assign('days30OrderProcessNum', $days30OrderProcessNum);
@@ -824,5 +828,65 @@ class Index extends Backend
         $this->view->assign('ornamentsStock', $ornamentsStock);
         $this->view->assign('ornamentsStockPrice', $ornamentsStockPrice);
         return $this->view->fetch();
+    }
+
+    /**
+     * 加工时效数据统计
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/03/19 09:38:24 
+     * @return void
+     */
+    protected function processing_aging_data()
+    {
+        $zeelool = $this->zeelool->getProcessingAging();
+       
+        $voogueme = $this->voogueme->getProcessingAging();
+
+        $nihao = $this->nihao->getProcessingAging();
+
+        //打印标签未超时未处理
+        $data['labelNotOvertime'] = $zeelool['labelNotOvertime'] + $voogueme['labelNotOvertime'] + $nihao['labelNotOvertime'];
+        //配镜架未超时未处理
+        $data['frameNotOvertime'] = $zeelool['frameNotOvertime'] + $voogueme['frameNotOvertime'] + $nihao['frameNotOvertime'];
+        //配镜片未超时未处理
+        $data['lensNotOvertime'] = $zeelool['lensNotOvertime'] + $voogueme['lensNotOvertime'] + $nihao['lensNotOvertime'];
+        //加工未超时未处理
+        $data['machiningNotOvertime'] = $zeelool['machiningNotOvertime'] + $voogueme['machiningNotOvertime'] + $nihao['machiningNotOvertime'];
+        //质检未超时未处理
+        $data['checkNotOvertime'] = $zeelool['checkNotOvertime'] + $voogueme['checkNotOvertime'] + $nihao['checkNotOvertime'];
+        //打印标签超时未处理
+        $data['labelOvertime'] = $zeelool['labelOvertime'] + $voogueme['labelOvertime'] + $nihao['labelOvertime'];
+        //配镜架超时未处理
+        $data['frameOvertime'] = $zeelool['frameOvertime'] + $voogueme['frameOvertime'] + $nihao['frameOvertime'];
+        //配镜片超时未处理
+        $data['lensOvertime'] = $zeelool['lensOvertime'] + $voogueme['lensOvertime'] + $nihao['lensOvertime'];
+        //加工超时未处理
+        $data['machiningOvertime'] = $zeelool['machiningOvertime'] + $voogueme['machiningOvertime'] + $nihao['machiningOvertime'];
+        //质检超时未处理
+        $data['checkOvertime'] = $zeelool['checkOvertime'] + $voogueme['checkOvertime'] + $nihao['checkOvertime'];
+        //打印标签未超时已处理
+        $data['labelNotOvertimeProcess'] = $zeelool['labelNotOvertimeProcess'] + $voogueme['labelNotOvertimeProcess'] + $nihao['labelNotOvertimeProcess'];
+        //配镜架未超时已处理
+        $data['frameNotOvertimeProcess'] = $zeelool['frameNotOvertimeProcess'] + $voogueme['frameNotOvertimeProcess'] + $nihao['frameNotOvertimeProcess'];
+         //配镜片未超时已处理
+        $data['lensNotOvertimeProcess'] = $zeelool['lensNotOvertimeProcess'] + $voogueme['lensNotOvertimeProcess'] + $nihao['lensNotOvertimeProcess'];
+        //加工未超时已处理
+        $data['machiningNotOvertimeProcess'] = $zeelool['machiningNotOvertimeProcess'] + $voogueme['machiningNotOvertimeProcess'] + $nihao['machiningNotOvertimeProcess'];
+        //质检未超时已处理
+        $data['checkNotOvertimeProcess'] = $zeelool['checkNotOvertimeProcess'] + $voogueme['checkNotOvertimeProcess'] + $nihao['checkNotOvertimeProcess'];
+        //打印标签超时已处理
+        $data['labelOvertimeProcess'] = $zeelool['labelOvertimeProcess'] + $voogueme['labelOvertimeProcess'] + $nihao['labelOvertimeProcess'];
+        //配镜架超时已处理
+        $data['frameOvertimeProcess'] = $zeelool['frameOvertimeProcess'] + $voogueme['frameOvertimeProcess'] + $nihao['frameOvertimeProcess'];
+        //配镜片超时已处理
+        $data['lensOvertimeProcess'] = $zeelool['lensOvertimeProcess'] + $voogueme['lensOvertimeProcess'] + $nihao['lensOvertimeProcess'];
+        //加工超时已处理
+        $data['machiningOvertimeProcess'] = $zeelool['machiningOvertimeProcess'] + $voogueme['machiningOvertimeProcess'] + $nihao['machiningOvertimeProcess'];
+        //质检超时已处理
+        $data['checkOvertimeProcess'] = $zeelool['checkOvertimeProcess'] + $voogueme['checkOvertimeProcess'] + $nihao['checkOvertimeProcess'];
+
+        return $data;
     }
 }
