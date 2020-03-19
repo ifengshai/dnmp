@@ -564,7 +564,7 @@ class Nihao extends Model
 
         //配镜架（24h）
         $map = [];
-        $map[] = ['exp', Db::raw("custom_print_label_created_at_new >= (custom_match_frame_created_at_new - interval 24 hour) and custom_is_match_frame_new = 0 and custom_print_label_new = 1")];
+        $map[] = ['exp', Db::raw("custom_print_label_created_at_new >= (NOW() - interval 24 hour) and custom_is_match_frame_new = 0 and custom_print_label_new = 1")];
         $map['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
         $map['created_at'] = $created_at;
         $data['frameNotOvertime'] = $this->where($map)->cache(7200)->count(1);
@@ -574,7 +574,7 @@ class Nihao extends Model
         $map = [];
         $map['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
         $map['custom_order_prescription_type'] = ['in', [2, 4]];
-        $map[] = ['exp', Db::raw("custom_match_frame_created_at_new >= (custom_match_lens_created_at_new - interval 24 hour) and custom_is_match_lens_new = 0 and custom_is_match_frame_new = 1")];
+        $map[] = ['exp', Db::raw("custom_match_frame_created_at_new >= (NOW() - interval 24 hour) and custom_is_match_lens_new = 0 and custom_is_match_frame_new = 1")];
         $map['created_at'] = $created_at;
         $nowLensNotOvertime = $this->where($map)->cache(7200)->count(1);
 
@@ -582,14 +582,14 @@ class Nihao extends Model
         $map = [];
         $map['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
         $map['custom_order_prescription_type'] = ['in', [3, 5, 6]];
-        $map[] = ['exp', Db::raw("custom_match_frame_created_at_new >= (custom_match_lens_created_at_new - interval 5*24 hour) and custom_is_match_lens_new = 0 and custom_is_match_frame_new = 1")];
+        $map[] = ['exp', Db::raw("custom_match_frame_created_at_new >= (NOW() - interval 5*24 hour) and custom_is_match_lens_new = 0 and custom_is_match_frame_new = 1")];
         $map['created_at'] = $created_at;
         $customLensNotOvertime = $this->where($map)->cache(7200)->count(1);
         $data['lensNotOvertime'] = $nowLensNotOvertime + $customLensNotOvertime;
 
         //加工(24h）
         $map = [];
-        $map[] = ['exp', Db::raw("custom_match_lens_created_at_new >= (custom_match_factory_created_at_new - interval 24 hour) and custom_is_send_factory_new = 0 and custom_is_match_lens_new = 1")];
+        $map[] = ['exp', Db::raw("custom_match_lens_created_at_new >= (NOW() - interval 24 hour) and custom_is_send_factory_new = 0 and custom_is_match_lens_new = 1")];
         $map['created_at'] = $created_at;
         $map['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
         $data['machiningNotOvertime'] = $this->where($map)->cache(7200)->count(1);
@@ -597,14 +597,14 @@ class Nihao extends Model
         //成品质检(24h）两种情况 1 仅镜架不许要点击加工  2 含处方需要点击加工
         //仅镜架情况 以配镜架为时间节点
         $map = [];
-        $map[] = ['exp', Db::raw("custom_match_frame_created_at_new >= (custom_match_delivery_created_at_new - interval 24 hour) and custom_is_delivery_new = 0 and custom_is_match_frame_new = 1")];
+        $map[] = ['exp', Db::raw("custom_match_frame_created_at_new >= (NOW() - interval 24 hour) and custom_is_delivery_new = 0 and custom_is_match_frame_new = 1")];
         $map['created_at'] = $created_at;
         $map['custom_order_prescription_type'] = 1;
         $map['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
         $checkNotOvertime01 = $this->where($map)->cache(7200)->count(1);
 
         $map = [];
-        $map[] = ['exp', Db::raw("custom_match_factory_created_at_new >= (custom_match_delivery_created_at_new - interval 24 hour) and custom_is_delivery_new = 0 and custom_is_send_factory_new = 1")];
+        $map[] = ['exp', Db::raw("custom_match_factory_created_at_new >= (NOW() - interval 24 hour) and custom_is_delivery_new = 0 and custom_is_send_factory_new = 1")];
         $map['created_at'] = $created_at;
         $map['custom_order_prescription_type'] = ['in', [2, 3, 4, 5, 6]];;
         $map['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
@@ -621,7 +621,7 @@ class Nihao extends Model
 
         //配镜架（24h）
         $map = [];
-        $map[] = ['exp', Db::raw("custom_print_label_created_at_new < (custom_match_frame_created_at_new - interval 24 hour) and custom_is_match_frame_new = 0 and custom_print_label_new = 1")];
+        $map[] = ['exp', Db::raw("custom_print_label_created_at_new < (NOW() - interval 24 hour) and custom_is_match_frame_new = 0 and custom_print_label_new = 1")];
         $map['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
         $map['created_at'] = $created_at;
         $data['frameOvertime'] = $this->where($map)->cache(3600)->count(1);
@@ -631,7 +631,7 @@ class Nihao extends Model
         $map = [];
         $map['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
         $map['custom_order_prescription_type'] = ['in', [2, 4]];
-        $map[] = ['exp', Db::raw("custom_match_frame_created_at_new < (custom_match_lens_created_at_new - interval 24 hour) and custom_is_match_lens_new = 0 and custom_is_match_frame_new = 1")];
+        $map[] = ['exp', Db::raw("custom_match_frame_created_at_new < (NOW() - interval 24 hour) and custom_is_match_lens_new = 0 and custom_is_match_frame_new = 1")];
         $map['created_at'] = $created_at;
         $nowLensOvertime = $this->where($map)->cache(3600)->count(1);
 
@@ -639,7 +639,7 @@ class Nihao extends Model
         $map = [];
         $map['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
         $map['custom_order_prescription_type'] = ['in', [3, 5, 6]];
-        $map[] = ['exp', Db::raw("custom_match_frame_created_at_new < (custom_match_lens_created_at_new - interval 5*24 hour) and custom_is_match_lens_new = 0 and custom_is_match_frame_new = 1")];
+        $map[] = ['exp', Db::raw("custom_match_frame_created_at_new < (NOW() - interval 5*24 hour) and custom_is_match_lens_new = 0 and custom_is_match_frame_new = 1")];
         $map['created_at'] = $created_at;
         $customLensOvertime = $this->where($map)->cache(3600)->count(1);
         $data['lensOvertime'] = $nowLensOvertime + $customLensOvertime;
@@ -647,21 +647,21 @@ class Nihao extends Model
         //加工(24h）
         $map = [];
         $map['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
-        $map[] = ['exp', Db::raw("custom_match_lens_created_at_new < (custom_match_factory_created_at_new - interval 24 hour) and custom_is_send_factory_new = 0 and custom_is_match_lens_new = 1")];
+        $map[] = ['exp', Db::raw("custom_match_lens_created_at_new < (NOW() - interval 24 hour) and custom_is_send_factory_new = 0 and custom_is_match_lens_new = 1")];
         $map['created_at'] = $created_at;
         $data['machiningOvertime'] = $this->where($map)->cache(3600)->count(1);
 
         //成品质检(24h）两种情况 1 仅镜架不许要点击加工  2 含处方需要点击加工
         //仅镜架情况 以配镜架为时间节点
         $map = [];
-        $map[] = ['exp', Db::raw("custom_match_frame_created_at_new < (custom_match_delivery_created_at_new - interval 24 hour) and custom_is_delivery_new = 0 and custom_is_match_frame_new = 1")];
+        $map[] = ['exp', Db::raw("custom_match_frame_created_at_new < (NOW() - interval 24 hour) and custom_is_delivery_new = 0 and custom_is_match_frame_new = 1")];
         $map['created_at'] = $created_at;
         $map['custom_order_prescription_type'] = 1;
         $map['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
         $checkOvertime01 = $this->where($map)->cache(7200)->count(1);
 
         $map = [];
-        $map[] = ['exp', Db::raw("custom_match_factory_created_at_new < (custom_match_delivery_created_at_new - interval 24 hour) and custom_is_delivery_new = 0 and custom_is_send_factory_new = 1")];
+        $map[] = ['exp', Db::raw("custom_match_factory_created_at_new < (NOW() - interval 24 hour) and custom_is_delivery_new = 0 and custom_is_send_factory_new = 1")];
         $map['created_at'] = $created_at;
         $map['custom_order_prescription_type'] = ['in', [2, 3, 4, 5, 6]];;
         $map['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
@@ -672,7 +672,7 @@ class Nihao extends Model
         /**************未超时已处理******************/
         //打标签(24h)
         $map = [];
-        $map[] = ['exp', Db::raw("created_at >= (custom_print_label_created_at_new - interval 24 hour) and custom_print_label_new = 1")];
+        $map[] = ['exp', Db::raw("created_at >= (NOW() - interval 24 hour) and custom_print_label_new = 1")];
         $map['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
         $map['created_at'] = $created_at;
         $data['labelNotOvertimeProcess'] = $this->where($map)->cache(10800)->count(1);
