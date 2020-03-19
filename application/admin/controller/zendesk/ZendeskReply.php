@@ -2,6 +2,7 @@
 
 namespace app\admin\controller\zendesk;
 
+use app\api\controller\ZendeskOne;
 use app\common\controller\Backend;
 use think\Db;
 use think\Exception;
@@ -94,7 +95,7 @@ class ZendeskReply extends Backend
             $result = $row->allowField(true)->save($params);
             if($result){
                 //更改zendesk的状态
-                $zendesk = controller('Api/zendesk_one');
+                $zendesk = new ZendeskOne();
                 $query = [
                     'tags' => explode(',',$params['tags']),
                     'status' => $params['status']
