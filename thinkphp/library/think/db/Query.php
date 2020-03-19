@@ -3046,4 +3046,29 @@ class Query
         }
         return $result;
     }
+    /**
+    * SUM查询单条件下各个字段的和
+    * access public
+    * @param string $field[] 字段名数组 多个字段用逗号分隔
+    * return float|int[]
+    */
+    public function sumany($field='')
+    {
+    if($field='')
+    return $this->sum();
+    if(!is_array($field))
+    {
+    $field=explode(',',$field);
+    }
+    $str="";
+    $str2="";
+    foreach($field as $k=>$v)
+    {
+    $str.='SUM('.$field[$k].') AS tp_sum'.$k.',';
+    $str2.='tp_sum'.$k.',';
+    }
+    $str=substr($str, 0, -1);
+    $str2=substr($str, 0, -1);
+    return $this->field($str2)->find();
+    }
 }
