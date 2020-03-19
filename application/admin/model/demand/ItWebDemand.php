@@ -27,14 +27,6 @@ class ItWebDemand extends Model
     protected $append = [
 
     ];
-    
-
-    
-
-
-
-
-
 
 
 }
