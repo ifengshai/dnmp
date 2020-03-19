@@ -631,8 +631,34 @@ class Item extends Model
         $where['a.is_open']  = 1;
         $where['b.is_del']  = 1;
         return $this->where($where)->alias('a')
-        ->join(['fa_item_category' => 'b'], 'a.category_id=b.id')
-        ->cache(86400)->column('a.available_stock,a.name,b.name as type_name', 'sku');
+            ->join(['fa_item_category' => 'b'], 'a.category_id=b.id')
+            ->cache(86400)->column('a.available_stock,a.name,b.name as type_name', 'sku');
+    }
+
+    /**
+     * 产品库存分级
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/03/18 15:38:11 
+     * @return void
+     */
+    public function stockClass()
+    {
+        $where['is_del']  = 1;
+        $where['is_open']  = 1;
+        $where['category_id']  = ['<>', 43];
+        $data = $this->field('sum(if(stock<0,1,0)) as a,
+        sum(if(stock=0,1,0)) as b,
+        sum(if(stock>=1 and stock<=10,1,0)) as c,
+        sum(if(stock>=11 and stock<=30,1,0)) as d,
+        sum(if(stock>=31 and stock<=50,1,0)) as e,
+        sum(if(stock>=51 and stock<=70,1,0)) as f,
+        sum(if(stock>=71 and stock<=100,1,0)) as g,
+        sum(if(stock>=101,1,0)) as h
+        ')->where($where)->select();
+        $data = collection($data)->toArray();
+        return $data;
     }
     /**
      * 获取不同分类的sku
