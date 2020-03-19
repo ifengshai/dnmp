@@ -100,7 +100,7 @@ class ZendeskReply extends Backend
                     'tags' => explode(',',$params['tags']),
                     'status' => $params['status']
                 ];
-                $res = $zendesk->autoUpdate($row->email_id,$query);
+                $res = $zendesk->autoUpdate($row->email_id,$query,false);
                 if($res){
                     $this->success();
                 }
