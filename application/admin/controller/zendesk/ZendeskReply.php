@@ -94,7 +94,7 @@ class ZendeskReply extends Backend
             $result = $row->allowField(true)->save($params);
             if($result){
                 //更改zendesk的状态
-                $zendesk = controller('Api/ZendeskOne');
+                $zendesk = controller('Api/zendesk_one');
                 $query = [
                     'tags' => explode(',',$params['tags']),
                     'status' => $params['status']
