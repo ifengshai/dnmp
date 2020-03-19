@@ -201,7 +201,8 @@ class Operationalreport extends Backend{
         //求出饰品的所有sku
         $decoration_sku = $this->item->getDifferenceSku(3);
         //眼镜所有sku销售额
-        $frame_sku_money = $model->table('sales_flat_order_item')->where('sku','in',$frame_sku)->where($map)->
+        $frame_sku_money = $model->table('sales_flat_order_item')->where('sku','in',$frame_sku)->where($map)->sumany(['base_price','base_discount_price']);
+
         return [
             'general_order'                     => $general_order,
             'general_money'                     => $general_money,
@@ -239,7 +240,8 @@ class Operationalreport extends Backend{
             'gbp_order_average_amount'          => $gbp_order_average_amount,
             'gbp_order_percent'                 => $gbp_order_percent,
             'order_status'                      => $order_status_arr,
-            'base_shipping_amount'              => $all_shipping_amount_arr
+            'base_shipping_amount'              => $all_shipping_amount_arr,
+            'frame_sku_money'                   => $frame_sku_money,
         ];
     }
 }
