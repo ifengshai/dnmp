@@ -24,15 +24,15 @@ class Operationalreport extends Backend{
             //默认当天
             if ($params['time']) {
                 $time = explode(' ', $params['time']);
-                $map['created_at'] = ['between', [$time[0] . ' ' . $time[1], $time[3] . ' ' . $time[4]]];
+                $map['created_at'] = $itemMap['m.created_at'] =  ['between', [$time[0] . ' ' . $time[1], $time[3] . ' ' . $time[4]]];
             } else {
-                $map['created_at'] = ['between', [date('Y-m-d 00:00:00', strtotime('-7 day')), date('Y-m-d H:i:s', time())]];
+                $map['created_at'] = $itemMap['m.created_at'] =  ['between', [date('Y-m-d 00:00:00', strtotime('-7 day')), date('Y-m-d H:i:s', time())]];
             }
             $order_platform = $params['platform'];
             if(4<=$order_platform){
                 return $this->error('该平台暂时没有数据');
             }
-            $result = $this->platformOrderInfo($order_platform,$map);
+            $result = $this->platformOrderInfo($order_platform,$map,$itemMap);
             if(!$result){
                 return $this->error('暂无数据');
             }
@@ -58,7 +58,7 @@ class Operationalreport extends Backend{
      * @param [type] $map
      * @return void
      */
-    public function platformOrderInfo($platform,$map)
+    public function platformOrderInfo($platform,$map,$itemMap)
     {
         $this->item = new \app\admin\model\itemmanage\Item;
         switch($platform){
@@ -81,6 +81,7 @@ class Operationalreport extends Backend{
         $model->table('sales_flat_order')->query("set time_zone='+8:00'");
         $model->table('sales_flat_order_item')->query("set time_zone='+8:00'");
         $where = " status in ('processing','complete','creditcard_proccessing','free_processing')";
+        $whereItem = " o.status in ('processing','complete','creditcard_proccessing','free_processing')";
         //订单类型数据统计
         //1.普通订单数量
         $general_order              = $model->table('sales_flat_order')->where($where)->where(['order_type'=>1])->where($map)->count('*');
@@ -200,6 +201,8 @@ class Operationalreport extends Backend{
         $frame_sku  = $this->item->getDifferenceSku(1);
         //求出饰品的所有sku
         $decoration_sku = $this->item->getDifferenceSku(3);
+        //求出眼镜的销售额 base_price  base_discount_amount
+        $frame_sku_money = $model->table('sales_flat_order_item m')->join('sales_flat_order o','m.order_id=o.entity_id','left')->where($whereItem)->where($itemMap)->where('m.sku','in',$frame_sku)->sum('base_price-base_discount_amount as frame_sku_money');
         return [
             'general_order'                     => $general_order,
             'general_money'                     => $general_money,
@@ -238,8 +241,7 @@ class Operationalreport extends Backend{
             'gbp_order_percent'                 => $gbp_order_percent,
             'order_status'                      => $order_status_arr,
             'base_shipping_amount'              => $all_shipping_amount_arr,
-            'frame_sku'                         => $frame_sku,
-            'decoration_sku'                    => $decoration_sku
+            'frame_sku_money'                   => $frame_sku_money,
         ];
     }
 }
