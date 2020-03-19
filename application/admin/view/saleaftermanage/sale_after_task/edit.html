@@ -145,7 +145,8 @@
             </select>
         </div> -->
         <div class="col-xs-12 col-sm-3">
-            {:Form::selects('row[handle_scheme][]', $SolveScheme, $row.handle_scheme, ['class'=>'form-control selectpicker', 'data-rule'=>'required','data-live-search' => true])}
+            <!-- {:build_select('row[handle_scheme][]', $SolveScheme, $row.handle_scheme, ['class'=>'form-control selectpicker', 'data-rule'=>'required','data-live-search' => true])} -->
+            {:build_select('row[handle_scheme][]', $SolveScheme, $row.handle_scheme,['class'=>'form-control selectpicker', 'data-rule'=>'required','data-live-search' => true,'multiple'=>'multiple'])}
         </div> 
         <label class="control-label col-xs-12 col-sm-2">{:__('Refund_way')}:</label>
         <div class="col-xs-12 col-sm-3">
