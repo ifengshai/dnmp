@@ -696,52 +696,62 @@ class Zeelool extends Model
     {
         //最近30天
         $created_at = ['between', [date('Y-m-d 00:00:00', strtotime('-30 day')), date('Y-m-d H:i:s', time())]];
-       
+
         /**************未超时未处理******************/
         //打标签(24h)
         $map[] = ['exp', Db::raw("created_at >= (NOW() - interval 24 hour) and custom_print_label_new = 0")];
         $map['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
         $map['created_at'] = $created_at;
-        $data['labelNotOvertime'] = $this->where($map)->count(1);
+        $data['labelNotOvertime'] = $this->where($map)->cache(7200)->count(1);
 
         //配镜架（24h）
         $map = [];
-        $map[] = ['exp', Db::raw("custom_print_label_created_at_new >= (custom_match_frame_created_at_new - interval 24 hour) and custom_is_match_frame_new = 0 and custom_print_label_new = 1")];
+        $map[] = ['exp', Db::raw("custom_print_label_created_at_new >= (NOW() - interval 24 hour) and custom_is_match_frame_new = 0 and custom_print_label_new = 1")];
         $map['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
         $map['created_at'] = $created_at;
-        $data['frameNotOvertime'] = $this->where($map)->count(1);
+        $data['frameNotOvertime'] = $this->where($map)->cache(7200)->count(1);
 
         //配镜片
         //现片时效 24h
         $map = [];
         $map['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
         $map['custom_order_prescription_type'] = ['in', [2, 4]];
-        $map[] = ['exp', Db::raw("custom_match_frame_created_at_new >= (custom_match_lens_created_at_new - interval 24 hour) and custom_is_match_lens_new = 0 and custom_is_match_frame_new = 1")];
+        $map[] = ['exp', Db::raw("custom_match_frame_created_at_new >= (NOW() - interval 24 hour) and custom_is_match_lens_new = 0 and custom_is_match_frame_new = 1")];
         $map['created_at'] = $created_at;
-        $nowLensNotOvertime = $this->where($map)->count(1);
+        $nowLensNotOvertime = $this->where($map)->cache(7200)->count(1);
 
         //定制片时效 5*24h
         $map = [];
         $map['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
         $map['custom_order_prescription_type'] = ['in', [3, 5, 6]];
-        $map[] = ['exp', Db::raw("custom_match_frame_created_at_new >= (custom_match_lens_created_at_new - interval 5*24 hour) and custom_is_match_lens_new = 0 and custom_is_match_frame_new = 1")];
+        $map[] = ['exp', Db::raw("custom_match_frame_created_at_new >= (NOW() - interval 5*24 hour) and custom_is_match_lens_new = 0 and custom_is_match_frame_new = 1")];
         $map['created_at'] = $created_at;
-        $customLensNotOvertime = $this->where($map)->count(1);
-        $data['lensNotOvertime'] = $nowLensNotOvertime+$customLensNotOvertime;
+        $customLensNotOvertime = $this->where($map)->cache(7200)->count(1);
+        $data['lensNotOvertime'] = $nowLensNotOvertime + $customLensNotOvertime;
 
         //加工(24h）
         $map = [];
-        $map[] = ['exp', Db::raw("custom_match_lens_created_at_new >= (custom_match_factory_created_at_new - interval 24 hour) and custom_is_send_factory_new = 0 and custom_is_match_lens_new = 1")];
+        $map[] = ['exp', Db::raw("custom_match_lens_created_at_new >= (NOW() - interval 24 hour) and custom_is_send_factory_new = 0 and custom_is_match_lens_new = 1")];
         $map['created_at'] = $created_at;
         $map['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
-        $data['machiningNotOvertime'] = $this->where($map)->count(1);
+        $data['machiningNotOvertime'] = $this->where($map)->cache(7200)->count(1);
 
-        //成品质检(24h）
+        //成品质检(24h）两种情况 1 仅镜架不许要点击加工  2 含处方需要点击加工
+        //仅镜架情况 以配镜架为时间节点
         $map = [];
-        $map[] = ['exp', Db::raw("custom_match_factory_created_at_new >= (custom_match_delivery_created_at_new - interval 24 hour) and custom_is_send_factory_new = 0 and custom_is_match_lens_new = 1")];
+        $map[] = ['exp', Db::raw("custom_match_frame_created_at_new >= (NOW() - interval 24 hour) and custom_is_delivery_new = 0 and custom_is_match_frame_new = 1")];
         $map['created_at'] = $created_at;
+        $map['custom_order_prescription_type'] = 1;
         $map['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
-        $data['checkNotOvertime'] = $this->where($map)->count(1);
+        $checkNotOvertime01 = $this->where($map)->cache(7200)->count(1);
+
+        $map = [];
+        $map[] = ['exp', Db::raw("custom_match_factory_created_at_new >= (NOW() - interval 24 hour) and custom_is_delivery_new = 0 and custom_is_send_factory_new = 1")];
+        $map['created_at'] = $created_at;
+        $map['custom_order_prescription_type'] = ['in', [2, 3, 4, 5, 6]];;
+        $map['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
+        $checkNotOvertime02 = $this->where($map)->cache(7200)->count(1);
+        $data['checkNotOvertime'] =  $checkNotOvertime01 +  $checkNotOvertime02;
 
         /**************超时未处理******************/
         //打标签(24h)
@@ -749,101 +759,129 @@ class Zeelool extends Model
         $map[] = ['exp', Db::raw("created_at < (NOW() - interval 24 hour) and custom_print_label_new = 0")];
         $map['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
         $map['created_at'] = $created_at;
-        $data['labelOvertime'] = $this->where($map)->count(1);
+        $data['labelOvertime'] = $this->where($map)->cache(3600)->count(1);
 
         //配镜架（24h）
         $map = [];
-        $map[] = ['exp', Db::raw("custom_print_label_created_at_new < (custom_match_frame_created_at_new - interval 24 hour) and custom_is_match_frame_new = 0 and custom_print_label_new = 1")];
+        $map[] = ['exp', Db::raw("custom_print_label_created_at_new < (NOW() - interval 24 hour) and custom_is_match_frame_new = 0 and custom_print_label_new = 1")];
         $map['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
         $map['created_at'] = $created_at;
-        $data['frameOvertime'] = $this->where($map)->count(1);
+        $data['frameOvertime'] = $this->where($map)->cache(3600)->count(1);
 
         //配镜片
         //现片时效 24h
         $map = [];
         $map['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
         $map['custom_order_prescription_type'] = ['in', [2, 4]];
-        $map[] = ['exp', Db::raw("custom_match_frame_created_at_new < (custom_match_lens_created_at_new - interval 24 hour) and custom_is_match_lens_new = 0 and custom_is_match_frame_new = 1")];
+        $map[] = ['exp', Db::raw("custom_match_frame_created_at_new < (NOW() - interval 24 hour) and custom_is_match_lens_new = 0 and custom_is_match_frame_new = 1")];
         $map['created_at'] = $created_at;
-        $nowLensOvertime = $this->where($map)->count(1);
+        $nowLensOvertime = $this->where($map)->cache(3600)->count(1);
 
         //定制片时效 5*24h
         $map = [];
         $map['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
         $map['custom_order_prescription_type'] = ['in', [3, 5, 6]];
-        $map[] = ['exp', Db::raw("custom_match_frame_created_at_new < (custom_match_lens_created_at_new - interval 5*24 hour) and custom_is_match_lens_new = 0 and custom_is_match_frame_new = 1")];
+        $map[] = ['exp', Db::raw("custom_match_frame_created_at_new < (NOW() - interval 5*24 hour) and custom_is_match_lens_new = 0 and custom_is_match_frame_new = 1")];
         $map['created_at'] = $created_at;
-        $customLensOvertime = $this->where($map)->count(1);
-        $data['lensOvertime'] = $nowLensOvertime+$customLensOvertime;
+        $customLensOvertime = $this->where($map)->cache(3600)->count(1);
+        $data['lensOvertime'] = $nowLensOvertime + $customLensOvertime;
 
         //加工(24h）
         $map = [];
         $map['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
-        $map[] = ['exp', Db::raw("custom_match_lens_created_at_new < (custom_match_factory_created_at_new - interval 24 hour) and custom_is_send_factory_new = 0 and custom_is_match_lens_new = 1")];
+        $map[] = ['exp', Db::raw("custom_match_lens_created_at_new < (NOW() - interval 24 hour) and custom_is_send_factory_new = 0 and custom_is_match_lens_new = 1")];
         $map['created_at'] = $created_at;
-        $data['machiningOvertime'] = $this->where($map)->count(1);
+        $data['machiningOvertime'] = $this->where($map)->cache(3600)->count(1);
 
-        //成品质检(24h）
-        $map[] = ['exp', Db::raw("custom_match_factory_created_at_new < (custom_match_delivery_created_at_new - interval 24 hour) and custom_is_send_factory_new = 0 and custom_is_match_lens_new = 1")];
-        $data['checkOvertime'] = $this->where($map)->count(1);
+        //成品质检(24h）两种情况 1 仅镜架不许要点击加工  2 含处方需要点击加工
+        //仅镜架情况 以配镜架为时间节点
+        $map = [];
+        $map[] = ['exp', Db::raw("custom_match_frame_created_at_new < (NOW() - interval 24 hour) and custom_is_delivery_new = 0 and custom_is_match_frame_new = 1")];
+        $map['created_at'] = $created_at;
+        $map['custom_order_prescription_type'] = 1;
+        $map['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
+        $checkOvertime01 = $this->where($map)->cache(7200)->count(1);
+
+        $map = [];
+        $map[] = ['exp', Db::raw("custom_match_factory_created_at_new < (NOW() - interval 24 hour) and custom_is_delivery_new = 0 and custom_is_send_factory_new = 1")];
+        $map['created_at'] = $created_at;
+        $map['custom_order_prescription_type'] = ['in', [2, 3, 4, 5, 6]];;
+        $map['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
+        $checkOvertime02 = $this->where($map)->cache(7200)->count(1);
+        $data['checkOvertime'] =  $checkOvertime01 +  $checkOvertime02;
+
 
         /**************未超时已处理******************/
         //打标签(24h)
         $map = [];
-        $map[] = ['exp', Db::raw("created_at >= (custom_print_label_created_at_new - interval 24 hour) and custom_print_label_new = 1")];
+        $map[] = ['exp', Db::raw("created_at >= (NOW() - interval 24 hour) and custom_print_label_new = 1")];
         $map['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
         $map['created_at'] = $created_at;
-        $data['labelNotOvertimeProcess'] = $this->where($map)->count(1);
+        $data['labelNotOvertimeProcess'] = $this->where($map)->cache(10800)->count(1);
 
         //配镜架（24h）
         $map = [];
         $map[] = ['exp', Db::raw("custom_print_label_created_at_new >= (custom_match_frame_created_at_new - interval 24 hour) and custom_is_match_frame_new = 1 and custom_print_label_new = 1")];
         $map['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
         $map['created_at'] = $created_at;
-        $data['frameNotOvertimeProcess'] = $this->where($map)->count(1);
+        $data['frameNotOvertimeProcess'] = $this->where($map)->cache(10800)->count(1);
 
         //配镜片
         //现片时效 24h
         $map = [];
         $map['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
         $map['custom_order_prescription_type'] = ['in', [2, 4]];
+        $map['created_at'] = $created_at;
         $map[] = ['exp', Db::raw("custom_match_frame_created_at_new >= (custom_match_lens_created_at_new- interval 24 hour) and custom_is_match_lens_new = 1 and custom_is_match_frame_new = 1")];
-        $nowLensNotOvertimeProcess = $this->where($map)->count(1);
+        $nowLensNotOvertimeProcess = $this->where($map)->cache(10800)->count(1);
 
         //定制片时效 5*24h
         $map = [];
         $map['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
         $map['custom_order_prescription_type'] = ['in', [3, 5, 6]];
+        $map['created_at'] = $created_at;
         $map[] = ['exp', Db::raw("custom_match_frame_created_at_new >= (custom_match_lens_created_at_new - interval 5*24 hour) and custom_is_match_lens_new = 1 and custom_is_match_frame_new = 1")];
-        $customLensNotOvertimeProcess = $this->where($map)->count(1);
-        $data['lensNotOvertimeProcess'] = $nowLensNotOvertimeProcess+$customLensNotOvertimeProcess;
+        $customLensNotOvertimeProcess = $this->where($map)->cache(10800)->count(1);
+        $data['lensNotOvertimeProcess'] = $nowLensNotOvertimeProcess + $customLensNotOvertimeProcess;
 
         //加工(24h）
         $map = [];
         $map[] = ['exp', Db::raw("custom_match_lens_created_at_new >= (custom_match_factory_created_at_new - interval 24 hour) and custom_is_send_factory_new = 1 and custom_is_match_lens_new = 1")];
         $map['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
         $map['created_at'] = $created_at;
-        $data['machiningNotOvertimeProcess'] = $this->where($map)->count(1);
+        $data['machiningNotOvertimeProcess'] = $this->where($map)->cache(10800)->count(1);
 
-        //成品质检(24h）
+        //成品质检(24h）两种情况 1 仅镜架不许要点击加工  2 含处方需要点击加工
+        //仅镜架情况 以配镜架为时间节点
         $map = [];
-        $map[] = ['exp', Db::raw("custom_match_factory_created_at_new >= (custom_match_delivery_created_at_new - interval 24 hour) and custom_is_send_factory_new = 1 and custom_is_match_lens_new = 1")];
-        $map['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
+        $map[] = ['exp', Db::raw("custom_match_frame_created_at_new >= (custom_match_delivery_created_at_new - interval 24 hour) and custom_is_delivery_new = 1 and custom_is_match_frame_new = 1")];
         $map['created_at'] = $created_at;
-        $data['checkNotOvertimeProcess'] = $this->where($map)->count(1);
+        $map['custom_order_prescription_type'] = 1;
+        $map['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
+        $checkNotOvertimeProcess01 = $this->where($map)->cache(7200)->count(1);
+
+        $map = [];
+        $map[] = ['exp', Db::raw("custom_match_factory_created_at_new >= (custom_match_delivery_created_at_new - interval 24 hour) and custom_is_delivery_new = 1 and custom_is_send_factory_new = 1")];
+        $map['created_at'] = $created_at;
+        $map['custom_order_prescription_type'] = ['in', [2, 3, 4, 5, 6]];;
+        $map['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
+        $checkNotOvertimeProcess02 = $this->where($map)->cache(7200)->count(1);
+        $data['checkNotOvertimeProcess'] =  $checkNotOvertimeProcess01 +  $checkNotOvertimeProcess02;
 
         /**************超时已处理******************/
         //打标签(24h)
+        $map = [];
         $map[] = ['exp', Db::raw("created_at < (custom_print_label_created_at_new - interval 24 hour) and custom_print_label_new = 1")];
         $map['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
-        $data['labelOvertimeProcess'] = $this->where($map)->count(1);
+        $map['created_at'] = $created_at;
+        $data['labelOvertimeProcess'] = $this->where($map)->cache(10800)->count(1);
 
         //配镜架（24h）
         $map = [];
         $map[] = ['exp', Db::raw("custom_print_label_created_at_new < (custom_match_frame_created_at_new - interval 24 hour) and custom_is_match_frame_new = 1 and custom_print_label_new = 1")];
         $map['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
         $map['created_at'] = $created_at;
-        $data['frameOvertimeProcess'] = $this->where($map)->count(1);
+        $data['frameOvertimeProcess'] = $this->where($map)->cache(10800)->count(1);
 
         //配镜片
         //现片时效 24h
@@ -852,7 +890,7 @@ class Zeelool extends Model
         $map['custom_order_prescription_type'] = ['in', [2, 4]];
         $map[] = ['exp', Db::raw("custom_match_frame_created_at_new < (custom_match_lens_created_at_new - interval 24 hour) and custom_is_match_lens_new = 1 and custom_is_match_frame_new = 1")];
         $map['created_at'] = $created_at;
-        $nowLensOvertimeProcess = $this->where($map)->count(1);
+        $nowLensOvertimeProcess = $this->where($map)->cache(10800)->count(1);
 
         //定制片时效 5*24h
         $map = [];
@@ -860,23 +898,32 @@ class Zeelool extends Model
         $map['custom_order_prescription_type'] = ['in', [3, 5, 6]];
         $map[] = ['exp', Db::raw("custom_match_frame_created_at_new < (custom_match_lens_created_at_new - interval 5*24 hour) and custom_is_match_lens_new = 1 and custom_is_match_frame_new = 1")];
         $map['created_at'] = $created_at;
-        $customLensOvertimeProcess = $this->where($map)->count(1);
-        $data['lensOvertimeProcess'] = $nowLensOvertimeProcess+$customLensOvertimeProcess;
+        $customLensOvertimeProcess = $this->where($map)->cache(10800)->count(1);
+        $data['lensOvertimeProcess'] = $nowLensOvertimeProcess + $customLensOvertimeProcess;
 
         //加工(24h）
         $map['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
         $map[] = ['exp', Db::raw("custom_match_lens_created_at_new < (custom_match_factory_created_at_new - interval 24 hour) and custom_is_send_factory_new = 1 and custom_is_match_lens_new = 1")];
         $map['created_at'] = $created_at;
-        $data['machiningOvertimeProcess'] = $this->where($map)->count(1);
+        $data['machiningOvertimeProcess'] = $this->where($map)->cache(10800)->count(1);
 
-        //成品质检(24h）
-        $map[] = ['exp', Db::raw("custom_match_factory_created_at_new < (custom_match_delivery_created_at_new - interval 24 hour) and custom_is_send_factory_new = 1 and custom_is_match_lens_new = 1")];
-        $map['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
+        //成品质检(24h）两种情况 1 仅镜架不许要点击加工  2 含处方需要点击加工
+        //仅镜架情况 以配镜架为时间节点
+        $map = [];
+        $map[] = ['exp', Db::raw("custom_match_frame_created_at_new < (custom_match_delivery_created_at_new - interval 24 hour) and custom_is_delivery_new = 1 and custom_is_match_frame_new = 1")];
         $map['created_at'] = $created_at;
-        $data['checkOvertimeProcess'] = $this->where($map)->count(1);
+        $map['custom_order_prescription_type'] = 1;
+        $map['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
+        $checkOvertimeProcess01 = $this->where($map)->cache(7200)->count(1);
 
+        $map = [];
+        $map[] = ['exp', Db::raw("custom_match_factory_created_at_new < (custom_match_delivery_created_at_new - interval 24 hour) and custom_is_delivery_new = 1 and custom_is_send_factory_new = 1")];
+        $map['created_at'] = $created_at;
+        $map['custom_order_prescription_type'] = ['in', [2, 3, 4, 5, 6]];;
+        $map['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
+        $checkOvertimeProcess02 = $this->where($map)->cache(10800)->count(1);
+        $data['checkOvertimeProcess'] =  $checkOvertimeProcess01 +  $checkOvertimeProcess02;
         return $data;
-
     }
 
 
