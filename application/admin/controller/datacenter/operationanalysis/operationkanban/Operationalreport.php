@@ -5,7 +5,7 @@ use app\common\controller\Backend;
 use app\admin\model\platformmanage\MagentoPlatform;
 class Operationalreport extends Backend{
     //订单类型数据统计
-    protected $success_order = ['processing','complete','creditcard_proccessing','free_processing'];
+    protected $item = null;
     /**
      * 运营报告首页数据
      *
@@ -60,7 +60,7 @@ class Operationalreport extends Backend{
      */
     public function platformOrderInfo($platform,$map)
     {
-
+        $this->item = new \app\admin\model\itemmanage\Item;
         switch($platform){
             case 1:
             $model = Db::connect('database.db_zeelool');
@@ -79,6 +79,7 @@ class Operationalreport extends Backend{
             return false;
         }
         $model->table('sales_flat_order')->query("set time_zone='+8:00'");
+        $model->table('sales_flat_order_item')->query("set time_zone='+8:00'");
         $where = " status in ('processing','complete','creditcard_proccessing','free_processing')";
         //订单类型数据统计
         //1.普通订单数量
@@ -195,6 +196,13 @@ class Operationalreport extends Backend{
                 $all_shipping_amount_arr['money'][]           = round($av['base_shipping_amount']*$num,2);         
             }
         }
+        //求出眼镜所有sku
+        $frame_sku  = $this->item->getDifferenceSku(1);
+        //求出饰品的所有sku
+        $decoration_sku = $this->item->getDifferenceSku(3);
+        //眼镜所有sku销售额
+        $frame_sku_money = $model->table('sales_flat_order_item')->where('sku','in',$frame_sku)->where($map)->sumany(['base_price','base_discount_price']);
+
         return [
             'general_order'                     => $general_order,
             'general_money'                     => $general_money,
@@ -232,7 +240,8 @@ class Operationalreport extends Backend{
             'gbp_order_average_amount'          => $gbp_order_average_amount,
             'gbp_order_percent'                 => $gbp_order_percent,
             'order_status'                      => $order_status_arr,
-            'base_shipping_amount'              => $all_shipping_amount_arr
+            'base_shipping_amount'              => $all_shipping_amount_arr,
+            'frame_sku_money'                   => $frame_sku_money,
         ];
     }
 }

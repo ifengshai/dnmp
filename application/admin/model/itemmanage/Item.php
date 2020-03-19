@@ -660,4 +660,23 @@ class Item extends Model
         $data = collection($data)->toArray();
         return $data;
     }
+    /**
+     * 获取不同分类的sku
+     * param id 1 眼镜 3 配饰
+     * @Description created by lsw
+     * @author lsw
+     * @since 2020/03/18 17:37:02 
+     * @param [type] $id
+     * @return void
+     */
+    public function getDifferenceSku($id)
+    {
+        //查询镜框分类有哪些
+        $category = new \app\admin\model\itemmanage\ItemCategory;
+        $map['attribute_group_id'] = $id;
+        $ids = $category->where($map)->column('id');
+
+        $where['category_id']  = ['in', $ids];
+        return $this->where($where)->column('sku');
+    }
 }
