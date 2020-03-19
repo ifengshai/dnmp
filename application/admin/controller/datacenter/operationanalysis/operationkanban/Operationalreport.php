@@ -103,15 +103,15 @@ class Operationalreport extends Backend{
         //补差价订单金额
         $fill_post_money            = $model->table('sales_flat_order')->where($where)->where(['order_type'=>5])->where($map)->sum('base_grand_total');
         //普通订单占比
-        $general_order_percent      = round(($general_order/($general_order + $wholesale_order + $celebrity_order + $reissue_order + $fill_post_order))*100,2);
+        $general_order_percent      = @round(($general_order/($general_order + $wholesale_order + $celebrity_order + $reissue_order + $fill_post_order))*100,2);
         //批发订单占比
-        $wholesale_order_percent    = round(($wholesale_order/($general_order + $wholesale_order + $celebrity_order + $reissue_order + $fill_post_order))*100,2);
+        $wholesale_order_percent    = @round(($wholesale_order/($general_order + $wholesale_order + $celebrity_order + $reissue_order + $fill_post_order))*100,2);
         //网红订单占比
-        $celebrity_order_percent    = round(($celebrity_order/($general_order + $wholesale_order + $celebrity_order + $reissue_order + $fill_post_order))*100,2);
+        $celebrity_order_percent    = @round(($celebrity_order/($general_order + $wholesale_order + $celebrity_order + $reissue_order + $fill_post_order))*100,2);
         //补发订单占比
-        $reissue_order_percent      = round(($reissue_order/($general_order + $wholesale_order + $celebrity_order + $reissue_order + $fill_post_order))*100,2);
+        $reissue_order_percent      = @round(($reissue_order/($general_order + $wholesale_order + $celebrity_order + $reissue_order + $fill_post_order))*100,2);
         //补差价订单占比
-        $fill_post_order_percent    = round(($fill_post_order/($general_order + $wholesale_order + $celebrity_order + $reissue_order + $fill_post_order))*100,2);
+        $fill_post_order_percent    = @round(($fill_post_order/($general_order + $wholesale_order + $celebrity_order + $reissue_order + $fill_post_order))*100,2);
         //美元订单数量
         $usd_order_num              = $model->table('sales_flat_order')->where($where)->where(['order_currency_code'=>'USD'])->where($map)->count('*');
         //美元订单金额
@@ -200,9 +200,6 @@ class Operationalreport extends Backend{
         $frame_sku  = $this->item->getDifferenceSku(1);
         //求出饰品的所有sku
         $decoration_sku = $this->item->getDifferenceSku(3);
-        //眼镜所有sku销售额
-        $frame_sku_money = $model->table('sales_flat_order_item')->where('sku','in',$frame_sku)->where($map)->sumany(['base_price','base_discount_price']);
-
         return [
             'general_order'                     => $general_order,
             'general_money'                     => $general_money,
@@ -241,7 +238,8 @@ class Operationalreport extends Backend{
             'gbp_order_percent'                 => $gbp_order_percent,
             'order_status'                      => $order_status_arr,
             'base_shipping_amount'              => $all_shipping_amount_arr,
-            'frame_sku_money'                   => $frame_sku_money,
+            'frame_sku'                         => $frame_sku,
+            'decoration_sku'                    => $decoration_sku
         ];
     }
 }
