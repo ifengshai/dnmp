@@ -94,10 +94,10 @@ class ZendeskReply extends Backend
             $result = $row->allowField(true)->save($params);
             if($result){
                 //更改zendesk的状态
-                $zendesk = controller('Api/Zendesk');
+                $zendesk = controller('Api/ZendeskOne');
                 $query = [
                     'tags' => explode(',',$params['tags']),
-                    'status' => 'pending'
+                    'status' => $params['status']
                 ];
                 $res = $zendesk->autoUpdate($row->email_id,$query);
                 if($res){
