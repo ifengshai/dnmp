@@ -39,7 +39,8 @@ class Crontab extends Backend
         'warehouse_data',
         'select_product_data',
         'get_sales_order_update',
-        'get_sales_order_update_two'
+        'get_sales_order_update_two',
+        'calculate_order_item_num'
 
     ];
 
