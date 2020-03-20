@@ -301,7 +301,10 @@ class Operationalreport extends Backend{
             'decoration_avg_money'              => $decoration_avg_money,
             'frame_onsales_num'                 => $frame_onsales_num,
             'decoration_onsales_num'            => $decoration_onsales_num,
-            'frame_in_print_num'                => $frame_in_print_num
+            'frame_in_print_num'                => $frame_in_print_num,
+            'frame_in_print_rate'               => $frame_in_print_rate,
+            'decoration_in_print_num'           => $decoration_in_print_num,
+            'decoration_in_print_rate'          => $decoration_in_print_rate
         ];
     }
 }
