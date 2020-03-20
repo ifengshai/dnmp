@@ -2852,6 +2852,22 @@ order by sfoi.item_id asc limit 1000";
 
         $data['create_time'] = date('Y-m-d H:i:s', time());
         $data['create_date'] = date('Y-m-d', time());
+
+        //计算每天采购数量
+        $purchase = new \app\admin\model\purchase\PurchaseOrder();
+        //总采购数量
+        $data['all_purchase_num'] = $purchase->getPurchaseNumNow([]);
+        //总采购金额
+        $data['all_purchase_price'] = $purchase->getPurchasePriceNow([]);
+        //线上采购数量
+        $data['online_purchase_num'] = $purchase->getPurchasePriceNow(['purchase_type' => 2]);
+        //线上采购金额
+        $data['online_purchase_price'] = $purchase->getPurchasePriceNow(['purchase_type' => 2]);
+        //线下采购数量
+        $data['purchase_num'] = $data['all_purchase_num'] - $data['online_purchase_num'];
+        //线下采购金额
+        $data['purchase_price'] = $data['all_purchase_price'] - $data['online_purchase_price'];
+
         //添加数据
         $model = new \app\admin\model\WarehouseData();
         $model->save($data);

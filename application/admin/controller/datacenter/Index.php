@@ -968,7 +968,17 @@ class Index extends Backend
      */
     public function purchase_data_analysis()
     {
-        
+        $dataConfig = new \app\admin\model\DataConfig();
+        //采购总数
+        $purchaseNum = $dataConfig->getValue('purchaseNum');
+        //采购总金额
+        $purchasePrice = $dataConfig->getValue('purchasePrice');
+        //采购总SKU数
+        $purchaseSkuNum = $dataConfig->getValue('purchaseSkuNum');
+        //采购镜架总数
+        $purchaseFrameNum = $dataConfig->getValue('purchaseFrameNum');
+        //采购到货总数
+        $arrivalsNum = $dataConfig->getValue('arrivalsNum');
         return $this->view->fetch();
     }
 }
