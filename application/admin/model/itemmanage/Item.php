@@ -671,12 +671,29 @@ class Item extends Model
      */
     public function getDifferenceSku($id)
     {
-        //查询镜框分类有哪些
         $category = new \app\admin\model\itemmanage\ItemCategory;
         $map['attribute_group_id'] = $id;
         $ids = $category->where($map)->column('id');
 
         $where['category_id']  = ['in', $ids];
         return $this->where($where)->column('sku');
+    }
+    /**
+     * 获取不同分类sku的数量
+     *
+     * @Description created by lsw
+     * @author lsw
+     * @since 2020/03/20 10:19:47 
+     * @param [type] $id
+     * @return void
+     */
+    public function getDifferenceSkuNUm($id)
+    {
+        $category = new \app\admin\model\itemmanage\ItemCategory;
+        $map['attribute_group_id'] = $id;
+        $ids = $category->where($map)->column('id');
+
+        $where['category_id']  = ['in', $ids];
+        return $this->where($where)->count('sku');
     }
 }
