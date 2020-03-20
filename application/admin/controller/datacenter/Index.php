@@ -957,4 +957,17 @@ class Index extends Backend
 
         return $data;
     }
+
+    /**
+     * 采购数据分析
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/03/20 13:42:08 
+     * @return void
+     */
+    public function purchase_data_analysis()
+    {
+        return $this->view->fetch();
+    }
 }
