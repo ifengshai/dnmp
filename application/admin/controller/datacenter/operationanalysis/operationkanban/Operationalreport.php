@@ -236,7 +236,7 @@ class Operationalreport extends Backend{
         //配饰正常售卖数
         $decoration_onsales_num    = $this->itemPlatformSku->putawayDifferenceSku(3,$platform);
         //眼镜动销数
-        $frame_in_print_num        = $model->table('sales_flat_order_item m')->join('sales_flat_order o','m.order_id=o.entity_id','left')->where($whereItem)->where($itemMap)->where('m.sku','in',$decoration_sku)->count('DISTINCT(m.sku)'); 
+        $frame_in_print_num        = $model->table('sales_flat_order_item m')->join('sales_flat_order o','m.order_id=o.entity_id','left')->where($whereItem)->where($itemMap)->where('m.sku','in',$decoration_sku)->distinct(true)->field('m.sku')->count('m.sku'); 
         return [
             'general_order'                     => $general_order,
             'general_money'                     => $general_money,
