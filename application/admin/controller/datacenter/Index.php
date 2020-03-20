@@ -968,6 +968,7 @@ class Index extends Backend
      */
     public function purchase_data_analysis()
     {
+        
         return $this->view->fetch();
     }
 }

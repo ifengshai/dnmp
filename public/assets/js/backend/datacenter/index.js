@@ -225,6 +225,89 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj', 'custom
             // 为表格绑定事件
             Table.api.bindevent(table);
         },
+        purchase_data_analysis: function () {
+            //库存分布
+            var chartOptions = {
+                targetId: 'echart',
+                downLoadTitle: '图表',
+                type: 'pie'
+            };
+
+            var options = {
+                type: 'post',
+                url: 'datacenter/index/warehouse_data_analysis',
+                data: {
+                    'key': 'pie'
+                }
+
+            }
+            EchartObj.api.ajax(options, chartOptions)
+
+
+            //订单处理
+            var chartOptions = {
+                targetId: 'echart2',
+                downLoadTitle: '图表',
+                type: 'line'
+            };
+
+            var options = {
+                type: 'post',
+                url: 'datacenter/index/warehouse_data_analysis',
+                data: {
+                    'key': 'line'
+                }
+
+            }
+            EchartObj.api.ajax(options, chartOptions)
+
+
+            // 初始化表格参数配置
+            Table.api.init({
+                commonSearch: false,
+                search: false,
+                showExport: false,
+                showColumns: false,
+                showToggle: false,
+                pageList: [10, 25, 50, 100],
+                extend: {
+                    index_url: 'datacenter/index/warehouse_data_analysis' + location.search + '&key=list',
+                }
+            });
+
+            var table = $("#table");
+
+            // 初始化表格
+            table.bootstrapTable({
+                url: $.fn.bootstrapTable.defaults.extend.index_url,
+                pk: 'id',
+                sortName: 'id',
+                columns: [
+                    [
+                        { checkbox: true },
+                        {
+                            field: '', title: __('序号'), formatter: function (value, row, index) {
+                                var options = table.bootstrapTable('getOptions');
+                                var pageNumber = options.pageNumber;
+                                var pageSize = options.pageSize;
+                                return (pageNumber - 1) * pageSize + 1 + index;
+                            }, operate: false
+                        },
+                        { field: 'create_date', title: __('日期'), operate: 'like' },
+                        { field: 'arrival_num', title: __('到货'), operate: false },
+                        { field: 'check_num', title: __('质检'), operate: false },
+                        { field: 'print_label_num', title: __('打印标签'), operate: false },
+                        { field: 'frame_num', title: __('配镜架'), operate: false },
+                        { field: 'lens_num', title: __('配镜片'), operate: false },
+                        { field: 'machining_num', title: __('加工'), operate: false },
+                        { field: 'quality_num', title: __('成品质检'), operate: false }
+                    ]
+                ]
+            });
+
+            // 为表格绑定事件
+            Table.api.bindevent(table);
+        },
         edit: function () {
             Controller.api.bindevent();
         },
