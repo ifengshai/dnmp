@@ -6,6 +6,7 @@ use app\admin\model\platformmanage\MagentoPlatform;
 class Operationalreport extends Backend{
     //订单类型数据统计
     protected $item = null;
+    protected $itemPlatformSku = null;
     /**
      * 运营报告首页数据
      *
@@ -61,6 +62,7 @@ class Operationalreport extends Backend{
     public function platformOrderInfo($platform,$map,$itemMap)
     {
         $this->item = new \app\admin\model\itemmanage\Item;
+        $this->itemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku;
         switch($platform){
             case 1:
             $model = Db::connect('database.db_zeelool');
@@ -202,11 +204,39 @@ class Operationalreport extends Backend{
         //求出饰品的所有sku
         $decoration_sku = $this->item->getDifferenceSku(3);
         //求出眼镜的销售额 base_price  base_discount_amount
-        $frame_sku_money_price    = $model->table('sales_flat_order_item m')->join('sales_flat_order o','m.order_id=o.entity_id','left')->where($whereItem)->where($itemMap)->where('m.sku','in',$frame_sku)->sum('base_price');
+        $frame_money_price    = $model->table('sales_flat_order_item m')->join('sales_flat_order o','m.order_id=o.entity_id','left')->where($whereItem)->where($itemMap)->where('m.sku','in',$frame_sku)->sum('m.base_price');
         //眼镜的折扣价格
-        $frame_sku_money_discount = $model->table('sales_flat_order_item m')->join('sales_flat_order o','m.order_id=o.entity_id','left')->where($whereItem)->where($itemMap)->where('m.sku','in',$frame_sku)->sum('base_discount_amount');
-        //眼镜的销售额
-        
+        $frame_money_discount = $model->table('sales_flat_order_item m')->join('sales_flat_order o','m.order_id=o.entity_id','left')->where($whereItem)->where($itemMap)->where('m.sku','in',$frame_sku)->sum('m.base_discount_amount');
+        //眼镜的实际销售额
+        $frame_money          = round(($frame_money_price - $frame_money_discount),2);
+        //眼镜的销售副数
+        $frame_sales_num      = $model->table('sales_flat_order_item m')->join('sales_flat_order o','m.order_id=o.entity_id','left')->where($whereItem)->where($itemMap)->where('m.sku','in',$frame_sku)->count('*');
+        //眼镜平均副金额
+        if( 0 <$frame_sales_num){
+            $frame_avg_money  = round(($frame_money/$frame_sales_num),2);
+        }else{
+            $frame_avg_money  = 0;
+        }
+        //求出配饰的销售额
+        $decoration_money_price    = $model->table('sales_flat_order_item m')->join('sales_flat_order o','m.order_id=o.entity_id','left')->where($whereItem)->where($itemMap)->where('m.sku','in',$decoration_sku)->sum('m.base_price');
+        //配饰的折扣价格
+        $decoration_money_discount = $model->table('sales_flat_order_item m')->join('sales_flat_order o','m.order_id=o.entity_id','left')->where($whereItem)->where($itemMap)->where('m.sku','in',$decoration_sku)->sum('m.base_discount_amount');
+        //配饰的实际销售额
+        $decoration_money          = round(($decoration_money_price - $decoration_money_discount),2);
+        //配饰的销售副数
+        $decoration_sales_num      = $model->table('sales_flat_order_item m')->join('sales_flat_order o','m.order_id=o.entity_id','left')->where($whereItem)->where($itemMap)->where('m.sku','in',$decoration_sku)->count('*');
+        //配饰平均副金额
+        if(0< $decoration_sales_num){
+            $decoration_avg_money  = round(($decoration_money/$decoration_sales_num),2);
+        }else{
+            $decoration_avg_money  = 0; 
+        }
+        //眼镜正常售卖数
+        $frame_onsales_num         = $this->itemPlatformSku->putawayDifferenceSku(1,$platform);
+        //配饰正常售卖数
+        $decoration_onsales_num    = $this->itemPlatformSku->putawayDifferenceSku(3,$platform);
+        //眼镜动销数
+        $frame_in_print_num        = $model->table('sales_flat_order_item m')->join('sales_flat_order o','m.order_id=o.entity_id','left')->where($whereItem)->where($itemMap)->where('m.sku','in',$decoration_sku)->distinct(true)->field('m.sku')->count('m.sku'); 
         return [
             'general_order'                     => $general_order,
             'general_money'                     => $general_money,
@@ -245,7 +275,15 @@ class Operationalreport extends Backend{
             'gbp_order_percent'                 => $gbp_order_percent,
             'order_status'                      => $order_status_arr,
             'base_shipping_amount'              => $all_shipping_amount_arr,
-            'frame_sku_money'                   => $frame_sku_money,
+            'frame_money'                       => $frame_money,
+            'frame_sales_num'                   => $frame_sales_num,
+            'frame_avg_money'                   => $frame_avg_money,
+            'decoration_money'                  => $decoration_money,
+            'decoration_sales_num'              => $decoration_sales_num,
+            'decoration_avg_money'              => $decoration_avg_money,
+            'frame_onsales_num'                 => $frame_onsales_num,
+            'decoration_onsales_num'            => $decoration_onsales_num,
+            'frame_in_print_num'                => $frame_in_print_num
         ];
     }
 }
