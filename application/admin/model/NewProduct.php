@@ -112,7 +112,6 @@ class NewProduct extends Model
             //镜架类型
             $where['origin_sku'] = $result['origin_sku'];
             $where['is_del'] = 1;
-            $where['item_status'] = ['in', [1, 2]];
             $result['itemCount'] = $this->where($where)->count();
             $result['type'] = $type;
         }
