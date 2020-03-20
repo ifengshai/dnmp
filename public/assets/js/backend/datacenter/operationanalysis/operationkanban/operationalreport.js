@@ -110,6 +110,10 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echartsobj
                     $('#decoration_sales_num').text(ret.rows.decoration_sales_num);
                     $('#decoration_avg_money').text(ret.rows.decoration_avg_money);
                     $('#decoration_onsales_num').text(ret.rows.decoration_onsales_num);
+                    $('#frame_in_print_num').text(ret.rows.frame_in_print_num);
+                    $('#frame_in_print_rate').text(ret.rows.frame_in_print_rate);
+                    $('#decoration_in_print_num').text(ret.rows.decoration_in_print_num);
+                    $('#decoration_in_print_rate').text(ret.rows.decoration_in_print_rate);
                 },function(data,ret){
                     alert(ret.msg);
                     return false;
