@@ -684,7 +684,7 @@ class Item extends Model
      * @Description created by lsw
      * @author lsw
      * @since 2020/03/20 10:19:47 
-     * @param [type] $id
+     * @param [type] $id sku分类 1 商品  3 配饰
      * @return void
      */
     public function getDifferenceSkuNUm($id)
@@ -695,5 +695,41 @@ class Item extends Model
 
         $where['category_id']  = ['in', $ids];
         return $this->where($where)->count('sku');
+    }
+    /**
+     * 获取不同分类的sku中新品sku
+     *
+     * @Description created by lsw
+     * @author lsw
+     * @since 2020/03/20 13:43:33
+     * @param $id  sku分类 1 商品 3 配饰 
+     * @return void
+     */
+    public function getDifferenceNewSku($id)
+    {
+        $category = new \app\admin\model\itemmanage\ItemCategory;
+        $map['attribute_group_id'] = $id;
+        $ids = $category->where($map)->column('id');
+
+        $where['category_id']  = ['in', $ids];
+        return $this->where($where)->where(['is_new'=>1])->column('sku');
+    }
+    /**
+     * 获取不同分类的sku中新品sku的数量
+     *
+     * @Description created by lsw
+     * @author lsw
+     * @since 2020/03/20 15:12:04 
+     * @param [type] $id
+     * @return void
+     */
+    public function getDifferenceNewSkuNum($id)
+    {
+        $category = new \app\admin\model\itemmanage\ItemCategory;
+        $map['attribute_group_id'] = $id;
+        $ids = $category->where($map)->column('id');
+
+        $where['category_id']  = ['in', $ids];
+        return $this->where($where)->where(['is_new'=>1])->count('sku');
     }
 }
