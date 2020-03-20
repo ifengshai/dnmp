@@ -730,5 +730,102 @@ class Voogueme extends Model
         return $data;
     }
 
+    /**
+     * 打标签数量
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/03/20 09:52:30 
+     * @return void
+     */
+    public function printLabelNum()
+    {
+        $where['a.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
+        $where['a.custom_print_label_created_at_new'] = ['between', [date('Y-m-d 00:00:00', time()), date('Y-m-d H:i:s', time())]];
+        $where['custom_print_label_new'] = 1;
+        return $this->alias('a')
+                ->where($where)
+                ->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')
+                ->sum('b.qty_ordered');
+    }
+
+
+    /**
+     * 配镜架数量
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/03/20 09:52:30 
+     * @return void
+     */
+    public function frameNum()
+    {
+        $where['a.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
+        $where['a.custom_match_frame_created_at_new'] = ['between', [date('Y-m-d 00:00:00', time()), date('Y-m-d H:i:s', time())]];
+        $where['custom_is_match_frame_new'] = 1;
+        return $this->alias('a')
+                ->where($where)
+                ->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')
+                ->sum('b.qty_ordered');
+    }
+
+
+    /**
+     * 配镜片数量
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/03/20 09:52:30 
+     * @return void
+     */
+    public function lensNum()
+    {
+        $where['a.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
+        $where['a.custom_match_lens_created_at_new'] = ['between', [date('Y-m-d 00:00:00', time()), date('Y-m-d H:i:s', time())]];
+        $where['custom_is_match_lens_new'] = 1;
+        return $this->alias('a')
+                ->where($where)
+                ->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')
+                ->sum('b.qty_ordered');
+    }
+
+    /**
+     * 加工数量
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/03/20 09:52:30 
+     * @return void
+     */
+    public function factoryNum()
+    {
+        $where['a.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
+        $where['a.custom_match_factory_created_at_new'] = ['between', [date('Y-m-d 00:00:00', time()), date('Y-m-d H:i:s', time())]];
+        $where['custom_is_send_factory_new'] = 1;
+        return $this->alias('a')
+                ->where($where)
+                ->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')
+                ->sum('b.qty_ordered');
+    }
+
+    /**
+     * 成品质检数量
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/03/20 09:52:30 
+     * @return void
+     */
+    public function checkNum()
+    {
+        $where['a.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
+        $where['a.custom_match_delivery_created_at_new'] = ['between', [date('Y-m-d 00:00:00', time()), date('Y-m-d H:i:s', time())]];
+        $where['custom_is_delivery_new'] = 1;
+        return $this->alias('a')
+                ->where($where)
+                ->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')
+                ->sum('b.qty_ordered');
+    }
+
 
 }

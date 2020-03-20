@@ -1246,7 +1246,7 @@ order by sfoi.item_id asc limit 1000";
         //zeelool购物车转化率
         $zeelool_shoppingcart_conversion = @round(($zeelool_count / $zeelool_shoppingcart_total) * 100, 2);
         //zeelool购物车更新转化率
-        $zeelool_shoppingcart_update_conversion = @round(($zeelool_count/$zeelool_shoppingcart_update_total) * 100,2);
+        $zeelool_shoppingcart_update_conversion = @round(($zeelool_count / $zeelool_shoppingcart_update_total) * 100, 2);
         //zeelool注册用户数SELECT count(*) counter from customer_entity
         $zeelool_register_customer = $zeelool_model->table('customer_entity')->where($date)->count('*');
         $voogueme_count = $voogueme_model->table('sales_flat_order')->where($map)->count(1);
@@ -1260,7 +1260,7 @@ order by sfoi.item_id asc limit 1000";
         //voogueme购物车转化率
         $voogueme_shoppingcart_conversion = @round(($voogueme_count / $voogueme_shoppingcart_total) * 100, 2);
         //voogueme购物车更新转化率
-        $voogueme_shoppingcart_update_conversion = @round(($voogueme_count/$voogueme_shoppingcart_update_total) * 100,2);
+        $voogueme_shoppingcart_update_conversion = @round(($voogueme_count / $voogueme_shoppingcart_update_total) * 100, 2);
         //voogueme注册用户数
         $voogueme_register_customer = $voogueme_model->table('customer_entity')->where($date)->count('*');
         $nihao_count = $nihao_model->table('sales_flat_order')->where($map)->count(1);
@@ -1274,7 +1274,7 @@ order by sfoi.item_id asc limit 1000";
         //nihao购物车转化率
         $nihao_shoppingcart_conversion = @round(($nihao_count / $nihao_shoppingcart_total) * 100, 2);
         //nihao站购物车更新转化率
-        $nihao_shoppingcart_update_conversion = @round(($nihao_count/$nihao_shoppingcart_update_total) * 100,2);
+        $nihao_shoppingcart_update_conversion = @round(($nihao_count / $nihao_shoppingcart_update_total) * 100, 2);
         //nihao注册用户数
         $nihao_register_customer = $nihao_model->table('customer_entity')->where($date)->count('*');
         $data['zeelool_sales_num']                          = $zeelool_count;
@@ -1304,7 +1304,7 @@ order by sfoi.item_id asc limit 1000";
         $data['zeelool_shoppingcart_update_total']          = $zeelool_shoppingcart_update_total;
         $data['voogueme_shoppingcart_update_total']         = $voogueme_shoppingcart_update_total;
         $data['nihao_shoppingcart_update_total']            = $nihao_shoppingcart_update_total;
-        $data['all_shoppingcart_update_total']              = $zeelool_shoppingcart_update_total + $voogueme_shoppingcart_update_total+ $nihao_shoppingcart_update_total;
+        $data['all_shoppingcart_update_total']              = $zeelool_shoppingcart_update_total + $voogueme_shoppingcart_update_total + $nihao_shoppingcart_update_total;
         $data['zeelool_shoppingcart_update_conversion']     = $zeelool_shoppingcart_update_conversion;
         $data['voogueme_shoppingcart_update_conversion']    = $voogueme_shoppingcart_update_conversion;
         $data['nihao_shoppingcart_update_conversion']       = $nihao_shoppingcart_update_conversion;
@@ -1362,7 +1362,7 @@ order by sfoi.item_id asc limit 1000";
         echo 'ok';
     }
 
-    
+
     /**
      * 每天9点 根据销量计算产品分级
      */
@@ -2814,17 +2814,57 @@ order by sfoi.item_id asc limit 1000";
     }
 
     /**
-     * 定时更新供应链分析-加工时效
+     * 记录仓库每天加工数据
      *
      * @Description
      * @author wpl
      * @since 2020/03/14 14:15:37 
      * @return void
      */
-    public function processing_aging()
+    public function warehouse_data_everyday()
     {
-        $dataConfig = new \app\admin\model\DataConfig();
-        
+        //到货数量
+        $check = new \app\admin\model\warehouse\Check();
+        $data['arrival_num'] = ($check->getArrivalsNumToday()) ?? 0;
+
+        //质检数量
+        $data['check_num'] = ($check->getCheckNumToday()) ?? 0;
+
+        //打印标签
+        $zeeloolPrintLabelNum = $this->zeelool->printLabelNum();
+        $vooguemePrintLabelNum = $this->voogueme->printLabelNum();
+        $nihaoPrintLabelNum = $this->nihao->printLabelNum();
+        $data['print_label_num'] = ($zeeloolPrintLabelNum + $vooguemePrintLabelNum + $nihaoPrintLabelNum) ?? 0;
+        //配镜架
+        $zeeloolFrameNum = $this->zeelool->frameNum();
+        $vooguemeFrameNum = $this->voogueme->frameNum();
+        $nihaoFrameNum =  $this->nihao->frameNum();
+        $data['frame_num'] = ($zeeloolFrameNum + $vooguemeFrameNum + $nihaoFrameNum) ?? 0;
+
+        //配镜片
+        $zeeloolLensNum = $this->zeelool->lensNum();
+        $vooguemeLensNum = $this->voogueme->lensNum();
+        $nihaoLensNum = $this->nihao->lensNum();
+        $data['lens_num'] = ($zeeloolLensNum + $vooguemeLensNum + $nihaoLensNum) ?? 0;
+
+        //加工
+        $zeeloolfactoryNum = $this->zeelool->factoryNum();
+        $vooguemefactoryNum = $this->voogueme->factoryNum();
+        $nihaofactoryNum = $this->nihao->factoryNum();
+        $data['machining_num'] = ($zeeloolfactoryNum + $vooguemefactoryNum + $nihaofactoryNum) ?? 0;
+
+        //成品质检
+        $zeeloolfactoryNum = $this->zeelool->checkNum();
+        $vooguemefactoryNum = $this->voogueme->checkNum();
+        $nihaofactoryNum = $this->nihao->checkNum();
+        $data['quality_num'] = ($zeeloolfactoryNum + $vooguemefactoryNum + $nihaofactoryNum) ?? 0;
+
+        $data['create_time'] = date('Y-m-d H:i:s', time());
+        $data['create_date'] = date('Y-m-d', time());
+        //添加数据
+        $model = new \app\admin\model\WarehouseData();
+        $model->save($data);
+        echo 'ok';
     }
 
     /**
@@ -3217,5 +3257,5 @@ order by sfoi.item_id asc limit 1000";
         }
         echo 'ok';
         die;
-    }    
+    }
 }
