@@ -290,7 +290,7 @@ class Operationalreport extends Backend{
         $frame_new_in_print_num        = $model->table('sales_flat_order_item m')->join('sales_flat_order o','m.order_id=o.entity_id','left')->where($whereItem)->where($itemMap)->where('m.sku','in',$frame_new_sku)->count('distinct m.sku');
         //新品眼镜动销率
         if(0< $frame_new_num){
-            $frame_new_in_print_rate   = round(($frame_new_in_print_num/$frame_new_num),2);
+            $frame_new_in_print_rate   = round(($frame_new_in_print_num/$frame_new_num)*100,2);
         }else{
             $frame_new_in_print_rate   = 0;
         }
@@ -298,7 +298,7 @@ class Operationalreport extends Backend{
         $decoration_new_in_print_num   = $model->table('sales_flat_order_item m')->join('sales_flat_order o','m.order_id=o.entity_id','left')->where($whereItem)->where($itemMap)->where('m.sku','in',$decoration_new_sku)->count('distinct m.sku');
         //新品饰品动销率
         if(0< $decoration_new_num){
-            $decoration_new_in_print_rate  = round(($decoration_new_in_print_num/$decoration_new_num),2);
+            $decoration_new_in_print_rate  = round(($decoration_new_in_print_num/$decoration_new_num)*100,2);
         }else{
             $decoration_new_in_print_rate  = 0;
         }
