@@ -236,7 +236,7 @@ class Operationalreport extends Backend{
         //配饰正常售卖数
         $decoration_onsales_num    = $this->itemPlatformSku->putawayDifferenceSku(3,$platform);
         //眼镜动销数
-        $frame_in_print_num        = $model->table('sales_flat_order_item m')->join('sales_flat_order o','m.order_id=o.entity_id','left')->where($whereItem)->where($itemMap)->where('m.sku','in',$frame_sku)->distinct(true)->field('m.sku')->count('m.sku');
+        $frame_in_print_num        = $model->table('sales_flat_order_item m')->join('sales_flat_order o','m.order_id=o.entity_id','left')->where($whereItem)->where($itemMap)->where('m.sku','in',$frame_sku)->count('distinct m.sku');
         //眼镜总共的数量
         $frame_num                 = $this->item->getDifferenceSkuNUm(1);
         //眼镜动销率
@@ -246,7 +246,7 @@ class Operationalreport extends Backend{
             $frame_in_print_rate   = 0;
         }
         //配饰动销数
-        $decoration_in_print_num   = $model->table('sales_flat_order_item m')->join('sales_flat_order o','m.order_id=o.entity_id','left')->where($whereItem)->where($itemMap)->where('m.sku','in',$decoration_sku)->distinct(true)->field('m.sku')->count('m.sku');
+        $decoration_in_print_num   = $model->table('sales_flat_order_item m')->join('sales_flat_order o','m.order_id=o.entity_id','left')->where($whereItem)->where($itemMap)->where('m.sku','in',$decoration_sku)->count('distinct m.sku');
         //配饰总共的数量
         $decoration_num            = $this->item->getDifferenceSkuNUm(3);    
         //配饰动销率
