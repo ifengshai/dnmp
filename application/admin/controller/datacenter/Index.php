@@ -710,7 +710,7 @@ class Index extends Backend
                 //查询每天处理的订单
                 $orderLog = new \app\admin\model\OrderLog();
                 $order_process_res = $orderLog->getOrderProcessNum();
-                
+
                 $all_sales_num  = [];
                 $order_process_num  = [];
                 foreach ($list as $k => $v) {
@@ -736,6 +736,23 @@ class Index extends Backend
 
                 ];
                 return json(['code' => 1, 'data' => $json]);
+            } elseif ($key == 'list') {
+                $model = new \app\admin\model\WarehouseData();
+                list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+                $total = $model
+                    ->where($where)
+                    ->order($sort, $order)
+                    ->count();
+
+                $list = $model
+                    ->where($where)
+                    ->order($sort, $order)
+                    ->limit($offset, $limit)
+                    ->select();
+                $list = collection($list)->toArray();
+                $result = array("total" => $total, "rows" => $list);
+
+                return json($result);
             }
         }
 
@@ -892,7 +909,7 @@ class Index extends Backend
     protected function processing_aging_data()
     {
         $zeelool = $this->zeelool->getProcessingAging();
-       
+
         $voogueme = $this->voogueme->getProcessingAging();
 
         $nihao = $this->nihao->getProcessingAging();
@@ -921,7 +938,7 @@ class Index extends Backend
         $data['labelNotOvertimeProcess'] = $zeelool['labelNotOvertimeProcess'] + $voogueme['labelNotOvertimeProcess'] + $nihao['labelNotOvertimeProcess'];
         //配镜架未超时已处理
         $data['frameNotOvertimeProcess'] = $zeelool['frameNotOvertimeProcess'] + $voogueme['frameNotOvertimeProcess'] + $nihao['frameNotOvertimeProcess'];
-         //配镜片未超时已处理
+        //配镜片未超时已处理
         $data['lensNotOvertimeProcess'] = $zeelool['lensNotOvertimeProcess'] + $voogueme['lensNotOvertimeProcess'] + $nihao['lensNotOvertimeProcess'];
         //加工未超时已处理
         $data['machiningNotOvertimeProcess'] = $zeelool['machiningNotOvertimeProcess'] + $voogueme['machiningNotOvertimeProcess'] + $nihao['machiningNotOvertimeProcess'];
