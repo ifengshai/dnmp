@@ -273,7 +273,7 @@ class Operationalreport extends Backend{
             'gbp_order_percent'                 => $gbp_order_percent,
             'order_status'                      => $order_status_arr,
             'base_shipping_amount'              => $all_shipping_amount_arr,
-            'frame_sku_money'                   => $frame_money,
+            'frame_money'                       => $frame_money,
             'frame_sales_num'                   => $frame_sales_num,
             'frame_avg_money'                   => $frame_avg_money,
             'decoration_money'                  => $decoration_money,
