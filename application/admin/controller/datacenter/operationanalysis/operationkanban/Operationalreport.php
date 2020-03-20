@@ -236,7 +236,25 @@ class Operationalreport extends Backend{
         //配饰正常售卖数
         $decoration_onsales_num    = $this->itemPlatformSku->putawayDifferenceSku(3,$platform);
         //眼镜动销数
-        $frame_in_print_num        = $model->table('sales_flat_order_item m')->join('sales_flat_order o','m.order_id=o.entity_id','left')->where($whereItem)->where($itemMap)->where('m.sku','in',$decoration_sku)->distinct(true)->field('m.sku')->count('m.sku'); 
+        $frame_in_print_num        = $model->table('sales_flat_order_item m')->join('sales_flat_order o','m.order_id=o.entity_id','left')->where($whereItem)->where($itemMap)->where('m.sku','in',$frame_sku)->distinct(true)->field('m.sku')->count('m.sku');
+        //眼镜总共的数量
+        $frame_num                 = $this->item->getDifferenceSkuNUm(1);
+        //眼镜动销率
+        if(0<$frame_num){
+            $frame_in_print_rate   = round(($frame_in_print_num/$frame_num),2); 
+        }else{
+            $frame_in_print_rate   = 0;
+        }
+        //配饰动销数
+        $decoration_in_print_num   = $model->table('sales_flat_order_item m')->join('sales_flat_order o','m.order_id=o.entity_id','left')->where($whereItem)->where($itemMap)->where('m.sku','in',$decoration_sku)->distinct(true)->field('m.sku')->count('m.sku');
+        //配饰总共的数量
+        $decoration_num            = $this->item->getDifferenceSkuNUm(3);    
+        //配饰动销率
+        if(0<$decoration_num){
+          $decoration_in_print_rate = round(($decoration_in_print_num/$decoration_num),2);
+        }else{
+          $decoration_in_print_rate = 0;  
+        }
         return [
             'general_order'                     => $general_order,
             'general_money'                     => $general_money,
@@ -283,7 +301,10 @@ class Operationalreport extends Backend{
             'decoration_avg_money'              => $decoration_avg_money,
             'frame_onsales_num'                 => $frame_onsales_num,
             'decoration_onsales_num'            => $decoration_onsales_num,
-            'frame_in_print_num'                => $frame_in_print_num
+            'frame_in_print_num'                => $frame_in_print_num,
+            'frame_in_print_rate'               => $frame_in_print_rate,
+            'decoration_in_print_num'           => $decoration_in_print_num,
+            'decoration_in_print_rate'          => $decoration_in_print_rate
         ];
     }
 }
