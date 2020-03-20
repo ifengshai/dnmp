@@ -1017,7 +1017,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                                     },
                                 },
                                 {
-                                    name: 'edit',
+                                    name: 'edit_presell',
                                     text: '编辑预售',
                                     title: __('编辑预售'),
                                     classname: 'btn btn-xs btn-success btn-dialog',
