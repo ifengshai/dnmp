@@ -101,10 +101,10 @@ class NewProduct extends Model
      */
     public function getItemInfo($sku, $type = 1)
     {
-        $item = new \app\admin\model\itemmanage\Item;
+        // $item = new \app\admin\model\itemmanage\Item;
         $map['m.is_del'] = 1;
         $map['m.sku'] = $sku;
-        $result = $item->alias('m')->where($map)->join('item_attribute a', 'm.id=a.item_id', 'left')->find();
+        $result = $this->alias('m')->where($map)->join('fa_new_product_attribute a', 'm.id=a.item_id', 'left')->find();
         if (!$result) {
             return false;
         }
@@ -112,7 +112,7 @@ class NewProduct extends Model
             //镜架类型
             $where['origin_sku'] = $result['origin_sku'];
             $where['is_del'] = 1;
-            $result['itemCount'] = $item->where($where)->count();
+            $result['itemCount'] = $this->where($where)->count();
             $result['type'] = $type;
         }
 
