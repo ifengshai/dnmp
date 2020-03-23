@@ -227,19 +227,30 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj', 'custom
         },
         purchase_data_analysis: function () {
             //库存分布
+            //销售排行榜图表
             var chartOptions = {
                 targetId: 'echart',
                 downLoadTitle: '图表',
-                type: 'pie'
+                type: 'bar',
+                bar: {
+                    xAxis: {
+                        type: 'value',
+                        boundaryGap: [0, 0.01]
+                    },
+                    yAxis: {
+                        type: 'category',
+                        data: []
+                    }
+                }
             };
 
             var options = {
                 type: 'post',
-                url: 'datacenter/index/warehouse_data_analysis',
+                url: 'datacenter/index/top_sale_list',
                 data: {
-                    'key': 'pie'
+                    'time': time,
+                    'site': site
                 }
-
             }
             EchartObj.api.ajax(options, chartOptions)
 

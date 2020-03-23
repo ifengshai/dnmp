@@ -968,6 +968,9 @@ class Index extends Backend
      */
     public function purchase_data_analysis()
     {
+        if ($this->request->isAjax()) {
+            
+        }
         $dataConfig = new \app\admin\model\DataConfig();
         //采购总数
         $purchaseNum = $dataConfig->getValue('purchaseNum');
