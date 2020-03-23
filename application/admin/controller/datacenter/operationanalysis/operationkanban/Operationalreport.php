@@ -2,6 +2,7 @@
 namespace app\admin\controller\datacenter\operationanalysis\operationkanban;
 use think\Db;
 use app\common\controller\Backend;
+use app\admin\model\OrderItemInfo;
 use app\admin\model\platformmanage\MagentoPlatform;
 class Operationalreport extends Backend{
     //订单类型数据统计
@@ -33,11 +34,61 @@ class Operationalreport extends Backend{
             if(4<=$order_platform){
                 return $this->error('该平台暂时没有数据');
             }
-            $result = $this->platformOrderInfo($order_platform,$map,$itemMap);
-            if(!$result){
-                return $this->error('暂无数据');
+            $orderItemInfo = new OrderItemInfo();
+            $list = $orderItemInfo->getAllData($order_platform);
+            $create_date = $frame_sales_num = $frame_in_print_num = $decoration_sales_num = $decoration_in_print_num =[];
+            foreach ($list as $v) {
+                $frame_sales_num[]          = $v['frame_sales_num'];
+                $frame_in_print_num[]       = $v['frame_in_print_num'];
+                $decoration_sales_num[]     = $v['decoration_sales_num'];
+                $decoration_in_print_num[]  = $v['decoration_in_print_num'];
+                $create_date[]              = $v['create_date'];  
             }
-            return json(['code' => 1, 'data'=>[1,2,3],'rows' => $result]);
+            $json['xcolumnData'] = $json2['xcolumnData'] = $create_date ? $create_date :[];
+            $json['column'] = ['眼镜销售副数', '眼镜动销数'];
+            $json2['column'] = ['配饰销售副数', '配饰动销数'];
+            $json['columnData'] = [
+                [
+                    'type' => 'bar',
+                    'barWidth' => '20%',
+                    'data' => $frame_sales_num ? $frame_sales_num:[],
+                    'name' => '眼镜销售副数'
+                ],
+                [
+                    'type' => 'line',
+                    'yAxisIndex' => 1,
+                    'data' => $frame_in_print_num ? $frame_in_print_num:[],
+                    'name' => '眼镜动销数'                    
+                ]
+
+            ];
+            $json2['columnData'] = [
+                [
+                    'type' => 'bar',
+                    'barWidth' => '20%',
+                    'data' => $decoration_sales_num ? $decoration_sales_num:[],
+                    'name' => '配饰销售副数'
+                ],
+                [
+                    'type' => 'line',
+                    'yAxisIndex' => 1,
+                    'data' => $decoration_in_print_num ? $decoration_in_print_num:[],
+                    'name' => '配饰动销数'                    
+                ]
+            ];
+            if($params['key'] == 'frame_sales_num'){
+                return json(['code' => 1, 'data'=>$json]);
+
+            }elseif($params['key'] == 'decoration_sales_num'){
+                return json(['code' => 1, 'data'=>$json2]);
+            }else{
+           // $result = $this->platformOrderInfo($order_platform,$map,$itemMap);
+            // if(!$result){
+            //     return $this->error('暂无数据');
+            // }
+                return json(['code' => 1, 'rows' => $result]);
+            }
+            
 
         }	
         $this->view->assign(
