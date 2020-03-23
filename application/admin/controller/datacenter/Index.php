@@ -968,6 +968,7 @@ class Index extends Backend
      */
     public function purchase_data_analysis()
     {
+        $purchase = new \app\admin\model\purchase\PurchaseOrder();
         if ($this->request->isAjax()) {
             $purchase_type = input('purchase_type');
             $key = input('key');
@@ -978,7 +979,6 @@ class Index extends Backend
                 $time = [$arr[0] . ' ' . $arr[1], $arr[3] . ' ' . $arr[4]];
             }
             if ($key == 'pie01') {
-                $purchase = new \app\admin\model\purchase\PurchaseOrder();
                 $data = $purchase->getPurchaseNumNowPerson([], $time);
                 $json['column'] = array_keys($data);
                 //转二维数组
@@ -993,7 +993,6 @@ class Index extends Backend
                 }
                 $json['columnData'] = $list;
             } elseif ($key == 'pie02') {
-                $purchase = new \app\admin\model\purchase\PurchaseOrder();
                 $data = $purchase->getPurchaseOrderNumNowPerson([], $time);
                 $json['column'] = array_keys($data);
                 //转二维数组
@@ -1055,7 +1054,25 @@ class Index extends Backend
         $purchaseFrameNum = $dataConfig->getValue('purchaseFrameNum');
         //采购到货总数
         $arrivalsNum = $dataConfig->getValue('arrivalsNum');
+        //采购平均单价
+        $purchaseAveragePrice = $dataConfig->getValue('purchaseAveragePrice');
+        //当月销售总数
+        $salesNum = $dataConfig->getValue('salesNum');
+        //当月销售总成本
+        $salesCost = $dataConfig->getValue('salesCost');
+        //当月质检合格总数
+        $quantityNum = $dataConfig->getValue('quantityNum');
 
+        //当月线上采购数量
+        $onlinePurchaseNum = $purchase->getOnlinePurchaseNum();
+        //当月线下采购数量
+        $underPurchaseNum = $purchase->getUnderPurchaseNum();
+        $this->assign('purchaseAveragePrice', $purchaseAveragePrice);
+        $this->assign('salesNum', $salesNum);
+        $this->assign('salesCost', $salesCost);
+        $this->assign('quantityNum', $quantityNum);
+        $this->assign('onlinePurchaseNum', $onlinePurchaseNum);
+        $this->assign('underPurchaseNum', $underPurchaseNum);
         $this->assign('purchaseNum', $purchaseNum);
         $this->assign('purchasePrice', $purchasePrice);
         $this->assign('purchaseSkuNum', $purchaseSkuNum);

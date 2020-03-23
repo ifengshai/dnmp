@@ -188,6 +188,40 @@ class PurchaseOrder extends Model
     }
 
     /**
+     * 当月线上采购数量
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/03/05 17:08:36 
+     * @return void
+     */
+    public function getOnlinePurchaseNum()
+    {
+        $where['createtime'] = ['between', [date('Y-m-01 00:00:00', time()), date('Y-m-d H:i:s', time())]];
+        $where['is_del'] = 1;
+        $where['purchase_type'] = 2;
+        $where['purchase_status'] = ['in', [2, 5, 6, 7]];
+        return $this->alias('a')->where($where)->join(['fa_purchase_order_item' => 'b'], 'a.id=b.purchase_id')->sum('b.purchase_num');
+    }
+
+    /**
+     * 当月线下采购数量
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/03/05 17:08:36 
+     * @return void
+     */
+    public function getUnderPurchaseNum()
+    {
+        $where['createtime'] = ['between', [date('Y-m-01 00:00:00', time()), date('Y-m-d H:i:s', time())]];
+        $where['is_del'] = 1;
+        $where['purchase_type'] = 1;
+        $where['purchase_status'] = ['in', [2, 5, 6, 7]];
+        return $this->alias('a')->where($where)->join(['fa_purchase_order_item' => 'b'], 'a.id=b.purchase_id')->sum('b.purchase_num');
+    }
+
+    /**
      * 当月采购总金额
      *
      * @Description
