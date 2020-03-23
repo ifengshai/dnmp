@@ -200,9 +200,9 @@ class Operationalreport extends Backend{
             }
         }
         //求出眼镜所有sku
-        $frame_sku  = $this->itemplatformsku->getDifferencePlatformSku(1,$platform);
+        $frame_sku  = $this->itemPlatformSku->getDifferencePlatformSku(1,$platform);
         //求出饰品的所有sku
-        $decoration_sku = $this->itemplatformsku->getDifferencePlatformSku(3,$platform);
+        $decoration_sku = $this->itemPlatformSku->getDifferencePlatformSku(3,$platform);
         //求出眼镜的销售额 base_price  base_discount_amount
         $frame_money_price    = $model->table('sales_flat_order_item m')->join('sales_flat_order o','m.order_id=o.entity_id','left')->where($whereItem)->where($itemMap)->where('m.sku','in',$frame_sku)->sum('m.base_price');
         //眼镜的折扣价格
