@@ -2360,6 +2360,9 @@ order by sfoi.item_id asc limit 1000";
         //当月采购镜架总数
         $purchaseFrameNum = $purchase->getPurchaseFrameNum();
 
+        //当月采购镜架总金额
+        $purchaseFramePrice = $purchase->getPurchaseFramePrice();
+
         //当月采购总SKU数
         $purchaseSkuNum = $purchase->getPurchaseSkuNum();
 
@@ -2401,6 +2404,10 @@ order by sfoi.item_id asc limit 1000";
         $data['value'] = $purchaseFrameNum;
         $data['updatetime'] = date('Y-m-d H:i:s', time());
         $dataConfig->where('key', 'purchaseFrameNum')->update($data);
+
+        $data['value'] = $purchaseFramePrice;
+        $data['updatetime'] = date('Y-m-d H:i:s', time());
+        $dataConfig->where('key', 'purchaseFramePrice')->update($data);
 
         $data['value'] = $purchaseSkuNum;
         $data['updatetime'] = date('Y-m-d H:i:s', time());

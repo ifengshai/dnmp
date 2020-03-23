@@ -968,8 +968,80 @@ class Index extends Backend
      */
     public function purchase_data_analysis()
     {
+        $purchase = new \app\admin\model\purchase\PurchaseOrder();
         if ($this->request->isAjax()) {
-            
+            $purchase_type = input('purchase_type');
+            $key = input('key');
+            $time = input('time');
+            //拆分
+            if ($time) {
+                $arr = explode(' ', $time);
+                $time = [$arr[0] . ' ' . $arr[1], $arr[3] . ' ' . $arr[4]];
+            }
+            if ($key == 'pie01') {
+                $data = $purchase->getPurchaseNumNowPerson([], $time);
+                $json['column'] = array_keys($data);
+                //转二维数组
+                if ($data) {
+                    $list = [];
+                    $i = 0;
+                    foreach ($data as $k => $v) {
+                        $list[$i]['name'] = $k;
+                        $list[$i]['value'] = $v;
+                        $i++;
+                    }
+                }
+                $json['columnData'] = $list;
+            } elseif ($key == 'pie02') {
+                $data = $purchase->getPurchaseOrderNumNowPerson([], $time);
+                $json['column'] = array_keys($data);
+                //转二维数组
+                if ($data) {
+                    $list = [];
+                    $i = 0;
+                    foreach ($data as $k => $v) {
+                        $list[$i]['name'] = $k;
+                        $list[$i]['value'] = $v;
+                        $i++;
+                    }
+                }
+                $json['columnData'] = $list;
+            } else {
+                $warehouse_model = new \app\admin\model\WarehouseData();
+                $warehouse_data = $warehouse_model->getPurchaseData();
+                //线上采购单
+                if ($purchase_type == 1) {
+                    $barcloumndata = array_column($warehouse_data, 'online_purchase_num');
+                    $linecloumndata = array_column($warehouse_data, 'online_purchase_price');
+                } elseif ($purchase_type == 2) {
+                    //线下采购单
+                    $barcloumndata = array_column($warehouse_data, 'purchase_num');
+                    $linecloumndata = array_column($warehouse_data, 'purchase_price');
+                } else {
+                    //全部采购单
+                    $barcloumndata = array_column($warehouse_data, 'all_purchase_num');
+                    $linecloumndata = array_column($warehouse_data, 'all_purchase_price');
+                }
+
+                $json['xColumnName'] = array_column($warehouse_data, 'create_date');
+                $json['columnData'] = [
+                    [
+                        'type' => 'bar',
+                        'data' => $barcloumndata,
+                        'name' => '采购数量'
+                    ],
+                    [
+                        'type' => 'line',
+                        'data' => $linecloumndata,
+                        'name' => '采购金额',
+                        'yAxisIndex' => 1,
+                        'smooth' => true //平滑曲线
+                    ],
+
+                ];
+            }
+
+            return json(['code' => 1, 'data' => $json]);
         }
         $dataConfig = new \app\admin\model\DataConfig();
         //采购总数
@@ -982,7 +1054,25 @@ class Index extends Backend
         $purchaseFrameNum = $dataConfig->getValue('purchaseFrameNum');
         //采购到货总数
         $arrivalsNum = $dataConfig->getValue('arrivalsNum');
+        //采购平均单价
+        $purchaseAveragePrice = $dataConfig->getValue('purchaseAveragePrice');
+        //当月销售总数
+        $salesNum = $dataConfig->getValue('salesNum');
+        //当月销售总成本
+        $salesCost = $dataConfig->getValue('salesCost');
+        //当月质检合格总数
+        $quantityNum = $dataConfig->getValue('quantityNum');
 
+        //当月线上采购数量
+        $onlinePurchaseNum = $purchase->getOnlinePurchaseNum();
+        //当月线下采购数量
+        $underPurchaseNum = $purchase->getUnderPurchaseNum();
+        $this->assign('purchaseAveragePrice', $purchaseAveragePrice);
+        $this->assign('salesNum', $salesNum);
+        $this->assign('salesCost', $salesCost);
+        $this->assign('quantityNum', $quantityNum);
+        $this->assign('onlinePurchaseNum', $onlinePurchaseNum);
+        $this->assign('underPurchaseNum', $underPurchaseNum);
         $this->assign('purchaseNum', $purchaseNum);
         $this->assign('purchasePrice', $purchasePrice);
         $this->assign('purchaseSkuNum', $purchaseSkuNum);

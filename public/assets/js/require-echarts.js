@@ -1018,15 +1018,18 @@ define(['echarts', 'echarts-theme', Config.store_enname], function (Echarts, und
                             });
 
                         } else {
-                            console.log(res.firtColumnName);
                             if (res.firtColumnName) {
                                 chartOptions.bar.yAxis.data = res.firtColumnName;
                             }
+                           
                             $.extend(true, EchartObj.api.barConfig, chartOptions.bar, {
                                 targetId: chartOptions.targetId,
                                 downLoadID: chartOptions.downLoadID,
                                 downLoadTitle: chartOptions.downLoadTitle
                             }, {
+                                xAxis: {
+                                    data: res.xColumnName
+                                },
                                 legend: {
                                     data: res.column
                                 },
