@@ -2815,9 +2815,9 @@ order by sfoi.item_id asc limit 1000";
      */
     public function warehouse_data_everyday()
     {
-        $time = ['2020-03-13 00:00:00', '2020-03-13 23:59:59'];
-        $date = '2020-03-13';
-        $createtime = '2020-03-13 22:00:00';
+        $time = ['2020-03-12 00:00:00', '2020-03-12 23:59:59'];
+        $date = '2020-03-12';
+        $createtime = '2020-03-12 22:00:00';
         //到货数量
         $check = new \app\admin\model\warehouse\Check();
         $data['arrival_num'] = ($check->getArrivalsNumToday($time)) ?? 0;
