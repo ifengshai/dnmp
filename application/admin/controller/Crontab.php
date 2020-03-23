@@ -2815,9 +2815,7 @@ order by sfoi.item_id asc limit 1000";
      */
     public function warehouse_data_everyday()
     {
-        $time = ['2020-03-12 00:00:00', '2020-03-12 23:59:59'];
-        $date = '2020-03-12';
-        $createtime = '2020-03-12 22:00:00';
+        $time = [];
         //到货数量
         $check = new \app\admin\model\warehouse\Check();
         $data['arrival_num'] = ($check->getArrivalsNumToday($time)) ?? 0;
@@ -2854,8 +2852,8 @@ order by sfoi.item_id asc limit 1000";
         $nihaofactoryNum = $this->nihao->checkNum($time);
         $data['quality_num'] = ($zeeloolfactoryNum + $vooguemefactoryNum + $nihaofactoryNum) ?? 0;
 
-        $data['create_time'] = $createtime;
-        $data['create_date'] = $date;
+        $data['create_time'] = date('Y-m-d H:i:s', time());
+        $data['create_date'] = date('Y-m-d');
 
         //计算每天采购数量
         $purchase = new \app\admin\model\purchase\PurchaseOrder();
@@ -3312,7 +3310,7 @@ order by sfoi.item_id asc limit 1000";
         //求出饰品的所有sku
         $decoration_sku = $this->item->getDifferenceSku(3);
         //眼镜销售副数
-        $data['frame_sales_num']            = $model->table('sales_flat_order_item m')->join('sales_flat_order o','m.order_id=o.entity_id','left')->where($whereItem)->where($map)->where('m.skus','in',$frame_sku)->count('*');
+        $data['frame_sales_num']            = $model->table('sales_flat_order_item m')->join('sales_flat_order o', 'm.order_id=o.entity_id', 'left')->where($whereItem)->where($map)->where('m.skus', 'in', $frame_sku)->count('*');
         exit;
         // //眼镜动销数
         // $data['frame_in_print_num']         = $model->table('sales_flat_order_item m')->join('sales_flat_order o','m.order_id=o.entity_id','left')->where($whereItem)->where($map)->where('m.sku','in',$frame_sku)->count('distinct m.sku');
@@ -3326,5 +3324,5 @@ order by sfoi.item_id asc limit 1000";
         // Db::name('order_item_info')->insert($data);
         // echo 'ok';
         // die;
-    }    
+    }
 }
