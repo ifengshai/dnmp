@@ -44,9 +44,7 @@ class Operationalreport extends Backend{
                 $decoration_in_print_num[]  = $v['decoration_in_print_num'];
                 $create_date[]              = $v['create_date'];  
             }
-            $json['xcolumnData'] = $json2['xcolumnData'] = $create_date ? $create_date :[];
-            $json['column'] = ['眼镜销售副数', '眼镜动销数'];
-            $json2['column'] = ['配饰销售副数', '配饰动销数'];
+            $json['xColumnName'] = $json2['xColumnName'] = $create_date ? $create_date :[];
             $json['columnData'] = [
                 [
                     'type' => 'bar',
