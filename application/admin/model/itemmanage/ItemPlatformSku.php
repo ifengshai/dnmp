@@ -293,8 +293,26 @@ class ItemPlatformSku extends Model
         $category = new \app\admin\model\itemmanage\ItemCategory;
         $map['attribute_group_id'] = $id;
         $ids = $category->where($map)->column('id');
-
         $where['m.category_id']  = ['in', $ids];
+        $where['p.platform_type'] = $platform;
+        return $this->alias('p')->join('fa_item m','p.sku=m.sku','inner')->where($where)->column('p.platform_sku');
+    }
+    /**
+     * 获取不同平台的新品sku
+     *
+     * @Description created by lsw
+     * @author lsw
+     * @since 2020/03/23 11:24:15 
+     * @param [type] $id
+     * @return void
+     */
+    public function getDifferencePlatformNewSku($id,$platform)
+    {
+        $category = new \app\admin\model\itemmanage\ItemCategory;
+        $map['attribute_group_id'] = $id;
+        $ids = $category->where($map)->column('id');
+        $where['m.category_id']  = ['in', $ids];
+        $where['m.is_new']       = 1;
         $where['p.platform_type'] = $platform;
         return $this->alias('p')->join('fa_item m','p.sku=m.sku','inner')->where($where)->column('p.platform_sku');
     }    
