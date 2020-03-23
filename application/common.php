@@ -451,3 +451,38 @@ function pinyin($str, $ret_format = 'all', $placeholder = '_', $allow_chars = '/
 
     return rtrim($rs, ' ');
 }
+/**
+ * [发送钉钉通知]
+ * @param  array  $userIds [用户的userid]
+ * @param  [type] $title   [标题]
+ * @param  [type] $text    [内容]
+ * @return [type]          [description]
+ */
+if (!function_exists('send_ding_message')) {
+    
+    function send_ding_message(array $userIds, $title, $text)
+    {
+        //type 1    收到需求，待通过
+        //type 2    收到需求，待完成
+        //type 3    需求完成，待测试
+        //type 4    测试完成，待上线
+        $url = config('ding.message_url');
+        $agentId = config('ding.agent_id');
+        $link = [
+            'msgtype' => 'link',
+            'link' => [
+                'messageUrl' => $url,
+                'picUrl' => 'https://static.dingtalk.com/media/lALPDeC2v2wwMcPMpcyk_164_165.png',
+                'title' => $title,
+                'text' => $text
+            ]
+            
+        ];
+        $params = [
+            'agent_id' => $agentId,
+            'userid_list' => join(',', $userIds),
+            'msg' => json_encode($link)
+        ];
+        return $params;
+    }
+}
