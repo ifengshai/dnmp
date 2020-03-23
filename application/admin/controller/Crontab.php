@@ -3308,23 +3308,25 @@ order by sfoi.item_id asc limit 1000";
         $map['m.created_at'] =  ['between', [$stime, $etime]];
         $whereItem = " o.status in ('processing','complete','creditcard_proccessing','free_processing')";
         //求出眼镜所有sku
-        $frame_sku  = $this->item->getDifferenceSku(1);
+        $frame_sku  = $this->itemplatformsku->getDifferencePlatformSku(1,$platform);
         //求出饰品的所有sku
-        $decoration_sku = $this->item->getDifferenceSku(3);
+        $decoration_sku = $this->itemplatformsku->getDifferencePlatformSku(3,$platform);
+        dump($frame_sku);
+        dump($decoration_sku);
+        exit;
         //眼镜销售副数
         $data['frame_sales_num']            = $model->table('sales_flat_order_item m')->join('sales_flat_order o','m.order_id=o.entity_id','left')->where($whereItem)->where($map)->where('m.skus','in',$frame_sku)->count('*');
-        exit;
-        // //眼镜动销数
-        // $data['frame_in_print_num']         = $model->table('sales_flat_order_item m')->join('sales_flat_order o','m.order_id=o.entity_id','left')->where($whereItem)->where($map)->where('m.sku','in',$frame_sku)->count('distinct m.sku');
-        // //配饰的销售副数
-        // $data['decoration_sales_num']       = $model->table('sales_flat_order_item m')->join('sales_flat_order o','m.order_id=o.entity_id','left')->where($whereItem)->where($map)->where('m.sku','in',$decoration_sku)->count('*');
-        // //配饰动销数
-        // $data['decoration_in_print_num']    = $model->table('sales_flat_order_item m')->join('sales_flat_order o','m.order_id=o.entity_id','left')->where($whereItem)->where($map)->where('m.sku','in',$decoration_sku)->count('distinct m.sku');
-        // $data['platform']    = $platform;
-        // $data['create_date'] = date("Y-m-d", strtotime("-1 day"));
-        // $data['createtime']  = date("Y-m-d H:i:s");
-        // Db::name('order_item_info')->insert($data);
-        // echo 'ok';
-        // die;
+        //眼镜动销数
+        $data['frame_in_print_num']         = $model->table('sales_flat_order_item m')->join('sales_flat_order o','m.order_id=o.entity_id','left')->where($whereItem)->where($map)->where('m.sku','in',$frame_sku)->count('distinct m.sku');
+        //配饰的销售副数
+        $data['decoration_sales_num']       = $model->table('sales_flat_order_item m')->join('sales_flat_order o','m.order_id=o.entity_id','left')->where($whereItem)->where($map)->where('m.sku','in',$decoration_sku)->count('*');
+        //配饰动销数
+        $data['decoration_in_print_num']    = $model->table('sales_flat_order_item m')->join('sales_flat_order o','m.order_id=o.entity_id','left')->where($whereItem)->where($map)->where('m.sku','in',$decoration_sku)->count('distinct m.sku');
+        $data['platform']    = $platform;
+        $data['create_date'] = date("Y-m-d", strtotime("-1 day"));
+        $data['createtime']  = date("Y-m-d H:i:s");
+        Db::name('order_item_info')->insert($data);
+        echo 'ok';
+        die;
     }    
 }
