@@ -87,9 +87,14 @@ class Check extends Model
      * @since 2020/03/06 16:36:49 
      * @return void
      */
-    public function getArrivalsNumToday()
+    public function getArrivalsNumToday($time = [])
     {
-        $where['createtime'] = ['between', [date('Y-m-d 00:00:00', time()), date('Y-m-d H:i:s', time())]];
+        if ($time) {
+            $where['createtime'] = ['between', $time];
+        } else {
+            $where['createtime'] = ['between', [date('Y-m-d 00:00:00', time()), date('Y-m-d H:i:s', time())]];
+        }
+        
         $where['status'] = 2;
         return $this->alias('a')->where($where)->join(['fa_check_order_item' => 'b'], 'a.id=b.check_id')->sum('arrivals_num');
     }
@@ -102,9 +107,14 @@ class Check extends Model
      * @since 2020/03/06 16:36:49 
      * @return void
      */
-    public function getCheckNumToday()
+    public function getCheckNumToday($time = [])
     {
-        $where['createtime'] = ['between', [date('Y-m-d 00:00:00', time()), date('Y-m-d H:i:s', time())]];
+        if ($time) {
+            $where['createtime'] = ['between', $time];
+        } else {
+            $where['createtime'] = ['between', [date('Y-m-d 00:00:00', time()), date('Y-m-d H:i:s', time())]];
+        }
+        
         $where['status'] = 2;
         return $this->alias('a')->where($where)->join(['fa_check_order_item' => 'b'], 'a.id=b.check_id')->sum('check_num');
     }

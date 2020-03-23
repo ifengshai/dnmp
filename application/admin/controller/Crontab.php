@@ -2827,55 +2827,58 @@ order by sfoi.item_id asc limit 1000";
      */
     public function warehouse_data_everyday()
     {
+        $time = ['2020-03-15 00:00:00', '2020-03-15 23:59:59'];
+        $date = '2020-03-15';
+        $createtime = '2020-03-15 22:00:00';
         //到货数量
         $check = new \app\admin\model\warehouse\Check();
-        $data['arrival_num'] = ($check->getArrivalsNumToday()) ?? 0;
+        $data['arrival_num'] = ($check->getArrivalsNumToday($time)) ?? 0;
 
         //质检数量
-        $data['check_num'] = ($check->getCheckNumToday()) ?? 0;
+        $data['check_num'] = ($check->getCheckNumToday($time)) ?? 0;
 
         //打印标签
-        $zeeloolPrintLabelNum = $this->zeelool->printLabelNum();
-        $vooguemePrintLabelNum = $this->voogueme->printLabelNum();
-        $nihaoPrintLabelNum = $this->nihao->printLabelNum();
+        $zeeloolPrintLabelNum = $this->zeelool->printLabelNum($time);
+        $vooguemePrintLabelNum = $this->voogueme->printLabelNum($time);
+        $nihaoPrintLabelNum = $this->nihao->printLabelNum($time);
         $data['print_label_num'] = ($zeeloolPrintLabelNum + $vooguemePrintLabelNum + $nihaoPrintLabelNum) ?? 0;
         //配镜架
-        $zeeloolFrameNum = $this->zeelool->frameNum();
-        $vooguemeFrameNum = $this->voogueme->frameNum();
-        $nihaoFrameNum =  $this->nihao->frameNum();
+        $zeeloolFrameNum = $this->zeelool->frameNum($time);
+        $vooguemeFrameNum = $this->voogueme->frameNum($time);
+        $nihaoFrameNum =  $this->nihao->frameNum($time);
         $data['frame_num'] = ($zeeloolFrameNum + $vooguemeFrameNum + $nihaoFrameNum) ?? 0;
 
         //配镜片
-        $zeeloolLensNum = $this->zeelool->lensNum();
-        $vooguemeLensNum = $this->voogueme->lensNum();
-        $nihaoLensNum = $this->nihao->lensNum();
+        $zeeloolLensNum = $this->zeelool->lensNum($time);
+        $vooguemeLensNum = $this->voogueme->lensNum($time);
+        $nihaoLensNum = $this->nihao->lensNum($time);
         $data['lens_num'] = ($zeeloolLensNum + $vooguemeLensNum + $nihaoLensNum) ?? 0;
 
         //加工
-        $zeeloolfactoryNum = $this->zeelool->factoryNum();
-        $vooguemefactoryNum = $this->voogueme->factoryNum();
-        $nihaofactoryNum = $this->nihao->factoryNum();
+        $zeeloolfactoryNum = $this->zeelool->factoryNum($time);
+        $vooguemefactoryNum = $this->voogueme->factoryNum($time);
+        $nihaofactoryNum = $this->nihao->factoryNum($time);
         $data['machining_num'] = ($zeeloolfactoryNum + $vooguemefactoryNum + $nihaofactoryNum) ?? 0;
 
         //成品质检
-        $zeeloolfactoryNum = $this->zeelool->checkNum();
-        $vooguemefactoryNum = $this->voogueme->checkNum();
-        $nihaofactoryNum = $this->nihao->checkNum();
+        $zeeloolfactoryNum = $this->zeelool->checkNum($time);
+        $vooguemefactoryNum = $this->voogueme->checkNum($time);
+        $nihaofactoryNum = $this->nihao->checkNum($time);
         $data['quality_num'] = ($zeeloolfactoryNum + $vooguemefactoryNum + $nihaofactoryNum) ?? 0;
 
-        $data['create_time'] = date('Y-m-d H:i:s', time());
-        $data['create_date'] = date('Y-m-d', time());
+        $data['create_time'] = $createtime;
+        $data['create_date'] = $date;
 
         //计算每天采购数量
         $purchase = new \app\admin\model\purchase\PurchaseOrder();
         //总采购数量
-        $data['all_purchase_num'] = $purchase->getPurchaseNumNow([]);
+        $data['all_purchase_num'] = $purchase->getPurchaseNumNow([], $time);
         //总采购金额
-        $data['all_purchase_price'] = $purchase->getPurchasePriceNow([]);
+        $data['all_purchase_price'] = $purchase->getPurchasePriceNow([], $time);
         //线上采购数量
-        $data['online_purchase_num'] = $purchase->getPurchasePriceNow(['purchase_type' => 2]);
+        $data['online_purchase_num'] = $purchase->getPurchaseNumNow(['purchase_type' => 2], $time);
         //线上采购金额
-        $data['online_purchase_price'] = $purchase->getPurchasePriceNow(['purchase_type' => 2]);
+        $data['online_purchase_price'] = $purchase->getPurchasePriceNow(['purchase_type' => 2], $time);
         //线下采购数量
         $data['purchase_num'] = $data['all_purchase_num'] - $data['online_purchase_num'];
         //线下采购金额
@@ -3124,8 +3127,8 @@ order by sfoi.item_id asc limit 1000";
 
 
     /**
-     * 统计SKU每天的销售数量
-     *
+     * 统计SKU每天的销售数量 
+     * @todo 待定
      * @Description
      * @author wpl
      * @since 2020/03/10 17:16:04 
@@ -3171,6 +3174,7 @@ order by sfoi.item_id asc limit 1000";
             $salesSkuNum->saveAll($data);
         }
     }
+
     /**
      * 更新order_statistics表字段
      *

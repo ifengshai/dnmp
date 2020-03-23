@@ -247,9 +247,14 @@ class PurchaseOrder extends Model
      * @since 2020/03/05 17:08:36 
      * @return void
      */
-    public function getPurchaseNumNow($where = [])
+    public function getPurchaseNumNow($where = [], $time = [])
     {
-        $where['createtime'] = ['between', [date('Y-m-d 00:00:00', time()), date('Y-m-d H:i:s', time())]];
+        if ($time) {
+            $where['createtime'] = ['between', $time];
+        } else {
+            $where['createtime'] = ['between', [date('Y-m-d 00:00:00', time()), date('Y-m-d H:i:s', time())]];
+        }
+
         $where['is_del'] = 1;
         $where['purchase_status'] = ['in', [2, 5, 6, 7]];
         return $this->alias('a')->where($where)->join(['fa_purchase_order_item' => 'b'], 'a.id=b.purchase_id')->sum('b.purchase_num');
@@ -263,9 +268,13 @@ class PurchaseOrder extends Model
      * @since 2020/03/05 17:08:36 
      * @return void
      */
-    public function getPurchasePriceNow($where = [])
+    public function getPurchasePriceNow($where = [], $time = [])
     {
-        $where['createtime'] = ['between', [date('Y-m-d 00:00:00', time()), date('Y-m-d H:i:s', time())]];
+        if ($time) {
+            $where['createtime'] = ['between', $time];
+        } else {
+            $where['createtime'] = ['between', [date('Y-m-d 00:00:00', time()), date('Y-m-d H:i:s', time())]];
+        }
         $where['is_del'] = 1;
         $where['purchase_status'] = ['in', [2, 5, 6, 7]];
         return $this->alias('a')->where($where)->join(['fa_purchase_order_item' => 'b'], 'a.id=b.purchase_id')->sum('purchase_num*purchase_price');

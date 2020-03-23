@@ -979,6 +979,12 @@ class Index extends Backend
         $purchaseFrameNum = $dataConfig->getValue('purchaseFrameNum');
         //采购到货总数
         $arrivalsNum = $dataConfig->getValue('arrivalsNum');
+
+        $this->assign('purchaseNum', $purchaseNum);
+        $this->assign('purchasePrice', $purchasePrice);
+        $this->assign('purchaseSkuNum', $purchaseSkuNum);
+        $this->assign('purchaseFrameNum', $purchaseFrameNum);
+        $this->assign('arrivalsNum', $arrivalsNum);
         return $this->view->fetch();
     }
 }
