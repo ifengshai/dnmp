@@ -3356,7 +3356,7 @@ order by sfoi.item_id asc limit 1000";
             return false;
         }        
         $model->query("set time_zone='+8:00'");
-        $result = $model->where(['platform'=>$platform])->select();
+        $result = Db::name('order_item_info')->where(['platform'=>$platform])->select();
         if (!$result) {
             echo 'ok2';
             exit;
