@@ -2815,9 +2815,7 @@ order by sfoi.item_id asc limit 1000";
      */
     public function warehouse_data_everyday()
     {
-        $time = ['2020-03-13 00:00:00', '2020-03-13 23:59:59'];
-        $date = '2020-03-13';
-        $createtime = '2020-03-13 22:00:00';
+        $time = [];
         //到货数量
         $check = new \app\admin\model\warehouse\Check();
         $data['arrival_num'] = ($check->getArrivalsNumToday($time)) ?? 0;
@@ -2854,8 +2852,8 @@ order by sfoi.item_id asc limit 1000";
         $nihaofactoryNum = $this->nihao->checkNum($time);
         $data['quality_num'] = ($zeeloolfactoryNum + $vooguemefactoryNum + $nihaofactoryNum) ?? 0;
 
-        $data['create_time'] = $createtime;
-        $data['create_date'] = $date;
+        $data['create_time'] = date('Y-m-d H:i:s', time());
+        $data['create_date'] = date('Y-m-d');
 
         //计算每天采购数量
         $purchase = new \app\admin\model\purchase\PurchaseOrder();
