@@ -200,9 +200,9 @@ class Operationalreport extends Backend{
             }
         }
         //求出眼镜所有sku
-        $frame_sku  = $this->item->getDifferenceSku(1);
+        $frame_sku  = $this->itemPlatformSku->getDifferencePlatformSku(1,$platform);
         //求出饰品的所有sku
-        $decoration_sku = $this->item->getDifferenceSku(3);
+        $decoration_sku = $this->itemPlatformSku->getDifferencePlatformSku(3,$platform);
         //求出眼镜的销售额 base_price  base_discount_amount
         $frame_money_price    = $model->table('sales_flat_order_item m')->join('sales_flat_order o','m.order_id=o.entity_id','left')->where($whereItem)->where($itemMap)->where('m.sku','in',$frame_sku)->sum('m.base_price');
         //眼镜的折扣价格
@@ -256,9 +256,9 @@ class Operationalreport extends Backend{
           $decoration_in_print_rate = 0;  
         }
         //求出所有新品眼镜sku
-        $frame_new_sku  = $this->item->getDifferenceNewSku(1);
+        $frame_new_sku  = $this->itemPlatformSku->getDifferencePlatformNewSku(1,$platform);
         //求出所有新品饰品sku
-        $decoration_new_sku = $this->item->getDifferenceNewSku(3);
+        $decoration_new_sku = $this->itemPlatformSku->getDifferencePlatformNewSku(3,$platform);
         //求出新品眼镜的销售额 base_price  base_discount_amount
         $frame_new_money_price    = $model->table('sales_flat_order_item m')->join('sales_flat_order o','m.order_id=o.entity_id','left')->where($whereItem)->where($itemMap)->where('m.sku','in',$frame_new_sku)->sum('m.base_price');
         //新品眼镜的折扣价格

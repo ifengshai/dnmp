@@ -277,5 +277,43 @@ class ItemPlatformSku extends Model
         $map['platform_type']    = $platform;
         $map['sku'] = ['in', $skus];
         return $this->where($map)->group('sku')->count(1);
+    }
+    /**
+     * 获取不同平台的sku
+     *
+     * @Description created by lsw
+     * @author lsw
+     * @since 2020/03/23 10:04:36 
+     * @param [type] $id 商品类型 1 镜架 3 配饰
+     * @param [type] $platform 平台
+     * @return void
+     */
+    public function getDifferencePlatformSku($id,$platform)
+    {
+        $category = new \app\admin\model\itemmanage\ItemCategory;
+        $map['attribute_group_id'] = $id;
+        $ids = $category->where($map)->column('id');
+        $where['m.category_id']  = ['in', $ids];
+        $where['p.platform_type'] = $platform;
+        return $this->alias('p')->join('fa_item m','p.sku=m.sku','inner')->where($where)->column('p.platform_sku');
+    }
+    /**
+     * 获取不同平台的新品sku
+     *
+     * @Description created by lsw
+     * @author lsw
+     * @since 2020/03/23 11:24:15 
+     * @param [type] $id
+     * @return void
+     */
+    public function getDifferencePlatformNewSku($id,$platform)
+    {
+        $category = new \app\admin\model\itemmanage\ItemCategory;
+        $map['attribute_group_id'] = $id;
+        $ids = $category->where($map)->column('id');
+        $where['m.category_id']  = ['in', $ids];
+        $where['m.is_new']       = 1;
+        $where['p.platform_type'] = $platform;
+        return $this->alias('p')->join('fa_item m','p.sku=m.sku','inner')->where($where)->column('p.platform_sku');
     }    
 }
