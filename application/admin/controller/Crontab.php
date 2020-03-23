@@ -3309,11 +3309,8 @@ order by sfoi.item_id asc limit 1000";
         $frame_sku  = $this->itemplatformsku->getDifferencePlatformSku(1,$platform);
         //求出饰品的所有sku
         $decoration_sku = $this->itemplatformsku->getDifferencePlatformSku(3,$platform);
-        dump($frame_sku);
-        dump($decoration_sku);
-        exit;
         //眼镜销售副数
-        $data['frame_sales_num']            = $model->table('sales_flat_order_item m')->join('sales_flat_order o','m.order_id=o.entity_id','left')->where($whereItem)->where($map)->where('m.skus','in',$frame_sku)->count('*');
+        $data['frame_sales_num']            = $model->table('sales_flat_order_item m')->join('sales_flat_order o','m.order_id=o.entity_id','left')->where($whereItem)->where($map)->where('m.sku','in',$frame_sku)->count('*');
         //眼镜动销数
         $data['frame_in_print_num']         = $model->table('sales_flat_order_item m')->join('sales_flat_order o','m.order_id=o.entity_id','left')->where($whereItem)->where($map)->where('m.sku','in',$frame_sku)->count('distinct m.sku');
         //配饰的销售副数
@@ -3326,5 +3323,65 @@ order by sfoi.item_id asc limit 1000";
         Db::name('order_item_info')->insert($data);
         echo 'ok';
         die;
-    }    
+    }
+    /**
+     * 更新动销数和动销率
+     *
+     * @Description created by lsw
+     * @author lsw
+     * @since 2020/03/23 10:33:12 
+     * @return void
+     */
+    public function  update_order_item_num()
+    {
+        $platform = $this->request->get('platform');
+        if (!$platform) {
+            return 'error';
+        }
+        switch ($platform) {
+            case 1:
+                $model = Db::connect('database.db_zeelool');
+                break;
+            case 2:
+                $model = Db::connect('database.db_voogueme');
+                break;
+            case 3:
+                $model = Db::connect('database.db_nihao');
+                break;
+            default:
+                $model = false;
+                break;
+        }
+        if (false === $model) {
+            return false;
+        }        
+        $model->query("set time_zone='+8:00'");
+        $result = $model->where(['platform'=>$platform])->select();
+        if (!$result) {
+            echo 'ok2';
+            exit;
+        }
+        $data = [];
+        foreach ($result as $v) {
+            $starttime          = $v['create_date'] . ' ' . '00:00:00';
+            $endtime            = $v['create_date'] . ' ' . '23:59:59';
+            $date['m.created_at'] = ['between', [$starttime, $endtime]];
+            $whereItem = " o.status in ('processing','complete','creditcard_proccessing','free_processing')";
+            //求出眼镜所有sku
+            $frame_sku  = $this->itemplatformsku->getDifferencePlatformSku(1,$v['platform']);
+            //求出饰品的所有sku
+            $decoration_sku = $this->itemplatformsku->getDifferencePlatformSku(3,$v['platform']);
+            //zeelool的购物车总数
+            $data['frame_sales_num'] =   $model->table('sales_flat_order_item m')->join('sales_flat_order o','m.order_id=o.entity_id','left')->where($whereItem)->where($date)->where('m.sku','in',$frame_sku)->count('*');
+            //zeelool购物车转化率
+            $data['frame_in_print_num'] = $model->table('sales_flat_order_item m')->join('sales_flat_order o','m.order_id=o.entity_id','left')->where($whereItem)->where($date)->where('m.sku','in',$frame_sku)->count('distinct m.sku');;
+            //voogueme的购物车总数
+            $data['decoration_sales_num'] =  $model->table('sales_flat_order_item m')->join('sales_flat_order o','m.order_id=o.entity_id','left')->where($whereItem)->where($date)->where('m.sku','in',$decoration_sku)->count('*');
+            //voogueme的购物车转化率
+            $data['decoration_in_print_num'] = $model->table('sales_flat_order_item m')->join('sales_flat_order o','m.order_id=o.entity_id','left')->where($whereItem)->where($date)->where('m.sku','in',$decoration_sku)->count('distinct m.sku');
+            Db::name('order_item_info')->where(['id' => $v['id']])->update($data);
+        }
+        echo 'ok';
+        die;
+    }   
 }
