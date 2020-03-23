@@ -60,6 +60,7 @@ class Check extends Model
     public function getArrivalsNum()
     {
         $where['createtime'] = ['between', [date('Y-m-01 00:00:00', time()), date('Y-m-d H:i:s', time())]];
+        $where['status'] = 2;
         return $this->alias('a')->where($where)->join(['fa_check_order_item' => 'b'], 'a.id=b.check_id')->sum('arrivals_num');
     }
 
@@ -74,6 +75,47 @@ class Check extends Model
     public function getQuantityNum()
     {
         $where['createtime'] = ['between', [date('Y-m-01 00:00:00', time()), date('Y-m-d H:i:s', time())]];
+        $where['status'] = 2;
         return $this->alias('a')->where($where)->join(['fa_check_order_item' => 'b'], 'a.id=b.check_id')->sum('quantity_num');
+    }
+
+    /**
+     * 获取当日到货数量
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/03/06 16:36:49 
+     * @return void
+     */
+    public function getArrivalsNumToday($time = [])
+    {
+        if ($time) {
+            $where['createtime'] = ['between', $time];
+        } else {
+            $where['createtime'] = ['between', [date('Y-m-d 00:00:00', time()), date('Y-m-d H:i:s', time())]];
+        }
+        
+        $where['status'] = 2;
+        return $this->alias('a')->where($where)->join(['fa_check_order_item' => 'b'], 'a.id=b.check_id')->sum('arrivals_num');
+    }
+
+    /**
+     * 获取当日质检数量
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/03/06 16:36:49 
+     * @return void
+     */
+    public function getCheckNumToday($time = [])
+    {
+        if ($time) {
+            $where['createtime'] = ['between', $time];
+        } else {
+            $where['createtime'] = ['between', [date('Y-m-d 00:00:00', time()), date('Y-m-d H:i:s', time())]];
+        }
+        
+        $where['status'] = 2;
+        return $this->alias('a')->where($where)->join(['fa_check_order_item' => 'b'], 'a.id=b.check_id')->sum('check_num');
     }
 }

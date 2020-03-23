@@ -297,8 +297,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                     return msg;
                 },
                 getClear: function (value) {
-
-                    console.log(value);
                     if (value == null || value == undefined) {
                         return '';
                     } else {

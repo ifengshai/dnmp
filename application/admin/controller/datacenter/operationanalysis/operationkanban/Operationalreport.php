@@ -6,6 +6,7 @@ use app\admin\model\platformmanage\MagentoPlatform;
 class Operationalreport extends Backend{
     //订单类型数据统计
     protected $item = null;
+    protected $itemPlatformSku = null;
     /**
      * 运营报告首页数据
      *
@@ -24,15 +25,15 @@ class Operationalreport extends Backend{
             //默认当天
             if ($params['time']) {
                 $time = explode(' ', $params['time']);
-                $map['created_at'] = ['between', [$time[0] . ' ' . $time[1], $time[3] . ' ' . $time[4]]];
+                $map['created_at'] = $itemMap['m.created_at'] =  ['between', [$time[0] . ' ' . $time[1], $time[3] . ' ' . $time[4]]];
             } else {
-                $map['created_at'] = ['between', [date('Y-m-d 00:00:00', strtotime('-7 day')), date('Y-m-d H:i:s', time())]];
+                $map['created_at'] = $itemMap['m.created_at'] =  ['between', [date('Y-m-d 00:00:00', strtotime('-7 day')), date('Y-m-d H:i:s', time())]];
             }
             $order_platform = $params['platform'];
             if(4<=$order_platform){
                 return $this->error('该平台暂时没有数据');
             }
-            $result = $this->platformOrderInfo($order_platform,$map);
+            $result = $this->platformOrderInfo($order_platform,$map,$itemMap);
             if(!$result){
                 return $this->error('暂无数据');
             }
@@ -58,9 +59,10 @@ class Operationalreport extends Backend{
      * @param [type] $map
      * @return void
      */
-    public function platformOrderInfo($platform,$map)
+    public function platformOrderInfo($platform,$map,$itemMap)
     {
         $this->item = new \app\admin\model\itemmanage\Item;
+        $this->itemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku;
         switch($platform){
             case 1:
             $model = Db::connect('database.db_zeelool');
@@ -81,6 +83,7 @@ class Operationalreport extends Backend{
         $model->table('sales_flat_order')->query("set time_zone='+8:00'");
         $model->table('sales_flat_order_item')->query("set time_zone='+8:00'");
         $where = " status in ('processing','complete','creditcard_proccessing','free_processing')";
+        $whereItem = " o.status in ('processing','complete','creditcard_proccessing','free_processing')";
         //订单类型数据统计
         //1.普通订单数量
         $general_order              = $model->table('sales_flat_order')->where($where)->where(['order_type'=>1])->where($map)->count('*');
@@ -103,15 +106,15 @@ class Operationalreport extends Backend{
         //补差价订单金额
         $fill_post_money            = $model->table('sales_flat_order')->where($where)->where(['order_type'=>5])->where($map)->sum('base_grand_total');
         //普通订单占比
-        $general_order_percent      = round(($general_order/($general_order + $wholesale_order + $celebrity_order + $reissue_order + $fill_post_order))*100,2);
+        $general_order_percent      = @round(($general_order/($general_order + $wholesale_order + $celebrity_order + $reissue_order + $fill_post_order))*100,2);
         //批发订单占比
-        $wholesale_order_percent    = round(($wholesale_order/($general_order + $wholesale_order + $celebrity_order + $reissue_order + $fill_post_order))*100,2);
+        $wholesale_order_percent    = @round(($wholesale_order/($general_order + $wholesale_order + $celebrity_order + $reissue_order + $fill_post_order))*100,2);
         //网红订单占比
-        $celebrity_order_percent    = round(($celebrity_order/($general_order + $wholesale_order + $celebrity_order + $reissue_order + $fill_post_order))*100,2);
+        $celebrity_order_percent    = @round(($celebrity_order/($general_order + $wholesale_order + $celebrity_order + $reissue_order + $fill_post_order))*100,2);
         //补发订单占比
-        $reissue_order_percent      = round(($reissue_order/($general_order + $wholesale_order + $celebrity_order + $reissue_order + $fill_post_order))*100,2);
+        $reissue_order_percent      = @round(($reissue_order/($general_order + $wholesale_order + $celebrity_order + $reissue_order + $fill_post_order))*100,2);
         //补差价订单占比
-        $fill_post_order_percent    = round(($fill_post_order/($general_order + $wholesale_order + $celebrity_order + $reissue_order + $fill_post_order))*100,2);
+        $fill_post_order_percent    = @round(($fill_post_order/($general_order + $wholesale_order + $celebrity_order + $reissue_order + $fill_post_order))*100,2);
         //美元订单数量
         $usd_order_num              = $model->table('sales_flat_order')->where($where)->where(['order_currency_code'=>'USD'])->where($map)->count('*');
         //美元订单金额
@@ -197,12 +200,108 @@ class Operationalreport extends Backend{
             }
         }
         //求出眼镜所有sku
-        $frame_sku  = $this->item->getDifferenceSku(1);
+        $frame_sku  = $this->itemPlatformSku->getDifferencePlatformSku(1,$platform);
         //求出饰品的所有sku
-        $decoration_sku = $this->item->getDifferenceSku(3);
-        //眼镜所有sku销售额
-        $frame_sku_money = $model->table('sales_flat_order_item')->where('sku','in',$frame_sku)->where($map)->sumany(['base_price','base_discount_price']);
-
+        $decoration_sku = $this->itemPlatformSku->getDifferencePlatformSku(3,$platform);
+        //求出眼镜的销售额 base_price  base_discount_amount
+        $frame_money_price    = $model->table('sales_flat_order_item m')->join('sales_flat_order o','m.order_id=o.entity_id','left')->where($whereItem)->where($itemMap)->where('m.sku','in',$frame_sku)->sum('m.base_price');
+        //眼镜的折扣价格
+        $frame_money_discount = $model->table('sales_flat_order_item m')->join('sales_flat_order o','m.order_id=o.entity_id','left')->where($whereItem)->where($itemMap)->where('m.sku','in',$frame_sku)->sum('m.base_discount_amount');
+        //眼镜的实际销售额
+        $frame_money          = round(($frame_money_price - $frame_money_discount),2);
+        //眼镜的销售副数
+        $frame_sales_num      = $model->table('sales_flat_order_item m')->join('sales_flat_order o','m.order_id=o.entity_id','left')->where($whereItem)->where($itemMap)->where('m.sku','in',$frame_sku)->count('*');
+        //眼镜平均副金额
+        if( 0 <$frame_sales_num){
+            $frame_avg_money  = round(($frame_money/$frame_sales_num),2);
+        }else{
+            $frame_avg_money  = 0;
+        }
+        //求出配饰的销售额
+        $decoration_money_price    = $model->table('sales_flat_order_item m')->join('sales_flat_order o','m.order_id=o.entity_id','left')->where($whereItem)->where($itemMap)->where('m.sku','in',$decoration_sku)->sum('m.base_price');
+        //配饰的折扣价格
+        $decoration_money_discount = $model->table('sales_flat_order_item m')->join('sales_flat_order o','m.order_id=o.entity_id','left')->where($whereItem)->where($itemMap)->where('m.sku','in',$decoration_sku)->sum('m.base_discount_amount');
+        //配饰的实际销售额
+        $decoration_money          = round(($decoration_money_price - $decoration_money_discount),2);
+        //配饰的销售副数
+        $decoration_sales_num      = $model->table('sales_flat_order_item m')->join('sales_flat_order o','m.order_id=o.entity_id','left')->where($whereItem)->where($itemMap)->where('m.sku','in',$decoration_sku)->count('*');
+        //配饰平均副金额
+        if(0< $decoration_sales_num){
+            $decoration_avg_money  = round(($decoration_money/$decoration_sales_num),2);
+        }else{
+            $decoration_avg_money  = 0; 
+        }
+        //眼镜正常售卖数
+        $frame_onsales_num         = $this->itemPlatformSku->putawayDifferenceSku(1,$platform);
+        //配饰正常售卖数
+        $decoration_onsales_num    = $this->itemPlatformSku->putawayDifferenceSku(3,$platform);
+        //眼镜动销数
+        $frame_in_print_num        = $model->table('sales_flat_order_item m')->join('sales_flat_order o','m.order_id=o.entity_id','left')->where($whereItem)->where($itemMap)->where('m.sku','in',$frame_sku)->count('distinct m.sku');
+        //眼镜总共的数量
+        //$frame_num                 = $this->item->getDifferenceSkuNUm(1);
+        //眼镜动销率
+        if(0<$frame_onsales_num){
+            $frame_in_print_rate   = round(($frame_in_print_num/$frame_onsales_num)*100,2); 
+        }else{
+            $frame_in_print_rate   = 0;
+        }
+        //配饰动销数
+        $decoration_in_print_num   = $model->table('sales_flat_order_item m')->join('sales_flat_order o','m.order_id=o.entity_id','left')->where($whereItem)->where($itemMap)->where('m.sku','in',$decoration_sku)->count('distinct m.sku');
+        //配饰总共的数量
+        //$decoration_num            = $this->item->getDifferenceSkuNUm(3);    
+        //配饰动销率
+        if(0<$decoration_onsales_num){
+          $decoration_in_print_rate = round(($decoration_in_print_num/$decoration_onsales_num)*100,2);
+        }else{
+          $decoration_in_print_rate = 0;  
+        }
+        //求出所有新品眼镜sku
+        $frame_new_sku  = $this->itemPlatformSku->getDifferencePlatformNewSku(1,$platform);
+        //求出所有新品饰品sku
+        $decoration_new_sku = $this->itemPlatformSku->getDifferencePlatformNewSku(3,$platform);
+        //求出新品眼镜的销售额 base_price  base_discount_amount
+        $frame_new_money_price    = $model->table('sales_flat_order_item m')->join('sales_flat_order o','m.order_id=o.entity_id','left')->where($whereItem)->where($itemMap)->where('m.sku','in',$frame_new_sku)->sum('m.base_price');
+        //新品眼镜的折扣价格
+        $frame_new_money_discount = $model->table('sales_flat_order_item m')->join('sales_flat_order o','m.order_id=o.entity_id','left')->where($whereItem)->where($itemMap)->where('m.sku','in',$frame_new_sku)->sum('m.base_discount_amount');
+        //新品眼镜的实际销售额
+        $frame_new_money          = round(($frame_new_money_price - $frame_new_money_discount),2);
+        //求出新品配饰的销售额
+        $decoration_new_money_price    = $model->table('sales_flat_order_item m')->join('sales_flat_order o','m.order_id=o.entity_id','left')->where($whereItem)->where($itemMap)->where('m.sku','in',$decoration_new_sku)->sum('m.base_price');
+        //求出新品配饰的折扣价格
+        $decoration_new_money_discount = $model->table('sales_flat_order_item m')->join('sales_flat_order o','m.order_id=o.entity_id','left')->where($whereItem)->where($itemMap)->where('m.sku','in',$decoration_new_sku)->sum('m.base_discount_amount');
+        //求出新品配饰的实际销售额
+        $decoration_new_money          = round(($decoration_new_money_price - $decoration_new_money_discount),2);
+        //眼镜下单客户数
+        $frame_order_customer          = $model->table('sales_flat_order o')->join('sales_flat_order_item m','o.entity_id=m.order_id','left')->where($whereItem)->where('m.sku','in',$frame_sku)->where($itemMap)->count('distinct o.customer_email');
+        //眼镜客户平均副数
+        if(0<$frame_order_customer){
+            $frame_avg_customer        = round(($frame_sales_num/$frame_order_customer),2);           
+        }
+        //配饰下单客户数
+        $decoration_order_customer     = $model->table('sales_flat_order o')->join('sales_flat_order_item m','o.entity_id=m.order_id','left')->where($whereItem)->where('m.sku','in',$decoration_sku)->where($itemMap)->count('distinct o.customer_email');
+        if(0<$decoration_order_customer){
+            $decoration_avg_customer   = round(($decoration_sales_num/$decoration_order_customer),2); 
+        }
+        //新品眼镜数量
+        $frame_new_num                 = $this->item->getDifferenceNewSkuNum(1);
+        //新品饰品数量
+        $decoration_new_num            = $this->item->getDifferenceNewSkuNum(3);
+        //新品眼镜动销数
+        $frame_new_in_print_num        = $model->table('sales_flat_order_item m')->join('sales_flat_order o','m.order_id=o.entity_id','left')->where($whereItem)->where($itemMap)->where('m.sku','in',$frame_new_sku)->count('distinct m.sku');
+        //新品眼镜动销率
+        if(0< $frame_new_num){
+            $frame_new_in_print_rate   = round(($frame_new_in_print_num/$frame_new_num)*100,2);
+        }else{
+            $frame_new_in_print_rate   = 0;
+        }
+        //新品饰品动销数
+        $decoration_new_in_print_num   = $model->table('sales_flat_order_item m')->join('sales_flat_order o','m.order_id=o.entity_id','left')->where($whereItem)->where($itemMap)->where('m.sku','in',$decoration_new_sku)->count('distinct m.sku');
+        //新品饰品动销率
+        if(0< $decoration_new_num){
+            $decoration_new_in_print_rate  = round(($decoration_new_in_print_num/$decoration_new_num)*100,2);
+        }else{
+            $decoration_new_in_print_rate  = 0;
+        }
         return [
             'general_order'                     => $general_order,
             'general_money'                     => $general_money,
@@ -241,7 +340,30 @@ class Operationalreport extends Backend{
             'gbp_order_percent'                 => $gbp_order_percent,
             'order_status'                      => $order_status_arr,
             'base_shipping_amount'              => $all_shipping_amount_arr,
-            'frame_sku_money'                   => $frame_sku_money,
+            'frame_money'                       => $frame_money,
+            'frame_sales_num'                   => $frame_sales_num,
+            'frame_avg_money'                   => $frame_avg_money,
+            'decoration_money'                  => $decoration_money,
+            'decoration_sales_num'              => $decoration_sales_num,
+            'decoration_avg_money'              => $decoration_avg_money,
+            'frame_onsales_num'                 => $frame_onsales_num,
+            'decoration_onsales_num'            => $decoration_onsales_num,
+            'frame_in_print_num'                => $frame_in_print_num,
+            'frame_in_print_rate'               => $frame_in_print_rate,
+            'decoration_in_print_num'           => $decoration_in_print_num,
+            'decoration_in_print_rate'          => $decoration_in_print_rate,
+            'frame_new_money'                   => $frame_new_money,
+            'decoration_new_money'              => $decoration_new_money,
+            'frame_order_customer'              => $frame_order_customer,
+            'frame_avg_customer'                => $frame_avg_customer,
+            'decoration_order_customer'         => $decoration_order_customer,
+            'decoration_avg_customer'           => $decoration_avg_customer,
+            'frame_new_num'                     => $frame_new_num,
+            'decoration_new_num'                => $decoration_new_num,
+            'frame_new_in_print_num'            => $frame_new_in_print_num,
+            'frame_new_in_print_rate'           => $frame_new_in_print_rate,
+            'decoration_new_in_print_num'       => $decoration_new_in_print_num,
+            'decoration_new_in_print_rate'      => $decoration_new_in_print_rate
         ];
     }
 }

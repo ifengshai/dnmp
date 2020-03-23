@@ -102,6 +102,30 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echartsobj
                     $('#gbp_order_percent').text(ret.rows.gbp_order_percent);
                     $('#gbp_order_money').text(ret.rows.gbp_order_money);
                     $('#gbp_order_average_amount').text(ret.rows.gbp_order_average_amount);
+                    $('#frame_money').text(ret.rows.frame_money);
+                    $('#frame_sales_num').text(ret.rows.frame_sales_num);
+                    $('#frame_avg_money').text(ret.rows.frame_avg_money);
+                    $('#frame_onsales_num').text(ret.rows.frame_onsales_num);
+                    $('#decoration_money').text(ret.rows.decoration_money);
+                    $('#decoration_sales_num').text(ret.rows.decoration_sales_num);
+                    $('#decoration_avg_money').text(ret.rows.decoration_avg_money);
+                    $('#decoration_onsales_num').text(ret.rows.decoration_onsales_num);
+                    $('#frame_in_print_num').text(ret.rows.frame_in_print_num);
+                    $('#frame_in_print_rate').text(ret.rows.frame_in_print_rate);
+                    $('#decoration_in_print_num').text(ret.rows.decoration_in_print_num);
+                    $('#decoration_in_print_rate').text(ret.rows.decoration_in_print_rate);
+                    $('#frame_new_money').text(ret.rows.frame_new_money);
+                    $('#decoration_new_money').text(ret.rows.decoration_new_money);
+                    $('#frame_order_customer').text(ret.rows.frame_order_customer);
+                    $('#frame_avg_customer').text(ret.rows.frame_avg_customer);
+                    $('#decoration_order_customer').text(ret.rows.decoration_order_customer);
+                    $('#decoration_avg_customer').text(ret.rows.decoration_avg_customer);
+                    $('#frame_new_num').text(ret.rows.frame_new_num);
+                    $('#decoration_new_num').text(ret.rows.decoration_new_num);
+                    $('#frame_new_in_print_num').text(ret.rows.frame_new_in_print_num);
+                    $('#frame_new_in_print_rate').text(ret.rows.frame_new_in_print_rate);
+                    $('#decoration_new_in_print_num').text(ret.rows.decoration_new_in_print_num);
+                    $('#decoration_new_in_print_rate').text(ret.rows.decoration_new_in_print_rate);
 
                 },function(data,ret){
                     alert(ret.msg);

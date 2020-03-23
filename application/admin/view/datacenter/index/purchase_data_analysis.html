@@ -1,0 +1,160 @@
+<style>
+    .content {
+        max-width: 100%;
+    }
+</style>
+
+<style type="text/css">
+    table.altrowstable {
+        margin: 0 auto;
+        width: 45%;
+        font-family: verdana, arial, sans-serif;
+        font-size: 11px;
+        color: #333333;
+        border-width: 1px;
+        border-color: #247692;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+    }
+
+    table.altrowstable th {
+        border-width: 1px;
+        padding: 8px;
+        font-size: 14px;
+        border-style: solid;
+        border-color: #d2d6de;
+    }
+
+    table.altrowstable td {
+        border-width: 1px;
+        padding: 8px;
+        text-align: center;
+        font-size: 12px;
+        border-style: solid;
+        border-color: #ddd;
+    }
+
+    table.altrowstable tr:nth-child(odd) {
+        background: #E9F1F4;
+        background: #F5F5F5;
+    }
+
+    table.altrowstable tr:nth-child(even) {
+        background: #fff;
+        background: #eee;
+    }
+
+    .btn-div {
+        font-size: 14px;
+        line-height: 50px;
+        background: inherit;
+        background-color: rgba(255, 255, 255, 1);
+        border: none;
+        border-radius: 4px;
+        box-shadow: 0px 0px 7px rgba(0, 0, 0, 0.349019607843137);
+        border-width: 0px;
+        font-family: 'Arial Negreta', 'Arial';
+        font-weight: 700;
+        font-style: normal;
+        margin-right: 20px;
+        width: 200px;
+    }
+
+    /* #caigou-table {
+        border-width: 0px;
+    }
+    #caigou-table th{
+        border-width: 0px;
+    }
+    #caigou-table td{
+        border-width: 0px;
+    } */
+</style>
+<div class="panel panel-default panel-intro">
+    {:build_heading()}
+
+    <div class="panel-body">
+        <div id="myTabContent" class="tab-content">
+            <div class="tab-pane fade active in" id="one">
+                <div class="widget-body no-padding">
+
+                    <div style="border-radius:2px;margin-bottom:10px;background:#f5f5f5;padding:20px;">
+                        <div class="row">
+                            <div id="toolbar4" class="">
+
+                                <div class="btn btn-div" style="width: 300px;">
+
+                                    <span class="extend">
+                                        采购总数<span style="color: red;" id="totalPayInfo">{$purchaseNum}</span>
+
+                                    </span>
+                                </div>
+
+                                <div class="btn btn-div" style="width: 300px;">
+
+                                    <span class="extend">
+                                        采购总金额（<i class="fa fa-cny"></i>）：<span style="color: red;"
+                                            id="totalFramePrice">{$purchasePrice}</span>
+                                    </span>
+                                </div>
+
+                                <div class="btn btn-div">
+                                    <span class="extend">
+                                        采购总SKU数：<span style="color: red;" id="totalLensPrice">{$purchaseSkuNum}</span>
+                                    </span>
+                                </div>
+
+                                <div class="btn btn-div">
+
+                                    <span class="extend">
+                                        采购镜架总数：<span style="color: red;"
+                                            id="totalPostageMoney">{$purchaseFrameNum}</span>
+
+                                    </span>
+                                </div>
+
+                                <div class="btn btn-div" style="width: 200px;">
+                                    <span class="extend">
+                                        采购到货总数：<span style="color: red;" id="totalRefundMoney">{$arrivalsNum}</span>
+
+                                    </span>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div style="width: 100%;">
+
+
+
+                        <div class="row item_info" style="background:#f5f5f5;float: left;width: 100%;margin-top: 20px;">
+                            <div class="form-group col-xs-12 col-sm-6 col-md-4 col-lg-3" style="margin-top: 20px;">
+                                <label for="custom_is_match_frame_new" class="control-label col-xs-4">采购数量统计</label>
+                                <div class="col-xs-8">
+                                    <select class="form-control purchase_type" name="purchase_type">
+                                        <option value="all">全部</option>
+                                        <option value="1">线上采购</option>
+                                        <option value="2">线下采购</option>
+                                    </select></div>
+                            </div>
+
+                            <div class="col-lg-12">
+                                <div id="echart" style="float: left;height:400px;width:100%;"></div>
+
+
+                            </div>
+
+                        </div>
+
+
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
