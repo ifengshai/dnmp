@@ -969,7 +969,41 @@ class Index extends Backend
     public function purchase_data_analysis()
     {
         if ($this->request->isAjax()) {
-            
+            $purchase_type = input('purchase_type');
+            $warehouse_model = new \app\admin\model\WarehouseData();
+            $warehouse_data = $warehouse_model->getPurchaseData();
+            //线上采购单
+            if ($purchase_type == 1) {
+                $barcloumndata = array_column($warehouse_data, 'online_purchase_num');
+                $linecloumndata = array_column($warehouse_data, 'online_purchase_price');
+            } elseif ($purchase_type == 2) {
+                //线下采购单
+                $barcloumndata = array_column($warehouse_data, 'purchase_num');
+                $linecloumndata = array_column($warehouse_data, 'purchase_price');
+            } else {
+                //全部采购单
+                $barcloumndata = array_column($warehouse_data, 'all_purchase_num');
+                $linecloumndata = array_column($warehouse_data, 'all_purchase_price');
+            }
+
+            $json['xColumnName'] = array_column($warehouse_data, 'create_date');
+            $json['columnData'] = [
+                [
+                    'type' => 'bar',
+                    'data' => $barcloumndata,
+                    'name' => '采购数量'
+                ],
+                [
+                    'type' => 'line',
+                    'data' => $linecloumndata,
+                    'name' => '采购金额',
+                    'yAxisIndex' => 1,
+                    'smooth' => true
+                ],
+
+            ];
+
+            return json(['code' => 1, 'data' => $json]);
         }
         $dataConfig = new \app\admin\model\DataConfig();
         //采购总数
