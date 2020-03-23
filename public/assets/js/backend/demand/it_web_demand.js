@@ -26,22 +26,24 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {field: 'status', title: __('Status'),visible:false},
                         {field: 'id', title: __('Id')},
                         {field: 'site_type', title: __('Site_type')},
-                        {field: 'entry_user_id', title: __('Entry_user_id')},
+                        {
+                            field: 'entry_user_id', title: __('Entry_user_id'), operate: false, formatter: function (value, rows) {
+                                var res = '';
+                                for(i = 0,len = value.length; i < len; i++){
+                                    res += value[i] + '</br>';
+                                }
+                                return res;
+                            }
+                        },                        
                         {field: 'title', title: __('Title')},
                         {
                             field: 'content',
                             title: __('content'),
+                            events: Controller.api.events.getcontent,
                             formatter: Controller.api.formatter.getcontent,
                         },
                         {field: 'hope_time', title: __('Hope_time'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime},
                         {field: 'All_group', title: __('All_group')},
-
-
-
-
-
-
-
                         {field: 'web_designer_user_id', title: __('Web_designer_user_id')},
                         {field: 'web_designer_expect_time', title: __('Web_designer_expect_time'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime},
                         {field: 'web_designer_is_finish', title: __('Web_designer_is_finish')},
@@ -69,7 +71,56 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {field: 'entry_user_confirm', title: __('Entry_user_confirm')},
                         {field: 'entry_user_confirm_time', title: __('Entry_user_confirm_time'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime},
                         {field: 'all_finish_time', title: __('All_finish_time'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime},
-                        {field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate}
+                        {
+                            field: 'operate',
+                            width: "150px",
+                            title: __('Operate'),
+                            table: table,
+                            events: Table.api.events.operate,
+                            buttons: [
+                                {
+                                    name: 'ajax',
+                                    title: __('发送Ajax'),
+                                    classname: 'btn btn-xs btn-success btn-magic btn-ajax',
+                                    icon: 'fa fa-magic',
+                                    url: 'example/bootstraptable/detail',
+                                    success: function (data, ret) {
+                                        Layer.alert(ret.msg + ",返回数据：" + JSON.stringify(data));
+                                        //如果需要阻止成功提示，则必须使用return false;
+                                        //return false;
+                                    },
+                                    error: function (data, ret) {
+                                        console.log(data, ret);
+                                        Layer.alert(ret.msg);
+                                        return false;
+                                    },
+                                    visible: function(row){
+                                        if(row.id == 1){
+                                            return true;
+                                        }else{
+                                            return false;
+                                        }
+                                    }
+                                },
+                                {
+                                    name: 'click',
+                                    title: __('点击执行事件'),
+                                    classname: 'btn btn-xs btn-info btn-click',
+                                    icon: 'fa fa-leaf',
+                                    click: function (data) {
+                                        Layer.alert("点击按钮执行的事件");
+                                    },
+                                    visible: function(row){
+                                        if(row.id == 4){
+                                            return true;
+                                        }else{
+                                            return false;
+                                        }
+                                    }
+                                },                                
+                            ],
+                            formatter: Table.api.formatter.operate
+                        },                       
                     ]
                 ]
             });
@@ -77,16 +128,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             // 为表格绑定事件
             Table.api.bindevent(table);
             //需求详情
-            $(document).on('click', '.check_demand_content', function () {
-                var problem_desc = $(this).attr('data');
-                Layer.open({
-                    closeBtn: 1,
-                    title: '问题描述',
-
-                    content: problem_desc
-                });
-                return false;
-            });
+            
         },
         add: function () {
             Controller.api.bindevent();
@@ -105,7 +147,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     if (value == null || value == undefined) {
                         value = '';
                     }
-                    return '<span class="check_demand_content" data = "' + value + '" style="">查 看</span>';
+                    return '<span class="btn-getcontent check_demand_content" data = "' + value + '" style="">查 看</span>';
                 },
 
                 getClear: function (value) {
@@ -124,7 +166,20 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     }
                 }
 
-            }
+            },
+            events: {//绑定事件的方法
+                getcontent: {
+                    //格式为：方法名+空格+DOM元素
+                    'click .btn-getcontent': function (e, value, row, index) {
+                       Layer.open({
+                            closeBtn: 1,
+                            title: '问题描述',
+
+                            content: value
+                        });
+                    }
+                }
+            }            
         }
     };
     return Controller;
