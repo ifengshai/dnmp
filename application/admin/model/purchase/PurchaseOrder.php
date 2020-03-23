@@ -204,7 +204,7 @@ class PurchaseOrder extends Model
     }
 
     /**
-     * 当月采购总数
+     * 当月采购镜架总数
      *
      * @Description
      * @author wpl
@@ -221,6 +221,26 @@ class PurchaseOrder extends Model
         $where['sku'] = ['in', $skus];
         $where['purchase_status'] = ['in', [2, 5, 6, 7]];
         return $this->alias('a')->where($where)->join(['fa_purchase_order_item' => 'b'], 'a.id=b.purchase_id')->sum('purchase_num');
+    }
+
+    /**
+     * 当月采购镜架总金额
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/03/05 17:08:36 
+     * @return void
+     */
+    public function getPurchaseFramePrice()
+    {
+        //查询镜架SKU
+        $item = new \app\admin\model\itemmanage\Item();
+        $skus = $item->getFrameSku();
+        $where['createtime'] = ['between', [date('Y-m-01 00:00:00', time()), date('Y-m-d H:i:s', time())]];
+        $where['is_del'] = 1;
+        $where['sku'] = ['in', $skus];
+        $where['purchase_status'] = ['in', [2, 5, 6, 7]];
+        return $this->alias('a')->where($where)->join(['fa_purchase_order_item' => 'b'], 'a.id=b.purchase_id')->sum('purchase_num*purchase_price');
     }
 
     /**
@@ -261,7 +281,7 @@ class PurchaseOrder extends Model
     }
 
     /**
-     * 当月采购总金额
+     * 当日采购总金额
      *
      * @Description
      * @author wpl
