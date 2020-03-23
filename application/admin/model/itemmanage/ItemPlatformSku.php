@@ -296,6 +296,6 @@ class ItemPlatformSku extends Model
 
         $where['m.category_id']  = ['in', $ids];
         $where['p.platform_type'] = $platform;
-        return $this->alias('p')->join('fa_item m','p.sku=m.sku','inner')->where($where)->column('m.platform_sku');
+        return $this->alias('p')->join('fa_item m','p.sku=m.sku','inner')->where($where)->column('p.platform_sku');
     }    
 }
