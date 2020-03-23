@@ -80,10 +80,10 @@ class Operationalreport extends Backend{
             }elseif($params['key'] == 'decoration_sales_num'){
                 return json(['code' => 1, 'data'=>$json2]);
             }else{
-           // $result = $this->platformOrderInfo($order_platform,$map,$itemMap);
-            // if(!$result){
-            //     return $this->error('暂无数据');
-            // }
+           $result = $this->platformOrderInfo($order_platform,$map,$itemMap);
+            if(!$result){
+                return $this->error('暂无数据');
+            }
                 return json(['code' => 1, 'rows' => $result]);
             }
             
