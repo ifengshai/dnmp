@@ -1100,11 +1100,11 @@ class Index extends Backend
      */
     public function test()
     {
-        $starttime = strtotime(date('Y-m-01 00:00:00', time()));
+        $starttime = strtotime(date('Y-m-01 00:00:00', time())) - 8*3600;
         $endtime = strtotime(date('Y-m-d H:i:s', time()));
-
         $track = new Trackingmore();
         $track = $track->getStatusNumberCount($starttime, $endtime);
         dump($track);die;
+        
     }
 }
