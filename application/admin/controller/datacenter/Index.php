@@ -1052,6 +1052,8 @@ class Index extends Backend
         $purchaseSkuNum = $dataConfig->getValue('purchaseSkuNum');
         //采购镜架总数
         $purchaseFrameNum = $dataConfig->getValue('purchaseFrameNum');
+        //当月采购镜架总金额
+        $purchaseFramePrice = $dataConfig->getValue('purchaseFramePrice');
         //采购到货总数
         $arrivalsNum = $dataConfig->getValue('arrivalsNum');
         //采购平均单价
@@ -1068,6 +1070,7 @@ class Index extends Backend
         //当月线下采购数量
         $underPurchaseNum = $purchase->getUnderPurchaseNum();
         $this->assign('purchaseAveragePrice', $purchaseAveragePrice);
+        $this->assign('purchaseFramePrice', $purchaseFramePrice);
         $this->assign('salesNum', $salesNum);
         $this->assign('salesCost', $salesCost);
         $this->assign('quantityNum', $quantityNum);
