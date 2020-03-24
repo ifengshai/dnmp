@@ -7,6 +7,7 @@ use app\admin\model\warehouse\LogisticsInfo;
 use app\common\controller\Backend;
 use think\Db;
 use fast\Alibaba;
+use fast\Trackingmore;
 
 
 
@@ -2726,11 +2727,18 @@ order by sfoi.item_id asc limit 1000";
         $data['updatetime'] = date('Y-m-d H:i:s', time());
         $dataConfig->where('key', 'pressureRate7days')->update($data);
 
+        //获取当月物流妥投数量
+        $list = $this->getTrackingMoreStatusNumberCount();
+        $monthAppropriate = $list['delivered'];
+
         //当月妥投总量
         $data['value'] = $monthAppropriate ?? 0;
         $data['updatetime'] = date('Y-m-d H:i:s', time());
         $dataConfig->where('key', 'monthAppropriate')->update($data);
 
+        $allAppropriateNum = array_sum($list);
+        $monthAppropriatePercent = $allAppropriateNum ? $list['delivered']/$allAppropriateNum : 0;
+        
         //当月妥投占比
         $data['value'] = $monthAppropriatePercent ?? 0;
         $data['updatetime'] = date('Y-m-d H:i:s', time());
@@ -2741,6 +2749,26 @@ order by sfoi.item_id asc limit 1000";
         $data['updatetime'] = date('Y-m-d H:i:s', time());
         $dataConfig->where('key', 'overtimeOrder')->update($data);
     }
+
+     /**
+     * 获取当月物流妥投数量
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/03/24 14:04:27 
+     * @return void
+     */
+    protected function getTrackingMoreStatusNumberCount()
+    {
+        //转国内时间
+        $starttime = strtotime(date('Y-m-01 00:00:00', time())) - 8*3600;
+        $endtime = strtotime(date('Y-m-d H:i:s', time()));
+        $track = new Trackingmore();
+        $track = $track->getStatusNumberCount($starttime, $endtime);
+        return $track['data'];
+    }
+
+
 
     /**
      * 定时更新供应链大屏-选品数据
