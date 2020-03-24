@@ -374,4 +374,36 @@ class PurchaseOrder extends Model
         $where['purchase_status'] = ['in', [2, 5, 6, 7]];
         return $this->where($where)->group('create_person')->column('count(1)','create_person');
     }
+
+    /**
+     * 本月SKU采购数量排行榜
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/03/24 11:13:42 
+     * @return void
+     */
+    public function getPurchaseNumRanking()
+    {
+        $where['createtime'] = ['between', [date('Y-m-01 00:00:00', time()), date('Y-m-d H:i:s', time())]];
+        $where['is_del'] = 1;
+        $where['purchase_status'] = ['in', [2, 5, 6, 7]];
+        $list = $this->alias('a')
+        ->where($where)
+        ->field('sum(b.purchase_num) as num,sku')
+        ->join(['fa_purchase_order_item' => 'b'], 'a.id=b.purchase_id')
+        ->group('sku')
+        ->order('num desc')
+        ->limit(30)
+        ->select();
+        $list = collection($list)->toArray();
+        //查询SKU分类名称
+        $item = new \app\admin\model\itemmanage\Item();
+        $skuCategoryName = $item->getSkuCategoryName();
+        foreach($list as &$v) {
+            $v['category_name'] = $skuCategoryName[$v['sku']];
+        }
+        unset($v);
+        return $list ?? [];
+    }
 }

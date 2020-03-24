@@ -248,66 +248,22 @@
                                         <tr>
                                             <td colspan="4" style="font-size: 16px;font-weight:1000">库存数据</td>
                                         </tr>
+
                                         <tr>
-                                            <td>镜架库存</td>
-                                            <td>{$frameStock}</td>
-                                            <td>镜架库存总金额（￥）</td>
-                                            <td>{$frameStockPrice}</td>
+                                            <td>序号</td>
+                                            <td>SKU</td>
+                                            <td>分类</td>
+                                            <td>采购数量</td>
                                         </tr>
+                                        {foreach $data as $k => $v}
                                         <tr>
-                                            <td>饰品库存</td>
-                                            <td>{$ornamentsStock}</td>
-                                            <td>饰品库存总金额（￥）</td>
-                                            <td>{$ornamentsStockPrice}</td>
+                                            <td>{$k}</td>
+                                            <td>{$v.sku}</td>
+                                            <td>{$v.category_name}</td>
+                                            <td>{$v.num}</td>
                                         </tr>
-                                        <tr>
-                                            <td>镜片库存</td>
-                                            <td>{$lensStock}</td>
-                                            <td>镜片库存总金额（￥）</td>
-                                            <td>{$lensStockPrice}</td>
-                                        </tr>
-                                        <tr>
-                                            <td>辅料总库存</td>
-                                            <td>0</td>
-                                            <td>辅料库存总金额（￥）</td>
-                                            <td>0</td>
-                                        </tr>
-                                        <tr>
-                                            <td>镜架均价（￥）</td>
-                                            <td></td>
-                                            <td>饰品均价（￥）</td>
-                                            <td></td>
-                                        </tr>
-                                        <tr>
-                                            <td>在途库存</td>
-                                            <td>{$onway_all_stock}</td>
-                                            <td>在途库存总金额（￥）</td>
-                                            <td>{$onway_all_stock_price}</td>
-                                        </tr>
-                                        <tr>
-                                            <td>在途镜架库存</td>
-                                            <td>{$onway_frame_all_stock}</td>
-                                            <td>在途镜架总金额（￥）</td>
-                                            <td>{$onway_frame_all_stock_price}</td>
-                                        </tr>
-                                        <tr>
-                                            <td>在途饰品库存</td>
-                                            <td>{$onway_ornament_all_stock}</td>
-                                            <td>在途饰品总金额（￥）</td>
-                                            <td>{$onway_ornament_all_stock_price}</td>
-                                        </tr>
-                                        <tr>
-                                            <td>留样库存</td>
-                                            <td>{$sampleNumStock}</td>
-                                            <td>留样库存总金额（￥）</td>
-                                            <td>{$sampleNumStockPrice}</td>
-                                        </tr>
-                                        <tr>
-                                            <td>库存周转天数</td>
-                                            <td>{$stock7days}</td>
-                                            <td>库存周转率</td>
-                                            <td>{$stock7daysPercent}</td>
-                                        </tr>
+                                        {/foreach}
+                                        
                                     </table>
                                 </div>
                             </div>
