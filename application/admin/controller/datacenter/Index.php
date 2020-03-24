@@ -5,6 +5,7 @@ namespace app\admin\controller\datacenter;
 use app\common\controller\Backend;
 use think\Db;
 
+
 /**
  * 数据中心
  *
@@ -1052,6 +1053,8 @@ class Index extends Backend
         $purchaseSkuNum = $dataConfig->getValue('purchaseSkuNum');
         //采购镜架总数
         $purchaseFrameNum = $dataConfig->getValue('purchaseFrameNum');
+        //当月采购镜架总金额
+        $purchaseFramePrice = $dataConfig->getValue('purchaseFramePrice');
         //采购到货总数
         $arrivalsNum = $dataConfig->getValue('arrivalsNum');
         //采购平均单价
@@ -1067,7 +1070,13 @@ class Index extends Backend
         $onlinePurchaseNum = $purchase->getOnlinePurchaseNum();
         //当月线下采购数量
         $underPurchaseNum = $purchase->getUnderPurchaseNum();
+
+        //采购SKU排行数据
+        $data = $purchase->getPurchaseNumRanking();
+
+        $this->assign('data', $data);
         $this->assign('purchaseAveragePrice', $purchaseAveragePrice);
+        $this->assign('purchaseFramePrice', $purchaseFramePrice);
         $this->assign('salesNum', $salesNum);
         $this->assign('salesCost', $salesCost);
         $this->assign('quantityNum', $quantityNum);
@@ -1079,5 +1088,23 @@ class Index extends Backend
         $this->assign('purchaseFrameNum', $purchaseFrameNum);
         $this->assign('arrivalsNum', $arrivalsNum);
         return $this->view->fetch();
+    }
+
+    /**
+     * 测试
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/03/24 14:04:27 
+     * @return void
+     */
+    public function test()
+    {
+        $starttime = strtotime(date('Y-m-01 00:00:00', time())) - 8*3600;
+        $endtime = strtotime(date('Y-m-d H:i:s', time()));
+        $track = new Trackingmore();
+        $track = $track->getStatusNumberCount($starttime, $endtime);
+        dump($track);die;
+        
     }
 }
