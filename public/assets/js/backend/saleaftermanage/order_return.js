@@ -495,6 +495,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','custom-css','
             Form.api.bindevent($("form[role=form]"), function (data) {
                 window.top.location.href = Config.moduleurl + '/saleaftermanage/order_return/search';
             });
+            //$('tr:not(:has(td[rowspan])):even');
             //点击重置按钮
             $(document).on('click','.btn-default',function(){
                 $('#increment_id').attr({"value": ""});
