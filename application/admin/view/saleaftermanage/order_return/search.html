@@ -33,13 +33,45 @@ table.altrowstable td {
     border-style: solid;
     border-color: #ddd;
 }
+table.altrowstable1 {
+    margin: 0 auto;
+    width: 100%;
+    font-family: verdana, arial, sans-serif;
+    font-size: 11px;
+    color: #333333;
+    border-width: 1px;
+    border-color: #247692;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+table.altrowstable1 th {
+    border-width: 1px;
+    padding: 8px;
+    font-size: 14px;
+    border-style: solid;
+    border-color: #d2d6de;
+}
+
+table.altrowstable1 td {
+    border-width: 1px;
+    padding: 8px;
+    text-align: center;
+    font-size: 12px;
+    border-style: solid;
+    border-color: #ddd;
+}
 table.altrowstable tr:nth-child(odd){
-    background:#E9F1F4;
-    background: #F5F5F5;
+    background-color:#eeeeee;
 }
 table.altrowstable tr:nth-child(even){
-    background: #fff;
-    background: #eee;
+    background-color: #ffffff;
+}
+.class-body:nth-child(odd) {
+    background-color: #ffffff;
+}
+.class-body:nth-child(even){
+    background-color: #eeeeee;
 }
 </style>
 <div class="panel panel-default panel-intro">
@@ -98,7 +130,7 @@ table.altrowstable tr:nth-child(even){
                                     <div class="form-group">
                                         <label class="control-label col-xs-4">客户姓名</label>
                                         <div class="col-xs-8">
-                                            <input type="text" id="customer_name" class="form-control" name="customer_name" value="{$customerInfo.customer_name}"/>
+                                            <input type="text" id="customer_name" class="form-control" name="customer_name" value="{$customer_name}"/>
                                         </div>
                                     </div>
                                 </div>
@@ -231,11 +263,11 @@ table.altrowstable tr:nth-child(even){
                                data-operate-del="{:$auth->check('saleaftermanage/order_return/del')}"
                                width="100%">
                         <thead>
-                            <tr><th colspan="16" style="font-size:16px;text-align: center; vertical-align: middle;">协同任务列表</th></tr>                               
+                            <tr><th colspan="16" style="font-size:16px;text-align: center; vertical-align: middle;background-color: #cccccc;">协同任务列表</th></tr>                               
                           <tr>
-                              <th style="text-align: center; vertical-align: middle;">序号</th>
+                              <!-- <th style="text-align: center; vertical-align: middle;">序号</th> -->
                               <th style="text-align: center; vertical-align: middle;">任务状态</th>
-                              <th style="text-align: center; vertical-align: middle;">协同任务单号</th>
+                              <!-- <th style="text-align: center; vertical-align: middle;">协同任务单号</th> -->
                               <th style="text-align: center; vertical-align: middle;">关联单据类型</th>
                               <th style="text-align: center; vertical-align: middle;">关联单号</th>
                               <th style="text-align: center; vertical-align: middle;">订单SKUS</th>
@@ -252,9 +284,9 @@ table.altrowstable tr:nth-child(even){
                         </thead>
                             {foreach name="infoSynergyTaskResult" item="synergyTaskList" }
                             <tr>
-                                <td style="text-align: center; vertical-align: middle;">{$synergyTaskList.id}</td>
+                                <!-- <td style="text-align: center; vertical-align: middle;">{$synergyTaskList.id}</td> -->
                                 <td style="text-align: center; vertical-align: middle;">{$synergyTaskList.synergy_status}</td>
-                                <td style="text-align: center; vertical-align: middle;">{$synergyTaskList.synergy_number}</td>
+                                <!-- <td style="text-align: center; vertical-align: middle;">{$synergyTaskList.synergy_number}</td> -->
                                 <td style="text-align: center; vertical-align: middle;">{$synergyTaskList.synergy_order_id}</td>
                                 <td style="text-align: center; vertical-align: middle;">{$synergyTaskList.synergy_order_number}</td>
                                 <td style="text-align: center; vertical-align: middle;">{$synergyTaskList.order_status}</td>
@@ -277,9 +309,9 @@ table.altrowstable tr:nth-child(even){
                            data-operate-del="{:$auth->check('saleaftermanage/order_return/del')}"
                            width="100%">
                             <thead>
-                            <tr><th colspan="16" style="font-size:16px;text-align: center; vertical-align: middle;">售后任务列表</th></tr>                           
+                            <tr><th colspan="16" style="font-size:16px;text-align: center; vertical-align: middle;background-color: #cccccc;">售后任务列表</th></tr>                           
                             <tr>
-                                <th style="text-align: center; vertical-align: middle;">序号</th>
+                                <!-- <th style="text-align: center; vertical-align: middle;">序号</th> -->
                                 <!-- <th style="text-align: center; vertical-align: middle;">任务单号</th> -->
                                 <th style="text-align: center; vertical-align: middle;">任务状态</th>
                                 <th style="text-align: center; vertical-align: middle;">订单平台</th>
@@ -290,7 +322,7 @@ table.altrowstable tr:nth-child(even){
                                 <th style="text-align: center; vertical-align: middle;">订单状态</th>
                                 <th style="text-align: center; vertical-align: middle;">责任部门</th>
                                 <th style="text-align: center; vertical-align: middle;">承接人</th>
-                                <th style="text-align: center; vertical-align: middle;">任务优先级</th>
+                                <!-- <th style="text-align: center; vertical-align: middle;">任务优先级</th> -->
                                 <th style="text-align: center; vertical-align: middle;">问题分类</th>
                                 <th style="text-align: center; vertical-align: middle;">问题描述</th>
                                 <th style="text-align: center; vertical-align: middle;">解决方案</th>
@@ -301,7 +333,7 @@ table.altrowstable tr:nth-child(even){
                         </thead> 
                             {foreach name="saleAfterTaskResult" item="saleTaskList"}
                             <tr>
-                                <td style="text-align: center; vertical-align: middle;">{$saleTaskList.id}</td>
+                                <!-- <td style="text-align: center; vertical-align: middle;">{$saleTaskList.id}</td> -->
                                 <!-- <td style="text-align: center; vertical-align: middle;">{$saleTaskList.task_number}</td> -->
                                 <td style="text-align: center; vertical-align: middle;">{$saleTaskList.task_status}</td>
                                 <td style="text-align: center; vertical-align: middle;">{$saleTaskList.order_platform}</td>
@@ -312,7 +344,7 @@ table.altrowstable tr:nth-child(even){
                                 <td style="text-align: center; vertical-align: middle;">{$saleTaskList.order_status}</td>
                                 <td style="text-align: center; vertical-align: middle;">{$saleTaskList.dept_id}</td>
                                 <td style="text-align: center; vertical-align: middle;">{$saleTaskList.rep_id}</td>
-                                <td style="text-align: center; vertical-align: middle;">{$saleTaskList.prty_id}</td>
+                                <!-- <td style="text-align: center; vertical-align: middle;">{$saleTaskList.prty_id}</td> -->
                                 <td style="text-align: center; vertical-align: middle;">{$saleTaskList.problem_id}</td>
                                 <td style="text-align: center; vertical-align: middle;">{$saleTaskList.problem_desc}</td>
                                 <td style="text-align: center; vertical-align: middle;">{$saleTaskList.handle_scheme}</td>
@@ -329,7 +361,7 @@ table.altrowstable tr:nth-child(even){
                            data-operate-del="{:$auth->check('saleaftermanage/order_return/del')}"
                            width="100%">
                         <thead>
-                            <tr><th colspan="16" style="font-size:16px;text-align: center; vertical-align: middle;">退货任务列表</th></tr>                           
+                            <tr><th colspan="16" style="font-size:16px;text-align: center; vertical-align: middle;background-color: #cccccc;">退货任务列表</th></tr>                           
                         <tr>
                             <th style="text-align: center; vertical-align: middle;">序号</th>
                             <th style="text-align: center; vertical-align: middle;">退货单号</th>
@@ -362,10 +394,10 @@ table.altrowstable tr:nth-child(even){
                            data-operate-del="{:$auth->check('saleaftermanage/order_return/del')}"
                            width="100%">
                         <thead>
-                            <tr><th colspan="19" style="font-size:16px;text-align: center; vertical-align: middle;">订单信息列表</th></tr>                     
+                            <tr><th colspan="19" style="font-size:16px;text-align: center; vertical-align: middle;background-color: #cccccc;">订单信息列表</th></tr>                     
                         <tr>
 							<th style="text-align: center; vertical-align: middle;">订单类型</th>
-                            <th style="text-align: center; vertical-align: middle;">序号</th>
+                            <!-- <th style="text-align: center; vertical-align: middle;">序号</th> -->
                             <th style="text-align: center; vertical-align: middle;">订单号</th>
                             <th style="text-align: center; vertical-align: middle;">快递单号</th>
                             <th style="text-align: center; vertical-align: middle;">快递名称</th>
@@ -390,7 +422,7 @@ table.altrowstable tr:nth-child(even){
                             {foreach name="orderInfoResult" item="orderInfoList"}
                              <tr>
 								 <td style="text-align: center; vertical-align: middle;">{$orderInfoList.order_type}</td>
-                                 <td style="text-align: center; vertical-align: middle;">{$orderInfoList.entity_id}</td>
+                                 <!-- <td style="text-align: center; vertical-align: middle;">{$orderInfoList.entity_id}</td> -->
                                  <td style="text-align: center; vertical-align: middle;">{$orderInfoList.increment_id}</td>
                                  <td style="text-align: center; vertical-align: middle;"><a href="javascript:void(0)" class="track-number">{$orderInfoList.track_number}</a></td>
                                  <td style="text-align: center; vertical-align: middle;">{$orderInfoList.title}</td>
@@ -412,40 +444,41 @@ table.altrowstable tr:nth-child(even){
                             {/foreach}
                         {/notempty}
                     </table>
-                    <table id="order-item-list" class="altrowstable"
+                    <table id="order-item-list" class="altrowstable1"
                            data-operate-edit="{:$auth->check('saleaftermanage/order_return/edit')}"
                            data-operate-del="{:$auth->check('saleaftermanage/order_return/del')}"
                            width="100%">
                         <thead>
-                            <tr><th colspan="20" style="font-size:16px;text-align: center; vertical-align: middle;">订单商品信息列表</th></tr> 
+                            <tr><th colspan="20" style="font-size:16px;text-align: center; vertical-align: middle;background-color: #cccccc;">订单商品信息列表</th></tr> 
                         <tr>
-                            <th style="text-align: center; vertical-align: middle;">increment<br/>_id</th>
+                            <th style="text-align: center; vertical-align: middle;">ID</th>
                             <th style="text-align: center; vertical-align: middle;">SKU</th>
                             <th style="text-align: center; vertical-align: middle;">name</th>
-                            <th style="text-align: center; vertical-align: middle;">q<br/>ty<br/>_ord<br/>ered</th>
-                            <th style="text-align: center; vertical-align: middle;">fra<br/>me<br/>_price</th>
-                            <th style="text-align: center; vertical-align: middle;">ori<br/>ginal<br/>_price</th>
-                            <th style="text-align: center; vertical-align: middle;">dis<br/>count<br/>_amount</th>
-                            <th style="text-align: center; vertical-align: middle;">coatiing<br/>_name</th>
-                            <th style="text-align: center; vertical-align: middle;">coat<br/>iing<br/>_price</th>
-                            <th style="text-align: center; vertical-align: middle;">index<br/>_type</th>
-                            <th style="text-align: center; vertical-align: middle;">ind<br/>ex<br/>_price</th>
-                            <th style="text-align: center; vertical-align: middle;">prescription<br/>_type</th>
-                            <th style="text-align: center; vertical-align: middle;">left/right</th>                            
+                            <th style="text-align: center; vertical-align: middle;">Qty</th>
+                            <th style="text-align: center; vertical-align: middle;">Frame<br/>Price</th>
+                            <th style="text-align: center; vertical-align: middle;">Orig<br/>inal<br/>Price</th>
+                            <th style="text-align: center; vertical-align: middle;">Dis<br/>count</th>
+                            <th style="text-align: center; vertical-align: middle;">Coating</th>
+                            <th style="text-align: center; vertical-align: middle;">Coat<br/>iing<br/>Price</th>
+                            <th style="text-align: center; vertical-align: middle;">Index<br/>Type</th>
+                            <th style="text-align: center; vertical-align: middle;">Index<br/>Price</th>
+                            <th style="text-align: center; vertical-align: middle;">Prescription</th>
+                            <th style="text-align: center; vertical-align: middle;">OD/OS</th>                            
                             <th style="text-align: center; vertical-align: middle;">SPH</th>
                             <th style="text-align: center; vertical-align: middle;">CYL</th>
                             <th style="text-align: center; vertical-align: middle;">AXI</th>
                             <th style="text-align: center; vertical-align: middle;">ADD</th>
                             <th style="text-align: center; vertical-align: middle;">PD</th>
-                            <th style="text-align: center; vertical-align: middle;">PrismHorizontal<br>(out/in)</th>
-                            <th style="text-align: center; vertical-align: middle;">PrismVertical<br>(up/down)</th>
+                            <th style="text-align: center; vertical-align: middle;">Prism(out/in)</th>
+                            <th style="text-align: center; vertical-align: middle;">Prism(up/down)</th>
                         </tr>
                         </thead>  
                         {notempty name="orderInfoResult"}
-                        {foreach name="orderInfoResult" item="orderInfoList"}
-                        {foreach name="orderInfoList.item" item="itemInfoList"}
+                        {foreach name="orderInfoResult" item="orderInfoList" key="k"}
+                        <tbody class='class-body'>
                         <tr>
-                            <td style="text-align: center; vertical-align: middle;">{$orderInfoList.increment_id}</td>
+                            <td style="text-align: center; vertical-align: middle;" rowspan="{$orderInfoList.total_qty_ordered}">{$orderInfoList.increment_id}</td>
+                        {foreach name="orderInfoList.item" item="itemInfoList"}    
                             <td style="text-align: center; vertical-align: middle;">{$itemInfoList.sku}</td>
                             <td style="text-align: center; vertical-align: middle;">{$itemInfoList.name}</td>
                             <td style="width:20px;">{:round($itemInfoList.qty_ordered)}</td>
@@ -484,6 +517,7 @@ table.altrowstable tr:nth-child(even){
                             <td style="text-align: center; vertical-align: middle;">{$itemInfoList.os_pv}({$itemInfoList.os_bd})<br>{$itemInfoList.os_pv_r}({$itemInfoList.os_bd_r})</td>
                         </tr>
                         {/foreach}
+                        </tbody>
                         {/foreach}
                         {/notempty}
                     </table>
@@ -492,7 +526,7 @@ table.altrowstable tr:nth-child(even){
                            data-operate-del="{:$auth->check('saleaftermanage/order_return/del')}"
                            width="100%">
                            <thead>
-                            <tr><th colspan="10" style="font-size:16px;text-align: center; vertical-align: middle;">支付信息列表</th></tr>
+                            <tr><th colspan="10" style="font-size:16px;text-align: center; vertical-align: middle;background-color: #cccccc;">支付信息列表</th></tr>
                             <tr>
                                 <th style="text-align: center; vertical-align: middle;">订单号</th>
                                 <th style="text-align: center; vertical-align: middle;">支付金额</th>
@@ -526,7 +560,7 @@ table.altrowstable tr:nth-child(even){
                            data-operate-del="{:$auth->check('saleaftermanage/order_return/del')}"
                            width="100%">
                            <thead>
-                            <tr><th colspan="10" style="font-size:16px;text-align: center; vertical-align: middle;">vip订单信息列表</th></tr>
+                            <tr><th colspan="10" style="font-size:16px;text-align: center; vertical-align: middle;background-color: #cccccc;">vip订单信息列表</th></tr>
                             <tr>
                                 <th style="text-align: center; vertical-align: middle;">id</th>
                                 <th style="text-align: center; vertical-align: middle;">customer_email</th>
