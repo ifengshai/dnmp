@@ -46,12 +46,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'template'], function
 
             // 初始化表格
             // 这里使用的是Bootstrap-table插件渲染表格
-            // 相关文档：http://bootstrap-table.wenzhixin.net.cn/zh-cn/documentation/
+            // 相关文档：https://doc.fastadmin.net/doc/table.html
             table.bootstrapTable({
+                //表格参数可以参考：https://doc.fastadmin.net/doc/190.html
                 url: $.fn.bootstrapTable.defaults.extend.index_url,
                 columns: [
                     [
-                        //更多配置参数可参考http://bootstrap-table.wenzhixin.net.cn/zh-cn/documentation/#c
+                        //更多列参数可以参考：https://doc.fastadmin.net/doc/191.html
                         //该列为复选框字段,如果后台的返回state值将会默认选中
                         {field: 'state', checkbox: true,},
                         //sortable为是否排序,operate为搜索时的操作符,visible表示是否可见
@@ -117,6 +118,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'template'], function
                                     title: __('点击执行事件'),
                                     classname: 'btn btn-xs btn-info btn-click',
                                     icon: 'fa fa-leaf',
+                                    // dropdown: '更多',//如果包含dropdown，将会以下拉列表的形式展示
                                     click: function (data) {
                                         Layer.alert("点击按钮执行的事件");
                                     }
@@ -136,6 +138,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'template'], function
                                     title: __('发送Ajax'),
                                     classname: 'btn btn-xs btn-success btn-magic btn-ajax',
                                     icon: 'fa fa-magic',
+                                    confirm: '确认发送Ajax请求？',
                                     url: 'example/bootstraptable/detail',
                                     success: function (data, ret) {
                                         Layer.alert(ret.msg + ",返回数据：" + JSON.stringify(data));
@@ -160,7 +163,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'template'], function
                         },
                     ],
                 ],
-                //更多配置参数可参考http://bootstrap-table.wenzhixin.net.cn/zh-cn/documentation/#t
+                //更多配置参数可参考：https://doc.fastadmin.net/doc/190.html
                 //亦可以参考require-table.js中defaults的配置
                 //快捷搜索,这里可在控制器定义快捷搜索的字段
                 search: true,
@@ -273,7 +276,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'template'], function
                     //格式为：方法名+空格+DOM元素
                     'click .btn-ip': function (e, value, row, index) {
                         e.stopPropagation();
-                        console.log();
                         var container = $("#table").data("bootstrap.table").$container;
                         var options = $("#table").bootstrapTable('getOptions');
                         //这里我们手动将数据填充到表单然后提交

@@ -1,4 +1,3 @@
-
 CREATE TABLE IF NOT EXISTS `__PREFIX__area` (
   `id` int(10) NOT NULL AUTO_INCREMENT COMMENT 'ID',
   `pid` int(10) DEFAULT NULL COMMENT '父id',
@@ -14,8 +13,7 @@ CREATE TABLE IF NOT EXISTS `__PREFIX__area` (
   `lat` varchar(100) DEFAULT NULL COMMENT '纬度',
   PRIMARY KEY (`id`),
   KEY `pid` (`pid`)
-) ENGINE=InnoDB AUTO_INCREMENT=3750 DEFAULT CHARSET=utf8 COMMENT='地区表' ROW_FORMAT=DYNAMIC;
-
+) ENGINE=InnoDB AUTO_INCREMENT=3750 DEFAULT CHARSET=utf8 COMMENT='地区表';
 
 BEGIN;
 INSERT INTO `__PREFIX__area` (`id`, `pid`, `shortname`, `name`, `mergename`, `level`, `pinyin`, `code`, `zip`, `first`, `lng`, `lat`) VALUES
@@ -3774,4 +3772,24 @@ INSERT INTO `__PREFIX__area` (`id`, `pid`, `shortname`, `name`, `mergename`, `le
 (3746, 3745, '嘉模堂区', '嘉模堂区', '中国,澳门特别行政区,氹仔岛,嘉模堂区', 3, 'ourladyofcarmel''sparish', '00853', '999078', 'J', '113.565303', '22.149029'),
 (3747, 3738, '路环岛', '路环岛', '中国,澳门特别行政区,路环岛', 2, 'coloane', '00853', '999078', 'L', '113.564857', '22.116226'),
 (3748, 3747, '圣方济各堂区', '圣方济各堂区', '中国,澳门特别行政区,路环岛,圣方济各堂区', 3, 'stfrancisxavier''sparish', '00853', '999078', 'S', '113.559954', '22.123486');
+COMMIT;
+
+CREATE TABLE IF NOT EXISTS `__PREFIX__version`  (
+  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'ID',
+  `oldversion` varchar(30) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '' COMMENT '旧版本号',
+  `newversion` varchar(30) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '' COMMENT '新版本号',
+  `packagesize` varchar(30) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '' COMMENT '包大小',
+  `content` varchar(500) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '' COMMENT '升级内容',
+  `downloadurl` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '' COMMENT '下载地址',
+  `enforce` tinyint(1) UNSIGNED NOT NULL DEFAULT 0 COMMENT '强制更新',
+  `createtime` int(10) NOT NULL DEFAULT 0 COMMENT '创建时间',
+  `updatetime` int(10) UNSIGNED NOT NULL DEFAULT 0 COMMENT '更新时间',
+  `weigh` int(10) NOT NULL DEFAULT 0 COMMENT '权重',
+  `status` varchar(30) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '' COMMENT '状态',
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 1 DEFAULT CHARSET=utf8 COMMENT = '版本表';
+
+BEGIN;
+INSERT INTO `__PREFIX__version` (`id`, `oldversion`, `newversion`, `packagesize`, `content`, `downloadurl`, `enforce`, `createtime`, `updatetime`, `weigh`, `status`) VALUES
+(1, '1.1.1,2', '1.2.1', '20M', '更新内容', 'https://www.fastadmin.net/download.html', 1, 1520425318, 0, 0, 'normal');
 COMMIT;
