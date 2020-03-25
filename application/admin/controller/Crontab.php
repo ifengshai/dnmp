@@ -2737,7 +2737,7 @@ order by sfoi.item_id asc limit 1000";
         $dataConfig->where('key', 'monthAppropriate')->update($data);
 
         $allAppropriateNum = array_sum($list);
-        $monthAppropriatePercent = $allAppropriateNum ? $list['delivered']/$allAppropriateNum : 0;
+        $monthAppropriatePercent = $allAppropriateNum ? $list['delivered']/$allAppropriateNum*100 : 0;
         
         //当月妥投占比
         $data['value'] = $monthAppropriatePercent ?? 0;
