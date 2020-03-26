@@ -14,5 +14,7 @@ return [
     'Create_person'        => '创建人',
     'Update_time'          => '更新时间',
     'Create_time'          => '创建时间',
-    'Param_value'          => '参数值' 
+    'Param_value'          => '参数值',
+    'Start'                => '开启',
+    'Forbidden'            => '禁止'   
 ];
