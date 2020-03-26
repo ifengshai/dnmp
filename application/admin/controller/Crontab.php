@@ -478,11 +478,11 @@ order by sfoi.item_id asc limit 1000";
             $label = [];
             foreach ($items as $k => $v) {
                 //如果镜片参数为真 或 不等于 Plastic Lenses 并且不等于 FRAME ONLY则此订单为含处方
-                if ($v['index_type'] == '' || $v['index_type'] == 'Plastic Lenses' || $v['index_type'] == 'FRAME ONLY') {
+                if ($v['index_type'] == '' || $v['index_type'] == 'Plastic Lenses' || $v['index_type'] == 'FRAME ONLY' || $v['index_type'] == 'FRAME ONLY (Plastic lenses)') {
                     $label[] = 1; //仅镜架
-                } else if (($v['index_type'] && $v['index_type'] != 'Plastic Lenses' && $v['index_type'] != 'FRAME ONLY') && $v['is_custom_lens'] == 0) {
+                } else if (($v['index_type'] && $v['index_type'] != 'Plastic Lenses' && $v['index_type'] != 'FRAME ONLY' && $v['index_type'] != 'FRAME ONLY (Plastic lenses)') && $v['is_custom_lens'] == 0) {
                     $label[] = 2; //现片含处方
-                } else if (($v['index_type'] && $v['index_type'] != 'Plastic Lenses' && $v['index_type'] != 'FRAME ONLY') && $v['is_custom_lens'] == 1) {
+                } else if (($v['index_type'] && $v['index_type'] != 'Plastic Lenses' && $v['index_type'] != 'FRAME ONLY' && $v['index_type'] != 'FRAME ONLY (Plastic lenses)') && $v['is_custom_lens'] == 1) {
                     $label[] = 3; //定制含处方
                 }
             }
