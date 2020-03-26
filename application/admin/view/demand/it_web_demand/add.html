@@ -42,6 +42,7 @@
     <input name="row[type]" type="hidden" value="2">
     <input name="row[status]" type="hidden" value="1">
     <input name="row[create_time]" type="hidden" value="{:date('Y-m-d H:i:s')}">
+    <input name="row[entry_user_id]" type="hidden" value="">
 
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">{:__('Site_type')}</label>
@@ -51,39 +52,12 @@
     </div>
 
     <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Entry_user_id')}</label>
+        <label class="control-label col-xs-12 col-sm-2">{:__('Copy_to_user_id')}</label>
         <div class="col-xs-12 col-sm-8" id="st_sel">
-            {:Form::select('', config('demand.entryUserId'), null, ['class'=>'form-control selectpicker', null,'data-live-search' => true,'id'=>'Entry_user_id_select'])}
+            {:Form::select('', config('demand.copyToUserId'), null, ['class'=>'form-control selectpicker', null,'data-live-search' => true,'id'=>'Copy_to_user_id'])}
             <div id="user_list"></div>
         </div>
-        <div id="add_entry_user" onclick="add_Entry_user()"><span>add</span></div>
-        <script>
-            function add_Entry_user(){
-                var user_id = $('#Entry_user_id_select').val();
-                if(isNaN(parseInt(user_id))){
-                    layer.alert('无效的选择');
-                    return false;
-                }
-                var user_name = $("#Entry_user_id_select option:selected").text();
-                var status = 0;
-                $("#user_list .user_list input").each(function(){
-                    var sel_userid=$(this).val();
-                    if(user_id == sel_userid){
-                        status = 1;
-                    }
-                });
-                if(status == 1){
-                    layer.alert('重复的提出人');
-                    return false;
-                }
-                var add_str = '<div class="user_list" id="userid_'+user_id+'"><span>'+user_name+'</span><a href="javascript:;" onclick="del_Entry_user('+user_id+')"> Ｘ </a><input type="hidden" name="row[entry_user_id][]" value="'+user_id+'"></div>'
-                $('#user_list').append(add_str);
-
-            }
-            function del_Entry_user(user_id){
-                $("#userid_"+user_id).remove();
-            }
-        </script>
+        <div id="add_entry_user" ><span>add</span></div>
     </div>
 
     <div class="form-group">
@@ -114,12 +88,12 @@
         </div>
     </div>
 
-    <div class="form-group">
+    <!--<div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">{:__('Test_group')}</label>
         <div class="col-xs-12 col-sm-8">
             {:Form::select('row[test_group]', config('demand.testGroup'), null, ['class'=>'form-control', 'data-rule'=>'required','data-live-search' => true,'id'=>'Test_group'])}
         </div>
-    </div>
+    </div>-->
 
     <div class="form-group layer-footer">
         <label class="control-label col-xs-12 col-sm-2"></label>

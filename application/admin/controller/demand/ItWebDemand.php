@@ -4,6 +4,7 @@ namespace app\admin\controller\demand;
 
 use app\common\controller\Backend;
 use think\Db;
+use think\Request;
 
 /**
  * 技术部网站组需求管理
@@ -23,7 +24,6 @@ class ItWebDemand extends Backend
     {
         parent::_initialize();
         $this->model = new \app\admin\model\demand\ItWebDemand;
-
     }
 
     /**
@@ -58,30 +58,36 @@ class ItWebDemand extends Backend
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
-
             $list = collection($list)->toArray();
-
             foreach ($list as $k => $v){
-                $list[$k]['site_type'] = config('demand.siteType')[$v['site_type']];//取站点
-                $entry_user_id_arr = explode(',',$v['entry_user_id']);
-                foreach ($entry_user_id_arr as $k1 => $user_name ){
-                    $entry_user_id_arr[$k1] = config('demand.entryUserId')[$user_name];//取提出人
-                }
+                $list[$k]['sitetype'] = config('demand.siteType')[$v['site_type']];//取站点
+                $user_detail = $this->auth->getUserInfo($list[$k]['entry_user_id']);
+                $list[$k]['entry_user_name'] = $user_detail['nickname'];//取提出人
 
-                //$list[$k]['entry_user_id'] = implode(",", $entry_user_id_arr);//取提出人姓名
-                $list[$k]['entry_user_id'] = $entry_user_id_arr;//取提出人姓名
-                $list[$k]['all_complexity'] = config('demand.allComplexity')[$v['all_complexity']];//复杂度
+                $list[$k]['allcomplexity'] = config('demand.allComplexity')[$v['all_complexity']];//复杂度
 
-                $list[$k]['All_group'] = array();
+                $list[$k]['Allgroup'] = array();
                 if($v['web_designer_group'] == 1){
-                    $list[$k]['All_group'][] = '前端';
+                    $list[$k]['Allgroup'][] = '前端';
                 }
                 if($v['phper_group'] == 1){
-                    $list[$k]['All_group'][] = '后端';
+                    $list[$k]['Allgroup'][] = '后端';
                 }
                 if($v['app_group'] == 1){
-                    $list[$k]['All_group'][] = 'app';
+                    $list[$k]['Allgroup'][] = 'app';
                 }
+                if($v['test_group'] == 1){
+                    $list[$k]['testgroup'] = '是';
+                }else{
+                    $list[$k]['testgroup'] = '否';
+                }
+
+                //权限赋值
+                $this->user_id = $this->auth->id;
+                //检查有没有权限
+                $list[$k]['demand_add'] = $this->auth->check('demand/it_web_demand/add');
+                $list[$k]['demand_through_demand'] = $this->auth->check('demand/it_web_demand/through_demand');
+                $list[$k]['demand_distribution'] = $this->auth->check('demand/it_web_demand/distribution');
             }
             $result = array("total" => $total, "rows" => $list);
 
@@ -98,11 +104,10 @@ class ItWebDemand extends Backend
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
             if ($params) {
-                if (!$params['entry_user_id']) {
-                    $this->error(__('提出人必选'));
-                } else {
-                    $params['entry_user_id'] = implode(",", $params['entry_user_id']);
+                if ($params['copy_to_user_id']) {
+                    $params['copy_to_user_id'] = implode(",", $params['copy_to_user_id']);
                 }
+                $params['entry_user_id'] = $this->auth->id;
 
                 $params = $this->preExcludeFields($params);
 
@@ -139,7 +144,157 @@ class ItWebDemand extends Backend
             }
             $this->error(__('Parameter %s can not be empty', ''));
         }
+
+        /*$user_id = $this->auth->id;
+        $user_name = $this->auth->username;
+        $this->view->assign('user_id',$this->auth->id);
+        $this->view->assign('user_name', $this->auth->username);*/
         return $this->view->fetch();
     }
+
+    /**
+     * 通过需求
+     * */
+    public function through_demand($ids = null)
+    {
+        $row = $this->model->get($ids);
+        if (!$row) {
+            $this->error(__('No Results were found'));
+        }
+        $adminIds = $this->getDataLimitAdminIds();
+        if (is_array($adminIds)) {
+            if (!in_array($row[$this->dataLimitField], $adminIds)) {
+                $this->error(__('You have no permission'));
+            }
+        }
+        if ($this->request->isAjax()) {
+            //$this->success('成功','',$a);
+
+            $data['status'] =  2;
+            $res = $this->model->allowField(true)->save($data,['id'=> input('ids')]);
+            if ($res) {
+                $this->success('成功','',$ids);
+            } else {
+                $this->error('失败');
+            }
+        }
+    }
+
+
+    /**
+     * 分配
+     */
+    public function distribution($ids = null)
+    {
+        if($this->request->isPost()) {
+            $params = $this->request->post("row/a");
+            if ($params) {
+                $update_date = array();
+                if($params['status'] == 1){
+                    if($params['test_group'] == 1){
+                        if(!$params['test_user_id']){
+                            $this->error('未分配测试责任人');
+                        }
+                        $update_date['test_group'] = $params['test_group'];
+                        $update_date['test_complexity'] = $params['test_complexity'];
+                        $update_date['test_user_id'] = implode(',',$params['test_user_id']);
+                    }else{
+                        $update_date['test_group'] = $params['test_group'];
+                        $update_date['test_complexity'] = '';
+                        $update_date['test_user_id'] = '';
+                    }
+                    $update_date['status'] = 2;
+                }
+                if($params['status'] == 2){
+                    if($params['web_designer_group'] == 1){
+                        if(!$params['web_designer_user_id']){
+                            $this->error('未分配前端责任人');
+                        }
+                        $update_date['web_designer_group'] = $params['web_designer_group'];
+                        $update_date['web_designer_complexity'] = $params['web_designer_complexity'];
+                        $update_date['web_designer_expect_time'] = $params['web_designer_expect_time'];
+                        $update_date['web_designer_user_id'] = implode(',',$params['web_designer_user_id']);
+                    }
+                    if($params['phper_group'] == 1){
+                        if(!$params['phper_user_id']){
+                            $this->error('未分配后端责任人');
+                        }
+                        $update_date['phper_group'] = $params['phper_group'];
+                        $update_date['phper_complexity'] = $params['phper_complexity'];
+                        $update_date['phper_expect_time'] = $params['phper_expect_time'];
+                        $update_date['phper_user_id'] = implode(',',$params['phper_user_id']);
+                    }
+                    if($params['app_group'] == 1){
+                        if(!$params['app_user_id']){
+                            $this->error('未分配app责任人');
+                        }
+                        $update_date['app_group'] = $params['app_group'];
+                        $update_date['app_complexity'] = $params['app_complexity'];
+                        $update_date['app_expect_time'] = $params['app_expect_time'];
+                        $update_date['app_user_id'] = implode(',',$params['app_user_id']);
+                    }
+
+                }
+
+                $res = $this->model->allowField(true)->save($update_date,['id'=> $params['id']]);
+                if ($res) {
+                    $this->success('成功','',$ids);
+                } else {
+                    $this->error('失败');
+                }
+            }
+            $this->error(__('Parameter %s can not be empty', ''));
+        }
+        $row = $this->model->get(['id' => $ids]);
+        $row_arr = $row->toArray();
+
+        //如果已分配前端人员
+        if($row_arr['web_designer_user_id']){
+            $web_userids = explode(',',$row_arr['web_designer_user_id']);
+            foreach ($web_userids as $k1 => $v1){
+                $web_userid_arr[$k1]['user_id'] = $v1;
+                $web_userid_arr[$k1]['user_name'] = config('demand.web_designer_user')[$v1];
+            }
+        }
+
+        //如果已分配后端人员
+        if($row_arr['phper_user_id']){
+            $phper_userids = explode(',',$row_arr['phper_user_id']);
+            foreach ($phper_userids as $k2 => $v2){
+                $phper_userid_arr[$k2]['user_id'] = $v2;
+                $phper_userid_arr[$k2]['user_name'] = config('demand.phper_user')[$v2];
+            }
+        }
+
+        //如果已分配app人员
+        if($row_arr['app_user_id']){
+            $app_userids = explode(',',$row_arr['app_user_id']);
+            foreach ($app_userids as $k3 => $v3){
+                $app_userid_arr[$k3]['user_id'] = $v3;
+                $app_userid_arr[$k3]['user_name'] = config('demand.app_user')[$v3];
+            }
+        }
+
+
+        //如果已分配app人员
+        if($row_arr['test_group'] == 1){
+            if($row_arr['test_user_id']){
+                $test_userids = explode(',',$row_arr['test_user_id']);
+                foreach ($test_userids as $k4 => $v4){
+                    $test_userid_arr[$k4]['user_id'] = $v4;
+                    $test_userid_arr[$k4]['user_name'] = config('demand.test_user')[$v4];
+                }
+            }
+        }
+
+        $this->view->assign("web_userid_arr", $web_userid_arr);
+        $this->view->assign("phper_userid_arr", $phper_userid_arr);
+        $this->view->assign("app_userid_arr", $app_userid_arr);
+        $this->view->assign("test_userid_arr", $test_userid_arr);
+
+        $this->view->assign("row", $row_arr);
+        return $this->view->fetch();
+    }
+
 
 }

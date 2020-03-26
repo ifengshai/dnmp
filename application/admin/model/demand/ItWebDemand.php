@@ -25,8 +25,18 @@ class ItWebDemand extends Model
 
     // 追加属性
     protected $append = [
-
+        'hope_time_format'
     ];
 
+    /**
+     * hopetime格式化
+     * @param $value
+     * @param $data
+     * @return false|string
+     */
+    public function getHopeTimeFormatAttr($value, $data)
+    {
+        return date('Y-m-d H:i',strtotime($data['hope_time']));
+    }
 
 }
