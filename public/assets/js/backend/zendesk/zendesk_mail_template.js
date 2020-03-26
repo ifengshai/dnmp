@@ -8,7 +8,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     index_url: 'zendesk/zendesk_mail_template/index' + location.search,
                     add_url: 'zendesk/zendesk_mail_template/add',
                     edit_url: 'zendesk/zendesk_mail_template/edit',
-                    del_url: 'zendesk/zendesk_mail_template/del',
+                    //del_url: 'zendesk/zendesk_mail_template/del',
                     multi_url: 'zendesk/zendesk_mail_template/multi',
                     table: 'zendesk_mail_template',
                 }
@@ -55,19 +55,146 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {field: 'create_person', title: __('Create_person')},
                         {field: 'update_time', title: __('Update_time'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime},
                         {field: 'create_time', title: __('Create_time'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime},
-                        {field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate}
+                        {field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate,
+                        buttons: [
+                            {
+                                name: 'detail',
+                                text: '详情',
+                                title: __('查看详情'),
+                                extend: 'data-area = \'["100%","100%"]\'',
+                                classname: 'btn btn-xs btn-primary btn-dialog',
+                                icon: 'fa fa-list',
+                                url: 'zendesk/zendesk_mail_template/detail',
+                                callback: function (data) {
+                                    Layer.alert("接收到回传数据：" + JSON.stringify(data), {title: "回传数据"});
+                                },
+                                visible: function (row) {
+                                    //返回true时按钮显示,返回false隐藏
+                                    return true;
+                                }
+                            },
+                            {
+                                name: 'edit',
+                                text: '编辑',
+                                title: __('编辑'),
+                                classname: 'btn btn-xs btn-success btn-dialog',
+                                icon: 'fa fa-pencil',
+                                url:  'zendesk/zendesk_mail_template/edit',
+                                extend: 'data-area = \'["100%","100%"]\'',
+                                callback: function (data) {
+                                    Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                },
+                                visible: function (row) {
+                                        return true;
+                                }
+                            },
+                            {
+                                name: 'start',
+                                text: '启用',
+                                title: __('start'),
+                                classname: 'btn btn-xs btn-danger btn-ajax',
+                                icon: 'fa fa-remove',
+                                confirm: '确定要启用吗',
+                                url: 'zendesk/zendesk_mail_template/start',
+                                success: function (data, ret) {
+                                    Layer.alert(ret.msg);
+                                    $(".btn-refresh").trigger("click");
+                                    //如果需要阻止成功提示，则必须使用return false;
+                                    //return false;
+                                },
+                                error: function (data, ret) {
+                                    Layer.alert(ret.msg);
+                                    return false;
+                                },
+                                visible: function (row) {
+                                    //返回true时按钮显示,返回false隐藏
+                                    if(row.is_active == 2){
+                                        return true;
+                                    }
+                                        return false;
+                                        
+                                }
+
+                            },
+                            {
+                                name: 'forbidden',
+                                text: '禁用',
+                                title: __('forbidden'),
+                                classname: 'btn btn-xs btn-danger btn-ajax',
+                                icon: 'fa fa-remove',
+                                confirm: '确定要禁用吗',
+                                url: 'zendesk/zendesk_mail_template/forbidden',
+                                success: function (data, ret) {
+                                    Layer.alert(ret.msg);
+                                    $(".btn-refresh").trigger("click");
+                                    //如果需要阻止成功提示，则必须使用return false;
+                                    //return false;
+                                },
+                                error: function (data, ret) {
+                                    Layer.alert(ret.msg);
+                                    return false;
+                                },
+                                visible: function (row) {
+                                    //返回true时按钮显示,返回false隐藏
+                                    if(row.is_active == 1){
+                                        return true;
+                                    }
+                                        return false;
+                                        
+                                }
+
+                            }                            
+                        ]
+                        }
                     ]
                 ]
             });
 
             // 为表格绑定事件
             Table.api.bindevent(table);
+            //商品启用
+            $(document).on('click', '.btn-start', function () {
+                var ids = Table.api.selectedids(table);
+                Layer.confirm(
+                    __('确定要启用模板吗'),
+                    function (index) {
+                        Backend.api.ajax({
+                            url: "zendesk/zendesk_mail_template/start",
+                            data: { ids: ids }
+                        }, function (data, ret) {
+                            table.bootstrapTable('refresh');
+                            Layer.close(index);
+                        });
+                    }
+                );
+            });
+            //商品禁用
+            $(document).on('click', '.btn-forbidden', function () {
+                var ids = Table.api.selectedids(table);
+                Layer.confirm(
+                    __('确定要禁用模板吗'),
+                    function (index) {
+                        Backend.api.ajax(
+                            +++++++.-........................{
+                            url: "zendesk/zendesk_mail_template/forbidden",
+                            data: { ids: ids }
+                        }, function (data, ret) {
+                            table.bootstrapTable('refresh');
+                            Layer.close(index);
+                        });
+                    }
+                );
+            });            
         },
         add: function () {
             Controller.api.bindevent();
         },
         edit: function () {
             Controller.api.bindevent();
+        },
+        detail:function(){
+            Controller.api.bindevent();
+            Form.api.bindevent($("form[role=form]"));
         },
         api: {
             bindevent: function () {
