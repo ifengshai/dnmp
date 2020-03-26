@@ -231,6 +231,87 @@ class ZendeskMailTemplate extends Backend
         }
         $this->view->assign("row", $row);
         return $this->view->fetch();
+    }
+    /**
+     * 自定义模板回复详情
+     *
+     * @Description
+     * @author lsw
+     * @since 2020/03/26 15:38:14 
+     * @return void
+     */
+    public function detail($ids = null)
+    {
+        $row = $this->model->get($ids);
+        if (!$row) {
+            $this->error(__('No Results were found'));
+        }
+        $adminIds = $this->getDataLimitAdminIds();
+        if (is_array($adminIds)) {
+            if (!in_array($row[$this->dataLimitField], $adminIds)) {
+                $this->error(__('You have no permission'));
+            }
+        }
+        $this->view->assign("row", $row);
+        return $this->view->fetch();
+    }
+    /**
+     * 启用自定义模板
+     *
+     * @Description
+     * @author lsw
+     * @since 2020/03/26 16:00:51 
+     * @return void
+     */
+    public function start($ids=null)
+    {
+        if ($this->request->isAjax()) {
+            $map['id'] = ['in', $ids];
+            $row = $this->model->where($map)->field('id,is_active')->select();
+            foreach ($row as $v) {
+                if ($v['is_active'] != 2) {
+                    $this->error('只有禁用状态才能操作！！');
+                }
+            }
+            $data['is_active'] = 1;
+            $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
+            if ($res !== false) {
+                $this->success('启动成功');
+            } else {
+                $this->error('启动失败');
+            }
+        } else {
+            $this->error('404 Not found');
+        }       
+    }
+    /**
+     * 禁用自定义模板
+     *
+     * @Description
+     * @author lsw
+     * @since 2020/03/26 16:09:39 
+     * @return void
+     */
+    public function forbidden($ids=null)
+    {
+        if ($this->request->isAjax()) {
+            $map['id'] = ['in', $ids];
+            $row = $this->model->where($map)->field('id,is_active')->select();
+            foreach ($row as $v) {
+                if ($v['is_active'] != 1) {
+                    $this->error('只有启用状态才能操作！！');
+                }
+            }
+            $data['is_active'] = 2;
+            $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
+            if ($res !== false) {
+                $this->success('禁用成功');
+            } else {
+                $this->error('禁用失败');
+            }
+        } else {
+            $this->error('404 Not found');
+        }          
     }    
 
 }
