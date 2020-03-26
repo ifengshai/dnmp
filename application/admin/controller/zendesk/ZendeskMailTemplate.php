@@ -65,6 +65,7 @@ class ZendeskMailTemplate extends Backend
         $this->model = new \app\admin\model\zendesk\ZendeskMailTemplate;
         $this->view->assign(
             [
+                "orderPlatformList"     => (new MagentoPlatform())->getOrderPlatformList(),
                 "templatePermission"    => $this->template_permission(),
                 "templateCategory"      => $this->template_category()
             ]);
@@ -90,14 +91,26 @@ class ZendeskMailTemplate extends Backend
                 return $this->selectpage();
             }
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+
+            $whereAnd = [
+                'template_permission'=> 1
+            ];
+            $whereOr = [
+                'template_permission' => 2,
+                'create_person' => session('admin.nickname'),
+            ];
             $total = $this->model
-                ->where($where)
-                ->order($sort, $order)
+                ->where($where)->where($whereAnd)
+                ->whereOr(function($query) use ($whereOr){
+                    $query->where($whereOr);
+                })->order($sort, $order)
                 ->count();
 
             $list = $this->model
-                ->where($where)
-                ->order($sort, $order)
+                ->where($where)->where($whereAnd)
+                ->whereOr(function($query) use ($whereOr){
+                    $query->where($whereOr);
+                })->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
 
@@ -116,14 +129,7 @@ class ZendeskMailTemplate extends Backend
 
             return json($result);
         }
-        $this->view->assign(
-            [
-                'orderPlatformList' => $platform
-            ]
-        );
-        return $this->view->fetch(
-
-        );
+        return $this->view->fetch();
     }    
         /**
      * 添加
@@ -148,6 +154,8 @@ class ZendeskMailTemplate extends Backend
                         $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.add' : $name) : $this->modelValidate;
                         $this->model->validateFailException(true)->validate($validate);
                     }
+                    $params['create_time']   = date("Y-m-d H:i:s",time());
+                    $params['update_time']   = date("Y-m-d H:i:s",time());
                     $params['create_person'] = session('admin.nickname');
                     $result = $this->model->allowField(true)->save($params);
                     Db::commit();
@@ -169,12 +177,60 @@ class ZendeskMailTemplate extends Backend
             }
             $this->error(__('Parameter %s can not be empty', ''));
         }
-        $this->view->assign(
-            [
-                'orderPlatformList' => $platform
-            ]
-        );
         return $this->view->fetch();
     }
+
+    /**
+     * 编辑
+     */
+    public function edit($ids = null)
+    {
+        $row = $this->model->get($ids);
+        if (!$row) {
+            $this->error(__('No Results were found'));
+        }
+        $adminIds = $this->getDataLimitAdminIds();
+        if (is_array($adminIds)) {
+            if (!in_array($row[$this->dataLimitField], $adminIds)) {
+                $this->error(__('You have no permission'));
+            }
+        }
+        if ($this->request->isPost()) {
+            $params = $this->request->post("row/a");
+            if ($params) {
+                $params = $this->preExcludeFields($params);
+                $result = false;
+                Db::startTrans();
+                try {
+                    //是否采用模型验证
+                    if ($this->modelValidate) {
+                        $name = str_replace("\\model\\", "\\validate\\", get_class($this->model));
+                        $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.edit' : $name) : $this->modelValidate;
+                        $row->validateFailException(true)->validate($validate);
+                    }
+                    $params['update_time']   = date("Y-m-d H:i:s",time());
+                    $result = $row->allowField(true)->save($params);
+                    Db::commit();
+                } catch (ValidateException $e) {
+                    Db::rollback();
+                    $this->error($e->getMessage());
+                } catch (PDOException $e) {
+                    Db::rollback();
+                    $this->error($e->getMessage());
+                } catch (Exception $e) {
+                    Db::rollback();
+                    $this->error($e->getMessage());
+                }
+                if ($result !== false) {
+                    $this->success();
+                } else {
+                    $this->error(__('No rows were updated'));
+                }
+            }
+            $this->error(__('Parameter %s can not be empty', ''));
+        }
+        $this->view->assign("row", $row);
+        return $this->view->fetch();
+    }    
 
 }
