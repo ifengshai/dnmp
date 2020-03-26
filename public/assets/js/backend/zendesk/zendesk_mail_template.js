@@ -175,7 +175,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     __('确定要禁用模板吗'),
                     function (index) {
                         Backend.api.ajax(
-                            +++++++.-........................{
+                            {
                             url: "zendesk/zendesk_mail_template/forbidden",
                             data: { ids: ids }
                         }, function (data, ret) {
