@@ -672,7 +672,7 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
             $finalResult[$key]['index_type'] = $tmp_product_options['info_buyRequest']['tmplens']['index_type'];
             //镜片类型拼接颜色字段
             if ($tmp_product_options['info_buyRequest']['tmplens']['color_name']) {
-                $finalResult[$key]['index_type'] .= '_' . $tmp_product_options['info_buyRequest']['tmplens']['color_name']; 
+                $finalResult[$key]['index_type'] .= '-' . $tmp_product_options['info_buyRequest']['tmplens']['color_name']; 
             }
 
             $tmp_prescription_params = $tmp_product_options['info_buyRequest']['tmplens']['prescription'];
@@ -1334,7 +1334,7 @@ EOF;
                 $final_print['index_type'] = $product_options['info_buyRequest']['tmplens']['index_type'];
                 //镜片类型拼接颜色字段
                 if ($product_options['info_buyRequest']['tmplens']['color_name']) {
-                    $final_print['index_type'] .= '_' . $product_options['info_buyRequest']['tmplens']['color_name']; 
+                    $final_print['index_type'] .= '-' . $product_options['info_buyRequest']['tmplens']['color_name']; 
                 }
                 $prescription_params = $product_options['info_buyRequest']['tmplens']['prescription'];
                 if ($prescription_params) {
