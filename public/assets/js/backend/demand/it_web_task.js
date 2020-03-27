@@ -47,11 +47,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             formatter: Table.api.formatter.status
                         },
                         {
-                            field: 'result', title: __('关键结果'), formatter: function (value, row) {
-                                return '<a href="demand/it_web_task/item/ids/' + row.id + '" class="btn btn-xs btn-primary btn-dialog" data-area="[&quot;80%&quot;,&quot;70%&quot;]" title="关键结果" data-table-id="table" data-field-index="13" data-row-index="0" data-button-index="0"><i class="fa fa-list"></i> 查看</a>';
+                            field: 'result', title: __('关键结果'), operate: false, formatter: function (value, row) {
+                                return '<a href="javascript:;" data-id="' + row.id + '" class="btn btn-xs btn-primary  btn-list" title="关键结果" ><i class="fa fa-list"></i> 查看</a>';
                             }
                         },
                         { field: 'create_person', title: __('Create_person'), operate: false },
+                        { field: 'nickname', title: __('负责人'), visible: false, operate: 'like' },
                         { field: 'createtime', title: __('Create_time'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime },
 
                         {
@@ -64,7 +65,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     icon: 'fa fa-magic',
                                     url: 'demand/it_web_task/set_task_complete_status',
                                     success: function (data, ret) {
-                                        table.bootstrapTable('refresh', {});
+                                        table.bootstrapTable('refresh', {});
                                         //如果需要阻止成功提示，则必须使用return false;
                                         //return false;
                                     },
@@ -73,7 +74,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                         return false;
                                     },
                                     visible: function (row) {
-                                        if (row.is_test_adopt == 1 && row.is_complete == 0) {
+                                        if (row.is_test_adopt == 1 && row.is_complete == 0 && Config.is_set_status == 1) {
                                             return true;
                                         } else {
                                             return false;
@@ -108,7 +109,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
                                     },
                                     visible: function (row) {
-                                        return true;
+                                        if (row.is_test_adopt == 0 && row.is_complete == 0 && Config.is_edit == 1) {
+                                            return true;
+                                        } else {
+                                            return false;
+                                        }
                                     }
                                 }
                             ], formatter: Table.api.formatter.operate
@@ -131,6 +136,20 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 });
                 return false;
             });
+
+            $(document).on('click', '.btn-list', function () {
+                var options = {
+                    shadeClose: false,
+                    shade: [0.3, '#393D49'],
+                    area: ['80%', '70%'], //弹出层宽高
+                    callback: function (value) {
+                    }
+                };
+                var ids = $(this).data('id');
+                Fast.api.open('demand/it_web_task/item?ids=' + ids, '关键结果', options);
+            })
+
+
         },
         add: function () {
             Controller.api.bindevent();
@@ -144,7 +163,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
         },
         item: function () {
             // 初始化表格参数配置
-            
+
             Table.api.init({
                 escape: false,
                 commonSearch: false,
@@ -205,7 +224,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     icon: 'fa fa-magic',
                                     url: 'demand/it_web_task/set_complete_status',
                                     success: function (data, ret) {
-                                        table.bootstrapTable('refresh', {});
+                                        table.bootstrapTable('refresh', {});
                                         //如果需要阻止成功提示，则必须使用return false;
                                         //return false;
                                     },
@@ -214,8 +233,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                         return false;
                                     },
                                     visible: function (row) {
-                                        return true;
-                                        if (row.user_id == row.person_in_charge && row.is_complete == 0 ) {
+                                        if (Config.user_id == row.person_in_charge && row.is_complete == 0) {
                                             return true;
                                         } else {
                                             return false;
@@ -230,7 +248,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     icon: 'fa fa-leaf',
                                     url: 'demand/it_web_task/set_test_status',
                                     success: function (data, ret) {
-                                        table.bootstrapTable('refresh', {});
+                                        table.bootstrapTable('refresh', {});
                                         //如果需要阻止成功提示，则必须使用return false;
                                         //return false;
                                     },
@@ -240,9 +258,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                         return false;
                                     },
                                     visible: function (row) {
-                                        return true;
                                         var test_person = Config.test_user;
-                                        if ($.inArray(row.user_id,test_person) && row.is_test_adopt == 0 && row.is_complete == 1 ) {
+                                        if ($.inArray(Config.user_id, test_person) !== -1 && row.is_test_adopt == 0 && row.is_complete == 1) {
                                             return true;
                                         } else {
                                             return false;
@@ -321,8 +338,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
     return Controller;
 });
 
- //td宽度以及内容超过宽度隐藏
- function formatTableUnit(value, row, index) {
+//td宽度以及内容超过宽度隐藏
+function formatTableUnit(value, row, index) {
     return {
         css: {
             "white-space": "nowrap",

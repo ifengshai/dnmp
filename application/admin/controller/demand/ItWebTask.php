@@ -49,6 +49,20 @@ class ItWebTask extends Backend
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
+
+            //自定义姓名搜索
+            $filter = json_decode($this->request->get('filter'), true);
+            if ($filter['nickname']) {
+                $admin = new \app\admin\model\Admin();
+                $smap['nickname'] = ['like', '%' . $filter['nickname'] . '%'];
+                $id = $admin->where($smap)->value('id');
+                $task_ids = $this->itWebTaskItem->where('person_in_charge',$id)->column('task_id');
+                $map['id'] = ['in', $task_ids];
+                unset($filter['nickname']);
+                $this->request->get(['filter' => json_encode($filter)]);
+            }
+
+
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
                 ->where($where)
@@ -60,6 +74,7 @@ class ItWebTask extends Backend
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
+            
             foreach ($list as $k => $v) {
                 $list[$k]['sitetype'] = config('demand.siteType')[$v['site_type']]; //取站点
             }
@@ -68,6 +83,9 @@ class ItWebTask extends Backend
 
             return json($result);
         }
+        //判断是否有完成按钮权限
+        $this->assignconfig('is_set_status',$this->auth->check('demand/it_web_task/set_task_complete_status'));
+        $this->assignconfig('is_edit',$this->auth->check('demand/it_web_task/edit'));
         return $this->view->fetch();
     }
 
@@ -239,7 +257,7 @@ class ItWebTask extends Backend
 
 
     /**
-     * 编辑
+     * 详情
      */
     public function detail($ids = null)
     {
@@ -279,6 +297,7 @@ class ItWebTask extends Backend
      */
     public function item($ids = null)
     {
+        $ids = $ids ?? input('ids');
         //设置过滤方法
         $this->request->filter(['strip_tags']);
         if ($this->request->isAjax()) {
@@ -311,7 +330,6 @@ class ItWebTask extends Backend
                 } elseif ($v['group_type'] == 4) {
                     $v['person_in_charge_text'] = config('demand.test_user')[$v['person_in_charge']];
                 }
-                $v['user_id'] = session('admin.id');
             }
             unset($v);
             $list = collection($list)->toArray();
@@ -320,7 +338,8 @@ class ItWebTask extends Backend
             return json($result);
         }
         $this->assignconfig('id', $ids);
-        $this->assignconfig('test_user', config('demand.test_user'));
+        $this->assignconfig('user_id', session('admin.id'));
+        $this->assignconfig('test_user', array_keys(config('demand.test_user')));
         return $this->view->fetch();
     }
 
