@@ -26,6 +26,7 @@ class ItTestOptimize extends Backend
     {
         parent::_initialize();
         $this->model = new \app\admin\model\demand\testManage\ItTestOptimize;
+        $this->view->assign('orderPlatformList',config('demand.siteType'));
 
     }
     
@@ -59,6 +60,13 @@ class ItTestOptimize extends Backend
                 ->select();
 
             $list = collection($list)->toArray();
+            if(!empty($list)){
+                foreach($list as $k => $v){
+                    if(!empty($v['optimize_site_type'])){
+                        $list[$k]['optimize_site_type'] = config('demand.siteType')[$v['optimize_site_type']];
+                    }
+                }
+            }
             $result = array("total" => $total, "rows" => $list);
 
             return json($result);
@@ -87,6 +95,9 @@ class ItTestOptimize extends Backend
                         $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.add' : $name) : $this->modelValidate;
                         $this->model->validateFailException(true)->validate($validate);
                     }
+                    $params['create_person'] = session('admin.nickname');
+                    $params['create_time']   = date("Y-m-d H:i:s",time());
+                    $params['update_time']   = date("Y-m-d H:i:s",time());
                     $result = $this->model->allowField(true)->save($params);
                     Db::commit();
                 } catch (ValidateException $e) {
@@ -138,6 +149,7 @@ class ItTestOptimize extends Backend
                         $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.edit' : $name) : $this->modelValidate;
                         $row->validateFailException(true)->validate($validate);
                     }
+                    $params['update_time']   = date("Y-m-d H:i:s",time());
                     $result = $row->allowField(true)->save($params);
                     Db::commit();
                 } catch (ValidateException $e) {

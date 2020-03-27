@@ -7,8 +7,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 extend: {
                     index_url: 'demand/testmanage/it_test_optimize/index' + location.search,
                     add_url: 'demand/testmanage/it_test_optimize/add',
-                    edit_url: 'demand/testmanage/it_test_optimize/edit',
-                    del_url: 'demand/testmanage/it_test_optimize/del',
+                    //edit_url: 'demand/testmanage/it_test_optimize/edit',
+                    //del_url: 'demand/testmanage/it_test_optimize/del',
                     multi_url: 'demand/testmanage/it_test_optimize/multi',
                     table: 'it_test_optimize',
                 }
@@ -27,12 +27,76 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {field: 'id', title: __('Id')},
                         {field: 'optimize_site_type', title: __('Optimize_site_type')},
                         {field: 'optimize_title', title: __('Optimize_title')},
-                        {field: 'optimize_status', title: __('Optimize_status')},
-                        {field: 'operate_status', title: __('Operate_status')},
+                        {field: 'optimize_description', title: __('描述'),
+                        events: Controller.api.events.getcontent,
+                        formatter: Controller.api.formatter.getcontent,     
+                        },
+                        {field: 'optimize_status', title: __('Optimize_status'),
+                        searchList: { 1 :'待处理', 2 :'已审核', 3 :'已处理', 4 :'已完成', 5 :'取消' },
+                        custom: { 1: 'yellow', 2: 'blue', 3: 'success', 4: 'red', 5: 'danger' },
+                        formatter: Table.api.formatter.status
+                        },
+                        // {field: 'operate_status', title: __('Operate_status')},
                         {field: 'create_person', title: __('Create_person')},
                         {field: 'update_time', title: __('Update_time'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime},
                         {field: 'create_time', title: __('Create_time'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime},
-                        {field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate}
+                        {field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate,
+                         buttons:[
+                            // {
+                            //     name: 'detail',
+                            //     text: '详情',
+                            //     title: __('查看详情'),
+                            //     extend: 'data-area = \'["100%","100%"]\'',
+                            //     classname: 'btn btn-xs btn-primary btn-dialog',
+                            //     icon: 'fa fa-list',
+                            //     url: Config.moduleurl + '/itemmanage/item/detail',
+                            //     callback: function (data) {
+                            //         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                            //     },
+                            //     visible: function (row) {
+                            //         //返回true时按钮显示,返回false隐藏
+                            //         return true;
+                            //     }
+                            // },
+                            {
+                                name: 'plan',
+                                text: '安排',
+                                title: __('安排'),
+                                classname: 'btn btn-xs btn-success btn-dialog',
+                                icon: 'fa fa-pencil',
+                                url: Config.moduleurl + '/itemmanage/item/edit',
+                                extend: 'data-area = \'["100%","100%"]\'',
+                                callback: function (data) {
+                                    Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                },
+                                visible: function (row) {
+                                        return true;
+                                }
+                            },
+                            {
+                                name: 'no_processing',
+                                text: '暂不处理',
+                                title: __('暂不处理'),
+                                classname: 'btn btn-xs btn-success btn-ajax',
+                                icon: 'fa fa-pencil',
+                                url: Config.moduleurl + '/itemmanage/item/audit',
+                                confirm: '确认提交审核吗',
+                                success: function (data, ret) {
+                                    Layer.alert(ret.msg);
+                                    $(".btn-refresh").trigger("click");
+                                    //如果需要阻止成功提示，则必须使用return false;
+                                    //return false;
+                                },
+                                error: function (data, ret) {
+                                    Layer.alert(ret.msg);
+                                    return false;
+                                },
+                                visible: function (row) {
+                                    return true;
+                                },
+                            },
+                         ]   
+                        }
                     ]
                 ]
             });
@@ -47,6 +111,44 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             Controller.api.bindevent();
         },
         api: {
+            formatter: {
+                getcontent: function (value) {
+                    if (value == null || value == undefined) {
+                        value = '';
+                    }
+                    return '<span class="btn-getcontent check_demand_content" data = "' + value + '" style="">查 看</span>';
+                },
+
+                getClear: function (value) {
+
+                    if (value == null || value == undefined) {
+                        return '';
+                    } else {
+                        var tem = value;
+
+                        if (tem.length <= 20) {
+                            return tem;
+                        } else {
+                            return '<span class="problem_desc_info" name = "' + tem + '" style="">' + tem.substr(0, 20) + '...</span>';
+
+                        }
+                    }
+                }
+
+            },
+            events: {//绑定事件的方法
+                getcontent: {
+                    //格式为：方法名+空格+DOM元素
+                    'click .btn-getcontent': function (e, value, row, index) {
+                        var str = '标题：'+row.optimize_title+'<br><hr>内容：'+value;
+                        Layer.open({
+                            closeBtn: 1,
+                            title: "详情",
+                            content: str
+                        });
+                    }
+                }
+            },            
             bindevent: function () {
                 Form.api.bindevent($("form[role=form]"));
             }
