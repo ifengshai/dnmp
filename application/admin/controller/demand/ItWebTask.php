@@ -60,8 +60,8 @@ class ItWebTask extends Backend
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
-
-            foreach ($list as $row) {
+            foreach ($list as $k => $v) {
+                $list[$k]['sitetype'] = config('demand.siteType')[$v['site_type']]; //取站点
             }
             $list = collection($list)->toArray();
             $result = array("total" => $total, "rows" => $list);
@@ -144,6 +144,7 @@ class ItWebTask extends Backend
         $this->assignconfig('phper_user', config('demand.phper_user'));
         $this->assignconfig('app_user', config('demand.app_user'));
         $this->assignconfig('test_user', config('demand.test_user'));
+        $this->assign('siteType', config('demand.siteType'));
         return $this->view->fetch();
     }
 
@@ -232,6 +233,7 @@ class ItWebTask extends Backend
         $this->assignconfig('phper_user', config('demand.phper_user'));
         $this->assignconfig('app_user', config('demand.app_user'));
         $this->assignconfig('test_user', config('demand.test_user'));
+        $this->assign('siteType', config('demand.siteType'));
         return $this->view->fetch();
     }
 
@@ -262,6 +264,7 @@ class ItWebTask extends Backend
         $this->assignconfig('phper_user', config('demand.phper_user'));
         $this->assignconfig('app_user', config('demand.app_user'));
         $this->assignconfig('test_user', config('demand.test_user'));
+        $this->assign('siteType', config('demand.siteType'));
         return $this->view->fetch();
     }
 
@@ -330,6 +333,28 @@ class ItWebTask extends Backend
      * @param [type] $ids
      * @return void
      */
+    public function set_task_complete_status($ids = null)
+    {
+        $data['is_complete'] = 1;
+        $data['complete_date'] = date('Y-m-d H:i:s', time());
+        $res = $this->model->save($data, ['id' => $ids]);
+        if ($res !== false) {
+            $this->success('操作成功！！');
+        } else {
+            $this->error('操作失败！！');
+        }
+    }
+
+
+    /**
+     * 更改完成状态
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/03/26 18:24:19 
+     * @param [type] $ids
+     * @return void
+     */
     public function set_complete_status($ids = null)
     {
         $data['is_complete'] = 1;
@@ -359,10 +384,20 @@ class ItWebTask extends Backend
             $data['test_adopt_time'] = date('Y-m-d H:i:s', time());
             $data['test_person'] = session('admin.nickname');
             $res = $this->itWebTaskItem->save($data, ['id' => $ids]);
-            dump($res);die;
             //有错误 则回滚数据
             if (!$res) {
-                throw new Exception("添加失败！！请重新添加");
+                throw new Exception("修改失败");
+            }
+            //查询同记录下是否还存在未测试通过的数据
+            $itWebTaskInfo = $this->itWebTaskItem->get($ids);
+            $map['task_id'] = $itWebTaskInfo['task_id'];
+            $map['is_test_adopt'] = 0;
+            $num = $this->itWebTaskItem->where($map)->count();
+            //如果不存在则修改主记录测试完成 并更新时间
+            if ($num == 0) {
+                $list['is_test_adopt'] = 1;
+                $list['test_adopt_time'] = date('Y-m-d H:i:s', time());
+                $this->model->save($list, ['id' => $itWebTaskInfo['task_id']]);
             }
             Db::commit();
         } catch (ValidateException $e) {

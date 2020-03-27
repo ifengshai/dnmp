@@ -13,7 +13,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     index_url: 'demand/it_web_task/index' + location.search,
                     add_url: 'demand/it_web_task/add',
                     edit_url: 'demand/it_web_task/edit',
-
                     multi_url: 'demand/it_web_task/multi',
                     table: 'it_web_task',
                 }
@@ -30,6 +29,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     [
                         { checkbox: true },
                         { field: 'id', title: __('Id') },
+                        { field: 'sitetype', title: __('站点') },
                         { field: 'type', title: __('Type'), custom: { 1: 'success', 2: 'success', 3: 'success' }, searchList: { 1: '短期任务', 2: '中期任务', 3: '长期任务' }, formatter: Table.api.formatter.status },
                         { field: 'title', title: __('Title') },
                         { field: 'desc', title: __('Desc'), cellStyle: formatTableUnit, formatter: Controller.api.formatter.getClear, operate: false },
@@ -48,8 +48,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         },
                         {
                             field: 'result', title: __('关键结果'), formatter: function (value, row) {
-                                console.log(row);
-                                return '<a class="btn btn-xs btn-primary btn-dialog" data-area="[&quot;80%&quot;,&quot;70%&quot;]" title="关键结果" data-table-id="table" data-field-index="12" data-row-index="0" data-button-index="0" href="demand/it_web_task/item/ids/' + row.id + '"><i class="fa fa-list"></i> 查看</a>';
+                                return '<a href="demand/it_web_task/item/ids/' + row.id + '" class="btn btn-xs btn-primary btn-dialog" data-area="[&quot;80%&quot;,&quot;70%&quot;]" title="关键结果" data-table-id="table" data-field-index="13" data-row-index="0" data-button-index="0"><i class="fa fa-list"></i> 查看</a>';
                             }
                         },
                         { field: 'create_person', title: __('Create_person'), operate: false },
@@ -57,7 +56,30 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
 
                         {
                             field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [
-
+                                {
+                                    name: 'ajax',
+                                    text: '完成',
+                                    title: __('完成'),
+                                    classname: 'btn btn-xs btn-success btn-magic btn-ajax',
+                                    icon: 'fa fa-magic',
+                                    url: 'demand/it_web_task/set_task_complete_status',
+                                    success: function (data, ret) {
+                                        table.bootstrapTable('refresh', {});
+                                        //如果需要阻止成功提示，则必须使用return false;
+                                        //return false;
+                                    },
+                                    error: function (data, ret) {
+                                        Layer.alert(ret.msg);
+                                        return false;
+                                    },
+                                    visible: function (row) {
+                                        if (row.is_test_adopt == 1 && row.is_complete == 0) {
+                                            return true;
+                                        } else {
+                                            return false;
+                                        }
+                                    }
+                                },
                                 {
                                     name: 'detail',
                                     text: '详情',
@@ -193,7 +215,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     },
                                     visible: function (row) {
                                         return true;
-                                        if (row.user_id == row.person_in_charge && row.is_complete == 0) {
+                                        if (row.user_id == row.person_in_charge && row.is_complete == 0 ) {
                                             return true;
                                         } else {
                                             return false;
@@ -220,7 +242,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     visible: function (row) {
                                         return true;
                                         var test_person = Config.test_user;
-                                        if (test_person.includes(row.user_id) && row.is_test_adopt == 0) {
+                                        if ($.inArray(row.user_id,test_person) && row.is_test_adopt == 0 && row.is_complete == 1 ) {
                                             return true;
                                         } else {
                                             return false;
