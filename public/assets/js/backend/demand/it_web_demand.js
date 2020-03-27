@@ -551,3 +551,9 @@ function update_responsibility_detail(val,classstr){
         $('.'+classstr).hide();
     }
 }
+
+function update_responsibility_user(val){
+    var is_val = $(val).val();
+    $('.responsibility_user_id').attr('name','');
+    $('#responsibility_user_id_'+is_val).attr('name','row[responsibility_user_id]');
+}

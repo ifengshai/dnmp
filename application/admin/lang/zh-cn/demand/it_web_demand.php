@@ -57,8 +57,11 @@ return [
 
 
     //测试记录使用
-    'test_record'                   => '测试记录',
     'bug_type'                   => '严重类型',
+    'describe'                   => '简单描述',
+    'test_environment'           => '测试环境',
+    'formal_environment'           => '正式环境',
+    'test_add_time'           => '添加时间',
 
 
 ];
