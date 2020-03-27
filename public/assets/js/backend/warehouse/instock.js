@@ -169,6 +169,21 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','bootstrap-tab
                 });
             })
 
+            //批量导出xls 
+            $('.btn-batch-export-xls').click(function () {
+                var ids = Table.api.selectedids(table);
+                if (ids.length > 0) {
+                    window.open(Config.moduleurl + '/warehouse/instock/batch_export_xls?ids=' + ids, '_blank');
+                } else {
+                    var options = table.bootstrapTable('getOptions');
+                    var search = options.queryParams({});
+                    var filter = search.filter;
+                    var op = search.op;
+                    window.open(Config.moduleurl + '/warehouse/instock/batch_export_xls?filter=' + filter + '&op=' + op, '_blank');
+                }
+                
+            });
+
         },
         add: function () {
             Controller.api.bindevent();
@@ -182,28 +197,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','bootstrap-tab
                 $('.check_id').change();
             }
 
-            //移除
-            $(document).on('click', '.btn-del', function () {
-                $(this).parent().parent().remove();
-            })
 
         },
         edit: function () {
             Controller.api.bindevent();
-
-            // //删除商品数据
-            // $(document).on('click', '.btn-del', function () {
-            //     $(this).parent().parent().remove();
-            //     var id = $(this).parent().parent().find('.item_id').val();
-            //     if (id) {
-            //         Backend.api.ajax({
-            //             url: Config.moduleurl + '/warehouse/instock/deleteItem',
-            //             data: { id: id }
-            //         });
-            //     }
-            // })
-
-
         },
         detail: function () {
             Controller.api.bindevent();

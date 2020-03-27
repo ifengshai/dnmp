@@ -4,20 +4,34 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echartsobj
         index: function () {            
             Controller.api.formatter.daterangepicker($("form[role=form1]"));
             Form.api.bindevent($("form[role=form]"));
-                //购物车图表
+            //眼镜销售副数和动销数柱状和折线混合图
                 var chartOptions = {
                     targetId: 'echart',
                     downLoadTitle: '图表',
-                    type: 'line',
-                    line: {
+                    type: 'bar',
+                    bar:{
+                        legend: { //图例配置
+                            padding: 5,
+                            top: '2%',
+                            data: ['配饰销售副数', '配饰动销数']
+                        },                        
+                        tooltip: { //提示框组件。
+                            trigger: 'axis', // 触发类型。可选项item:数据项图形触发，主要在散点图，饼图等无类目轴的图表中使用。axis:坐标轴触发，主要在柱状图，折线图等会使用类目轴的图表中使用。
+                            axisPointer: { //坐标轴指示器配置项。
+                                type: 'shadow' //指示器类型。可选项'line' 直线指示器。'shadow' 阴影指示器。'cross' 十字准星指示器。其实是种简写，表示启用两个正交的轴的 axisPointer。
+                            },
+                            formatter: function (param) { //格式化提示信息
+                                console.log(param);
+                                return param[0].name + '<br/>' + param[0].seriesName + '：' + param[0].value + '<br/>' + param[1].seriesName + '：' + param[1].value;
+                            }
+                        },                        
                         xAxis: {
                             type: 'category',
-                            boundaryGap: [0, 0.01]
                         },
                         yAxis: [
                             {
                                 type: 'value',
-                                name: '购物车数量',
+                                name: '配饰销售副数',
 								position: 'left',
                                 axisLabel: {
                                     formatter: '{value}'
@@ -25,10 +39,42 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echartsobj
                             },
                             {
                                 type: 'value',
-                                name: '购物车转化率',
+                                name: '配饰动销数',
 								position: 'right',
                                 axisLabel: {
-                                    formatter: '{value} %'
+                                    formatter: '{value}'
+                                }
+                            }
+                        ],                        
+                    }
+                };            
+                //饰品销售件数和动销数柱状和折线混合图
+                var chartOptions2 = {
+                    targetId: 'echart2',
+                    downLoadTitle: '图表',
+                    type: 'bar',
+                    bar: {
+                        xAxis: {
+                            type: 'category',
+                            axisPointer: {
+                                type: 'shadow'
+                            }
+                        },
+                        yAxis: [
+                            {
+                                type: 'value',
+                                name: '配饰销售副数',
+								position: 'left',
+                                axisLabel: {
+                                    formatter: '{value}'
+                                }
+                            },
+                            {
+                                type: 'value',
+                                name: '配饰动销数',
+								position: 'right',
+                                axisLabel: {
+                                    formatter: '{value}'
                                 }
                             }
                         ],
@@ -36,15 +82,24 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echartsobj
                 };
                 var time = $('#create_time').val();
                 var platform = $('#c-order_platform').val();
-                // var options = {
-                //     type: 'post',
-                //     url: 'datacenter/operationanalysis/operationkanban/operationalreport/index',
-                //     data: {
-                //         'time': time,
-                //         'platform': platform
-                //     }
-                // }
-                // EchartObj.api.ajax(options, chartOptions)
+                var options = {
+                    type: 'post',
+                    url: 'datacenter/operationanalysis/operationkanban/operationalreport/index',
+                    data: {
+                        'key':'frame_sales_num',
+                        'platform': platform
+                    }
+                }
+                var options2 = {
+                    type: 'post',
+                    url: 'datacenter/operationanalysis/operationkanban/operationalreport/index',
+                    data: {
+                        'key':'decoration_sales_num',
+                        'platform': platform
+                    }
+                }                
+                EchartObj.api.ajax(options, chartOptions)
+                EchartObj.api.ajax(options2, chartOptions2)
                 Backend.api.ajax({
                     url: "datacenter/operationanalysis/operationkanban/operationalreport/index",
                     data: { 
@@ -102,6 +157,30 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echartsobj
                     $('#gbp_order_percent').text(ret.rows.gbp_order_percent);
                     $('#gbp_order_money').text(ret.rows.gbp_order_money);
                     $('#gbp_order_average_amount').text(ret.rows.gbp_order_average_amount);
+                    $('#frame_money').text(ret.rows.frame_money);
+                    $('#frame_sales_num').text(ret.rows.frame_sales_num);
+                    $('#frame_avg_money').text(ret.rows.frame_avg_money);
+                    $('#frame_onsales_num').text(ret.rows.frame_onsales_num);
+                    $('#decoration_money').text(ret.rows.decoration_money);
+                    $('#decoration_sales_num').text(ret.rows.decoration_sales_num);
+                    $('#decoration_avg_money').text(ret.rows.decoration_avg_money);
+                    $('#decoration_onsales_num').text(ret.rows.decoration_onsales_num);
+                    $('#frame_in_print_num').text(ret.rows.frame_in_print_num);
+                    $('#frame_in_print_rate').text(ret.rows.frame_in_print_rate);
+                    $('#decoration_in_print_num').text(ret.rows.decoration_in_print_num);
+                    $('#decoration_in_print_rate').text(ret.rows.decoration_in_print_rate);
+                    $('#frame_new_money').text(ret.rows.frame_new_money);
+                    $('#decoration_new_money').text(ret.rows.decoration_new_money);
+                    $('#frame_order_customer').text(ret.rows.frame_order_customer);
+                    $('#frame_avg_customer').text(ret.rows.frame_avg_customer);
+                    $('#decoration_order_customer').text(ret.rows.decoration_order_customer);
+                    $('#decoration_avg_customer').text(ret.rows.decoration_avg_customer);
+                    $('#frame_new_num').text(ret.rows.frame_new_num);
+                    $('#decoration_new_num').text(ret.rows.decoration_new_num);
+                    $('#frame_new_in_print_num').text(ret.rows.frame_new_in_print_num);
+                    $('#frame_new_in_print_rate').text(ret.rows.frame_new_in_print_rate);
+                    $('#decoration_new_in_print_num').text(ret.rows.decoration_new_in_print_num);
+                    $('#decoration_new_in_print_rate').text(ret.rows.decoration_new_in_print_rate);
 
                 },function(data,ret){
                     alert(ret.msg);

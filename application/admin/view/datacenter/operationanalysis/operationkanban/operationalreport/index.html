@@ -137,39 +137,39 @@ table.altrowstable tr:nth-child(even){
                                     </tr>
                                     <tr>
                                         <td>眼镜销售额（$）</td>
-                                        <td></td>
+                                        <td id='frame_money'></td>
                                         <td>新品眼镜销售额($)</td>
-                                        <td></td>
+                                        <td id='frame_new_money'></td>
                                     </tr>
                                     <tr>
                                         <td>销售副数</td>
-                                        <td></td>
+                                        <td id='frame_sales_num'></td>
                                         <td>下单客户数</td>
-                                        <td></td>
+                                        <td id='frame_order_customer'></td>
                                     </tr>
                                     <tr>
                                         <td>平均副数金额（$）</td>
-                                        <td></td>
+                                        <td id='frame_avg_money'></td>
                                         <td>客户平均副数</td>
-                                        <td></td>
+                                        <td id='frame_avg_customer'></td>
                                     </tr>
                                     <tr>
                                         <td>正常售卖数</td>
-                                        <td>0</td>
-                                        <td>新增眼镜数量（sku）</td>
-                                        <td>0</td>
+                                        <td id='frame_onsales_num'>0</td>
+                                        <td>新品眼镜数量（sku）</td>
+                                        <td id='frame_new_num'>0</td>
                                     </tr>
                                     <tr>
                                         <td>眼镜动销数</td>
-                                        <td></td>
-                                        <td>新增眼镜动销数</td>
-                                        <td></td>
+                                        <td id='frame_in_print_num'></td>
+                                        <td>新品眼镜动销数</td>
+                                        <td id='frame_new_in_print_num'></td>
                                     </tr>
                                     <tr>
                                         <td>眼镜动销率</td>
-                                        <td></td>
-                                        <td>新增眼镜动销率</td>
-                                        <td></td>
+                                        <td id='frame_in_print_rate'></td>
+                                        <td>新品眼镜动销率</td>
+                                        <td id='frame_new_in_print_rate'></td>
                                     </tr>
                                 </table>
                             </div>
@@ -186,39 +186,39 @@ table.altrowstable tr:nth-child(even){
                                     </tr>
                                     <tr>
                                         <td>饰品销售额（$）</td>
-                                        <td></td>
+                                        <td id='decoration_money'></td>
                                         <td>新品饰品销售额</td>
-                                        <td></td>
+                                        <td id='decoration_new_money'></td>
                                     </tr>
                                     <tr>
                                         <td>销售件数</td>
-                                        <td></td>
+                                        <td id='decoration_sales_num'></td>
                                         <td>下单客户数</td>
-                                        <td></td>
+                                        <td id='decoration_order_customer'></td>
                                     </tr>
                                     <tr>
                                         <td>平均件数金额（$）</td>
-                                        <td></td>
+                                        <td id='decoration_avg_money'></td>
                                         <td>客户平均件数</td>
-                                        <td></td>
+                                        <td id='decoration_avg_customer'></td>
                                     </tr>
                                     <tr>
                                         <td>正常售卖数</td>
-                                        <td></td>
-                                        <td>新增饰品数量（sku）</td>
-                                        <td></td>
+                                        <td id='decoration_onsales_num'></td>
+                                        <td>新品饰品数量（sku）</td>
+                                        <td id='decoration_new_num'></td>
                                     </tr>
                                     <tr>
                                         <td>饰品动销数</td>
-                                        <td></td>
+                                        <td id='decoration_in_print_num'></td>
                                         <td>新增饰品动销数</td>
-                                        <td></td>
+                                        <td id='decoration_new_in_print_num'></td>
                                     </tr>
                                     <tr>
                                         <td>饰品动销率</td>
-                                        <td></td>
+                                        <td id='decoration_in_print_rate'></td>
                                         <td>新增饰品动销率</td>
-                                        <td></td>
+                                        <td id='decoration_new_in_print_rate'></td>
                                     </tr>
                                 </table>
                             </div>
@@ -227,23 +227,19 @@ table.altrowstable tr:nth-child(even){
                     </div>
                 </div>
 			</div>    
-            <div class="row">                    
-			<form id = "form2" action="{:url('/admin/saleaftermanage/order_return/search')}" class="form-commonsearch form-horizontal" method="post">
-				<div class="col-lg-4" style="border-radius:2px;margin-bottom:10px;background:#f5f5f5;margin-left:10px;margin-right: 30px;">
+            <div class="row">
+				<div class="col-lg-5" style="border-radius:2px;margin-bottom:10px;background:#f5f5f5;margin-left:15px;margin-right: 30px;">
 						<div class="col-xs-12 col-sm-6 col-md-12">
 				<div id="echart" style="height:200px;width:100%;"></div>
 				<div class="col-lg-12" style="margin-top:20px;text-align: center; vertical-align: middle;">眼镜销售副数和动销数柱状和折线混合图</div>							
 				</div>
 			    </div>			
-            </form>
-			<form id = "form3" action="{:url('/admin/saleaftermanage/order_return/search')}" class="form-commonsearch form-horizontal" method="post">
-				<div class="col-lg-4" style="border-radius:2px;margin-bottom:10px;background:#f5f5f5;margin-left: 30px;">
+				<div class="col-lg-5" style="border-radius:2px;margin-bottom:10px;background:#f5f5f5;margin-left: 20px;">
 						<div class="col-xs-12 col-sm-6 col-md-12">
 					<div id="echart2" style="height:200px;width:100%;"></div>
 					<div class="col-lg-12" style="margin-top:20px;text-align: center; vertical-align: middle;">饰品销售件数和动销数柱状和折线混合图</div>							
 						</div>
 				</div>
-            </form>
         </div>
         <div class="row" style="margin-left:0px;margin-bottom: 10px;">
             <div style="width: 100%;float: left;">

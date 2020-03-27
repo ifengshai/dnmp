@@ -160,4 +160,5 @@ class OrderLog extends Model
         return $this->where($map)->sum('num');
     }
 
+
 }

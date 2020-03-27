@@ -7,6 +7,7 @@ use app\admin\model\warehouse\LogisticsInfo;
 use app\common\controller\Backend;
 use think\Db;
 use fast\Alibaba;
+use fast\Trackingmore;
 
 
 
@@ -39,7 +40,9 @@ class Crontab extends Backend
         'warehouse_data',
         'select_product_data',
         'get_sales_order_update',
-        'get_sales_order_update_two'
+        'get_sales_order_update_two',
+        'warehouse_data_everyday',
+        'calculate_order_item_num'
 
     ];
 
@@ -475,11 +478,11 @@ order by sfoi.item_id asc limit 1000";
             $label = [];
             foreach ($items as $k => $v) {
                 //如果镜片参数为真 或 不等于 Plastic Lenses 并且不等于 FRAME ONLY则此订单为含处方
-                if ($v['index_type'] == '' || $v['index_type'] == 'Plastic Lenses' || $v['index_type'] == 'FRAME ONLY') {
+                if ($v['index_type'] == '' || $v['index_type'] == 'Plastic Lenses' || $v['index_type'] == 'FRAME ONLY' || $v['index_type'] == 'FRAME ONLY (Plastic lenses)') {
                     $label[] = 1; //仅镜架
-                } else if (($v['index_type'] && $v['index_type'] != 'Plastic Lenses' && $v['index_type'] != 'FRAME ONLY') && $v['is_custom_lens'] == 0) {
+                } else if (($v['index_type'] && $v['index_type'] != 'Plastic Lenses' && $v['index_type'] != 'FRAME ONLY' && $v['index_type'] != 'FRAME ONLY (Plastic lenses)') && $v['is_custom_lens'] == 0) {
                     $label[] = 2; //现片含处方
-                } else if (($v['index_type'] && $v['index_type'] != 'Plastic Lenses' && $v['index_type'] != 'FRAME ONLY') && $v['is_custom_lens'] == 1) {
+                } else if (($v['index_type'] && $v['index_type'] != 'Plastic Lenses' && $v['index_type'] != 'FRAME ONLY' && $v['index_type'] != 'FRAME ONLY (Plastic lenses)') && $v['is_custom_lens'] == 1) {
                     $label[] = 3; //定制含处方
                 }
             }
@@ -1246,7 +1249,7 @@ order by sfoi.item_id asc limit 1000";
         //zeelool购物车转化率
         $zeelool_shoppingcart_conversion = @round(($zeelool_count / $zeelool_shoppingcart_total) * 100, 2);
         //zeelool购物车更新转化率
-        $zeelool_shoppingcart_update_conversion = @round(($zeelool_count/$zeelool_shoppingcart_update_total) * 100,2);
+        $zeelool_shoppingcart_update_conversion = @round(($zeelool_count / $zeelool_shoppingcart_update_total) * 100, 2);
         //zeelool注册用户数SELECT count(*) counter from customer_entity
         $zeelool_register_customer = $zeelool_model->table('customer_entity')->where($date)->count('*');
         $voogueme_count = $voogueme_model->table('sales_flat_order')->where($map)->count(1);
@@ -1260,7 +1263,7 @@ order by sfoi.item_id asc limit 1000";
         //voogueme购物车转化率
         $voogueme_shoppingcart_conversion = @round(($voogueme_count / $voogueme_shoppingcart_total) * 100, 2);
         //voogueme购物车更新转化率
-        $voogueme_shoppingcart_update_conversion = @round(($voogueme_count/$voogueme_shoppingcart_update_total) * 100,2);
+        $voogueme_shoppingcart_update_conversion = @round(($voogueme_count / $voogueme_shoppingcart_update_total) * 100, 2);
         //voogueme注册用户数
         $voogueme_register_customer = $voogueme_model->table('customer_entity')->where($date)->count('*');
         $nihao_count = $nihao_model->table('sales_flat_order')->where($map)->count(1);
@@ -1274,7 +1277,7 @@ order by sfoi.item_id asc limit 1000";
         //nihao购物车转化率
         $nihao_shoppingcart_conversion = @round(($nihao_count / $nihao_shoppingcart_total) * 100, 2);
         //nihao站购物车更新转化率
-        $nihao_shoppingcart_update_conversion = @round(($nihao_count/$nihao_shoppingcart_update_total) * 100,2);
+        $nihao_shoppingcart_update_conversion = @round(($nihao_count / $nihao_shoppingcart_update_total) * 100, 2);
         //nihao注册用户数
         $nihao_register_customer = $nihao_model->table('customer_entity')->where($date)->count('*');
         $data['zeelool_sales_num']                          = $zeelool_count;
@@ -1304,7 +1307,7 @@ order by sfoi.item_id asc limit 1000";
         $data['zeelool_shoppingcart_update_total']          = $zeelool_shoppingcart_update_total;
         $data['voogueme_shoppingcart_update_total']         = $voogueme_shoppingcart_update_total;
         $data['nihao_shoppingcart_update_total']            = $nihao_shoppingcart_update_total;
-        $data['all_shoppingcart_update_total']              = $zeelool_shoppingcart_update_total + $voogueme_shoppingcart_update_total+ $nihao_shoppingcart_update_total;
+        $data['all_shoppingcart_update_total']              = $zeelool_shoppingcart_update_total + $voogueme_shoppingcart_update_total + $nihao_shoppingcart_update_total;
         $data['zeelool_shoppingcart_update_conversion']     = $zeelool_shoppingcart_update_conversion;
         $data['voogueme_shoppingcart_update_conversion']    = $voogueme_shoppingcart_update_conversion;
         $data['nihao_shoppingcart_update_conversion']       = $nihao_shoppingcart_update_conversion;
@@ -1362,7 +1365,7 @@ order by sfoi.item_id asc limit 1000";
         echo 'ok';
     }
 
-    
+
     /**
      * 每天9点 根据销量计算产品分级
      */
@@ -1445,6 +1448,9 @@ order by sfoi.item_id asc limit 1000";
 
         //查询供货商
         $supplier = new \app\admin\model\purchase\SupplierSku;
+        $where['a.label'] = 1;
+        $where['a.status'] = 1;
+        $where['b.status'] = 1;
         $supplier_list = $supplier->alias('a')->join(['fa_supplier' => 'b'], 'a.supplier_id=b.id')->column('b.supplier_name,b.purchase_person', 'a.sku');
 
 
@@ -2336,19 +2342,6 @@ order by sfoi.item_id asc limit 1000";
         }
     }
     /**
-     * 更新批发站的数据，依据亚马逊的数据
-     *
-     * @Description created by lsw
-     * @author lsw
-     * @since 2020/03/06 15:05:05 
-     * @return void
-     */
-    public function update_wesee_data()
-    {
-    }
-
-
-    /**
      * 定时更新供应链大屏-采购数据
      *
      * @Description
@@ -2367,6 +2360,9 @@ order by sfoi.item_id asc limit 1000";
 
         //当月采购镜架总数
         $purchaseFrameNum = $purchase->getPurchaseFrameNum();
+
+        //当月采购镜架总金额
+        $purchaseFramePrice = $purchase->getPurchaseFramePrice();
 
         //当月采购总SKU数
         $purchaseSkuNum = $purchase->getPurchaseSkuNum();
@@ -2409,6 +2405,10 @@ order by sfoi.item_id asc limit 1000";
         $data['value'] = $purchaseFrameNum;
         $data['updatetime'] = date('Y-m-d H:i:s', time());
         $dataConfig->where('key', 'purchaseFrameNum')->update($data);
+
+        $data['value'] = $purchaseFramePrice;
+        $data['updatetime'] = date('Y-m-d H:i:s', time());
+        $dataConfig->where('key', 'purchaseFramePrice')->update($data);
 
         $data['value'] = $purchaseSkuNum;
         $data['updatetime'] = date('Y-m-d H:i:s', time());
@@ -2727,11 +2727,18 @@ order by sfoi.item_id asc limit 1000";
         $data['updatetime'] = date('Y-m-d H:i:s', time());
         $dataConfig->where('key', 'pressureRate7days')->update($data);
 
+        //获取当月物流妥投数量
+        $list = $this->getTrackingMoreStatusNumberCount();
+        $monthAppropriate = $list['delivered'];
+
         //当月妥投总量
         $data['value'] = $monthAppropriate ?? 0;
         $data['updatetime'] = date('Y-m-d H:i:s', time());
         $dataConfig->where('key', 'monthAppropriate')->update($data);
 
+        $allAppropriateNum = array_sum($list);
+        $monthAppropriatePercent = $allAppropriateNum ? $list['delivered']/$allAppropriateNum*100 : 0;
+        
         //当月妥投占比
         $data['value'] = $monthAppropriatePercent ?? 0;
         $data['updatetime'] = date('Y-m-d H:i:s', time());
@@ -2742,6 +2749,26 @@ order by sfoi.item_id asc limit 1000";
         $data['updatetime'] = date('Y-m-d H:i:s', time());
         $dataConfig->where('key', 'overtimeOrder')->update($data);
     }
+
+     /**
+     * 获取当月物流妥投数量
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/03/24 14:04:27 
+     * @return void
+     */
+    protected function getTrackingMoreStatusNumberCount()
+    {
+        //转国内时间
+        $starttime = strtotime(date('Y-m-01 00:00:00', time())) - 8*3600;
+        $endtime = strtotime(date('Y-m-d H:i:s', time()));
+        $track = new Trackingmore();
+        $track = $track->getStatusNumberCount($starttime, $endtime);
+        return $track['data'];
+    }
+
+
 
     /**
      * 定时更新供应链大屏-选品数据
@@ -2814,17 +2841,74 @@ order by sfoi.item_id asc limit 1000";
     }
 
     /**
-     * 定时更新供应链分析-加工时效
+     * 记录仓库每天加工数据
      *
      * @Description
      * @author wpl
      * @since 2020/03/14 14:15:37 
      * @return void
      */
-    public function processing_aging()
+    public function warehouse_data_everyday()
     {
-        $dataConfig = new \app\admin\model\DataConfig();
-        
+        $time = [];
+        //到货数量
+        $check = new \app\admin\model\warehouse\Check();
+        $data['arrival_num'] = ($check->getArrivalsNumToday($time)) ?? 0;
+
+        //质检数量
+        $data['check_num'] = ($check->getCheckNumToday($time)) ?? 0;
+
+        //打印标签
+        $zeeloolPrintLabelNum = $this->zeelool->printLabelNum($time);
+        $vooguemePrintLabelNum = $this->voogueme->printLabelNum($time);
+        $nihaoPrintLabelNum = $this->nihao->printLabelNum($time);
+        $data['print_label_num'] = ($zeeloolPrintLabelNum + $vooguemePrintLabelNum + $nihaoPrintLabelNum) ?? 0;
+        //配镜架
+        $zeeloolFrameNum = $this->zeelool->frameNum($time);
+        $vooguemeFrameNum = $this->voogueme->frameNum($time);
+        $nihaoFrameNum =  $this->nihao->frameNum($time);
+        $data['frame_num'] = ($zeeloolFrameNum + $vooguemeFrameNum + $nihaoFrameNum) ?? 0;
+
+        //配镜片
+        $zeeloolLensNum = $this->zeelool->lensNum($time);
+        $vooguemeLensNum = $this->voogueme->lensNum($time);
+        $nihaoLensNum = $this->nihao->lensNum($time);
+        $data['lens_num'] = ($zeeloolLensNum + $vooguemeLensNum + $nihaoLensNum) ?? 0;
+
+        //加工
+        $zeeloolfactoryNum = $this->zeelool->factoryNum($time);
+        $vooguemefactoryNum = $this->voogueme->factoryNum($time);
+        $nihaofactoryNum = $this->nihao->factoryNum($time);
+        $data['machining_num'] = ($zeeloolfactoryNum + $vooguemefactoryNum + $nihaofactoryNum) ?? 0;
+
+        //成品质检
+        $zeeloolfactoryNum = $this->zeelool->checkNum($time);
+        $vooguemefactoryNum = $this->voogueme->checkNum($time);
+        $nihaofactoryNum = $this->nihao->checkNum($time);
+        $data['quality_num'] = ($zeeloolfactoryNum + $vooguemefactoryNum + $nihaofactoryNum) ?? 0;
+
+        $data['create_time'] = date('Y-m-d H:i:s', time());
+        $data['create_date'] = date('Y-m-d');
+
+        //计算每天采购数量
+        $purchase = new \app\admin\model\purchase\PurchaseOrder();
+        //总采购数量
+        $data['all_purchase_num'] = $purchase->getPurchaseNumNow([], $time);
+        //总采购金额
+        $data['all_purchase_price'] = $purchase->getPurchasePriceNow([], $time);
+        //线上采购数量
+        $data['online_purchase_num'] = $purchase->getPurchaseNumNow(['purchase_type' => 2], $time);
+        //线上采购金额
+        $data['online_purchase_price'] = $purchase->getPurchasePriceNow(['purchase_type' => 2], $time);
+        //线下采购数量
+        $data['purchase_num'] = $data['all_purchase_num'] - $data['online_purchase_num'];
+        //线下采购金额
+        $data['purchase_price'] = $data['all_purchase_price'] - $data['online_purchase_price'];
+
+        //添加数据
+        $model = new \app\admin\model\WarehouseData();
+        $model->save($data);
+        echo 'ok';
     }
 
     /**
@@ -3064,8 +3148,8 @@ order by sfoi.item_id asc limit 1000";
 
 
     /**
-     * 统计SKU每天的销售数量
-     *
+     * 统计SKU每天的销售数量 
+     * @todo 待定
      * @Description
      * @author wpl
      * @since 2020/03/10 17:16:04 
@@ -3111,6 +3195,7 @@ order by sfoi.item_id asc limit 1000";
             $salesSkuNum->saveAll($data);
         }
     }
+
     /**
      * 更新order_statistics表字段
      *
@@ -3217,5 +3302,61 @@ order by sfoi.item_id asc limit 1000";
         }
         echo 'ok';
         die;
-    }    
+    }
+    /**
+     * 计算镜架销售副数和配饰销售副数
+     *
+     * @Description created by lsw
+     * @author lsw
+     * @since 2020/03/20 17:15:36 
+     * @return void
+     */
+    public function calculate_order_item_num()
+    {
+        $platform = $this->request->get('platform');
+        if (!$platform) {
+            return 'error';
+        }
+        switch ($platform) {
+            case 1:
+                $model = Db::connect('database.db_zeelool');
+                break;
+            case 2:
+                $model = Db::connect('database.db_voogueme');
+                break;
+            case 3:
+                $model = Db::connect('database.db_nihao');
+                break;
+            default:
+                $model = false;
+                break;
+        }
+        if (false === $model) {
+            return false;
+        }
+        $model->query("set time_zone='+8:00'");
+        //计算前一天的销量
+        $stime = date("Y-m-d 00:00:00", strtotime("-1 day"));
+        $etime = date("Y-m-d 23:59:59", strtotime("-1 day"));
+        $map['m.created_at'] =  ['between', [$stime, $etime]];
+        $whereItem = " o.status in ('processing','complete','creditcard_proccessing','free_processing')";
+        //求出眼镜所有sku
+        $frame_sku  = $this->itemplatformsku->getDifferencePlatformSku(1,$platform);
+        //求出饰品的所有sku
+        $decoration_sku = $this->itemplatformsku->getDifferencePlatformSku(3,$platform);
+        //眼镜销售副数
+        $data['frame_sales_num']            = $model->table('sales_flat_order_item m')->join('sales_flat_order o','m.order_id=o.entity_id','left')->where($whereItem)->where($map)->where('m.sku','in',$frame_sku)->count('*');
+        //眼镜动销数
+        $data['frame_in_print_num']         = $model->table('sales_flat_order_item m')->join('sales_flat_order o','m.order_id=o.entity_id','left')->where($whereItem)->where($map)->where('m.sku','in',$frame_sku)->count('distinct m.sku');
+        //配饰的销售副数
+        $data['decoration_sales_num']       = $model->table('sales_flat_order_item m')->join('sales_flat_order o','m.order_id=o.entity_id','left')->where($whereItem)->where($map)->where('m.sku','in',$decoration_sku)->count('*');
+        //配饰动销数
+        $data['decoration_in_print_num']    = $model->table('sales_flat_order_item m')->join('sales_flat_order o','m.order_id=o.entity_id','left')->where($whereItem)->where($map)->where('m.sku','in',$decoration_sku)->count('distinct m.sku');
+        $data['platform']    = $platform;
+        $data['create_date'] = date("Y-m-d", strtotime("-1 day"));
+        $data['createtime']  = date("Y-m-d H:i:s");
+        Db::name('order_item_info')->insert($data);
+        echo 'ok';
+        die;
+    }   
 }

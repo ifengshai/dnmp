@@ -822,7 +822,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                         return '';
                     } else {
                         var tem = value;
-
                         if (tem.length <= 20) {
                             return tem;
                         } else {

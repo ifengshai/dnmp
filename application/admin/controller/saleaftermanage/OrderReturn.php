@@ -429,7 +429,7 @@ class OrderReturn extends Backend
             //获取客户邮箱地址
             $customer_email = trim($request->post('customer_email'));
             //获取客户姓名
-            $customer_name  = trim($request->post('customer_name'));
+            $customer_name  = $input_name =  trim($request->post('customer_name'));
             //获取客户电话
             $customer_phone = trim($request->post('customer_phone'));
             //获取运单号
@@ -442,8 +442,8 @@ class OrderReturn extends Backend
             }
             //求出用户的所有订单信息
             $customer = (new SaleAfterTask())->getCustomerEmail($order_platform, $increment_id, $customer_name, $customer_phone, $track_number, $customer_email);
-            //dump($customer);
-            //exit;
+            // dump($customer);
+            // exit;
             if (!$customer) {
                 $this->error('找不到订单信息，请重新尝试', 'saleaftermanage/order_return/search?ref=addtabs');
             }
@@ -510,16 +510,16 @@ class OrderReturn extends Backend
                     }
                     switch($v['synergy_status']){
                         case 1:
-                        $infoSynergyTaskResult[$k]['synergy_status'] = '处理中';
+                        $infoSynergyTaskResult[$k]['synergy_status'] = '<span style="color:#f39c12">处理中</span>';
                         break;
                         case 2:
-                        $infoSynergyTaskResult[$k]['synergy_status'] = '处理完成';
+                        $infoSynergyTaskResult[$k]['synergy_status'] = '<span style="color:#18bc9c">处理完成</span>';
                         break;
                         case 3:
-                        $infoSynergyTaskResult[$k]['synergy_status'] = '取消';
+                        $infoSynergyTaskResult[$k]['synergy_status'] = '<span style="color:#e74c3c">取消</span>';
                         break;
                         default:
-                        $infoSynergyTaskResult[$k]['synergy_status'] = '未处理';
+                        $infoSynergyTaskResult[$k]['synergy_status'] = '<span style="color:#0073b7">新建</span>';
                         break;                                
                     }
                 }
@@ -536,13 +536,13 @@ class OrderReturn extends Backend
                         $saleAfterTaskResult[$k]['order_platform'] = $orderPlatformList[$v['order_platform']];
                     }
                     if ($v['task_status'] == 1) {
-                        $saleAfterTaskResult[$k]['task_status'] = '处理中';
+                        $saleAfterTaskResult[$k]['task_status'] = '<span style="color:#f39c12">处理中</span>';
                     } elseif ($v['task_status'] == 2) {
-                        $saleAfterTaskResult[$k]['task_status'] = '处理完成';
+                        $saleAfterTaskResult[$k]['task_status'] = '<span style="color:#18bc9c">处理完成</span>';
                     } elseif($v['task_status'] == 3){
-                        $saleAfterTaskResult[$k]['task_status'] = '取消';
+                        $saleAfterTaskResult[$k]['task_status'] = '<span style="color:#e74c3c">取消</span>';
                     }else {
-                        $saleAfterTaskResult[$k]['task_status'] = '未处理';
+                        $saleAfterTaskResult[$k]['task_status'] = '<span style="color:#0073b7">新建</span>';
                     }
                     if ($v['prty_id']) {
                         $saleAfterTaskResult[$k]['prty_id'] = $prtyIdList[$v['prty_id']];
@@ -608,7 +608,7 @@ class OrderReturn extends Backend
             }
             //如果查询客户姓名
             if($customer_name){
-                $this->view->assign('customer_name',$customer_name);
+                $this->view->assign('customer_name',$input_name);
             }
             //如果查询客户电话
             if($customer_phone){

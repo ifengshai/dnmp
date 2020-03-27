@@ -198,7 +198,6 @@ define(['jquery', 'bootstrap', 'upload', 'validator'], function ($, undefined, U
                     });
                 }
             },
-
             daterangepicker: function (form) {
                 //绑定日期时间元素事件
                 if ($(".datetimerange", form).size() > 0) {
@@ -515,6 +514,8 @@ define(['jquery', 'bootstrap', 'upload', 'validator'], function ($, undefined, U
 
                 events.datetimepicker(form);
                 
+                events.datetimepickernew(form);
+
                 events.datetimepickernew(form);
 
                 events.plupload(form);

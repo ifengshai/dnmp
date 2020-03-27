@@ -1,0 +1,100 @@
+<form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
+
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Template_platform')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <select  id="c-order_platform" data-rule="required" class="form-control selectpicker" name="row[template_platform]">
+                {foreach name="orderPlatformList" item="vo"}
+                <option value="{$key}" {in name="key" value="0"}selected{/in}>{$vo}</option>
+                {/foreach}
+            </select>
+        </div>
+        <label class="control-label col-xs-12 col-sm-2">{:__('Template_permission')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <select  id="c-template_permission" data-rule="required" class="form-control selectpicker" name="row[template_permission]">
+                {foreach name="templatePermission" item="vo"}
+                <option value="{$key}" {in name="key" value="0"}selected{/in}>{$vo}</option>
+                {/foreach}
+            </select>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Template_category')}:</label>
+        <!-- <div class="col-xs-12 col-sm-8">
+            <input id="c-template_category" data-rule="required" class="form-control" name="row[template_category]" type="number" value="0">
+        </div> -->
+        <div class="col-xs-12 col-sm-3">
+            <select  id="c-template_category" data-rule="required" class="form-control selectpicker" name="row[template_category]">
+                {foreach name="templateCategory" item="vo"}
+                <option value="{$key}" {in name="key" value="0"}selected{/in}>{$vo}</option>
+                {/foreach}
+            </select>
+        </div>        
+    </div>    
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Template_name')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-template_name" data-rule="required" class="form-control" name="row[template_name]" type="text" value="">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Template_description')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-template_description" class="form-control" name="row[template_description]" type="text" value="">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Template_content')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-template_content" data-rule="required" class="form-control editor" name="row[template_content]" type="text" value="">
+        </div>
+    </div>
+
+    <!-- <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Is_active')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-is_active" data-rule="required" class="form-control" name="row[is_active]" type="number" value="1">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Used_time')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-used_time" data-rule="required" class="form-control datetimepicker" data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[used_time]" type="text" value="{:date('Y-m-d H:i:s')}">
+        </div>
+    </div> -->
+    <!-- <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Extra_param')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-extra_param" data-rule="required" class="form-control" name="row[extra_param]" type="text" value="">
+        </div>
+        <label class="control-label col-xs-12 col-sm-2">{:__('Param_value')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-extra_param" data-rule="required" class="form-control" name="row[extra_param]" type="text" value="">
+        </div>
+    </div> -->
+    <!-- <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Create_person')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-create_person" data-rule="required" class="form-control" name="row[create_person]" type="text" value="">
+        </div>
+    </div> -->
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Update_time')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-update_time" data-rule="required" class="form-control datetimepicker" data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[update_time]" type="text" value="{:date('Y-m-d H:i:s')}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Create_time')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-create_time" data-rule="required" class="form-control datetimepicker" data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[create_time]" type="text" value="{:date('Y-m-d H:i:s')}">
+        </div>
+    </div>
+    <div class="form-group layer-footer">
+        <label class="control-label col-xs-12 col-sm-2"></label>
+        <div class="col-xs-12 col-sm-8">
+            <button type="submit" class="btn btn-success btn-embossed disabled">{:__('OK')}</button>
+            <button type="reset" class="btn btn-default btn-embossed">{:__('Reset')}</button>
+        </div>
+    </div>
+</form>

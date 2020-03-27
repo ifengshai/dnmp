@@ -110,13 +110,16 @@
                 </select>
             </div>
         <label class="control-label col-xs-12 col-sm-2">{:__('Handle_scheme')}:</label>
-            <div class="col-xs-12 col-sm-3">
+            <!-- <div class="col-xs-12 col-sm-3">
                 <select  id="c-handle_scheme" data-rule="required" class="form-control selectpicker" name="row[handle_scheme]">
                     {foreach name="SolveScheme" item="vo"}
                     <option value="{$key}" {in name="key" value="$row.handle_scheme"}selected{/in}>{$vo}</option>
                     {/foreach}
                 </select>
-        </div>
+        </div> -->
+        <div class="col-xs-12 col-sm-3">
+            {:build_select('row[handle_scheme][]', $SolveScheme, $row.handle_scheme, ['class'=>'form-control selectpicker', 'data-rule'=>'required','data-live-search' => true,'multiple'=>'multiple'])}
+        </div> 
     </div>
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">{:__('Refund_money')}:</label>
