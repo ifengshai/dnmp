@@ -133,7 +133,8 @@ class ZeeloolPrescriptionDetailHelper{
 			$final_params['frame_price'] = $product_options['info_buyRequest']['tmplens']['frame_price'];
 			$final_params['index_price'] = $product_options['info_buyRequest']['tmplens']['index_price'];
 			$final_params['coatiing_price'] = $product_options['info_buyRequest']['tmplens']['coatiing_price'];
-				
+			//添加color-name 参数	
+			$final_params['color_name']  = isset($product_options['info_buyRequest']['tmplens']['color_name']) ? $product_options['info_buyRequest']['tmplens']['color_name'] : '';
 
 			$items[$item_key]['frame_regural_price'] = $final_params['frame_regural_price'] = $product_options['info_buyRequest']['tmplens']['frame_regural_price'];
 			$items[$item_key]['is_special_price'] = $final_params['is_special_price'] = $product_options['info_buyRequest']['tmplens']['is_special_price'];
@@ -160,7 +161,12 @@ class ZeeloolPrescriptionDetailHelper{
 			$final_params = array_merge($lens_params, $final_params);
           
 			$items[$item_key]['coatiing_name'] = $final_params['coatiing_name'];
-			$items[$item_key]['index_type'] = $final_params['index_type'];
+			if(!empty($final_params['color_name'])){
+				$items[$item_key]['index_type'] = $final_params['index_type'].'-'.$final_params['color_name'];
+			}else{
+				$items[$item_key]['index_type'] = $final_params['index_type'];
+			}
+			
 			$items[$item_key]['prescription_type'] = $final_params['prescription_type'];
 
 			$items[$item_key]['frame_price'] = $final_params['frame_price']?$final_params['frame_price']:0;

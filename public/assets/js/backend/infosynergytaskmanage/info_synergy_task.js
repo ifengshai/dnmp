@@ -58,7 +58,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','bootstrap-table-jump-
                         },
                         {
                           field:'refund_money',
-                          title:__('Refund_money')  
+                          title:__('Refund_money'),
+                          operate: 'between', formatter: Controller.api.formatter.float_format  
                         },
                         {field: 'dept', title: __('Dept_id')},
                         {field: 'rep', title: __('Rep_id')},
@@ -270,6 +271,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','bootstrap-table-jump-
 
         },
         api: {
+            formatter:{
+                float_format: function (value, row, index) {
+                    return parseFloat(value).toFixed(2);
+                },
+            },
             bindevent: function () {
                 Form.api.bindevent($("form[role=form]"));
                 //判断输入的sku的数量和sku编码是否符合需求
