@@ -47,7 +47,7 @@
 </form>
 
 
-<ul class="timeline" style="width: 48%;float: left;">
+<ul class="timeline" style="width: 50%;float: left;">
     <li class="time-label">
         <span class="bg-red">
             {:__('test_environment')}
@@ -58,10 +58,11 @@
             <i class="fa fa-user bg-aqua"></i>
             <div class="timeline-item">
                 <span class="time"><i class="fa fa-clock-o"></i>{:__('test_add_time')}：{$ltl['create_time']}</span>
-                <h3 class="timeline-header"><a href="#">{:__('bug_type')}：{$bug_type[$ltl['bug_type']]}</a></h3>
+                <h3 class="timeline-header"><a href="#" {if $ltl['bug_type'] == 1}style="color: darkseagreen;font-weight: 900"{elseif $ltl['bug_type'] == 2}style="color: green;font-weight: 900"{elseif $ltl['bug_type'] == 3}style="color: darkorange;font-weight: 900"{elseif $ltl['bug_type'] == 4}style="color: red;font-weight: 900"{/if}>{$bug_type[$ltl['bug_type']]}</a></h3>
 
                 <div class="timeline-body">
-                    {:__('All_user_id')}：<span><b>{$ltl['responsibility_user_name']}</b></span>
+                    <p style="float: left;width: 62%">{:__('All_user_id')}：<span><b>{$ltl['responsibility_user_name']}</b></span></p>
+                    <p>{:__('Entry_user_id')}：<span><b>{$ltl['create_user_name']}</b></span></p>
                 </div>
 
                 <div class="timeline-body" >
@@ -73,7 +74,7 @@
     {/volist}
 </ul>
 
-<ul class="timeline" style="width: 48%;float: right;">
+<ul class="timeline" style="width: 50%;float: right;">
     <li class="time-label">
             <span class="bg-red">
                 {:__('formal_environment')}
@@ -84,10 +85,11 @@
         <i class="fa fa-user bg-aqua"></i>
         <div class="timeline-item">
             <span class="time"><i class="fa fa-clock-o"></i>{:__('test_add_time')}：{$rtl['create_time']}</span>
-            <h3 class="timeline-header"><a href="#">{:__('bug_type')}：{$bug_type[$rtl['bug_type']]}</a></h3>
+            <h3 class="timeline-header"><a href="#"{if $rtl['bug_type'] == 1}style="color: darkseagreen;font-weight: 900"{elseif $rtl['bug_type'] == 2}style="color: green;font-weight: 900"{elseif $rtl['bug_type'] == 3}style="color: darkorange;font-weight: 900"{elseif $rtl['bug_type'] == 4}style="color: red;font-weight: 900"{/if}>{$bug_type[$rtl['bug_type']]}</a></h3>
 
             <div class="timeline-body">
-                {:__('All_user_id')}：<span><b>{$rtl['responsibility_user_name']}</b></span>
+                <p style="float: left;width: 62%">{:__('All_user_id')}：<span><b>{$rtl['responsibility_user_name']}</b></span></p>
+                <p>{:__('Entry_user_id')}：<span><b>{$rtl['create_user_name']}</b></span></p>
             </div>
 
             <div class="timeline-body" >

@@ -120,7 +120,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             events: Table.api.events.operate,
                             buttons: [
                                 {
-                                    name: 'distribution',
+                                    name: 'test_distribution',
                                     text: __('测试确认'),
                                     title: __('测试确认'),
                                     classname: 'btn btn-xs btn-primary btn-dialog',
@@ -183,7 +183,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     }
                                 },
                                 {
-                                    name: 'group_finish',
+                                    name: 'test_record_bug',
                                     text: __('记录问题'),
                                     title: __('记录问题'),
                                     classname: 'btn btn-xs btn-primary btn-dialog',
@@ -191,27 +191,26 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     callback: function (data) {
                                     },
                                     visible: function(row){
-                                        return true;
                                         if(row.status == 4){
-                                            if(row.demand_finish){
-                                                if(row.web_designer_group == 0 && row.phper_group == 0 && row.app_group == 0){
-                                                    return false;
-                                                }else{
+                                            if(row.demand_test_record_bug){
+                                                if(row.test_is_finish == 0){
                                                     return true;
+                                                }else{
+                                                    return false;
                                                 }
                                             }
                                         }
                                     }
                                 },
                                 {
-                                    name: 'test_finish',
+                                    name: 'test_group_finish',
                                     text: __('通过测试'),
                                     title: __('通过测试'),
                                     classname: 'btn btn-xs btn-success btn-magic btn-ajax',
-                                    url: 'demand/it_web_demand/test_group_finish/is_test/1',
+                                    url: 'demand/it_web_demand/test_group_finish',
                                     confirm: '请确定是否  <b>通过测试</b>',
                                     success: function (data, ret) {
-                                        Layer.alert(ret.msg + ",返回数据：" + JSON.stringify(data));
+                                        table.bootstrapTable('refresh');
                                         //如果需要阻止成功提示，则必须使用return false;
                                         //return false;
                                     },
@@ -223,24 +222,130 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     visible: function(row){
                                         if(row.status == 4){
                                             if(row.demand_test_finish){
-                                                if(row.test_group == 0){
-                                                    return false;
-                                                }else{
+                                                if(row.test_group == 1 && row.test_is_finish == 0){
                                                     return true;
+                                                }else{
+                                                    return false;
                                                 }
                                             }
                                         }
 
                                     }
                                 },
-                                /*{
-                                    name: 'addtabs',
-                                    text: __('新选项卡中打开'),
-                                    title: __('新选项卡中打开'),
-                                    classname: 'btn btn-xs btn-warning btn-addtabs',
-                                    icon: 'fa fa-folder-o',
-                                    url: 'example/bootstraptable/detail'
-                                }*/
+                                {
+                                    name: 'add',
+                                    text: __('提出人确认'),
+                                    title: __('提出人确认'),
+                                    classname: 'btn btn-xs btn-success btn-magic btn-ajax',
+                                    icon: 'fa fa-magic',
+                                    url: 'demand/it_web_demand/add/is_user_confirm/1',
+                                    confirm: '确认本需求？',
+                                    success: function (data, ret) {
+                                        table.bootstrapTable('refresh');
+                                    },
+                                    error: function (data, ret) {
+                                        console.log(data, ret);
+                                        Layer.alert(ret.msg);
+                                        return false;
+                                    },
+                                    visible: function(row){
+                                        if(row.status == 4 || row.status == 5){
+                                            if(row.demand_add){
+                                                if(row.test_group == 1){
+                                                    if(row.entry_user_confirm == 0){
+                                                        return true;
+                                                    }
+                                                }
+                                            }
+                                        }else{
+                                            return false;
+                                        }
+                                    }
+                                },
+                                {
+                                    name: 'add_online',
+                                    text: __('上线'),
+                                    title: __('上线'),
+                                    classname: 'btn btn-xs btn-success btn-magic btn-ajax',
+                                    icon: 'fa fa-magic',
+                                    url: 'demand/it_web_demand/add_online',
+                                    confirm: '确定上线？',
+                                    success: function (data, ret) {
+                                        table.bootstrapTable('refresh');
+                                    },
+                                    error: function (data, ret) {
+                                        console.log(data, ret);
+                                        Layer.alert(ret.msg);
+                                        return false;
+                                    },
+                                    visible: function(row){
+                                        if(row.status == 5){
+                                            if(row.demand_add_online){
+                                                if(row.test_group == 1){
+                                                    if(row.entry_user_confirm == 0){
+                                                        return false;
+                                                    }else{
+                                                        return true;
+                                                    }
+                                                }else{
+                                                    return true;
+                                                }
+                                            }
+                                        }else{
+                                            return false;
+                                        }
+                                    }
+                                },
+                                {
+                                    name: 'test_record_bug',
+                                    text: __('记录问题'),
+                                    title: __('记录问题'),
+                                    classname: 'btn btn-xs btn-primary btn-dialog',
+                                    url: 'demand/it_web_demand/test_record_bug',
+                                    callback: function (data) {
+                                    },
+                                    visible: function(row){
+                                        if(row.status == 6){
+                                            if(row.demand_test_record_bug){
+                                                if(row.return_test_is_finish == 0){
+                                                    return true;
+                                                }else{
+                                                    return false;
+                                                }
+                                            }
+                                        }
+                                    }
+                                },
+                                {
+                                    name: 'test_group_finish',
+                                    text: __('通过测试'),
+                                    title: __('通过测试'),
+                                    classname: 'btn btn-xs btn-success btn-magic btn-ajax',
+                                    url: 'demand/it_web_demand/test_group_finish',
+                                    confirm: '请确定是否  <b>通过测试</b>',
+                                    success: function (data, ret) {
+                                        table.bootstrapTable('refresh');
+                                        //如果需要阻止成功提示，则必须使用return false;
+                                        //return false;
+                                    },
+                                    error: function (data, ret) {
+                                        console.log(data, ret);
+                                        Layer.alert(ret.msg);
+                                        return false;
+                                    },
+                                    visible: function(row){
+                                        if(row.status == 6){
+                                            if(row.demand_test_finish){
+                                                if(row.test_group == 1 && row.return_test_is_finish == 0){
+                                                    return true;
+                                                }else{
+                                                    return false;
+                                                }
+                                            }
+                                        }
+
+                                    }
+                                },
                             ],
                             formatter: Table.api.formatter.buttons
                         },

@@ -66,7 +66,9 @@ class ItWebDemand extends Backend
             $permissions['demand_distribution'] = $this->auth->check('demand/it_web_demand/distribution');//开发分配
             $permissions['demand_test_distribution'] = $this->auth->check('demand/it_web_demand/test_distribution');//测试分配
             $permissions['demand_finish'] = $this->auth->check('demand/it_web_demand/group_finish');//开发完成
-            $permissions['demand_test_finish'] = $this->auth->check('demand/it_web_demand/test_group_finish');//开发完成
+            $permissions['demand_test_finish'] = $this->auth->check('demand/it_web_demand/test_group_finish');//测试完成
+            $permissions['demand_test_record_bug'] = $this->auth->check('demand/it_web_demand/test_record_bug');//测试完成
+            $permissions['demand_add_online'] = $this->auth->check('demand/it_web_demand/add_online');//上线需求
 
             foreach ($list as $k => $v){
                 $list[$k]['sitetype'] = config('demand.siteType')[$v['site_type']];//取站点
@@ -82,16 +84,25 @@ class ItWebDemand extends Backend
                     $list[$k]['Allgroup'][] = '前端';
                     $list[$k]['web_designer_user_name'] = $this->extract_username($v['web_designer_user_id'],'web_designer_user');
                     $list[$k]['web_designer_expect_time'] = date('m-d H:i',strtotime($v['web_designer_expect_time']));
+                    if($v['web_designer_is_finish'] == 1){
+                        $list[$k]['web_designer_finish_time'] = date('m-d H:i',strtotime($v['web_designer_finish_time']));
+                    }
                 }
                 if($v['phper_group'] == 1){
                     $list[$k]['Allgroup'][] = '后端';
                     $list[$k]['phper_user_name'] = $this->extract_username($v['phper_user_id'],'phper_user');
                     $list[$k]['phper_expect_time'] = date('m-d H:i',strtotime($v['phper_expect_time']));
+                    if($v['phper_is_finish'] == 1){
+                        $list[$k]['phper_finish_time'] = date('m-d H:i',strtotime($v['phper_finish_time']));
+                    }
                 }
                 if($v['app_group'] == 1){
                     $list[$k]['Allgroup'][] = 'APP';
                     $list[$k]['app_user_name'] = $this->extract_username($v['app_user_id'],'app_user');
                     $list[$k]['app_expect_time'] = date('m-d H:i',strtotime($v['app_expect_time']));
+                    if($v['app_is_finish'] == 1){
+                        $list[$k]['app_finish_time'] = date('m-d H:i',strtotime($v['app_finish_time']));
+                    }
                 }
                 if($v['test_group'] == 1){
                     $list[$k]['testgroup'] = '是';
@@ -116,11 +127,31 @@ class ItWebDemand extends Backend
                     }
                 }elseif ($v['status'] == 4){
                     if($v['test_group'] == 1){
-                        $list[$k]['status_str'] = '待测试';
+                        if($v['entry_user_confirm'] == 0){
+                            $list[$k]['status_str'] = '待测试,待确认';
+                        }else{
+                            $list[$k]['status_str'] = '待测试,已确认';
+                        }
                     }else{
-                        $list[$k]['status_str'] = '已完成，待上线';
+                        $list[$k]['status_str'] = '待上线';
                     }
 
+                }elseif ($v['status'] == 5){
+                    if($v['test_group'] == 1){
+                        if($v['entry_user_confirm'] == 0){
+                            $list[$k]['status_str'] = '待确认';
+                        }else{
+                            $list[$k]['status_str'] = '待上线';
+                        }
+                    }else{
+                        $list[$k]['status_str'] = '待上线';
+                    }
+                }elseif ($v['status'] == 6){
+
+                    $list[$k]['status_str'] = '待回归测试';
+                }elseif ($v['status'] == 7){
+
+                    $list[$k]['status_str'] = '已完成';
                 }
 
                 /*当前状态*/
@@ -132,6 +163,8 @@ class ItWebDemand extends Backend
                 $list[$k]['demand_test_distribution'] = $permissions['demand_test_distribution'];
                 $list[$k]['demand_finish'] = $permissions['demand_finish'];
                 $list[$k]['demand_test_finish'] = $permissions['demand_test_finish'];
+                $list[$k]['demand_test_record_bug'] = $permissions['demand_test_record_bug'];
+                $list[$k]['demand_add_online'] = $permissions['demand_add_online'];
             }
 
 
@@ -164,43 +197,57 @@ class ItWebDemand extends Backend
     {
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
+            $params = input();
+
             if ($params) {
-                if ($params['copy_to_user_id']) {
-                    $params['copy_to_user_id'] = implode(",", $params['copy_to_user_id']);
-                }
-                $params['entry_user_id'] = $this->auth->id;
-
-                $params = $this->preExcludeFields($params);
-
-                if ($this->dataLimit && $this->dataLimitFieldAutoFill) {
-                    $params[$this->dataLimitField] = $this->auth->id;
-                }
-
-                $result = false;
-                Db::startTrans();
-                try {
-                    //是否采用模型验证
-                    if ($this->modelValidate) {
-                        $name = str_replace("\\model\\", "\\validate\\", get_class($this->model));
-                        $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.add' : $name) : $this->modelValidate;
-                        $this->model->validateFailException(true)->validate($validate);
+                if($params['is_user_confirm'] == 1){
+                    $data['entry_user_confirm'] =  1;
+                    $data['entry_user_confirm_time'] =  date('Y-m-d H:i',time());
+                    $res = $this->model->allowField(true)->save($data,['id'=> input('ids')]);
+                    if ($res) {
+                        $this->success('成功');
+                    } else {
+                        $this->error('失败');
                     }
-                    $result = $this->model->allowField(true)->save($params);
-                    Db::commit();
-                } catch (ValidateException $e) {
-                    Db::rollback();
-                    $this->error($e->getMessage());
-                } catch (PDOException $e) {
-                    Db::rollback();
-                    $this->error($e->getMessage());
-                } catch (Exception $e) {
-                    Db::rollback();
-                    $this->error($e->getMessage());
-                }
-                if ($result !== false) {
-                    $this->success();
-                } else {
-                    $this->error(__('No rows were inserted'));
+                }else{
+                    $params = $params['row'];
+                    if ($params['copy_to_user_id']) {
+                        $params['copy_to_user_id'] = implode(",", $params['copy_to_user_id']);
+                    }
+                    $params['entry_user_id'] = $this->auth->id;
+
+                    $params = $this->preExcludeFields($params);
+
+                    if ($this->dataLimit && $this->dataLimitFieldAutoFill) {
+                        $params[$this->dataLimitField] = $this->auth->id;
+                    }
+
+                    $result = false;
+                    Db::startTrans();
+                    try {
+                        //是否采用模型验证
+                        if ($this->modelValidate) {
+                            $name = str_replace("\\model\\", "\\validate\\", get_class($this->model));
+                            $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.add' : $name) : $this->modelValidate;
+                            $this->model->validateFailException(true)->validate($validate);
+                        }
+                        $result = $this->model->allowField(true)->save($params);
+                        Db::commit();
+                    } catch (ValidateException $e) {
+                        Db::rollback();
+                        $this->error($e->getMessage());
+                    } catch (PDOException $e) {
+                        Db::rollback();
+                        $this->error($e->getMessage());
+                    } catch (Exception $e) {
+                        Db::rollback();
+                        $this->error($e->getMessage());
+                    }
+                    if ($result !== false) {
+                        $this->success();
+                    } else {
+                        $this->error(__('No rows were inserted'));
+                    }
                 }
             }
             $this->error(__('Parameter %s can not be empty', ''));
@@ -459,7 +506,11 @@ class ItWebDemand extends Backend
                     }
 
                     if($flag == 3){
-                        $update_status['status'] = 4;
+                        if($row_arr['test_group'] == 2){
+                            $update_status['status'] = 5;
+                        }else{
+                            $update_status['status'] = 4;
+                        }
                         $res_status = $this->model->allowField(true)->save($update_status,['id'=> $params['id']]);
                         if ($res_status) {
                             $this->success('成功');
@@ -532,15 +583,12 @@ class ItWebDemand extends Backend
     public function test_group_finish($ids = null)
     {
         if ($this->request->isAjax()) {
-            dump(1);exit;
-            //$this->success('成功','',$a);
-
             $data['status'] =  5;
             $data['test_is_finish'] =  1;
             $data['test_finish_time'] =  date('Y-m-d H:i',time());
             $res = $this->model->allowField(true)->save($data,['id'=> input('ids')]);
             if ($res) {
-                $this->success('成功','',$ids);
+                $this->success('成功');
             } else {
                 $this->error('失败');
             }
@@ -602,6 +650,7 @@ class ItWebDemand extends Backend
             $params = $this->request->post("row/a");
             if ($params) {
                 $params['create_time'] =  date('Y-m-d H:i',time());
+                $params['create_user_id'] =  $this->auth->id;
                 $res_status = $this->testRecordModel->allowField(true)->save($params);
 
                 if ($res_status) {
@@ -646,7 +695,9 @@ class ItWebDemand extends Backend
                 $left_test_list[$k_left]['responsibility_user_name'] = $this->extract_username($row['app_user_id'],'app_user');
             }
             $left_test_list[$k_left]['create_time'] = date('m-d H:i',strtotime($v_left['create_time']));
+            $left_test_list[$k_left]['create_user_name'] = config('demand.test_user')[$v_left['create_user_id']];
         }
+
         /*测试日志--正式环境*/
         $right_test_list = $this->testRecordModel
             ->where('pid',$ids)
@@ -666,6 +717,7 @@ class ItWebDemand extends Backend
                 $right_test_list[$k_right]['responsibility_user_name'] = $this->extract_username($row['app_user_id'],'app_user');
             }
             $right_test_list[$k_right]['create_time'] = date('m-d H:i',strtotime($v_right['create_time']));
+            $right_test_list[$k_right]['create_user_name'] = config('demand.test_user')[$v_right['create_user_id']];
         }
 
         $bug_type = config('demand.bug_type');//严重类型
@@ -677,4 +729,29 @@ class ItWebDemand extends Backend
         return $this->view->fetch();
     }
 
+    /**
+     * 上线需求
+     * 开发组权限
+     * */
+    public function add_online($ids = null)
+    {
+        if ($this->request->isAjax()) {
+            $ids = $ids ?? input('ids');
+            $row = $this->model->get(['id' => $ids]);
+            $row_arr = $row->toArray();
+
+            if($row_arr['test_group'] == 2){
+                $data['status'] =  7;
+                $data['all_finish_time'] =  date('Y-m-d H:i',time());
+            }else if($row_arr['test_group'] == 1){
+                $data['status'] =  6;
+            }
+            $res = $this->model->allowField(true)->save($data,['id'=> $ids]);
+            if ($res) {
+                $this->success('成功');
+            } else {
+                $this->error('失败');
+            }
+        }
+    }
 }
