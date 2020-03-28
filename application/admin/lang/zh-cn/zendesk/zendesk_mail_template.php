@@ -16,5 +16,9 @@ return [
     'Create_time'          => '创建时间',
     'Param_value'          => '参数值',
     'Start'                => '开启',
-    'Forbidden'            => '禁止'   
+    'Forbidden'            => '禁止',
+    'Mail_subject'         => '邮件主题',
+    'Mail_status'          => '邮件状态',
+    'Mail_level'           => '邮件优先级',
+    'Mail_tag'             => '邮件tag' 
 ];

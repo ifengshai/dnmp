@@ -4,6 +4,7 @@ namespace app\admin\controller\zendesk;
 use think\Db;
 use app\common\controller\Backend;
 use think\Exception;
+use app\admin\model\zendesk\ZendeskTags;
 use think\exception\PDOException;
 use think\exception\ValidateException;
 use app\admin\model\platformmanage\MagentoPlatform;
@@ -59,6 +60,46 @@ class ZendeskMailTemplate extends Backend
         ];
         return $arr;
     }
+    /**
+     * 邮件状态
+     *
+     * @Description
+     * @author lsw
+     * @since 2020/03/28 09:53:09 
+     * @return void
+     */
+    private function mail_status()
+    {
+        $arr = [
+                0       => '',
+            'New'       => 'New',
+            'Open'      => 'Open',
+            'Pending'   => 'Pending',
+            'Solved'    => 'Solved',
+            'Closed'    => 'Closed'
+        ];
+        return $arr;
+    }
+    /**
+     * 邮件等级
+     *
+     * @Description
+     * @author lsw
+     * @since 2020/03/28 09:58:52 
+     * @return void
+     */
+    private function mail_level()
+    {
+        $arr = [
+              0         => '',
+            'Low'       => 'Low',
+            'Normal'    => 'Normal',
+            'High'      => 'High',
+            'Urgent'    => 'Urgent'
+        ];
+        return $arr;        
+
+    }
     public function _initialize()
     {
         parent::_initialize();
@@ -67,7 +108,10 @@ class ZendeskMailTemplate extends Backend
             [
                 "orderPlatformList"     => (new MagentoPlatform())->getOrderPlatformList(),
                 "templatePermission"    => $this->template_permission(),
-                "templateCategory"      => $this->template_category()
+                "templateCategory"      => $this->template_category(),
+                "mailStatus"            => config('zendesk.status'),
+                "mailLevel"             => config('zendesk.priority'),
+                "tagsList"              => (new ZendeskTags())->tags_list()
             ]);
     }
     
@@ -136,12 +180,13 @@ class ZendeskMailTemplate extends Backend
      */
     public function add()
     {
-        $platform =  (new MagentoPlatform())->getOrderPlatformList();
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
             if ($params) {
                 $params = $this->preExcludeFields($params);
-
+                if(is_array($params['mail_tag'])){
+                    $params['mail_tag'] = implode(',',$params['mail_tag']);
+                }
                 if ($this->dataLimit && $this->dataLimitFieldAutoFill) {
                     $params[$this->dataLimitField] = $this->auth->id;
                 }
@@ -198,6 +243,9 @@ class ZendeskMailTemplate extends Backend
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
             if ($params) {
+                if(is_array($params['mail_tag'])){
+                    $params['mail_tag'] = implode(',',$params['mail_tag']);
+                }  
                 $params = $this->preExcludeFields($params);
                 $result = false;
                 Db::startTrans();
