@@ -1,0 +1,55 @@
+
+<form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
+
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('问题严重程度')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <select name="row[bug_type]" class="form-control"  data-rule="required">
+                <option value="">请选择</option>
+                <option value="1">次要</option>
+                <option value="2">一般</option>
+                <option value="3">严重</option>
+                <option value="4">崩溃</option>
+            </select>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('站点')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <select name="row[site_type]" class="form-control"  data-rule="required">
+                {foreach $siteType as $k => $v}
+                <option value="{$k}">{$v}</option>
+                {/foreach}
+            </select>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('环境分类')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <select name="row[environment_type]" class="form-control"  data-rule="required">
+                <option value="">请选择</option>
+                <option value="1">测试环境</option>
+                <option value="2">正式环境</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Desc')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <textarea id="c-desc" class="form-control editor" rows="4" name="row[describe]"
+                    cols="30"></textarea>
+        </div>
+    </div>
+   
+
+    <div class="form-group layer-footer">
+        <label class="control-label col-xs-12 col-sm-2"></label>
+        <div class="col-xs-12 col-sm-8">
+            <button type="submit" class="btn btn-success btn-embossed disabled">{:__('OK')}</button>
+            <button type="reset" class="btn btn-default btn-embossed">{:__('Reset')}</button>
+        </div>
+    </div>
+</form>
+

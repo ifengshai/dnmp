@@ -58,6 +58,22 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {
                             field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [
                                 {
+                                    name: 'problem',
+                                    text: '问题记录',
+                                    title: __('问题记录'),
+                                    extend: 'data-area = \'["70%","70%"]\'',
+                                    classname: 'btn btn-xs btn-warning btn-dialog',
+                                    icon: 'fa fa-list',
+                                    url: 'demand/it_web_task/problem_detail',
+                                    callback: function (data) {
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                    },
+                                    visible: function (row) {
+                                        //返回true时按钮显示,返回false隐藏
+                                        return true;
+                                    }
+                                },
+                                {
                                     name: 'ajax',
                                     text: '完成',
                                     title: __('完成'),
@@ -137,6 +153,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 return false;
             });
 
+            //关键结果弹出框
             $(document).on('click', '.btn-list', function () {
                 var options = {
                     shadeClose: false,
@@ -266,6 +283,34 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                             return false;
                                         }
                                     }
+                                },
+
+                                {
+                                    name: 'info',
+                                    text: '记录问题',
+                                    title: __('记录问题'),
+                                    classname: 'btn btn-xs btn-success  btn-dialog',
+                                    icon: 'fa fa-pencil',
+                                    url: 'demand/it_web_task/test_info',
+                                    success: function (data, ret) {
+                                        table.bootstrapTable('refresh', {});
+                                        //如果需要阻止成功提示，则必须使用return false;
+                                        //return false;
+                                    },
+                                    error: function (data, ret) {
+                                        console.log(data, ret);
+                                        Layer.alert(ret.msg);
+                                        return false;
+                                    },
+                                    visible: function (row) {
+                                        return true;
+                                        var test_person = Config.test_user;
+                                        if ($.inArray(Config.user_id, test_person) !== -1 && row.is_test_adopt == 0 && row.is_complete == 1) {
+                                            return true;
+                                        } else {
+                                            return false;
+                                        }
+                                    }
                                 }
                             ], formatter: Table.api.formatter.operate
                         }
@@ -277,6 +322,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             Table.api.bindevent(table);
 
 
+        },
+        test_info:function(){
+            Controller.api.bindevent();
+        },
+        problem_detail: function () {
+            Controller.api.bindevent();
         },
         api: {
             formatter: {
@@ -327,6 +378,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     }
                     var shtml = '';
                     for (var i in person) {
+                        if (!i) {
+                            continue;
+                        }
                         shtml += "<option value='" + i + "'>" + person[i] + "</option>";
                     }
                     $(this).parent().parent().find('.person_in_charge').html(shtml);
