@@ -72,5 +72,16 @@ class ZendeskAgents extends Backend
 
         return $this->view->fetch();
     }
-
+    /**
+     * 获取平台Agents用户
+     *
+     * @Description
+     * @author lsw
+     * @since 2020/03/28 14:58:26 
+     * @return void
+     */
+    public function getPlatformUser()
+    {
+        $res = (new Notice(request(),['type' => 'zeelool']))->fetchUser();
+    }
 }

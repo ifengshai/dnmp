@@ -238,5 +238,26 @@ class Notice extends Controller
             return ['code' => 0, 'message' => $e->getMessage()];
         }
     }
+    /**
+     * 获取所有用户
+     *
+     * @Description
+     * @author lsw
+     * @since 2020/03/28 14:50:55 
+     * @return void
+     */
+    public function fetchUser()
+    {
+        // try {
+        //     $params['role'] = 'admin';
+        //     return $this->client->users()->findAll($params);
+        // } catch (\Exception $e) {
+        //     return ['code' => 0, 'message' => $e->getMessage()];
+        // }
+        // $params['role'] = 'admin';
+        // return $this->client->users()->findAll($params);
+        $result =  $this->client->users()->findAll(['role' => 'end-user']);
+        return $result;    
+    }
 
 }
