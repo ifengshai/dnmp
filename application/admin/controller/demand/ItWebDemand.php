@@ -46,22 +46,46 @@ class ItWebDemand extends Backend
                 return $this->selectpage();
             }
 
+            $filter = json_decode($this->request->get('filter'), true);
+            $smap = array();
+            if ($filter['Allgroup_sel'] == 1) {
+                $smap['web_designer_group'] = 1;
+            }
+            if ($filter['Allgroup_sel'] == 2) {
+                $smap['phper_group'] = 1;
+            }
+            if ($filter['Allgroup_sel'] == 3) {
+                $smap['app_group'] = 1;
+            }
+            if ($filter['Allgroup_sel'] == 4) {
+                $smap['test_group'] = 1;
+            }
+            if($smap){
+                unset($filter['Allgroup_sel']);
+                $this->request->get(['filter' => json_encode($filter)]);
+            }
+
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
                 ->where($where)
+                ->where($smap)
                 ->where('type', 2)
+                ->where('is_del', 1)
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->model
                 ->where($where)
+                ->where($smap)
                 ->where('type', 2)
+                ->where('is_del', 1)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
             $list = collection($list)->toArray();
             //检查有没有权限
             $permissions['demand_add'] = $this->auth->check('demand/it_web_demand/add');//新增权限
+            $permissions['demand_del'] = $this->auth->check('demand/it_web_demand/del');//删除权限
             $permissions['demand_through_demand'] = $this->auth->check('demand/it_web_demand/through_demand');//开发通过
             $permissions['demand_distribution'] = $this->auth->check('demand/it_web_demand/distribution');//开发分配
             $permissions['demand_test_distribution'] = $this->auth->check('demand/it_web_demand/test_distribution');//测试分配
@@ -71,7 +95,6 @@ class ItWebDemand extends Backend
             $permissions['demand_add_online'] = $this->auth->check('demand/it_web_demand/add_online');//上线需求
 
             foreach ($list as $k => $v){
-                $list[$k]['sitetype'] = config('demand.siteType')[$v['site_type']];//取站点
                 $user_detail = $this->auth->getUserInfo($list[$k]['entry_user_id']);
                 $list[$k]['entry_user_name'] = $user_detail['nickname'];//取提出人
 
@@ -158,6 +181,7 @@ class ItWebDemand extends Backend
                 //$this->user_id = $this->auth->id;
                 //权限赋值
                 $list[$k]['demand_add'] = $permissions['demand_add'];
+                $list[$k]['demand_del'] = $permissions['demand_del'];
                 $list[$k]['demand_through_demand'] = $permissions['demand_through_demand'];
                 $list[$k]['demand_distribution'] = $permissions['demand_distribution'];
                 $list[$k]['demand_test_distribution'] = $permissions['demand_test_distribution'];
@@ -165,14 +189,23 @@ class ItWebDemand extends Backend
                 $list[$k]['demand_test_finish'] = $permissions['demand_test_finish'];
                 $list[$k]['demand_test_record_bug'] = $permissions['demand_test_record_bug'];
                 $list[$k]['demand_add_online'] = $permissions['demand_add_online'];
+
+                //判断当前登录人是否显示应该操作的按钮
+                if($v['test_group'] == 1 && $v['test_user_id'] != ''){
+                    if(in_array($this->auth->id, explode(',', $v['test_user_id']))){
+                        $list[$k]['is_test_record_hidden'] = 1;
+                        $list[$k]['is_test_finish_hidden'] = 1;
+                    }
+                }
+                if($this->auth->id == $v['entry_user_id']){
+                    $list[$k]['is_entry_user_hidden'] = 1;
+                }
             }
-
-
-
             $result = array("total" => $total, "rows" => $list);
-
             return json($result);
         }
+        $this->assignconfig('is_test_record_hidden', $this->auth->check('demand/it_web_demand/test_record_bug'));
+        $this->assignconfig('is_test_finish_hidden', $this->auth->check('demand/it_web_demand/test_group_finish'));
         return $this->view->fetch();
     }
 
@@ -201,6 +234,7 @@ class ItWebDemand extends Backend
 
             if ($params) {
                 if($params['is_user_confirm'] == 1){
+                    //提出人确认
                     $data['entry_user_confirm'] =  1;
                     $data['entry_user_confirm_time'] =  date('Y-m-d H:i',time());
                     $res = $this->model->allowField(true)->save($data,['id'=> input('ids')]);
@@ -210,6 +244,7 @@ class ItWebDemand extends Backend
                         $this->error('失败');
                     }
                 }else{
+                    //新增
                     $params = $params['row'];
                     if ($params['copy_to_user_id']) {
                         $params['copy_to_user_id'] = implode(",", $params['copy_to_user_id']);
@@ -261,6 +296,60 @@ class ItWebDemand extends Backend
     }
 
     /**
+     * 编辑
+     */
+    public function edit($ids = null)
+    {
+
+        if ($this->request->isPost()) {
+            $params = $this->request->post("row/a");
+            if ($params) {
+                if ($params['copy_to_user_id']) {
+                    $params['copy_to_user_id'] = implode(",", $params['copy_to_user_id']);
+                }
+                $res = $this->model->allowField(true)->save($params,['id'=> input('ids')]);
+                if ($res) {
+                    $this->success('成功');
+                } else {
+                    $this->error('失败');
+                }
+            }
+            $this->error(__('Parameter %s can not be empty', ''));
+        }
+        $row = $this->model->get($ids);
+        $row = $row->toArray();
+        //如果已分配app人员
+        $copy_to_user_id_arr = array();
+        if($row['copy_to_user_id']){
+            $copy_userids = explode(',',$row['copy_to_user_id']);
+            foreach ($copy_userids as $k => $v){
+                $copy_to_user_id_arr[$k]['user_id'] = $v;
+                $copy_to_user_id_arr[$k]['user_name'] = config('demand.copyToUserId')[$v];
+            }
+        }
+
+        $this->view->assign("copy_to_user_id_arr", $copy_to_user_id_arr );
+        $this->view->assign("row", $row );
+        return $this->view->fetch();
+    }
+
+    /**
+     * 逻辑删除
+     * */
+    public function del($ids = "")
+    {
+        if ($this->request->isAjax()) {
+            $data['is_del'] =  2;
+            $res = $this->model->allowField(true)->save($data,['id'=> input('ids')]);
+            if ($res) {
+                $this->success('成功');
+            } else {
+                $this->error('失败');
+            }
+        }
+    }
+
+    /**
      * 测试分配
      * 测试组权限
      */
@@ -299,7 +388,7 @@ class ItWebDemand extends Backend
         $row = $this->model->get(['id' => $ids]);
         $row_arr = $row->toArray();
 
-        //如果已分配app人员
+        //如果已测试人员
         if($row_arr['test_group'] == 1){
             if($row_arr['test_user_id']){
                 $test_userids = explode(',',$row_arr['test_user_id']);
@@ -583,9 +672,17 @@ class ItWebDemand extends Backend
     public function test_group_finish($ids = null)
     {
         if ($this->request->isAjax()) {
-            $data['status'] =  5;
-            $data['test_is_finish'] =  1;
-            $data['test_finish_time'] =  date('Y-m-d H:i',time());
+            $is_all_test = input('is_all_test');
+            if($is_all_test == 1){
+                $data['status'] =  7;
+                $data['return_test_is_finish'] =  1;
+                $data['return_test_finish_time'] =  date('Y-m-d H:i',time());
+                $data['all_finish_time'] =  date('Y-m-d H:i',time());
+            }else{
+                $data['status'] =  5;
+                $data['test_is_finish'] =  1;
+                $data['test_finish_time'] =  date('Y-m-d H:i',time());
+            }
             $res = $this->model->allowField(true)->save($data,['id'=> input('ids')]);
             if ($res) {
                 $this->success('成功');
