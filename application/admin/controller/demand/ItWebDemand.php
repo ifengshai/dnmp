@@ -24,7 +24,7 @@ class ItWebDemand extends Backend
     {
         parent::_initialize();
         $this->model = new \app\admin\model\demand\ItWebDemand;
-        $this->TestRecordModel = new \app\admin\model\demand\ItTestRecord;
+        $this->testRecordModel = new \app\admin\model\demand\ItTestRecord;
     }
 
     /**
@@ -601,61 +601,13 @@ class ItWebDemand extends Backend
         if($this->request->isPost()) {
             $params = $this->request->post("row/a");
             if ($params) {
-                if($params['group_finish'] == 1){
-                    $flag = 0;//3可以更新status值，其他都不能更新
-                    $update_date = array();
-                    //前端点击完成方法
-                    if($params['web_finish'] == 1){
-                        $update_date['web_designer_is_finish'] = 1;
-                        $update_date['web_designer_finish_time'] =  date('Y-m-d H:i',time());
-                        $res = $this->model->allowField(true)->save($update_date,['id'=> $params['id']]);
-                    }
+                $params['create_time'] =  date('Y-m-d H:i',time());
+                $res_status = $this->testRecordModel->allowField(true)->save($params);
 
-                    //后端点击完成方法
-                    if($params['php_finish'] == 1){
-                        $update_date['phper_is_finish'] = 1;
-                        $update_date['phper_finish_time'] =  date('Y-m-d H:i',time());
-                        $res = $this->model->allowField(true)->save($update_date,['id'=> $params['id']]);
-                    }
-
-                    //app点击完成方法
-                    if($params['app_finish'] == 1){
-                        $update_date['app_is_finish'] = 1;
-                        $update_date['app_finish_time'] =  date('Y-m-d H:i',time());
-                        $res = $this->model->allowField(true)->save($update_date,['id'=> $params['id']]);
-                    }
-
-                    //判断状态
-                    $row = $this->model->get(['id' => $params['id']]);
-                    $row_arr = $row->toArray();
-
-                    if(($row_arr['web_designer_group'] == 1 && $row_arr['web_designer_is_finish'] == 1) || $row_arr['web_designer_group'] == 0){
-                        $flag += 1;
-                    }
-
-                    if(($row_arr['phper_group'] == 1 && $row_arr['phper_is_finish'] == 1) || $row_arr['phper_group'] == 0){
-                        $flag += 1;
-                    }
-
-                    if(($row_arr['app_group'] == 1 && $row_arr['app_is_finish'] == 1) || $row_arr['app_group'] == 0){
-                        $flag += 1;
-                    }
-
-                    if($flag == 3){
-                        $update_status['status'] = 4;
-                        $res_status = $this->model->allowField(true)->save($update_status,['id'=> $params['id']]);
-                        if ($res_status) {
-                            $this->success('成功');
-                        } else {
-                            $this->error('失败');
-                        }
-                    }else{
-                        if ($res) {
-                            $this->success('成功');
-                        } else {
-                            $this->error('失败');
-                        }
-                    }
+                if ($res_status) {
+                    $this->success('成功');
+                } else {
+                    $this->error('失败');
                 }
             }
             $this->error(__('Parameter %s can not be empty', ''));
@@ -666,8 +618,6 @@ class ItWebDemand extends Backend
         $row_arr = $row->toArray();
         $year_time = date('Y-m-d H:i',time());
 
-
-
         if($row['web_designer_group'] == 1 && $row['web_designer_user_id'] != ''){
             $row_arr['web_designer_username'] = $this->extract_username($row['web_designer_user_id'],'web_designer_user');
         }
@@ -677,10 +627,51 @@ class ItWebDemand extends Backend
         if($row['app_group'] == 1 && $row['app_user_id'] != ''){
             $row_arr['app_username'] = $this->extract_username($row['app_user_id'],'app_user');
         }
+        /*测试日志--测试环境*/
+        $left_test_list = $this->testRecordModel
+            ->where('pid',$ids)
+            ->where('type', $row_arr['type'])
+            ->where('environment_type', 1)
+            ->order('id', 'desc')
+            ->select();
+        $left_test_list = collection($left_test_list)->toArray();
+        foreach ($left_test_list as $k_left => $v_left){
+            if($v_left['responsibility_group'] == 1){
+                $left_test_list[$k_left]['responsibility_user_name'] = $this->extract_username($row['web_designer_user_id'],'web_designer_user');
+            }
+            if($v_left['responsibility_group'] == 2){
+                $left_test_list[$k_left]['responsibility_user_name'] = $this->extract_username($row['phper_user_id'],'phper_user');
+            }
+            if($v_left['responsibility_group'] == 3){
+                $left_test_list[$k_left]['responsibility_user_name'] = $this->extract_username($row['app_user_id'],'app_user');
+            }
+            $left_test_list[$k_left]['create_time'] = date('m-d H:i',strtotime($v_left['create_time']));
+        }
+        /*测试日志--正式环境*/
+        $right_test_list = $this->testRecordModel
+            ->where('pid',$ids)
+            ->where('type', $row_arr['type'])
+            ->where('environment_type', 2)
+            ->order('id', 'desc')
+            ->select();
+        $right_test_list = collection($right_test_list)->toArray();
+        foreach ($right_test_list as $k_right => $v_right){
+            if($v_right['responsibility_group'] == 1){
+                $right_test_list[$k_right]['responsibility_user_name'] = $this->extract_username($row['web_designer_user_id'],'web_designer_user');
+            }
+            if($v_right['responsibility_group'] == 2){
+                $right_test_list[$k_right]['responsibility_user_name'] = $this->extract_username($row['phper_user_id'],'phper_user');
+            }
+            if($v_right['responsibility_group'] == 3){
+                $right_test_list[$k_right]['responsibility_user_name'] = $this->extract_username($row['app_user_id'],'app_user');
+            }
+            $right_test_list[$k_right]['create_time'] = date('m-d H:i',strtotime($v_right['create_time']));
+        }
 
-        dump($row_arr);
-
-        $this->view->assign("year_time", $year_time);
+        $bug_type = config('demand.bug_type');//严重类型
+        $this->view->assign("bug_type", $bug_type);
+        $this->view->assign("left_test_list", $left_test_list);
+        $this->view->assign("right_test_list", $right_test_list);
 
         $this->view->assign("row", $row_arr);
         return $this->view->fetch();
