@@ -7,6 +7,7 @@ use app\admin\model\warehouse\LogisticsInfo;
 use app\common\controller\Backend;
 use think\Db;
 use fast\Alibaba;
+use fast\Trackingmore;
 
 
 
@@ -477,11 +478,11 @@ order by sfoi.item_id asc limit 1000";
             $label = [];
             foreach ($items as $k => $v) {
                 //如果镜片参数为真 或 不等于 Plastic Lenses 并且不等于 FRAME ONLY则此订单为含处方
-                if ($v['index_type'] == '' || $v['index_type'] == 'Plastic Lenses' || $v['index_type'] == 'FRAME ONLY') {
+                if ($v['index_type'] == '' || $v['index_type'] == 'Plastic Lenses' || $v['index_type'] == 'FRAME ONLY' || $v['index_type'] == 'FRAME ONLY (Plastic lenses)') {
                     $label[] = 1; //仅镜架
-                } else if (($v['index_type'] && $v['index_type'] != 'Plastic Lenses' && $v['index_type'] != 'FRAME ONLY') && $v['is_custom_lens'] == 0) {
+                } else if (($v['index_type'] && $v['index_type'] != 'Plastic Lenses' && $v['index_type'] != 'FRAME ONLY' && $v['index_type'] != 'FRAME ONLY (Plastic lenses)') && $v['is_custom_lens'] == 0) {
                     $label[] = 2; //现片含处方
-                } else if (($v['index_type'] && $v['index_type'] != 'Plastic Lenses' && $v['index_type'] != 'FRAME ONLY') && $v['is_custom_lens'] == 1) {
+                } else if (($v['index_type'] && $v['index_type'] != 'Plastic Lenses' && $v['index_type'] != 'FRAME ONLY' && $v['index_type'] != 'FRAME ONLY (Plastic lenses)') && $v['is_custom_lens'] == 1) {
                     $label[] = 3; //定制含处方
                 }
             }
@@ -2360,6 +2361,9 @@ order by sfoi.item_id asc limit 1000";
         //当月采购镜架总数
         $purchaseFrameNum = $purchase->getPurchaseFrameNum();
 
+        //当月采购镜架总金额
+        $purchaseFramePrice = $purchase->getPurchaseFramePrice();
+
         //当月采购总SKU数
         $purchaseSkuNum = $purchase->getPurchaseSkuNum();
 
@@ -2401,6 +2405,10 @@ order by sfoi.item_id asc limit 1000";
         $data['value'] = $purchaseFrameNum;
         $data['updatetime'] = date('Y-m-d H:i:s', time());
         $dataConfig->where('key', 'purchaseFrameNum')->update($data);
+
+        $data['value'] = $purchaseFramePrice;
+        $data['updatetime'] = date('Y-m-d H:i:s', time());
+        $dataConfig->where('key', 'purchaseFramePrice')->update($data);
 
         $data['value'] = $purchaseSkuNum;
         $data['updatetime'] = date('Y-m-d H:i:s', time());
@@ -2719,11 +2727,18 @@ order by sfoi.item_id asc limit 1000";
         $data['updatetime'] = date('Y-m-d H:i:s', time());
         $dataConfig->where('key', 'pressureRate7days')->update($data);
 
+        //获取当月物流妥投数量
+        $list = $this->getTrackingMoreStatusNumberCount();
+        $monthAppropriate = $list['delivered'];
+
         //当月妥投总量
         $data['value'] = $monthAppropriate ?? 0;
         $data['updatetime'] = date('Y-m-d H:i:s', time());
         $dataConfig->where('key', 'monthAppropriate')->update($data);
 
+        $allAppropriateNum = array_sum($list);
+        $monthAppropriatePercent = $allAppropriateNum ? $list['delivered']/$allAppropriateNum*100 : 0;
+        
         //当月妥投占比
         $data['value'] = $monthAppropriatePercent ?? 0;
         $data['updatetime'] = date('Y-m-d H:i:s', time());
@@ -2734,6 +2749,26 @@ order by sfoi.item_id asc limit 1000";
         $data['updatetime'] = date('Y-m-d H:i:s', time());
         $dataConfig->where('key', 'overtimeOrder')->update($data);
     }
+
+     /**
+     * 获取当月物流妥投数量
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/03/24 14:04:27 
+     * @return void
+     */
+    protected function getTrackingMoreStatusNumberCount()
+    {
+        //转国内时间
+        $starttime = strtotime(date('Y-m-01 00:00:00', time())) - 8*3600;
+        $endtime = strtotime(date('Y-m-d H:i:s', time()));
+        $track = new Trackingmore();
+        $track = $track->getStatusNumberCount($starttime, $endtime);
+        return $track['data'];
+    }
+
+
 
     /**
      * 定时更新供应链大屏-选品数据

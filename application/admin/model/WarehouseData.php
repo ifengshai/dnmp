@@ -25,6 +25,6 @@ class WarehouseData extends Model
         ->order('create_date asc')
         ->select();
         $list = collection($list)->toArray();
-        return $list;
+        return $list ?? [];
     }
 }

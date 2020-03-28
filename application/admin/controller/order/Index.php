@@ -3,7 +3,6 @@
 namespace app\admin\controller\order;
 
 use app\common\controller\Backend;
-use think\Hook;
 use fast\Trackingmore;
 use Util\NihaoPrescriptionDetailHelper;
 use Util\ZeeloolPrescriptionDetailHelper;
@@ -14,7 +13,6 @@ use PhpOffice\PhpSpreadsheet\Reader\Xls;
 use PhpOffice\PhpSpreadsheet\Reader\Csv;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use think\Exception;
-use think\exception\PDOException;
 
 /**
  * 订单列表
@@ -209,6 +207,8 @@ class Index extends Backend
         $this->view->assign("label", $label);
         return $this->view->fetch();
     }
+
+
     /**
      * 订单成本核算 create@lsw
      */

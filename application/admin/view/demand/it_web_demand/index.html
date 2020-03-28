@@ -13,6 +13,11 @@
     .check_demand_content:hover{
         background-color: #217dbb;
     }
+    .all_user_name{
+        text-align: left;
+        width: 100%;
+        float: left;
+    }
 </style>
 <div class="panel panel-default panel-intro">
     {:build_heading()}
@@ -39,6 +44,7 @@
                         
                     </div>
                     <table id="table" class="table table-striped table-bordered table-hover table-nowrap"
+                           data-operate-through_demand="{:$auth->check('demand/it_web_demand/through_demand')}"
                            data-operate-edit="{:$auth->check('demand/it_web_demand/edit')}"
                            data-operate-del="{:$auth->check('demand/it_web_demand/del')}"
                            width="100%">

@@ -639,16 +639,16 @@ class SaleAfterTask extends Model
                 }
 				switch($v['order_type']){
 					case 2:
-					$result[$k]['order_type'] = '批发';
+					$result[$k]['order_type'] = '<span style="color:#f39c12">批发</span>';
 					break;
 					case 3:
-					$result[$k]['order_type'] = '网红';
+					$result[$k]['order_type'] = '<span style="color:#18bc9c">网红</span>';
 					break;
 					case 4:
-					$result[$k]['order_type'] = '补发';
+					$result[$k]['order_type'] = '<span style="color:#e74c3c">补发</span>';
 					break;
 					default:
-					$result[$k]['order_type'] = '普通订单';
+					$result[$k]['order_type'] = '<span style="color:#0073b7">普通订单</span>';
 					break;
 				}
 				$result[$k]['real_papid'] = round(($v['base_total_paid'] + $v['base_total_due'])*$v['base_to_order_rate'],3);

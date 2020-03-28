@@ -226,6 +226,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj', 'custom
             Table.api.bindevent(table);
         },
         purchase_data_analysis: function () {
+            Controller.api.formatter.daterangepicker($("form[role=form1]"));
             //库存分布
             //销售排行榜图表
             var chartOptions = {
@@ -296,6 +297,90 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj', 'custom
                     }
                 }
                 EchartObj.api.ajax(options, chartOptions)
+            })
+
+
+            //库存分布
+            var chartOptions01 = {
+                targetId: 'echart1',
+                downLoadTitle: '图表',
+                type: 'pie',
+                pie: {
+                    
+                    tooltip: { //提示框组件。
+                        trigger: 'item',
+                        formatter: function (param) {
+                            return param.data.name + '<br/>数量：' + param.data.value + '<br/> 占比：' + param.percent.toFixed(2) + '%';
+                        }
+                    },
+                }
+            };
+
+            var options01 = {
+                type: 'post',
+                url: 'datacenter/index/purchase_data_analysis',
+                data: {
+                    'key': 'pie01'
+                }
+
+            }
+            EchartObj.api.ajax(options01, chartOptions01)
+
+
+            //库存分布
+            var chartOptions02 = {
+                targetId: 'echart2',
+                downLoadTitle: '图表',
+                type: 'pie',
+                pie: {
+                    tooltip: { //提示框组件。
+                        trigger: 'item',
+                        formatter: function (param) {
+                            return param.data.name + '<br/>数量：' + param.data.value + '<br/> 占比：' + param.percent.toFixed(2) + '%';
+                        }
+                    },
+                }
+            };
+
+            var options02 = {
+                type: 'post',
+                url: 'datacenter/index/purchase_data_analysis',
+                data: {
+                    'key': 'pie02'
+                }
+
+            }
+            EchartObj.api.ajax(options02, chartOptions02)
+
+
+            //切换图表
+            $(document).on('click', '.btn-success', function () {
+                var create_time = $('#create_time').val();
+                if (!create_time) {
+                    Toastr.error('请先选择时间范围');
+                    return false;
+                }
+                var options01 = {
+                    type: 'post',
+                    url: 'datacenter/index/purchase_data_analysis',
+                    data: {
+                        'key': 'pie01',
+                        'time': create_time
+                    }
+
+                }
+                EchartObj.api.ajax(options01, chartOptions01)
+
+                var options02 = {
+                    type: 'post',
+                    url: 'datacenter/index/purchase_data_analysis',
+                    data: {
+                        'key': 'pie02',
+                        'time': create_time
+                    }
+
+                }
+                EchartObj.api.ajax(options02, chartOptions02)
             })
 
         },
