@@ -33,14 +33,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         { field: 'type', title: __('Type'), custom: { 1: 'success', 2: 'success', 3: 'success' }, searchList: { 1: '短期任务', 2: '中期任务', 3: '长期任务' }, formatter: Table.api.formatter.status },
                         { field: 'title', title: __('Title') },
                         { field: 'desc', title: __('Desc'), cellStyle: formatTableUnit, formatter: Controller.api.formatter.getClear, operate: false },
-                        { field: 'closing_date', title: __('Closing_date') },
+                        { field: 'closing_date', title: __('Closing_date') , operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime },
                         {
                             field: 'is_complete', title: __('Is_complete'),
                             custom: { 1: 'success', 0: 'danger' },
                             searchList: { 1: '是', 0: '否' },
                             formatter: Table.api.formatter.status
                         },
-                        { field: 'complete_date', title: __('complete_date') },
+                        { field: 'complete_date', title: __('complete_date'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime },
                         {
                             field: 'is_test_adopt', title: __('Is_test_adopt'), custom: { 1: 'success', 0: 'danger' },
                             searchList: { 1: '是', 0: '否' },
@@ -258,6 +258,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                         return false;
                                     },
                                     visible: function (row) {
+                                        return true;
                                         var test_person = Config.test_user;
                                         if ($.inArray(Config.user_id, test_person) !== -1 && row.is_test_adopt == 0 && row.is_complete == 1) {
                                             return true;
