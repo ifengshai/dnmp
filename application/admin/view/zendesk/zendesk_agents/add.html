@@ -1,0 +1,39 @@
+<form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('admin.nickname')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            {:Form::select('row[admin_id]', $user, null, ['class'=>'form-control', 'data-rule'=>'required','data-live-search' => true,'id'=>'admin_id'])}
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Type')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            {:Form::select('row[type]', $type, null, ['class'=>'form-control', 'data-rule'=>'required','data-live-search' => true,'id'=>'type'])}
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Name')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-name" data-rule="required" class="form-control" name="row[name]" type="text">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Agent_type')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            {:Form::select('row[agent_type]', $agent_type, null, ['class'=>'form-control', 'data-rule'=>'required','data-live-search' => true,'id'=>'agent_type'])}
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Count')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-count" data-rule="required" class="form-control" name="row[count]" type="number" value="0">
+        </div>
+    </div>
+    <div class="form-group layer-footer">
+        <label class="control-label col-xs-12 col-sm-2"></label>
+        <div class="col-xs-12 col-sm-8">
+            <button type="submit" class="btn btn-success btn-embossed disabled">{:__('OK')}</button>
+            <button type="reset" class="btn btn-default btn-embossed">{:__('Reset')}</button>
+        </div>
+    </div>
+</form>

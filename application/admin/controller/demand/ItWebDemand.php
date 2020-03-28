@@ -31,7 +31,6 @@ class ItWebDemand extends Backend
      * 因此在当前控制器中可不用编写增删改查的代码,除非需要自己控制这部分逻辑
      * 需要将application/admin/library/traits/Backend.php中对应的方法复制到当前控制器,然后进行修改
      */
-
     /**
      * 技术部网站需求列表
      */
