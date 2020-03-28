@@ -60,46 +60,6 @@ class ZendeskMailTemplate extends Backend
         ];
         return $arr;
     }
-    /**
-     * 邮件状态
-     *
-     * @Description
-     * @author lsw
-     * @since 2020/03/28 09:53:09 
-     * @return void
-     */
-    private function mail_status()
-    {
-        $arr = [
-                0       => '',
-            'New'       => 'New',
-            'Open'      => 'Open',
-            'Pending'   => 'Pending',
-            'Solved'    => 'Solved',
-            'Closed'    => 'Closed'
-        ];
-        return $arr;
-    }
-    /**
-     * 邮件等级
-     *
-     * @Description
-     * @author lsw
-     * @since 2020/03/28 09:58:52 
-     * @return void
-     */
-    private function mail_level()
-    {
-        $arr = [
-              0         => '',
-            'Low'       => 'Low',
-            'Normal'    => 'Normal',
-            'High'      => 'High',
-            'Urgent'    => 'Urgent'
-        ];
-        return $arr;        
-
-    }
     public function _initialize()
     {
         parent::_initialize();
