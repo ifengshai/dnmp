@@ -225,6 +225,11 @@ class Zendesk extends Backend
         $ticket['lastComment'] = $comment->lastComment[0]->html_body;
         return json($ticket);
     }
+
+    /**
+     * 合并工单
+     * @throws \Exception
+     */
     public function setMerge()
     {
         if ($this->request->isPost()) {

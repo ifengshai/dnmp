@@ -205,6 +205,12 @@ class Notice extends Controller
 
 
     }
+
+    /**
+     * 上传附件
+     * @param $attachment
+     * @return array
+     */
     public function attachment($attachment)
     {
         try {
@@ -217,6 +223,13 @@ class Notice extends Controller
             return ['code' => 0, 'message' => $e->getMessage()];
         }
     }
+
+    /**
+     * 合并工单
+     * @param $ticket_id
+     * @param $params
+     * @return array
+     */
     public function merge($ticket_id,$params)
     {
         try {
