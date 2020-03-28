@@ -76,6 +76,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                var nid = $(this).data('nid');
                var pid = $(this).data('pid');
                var subject = $(this).data('subject');
+               var ticket_id = $('.merge-input').val();
+               if(ticket_id){
+                   nid = ticket_id;
+               }
                 if (nid) {
                     $.ajax({
                         type: "POST",

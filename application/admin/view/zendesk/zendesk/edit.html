@@ -27,6 +27,12 @@
                 <div class="box box-primary">
                     <!-- /.box-header -->
                     <div class="box-body">
+                        <strong>CCs</strong>
+                        <p class="text-muted">
+                            {:Form::select('row[email_cc][]', [], null, ['class'=>'form-control selectpicker', null,'multiple' => true,'data-live-search' => true,'id'=>'Entry_tags_select'])}
+                        </p>
+
+                        <hr>
                         <strong>tags</strong>
                         <p class="text-muted">
                             {:Form::select('row[tags][]', $tags, explode(',',$ticket->tags), ['class'=>'form-control selectpicker', null,'multiple' => true,'data-live-search' => true,'id'=>'Entry_tags_select'])}
@@ -186,15 +192,11 @@
                 </div>
                 <div class="box-body box-profile">
                     <ul class="list-group list-group-unbordered">
+                        {foreach name="recentTickets" item="vo"}
                         <li class="list-group-item">
-                            <b>#90733  Order 400189475</b> <a class="pull-right">open</a>
+                            <b>#{$vo->ticket_id}  {$vo->subject}</b> <a class="pull-right">{$vo->status_format}</a>
                         </li>
-                        <li class="list-group-item">
-                            <b>#90733  Order 400189475</b> <a class="pull-right">open</a>
-                        </li>
-                        <li class="list-group-item">
-                            <b>#90733  Order 400189475</b> <a class="pull-right">open</a>
-                        </li>
+                        {/foreach}
                     </ul>
                 </div>
                 <!-- /.box-body -->
@@ -207,7 +209,7 @@
 
                     <div class="box-tools">
                         <div class="input-group input-group-xs" style="width: 200px;">
-                            <input type="text" disabled="" class="form-control pull-right" placeholder="zeliciousone@yahoo.com">
+                            <input type="text" disabled="" class="form-control pull-right" placeholder="{$ticket->email}">
                         </div>
                     </div>
                 </div>
@@ -264,9 +266,9 @@
                     <div class="form-group">
                         <label for="exampleInputEmail1">Enter ticket id to merge into:</label>
                         <div class="input-group input-group-xs">
-                            <input id="c-name" data-rule="required" class="form-control" name="row[name]" type="text" value="{$row.name|htmlentities}">
+                            <input  data-rule="required" class="form-control merge-input" name="row[name]" type="text" value="">
                             <span class="input-group-btn">
-                                <button type="button" class="btn btn-default btn-flat">Merge</button>
+                                <button type="button" class="btn btn-default btn-flat merge" data-subject="{$ticket->subject}" data-pid="{$ticket->ticket_id}"  data-dismiss="modal" aria-label="Close" data-toggle="modal" data-target="#modal-default2">Merge</button>
                             </span>
                         </div>
 

@@ -19,7 +19,9 @@ class Zendesk extends Model
 
     // 追加属性
     protected $append = [
-        'tag_format'
+        'tag_format',
+        'status_format',
+        'username_format'
     ];
 
     public function admin()
@@ -29,6 +31,14 @@ class Zendesk extends Model
     public function lastComment()
     {
         return $this->hasMany(ZendeskComments::class,'zid','id')->order('id','desc')->limit(1);
+    }
+    public function getStatusFormatAttr($value, $data)
+    {
+        return config('zendesk.status')[$data['status']];
+    }
+    public function getUsernameFormatAttr($value, $data)
+    {
+        return $data['username'].'——'.$data['email'];
     }
     public function getTagFormatAttr($value, $data)
     {
