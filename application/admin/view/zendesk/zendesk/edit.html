@@ -1,0 +1,360 @@
+<!-- Main content -->
+<section class="content">
+
+    <div class="row">
+        <form id="edit-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
+            <div class="col-md-2">
+
+                <!-- Profile Image -->
+                <div class="box box-primary">
+                    <div class="box-body box-profile">
+                        <img class="profile-user-img img-responsive img-circle" src="/assets/img/avatar.png" alt="User profile picture">
+
+                        <h3 class="profile-username text-center">{$ticket->username}</h3>
+
+
+                        <ul class="list-group list-group-unbordered">
+                            <li class="list-group-item">
+                                <i class="fa fa-envelope margin-r-5"></i> {$ticket->email}
+                            </li>
+                        </ul>
+                    </div>
+                    <!-- /.box-body -->
+                </div>
+                <!-- /.box -->
+
+                <!-- About Me Box -->
+                <div class="box box-primary">
+                    <!-- /.box-header -->
+                    <div class="box-body">
+                        <strong>tags</strong>
+                        <p class="text-muted">
+                            {:Form::select('row[tags][]', $tags, explode(',',$ticket->tags), ['class'=>'form-control selectpicker', null,'multiple' => true,'data-live-search' => true,'id'=>'Entry_tags_select'])}
+                        </p>
+
+                        <hr>
+
+                        <strong>priority</strong>
+                        <p class="text-muted">
+                            {:Form::select('row[priority]', config('zendesk.priority'), $ticket->priority, ['class'=>'form-control selectpicker', null,'data-live-search' => true,'id'=>'Entry_priority_select'])}
+                        </p>
+                    </div>
+                    <!-- /.box-body -->
+                </div>
+                <!-- /.box -->
+            </div>
+            <!-- /.col -->
+            <div class="col-md-7">
+                <div class="nav-tabs-custom">
+                    <div class="box box-solid">
+                        <!-- /.box-header -->
+                        <div class="box-body">
+                            <div class="user-block pull-left">
+                                <img class="img-circle img-bordered-sm" src="../../dist/img/user7-128x128.jpg" alt="User Image">
+                                <span class="username">
+                                  <span href="#"><input id="c-subject" data-rule="required" value="{$ticket->subject}" class="form-control" name="row[subject]" type="text"></span>
+                                </span>
+                                <span class="description">{$ticket->update_time} · {$ticket->username} {$ticket->email} · {$ticket->channel}</span>
+                            </div>
+                            <div class="user-block pull-right">
+                                <button type="button" class="btn btn-default" data-toggle="modal" data-target="#modal-default">
+                                    合并工单
+                                </button>
+                            </div>
+                        </div>
+                        {if condition="$ticket->rating"}
+                        <div class="callout" style="background-color:#fffcf3;">
+                            <h4>Rating! <button type="button" class="btn btn-block btn-warning btn-flat">{$ticket->rating}</button></h4>
+                            {$ticket->comment}
+                        </div>
+                        {/if}
+                        <div class="form-group">
+                            <label class="control-label col-xs-12 col-sm-2">{:__('pulbic_type')}</label>
+                            <div class="col-xs-12 col-sm-8">
+                                {:Form::select('row[public_type]', config('zendesk.pulbic_type'), null, ['class'=>'form-control selectpicker', null,'data-live-search' => true,'id'=>'Entry_type_select'])}
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-xs-12 col-sm-2">{:__('Status')}</label>
+                            <div class="col-xs-12 col-sm-8">
+                                {:Form::select('row[status]', config('zendesk.status'), $ticket->status, ['class'=>'form-control selectpicker', null,'data-live-search' => true,'id'=>'Entry_status_select'])}
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-xs-12 col-sm-2">回复内容：</label>
+                            <div class="col-xs-12 col-sm-9">
+                                <textarea id="c-content" class="form-control editor" rows="5" name="row[content]" cols="50"></textarea>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="c-image" class="control-label col-xs-12 col-sm-2">上传附件:</label>
+                            <div class="col-xs-12 col-sm-8">
+                                <div class="input-group">
+                                    <input id="c-image" class="form-control" size="35" name="row[image]" type="text" value="">
+                                    <div class="input-group-addon no-border no-padding">
+                                        <span><button type="button" id="plupload-image" class="btn btn-danger plupload" data-input-id="c-image" data-mimetype="*" data-multiple="true"  data-preview-id="p-image"><i class="fa fa-upload"></i> {:__('Upload')}</button></span>
+                                    </div>
+                                    <span class="msg-box n-right"></span>
+                                </div>
+                                <ul class="row list-inline plupload-preview" id="p-image"></ul>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-xs-12 col-sm-2">是否创建工单</label>
+                            <div class="col-xs-12 col-sm-8">
+                                <input  id="c-switch" name="row[switch]" type="hidden" value="0">
+                                <a href="javascript:;" data-toggle="switcher" class="btn-switcher" data-input-id="c-switch" data-yes="1" data-no="0" >
+                                    <i class="fa fa-toggle-on text-success  fa-2x"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="form-group layer-footer">
+                            <label class="control-label col-xs-12 col-sm-2"></label>
+                            <div class="col-xs-12 col-sm-8">
+                                <button type="submit" class="btn btn-success btn-embossed disabled">发送邮件</button>
+                            </div>
+                        </div>
+                        <!-- /.box-body -->
+                    </div>
+                    <br />
+                    <div class="tab-content">
+                        <div class="active tab-pane" id="activity">
+                            <!-- Post -->
+                            {foreach name="comments" item="vo"}
+                            <div class="post">
+                                <div class="user-block">
+                                    <img class="img-circle img-bordered-sm" src="../../dist/img/user1-128x128.jpg" alt="user image">
+                                    <span class="username">
+                                        {if condition="$vo['is_admin']"}
+                                      <a href="#">{$vo->agent->name}</a>
+                                        {else/}
+                                        <a href="#">{$ticket->username}</a>
+                                        {/if}
+                                    </span>
+                                    <span class="description">{$vo->update_time}</span>
+                                </div>
+                                <!-- /.user-block -->
+                                <div style="margin:0px 0px 0px 50px;">
+                                   {$vo->html_body}
+                                    {if condition="$vo.attachments"}
+                                    <ul class="mailbox-attachments clearfix">
+                                        {foreach name="$vo['attachments']|explode=',',###" item="vv"}
+                                        {if condition="in_array(pathinfo($vv,PATHINFO_EXTENSION),['jpg','jpeg','git','png','bmp'])"}
+                                        <li>
+                                            <span class="mailbox-attachment-icon has-img"><img src="{$vv}" alt="Attachment"></span>
+                                            <div class="mailbox-attachment-info">
+                                                <a href="{$vv}" target="_blank" class="mailbox-attachment-name"><i class="fa fa-camera"></i> {$vv|basename|substr='-10'}</a>
+                                                <span class="mailbox-attachment-size">
+                                                    附件
+                                                  <a href="{$vv}"  download="{$vv}" class="btn btn-default btn-xs pull-right"><i class="fa fa-cloud-download"></i></a>
+                                                </span>
+                                            </div>
+                                        </li>
+                                        {else/}
+                                        <li>
+                                            <span class="mailbox-attachment-icon"><i class="fa fa-file-o"></i></span>
+                                            <div class="mailbox-attachment-info">
+                                                <a href="#" class="mailbox-attachment-name"><i class="fa fa-paperclip"></i> {$vv|basename|substr='-10'}</a>
+                                                <span class="mailbox-attachment-size">
+                                                    附件
+                                                    <a href="{$vv}"  download="{$vv}" class="btn btn-default btn-xs pull-right"><i class="fa fa-cloud-download"></i></a>
+                                                </span>
+                                            </div>
+                                        </li>
+                                        {/if}
+                                        {/foreach}
+                                    </ul>
+                                    {/if}
+                                </div>
+                            </div>
+
+                            {/foreach}
+                            <!-- /.post -->
+                        </div>
+                    </div>
+                    <!-- /.tab-content -->
+                </div>
+                <!-- /.nav-tabs-custom -->
+            </div>
+        </form>
+        <div class="col-md-3">
+
+            <!-- Profile Image -->
+            <div class="box box-primary">
+                <div class="box-header with-border">
+                    <h3 class="box-title">Five Most Recent</h3>
+                </div>
+                <div class="box-body box-profile">
+                    <ul class="list-group list-group-unbordered">
+                        <li class="list-group-item">
+                            <b>#90733  Order 400189475</b> <a class="pull-right">open</a>
+                        </li>
+                        <li class="list-group-item">
+                            <b>#90733  Order 400189475</b> <a class="pull-right">open</a>
+                        </li>
+                        <li class="list-group-item">
+                            <b>#90733  Order 400189475</b> <a class="pull-right">open</a>
+                        </li>
+                    </ul>
+                </div>
+                <!-- /.box-body -->
+            </div>
+
+            <!-- About Me Box -->
+            <div class="box">
+                <div class="box-header">
+                    <h3 class="box-title">Order</h3>
+
+                    <div class="box-tools">
+                        <div class="input-group input-group-xs" style="width: 200px;">
+                            <input type="text" disabled="" class="form-control pull-right" placeholder="zeliciousone@yahoo.com">
+                        </div>
+                    </div>
+                </div>
+                <!-- /.box-header -->
+                <div class="box-body table-responsive no-padding">
+                    <table class="table table-hover">
+                        <tr>
+                            <th>Number</th>
+                            <th>Date</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                        </tr>
+                        <tr>
+                            <td>100184275</td>
+                            <td>1/30/2020</td>
+                            <td>$80.76</td>
+                            <td>Processing</td>
+                        </tr>
+                        <tr>
+                            <td>100184275</td>
+                            <td>1/30/2020</td>
+                            <td>$80.76</td>
+                            <td>Processing</td>
+                        </tr>
+                        <tr>
+                            <td>100184275</td>
+                            <td>1/30/2020</td>
+                            <td>$80.76</td>
+                            <td>Processing</td>
+                        </tr>
+                    </table>
+                </div>
+                <!-- /.box-body -->
+            </div>
+            <!-- /.box -->
+        </div>
+        <!-- /.col -->
+    </div>
+    <!-- /.row -->
+    <div class="modal fade in" id="modal-default" style="padding-right: 17px;">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span></button>
+                    <h4 class="modal-title">Ticket merge</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-info alert-dismissible">
+                        <h4>#{$ticket->ticket_id}</h4>
+                        <h4>{$ticket->create_time} · {$ticket->username}</h4>
+                        {$ticket->subject}
+                    </div>
+                    <div class="form-group">
+                        <label for="exampleInputEmail1">Enter ticket id to merge into:</label>
+                        <div class="input-group input-group-xs">
+                            <input id="c-name" data-rule="required" class="form-control" name="row[name]" type="text" value="{$row.name|htmlentities}">
+                            <span class="input-group-btn">
+                                <button type="button" class="btn btn-default btn-flat">Merge</button>
+                            </span>
+                        </div>
+
+                    </div>
+                    <p class="text-green">———————————————————— OR ————————————————————</p>
+                    <div class="row">
+                        {foreach name="tickets" item="vo"}
+                        <div class="col-sm-4 col-md-6">
+                            <div class="color-palette-set">
+                                <div class=""><span class="label label-primary">#{$vo->ticket_id}</span></div>
+                                <div class=""><span class="label text-green">{$vo->update_time} {$vo->username}</span></div>
+                                <div class="merge" data-subject="{$ticket->subject}" data-pid="{$ticket->ticket_id}" data-nid="{$vo->ticket_id}" data-dismiss="modal" aria-label="Close" data-toggle="modal" data-target="#modal-default2"><a href=""><b>{$vo->subject}</b></a></div>
+                            </div>
+                        </div>
+                        {/foreach}
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal" aria-label="Close">Close</button>
+                </div>
+            </div>
+            <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
+    </div>
+    <div class="modal fade in" id="modal-default2" style="padding-right: 17px;">
+        <div class="modal-dialog">
+            <form action="{:url('zendesk/zendesk/test')}" method="post">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span></button>
+                    <h4 class="modal-title">Ticket merge</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-warning alert-dismissible">
+                        You are about to merge ticket #{$ticket->ticket_id} into ticket <sapn class="merge-ticket-id"></sapn>
+                    </div>
+                    <div class="row">
+                        <div class="box box-primary">
+                            <div class="box-header with-border">
+                                <span class="label label-primary">#{$ticket->ticket_id}</span>
+                                {$ticket->subject}
+                            </div>
+                            <!-- /.box-header -->
+                                <div class="box-body">
+                                    <input type="hidden" name="row[merge_to_id]" class="pid" value="{$ticket->ticket_id}">
+                                    <div class="form-group">
+                                        <label for="exampleInputEmail1">This ticket will be closed with the following comment: </label>
+                                        <textarea type="test" name="row[merge_to]" class="form-control close-content merge-content-to" id="exampleInputEmail1"></textarea>
+                                    </div>
+                                    <div class="checkbox">
+                                        <label>
+                                            <input type="checkbox"  name="row[merge_to_check]" checked> Requester can see this comment
+                                        </label>
+                                    </div>
+                                </div>
+                        </div>
+                        <div class="box box-primary">
+                            <div class="box-header with-border">
+                                <span class="label label-primary merge-ticket-id"></span>
+                                <span class="merge-title merge-subject"></span>
+                            </div>
+                            <!-- /.box-header -->
+                            <div class="box-body">
+                                <input type="hidden" name="row[merge_in_id]" value="" class="nid">
+                                <div class="form-group">
+                                    <label for="exampleInputEmail1">This ticket will be updated with the following comment:  </label>
+                                    <textarea type="text" class="form-control merge-content-in" name="row[merge_in]"> </textarea>
+                                </div>
+                                <div class="checkbox">
+                                    <label>
+                                        <input type="checkbox" name="row[merge_in_check]" checked> Requester can see this comment
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal" aria-label="Close">Close</button>
+                    <button type="submit" class="btn btn-success btn-merge-submit">Confirm and Merge</button>
+                </div>
+            </div>
+            </form>
+            <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
+    </div>
+</section>
+<!-- /.content -->

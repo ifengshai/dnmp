@@ -66,8 +66,9 @@ class ZendeskOne extends Controller
     {
         try {
             // Query Zendesk API to retrieve the ticket details
-            $id = 86205;
+            $id = 95686;
             $ticket = $this->client->tickets()->find($id);
+            dump(collection($ticket)->toArray());
             // $result = $this->client->tickets($id)->comments()->findAll();
             // $requester_email = $ticket->via->source->from->address;
             // $count = $result->count;
@@ -83,13 +84,19 @@ class ZendeskOne extends Controller
             // $get_order_id = $this->getOrderId($customr_comment_all);
             // $order = $this->findOrderByEmail($requester_email,$get_order_id);
             // $res = $this->getTrackMsg(41);
-            $track = new Trackingmore();
-            $res = $track->getRealtimeTrackingResults('usps', '92748902348247002004895036');
-            echo json_encode($res);
+            // $track = new Trackingmore();
+            // $res = $track->getRealtimeTrackingResults('usps', '92748902348247002004895036');
+            // echo json_encode($res);
             die;
         } catch (\Zendesk\API\Exceptions\ApiResponseException $e) {
             echo $e->getMessage() . '</br>';
         }
+    }
+    public function test2()
+    {
+            $id = 95686;
+            $result = $this->client->tickets($id)->comments()->findAll();     
+            dump($result);   
     }
 
     /**

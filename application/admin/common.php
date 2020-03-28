@@ -198,7 +198,7 @@ if (!function_exists('build_heading')) {
 /**
  * 过滤数组空值
  */
-function trim_value(&$value)
-{
-    $value  =  trim($value);
-}
+//function trim_value(&$value)
+//{
+//    $value  =  trim($value);
+//}
