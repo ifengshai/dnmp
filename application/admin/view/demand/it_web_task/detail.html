@@ -57,7 +57,7 @@
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">{:__('Type')}:</label>
         <div class="col-xs-12 col-sm-8">
-            <select name="row[type]" class="form-control" data-rule="required">
+            <select name="row[type]" class="form-control" data-rule="required" disabled>
                 <option value="">请选择</option>
                 <option value="1" {:$row['type']==1 ? 'selected' : '' }>短期任务</option>
                 <option value="2" {:$row['type']==2 ? 'selected' : '' }>中期任务</option>
@@ -68,7 +68,7 @@
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">{:__('站点')}:</label>
         <div class="col-xs-12 col-sm-8">
-            <select name="row[site_type]" class="form-control" data-rule="required">
+            <select name="row[site_type]" class="form-control" data-rule="required" disabled>
                 {foreach $siteType as $k => $v}
                 <option value="{$k}" {:$row['site_type']==$k ? 'selected' : '' }>{$v}</option>
                 {/foreach}
@@ -78,20 +78,20 @@
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">{:__('Title')}:</label>
         <div class="col-xs-12 col-sm-8">
-            <input id="c-title" data-rule="required" class="form-control" name="row[title]" type="text"
+            <input id="c-title" data-rule="required" disabled class="form-control" name="row[title]" type="text"
                 value="{$row.title}">
         </div>
     </div>
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">{:__('Desc')}:</label>
         <div class="col-xs-12 col-sm-8">
-            <textarea id="c-desc" class="form-control editor" rows="4" name="row[desc]" cols="30">{$row.desc}</textarea>
+            <textarea id="c-desc" class="form-control editor" rows="4" disabled name="row[desc]" cols="30">{$row.desc}</textarea>
         </div>
     </div>
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">{:__('Closing_date')}:</label>
         <div class="col-xs-12 col-sm-8">
-            <input id="c-closing_date" data-rule="required" class="form-control datetimepickernew"
+            <input id="c-closing_date" data-rule="required" disabled class="form-control datetimepickernew"
                 name="row[closing_date]" type="text" value="{$row.closing_date}">
         </div>
     </div>
@@ -114,18 +114,15 @@
                 {foreach $item as $v}
                 <tr>
                     <td>
-                        <select name="type[]" class="form-control" data-rule="required" style="width:120px;">
+                        <select name="type[]" class="form-control" data-rule="required" disabled style="width:120px;">
                             <option value="">请选择</option>
                             <option value="1" {:$v['type']==1 ? 'selected' : '' }>短期任务</option>
                             <option value="2" {:$v['type']==2 ? 'selected' : '' }>中期任务</option>
                             <option value="3" {:$v['type']==3 ? 'selected' : '' }>长期任务</option>
                         </select>
                     </td>
-
-                    <input id="c-purchase_remark" class="form-control item_id" name="item_id[]" value="{$v.id}"
-                        type="hidden">
                     <td>
-                        <select name="group_type[]" class="form-control group_type" style="width:120px;">
+                        <select name="group_type[]" class="form-control group_type" disabled style="width:120px;">
                             <option value="">请选择</option>
                             <option value="1" {:$v['group_type']==1 ? 'selected' : '' }>前端</option>
                             <option value="2" {:$v['group_type']==2 ? 'selected' : '' }>后端</option>
@@ -146,13 +143,13 @@
                     }
                     {/php}
                     <td>
-                        <select name="person_in_charge[]" class="form-control person_in_charge" style="width:120px;">
+                        <select name="person_in_charge[]" class="form-control person_in_charge" disabled style="width:120px;">
                             <option value="{$v.person_in_charge}">{$person_in_charge[$v['person_in_charge']]}</option>
                         </select>
                     </td>
-                    <td><input id="c-title" class="form-control" name="title[]" type="text" value="{$v.title}"></td>
-                    <td><input id="c-desc" class="form-control" name="desc[]" type="text" value="{$v.desc}"></td>
-                    <td><input id="c-closing_date" class="form-control datetimepickernew" name="plan_date[]" type="text"
+                    <td><input id="c-title" class="form-control" name="title[]" type="text" disabled value="{$v.title}"></td>
+                    <td><input id="c-desc" class="form-control" name="desc[]" type="text" disabled value="{$v.desc}"></td>
+                    <td><input id="c-closing_date" class="form-control datetimepickernew" disabled name="plan_date[]" type="text"
                             value="{$v.plan_date}"></td>
 
                 </tr>
