@@ -27,6 +27,7 @@ class ItWebTask extends Backend
         parent::_initialize();
         $this->model = new \app\admin\model\demand\ItWebTask;
         $this->itWebTaskItem = new \app\admin\model\demand\ItWebTaskItem;
+        $this->testRecord = new \app\admin\model\demand\ItTestRecord();
     }
 
     /**
@@ -56,7 +57,7 @@ class ItWebTask extends Backend
                 $admin = new \app\admin\model\Admin();
                 $smap['nickname'] = ['like', '%' . $filter['nickname'] . '%'];
                 $id = $admin->where($smap)->value('id');
-                $task_ids = $this->itWebTaskItem->where('person_in_charge',$id)->column('task_id');
+                $task_ids = $this->itWebTaskItem->where('person_in_charge', $id)->column('task_id');
                 $map['id'] = ['in', $task_ids];
                 unset($filter['nickname']);
                 $this->request->get(['filter' => json_encode($filter)]);
@@ -74,7 +75,7 @@ class ItWebTask extends Backend
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
-            
+
             foreach ($list as $k => $v) {
                 $list[$k]['sitetype'] = config('demand.siteType')[$v['site_type']]; //取站点
             }
@@ -84,8 +85,11 @@ class ItWebTask extends Backend
             return json($result);
         }
         //判断是否有完成按钮权限
-        $this->assignconfig('is_set_status',$this->auth->check('demand/it_web_task/set_task_complete_status'));
-        $this->assignconfig('is_edit',$this->auth->check('demand/it_web_task/edit'));
+        $this->assignconfig('is_set_status', $this->auth->check('demand/it_web_task/set_task_complete_status'));
+        $this->assignconfig('is_problem_detail', $this->auth->check('demand/it_web_task/problem_detail'));
+        $this->assignconfig('is_edit', $this->auth->check('demand/it_web_task/edit'));
+        $this->assignconfig('is_set_task_test_status', $this->auth->check('demand/it_web_task/set_task_test_status'));
+        $this->assignconfig('is_regression_test_info', $this->auth->check('demand/it_web_task/regression_test_info'));
         return $this->view->fetch();
     }
 
@@ -111,17 +115,27 @@ class ItWebTask extends Backend
                         $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.add' : $name) : $this->modelValidate;
                         $this->model->validateFailException(true)->validate($validate);
                     }
+
+                    $group_type = $this->request->post("group_type/a");
+                    $person_in_charge = $this->request->post("person_in_charge/a");
+                    $title = $this->request->post("title/a");
+                    $desc = $this->request->post("desc/a");
+                    $plan_date = $this->request->post("plan_date/a");
+
+                    //执行过滤空值
+                    array_walk($group_type, 'trim_value');
+                    array_walk($person_in_charge, 'trim_value');
+                    array_walk($title, 'trim_value');
+                   
+                    if (count(array_filter($group_type)) < 1 || count(array_filter($person_in_charge)) < 1 || count(array_filter($title)) < 1) {
+                        $this->error('请先分配任务');
+                    }
+
                     $params['create_person'] = session('admin.nickname');
                     $params['createtime'] = date('Y-m-d H:i:s', time());
                     $result = $this->model->allowField(true)->save($params);
                     //添加分配信息
                     if ($result !== false) {
-                        $group_type = $this->request->post("group_type/a");
-                        $person_in_charge = $this->request->post("person_in_charge/a");
-                        $title = $this->request->post("title/a");
-                        $desc = $this->request->post("desc/a");
-                        $plan_date = $this->request->post("plan_date/a");
-
                         $data = [];
                         foreach ($group_type as $k => $v) {
                             $data[$k]['person_in_charge'] = $person_in_charge[$k];
@@ -364,6 +378,28 @@ class ItWebTask extends Backend
         }
     }
 
+    /**
+     * 更改通过测试状态
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/03/26 18:24:19 
+     * @param [type] $ids
+     * @return void
+     */
+    public function set_task_test_status($ids = null)
+    {
+        $data['test_regression_adopt'] = 1;
+        $data['test_regression_adopt_time'] = date('Y-m-d H:i:s', time());
+        $data['test_regression_person'] = session('admin.nickname');
+        $res = $this->model->save($data, ['id' => $ids]);
+        if ($res !== false) {
+            $this->success('操作成功！！');
+        } else {
+            $this->error('操作失败！！');
+        }
+    }
+
 
     /**
      * 更改完成状态
@@ -435,5 +471,202 @@ class ItWebTask extends Backend
         } else {
             $this->error('操作失败！！');
         }
+    }
+
+    /**
+     * 记录测试问题
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/03/28 10:30:31 
+     * @param [type] $ids
+     * @return void
+     */
+    public function test_info($ids = null)
+    {
+        $row = $this->itWebTaskItem->get($ids);
+        if (!$row) {
+            $this->error(__('No Results were found'));
+        }
+        $adminIds = $this->getDataLimitAdminIds();
+        if (is_array($adminIds)) {
+            if (!in_array($row[$this->dataLimitField], $adminIds)) {
+                $this->error(__('You have no permission'));
+            }
+        }
+
+        $testInfo = $this->model->get($row->task_id);
+        if ($this->request->isPost()) {
+            $params = $this->request->post("row/a");
+            if ($params) {
+                $params = $this->preExcludeFields($params);
+                $result = false;
+                Db::startTrans();
+                try {
+                    $params['site_type'] = $testInfo['site_type'];
+                    $params['type'] = 3;
+                    $params['pid'] = $row->task_id;
+                    $params['responsibility_group'] = $row->group_type;
+                    $params['environment_type'] = 1;
+                    $params['responsibility_user_id'] = $row->person_in_charge;
+                    $params['create_time'] = date('Y-m-d H:i:s');
+                    $params['create_user_id'] = $this->auth->id;
+                    $result = $this->testRecord->allowField(true)->save($params);
+                    Db::commit();
+                } catch (ValidateException $e) {
+                    Db::rollback();
+                    $this->error($e->getMessage());
+                } catch (PDOException $e) {
+                    Db::rollback();
+                    $this->error($e->getMessage());
+                } catch (Exception $e) {
+                    Db::rollback();
+                    $this->error($e->getMessage());
+                }
+                if ($result !== false) {
+                    $this->success();
+                } else {
+                    $this->error(__('No rows were updated'));
+                }
+            }
+            $this->error(__('Parameter %s can not be empty', ''));
+        }
+
+        $this->view->assign("row", $row);
+        $this->assign('siteType', config('demand.siteType'));
+        return $this->view->fetch();
+    }
+
+    /**
+     * 问题记录
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/03/28 11:31:24 
+     * @param [type] $ids
+     * @return void
+     */
+    public function problem_detail($ids = null)
+    {
+        $map['pid'] = $ids;
+        $map['type'] = 3;
+        /*测试日志--测试环境*/
+        $left_test_list = $this->testRecord
+            ->where($map)
+            ->where('environment_type', 1)
+            ->order('id', 'desc')
+            ->select();
+        $left_test_list = collection($left_test_list)->toArray();
+        foreach ($left_test_list as $k_left => $v_left) {
+            if ($v_left['responsibility_group'] == 1) {
+                $left_test_list[$k_left]['responsibility_user_name'] = config('demand.web_designer_user')[$v_left['responsibility_user_id']];
+            } elseif ($v_left['responsibility_group'] == 2) {
+                $left_test_list[$k_left]['responsibility_user_name'] = config('demand.phper_user')[$v_left['responsibility_user_id']];
+            } else if ($v_left['responsibility_group'] == 3) {
+                $left_test_list[$k_left]['responsibility_user_name'] = config('demand.app_user')[$v_left['responsibility_user_id']];
+            }
+            $left_test_list[$k_left]['create_user_name'] = config('demand.test_user')[$v_left['create_user_id']];
+        }
+
+        /*测试日志--正式环境*/
+        $right_test_list = $this->testRecord
+            ->where($map)
+            ->where('environment_type', 2)
+            ->order('id', 'desc')
+            ->select();
+        $right_test_list = collection($right_test_list)->toArray();
+        foreach ($right_test_list as $k_right => $v_right) {
+            if ($v_left['responsibility_group'] == 1) {
+                $right_test_list[$k_right]['responsibility_user_name'] = config('demand.web_designer_user')[$v_right['responsibility_user_id']];
+            } elseif ($v_left['responsibility_group'] == 2) {
+                $right_test_list[$k_right]['responsibility_user_name'] = config('demand.phper_user')[$v_right['responsibility_user_id']];
+            } else if ($v_left['responsibility_group'] == 3) {
+                $right_test_list[$k_right]['responsibility_user_name'] = config('demand.app_user')[$v_right['responsibility_user_id']];
+            }
+            $right_test_list[$k_right]['create_user_name'] = config('demand.test_user')[$v_right['create_user_id']];
+        }
+
+        $bug_type = config('demand.bug_type'); //严重类型
+        $this->view->assign("bug_type", $bug_type);
+        $this->view->assign("left_test_list", $left_test_list);
+        $this->view->assign("right_test_list", $right_test_list);
+        return $this->view->fetch();
+    }
+
+    /**
+     * 记录回归测试问题
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/03/28 10:30:31 
+     * @param [type] $ids
+     * @return void
+     */
+    public function regression_test_info($ids = null)
+    {
+        $row = $this->model->get($ids);
+        if (!$row) {
+            $this->error(__('No Results were found'));
+        }
+        $adminIds = $this->getDataLimitAdminIds();
+        if (is_array($adminIds)) {
+            if (!in_array($row[$this->dataLimitField], $adminIds)) {
+                $this->error(__('You have no permission'));
+            }
+        }
+
+        if ($this->request->isPost()) {
+            $params = $this->request->post("row/a");
+            if ($params) {
+                $params = $this->preExcludeFields($params);
+                $result = false;
+                Db::startTrans();
+                try {
+                    $params['type'] = 3;
+                    $params['environment_type'] = 2;
+                    $params['pid'] = $row->id;
+                    $params['site_type'] = $row->site_type;
+                    $params['create_time'] = date('Y-m-d H:i:s');
+                    $params['create_user_id'] = $this->auth->id;
+                    $result = $this->testRecord->allowField(true)->save($params);
+                    Db::commit();
+                } catch (ValidateException $e) {
+                    Db::rollback();
+                    $this->error($e->getMessage());
+                } catch (PDOException $e) {
+                    Db::rollback();
+                    $this->error($e->getMessage());
+                } catch (Exception $e) {
+                    Db::rollback();
+                    $this->error($e->getMessage());
+                }
+                if ($result !== false) {
+                    $this->success();
+                } else {
+                    $this->error(__('No rows were updated'));
+                }
+            }
+            $this->error(__('Parameter %s can not be empty', ''));
+        }
+
+        $this->view->assign("row", $row);
+        //查询此记录责任人id
+        $person_ids = $this->itWebTaskItem->where('task_id', $ids)->field('person_in_charge,group_type')->select();
+
+        $group_type = [];
+        foreach ($person_ids as &$v) {
+            if ($v['group_type'] == 1) {
+                $v['person_in_charge_name'] = config('demand.web_designer_user')[$v['person_in_charge']];
+            } elseif ($v['group_type'] == 2) {
+                $v['person_in_charge_name'] = config('demand.phper_user')[$v['person_in_charge']];
+            } elseif ($v['group_type'] == 3) {
+                $v['person_in_charge_name'] = config('demand.app_user')[$v['person_in_charge']];
+            }
+            $group_type[] = $v['group_type'];
+        }
+        $this->assign('person_ids', $person_ids);
+        $this->assign('group_type', array_unique($group_type));
+        $this->assign('siteType', config('demand.siteType'));
+        return $this->view->fetch();
     }
 }
