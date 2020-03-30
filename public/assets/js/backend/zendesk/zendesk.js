@@ -1,4 +1,4 @@
-define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefined, Backend, Table, Form) {
+define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui'], function ($, undefined, Backend, Table, Form) {
 
     var Controller = {
         index: function () {
@@ -39,7 +39,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                 {
                                     name: 'edit',
                                     text: __('Answer'),
-                                    title:function (row) {
+                                    title: function (row) {
                                         return __('Answer') + '【' + row.ticket_id + '】' + row.subject;
                                     },
                                     classname: 'btn btn-xs btn-success btn-dialog',
@@ -62,7 +62,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                 }
 
                             ], formatter: Table.api.formatter.operate
-                        }                    ]
+                        }]
                 ]
             });
             $('.panel-heading a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
@@ -99,13 +99,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             Controller.api.bindevent();
             //删除商品数据
             $(document).on('click', '.merge', function () {
-               var nid = $(this).data('nid');
-               var pid = $(this).data('pid');
-               var subject = $(this).data('subject');
-               var ticket_id = $('.merge-input').val();
-               if(ticket_id){
-                   nid = ticket_id;
-               }
+                var nid = $(this).data('nid');
+                var pid = $(this).data('pid');
+                var subject = $(this).data('subject');
+                var ticket_id = $('.merge-input').val();
+                if (ticket_id) {
+                    nid = ticket_id;
+                }
                 if (nid) {
                     $.ajax({
                         type: "POST",
@@ -136,25 +136,36 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     });
                 }
             });
-            $(document).on('click','.btn-merge-submit',function(){
-               var data = $(this).parents('form').serialize();
-               $.ajax({
-                   type: "POST",
-                   url: "zendesk/zendesk/setMerge",
-                   dataType: "json",
-                   cache: false,
-                   async: false,
-                   data: data,
-                   success: function (json) {
-                       return false;
-                   },
-                   error: function(json){
+            $(document).on('click', '.btn-merge-submit', function () {
+                var data = $(this).parents('form').serialize();
+                $.ajax({
+                    type: "POST",
+                    url: "zendesk/zendesk/setMerge",
+                    dataType: "json",
+                    cache: false,
+                    async: false,
+                    data: data,
+                    success: function (json) {
+                        return false;
+                    },
+                    error: function (json) {
                         return false;
 
-                   }
-               })
-               return false;
+                    }
+                })
+                return false;
             });
+
+            //抄送人标签输入
+            $('#ccs').tagsInput({
+                width: 'auto',
+                defaultText: '输入后回车确认',
+                minInputWidth: 110,
+                height: 'auto',
+                placeholderColor: '#999',
+                autocomplete_url:'zendesk/zendesk/getEmail'
+            });
+
             $(document).on('change','.macro-apply',function(){
                 var id = $(this).val();
                 var ticket_id = $('.ticket_id').val();
