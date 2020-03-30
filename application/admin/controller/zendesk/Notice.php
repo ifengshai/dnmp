@@ -8,6 +8,7 @@
 namespace app\admin\controller\zendesk;
 
 
+use app\admin\model\zendesk\ZendeskPosts;
 use think\Controller;
 use think\Db;
 use think\Exception;
@@ -239,4 +240,27 @@ class Notice extends Controller
         }
     }
 
+    public function setPosts()
+    {
+        $res = $this->client->helpCenter->articles()->findAll(['per_page' => 100]);
+        $page_count = $res->page_count;
+        for($i=1;$i<=$page_count;$i++){
+            $res = $this->client->helpCenter->articles()->findAll(['page' => $i,'per_page' => 100]);
+            $articles = $res->articles;
+            foreach($articles as $article){
+                if(!ZendeskPosts::where('post_id',$article->id)->find()) {
+                    ZendeskPosts::create([
+                        'post_id' => $article->id,
+                        'title' => $article->title,
+                        'html_url' => $article->html_url,
+                        'author_id' => $article->author_id,
+                        'body' => $article->body,
+                        'create_time' => date('Y-m-d H:i:s',strtotime($article->created_at)),
+                        'update_time' => date('Y-m-d H:i:s',strtotime($article->updated_at)),
+                    ]);
+                }
+            }
+
+        }
+    }
 }

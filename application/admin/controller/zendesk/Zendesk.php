@@ -3,10 +3,12 @@
 namespace app\admin\controller\zendesk;
 
 use app\admin\model\Admin;
+use app\admin\model\zendesk\ZendeskPosts;
 use app\common\controller\Backend;
 use app\admin\model\zendesk\ZendeskTags;
 use app\admin\model\zendesk\ZendeskAgents;
 use app\admin\model\zendesk\ZendeskComments;
+use app\admin\model\zendesk\ZendeskMailTemplate;
 use think\Db;
 use think\Exception;
 
@@ -214,7 +216,23 @@ class Zendesk extends Backend
             ->order('id desc')
             ->limit(5)
             ->select();
-        $this->view->assign(compact('tags','ticket','comments','tickets','recentTickets'));
+        //获取所有的消息模板
+        $templateAll = ZendeskMailTemplate::where([
+            'template_platform' => $ticket->type,
+            'template_permission' => 1,
+            'is_active' => 1])
+            ->order('template_category desc,id desc')
+            ->select();
+        $templates = [];
+        foreach($templateAll as $key => $template){
+            $category = '';
+            if($template['template_category']){
+                $category = '【'.config('zendesk.template_category')[$template['template_category']].'】';
+            }
+            $templates[$template['id']] = $category . $template['template_name'];
+        }
+        array_unshift($templates,'Apply Macro');
+        $this->view->assign(compact('tags','ticket','comments','tickets','recentTickets','templates'));
         return $this->view->fetch();
     }
 
@@ -226,12 +244,20 @@ class Zendesk extends Backend
     {
         $ticket_id = input('nid');
         $pid = input('pid');
+        if($ticket_id == $pid) {
+            $this->error("You selected the same ticket as source and target: #{$pid}. You cannot merge a ticket into itself.
+Please close this window and try again.");
+        }
         //合并到的信息
         $ticket = $this->model->where('ticket_id',$ticket_id)->field('id,ticket_id,subject')->find();
         //合并的最后一条评论
         $comment = $this->model->where('ticket_id',$pid)->with('lastComment')->find();
+        if($comment->status == 5) {
+            $this->error("You are unable to merge into #{$pid}. Tickets that are Closed, tickets that are shared with other accounts, and tickets you don\'t have access to cannot be merged into.
+Please close this window and try again.");
+        }
         $ticket['lastComment'] = $comment->lastComment[0]->html_body;
-        return json($ticket);
+        return $this->success('success','',$ticket);
     }
 
     /**
@@ -331,5 +357,42 @@ class Zendesk extends Backend
             }
         }
         $this->error(__('Parameter %s can not be empty', ''));
+    }
+    public function searchPosts()
+    {
+        if ($this->request->isPost()) {
+            $text = input('text');
+            $type = input('type');
+            $posts = ZendeskPosts::where('title','like','%'.$text.'%')->where('type',$type)->select();
+            //拼接html
+            $html = '';
+            $post_html = '';
+            foreach($posts as $key => $post){
+                $html .= <<<DOC
+<div class="card" data-num="{$key}">
+                                <div class="card-body">
+                                <h4 class="card-title"><a href="javascript:void(0)" style="color:#2f3941;font-weight: bold;">{$post->title}</a></h4>
+                            <a href="javascript:void(0)" data-title="{$post->title}" data-link="{$post->html_url}" class="card-link">add link</a>
+                            <button class="btn btn-xs btn-primary pull-right" style="display:none;">linked</button>
+                            </div>
+                            </div>
+DOC;
+                $post_html .= <<<DOC
+<div class="post-row" style="display:none;">
+                            <div class="mailbox-read-info">
+                                <h3>{$post->title}</h3>
+                            </div>
+                            <div class="row  show-posts">
+                            {$post->body}
+                            </div>
+                        </div>
+DOC;
+
+            }
+
+
+            return json(['html' => $html,'post_html' => $post_html]);
+        }
+        $this->error('there has something wrong');
     }
 }
