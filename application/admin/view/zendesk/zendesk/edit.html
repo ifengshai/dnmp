@@ -29,7 +29,7 @@
                     <div class="box-body">
                         <strong>CCs</strong>
                         <p class="text-muted">
-                            {:Form::select('row[email_cc][]', [], null, ['class'=>'form-control selectpicker', null,'multiple' => true,'data-live-search' => true,'id'=>'Entry_tags_select'])}
+                            <input  data-rule="required" class="form-control" id='ccs' name="row[email_cc]" type="text" value="{$rows.email_cc}">
                         </p>
 
                         <hr>

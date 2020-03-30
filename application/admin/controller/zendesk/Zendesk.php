@@ -9,6 +9,9 @@ use app\admin\model\zendesk\ZendeskAgents;
 use app\admin\model\zendesk\ZendeskComments;
 use think\Db;
 use think\Exception;
+use think\exception\PDOException;
+use think\exception\ValidateException;
+
 
 /**
  *
@@ -24,9 +27,8 @@ class Zendesk extends Backend
     {
         parent::_initialize();
         $this->model = new \app\admin\model\zendesk\Zendesk;
-
     }
-    
+
     /**
      * 默认生成的控制器所继承的父类中有index/add/edit/del/multi五个基础方法、destroy/restore/recyclebin三个回收站方法
      * 因此在当前控制器中可不用编写增删改查的代码,除非需要自己控制这部分逻辑
@@ -43,13 +45,13 @@ class Zendesk extends Backend
             }
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
-                ->with(['admin','lastComment'])
+                ->with(['admin', 'lastComment'])
                 ->where($where)
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->model
-                ->with(['admin','lastComment'])
+                ->with(['admin', 'lastComment'])
                 ->where($where)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
@@ -87,7 +89,7 @@ class Zendesk extends Backend
             }
         }
         //获取主的ticket
-        $ticket = $this->model->where('id',$ids)->find();
+        $ticket = $this->model->where('id', $ids)->find();
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
             if ($params) {
@@ -99,10 +101,10 @@ class Zendesk extends Backend
                     //1、tag
                     //2、priority
                     //status
-                    $tags = ZendeskTags::where('id','in',$params['tags'])->column('name');
+                    $tags = ZendeskTags::where('id', 'in', $params['tags'])->column('name');
                     $status = config('zendesk.status')[$params['status']];
-                    $author_id = $assignee_id = ZendeskAgents::where(['admin_id' => session('admin.id'),'agent_type' => $ticket->type])->value('agent_id');
-                    if(!$author_id){
+                    $author_id = $assignee_id = ZendeskAgents::where(['admin_id' => session('admin.id'), 'agent_type' => $ticket->type])->value('agent_id');
+                    if (!$author_id) {
                         throw new Exception('请将用户先绑定zendesk的账号', 10001);
                     }
                     //发送邮件的参数
@@ -115,55 +117,55 @@ class Zendesk extends Backend
                         'assignee_id' => $assignee_id
                     ];
                     //修改主题
-                    if($params['subject'] != $ticket->subject){
+                    if ($params['subject'] != $ticket->subject) {
                         $updateData['subject'] = $params['subject'];
                     }
                     $priority = config('zendesk.priority')[$params['priority']];
                     $body = $params['content'];
-                    if($priority){
+                    if ($priority) {
                         $updateData['priority'] = $priority;
                     }
                     //由于编辑器或默认带个<br>,所以去除标签判断有无值
-                    if(strip_tags($body)){
+                    if (strip_tags($body)) {
                         $updateData['comment']['html_body'] = $body;
                     }
-                    if($params['image']){
+                    if ($params['image']) {
                         //附件上传
-                        $attachments = explode(',',$params['image']);
+                        $attachments = explode(',', $params['image']);
                         $token = [];
-                        foreach($attachments as $attachment){
-                            $res = (new Notice(request(),['type' => 'zeelool']))->attachment($attachment);
-                            if(isset($res['code'])){
+                        foreach ($attachments as $attachment) {
+                            $res = (new Notice(request(), ['type' => 'zeelool']))->attachment($attachment);
+                            if (isset($res['code'])) {
                                 throw new Exception($res['message'], 10001);
                             }
                             $token[] = $res;
                         }
-                        if($token){
+                        if ($token) {
                             $updateData['comment']['uploads'] = $token;
                         }
                     }
                     //私有的
-                    if($params['public_type'] == 1){
+                    if ($params['public_type'] == 1) {
                         $updateData['comment']['public'] = false;
                     }
                     //开始发送
-                    $res = (new Notice(request(),['type' => 'zeelool']))->autoUpdate($ticket->ticket_id,$updateData);
-                    if(isset($res['code'])){
+                    $res = (new Notice(request(), ['type' => 'zeelool']))->autoUpdate($ticket->ticket_id, $updateData);
+                    if (isset($res['code'])) {
                         throw new Exception($res['message'], 10001);
                     }
                     //开始写入数据库
-                    $agent_id = ZendeskAgents::where('admin_id',session('admin.id'))->value('agent_id');
+                    $agent_id = ZendeskAgents::where('admin_id', session('admin.id'))->value('agent_id');
                     //更新主表的状态和priority，tags,due_id，assignee_id等
-                    $result = $this->model->where('id',$ids)->update([
+                    $result = $this->model->where('id', $ids)->update([
                         'subject' => $params['subject'],
                         'priority' => $params['priority'],
                         'status' => $params['status'],
-                        'tags' => join(',',$params['tags']),
+                        'tags' => join(',', $params['tags']),
                         'assignee_id' => $agent_id,
                         'due_id' => session('admin.id'),
                     ]);
                     //评论表添加内容,有body时添加评论，修改状态等不添加
-                    if(strip_tags($params['content'])){
+                    if (strip_tags($params['content'])) {
                         $result = ZendeskComments::create([
                             'ticket_id' => $ticket->ticket_id,
                             'zid' => $ids,
@@ -188,7 +190,7 @@ class Zendesk extends Backend
                     $this->error($e->getMessage());
                 }
                 if ($result !== false) {
-                    $this->success('回复成功！！',url('zendesk/index'));
+                    $this->success('回复成功！！', url('zendesk/index'));
                 } else {
                     $this->error(__('No rows were updated'));
                 }
@@ -196,26 +198,43 @@ class Zendesk extends Backend
             $this->error(__('Parameter %s can not be empty', ''));
         }
         //获取所有的tags
-        $tags = ZendeskTags::column('name','id');
+        $tags = ZendeskTags::column('name', 'id');
 
-        $comments = ZendeskComments::where('zid',$ids)->order('id','desc')->select();
+        $comments = ZendeskComments::where('zid', $ids)->order('id', 'desc')->select();
         //获取该用户的所有状态不为close，sloved的ticket
         $tickets = $this->model
-            ->where(['user_id' => $ticket->user_id,'status' => ['in', [1,2,3]],'type' => $ticket->type])
-            ->where('id','neq',$ids)
+            ->where(['user_id' => $ticket->user_id, 'status' => ['in', [1, 2, 3]], 'type' => $ticket->type])
+            ->where('id', 'neq', $ids)
             ->field('ticket_id,id,username,subject')
             ->order('id desc')
             ->select();
         //获取该用户最新的5条ticket
         $recentTickets = $this->model
-            ->where(['user_id' => $ticket->user_id,'type' => $ticket->type])
-            ->where('id','neq',$ids)
+            ->where(['user_id' => $ticket->user_id, 'type' => $ticket->type])
+            ->where('id', 'neq', $ids)
             ->field('ticket_id,id,username,subject,status')
             ->order('id desc')
             ->limit(5)
             ->select();
-        $this->view->assign(compact('tags','ticket','comments','tickets','recentTickets'));
+        $this->view->assign(compact('tags', 'ticket', 'comments', 'tickets', 'recentTickets'));
+        $this->view->assign('rows', $row);
         return $this->view->fetch();
+    }
+
+    /**
+     * 获取邮箱
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/03/30 09:25:07 
+     * @return void
+     */
+    public function getEmail()
+    {
+        $term = input('term');
+        $where['email'] = ['like', '%' . $term . '%'];
+        $data = $this->model->where($where)->column('email');
+        return json(array_unique($data));
     }
 
     /**
@@ -227,9 +246,9 @@ class Zendesk extends Backend
         $ticket_id = input('nid');
         $pid = input('pid');
         //合并到的信息
-        $ticket = $this->model->where('ticket_id',$ticket_id)->field('id,ticket_id,subject')->find();
+        $ticket = $this->model->where('ticket_id', $ticket_id)->field('id,ticket_id,subject')->find();
         //合并的最后一条评论
-        $comment = $this->model->where('ticket_id',$pid)->with('lastComment')->find();
+        $comment = $this->model->where('ticket_id', $pid)->with('lastComment')->find();
         $ticket['lastComment'] = $comment->lastComment[0]->html_body;
         return json($ticket);
     }
@@ -254,38 +273,38 @@ class Zendesk extends Backend
                 'target_comment_is_public' => $target_comment_is_public,
                 'source_comment_is_public' => $source_comment_is_public,
             ];
-            if($target_comment){
+            if ($target_comment) {
                 $data['target_comment'] = $target_comment;
             }
-            if($source_comment){
+            if ($source_comment) {
                 $data['source_comment'] = $source_comment;
             }
             $result = false;
             try {
                 //合并工单
-                $result = (new Notice(request(),['type' => 'zeelool']))->merge($ticket,$data);
-                if(isset($result['code'])){
+                $result = (new Notice(request(), ['type' => 'zeelool']))->merge($ticket, $data);
+                if (isset($result['code'])) {
                     throw new Exception($result['message'], 10001);
                 }
                 //修改数据库，修改状态
                 //获取closed_by_merge的tag的id
-                $tagId = ZendeskTags::where('name','closed_by_merge')->value('id');
+                $tagId = ZendeskTags::where('name', 'closed_by_merge')->value('id');
                 //获取被合并的tags
-                $tagIds = $this->model->where('ticket_id',$ticket)->value('tags');
-                if($tagIds){
-                    $tagIds = explode(',',$tagIds);
+                $tagIds = $this->model->where('ticket_id', $ticket)->value('tags');
+                if ($tagIds) {
+                    $tagIds = explode(',', $tagIds);
                     array_unshift($tagIds, $tagId);
-                    $tagIds = join(',',$tagIds);
-                }else{
+                    $tagIds = join(',', $tagIds);
+                } else {
                     $tagIds = $tagId;
                 }
 
-                $agent_id = ZendeskAgents::where('admin_id',session('admin.id'))->value('agent_id');
-                $zid = $this->model->where('ticket_id',$ids)->value('id');
+                $agent_id = ZendeskAgents::where('admin_id', session('admin.id'))->value('agent_id');
+                $zid = $this->model->where('ticket_id', $ids)->value('id');
                 //被合并的状态closed，添加content，tag：closed_by_merge
-                $this->model->where('ticket_id',$ids)->update([
+                $this->model->where('ticket_id', $ids)->update([
                     'status' => '5',
-                    'tags' =>$tagIds,
+                    'tags' => $tagIds,
                     'assignee_id' => $agent_id,
                     'due_id' => session('admin.id'),
                 ]);
@@ -300,11 +319,11 @@ class Zendesk extends Backend
                     'is_admin' => 1
                 ]);
                 //合并的添加评论content
-                $this->model->where('ticket_id',$ticket)->update([
+                $this->model->where('ticket_id', $ticket)->update([
                     'assignee_id' => $agent_id,
                     'due_id' => session('admin.id'),
                 ]);
-                $zid = $this->model->where('ticket_id',$ticket)->value('id');
+                $zid = $this->model->where('ticket_id', $ticket)->value('id');
                 ZendeskComments::create([
                     'ticket_id' => $ticket,
                     'zid' => $zid,
@@ -325,7 +344,7 @@ class Zendesk extends Backend
                 $this->error($e->getMessage());
             }
             if ($result !== false) {
-                $this->success('回复成功！！',url('zendesk/index'));
+                $this->success('回复成功！！', url('zendesk/index'));
             } else {
                 $this->error(__('No rows were updated'));
             }
