@@ -26,6 +26,8 @@ class Zendesk extends Backend
     {
         parent::_initialize();
         $this->model = new \app\admin\model\zendesk\Zendesk;
+        $this->view->assign('getTabList',$this->model->getTabList());
+        $this->assignconfig('admin_id',session('admin.id'));
 
     }
     
@@ -43,16 +45,29 @@ class Zendesk extends Backend
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
+            $filter = json_decode($this->request->get('filter'), true);
+            $map = [];
+            if($filter['me_task'] == 1){ //我的所有任务
+                unset($filter['me_task']);
+                $map['zendesk.assign_id'] = session('admin.id');
+            }elseif($filter['me_task'] == 2){ //我的待处理任务
+                unset($filter['me_task']);
+                $map['zendesk.assign_id'] = session('admin.id');
+                $map['zendesk.status'] = ['in', [1,2]];
+            }
+            $this->request->get(['filter' => json_encode($filter)]);
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
                 ->with(['admin','lastComment'])
                 ->where($where)
+                ->where($map)
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->model
                 ->with(['admin','lastComment'])
                 ->where($where)
+                ->where($map)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
@@ -62,7 +77,6 @@ class Zendesk extends Backend
 
             return json($result);
         }
-
         return $this->view->fetch();
     }
 

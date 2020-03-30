@@ -89,7 +89,7 @@ class Notice extends Controller
                 'subject' => $ticket->subject,
                 'raw_subject' => $ticket->raw_subject,
                 'assignee_id' => $ticket->assignee_id ?: 0,
-                'assign_id' => 1,
+                'assign_id' => 0,
             ]);
             //获取所有的附件
             $attachments = [];
@@ -240,6 +240,14 @@ class Notice extends Controller
         }
     }
 
+    /**
+     * 拉取posts的所有数据
+     * @throws \Zendesk\API\Exceptions\ApiResponseException
+     * @throws \Zendesk\API\Exceptions\AuthException
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
     public function setPosts()
     {
         $res = $this->client->helpCenter->articles()->findAll(['per_page' => 100]);

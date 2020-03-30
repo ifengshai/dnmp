@@ -46,4 +46,12 @@ class Zendesk extends Model
         $tags = ZendeskTags::where('id','in',$tagIds)->column('name');
         return join(',',$tags);
     }
+    //获取选项卡列表
+    public function getTabList()
+    {
+        return [
+            ['name'=>'我的全部','field'=>'me_task','value'=>1],
+            ['name'=>'我的待处理','field'=>'me_task','value'=>2],
+        ];
+    }
 }
