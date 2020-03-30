@@ -30,7 +30,8 @@ return [
         1 => 'new',
         2 => 'open',
         3 => 'pending',
-        4 => 'solved'
+        4 => 'solved',
+        5 => 'close'
     ],
     'templates' => [
         //自动回复判断性邮件

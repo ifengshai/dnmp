@@ -201,12 +201,20 @@ class Zendesk extends Backend
         $comments = ZendeskComments::where('zid',$ids)->order('id','desc')->select();
         //获取该用户的所有状态不为close，sloved的ticket
         $tickets = $this->model
-            ->where(['user_id' => $ticket->user_id,'status' => ['in', [1,2,3]]])
+            ->where(['user_id' => $ticket->user_id,'status' => ['in', [1,2,3]],'type' => $ticket->type])
             ->where('id','neq',$ids)
             ->field('ticket_id,id,username,subject')
             ->order('id desc')
             ->select();
-        $this->view->assign(compact('tags','ticket','comments','tickets'));
+        //获取该用户最新的5条ticket
+        $recentTickets = $this->model
+            ->where(['user_id' => $ticket->user_id,'type' => $ticket->type])
+            ->where('id','neq',$ids)
+            ->field('ticket_id,id,username,subject,status')
+            ->order('id desc')
+            ->limit(5)
+            ->select();
+        $this->view->assign(compact('tags','ticket','comments','tickets','recentTickets'));
         return $this->view->fetch();
     }
 

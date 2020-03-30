@@ -38,7 +38,12 @@
 
     }
 </style>
-<form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="{:url('distribution')}">
+{if $row['status'] == 1}
+    <form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="{:url('test_distribution')}">
+    {else}
+    <form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="{:url('distribution')}">
+{/if}
+
     <input type="hidden" name="row[id]" value="{$row.id}" id="demand_id" />
     <input type="hidden" name="row[status]" value="{$row.status}" id="status" />
     {if $row['status'] == 1}
@@ -75,7 +80,7 @@
         <!--测试确认、分配 end-->
     {/if}
 
-    {if $row['status'] == 2}
+    {if $row['status'] == 3}
         <!--前端分配 start-->
         <div class="form-group">
             <label class="control-label col-xs-12 col-sm-2">{:__('Web_designer_group')}</label>

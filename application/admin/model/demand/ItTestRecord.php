@@ -5,7 +5,7 @@ namespace app\admin\model\demand;
 use think\Model;
 
 
-class ItWebDemand extends Model
+class ItTestRecord extends Model
 {
 
     
@@ -13,7 +13,7 @@ class ItWebDemand extends Model
     
 
     // 表名
-    protected $name = 'it_web_demand';
+    protected $name = 'it_test_record';
     
     // 自动写入时间戳字段
     protected $autoWriteTimestamp = false;

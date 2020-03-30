@@ -35,27 +35,83 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             events: Controller.api.events.getcontent,
                             formatter: Controller.api.formatter.getcontent,
                         },
-                        {field: 'hope_time_format', title: __('Hope_time'), operate:'RANGE', addclass:'datetimerange'},
+                        {field: 'hope_time', title: __('Hope_time'), operate:'RANGE', addclass:'datetimerange'},
                         {
                             field: 'Allgroup',
                             title: __('All_group'),
                             operate: false,
-
                             formatter: function (value, rows) {
                                 var res = '';
-                                for(i = 0,len = value.length; i < len; i++){
-                                    res += value[i] + '</br>';
+                                if(value){
+                                    for(i = 0,len = value.length; i < len; i++){
+                                        res += value[i] + '</br>';
+                                    }
                                 }
-                                return res;
+                                var group = '<span>'+res+'</span>';
+                                var web_distribution = '';
+                                if(rows.status == 3 && rows.demand_distribution){
+                                    web_distribution ='<span><a href="#" class="btn btn-xs btn-primary web_distribution" data="'+rows.id+'"><i class="fa fa-list"></i>分配</a></span><br>';
+                                }
+                                return  web_distribution + group;
                             },
                         },
-
-
-                        {field: 'all_user_id', title: __('all_user_id')},
-                        {field: 'all_expect_time', title: __('all_expect_time'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime},
+                        {
+                            field: 'all_user_id',
+                            title: __('all_user_id'),
+                            operate: false,
+                            formatter: function (value, rows) {
+                                var all_user_name = '';
+                                if(rows.web_designer_group == 1){
+                                    all_user_name += '<span class="all_user_name">前端：<b>'+ rows.web_designer_user_name + '</b></span><br>';
+                                }
+                                if(rows.phper_group == 1){
+                                    all_user_name += '<span class="all_user_name">后端：<b>'+ rows.phper_user_name + '</b></span><br>';
+                                }
+                                if(rows.app_group == 1){
+                                    all_user_name += '<span class="all_user_name">APP：<b>'+ rows.app_user_name + '</b></span><br>';
+                                }
+                                return all_user_name;
+                            },
+                        },
+                        {
+                            field: 'all_expect_time',
+                            title: __('all_expect_time'),
+                            operate: false,
+                            formatter: function (value, rows) {
+                                var all_user_name = '';
+                                if(rows.web_designer_group == 1){
+                                    all_user_name += '<span class="all_user_name">前端：<b>'+ rows.web_designer_expect_time + '</b></span><br>';
+                                }
+                                if(rows.phper_group == 1){
+                                    all_user_name += '<span class="all_user_name">后端：<b>'+ rows.phper_expect_time + '</b></span><br>';
+                                }
+                                if(rows.app_group == 1){
+                                    all_user_name += '<span class="all_user_name">APP：<b>'+ rows.app_expect_time + '</b></span><br>';
+                                }
+                                return all_user_name;
+                            },
+                        },
                         {field: 'testgroup', title: __('Test_group')},
-                        {field: 'all_finish_time', title: __('all_finish_time'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime},
+                        {
+                            field: 'test_user_id_arr',
+                            title: __('test_user_id'),
+                            operate: false,
+                            formatter: function (value, rows) {
+                                var res = '';
+                                if(value){
+                                    for(i = 0,len = value.length; i < len; i++){
+                                        res += value[i] + '</br>';
+                                    }
+                                    var group = '<span>'+res+'</span>';
+                                    return  group;
+                                }else{
+                                    return '-';
+                                }
 
+                            },
+                        },
+                        {field: 'all_finish_time', title: __('all_finish_time'), operate:'RANGE', addclass:'datetimerange'},
+                        {field: 'status_str', title: __('Status')},
                         {
                             field: 'buttons',
                             width: "120px",
@@ -64,22 +120,21 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             events: Table.api.events.operate,
                             buttons: [
                                 {
-                                    name: 'distribution1',
+                                    name: 'distribution',
                                     text: __('测试确认'),
                                     title: __('测试确认'),
                                     classname: 'btn btn-xs btn-primary btn-dialog',
-                                    url: 'demand/it_web_demand/distribution',
+                                    url: 'demand/it_web_demand/test_distribution',
                                     callback: function (data) {
                                     },
                                     visible: function(row){
-                                        return true;
-                                        /*if(row.status == 2){
-                                            if(row.demand_distribution){
+                                        if(row.status == 1){
+                                            if(row.demand_test_distribution){
                                                 return true;
                                             }
                                         }else{
                                             return false;
-                                        }*/
+                                        }
                                     }
                                 },
                                 {
@@ -98,28 +153,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                         return false;
                                     },
                                     visible: function(row){
-                                        return true;
-                                        /*if(row.status == 1){
-                                            if(row.demand_through_demand){
-                                                return true;
-                                            }
-                                        }else{
-                                            return false;
-                                        }*/
-                                    }
-                                },
-                                {
-                                    name: 'distribution',
-                                    text: __('分配'),
-                                    title: __('分配'),
-                                    classname: 'btn btn-xs btn-primary btn-dialog',
-                                    icon: 'fa fa-list',
-                                    url: 'demand/it_web_demand/distribution',
-                                    callback: function (data) {
-                                    },
-                                    visible: function(row){
                                         if(row.status == 2){
-                                            if(row.demand_distribution){
+                                            if(row.demand_through_demand){
                                                 return true;
                                             }
                                         }else{
@@ -128,13 +163,53 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     }
                                 },
                                 {
-                                    name: 'ajax',
-                                    text: __('发送Ajax'),
-                                    title: __('发送Ajax'),
+                                    name: 'group_finish',
+                                    text: __('完成'),
+                                    title: __('完成'),
+                                    classname: 'btn btn-xs btn-primary btn-dialog',
+                                    url: 'demand/it_web_demand/group_finish',
+                                    callback: function (data) {
+                                    },
+                                    visible: function(row){
+                                        if(row.status == 3){
+                                            if(row.demand_finish){
+                                                if(row.web_designer_group == 0 && row.phper_group == 0 && row.app_group == 0){
+                                                    return false;
+                                                }else{
+                                                    return true;
+                                                }
+                                            }
+                                        }
+                                    }
+                                },
+                                {
+                                    name: 'group_finish',
+                                    text: __('记录问题'),
+                                    title: __('记录问题'),
+                                    classname: 'btn btn-xs btn-primary btn-dialog',
+                                    url: 'demand/it_web_demand/test_record_bug',
+                                    callback: function (data) {
+                                    },
+                                    visible: function(row){
+                                        return true;
+                                        if(row.status == 4){
+                                            if(row.demand_finish){
+                                                if(row.web_designer_group == 0 && row.phper_group == 0 && row.app_group == 0){
+                                                    return false;
+                                                }else{
+                                                    return true;
+                                                }
+                                            }
+                                        }
+                                    }
+                                },
+                                {
+                                    name: 'test_finish',
+                                    text: __('通过测试'),
+                                    title: __('通过测试'),
                                     classname: 'btn btn-xs btn-success btn-magic btn-ajax',
-                                    icon: 'fa fa-magic',
-                                    url: 'example/bootstraptable/detail',
-                                    confirm: '确认发送',
+                                    url: 'demand/it_web_demand/test_group_finish/is_test/1',
+                                    confirm: '请确定是否  <b>通过测试</b>',
                                     success: function (data, ret) {
                                         Layer.alert(ret.msg + ",返回数据：" + JSON.stringify(data));
                                         //如果需要阻止成功提示，则必须使用return false;
@@ -144,16 +219,28 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                         console.log(data, ret);
                                         Layer.alert(ret.msg);
                                         return false;
+                                    },
+                                    visible: function(row){
+                                        if(row.status == 4){
+                                            if(row.demand_test_finish){
+                                                if(row.test_group == 0){
+                                                    return false;
+                                                }else{
+                                                    return true;
+                                                }
+                                            }
+                                        }
+
                                     }
                                 },
-                                {
+                                /*{
                                     name: 'addtabs',
                                     text: __('新选项卡中打开'),
                                     title: __('新选项卡中打开'),
                                     classname: 'btn btn-xs btn-warning btn-addtabs',
                                     icon: 'fa fa-folder-o',
                                     url: 'example/bootstraptable/detail'
-                                }
+                                }*/
                             ],
                             formatter: Table.api.formatter.buttons
                         },
@@ -208,37 +295,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             formatter: Table.api.formatter.operate
                         },*/
 
-
-
-
-                        /*{field: 'web_designer_user_id', title: __('Web_designer_user_id')},
-                        {field: 'web_designer_expect_time', title: __('Web_designer_expect_time'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime},
-                        {field: 'web_designer_is_finish', title: __('Web_designer_is_finish')},
-                        {field: 'web_designer_finish_time', title: __('Web_designer_finish_time'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime},
-                        {field: 'phper_group', title: __('Phper_group')},
-                        {field: 'phper_complexity', title: __('Phper_complexity')},
-                        {field: 'phper_user_id', title: __('Phper_user_id')},
-                        {field: 'phper_expect_time', title: __('Phper_expect_time'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime},
-                        {field: 'phper_is_finish', title: __('Phper_is_finish')},
-                        {field: 'phper_finish_time', title: __('Phper_finish_time'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime},
-                        {field: 'app_group', title: __('App_group')},
-                        {field: 'app_complexity', title: __('App_complexity')},
-                        {field: 'app_user_id', title: __('App_user_id')},
-                        {field: 'app_expect_time', title: __('App_expect_time'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime},
-                        {field: 'app_is_finish', title: __('App_is_finish')},
-                        {field: 'app_finish_time', title: __('App_finish_time'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime},
-                        {field: 'test_group', title: __('Test_group')},
-                        {field: 'test_complexity', title: __('Test_complexity')},
-                        {field: 'test_user_id', title: __('Test_user_id')},
-                        {field: 'test_is_finish', title: __('Test_is_finish')},
-                        {field: 'test_finish_time', title: __('Test_finish_time'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime},
-                        {field: 'test_bug_for_web_designer_num', title: __('Test_bug_for_web_designer_num')},
-                        {field: 'test_bug_for_phper_num', title: __('Test_bug_for_phper_num')},
-                        {field: 'test_bug_for_app_num', title: __('Test_bug_for_app_num')},
-                        {field: 'entry_user_confirm', title: __('Entry_user_confirm')},
-                        {field: 'entry_user_confirm_time', title: __('Entry_user_confirm_time'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime},
-                        {field: 'all_finish_time', title: __('All_finish_time'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime},*/
-
                     ]
                 ]
             });
@@ -246,7 +302,22 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             // 为表格绑定事件
             Table.api.bindevent(table);
             //需求详情
-            
+
+
+            $(document).on('click', ".web_distribution", function () {
+                var id = $(this).attr('data');
+                var options = {
+                    shadeClose: false,
+                    shade: [0.3, '#393D49'],
+                    area: ['100%', '100%'], //弹出层宽高
+                    callback: function (value) {
+
+                    }
+                };
+                Fast.api.open('demand/it_web_demand/distribution?id=' + id, '分配', options);
+            });
+
+
         },
         add: function () {
             Controller.api.bindevent();
@@ -275,19 +346,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
         },
         edit: function () {
             Controller.api.bindevent();
+
         },
         distribution: function () {
             Controller.api.bindevent();
 
             $(function(){
                 var status = $('#status').val();
-                if(status == 1){
-                    var test_group = $('#test_group').val();
-                    if(test_group == 1){
-                        $('.test_class').show();
-                    }
-                }
-                if(status == 2){
+                if(status == 3){
                     var web_designer_group = $('#Web_designer_group').val();
                     if(web_designer_group == 1){
                         $('.Web_designer_class').show();
@@ -304,31 +370,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     }
                 }
             });
-
-            /*测试确认、分配 start*/
-            $(document).on('click', "#add_test_user", function () {
-                var user_id = $('#test_user').val();
-                if(isNaN(parseInt(user_id))){
-                    layer.alert('无效的选择');
-                    return false;
-                }
-                var user_name = $("#test_user option:selected").text();
-
-                var status = 0;
-                $("#test_user_list .user_list input").each(function(){
-                    var sel_userid=$(this).val();
-                    if(user_id == sel_userid){
-                        status = 1;
-                    }
-                });
-                if(status == 1){
-                    layer.alert('重复的责任人');
-                    return false;
-                }
-                var add_str = '<div class="user_list" id="userid_'+user_id+'"><span>'+user_name+'</span><a href="javascript:;" onclick="del_Entry_user('+user_id+')"> Ｘ </a><input type="hidden" name="row[test_user_id][]" value="'+user_id+'"></div>'
-                $('#test_user_list').append(add_str);
-            });
-            /*测试确认、分配 end*/
 
             /*前端分配 start*/
             $(document).on('click', "#add_web_designer_user", function () {
@@ -405,6 +446,50 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             });
             /*app分配 end*/
         },
+        test_distribution: function () {
+            Controller.api.bindevent();
+
+            $(function(){
+                var status = $('#status').val();
+                if(status == 1){
+                    var test_group = $('#test_group').val();
+                    if(test_group == 1){
+                        $('.test_class').show();
+                    }
+                }
+            });
+
+            /*测试确认、分配 start*/
+            $(document).on('click', "#add_test_user", function () {
+                var user_id = $('#test_user').val();
+                if(isNaN(parseInt(user_id))){
+                    layer.alert('无效的选择');
+                    return false;
+                }
+                var user_name = $("#test_user option:selected").text();
+
+                var status = 0;
+                $("#test_user_list .user_list input").each(function(){
+                    var sel_userid=$(this).val();
+                    if(user_id == sel_userid){
+                        status = 1;
+                    }
+                });
+                if(status == 1){
+                    layer.alert('重复的责任人');
+                    return false;
+                }
+                var add_str = '<div class="user_list" id="userid_'+user_id+'"><span>'+user_name+'</span><a href="javascript:;" onclick="del_Entry_user('+user_id+')"> Ｘ </a><input type="hidden" name="row[test_user_id][]" value="'+user_id+'"></div>'
+                $('#test_user_list').append(add_str);
+            });
+            /*测试确认、分配 end*/
+        },
+        group_finish: function () {
+            Controller.api.bindevent();
+        },
+        test_record_bug: function () {
+            Controller.api.bindevent();
+        },
         api: {
             bindevent: function () {
                 Form.api.bindevent($("form[role=form]"));
@@ -439,7 +524,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 getcontent: {
                     //格式为：方法名+空格+DOM元素
                     'click .btn-getcontent': function (e, value, row, index) {
-                        console.log(row.title);
                         var str = '标题：'+row.title+'<br><hr>内容：'+value;
                         Layer.open({
                             closeBtn: 1,
@@ -465,4 +549,10 @@ function update_responsibility_detail(val,classstr){
     }else{
         $('.'+classstr).hide();
     }
+}
+
+function update_responsibility_user(val){
+    var is_val = $(val).val();
+    $('.responsibility_user_id').attr('name','');
+    $('#responsibility_user_id_'+is_val).attr('name','row[responsibility_user_id]');
 }
