@@ -23,7 +23,9 @@ class ZendeskAgents extends Model
     // 追加属性
     protected $append = [
     ];
-
+    public function getType() {
+        return $this->data['type'];
+    }
     /**
      * 用户关联
      * @return \think\model\relation\BelongsTo1

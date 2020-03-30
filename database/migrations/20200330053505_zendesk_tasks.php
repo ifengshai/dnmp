@@ -13,6 +13,7 @@ class ZendeskTasks extends Migrator
     {
         $table = $this->table('zendesk_tasks', array('engine' => 'InnoDB', 'signed' => false,'comment' => '分配任务的表'));
         $table->addColumn('type', 'integer', array('limit' => MysqlAdapter::INT_TINY,'default' => 0,'signed'=>false, 'comment' => '站点类型，1:zeeloolw,2:voogueme'))
+            ->addColumn('assignee_id', 'string', array('limit' => 20, 'comment' => '处理人id，zendesk对应的id'))
             ->addColumn('admin_id', 'integer', array('limit' => MysqlAdapter::INT_MEDIUM,'default' => 0,'signed'=>false, 'comment' => '用户id'))
             ->addColumn('leave_count', 'integer', array('limit' => MysqlAdapter::INT_MEDIUM,'default' => 0,'signed'=>false, 'comment' => '之前剩余的open,new的数目'))
             ->addColumn('target_count', 'integer', array('limit' => MysqlAdapter::INT_TINY,'default' => 0,'signed'=>false, 'comment' => '目标的数目'))

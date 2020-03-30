@@ -35,6 +35,13 @@ class Zendesk extends Model
         });
     }
 
+    /**
+     * type获取
+     * @return mixed
+     */
+    public function getType() {
+        return $this->data['type'];
+    }
     public function admin()
     {
         return $this->belongsTo(Admin::class, 'due_id', 'id')->setEagerlyType(0)->joinType('left');
@@ -74,22 +81,21 @@ class Zendesk extends Model
      */
     public function assignTicket($ticket)
     {
-        $ticketData = $ticket->toArray();
         //判断该邮件是否属于之前的老用户
-        $preTicket = Zendesk::where(['user_id' => $ticket->user_id,'assign_id' => ['>',0],'type' => $ticketData['type']])
+        $preTicket = Zendesk::where(['user_id' => $ticket->user_id,'assign_id' => ['>',0],'type' => $ticket->getType()])
             ->order('id','desc')
             ->limit(1)
             ->find();
         if(!$preTicket){
             //无老用户，则分配给最少单的用户
             $task = ZendeskTasks::whereTime('create_time','today')
-                ->where(['type' => $ticketData['type']])
+                ->where(['type' => $ticket->getType()])
                 ->order('surplus_count','desc')
                 ->limit(1)
                 ->find();
         }else{
             $task = ZendeskTasks::whereTime('create_time','today')
-                ->where(['admin_id' => $preTicket->assign_id,'type' => $ticketData['type']])
+                ->where(['admin_id' => $preTicket->assign_id,'type' => $ticket->getType()])
                 ->find();
         }
         if($task){
@@ -98,6 +104,7 @@ class Zendesk extends Model
                 //修改zendesk的assign_id,assign_time
                 $ticket->assign_id = $task->admin_id;
                 $ticket->assign_time = date('Y-m-d H:i:s', time());
+                $ticket->assignee_id = $task->assignee_id;
 
                 //修改task的字段
                 $task->surplus_count = $task->surplus_count - 1;
@@ -108,6 +115,12 @@ class Zendesk extends Model
 
     }
 
+    /**
+     * 脚本自动运行
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
     public static function shellAssignTicket()
     {
         //1，判断今天有无task，无，创建
@@ -121,8 +134,9 @@ class Zendesk extends Model
             foreach($agents as $agent){
                 $target_count = $agent->count - $agent->tickets_count > 0 ?  $agent->count - $agent->tickets_count : 0;
                 ZendeskTasks::create([
-                    'type' => $agent->type,
+                    'type' => $agent->getType(),
                     'admin_id' => $agent->admin_id,
+                    'assignee_id' => $agent->agent_id,
                     'leave_count' => $agent->tickets_count,
                     'target_count' => $target_count,
                     'surplus_count' => $target_count,
@@ -134,20 +148,20 @@ class Zendesk extends Model
         $waitTickets = self::where('assign_id',0)->select();
         foreach($waitTickets as $ticket){
             //判断该邮件是否有老用户
-            $preTicket = Zendesk::where(['user_id' => $ticket->user_id,'assign_id' => ['>',0],'type' => $ticket->type])
+            $preTicket = Zendesk::where(['user_id' => $ticket->user_id,'assign_id' => ['>',0],'type' => $ticket->getType()])
                 ->order('id','desc')
                 ->limit(1)
                 ->find();
             if(!$preTicket){
                 //无老用户，则分配给最少单的用户
                 $task = ZendeskTasks::whereTime('create_time','today')
-                    ->where(['type' => $ticket->type])
+                    ->where(['type' => $ticket->getType()])
                     ->order('surplus_count','desc')
                     ->limit(1)
                     ->find();
             }else{
                 $task = ZendeskTasks::whereTime('create_time','today')
-                    ->where(['admin_id' => $preTicket->assign_id,'type' => $ticket->type])
+                    ->where(['admin_id' => $preTicket->assign_id,'type' => $ticket->getType()])
                     ->find();
             }
             if($task){
@@ -155,6 +169,7 @@ class Zendesk extends Model
                 if($task->target_count > $task->complete_count) {
                     //修改zendesk的assign_id,assign_time
                     $ticket->assign_id = $task->admin_id;
+                    $ticket->assignee_id = $task->assignee_id;
                     $ticket->assign_time = date('Y-m-d H:i:s', time());
                     $ticket->save();
                     //修改task的字段
