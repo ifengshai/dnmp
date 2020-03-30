@@ -37,7 +37,7 @@ return [
     'Copy_to_user_id'               => '抄送人',
     'All_finish'               => '点击完成',
 
-    
+
     //分配使用
     'Test_complexity'               => '测试复杂度：',
     'Web_designer_group'            => '是否需要前端：',
@@ -56,5 +56,6 @@ return [
     'test_environment'           => '测试环境',
     'formal_environment'           => '正式环境',
     'test_add_time'           => '添加时间',
+    'Entry_user_id'                 => '提出人',
 
 ];

@@ -68,7 +68,7 @@
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">{:__('站点')}:</label>
         <div class="col-xs-12 col-sm-8">
-            <select name="row[site_type]" class="form-control"  data-rule="required">
+            <select name="row[site_type]" class="form-control" data-rule="required">
                 {foreach $siteType as $k => $v}
                 <option value="{$k}" {:$row['site_type']==$k ? 'selected' : '' }>{$v}</option>
                 {/foreach}
@@ -100,18 +100,30 @@
     <div class='caigou'>
 
         <div style="margin-bottom: 20px;">
-            
+
             <table id="caigou-table">
                 <tr>
+                    <th>任务类型</td>
                     <th>分组</td>
                     <th>负责人</td>
                     <th>任务标题</td>
                     <th>内容</td>
                     <th>计划完成日期</td>
+        
                 </tr>
                 {foreach $item as $v}
                 <tr>
-                    <input id="c-purchase_remark" class="form-control item_id" name="item_id[]" value="{$v.id}" type="hidden">
+                    <td>
+                        <select name="type[]" class="form-control" data-rule="required" style="width:120px;">
+                            <option value="">请选择</option>
+                            <option value="1" {:$v['type']==1 ? 'selected' : '' }>短期任务</option>
+                            <option value="2" {:$v['type']==2 ? 'selected' : '' }>中期任务</option>
+                            <option value="3" {:$v['type']==3 ? 'selected' : '' }>长期任务</option>
+                        </select>
+                    </td>
+
+                    <input id="c-purchase_remark" class="form-control item_id" name="item_id[]" value="{$v.id}"
+                        type="hidden">
                     <td>
                         <select name="group_type[]" class="form-control group_type" style="width:120px;">
                             <option value="">请选择</option>
@@ -142,6 +154,7 @@
                     <td><input id="c-desc" class="form-control" name="desc[]" type="text" value="{$v.desc}"></td>
                     <td><input id="c-closing_date" class="form-control datetimepickernew" name="plan_date[]" type="text"
                             value="{$v.plan_date}"></td>
+
                 </tr>
                 {/foreach}
 
@@ -151,4 +164,3 @@
     </div>
 
 </form>
-
