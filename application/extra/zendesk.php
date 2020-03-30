@@ -5,6 +5,10 @@
  * @Email: 646054215@qq.com
  */
 return [
+    'platform'=>[
+        1=>'zeelool',
+        2=>'voogueme'
+    ],
     'zeelool' => [
         'subdomain' => "zeelooloptical",
         'username' => "complaint@zeelool.com",

@@ -9,6 +9,8 @@ use app\admin\model\zendesk\ZendeskAgents;
 use app\admin\model\zendesk\ZendeskComments;
 use think\Db;
 use think\Exception;
+use think\exception\PDOException;
+use think\exception\ValidateException;
 
 /**
  *

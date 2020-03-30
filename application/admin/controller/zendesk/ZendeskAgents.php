@@ -1,10 +1,14 @@
 <?php
 
 namespace app\admin\controller\zendesk;
-
+use think\Db;
 use app\admin\model\Admin;
+use app\admin\model\zendesk\Zendesk;
 use app\common\controller\Backend;
-
+use app\admin\model\zendesk\ZendeskAccount;
+use think\Exception;
+use think\exception\PDOException;
+use think\exception\ValidateException;
 /**
  * 
  *
@@ -32,7 +36,9 @@ class ZendeskAgents extends Backend
             1 => '邮件组',
             2 => '电话组'
         ];
-        $user = Admin::where('status','normal')->column('nickname','id');
+        //$user = Admin::where('status','normal')->column('nickname','id');
+        $user = (new Admin())->getStaffListss();
+        
         $this->assign(compact('type','agent_type','user'));
     }
     
@@ -73,6 +79,147 @@ class ZendeskAgents extends Backend
         return $this->view->fetch();
     }
     /**
+     * 添加
+     */
+    public function add()
+    {
+        $account = (new ZendeskAccount())->getAccountList(1);
+        if ($this->request->isPost()) {
+            $params = $this->request->post("row/a");
+            if ($params) {
+                $params = $this->preExcludeFields($params);
+
+                if ($this->dataLimit && $this->dataLimitFieldAutoFill) {
+                    $params[$this->dataLimitField] = $this->auth->id;
+                }
+                if(!empty($params['name'])){
+                    //获取平台绑定信息
+                    $zeedeskAccount = (new ZendeskAccount())->getNameById($params['name']);
+                    if($zeedeskAccount){
+                        $params['name']     = $zeedeskAccount['account_user'];
+                        $params['agent_id'] = $zeedeskAccount['account_id'];
+                        $zeedeskAccountId   = $zeedeskAccount['id'];
+                    }
+                }
+                $result = false;
+                Db::startTrans();
+                try {
+                    //是否采用模型验证
+                    if ($this->modelValidate) {
+                        $name = str_replace("\\model\\", "\\validate\\", get_class($this->model));
+                        $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.add' : $name) : $this->modelValidate;
+                        $this->model->validateFailException(true)->validate($validate);
+                    }
+                    $result = $this->model->allowField(true)->save($params);
+                    Db::commit();
+                } catch (ValidateException $e) {
+                    Db::rollback();
+                    $this->error($e->getMessage());
+                } catch (PDOException $e) {
+                    Db::rollback();
+                    $this->error($e->getMessage());
+                } catch (Exception $e) {
+                    Db::rollback();
+                    $this->error($e->getMessage());
+                }
+                if ($result !== false) {
+                    //更新账户信息
+                    Db::name('zendesk_account')->where(['id'=>$zeedeskAccountId])->update(['is_used'=>2]);
+                    $this->success();
+                } else {
+                    $this->error(__('No rows were inserted'));
+                }
+            }
+            $this->error(__('Parameter %s can not be empty', ''));
+        }
+        $this->assign('account',$account);
+        return $this->view->fetch();
+    } 
+    /**
+     * 编辑
+     */
+    public function edit($ids = null)
+    {
+        $account = (new ZendeskAccount())->getAccountList(1,2);
+        $row = $this->model->get($ids);
+        if (!$row) {
+            $this->error(__('No Results were found'));
+        }
+        $adminIds = $this->getDataLimitAdminIds();
+        if (is_array($adminIds)) {
+            if (!in_array($row[$this->dataLimitField], $adminIds)) {
+                $this->error(__('You have no permission'));
+            }
+        }
+        if ($this->request->isPost()) {
+            $params = $this->request->post("row/a");
+            if ($params) {
+                $params = $this->preExcludeFields($params);
+                if(!empty($params['name'])){
+                    //获取平台绑定信息
+                    $zeedeskAccount = (new ZendeskAccount())->getNameById($params['name']);
+                    if($zeedeskAccount){
+                        $params['name']     = $zeedeskAccount['account_user'];
+                        $params['agent_id'] = $zeedeskAccount['account_id'];
+                        $zeedeskAccountId   = $zeedeskAccount['id'];
+                    }
+                }
+                $result = false;
+                Db::startTrans();
+                try {
+                    //是否采用模型验证
+                    if ($this->modelValidate) {
+                        $name = str_replace("\\model\\", "\\validate\\", get_class($this->model));
+                        $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.edit' : $name) : $this->modelValidate;
+                        $row->validateFailException(true)->validate($validate);
+                    }
+                    $result = $row->allowField(true)->save($params);
+                    Db::commit();
+                } catch (ValidateException $e) {
+                    Db::rollback();
+                    $this->error($e->getMessage());
+                } catch (PDOException $e) {
+                    Db::rollback();
+                    $this->error($e->getMessage());
+                } catch (Exception $e) {
+                    Db::rollback();
+                    $this->error($e->getMessage());
+                }
+                if ($result !== false) {
+                    Db::name('zendesk_account')->where(['id'=>$zeedeskAccountId])->update(['is_used'=>2]);                    
+                    $this->success();
+                } else {
+                    $this->error(__('No rows were updated'));
+                }
+            }
+            $this->error(__('Parameter %s can not be empty', ''));
+        }
+        //默认z站的zeedesk账号
+        $this->assign('account',$account);
+        $this->view->assign("row", $row);
+        return $this->view->fetch();
+    }       
+    /**
+     * 对象转数组
+     *
+     * @Description
+     * @author lsw
+     * @since 2020/03/30 11:19:37 
+     * @param [type] $array
+     * @return void
+     */
+    function object_array($array) {  
+        if(is_object($array)) {  
+            $array = (array)$array;  
+        } 
+        if(is_array($array)) {
+            foreach($array as $key=>$value) {  
+                $array[$key] = $this->object_array($value);  
+            }  
+        }  
+        return $array;  
+    }
+    /**
      * 获取平台Agents用户
      *
      * @Description
@@ -82,6 +229,43 @@ class ZendeskAgents extends Backend
      */
     public function getPlatformUser()
     {
-        $res = (new Notice(request(),['type' => 'zeelool']))->fetchUser();
+        $res = (new Notice(request(),['type' => 'voogueme']))->fetchUser(['role'=>'admin']);
+        $info = $this->object_array($res);
+        if(!$info){
+            return false;
+        }
+        $data = [];
+        foreach($info['users'] as $k=> $v){
+            $data[$k]['user_type']      = 1;
+            $data[$k]['account_id']     = $v['id'];
+            $data[$k]['account_type']   = 2;
+            $data[$k]['account_user']   = $v['name'];
+            $data[$k]['account_email']  = $v['email'];
+        }
+        Db::name('zendesk_account')->insertAll($data);
+    }
+    /**
+     * 异步获取zendesk账户信息
+     *
+     * @Description
+     * @author lsw
+     * @since 2020/03/30 15:43:59 
+     * @return void
+     */
+    public function get_zendesk_account()
+    {
+        if ($this->request->isAjax()) {
+            $platform = $this->request->post('platform');
+            if (!$platform) {
+                return $this->error('没有选择站点,请重新尝试', '', 'error', 0);
+            }
+            $result = (new ZendeskAccount())->getAccountList($platform);
+            if (!$result) {
+                return $this->error('这个站点没有账户', '', 'error', 0);
+            }
+            return $this->success('', '', $result, 0);
+        } else {
+            return $this->error('请求错误,请重新尝试', '', 'error', 0);
+        }       
     }
 }

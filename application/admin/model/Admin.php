@@ -38,7 +38,7 @@ class Admin extends Model
      * @param $id
      * @return array|bool
      */
-    public function getStaffListss($id)
+    public function getStaffListss()
     {
         $id = [31, 32, 33, 34];
         $result = $this->alias('a')->join(' auth_group_access g', 'a.id = g.uid')->where('a.status', '=', 'normal')->where('g.group_id', 'in', $id)->field('a.id,a.nickname

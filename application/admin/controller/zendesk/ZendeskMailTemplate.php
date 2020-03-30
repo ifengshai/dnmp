@@ -66,7 +66,7 @@ class ZendeskMailTemplate extends Backend
         $this->model = new \app\admin\model\zendesk\ZendeskMailTemplate;
         $this->view->assign(
             [
-                "orderPlatformList"     => (new MagentoPlatform())->getOrderPlatformList(),
+                "orderPlatformList"     => config('zendesk.platform'),
                 "templatePermission"    => $this->template_permission(),
                 "templateCategory"      => $this->template_category(),
                 "mailStatus"            => config('zendesk.status'),
