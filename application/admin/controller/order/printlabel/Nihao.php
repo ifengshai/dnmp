@@ -60,7 +60,7 @@ class Nihao extends Backend
             if ($filter['increment_id']) {
                 $map['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal']];
             } elseif (!$filter['status']) {
-                $map['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed']];
+                $map['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal']];
             }
             //是否有协同任务
             $infoSynergyTask = new \app\admin\model\infosynergytaskmanage\InfoSynergyTask;
@@ -154,7 +154,7 @@ class Nihao extends Backend
             $increment_id = $this->request->post('increment_id');
             if ($increment_id) {
                 $map['increment_id'] = $increment_id;
-                $map['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed']];
+                $map['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal']];
                 $list = $this->model
                     // ->field($field)
                     ->where($map)
@@ -597,7 +597,7 @@ where cped.attribute_id in(146,147) and cped.store_id=0 and cped.entity_id=$prod
         if ($filter['increment_id']) {
             $map['sfo.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal']];
         } elseif (!$filter['status']) {
-            $map['sfo.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed']];
+            $map['sfo.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal']];
         }
 
         $infoSynergyTask = new \app\admin\model\infosynergytaskmanage\InfoSynergyTask;

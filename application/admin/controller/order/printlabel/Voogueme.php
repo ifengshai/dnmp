@@ -63,7 +63,7 @@ class Voogueme extends Backend
             if ($filter['increment_id']) {
                 $map['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal']];
             } elseif (!$filter['status']) {
-                $map['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed']];
+                $map['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal']];
             }
             //是否有协同任务
             $infoSynergyTask = new \app\admin\model\infosynergytaskmanage\InfoSynergyTask;
@@ -158,7 +158,7 @@ class Voogueme extends Backend
             $increment_id = $this->request->post('increment_id');
             if ($increment_id) {
                 $map['increment_id'] = $increment_id;
-                $map['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed']];
+                $map['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal']];
                 $field = 'order_type,custom_order_prescription_type,entity_id,status,base_shipping_amount,increment_id,coupon_code,shipping_description,store_id,customer_id,base_discount_amount,base_grand_total,
                 total_qty_ordered,quote_id,base_currency_code,customer_email,customer_firstname,customer_lastname,custom_is_match_frame_new,custom_is_match_lens_new,
                 custom_is_send_factory_new,custom_is_delivery_new,custom_print_label_new,custom_order_prescription,custom_service_name,created_at';
@@ -597,7 +597,7 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
         if ($filter['increment_id']) {
             $map['sfo.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal']];
         } elseif (!$filter['status']) {
-            $map['sfo.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed']];
+            $map['sfo.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal']];
         }
 
         $infoSynergyTask = new \app\admin\model\infosynergytaskmanage\InfoSynergyTask;
