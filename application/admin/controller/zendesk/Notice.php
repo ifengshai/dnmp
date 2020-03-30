@@ -9,6 +9,7 @@ namespace app\admin\controller\zendesk;
 
 
 use app\admin\model\zendesk\ZendeskPosts;
+use app\admin\model\zendesk\ZendeskTasks;
 use think\Controller;
 use think\Db;
 use think\Exception;
@@ -139,6 +140,20 @@ class Notice extends Controller
                 'status' => array_search($ticket->status, config('zendesk.status')),
             ],['id' => $zendesk->id]);
             //写入附表
+            //如果该ticket的分配时间不是今天，且修改后的状态是open或者new的话，则今天任务数-1
+            if(in_array(strtolower($ticket->status),['open','new']) && strtotime($zendesk->assign_time) < strtotime(date('Y-m-d',time()))){
+                //找出今天的task
+                $task = ZendeskTasks::whereTime('create_time','today')
+                    ->where(['admin_id' => $zendesk->assign_id,'type' => $zendesk->type])
+                    ->find();
+                //存在，则更新
+                if($task){
+                    $task->leave_count = $task->leave_count + 1;
+                    $task->target_count = $task->target_count - 1;
+                    $task->surplus_count = $task->surplus_count - 1;
+                    $task->save();
+                }
+            }
             //获取所有的附件
             $attachments = [];
             if($comment->attachments){
@@ -270,5 +285,9 @@ class Notice extends Controller
             }
 
         }
+    }
+    public function shellAssignTicket()
+    {
+        Zendesk::shellAssignTicket();
     }
 }

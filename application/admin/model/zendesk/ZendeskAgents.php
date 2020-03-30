@@ -32,6 +32,9 @@ class ZendeskAgents extends Model
     {
         return $this->belongsTo(Admin::class,'admin_id','id')->setEagerlyType(0)->joinType('left');
     }
-
+    public function tickets()
+    {
+        return $this->hasMany(Zendesk::class,'assign_id','admin_id');
+    }
 
 }
