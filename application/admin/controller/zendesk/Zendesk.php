@@ -29,8 +29,8 @@ class Zendesk extends Backend
     {
         parent::_initialize();
         $this->model = new \app\admin\model\zendesk\Zendesk;
-        $this->view->assign('getTabList',$this->model->getTabList());
-        $this->assignconfig('admin_id',session('admin.id'));
+        $this->view->assign('getTabList', $this->model->getTabList());
+        $this->assignconfig('admin_id', session('admin.id'));
     }
 
     /**
@@ -49,13 +49,13 @@ class Zendesk extends Backend
             }
             $filter = json_decode($this->request->get('filter'), true);
             $map = [];
-            if($filter['me_task'] == 1){ //我的所有任务
+            if ($filter['me_task'] == 1) { //我的所有任务
                 unset($filter['me_task']);
                 $map['zendesk.assign_id'] = session('admin.id');
-            }elseif($filter['me_task'] == 2){ //我的待处理任务
+            } elseif ($filter['me_task'] == 2) { //我的待处理任务
                 unset($filter['me_task']);
                 $map['zendesk.assign_id'] = session('admin.id');
-                $map['zendesk.status'] = ['in', [1,2]];
+                $map['zendesk.status'] = ['in', [1, 2]];
             }
             $this->request->get(['filter' => json_encode($filter)]);
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
@@ -133,8 +133,8 @@ class Zendesk extends Backend
                         'assignee_id' => $assignee_id
                     ];
                     //有抄送，添加抄送
-                    if($params['email_cc']){
-                        $email_ccs = $this->emailCcs($params['email_cc'],$ticket->email_cc);
+                    if ($params['email_cc']) {
+                        $email_ccs = $this->emailCcs($params['email_cc'], $ticket->email_cc);
                         $updateData['email_ccs'] = $email_ccs;
                     }
                     //修改主题
@@ -227,7 +227,7 @@ class Zendesk extends Backend
         $tickets = $this->model
             ->where(['user_id' => $ticket->user_id, 'status' => ['in', [1, 2, 3]], 'type' => $ticket->type])
             ->where('id', 'neq', $ids)
-            ->field('ticket_id,id,username,subject')
+            ->field('ticket_id,id,username,subject,update_time')
             ->order('id desc')
             ->select();
         //获取该用户最新的5条ticket
@@ -246,15 +246,15 @@ class Zendesk extends Backend
             ->order('template_category desc,id desc')
             ->select();
         $templates = [];
-        foreach($templateAll as $key => $template){
+        foreach ($templateAll as $key => $template) {
             $category = '';
-            if($template['template_category']){
-                $category = '【'.config('zendesk.template_category')[$template['template_category']].'】';
+            if ($template['template_category']) {
+                $category = '【' . config('zendesk.template_category')[$template['template_category']] . '】';
             }
             $templates[$template['id']] = $category . $template['template_name'];
         }
-        array_unshift($templates,'Apply Macro');
-        $this->view->assign(compact('tags','ticket','comments','tickets','recentTickets','templates'));
+        array_unshift($templates, 'Apply Macro');
+        $this->view->assign(compact('tags', 'ticket', 'comments', 'tickets', 'recentTickets', 'templates'));
         $this->view->assign('rows', $row);
         return $this->view->fetch();
     }
@@ -283,20 +283,24 @@ class Zendesk extends Backend
     {
         $ticket_id = input('nid');
         $pid = input('pid');
-        if($ticket_id == $pid) {
-            $this->error("You selected the same ticket as source and target: #{$pid}. You cannot merge a ticket into itself.
+        if ($ticket_id == $pid) {
+            $this->error("You selected the same ticket as source and target: #{$ticket_id}. You cannot merge a ticket into itself.
 Please close this window and try again.");
         }
         //合并到的信息
         $ticket = $this->model->where('ticket_id', $ticket_id)->field('id,ticket_id,subject')->find();
+        if (!$ticket) {
+            $this->error("You are unable to merge into #{$ticket_id}. Tickets don't find, tickets that are shared with other accounts, and tickets you don't have access to cannot be merged into.
+Please close this window and try again.");
+        }
         //合并的最后一条评论
-        $comment = $this->model->where('ticket_id',$pid)->with('lastComment')->find();
-        if($comment->status == 5) {
-            $this->error("You are unable to merge into #{$pid}. Tickets that are Closed, tickets that are shared with other accounts, and tickets you don\'t have access to cannot be merged into.
+        $comment = $this->model->where('ticket_id', $pid)->with('lastComment')->find();
+        if ($comment->status == 5) {
+            $this->error("You are unable to merge into #{$ticket_id}. Tickets that are Closed, tickets that are shared with other accounts, and tickets you don\'t have access to cannot be merged into.
 Please close this window and try again.");
         }
         $ticket['lastComment'] = $comment->lastComment[0]->html_body;
-        return $this->success('success','',$ticket);
+        return $this->success('success', '', $ticket);
     }
 
     /**
@@ -410,11 +414,11 @@ Please close this window and try again.");
         if ($this->request->isPost()) {
             $text = input('text');
             $type = input('type');
-            $posts = ZendeskPosts::where('title','like','%'.$text.'%')->where('type',$type)->select();
+            $posts = ZendeskPosts::where('title', 'like', '%' . $text . '%')->where('type', $type)->select();
             //拼接html
             $html = '';
             $post_html = '';
-            foreach($posts as $key => $post){
+            foreach ($posts as $key => $post) {
                 $html .= <<<DOC
 <div class="card" data-num="{$key}">
                                 <div class="card-body">
@@ -438,7 +442,7 @@ DOC;
             }
 
 
-            return json(['html' => $html,'post_html' => $post_html]);
+            return json(['html' => $html, 'post_html' => $post_html]);
         }
         $this->error('there has something wrong');
     }
@@ -449,19 +453,19 @@ DOC;
      * @param $preEmailCcs
      * @return array
      */
-    public function emailCcs($emailCcs,$preEmailCcs)
+    public function emailCcs($emailCcs, $preEmailCcs)
     {
-        $preEmailCcs = explode(',',$preEmailCcs);
-        $emailCcs = explode(',',$emailCcs);
+        $preEmailCcs = explode(',', $preEmailCcs);
+        $emailCcs = explode(',', $emailCcs);
         //pre并em，删除，
         //$del = array_diff($preEmailCcs,$emailCcs);
         //em并pre，新增
         //$add = array_diff($emailCcs,$preEmailCcs);
         $emails = [];
-        foreach($emailCcs as $email){
+        foreach ($emailCcs as $email) {
             $emails[] = [
-              'user_email' => $email,
-              'action' => 'put'
+                'user_email' => $email,
+                'action' => 'put'
             ];
         }
         return $emails;

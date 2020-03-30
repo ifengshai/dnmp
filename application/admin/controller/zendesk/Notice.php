@@ -25,22 +25,23 @@ use app\admin\model\zendesk\ZendeskComments;
 class Notice extends Controller
 {
     public $postData = [];
+
     /**
      * 方法初始化
      * @throws \Exception
      */
-    public function __construct($request = null ,$postData = [])
+    public function __construct($request = null, $postData = [])
     {
         parent::__construct();
-        if(!$postData){
+        if (!$postData) {
             $postData = json_decode(file_get_contents("php://input"), true);
         }
         $this->postData = $postData;
         try {
-            if($this->postData['type'] == 'voogueme'){
+            if ($this->postData['type'] == 'voogueme') {
                 $this->client = new ZendeskAPI(config('zendesk.voogueme')['subdomain']);
                 $this->client->setAuth('basic', ['username' => config('zendesk.voogueme')['username'], 'token' => config('zendesk.voogueme')['token']]);
-            }else{
+            } else {
                 $this->client = new ZendeskAPI(config('zendesk.zeelool')['subdomain']);
                 $this->client->setAuth('basic', ['username' => config('zendesk.zeelool')['username'], 'token' => config('zendesk.zeelool')['token']]);
             }
@@ -58,9 +59,9 @@ class Notice extends Controller
         $postData = $this->postData;
         $id = $postData['id'];
         $type = $postData['type'];
-        if($type == 'zeelool'){
+        if ($type == 'zeelool') {
             $type = 1;
-        }else{
+        } else {
             $type = 2;
         }
         //最后一条评论
@@ -68,7 +69,7 @@ class Notice extends Controller
         $ticket = $this->getTicket($id)->ticket;
         $via = $ticket->via;
         $priority = 0;
-        if($ticket->priority){
+        if ($ticket->priority) {
             $priority = array_search($ticket->priority, config('zendesk.priority'));
         }
         //开始插入相关数据
@@ -94,9 +95,8 @@ class Notice extends Controller
             ]);
             //获取所有的附件
             $attachments = [];
-            if($comment->attachments){
-                foreach($comment->attachments as $attachment)
-                {
+            if ($comment->attachments) {
+                foreach ($comment->attachments as $attachment) {
                     $attachments[] = $attachment->content_url;
                 }
             }
@@ -114,9 +114,10 @@ class Notice extends Controller
             //写入附表
         } catch (Exception $e) {
             Db::rollback();
-            $this->error($e->getMessage(),'');
+            $this->error($e->getMessage(), '');
         }
     }
+
     /**
      * 获取修改的通知
      */
@@ -129,25 +130,25 @@ class Notice extends Controller
         $ticket = $this->getTicket($id);
         //开始插入相关数据
         $tags = $ticket->tags;
-        $tags = join(',',\app\admin\model\zendesk\ZendeskTags::where('name','in',$tags)->column('id'));
+        $tags = join(',', \app\admin\model\zendesk\ZendeskTags::where('name', 'in', $tags)->column('id'));
         //开启事务
         Db::startTrans();
         try {
-            $zendesk = Zendesk::where('ticket_id',$id)->find();
+            $zendesk = Zendesk::where('ticket_id', $id)->find();
             //更新主表,目前应该只会更新status，其他不会更新
             Zendesk::update([
                 'tags' => $tags,
                 'status' => array_search($ticket->status, config('zendesk.status')),
-            ],['id' => $zendesk->id]);
+            ], ['id' => $zendesk->id]);
             //写入附表
             //如果该ticket的分配时间不是今天，且修改后的状态是open或者new的话，则今天任务数-1
-            if(in_array(strtolower($ticket->status),['open','new']) && strtotime($zendesk->assign_time) < strtotime(date('Y-m-d',time()))){
+            if (in_array(strtolower($ticket->status), ['open', 'new']) && strtotime($zendesk->assign_time) < strtotime(date('Y-m-d', time()))) {
                 //找出今天的task
-                $task = ZendeskTasks::whereTime('create_time','today')
-                    ->where(['admin_id' => $zendesk->assign_id,'type' => $zendesk->type])
+                $task = ZendeskTasks::whereTime('create_time', 'today')
+                    ->where(['admin_id' => $zendesk->assign_id, 'type' => $zendesk->type])
                     ->find();
                 //存在，则更新
-                if($task){
+                if ($task) {
                     $task->leave_count = $task->leave_count + 1;
                     $task->target_count = $task->target_count - 1;
                     $task->surplus_count = $task->surplus_count - 1;
@@ -156,9 +157,8 @@ class Notice extends Controller
             }
             //获取所有的附件
             $attachments = [];
-            if($comment->attachments){
-                foreach($comment->attachments as $attachment)
-                {
+            if ($comment->attachments) {
+                foreach ($comment->attachments as $attachment) {
                     $attachments[] = $attachment->content_url;
                 }
             }
@@ -178,6 +178,7 @@ class Notice extends Controller
             //写入日志
         }
     }
+
     /**
      * 根据id获取ticket
      * @param $id
@@ -187,6 +188,7 @@ class Notice extends Controller
     {
         return $this->client->tickets()->find($id);
     }
+
     /**
      * 返回最后一条comment
      * @param $id
@@ -198,7 +200,7 @@ class Notice extends Controller
         $all = $this->client->tickets($id)->comments()->findAll();
         $comments = $all->comments;
         $count = $all->count;
-        return $comments[$count-1];
+        return $comments[$count - 1];
     }
 
     /**
@@ -208,7 +210,7 @@ class Notice extends Controller
      * @param bool $echo
      * @return bool
      */
-    public function autoUpdate($ticket_id,$params)
+    public function autoUpdate($ticket_id, $params)
     {
         try {
             $this->client->tickets()->update($ticket_id, $params);
@@ -231,7 +233,7 @@ class Notice extends Controller
     {
         try {
             $res = $this->client->attachments()->upload([
-                'file' => '.'.$attachment,
+                'file' => '.' . $attachment,
                 'name' => basename($attachment),
             ]);
             return $res->upload->token;
@@ -246,7 +248,7 @@ class Notice extends Controller
      * @param $params
      * @return array
      */
-    public function merge($ticket_id,$params)
+    public function merge($ticket_id, $params)
     {
         try {
             $this->client->tickets($ticket_id)->merge($params);
@@ -254,13 +256,14 @@ class Notice extends Controller
             return ['code' => 0, 'message' => $e->getMessage()];
         }
     }
+
     /**
      * 获取所有用户
      *
      * @Description
-     * @author lsw
-     * @since 2020/03/28 14:50:55 
      * @return void
+     * @since 2020/03/28 14:50:55
+     * @author lsw
      */
     public function fetchUser()
     {
@@ -272,8 +275,8 @@ class Notice extends Controller
         // }
         // $params['role'] = 'admin';
         // return $this->client->users()->findAll($params);
-        $result =  $this->client->users()->findAll(['role' => 'end-user']);
-        return $result;    
+        $result = $this->client->users()->findAll(['role' => 'end-user']);
+        return $result;
     }
 
     /**
@@ -288,19 +291,19 @@ class Notice extends Controller
     {
         $res = $this->client->helpCenter->articles()->findAll(['per_page' => 100]);
         $page_count = $res->page_count;
-        for($i=1;$i<=$page_count;$i++){
-            $res = $this->client->helpCenter->articles()->findAll(['page' => $i,'per_page' => 100]);
+        for ($i = 1; $i <= $page_count; $i++) {
+            $res = $this->client->helpCenter->articles()->findAll(['page' => $i, 'per_page' => 100]);
             $articles = $res->articles;
-            foreach($articles as $article){
-                if(!ZendeskPosts::where('post_id',$article->id)->find()) {
+            foreach ($articles as $article) {
+                if (!ZendeskPosts::where('post_id', $article->id)->find()) {
                     ZendeskPosts::create([
                         'post_id' => $article->id,
                         'title' => $article->title,
                         'html_url' => $article->html_url,
                         'author_id' => $article->author_id,
                         'body' => $article->body,
-                        'create_time' => date('Y-m-d H:i:s',strtotime($article->created_at)),
-                        'update_time' => date('Y-m-d H:i:s',strtotime($article->updated_at)),
+                        'create_time' => date('Y-m-d H:i:s', strtotime($article->created_at)),
+                        'update_time' => date('Y-m-d H:i:s', strtotime($article->updated_at)),
                     ]);
                 }
             }

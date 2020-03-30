@@ -166,9 +166,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui'], f
                 autocomplete_url:'zendesk/zendesk/getEmail',
                 onChange:function(input,mail){
                     var strRegex = /^(\w-*\.*)+@(\w-?)+(\.\w{2,})+$/;
-                    if(!strRegex.test(mail)){
-                        Layer.msg('请输入正确的邮箱地址');
-                        input.removeTag(mail);
+                    if(mail != undefined){
+                        if(!strRegex.test(mail)){
+                            Layer.msg('请输入正确的邮箱地址');
+                            input.removeTag(mail);
+                        }
                     }
                 }
             });

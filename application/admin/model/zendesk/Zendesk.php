@@ -30,7 +30,7 @@ class Zendesk extends Model
     {
         parent::init();
         //新增后的回调函数，进行任务分配
-        self::beforeInsert(function ($zendesk){
+        self::beforeInsert(function ($zendesk) {
             self::assignTicket($zendesk);
         });
     }
@@ -39,39 +39,47 @@ class Zendesk extends Model
      * type获取
      * @return mixed
      */
-    public function getType() {
+    public function getType()
+    {
         return $this->data['type'];
     }
+
     public function admin()
     {
-        return $this->belongsTo(Admin::class, 'due_id', 'id')->setEagerlyType(0)->joinType('left');
+        return $this->belongsTo(Admin::class, 'assign_id', 'id')->setEagerlyType(0)->joinType('left');
     }
+
     public function lastComment()
     {
-        return $this->hasMany(ZendeskComments::class,'zid','id')->order('id','desc')->limit(1);
+        return $this->hasMany(ZendeskComments::class, 'zid', 'id')->order('id', 'desc')->limit(1);
     }
+
     public function getStatusFormatAttr($value, $data)
     {
         return config('zendesk.status')[$data['status']];
     }
+
     public function getUsernameFormatAttr($value, $data)
     {
-        return $data['username'].'——'.$data['email'];
+        return $data['username'] . '——' . $data['email'];
     }
+
     public function getTagFormatAttr($value, $data)
     {
         $tagIds = $data['tags'];
-        $tags = ZendeskTags::where('id','in',$tagIds)->column('name');
-        return join(',',$tags);
+        $tags = ZendeskTags::where('id', 'in', $tagIds)->column('name');
+        return join(',', $tags);
     }
+
     //获取选项卡列表
     public function getTabList()
     {
         return [
-            ['name'=>'我的全部','field'=>'me_task','value'=>1],
-            ['name'=>'我的待处理','field'=>'me_task','value'=>2],
+            ['name' => '我的全部', 'field' => 'me_task', 'value' => 1],
+            ['name' => '我的待处理', 'field' => 'me_task', 'value' => 2],
         ];
     }
+
     /**
      * 自动分配
      * @param $ticket
@@ -82,25 +90,25 @@ class Zendesk extends Model
     public function assignTicket($ticket)
     {
         //判断该邮件是否属于之前的老用户
-        $preTicket = Zendesk::where(['user_id' => $ticket->user_id,'assign_id' => ['>',0],'type' => $ticket->getType()])
-            ->order('id','desc')
+        $preTicket = Zendesk::where(['user_id' => $ticket->user_id, 'assign_id' => ['>', 0], 'type' => $ticket->getType()])
+            ->order('id', 'desc')
             ->limit(1)
             ->find();
-        if(!$preTicket){
+        if (!$preTicket) {
             //无老用户，则分配给最少单的用户
-            $task = ZendeskTasks::whereTime('create_time','today')
+            $task = ZendeskTasks::whereTime('create_time', 'today')
                 ->where(['type' => $ticket->getType()])
-                ->order('surplus_count','desc')
+                ->order('surplus_count', 'desc')
                 ->limit(1)
                 ->find();
-        }else{
-            $task = ZendeskTasks::whereTime('create_time','today')
-                ->where(['admin_id' => $preTicket->assign_id,'type' => $ticket->getType()])
+        } else {
+            $task = ZendeskTasks::whereTime('create_time', 'today')
+                ->where(['admin_id' => $preTicket->assign_id, 'type' => $ticket->getType()])
                 ->find();
         }
-        if($task){
+        if ($task) {
             //判断该用户是否已经分配满了，满的话则不分配
-            if($task->target_count > $task->complete_count) {
+            if ($task->target_count > $task->complete_count) {
                 //修改zendesk的assign_id,assign_time
                 $ticket->assign_id = $task->admin_id;
                 $ticket->assign_time = date('Y-m-d H:i:s', time());
@@ -124,15 +132,15 @@ class Zendesk extends Model
     public static function shellAssignTicket()
     {
         //1，判断今天有无task，无，创建
-        $tasks = ZendeskTasks::whereTime('create_time','today')->find();
-        if(!$tasks) {
+        $tasks = ZendeskTasks::whereTime('create_time', 'today')->find();
+        if (!$tasks) {
             //创建所有的tasks
             //获取所有的agents
-            $agents = ZendeskAgents::withCount(['tickets' => function($query){
-                $query->where('status','in','1,2');
+            $agents = ZendeskAgents::withCount(['tickets' => function ($query) {
+                $query->where('status', 'in', '1,2');
             }])->select();
-            foreach($agents as $agent){
-                $target_count = $agent->count - $agent->tickets_count > 0 ?  $agent->count - $agent->tickets_count : 0;
+            foreach ($agents as $agent) {
+                $target_count = $agent->count - $agent->tickets_count > 0 ? $agent->count - $agent->tickets_count : 0;
                 ZendeskTasks::create([
                     'type' => $agent->getType(),
                     'admin_id' => $agent->admin_id,
@@ -145,28 +153,28 @@ class Zendesk extends Model
             }
         }
         //获取所有未分配的邮件
-        $waitTickets = self::where('assign_id',0)->select();
-        foreach($waitTickets as $ticket){
+        $waitTickets = self::where('assign_id', 0)->select();
+        foreach ($waitTickets as $ticket) {
             //判断该邮件是否有老用户
-            $preTicket = Zendesk::where(['user_id' => $ticket->user_id,'assign_id' => ['>',0],'type' => $ticket->getType()])
-                ->order('id','desc')
+            $preTicket = Zendesk::where(['user_id' => $ticket->user_id, 'assign_id' => ['>', 0], 'type' => $ticket->getType()])
+                ->order('id', 'desc')
                 ->limit(1)
                 ->find();
-            if(!$preTicket){
+            if (!$preTicket) {
                 //无老用户，则分配给最少单的用户
-                $task = ZendeskTasks::whereTime('create_time','today')
+                $task = ZendeskTasks::whereTime('create_time', 'today')
                     ->where(['type' => $ticket->getType()])
-                    ->order('surplus_count','desc')
+                    ->order('surplus_count', 'desc')
                     ->limit(1)
                     ->find();
-            }else{
-                $task = ZendeskTasks::whereTime('create_time','today')
-                    ->where(['admin_id' => $preTicket->assign_id,'type' => $ticket->getType()])
+            } else {
+                $task = ZendeskTasks::whereTime('create_time', 'today')
+                    ->where(['admin_id' => $preTicket->assign_id, 'type' => $ticket->getType()])
                     ->find();
             }
-            if($task){
+            if ($task) {
                 //判断该用户是否已经分配满了，满的话则不分配
-                if($task->target_count > $task->complete_count) {
+                if ($task->target_count > $task->complete_count) {
                     //修改zendesk的assign_id,assign_time
                     $ticket->assign_id = $task->admin_id;
                     $ticket->assignee_id = $task->assignee_id;
