@@ -46,6 +46,9 @@
 
     <input type="hidden" name="row[id]" value="{$row.id}" id="demand_id" />
     <input type="hidden" name="row[status]" value="{$row.status}" id="status" />
+        {if $demand_type == 2}
+    <input type="hidden" name="row[demand_type]" value="{$demand_type}" id="demand_type" />
+        {/if}
     {if $row['status'] == 1}
         <!--测试确认、分配 start-->
         <div class="form-group">
@@ -57,13 +60,14 @@
                 </select>
             </div>
         </div>
-
-        <div class="form-group test_class" style="display: none">
-            <label class="control-label col-xs-12 col-sm-2">{:__('Test_complexity')}</label>
-            <div class="col-xs-12 col-sm-8">
-                {:Form::select('row[test_complexity]', config('demand.allComplexity'), $row.all_complexity, ['class'=>'form-control', null,'data-live-search' => true,'id'=>'Test_complexity'])}
+        {if $demand_type == 2}
+            <div class="form-group test_class" style="display: none">
+                <label class="control-label col-xs-12 col-sm-2">{:__('Test_complexity')}</label>
+                <div class="col-xs-12 col-sm-8">
+                    {:Form::select('row[test_complexity]', config('demand.allComplexity'), $row.all_complexity, ['class'=>'form-control', null,'data-live-search' => true,'id'=>'Test_complexity'])}
+                </div>
             </div>
-        </div>
+        {/if}
 
         <div class="form-group test_class" style="display: none">
             <label class="control-label col-xs-12 col-sm-2">{:__('Responsibility_user')}</label>
@@ -91,7 +95,7 @@
                 </select>
             </div>
         </div>
-
+        {if $demand_type == 2}
         <div class="form-group Web_designer_class" style="display: none">
             <label class="control-label col-xs-12 col-sm-2">{:__('Web_designer_complexity')}</label>
             <div class="col-xs-12 col-sm-8">
@@ -105,7 +109,7 @@
                 <input id="c-web_designer_expect_time" class="form-control datetimepicker" data-date-format="YYYY-MM-DD HH:mm" data-use-current="true" name="row[web_designer_expect_time]" type="text" value="{:date('Y-m-d H:i')}">
             </div>
         </div>
-
+        {/if}
 
         <div class="form-group Web_designer_class" style="display: none">
             <label class="control-label col-xs-12 col-sm-2">{:__('Responsibility_user')}</label>
@@ -133,7 +137,7 @@
                 </select>
             </div>
         </div>
-
+        {if $demand_type == 2}
         <div class="form-group phper_class" style="display: none">
             <label class="control-label col-xs-12 col-sm-2">{:__('Phper_complexity')}</label>
             <div class="col-xs-12 col-sm-8">
@@ -147,7 +151,7 @@
                 <input id="c-phper_expect_time" class="form-control datetimepicker" data-date-format="YYYY-MM-DD HH:mm" data-use-current="true" name="row[phper_expect_time]" type="text" value="{:date('Y-m-d H:i')}">
             </div>
         </div>
-
+        {/if}
         <div class="form-group phper_class" style="display: none">
             <label class="control-label col-xs-12 col-sm-2">{:__('Responsibility_user')}</label>
             <div class="col-xs-12 col-sm-8">
@@ -174,7 +178,7 @@
                 </select>
             </div>
         </div>
-
+        {if $demand_type == 2}
         <div class="form-group app_class" style="display: none">
             <label class="control-label col-xs-12 col-sm-2">{:__('App_complexity')}</label>
             <div class="col-xs-12 col-sm-8">
@@ -188,7 +192,7 @@
                 <input id="c-app_expect_time" class="form-control datetimepicker" data-date-format="YYYY-MM-DD HH:mm" data-use-current="true" name="row[app_expect_time]" type="text" value="{:date('Y-m-d H:i')}">
             </div>
         </div>
-
+        {/if}
         <div class="form-group app_class" style="display: none">
             <label class="control-label col-xs-12 col-sm-2">{:__('Responsibility_user')}</label>
             <div class="col-xs-12 col-sm-8">

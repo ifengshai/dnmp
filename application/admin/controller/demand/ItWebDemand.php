@@ -32,12 +32,183 @@ class ItWebDemand extends Backend
      * 因此在当前控制器中可不用编写增删改查的代码,除非需要自己控制这部分逻辑
      * 需要将application/admin/library/traits/Backend.php中对应的方法复制到当前控制器,然后进行修改
      */
+
+    public function bug_list(){
+        //设置过滤方法
+        $this->request->filter(['strip_tags']);
+        if ($this->request->isAjax()) {
+            //如果发送的来源是Selectpage，则转发到Selectpage
+            if ($this->request->request('keyField')) {
+                return $this->selectpage();
+            }
+
+            $filter = json_decode($this->request->get('filter'), true);
+            $smap = array();
+            if ($filter['Allgroup_sel'] == 1) {
+                $smap['web_designer_group'] = 1;
+            }
+            if ($filter['Allgroup_sel'] == 2) {
+                $smap['phper_group'] = 1;
+            }
+            if ($filter['Allgroup_sel'] == 3) {
+                $smap['app_group'] = 1;
+            }
+            if ($filter['Allgroup_sel'] == 4) {
+                $smap['test_group'] = 1;
+            }
+            if($smap){
+                unset($filter['Allgroup_sel']);
+                $this->request->get(['filter' => json_encode($filter)]);
+            }
+
+            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            $total = $this->model
+                ->where($where)
+                ->where($smap)
+                ->where('type', 1)
+                ->where('is_del', 1)
+                ->order($sort, $order)
+                ->count();
+
+            $list = $this->model
+                ->where($where)
+                ->where($smap)
+                ->where('type', 1)
+                ->where('is_del', 1)
+                ->order($sort, $order)
+                ->limit($offset, $limit)
+                ->select();
+            $list = collection($list)->toArray();
+
+            //检查有没有权限
+            $permissions['demand_add'] = $this->auth->check('demand/it_web_demand/add');//新增权限
+            $permissions['demand_del'] = $this->auth->check('demand/it_web_demand/del');//删除权限
+            $permissions['demand_through_demand'] = $this->auth->check('demand/it_web_demand/through_demand');//开发通过
+            $permissions['demand_distribution'] = $this->auth->check('demand/it_web_demand/distribution');//开发分配
+            $permissions['demand_test_distribution'] = $this->auth->check('demand/it_web_demand/test_distribution');//测试分配
+            $permissions['demand_finish'] = $this->auth->check('demand/it_web_demand/group_finish');//开发完成
+            $permissions['demand_test_finish'] = $this->auth->check('demand/it_web_demand/test_group_finish');//测试完成
+            $permissions['demand_test_record_bug'] = $this->auth->check('demand/it_web_demand/test_record_bug');//测试完成
+            $permissions['demand_add_online'] = $this->auth->check('demand/it_web_demand/add_online');//上线需求
+
+            foreach ($list as $k => $v){
+                $user_detail = $this->auth->getUserInfo($list[$k]['entry_user_id']);
+                $list[$k]['entry_user_name'] = $user_detail['nickname'];//取提出人
+
+                $list[$k]['allcomplexity'] = config('demand.allComplexity')[$v['all_complexity']];//复杂度
+                $list[$k]['hope_time'] = date('m-d H:i',strtotime($v['hope_time']));//预计时间
+
+                /*分配*/
+                $list[$k]['Allgroup'] = array();
+                if($v['web_designer_group'] == 1){
+                    $list[$k]['Allgroup'][] = '前端';
+                    $list[$k]['web_designer_user_name'] = $this->extract_username($v['web_designer_user_id'],'web_designer_user');
+                    $list[$k]['web_designer_expect_time'] = date('m-d H:i',strtotime($v['web_designer_expect_time']));
+                    if($v['web_designer_is_finish'] == 1){
+                        $list[$k]['web_designer_finish_time'] = date('m-d H:i',strtotime($v['web_designer_finish_time']));
+                    }
+                }
+                if($v['phper_group'] == 1){
+                    $list[$k]['Allgroup'][] = '后端';
+                    $list[$k]['phper_user_name'] = $this->extract_username($v['phper_user_id'],'phper_user');
+                    $list[$k]['phper_expect_time'] = date('m-d H:i',strtotime($v['phper_expect_time']));
+                    if($v['phper_is_finish'] == 1){
+                        $list[$k]['phper_finish_time'] = date('m-d H:i',strtotime($v['phper_finish_time']));
+                    }
+                }
+                if($v['app_group'] == 1){
+                    $list[$k]['Allgroup'][] = 'APP';
+                    $list[$k]['app_user_name'] = $this->extract_username($v['app_user_id'],'app_user');
+                    $list[$k]['app_expect_time'] = date('m-d H:i',strtotime($v['app_expect_time']));
+                    if($v['app_is_finish'] == 1){
+                        $list[$k]['app_finish_time'] = date('m-d H:i',strtotime($v['app_finish_time']));
+                    }
+                }
+                if($v['test_group'] == 1){
+                    $list[$k]['testgroup'] = '是';
+                    foreach (explode(',',$v['test_user_id']) as $t){
+                        $list[$k]['test_user_id_arr'][] = config('demand.test_user')[$t];
+                    }
+                }else{
+                    $list[$k]['testgroup'] = '否';
+                }
+                /*分配*/
+
+                /*当前状态*/
+                if($v['status'] == 1){
+                    $list[$k]['status_str'] = 'New';
+                }elseif ($v['status'] == 2){
+                    $list[$k]['status_str'] = '待通过';
+                }elseif ($v['status'] == 3){
+                    if($v['web_designer_group'] == 0 && $v['phper_group'] == 0 && $v['app_group'] == 0){
+                        $list[$k]['status_str'] = '待分配';
+                    }else{
+                        $list[$k]['status_str'] = '开发ing';
+                    }
+                }elseif ($v['status'] == 4){
+                    if($v['test_group'] == 1){
+                        if($v['entry_user_confirm'] == 0){
+                            $list[$k]['status_str'] = '待测试,待确认';
+                        }else{
+                            $list[$k]['status_str'] = '待测试,已确认';
+                        }
+                    }else{
+                        $list[$k]['status_str'] = '待上线';
+                    }
+
+                }elseif ($v['status'] == 5){
+                    if($v['test_group'] == 1){
+                        if($v['entry_user_confirm'] == 0){
+                            $list[$k]['status_str'] = '待确认';
+                        }else{
+                            $list[$k]['status_str'] = '待上线';
+                        }
+                    }else{
+                        $list[$k]['status_str'] = '待上线';
+                    }
+                }elseif ($v['status'] == 6){
+
+                    $list[$k]['status_str'] = '待回归测试';
+                }elseif ($v['status'] == 7){
+
+                    $list[$k]['status_str'] = '已完成';
+                }
+
+                /*当前状态*/
+                //$this->user_id = $this->auth->id;
+                //权限赋值
+                $list[$k]['demand_add'] = $permissions['demand_add'];
+                $list[$k]['demand_del'] = $permissions['demand_del'];
+                $list[$k]['demand_through_demand'] = $permissions['demand_through_demand'];
+                $list[$k]['demand_distribution'] = $permissions['demand_distribution'];
+                $list[$k]['demand_test_distribution'] = $permissions['demand_test_distribution'];
+                $list[$k]['demand_finish'] = $permissions['demand_finish'];
+                $list[$k]['demand_test_finish'] = $permissions['demand_test_finish'];
+                $list[$k]['demand_test_record_bug'] = $permissions['demand_test_record_bug'];
+                $list[$k]['demand_add_online'] = $permissions['demand_add_online'];
+
+                //判断当前登录人是否显示应该操作的按钮
+                if($v['test_group'] == 1 && $v['test_user_id'] != ''){
+                    if(in_array($this->auth->id, explode(',', $v['test_user_id']))){
+                        $list[$k]['is_test_record_hidden'] = 1;
+                        $list[$k]['is_test_finish_hidden'] = 1;
+                    }
+                }
+                if($this->auth->id == $v['entry_user_id']){
+                    $list[$k]['is_entry_user_hidden'] = 1;
+                }
+            }
+            $result = array("total" => $total, "rows" => $list);
+            return json($result);
+        }
+        return $this->view->fetch();
+    }
     /**
      * 技术部网站需求列表
      */
     public function index()
     {
-        //dump(input('type'));exit;
+        //dump(input());exit;
         //设置过滤方法
         $this->request->filter(['strip_tags']);
         if ($this->request->isAjax()) {
@@ -285,7 +456,7 @@ class ItWebDemand extends Backend
             }
             $this->error(__('Parameter %s can not be empty', ''));
         }
-
+        $this->view->assign('demand_type',input('demand_type'));
         /*$user_id = $this->auth->id;
         $user_name = $this->auth->username;
         $this->view->assign('user_id',$this->auth->id);
@@ -298,7 +469,6 @@ class ItWebDemand extends Backend
      */
     public function edit($ids = null)
     {
-
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
             if ($params) {
@@ -326,6 +496,7 @@ class ItWebDemand extends Backend
             }
         }
 
+        $this->view->assign('demand_type',input('demand_type'));
         $this->view->assign("copy_to_user_id_arr", $copy_to_user_id_arr );
         $this->view->assign("row", $row );
         return $this->view->fetch();
@@ -367,10 +538,16 @@ class ItWebDemand extends Backend
                         $update_date['test_user_id'] = implode(',',$params['test_user_id']);
                     }else{
                         $update_date['test_group'] = $params['test_group'];
-                        $update_date['test_complexity'] = '';
+                        $update_date['test_complexity'] = 0;
                         $update_date['test_user_id'] = '';
                     }
-                    $update_date['status'] = 2;
+                    if($params['demand_type'] == 2){
+                        $update_date['status'] = 2;
+                    }else{
+                        $update_date['status'] = 3;
+                        $update_date['test_complexity'] = 0;
+                    }
+
                 }
                 $res = $this->model->allowField(true)->save($update_date,['id'=> $params['id']]);
                 if ($res) {
@@ -398,7 +575,7 @@ class ItWebDemand extends Backend
         }
 
         $this->view->assign("test_userid_arr", $test_userid_arr);
-
+        $this->view->assign('demand_type',input('demand_type'));
         $this->view->assign("row", $row_arr);
         return $this->view->fetch('distribution');
     }
@@ -532,7 +709,10 @@ class ItWebDemand extends Backend
                 $app_userid_arr[$k3]['user_name'] = config('demand.app_user')[$v3];
             }
         }
-
+        if($row_arr['type'] == 2){
+            $demand_type = 2;
+        }
+        $this->view->assign('demand_type',$demand_type);
         $this->view->assign("web_userid_arr", $web_userid_arr);
         $this->view->assign("phper_userid_arr", $phper_userid_arr);
         $this->view->assign("app_userid_arr", $app_userid_arr);
@@ -559,6 +739,7 @@ class ItWebDemand extends Backend
                     if($params['web_finish'] == 1){
                         $update_date['web_designer_is_finish'] = 1;
                         $update_date['web_designer_finish_time'] =  date('Y-m-d H:i',time());
+                        $update_date['web_designer_note'] =  $params['web_designer_note'];
                         $res = $this->model->allowField(true)->save($update_date,['id'=> $params['id']]);
                     }
 
@@ -566,6 +747,7 @@ class ItWebDemand extends Backend
                     if($params['php_finish'] == 1){
                         $update_date['phper_is_finish'] = 1;
                         $update_date['phper_finish_time'] =  date('Y-m-d H:i',time());
+                        $update_date['phper_note'] =  $params['phper_note'];
                         $res = $this->model->allowField(true)->save($update_date,['id'=> $params['id']]);
                     }
 
@@ -573,6 +755,7 @@ class ItWebDemand extends Backend
                     if($params['app_finish'] == 1){
                         $update_date['app_is_finish'] = 1;
                         $update_date['app_finish_time'] =  date('Y-m-d H:i',time());
+                        $update_date['app_note'] =  $params['app_note'];
                         $res = $this->model->allowField(true)->save($update_date,['id'=> $params['id']]);
                     }
 
@@ -596,6 +779,10 @@ class ItWebDemand extends Backend
                         if($row_arr['test_group'] == 2){
                             $update_status['status'] = 5;
                         }else{
+                            if($params['demand_type'] == 1){
+                                $update_status['entry_user_confirm'] = 1;
+                                $update_status['entry_user_confirm_time'] = date('Y-m-d H:i',time());
+                            }
                             $update_status['status'] = 4;
                         }
                         $res_status = $this->model->allowField(true)->save($update_status,['id'=> $params['id']]);
@@ -630,6 +817,7 @@ class ItWebDemand extends Backend
             $web_userid_arr['expect_time'] = date('Y-m-d H:i',strtotime($row_arr['web_designer_expect_time']));
             $web_userid_arr['is_finish'] = $row_arr['web_designer_is_finish'];
             $web_userid_arr['finish_time'] = $row_arr['web_designer_finish_time'];
+            $web_userid_arr['note'] = $row_arr['web_designer_note'];
         }
         //如果已分配后端人员
         $phper_userid_arr = array();
@@ -640,6 +828,7 @@ class ItWebDemand extends Backend
             $phper_userid_arr['expect_time'] = date('Y-m-d H:i',strtotime($row_arr['phper_expect_time']));
             $phper_userid_arr['is_finish'] = $row_arr['phper_is_finish'];
             $phper_userid_arr['finish_time'] = $row_arr['phper_finish_time'];
+            $phper_userid_arr['note'] = $row_arr['phper_note'];
         }
 
         //如果已分配app人员
@@ -651,6 +840,7 @@ class ItWebDemand extends Backend
             $app_userid_arr['expect_time'] = date('Y-m-d H:i',strtotime($row_arr['app_expect_time']));
             $app_userid_arr['is_finish'] = $row_arr['app_is_finish'];
             $app_userid_arr['finish_time'] = $row_arr['app_finish_time'];
+            $app_userid_arr['note'] = $row_arr['app_note'];
         }
 
 
@@ -658,7 +848,7 @@ class ItWebDemand extends Backend
         $this->view->assign("phper_userid_arr", $phper_userid_arr);
         $this->view->assign("app_userid_arr", $app_userid_arr);
         $this->view->assign("year_time", $year_time);
-
+        $this->view->assign('demand_type',input('demand_type'));
         $this->view->assign("row", $row_arr);
         return $this->view->fetch();
     }

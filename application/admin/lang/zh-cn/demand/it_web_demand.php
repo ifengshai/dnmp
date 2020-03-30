@@ -43,6 +43,7 @@ return [
     'All_expect_time'               => '预计时间',
     'Copy_to_user_id'               => '抄送人',
     'All_finish'               => '点击完成',
+    'bug_note'                   => '描述',
 
     //分配使用
     'Test_complexity'               => '测试复杂度：',
