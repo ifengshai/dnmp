@@ -820,7 +820,7 @@ where cped.attribute_id in(146,147) and cped.store_id=0 and cped.entity_id=$prod
             $spreadsheet->getActiveSheet()->setCellValue("W" . ($key * 2 + 2), $value['second_name']);
             $spreadsheet->getActiveSheet()->setCellValue("X" . ($key * 2 + 2), $value['four_name']);
 
-            if ($value['od_add'] > 0 && $value['os_add'] > 0) {
+            if ($value['prescription_type'] == 'Reading Glasses' && $value['od_add'] > 0 && $value['os_add'] > 0) {
                 $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 2), $value['od_add']);
                 $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 3), $value['os_add']);
             } else {
