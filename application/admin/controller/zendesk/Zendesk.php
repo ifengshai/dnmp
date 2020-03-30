@@ -132,6 +132,11 @@ class Zendesk extends Backend
                         'status' => $status,
                         'assignee_id' => $assignee_id
                     ];
+                    //有抄送，添加抄送
+                    if($params['email_cc']){
+                        $email_ccs = $this->emailCcs($params['email_cc'],$ticket->email_cc);
+                        $updateData['email_ccs'] = $email_ccs;
+                    }
                     //修改主题
                     if ($params['subject'] != $ticket->subject) {
                         $updateData['subject'] = $params['subject'];
@@ -179,6 +184,7 @@ class Zendesk extends Backend
                         'tags' => join(',', $params['tags']),
                         'assignee_id' => $agent_id,
                         'due_id' => session('admin.id'),
+                        'email_cc' => $params['email_cc']
                     ]);
                     //评论表添加内容,有body时添加评论，修改状态等不添加
                     if (strip_tags($params['content'])) {
@@ -264,7 +270,7 @@ class Zendesk extends Backend
     public function getEmail()
     {
         $term = input('term');
-        $where['email'] = ['like', '%' . $term . '%'];
+        $where['email|username'] = ['like', '%' . $term . '%'];
         $data = $this->model->where($where)->column('email');
         return json(array_unique($data));
     }
@@ -391,6 +397,14 @@ Please close this window and try again.");
         }
         $this->error(__('Parameter %s can not be empty', ''));
     }
+
+    /**
+     * 知识库搜索文章
+     * @return \think\response\Json
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
     public function searchPosts()
     {
         if ($this->request->isPost()) {
@@ -427,5 +441,30 @@ DOC;
             return json(['html' => $html,'post_html' => $post_html]);
         }
         $this->error('there has something wrong');
+    }
+
+    /**
+     * 添加抄送，删除的目前先不做，sdk删除不能用
+     * @param $emailCcs
+     * @param $preEmailCcs
+     * @return array
+     */
+    public function emailCcs($emailCcs,$preEmailCcs)
+    {
+        $preEmailCcs = explode(',',$preEmailCcs);
+        $emailCcs = explode(',',$emailCcs);
+        //pre并em，删除，
+        //$del = array_diff($preEmailCcs,$emailCcs);
+        //em并pre，新增
+        //$add = array_diff($emailCcs,$preEmailCcs);
+        $emails = [];
+        foreach($emailCcs as $email){
+            $emails[] = [
+              'user_email' => $email,
+              'action' => 'put'
+            ];
+        }
+        return $emails;
+
     }
 }
