@@ -92,12 +92,20 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui'], f
                             pid: pid
                         },
                         success: function (json) {
-                            $('.nid').val(json.ticket_id);
-                            $('.merge-ticket-id').html(json.ticket_id);
-                            $('.merge-subject').html(json.subject);
-                            $('.merge-content-in').html('Request #' + pid + ' "' + subject + '" was closed and merged into this request. Last comment in request #' + pid + '.' +
-                                '' + json.lastComment);
-                            $('.merge-content-to').html('This request was closed and merged into request #' + json.ticket_id + ' "' + json.subject + '".');
+                            var data = json.data;
+                            if(json.code == 0){
+                                Layer.msg(json.msg);
+                                //$('#modal-default2').modal('hide');
+                            }else{
+                                $('#modal-default2').modal('show');
+                                $('.nid').val(data.ticket_id);
+                                $('.merge-ticket-id').html(data.ticket_id);
+                                $('.merge-subject').html(data.subject);
+                                $('.merge-content-in').html('Request #'+ pid +' "'+ subject +'" was closed and merged into this request. Last comment in request #'+pid+'.' +
+                                    ''+data.lastComment);
+                                $('.merge-content-to').html('This request was closed and merged into request #'+data.ticket_id+' "'+data.subject+'".');
+                            }
+
                         }
                     });
                 }
@@ -122,6 +130,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui'], f
                 return false;
             });
 
+            //抄送人标签输入
             $('#ccs').tagsInput({
                 width: 'auto',
                 defaultText: '输入后回车确认',
@@ -130,6 +139,89 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui'], f
                 placeholderColor: '#999',
                 autocomplete_url:'zendesk/zendesk/getEmail'
             });
+
+            $(document).on('change','.macro-apply',function(){
+                var id = $(this).val();
+                var ticket_id = $('.ticket_id').val();
+                if(id){
+                    $.ajax({
+                        type: "POST",
+                        url: "zendesk/zendesk_mail_template/getTemplate",
+                        dataType: "json",
+                        cache: false,
+                        async: false,
+                        data: {
+                            id:id,
+                            ticket_id: ticket_id
+                        },
+                        success: function (json) {
+                            //修改回复内容，状态，priority，tags
+                            if(json.template_content){
+                                $('.ticket-content').summernote("code",json.template_content);
+                            }
+                            if(json.mail_status) {
+                                $('.ticket-status').val(json.mail_status);
+                            }
+                            if(json.mail_level) {
+                                $('.ticket-priority').val(json.mail_level);
+                            }
+                            if(json.mail_tag) {
+                                $('.ticket-tags').val(json.mail_tag);
+                            }
+                            if(json.mail_subject) {
+                                $('.ticket-subject').val(json.mail_subject);
+
+                            }
+                            $('.selectpicker ').selectpicker('refresh');
+                            Layer.msg('应用成功');
+                            return false;
+                        },
+                        error: function(json){
+                            return false;
+
+                        }
+                    })
+                }
+            });
+            $(document).on('click','.post-search',function(){
+               var text = $('.post-search-input').val();
+               var type = $('.search-post-type').val();
+                $.ajax({
+                    type: "POST",
+                    url: "zendesk/zendesk/searchPosts",
+                    dataType: "json",
+                    cache: false,
+                    async: false,
+                    data: {
+                        text: text,
+                        type: type
+                    },
+                    success: function (json) {
+                        $('.search-posts').html(json.html);
+                        $('.show-posts').html(json.post_html);
+                        return false;
+                    },
+                    error: function(json){
+                        return false;
+
+                    }
+                });
+            });
+            $(document).on('click','.card-link',function(){
+               var link = $(this).data('link');
+               var title = $(this).data('title');
+                $('.ticket-content').summernote("createLink",{
+                    text: title,
+                    url: link,
+                    isNowWindow: true
+                });
+                $(this).next('button').show();
+            });
+            $(document).on('mouseenter','.card',function(){
+                var num = $(this).data('num');
+                console.log(num);
+                $('.show-posts').find('.post-row').eq(num).show().siblings().hide();
+            })
         },
         api: {
             bindevent: function () {
