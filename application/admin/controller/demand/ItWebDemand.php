@@ -38,6 +38,7 @@ class ItWebDemand extends Backend
      */
     public function index()
     {
+        //dump(input('type'));exit;
         //设置过滤方法
         $this->request->filter(['strip_tags']);
         if ($this->request->isAjax()) {
@@ -204,8 +205,6 @@ class ItWebDemand extends Backend
             $result = array("total" => $total, "rows" => $list);
             return json($result);
         }
-        $this->assignconfig('is_test_record_hidden', $this->auth->check('demand/it_web_demand/test_record_bug'));
-        $this->assignconfig('is_test_finish_hidden', $this->auth->check('demand/it_web_demand/test_group_finish'));
         return $this->view->fetch();
     }
 
