@@ -3,8 +3,9 @@
 namespace app\admin\controller\zendesk;
 
 use app\admin\model\Admin;
+use app\admin\model\zendesk\ZendeskAccount;
 use app\common\controller\Backend;
-
+use think\Db;
 /**
  * 
  *
@@ -52,13 +53,13 @@ class ZendeskAgents extends Backend
             }
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
-                ->with(['admin'])
+                ->with(['admin','agent'])
                 ->where($where)
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->model
-                ->with(['admin'])
+                ->with(['admin','agent'])
                 ->where($where)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
@@ -73,6 +74,103 @@ class ZendeskAgents extends Backend
         return $this->view->fetch();
     }
     /**
+     * 添加
+     */
+    public function add()
+    {
+        if ($this->request->isPost()) {
+            $params = $this->request->post("row/a");
+            if ($params) {
+                $params = $this->preExcludeFields($params);
+                if ($this->dataLimit && $this->dataLimitFieldAutoFill) {
+                    $params[$this->dataLimitField] = $this->auth->id;
+                }
+                $result = false;
+                Db::startTrans();
+                try {
+                    //是否采用模型验证
+                    if ($this->modelValidate) {
+                        $name = str_replace("\\model\\", "\\validate\\", get_class($this->model));
+                        $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.add' : $name) : $this->modelValidate;
+                        $this->model->validateFailException(true)->validate($validate);
+                    }
+                    $result = $this->model->allowField(true)->save($params);
+                    Db::commit();
+                } catch (ValidateException $e) {
+                    Db::rollback();
+                    $this->error($e->getMessage());
+                } catch (PDOException $e) {
+                    Db::rollback();
+                    $this->error($e->getMessage());
+                } catch (Exception $e) {
+                    Db::rollback();
+                    $this->error($e->getMessage());
+                }
+                if ($result !== false) {
+                    $this->success();
+                } else {
+                    $this->error(__('No rows were inserted'));
+                }
+            }
+            $this->error(__('Parameter %s can not be empty', ''));
+        }
+        return $this->view->fetch();
+    }
+
+    /**
+     * 编辑
+     */
+    public function edit($ids = null)
+    {
+        $row = $this->model->get($ids);
+        if (!$row) {
+            $this->error(__('No Results were found'));
+        }
+        $adminIds = $this->getDataLimitAdminIds();
+        if (is_array($adminIds)) {
+            if (!in_array($row[$this->dataLimitField], $adminIds)) {
+                $this->error(__('You have no permission'));
+            }
+        }
+        if ($this->request->isPost()) {
+            $params = $this->request->post("row/a");
+            if ($params) {
+                $params = $this->preExcludeFields($params);
+                $result = false;
+                Db::startTrans();
+                try {
+                    //是否采用模型验证
+                    if ($this->modelValidate) {
+                        $name = str_replace("\\model\\", "\\validate\\", get_class($this->model));
+                        $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.edit' : $name) : $this->modelValidate;
+                        $row->validateFailException(true)->validate($validate);
+                    }
+                    $result = $row->allowField(true)->save($params);
+                    Db::commit();
+                } catch (ValidateException $e) {
+                    Db::rollback();
+                    $this->error($e->getMessage());
+                } catch (PDOException $e) {
+                    Db::rollback();
+                    $this->error($e->getMessage());
+                } catch (Exception $e) {
+                    Db::rollback();
+                    $this->error($e->getMessage());
+                }
+                if ($result !== false) {
+                    $this->success();
+                } else {
+                    $this->error(__('No rows were updated'));
+                }
+            }
+            $this->error(__('Parameter %s can not be empty', ''));
+        }
+        $agents = ZendeskAccount::where('user_type',$row->type)->field('account_id,account_user')->select();
+        $this->view->assign("row", $row);
+        $this->view->assign("agents", $agents);
+        return $this->view->fetch();
+    }
+    /**
      * 获取平台Agents用户
      *
      * @Description
@@ -83,5 +181,18 @@ class ZendeskAgents extends Backend
     public function getPlatformUser()
     {
         $res = (new Notice(request(),['type' => 'zeelool']))->fetchUser();
+    }
+    public function getAgents()
+    {
+        if($this->request->isPost()) {
+            $type = input('type');
+            $agents = ZendeskAccount::where('user_type',$type)->field('account_id,account_user')->select();
+            $html = '<option value="">请选择</option>';
+            foreach($agents as $agent){
+                $html .= "<option value='{$agent->account_id}'>{$agent->account_user}</option>";
+            }
+            return $html;
+        }
+        $this->error('not found');
     }
 }

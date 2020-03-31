@@ -16,6 +16,7 @@ use think\Exception;
 use Zendesk\API\HttpClient as ZendeskAPI;
 use app\admin\model\zendesk\Zendesk;
 use app\admin\model\zendesk\ZendeskComments;
+use app\admin\model\zendesk\ZendeskTags;
 
 /**
  * 通知方法
@@ -291,6 +292,7 @@ class Notice extends Controller
     {
         $res = $this->client->helpCenter->articles()->findAll(['per_page' => 100]);
         $page_count = $res->page_count;
+        $type = $this->postData['type'] == 'zeelool' ? 1 : 2;
         for ($i = 1; $i <= $page_count; $i++) {
             $res = $this->client->helpCenter->articles()->findAll(['page' => $i, 'per_page' => 100]);
             $articles = $res->articles;
@@ -300,10 +302,30 @@ class Notice extends Controller
                         'post_id' => $article->id,
                         'title' => $article->title,
                         'html_url' => $article->html_url,
+                        'type' => $type,
                         'author_id' => $article->author_id,
                         'body' => $article->body,
                         'create_time' => date('Y-m-d H:i:s', strtotime($article->created_at)),
                         'update_time' => date('Y-m-d H:i:s', strtotime($article->updated_at)),
+                    ]);
+                }
+            }
+
+        }
+    }
+    public function setTags()
+    {
+        $res = $this->client->crasp()->findTags();
+        $page_count = $res->count;
+        $type = $this->postData['type'] == 'zeelool' ? 1 : 2;
+        for ($i = 1; $i <= $page_count; $i++) {
+            $res = $this->client->crasp()->findTags(['page' => $i, 'per_page' => 100]);
+            $tags = $res->tags;
+            foreach ($tags as $tag) {
+                if (!ZendeskTags::where('name', $tag->name)->find()) {
+                    ZendeskTags::create([
+                        'name' => $tag->name,
+                        'count' => $tag->count,
                     ]);
                 }
             }

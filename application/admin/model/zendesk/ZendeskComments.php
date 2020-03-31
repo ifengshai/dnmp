@@ -26,7 +26,7 @@ class ZendeskComments extends Model
     ];
     public function agent()
     {
-        return $this->hasOne(ZendeskAgents::class,'id','due_id');
+        return $this->hasOne(ZendeskAgents::class,'admin_id','due_id');
     }
     
 

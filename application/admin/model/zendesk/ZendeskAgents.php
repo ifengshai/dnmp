@@ -26,6 +26,7 @@ class ZendeskAgents extends Model
     public function getType() {
         return $this->data['type'];
     }
+
     /**
      * 用户关联
      * @return \think\model\relation\BelongsTo1
@@ -37,6 +38,10 @@ class ZendeskAgents extends Model
     public function tickets()
     {
         return $this->hasMany(Zendesk::class,'assign_id','admin_id');
+    }
+    public function agent()
+    {
+        return $this->belongsTo(ZendeskAccount::class,'agent_id','account_id');
     }
 
 }

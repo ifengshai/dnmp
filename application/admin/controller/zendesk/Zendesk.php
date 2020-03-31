@@ -59,21 +59,20 @@ class Zendesk extends Backend
             }
             $this->request->get(['filter' => json_encode($filter)]);
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            //默认使用
             $total = $this->model
-                ->with(['admin', 'lastComment'])
+                ->with(['admin'])
                 ->where($where)
                 ->where($map)
-                ->order($sort, $order)
                 ->count();
 
             $list = $this->model
-                ->with(['admin', 'lastComment'])
+                ->with(['admin'])
                 ->where($where)
                 ->where($map)
-                ->order($sort, $order)
+                ->order('status asc,update_time desc,id desc')
                 ->limit($offset, $limit)
                 ->select();
-
             $list = collection($list)->toArray();
             $result = array("total" => $total, "rows" => $list);
 
@@ -196,6 +195,7 @@ class Zendesk extends Backend
                             'html_body' => $params['content'],
                             'is_public' => $params['public_type'],
                             'is_admin' => 1,
+                            'due_id' => session('admin.id'),
                             'attachments' => $params['image']
                         ]);
                     }
@@ -220,9 +220,11 @@ class Zendesk extends Backend
             $this->error(__('Parameter %s can not be empty', ''));
         }
         //获取所有的tags
-        $tags = ZendeskTags::column('name', 'id');
+        $tags = ZendeskTags::order('count desc')->column('name', 'id');
 
-        $comments = ZendeskComments::where('zid', $ids)->order('id', 'desc')->select();
+        $comments = ZendeskComments::with(['agent' => function($query) use($ticket){
+            $query->where('type',$ticket->type);
+        }])->where('zid', $ids)->order('id', 'desc')->select();
         //获取该用户的所有状态不为close，sloved的ticket
         $tickets = $this->model
             ->where(['user_id' => $ticket->user_id, 'status' => ['in', [1, 2, 3]], 'type' => $ticket->type])
@@ -254,7 +256,20 @@ class Zendesk extends Backend
             $templates[$template['id']] = $category . $template['template_name'];
         }
         array_unshift($templates, 'Apply Macro');
-        $this->view->assign(compact('tags', 'ticket', 'comments', 'tickets', 'recentTickets', 'templates'));
+        //获取当前用户的最新5个的订单
+        if($ticket->type == 1){
+            $orderModel = new \app\admin\model\order\order\Zeelool;
+        }else{
+            $orderModel = new \app\admin\model\order\order\Voogueme;
+        }
+
+        $orders = $orderModel
+            ->where('customer_email',$ticket->email)
+            ->order('entity_id desc')
+            ->limit(5)
+            ->select();
+        $btn = input('btn',0);
+        $this->view->assign(compact('tags', 'ticket', 'comments', 'tickets', 'recentTickets', 'templates','orders','btn'));
         $this->view->assign('rows', $row);
         return $this->view->fetch();
     }
@@ -294,7 +309,7 @@ Please close this window and try again.");
 Please close this window and try again.");
         }
         //合并的最后一条评论
-        $comment = $this->model->where('ticket_id', $pid)->with('lastComment')->find();
+        $comment = $this->model->where('ticket_id', $ticket_id)->with('lastComment')->find();
         if ($comment->status == 5) {
             $this->error("You are unable to merge into #{$ticket_id}. Tickets that are Closed, tickets that are shared with other accounts, and tickets you don\'t have access to cannot be merged into.
 Please close this window and try again.");

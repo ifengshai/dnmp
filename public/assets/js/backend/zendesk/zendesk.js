@@ -6,7 +6,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui'], f
             Table.api.init({
                 extend: {
                     index_url: 'zendesk/zendesk/index' + location.search,
-                    add_url: 'zendesk/zendesk/add',
                     edit_url: 'zendesk/zendesk/edit',
                     table: 'zendesk',
                 }
@@ -38,7 +37,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui'], f
                             field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [
                                 {
                                     name: 'edit',
-                                    text: __('Answer'),
+                                    text: function(row){
+                                        if(row.status == 5){
+                                            return '查看';
+                                        }
+                                        return __('Answer');
+                                    },
                                     title: function (row) {
                                         return __('Answer') + '【' + row.ticket_id + '】' + row.subject;
                                     },
@@ -51,9 +55,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui'], f
                                     },
                                     visible: function(row){
                                         //console.log(row.assign_id)
-                                        if(row.status == 4 || row.status == 5){
-                                            return false;
-                                        }
                                         if(row.assign_id != Config.admin_id){
                                             return false;
                                         }
@@ -123,6 +124,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui'], f
                                 Layer.msg(json.msg);
                                 //$('#modal-default2').modal('hide');
                             }else{
+                                $('#modal-default').modal('hide')
                                 $('#modal-default2').modal('show');
                                 $('.nid').val(data.ticket_id);
                                 $('.merge-ticket-id').html(data.ticket_id);
@@ -135,6 +137,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui'], f
                         }
                     });
                 }
+                return false;
             });
             $(document).on('click', '.btn-merge-submit', function () {
                 var data = $(this).parents('form').serialize();
@@ -257,6 +260,16 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui'], f
                 console.log(num);
                 $('.show-posts').find('.post-row').eq(num).show().siblings().hide();
             })
+            $(document).on('click','.change-ticket',function(){
+                var title = $(this).data('title');
+                var status = $(this).data('status');
+                parent.$(".layui-layer-title")[0].innerText= title;
+                if(status == 5){
+                    parent.$(".layui-layer-footer").hide();
+                }else{
+                    parent.$(".layui-layer-footer").show();
+                }
+            });
         },
         api: {
             bindevent: function () {
