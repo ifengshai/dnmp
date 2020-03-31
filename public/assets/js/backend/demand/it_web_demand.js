@@ -1104,7 +1104,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     if (value == null || value == undefined) {
                         value = '';
                     }
-                    return '<span class="btn-getcontent check_demand_content" data = "' + value + '" style="">查 看</span>';
+                    return '<div style="float: left;width: 100%;"><span class="btn-getcontent check_demand_content" data = "' + value + '" style="">查 看</span></div>';
                 },
 
                 getClear: function (value) {
