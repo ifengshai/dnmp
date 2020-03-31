@@ -38,7 +38,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {
                             field:'is_used',
                             title:__('Is_used'),
-                            searchList:{1:'未使用',2:'已使用'},
+                            searchList:{1:'未绑定',2:'已绑定'},
                             custom: { 1: 'blue', 2: 'red'},
                             formatter:Table.api.formatter.status                            
                         }
@@ -50,6 +50,23 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
 
             // 为表格绑定事件
             Table.api.bindevent(table);
+            //刷新账户
+            $(document).on('click', '.btn-refresh-account', function () {
+                Layer.confirm(
+                    __('确定要刷新账户吗'),
+                    function (index) {
+                        Backend.api.ajax({
+                            url: "zendesk/zendesk_account/refresh_account",
+                        }, function (data, ret) {
+                            table.bootstrapTable('refresh');
+                            Layer.close(index);
+                        },function(data,ret){
+                            Layer.alert(ret.msg);
+                            return false;
+                        });
+                    }
+                );
+            });
         },
         add: function () {
             Controller.api.bindevent();

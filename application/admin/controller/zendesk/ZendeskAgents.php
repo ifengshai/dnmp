@@ -198,51 +198,6 @@ class ZendeskAgents extends Backend
         $this->assign('account',$account);
         $this->view->assign("row", $row);
         return $this->view->fetch();
-    }       
-    /**
-     * 对象转数组
-     *
-     * @Description
-     * @author lsw
-     * @since 2020/03/30 11:19:37 
-     * @param [type] $array
-     * @return void
-     */
-    function object_array($array) {  
-        if(is_object($array)) {  
-            $array = (array)$array;  
-        } 
-        if(is_array($array)) {
-            foreach($array as $key=>$value) {  
-                $array[$key] = $this->object_array($value);  
-            }  
-        }  
-        return $array;  
-    }
-    /**
-     * 获取平台Agents用户
-     *
-     * @Description
-     * @author lsw
-     * @since 2020/03/28 14:58:26 
-     * @return void
-     */
-    public function getPlatformUser()
-    {
-        $res = (new Notice(request(),['type' => 'voogueme']))->fetchUser(['role'=>'admin']);
-        $info = $this->object_array($res);
-        if(!$info){
-            return false;
-        }
-        $data = [];
-        foreach($info['users'] as $k=> $v){
-            $data[$k]['user_type']      = 1;
-            $data[$k]['account_id']     = $v['id'];
-            $data[$k]['account_type']   = 2;
-            $data[$k]['account_user']   = $v['name'];
-            $data[$k]['account_email']  = $v['email'];
-        }
-        Db::name('zendesk_account')->insertAll($data);
     }
     /**
      * 异步获取zendesk账户信息
