@@ -266,18 +266,13 @@ class Notice extends Controller
      * @since 2020/03/28 14:50:55
      * @author lsw
      */
-    public function fetchUser()
+    public function fetchUser($params)
     {
-        // try {
-        //     $params['role'] = 'admin';
-        //     return $this->client->users()->findAll($params);
-        // } catch (\Exception $e) {
-        //     return ['code' => 0, 'message' => $e->getMessage()];
-        // }
-        // $params['role'] = 'admin';
-        // return $this->client->users()->findAll($params);
-        $result = $this->client->users()->findAll(['role' => 'end-user']);
-        return $result;
+        try {
+            return  $this->client->users()->findAll($params);
+        } catch (\Exception $e) {
+            return ['code' => 0, 'message' => $e->getMessage()];
+        }
     }
 
     /**

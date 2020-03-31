@@ -5,15 +5,19 @@
  * @Email: 646054215@qq.com
  */
 return [
+    'platform'=>[
+        1=>'zeelool',
+        2=>'voogueme'
+    ],
     'zeelool' => [
         'subdomain' => "zeelooloptical",
         'username' => "complaint@zeelool.com",
         'token' => "wAhNtX3oeeYOJ3RI1i2oUuq0f77B2MiV5upmh11B"
     ],
     'voogueme' => [
-        'subdomain' => "zeelooloptical",
-        'username' => "complaint@zeelool.com",
-        'token' => "wAhNtX3oeeYOJ3RI1i2oUuq0f77B2MiV5upmh11B"
+        'subdomain' => "voogue",
+        'username' => "ww591795345@outlook.com",
+        'token' => "FksHlSPfruUXrfXv4rAz5IGFZHbW48UKzMg6H5Go"
     ],
     'priority' => [
         0 => '',
