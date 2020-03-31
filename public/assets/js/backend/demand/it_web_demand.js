@@ -34,7 +34,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {
                             field: 'site_type',
                             title: __('Site_type'),
-                            searchList: { 1: 'Zeelool', 2: 'Voogueme', 3: 'Nihao' , 4: 'Wesee', 5: '魔晶', 6: 'Orther'},
+                            searchList: { 1: 'Zeelool', 2: 'Voogueme', 3: 'Nihao' , 4: 'Wesee', 5: 'Orther'},
                             formatter: Table.api.formatter.status
                         },
                         {field: 'entry_user_id', title: __('Entry_user_id'),visible:false,operate:false},
@@ -110,7 +110,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                 return all_user_name;
                             },
                         },
-                        {field: 'testgroup', title: __('Test_group'),operate:false},
+                        { field: 'test_group', title: __('Test_group'), custom: { 2: 'danger', 1: 'success',0: 'black' }, searchList: { 1: '是', 2: '否', 0:'未确认' }, formatter: Table.api.formatter.status },
+                        /*{field: 'testgroup', title: __('Test_group'),operate:false},*/
                         {
                             field: 'test_user_id_arr',
                             title: __('test_user_id'),
@@ -408,6 +409,22 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
 
                                     }
                                 },
+                                {
+                                    name: 'detail_log',
+                                    text: __('详情记录'),
+                                    title: __('详情记录'),
+                                    classname: 'btn btn-xs btn-primary btn-dialog',
+                                    url: 'demand/it_web_demand/detail_log/demand_type/2',
+                                    callback: function (data) {
+                                    },
+                                    visible: function(row){
+                                        if(row.status == 7){
+                                            return true;
+                                        }else{
+                                            return false;
+                                        }
+                                    }
+                                },
                             ],
                             formatter: Table.api.formatter.buttons
                         },
@@ -465,7 +482,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {
                             field: 'site_type',
                             title: __('Site_type'),
-                            searchList: { 1: 'Zeelool', 2: 'Voogueme', 3: 'Nihao' , 4: 'Wesee', 5: '魔晶', 6: 'Orther'},
+                            searchList: { 1: 'Zeelool', 2: 'Voogueme', 3: 'Nihao' , 4: 'Wesee', 5: 'Orther'},
                             formatter: Table.api.formatter.status
                         },
                         {field: 'entry_user_id', title: __('Entry_user_id'),visible:false,operate:false},
@@ -478,7 +495,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             events: Controller.api.events.getcontent,
                             formatter: Controller.api.formatter.getcontent,
                         },
-                        {field: 'hope_time', title: __('Hope_time'), operate:'RANGE', addclass:'datetimerange',operate:false},
                         {
                             field: 'Allgroup_sel',
                             title: __('All_group'),
@@ -523,25 +539,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                 return all_user_name;
                             },
                         },
-                        {
-                            field: 'all_expect_time',
-                            title: __('all_expect_time'),
-                            operate: false,
-                            formatter: function (value, rows) {
-                                var all_user_name = '';
-                                if(rows.web_designer_group == 1){
-                                    all_user_name += '<span class="all_user_name">前端：<b>'+ rows.web_designer_expect_time + '</b></span><br>';
-                                }
-                                if(rows.phper_group == 1){
-                                    all_user_name += '<span class="all_user_name">后端：<b>'+ rows.phper_expect_time + '</b></span><br>';
-                                }
-                                if(rows.app_group == 1){
-                                    all_user_name += '<span class="all_user_name">APP：<b>'+ rows.app_expect_time + '</b></span><br>';
-                                }
-                                return all_user_name;
-                            },
-                        },
-                        {field: 'testgroup', title: __('Test_group'),operate:false},
+                        { field: 'test_group', title: __('Test_group'), custom: { 2: 'danger', 1: 'success',0: 'black' }, searchList: { 1: '是', 2: '否', 0:'未确认' }, formatter: Table.api.formatter.status },
+                        /*{field: 'testgroup', title: __('Test_group'),operate:false},*/
                         {
                             field: 'test_user_id_arr',
                             title: __('test_user_id'),
@@ -558,6 +557,21 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     return '-';
                                 }
 
+                            },
+                        },
+                        {
+                            field: 'is_small_probability',
+                            title: __('is_small_probability'),
+                            operate:false,
+                            formatter: function (value, rows) {
+                                var str = '';
+                                if(value == 0){
+                                    str = '<a href="javascript:;" class="is_small_probability" data-toggle="tooltip" title="" data-field="is_small_probability" data-value="1" data-id="'+rows.id+'" data-original-title="标记为小概率"><span class="text-black"><i class="fa fa-circle"></i> 否</span></a>'
+                                }
+                                if(value == 1){
+                                    str = '<a href="javascript:;" class="is_small_probability" data-toggle="tooltip" title="" data-field="is_small_probability" data-value="0" data-id="'+rows.id+'" data-original-title="修改为非小概率"><span class="text-danger"><i class="fa fa-circle"></i> 是</span></a>';
+                                }
+                                return str;
                             },
                         },
                         {field: 'all_finish_time', title: __('all_finish_time'), operate:'RANGE', addclass:'datetimerange',operate:false},
@@ -814,6 +828,22 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
 
                                     }
                                 },
+                                {
+                                    name: 'detail_log',
+                                    text: __('详情记录'),
+                                    title: __('详情记录'),
+                                    classname: 'btn btn-xs btn-primary btn-dialog',
+                                    url: 'demand/it_web_demand/detail_log/demand_type/1',
+                                    callback: function (data) {
+                                    },
+                                    visible: function(row){
+                                        if(row.status == 7){
+                                            return true;
+                                        }else{
+                                            return false;
+                                        }
+                                    }
+                                },
                             ],
                             formatter: Table.api.formatter.buttons
                         },
@@ -827,6 +857,40 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
 
             $(document).on('click', ".web_distribution", function () {
                 var id = $(this).attr('data');
+                var options = {
+                    shadeClose: false,
+                    shade: [0.3, '#393D49'],
+                    area: ['100%', '100%'], //弹出层宽高
+                    callback: function (value) {
+
+                    }
+                };
+                Fast.api.open('demand/it_web_demand/distribution?id=' + id, '分配', options);
+            });
+
+            $(document).on('click', ".is_small_probability", function () {
+
+                var id = $(this).attr('data-id');
+                var val = $(this).attr('data-value');
+
+                Layer.confirm(
+                    __('确定要执行操作么'),
+                    function (index) {
+                        Backend.api.ajax({
+                            url: "demand/it_web_demand/through_demand",
+                            data: { ids: id,val: val,small_probability:1 }
+                        }, function (data, ret) {
+                            table.bootstrapTable('refresh');
+                            Layer.close(index);
+                        });
+                    }
+                );
+
+
+
+                console.log(id);
+                console.log(val);
+                return false;
                 var options = {
                     shadeClose: false,
                     shade: [0.3, '#393D49'],
