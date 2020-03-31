@@ -47,6 +47,35 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
         api: {
             bindevent: function () {
                 Form.api.bindevent($("form[role=form]"));
+                //站点名和账户名二级联动
+                $(document).on('change','#type',function(){
+                    var platform = $(this).val();
+                    if(platform == null){
+                        Layer.alert('请选择站点');
+                        return false;
+                    }
+                    //根据承接部门查找出承接人
+                    Backend.api.ajax({
+                        url:'zendesk/zendesk_agents/get_zendesk_account',
+                        data:{platform:platform}
+                    }, function(data, ret){
+                        var rs = ret.data;
+                        var x;
+                        $("#name").html('');
+                        var str = '';
+                        for( x in rs ){
+                            str +='<option value="'+x+'">' + rs[x]+'</option>';
+                        }
+                        $("#name").append(str);
+                        $("#name").selectpicker('refresh');
+                        return false;
+                    }, function(data, ret){
+                        alert(ret.msg);
+                        console.log(ret);
+                        return false;
+                    });
+                    //console.log($(this).val());
+                });
             }
         }
     };

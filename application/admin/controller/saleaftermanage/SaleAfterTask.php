@@ -63,14 +63,13 @@ class SaleAfterTask extends Backend
                 $result = array_merge($result, Tree::instance()->getTreeList(Tree::instance()->getTreeArray($n['pid'])));
             }
         }
-        //dump($result);
         $groupName = [];
         foreach ($result as $k => $v) {
             //$groupName['group_id'][] = $v['id'];
             $groupName[$v['id']] = $v['name'];
         }
-        $staffArr = array_keys($groupName);
-        $staffList = (new Admin())->getStaffListss($staffArr);
+        //$staffArr = array_keys($groupName);
+        $staffList = (new Admin())->getStaffListss();
         $this->groupdata = $groupName;
         $this->assignconfig("admin", ['id' => $this->auth->id, 'group_ids' => $this->auth->getGroupIds()]);
         $this->view->assign('staffList',$staffList);

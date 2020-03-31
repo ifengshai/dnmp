@@ -25,6 +25,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     [
                         {checkbox: true},
                         {field: 'id', title: __('Id')},
+                        {field: 'optimize_type', 
+                         title: __('Optimize_type'),
+                         searchList :{0:'未操作',1:'bug',2:'需求'},
+                         custom:{ 1: 'blue', 2: 'red', 3: 'yellow'},
+                         formatter: Table.api.formatter.status
+                        },
                         {field: 'optimize_site_type', title: __('Optimize_site_type')},
                         {field: 'optimize_title', title: __('Optimize_title')},
                         {field: 'optimize_description', title: __('描述'),
@@ -64,12 +70,15 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                 title: __('安排'),
                                 classname: 'btn btn-xs btn-success btn-dialog',
                                 icon: 'fa fa-pencil',
-                                url: Config.moduleurl + '/itemmanage/item/edit',
-                                extend: 'data-area = \'["100%","100%"]\'',
+                                url: 'demand/testmanage/it_test_optimize/plan',
+                                extend: 'data-area = \'["60%","60%"]\'',
                                 callback: function (data) {
                                     Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
                                 },
                                 visible: function (row) {
+                                    if(1 == row.operate_status){
+                                        return false;
+                                    }
                                         return true;
                                 }
                             },
@@ -108,6 +117,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             Controller.api.bindevent();
         },
         edit: function () {
+            Controller.api.bindevent();
+        },
+        plan:function(){
             Controller.api.bindevent();
         },
         api: {

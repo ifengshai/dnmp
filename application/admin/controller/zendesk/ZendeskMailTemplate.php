@@ -4,6 +4,7 @@ namespace app\admin\controller\zendesk;
 use think\Db;
 use app\common\controller\Backend;
 use think\Exception;
+use app\admin\model\zendesk\ZendeskTags;
 use think\exception\PDOException;
 use think\exception\ValidateException;
 use app\admin\model\platformmanage\MagentoPlatform;
@@ -65,9 +66,12 @@ class ZendeskMailTemplate extends Backend
         $this->model = new \app\admin\model\zendesk\ZendeskMailTemplate;
         $this->view->assign(
             [
-                "orderPlatformList"     => (new MagentoPlatform())->getOrderPlatformList(),
+                "orderPlatformList"     => config('zendesk.platform'),
                 "templatePermission"    => $this->template_permission(),
-                "templateCategory"      => $this->template_category()
+                "templateCategory"      => $this->template_category(),
+                "mailStatus"            => config('zendesk.status'),
+                "mailLevel"             => config('zendesk.priority'),
+                "tagsList"              => (new ZendeskTags())->tags_list()
             ]);
     }
     
@@ -136,12 +140,13 @@ class ZendeskMailTemplate extends Backend
      */
     public function add()
     {
-        $platform =  (new MagentoPlatform())->getOrderPlatformList();
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
             if ($params) {
                 $params = $this->preExcludeFields($params);
-
+                if(is_array($params['mail_tag'])){
+                    $params['mail_tag'] = implode(',',$params['mail_tag']);
+                }
                 if ($this->dataLimit && $this->dataLimitFieldAutoFill) {
                     $params[$this->dataLimitField] = $this->auth->id;
                 }
@@ -198,6 +203,9 @@ class ZendeskMailTemplate extends Backend
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
             if ($params) {
+                if(is_array($params['mail_tag'])){
+                    $params['mail_tag'] = implode(',',$params['mail_tag']);
+                }  
                 $params = $this->preExcludeFields($params);
                 $result = false;
                 Db::startTrans();
