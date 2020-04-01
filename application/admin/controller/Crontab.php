@@ -1623,7 +1623,7 @@ order by sfoi.item_id asc limit 1000";
         //select*from table where now() >SUBDATE(times,interval -1 day);
         Db::connect('database.db_stock')->name('item')->query("set time_zone='+8:00'");
         $where['is_new'] = 1;
-        $itemId = Db::connect('database.db_stock')->name('item')->where($where)->where("now() >SUBDATE(check_time,interval -15 day)")->column('id');
+        $itemId = Db::connect('database.db_stock')->name('item')->where($where)->where("now() >SUBDATE(sku_putaway_time,interval -15 day)")->column('id');
         if (false == $itemId) {
             return 'ok';
         }
