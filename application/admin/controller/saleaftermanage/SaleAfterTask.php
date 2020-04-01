@@ -650,8 +650,8 @@ class SaleAfterTask extends Backend
             }
             if(2 == $params['task_status']){
                 $params['complete_time'] = date("Y-m-d H:i:s",time());
-                if((1 == count($params['handle_scheme'])) &&(in_array(0,$params['handle_scheme']))){
-                    $this->error('没有选择解决方案，无法处理完成');    
+                if(in_array(0,$params['handle_scheme'])){
+                    $this->error('请选择正确的解决方案');    
                 }
             }
             $handle_scheme = $params['handle_scheme'];
