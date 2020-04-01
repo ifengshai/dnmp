@@ -87,7 +87,7 @@ class SaleAfterTask extends Backend
      */
     public function index()
     {
-        //设置过滤方法
+        //设置过滤方法 
         $task_number = input('task_number');
         $this->request->filter(['strip_tags']);
         if ($this->request->isAjax()) {
@@ -104,6 +104,7 @@ class SaleAfterTask extends Backend
 
             $list = $this->model
                ->with(['saleAfterIssue'])
+                ->where(['is'=>2])
                 ->where($where)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
@@ -112,7 +113,8 @@ class SaleAfterTask extends Backend
             $list = collection($list)->toArray();
             $deptArr = (new AuthGroup())->getAllGroup();
             $repArr  = (new Admin())->getAllStaff();
-			$issueArr = (new SaleAfterIssue())->getAjaxIssueList();
+            $issueArr = (new SaleAfterIssue())->getAjaxIssueList();
+            $solveScheme = $this->model->getSolveScheme();
             foreach ($list as $key => $val){
 				if ($val['problem_id']) {
                     $deptNumArr = explode(',', $val['problem_id']);
@@ -127,6 +129,13 @@ class SaleAfterTask extends Backend
                 }
                 if($val['rep_id']){
                     $list[$key]['rep_id'] = $repArr[$val['rep_id']];
+                }
+                if($val['handle_scheme']){
+                    $schemeArr = explode(',',$val['handle_scheme']);
+                    $list[$key]['handle_scheme'] = '';
+                    foreach($schemeArr as $sval){
+                        $list[$key]['handle_scheme'] .= $solveScheme[$sval] . ' ';
+                    }
                 }
             }
             $result = array("total" => $total, "rows" => $list);
@@ -1289,6 +1298,24 @@ class SaleAfterTask extends Backend
         $writer = new $class($spreadsheet);
 
         $writer->save('php://output');
+    }
+    /**
+     * 异步获取解决方案
+     *
+     * @Description
+     * @author lsw
+     * @since 2020/04/01 11:29:25 
+     * @return void
+     */
+    public function getAjaxHandleScheme()
+    {
+        if($this->request->isAjax()){
+            $json = $this->model->getSolveScheme();
+            $arrToObject = (object)($json);
+            return json($arrToObject);
+        }else{
+            return $this->error('404 Not Found');    
+        }
     }	
 
 }
