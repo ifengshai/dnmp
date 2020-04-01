@@ -75,6 +75,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui','custom-css','b
                         {field: 'order_status', title: __('Order_status'),searchList:{'canceled':'canceled','closed':'closed','complete':'complete','creditcard_failed':'creditcard_failed','creditcard_pending':'creditcard_pending','free_processing':'free_processing','holded':'holded','payment_review':'payment_review','paypal_canceled_reversal':'paypal_canceled_reversal','paypal_reversed':'paypal_reversed','pending':'pending','processing':'processing'}},
                         //{field: 'dept_id', title: __('Dept_id'),operate:false},
                         {field: 'rep_id', title: __('Rep_id'),operate:false},
+                        {field:'handle_scheme',
+                         title:__('Handle_scheme'),
+                         searchList:$.getJSON('saleaftermanage/sale_after_task/getAjaxHandleScheme'),
+                         operate:'like'
+                        },
                         { field: 'is_refund',
                           title:__('Is_refund'),
                           searchList:{1:'无',2:'有'},
