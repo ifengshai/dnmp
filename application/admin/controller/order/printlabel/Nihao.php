@@ -1001,7 +1001,7 @@ where cped.attribute_id in(146,147) and cped.store_id=0 and cped.entity_id=$prod
         ', $str);
 
         $map['sfo.increment_id'] = ['in', $str];
-
+        $map['sfo.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal']];
        
         if ($filter['created_at']) {
             $created_at = explode(' - ', $filter['created_at']);
