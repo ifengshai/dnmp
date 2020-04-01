@@ -203,6 +203,7 @@ class ItTestOptimize extends Backend
                 $params['entry_user_id']    = $row['create_person_id'];
                 $params['title']            = $row['optimize_title'];
                 $params['content']          = $row['optimize_description'];
+                $params['status']           = 1;
                 $params['create_time']      = $optimize['update_time'] =  date("Y-m-d H:i:s",time());
                 $optimize['optimize_type']  = $params['type'];
                 $optimize['operate_status'] = 1;
