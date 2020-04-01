@@ -686,7 +686,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','custom-css','
             });
             //点击查看物流信息
             $(document).on('click','.track-number',function(){
-                var entity_id = $('#entity_id').val();
+                var entity_id = $(this).parent().prev().prev().val();
                 var order_platform = $('#c-order_platform').val();
                 var track_number = $(this).html();
                 console.log(entity_id);
