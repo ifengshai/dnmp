@@ -21,7 +21,7 @@ class ItTestOptimize extends Backend
      * @var \app\admin\model\demand\testManage\ItTestOptimize
      */
     protected $model = null;
-
+    protected $itWebDemand = null;
     public function _initialize()
     {
         parent::_initialize();
@@ -95,9 +95,10 @@ class ItTestOptimize extends Backend
                         $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.add' : $name) : $this->modelValidate;
                         $this->model->validateFailException(true)->validate($validate);
                     }
-                    $params['create_person'] = session('admin.nickname');
-                    $params['create_time']   = date("Y-m-d H:i:s",time());
-                    $params['update_time']   = date("Y-m-d H:i:s",time());
+                    $params['create_person_id'] = session('admin.id');
+                    $params['create_person']    = session('admin.nickname');
+                    $params['create_time']      = date("Y-m-d H:i:s",time());
+                    $params['update_time']      = date("Y-m-d H:i:s",time());
                     $result = $this->model->allowField(true)->save($params);
                     Db::commit();
                 } catch (ValidateException $e) {
@@ -172,6 +173,74 @@ class ItTestOptimize extends Backend
         }
         $this->view->assign("row", $row);
         return $this->view->fetch();
+    }
+    /**
+     * 安排
+     *
+     * @Description
+     * @author lsw
+     * @since 2020/03/31 15:31:30 
+     * @return void
+     */
+    public function plan($ids = null)
+    {
+        $this->itWebDemand =  new \app\admin\model\demand\ItWebDemand;
+        $row = $this->model->get($ids);
+        if (!$row) {
+            $this->error(__('No Results were found'));
+        }
+        $adminIds = $this->getDataLimitAdminIds();
+        if (is_array($adminIds)) {
+            if (!in_array($row[$this->dataLimitField], $adminIds)) {
+                $this->error(__('You have no permission'));
+            }
+        }
+        if ($this->request->isPost()) {
+            $params = $this->request->post("row/a");
+            if ($params) {
+                $params = $this->preExcludeFields($params);
+                $params['site_type']        = $row['optimize_site_type'];
+                $params['entry_user_id']    = $row['create_person_id'];
+                $params['title']            = $row['optimize_title'];
+                $params['content']          = $row['optimize_description'];
+                $params['create_time']      = date("Y-m-d H:i:s",time());
+                $optimize['optimize_type']  = $params['type'];
+                $optimize['operate_status'] = 1;
+                $result = false;
+                $info   = false;
+                Db::startTrans();
+                try {
+                    //是否采用模型验证
+                    if ($this->modelValidate) {
+                        $name = str_replace("\\model\\", "\\validate\\", get_class($this->model));
+                        $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.edit' : $name) : $this->modelValidate;
+                        $row->validateFailException(true)->validate($validate);
+                    }
+                    $result = $this->itWebDemand->allowField(true)->save($params);
+                    $info = $row->allowField(true)->save($optimize);
+                    Db::commit();
+                } catch (ValidateException $e) {
+                    Db::rollback();
+                    $this->error($e->getMessage());
+                } catch (PDOException $e) {
+                    Db::rollback();
+                    $this->error($e->getMessage());
+                } catch (Exception $e) {
+                    Db::rollback();
+                    $this->error($e->getMessage());
+                }
+                if (($result !== false) &&($info !== false)) {
+                    $this->success();
+                } else {
+                    $this->error(__('No rows were updated'));
+                }
+            }
+            $this->error(__('Parameter %s can not be empty', ''));
+        }
+        $this->view->assign("demand_type",config('demand.demand_type'));
+        $this->view->assign("allComplexity",config('demand.allComplexity'));
+        $this->view->assign("row", $row);
+        return $this->view->fetch();        
     }    
 
 }
