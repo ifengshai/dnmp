@@ -5,6 +5,7 @@ namespace app\admin\controller\saleaftermanage;
 use app\admin\model\infosynergytaskmanage\InfoSynergyTask;
 use app\admin\model\infosynergytaskmanage\InfoSynergyTaskCategory;
 use think\Db;
+use think\Cache;
 use app\common\controller\Backend;
 use app\admin\model\Admin;
 use app\admin\model\AuthGroup;
@@ -908,7 +909,8 @@ class OrderReturn extends Backend
             $express = $this->zeelool->getExpressData($order_platform, $entity_id);
             if($express){
                  //缓存一个小时
-                $express_data = session('order_checkDetail_' . $express['track_number'] . '_' . date('YmdH'));
+                // $express_data = session('order_checkDetail_' . $express['track_number'] . '_' . date('YmdH'));
+                $express_data = Cache::get('orderReturn_get_logistics_info_'.$express['track_number']);
                 if (!$express_data) {
                     try {
                     //查询物流信息
@@ -933,7 +935,8 @@ class OrderReturn extends Backend
                         $track = new Trackingmore();
                         $track = $track->getRealtimeTrackingResults($title, $express['track_number']);
                         $express_data = $track['data']['items'][0];
-                        session('order_checkDetail_' . $express['track_number'] . '_' . date('YmdH'), $express_data);
+                        //session('order_checkDetail_' . $express['track_number'] . '_' . date('YmdH'), $express_data);
+                        Cache::get('orderReturn_get_logistics_info_'.$express['track_number'],$express_data,3600);
                         } catch (\Exception $e) {
                         $this->error($e->getMessage());
                      }
