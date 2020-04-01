@@ -203,9 +203,12 @@ class ItTestOptimize extends Backend
                 $params['entry_user_id']    = $row['create_person_id'];
                 $params['title']            = $row['optimize_title'];
                 $params['content']          = $row['optimize_description'];
-                $params['create_time']      = date("Y-m-d H:i:s",time());
+                $params['status']           = 1;
+                $params['create_time']      = $optimize['update_time'] =  date("Y-m-d H:i:s",time());
                 $optimize['optimize_type']  = $params['type'];
                 $optimize['operate_status'] = 1;
+                $optimize['optimize_status'] = 2;
+
                 $result = false;
                 $info   = false;
                 Db::startTrans();
@@ -241,6 +244,34 @@ class ItTestOptimize extends Backend
         $this->view->assign("allComplexity",config('demand.allComplexity'));
         $this->view->assign("row", $row);
         return $this->view->fetch();        
+    }
+    /**
+     * 暂不处理
+     *
+     * @Description
+     * @author lsw
+     * @since 2020/03/31 17:58:00 
+     * @return void
+     */
+    public function not_handle($ids=null)
+    {
+        if($this->request->isAjax()){
+            $row = $this->model->get($ids);
+            if (1 !=$row['optimize_status']) {
+                $this->error(__('只有待处理状态才能此操作'));
+            }
+            $map['id'] = $ids;
+            $data['optimize_status'] = 3;
+            $data['update_time'] = date("Y-m-d H:i:s",time());
+            $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
+            if ($res) {
+                $this->success('操作成功');
+            } else {
+                $this->error('操作失败');
+            }           
+        }else{
+            return $this->error('404 Not found');
+        }
     }    
 
 }
