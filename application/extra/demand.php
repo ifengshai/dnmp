@@ -7,8 +7,7 @@ return [
         '2' => 'Voogueme',
         '3' => 'Nihao',
         '4' => 'Wesee',
-        '5' => '魔晶',
-        '6' => 'Orther',
+        '5' => 'Orther',
     ],
     //抄送人
     'copyToUserId' => [
@@ -93,8 +92,12 @@ return [
         '3' => '严重',
         '4' => '崩溃',
     ],
-
-
+    //类型 lsw add
+    'demand_type' =>[
+        1=> 'bug',
+        2=> '需求',
+        3=> '疑难',
+    ]
 
 
 ];

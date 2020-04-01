@@ -9,5 +9,9 @@ return [
     'Operate_status'       => '操作',
     'Create_person'        => '提出人',
     'Update_time'          => '更新时间',
-    'Create_time'          => '创建时间'
+    'Create_time'          => '创建时间',
+    'Demand_type'          => '类型',
+    'AllComplexity'        => '难易程度',
+    'Hope_time'            => '期望时间',
+    'Optimize_type'        => '类型' 
 ];
