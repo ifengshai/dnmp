@@ -104,7 +104,6 @@ class SaleAfterTask extends Backend
 
             $list = $this->model
                ->with(['saleAfterIssue'])
-                ->where(['is'=>2])
                 ->where($where)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
