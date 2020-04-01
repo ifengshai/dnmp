@@ -6,15 +6,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             Table.api.init({
                 showJumpto: true,
                 searchFormVisible: true,
-                pageSize: 10,
                 pageList: [10, 25, 50, 100],
                 escape: false,
                 extend: {
-                    index_url: 'demand/it_web_task/index' + location.search,
-                    add_url: 'demand/it_web_task/add',
-                    edit_url: 'demand/it_web_task/edit',
-                    multi_url: 'demand/it_web_task/multi',
-                    table: 'it_web_task',
+                    index_url: 'demand/develop_web_task/index' + location.search,
+                    add_url: 'demand/develop_web_task/add',
+                    edit_url: 'demand/develop_web_task/edit',
+                    multi_url: 'demand/develop_web_task/multi',
+                    table: 'develop_web_task',
                 }
             });
 
@@ -29,7 +28,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     [
                         { checkbox: true },
                         { field: 'id', title: __('Id') },
-                        { field: 'sitetype', title: __('站点') },
                         { field: 'type', title: __('Type'), custom: { 1: 'success', 2: 'success', 3: 'success' }, searchList: { 1: '短期任务', 2: '中期任务', 3: '长期任务' }, formatter: Table.api.formatter.status },
                         { field: 'title', title: __('Title') },
                         { field: 'desc', title: __('Desc'), cellStyle: formatTableUnit, formatter: Controller.api.formatter.getClear, operate: false },
@@ -59,7 +57,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         },
                         { field: 'create_person', title: __('Create_person'), operate: false },
                         { field: 'nickname', title: __('负责人'), visible: false, operate: 'like' },
-                        { field: 'createtime', title: __('Create_time'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime },
+                        { field: 'createtime', title: __('创建时间'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime },
 
                         {
                             field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [
@@ -70,7 +68,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     extend: 'data-area = \'["70%","70%"]\'',
                                     classname: 'btn btn-xs btn-warning btn-dialog',
                                     icon: 'fa fa-list',
-                                    url: 'demand/it_web_task/problem_detail',
+                                    url: 'demand/develop_web_task/problem_detail',
                                     callback: function (data) {
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
                                     },
@@ -89,7 +87,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     title: __('完成'),
                                     classname: 'btn btn-xs btn-success btn-magic btn-ajax',
                                     icon: 'fa fa-magic',
-                                    url: 'demand/it_web_task/set_task_complete_status',
+                                    url: 'demand/develop_web_task/set_task_complete_status',
                                     success: function (data, ret) {
                                         table.bootstrapTable('refresh', {});
                                         //如果需要阻止成功提示，则必须使用return false;
@@ -114,7 +112,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     extend: 'data-area = \'["80%","70%"]\'',
                                     classname: 'btn btn-xs btn-primary btn-dialog',
                                     icon: 'fa fa-list',
-                                    url: 'demand/it_web_task/detail',
+                                    url: 'demand/develop_web_task/detail',
                                     callback: function (data) {
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
                                     },
@@ -129,7 +127,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     title: __('Edit'),
                                     classname: 'btn btn-xs btn-success btn-dialog',
                                     icon: 'fa fa-pencil',
-                                    url: 'demand/it_web_task/edit',
+                                    url: 'demand/develop_web_task/edit',
                                     extend: 'data-area = \'["80%","70%"]\'',
                                     callback: function (data) {
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
@@ -147,7 +145,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     text: '回归测试',
                                     title: __('回归测试'),
                                     classname: 'btn btn-xs btn-warning btn-dialog',
-                                    url: 'demand/it_web_task/regression_test_info',
+                                    url: 'demand/develop_web_task/regression_test_info',
                                     extend: 'data-area = \'["70%","70%"]\'',
                                     callback: function (data) {
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
@@ -166,7 +164,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     title: __('通过测试'),
                                     classname: 'btn btn-xs btn-success btn-magic btn-ajax',
                                     icon: 'fa fa-magic',
-                                    url: 'demand/it_web_task/set_task_test_status',
+                                    url: 'demand/develop_web_task/set_task_test_status',
                                     success: function (data, ret) {
                                         table.bootstrapTable('refresh', {});
                                         //如果需要阻止成功提示，则必须使用return false;
@@ -190,9 +188,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 ]
             });
 
-            // 为表格绑定事件
-            Table.api.bindevent(table);
-
             //描述弹窗
             $(document).on('click', ".problem_desc_info", function () {
                 var problem_desc = $(this).attr('data');
@@ -215,14 +210,15 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     }
                 };
                 var ids = $(this).data('id');
-                Fast.api.open('demand/it_web_task/item?ids=' + ids, '关键结果', options);
+                Fast.api.open('demand/develop_web_task/item?ids=' + ids, '关键结果', options);
             })
 
 
+            // 为表格绑定事件
+            Table.api.bindevent(table);
         },
         add: function () {
             Controller.api.bindevent();
-
         },
         edit: function () {
             Controller.api.bindevent();
@@ -242,7 +238,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 showToggle: false,
                 pagination: false,
                 extend: {
-                    index_url: 'demand/it_web_task/item' + location.search + '&id=' + Config.id,
+                    index_url: 'demand/develop_web_task/item' + location.search + '&id=' + Config.id,
 
                     table: 'it_web_task_item',
                 }
@@ -264,12 +260,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             field: 'type', title: __('任务类型'),
                             custom: { 1: 'success', 2: 'success', 3: 'success' },
                             searchList: { 1: '短期任务', 2: '中期任务', 3: '长期任务' },
-                            formatter: Table.api.formatter.status
-                        },
-                        {
-                            field: 'group_type', title: __('分组类型'),
-                            custom: { 1: 'success', 2: 'success', 3: 'success', 4: 'success' },
-                            searchList: { 1: '前端', 2: '后端', 3: 'app', 4: '测试' },
                             formatter: Table.api.formatter.status
                         },
                         
