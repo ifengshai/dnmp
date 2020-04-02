@@ -665,9 +665,7 @@ class PurchaseOrder extends Backend
                 Cache::set($cacheIndex, $data, 3600);
             }
             $data = $data->logisticsTrace[0];
-            dump($data);die;
         } else {
-            echo 222;die;
             if ($row['logistics_number']) {
                 $arr = explode(',', $row['logistics_number']);
                 //物流公司编码
