@@ -697,6 +697,7 @@ class PurchaseOrder extends Backend
                 try {
                     $param = ['express_id' => trim($v)];
                     $param = ['code' => trim($com_arr[$k])];
+                    dump($param);die;
                     $return_data[$k] = Hook::listen('express_query', $param)[0];
                 } catch (\Exception $e) {
                     $this->error($e->getMessage());
