@@ -97,7 +97,6 @@
             <table id="caigou-table">
                 <tr>
                     <th>任务类型</td>
-                    <th>分组</td>
                     <th>负责人</td>
                     <th>任务标题</td>
                     <th>内容</td>
@@ -117,21 +116,11 @@
 
                     <input id="c-purchase_remark" class="form-control item_id" name="item_id[]" value="{$v.id}" type="hidden">
                  
-                    {php}
-
-                    if ($v['group_type'] == 1) {
-                    $person_in_charge = config('demand.web_designer_user');
-                    } elseif($v['group_type'] == 2) {
-                    $person_in_charge = config('demand.phper_user');
-                    } elseif($v['group_type'] == 3) {
-                    $person_in_charge = config('demand.app_user');
-                    } elseif($v['group_type'] == 4) {
-                    $person_in_charge = config('demand.test_user');
-                    }
-                    {/php}
                     <td>
                         <select name="person_in_charge[]" class="form-control person_in_charge" style="width:120px;">
-                            <option value="{$v.person_in_charge}">{$person_in_charge[$v['person_in_charge']]}</option>
+                            {foreach $phper_user as $k => $val}
+                            <option value="{$k}" {:$v['person_in_charge']==$k ? 'selected' : '' }>{$val}</option>
+                            {/foreach}
                         </select>
                     </td>
                     <td><input id="c-title" class="form-control" name="title[]" type="text" value="{$v.title}"></td>
@@ -172,7 +161,9 @@
          
             <td>
                 <select name="person_in_charge[]" class="form-control person_in_charge" style="width:120px;">
-
+                    {foreach $phper_user as $k => $v}
+                    <option value="{$k}">{$v}</option>
+                    {/foreach}
                 </select>
             </td>
             <td><input id="c-title" class="form-control" name="title[]" type="text"></td>

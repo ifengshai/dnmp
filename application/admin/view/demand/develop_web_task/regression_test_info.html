@@ -13,25 +13,6 @@
         </div>
     </div>
 
-    <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('责任组')}:</label>
-        <div class="col-xs-12 col-sm-8">
-            <select name="row[responsibility_group]" class="form-control" data-rule="required">
-                <option value="">请选择</option>
-                {foreach $group_type as $v}
-                <option value="{$v}">
-                    {if $v == 1}
-                    前端
-                    {elseif $v == 2}
-                    后端
-                    {elseif $v == 3}
-                    app
-                    {/if}
-                </option>
-                {/foreach}
-            </select>
-        </div>
-    </div>
 
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">{:__('责任人')}:</label>

@@ -508,7 +508,7 @@ class ItWebTask extends Backend
                 Db::startTrans();
                 try {
                     $params['site_type'] = $testInfo['site_type'];
-                    $params['type'] = 3;
+                    $params['type'] = 4;
                     $params['pid'] = $row->task_id;
                     $params['responsibility_group'] = $row->group_type;
                     $params['environment_type'] = 1;
@@ -553,7 +553,7 @@ class ItWebTask extends Backend
     public function problem_detail($ids = null)
     {
         $map['pid'] = $ids;
-        $map['type'] = 3;
+        $map['type'] = 4;
         /*测试日志--测试环境*/
         $left_test_list = $this->testRecord
             ->where($map)
@@ -626,7 +626,7 @@ class ItWebTask extends Backend
                 $result = false;
                 Db::startTrans();
                 try {
-                    $params['type'] = 3;
+                    $params['type'] = 4;
                     $params['environment_type'] = 2;
                     $params['pid'] = $row->id;
                     $params['site_type'] = $row->site_type;

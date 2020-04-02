@@ -82,11 +82,12 @@ class DevelopWebTask extends Backend
             return json($result);
         }
         //判断是否有完成按钮权限
-        $this->assignconfig('is_set_status', $this->auth->check('demand/it_web_task/set_task_complete_status'));
-        $this->assignconfig('is_problem_detail', $this->auth->check('demand/it_web_task/problem_detail'));
-        $this->assignconfig('is_edit', $this->auth->check('demand/it_web_task/edit'));
-        $this->assignconfig('is_set_task_test_status', $this->auth->check('demand/it_web_task/set_task_test_status'));
-        $this->assignconfig('is_regression_test_info', $this->auth->check('demand/it_web_task/regression_test_info'));
+        $this->assignconfig('is_set_status', $this->auth->check('demand/develop_web_task/set_task_complete_status'));
+        $this->assignconfig('is_problem_detail', $this->auth->check('demand/develop_web_task/problem_detail'));
+        $this->assignconfig('is_edit', $this->auth->check('demand/develop_web_task/edit'));
+        $this->assignconfig('is_set_task_test_status', $this->auth->check('demand/develop_web_task/set_task_test_status'));
+        $this->assignconfig('is_regression_test_info', $this->auth->check('demand/develop_web_task/regression_test_info'));
+        $this->assignconfig('is_finish_task', $this->auth->check('demand/develop_web_task/is_finish_task'));
         return $this->view->fetch();
     }
 
@@ -471,8 +472,6 @@ class DevelopWebTask extends Backend
                 $this->error(__('You have no permission'));
             }
         }
-
-        $testInfo = $this->model->get($row->task_id);
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
             if ($params) {
@@ -480,10 +479,8 @@ class DevelopWebTask extends Backend
                 $result = false;
                 Db::startTrans();
                 try {
-                    $params['site_type'] = $testInfo['site_type'];
-                    $params['type'] = 3;
+                    $params['type'] = 4;
                     $params['pid'] = $row->task_id;
-                    $params['responsibility_group'] = $row->group_type;
                     $params['environment_type'] = 1;
                     $params['responsibility_user_id'] = $row->person_in_charge;
                     $params['create_time'] = date('Y-m-d H:i:s');
@@ -510,7 +507,6 @@ class DevelopWebTask extends Backend
         }
 
         $this->view->assign("row", $row);
-        $this->assign('siteType', config('demand.siteType'));
         return $this->view->fetch();
     }
 
@@ -526,7 +522,7 @@ class DevelopWebTask extends Backend
     public function problem_detail($ids = null)
     {
         $map['pid'] = $ids;
-        $map['type'] = 3;
+        $map['type'] = 4;
         /*测试日志--测试环境*/
         $left_test_list = $this->testRecord
             ->where($map)
@@ -535,13 +531,7 @@ class DevelopWebTask extends Backend
             ->select();
         $left_test_list = collection($left_test_list)->toArray();
         foreach ($left_test_list as $k_left => $v_left) {
-            if ($v_left['responsibility_group'] == 1) {
-                $left_test_list[$k_left]['responsibility_user_name'] = config('demand.web_designer_user')[$v_left['responsibility_user_id']];
-            } elseif ($v_left['responsibility_group'] == 2) {
-                $left_test_list[$k_left]['responsibility_user_name'] = config('demand.phper_user')[$v_left['responsibility_user_id']];
-            } else if ($v_left['responsibility_group'] == 3) {
-                $left_test_list[$k_left]['responsibility_user_name'] = config('demand.app_user')[$v_left['responsibility_user_id']];
-            }
+            $left_test_list[$k_left]['responsibility_user_name'] = config('develop_demand.phper_user')[$v_left['responsibility_user_id']];
             $left_test_list[$k_left]['create_user_name'] = config('demand.test_user')[$v_left['create_user_id']];
         }
 
@@ -553,13 +543,7 @@ class DevelopWebTask extends Backend
             ->select();
         $right_test_list = collection($right_test_list)->toArray();
         foreach ($right_test_list as $k_right => $v_right) {
-            if ($v_left['responsibility_group'] == 1) {
-                $right_test_list[$k_right]['responsibility_user_name'] = config('demand.web_designer_user')[$v_right['responsibility_user_id']];
-            } elseif ($v_left['responsibility_group'] == 2) {
-                $right_test_list[$k_right]['responsibility_user_name'] = config('demand.phper_user')[$v_right['responsibility_user_id']];
-            } else if ($v_left['responsibility_group'] == 3) {
-                $right_test_list[$k_right]['responsibility_user_name'] = config('demand.app_user')[$v_right['responsibility_user_id']];
-            }
+            $right_test_list[$k_right]['responsibility_user_name'] = config('develop_demand.phper_user')[$v_right['responsibility_user_id']];
             $right_test_list[$k_right]['create_user_name'] = config('demand.test_user')[$v_right['create_user_id']];
         }
 
@@ -599,10 +583,9 @@ class DevelopWebTask extends Backend
                 $result = false;
                 Db::startTrans();
                 try {
-                    $params['type'] = 3;
+                    $params['type'] = 4;
                     $params['environment_type'] = 2;
                     $params['pid'] = $row->id;
-                    $params['site_type'] = $row->site_type;
                     $params['create_time'] = date('Y-m-d H:i:s');
                     $params['create_user_id'] = $this->auth->id;
                     $result = $this->testRecord->allowField(true)->save($params);
@@ -628,22 +611,32 @@ class DevelopWebTask extends Backend
 
         $this->view->assign("row", $row);
         //查询此记录责任人id
-        $person_ids = $this->itWebTaskItem->where('task_id', $ids)->field('person_in_charge,group_type')->select();
-
-        $group_type = [];
+        $person_ids = $this->itWebTaskItem->where('task_id', $ids)->field('person_in_charge')->select();
         foreach ($person_ids as &$v) {
-            if ($v['group_type'] == 1) {
-                $v['person_in_charge_name'] = config('demand.web_designer_user')[$v['person_in_charge']];
-            } elseif ($v['group_type'] == 2) {
-                $v['person_in_charge_name'] = config('demand.phper_user')[$v['person_in_charge']];
-            } elseif ($v['group_type'] == 3) {
-                $v['person_in_charge_name'] = config('demand.app_user')[$v['person_in_charge']];
-            }
-            $group_type[] = $v['group_type'];
+            $v['person_in_charge_name'] = config('develop_demand.phper_user')[$v['person_in_charge']];
         }
         $this->assign('person_ids', $person_ids);
-        $this->assign('group_type', array_unique($group_type));
-        $this->assign('siteType', config('demand.siteType'));
         return $this->view->fetch();
+    }
+
+    /**
+     * 产品经理确认
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/03/31 16:52:22 
+     * @param [type] $ids
+     * @return void
+     */
+    public function is_finish_task($ids = null)
+    {
+        $data['is_finish'] = 1;
+        $data['finish_time'] = date('Y-m-d H:i:s', time());
+        $res = $this->model->save($data, ['id' => $ids]);
+        if ($res !== false) {
+            $this->success('操作成功！！');
+        } else {
+            $this->error('操作失败！！');
+        }
     }
 }

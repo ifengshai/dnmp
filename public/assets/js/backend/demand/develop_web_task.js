@@ -58,7 +58,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         { field: 'create_person', title: __('Create_person'), operate: false },
                         { field: 'nickname', title: __('负责人'), visible: false, operate: 'like' },
                         { field: 'createtime', title: __('创建时间'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime },
-
+                        {
+                            field: 'is_finish', title: __('产品经理确认'), custom: { 1: 'success', 0: 'danger' },
+                            searchList: { 1: '已确认', 0: '未确认' },
+                            formatter: Table.api.formatter.status
+                        },
+                        { field: 'finish_time', title: __('确认时间'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime },
+                    
                         {
                             field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [
                                 {
@@ -73,6 +79,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
                                     },
                                     visible: function (row) {
+                                        return true;
                                         //返回true时按钮显示,返回false隐藏
                                         if (row.is_problem_detail == 1) {
                                             return true;
@@ -98,6 +105,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                         return false;
                                     },
                                     visible: function (row) {
+                                        return true;
                                         if (row.is_test_adopt == 1 && row.is_complete == 0 && Config.is_set_status == 1) {
                                             return true;
                                         } else {
@@ -133,6 +141,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
                                     },
                                     visible: function (row) {
+                                        return true;
                                         if (row.is_test_adopt == 0 && row.is_complete == 0 && Config.is_edit == 1) {
                                             return true;
                                         } else {
@@ -151,6 +160,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
                                     },
                                     visible: function (row) {
+                                        return true;
                                         if (row.is_complete == 1 && Config.is_regression_test_info == 1) {
                                             return true;
                                         } else {
@@ -175,11 +185,37 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                         return false;
                                     },
                                     visible: function (row) {
+                                        return true;
                                         if (row.test_regression_adopt == 0 && Config.is_set_task_test_status == 1) {
                                             return true;
                                         } else {
                                             return false;
                                         }
+                                    }
+                                },
+                                {
+                                    name: 'ajax',
+                                    text: '产品经理确认',
+                                    title: __('产品经理确认'),
+                                    classname: 'btn btn-xs btn-success btn-magic btn-ajax',
+                                    icon: 'fa fa-magic',
+                                    url: 'demand/develop_web_task/is_finish_task',
+                                    success: function (data, ret) {
+                                        table.bootstrapTable('refresh', {});
+                                        //如果需要阻止成功提示，则必须使用return false;
+                                        //return false;
+                                    },
+                                    error: function (data, ret) {
+                                        Layer.alert(ret.msg);
+                                        return false;
+                                    },
+                                    visible: function (row) {
+                                        if (row.test_regression_adopt == 1 && Config.is_finish_task == 1 && row.is_finish_task == 0) {
+                                            return true;
+                                        } else {
+                                            return false;
+                                        }
+                                        
                                     }
                                 },
                             ], formatter: Table.api.formatter.operate
@@ -288,7 +324,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     title: __('完成'),
                                     classname: 'btn btn-xs btn-success btn-magic btn-ajax',
                                     icon: 'fa fa-magic',
-                                    url: 'demand/it_web_task/set_complete_status',
+                                    url: 'demand/develop_web_task/set_complete_status',
                                     success: function (data, ret) {
                                         table.bootstrapTable('refresh', {});
                                         //如果需要阻止成功提示，则必须使用return false;
@@ -299,6 +335,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                         return false;
                                     },
                                     visible: function (row) {
+                                        return true;
                                         if (Config.user_id == row.person_in_charge && row.is_complete == 0) {
                                             return true;
                                         } else {
@@ -312,7 +349,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     title: __('测试通过'),
                                     classname: 'btn btn-xs btn-success btn-info btn-ajax',
                                     icon: 'fa fa-leaf',
-                                    url: 'demand/it_web_task/set_test_status',
+                                    url: 'demand/develop_web_task/set_test_status',
                                     success: function (data, ret) {
                                         table.bootstrapTable('refresh', {});
                                         //如果需要阻止成功提示，则必须使用return false;
@@ -324,6 +361,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                         return false;
                                     },
                                     visible: function (row) {
+                                        return true;
                                         var test_person = Config.test_user;
                                         if ($.inArray(Config.user_id, test_person) !== -1 && row.is_test_adopt == 0 && row.is_complete == 1) {
                                             return true;
@@ -339,7 +377,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     title: __('记录问题'),
                                     classname: 'btn btn-xs btn-success  btn-dialog',
                                     icon: 'fa fa-pencil',
-                                    url: 'demand/it_web_task/test_info',
+                                    url: 'demand/develop_web_task/test_info',
                                     success: function (data, ret) {
                                         table.bootstrapTable('refresh', {});
                                         //如果需要阻止成功提示，则必须使用return false;
@@ -351,6 +389,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                         return false;
                                     },
                                     visible: function (row) {
+                                        return true;
                                         var test_person = Config.test_user;
                                         if ($.inArray(Config.user_id, test_person) !== -1 && row.is_test_adopt == 0 && row.is_complete == 1) {
                                             return true;

@@ -12,14 +12,14 @@
 <ul class="timeline" style="width: 48%;float: left;">
     <li class="time-label">
         <span class="bg-red">
-            {:__('test_environment')}
+            {:__('测试环境')}
         </span>
     </li>
     {volist name="left_test_list" id="ltl"}
     <li>
         <i class="fa fa-user bg-aqua"></i>
         <div class="timeline-item">
-            <span class="time"><i class="fa fa-clock-o"></i>{:__('test_add_time')}：{$ltl['create_time']}</span>
+            <span class="time"><i class="fa fa-clock-o"></i>{:__('记录时间')}：{$ltl['create_time']}</span>
             <h3 class="timeline-header"><a href="#" {if $ltl['bug_type']==1}style="color: darkseagreen;font-weight: 900"
                     {elseif $ltl['bug_type']==2}style="color: green;font-weight: 900" {elseif
                     $ltl['bug_type']==3}style="color: darkorange;font-weight: 900" {elseif
@@ -27,12 +27,12 @@
 
             <div class="timeline-body" style="padding-bottom: 0px;">
                 <p style="float: left;width: 62%">
-                    {:__('All_user_id')}：<span><b>{$ltl['responsibility_user_name']}</b></span></p>
-                <p>{:__('Entry_user_id')}：<span><b>{$ltl['create_user_name']}</b></span></p>
+                    {:__('责任人')}：<span><b>{$ltl['responsibility_user_name']}</b></span></p>
+                <p>{:__('测试记录人')}：<span><b>{$ltl['create_user_name']}</b></span></p>
             </div>
 
             <div class="timeline-body" style="padding-top: 0px;">
-                {:__('describe')}：<span style="word-break: break-all;"><b>{$ltl['describe']}</b></span>
+                {:__('描述')}：<span style="word-break: break-all;"><b>{$ltl['describe']}</b></span>
             </div>
 
         </div>
@@ -43,14 +43,14 @@
 <ul class="timeline" style="width: 48%;float: right;">
     <li class="time-label">
         <span class="bg-red">
-            {:__('formal_environment')}
+            {:__('线上环境')}
         </span>
     </li>
     {volist name="right_test_list" id="rtl"}
     <li>
         <i class="fa fa-user bg-aqua"></i>
         <div class="timeline-item">
-            <span class="time"><i class="fa fa-clock-o"></i>{:__('test_add_time')}：{$rtl['create_time']}</span>
+            <span class="time"><i class="fa fa-clock-o"></i>{:__('记录时间')}：{$rtl['create_time']}</span>
             <h3 class="timeline-header"><a href="#" {if $rtl['bug_type']==1}style="color: darkseagreen;font-weight: 900"
                     {elseif $rtl['bug_type']==2}style="color: green;font-weight: 900" {elseif
                     $rtl['bug_type']==3}style="color: darkorange;font-weight: 900" {elseif
@@ -58,12 +58,12 @@
 
             <div class="timeline-body" style="padding-bottom: 0px;">
                 <p style="float: left;width: 62%">
-                    {:__('All_user_id')}：<span><b>{$rtl['responsibility_user_name']}</b></span></p>
-                <p>{:__('Entry_user_id')}：<span><b>{$rtl['create_user_name']}</b></span></p>
+                    {:__('责任人')}：<span><b>{$rtl['responsibility_user_name']}</b></span></p>
+                <p>{:__('测试记录人')}：<span><b>{$rtl['create_user_name']}</b></span></p>
             </div>
 
             <div class="timeline-body" style="padding-top: 0px;">
-                {:__('describe')}：<span style="word-break: break-all;"><b>{$rtl['describe']}</b></span>
+                {:__('描述')}：<span style="word-break: break-all;"><b>{$rtl['describe']}</b></span>
             </div>
 
         </div>
