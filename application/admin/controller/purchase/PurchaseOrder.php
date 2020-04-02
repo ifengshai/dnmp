@@ -656,7 +656,7 @@ class PurchaseOrder extends Backend
         $data = [];
         //判断采购单类型是否为线上采购单 1线下采购单=> 快递100api 2线上采购单 1688api
         if ($row['purchase_type'] == 2) {
-            echo 111;die;
+           
             $cacheIndex = 'logisticsDetail_' . $row['purchase_number'];
             $data = Cache::get($cacheIndex);
             if (!$data) {
@@ -665,6 +665,7 @@ class PurchaseOrder extends Backend
                 Cache::set($cacheIndex, $data, 3600);
             }
             $data = $data->logisticsTrace[0];
+            dump($data);die;
         } else {
             echo 222;die;
             if ($row['logistics_number']) {
