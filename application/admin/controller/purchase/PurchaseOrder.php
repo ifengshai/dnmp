@@ -685,6 +685,7 @@ class PurchaseOrder extends Backend
         //采购单退销物流信息
         $purchaseReturn = new \app\admin\model\purchase\PurchaseReturn;
         $res = $purchaseReturn->where('purchase_id', $id)->column('logistics_number');
+        dump($res);die;
         $return_data = [];
         if ($res) {
             $number = implode(',', $res);
