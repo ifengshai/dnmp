@@ -695,9 +695,8 @@ class PurchaseOrder extends Backend
             $com_arr = array_filter(explode(',', $com_number));
             foreach ($arr as $k => $v) {
                 try {
-                    $param = ['express_id' => trim($v)];
-                    $param = ['code' => trim($com_arr[$k])];
-                    dump($param);die;
+                    $param['express_id'] = trim($v);
+                    $param['code'] = trim($com_arr[$k]);
                     $return_data[$k] = Hook::listen('express_query', $param)[0];
                 } catch (\Exception $e) {
                     $this->error($e->getMessage());
