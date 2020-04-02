@@ -29,14 +29,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         { field: 'id', title: __('Id') },
                         { field: 'title', title: __('Titel'), cellStyle: formatTableUnit, formatter: Controller.api.formatter.getClear, operate: false },
                         { field: 'desc', title: __('Desc'), cellStyle: formatTableUnit, formatter: Controller.api.formatter.getClear, operate: false },
-                        { field: 'create_person', title: __('提出人') },
+                        { field: 'create_person', title: __('提出人'), operate: false },
                         { field: 'review_status_manager', title: __('Review_status_manager'), custom: { 0: 'yellow', 1: 'success', 2: 'danger' }, searchList: { 0: '待审核', 1: '审核通过', 2: '审核拒绝' }, formatter: Table.api.formatter.status },
                         { field: 'solution', title: __('解决方案'), cellStyle: formatTableUnit, formatter: Controller.api.formatter.getClear, operate: false },
                         { field: 'refuse_reason', title: __('拒绝原因'), cellStyle: formatTableUnit, formatter: Controller.api.formatter.getClear, operate: false },
                         { field: 'priority', title: __('Priority'), custom: { 1: 'success', 2: 'blue', 3: 'danger' }, searchList: { 1: '低', 2: '中', 3: '高' }, formatter: Table.api.formatter.status },
                         { field: 'review_status_develop', title: __('Review_status_develop'), custom: { 0: 'yellow', 1: 'success', 2: 'danger' }, searchList: { 0: '待审核', 1: '审核通过', 2: '审核拒绝' }, formatter: Table.api.formatter.status },
                         {
-                            field: 'nickname', title: __('开发负责人'), formatter: function (value, rows) {
+                            field: 'nickname', title: __('开发负责人'), operate: false, formatter: function (value, rows) {
                                 var group = '<span>' + value + '</span>';
                                 var web_distribution = '';
                                 if (rows.review_status_develop == 1 && !rows.assign_developer_ids) {
@@ -47,7 +47,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         },
                         { field: 'complexity', title: __('Complexity'), custom: { 1: 'success', 2: 'blue', 3: 'danger' }, searchList: { 1: '简单', 2: '中等', 3: '复杂' }, formatter: Table.api.formatter.status },
                         { field: 'is_test', title: __('Is_test'), custom: { 0: 'danger', 1: 'success' }, searchList: { 0: '否', 1: '是' }, formatter: Table.api.formatter.status },
-                        { field: 'test_person', title: __('Test_person') },
+                        { field: 'test_person', title: __('Test_person'), operate: false },
                         { field: 'is_finish', title: __('是否开发完成'), custom: { 0: 'danger', 1: 'success' }, searchList: { 0: '否', 1: '是' }, formatter: Table.api.formatter.status },
                         { field: 'test_is_passed', title: __('Test_is_passed'), custom: { 0: 'danger', 1: 'success' }, searchList: { 0: '否', 1: '是' }, formatter: Table.api.formatter.status },
                         { field: 'is_finish_task', title: __('产品经理是否确认'), custom: { 0: 'danger', 1: 'success' }, searchList: { 0: '否', 1: '是' }, formatter: Table.api.formatter.status },
@@ -116,7 +116,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     callback: function (data) {
                                     },
                                     visible: function (row) {
-                                        if (row.is_test == 1 && !row.test_person &&  Config.test_btn == 1) {
+                                        if (row.is_test == 1 && !row.test_person && Config.test_btn == 1) {
                                             return true;
                                         } else {
                                             return false;
@@ -238,7 +238,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                                 return false;
                                             }
                                         }
-                                        
+
                                     }
                                 },
                                 {

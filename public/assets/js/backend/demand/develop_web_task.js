@@ -141,7 +141,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
                                     },
                                     visible: function (row) {
-                                        return true;
                                         if (row.is_test_adopt == 0 && row.is_complete == 0 && Config.is_edit == 1) {
                                             return true;
                                         } else {
@@ -160,7 +159,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
                                     },
                                     visible: function (row) {
-                                        return true;
                                         if (row.is_complete == 1 && Config.is_regression_test_info == 1) {
                                             return true;
                                         } else {
@@ -185,7 +183,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                         return false;
                                     },
                                     visible: function (row) {
-                                        return true;
                                         if (row.test_regression_adopt == 0 && Config.is_set_task_test_status == 1) {
                                             return true;
                                         } else {
@@ -210,7 +207,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                         return false;
                                     },
                                     visible: function (row) {
-                                        if (row.test_regression_adopt == 1 && Config.is_finish_task == 1 && row.is_finish_task == 0) {
+                                        if (row.test_regression_adopt == 1 && Config.is_finish_task == 1 && row.is_finish == 0) {
                                             return true;
                                         } else {
                                             return false;
@@ -335,7 +332,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                         return false;
                                     },
                                     visible: function (row) {
-                                        return true;
                                         if (Config.user_id == row.person_in_charge && row.is_complete == 0) {
                                             return true;
                                         } else {
@@ -361,7 +357,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                         return false;
                                     },
                                     visible: function (row) {
-                                        return true;
                                         var test_person = Config.test_user;
                                         if ($.inArray(Config.user_id, test_person) !== -1 && row.is_test_adopt == 0 && row.is_complete == 1) {
                                             return true;
@@ -389,7 +384,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                         return false;
                                     },
                                     visible: function (row) {
-                                        return true;
                                         var test_person = Config.test_user;
                                         if ($.inArray(Config.user_id, test_person) !== -1 && row.is_test_adopt == 0 && row.is_complete == 1) {
                                             return true;

@@ -63,16 +63,16 @@ class DevelopWebTask extends Backend
                 unset($filter['nickname']);
                 $this->request->get(['filter' => json_encode($filter)]);
             }
-
-
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
                 ->where($where)
+                ->where($map)
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->model
                 ->where($where)
+                ->where($map)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
@@ -85,6 +85,7 @@ class DevelopWebTask extends Backend
         $this->assignconfig('is_set_status', $this->auth->check('demand/develop_web_task/set_task_complete_status'));
         $this->assignconfig('is_problem_detail', $this->auth->check('demand/develop_web_task/problem_detail'));
         $this->assignconfig('is_edit', $this->auth->check('demand/develop_web_task/edit'));
+        $this->assignconfig('is_set_status', $this->auth->check('demand/develop_web_task/set_task_complete_status'));
         $this->assignconfig('is_set_task_test_status', $this->auth->check('demand/develop_web_task/set_task_test_status'));
         $this->assignconfig('is_regression_test_info', $this->auth->check('demand/develop_web_task/regression_test_info'));
         $this->assignconfig('is_finish_task', $this->auth->check('demand/develop_web_task/is_finish_task'));
