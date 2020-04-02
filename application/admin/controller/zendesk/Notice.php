@@ -153,10 +153,25 @@ class Notice extends Controller
         try {
             $zendesk = Zendesk::where('ticket_id', $id)->find();
             //更新主表,目前应该只会更新status，其他不会更新
-            Zendesk::update([
+            $updateData = [
                 'tags' => $tags,
-                'status' => array_search(strtolower($ticket->status), config('zendesk.status')),
-            ], ['id' => $zendesk->id]);
+                'status' => array_search(strtolower($ticket->status), config('zendesk.status'))
+            ];
+            //更新rating,如果存在的话
+            if(!$zendesk->rating && $ticket->satisfaction_rating) {
+                $score = $ticket->satisfaction_rating->score;
+                $ratingComment = $ticket->satisfaction_rating->comment;
+                $ratingReason = $ticket->satisfaction_rating->reason;
+                $updateData['rating'] = $score;
+                $updateData['comment'] = $ratingComment;
+                $updateData['reason'] = $ratingReason;
+                if($score == 'good') {
+                    $updateData['rating_type'] = 1;
+                }elseif($score == 'bad') {
+                    $updateData['rating_type'] = 2;
+                }
+            }
+            Zendesk::update($updateData, ['id' => $zendesk->id]);
             //写入附表
             //如果该ticket的分配时间不是今天，且修改后的状态是open或者new的话，则今天任务数-1
             if (in_array(strtolower($ticket->status), ['open', 'new']) && strtotime($zendesk->assign_time) < strtotime(date('Y-m-d', time()))) {
