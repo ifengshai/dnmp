@@ -171,6 +171,18 @@ class Notice extends Controller
                     $updateData['rating_type'] = 2;
                 }
             }
+            //如果存在抄送则更新
+            if($ticket->follower_ids) {
+                $follweIds = $ticket->follower_ids;
+                $emailCcs = [];
+                foreach($follweIds as $follweId) {
+                    $userInfo = $this->client->crasp()->findUser(['id' => $follweId])->user;
+                    $emailCcs[] = $userInfo->email;
+                }
+                if($emailCcs) {
+                    $updateData['email_cc'] = join(',', $emailCcs);
+                }
+            }
             Zendesk::update($updateData, ['id' => $zendesk->id]);
             //写入附表
             //如果该ticket的分配时间不是今天，且修改后的状态是open或者new的话，则今天任务数-1

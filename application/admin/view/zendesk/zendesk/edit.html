@@ -42,7 +42,15 @@
 
                         <strong>priority</strong>
                         <p class="text-muted">
-                            {:Form::select('row[priority]', config('zendesk.priority'), $ticket->priority, ['class'=>'form-control selectpicker ticket-priority', null,'data-live-search' => true,'id'=>'Entry_priority_select'])}
+                            <select class="form-control ticket-priority selectpicker" data-live-search="1" data-rule="required" name="row[priority]">
+                                {if condition="$ticket->priority == 0"}
+                                <option value="0" {$ticket->priority == 0 ? 'selected' : ''}>- </option>
+                                {/if}
+                                <option value="1" {$ticket->priority == 1 ? 'selected' : ''}>low</option>
+                                <option value="2" {$ticket->priority == 2 ? 'selected' : ''}>normal</option>
+                                <option value="3" {$ticket->priority == 3 ? 'selected' : ''}>high</option>
+                                <option value="4" {$ticket->priority == 4 ? 'selected' : ''}>urgent</option>
+                            </select>
                         </p>
                     </div>
                     <!-- /.box-body -->
@@ -83,7 +91,14 @@
                         <div class="form-group">
                             <label class="control-label col-xs-12 col-sm-2">{:__('Status')}</label>
                             <div class="col-xs-12 col-sm-8">
-                                {:Form::select('row[status]', config('zendesk.status'), $ticket->status, ['class'=>'form-control selectpicker ticket-status', null,'data-live-search' => true,'id'=>'Entry_status_select'])}
+                                <select class="form-control ticket-status selectpicker" data-live-search="1" data-rule="required" name="row[status]">
+                                    {if condition="$ticket->status ==1"}
+                                    <option value="1" {$ticket->status == 1 ? 'selected' : ''}>new</option>
+                                    {/if}
+                                    <option value="2" {$ticket->status == 2 ? 'selected' : ''}>open</option>
+                                    <option value="3" {$ticket->status == 3 ? 'selected' : ''}>pending</option>
+                                    <option value="4" {$ticket->status == 4 ? 'selected' : ''}>solved</option>
+                                </select>
                             </div>
                         </div>
                         <div class="form-group">
