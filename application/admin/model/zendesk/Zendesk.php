@@ -31,7 +31,17 @@ class Zendesk extends Model
         parent::init();
         //新增后的回调函数，进行任务分配
         self::beforeInsert(function ($zendesk) {
-            self::assignTicket($zendesk);
+            //如果存在assignee_id,则不需要自动分配
+            //判断是否已分配，chat的情况会存在自动分配的情况，所有此处需要判断下
+            if($zendesk->assignee_id){
+                $assign_id = $due_id = ZendeskAgents::where('agent_id',$zendesk->assignee_id)->value('admin_id');
+                $zendesk->assign_id = $assign_id;
+                $zendesk->due_id = $due_id;
+                $zendesk->assign_time = date('Y-m-d H:i:s',time());
+            }else{
+                self::assignTicket($zendesk);
+            }
+
         });
     }
 
@@ -153,7 +163,7 @@ class Zendesk extends Model
             }
         }
         //获取所有未分配的邮件
-        $waitTickets = self::where('assign_id', 0)->select();
+        $waitTickets = self::where(['assign_id' => 0,'status' => ['in','0,1,2,3']])->select();
         foreach ($waitTickets as $ticket) {
             //判断该邮件是否有老用户
             $preTicket = Zendesk::where(['user_id' => $ticket->user_id, 'assign_id' => ['>', 0], 'type' => $ticket->getType()])

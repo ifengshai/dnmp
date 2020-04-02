@@ -165,7 +165,7 @@ class ZendeskAgents extends Backend
             }
             $this->error(__('Parameter %s can not be empty', ''));
         }
-        $agents = ZendeskAccount::where('user_type',$row->type)->field('account_id,account_user')->select();
+        $agents = ZendeskAccount::where('account_type',$row->type)->field('account_id,account_user')->select();
         $this->view->assign("row", $row);
         $this->view->assign("agents", $agents);
         return $this->view->fetch();
@@ -182,11 +182,19 @@ class ZendeskAgents extends Backend
     {
         $res = (new Notice(request(),['type' => 'zeelool']))->fetchUser();
     }
+
+    /**
+     * ajax获取所有的管理员
+     * @return string
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
     public function getAgents()
     {
         if($this->request->isPost()) {
             $type = input('type');
-            $agents = ZendeskAccount::where('user_type',$type)->field('account_id,account_user')->select();
+            $agents = ZendeskAccount::where('account_type',$type)->field('account_id,account_user')->select();
             $html = '<option value="">请选择</option>';
             foreach($agents as $agent){
                 $html .= "<option value='{$agent->account_id}'>{$agent->account_user}</option>";

@@ -35,7 +35,7 @@ return [
         2 => 'open',
         3 => 'pending',
         4 => 'solved',
-        5 => 'close'
+        5 => 'closed'
     ],
     'template_category' => [
         1=> '售前',

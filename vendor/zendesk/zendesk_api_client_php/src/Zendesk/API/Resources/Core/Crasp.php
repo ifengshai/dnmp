@@ -1,11 +1,5 @@
 <?php
 
-/**
- * @Author: CraspHB彬
- * @Date:   2020-03-31 14:40:56
- * @Email:   646054215@qq.com
- * @Last Modified time: 2020-03-31 14:41:04
- */
 namespace Zendesk\API\Resources\Core;
 
 use Psr\Http\Message\StreamInterface;
@@ -16,7 +10,7 @@ use Zendesk\API\Resources\ResourceAbstract;
 use Zendesk\API\Traits\Resource\FindAll;
 
 /**
- * sdk中没有的方法，自定义的方法
+ * The Attachments class exposes methods for uploading and retrieving attachments
  * @package Zendesk\API
  */
 class Crasp extends ResourceAbstract
@@ -30,18 +24,34 @@ class Crasp extends ResourceAbstract
     {
         $this->setRoutes([
             'findTags'       => "tags.json",
+            'findUser'       => 'users/{id}.json'
         ]);
     }
 
     /**
-     * 获取所有的tags
-     * @param array $params
-     * @return \stdClass|null
-     * @throws \Zendesk\API\Exceptions\ApiResponseException
-     * @throws \Zendesk\API\Exceptions\AuthException
+     * 获取所有的tag
+     * @param  array  $params [description]
+     * @return [type]         [description]
      */
     public function findTags(array $params = [])
     {
         return $this->findAll($params, __FUNCTION__);
     }
+
+    /**
+     * 获取用户信息
+     * @param  array  $params [description]
+     * @return [type]         [description]
+     */
+    public function findUser(array $params)
+    {
+        $params = $this->addChainedParametersToParams($params, ['id' => get_class($this)]);
+        if (! $this->hasKeys($params, ['id'])) {
+            throw new MissingParametersException(__METHOD__, ['id']);
+        }
+        $id = $params['id'];
+        unset($params['id']);
+
+        return $this->client->get($this->getRoute(__FUNCTION__, ['id' => $id]), $params);
+    }    
 }

@@ -189,6 +189,7 @@ class Zendesk extends Backend
                     if (strip_tags($params['content'])) {
                         $result = ZendeskComments::create([
                             'ticket_id' => $ticket->ticket_id,
+                            'comment_id' => $res,
                             'zid' => $ids,
                             'author_id' => $agent_id,
                             'body' => strip_tags($params['content']),

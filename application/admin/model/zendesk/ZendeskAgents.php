@@ -32,6 +32,7 @@ class ZendeskAgents extends Model
      * @return \think\model\relation\BelongsTo1
      */
     public function admin()
+
     {
         return $this->belongsTo(Admin::class,'admin_id','id')->setEagerlyType(0)->joinType('left');
     }

@@ -68,7 +68,7 @@
                                 </button>
                             </div>
                         </div>
-                        {if condition="$ticket->rating"}
+                        {if condition="in_array($ticket->rating,['bad','good'])"}
                         <div class="callout" style="background-color:#fffcf3;">
                             <h4>Rating! <button type="button" class="btn btn-block btn-warning btn-flat">{$ticket->rating}</button></h4>
                             {$ticket->comment}
