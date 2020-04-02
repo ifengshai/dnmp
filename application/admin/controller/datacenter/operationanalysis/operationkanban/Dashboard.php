@@ -7,6 +7,7 @@ use app\common\controller\Backend;
 use think\Db;
 use think\Exception;
 use app\admin\model\platformmanage\MagentoPlatform;
+use think\Cache;
 
 class Dashboard extends Backend
 {
@@ -248,6 +249,10 @@ class Dashboard extends Backend
 	// }
 	public function get_platform_data($map)
 	{
+		$arr = Cache::get('Dashboard_get_platform_data_'.md5(serialize($map)));
+		if($arr){
+			return $arr;
+		}				
 		$zeelool_model 	= Db::connect('database.db_zeelool');
 		$voogueme_model = Db::connect('database.db_voogueme');
 		$nihao_model	= Db::connect('database.db_nihao');
@@ -299,8 +304,8 @@ class Dashboard extends Backend
 		//nihao pc端客单价
 		$nihao_pc_unit_price   		= @round(($nihao_pc_sales_money/$nihao_pc_sales_num),2);
 		//nihao wap客单价
-		$nihao_wap_unit_price  		= @round(($nihao_wap_sales_money/$nihao_wap_sales_num),2);
-		return [
+		$nihao_wap_unit_price  		= @round(($nihao_wap_sales_money/$nihao_wap_sales_num),2);				
+		$arr = [
 			'zeelool_pc_sales_money' 	=> $zeelool_pc_sales_money,
 			'zeelool_wap_sales_money' 	=> $zeelool_wap_sales_money,
 			'zeelool_app_sales_money' 	=> $zeelool_app_sales_money,
@@ -322,7 +327,9 @@ class Dashboard extends Backend
 			'nihao_wap_sales_num' 		=> $nihao_wap_sales_num,
 			'nihao_pc_unit_price' 		=> $nihao_pc_unit_price,
 			'nihao_wap_unit_price' 		=> $nihao_wap_unit_price
-		];		
+		];
+		Cache::set('Dashboard_get_platform_data_'.md5(serialize($map)),$arr,7200);
+		return $arr;		
 
 	}
 }
