@@ -2,6 +2,7 @@
 
 namespace app\admin\controller\demand;
 
+use app\api\controller\Ding;
 use app\common\controller\Backend;
 use think\Db;
 use think\Request;
@@ -567,6 +568,12 @@ class ItWebDemand extends Backend
      */
     public function add()
     {
+        $url = 'http://mj.com/admin_1biSSnWyfW.php/demand/it_web_demand/index?ref=addtabs';
+        $user_id[] =  '0550643549844645';//李想
+        $user_id[] =  '0333543233781107';//张晓
+        $res = (new Ding())->ding_notice($user_id,$url,'新需求来了1111111111','测试内容222222222222');
+        dump($res);exit;
+
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
             $params = input();
