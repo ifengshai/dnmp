@@ -8,6 +8,7 @@
 namespace app\admin\controller\zendesk;
 
 
+use app\admin\model\zendesk\ZendeskAgents;
 use app\admin\model\zendesk\ZendeskPosts;
 use app\admin\model\zendesk\ZendeskTasks;
 use think\Controller;
@@ -113,6 +114,7 @@ class Notice extends Controller
                         $attachments[] = $attachment->content_url;
                     }
                 }
+                $admin_id = $due_id = ZendeskAgents::where('agent_id',$comment->author_id)->value('admin_id');
                 ZendeskComments::create([
                     'ticket_id' => $id,
                     'comment_id' => $comment->id,
@@ -121,8 +123,9 @@ class Notice extends Controller
                     'body' => $comment->body,
                     'html_body' => $comment->html_body,
                     'is_public' => $comment->public ? 1 : 2,
-                    'is_admin' => 0,
-                    'attachments' => json($attachments)
+                    'is_admin' => $admin_id ? 1 : 0,
+                    'attachments' => json($attachments),
+                    'is_created' => 1
                 ]);
             }
             Db::commit();
@@ -208,6 +211,7 @@ class Notice extends Controller
                         $attachments[] = $attachment->content_url;
                     }
                 }
+                $admin_id = $due_id = ZendeskAgents::where('agent_id',$comment->author_id)->value('admin_id');
                 ZendeskComments::create([
                     'ticket_id' => $id,
                     'zid' => $zendesk->id,
@@ -216,8 +220,9 @@ class Notice extends Controller
                     'body' => $comment->body,
                     'html_body' => $comment->html_body,
                     'is_public' => $comment->public ? 1 : 2,
-                    'is_admin' => 0,
-                    'attachments' => json($attachments)
+                    'is_admin' => $admin_id ? 1 : 0,
+                    'attachments' => json($attachments),
+                    'is_created' => 1
                 ]);
             }
             Db::commit();

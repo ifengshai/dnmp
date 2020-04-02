@@ -248,7 +248,7 @@ class Zendesk extends Backend
             'is_active' => 1])
             ->order('template_category desc,id desc')
             ->select();
-        $templates = [];
+        $templates = ['Apply Macro'];
         foreach ($templateAll as $key => $template) {
             $category = '';
             if ($template['template_category']) {
@@ -256,7 +256,7 @@ class Zendesk extends Backend
             }
             $templates[$template['id']] = $category . $template['template_name'];
         }
-        array_unshift($templates, 'Apply Macro');
+        //array_unshift($templates, 'Apply Macro');
         //获取当前用户的最新5个的订单
         if($ticket->type == 1){
             $orderModel = new \app\admin\model\order\order\Zeelool;

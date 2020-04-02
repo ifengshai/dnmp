@@ -16,7 +16,7 @@ class Zendesk extends Migrator
         $table->addColumn('ticket_id','integer',array('limit' => 7, 'signed' => false, 'comment' => '邮件id'))
             ->addColumn('type', 'integer', array('limit' => MysqlAdapter::INT_TINY,'default' => 0,'signed'=>false, 'comment' => '站点类型，1:zeeloolw,2:voogueme'))
             ->addColumn('channel', 'string', array('limit' => 15,'null' => true, 'comment' => '类型：email,web，chat等'))
-            ->addColumn('email', 'string', array('limit' => 100, 'comment' => '发送人的email'))
+            ->addColumn('email', 'string', array('limit' => 100,'null' => true, 'comment' => '发送人的email'))
             ->addColumn('username', 'string', array('limit' => 100, 'comment' => '发送人昵称'))
             ->addColumn('user_id', 'string', array('limit' => 20, 'comment' => '发送人id'))
             ->addColumn('to_email', 'string', array('limit' => 100,'null' => true, 'comment' => '接受的账号邮箱'))
