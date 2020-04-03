@@ -18,6 +18,8 @@ class ZendeskComments extends Migrator
             ->addColumn('is_public', 'integer', array('limit' => MysqlAdapter::INT_TINY,'default' => 0,'signed'=>false, 'comment' => '是否公开1：true，2：false'))
             ->addColumn('is_admin', 'integer', array('limit' => MysqlAdapter::INT_TINY,'default' => 0,'signed'=>false, 'comment' => '是否是管理员回复，1：是，2：否'))
             ->addColumn('attachments', 'text', array('null' => true,'comment' => '附件，多个以，隔开'))
+            ->addColumn('comment_id', 'string', array('limit' => 20,'null' => true, 'comment' => '评论的id'))
+            ->addColumn('is_created', 'integer', array('limit' => MysqlAdapter::INT_TINY,'default' => 0,'signed'=>false, 'comment' => '1:create,2:update'))
             ->addColumn('create_time', 'datetime', [])
             ->addColumn('update_time', 'datetime', [])
             ->addIndex(array('zid','is_admin','due_id'))
