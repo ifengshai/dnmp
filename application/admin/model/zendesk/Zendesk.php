@@ -160,7 +160,8 @@ class Zendesk extends Model
                     'leave_count' => $agent->tickets_count,
                     'target_count' => $target_count,
                     'surplus_count' => $target_count,
-                    'complete_count' => 0
+                    'complete_count' => 0,
+                    'check_count' => $agent->count
                 ]);
             }
         }
