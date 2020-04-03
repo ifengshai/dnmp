@@ -325,7 +325,7 @@ Please close this window and try again.");
 Please close this window and try again.");
         }
         //合并的最后一条评论
-        $comment = $this->model->where('ticket_id', $ticket_id)->with('lastComment')->find();
+        $comment = $this->model->where('ticket_id', $pid)->with('lastComment')->find();
         if ($comment->status == 5) {
             $this->error("You are unable to merge into #{$ticket_id}. Tickets that are Closed, tickets that are shared with other accounts, and tickets you don\'t have access to cannot be merged into.
 Please close this window and try again.");
