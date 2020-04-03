@@ -250,12 +250,14 @@
                         </tr>
                         {foreach name="orders" item="vo"}
                         <tr>
-                            <td>{$vo->increment_id}</td>
+
+                            <td><a href="{$orderUrl}{$vo->entity_id}" target="_blank">{$vo->increment_id}</a></td>
                             <td>{$vo->created_at}</td>
                             <td>{$vo->order_currency_code}{$vo->grand_total}</td>
                             <td>{$vo->status}</td>
                         </tr>
                         {/foreach}
+                        <tr><td  style="width: 100px;text-align: center;"><a href="{:config('zendesk.check_order_info_url')}" target="_blank">查看用户信息</a></td></tr>
                     </table>
                 </div>
                 <!-- /.box-body -->

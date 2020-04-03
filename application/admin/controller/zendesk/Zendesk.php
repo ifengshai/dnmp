@@ -282,10 +282,11 @@ class Zendesk extends Backend
             ->where('customer_email',$ticket->email)
             ->order('entity_id desc')
             ->limit(5)
-            ->select();
+            ->select();        
         $btn = input('btn',0);
         $this->view->assign(compact('tags', 'ticket', 'comments', 'tickets', 'recentTickets', 'templates','orders','btn'));
         $this->view->assign('rows', $row);
+        $this->view->assign('orderUrl',config('zendesk.platform_url')[$ticket->type]);
         return $this->view->fetch();
     }
 
