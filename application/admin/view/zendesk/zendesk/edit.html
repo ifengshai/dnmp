@@ -58,7 +58,7 @@
                 <!-- /.box -->
             </div>
             <!-- /.col -->
-            <div class="col-md-7">
+            <div class="col-md-7 col-center">
                 <div class="nav-tabs-custom">
                     <div class="box box-solid">
                         <!-- /.box-header -->
@@ -110,9 +110,9 @@
                         <div class="form-group">
                             <label for="c-image" class="control-label col-xs-12 col-sm-2">上传附件:</label>
                             <div class="col-xs-12 col-sm-8">
-                                <div class="input-group">
+                                <div class="input-group uploadBox">
                                     <input id="c-image" class="form-control" size="35" name="row[image]" type="text" value="">
-                                    <div class="input-group-addon no-border no-padding">
+                                    <div class="input-group-addon no-border no-padding upload">
                                         <span><button type="button" id="plupload-image" class="btn btn-danger plupload" data-input-id="c-image" data-mimetype="*" data-multiple="true"  data-preview-id="p-image"><i class="fa fa-upload"></i> {:__('Upload')}</button></span>
                                     </div>
                                     <span class="msg-box n-right"></span>
@@ -166,7 +166,7 @@
                                     <span class="description">{$vo->update_time}</span>
                                 </div>
                                 <!-- /.user-block -->
-                                <div style="margin:0px 0px 0px 50px;">
+                                <div style="margin:0px 0px 0px 70px;">
                                    {$vo->html_body}
                                     {if condition="$vo.attachments"}
                                     <ul class="mailbox-attachments clearfix">
@@ -437,4 +437,40 @@
     <input type="hidden" class="ticket_id" value="{$ticket->ticket_id}">
     <input type="hidden" class="search-post-type" value="{$ticket->type}">
 </section>
+<style>
+    .col-center{
+        border-right: 2px solid #ccc;
+        border-left: 2px solid #ccc;
+    }
+    .col-center .box-body{
+        padding: 10px 8.5%!important;
+    }
+    .col-center .description{
+        margin-top: 10px;
+        margin-left: 67px;
+    }
+    .col-center .username{
+        margin-left: 67px;
+    }
+    .col-center .form-group{
+        margin-bottom: 20px!important;
+    }
+    .col-center .tab-content{
+        padding: 10px 9.5%;
+    }
+    .col-center .box-solid{
+        padding-bottom: 10px;
+    }
+    .col-center .upload{
+        margin-left: 10px;
+    }
+    .col-center .uploadBox{
+        display: flex;
+        justify-content: space-between;
+        width: 90%;
+    }
+    .col-center .uploadBox input{
+        width: 96%;
+    }
+</style>
 <!-- /.content -->
