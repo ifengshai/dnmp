@@ -19,7 +19,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                 sortName: 'id',
                 columns: [
                     [
-                        {checkbox: true},
                         {field: 'id', title: __('Id')},
                         {field: 'ticket_id', title: __('Ticket_id')},
                         {field: 'subject', title: __('Subject'),operate:false},
