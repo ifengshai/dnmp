@@ -13,6 +13,7 @@ class ZendeskTasksUpdate extends Migrator
     {
         $table = $this->table('zendesk_tasks');
         $table->addColumn('check_count', 'integer', array('limit' => MysqlAdapter::INT_TINY,'default' => 0,'signed'=>false, 'comment' => '考核的数目'))
+            ->addColumn('check_count', 'integer', array('limit' => MysqlAdapter::INT_TINY,'default' => 0,'signed'=>false, 'comment' => '考核的数目'))
             ->save();
     }
 }
