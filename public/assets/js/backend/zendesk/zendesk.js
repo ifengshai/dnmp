@@ -154,7 +154,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                     success: function (json) {
                         if(json.code == 1) {
                             window.location.reload();
-                            Layer.closeAll();
                         }else if(json.code == 0) {
                             Layer.msg(json.msg);
                             return false;
