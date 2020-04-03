@@ -315,7 +315,7 @@ class Notice extends Controller
             //exception($e->getMessage(), 10001);
         }
         //返回最后一条评论的id
-        $event = $res->audit->event;
+        $event = $res->audit->events;
         $commentId = $event[0]->id;
         return $commentId;
 
