@@ -216,7 +216,7 @@ class Ding extends Controller
         }
     }
 
-    public function test()
+    public function test($url = '')
     {
         $params = send_ding_message(['040740464839840580'], '收到需求2', '钱海信用卡支付后重复发送确认订单的邮件');
         dump($this->app->conversation->sendCorporationMessage($params));
@@ -257,5 +257,28 @@ class Ding extends Controller
         // 获取邮件为new的进行分配，其余按第一次分配的为准
         // 获取上班的人数 eg:5
         // 邮件id%5求余数分配
+    }
+
+    public function ding_notice(array $userIds,$url = null,$title=null,$text=null){
+        $url = config('ding.message_url');
+        $agentId = config('ding.agent_id');
+        $link = [
+            'msgtype' => 'link',
+            'link' => [
+                'messageUrl' => $url,
+                'picUrl' => 'https://static.dingtalk.com/media/lALPDeC2v2wwMcPMpcyk_164_165.png',
+                'title' => $title,
+                'text' => $text
+            ]
+
+        ];
+        $params = [
+            'agent_id' => $agentId,
+            'userid_list' => join(',', $userIds),
+            'msg' => json_encode($link)
+        ];
+        //$params = send_ding_message(['0550643549844645'], '收到需求2', '钱海信用卡支付后重复发送确认订单的邮件');
+        $return_date = $this->app->conversation->sendCorporationMessage($params);
+        return $return_date;
     }
 }

@@ -13,29 +13,30 @@ use think\exception\ValidateException;
  *
  * @icon fa fa-circle-o
  */
-class ItWebTask extends Backend
+class DevelopWebTask extends Backend
 {
-
+    
     /**
-     * ItWebTask模型对象
-     * @var \app\admin\model\demand\ItWebTask
+     * DevelopWebTask模型对象
+     * @var \app\admin\model\demand\DevelopWebTask
      */
     protected $model = null;
 
     public function _initialize()
     {
         parent::_initialize();
-        $this->model = new \app\admin\model\demand\ItWebTask;
-        $this->itWebTaskItem = new \app\admin\model\demand\ItWebTaskItem;
-        $this->testRecord = new \app\admin\model\demand\ItTestRecord();
-    }
+        $this->model = new \app\admin\model\demand\DevelopWebTask;
+        $this->itWebTaskItem = new \app\admin\model\demand\DevelopWebTaskItem();
+        $this->testRecord = new \app\admin\model\demand\DevelopTestRecord();
 
+    }
+    
     /**
      * 默认生成的控制器所继承的父类中有index/add/edit/del/multi五个基础方法、destroy/restore/recyclebin三个回收站方法
      * 因此在当前控制器中可不用编写增删改查的代码,除非需要自己控制这部分逻辑
      * 需要将application/admin/library/traits/Backend.php中对应的方法复制到当前控制器,然后进行修改
      */
-
+    
 
     /**
      * 查看
@@ -62,34 +63,32 @@ class ItWebTask extends Backend
                 unset($filter['nickname']);
                 $this->request->get(['filter' => json_encode($filter)]);
             }
-
-
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
                 ->where($where)
+                ->where($map)
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->model
                 ->where($where)
+                ->where($map)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
-
-            foreach ($list as $k => $v) {
-                $list[$k]['sitetype'] = config('demand.siteType')[$v['site_type']]; //取站点
-            }
             $list = collection($list)->toArray();
             $result = array("total" => $total, "rows" => $list);
 
             return json($result);
         }
         //判断是否有完成按钮权限
-        $this->assignconfig('is_set_status', $this->auth->check('demand/it_web_task/set_task_complete_status'));
-        $this->assignconfig('is_problem_detail', $this->auth->check('demand/it_web_task/problem_detail'));
-        $this->assignconfig('is_edit', $this->auth->check('demand/it_web_task/edit'));
-        $this->assignconfig('is_set_task_test_status', $this->auth->check('demand/it_web_task/set_task_test_status'));
-        $this->assignconfig('is_regression_test_info', $this->auth->check('demand/it_web_task/regression_test_info'));
+        $this->assignconfig('is_set_status', $this->auth->check('demand/develop_web_task/set_task_complete_status'));
+        $this->assignconfig('is_problem_detail', $this->auth->check('demand/develop_web_task/problem_detail'));
+        $this->assignconfig('is_edit', $this->auth->check('demand/develop_web_task/edit'));
+        $this->assignconfig('is_set_status', $this->auth->check('demand/develop_web_task/set_task_complete_status'));
+        $this->assignconfig('is_set_task_test_status', $this->auth->check('demand/develop_web_task/set_task_test_status'));
+        $this->assignconfig('is_regression_test_info', $this->auth->check('demand/develop_web_task/regression_test_info'));
+        $this->assignconfig('is_finish_task', $this->auth->check('demand/develop_web_task/is_finish_task'));
         return $this->view->fetch();
     }
 
@@ -116,7 +115,6 @@ class ItWebTask extends Backend
                         $this->model->validateFailException(true)->validate($validate);
                     }
 
-                    $group_type = $this->request->post("group_type/a");
                     $person_in_charge = $this->request->post("person_in_charge/a");
                     $title = $this->request->post("title/a");
                     $desc = $this->request->post("desc/a");
@@ -124,11 +122,11 @@ class ItWebTask extends Backend
                     $type = $this->request->post("type/a");
 
                     //执行过滤空值
-                    array_walk($group_type, 'trim_value');
                     array_walk($person_in_charge, 'trim_value');
                     array_walk($title, 'trim_value');
-             
-                    if (count(array_filter($group_type)) < 1 || count(array_filter($person_in_charge)) < 1 || count(array_filter($title)) < 1) {
+                    array_walk($type, 'trim_value');
+                   
+                    if (count(array_filter($person_in_charge)) < 1 || count(array_filter($title)) < 1) {
                         $this->error('请先分配任务');
                     }
 
@@ -138,11 +136,10 @@ class ItWebTask extends Backend
                     //添加分配信息
                     if ($result !== false) {
                         $data = [];
-                        foreach ($group_type as $k => $v) {
+                        foreach ($person_in_charge as $k => $v) {
                             $data[$k]['person_in_charge'] = $person_in_charge[$k];
-                            $data[$k]['group_type'] = $v;
-                            $data[$k]['title'] = $title[$k];
                             $data[$k]['type'] = $type[$k];
+                            $data[$k]['title'] = $title[$k];
                             $data[$k]['desc'] = $desc[$k];
                             $data[$k]['plan_date'] = $plan_date[$k];
                             $data[$k]['task_id'] = $this->model->id;
@@ -174,11 +171,7 @@ class ItWebTask extends Backend
             }
             $this->error(__('Parameter %s can not be empty', ''));
         }
-        $this->assignconfig('web_designer_user', config('demand.web_designer_user'));
-        $this->assignconfig('phper_user', config('demand.phper_user'));
-        $this->assignconfig('app_user', config('demand.app_user'));
-        $this->assignconfig('test_user', config('demand.test_user'));
-        $this->assign('siteType', config('demand.siteType'));
+        $this->assign('phper_user', config('develop_demand.phper_user'));
         return $this->view->fetch();
     }
 
@@ -214,20 +207,18 @@ class ItWebTask extends Backend
 
                     //添加分配信息
                     if ($result !== false) {
-                        $group_type = $this->request->post("group_type/a");
+                        $type = $this->request->post("type/a");
                         $person_in_charge = $this->request->post("person_in_charge/a");
                         $title = $this->request->post("title/a");
                         $desc = $this->request->post("desc/a");
                         $plan_date = $this->request->post("plan_date/a");
                         $item_id = $this->request->post("item_id/a");
-                        $type = $this->request->post("type/a");
                         $data = [];
-                        foreach ($group_type as $k => $v) {
+                        foreach ($type as $k => $v) {
                             $data[$k]['person_in_charge'] = $person_in_charge[$k];
-                            $data[$k]['group_type'] = $v;
+                            $data[$k]['type'] = $v;
                             $data[$k]['title'] = $title[$k];
                             $data[$k]['desc'] = $desc[$k];
-                            $data[$k]['type'] = $type[$k];
                             $data[$k]['plan_date'] = $plan_date[$k];
                             if (@$item_id[$k]) {
                                 $data[$k]['id'] = $item_id[$k];
@@ -265,11 +256,7 @@ class ItWebTask extends Backend
         $this->assign('item', $item);
 
         $this->view->assign("row", $row);
-        $this->assignconfig('web_designer_user', config('demand.web_designer_user'));
-        $this->assignconfig('phper_user', config('demand.phper_user'));
-        $this->assignconfig('app_user', config('demand.app_user'));
-        $this->assignconfig('test_user', config('demand.test_user'));
-        $this->assign('siteType', config('demand.siteType'));
+        $this->assign('phper_user', config('develop_demand.phper_user'));
         return $this->view->fetch();
     }
 
@@ -296,11 +283,7 @@ class ItWebTask extends Backend
         $this->assign('item', $item);
 
         $this->view->assign("row", $row);
-        $this->assignconfig('web_designer_user', config('demand.web_designer_user'));
-        $this->assignconfig('phper_user', config('demand.phper_user'));
-        $this->assignconfig('app_user', config('demand.app_user'));
-        $this->assignconfig('test_user', config('demand.test_user'));
-        $this->assign('siteType', config('demand.siteType'));
+        $this->assign('phper_user', config('develop_demand.phper_user'));
         return $this->view->fetch();
     }
 
@@ -323,7 +306,7 @@ class ItWebTask extends Backend
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
-            $id = input('id');
+            $id = input('ids');
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->itWebTaskItem
                 ->where($where)
@@ -339,15 +322,7 @@ class ItWebTask extends Backend
                 ->select();
 
             foreach ($list as &$v) {
-                if ($v['group_type'] == 1) {
-                    $v['person_in_charge_text'] = config('demand.web_designer_user')[$v['person_in_charge']];
-                } elseif ($v['group_type'] == 2) {
-                    $v['person_in_charge_text'] = config('demand.phper_user')[$v['person_in_charge']];
-                } elseif ($v['group_type'] == 3) {
-                    $v['person_in_charge_text'] = config('demand.app_user')[$v['person_in_charge']];
-                } elseif ($v['group_type'] == 4) {
-                    $v['person_in_charge_text'] = config('demand.test_user')[$v['person_in_charge']];
-                }
+                $v['person_in_charge_text'] = config('develop_demand.phper_user')[$v['person_in_charge']];
             }
             unset($v);
             $list = collection($list)->toArray();
@@ -498,8 +473,6 @@ class ItWebTask extends Backend
                 $this->error(__('You have no permission'));
             }
         }
-
-        $testInfo = $this->model->get($row->task_id);
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
             if ($params) {
@@ -507,10 +480,8 @@ class ItWebTask extends Backend
                 $result = false;
                 Db::startTrans();
                 try {
-                    $params['site_type'] = $testInfo['site_type'];
                     $params['type'] = 4;
                     $params['pid'] = $row->task_id;
-                    $params['responsibility_group'] = $row->group_type;
                     $params['environment_type'] = 1;
                     $params['responsibility_user_id'] = $row->person_in_charge;
                     $params['create_time'] = date('Y-m-d H:i:s');
@@ -537,7 +508,6 @@ class ItWebTask extends Backend
         }
 
         $this->view->assign("row", $row);
-        $this->assign('siteType', config('demand.siteType'));
         return $this->view->fetch();
     }
 
@@ -562,13 +532,7 @@ class ItWebTask extends Backend
             ->select();
         $left_test_list = collection($left_test_list)->toArray();
         foreach ($left_test_list as $k_left => $v_left) {
-            if ($v_left['responsibility_group'] == 1) {
-                $left_test_list[$k_left]['responsibility_user_name'] = config('demand.web_designer_user')[$v_left['responsibility_user_id']];
-            } elseif ($v_left['responsibility_group'] == 2) {
-                $left_test_list[$k_left]['responsibility_user_name'] = config('demand.phper_user')[$v_left['responsibility_user_id']];
-            } else if ($v_left['responsibility_group'] == 3) {
-                $left_test_list[$k_left]['responsibility_user_name'] = config('demand.app_user')[$v_left['responsibility_user_id']];
-            }
+            $left_test_list[$k_left]['responsibility_user_name'] = config('develop_demand.phper_user')[$v_left['responsibility_user_id']];
             $left_test_list[$k_left]['create_user_name'] = config('demand.test_user')[$v_left['create_user_id']];
         }
 
@@ -580,13 +544,7 @@ class ItWebTask extends Backend
             ->select();
         $right_test_list = collection($right_test_list)->toArray();
         foreach ($right_test_list as $k_right => $v_right) {
-            if ($v_left['responsibility_group'] == 1) {
-                $right_test_list[$k_right]['responsibility_user_name'] = config('demand.web_designer_user')[$v_right['responsibility_user_id']];
-            } elseif ($v_left['responsibility_group'] == 2) {
-                $right_test_list[$k_right]['responsibility_user_name'] = config('demand.phper_user')[$v_right['responsibility_user_id']];
-            } else if ($v_left['responsibility_group'] == 3) {
-                $right_test_list[$k_right]['responsibility_user_name'] = config('demand.app_user')[$v_right['responsibility_user_id']];
-            }
+            $right_test_list[$k_right]['responsibility_user_name'] = config('develop_demand.phper_user')[$v_right['responsibility_user_id']];
             $right_test_list[$k_right]['create_user_name'] = config('demand.test_user')[$v_right['create_user_id']];
         }
 
@@ -629,7 +587,6 @@ class ItWebTask extends Backend
                     $params['type'] = 4;
                     $params['environment_type'] = 2;
                     $params['pid'] = $row->id;
-                    $params['site_type'] = $row->site_type;
                     $params['create_time'] = date('Y-m-d H:i:s');
                     $params['create_user_id'] = $this->auth->id;
                     $result = $this->testRecord->allowField(true)->save($params);
@@ -655,22 +612,32 @@ class ItWebTask extends Backend
 
         $this->view->assign("row", $row);
         //查询此记录责任人id
-        $person_ids = $this->itWebTaskItem->where('task_id', $ids)->field('person_in_charge,group_type')->select();
-
-        $group_type = [];
+        $person_ids = $this->itWebTaskItem->where('task_id', $ids)->field('person_in_charge')->select();
         foreach ($person_ids as &$v) {
-            if ($v['group_type'] == 1) {
-                $v['person_in_charge_name'] = config('demand.web_designer_user')[$v['person_in_charge']];
-            } elseif ($v['group_type'] == 2) {
-                $v['person_in_charge_name'] = config('demand.phper_user')[$v['person_in_charge']];
-            } elseif ($v['group_type'] == 3) {
-                $v['person_in_charge_name'] = config('demand.app_user')[$v['person_in_charge']];
-            }
-            $group_type[] = $v['group_type'];
+            $v['person_in_charge_name'] = config('develop_demand.phper_user')[$v['person_in_charge']];
         }
         $this->assign('person_ids', $person_ids);
-        $this->assign('group_type', array_unique($group_type));
-        $this->assign('siteType', config('demand.siteType'));
         return $this->view->fetch();
+    }
+
+    /**
+     * 产品经理确认
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/03/31 16:52:22 
+     * @param [type] $ids
+     * @return void
+     */
+    public function is_finish_task($ids = null)
+    {
+        $data['is_finish'] = 1;
+        $data['finish_time'] = date('Y-m-d H:i:s', time());
+        $res = $this->model->save($data, ['id' => $ids]);
+        if ($res !== false) {
+            $this->success('操作成功！！');
+        } else {
+            $this->error('操作失败！！');
+        }
     }
 }

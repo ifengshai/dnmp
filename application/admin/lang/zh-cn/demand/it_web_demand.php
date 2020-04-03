@@ -10,24 +10,19 @@ return [
     'Status'                        => '状态',
     'Create_time'                   => '创建时间',
     'Hope_time'                     => '期望时间',
-
-    'Web_designer_user_id'          => '前端负责人id,逗号分隔',
+    'Web_designer_user_id'          => '前端负责人',
     'Web_designer_expect_time'      => '前端预计时间',
     'Web_designer_is_finish'        => '前端是否完成,0：否,1：是',
     'Web_designer_finish_time'      => '前端完成时间',
-
-
-    'Phper_user_id'                 => '后端负责人id,逗号分隔',
+    'Phper_user_id'                 => '后端负责人',
     'Phper_expect_time'             => '后端预计时间',
     'Phper_is_finish'               => '后端是否完成,0：否,1：是',
     'Phper_finish_time'             => '后端完成时间',
-
-    'App_user_id'                   => 'app负责人id,逗号分隔',
+    'App_user_id'                   => 'APP负责人',
     'App_expect_time'               => 'app预计时间',
     'App_is_finish'                 => 'app是否完成,0：否,1：是',
     'App_finish_time'               => 'app完成时间',
     'Test_group'                    => '是否测试',
-
     'Test_user_id'                  => '测试责任人',
     'Test_is_finish'                => '测试人员是否完成测试,0：否,1：是',
     'Test_finish_time'              => '测试完成时间',
@@ -43,6 +38,8 @@ return [
     'All_expect_time'               => '预计时间',
     'Copy_to_user_id'               => '抄送人',
     'All_finish'               => '点击完成',
+    'bug_note'                   => '描述',
+    'is_small_probability'                   => '是否小概率',
 
     //分配使用
     'Test_complexity'               => '测试复杂度：',
