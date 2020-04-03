@@ -25,5 +25,6 @@ class AuthRule extends Model
     {
         return __($value);
     }
+    
 
 }
