@@ -183,6 +183,41 @@ class PurchaseOrder extends Model
     {
         $where['createtime'] = ['between', [date('Y-m-01 00:00:00', time()), date('Y-m-d H:i:s', time())]];
         $where['is_del'] = 1;
+        $where['purchase_status'] = ['in', [2, 5, 6, 7]];
+        return $this->alias('a')->where($where)->join(['fa_purchase_order_item' => 'b'], 'a.id=b.purchase_id')->sum('b.purchase_num');
+    }
+
+    /**
+     * 当月线上采购数量
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/03/05 17:08:36 
+     * @return void
+     */
+    public function getOnlinePurchaseNum()
+    {
+        $where['createtime'] = ['between', [date('Y-m-01 00:00:00', time()), date('Y-m-d H:i:s', time())]];
+        $where['is_del'] = 1;
+        $where['purchase_type'] = 2;
+        $where['purchase_status'] = ['in', [2, 5, 6, 7]];
+        return $this->alias('a')->where($where)->join(['fa_purchase_order_item' => 'b'], 'a.id=b.purchase_id')->sum('b.purchase_num');
+    }
+
+    /**
+     * 当月线下采购数量
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/03/05 17:08:36 
+     * @return void
+     */
+    public function getUnderPurchaseNum()
+    {
+        $where['createtime'] = ['between', [date('Y-m-01 00:00:00', time()), date('Y-m-d H:i:s', time())]];
+        $where['is_del'] = 1;
+        $where['purchase_type'] = 1;
+        $where['purchase_status'] = ['in', [2, 5, 6, 7]];
         return $this->alias('a')->where($where)->join(['fa_purchase_order_item' => 'b'], 'a.id=b.purchase_id')->sum('b.purchase_num');
     }
 
@@ -198,11 +233,12 @@ class PurchaseOrder extends Model
     {
         $where['createtime'] = ['between', [date('Y-m-01 00:00:00', time()), date('Y-m-d H:i:s', time())]];
         $where['is_del'] = 1;
+        $where['purchase_status'] = ['in', [2, 5, 6, 7]];
         return $this->alias('a')->where($where)->join(['fa_purchase_order_item' => 'b'], 'a.id=b.purchase_id')->sum('purchase_num*purchase_price');
     }
 
     /**
-     * 当月采购总数
+     * 当月采购镜架总数
      *
      * @Description
      * @author wpl
@@ -217,7 +253,28 @@ class PurchaseOrder extends Model
         $where['createtime'] = ['between', [date('Y-m-01 00:00:00', time()), date('Y-m-d H:i:s', time())]];
         $where['is_del'] = 1;
         $where['sku'] = ['in', $skus];
+        $where['purchase_status'] = ['in', [2, 5, 6, 7]];
         return $this->alias('a')->where($where)->join(['fa_purchase_order_item' => 'b'], 'a.id=b.purchase_id')->sum('purchase_num');
+    }
+
+    /**
+     * 当月采购镜架总金额
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/03/05 17:08:36 
+     * @return void
+     */
+    public function getPurchaseFramePrice()
+    {
+        //查询镜架SKU
+        $item = new \app\admin\model\itemmanage\Item();
+        $skus = $item->getFrameSku();
+        $where['createtime'] = ['between', [date('Y-m-01 00:00:00', time()), date('Y-m-d H:i:s', time())]];
+        $where['is_del'] = 1;
+        $where['sku'] = ['in', $skus];
+        $where['purchase_status'] = ['in', [2, 5, 6, 7]];
+        return $this->alias('a')->where($where)->join(['fa_purchase_order_item' => 'b'], 'a.id=b.purchase_id')->sum('purchase_num*purchase_price');
     }
 
     /**
@@ -232,6 +289,121 @@ class PurchaseOrder extends Model
     {
         $where['createtime'] = ['between', [date('Y-m-01 00:00:00', time()), date('Y-m-d H:i:s', time())]];
         $where['is_del'] = 1;
+        $where['purchase_status'] = ['in', [2, 5, 6, 7]];
         return $this->alias('a')->where($where)->join(['fa_purchase_order_item' => 'b'], 'a.id=b.purchase_id')->group('sku')->count(1);
+    }
+
+    /**
+     * 当日采购总数
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/03/05 17:08:36 
+     * @return void
+     */
+    public function getPurchaseNumNow($where = [], $time = [])
+    {
+        if ($time) {
+            $where['createtime'] = ['between', $time];
+        } else {
+            $where['createtime'] = ['between', [date('Y-m-d 00:00:00', time()), date('Y-m-d H:i:s', time())]];
+        }
+
+        $where['is_del'] = 1;
+        $where['purchase_status'] = ['in', [2, 5, 6, 7]];
+        return $this->alias('a')->where($where)->join(['fa_purchase_order_item' => 'b'], 'a.id=b.purchase_id')->sum('b.purchase_num');
+    }
+
+    /**
+     * 当日采购总金额
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/03/05 17:08:36 
+     * @return void
+     */
+    public function getPurchasePriceNow($where = [], $time = [])
+    {
+        if ($time) {
+            $where['createtime'] = ['between', $time];
+        } else {
+            $where['createtime'] = ['between', [date('Y-m-d 00:00:00', time()), date('Y-m-d H:i:s', time())]];
+        }
+        $where['is_del'] = 1;
+        $where['purchase_status'] = ['in', [2, 5, 6, 7]];
+        return $this->alias('a')->where($where)->join(['fa_purchase_order_item' => 'b'], 'a.id=b.purchase_id')->sum('purchase_num*purchase_price');
+    }
+
+
+    /**
+     * 每个人当月采购总数 
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/03/05 17:08:36 
+     * @return void
+     */
+    public function getPurchaseNumNowPerson($where = [], $time = [])
+    {
+        if ($time) {
+            $where['createtime'] = ['between', $time];
+        } else {
+            $where['createtime'] = ['between', [date('Y-m-01 00:00:00', time()), date('Y-m-d H:i:s', time())]];
+        }
+        $where['is_del'] = 1;
+        $where['purchase_status'] = ['in', [2, 5, 6, 7]];
+        return $this->alias('a')->where($where)->join(['fa_purchase_order_item' => 'b'], 'a.id=b.purchase_id')->group('a.create_person')->column('sum(b.purchase_num)','a.create_person');
+    }
+
+    /**
+     * 每个人当月采购总单量 
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/03/05 17:08:36 
+     * @return void
+     */
+    public function getPurchaseOrderNumNowPerson($where = [], $time = [])
+    {
+        if ($time) {
+            $where['createtime'] = ['between', $time];
+        } else {
+            $where['createtime'] = ['between', [date('Y-m-01 00:00:00', time()), date('Y-m-d H:i:s', time())]];
+        }
+        $where['is_del'] = 1;
+        $where['purchase_status'] = ['in', [2, 5, 6, 7]];
+        return $this->where($where)->group('create_person')->column('count(1)','create_person');
+    }
+
+    /**
+     * 本月SKU采购数量排行榜
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/03/24 11:13:42 
+     * @return void
+     */
+    public function getPurchaseNumRanking()
+    {
+        $where['createtime'] = ['between', [date('Y-m-01 00:00:00', time()), date('Y-m-d H:i:s', time())]];
+        $where['is_del'] = 1;
+        $where['purchase_status'] = ['in', [2, 5, 6, 7]];
+        $list = $this->alias('a')
+        ->where($where)
+        ->field('sum(b.purchase_num) as num,sku')
+        ->join(['fa_purchase_order_item' => 'b'], 'a.id=b.purchase_id')
+        ->group('sku')
+        ->order('num desc')
+        ->limit(30)
+        ->select();
+        $list = collection($list)->toArray();
+        //查询SKU分类名称
+        $item = new \app\admin\model\itemmanage\Item();
+        $skuCategoryName = $item->getSkuCategoryName();
+        foreach($list as &$v) {
+            $v['category_name'] = $skuCategoryName[$v['sku']];
+        }
+        unset($v);
+        return $list ?? [];
     }
 }

@@ -345,7 +345,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
         add: function () {
             Controller.api.bindevent();
             $(document).on('click', '.btn-add', function () {
-                var content = $('#table-content table tbody').html();
+                var content = $('#caigou-table table tbody').html();
                 $('.caigou table tbody').append(content);
 
                 Controller.api.bindevent();
@@ -822,7 +822,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                         return '';
                     } else {
                         var tem = value;
-
                         if (tem.length <= 20) {
                             return tem;
                         } else {

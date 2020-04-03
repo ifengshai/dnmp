@@ -55,7 +55,29 @@ require(['form', 'upload'], function (Form, Upload) {
                         });
                         return button.render();
                     };
+                    var HelloButton = function (context) {
 
+                        var ui = $.summernote.ui;
+
+                        // create button
+
+                        var button = ui.button({
+
+                            contents: '<i class="fa fa-child"/> 知识库',
+
+                            tooltip: 'hello',
+
+                            click: function () {
+                                $('#modal-default-knowledge').modal('toggle');
+                                $('.show-posts').html('');
+                                $('.search-posts').html('');
+                            }
+
+                        });
+
+                        return button.render();  // return button as jquery object
+
+                    }
                     $(".summernote,.editor", form).summernote({
                         height: 250,
                         lang: 'zh-CN',
@@ -78,12 +100,15 @@ require(['form', 'upload'], function (Form, Upload) {
                             ['insert', ['link', 'picture', 'video']],
                             ['select', ['image', 'attachment']],
                             ['view', ['fullscreen', 'codeview', 'help']],
+                            ['mybutton', ['hello']]
                         ],
                         buttons: {
                             image: imageButton,
                             attachment: attachmentButton,
+                            hello: HelloButton
                         },
                         dialogsInBody: true,
+                        followingToolbar: false,
                         callbacks: {
                             onChange: function (contents) {
                                 $(this).val(contents);

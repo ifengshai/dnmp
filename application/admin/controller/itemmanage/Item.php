@@ -1721,30 +1721,13 @@ class Item extends Backend
         // echo '<pre>';
         // var_dump($productInfo);
     }
-    public function ceshi2()
-    {
-        $platform_map = Db::name('platform_map')->field('platform_id,platform_field,magento_field')->select();
-        if (!$platform_map) {
-            return false;
-        }
-        $mapArr = [];
-        foreach ($platform_map as $k => $v) {
-            if (1 == $v['platform_id']) {
-                $mapArr[1]['platform_field'][] = $v['platform_field'];
-                $mapArr[1]['magento_field'][]  = $v['magento_field'];
-            }
-            if (2 == $v['platform_id']) {
-                $mapArr[2]['platform_field'][] = $v['platform_field'];
-                $mapArr[2]['magento_field'][]  = $v['magento_field'];
-            }
-            if (3 == $v['platform_id']) {
-                $mapArr[3]['platform_field'][] = $v['platform_field'];
-                $mapArr[3]['magento_field'][]  = $v['magento_field'];
-            }
-        }
-        echo '<pre>';
-        var_dump($mapArr);
-    }
+    // public function ceshi2()
+    // {
+    //     //$str = 's:4:"lens";s:5:"35.00";s:5:"total";s:5:"46.95";}}s:7:"options";a:1:{i:0;a:7:{s:5:"label";s:5:"Color";s:5:"value";s:5:"Black";s:11:"print_value";s:5:"Black";s:9:"option_id";s:4:"3131";s:11:"option_type";s:9:"drop_down";s:12:"option_value";s:4:"3827";s:11:"custom_view";b:0;}}}';
+    //     $str2 = 'a:2:{s:15:"info_buyRequest";a:6:{s:7:"product";s:4:"3200";s:8:"form_key";s:16:"JS2J2VXHOIsmkySi";s:3:"qty";s:1:"1";s:7:"options";a:1:{i:3131;s:4:"3827";}s:13:"cart_currency";s:3:"USD";s:7:"tmplens";a:16:{s:19:"frame_regural_price";s:5:"35.95";s:11:"frame_price";s:5:"11.95";s:12:"prescription";s:278:"customer_rx=0&prescription_type=SingleVision&od_sph=-1.50&od_cyl=-0.50&od_axis=70&os_sph=-1.00&os_cyl=-0.50&os_axis=150&pdcheck=on&pd_r=30.5&pd_l=32.5&prismcheck=&od_pv=0.00&os_pv=0.00&od_bd=0.00&os_bd=0.00&od_pv_r=0.00&os_pv_r=0.00&od_bd_r=0.00&os_bd_r=0.00&year=1983&save=&pd=";s:16:"is_special_price";s:1:"0";s:10:"index_type";s:35:"1.57 Mid-Index Lens with Color Tint";s:11:"index_price";s:5:"25.00";s:10:"index_name";s:17:"Color Tint Lenses";s:8:"index_id";s:7:"color_1";s:8:"color_id";s:2:"11";s:10:"color_name";s:9:"Dark Blue";s:10:"coating_id";s:9:"coating_3";s:13:"coatiing_name";s:74:"Oleophobic (premium oil and fingerprint resistant) Anti-Reflective Coating";s:14:"coatiing_price";s:5:"10.00";s:3:"rid";s:1:"0";s:4:"lens";s:5:"35.00";s:5:"total";s:5:"46.95";}}s:7:"options";a:1:{i:0;a:7:{s:5:"label";s:5:"Color";s:5:"value";s:5:"Black";s:11:"print_value";s:5:"Black";s:9:"option_id";s:4:"3131";s:11:"option_type";s:9:"drop_down";s:12:"option_value";s:4:"3827";s:11:"custom_view";b:0;}}}';
+    //     $unsiar = unserialize($str2);
+    //     dump($unsiar);
+    // }
     /***
      * 第二步
      * 解析magento字段获取字段的值

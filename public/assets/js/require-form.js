@@ -171,6 +171,33 @@ define(['jquery', 'bootstrap', 'upload', 'validator'], function ($, undefined, U
                     });
                 }
             },
+            datetimepickernew: function (form) {
+                //绑定日期时间元素事件
+                if ($(".datetimepickernew", form).size() > 0) {
+                    require(['bootstrap-daterangepicker'], function () {
+                      
+                        var options = {
+                          
+                            timePickerSeconds: true,
+                            timePicker24Hour: true,
+                            singleDatePicker:true,
+                            showDropdowns:true,
+                            timePicker : true,
+                            locale: {
+                                format: 'YYYY-MM-DD HH:mm:ss',
+                                customRangeLabel: __("Custom Range"),
+                                applyLabel: __("Apply"),
+                                cancelLabel: __("Clear"),
+                            },
+                            timePickerIncrement:1
+                            
+                    
+                        };
+                       
+                        $('.datetimepickernew', form).daterangepicker(options);
+                    });
+                }
+            },
             daterangepicker: function (form) {
                 //绑定日期时间元素事件
                 if ($(".datetimerange", form).size() > 0) {
@@ -486,6 +513,10 @@ define(['jquery', 'bootstrap', 'upload', 'validator'], function ($, undefined, U
                 events.citypicker(form);
 
                 events.datetimepicker(form);
+                
+                events.datetimepickernew(form);
+
+                events.datetimepickernew(form);
 
                 events.plupload(form);
 
