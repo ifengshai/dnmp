@@ -1,4 +1,4 @@
-define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui'], function ($, undefined, Backend, Table, Form) {
+define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','template'], function ($, undefined, Backend, Table, Form , JqTags , Jqui , Template) {
 
     var Controller = {
         index: function () {
@@ -12,7 +12,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui'], f
             });
 
             var table = $("#table");
-
             // 初始化表格
             table.bootstrapTable({
                 url: $.fn.bootstrapTable.defaults.extend.index_url,
@@ -23,12 +22,17 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui'], f
                         {checkbox: true},
                         {field: 'id', title: __('Id')},
                         {field: 'ticket_id', title: __('Ticket_id')},
-                        {field: 'subject', title: __('Subject')},
+                        {field: 'subject', title: __('Subject'),operate:false},
                         {field: 'email', title: __('Email')},
                         //{field: 'assign_id', title: __('Assgin_id'),operate: false,visible:false},
                         {field: 'admin.nickname', title: __('Assign_id')},
                         {field: 'status', title: __('Status'), custom: { 1: 'danger', 2: 'success', 3: 'blue', 4: 'orange', 5: 'gray' }, searchList: { 1: 'New', 2: 'Open', 3: 'Pending', 4: 'Solved', 5: 'Close' }, formatter: Table.api.formatter.status },
-                        {field: 'tag_format', title: __('Tags')},
+                        {
+                            field: 'tags', title: __('Tags'), searchList: function (column) {
+                                return Template('tagstpl', {});
+                            },visible: false
+                        },
+                        {field: 'tag_format', title: __('Tags'),operate:false},
                         {field: 'priority', title: __('priority'), custom: { 0: 'success', 1: 'gray', 2: 'yellow', 3: 'blue', 4: 'danger' }, searchList: { 0: '无', 1: 'Low', 2: 'Normal', 3: 'High', 4: 'Urgent' }, formatter: Table.api.formatter.status },
                         {field: 'channel', title: __('Channel')},
                         {field: 'type', title: __('type'), custom: { 1: 'yellow', 2: 'blue' }, searchList: { 1: 'Zeelool', 2: 'Voogueme' }, formatter: Table.api.formatter.status },
@@ -257,7 +261,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui'], f
             });
             $(document).on('mouseenter','.card',function(){
                 var num = $(this).data('num');
-                console.log(num);
+               // console.log(num);
                 $('.show-posts').find('.post-row').eq(num).show().siblings().hide();
             })
             $(document).on('click','.change-ticket',function(){
@@ -274,7 +278,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui'], f
         api: {
             bindevent: function () {
                 Form.api.bindevent($("form[role=form]"));
-            }
+            },
         }
     };
     return Controller;

@@ -42,6 +42,8 @@ class Zendesk extends Backend
     {
         //设置过滤方法
         $this->request->filter(['strip_tags']);
+        $tags = ZendeskTags::column('name','id');
+        $this->view->assign('tags',$tags);
         if ($this->request->isAjax()) {
             //如果发送的来源是Selectpage，则转发到Selectpage
             if ($this->request->request('keyField')) {
@@ -49,6 +51,7 @@ class Zendesk extends Backend
             }
             $filter = json_decode($this->request->get('filter'), true);
             $map = [];
+            $andWhere = '';
             if ($filter['me_task'] == 1) { //我的所有任务
                 unset($filter['me_task']);
                 $map['zendesk.assign_id'] = session('admin.id');
@@ -57,6 +60,10 @@ class Zendesk extends Backend
                 $map['zendesk.assign_id'] = session('admin.id');
                 $map['zendesk.status'] = ['in', [1, 2]];
             }
+            if($filter['tags']) {
+                $andWhere = "FIND_IN_SET({$filter['tags']},tags)";
+                unset($filter['tags']);
+            }
             $this->request->get(['filter' => json_encode($filter)]);
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             //默认使用
@@ -64,12 +71,16 @@ class Zendesk extends Backend
                 ->with(['admin'])
                 ->where($where)
                 ->where($map)
+                ->where($andWhere)
+                ->where('channel','in',['email','web','chat'])
                 ->count();
 
             $list = $this->model
                 ->with(['admin'])
                 ->where($where)
                 ->where($map)
+                ->where($andWhere)
+                ->where('channel','in',['email','web','chat'])
                 ->order('status asc,update_time desc,id desc')
                 ->limit($offset, $limit)
                 ->select();
@@ -175,12 +186,15 @@ class Zendesk extends Backend
                     }
                     //开始写入数据库
                     $agent_id = ZendeskAgents::where('admin_id', session('admin.id'))->value('agent_id');
+                    //对tag进行排序
+                    $zendeskTags = $params['tags'];
+                    sort($zendeskTags);
                     //更新主表的状态和priority，tags,due_id，assignee_id等
                     $result = $this->model->where('id', $ids)->update([
                         'subject' => $params['subject'],
                         'priority' => $params['priority'],
                         'status' => $params['status'],
-                        'tags' => join(',', $params['tags']),
+                        'tags' => join(',', $zendeskTags),
                         'assignee_id' => $agent_id,
                         'due_id' => session('admin.id'),
                         'email_cc' => $params['email_cc']

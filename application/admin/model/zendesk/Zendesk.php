@@ -38,7 +38,7 @@ class Zendesk extends Model
                 $zendesk->assign_id = $assign_id;
                 $zendesk->due_id = $due_id;
                 $zendesk->assign_time = date('Y-m-d H:i:s',time());
-            }else{
+            }elseif($zendesk->channel != 'voice'){  //电话的不自动分配
                 self::assignTicket($zendesk);
             }
 
@@ -78,6 +78,7 @@ class Zendesk extends Model
     {
         $tagIds = $data['tags'];
         $tags = ZendeskTags::where('id', 'in', $tagIds)->column('name');
+        sort($tags);
         return join(',', $tags);
     }
 
@@ -100,7 +101,7 @@ class Zendesk extends Model
     public function assignTicket($ticket)
     {
         //判断该邮件是否属于之前的老用户
-        $preTicket = Zendesk::where(['user_id' => $ticket->user_id, 'assign_id' => ['>', 0], 'type' => $ticket->getType()])
+        $preTicket = Zendesk::where(['user_id' => $ticket->user_id, 'assign_id' => ['>', 0], 'type' => $ticket->getType(),'channel' => ['neq','voice']])
             ->order('id', 'desc')
             ->limit(1)
             ->find();
@@ -116,6 +117,7 @@ class Zendesk extends Model
                 ->where(['admin_id' => $preTicket->assign_id, 'type' => $ticket->getType()])
                 ->find();
         }
+
         if ($task) {
             //判断该用户是否已经分配满了，满的话则不分配
             if ($task->target_count > $task->complete_count) {
@@ -147,7 +149,7 @@ class Zendesk extends Model
             //创建所有的tasks
             //获取所有的agents
             $agents = ZendeskAgents::withCount(['tickets' => function ($query) {
-                $query->where('status', 'in', '1,2');
+                $query->where('status', 'in', '1,2')->where('channel','in',['email','web','chat']);
             }])->select();
             foreach ($agents as $agent) {
                 $target_count = $agent->count - $agent->tickets_count > 0 ? $agent->count - $agent->tickets_count : 0;
@@ -163,10 +165,12 @@ class Zendesk extends Model
             }
         }
         //获取所有未分配的邮件
-        $waitTickets = self::where(['assign_id' => 0,'status' => ['in','0,1,2,3']])->select();
+        $waitTickets = self::where(['assign_id' => 0,'status' => ['in','0,1,2,3'],'channel' => ['neq','voice']])->select();
         foreach ($waitTickets as $ticket) {
+            //电话不分配
+            if($ticket->channel == 'voice') continue;
             //判断该邮件是否有老用户
-            $preTicket = Zendesk::where(['user_id' => $ticket->user_id, 'assign_id' => ['>', 0], 'type' => $ticket->getType()])
+            $preTicket = Zendesk::where(['user_id' => $ticket->user_id, 'assign_id' => ['>', 0], 'type' => $ticket->getType(),'channel' => ['in',['email','web','chat']]])
                 ->order('id', 'desc')
                 ->limit(1)
                 ->find();
@@ -195,6 +199,7 @@ class Zendesk extends Model
                     $task->complete_count = $task->complete_count + 1;
                     $task->save();
                 }
+                usleep(1000);
             }
         }
     }

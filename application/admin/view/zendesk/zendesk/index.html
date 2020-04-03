@@ -28,3 +28,15 @@
         </div>
     </div>
 </div>
+<script id="tagstpl" type="text/html">
+    <!--form表单必须添加form-commsearch这个类-->
+    <form action="" class="form-commonsearch">
+            <!--给select一个固定的高度-->
+            <select id="c-flag" class="form-control selectpicker" name="tags" data-live-search="true">
+                <option value="">选择</option>
+                {foreach name="tags" item="vo" key="i"}
+                <option value="{$i}">{$vo}</option>
+                {/foreach}
+            </select>
+    </form>
+</script>

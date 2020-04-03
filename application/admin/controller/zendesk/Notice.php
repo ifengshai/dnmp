@@ -75,7 +75,9 @@ class Notice extends Controller
         if ($ticket->priority) {
             $priority = array_search(strtolower($ticket->priority), config('zendesk.priority'));
         }
-        $tags = join(',', \app\admin\model\zendesk\ZendeskTags::where('name', 'in', $ticket->tags)->column('id'));
+        $tags = \app\admin\model\zendesk\ZendeskTags::where('name', 'in', $ticket->tags)->column('id');
+        sort($tags);
+        $tags = join(',',$tags);
         //开始插入相关数据
         //开启事务
         Db::startTrans();
@@ -114,7 +116,24 @@ class Notice extends Controller
                         $attachments[] = $attachment->content_url;
                     }
                 }
+                //如果是chat或者voice并且有了分配人，那么创建的一个public设置为1，is_admin设置为1，due_id设置为admin_id,目的是为了记录chat和voice的工作量
                 $admin_id = $due_id = ZendeskAgents::where('agent_id',$comment->author_id)->value('admin_id');
+                //存在分配人，是chat或者voice，并且不是管理员主动创建的
+                if($ticket->assignee_id && in_array($zendesk->channel,['chat','voice']) && $ticket->assignee_id != $ticket->requester_id) {
+                    ZendeskComments::create([
+                        'ticket_id' => $id,
+                        'comment_id' => 0,
+                        'zid' => $zid,
+                        'author_id' => $ticket->assignee_id,
+                        'body' => $zendesk->channel.'记录工作量',
+                        'html_body' => $zendesk->channel.'记录工作量',
+                        'is_public' => 1,
+                        'is_admin' => 1,
+                        'attachments' => '',
+                        'is_created' => 1,
+                        'due_id' => ZendeskAgents::where('agent_id',$ticket->assignee_id)->value('admin_id')
+                    ]);
+                }
                 ZendeskComments::create([
                     'ticket_id' => $id,
                     'comment_id' => $comment->id,
@@ -125,7 +144,8 @@ class Notice extends Controller
                     'is_public' => $comment->public ? 1 : 2,
                     'is_admin' => $admin_id ? 1 : 0,
                     'attachments' => json($attachments),
-                    'is_created' => 1
+                    'is_created' => 1,
+                    'due_id' => $due_id ? $due_id : 0
                 ]);
             }
             Db::commit();
@@ -150,8 +170,10 @@ class Notice extends Controller
         $ticket = $this->getTicket($id);
         //开始插入相关数据
         $tags = $ticket->tags;
-        $tags = join(',', \app\admin\model\zendesk\ZendeskTags::where('name', 'in', $tags)->column('id'));
-        //开启事务
+        $tags = \app\admin\model\zendesk\ZendeskTags::where('name', 'in', $tags)->column('id');
+        sort($tags);
+        $tags = join(',',$tags);
+            //开启事务
         Db::startTrans();
         try {
             $zendesk = Zendesk::where('ticket_id', $id)->find();
@@ -160,6 +182,12 @@ class Notice extends Controller
                 'tags' => $tags,
                 'status' => array_search(strtolower($ticket->status), config('zendesk.status'))
             ];
+            //如果分配人修改，则同步修改分配人
+            if($zendesk->assignee_id != $ticket->assignee_id && $ticket->assignee_id){
+
+                $updateData['assignee_id'] = $ticket->assignee_id;
+                $updateData['assign_id'] = ZendeskAgents::where('agent_id',$ticket->assignee_id)->value('admin_id');
+            }
             //更新rating,如果存在的话
             if(!$zendesk->rating && $ticket->satisfaction_rating) {
                 $score = $ticket->satisfaction_rating->score;
@@ -222,7 +250,8 @@ class Notice extends Controller
                     'is_public' => $comment->public ? 1 : 2,
                     'is_admin' => $admin_id ? 1 : 0,
                     'attachments' => json($attachments),
-                    'is_created' => 1
+                    'is_created' => 2,
+                    'due_id' => $due_id ? $due_id : 0
                 ]);
             }
             Db::commit();
@@ -460,6 +489,7 @@ class Notice extends Controller
 //            try {
                 $assign_id = \app\admin\model\zendesk\ZendeskAgents::where('agent_id',$ticket->assignee_id)->value('admin_id');
                 $tags = ZendeskTags::where('name','in',$ticket->tags)->column('id');
+                sort($tags);
                 if(!Zendesk::where('ticket_id',$ticket->id)->find()) {
                     //写入主表
                     $zendesk = Zendesk::create([
