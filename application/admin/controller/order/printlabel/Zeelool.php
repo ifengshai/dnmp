@@ -335,7 +335,7 @@ class Zeelool extends Backend
                             $v['qty_ordered'] = $infoTaskRes['change_number'];
                         }
 
-                        $trueSku = $ItemPlatformSku->getTrueSku($v['sku'], 1);
+                        $trueSku = $ItemPlatformSku->getTrueSku(trim($v['sku']), 1);
                         //总库存
                         $item_map['sku'] = $trueSku;
                         $item_map['is_del'] = 1;
@@ -378,7 +378,7 @@ class Zeelool extends Backend
                             $v['qty_ordered'] = $infoTaskRes['change_number'];
                         }
 
-                        $trueSku = $ItemPlatformSku->getTrueSku($v['sku'], 1);
+                        $trueSku = $ItemPlatformSku->getTrueSku(trim($v['sku']), 1);
 
                         //总库存
                         $item_map['sku'] = $trueSku;
