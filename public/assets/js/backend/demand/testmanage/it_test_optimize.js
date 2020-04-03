@@ -25,6 +25,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     [
                         {checkbox: true},
                         {field: 'id', title: __('Id')},
+                        {field: 'optimize_type', 
+                         title: __('Optimize_type'),
+                         searchList :{0:'未操作',1:'bug',2:'需求'},
+                         custom:{ 1: 'blue', 2: 'red', 3: 'yellow'},
+                         formatter: Table.api.formatter.status
+                        },
                         {field: 'optimize_site_type', title: __('Optimize_site_type')},
                         {field: 'optimize_title', title: __('Optimize_title')},
                         {field: 'optimize_description', title: __('描述'),
@@ -32,11 +38,16 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         formatter: Controller.api.formatter.getcontent,     
                         },
                         {field: 'optimize_status', title: __('Optimize_status'),
-                        searchList: { 1 :'待处理', 2 :'已审核', 3 :'已处理', 4 :'已完成', 5 :'取消' },
-                        custom: { 1: 'yellow', 2: 'blue', 3: 'success', 4: 'red', 5: 'danger' },
+                        searchList: { 1 :'待处理', 2 :'已处理', 3 :'不处理'},
+                        custom: { 1: 'yellow', 2: 'blue', 3: 'red'},
                         formatter: Table.api.formatter.status
                         },
-                        // {field: 'operate_status', title: __('Operate_status')},
+                        {field: 'operate_status', 
+                         title: __('Operate_status'),
+                         searchList: { 0 :'未安排', 1 :'已安排'},
+                         custom: { 1: 'yellow', 2: 'blue'},
+                         formatter: Table.api.formatter.status                        
+                        },
                         {field: 'create_person', title: __('Create_person')},
                         {field: 'update_time', title: __('Update_time'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime},
                         {field: 'create_time', title: __('Create_time'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime},
@@ -64,13 +75,16 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                 title: __('安排'),
                                 classname: 'btn btn-xs btn-success btn-dialog',
                                 icon: 'fa fa-pencil',
-                                url: Config.moduleurl + '/itemmanage/item/edit',
-                                extend: 'data-area = \'["100%","100%"]\'',
+                                url: 'demand/testmanage/it_test_optimize/plan',
+                                extend: 'data-area = \'["60%","60%"]\'',
                                 callback: function (data) {
                                     Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
                                 },
                                 visible: function (row) {
+                                    if(1 == row.optimize_status){
                                         return true;
+                                    }
+                                        return false;
                                 }
                             },
                             {
@@ -79,8 +93,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                 title: __('暂不处理'),
                                 classname: 'btn btn-xs btn-success btn-ajax',
                                 icon: 'fa fa-pencil',
-                                url: Config.moduleurl + '/itemmanage/item/audit',
-                                confirm: '确认提交审核吗',
+                                url: 'demand/testmanage/it_test_optimize/not_handle',
+                                confirm: '确认暂不处理吗',
                                 success: function (data, ret) {
                                     Layer.alert(ret.msg);
                                     $(".btn-refresh").trigger("click");
@@ -92,7 +106,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     return false;
                                 },
                                 visible: function (row) {
-                                    return true;
+                                    if(1 == row.optimize_status){
+                                        return true;
+                                    }
+                                        return false;
                                 },
                             },
                          ]   
@@ -108,6 +125,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             Controller.api.bindevent();
         },
         edit: function () {
+            Controller.api.bindevent();
+        },
+        plan:function(){
             Controller.api.bindevent();
         },
         api: {
