@@ -155,6 +155,10 @@ class ComposerStaticInitb98307c2f45aa3f721d213bf9f8b996a
             'Monolog\\' => 8,
             'Matrix\\' => 7,
         ),
+        'L' => 
+        array (
+            'League\\HTMLToMarkdown\\' => 22,
+        ),
         'G' => 
         array (
             'GuzzleHttp\\Psr7\\' => 16,
@@ -347,6 +351,10 @@ class ComposerStaticInitb98307c2f45aa3f721d213bf9f8b996a
         'Matrix\\' => 
         array (
             0 => __DIR__ . '/..' . '/markbaker/matrix/classes/src',
+        ),
+        'League\\HTMLToMarkdown\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/league/html-to-markdown/src',
         ),
         'GuzzleHttp\\Psr7\\' => 
         array (
