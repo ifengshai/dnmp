@@ -2,19 +2,18 @@
 
 namespace app\admin\model\zendesk;
 
-use app\admin\model\zendesk\ZendeskAgents;
 use think\Model;
 
 
-class ZendeskComments extends Model
+class ZendeskTasks extends Model
 {
 
-    
 
-    
+
+
 
     // 表名
-    protected $name = 'zendesk_comments';
+    protected $name = 'zendesk_tasks';
 
     // 定义时间戳字段名
     protected $autoWriteTimestamp = 'datetime';
@@ -24,13 +23,9 @@ class ZendeskComments extends Model
     protected $append = [
 
     ];
-    public function agent()
-    {
-        return $this->hasOne(ZendeskAgents::class,'admin_id','due_id');
-    }
-    
 
-    
+
+
 
 
 

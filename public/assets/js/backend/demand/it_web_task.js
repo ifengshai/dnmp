@@ -35,15 +35,21 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         { field: 'desc', title: __('Desc'), cellStyle: formatTableUnit, formatter: Controller.api.formatter.getClear, operate: false },
                         { field: 'closing_date', title: __('Closing_date') , operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime },
                         {
+                            field: 'is_test_adopt', title: __('Is_test_adopt'), custom: { 1: 'success', 0: 'danger' },
+                            searchList: { 1: '是', 0: '否' },
+                            formatter: Table.api.formatter.status
+                        },
+                        {
                             field: 'is_complete', title: __('Is_complete'),
                             custom: { 1: 'success', 0: 'danger' },
                             searchList: { 1: '是', 0: '否' },
                             formatter: Table.api.formatter.status
                         },
                         { field: 'complete_date', title: __('complete_date'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime },
+                       
                         {
-                            field: 'is_test_adopt', title: __('Is_test_adopt'), custom: { 1: 'success', 0: 'danger' },
-                            searchList: { 1: '是', 0: '否' },
+                            field: 'test_regression_adopt', title: __('回归测试状态'), custom: { 1: 'success', 0: 'danger' },
+                            searchList: { 1: '已通过', 0: '待处理' },
                             formatter: Table.api.formatter.status
                         },
                         {
@@ -57,6 +63,26 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
 
                         {
                             field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [
+                                {
+                                    name: 'problem',
+                                    text: '问题记录',
+                                    title: __('问题记录'),
+                                    extend: 'data-area = \'["70%","70%"]\'',
+                                    classname: 'btn btn-xs btn-warning btn-dialog',
+                                    icon: 'fa fa-list',
+                                    url: 'demand/it_web_task/problem_detail',
+                                    callback: function (data) {
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                    },
+                                    visible: function (row) {
+                                        //返回true时按钮显示,返回false隐藏
+                                        if (row.is_problem_detail == 1) {
+                                            return true;
+                                        } else {
+                                            return false;
+                                        }
+                                    }
+                                },
                                 {
                                     name: 'ajax',
                                     text: '完成',
@@ -85,7 +111,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     name: 'detail',
                                     text: '详情',
                                     title: __('查看详情'),
-                                    extend: 'data-area = \'["100%","100%"]\'',
+                                    extend: 'data-area = \'["80%","70%"]\'',
                                     classname: 'btn btn-xs btn-primary btn-dialog',
                                     icon: 'fa fa-list',
                                     url: 'demand/it_web_task/detail',
@@ -104,7 +130,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     classname: 'btn btn-xs btn-success btn-dialog',
                                     icon: 'fa fa-pencil',
                                     url: 'demand/it_web_task/edit',
-                                    extend: 'data-area = \'["70%","70%"]\'',
+                                    extend: 'data-area = \'["80%","70%"]\'',
                                     callback: function (data) {
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
                                     },
@@ -115,7 +141,49 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                             return false;
                                         }
                                     }
-                                }
+                                },
+                                {
+                                    name: 'test',
+                                    text: '回归测试',
+                                    title: __('回归测试'),
+                                    classname: 'btn btn-xs btn-warning btn-dialog',
+                                    url: 'demand/it_web_task/regression_test_info',
+                                    extend: 'data-area = \'["70%","70%"]\'',
+                                    callback: function (data) {
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                    },
+                                    visible: function (row) {
+                                        if (row.is_complete == 1 && Config.is_regression_test_info == 1) {
+                                            return true;
+                                        } else {
+                                            return false;
+                                        }
+                                    }
+                                },
+                                {
+                                    name: 'ajax',
+                                    text: '通过测试',
+                                    title: __('通过测试'),
+                                    classname: 'btn btn-xs btn-success btn-magic btn-ajax',
+                                    icon: 'fa fa-magic',
+                                    url: 'demand/it_web_task/set_task_test_status',
+                                    success: function (data, ret) {
+                                        table.bootstrapTable('refresh', {});
+                                        //如果需要阻止成功提示，则必须使用return false;
+                                        //return false;
+                                    },
+                                    error: function (data, ret) {
+                                        Layer.alert(ret.msg);
+                                        return false;
+                                    },
+                                    visible: function (row) {
+                                        if (row.test_regression_adopt == 0 && Config.is_set_task_test_status == 1) {
+                                            return true;
+                                        } else {
+                                            return false;
+                                        }
+                                    }
+                                },
                             ], formatter: Table.api.formatter.operate
                         }
                     ]
@@ -137,6 +205,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 return false;
             });
 
+            //关键结果弹出框
             $(document).on('click', '.btn-list', function () {
                 var options = {
                     shadeClose: false,
@@ -192,11 +261,18 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         { field: 'id', title: __('Id') },
                         { field: 'person_in_charge_text', title: __('负责人') },
                         {
+                            field: 'group_type', title: __('任务类型'),
+                            custom: { 1: 'success', 2: 'success', 3: 'success' },
+                            searchList: { 1: '短期任务', 2: '中期任务', 3: '长期任务' },
+                            formatter: Table.api.formatter.status
+                        },
+                        {
                             field: 'group_type', title: __('分组类型'),
                             custom: { 1: 'success', 2: 'success', 3: 'success', 4: 'success' },
                             searchList: { 1: '前端', 2: '后端', 3: 'app', 4: '测试' },
                             formatter: Table.api.formatter.status
                         },
+                        
                         { field: 'title', title: __('Title') },
                         { field: 'desc', title: __('Desc'), cellStyle: formatTableUnit, formatter: Controller.api.formatter.getClear, operate: false },
                         { field: 'plan_date', title: __('Closing_date') },
@@ -258,7 +334,33 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                         return false;
                                     },
                                     visible: function (row) {
-                                        return true;
+                                        var test_person = Config.test_user;
+                                        if ($.inArray(Config.user_id, test_person) !== -1 && row.is_test_adopt == 0 && row.is_complete == 1) {
+                                            return true;
+                                        } else {
+                                            return false;
+                                        }
+                                    }
+                                },
+
+                                {
+                                    name: 'info',
+                                    text: '记录问题',
+                                    title: __('记录问题'),
+                                    classname: 'btn btn-xs btn-success  btn-dialog',
+                                    icon: 'fa fa-pencil',
+                                    url: 'demand/it_web_task/test_info',
+                                    success: function (data, ret) {
+                                        table.bootstrapTable('refresh', {});
+                                        //如果需要阻止成功提示，则必须使用return false;
+                                        //return false;
+                                    },
+                                    error: function (data, ret) {
+                                        console.log(data, ret);
+                                        Layer.alert(ret.msg);
+                                        return false;
+                                    },
+                                    visible: function (row) {
                                         var test_person = Config.test_user;
                                         if ($.inArray(Config.user_id, test_person) !== -1 && row.is_test_adopt == 0 && row.is_complete == 1) {
                                             return true;
@@ -277,6 +379,15 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             Table.api.bindevent(table);
 
 
+        },
+        test_info:function(){
+            Controller.api.bindevent();
+        },
+        problem_detail: function () {
+            Controller.api.bindevent();
+        },
+        regression_test_info: function () {
+            Controller.api.bindevent();
         },
         api: {
             formatter: {
@@ -327,6 +438,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     }
                     var shtml = '';
                     for (var i in person) {
+                        if (!i) {
+                            continue;
+                        }
                         shtml += "<option value='" + i + "'>" + person[i] + "</option>";
                     }
                     $(this).parent().parent().find('.person_in_charge').html(shtml);

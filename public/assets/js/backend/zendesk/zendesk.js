@@ -1,4 +1,4 @@
-define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefined, Backend, Table, Form) {
+define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui'], function ($, undefined, Backend, Table, Form) {
 
     var Controller = {
         index: function () {
@@ -6,7 +6,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             Table.api.init({
                 extend: {
                     index_url: 'zendesk/zendesk/index' + location.search,
-                    add_url: 'zendesk/zendesk/add',
                     edit_url: 'zendesk/zendesk/edit',
                     table: 'zendesk',
                 }
@@ -26,6 +25,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {field: 'ticket_id', title: __('Ticket_id')},
                         {field: 'subject', title: __('Subject')},
                         {field: 'email', title: __('Email')},
+                        //{field: 'assign_id', title: __('Assgin_id'),operate: false,visible:false},
                         {field: 'admin.nickname', title: __('Assign_id')},
                         {field: 'status', title: __('Status'), custom: { 1: 'danger', 2: 'success', 3: 'blue', 4: 'orange', 5: 'gray' }, searchList: { 1: 'New', 2: 'Open', 3: 'Pending', 4: 'Solved', 5: 'Close' }, formatter: Table.api.formatter.status },
                         {field: 'tag_format', title: __('Tags')},
@@ -37,8 +37,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [
                                 {
                                     name: 'edit',
-                                    text: __('Answer'),
-                                    title:function (row) {
+                                    text: function(row){
+                                        if(row.status == 5){
+                                            return '查看';
+                                        }
+                                        return __('Answer');
+                                    },
+                                    title: function (row) {
                                         return __('Answer') + '【' + row.ticket_id + '】' + row.subject;
                                     },
                                     classname: 'btn btn-xs btn-success btn-dialog',
@@ -49,20 +54,42 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
                                     },
                                     visible: function(row){
-                                        if(row.status == 4 || row.status == 5){
+                                        //console.log(row.assign_id)
+                                        if(row.assign_id != Config.admin_id){
                                             return false;
-                                        }else{
-                                            return true;
                                         }
-
+                                        return true;
                                     }
                                 }
 
                             ], formatter: Table.api.formatter.operate
-                        }                    ]
+                        }]
                 ]
             });
-
+            $('.panel-heading a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+                var field = $(this).data("field");
+                var value = $(this).data("value");
+                // console.log(field);
+                // console.log(value);
+                var options = table.bootstrapTable('getOptions');
+                options.pageNumber = 1;
+                var queryParams = options.queryParams;
+                options.queryParams = function (params) {
+                    var params = queryParams(params);
+                    var filter = params.filter ? JSON.parse(params.filter) : {};
+                    var op     = params.op ? JSON.parse(params.op) : {};
+                    if(field == 'me_task'){
+                        filter[field] = value;
+                    }else{
+                        delete filter.me_task;
+                    }
+                    params.filter = JSON.stringify(filter);
+                    params.op     = JSON.stringify(op);
+                    return params;
+                };
+                table.bootstrapTable('refresh', {});
+                return false;
+            });
             // 为表格绑定事件
             Table.api.bindevent(table);
         },
@@ -73,13 +100,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             Controller.api.bindevent();
             //删除商品数据
             $(document).on('click', '.merge', function () {
-               var nid = $(this).data('nid');
-               var pid = $(this).data('pid');
-               var subject = $(this).data('subject');
-               var ticket_id = $('.merge-input').val();
-               if(ticket_id){
-                   nid = ticket_id;
-               }
+                var nid = $(this).data('nid');
+                var pid = $(this).data('pid');
+                var subject = $(this).data('subject');
+                var ticket_id = $('.merge-input').val();
+                if (ticket_id) {
+                    nid = ticket_id;
+                }
                 if (nid) {
                     $.ajax({
                         type: "POST",
@@ -92,34 +119,156 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             pid: pid
                         },
                         success: function (json) {
-                            $('.nid').val(json.ticket_id);
-                            $('.merge-ticket-id').html(json.ticket_id);
-                            $('.merge-subject').html(json.subject);
-                            $('.merge-content-in').html('Request #'+ pid +' "'+ subject +'" was closed and merged into this request. Last comment in request #'+pid+'.' +
-                                ''+json.lastComment);
-                            $('.merge-content-to').html('This request was closed and merged into request #'+json.ticket_id+' "'+json.subject+'".');
+                            var data = json.data;
+                            if(json.code == 0){
+                                Layer.msg(json.msg);
+                                //$('#modal-default2').modal('hide');
+                            }else{
+                                $('#modal-default').modal('hide')
+                                $('#modal-default2').modal('show');
+                                $('.nid').val(data.ticket_id);
+                                $('.merge-ticket-id').html(data.ticket_id);
+                                $('.merge-subject').html(data.subject);
+                                $('.merge-content-in').html('Request #'+ pid +' "'+ subject +'" was closed and merged into this request. Last comment in request #'+pid+'.' +
+                                    ''+data.lastComment);
+                                $('.merge-content-to').html('This request was closed and merged into request #'+data.ticket_id+' "'+data.subject+'".');
+                            }
+
                         }
                     });
                 }
+                return false;
             });
-            $(document).on('click','.btn-merge-submit',function(){
-               var data = $(this).parents('form').serialize();
-               $.ajax({
-                   type: "POST",
-                   url: "zendesk/zendesk/setMerge",
-                   dataType: "json",
-                   cache: false,
-                   async: false,
-                   data: data,
-                   success: function (json) {
-                       return false;
-                   },
-                   error: function(json){
+            $(document).on('click', '.btn-merge-submit', function () {
+                var data = $(this).parents('form').serialize();
+                $.ajax({
+                    type: "POST",
+                    url: "zendesk/zendesk/setMerge",
+                    dataType: "json",
+                    cache: false,
+                    async: false,
+                    data: data,
+                    success: function (json) {
+                        return false;
+                    },
+                    error: function (json) {
                         return false;
 
-                   }
-               })
-               return false;
+                    }
+                })
+                return false;
+            });
+
+            //抄送人标签输入
+            $('#ccs').tagsInput({
+                width: 'auto',
+                defaultText: '输入后回车确认',
+                minInputWidth: 110,
+                height: 'auto',
+                placeholderColor: '#999',
+                autocomplete_url:'zendesk/zendesk/getEmail',
+                onChange:function(input,mail){
+                    var strRegex = /^(\w-*\.*)+@(\w-?)+(\.\w{2,})+$/;
+                    if(mail != undefined){
+                        if(!strRegex.test(mail)){
+                            Layer.msg('请输入正确的邮箱地址');
+                            input.removeTag(mail);
+                        }
+                    }
+                }
+            });
+
+            $(document).on('change','.macro-apply',function(){
+                var id = $(this).val();
+                var ticket_id = $('.ticket_id').val();
+                if(id){
+                    $.ajax({
+                        type: "POST",
+                        url: "zendesk/zendesk_mail_template/getTemplate",
+                        dataType: "json",
+                        cache: false,
+                        async: false,
+                        data: {
+                            id:id,
+                            ticket_id: ticket_id
+                        },
+                        success: function (json) {
+                            //修改回复内容，状态，priority，tags
+                            if(json.template_content){
+                                $('.ticket-content').summernote("code",json.template_content);
+                            }
+                            if(json.mail_status) {
+                                $('.ticket-status').val(json.mail_status);
+                            }
+                            if(json.mail_level) {
+                                $('.ticket-priority').val(json.mail_level);
+                            }
+                            if(json.mail_tag) {
+                                $('.ticket-tags').val(json.mail_tag);
+                            }
+                            if(json.mail_subject) {
+                                $('.ticket-subject').val(json.mail_subject);
+
+                            }
+                            $('.selectpicker ').selectpicker('refresh');
+                            Layer.msg('应用成功');
+                            return false;
+                        },
+                        error: function(json){
+                            return false;
+
+                        }
+                    })
+                }
+            });
+            $(document).on('click','.post-search',function(){
+               var text = $('.post-search-input').val();
+               var type = $('.search-post-type').val();
+                $.ajax({
+                    type: "POST",
+                    url: "zendesk/zendesk/searchPosts",
+                    dataType: "json",
+                    cache: false,
+                    async: false,
+                    data: {
+                        text: text,
+                        type: type
+                    },
+                    success: function (json) {
+                        $('.search-posts').html(json.html);
+                        $('.show-posts').html(json.post_html);
+                        return false;
+                    },
+                    error: function(json){
+                        return false;
+
+                    }
+                });
+            });
+            $(document).on('click','.card-link',function(){
+               var link = $(this).data('link');
+               var title = $(this).data('title');
+                $('.ticket-content').summernote("createLink",{
+                    text: title,
+                    url: link,
+                    isNowWindow: true
+                });
+                $(this).next('button').show();
+            });
+            $(document).on('mouseenter','.card',function(){
+                var num = $(this).data('num');
+                console.log(num);
+                $('.show-posts').find('.post-row').eq(num).show().siblings().hide();
+            })
+            $(document).on('click','.change-ticket',function(){
+                var title = $(this).data('title');
+                var status = $(this).data('status');
+                parent.$(".layui-layer-title")[0].innerText= title;
+                if(status == 5){
+                    parent.$(".layui-layer-footer").hide();
+                }else{
+                    parent.$(".layui-layer-footer").show();
+                }
             });
         },
         api: {

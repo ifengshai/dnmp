@@ -26,6 +26,9 @@ class ZendeskAccount extends Model
     protected $append = [
 
     ];
+
+
+
     /**
      * 根据站点获取账户列表
      *

@@ -105,6 +105,7 @@
             </div>
             <table id="caigou-table">
                 <tr>
+                    <th>任务类型</td>
                     <th>分组</td>
                     <th>负责人</td>
                     <th>任务标题</td>
@@ -115,6 +116,14 @@
                
                 <tr>
                     <td>
+                        <select name="type[]" class="form-control"  data-rule="required" style="width:120px;">
+                            <option value="">请选择</option>
+                            <option value="1">短期任务</option>
+                            <option value="2">中期任务</option>
+                            <option value="3">长期任务</option>
+                        </select>
+                    </td>
+                    <td>
                         <select name="group_type[]" class="form-control group_type" style="width:120px;">
                             <option value="">请选择</option>
                             <option value="1">前端</option>
@@ -123,6 +132,7 @@
                             <option value="4">测试</option>
                         </select>
                     </td>
+                    
                     <td>
                         <select name="person_in_charge[]" class="form-control person_in_charge" style="width:120px;">
                            
@@ -153,6 +163,14 @@
 <div id="table-content" style="display: none;">
     <table>
         <tr>
+            <td>
+                <select name="type[]" class="form-control"  data-rule="required" style="width:120px;">
+                    <option value="">请选择</option>
+                    <option value="1">短期任务</option>
+                    <option value="2">中期任务</option>
+                    <option value="3">长期任务</option>
+                </select>
+            </td>
             <td>
                 <select name="group_type[]" class="form-control group_type" style="width:120px;">
                     <option value="">请选择</option>

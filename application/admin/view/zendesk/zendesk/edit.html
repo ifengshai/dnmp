@@ -29,20 +29,28 @@
                     <div class="box-body">
                         <strong>CCs</strong>
                         <p class="text-muted">
-                            {:Form::select('row[email_cc][]', [], null, ['class'=>'form-control selectpicker', null,'multiple' => true,'data-live-search' => true,'id'=>'Entry_tags_select'])}
+                            <input   class="form-control" id='ccs' name="row[email_cc]" type="text" value="{$rows.email_cc}">
                         </p>
 
                         <hr>
                         <strong>tags</strong>
                         <p class="text-muted">
-                            {:Form::select('row[tags][]', $tags, explode(',',$ticket->tags), ['class'=>'form-control selectpicker', null,'multiple' => true,'data-live-search' => true,'id'=>'Entry_tags_select'])}
+                            {:Form::select('row[tags][]', $tags, explode(',',$ticket->tags), ['class'=>'form-control selectpicker ticket-tags', null,'multiple' => true,'data-live-search' => true,'id'=>'Entry_tags_select'])}
                         </p>
 
                         <hr>
 
                         <strong>priority</strong>
                         <p class="text-muted">
-                            {:Form::select('row[priority]', config('zendesk.priority'), $ticket->priority, ['class'=>'form-control selectpicker', null,'data-live-search' => true,'id'=>'Entry_priority_select'])}
+                            <select class="form-control ticket-priority selectpicker" data-live-search="1" data-rule="required" name="row[priority]">
+                                {if condition="$ticket->priority == 0"}
+                                <option value="0" {$ticket->priority == 0 ? 'selected' : ''}>- </option>
+                                {/if}
+                                <option value="1" {$ticket->priority == 1 ? 'selected' : ''}>low</option>
+                                <option value="2" {$ticket->priority == 2 ? 'selected' : ''}>normal</option>
+                                <option value="3" {$ticket->priority == 3 ? 'selected' : ''}>high</option>
+                                <option value="4" {$ticket->priority == 4 ? 'selected' : ''}>urgent</option>
+                            </select>
                         </p>
                     </div>
                     <!-- /.box-body -->
@@ -56,9 +64,9 @@
                         <!-- /.box-header -->
                         <div class="box-body">
                             <div class="user-block pull-left">
-                                <img class="img-circle img-bordered-sm" src="../../dist/img/user7-128x128.jpg" alt="User Image">
+                                <img class="img-circle img-bordered-sm" src="/assets/img/avatar.png" alt="User Image">
                                 <span class="username">
-                                  <span href="#"><input id="c-subject" data-rule="required" value="{$ticket->subject}" class="form-control" name="row[subject]" type="text"></span>
+                                  <span href="#"><input id="c-subject" data-rule="required" value="{$ticket->subject}" class="form-control ticket-subject" name="row[subject]" type="text"></span>
                                 </span>
                                 <span class="description">{$ticket->update_time} · {$ticket->username} {$ticket->email} · {$ticket->channel}</span>
                             </div>
@@ -68,7 +76,7 @@
                                 </button>
                             </div>
                         </div>
-                        {if condition="$ticket->rating"}
+                        {if condition="in_array($ticket->rating,['bad','good'])"}
                         <div class="callout" style="background-color:#fffcf3;">
                             <h4>Rating! <button type="button" class="btn btn-block btn-warning btn-flat">{$ticket->rating}</button></h4>
                             {$ticket->comment}
@@ -83,13 +91,20 @@
                         <div class="form-group">
                             <label class="control-label col-xs-12 col-sm-2">{:__('Status')}</label>
                             <div class="col-xs-12 col-sm-8">
-                                {:Form::select('row[status]', config('zendesk.status'), $ticket->status, ['class'=>'form-control selectpicker', null,'data-live-search' => true,'id'=>'Entry_status_select'])}
+                                <select class="form-control ticket-status selectpicker" data-live-search="1" data-rule="required" name="row[status]">
+                                    {if condition="$ticket->status ==1"}
+                                    <option value="1" {$ticket->status == 1 ? 'selected' : ''}>new</option>
+                                    {/if}
+                                    <option value="2" {$ticket->status == 2 ? 'selected' : ''}>open</option>
+                                    <option value="3" {$ticket->status == 3 ? 'selected' : ''}>pending</option>
+                                    <option value="4" {$ticket->status == 4 ? 'selected' : ''}>solved</option>
+                                </select>
                             </div>
                         </div>
                         <div class="form-group">
                             <label class="control-label col-xs-12 col-sm-2">回复内容：</label>
                             <div class="col-xs-12 col-sm-9">
-                                <textarea id="c-content" class="form-control editor" rows="5" name="row[content]" cols="50"></textarea>
+                                <textarea id="c-content" class="form-control editor ticket-content" rows="5" name="row[content]" cols="50"></textarea>
                             </div>
                         </div>
                         <div class="form-group">
@@ -114,12 +129,19 @@
                                 </a>
                             </div>
                         </div>
+                        <div class="form-group">
+                            <label class="control-label col-xs-12 col-sm-2">选择模板：</label>
+                            <div class="col-xs-12 col-sm-8">
+                                {:Form::select('', $templates, null, ['class'=>'form-control selectpicker macro-apply', null,'data-live-search' => true,'id'=>'Entry_status_select'])}
+                            </div>
+                        </div>
+                        {if condition="$ticket->status != 5 && !$btn"}
                         <div class="form-group layer-footer">
-                            <label class="control-label col-xs-12 col-sm-2"></label>
                             <div class="col-xs-12 col-sm-8">
                                 <button type="submit" class="btn btn-success btn-embossed disabled">发送邮件</button>
                             </div>
                         </div>
+                        {/if}
                         <!-- /.box-body -->
                     </div>
                     <br />
@@ -129,10 +151,14 @@
                             {foreach name="comments" item="vo"}
                             <div class="post">
                                 <div class="user-block">
-                                    <img class="img-circle img-bordered-sm" src="../../dist/img/user1-128x128.jpg" alt="user image">
+                                    {if condition="$vo['is_admin']"}
+                                    <img class="img-circle img-bordered-sm" src="{:session('admin.avatar')}" alt="user image">
+                                    {else/}
+                                    <img class="img-circle img-bordered-sm" src="/assets/img/avatar.png" alt="user image">
+                                    {/if}
                                     <span class="username">
                                         {if condition="$vo['is_admin']"}
-                                      <a href="#">{$vo->agent->name}</a>
+                                      <a href="#">{$vo->agent->agent->account_user}</a>
                                         {else/}
                                         <a href="#">{$ticket->username}</a>
                                         {/if}
@@ -194,7 +220,7 @@
                     <ul class="list-group list-group-unbordered">
                         {foreach name="recentTickets" item="vo"}
                         <li class="list-group-item">
-                            <b>#{$vo->ticket_id}  {$vo->subject}</b> <a class="pull-right">{$vo->status_format}</a>
+                            <b><a class="change-ticket" data-status="{$vo->status}" data-title="回复【{$vo->ticket_id}】{$vo->subject}" href="{:url('zendesk/zendesk/edit',['ids' => $vo->id,'btn' => 1])}">#{$vo->ticket_id}  {$vo->subject}</a> </b><a class="pull-right">{$vo->status_format}</a>
                         </li>
                         {/foreach}
                     </ul>
@@ -222,24 +248,14 @@
                             <th>Amount</th>
                             <th>Status</th>
                         </tr>
+                        {foreach name="orders" item="vo"}
                         <tr>
-                            <td>100184275</td>
-                            <td>1/30/2020</td>
-                            <td>$80.76</td>
-                            <td>Processing</td>
+                            <td>{$vo->increment_id}</td>
+                            <td>{$vo->created_at}</td>
+                            <td>{$vo->order_currency_code}{$vo->grand_total}</td>
+                            <td>{$vo->status}</td>
                         </tr>
-                        <tr>
-                            <td>100184275</td>
-                            <td>1/30/2020</td>
-                            <td>$80.76</td>
-                            <td>Processing</td>
-                        </tr>
-                        <tr>
-                            <td>100184275</td>
-                            <td>1/30/2020</td>
-                            <td>$80.76</td>
-                            <td>Processing</td>
-                        </tr>
+                        {/foreach}
                     </table>
                 </div>
                 <!-- /.box-body -->
@@ -268,7 +284,7 @@
                         <div class="input-group input-group-xs">
                             <input  data-rule="required" class="form-control merge-input" name="row[name]" type="text" value="">
                             <span class="input-group-btn">
-                                <button type="button" class="btn btn-default btn-flat merge" data-subject="{$ticket->subject}" data-pid="{$ticket->ticket_id}"  data-dismiss="modal" aria-label="Close" data-toggle="modal" data-target="#modal-default2">Merge</button>
+                                <button type="button" class="btn btn-default btn-flat merge" data-subject="{$ticket->subject}" data-pid="{$ticket->ticket_id}">Merge</button>
                             </span>
                         </div>
 
@@ -280,7 +296,7 @@
                             <div class="color-palette-set">
                                 <div class=""><span class="label label-primary">#{$vo->ticket_id}</span></div>
                                 <div class=""><span class="label text-green">{$vo->update_time} {$vo->username}</span></div>
-                                <div class="merge" data-subject="{$ticket->subject}" data-pid="{$ticket->ticket_id}" data-nid="{$vo->ticket_id}" data-dismiss="modal" aria-label="Close" data-toggle="modal" data-target="#modal-default2"><a href=""><b>{$vo->subject}</b></a></div>
+                                <div class="merge" data-subject="{$ticket->subject}" data-pid="{$ticket->ticket_id}" data-nid="{$vo->ticket_id}"><a href=""><b>{$vo->subject}</b></a></div>
                             </div>
                         </div>
                         {/foreach}
@@ -358,5 +374,65 @@
         </div>
         <!-- /.modal-dialog -->
     </div>
+<!--    知识库弹出层-->
+    <div class="modal fade in" id="modal-default-knowledge" style="padding-right: 17px;">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span></button>
+                    <h4 class="modal-title">知识库</h4>
+                </div>
+                <div class="modal-body row">
+                    <div class="col-md-5">
+                        <div class="form-group">
+                            <div class="input-group input-group-xs">
+                                <input required  class="form-control post-search-input" name="" type="text" value="">
+                                <span class="input-group-btn">
+                                <button type="button" class="btn btn-default btn-flat post-search">Search</button>
+                            </span>
+                            </div>
+
+                        </div>
+                        <p class="text-green">——————— OR ———————</p>
+                        <style>
+                            .card:hover{
+                                background-color: #f0f0f0;
+                                border:1px solid #3b8ab8;
+                                cursor:pointer;
+                            }
+                            .card{
+                                padding:10px;
+                                border:1px solid #f0f0f0;
+                                border-radius: 5px;
+                                margin-bottom:5px;
+                            }
+                        </style>
+                        <div class="pre-scrollable search-posts">
+
+                        </div>
+                    </div>
+                    <style>
+                        .show-posts{
+                            height: auto;
+                            max-width: 100%;
+                        }
+                        .show-posts img,.ytp-cued-thumbnail-overlay-image{
+                            width:auto;
+                            width:100%;
+                        }
+                    </style>
+                    <div class="col-md-7  show-posts" style="overflow-y:auto;height:400px;">
+
+
+                    </div>
+                </div>
+            </div>
+            <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
+    </div>
+    <input type="hidden" class="ticket_id" value="{$ticket->ticket_id}">
+    <input type="hidden" class="search-post-type" value="{$ticket->type}">
 </section>
 <!-- /.content -->
