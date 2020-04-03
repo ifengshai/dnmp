@@ -152,7 +152,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                     async: false,
                     data: data,
                     success: function (json) {
-                        return false;
+                        if(json.code == 1) {
+                            window.location.reload();
+                            Layer.closeAll();
+                        }else if(json.code == 0) {
+                            Layer.msg(json.msg);
+                            return false;
+                        }
                     },
                     error: function (json) {
                         return false;
