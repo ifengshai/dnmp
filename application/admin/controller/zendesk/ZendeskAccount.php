@@ -88,31 +88,6 @@ class ZendeskAccount extends Backend
         return $array;  
     }
     /**
-     * 获取平台Agents用户
-     *
-     * @Description
-     * @author lsw
-     * @since 2020/03/28 14:58:26 
-     * @return void
-     */
-    public function getPlatformUser()
-    {
-        $res = (new Notice(request(),['type' => 'voogueme']))->fetchUser(['role'=>'agent']);
-        $info = $this->object_array($res);
-        if(!$info){
-            return false;
-        }
-        $data = [];
-        foreach($info['users'] as $k=> $v){
-            $data[$k]['user_type']      = 1;
-            $data[$k]['account_id']     = $v['id'];
-            $data[$k]['account_type']   = 2;
-            $data[$k]['account_user']   = $v['name'];
-            $data[$k]['account_email']  = $v['email'];
-        }
-        Db::name('zendesk_account')->insertAll($data);
-    }
-    /**
      * 刷新账户
      *
      * @Description
