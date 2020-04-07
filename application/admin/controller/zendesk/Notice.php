@@ -442,11 +442,11 @@ class Notice extends Controller
     {
         $search = [
             'type' => 'ticket',
-            'via' => ['mail'],
+            'status' => ['new', 'open','pending'],
             'order_by' => 'created_at',
             'created' => [
-                'valuetype' => '>=',
-                'value' => '2019-08-17T01:15:11Z',
+                'valuetype' => '<=',
+                'value' => '2020-04-03T09:32:51Z',
             ],
             'sort' => 'asc'
         ];
@@ -491,20 +491,28 @@ class Notice extends Controller
                 $tags = ZendeskTags::where('name','in',$ticket->tags)->column('id');
                 sort($tags);
                 if(!Zendesk::where('ticket_id',$ticket->id)->find()) {
+                    //根据用户的id获取用户的信息
+                    $user = $this->client->crasp()->findUser(['id' => $ticket->requester_id]);
+                    $userInfo = $user->user;
+                    $subject = $ticket->subject;
+                    $rawSubject = $ticket->raw_subject;
+                    if(!$ticket->subject && !$ticket->raw_subject){
+                        $subject = $rawSubject = substr($ticket->description,0,50).'...';
+                    }
                     //写入主表
                     $zendesk = Zendesk::create([
                         'ticket_id' => $ticket->id,
                         'type' => $type,
                         'channel' => $via->channel,
-                        'email' => $via->source->from->address,
-                        'username' => $via->source->from->name,
+                        'email' => $userInfo->email,
+                        'username' => $userInfo->name,
                         'user_id' => $ticket->requester_id,
                         'to_email' => $via->source->to->address,
                         'priority' => $priority,
                         'status' => array_search(strtolower($ticket->status), config('zendesk.status')),
                         'tags' => join(',',$tags),
-                        'subject' => $ticket->subject,
-                        'raw_subject' => $ticket->raw_subject,
+                        'subject' => $subject,
+                        'raw_subject' => $rawSubject,
                         'assignee_id' => $ticket->assignee_id ?: 0,
                         'assign_id' => $assign_id ?: 0,
                         'due_id' => $assign_id ?: 0,
@@ -528,9 +536,27 @@ class Notice extends Controller
                                 $attachments[] = $attachment->content_url;
                             }
                         }
+                        $admin_id = $due_id = ZendeskAgents::where('agent_id',$comment->author_id)->value('admin_id');
                         $is_admin = \app\admin\model\zendesk\ZendeskAccount::where('account_id',$comment->author_id)->find();
+                        //存在分配人，是chat或者voice，并且不是管理员主动创建的
+                        if($ticket->assignee_id && in_array($zendesk->channel,['chat','voice']) && $ticket->assignee_id != $ticket->requester_id) {
+                            ZendeskComments::create([
+                                'ticket_id' => $ticket->id,
+                                'comment_id' => 0,
+                                'zid' => $zid,
+                                'author_id' => $ticket->assignee_id,
+                                'body' => $zendesk->channel.'记录工作量',
+                                'html_body' => $zendesk->channel.'记录工作量',
+                                'is_public' => 1,
+                                'is_admin' => 1,
+                                'attachments' => '',
+                                'is_created' => 1,
+                                'due_id' => ZendeskAgents::where('agent_id',$ticket->assignee_id)->value('admin_id')
+                            ]);
+                        }
                         $res = ZendeskComments::create([
                             'ticket_id' => $ticket->id,
+                            'comment_id' => $comment->id,
                             'zid' => $zid,
                             'author_id' => $comment->author_id,
                             'body' => $comment->body,
@@ -538,11 +564,12 @@ class Notice extends Controller
                             'is_public' => $comment->public ? 1 : 2,
                             'is_admin' => $is_admin ? 1 : 0,
                             'attachments' => json($attachments),
+                            'is_created' => 1,
                             'create_time' => str_replace(['T','Z'],[' ',''],$comment->created_at),
                             'update_time' => str_replace(['T','Z'],[' ',''],$comment->created_at),
                         ]);
                     }
-                    echo $res->id."\r\n";
+                    echo $zendesk->ticket_id."\r\n";
                     // }
                     //sleep(1);
                     //Db::commit();
