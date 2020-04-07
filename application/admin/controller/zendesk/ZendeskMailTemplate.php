@@ -341,7 +341,7 @@ class ZendeskMailTemplate extends Backend
             //获取邮件的信息
             $ticket = \app\admin\model\zendesk\Zendesk::where('ticket_id',$ticket_id)->find();
             //替换模板内容
-            $template['template_content'] = str_replace(['{{username}}'],[$ticket->username],$template['template_content']);
+            $template['template_content'] = str_replace(['{{username}}','{{email}}'],[$ticket->username,$ticket->email],$template['template_content']);
             //tags合并
             $template['mail_tag'] = array_filter(array_merge(explode(',',$template['mail_tag']),explode(',',$ticket->tags)));
             return json($template);
