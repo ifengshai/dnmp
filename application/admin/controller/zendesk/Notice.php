@@ -88,7 +88,7 @@ class Notice extends Controller
             $subject = $ticket->subject;
             $rawSubject = $ticket->raw_subject;
             if(!$ticket->subject && !$ticket->raw_subject){
-                $subject = $rawSubject = substr($ticket->description,0,50).'...';
+                $subject = $rawSubject = substr($ticket->description,0,60).'...';
             }
             //写入主表
             $zendesk = Zendesk::create([
@@ -448,6 +448,10 @@ class Notice extends Controller
                 'valuetype' => '<=',
                 'value' => '2020-04-03T09:32:51Z',
             ],
+            'created' => [
+                'valuetype' => '>=',
+                'value' => '2020-04-02T17:01:51Z'
+            ],
             'sort' => 'asc'
         ];
         $type = $this->postData['type'] == 'zeelool' ? 1 : 2;
@@ -497,8 +501,9 @@ class Notice extends Controller
                     $subject = $ticket->subject;
                     $rawSubject = $ticket->raw_subject;
                     if(!$ticket->subject && !$ticket->raw_subject){
-                        $subject = $rawSubject = substr($ticket->description,0,50).'...';
+                        $subject = $rawSubject = substr($ticket->description,0,62).'...';
                     }
+                   // echo $subject;die;
                     //写入主表
                     $zendesk = Zendesk::create([
                         'ticket_id' => $ticket->id,
