@@ -677,8 +677,10 @@ class ZendeskOne extends Controller
      */
     public function getShipTime($order_id)
     {
-        $model = new \app\admin\model\order\printlabel\Zeelool;
-        $created_at = $model->where('order_id',$order_id)->value('created_at');
+        $created_at = Db::connect('database.db_zeelool')
+            ->table('sales_flat_shipment_track')
+            ->where('order_id',$order_id)
+            ->value('created_at');
         return strtotime($created_at);
     }
     /**
