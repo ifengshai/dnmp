@@ -732,6 +732,10 @@ class ZendeskOne extends Controller
                 'assignee_id' => 382940274852
             ];
             $this->autoUpdate($ticket->email_id, $params);
+            ZendeskReply::where('id',$ticket->id)->update([
+                'status' => 'open',
+                'tags' => '转客服,自动回复'
+            ]);
         }
     }
 }
