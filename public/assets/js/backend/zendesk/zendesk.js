@@ -98,9 +98,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                 var url = $(this).data('url');
                 $.post(url,{},function(data){
                     if(data.code == 1) {
+                        Layer.msg('申请成功');
                         table.bootstrapTable('refresh', {});
                     }else{
-
+                        Layer.msg(data.msg);
                     }
 
                 },'json')
