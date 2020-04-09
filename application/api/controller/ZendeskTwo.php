@@ -175,12 +175,15 @@ class ZendeskTwo extends Controller
                             //'status' => 'open'
                         ];
                     }else{
+                        echo 2;
                         if(!$requester_email){
                             $requester_email = $last_comment->via->source->from->address;
                         }
                         //查询订单状态的
                         if ($requester_email) {
+                            echo 1;
                             $params = $this->sendByOrder($ticket,$comments,$body,$requester_email);
+                            dump($params);
                         }
                     }
                     dump($params['tags']);
