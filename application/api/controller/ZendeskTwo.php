@@ -183,7 +183,9 @@ class ZendeskTwo extends Controller
                             $params = $this->sendByOrder($ticket,$comments,$body,$requester_email);
                         }
                     }
+                    dump($params['tags']);
                     $tags = join(',', $params['tags']);
+                    echo $tags;die;
                     //如果是第一条评论，则把对应的客户内容插入主表，回复内容插入附表，其余不做处理
                         //主email
                     $reply_data = [
