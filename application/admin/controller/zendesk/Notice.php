@@ -321,6 +321,19 @@ class Notice extends Controller
 
 
     }
+    public function createTicket($params)
+    {
+        try {
+            $res = $this->client->tickets()->create($params);
+            sleep(1);
+        } catch (\Exception $e) {
+            return ['code' => 0, 'message' => $e->getMessage()];
+            //exception($e->getMessage(), 10001);
+        }
+        $event = $res->audit->events;
+        $commentId = $event[0]->id;
+        return ['comment_id' => $commentId, 'ticket_id' => $res->ticket->id,'requester_id' => $res->ticket->requester_id];
+    }
 
     /**
      * 上传附件
@@ -353,6 +366,17 @@ class Notice extends Controller
         } catch (\Exception $e) {
             return ['code' => 0, 'message' => $e->getMessage()];
         }
+    }
+
+    /**
+     * 根据id获取用户信息
+     * @param $userId
+     * @return mixed
+     */
+    public function findUserById($userId)
+    {
+        $user = $this->client->crasp()->findUser(['id' => $userId]);
+        return $user->user;
     }
 
     /**
