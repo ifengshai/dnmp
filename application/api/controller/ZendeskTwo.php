@@ -128,6 +128,7 @@ class ZendeskTwo extends Controller
             $requester_id = $ticket->requester_id;
             //所有的tag
             $tags = $ticket->tags;
+            $subjet = $ticket->subject;
             //email
             $requester_email = $ticket->via->source->from->address;
             try{
@@ -149,6 +150,10 @@ class ZendeskTwo extends Controller
                 $body = strtolower($last_comment->body);
                 //开始匹配邮件内容
                 //匹配到相应的关键字，自动回复消息，修改为pending，回复共客户选择的内容
+                //过滤包含return的
+                if(s($body)->contains('return') || s($subjet)->contains('return')){
+                    continue;
+                }
                 if (s($body)->containsAny($this->preg_word) === true) {
                     $reply_detail_data = [];
                     $recent_reply_count = 0;
@@ -193,30 +198,30 @@ class ZendeskTwo extends Controller
                     //添加回复列表
                     //回复评论
                     if($zendesk_reply->id){
-                        foreach($comments as $comment){
-                            ZendeskReplyDetail::create([
-                                'reply_id' => $zendesk_reply->id,
-                                'body' => $comment->body,
-                                'html_body' => $comment->html_body,
-                                'tags' => join(',',array_unique(array_merge($tags, $params['tags']))),
-                                'status' => isset($params['status']) ? $params['status'] : $ticket->status,
-                                'assignee_id' => 382940274852,
-                                'is_admin' => 0
-                            ]);
-                        }
-                        $reply_detail_data = [
+                    foreach($comments as $comment){
+                        ZendeskReplyDetail::create([
                             'reply_id' => $zendesk_reply->id,
-                            'body' => isset($params['comment']['body']) ? $params['comment']['body']: '',
-                            'html_body' => isset($params['comment']['body']) ? $params['comment']['body']: '',
+                            'body' => $comment->body,
+                            'html_body' => $comment->html_body,
                             'tags' => join(',',array_unique(array_merge($tags, $params['tags']))),
                             'status' => isset($params['status']) ? $params['status'] : $ticket->status,
                             'assignee_id' => 382940274852,
-                            'is_admin' => 1
-                        ];
+                            'is_admin' => 0
+                        ]);
                     }
+                    $reply_detail_data = [
+                        'reply_id' => $zendesk_reply->id,
+                        'body' => isset($params['comment']['body']) ? $params['comment']['body']: '',
+                        'html_body' => isset($params['comment']['body']) ? $params['comment']['body']: '',
+                        'tags' => join(',',array_unique(array_merge($tags, $params['tags']))),
+                        'status' => isset($params['status']) ? $params['status'] : $ticket->status,
+                        'assignee_id' => 382940274852,
+                        'is_admin' => 1
+                    ];
+                }
 
-                    }
-                    if (!empty($params)) {
+                }
+                if (!empty($params)) {
                         //tag合并
                         $params['tags'] = array_unique(array_merge($tags, $params['tags']));
                         $params['comment']['author_id'] = 382940274852;
@@ -235,9 +240,8 @@ class ZendeskTwo extends Controller
                             }
                         }
                     }
-                }
             }
-            // }
+        }
     }
 
     /**
