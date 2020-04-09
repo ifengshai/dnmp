@@ -281,7 +281,6 @@ class ZendeskTwo extends Controller
             'first' => ' '.($comments[0])->body.' ',
             'title' => ' '.$ticket->subject.' '
         ];
-        echo 1;die;
         $get_order_id = $this->getOrderId($customr_comment_all);
         $order = $this->findOrderByEmail($requester_email,$get_order_id);
         $status = $order['status'];
@@ -426,6 +425,7 @@ class ZendeskTwo extends Controller
                 'status' => 'open'
             ];
         }
+        dump($params);die;
         return $params;
     }
     /**
