@@ -119,7 +119,7 @@ class Zendesk extends Backend
                         $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.add' : $name) : $this->modelValidate;
                         $this->model->validateFailException(true)->validate($validate);
                     }
-                    $type = $params['type'];
+                    $type = input('type');
                     $siteName = 'zeelool';
                     if($type == 2) {
                         $siteName = 'zeelool';
@@ -210,11 +210,12 @@ class Zendesk extends Backend
                         'to_email' => '',
                         'priority' => $params['priority'],
                         'status' => $params['status'],
-                        'tags' => $zendeskTags,
+                        'tags' => join(',',$zendeskTags),
                         'subject' => $subject,
                         'raw_subject' => $rawSubject,
                         'assignee_id' => $assignee_id,
                         'assign_id' => $agent_id,
+                        'email_cc' => $params['email_cc']
                     ]);
                     $zid = $zendesk->id;
                     //评论表添加内容,有body时添加评论，修改状态等不添加
@@ -673,7 +674,10 @@ DOC;
      */
     public function emailCcs($emailCcs, $preEmailCcs)
     {
-        $preEmailCcs = explode(',', $preEmailCcs);
+        if($preEmailCcs){
+            $preEmailCcs = explode(',', $preEmailCcs);
+        }
+
         $emailCcs = explode(',', $emailCcs);
         //pre并em，删除，
         //$del = array_diff($preEmailCcs,$emailCcs);

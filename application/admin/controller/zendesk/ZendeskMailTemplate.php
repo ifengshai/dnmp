@@ -348,5 +348,25 @@ class ZendeskMailTemplate extends Backend
         }
         $this->error('404 Not found');
     }
+    public function getTemplateAdd()
+    {
+        if($this->request->isAjax()) {
+            $id = $this->request->post('id');
+            $email = $this->request->post('email');
+            $type = $this->request->post('type');
+            //获取模板内容
+            $template = $this->model
+                ->where(['id' => $id, 'template_platform' => $type])
+                ->find();
+            //获取用户的信息
+            $ticket = \app\admin\model\zendesk\Zendesk::where('ticket_id',$ticket_id)->find();
+            //替换模板内容
+            $template['template_content'] = str_replace(['{{username}}','{{email}}'],[$ticket->username,$ticket->email],$template['template_content']);
+            //tags合并
+            $template['mail_tag'] = array_filter(explode(',',$template['mail_tag']));
+            return json($template);
+        }
+        $this->error('404 Not found');
+    }
 
 }

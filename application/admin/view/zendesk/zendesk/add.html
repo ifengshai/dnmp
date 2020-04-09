@@ -3,7 +3,7 @@
 
     <div class="row">
         <form id="edit-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
-            <input type="hidden" name="type" value="{$type}">
+            <input type="hidden" class="search-post-type" name="type" value="{$type}">
             <div class="col-md-2">
 
                 <!-- Profile Image -->
@@ -11,7 +11,7 @@
                     <div class="box-body box-profile">
                         <strong>requester</strong>
                         <p class="text-muted">
-                            <input  class="form-control col-xs-12"  name="row[email]" type="text" value="">
+                            <input  class="form-control col-xs-12 email"  name="row[email]" type="text" value="">
                         </p>
                     </div>
                     <!-- /.box-body -->
@@ -30,7 +30,7 @@
                         <hr>
                         <strong>tags</strong>
                         <p class="text-muted">
-                            {:Form::select('row[tags][]', $tags, explode(',',$ticket->tags), ['class'=>'form-control selectpicker ticket-tags', null,'multiple' => true,'data-live-search' => true,'id'=>'Entry_tags_select'])}
+                            {:Form::select('row[tags][]', $tags, null, ['class'=>'form-control selectpicker ticket-tags', null,'multiple' => true,'data-live-search' => true,'id'=>'Entry_tags_select'])}
                         </p>
 
                         <hr>
@@ -108,12 +108,12 @@
                                 </a>
                             </div>
                         </div>
-                        <div class="form-group">
-                            <label class="control-label col-xs-12 col-sm-2">选择模板：</label>
-                            <div class="col-xs-12 col-sm-8">
-                                {:Form::select('', $templates, null, ['class'=>'form-control selectpicker macro-apply', null,'data-live-search' => true,'id'=>'Entry_status_select'])}
-                            </div>
-                        </div>
+<!--                        <div class="form-group">-->
+<!--                            <label class="control-label col-xs-12 col-sm-2">选择模板：</label>-->
+<!--                            <div class="col-xs-12 col-sm-8">-->
+<!--                                {:Form::select('', $templates, null, ['class'=>'form-control selectpicker macro-apply', null,'data-live-search' => true,'id'=>'Entry_status_select'])}-->
+<!--                            </div>-->
+<!--                        </div>-->
                         <div class="form-group layer-footer">
                             <div class="col-xs-12 col-sm-8">
                                 <button type="submit" class="btn btn-success btn-embossed disabled">发送邮件</button>

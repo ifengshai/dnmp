@@ -98,6 +98,51 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
         },
         add: function () {
             Controller.api.bindevent();
+            $(document).on('change','.macro-apply',function(){
+                var id = $(this).val();
+                var email = $('.email').val();
+                var type = $('.search-post-type').val();
+                if(id){
+                    $.ajax({
+                        type: "POST",
+                        url: "zendesk/zendesk_mail_template/getTemplateAdd",
+                        dataType: "json",
+                        cache: false,
+                        async: false,
+                        data: {
+                            id:id,
+                            email: email,
+                            type: type
+                        },
+                        success: function (json) {
+                            //修改回复内容，状态，priority，tags
+                            if(json.template_content){
+                                $('.ticket-content').summernote("code",json.template_content);
+                            }
+                            if(json.mail_status) {
+                                $('.ticket-status').val(json.mail_status);
+                            }
+                            if(json.mail_level) {
+                                $('.ticket-priority').val(json.mail_level);
+                            }
+                            if(json.mail_tag) {
+                                $('.ticket-tags').val(json.mail_tag);
+                            }
+                            if(json.mail_subject) {
+                                $('.ticket-subject').val(json.mail_subject);
+
+                            }
+                            $('.selectpicker ').selectpicker('refresh');
+                            Layer.msg('应用成功');
+                            return false;
+                        },
+                        error: function(json){
+                            return false;
+
+                        }
+                    })
+                }
+            });
         },
         edit: function () {
             Controller.api.bindevent();
@@ -167,8 +212,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                 return false;
             });
 
-
-
             $(document).on('change','.macro-apply',function(){
                 var id = $(this).val();
                 var ticket_id = $('.ticket_id').val();
@@ -212,45 +255,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                     })
                 }
             });
-            $(document).on('click','.post-search',function(){
-               var text = $('.post-search-input').val();
-               var type = $('.search-post-type').val();
-                $.ajax({
-                    type: "POST",
-                    url: "zendesk/zendesk/searchPosts",
-                    dataType: "json",
-                    cache: false,
-                    async: false,
-                    data: {
-                        text: text,
-                        type: type
-                    },
-                    success: function (json) {
-                        $('.search-posts').html(json.html);
-                        $('.show-posts').html(json.post_html);
-                        return false;
-                    },
-                    error: function(json){
-                        return false;
-
-                    }
-                });
-            });
-            $(document).on('click','.card-link',function(){
-               var link = $(this).data('link');
-               var title = $(this).data('title');
-                $('.ticket-content').summernote("createLink",{
-                    text: title,
-                    url: link,
-                    isNowWindow: true
-                });
-                $(this).next('button').show();
-            });
-            $(document).on('mouseenter','.card',function(){
-                var num = $(this).data('num');
-               // console.log(num);
-                $('.show-posts').find('.post-row').eq(num).show().siblings().hide();
-            })
             $(document).on('click','.change-ticket',function(){
                 var title = $(this).data('title');
                 var status = $(this).data('status');
@@ -283,6 +287,46 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                         }
                     }
                 });
+
+                $(document).on('click','.post-search',function(){
+                    var text = $('.post-search-input').val();
+                    var type = $('.search-post-type').val();
+                    $.ajax({
+                        type: "POST",
+                        url: "zendesk/zendesk/searchPosts",
+                        dataType: "json",
+                        cache: false,
+                        async: false,
+                        data: {
+                            text: text,
+                            type: type
+                        },
+                        success: function (json) {
+                            $('.search-posts').html(json.html);
+                            $('.show-posts').html(json.post_html);
+                            return false;
+                        },
+                        error: function(json){
+                            return false;
+
+                        }
+                    });
+                });
+                $(document).on('click','.card-link',function(){
+                    var link = $(this).data('link');
+                    var title = $(this).data('title');
+                    $('.ticket-content').summernote("createLink",{
+                        text: title,
+                        url: link,
+                        isNowWindow: true
+                    });
+                    $(this).next('button').show();
+                });
+                $(document).on('mouseenter','.card',function(){
+                    var num = $(this).data('num');
+                    // console.log(num);
+                    $('.show-posts').find('.post-row').eq(num).show().siblings().hide();
+                })
 
             },
         }
