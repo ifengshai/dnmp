@@ -283,7 +283,6 @@ class ZendeskTwo extends Controller
         ];
         $get_order_id = $this->getOrderId($customr_comment_all);
         $order = $this->findOrderByEmail($requester_email,$get_order_id);
-        dump($order);
         $status = $order['status'];
         $increment_id = $order['increment_id'];
         if ($status == 'pending' or $status == 'creditcard_failed') {
@@ -332,7 +331,6 @@ class ZendeskTwo extends Controller
 
         } elseif ($status == 'complete') {
             $res = $this->getTrackMsg($order['order_id']);
-            dump($res);
             //判断是否签收
             if ($res['status'] == 'delivered') { //已签收
                 $params = [
@@ -351,7 +349,6 @@ class ZendeskTwo extends Controller
                     'status' => 'pending'
                 ];
                 $shipTime = $this->getShipTime($order['order_id']);
-                dump($shipTime);
                 $diffTime = ceil(( time() - $shipTime ) / (3600 * 24 * 7 ));
                 //根据发货时间进行补偿
                 //2周内
@@ -428,7 +425,6 @@ class ZendeskTwo extends Controller
                 'status' => 'open'
             ];
         }
-        dump($params);die;
         return $params;
     }
     /**
