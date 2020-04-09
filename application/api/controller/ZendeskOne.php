@@ -115,7 +115,7 @@ class ZendeskOne extends Controller
              ],//>=意思是3分钟之内，<=是三分钟之外
             'created_at' => [
                 'valuetype' => '>=',
-                'value'   => '2020-03-03T16:00:00Z'
+                'value'   => '2020-04-09T01:00:00Z'
             ], //添加创建时间的限制
             'order_by' => 'updated_at',
             'sort' => 'desc'
@@ -166,9 +166,9 @@ class ZendeskOne extends Controller
     public function findCommentsByTickets($tickets)
     {
         foreach($tickets as $key => $ticket){
-//           if($key >= 50){
-//               break;
-//           }
+           if($key >= 2){
+               break;
+           }
             $id = $ticket->id;
             //发送者的id
             $requester_id = $ticket->requester_id;
@@ -417,23 +417,30 @@ class ZendeskOne extends Controller
                 'status' => 'solved'
             ];
         } elseif($status == 'processing') {
+            $params = [
+                'comment' => [
+                    'body' => config('zendesk.t15')
+                ],
+                'tags' => ['未发货'],
+                'status' => 'pending'
+            ];
             //判断商品下单时间，2月1日前，8,9.2月1日后，转客服
-            if($order['created_at'] >= '2020-02-01 00:00:00'){
-                $params = [
-                    'tags' => ['转客服'],
-                    'status' => 'open'
-                ];
-            }else{
-                if(!$order['ship']){
-                    $params = [
-                        'comment' => [
-                            'body' => config('zendesk.t8')
-                        ],
-                        'tags' => ['com20'],
-                        'status' => 'pending'
-                    ];
-                }
-            }
+//            if($order['created_at'] >= '2020-02-01 00:00:00'){
+//                $params = [
+//                    'tags' => ['转客服'],
+//                    'status' => 'open'
+//                ];
+//            }else{
+//                if(!$order['ship']){
+//                    $params = [
+//                        'comment' => [
+//                            'body' => config('zendesk.t15')
+//                        ],
+//                        'tags' => ['未发货'],
+//                        'status' => 'pending'
+//                    ];
+//                }
+//            }
 
         } elseif ($status == 'complete') {
             $res = $this->getTrackMsg($order['order_id']);
@@ -508,10 +515,6 @@ class ZendeskOne extends Controller
                         'status' => 'pending'
                     ];
                 }
-
-
-
-
 //                $lastUpdateTime = strtotime($res['lastUpdateTime']);
 //                $now = time();
 //                if ($now - $lastUpdateTime > 7 * 24 * 3600) { //超7天未更新

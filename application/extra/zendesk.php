@@ -150,5 +150,15 @@ To remedy your long wait, we will offer you three options to choose from as our 
 
 We are waiting for your choice. If you choose option 3, please contact us within 24 hours of the purchase date so we can make the addition to your order. 
 
-We appreciate your kind understanding and patience. Please feel free to contact us with any questions. Thank you. Have a wonderful day.'
+We appreciate your kind understanding and patience. Please feel free to contact us with any questions. Thank you. Have a wonderful day.',
+    //未发货的模板
+    't15' => 'Hi there,
+
+Thank you for shopping with us at zeelool.com.
+
+Our order tracker indicates that your glasses are being processed in our facility. All the lenses must be in the queue to our technicians for machining, days of processing time are necessary. We will send you a shipping notification email and an SMS message with a tracking number when your order is dispatched from our warehouse.
+
+We really appreciate your patience and understanding. Please feel free to contact us if there is any other question.
+
+Have a nice day!'
 ];
