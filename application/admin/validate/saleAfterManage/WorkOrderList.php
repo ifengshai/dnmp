@@ -1,10 +1,10 @@
 <?php
 
-namespace app\admin\validate\saleaftermanage\workmanage;
+namespace app\admin\validate\saleaftermanage;
 
 use think\Validate;
 
-class WorkOrderMeasure extends Validate
+class WorkOrderList extends Validate
 {
     /**
      * 验证规则

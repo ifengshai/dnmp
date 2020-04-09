@@ -1,6 +1,6 @@
 <?php
 
-namespace app\admin\controller\saleaftermanage\workmanage;
+namespace app\admin\controller\saleaftermanage;
 
 use app\common\controller\Backend;
 
@@ -14,14 +14,14 @@ class WorkOrderList extends Backend
     
     /**
      * WorkOrderList模型对象
-     * @var \app\admin\model\saleaftermanage\workmanage\WorkOrderList
+     * @var \app\admin\model\saleaftermanage\WorkOrderList
      */
     protected $model = null;
 
     public function _initialize()
     {
         parent::_initialize();
-        $this->model = new \app\admin\model\saleaftermanage\workmanage\WorkOrderList;
+        $this->model = new \app\admin\model\saleaftermanage\WorkOrderList;
 
     }
     
