@@ -1336,7 +1336,7 @@ class Inventory extends Backend
                         $item->where(['sku' => $warehouse_original_sku])->inc('available_stock', $original_number)->dec('occupy_stock', $original_number)->update();
                     }
                 }
-                //不需要添加出入库逻辑(主要针对总库存)
+                //不需要添加出入库逻辑(主要针对总库存) 
                 //修改库存结果为真
                 // if (($changeSku === false) || ($original_stock === false)) {
                 //     throw new Exception('更改镜架失败,请检查SKU');
