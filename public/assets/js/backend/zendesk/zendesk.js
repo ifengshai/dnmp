@@ -167,24 +167,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                 return false;
             });
 
-            //抄送人标签输入
-            $('#ccs').tagsInput({
-                width: 'auto',
-                defaultText: '输入后回车确认',
-                minInputWidth: 110,
-                height: 'auto',
-                placeholderColor: '#999',
-                autocomplete_url:'zendesk/zendesk/getEmail',
-                onChange:function(input,mail){
-                    var strRegex = /^(\w-*\.*)+@(\w-?)+(\.\w{2,})+$/;
-                    if(mail != undefined){
-                        if(!strRegex.test(mail)){
-                            Layer.msg('请输入正确的邮箱地址');
-                            input.removeTag(mail);
-                        }
-                    }
-                }
-            });
+
 
             $(document).on('change','.macro-apply',function(){
                 var id = $(this).val();
@@ -282,6 +265,25 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
         api: {
             bindevent: function () {
                 Form.api.bindevent($("form[role=form]"));
+                //抄送人标签输入
+                $('#ccs').tagsInput({
+                    width: 'auto',
+                    defaultText: '输入后回车确认',
+                    minInputWidth: 110,
+                    height: 'auto',
+                    placeholderColor: '#999',
+                    autocomplete_url:'zendesk/zendesk/getEmail',
+                    onChange:function(input,mail){
+                        var strRegex = /^(\w-*\.*)+@(\w-?)+(\.\w{2,})+$/;
+                        if(mail != undefined){
+                            if(!strRegex.test(mail)){
+                                Layer.msg('请输入正确的邮箱地址');
+                                input.removeTag(mail);
+                            }
+                        }
+                    }
+                });
+
             },
         }
     };

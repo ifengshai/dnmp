@@ -94,6 +94,187 @@ class Zendesk extends Backend
     }
 
     /**
+     * 新增
+     * @return string
+     * @throws Exception
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public function add()
+    {
+        if ($this->request->isPost()) {
+            $params = $this->request->post("row/a");
+            if ($params) {
+                $params = $this->preExcludeFields($params);
+                if ($this->dataLimit && $this->dataLimitFieldAutoFill) {
+                    $params[$this->dataLimitField] = $this->auth->id;
+                }
+                $result = false;
+                Db::startTrans();
+                try {
+                    //是否采用模型验证
+                    if ($this->modelValidate) {
+                        $name = str_replace("\\model\\", "\\validate\\", get_class($this->model));
+                        $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.add' : $name) : $this->modelValidate;
+                        $this->model->validateFailException(true)->validate($validate);
+                    }
+                    $type = $params['type'];
+                    $siteName = 'zeelool';
+                    if($type == 2) {
+                        $siteName = 'zeelool';
+                    }
+                    $tags = ZendeskTags::where('id', 'in', $params['tags'])->column('name');
+                    $status = config('zendesk.status')[$params['status']];
+                    $author_id = $assignee_id = ZendeskAgents::where(['admin_id' => session('admin.id'), 'agent_type' => $type])->value('agent_id');
+                    if (!$author_id) {
+                        throw new Exception('请将用户先绑定zendesk的账号', 10001);
+                    }
+                    //发送邮件的参数
+                    $createData = [
+                        'comment' => [
+                            'author_id' => $author_id,
+                        ],
+                        'tags' => $tags,
+                        'status' => $status,
+                        'assignee_id' => $assignee_id,
+                        'submitter_id' => $assignee_id
+                    ];
+                    if(!$params['subject']) {
+                        throw new Exception('邮件标题不能为空', 10001);
+                    }
+                    if(!strip_tags($params['content'])) {
+                        throw new Exception('内容不能为空', 10001);
+                    }
+                    if(!$params['email']) {
+                        throw new Exception('发送人不能为空', 10001);
+                    }
+                    $createData['requester'] = [
+                        'email' => $params['email']
+                    ];
+                    //有抄送，添加抄送
+                    if ($params['email_cc']) {
+                        $email_ccs = $this->emailCcs($params['email_cc'], []);
+                        $createData['email_ccs'] = $email_ccs;
+                    }
+                    $priority = config('zendesk.priority')[$params['priority']];
+                    $body = $params['content'];
+                    if ($priority) {
+                        $createData['priority'] = $priority;
+                    }
+                    //由于编辑器或默认带个<br>,所以去除标签判断有无值
+                    if (strip_tags($body)) {
+                        $createData['comment']['html_body'] = $body;
+                    }
+                    if ($params['image']) {
+                        //附件上传
+                        $attachments = explode(',', $params['image']);
+                        $token = [];
+                        foreach ($attachments as $attachment) {
+                            $res = (new Notice(request(), ['type' => $siteName]))->attachment($attachment);
+                            if (isset($res['code'])) {
+                                throw new Exception($res['message'], 10001);
+                            }
+                            $token[] = $res;
+                        }
+                        if ($token) {
+                            $createData['comment']['uploads'] = $token;
+                        }
+                    }
+                    //私有的
+                    if ($params['public_type'] == 1) {
+                        $createData['comment']['public'] = false;
+                    }
+                    //开始发送
+                    $res = (new Notice(request(), ['type' => $siteName]))->createTicket($createData);
+                    if (isset($res['code'])) {
+                        throw new Exception($res['message'], 10001);
+                    }
+                    //开始写入数据库
+                    $agent_id = ZendeskAgents::where('admin_id', session('admin.id'))->value('agent_id');
+                    //对tag进行排序
+                    $zendeskTags = $params['tags'];
+                    sort($zendeskTags);
+                    //更新主表的状态和priority，tags,due_id，assignee_id等
+                    //根据用户的id获取用户的信息
+                    $userInfo = (new Notice(request(), ['type' => $siteName]))->findUserById($res['requester_id']);
+                    $rawSubject = $subject = $params['subject'];
+                    //写入主表
+                    $zendesk = \app\admin\model\zendesk\Zendesk::create([
+                        'ticket_id' => $res['ticket_id'],
+                        'type' => $type,
+                        'channel' => 'web',
+                        'email' => $userInfo->email,
+                        'username' => $userInfo->name,
+                        'user_id' => $res['requester_id'],
+                        'to_email' => '',
+                        'priority' => $params['priority'],
+                        'status' => $params['status'],
+                        'tags' => $zendeskTags,
+                        'subject' => $subject,
+                        'raw_subject' => $rawSubject,
+                        'assignee_id' => $assignee_id,
+                        'assign_id' => $agent_id,
+                    ]);
+                    $zid = $zendesk->id;
+                    //评论表添加内容,有body时添加评论，修改状态等不添加
+                    if (strip_tags($params['content'])) {
+                        $result = ZendeskComments::create([
+                            'ticket_id' => $res['ticket_id'],
+                            'comment_id' => $res['comment_id'],
+                            'zid' => $zid,
+                            'author_id' => $agent_id,
+                            'body' => strip_tags($params['content']),
+                            'html_body' => $params['content'],
+                            'is_public' => $params['public_type'],
+                            'is_admin' => 1,
+                            'due_id' => session('admin.id'),
+                            'attachments' => $params['image']
+                        ]);
+                    }
+                    Db::commit();
+                } catch (ValidateException $e) {
+                    Db::rollback();
+                    $this->error($e->getMessage());
+                } catch (PDOException $e) {
+                    Db::rollback();
+                    $this->error($e->getMessage());
+                } catch (Exception $e) {
+                    Db::rollback();
+                    $this->error($e->getMessage());
+                }
+                if ($result !== false) {
+                    $this->success();
+                } else {
+                    $this->error(__('No rows were inserted'));
+                }
+            }
+            $this->error(__('Parameter %s can not be empty', ''));
+        }
+        //获取所有的tags
+        $tags = ZendeskTags::order('count desc')->column('name', 'id');
+        //站点类型，默认zeelool，1：zeelool，2：voogueme
+        $type = input('type',1);
+        //获取所有的消息模板
+        $templateAll = ZendeskMailTemplate::where([
+            'template_platform' => $type,
+            'template_permission' => 1,
+            'is_active' => 1])
+            ->order('template_category desc,id desc')
+            ->select();
+        $templates = ['Apply Macro'];
+        foreach ($templateAll as $key => $template) {
+            $category = '';
+            if ($template['template_category']) {
+                $category = '【' . config('zendesk.template_category')[$template['template_category']] . '】';
+            }
+            $templates[$template['id']] = $category . $template['template_name'];
+        }
+
+        $this->view->assign(compact('tags',  'templates','type'));
+        return $this->view->fetch();
+    }
+    /**
      * 发送邮件
      * @param null $ids
      * @return string
@@ -134,6 +315,10 @@ class Zendesk extends Backend
                     if (!$author_id) {
                         throw new Exception('请将用户先绑定zendesk的账号', 10001);
                     }
+                    $siteName = 'zeelool';
+                    if($ticket->type == 2){
+                        $siteName = 'voogueme';
+                    }
                     //发送邮件的参数
                     $updateData = [
                         'comment' => [
@@ -166,7 +351,7 @@ class Zendesk extends Backend
                         $attachments = explode(',', $params['image']);
                         $token = [];
                         foreach ($attachments as $attachment) {
-                            $res = (new Notice(request(), ['type' => 'zeelool']))->attachment($attachment);
+                            $res = (new Notice(request(), ['type' => $siteName]))->attachment($attachment);
                             if (isset($res['code'])) {
                                 throw new Exception($res['message'], 10001);
                             }
@@ -181,7 +366,7 @@ class Zendesk extends Backend
                         $updateData['comment']['public'] = false;
                     }
                     //开始发送
-                    $res = (new Notice(request(), ['type' => 'zeelool']))->autoUpdate($ticket->ticket_id, $updateData);
+                    $res = (new Notice(request(), ['type' => $siteName]))->autoUpdate($ticket->ticket_id, $updateData);
                     if (isset($res['code'])) {
                         throw new Exception($res['message'], 10001);
                     }
