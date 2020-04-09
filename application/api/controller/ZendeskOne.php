@@ -137,6 +137,7 @@ class ZendeskOne extends Controller
     {
         $params = $this->parseStr($array);
         $search = $this->client->search()->find($params);
+        dump($search);die;
         $tickets = $search->results;
         if(!$search->count){
             return true;
