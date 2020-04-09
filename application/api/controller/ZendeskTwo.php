@@ -126,6 +126,7 @@ class ZendeskTwo extends Controller
     public function findCommentsByTickets($tickets)
     {
         foreach($tickets as $key => $ticket){
+            $params = [];
            if($key >= 200){
                break;
            }
@@ -265,7 +266,7 @@ class ZendeskTwo extends Controller
         try{
             $this->client->tickets()->update($ticket_id, $params);
             if($echo) echo $ticket_id . "\r\n";
-            sleep(1);
+            sleep(2);
         }catch (\Exception $e){
             return false;
             //exception($e->getMessage(), 10001);
