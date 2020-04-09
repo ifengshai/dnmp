@@ -352,13 +352,7 @@ class ZendeskTwo extends Controller
                     'status' => 'solved'
                 ];
             } elseif ($res['status'] == 'transit' || $res['status'] == 'pickup') { //判断物流时效
-                $params = [
-                    'comment' => [
-                        'body' => ''
-                    ],
-                    'tags' => [],
-                    'status' => 'pending'
-                ];
+
                 $shipTime = $this->getShipTime($order['order_id']);
                 $diffTime = ceil(( time() - $shipTime ) / (3600 * 24 * 7 ));
                 //根据发货时间进行补偿
