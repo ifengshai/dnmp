@@ -126,7 +126,7 @@ class ZendeskTwo extends Controller
     public function findCommentsByTickets($tickets)
     {
         foreach($tickets as $key => $ticket){
-           if($key >= 10){
+           if($key >= 200){
                break;
            }
             $id = $ticket->id;
@@ -233,6 +233,7 @@ class ZendeskTwo extends Controller
                         $params['comment']['author_id'] = 382940274852;
                         $params['assignee_id'] = 382940274852;
                         $res = $this->autoUpdate($id, $params);
+                        file_put_contents('/www/wwwroot/mojing/runtime/log/zendesktwo.txt',$ticket->id."\r\n",FILE_APPEND);
                         if($res){
                             if(!empty($reply_detail_data)){
                                 $reply_detail_res = ZendeskReplyDetail::create($reply_detail_data);
