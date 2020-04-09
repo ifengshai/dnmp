@@ -1,0 +1,220 @@
+<form id="edit-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
+
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Work_id')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-work_id" data-rule="required" data-source="work/index" class="form-control selectpage" name="row[work_id]" type="text" value="{$row.work_id|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Increment_id')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-increment_id" data-rule="required" data-source="increment/index" class="form-control selectpage" name="row[increment_id]" type="text" value="{$row.increment_id|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Platform_type')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-platform_type" data-rule="required" class="form-control" name="row[platform_type]" type="number" value="{$row.platform_type|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Original_name')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-original_name" data-rule="required" class="form-control" name="row[original_name]" type="text" value="{$row.original_name|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Original_sku')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-original_sku" data-rule="required" class="form-control" name="row[original_sku]" type="text" value="{$row.original_sku|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Original_number')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-original_number" data-rule="required" class="form-control" name="row[original_number]" type="number" value="{$row.original_number|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Change_type')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-change_type" data-rule="required" class="form-control" name="row[change_type]" type="number" value="{$row.change_type|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Change_sku')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-change_sku" data-rule="required" class="form-control" name="row[change_sku]" type="text" value="{$row.change_sku|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Change_number')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-change_number" data-rule="required" class="form-control" name="row[change_number]" type="number" value="{$row.change_number|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Recipe_type')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-recipe_type" data-rule="required" class="form-control" name="row[recipe_type]" type="text" value="{$row.recipe_type|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Lens_type')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-lens_type" data-rule="required" class="form-control" name="row[lens_type]" type="text" value="{$row.lens_type|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Coating_type')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-coating_type" data-rule="required" class="form-control" name="row[coating_type]" type="text" value="{$row.coating_type|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Second_name')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-second_name" data-rule="required" class="form-control" name="row[second_name]" type="text" value="{$row.second_name|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Zsl')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-zsl" data-rule="required" class="form-control" name="row[zsl]" type="text" value="{$row.zsl|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Od_sph')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-od_sph" data-rule="required" class="form-control" name="row[od_sph]" type="text" value="{$row.od_sph|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Od_cyl')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-od_cyl" data-rule="required" class="form-control" name="row[od_cyl]" type="text" value="{$row.od_cyl|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Od_axis')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-od_axis" data-rule="required" class="form-control" name="row[od_axis]" type="text" value="{$row.od_axis|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Od_add')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-od_add" data-rule="required" class="form-control" name="row[od_add]" type="text" value="{$row.od_add|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Pd_r')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-pd_r" data-rule="required" class="form-control" name="row[pd_r]" type="text" value="{$row.pd_r|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Od_pv')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-od_pv" data-rule="required" class="form-control" name="row[od_pv]" type="text" value="{$row.od_pv|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Od_bd')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-od_bd" data-rule="required" class="form-control" name="row[od_bd]" type="text" value="{$row.od_bd|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Od_pv_r')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-od_pv_r" data-rule="required" class="form-control" name="row[od_pv_r]" type="text" value="{$row.od_pv_r|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Od_bd_r')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-od_bd_r" data-rule="required" class="form-control" name="row[od_bd_r]" type="text" value="{$row.od_bd_r|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Os_sph')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-os_sph" data-rule="required" class="form-control" name="row[os_sph]" type="text" value="{$row.os_sph|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Os_cyl')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-os_cyl" data-rule="required" class="form-control" name="row[os_cyl]" type="text" value="{$row.os_cyl|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Os_axis')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-os_axis" data-rule="required" class="form-control" name="row[os_axis]" type="text" value="{$row.os_axis|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Os_add')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-os_add" data-rule="required" class="form-control" name="row[os_add]" type="text" value="{$row.os_add|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Pd_l')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-pd_l" data-rule="required" class="form-control" name="row[pd_l]" type="text" value="{$row.pd_l|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Os_pv')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-os_pv" data-rule="required" class="form-control" name="row[os_pv]" type="text" value="{$row.os_pv|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Os_bd')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-os_bd" data-rule="required" class="form-control" name="row[os_bd]" type="text" value="{$row.os_bd|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Os_pv_r')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-os_pv_r" data-rule="required" class="form-control" name="row[os_pv_r]" type="text" value="{$row.os_pv_r|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Os_bd_r')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-os_bd_r" data-rule="required" class="form-control" name="row[os_bd_r]" type="text" value="{$row.os_bd_r|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Create_person')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-create_person" data-rule="required" class="form-control" name="row[create_person]" type="text" value="{$row.create_person|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Update_time')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-update_time" class="form-control datetimepicker" data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[update_time]" type="text" value="{:$row.update_time?datetime($row.update_time):''}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Create_time')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-create_time" class="form-control datetimepicker" data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[create_time]" type="text" value="{:$row.create_time?datetime($row.create_time):''}">
+        </div>
+    </div>
+    <div class="form-group layer-footer">
+        <label class="control-label col-xs-12 col-sm-2"></label>
+        <div class="col-xs-12 col-sm-8">
+            <button type="submit" class="btn btn-success btn-embossed disabled">{:__('OK')}</button>
+            <button type="reset" class="btn btn-default btn-embossed">{:__('Reset')}</button>
+        </div>
+    </div>
+</form>

@@ -1,0 +1,32 @@
+<?php
+
+return [
+    'Id'                   => '自增ID',
+    'Work_platform'        => '工单平台 1 zeelool 2 voogueme 3 nihao',
+    'Work_type'            => '工单类型 1 售后工单 2 仓库工单 默认 1',
+    'Platform_order'       => '平台订单号',
+    'Order_sku'            => '订单中的sku',
+    'Work_status'          => '工单状态 1 新建 2 待审核 3 审核通过 4 审核拒绝 5 处理完成 6 处理失败 7 已撤销',
+    'Work_level'           => '工单级别 1 低 2 中 3 高 默认 1',
+    'Problem_type_id'      => '工单的问题类型ID',
+    'Problem_type_content' => '工单的问题类型描述',
+    'Problem_description'  => '问题描述',
+    'Refund_way'           => '订单退款方式 paypal、credit_card',
+    'Refund_money'         => '退款金额',
+    'Order_pay_currency'   => '订单支付的货币',
+    'Is_refund'            => '是否有退款 1 没有 2有 默认 1',
+    'Make_up_price_order'  => '补差价订单号',
+    'Replacement_order'    => '补发订单号',
+    'Logistics_order'      => '退回物流单号',
+    'Integral'             => '发放的积分',
+    'Coupon'               => '发放的优惠券',
+    'Work_picture'         => '工单图片',
+    'Create_id'            => '创建人ID',
+    'Create_person'        => '工单创建人',
+    'Handle_person'        => '工单经手人(第一次承接人,客服创建默认自己)',
+    'Check_person'         => '工单审核人',
+    'Create_time'          => '工单创建时间',
+    'Check_time'           => '工单审核时间',
+    'Handle_time'          => '工单处理时间',
+    'Complete_time'        => '工单完成时间'
+];
