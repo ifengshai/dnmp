@@ -4,6 +4,7 @@ namespace app\admin\controller\zendesk;
 
 use app\admin\model\Admin;
 use app\admin\model\zendesk\ZendeskPosts;
+use app\admin\model\zendesk\ZendeskTasks;
 use app\common\controller\Backend;
 use app\admin\model\zendesk\ZendeskTags;
 use app\admin\model\zendesk\ZendeskAgents;
@@ -692,5 +693,50 @@ DOC;
         }
         return $emails;
 
+    }
+
+    /**
+     * 申请分配
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public function moreTasks()
+    {
+
+        $admin_id = session('admin.id');
+        //判断是否已完成目标且不存在未完成的
+        $now = $this->model->where('assign_id',$admin_id)->where('status', 'in', '1,2')->where('channel','in',['email','web','chat'])->count();
+        if($now){
+            $this->error("请先处理完成已分配的工单");
+        }
+        //判断今天是否完成工作量
+        $tasks = ZendeskTasks::whereTime('create_time', 'today')
+            ->where(['admin_id' => $admin_id])
+            ->select();
+        foreach($tasks as $task){
+            if($task->surplus_count > 0){
+                $this->error("请先完成今天的任务量再进行申请");
+            }
+        }
+        $user_ids = $this->model->where('assign_id','neq',$admin_id)->where('assign_id','>',0)->column('user_id');
+        $tickets = $this->model->where(['user_id' => ['not in', $user_ids],'assign_id' => 0,'status' => 1])->order('id desc')->limit(10)->select();
+        foreach($tickets as $ticket){
+            $task = ZendeskTasks::whereTime('create_time', 'today')
+                ->where(['admin_id' => $admin_id, 'type' => $ticket->getType()])
+                ->find();
+            //修改zendesk的assign_id,assign_time
+            $this->model->where('id',$ticket->id)->update([
+                'assign_id' => $admin_id,
+                'assignee_id' => $task->assignee_id,
+                'assign_time' => date('Y-m-d H:i:s', time()),
+            ]);
+            //修改task的字段
+            if($task->surplus_count > 0){
+                $task->surplus_count = $task->surplus_count - 1;
+            }
+            $task->complete_count = $task->complete_count + 1;
+            $task->save();
+        }
     }
 }

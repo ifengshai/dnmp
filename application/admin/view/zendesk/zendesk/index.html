@@ -17,7 +17,8 @@
                         <a href="javascript:;" class="btn btn-success btn-edit btn-disabled disabled {:$auth->check('zendesk/zendesk/edit')?'':'hide'}" title="{:__('Answer')}" ><i class="fa fa-pencil"></i> {:__('Answer')}</a>
                         <a href="{:url('zendesk/zendesk/add',['type' => 1])}" class="btn btn-info {:$auth->check('zendesk/zendesk/add')?'':'hide'}" title="zeelool发送" ><i class="fa fa-plus"></i> zeelool发送</a>
                         <a href="{:url('zendesk/zendesk/add',['type' => 2])}" class="btn btn-warning {:$auth->check('zendesk/zendesk/add')?'':'hide'}" title="voogueme发送" ><i class="fa fa-plus"></i> voogueme发送</a>
-                        </div>
+                        <a class="btn btn-success btn-change btn-start"  data-url="{:url('zendesk/zendesk/moreTasks')}" href="javascript:;"><i class="fa fa-play"></i> 申请工单</a>
+                    </div>
                         <table id="table" class="table table-striped table-bordered table
                         -hover table-nowrap"
                                data-operate-edit="{:$auth->check('zendesk/zendesk/edit')}"
