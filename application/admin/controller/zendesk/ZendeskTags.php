@@ -17,6 +17,15 @@ class ZendeskTags extends Backend
      * @var \app\admin\model\zendesk\ZendeskTags
      */
     protected $model = null;
+    /**
+     * 是否开启Validate验证
+     */
+    protected $modelValidate = true;
+
+    /**
+     * 是否开启模型场景验证
+     */
+    protected $modelSceneValidate = true;
 
     public function _initialize()
     {
