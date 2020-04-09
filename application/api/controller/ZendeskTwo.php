@@ -126,6 +126,9 @@ class ZendeskTwo extends Controller
     public function findCommentsByTickets($tickets)
     {
         foreach($tickets as $key => $ticket){
+            if(ZendeskReply::where('email_id',$ticket->id)->find()){
+                continue;
+            }
             $params = [];
            if($key >= 200){
                break;
