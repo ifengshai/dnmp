@@ -388,7 +388,7 @@ class NewProduct extends Backend
             $this->error(__('Parameter %s can not be empty', ''));
         }
         $result = $this->category->getAttrCategoryById($row['category_id']);
-        if (3 == $result) {
+        if (3 <= $result) {
             $info = $this->category->getCategoryTexture($row['category_id']);
             $this->assign('AllTexture', $info['textureResult']);
             $this->assign('AllFrameColor', $info['colorResult']);
@@ -444,7 +444,7 @@ class NewProduct extends Backend
             }
         }
         $result = $this->category->getAttrCategoryById($row['category_id']);
-        if (3 == $result) {
+        if (3 <= $result) {
             $info = $this->category->getCategoryTexture($row['category_id']);
             $this->assign('AllTexture', $info['textureResult']);
             $this->assign('AllFrameColor', $info['colorResult']);
@@ -535,7 +535,7 @@ class NewProduct extends Backend
                 $data = $this->fetch('frame');
             } elseif ($result == 2) { //商品是镜片类型
                 $data = $this->fetch('eyeglass');
-            } elseif ($result == 3) { //商品是饰品类型
+            } elseif ($result >= 3) { //商品是饰品类型
                 $info = $this->category->getCategoryTexture($categoryId);
                 $this->assign('AllTexture', $info['textureResult']);
                 $this->assign('AllFrameColor', $info['colorResult']);
@@ -638,7 +638,7 @@ class NewProduct extends Backend
                 $data = $this->fetch('frame');
             } elseif ($result == 2) { //商品是镜片类型
                 $data = $this->fetch('eyeglass');
-            } elseif ($result == 3) { //商品是饰品类型
+            } elseif ($result >= 3) { //商品是饰品类型
                 $row  = $this->model->getItemInfo($sku, 3);
                 $result = $this->category->getCategoryTexture($categoryId);
                 $this->assign('AllTexture', $result['textureResult'] ?? []);
