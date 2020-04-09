@@ -93,7 +93,7 @@ class Zendesk extends Backend
         }
         return $this->view->fetch();
     }
-    
+
     /**
      * 新增
      * @return string
