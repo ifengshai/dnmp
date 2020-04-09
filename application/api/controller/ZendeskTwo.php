@@ -183,7 +183,7 @@ class ZendeskTwo extends Controller
                             $params = $this->sendByOrder($ticket,$comments,$body,$requester_email);
                         }
                     }
-
+                    $tags = join(',', $params['tags']);
                     //如果是第一条评论，则把对应的客户内容插入主表，回复内容插入附表，其余不做处理
                         //主email
                     $reply_data = [
@@ -192,7 +192,7 @@ class ZendeskTwo extends Controller
                         'email_id' => $ticket->id,
                         'body' => $last_comment->body,
                         'html_body' => $last_comment->html_body,
-                        'tags' => join(',',$params['tags']),
+                        'tags' => $tags,
                         'status' => $ticket->status,
                         'requester_id' => $requester_id,
                         'assignee_id' => $ticket->assignee_id ? $ticket->assignee_id : 0,
@@ -209,7 +209,7 @@ class ZendeskTwo extends Controller
                             'reply_id' => $zendesk_reply->id,
                             'body' => $comment->body,
                             'html_body' => $comment->html_body,
-                            'tags' => join(',',$params['tags']),
+                            'tags' => $tags,
                             'status' => isset($params['status']) ? $params['status'] : $ticket->status,
                             'assignee_id' => 382940274852,
                             'is_admin' => 0
@@ -219,7 +219,7 @@ class ZendeskTwo extends Controller
                         'reply_id' => $zendesk_reply->id,
                         'body' => isset($params['comment']['body']) ? $params['comment']['body']: '',
                         'html_body' => isset($params['comment']['body']) ? $params['comment']['body']: '',
-                        'tags' => join(',',$params['tags']),
+                        'tags' => $tags,
                         'status' => isset($params['status']) ? $params['status'] : $ticket->status,
                         'assignee_id' => 382940274852,
                         'is_admin' => 1
@@ -229,7 +229,7 @@ class ZendeskTwo extends Controller
                 }
                 if (!empty($params)) {
                         //tag合并
-                        $params['tags'] = join(',',$params['tags']);
+                        $params['tags'] = $tags;
                         $params['comment']['author_id'] = 382940274852;
                         $params['assignee_id'] = 382940274852;
                         $res = $this->autoUpdate($id, $params);
@@ -241,7 +241,7 @@ class ZendeskTwo extends Controller
                                     //更新主表状态
                                     ZendeskReply::where('id',$zendesk_reply->id)->update([
                                         'status' => $reply_detail_data['status'],
-                                        'tags' => $params['tags']
+                                        'tags' => $tags
                                     ]);
                                 }
                             }
