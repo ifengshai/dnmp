@@ -137,7 +137,6 @@ class ZendeskOne extends Controller
     {
         $params = $this->parseStr($array);
         $search = $this->client->search()->find($params);
-        dump($search);die;
         $tickets = $search->results;
         if(!$search->count){
             return true;
@@ -167,7 +166,7 @@ class ZendeskOne extends Controller
     public function findCommentsByTickets($tickets)
     {
         foreach($tickets as $key => $ticket){
-           if($key >= 2){
+           if($key >= 10){
                break;
            }
             $id = $ticket->id;
