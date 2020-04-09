@@ -166,9 +166,9 @@ class ZendeskOne extends Controller
     public function findCommentsByTickets($tickets)
     {
         foreach($tickets as $key => $ticket){
-           if($key >= 10){
-               break;
-           }
+//           if($key >= 10){
+//               break;
+//           }
             $id = $ticket->id;
             //发送者的id
             $requester_id = $ticket->requester_id;
