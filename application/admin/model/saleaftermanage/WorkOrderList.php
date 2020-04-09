@@ -1,11 +1,11 @@
 <?php
 
-namespace app\admin\model\saleaftermanage\workmanage;
+namespace app\admin\model\saleaftermanage;
 
 use think\Model;
 
 
-class WorkOrderRemark extends Model
+class WorkOrderList extends Model
 {
 
     
@@ -13,7 +13,7 @@ class WorkOrderRemark extends Model
     
 
     // 表名
-    protected $name = 'work_order_remark';
+    protected $name = 'work_order_list';
     
     // 自动写入时间戳字段
     protected $autoWriteTimestamp = false;
