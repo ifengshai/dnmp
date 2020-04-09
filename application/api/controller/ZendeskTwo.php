@@ -241,7 +241,7 @@ class ZendeskTwo extends Controller
                                     //更新主表状态
                                     ZendeskReply::where('id',$zendesk_reply->id)->update([
                                         'status' => $reply_detail_data['status'],
-                                        'tags' => join(',',$params['tags'])
+                                        'tags' => $params['tags']
                                     ]);
                                 }
                             }
