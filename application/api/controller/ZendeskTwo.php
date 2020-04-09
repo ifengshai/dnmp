@@ -209,7 +209,7 @@ class ZendeskTwo extends Controller
                             'reply_id' => $zendesk_reply->id,
                             'body' => $comment->body,
                             'html_body' => $comment->html_body,
-                            'tags' => join(',',array_unique(array_merge($tags, $params['tags']))),
+                            'tags' => join(',',$params['tags']),
                             'status' => isset($params['status']) ? $params['status'] : $ticket->status,
                             'assignee_id' => 382940274852,
                             'is_admin' => 0
@@ -219,7 +219,7 @@ class ZendeskTwo extends Controller
                         'reply_id' => $zendesk_reply->id,
                         'body' => isset($params['comment']['body']) ? $params['comment']['body']: '',
                         'html_body' => isset($params['comment']['body']) ? $params['comment']['body']: '',
-                        'tags' => join(',',array_unique(array_merge($tags, $params['tags']))),
+                        'tags' => join(',',$params['tags']),
                         'status' => isset($params['status']) ? $params['status'] : $ticket->status,
                         'assignee_id' => 382940274852,
                         'is_admin' => 1
@@ -229,7 +229,7 @@ class ZendeskTwo extends Controller
                 }
                 if (!empty($params)) {
                         //tag合并
-                        $params['tags'] = array_unique(array_merge($tags, $params['tags']));
+                        $params['tags'] = join(',',$params['tags']);
                         $params['comment']['author_id'] = 382940274852;
                         $params['assignee_id'] = 382940274852;
                         $res = $this->autoUpdate($id, $params);
