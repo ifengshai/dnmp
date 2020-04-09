@@ -206,8 +206,8 @@ class ZendeskTwo extends Controller
                         }
                         $reply_detail_data = [
                             'reply_id' => $zendesk_reply->id,
-                            'body' => $params['comment']['body'],
-                            'html_body' => $params['comment']['body'],
+                            'body' => isset($params['comment']['body']) ? $params['comment']['body']: '',
+                            'html_body' => isset($params['comment']['body']) ? $params['comment']['body']: '',
                             'tags' => join(',',array_unique(array_merge($tags, $params['tags']))),
                             'status' => isset($params['status']) ? $params['status'] : $ticket->status,
                             'assignee_id' => 382940274852,
