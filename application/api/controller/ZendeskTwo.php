@@ -36,7 +36,7 @@ class ZendeskTwo extends Controller
         'others'
     ];
     //匹配自动回复的单词
-    protected $preg_word = ['deliver','delivery','receive','track','ship','shipping','tracking','status','shipment','where','where is','find','update','eta','expected'];
+    protected $preg_word = ['deliver','delivery','track','ship','shipping','tracking','status','shipment','where','where is','update','eta','expected'];
     public $client = null;
     //public $testId = [383401621551,383402124271,383347471012,393708243591,383347496492,394745643811,394627403612,394627403852,394745654451,394627408052,383402007531,394627410752,394745679291];
 
