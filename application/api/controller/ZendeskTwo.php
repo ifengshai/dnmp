@@ -192,7 +192,7 @@ class ZendeskTwo extends Controller
                         'email_id' => $ticket->id,
                         'body' => $last_comment->body,
                         'html_body' => $last_comment->html_body,
-                        'tags' => join(',',$tags),
+                        'tags' => join(',',$params['tags']),
                         'status' => $ticket->status,
                         'requester_id' => $requester_id,
                         'assignee_id' => $ticket->assignee_id ? $ticket->assignee_id : 0,
