@@ -84,6 +84,7 @@ require(['form', 'upload'], function (Form, Upload) {
                             attachment: attachmentButton,
                         },
                         dialogsInBody: true,
+                        followingToolbar: false,
                         callbacks: {
                             onChange: function (contents) {
                                 $(this).val(contents);

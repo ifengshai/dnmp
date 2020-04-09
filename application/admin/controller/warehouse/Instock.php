@@ -7,6 +7,7 @@ use think\Db;
 use think\Exception;
 use think\exception\PDOException;
 use think\exception\ValidateException;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
 
 /**
  * 入库单管理
@@ -62,7 +63,7 @@ class Instock extends Backend
                 $map['instock.id'] = ['in', $ids];
                 unset($filter['sku']);
                 $this->request->get(['filter' => json_encode($filter)]);
-            } 
+            }
 
 
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
@@ -138,9 +139,8 @@ class Instock extends Backend
                             $data[$k]['in_stock_num'] = $in_stock_num[$k];
                             $data[$k]['sample_num'] = $sample_num[$k];
                             $data[$k]['no_stock_num'] = $in_stock_num[$k];
-                            $data[$k]['purchase_id']  = $purchase_id[$k];  
+                            $data[$k]['purchase_id']  = $purchase_id[$k];
                             $data[$k]['in_stock_id'] = $this->model->id;
-
                         }
                         //批量添加
                         $this->instockItem->allowField(true)->saveAll($data);
@@ -465,7 +465,7 @@ class Instock extends Backend
                         $check = new \app\admin\model\warehouse\Check;
                         //总到货数量
                         $all_arrivals_num = $check->hasWhere('checkItem')->where($check_map)->group('Check.purchase_id')->sum('arrivals_num');
-                        
+
                         $all_purchase_num = $purchase->where('purchase_id', $check_res['purchase_id'])->sum('purchase_num');
                         //总到货数量 小于 采购单采购数量 则为部分入库 
                         if ($all_arrivals_num < $all_purchase_num) {
@@ -602,47 +602,47 @@ class Instock extends Backend
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
                 ->with(['checkorder', 'instocktype'])
-                ->where(['instock.status'=>2,'type_id'=>1])
+                ->where(['instock.status' => 2, 'type_id' => 1])
                 ->where($where)
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->model
                 ->with(['checkorder', 'instocktype'])
-                ->where(['instock.status'=>2,'type_id'=>1])
+                ->where(['instock.status' => 2, 'type_id' => 1])
                 ->where($where)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
             $list = collection($list)->toArray();
             $totalId = $this->model
-                    ->with(['checkorder','instocktype'])
-                    ->where(['instock.status'=>2,'type_id'=>1])
-                    ->where($where)
-                    ->column('instock.id');
+                ->with(['checkorder', 'instocktype'])
+                ->where(['instock.status' => 2, 'type_id' => 1])
+                ->where($where)
+                ->column('instock.id');
             $thisPageId = $this->model
-                    ->with(['checkorder', 'instocktype'])
-                    ->where(['instock.status'=>2,'type_id'=>1])
-                    ->where($where)
-                    ->order($sort, $order)
-                    ->limit($offset, $limit)
-                    ->column('instock.id');
+                ->with(['checkorder', 'instocktype'])
+                ->where(['instock.status' => 2, 'type_id' => 1])
+                ->where($where)
+                ->order($sort, $order)
+                ->limit($offset, $limit)
+                ->column('instock.id');
             $totalPriceInfo =  $this->instockItem->calculateMoneyAccordInStock($totalId);
             $thisPagePriceInfo = $this->instockItem->calculateMoneyAccordInStockThisPageId($thisPageId);
-            if(0 != $thisPagePriceInfo){
-                foreach($list as $keys => $vals){
-                    if(array_key_exists($vals['id'],$thisPagePriceInfo)){
-                         $list[$keys]['total_money'] = $thisPagePriceInfo[$vals['id']];
+            if (0 != $thisPagePriceInfo) {
+                foreach ($list as $keys => $vals) {
+                    if (array_key_exists($vals['id'], $thisPagePriceInfo)) {
+                        $list[$keys]['total_money'] = $thisPagePriceInfo[$vals['id']];
                     }
                 }
             }
-            $result = array("total" => $total, "rows" => $list,"totalPriceInfo"=>$totalPriceInfo['total_money']);
+            $result = array("total" => $total, "rows" => $list, "totalPriceInfo" => $totalPriceInfo['total_money']);
             return json($result);
         }
         return $this->view->fetch();
     }
     //入库单成本核算详情 create@lsw
-    public function account_in_stock_order_detail($ids=null)
+    public function account_in_stock_order_detail($ids = null)
     {
         $row = $this->model->get($ids);
         if (!$row) {
@@ -677,11 +677,118 @@ class Instock extends Backend
         // $checkItem = new \app\admin\model\warehouse\CheckItem;
         // $check_data = $checkItem->where('check_id', $row['check_id'])->column('*', 'sku');
         /***********end***************/
-        if($item){
+        if ($item) {
             $this->assign('item', $item);
         }
-            // $this->assign('check_data', $check_data);
-            $this->view->assign("row", $row);
-            return $this->view->fetch();
+        // $this->assign('check_data', $check_data);
+        $this->view->assign("row", $row);
+        return $this->view->fetch();
+    }
+
+
+    /**
+     * 入库单批量导出xls
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/02/28 14:45:39 
+     * @return void
+     */
+    public function batch_export_xls()
+    {
+        set_time_limit(0);
+        ini_set('memory_limit', '512M');
+        $ids = input('ids');
+        if ($ids) {
+            $map['a.id'] = ['in', $ids];
+        }
+
+        //自定义sku搜索
+        $filter = json_decode($this->request->get('filter'), true);
+        if ($filter['sku']) {
+            $smap['sku'] = ['like', '%' . $filter['sku'] . '%'];
+            $ids = $this->instockItem->where($smap)->column('in_stock_id');
+            $map['instock.id'] = ['in', $ids];
+            unset($filter['sku']);
+            $this->request->get(['filter' => json_encode($filter)]);
+        }
+
+        list($where) = $this->buildparams();
+        $list = $this->model->alias('a')
+            ->field('in_stock_number,sku,in_stock_num,createtime,create_person')
+            ->join(['fa_in_stock_item' => 'b'], 'b.in_stock_id=a.id')
+            ->where($where)
+            ->where($map)
+            ->select();
+
+        $list = collection($list)->toArray();
+
+        //从数据库查询需要的数据
+        $spreadsheet = new Spreadsheet();
+
+        //常规方式：利用setCellValue()填充数据
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("A1", "入库单号")
+            ->setCellValue("B1", "SKU")
+            ->setCellValue("C1", "入库数量");   //利用setCellValues()填充数据
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("D1", "创建人")
+            ->setCellValue("E1", "创建时间");
+      
+
+        foreach ($list as $key => $value) {
+
+            $spreadsheet->getActiveSheet()->setCellValueExplicit("A" . ($key * 1 + 2), $value['in_stock_number'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+            $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $value['sku']);
+            $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 1 + 2), $value['in_stock_num']);
+            $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 1 + 2), $value['create_person']);
+            $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), $value['createtime']);
+        }
+
+        //设置宽度
+        $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(30);
+        $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('D')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('E')->setWidth(20);
+       
+
+        //设置边框
+        $border = [
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, // 设置border样式
+                    'color'       => ['argb' => 'FF000000'], // 设置border颜色
+                ],
+            ],
+        ];
+
+        $spreadsheet->getDefaultStyle()->getFont()->setName('微软雅黑')->setSize(12);
+
+
+        $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
+        $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
+
+        $spreadsheet->getActiveSheet()->getStyle('A1:E' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $spreadsheet->setActiveSheetIndex(0);
+
+        $format = 'xlsx';
+        $savename = '入库单数据' . date("YmdHis", time());;
+
+        if ($format == 'xls') {
+            //输出Excel03版本
+            header('Content-Type:application/vnd.ms-excel');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xls";
+        } elseif ($format == 'xlsx') {
+            //输出07Excel版本
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xlsx";
+        }
+
+        //输出名称
+        header('Content-Disposition: attachment;filename="' . $savename . '.' . $format . '"');
+        //禁止缓存
+        header('Cache-Control: max-age=0');
+        $writer = new $class($spreadsheet);
+
+        $writer->save('php://output');
     }
 }

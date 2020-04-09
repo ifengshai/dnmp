@@ -93,7 +93,7 @@ class Item extends Model
                     }
                 }
                 $result['itemArr'] = $arr;
-            } elseif (3 == $type) { //配饰类型
+            } elseif (3 <= $type) { //配饰类型
                 $arr = $this->alias('m')->where('origin_sku', '=', $result['origin_sku'])->join('item_attribute a', 'm.id=a.item_id')->field('m.name,m.price,a.accessory_color')->select();
                 $result['itemArr'] = $arr;
             }
@@ -731,5 +731,21 @@ class Item extends Model
 
         $where['category_id']  = ['in', $ids];
         return $this->where($where)->where(['is_new'=>1])->count('sku');
+    }
+
+    /**
+     * 获取SKU分类名称
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/03/24 11:31:21 
+     * @param [type] $sku
+     * @return void
+     */
+    public function getSkuCategoryName()
+    {
+        $where['a.is_del']  = 1;
+        $where['a.is_open']  = 1;
+        return $this->alias('a')->where($where)->join(['fa_item_category' => 'b'],'a.category_id=b.id')->column('b.name','sku');
     }
 }

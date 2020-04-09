@@ -124,6 +124,7 @@ class NewProduct extends Backend
                     if (!$textureEncode) {
                         $this->error(__('The corresponding encoding rule does not exist, please try again'));
                     }
+                   
                     //如果是后来添加的
                     if (!empty($params['origin_skus']) && $params['item_count'] >= 1) { //正常情况
                         $count = $params['item_count'];
@@ -141,6 +142,7 @@ class NewProduct extends Backend
                     } elseif (!empty($params['origin_skus']) && $params['item_count'] < 1) { //原始sku失败情况
                         $this->error(__('Make sure the original sku code is the correct sku code'));
                     }
+
                     if (!empty($params['origin_skus'])) {
                         $data['origin_sku'] = $params['origin_sku'];
                     } else {
@@ -207,7 +209,6 @@ class NewProduct extends Backend
                         $this->error(__('No rows were inserted'));
                     }
                 } else {
-
 
                     //求出材质对应的编码
                     if ($params['frame_texture']) {

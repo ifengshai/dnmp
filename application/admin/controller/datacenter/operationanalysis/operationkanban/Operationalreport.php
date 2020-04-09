@@ -1,7 +1,9 @@
 <?php
 namespace app\admin\controller\datacenter\operationanalysis\operationkanban;
 use think\Db;
+use think\Cache;
 use app\common\controller\Backend;
+use app\admin\model\OrderItemInfo;
 use app\admin\model\platformmanage\MagentoPlatform;
 class Operationalreport extends Backend{
     //订单类型数据统计
@@ -22,7 +24,7 @@ class Operationalreport extends Backend{
         $platform    = input('order_platform', 1);
         if($this->request->isAjax()){
             $params = $this->request->param();
-            //默认当天
+            //默认7天数据
             if ($params['time']) {
                 $time = explode(' ', $params['time']);
                 $map['created_at'] = $itemMap['m.created_at'] =  ['between', [$time[0] . ' ' . $time[1], $time[3] . ' ' . $time[4]]];
@@ -33,11 +35,68 @@ class Operationalreport extends Backend{
             if(4<=$order_platform){
                 return $this->error('该平台暂时没有数据');
             }
-            $result = $this->platformOrderInfo($order_platform,$map,$itemMap);
+            //缓存图标数据
+            $create_date = $frame_sales_num = $frame_in_print_num = $decoration_sales_num = $decoration_in_print_num =[];
+            $top_data = Cache::get('Operationalreport_index_top'.$order_platform.md5(serialize($map)));
+            if($top_data){
+                $list = $top_data;
+            }else{
+                $orderItemInfo = new OrderItemInfo();
+                $list = $orderItemInfo->getAllData($order_platform);
+                Cache::set('Operationalreport_index_top'.$order_platform.md5(serialize($map)),$list,7200);
+            }
+            if($list){
+                foreach ($list as $v) {
+                    $frame_sales_num[]          = $v['frame_sales_num'];
+                    $frame_in_print_num[]       = $v['frame_in_print_num'];
+                    $decoration_sales_num[]     = $v['decoration_sales_num'];
+                    $decoration_in_print_num[]  = $v['decoration_in_print_num'];
+                    $create_date[]              = $v['create_date'];  
+                }
+            }
+            $json['xColumnName'] = $json2['xColumnName'] = $create_date ? $create_date :[];
+            $json['columnData'] = [
+                [
+                    'type' => 'bar',
+                    'barWidth' => '20%',
+                    'data' => $frame_sales_num ? $frame_sales_num:[],
+                    'name' => '眼镜销售副数'
+                ],
+                [
+                    'type' => 'line',
+                    'yAxisIndex' => 1,
+                    'data' => $frame_in_print_num ? $frame_in_print_num:[],
+                    'name' => '眼镜动销数'                    
+                ]
+
+            ];
+            $json2['columnData'] = [
+                [
+                    'type' => 'bar',
+                    'barWidth' => '20%',
+                    'data' => $decoration_sales_num ? $decoration_sales_num:[],
+                    'name' => '配饰销售副数'
+                ],
+                [
+                    'type' => 'line',
+                    'yAxisIndex' => 1,
+                    'data' => $decoration_in_print_num ? $decoration_in_print_num:[],
+                    'name' => '配饰动销数'                    
+                ]
+            ];
+            if($params['key'] == 'frame_sales_num'){
+                return json(['code' => 1, 'data'=>$json]);
+
+            }elseif($params['key'] == 'decoration_sales_num'){
+                return json(['code' => 1, 'data'=>$json2]);
+            }else{
+                $result = $this->platformOrderInfo($order_platform,$map,$itemMap);
             if(!$result){
                 return $this->error('暂无数据');
             }
-            return json(['code' => 1, 'data'=>[1,2,3],'rows' => $result]);
+                return json(['code' => 1, 'rows' => $result]);
+            }
+            
 
         }	
         $this->view->assign(
@@ -61,6 +120,10 @@ class Operationalreport extends Backend{
      */
     public function platformOrderInfo($platform,$map,$itemMap)
     {
+        $arr = Cache::get('Operationalreport_platformOrderInfo'.$platform.md5(serialize($map)));
+        if($arr){
+            return $arr;
+        }
         $this->item = new \app\admin\model\itemmanage\Item;
         $this->itemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku;
         switch($platform){
@@ -200,9 +263,9 @@ class Operationalreport extends Backend{
             }
         }
         //求出眼镜所有sku
-        $frame_sku  = $this->item->getDifferenceSku(1);
+        $frame_sku  = $this->itemPlatformSku->getDifferencePlatformSku(1,$platform);
         //求出饰品的所有sku
-        $decoration_sku = $this->item->getDifferenceSku(3);
+        $decoration_sku = $this->itemPlatformSku->getDifferencePlatformSku(3,$platform);
         //求出眼镜的销售额 base_price  base_discount_amount
         $frame_money_price    = $model->table('sales_flat_order_item m')->join('sales_flat_order o','m.order_id=o.entity_id','left')->where($whereItem)->where($itemMap)->where('m.sku','in',$frame_sku)->sum('m.base_price');
         //眼镜的折扣价格
@@ -256,9 +319,9 @@ class Operationalreport extends Backend{
           $decoration_in_print_rate = 0;  
         }
         //求出所有新品眼镜sku
-        $frame_new_sku  = $this->item->getDifferenceNewSku(1);
+        $frame_new_sku  = $this->itemPlatformSku->getDifferencePlatformNewSku(1,$platform);
         //求出所有新品饰品sku
-        $decoration_new_sku = $this->item->getDifferenceNewSku(3);
+        $decoration_new_sku = $this->itemPlatformSku->getDifferencePlatformNewSku(3,$platform);
         //求出新品眼镜的销售额 base_price  base_discount_amount
         $frame_new_money_price    = $model->table('sales_flat_order_item m')->join('sales_flat_order o','m.order_id=o.entity_id','left')->where($whereItem)->where($itemMap)->where('m.sku','in',$frame_new_sku)->sum('m.base_price');
         //新品眼镜的折扣价格
@@ -302,7 +365,7 @@ class Operationalreport extends Backend{
         }else{
             $decoration_new_in_print_rate  = 0;
         }
-        return [
+        $arr = [
             'general_order'                     => $general_order,
             'general_money'                     => $general_money,
             'wholesale_order'                   => $wholesale_order,
@@ -365,5 +428,7 @@ class Operationalreport extends Backend{
             'decoration_new_in_print_num'       => $decoration_new_in_print_num,
             'decoration_new_in_print_rate'      => $decoration_new_in_print_rate
         ];
+        Cache::set('Operationalreport_platformOrderInfo'.$platform.md5(serialize($map)),$arr,7200);
+        return $arr;
     }
 }

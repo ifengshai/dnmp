@@ -495,6 +495,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','custom-css','
             Form.api.bindevent($("form[role=form]"), function (data) {
                 window.top.location.href = Config.moduleurl + '/saleaftermanage/order_return/search';
             });
+            //$('tr:not(:has(td[rowspan])):even');
             //点击重置按钮
             $(document).on('click','.btn-default',function(){
                 $('#increment_id').attr({"value": ""});
@@ -685,9 +686,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','custom-css','
             });
             //点击查看物流信息
             $(document).on('click','.track-number',function(){
-                var entity_id = $(this).parent().prev().prev().html();
+                var entity_id = $(this).parent().prev().prev().val();
                 var order_platform = $('#c-order_platform').val();
                 var track_number = $(this).html();
+                // console.log(entity_id);
+                // console.log(order_platform);
+                // console.log(track_number);
                 Backend.api.open('saleaftermanage/order_return/get_logistics_info/?track_number='+track_number+'&entity_id='+entity_id+'&order_platform='+order_platform,'查询物流信息',{area:["60%", "60%"]});
             });
             // $(document).on('change','#increment_id',function(){

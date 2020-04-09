@@ -359,11 +359,11 @@ class ZendeskOne extends Controller
      * @param $params
      * @throws \Exception
      */
-    public function autoUpdate($ticket_id,$params)
+    public function autoUpdate($ticket_id,$params,$echo = true)
     {
         try{
             $this->client->tickets()->update($ticket_id, $params);
-            echo $ticket_id . "\r\n";
+            if($echo) echo $ticket_id . "\r\n";
             sleep(1);
         }catch (\Exception $e){
             return false;

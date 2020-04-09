@@ -5,6 +5,7 @@ namespace app\admin\controller\datacenter;
 use app\common\controller\Backend;
 use think\Db;
 
+
 /**
  * 数据中心
  *
@@ -710,7 +711,7 @@ class Index extends Backend
                 //查询每天处理的订单
                 $orderLog = new \app\admin\model\OrderLog();
                 $order_process_res = $orderLog->getOrderProcessNum();
-                
+
                 $all_sales_num  = [];
                 $order_process_num  = [];
                 foreach ($list as $k => $v) {
@@ -736,6 +737,23 @@ class Index extends Backend
 
                 ];
                 return json(['code' => 1, 'data' => $json]);
+            } elseif ($key == 'list') {
+                $model = new \app\admin\model\WarehouseData();
+                list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+                $total = $model
+                    ->where($where)
+                    ->order($sort, $order)
+                    ->count();
+
+                $list = $model
+                    ->where($where)
+                    ->order($sort, $order)
+                    ->limit($offset, $limit)
+                    ->select();
+                $list = collection($list)->toArray();
+                $result = array("total" => $total, "rows" => $list);
+
+                return json($result);
             }
         }
 
@@ -803,6 +821,61 @@ class Index extends Backend
         //统计库存分级
         $stockData = $this->item->stockClass();
 
+        //加工时效
+        $processingAgingData = $this->processing_aging_data();
+
+
+        //计算产品等级的数量
+        $productGrade = new \app\admin\model\ProductGrade();
+        $where = [];
+        $where['grade'] = 'A+';
+        $AA_num = $productGrade->where($where)->sum('counter');
+
+        $where['grade'] = 'A';
+        $A_num = $productGrade->where($where)->sum('counter');
+
+        $where['grade'] = 'B';
+        $B_num = $productGrade->where($where)->sum('counter');
+
+        $where['grade'] = 'C+';
+        $CA_num = $productGrade->where($where)->sum('counter');
+
+        $where['grade'] = 'C';
+        $C_num = $productGrade->where($where)->sum('counter');
+
+        $where['grade'] = 'D';
+        $D_num = $productGrade->where($where)->sum('counter');
+
+        $where['grade'] = 'E';
+        $E_num = $productGrade->where($where)->sum('counter');
+
+        $where['grade'] = 'F';
+        $F_num = $productGrade->where($where)->sum('counter');
+
+        //总数
+        $all_num = $AA_num + $A_num + $B_num + $CA_num + $C_num + $D_num + $E_num + $F_num;
+        //A级数量即总占比
+        $res['AA_num'] = $AA_num;
+        $res['AA_percent'] = round($AA_num / $all_num * 100, 2);
+        $res['A_num'] = $A_num;
+        $res['A_percent'] = round($A_num / $all_num * 100, 2);
+        $res['B_num'] = $B_num;
+        $res['B_percent'] = round($B_num / $all_num * 100, 2);
+        $res['CA_num'] = $CA_num;
+        $res['CA_percent'] = round($CA_num / $all_num * 100, 2);
+        $res['C_num'] = $C_num;
+        $res['C_percent'] = round($C_num / $all_num * 100, 2);
+        $res['D_num'] = $D_num;
+        $res['D_percent'] = round($D_num / $all_num * 100, 2);
+        $res['E_num'] = $E_num;
+        $res['E_percent'] = round($E_num / $all_num * 100, 2);
+        $res['F_num'] = $F_num;
+        $res['F_percent'] = round($F_num / $all_num * 100, 2);
+
+        $this->view->assign('gradeSkuStock', $productGrade->getSkuStock());
+        $this->view->assign('res', $res);
+
+        $this->view->assign('processingAgingData', $processingAgingData);
         $this->view->assign('skuNum', $skuNum);
         $this->view->assign('stockData', $stockData);
         $this->view->assign('days30OrderProcessNum', $days30OrderProcessNum);
@@ -824,5 +897,214 @@ class Index extends Backend
         $this->view->assign('ornamentsStock', $ornamentsStock);
         $this->view->assign('ornamentsStockPrice', $ornamentsStockPrice);
         return $this->view->fetch();
+    }
+
+    /**
+     * 加工时效数据统计
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/03/19 09:38:24 
+     * @return void
+     */
+    protected function processing_aging_data()
+    {
+        $zeelool = $this->zeelool->getProcessingAging();
+
+        $voogueme = $this->voogueme->getProcessingAging();
+
+        $nihao = $this->nihao->getProcessingAging();
+
+        //打印标签未超时未处理
+        $data['labelNotOvertime'] = $zeelool['labelNotOvertime'] + $voogueme['labelNotOvertime'] + $nihao['labelNotOvertime'];
+        //配镜架未超时未处理
+        $data['frameNotOvertime'] = $zeelool['frameNotOvertime'] + $voogueme['frameNotOvertime'] + $nihao['frameNotOvertime'];
+        //配镜片未超时未处理
+        $data['lensNotOvertime'] = $zeelool['lensNotOvertime'] + $voogueme['lensNotOvertime'] + $nihao['lensNotOvertime'];
+        //加工未超时未处理
+        $data['machiningNotOvertime'] = $zeelool['machiningNotOvertime'] + $voogueme['machiningNotOvertime'] + $nihao['machiningNotOvertime'];
+        //质检未超时未处理
+        $data['checkNotOvertime'] = $zeelool['checkNotOvertime'] + $voogueme['checkNotOvertime'] + $nihao['checkNotOvertime'];
+        //打印标签超时未处理
+        $data['labelOvertime'] = $zeelool['labelOvertime'] + $voogueme['labelOvertime'] + $nihao['labelOvertime'];
+        //配镜架超时未处理
+        $data['frameOvertime'] = $zeelool['frameOvertime'] + $voogueme['frameOvertime'] + $nihao['frameOvertime'];
+        //配镜片超时未处理
+        $data['lensOvertime'] = $zeelool['lensOvertime'] + $voogueme['lensOvertime'] + $nihao['lensOvertime'];
+        //加工超时未处理
+        $data['machiningOvertime'] = $zeelool['machiningOvertime'] + $voogueme['machiningOvertime'] + $nihao['machiningOvertime'];
+        //质检超时未处理
+        $data['checkOvertime'] = $zeelool['checkOvertime'] + $voogueme['checkOvertime'] + $nihao['checkOvertime'];
+        //打印标签未超时已处理
+        $data['labelNotOvertimeProcess'] = $zeelool['labelNotOvertimeProcess'] + $voogueme['labelNotOvertimeProcess'] + $nihao['labelNotOvertimeProcess'];
+        //配镜架未超时已处理
+        $data['frameNotOvertimeProcess'] = $zeelool['frameNotOvertimeProcess'] + $voogueme['frameNotOvertimeProcess'] + $nihao['frameNotOvertimeProcess'];
+        //配镜片未超时已处理
+        $data['lensNotOvertimeProcess'] = $zeelool['lensNotOvertimeProcess'] + $voogueme['lensNotOvertimeProcess'] + $nihao['lensNotOvertimeProcess'];
+        //加工未超时已处理
+        $data['machiningNotOvertimeProcess'] = $zeelool['machiningNotOvertimeProcess'] + $voogueme['machiningNotOvertimeProcess'] + $nihao['machiningNotOvertimeProcess'];
+        //质检未超时已处理
+        $data['checkNotOvertimeProcess'] = $zeelool['checkNotOvertimeProcess'] + $voogueme['checkNotOvertimeProcess'] + $nihao['checkNotOvertimeProcess'];
+        //打印标签超时已处理
+        $data['labelOvertimeProcess'] = $zeelool['labelOvertimeProcess'] + $voogueme['labelOvertimeProcess'] + $nihao['labelOvertimeProcess'];
+        //配镜架超时已处理
+        $data['frameOvertimeProcess'] = $zeelool['frameOvertimeProcess'] + $voogueme['frameOvertimeProcess'] + $nihao['frameOvertimeProcess'];
+        //配镜片超时已处理
+        $data['lensOvertimeProcess'] = $zeelool['lensOvertimeProcess'] + $voogueme['lensOvertimeProcess'] + $nihao['lensOvertimeProcess'];
+        //加工超时已处理
+        $data['machiningOvertimeProcess'] = $zeelool['machiningOvertimeProcess'] + $voogueme['machiningOvertimeProcess'] + $nihao['machiningOvertimeProcess'];
+        //质检超时已处理
+        $data['checkOvertimeProcess'] = $zeelool['checkOvertimeProcess'] + $voogueme['checkOvertimeProcess'] + $nihao['checkOvertimeProcess'];
+
+        return $data;
+    }
+
+    /**
+     * 采购数据分析
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/03/20 13:42:08 
+     * @return void
+     */
+    public function purchase_data_analysis()
+    {
+        $purchase = new \app\admin\model\purchase\PurchaseOrder();
+        if ($this->request->isAjax()) {
+            $purchase_type = input('purchase_type');
+            $key = input('key');
+            $time = input('time');
+            //拆分
+            if ($time) {
+                $arr = explode(' ', $time);
+                $time = [$arr[0] . ' ' . $arr[1], $arr[3] . ' ' . $arr[4]];
+            }
+            if ($key == 'pie01') {
+                $data = $purchase->getPurchaseNumNowPerson([], $time);
+                $json['column'] = array_keys($data);
+                //转二维数组
+                if ($data) {
+                    $list = [];
+                    $i = 0;
+                    foreach ($data as $k => $v) {
+                        $list[$i]['name'] = $k;
+                        $list[$i]['value'] = $v;
+                        $i++;
+                    }
+                }
+                $json['columnData'] = $list;
+            } elseif ($key == 'pie02') {
+                $data = $purchase->getPurchaseOrderNumNowPerson([], $time);
+                $json['column'] = array_keys($data);
+                //转二维数组
+                if ($data) {
+                    $list = [];
+                    $i = 0;
+                    foreach ($data as $k => $v) {
+                        $list[$i]['name'] = $k;
+                        $list[$i]['value'] = $v;
+                        $i++;
+                    }
+                }
+                $json['columnData'] = $list;
+            } else {
+                $warehouse_model = new \app\admin\model\WarehouseData();
+                $warehouse_data = $warehouse_model->getPurchaseData();
+                //线上采购单
+                if ($purchase_type == 1) {
+                    $barcloumndata = array_column($warehouse_data, 'online_purchase_num');
+                    $linecloumndata = array_column($warehouse_data, 'online_purchase_price');
+                } elseif ($purchase_type == 2) {
+                    //线下采购单
+                    $barcloumndata = array_column($warehouse_data, 'purchase_num');
+                    $linecloumndata = array_column($warehouse_data, 'purchase_price');
+                } else {
+                    //全部采购单
+                    $barcloumndata = array_column($warehouse_data, 'all_purchase_num');
+                    $linecloumndata = array_column($warehouse_data, 'all_purchase_price');
+                }
+
+                $json['xColumnName'] = array_column($warehouse_data, 'create_date');
+                $json['columnData'] = [
+                    [
+                        'type' => 'bar',
+                        'data' => $barcloumndata,
+                        'name' => '采购数量'
+                    ],
+                    [
+                        'type' => 'line',
+                        'data' => $linecloumndata,
+                        'name' => '采购金额',
+                        'yAxisIndex' => 1,
+                        'smooth' => true //平滑曲线
+                    ],
+
+                ];
+            }
+
+            return json(['code' => 1, 'data' => $json]);
+        }
+        $dataConfig = new \app\admin\model\DataConfig();
+        //采购总数
+        $purchaseNum = $dataConfig->getValue('purchaseNum');
+        //采购总金额
+        $purchasePrice = $dataConfig->getValue('purchasePrice');
+        //采购总SKU数
+        $purchaseSkuNum = $dataConfig->getValue('purchaseSkuNum');
+        //采购镜架总数
+        $purchaseFrameNum = $dataConfig->getValue('purchaseFrameNum');
+        //当月采购镜架总金额
+        $purchaseFramePrice = $dataConfig->getValue('purchaseFramePrice');
+        //采购到货总数
+        $arrivalsNum = $dataConfig->getValue('arrivalsNum');
+        //采购平均单价
+        $purchaseAveragePrice = $dataConfig->getValue('purchaseAveragePrice');
+        //当月销售总数
+        $salesNum = $dataConfig->getValue('salesNum');
+        //当月销售总成本
+        $salesCost = $dataConfig->getValue('salesCost');
+        //当月质检合格总数
+        $quantityNum = $dataConfig->getValue('quantityNum');
+
+        //当月线上采购数量
+        $onlinePurchaseNum = $purchase->getOnlinePurchaseNum();
+        //当月线下采购数量
+        $underPurchaseNum = $purchase->getUnderPurchaseNum();
+
+        //采购SKU排行数据
+        $data = $purchase->getPurchaseNumRanking();
+
+        $this->assign('data', $data);
+        $this->assign('purchaseAveragePrice', $purchaseAveragePrice);
+        $this->assign('purchaseFramePrice', $purchaseFramePrice);
+        $this->assign('salesNum', $salesNum);
+        $this->assign('salesCost', $salesCost);
+        $this->assign('quantityNum', $quantityNum);
+        $this->assign('onlinePurchaseNum', $onlinePurchaseNum);
+        $this->assign('underPurchaseNum', $underPurchaseNum);
+        $this->assign('purchaseNum', $purchaseNum);
+        $this->assign('purchasePrice', $purchasePrice);
+        $this->assign('purchaseSkuNum', $purchaseSkuNum);
+        $this->assign('purchaseFrameNum', $purchaseFrameNum);
+        $this->assign('arrivalsNum', $arrivalsNum);
+        return $this->view->fetch();
+    }
+
+    /**
+     * 测试
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/03/24 14:04:27 
+     * @return void
+     */
+    public function test()
+    {
+        $starttime = strtotime(date('Y-m-01 00:00:00', time())) - 8*3600;
+        $endtime = strtotime(date('Y-m-d H:i:s', time()));
+        $track = new Trackingmore();
+        $track = $track->getStatusNumberCount($starttime, $endtime);
+        dump($track);die;
+        
     }
 }
