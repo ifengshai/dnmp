@@ -16,7 +16,7 @@ use think\Db;
 use think\Exception;
 use Zendesk\API\HttpClient as ZendeskAPI;
 use function Stringy\create as s;
-
+use fast\Http;
 /**
  * 临时使用的只处理processing的方法
  * Class ZendeskTwo
@@ -53,6 +53,12 @@ class ZendeskTwo extends Controller
         }catch (\Exception $e){
             exception('zendesk链接失败', 100006);
         }
+    }
+    public function test()
+    {
+        $url = "https://translation.googleapis.com/language/translate/v2?key=AIzaSyCqDt6cu0yCLkKkkutNAm9gHJB3pcHIhKU&source=zh&target=en".'&q='.urlencode('我的士大夫丰富阿萨德额');
+        $res = Http::sendRequest($url);
+        dump($res);
     }
     /**
      * 查询tickets
