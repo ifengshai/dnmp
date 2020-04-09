@@ -180,9 +180,7 @@ class ZendeskTwo extends Controller
                         }
                         //查询订单状态的
                         if ($requester_email) {
-                            echo 1;
                             $params = $this->sendByOrder($ticket,$comments,$body,$requester_email);
-                            dump($params);
                         }
                     }
                     if(!$requester_email) {
