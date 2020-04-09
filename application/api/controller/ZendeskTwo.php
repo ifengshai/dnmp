@@ -175,7 +175,6 @@ class ZendeskTwo extends Controller
                             //'status' => 'open'
                         ];
                     }else{
-                        echo 2;
                         if(!$requester_email){
                             $requester_email = $last_comment->via->source->from->address;
                         }
@@ -186,9 +185,10 @@ class ZendeskTwo extends Controller
                             dump($params);
                         }
                     }
-                    dump($params['tags']);
+                    if(!$requester_email) {
+                        continue;
+                    }
                     $tags = join(',', $params['tags']);
-                    echo $tags;die;
                     //如果是第一条评论，则把对应的客户内容插入主表，回复内容插入附表，其余不做处理
                         //主email
                     $reply_data = [
