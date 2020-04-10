@@ -202,6 +202,7 @@ class Notice extends Controller
 
                 $updateData['assignee_id'] = $ticket->assignee_id;
                 $updateData['assign_id'] = ZendeskAgents::where('agent_id',$ticket->assignee_id)->value('admin_id');
+
             }
             //更新rating,如果存在的话
             if(!$zendesk->rating && $ticket->satisfaction_rating) {
@@ -244,6 +245,35 @@ class Notice extends Controller
                     $task->leave_count = $task->leave_count + 1;
                     $task->target_count = $task->target_count - 1;
                     $task->surplus_count = $task->surplus_count - 1;
+                    $task->complete_count = $task->complete_count - 1;
+                    $task->complete_apply_count = $task->complete_apply_count - 1;
+                    $task->save();
+                }
+            }
+            //从stefen修改为其他用户，用户apply_count+1，complete_apply_count+1
+            if($ticket->assignee_id != '382940274852' && $zendesk->assignee_id == '382940274852'){
+                //找出今天的task
+                $task = ZendeskTasks::whereTime('create_time', 'today')
+                    ->where(['assignee_id' => $ticket->assignee_id, 'type' => $zendesk->type])
+                    ->find();
+                //存在，则更新
+                if ($task) {
+                    $task->complete_apply_count = $task->complete_apply_count + 1;
+                    $task->apply_count = $task->apply_count + 1;
+                    $task->save();
+                }
+            }
+            //其他用户修改为stefen,今天分配的量-1
+            if($ticket->assignee_id == '382940274852' && $zendesk->assignee_id != '382940274852'){
+                //找出今天的task
+                $task = ZendeskTasks::whereTime('create_time', 'today')
+                    ->where(['admin_id' => $zendesk->assign_id, 'type' => $zendesk->type])
+                    ->find();
+                //存在，则更新
+                if ($task) {
+                    $task->surplus_count = $task->surplus_count + 1;
+                    $task->complete_count = $task->complete_count - 1;
+                    $task->complete_apply_count = $task->complete_apply_count - 1;
                     $task->save();
                 }
             }

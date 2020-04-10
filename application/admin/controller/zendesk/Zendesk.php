@@ -731,11 +731,9 @@ DOC;
                 'assignee_id' => $task->assignee_id,
                 'assign_time' => date('Y-m-d H:i:s', time()),
             ]);
-            //修改task的字段
-            if($task->surplus_count > 0){
-                $task->surplus_count = $task->surplus_count - 1;
-            }
-            $task->complete_count = $task->complete_count + 1;
+            //分配数目+1
+            $task->complete_apply_count = $task->complete_apply_count + 1;
+            $task->apply_count = $task->apply_count + 1;
             $task->save();
         }
     }

@@ -129,6 +129,7 @@ class Zendesk extends Model
                 //修改task的字段
                 $task->surplus_count = $task->surplus_count - 1;
                 $task->complete_count = $task->complete_count + 1;
+                $task->complete_apply_count = $task->complete_apply_count + 1;
                 $task->save();
             }
         }
@@ -161,7 +162,9 @@ class Zendesk extends Model
                     'target_count' => $target_count,
                     'surplus_count' => $target_count,
                     'complete_count' => 0,
-                    'check_count' => $agent->count
+                    'check_count' => $agent->count,
+                    'apply_count' => 0,
+                    'complete_apply_count' => 0
                 ]);
             }
         }
@@ -198,6 +201,7 @@ class Zendesk extends Model
                     //修改task的字段
                     $task->surplus_count = $task->surplus_count - 1;
                     $task->complete_count = $task->complete_count + 1;
+                    $task->complete_apply_count = $task->complete_apply_count + 1;
                     $task->save();
                 }
                 usleep(1000);
