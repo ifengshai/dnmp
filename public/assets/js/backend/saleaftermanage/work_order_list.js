@@ -1,4 +1,4 @@
-define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefined, Backend, Table, Form) {
+define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($, undefined, Backend, Table, undefined, Form) {
 
     var Controller = {
         index: function () {
@@ -77,10 +77,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
 
             $(document).on('click', '.step_type', function () {
                 var id = $(this).val();
-                if($(this).prop('checked')){
-                    $('#step_function .step'+id).show();
-                }else{
-                    $('#step_function .step'+id).hide();
+                if ($(this).prop('checked')) {
+                    $('#step_function .step' + id).show();
+                } else {
+                    $('#step_function .step' + id).hide();
                 }
             });
             //增加一行镜架数据
@@ -216,6 +216,80 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 $(this).parent().parent().remove();
 
             });
+
+            //模糊匹配订单号
+            $('#c-platform_order').autocomplete({
+                source: function (request, response) {
+                    var incrementId = $('#c-platform_order').val();
+                    if (incrementId.length > 4) {
+                        $.ajax({
+                            type: "POST",
+                            url: "ajax/ajaxGetLikeOrder",
+                            dataType: "json",
+                            cache: false,
+                            async: false,
+                            data: {
+                                order_number: incrementId
+                            },
+                            success: function (json) {
+                                var data = json.data;
+                                response($.map(data, function (item) {
+                                    return {
+                                        label: item,//下拉框显示值
+                                        value: item,//选中后，填充到input框的值
+                                        //id:item.bankCodeInfo//选中后，填充到id里面的值
+                                    };
+                                }));
+                            }
+                        });
+                    }
+                },
+                delay: 10,//延迟100ms便于输入
+                select: function (event, ui) {
+                    $("#bankUnionNo").val(ui.item.id);//取出在return里面放入到item中的属性
+                },
+                scroll: true,
+                pagingMore: true,
+                max: 5000
+            });
+
+            //失去焦点
+            $('#c-platform_order').blur(function () {
+                var incrementId = $(this).val();
+                if (!incrementId) {
+                    Toastr.error('订单号不能为空');
+                    return false;
+                }
+                var str = incrementId.substring(0, 3);
+                //判断站点
+                if (str == '100' || str == '400' || str == '500') {
+                    $("#c-work_platform").val(1);
+                } else if (str == '130' || str == '430') {
+                    $('#c-work_platform').val(2);
+                } else if (str == '300' || str == '600') {
+                    $('#c-work_platform').val(3);
+                }
+                $('.selectpicker ').selectpicker('refresh');
+                var ordertype = $('#c-work_platform').val();
+                $('#c-order_sku').html('');
+                Backend.api.ajax({
+                    url: 'saleaftermanage/work_order_list/get_sku_list',
+                    data: {
+                        ordertype: ordertype,
+                        order_number: incrementId
+                    }
+                }, function (data, ret) {
+                    var shtml = '<option value="">请选择</option>';
+                    for (var i in data) {
+                        shtml += '<option value="' + data[i] + '">' + data[i] + '</option>'
+                    }
+                    $('#c-order_sku').append(shtml);
+                    $('.selectpicker ').selectpicker('refresh');
+                })
+
+            })
+
+
 
         },
         edit: function () {
