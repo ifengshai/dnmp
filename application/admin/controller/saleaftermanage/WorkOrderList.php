@@ -15,7 +15,7 @@ use think\exception\ValidateException;
  */
 class WorkOrderList extends Backend
 {
-    
+
     /**
      * WorkOrderList模型对象
      * @var \app\admin\model\saleaftermanage\WorkOrderList
@@ -26,16 +26,15 @@ class WorkOrderList extends Backend
     {
         parent::_initialize();
         $this->model = new \app\admin\model\saleaftermanage\WorkOrderList;
-
     }
-    
+
     /**
      * 默认生成的控制器所继承的父类中有index/add/edit/del/multi五个基础方法、destroy/restore/recyclebin三个回收站方法
      * 因此在当前控制器中可不用编写增删改查的代码,除非需要自己控制这部分逻辑
      * 需要将application/admin/library/traits/Backend.php中对应的方法复制到当前控制器,然后进行修改
      */
 
-     /**
+    /**
      * 添加
      */
     public function add()
@@ -82,15 +81,16 @@ class WorkOrderList extends Backend
 
         //dump(config('workorder.customer_problem_type'));
         if(1==1){
-            $this->view->assign('problem_type',config('workorder.customer_problem_type'));
+            $this->view->assign('problem_type',config('workorder.customer_problem_type'));//客服问题类型
         }else{
-            $this->view->assign('problem_type',config('workorder.warehouse_problem_type'));
+            $this->view->assign('problem_type',config('workorder.warehouse_problem_type'));//仓库问题类型
         }
 
-        $this->view->assign('step', config('workorder.step'));
-        $this->assignconfig('workorder', config('workorder'));
+        $this->view->assign('step', config('workorder.step'));//措施
+        $this->assignconfig('workorder', config('workorder'));//JS专用，整个配置文件
+
+        $this->view->assign('check_coupon', config('workorder.check_coupon'));//不需要审核的优惠券
+        $this->view->assign('need_check_coupon', config('workorder.need_check_coupon'));//需要审核的优惠券
         return $this->view->fetch();
     }
-    
-
 }
