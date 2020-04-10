@@ -8,9 +8,12 @@
 namespace app\api\controller;
 
 
+use app\admin\model\zendesk\Zendesk;
+use app\admin\model\zendesk\ZendeskComments;
 use app\admin\model\zendesk\ZendeskReply;
 use think\Controller;
 use app\admin\model\zendesk\ZendeskReplyDetail as Detail;
+use think\Db;
 use Zendesk\API\HttpClient as ZendeskAPI;
 
 //修改zendesk_detail数据库之前的数据
@@ -60,5 +63,43 @@ class ChangeZendesk extends Controller
             $res = ZendeskReply::where('id',$reply->id)->setField('tags',$tags);
         }
         echo 'success';
+    }
+    //同步测试站和正式站的数据
+    public function asycTicket()
+    {
+        $database = [
+            // 数据库类型
+            'type'        => 'mysql',
+            // 服务器地址
+            'hostname'    => '127.0.0.1',
+            // 数据库名
+            'database'    => 'mojing_test',
+            // 数据库用户名
+            'username'    => 'mojing_test',
+            // 数据库密码
+            'password'    => 'rmDdHj75ti8PR3M5',
+            // 数据库连接端口
+            'hostport'    => '3306',
+            // 数据库编码默认采用utf8
+            'charset'     => 'utf8',
+            // 数据库表前缀
+            'prefix'      => 'fa_',
+        ];
+        $db = Db::connect($database);
+        $tickets = $db->name('zendesk')->where('id','>',10751)->limit(1)->select();
+        foreach($tickets as $ticket){
+            $data = collection($ticket)->toArray();
+            $zid = $data['id'];
+            unset($data['id']);
+            $id = Zendesk::create($data);
+            $comments = $db->name('zendeskComments')->where('zid',$zid)->select();
+            foreach($comments as $comment){
+                $commentData = collection($comment)->toArray();
+                unset($commentData['id']);
+                $commentData['zid'] = $id;
+                ZendeskComments::create($commentData);
+            }
+            sleep(1);
+        }
     }
 }
