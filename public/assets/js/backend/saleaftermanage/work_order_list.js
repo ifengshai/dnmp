@@ -55,7 +55,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
         add: function () {
             Controller.api.bindevent();
 
-            //点击事件
+            //点击事件 #todo::需判断仓库或者客服
             $(document).on('click', '.problem_type', function () {
                 $('.step').attr('checked', false);
                 $('.step').parent().hide();
@@ -75,7 +75,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 }
                 
             })
-
 
         },
         edit: function () {
