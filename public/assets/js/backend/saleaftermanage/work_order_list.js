@@ -75,7 +75,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 }
                 
             })
-
         },
         edit: function () {
             Controller.api.bindevent();
