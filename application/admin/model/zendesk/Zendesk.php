@@ -113,8 +113,17 @@ class Zendesk extends Model
                 ->limit(1)
                 ->find();
         } else {
+            //判断老用户是否在表里面并且目标大于0
             $task = ZendeskTasks::whereTime('create_time', 'today')
-                ->where(['admin_id' => $preTicket->assign_id, 'type' => $ticket->getType()])
+                ->where(['admin_id' => $preTicket->assign_id, 'type' => $ticket->getType(),'target_count' => ['>',0]])
+                ->find();
+        }
+        if(!$task){
+            //则分配给最少单的用户
+            $task = ZendeskTasks::whereTime('create_time', 'today')
+                ->where(['type' => $ticket->getType()])
+                ->order('surplus_count', 'desc')
+                ->limit(1)
                 ->find();
         }
 
@@ -186,8 +195,17 @@ class Zendesk extends Model
                     ->limit(1)
                     ->find();
             } else {
+                //判断老用户是否在表里面并且目标大于0
                 $task = ZendeskTasks::whereTime('create_time', 'today')
-                    ->where(['admin_id' => $preTicket->assign_id, 'type' => $ticket->getType()])
+                    ->where(['admin_id' => $preTicket->assign_id, 'type' => $ticket->getType(),'target_count' => ['>',0]])
+                    ->find();
+            }
+            if(!$task){
+                //则分配给最少单的用户
+                $task = ZendeskTasks::whereTime('create_time', 'today')
+                    ->where(['type' => $ticket->getType()])
+                    ->order('surplus_count', 'desc')
+                    ->limit(1)
                     ->find();
             }
             if ($task) {
