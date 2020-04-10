@@ -70,6 +70,10 @@ class Notice extends Controller
         //评论s
         $comments = $this->getComments($id);
         $ticket = $this->getTicket($id);
+        //存在已创建的则跳过流程
+        if(Zendesk::where('ticket_id', $id)->find()){
+            return false;
+        }
         $via = $ticket->via;
         $priority = 0;
         if ($ticket->priority) {
