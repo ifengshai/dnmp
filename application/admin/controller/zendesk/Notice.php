@@ -509,14 +509,14 @@ class Notice extends Controller
         if($page > 1){
             //获取后续的
             for($i=2;$i<= $page;$i++){
-                $search = $this->client->search()->find($params,['page' => $i]);
-                $tickets = $search->results;
                 try{
-                    $this->findCommentsByTickets($tickets,$type);
+                    $search = $this->client->search()->find($params,['page' => $i]);
                 }catch (\Exception $e){
                     echo 1;
                     $this->setTickets();
                 }
+                $tickets = $search->results;
+                $this->findCommentsByTickets($tickets,$type);
 
             }
         }
