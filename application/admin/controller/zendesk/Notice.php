@@ -691,12 +691,12 @@ class Notice extends Controller
         $params = $this->parseStr($search);
         $search = $this->client->search()->find($params);
         $tickets = $search->results;
+        $a = 1;
         foreach($tickets as $key => $ticket){
-            if($key > 1){
+            $id = $ticket->id;
+            if($a > 2){
                 break;
             }
-            $id = $ticket->id;
-
             $comments = $this->getComments($id);
             //开始插入相关数据
             $tags = $ticket->tags;
@@ -752,6 +752,7 @@ class Notice extends Controller
                 //查找comment_id是否存在，不存在则添加
                 foreach($comments as $comment){
                     if(!ZendeskComments::where('comment_id',$comment->id)->find()) {
+                        $a++;
                         //获取所有的附件
                         $attachments = [];
                         if ($comment->attachments) {
