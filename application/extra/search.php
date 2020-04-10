@@ -2,7 +2,8 @@
 //客服A、B分组
 return 
   [
-    'zeelool'=>[
+    'platform'=>[
+      'zeelool'=>[
         117,
         126,
         87,
@@ -20,6 +21,7 @@ return
         105,
         131
     ]
+    ],
   ];
 
   
