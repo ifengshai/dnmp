@@ -171,7 +171,6 @@ class ZendeskOne extends Controller
 //               break;
 //           }
             $id = $ticket->id;
-            echo $id;
             //发送者的id
             $requester_id = $ticket->requester_id;
             //所有的tag
