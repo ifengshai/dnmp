@@ -824,6 +824,7 @@ class Notice extends Controller
      */
     public function shellAssignTicket()
     {
+        echo 1;die;
         Zendesk::shellAssignTicket();
     }
 }
