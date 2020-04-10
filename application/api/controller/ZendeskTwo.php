@@ -307,7 +307,7 @@ class ZendeskTwo extends Controller
             //状态改solved，tag支付失败
             $params = [
                 'comment' => [
-                    'body' => config('zendesk.t3')
+                    'body' => config('zendesk.templates.t3')
                 ],
                 'tags' => ['支付失败','自动回复'],
                 'status' => 'solved'
@@ -316,7 +316,7 @@ class ZendeskTwo extends Controller
             //状态solved，tag取消订单
             $params = [
                 'comment' => [
-                    'body' => sprintf(config('zendesk.t7'), $increment_id)
+                    'body' => sprintf(config('zendesk.templates.t7'), $increment_id)
                 ],
                 'tags' => ['取消订单','自动回复'],
                 'status' => 'solved'
@@ -324,7 +324,7 @@ class ZendeskTwo extends Controller
         } elseif($status == 'processing') {
             $params = [
                 'comment' => [
-                    'body' => config('zendesk.t15')
+                    'body' => config('zendesk.templates.t15')
                 ],
                 'tags' => ['未发货','自动回复'],
                 'status' => 'pending'
@@ -353,7 +353,7 @@ class ZendeskTwo extends Controller
             if ($res['status'] == 'delivered') { //已签收
                 $params = [
                     'comment' => [
-                        'body' => sprintf(config('zendesk.t4'), $res['updated_at'], $res['track_number'], $res['carrier_code'], $res['lastEvent'], $res['lastUpdateTime'])
+                        'body' => sprintf(config('zendesk.templates.t4'), $res['updated_at'], $res['track_number'], $res['carrier_code'], $res['lastEvent'], $res['lastUpdateTime'])
                     ],
                     'tags' => ['已签收', '查询物流信息','自动回复'],
                     'status' => 'solved'
@@ -367,7 +367,7 @@ class ZendeskTwo extends Controller
                 if($diffTime <= 2) {
                     $params = [
                         'comment' => [
-                            'body' => sprintf(config('zendesk.t9'), date('Y-m-d H:i',$shipTime), $res['track_number'], $res['carrier_code'], $res['lastEvent'])
+                            'body' => sprintf(config('zendesk.templates.t9'), date('Y-m-d H:i',$shipTime), $res['track_number'], $res['carrier_code'], $res['lastEvent'])
                         ],
 
                         'tags' => ['超时', '查询物流信息','自动回复'],
@@ -376,7 +376,7 @@ class ZendeskTwo extends Controller
                 }elseif($diffTime <= 3 && $diffTime > 2){
                     $params = [
                         'comment' => [
-                            'body' => sprintf(config('zendesk.t10'), $res['carrier_code'], $res['track_number'], date('Y-m-d H:i',$shipTime))
+                            'body' => sprintf(config('zendesk.templates.t10'), $res['carrier_code'], $res['track_number'], date('Y-m-d H:i',$shipTime))
                         ],
                         'tags' => ['超时', '查询物流信息','自动回复'],
                         'status' => 'pending'
@@ -384,7 +384,7 @@ class ZendeskTwo extends Controller
                 }elseif($diffTime <= 4 && $diffTime > 3){
                     $params = [
                         'comment' => [
-                            'body' => config('zendesk.t11')
+                            'body' => config('zendesk.templates.t11')
                         ],
                         'tags' => ['超时', '查询物流信息','自动回复'],
                         'status' => 'pending'
@@ -392,7 +392,7 @@ class ZendeskTwo extends Controller
                 }elseif($diffTime <= 6 && $diffTime > 4){
                     $params = [
                         'comment' => [
-                            'body' => config('zendesk.t12')
+                            'body' => config('zendesk.templates.t12')
                         ],
                         'tags' => ['超时', '查询物流信息','自动回复'],
                         'status' => 'pending'
@@ -400,7 +400,7 @@ class ZendeskTwo extends Controller
                 }elseif($diffTime <= 9 && $diffTime > 6){
                     $params = [
                         'comment' => [
-                            'body' => config('zendesk.t13')
+                            'body' => config('zendesk.templates.t13')
                         ],
                         'tags' => ['超时', '查询物流信息','自动回复'],
                         'status' => 'pending'
@@ -408,7 +408,7 @@ class ZendeskTwo extends Controller
                 }elseif($diffTime > 9){
                     $params = [
                         'comment' => [
-                            'body' => config('zendesk.t14')
+                            'body' => config('zendesk.templates.t14')
                         ],
                         'tags' => ['超时', '查询物流信息','自动回复'],
                         'status' => 'pending'
