@@ -24,5 +24,12 @@ return [
     'Complete_time'        => '工单完成时间',
     'problem_type'        => '问题类型',
     'step'        => '实时措施',
+    'replenish_money'        => '补差价金额',
+    'replenish_increment_id'        => '补差价订单号',
+    'check_coupon'        => '不需要审核的优惠券',
+    'need_check_coupon'        => '需要审核的优惠券',
+    'integral'        => '积分',
+    'refund_logistics_num'        => '退回物流单号',
+
 
 ];

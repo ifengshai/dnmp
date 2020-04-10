@@ -223,41 +223,62 @@
     <div class="form-group">
 
         <div class="form-group-child">
-            <label class="control-label col-xs-12 col-sm-2">{:__('platform_order')}：</label>
+            <label class="control-label col-xs-12 col-sm-2">{:__('replenish_increment_id')}：</label>
             <div class="col-xs-12 col-sm-8">
-                <input id="c-platform_order" data-rule="required" class="form-control" name="row[platform_order]" type="text" value="">
+                <input id="c-replenish_increment_id" data-rule="required" class="form-control" name="row[replenish_increment_id]" type="text" value="">
             </div>
         </div>
 
         <div class="form-group-child">
-            <label class="control-label col-xs-12 col-sm-2">{:__('work_platform')}：</label>
+            <label class="control-label col-xs-12 col-sm-2">{:__('replenish_money')}：</label>
             <div class="col-xs-12 col-sm-8">
-                <select  id="c-work_platform" data-rule="required" class="form-control selectpicker" name="row[work_platform]">
+                <input id="c-replenish_money" data-rule="required" class="form-control" name="row[replenish_money]" type="text" value="">
+            </div>
+        </div>
+
+        <div class="form-group-child">
+            <label class="control-label col-xs-12 col-sm-2">{:__('check_coupon')}：</label>
+            <div class="col-xs-12 col-sm-8">
+                <select  id="c-check_coupon" class="form-control selectpicker" name="row[check_coupon]">
                     <option value="0">请选择</option>
-                    <option value="1">zeelool</option>
-                    <option value="2">voogueme</option>
-                    <option value="3">nihao</option>
+                    {foreach $check_coupon as $k3 => $v3}
+                        <option value="{$v3.id}">{$v3.desc}</option>
+                    {/foreach}
                 </select>
             </div>
         </div>
 
         <div class="form-group-child">
-            <label class="control-label col-xs-12 col-sm-2">{:__('order_sku')}：</label>
+            <label class="control-label col-xs-12 col-sm-2">{:__('need_check_coupon')}：</label>
             <div class="col-xs-12 col-sm-8">
-                <input id="c-order_sku" class="form-control" name="row[order_sku]" type="text" value="">
+                <select  id="c-need_check_coupon" class="form-control selectpicker" name="row[need_check_coupon]">
+                    <option value="0">请选择</option>
+                    {foreach $need_check_coupon as $k3 => $v3}
+                    <option value="{$v3.id}">{$v3.desc}</option>
+                    {/foreach}
+                </select>
             </div>
         </div>
 
         <div class="form-group-child">
-            <label class="control-label col-xs-12 col-sm-2">{:__('work_level')}：</label>
+            <label class="control-label col-xs-12 col-sm-2">{:__('integral')}：</label>
             <div class="col-xs-12 col-sm-8">
-                <select  id="c-work_level" class="form-control selectpicker" name="row[work_level]">
-                    <option value="1">低</option>
-                    <option value="2">中</option>
-                    <option value="3">高</option>
-                </select>
+                <input id="c-integral" data-rule="required" class="form-control" name="row[integral]" type="text" value="">
             </div>
         </div>
+
+        <div class="form-group-child">
+            <label class="control-label col-xs-12 col-sm-2">{:__('refund_logistics_num')}：</label>
+            <div class="col-xs-12 col-sm-8">
+                <input id="c-refund_logistics_num" data-rule="required" class="form-control" name="row[refund_logistics_num]" type="text" value="">
+            </div>
+        </div>
+
+
+
+
+
+
 
     </div>
 

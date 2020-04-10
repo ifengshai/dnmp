@@ -82,13 +82,16 @@ class WorkOrderList extends Backend
 
         //dump(config('workorder.customer_problem_type'));
         if(1==1){
-            $this->view->assign('problem_type',config('workorder.customer_problem_type'));
+            $this->view->assign('problem_type',config('workorder.customer_problem_type'));//客服问题类型
         }else{
-            $this->view->assign('problem_type',config('workorder.warehouse_problem_type'));
+            $this->view->assign('problem_type',config('workorder.warehouse_problem_type'));//仓库问题类型
         }
 
-        $this->view->assign('step', config('workorder.step'));
-        $this->assignconfig('workorder', config('workorder'));
+        $this->view->assign('step', config('workorder.step'));//措施
+        $this->assignconfig('workorder', config('workorder'));//JS专用，整个配置文件
+
+        $this->view->assign('check_coupon', config('workorder.check_coupon'));//不需要审核的优惠券
+        $this->view->assign('need_check_coupon', config('workorder.need_check_coupon'));//需要审核的优惠券
         return $this->view->fetch();
     }
     
