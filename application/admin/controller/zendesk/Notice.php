@@ -184,7 +184,7 @@ class Notice extends Controller
             //开启事务
         Db::startTrans();
         try {
-
+            file_put_contents('/www/wwwroot/mojing_test/runtime/log/a.txt',$id."\r\n",FILE_APPEND);
             //更新主表,目前应该只会更新status，其他不会更新
             $updateData = [
                 'tags' => $tags,
@@ -222,7 +222,9 @@ class Notice extends Controller
                     $updateData['email_cc'] = join(',', $emailCcs);
                 }
             }
+            file_put_contents('/www/wwwroot/mojing_test/runtime/log/a.txt',json_encode($updateData)."\r\n",FILE_APPEND);
             Zendesk::update($updateData, ['id' => $zendesk->id]);
+            file_put_contents('/www/wwwroot/mojing_test/runtime/log/a.txt','2'."\r\n",FILE_APPEND);
             //写入附表
             //如果该ticket的分配时间不是今天，且修改后的状态是open或者new的话，则今天任务数-1
             if (in_array(strtolower($ticket->status), ['open', 'new']) && strtotime($zendesk->assign_time) < strtotime(date('Y-m-d', time()))) {
