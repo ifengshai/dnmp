@@ -7,10 +7,21 @@
     }
     .form-group-child label{
         width: 34%;
-        *text-align:left !important;
     }
     .form-group-child div{
         width: 64%;
+    }
+    .form-group-child2{
+        float: left;
+        width: 49%;
+        margin-top: 25px;
+        margin-left: 1%;
+    }
+    .form-group-child2 label{
+        width: 16%;
+    }
+    .form-group-child2 div{
+        width: 79%;
     }
     .form-group-content{
         display: flex;
@@ -41,6 +52,14 @@
         color: #3399FF;
         border: 1px solid #3399FF;
     }
+
+    .plupload-preview a img {
+        height: 60px;
+    }
+    .plupload-preview a:first-child {
+        height: 70px;
+    }
+
 </style>
 
 <form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
@@ -71,20 +90,56 @@
         <div class="form-group-child">
             <label class="control-label col-xs-12 col-sm-2">{:__('order_sku')}：</label>
             <div class="col-xs-12 col-sm-8">
-                <input id="c-order_sku" data-rule="required" class="form-control" name="row[order_sku]" type="text" value="">
+                <input id="c-order_sku" class="form-control" name="row[order_sku]" type="text" value="">
             </div>
         </div>
 
         <div class="form-group-child">
             <label class="control-label col-xs-12 col-sm-2">{:__('work_level')}：</label>
             <div class="col-xs-12 col-sm-8">
-                <select  id="c-work_level" data-rule="required" class="form-control selectpicker" name="row[work_level]">
+                <select  id="c-work_level" class="form-control selectpicker" name="row[work_level]">
                     <option value="1">低</option>
                     <option value="2">中</option>
                     <option value="3">高</option>
                 </select>
             </div>
         </div>
+
+
+        <div class="form-group-child2">
+            <label class="control-label col-xs-12 col-sm-2">{:__('problem_description')}：</label>
+            <div class="col-xs-12 col-sm-8">
+                <textarea id="c-problem_description" style="resize:none;height: 142px;" class="form-control " rows="5" name="row[problem_description]" cols="50"></textarea>
+            </div>
+        </div>
+
+
+
+
+        <div class="form-group-child2">
+            <label class="control-label col-xs-12 col-sm-2">{:__('work_picture')}：</label>
+            <div class="col-xs-12 col-sm-8">
+                <div class="input-group">
+                    <input id="c-work_picture" class="form-control unqualified_images" size="200" readonly
+                           name="row[unqualified_images]" type="hidden" value="{$img_url}">
+                    <div class="input-group-addon no-border no-padding" style="background-color:transparent;">
+                    <span><button type="button" id="plupload-work_picture" class="btn btn-danger plupload"
+                                  data-input-id="c-work_picture"
+                                  data-mimetype="image/gif,image/jpeg,image/png,image/jpg,image/bmp" data-multiple="true"
+                                  data-maxcount="4" data-multipart={"dir":"check"} data-preview-id="p-work_picture"><i class="fa fa-upload"></i>
+                            {:__('Upload')}</button></span>
+                        <span><button type="button" id="fachoose-work_picture" class="btn btn-primary fachoose"
+                                      data-input-id="c-work_picture" data-mimetype="image/*" data-multiple="true"
+                                      data-maxcount="4"><i class="fa fa-list"></i> {:__('Choose')}</button></span>
+                    </div>
+                    <span class="msg-box n-right" for="c-work_picture"></span>
+                </div>
+                <ul class="row list-inline plupload-preview" id="p-work_picture"></ul>
+            </div>
+        </div>
+
+
+
 
     </div>
 
