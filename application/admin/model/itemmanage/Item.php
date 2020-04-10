@@ -93,7 +93,7 @@ class Item extends Model
                     }
                 }
                 $result['itemArr'] = $arr;
-            } elseif (3 == $type) { //配饰类型
+            } elseif (3 <= $type) { //配饰类型
                 $arr = $this->alias('m')->where('origin_sku', '=', $result['origin_sku'])->join('item_attribute a', 'm.id=a.item_id')->field('m.name,m.price,a.accessory_color')->select();
                 $result['itemArr'] = $arr;
             }
