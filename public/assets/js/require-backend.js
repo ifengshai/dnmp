@@ -56,7 +56,8 @@ require.config({
         'citypicker-data': '../libs/fastadmin-citypicker/dist/js/city-picker.data',
         'jqui':'../libs/jquery-ui/jquery-ui',
         //新增css文件
-        'custom-css':'../libs/css-min/css.min'
+        'custom-css':'../libs/css-min/css.min',
+        'jq-tags':'../libs/jquery-tags/jquery.tagsinput',
     },
     // shim依赖配置
     shim: {
@@ -125,6 +126,13 @@ require.config({
         'custom-css':{
             deps:[
                 'css!../css/custom.css'
+            ],
+            
+        },
+        //新增自定义的样式文件
+        'jq-tags':{
+            deps:[
+                'css!../libs/jquery-tags/jquery.tagsinput.css'
             ],
             
         },
