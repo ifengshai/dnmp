@@ -104,7 +104,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     var contents = '<div class="col-lg-12">' +
                         '</div>' +
                         '<div class="col-xs-6 col-md-4" style="margin-left:5.6666%;" >' +
-                        '<div class="panel bg-blue">' +
+                        '<div class="panel bg-gray-light">' +
                         '<div class="panel-body">' +
                         '<div class="panel-title">' +
                         '<label class="control-label col-xs-12 col-sm-3">name:</label>' +
@@ -156,7 +156,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         '</div>' +
                         '</div>' +
                         '<div class="col-xs-6 col-md-7">' +
-                        '<div class="panel bg-aqua-gradient">' +
+                        '<div class="panel bg-gray-light">' +
                         '<div class="panel-body">' +
                         '<div class="ibox-title">' +
                         '<table id="caigou-table-lens">' +
