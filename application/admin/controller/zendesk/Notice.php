@@ -474,24 +474,16 @@ class Notice extends Controller
      */
     public function setTickets()
     {
-        $create_time = Zendesk::where(['shell' => 1,'type'=>2,'id' => ['>',6965]])->order('id','desc')->limit(1)->value('create_time');
-        if($create_time){
-            $create_time = date('Y-m-d H:i:s',(strtotime($create_time) - 8*3600));
-            $create_time = str_replace(' ','T',$create_time).'Z';
-        }else{
-            $create_time = '2019-11-26T01:49:54Z';
-        }
         $search = [
             'type' => 'ticket',
-            'status' => ['new', 'open','pending'],
             'order_by' => 'created_at',
             'created' => [
                 'valuetype' => '<=',
-                'value' => '2020-04-10T01:48:38Z',
+                'value' => '2020-04-10T07:20:38Z',
             ],
             'created' => [
                 'valuetype' => '>=',
-                'value' => $create_time
+                'value' => '2020-04-10T01:48:38Z'
             ],
             'sort' => 'asc'
         ];
@@ -663,6 +655,123 @@ class Notice extends Controller
         return $params;
     }
 
+    /**
+     * 同步应为消息通知断掉的今天的消息
+     */
+    public function asycTickets()
+    {
+        $search = [
+            'type' => 'ticket',
+            'order_by' => 'created_at',
+            'created' => [
+                'valuetype' => '<=',
+                'value' => '2020-04-10T07:20:38Z',
+            ],
+            'created' => [
+                'valuetype' => '>=',
+                'value' => '2020-04-10T01:48:38Z'
+            ],
+            'sort' => 'asc'
+        ];
+
+        $type = $this->postData['type'] == 'zeelool' ? 1 : 2;
+        $params = $this->parseStr($search);
+        $search = $this->client->search()->find($params);
+        $tickets = $search->results;
+        foreach($tickets as $key => $ticket){
+            if($key > 1){
+                break;
+            }
+            $id = $ticket->id;
+
+            $comments = $this->getComments($id);
+            //开始插入相关数据
+            $tags = $ticket->tags;
+            $tags = \app\admin\model\zendesk\ZendeskTags::where('name', 'in', $tags)->distinct(true)->column('id');
+            sort($tags);
+            $tags = join(',',$tags);
+            $zendesk = Zendesk::where('ticket_id', $id)->find();
+            if(!$zendesk){
+                return false;
+            }
+            //开启事务
+            Db::startTrans();
+            try {
+                //更新主表,目前应该只会更新status，其他不会更新
+                $updateData = [
+                    'tags' => $tags,
+                    'status' => array_search(strtolower($ticket->status), config('zendesk.status'))
+                ];
+                //如果分配人修改，则同步修改分配人
+                if($zendesk->assignee_id != $ticket->assignee_id && $ticket->assignee_id){
+
+                    $updateData['assignee_id'] = $ticket->assignee_id;
+                    $updateData['assign_id'] = ZendeskAgents::where('agent_id',$ticket->assignee_id)->value('admin_id');
+                }
+                //更新rating,如果存在的话
+                if(!$zendesk->rating && $ticket->satisfaction_rating) {
+                    $score = $ticket->satisfaction_rating->score;
+                    $ratingComment = $ticket->satisfaction_rating->comment;
+                    $ratingReason = $ticket->satisfaction_rating->reason;
+                    $updateData['rating'] = $score;
+                    $updateData['comment'] = $ratingComment;
+                    $updateData['reason'] = $ratingReason;
+                    if($score == 'good') {
+                        $updateData['rating_type'] = 1;
+                    }elseif($score == 'bad') {
+                        $updateData['rating_type'] = 2;
+                    }
+                }
+                //如果存在抄送则更新
+                if($ticket->follower_ids) {
+                    $follweIds = $ticket->follower_ids;
+                    $emailCcs = [];
+                    foreach($follweIds as $follweId) {
+                        $userInfo = $this->client->crasp()->findUser(['id' => $follweId])->user;
+                        $emailCcs[] = $userInfo->email;
+                    }
+                    if($emailCcs) {
+                        $updateData['email_cc'] = join(',', $emailCcs);
+                    }
+                }
+                Zendesk::update($updateData, ['id' => $zendesk->id]);
+                //写入附表
+                //查找comment_id是否存在，不存在则添加
+                foreach($comments as $comment){
+                    if(!ZendeskComments::where('comment_id',$comment->id)->find()) {
+                        //获取所有的附件
+                        $attachments = [];
+                        if ($comment->attachments) {
+                            foreach ($comment->attachments as $attachment) {
+                                $attachments[] = $attachment->content_url;
+                            }
+                        }
+                        $admin_id = $due_id = ZendeskAgents::where('agent_id',$comment->author_id)->value('admin_id');
+                        $res = ZendeskComments::create([
+                            'ticket_id' => $id,
+                            'zid' => $zendesk->id,
+                            'comment_id' => $comment->id,
+                            'author_id' => $comment->author_id,
+                            'body' => $comment->body,
+                            'html_body' => $comment->html_body,
+                            'is_public' => $comment->public ? 1 : 2,
+                            'is_admin' => $admin_id ? 1 : 0,
+                            'attachments' => json($attachments),
+                            'is_created' => 2,
+                            'due_id' => $due_id ? $due_id : 0
+                        ]);
+                        echo $res->id."\r\n";
+                    }
+                }
+
+                Db::commit();
+            } catch (Exception $e) {
+                Db::rollback();
+                //写入日志
+            }
+        }
+
+    }
     /**
      * 脚本执行分配
      * @throws \think\db\exception\DataNotFoundException
