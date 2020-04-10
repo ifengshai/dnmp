@@ -511,7 +511,13 @@ class Notice extends Controller
             for($i=2;$i<= $page;$i++){
                 $search = $this->client->search()->find($params,['page' => $i]);
                 $tickets = $search->results;
-                $this->findCommentsByTickets($tickets,$type);
+                try{
+                    $this->findCommentsByTickets($tickets,$type);
+                }catch (\Exception $e){
+                    echo 1;
+                    $this->setTickets();
+                }
+
             }
         }
     }
