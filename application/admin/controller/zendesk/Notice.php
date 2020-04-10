@@ -693,9 +693,9 @@ class Notice extends Controller
         $a = 1;
         foreach($tickets as $key => $ticket){
             $id = $ticket->id;
-            if($a > 2){
-                break;
-            }
+//            if($a > 2){
+//                break;
+//            }
             $comments = $this->getComments($id);
             //开始插入相关数据
             $tags = $ticket->tags;
