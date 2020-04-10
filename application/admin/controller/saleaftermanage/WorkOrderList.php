@@ -79,7 +79,15 @@ class WorkOrderList extends Backend
         }
 
 
-        $this->view->assign('problem_type',config('workorder.customer_problem_type'));
+
+        //dump(config('workorder.customer_problem_type'));
+        if(1==1){
+            $this->view->assign('problem_type',config('workorder.customer_problem_type'));
+        }else{
+            $this->view->assign('problem_type',config('workorder.warehouse_problem_type'));
+        }
+
+        $this->view->assign('step',config('workorder.step'));
         return $this->view->fetch();
     }
     
