@@ -725,7 +725,7 @@ class ZendeskOne extends Controller
     {
         //判断主的只有自动回复的，证明是第一次自动回复但是没有得到回应的，则5小时后自动open并tag转客服
         //每5分钟运行一次
-        $tickets = ZendeskReply::where(['tags' => '自动回复','id' => ['>',2370]])->whereTime('update_time','>=',date('Y-m-d H:i:s',time()-18000))->select();
+        $tickets = ZendeskReply::where(['tags' => '自动回复','id' => ['>',2370]])->whereTime('update_time','<=',date('Y-m-d H:i:s',time()-18000))->select();
         foreach($tickets as $ticket){
             $params = [
                 'tags' => ['转客服', '自动回复'],
