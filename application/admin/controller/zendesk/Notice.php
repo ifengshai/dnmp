@@ -703,11 +703,10 @@ class Notice extends Controller
             sort($tags);
             $tags = join(',',$tags);
             $zendesk = Zendesk::where(['ticket_id' => $id,'type' => $type])->find();
-            dump($zendesk);
             if(!$zendesk){
-                return false;
+                continue;
             }
-            echo 1;die;
+            //echo 1;die;
             //开启事务
             Db::startTrans();
             try {
