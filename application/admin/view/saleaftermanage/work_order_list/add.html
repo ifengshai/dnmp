@@ -96,7 +96,7 @@
             <div class="radio" style="width: 90%;float: left;">
                 {foreach $problem_type as $k1 => $v1}
                     <label>
-                        <input type="radio" name="row[problem_type_id]" id="optionsRadios{$k1}" value="{$k1}">
+                        <input type="radio" name="row[problem_type_id]" class="problem_type" id="optionsRadios{$k1}" value="{$k1}">
                         <span>{$v1}</span>
                     </label>
                 {/foreach}
@@ -109,8 +109,8 @@
             <label class="control-label col-xs-12 col-sm-2" style="width:8%;float: left;">{:__('step')}：</label>
             <div class="radio" style="width: 90%;float: left;">
                 {foreach $step as $k2 => $v2}
-                <label>
-                    <input type="checkbox" name="row[problem_type_id]" id="step{$k2}" value="{$k2}">
+                <label style="display: none;">
+                    <input type="checkbox"  name="row[problem_type_id]" class="step" id="step{$k2}" value="{$k2}">
                     <span>{$v2}</span>
                 </label>
                 {/foreach}
