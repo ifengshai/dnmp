@@ -390,7 +390,7 @@ class Voogueme extends Backend
                             $v['qty_ordered'] = $infoTaskRes['change_number'];
                         }
 
-                        $trueSku = $ItemPlatformSku->getTrueSku($v['sku'], 2);
+                        $trueSku = $ItemPlatformSku->getTrueSku(trim($v['sku']), 2);
                         //总库存
                         $item_map['sku'] = $trueSku;
                         $item_map['is_del'] = 1;
@@ -435,7 +435,7 @@ class Voogueme extends Backend
                         }
 
 
-                        $trueSku = $ItemPlatformSku->getTrueSku($v['sku'], 2);
+                        $trueSku = $ItemPlatformSku->getTrueSku(trim($v['sku']), 2);
                         //总库存
                         $item_map['sku'] = $trueSku;
                         $item_map['is_del'] = 1;
