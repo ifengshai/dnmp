@@ -83,6 +83,139 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     $('#step_function .step'+id).hide();
                 }
             });
+            //增加一行镜架数据
+            $(document).on('click', '.btn-add', function () {
+                var rows =  document.getElementById("caigou-table-sku").rows.length;
+                var content = '<tr>'+
+                    '<td><input id="c-original_sku" class="form-control" name="row[item]['+rows+'][original_sku]" type="text"></td>'+
+                    '<td><input id="c-original_number" class="form-control" name="row[item]['+rows+'][original_number]" type="text"></td>'+
+                    '<td><input id="c-change_sku" class="form-control change_sku" name="row[item]['+rows+'][change_sku]" type="text"></td>'+
+                    '<td><input id="c-change_number" class="form-control change_number" name="row[item]['+rows+'][change_number]" type="text"></td>'+
+                    '<td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i> 删除</a></td>'+
+                    '</tr>';
+                $('.caigou table tbody').append(content);
+            });
+            //删除一行镜架数据
+            $(document).on('click', '.btn-del', function () {
+                $(this).parent().parent().remove();
+            });
+            //增加一行镜片数据
+            $(document).on('click','.btn-add-lens',function(){
+                    var contents = '<div class="col-lg-12">' +
+                        '</div>' +
+                        '<div class="col-xs-6 col-md-4" style="margin-left:5.6666%;" >' +
+                        '<div class="panel bg-blue">' +
+                        '<div class="panel-body">' +
+                        '<div class="panel-title">' +
+                        '<label class="control-label col-xs-12 col-sm-3">name:</label>' +
+                        '<div class="col-xs-12 col-sm-8">' +
+                        '<input  id="c-item_name"  class="form-control" name="row[lens][original_name][]" type="text" value="">' +
+                        '</div>' +
+                        '</div>' +
+                        '</div>' +
+                        '<div class="panel-body">' +
+                        '<div class="panel-title">' +
+                        '<label class="control-label col-xs-12 col-sm-3">SKU:</label>' +
+                        '<div class="col-xs-12 col-sm-8">' +
+                        '<input  id="c-item_sku" class="form-control" name="row[lens][original_sku][]"  type="text" value="">' +
+                        '</div>' +
+                        '</div>' +
+                        '</div>' +
+                        '<div class="panel-body">' +
+                        '<div class="panel-title">' +
+                        '<label class="control-label col-xs-12 col-sm-3">qty_ordered:</label>' +
+                        '<div class="col-xs-12 col-sm-8">' +
+                        '<input  id="c-item_qty_ordered"  class="form-control" name="row[lens][original_number][]"  type="text" value="">' +
+                        '</div>' +
+                        '</div>' +
+                        '</div>' +
+                        '<div class="panel-body">' +
+                        '<div class="panel-title">' +
+                        '<label class="control-label col-xs-12 col-sm-3">prescription_type:</label>' +
+                        '<div class="col-xs-12 col-sm-8">' +
+                        '<input  id="c-recipe_type"  class="form-control" type="text" name="row[lens][recipe_type][]" value="">' +
+                        '</div>' +
+                        '</div>' +
+                        '</div>' +
+                        '<div class="panel-body">' +
+                        '<div class="panel-title">' +
+                        '<label class="control-label col-xs-12 col-sm-3">lens_type:</label>' +
+                        '<div class="col-xs-12 col-sm-8">' +
+                        '<input  id="c-lens_type"  class="form-control" name="row[lens][lens_type][]" type="text" value="">' +
+                        '</div>' +
+                        '</div>' +
+                        '</div>' +
+                        '<div class="panel-body">' +
+                        '<div class="panel-title">' +
+                        '<label class="control-label col-xs-12 col-sm-3">coating_type:</label>' +
+                        '<div class="col-xs-12 col-sm-8">' +
+                        '<input  id="c-coating_film_type"  class="form-control" name="row[lens][coating_type][]"  type="text" value="">' +
+                        '</div>' +
+                        '</div>' +
+                        '</div>' +
+                        '</div>' +
+                        '</div>' +
+                        '<div class="col-xs-6 col-md-7">' +
+                        '<div class="panel bg-aqua-gradient">' +
+                        '<div class="panel-body">' +
+                        '<div class="ibox-title">' +
+                        '<table id="caigou-table-lens">' +
+                        '<tr>' +
+                        '<td colspan="10" style="text-align: center">Prescription_type</td>' +
+                        '</tr>' +
+                        '<tr>' +
+                        '<td style="text-align: center">value</td>' +
+                        '<td style="text-align: center">SPH</td>' +
+                        '<td style="text-align: center">CYL</td>' +
+                        '<td style="text-align: center">AXI</td>' +
+                        '<td style="text-align: center">ADD</td>' +
+                        '<td style="text-align: center">PD</td>' +
+                        '<td style="text-align: center">Prism Horizontal</td>' +
+                        '<td style="text-align: center">Base Direction</td>' +
+                        '<td style="text-align: center">Prism Vertical</td>' +
+                        '<td style="text-align: center">Base Direction</td>' +
+                        '</tr>' +
+                        '<tr>' +
+                        '<td style="text-align: center">Right(OD)</td>' +
+                        '<td><input id="c-right_SPH" class="form-control" name="row[lens][od_sph][]"  type="text" value=""></td>' +
+                        '<td><input id="c-right_CYL" class="form-control" name="row[lens][od_cyl][]"  type="text" value=""></td>' +
+                        '<td><input id="c-right_AXI" class="form-control" name="row[lens][od_axis][]" type="text" value=""></td>' +
+                        '<td><input id="c-right_ADD" class="form-control" name="row[lens][od_add][]"  type="text" value=""></td>' +
+                        '<td><input id="c-right_PD" class="form-control"  name="row[lens][pd_r][]"    type="text" value=""></td>' +
+                        '<td><input id="c-right_Prism_Horizontal" class="form-control" name="row[lens][od_pv][]"  type="text" value=""></td>' +
+                        '<td><input id="c-right_bd" class="form-control"  type="text" name="row[lens][od_bd][]"  value=""></td>' +
+                        '<td><input id="c-purchase_remark" class="form-control"  type="text" name="row[lens][od_pv_r][]" value=""></td>' +
+                        '<td><input id="c-purchase_remark" class="form-control"  type="text" name="row[lens][od_bd_r][]" value=""></td>' +
+                        '</tr>' +
+                        '<tr>' +
+                        '<td style="text-align: center">Left(OS)</td>' +
+                        '<td><input id="c-left_SPH" class="form-control" name="row[lens][os_sph][]" type="text" value=""></td>' +
+                        '<td><input id="c-left_CYL" class="form-control" name="row[lens][os_cyl][]" type="text" value=""></td>' +
+                        '<td><input id="c-purchase_remark" class="form-control" name="row[lens][os_axis][]"  type="text" value=""></td>' +
+                        '<td><input id="c-purchase_remark" class="form-control" name="row[lens][os_add][]"   type="text" value=""></td>' +
+                        '<td><input id="c-purchase_remark" class="form-control" name="row[lens][pd_l][]"    type="text" value=""></td>' +
+                        '<td><input id="c-purchase_remark" class="form-control" name="row[lens][os_pv][]"   type="text" value=""></td>' +
+                        '<td><input id="c-purchase_remark" class="form-control" name="row[lens][os_bd][]" type="text" value=""></td>' +
+                        '<td><input id="c-purchase_remark" class="form-control" name="row[lens][os_pv_r][]" type="text" value=""></td>' +
+                        '<td><input id="c-purchase_remark" class="form-control" name="row[lens][os_bd_r][]" type="text" value=""></td>' +
+                        '</tr>' +
+                        '</table>' +
+                        '</div>' +
+                        '</div>' +
+                        '</div>' +
+                        '<div>'+
+                        '<a href="javascript:;" class="btn btn-danger btn-del-lens" title="删除"><i class="fa fa-trash"></i>删除</a>'+
+                        '</div>'+
+                        '</div>';
+                     $('.item_lens_info').append(contents);
+
+            });
+            //删除一行镜片数据
+            $(document).on('click', '.btn-del-lens', function () {
+                $(this).parent().parent().prev().remove();
+                $(this).parent().parent().remove();
+
+            });
 
         },
         edit: function () {
