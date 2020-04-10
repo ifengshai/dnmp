@@ -474,12 +474,12 @@ class Notice extends Controller
      */
     public function setTickets()
     {
-        $create_time = Zendesk::where('shell',1)->order('id','desc')->limit(1)->value('create_time');
+        $create_time = Zendesk::where(['shell' => 1,'type'=>2,'id' => ['>',6965]])->order('id','desc')->limit(1)->value('create_time');
         if($create_time){
             $create_time = date('Y-m-d H:i:s',(strtotime($create_time) - 8*3600));
             $create_time = str_replace(' ','T',$create_time).'Z';
         }else{
-            $create_time = '2019-12-02T22:09:48Z';
+            $create_time = '2019-11-26T01:49:54Z';
         }
         $search = [
             'type' => 'ticket',
@@ -487,7 +487,7 @@ class Notice extends Controller
             'order_by' => 'created_at',
             'created' => [
                 'valuetype' => '<=',
-                'value' => '2020-04-10T01:59:34Z',
+                'value' => '2020-04-10T01:48:38Z',
             ],
             'created' => [
                 'valuetype' => '>=',
@@ -495,6 +495,7 @@ class Notice extends Controller
             ],
             'sort' => 'asc'
         ];
+
         $type = $this->postData['type'] == 'zeelool' ? 1 : 2;
         $params = $this->parseStr($search);
         $search = $this->client->search()->find($params);
@@ -508,9 +509,15 @@ class Notice extends Controller
         if($page > 1){
             //获取后续的
             for($i=2;$i<= $page;$i++){
-                $search = $this->client->search()->find($params,['page' => $i]);
+                try{
+                    $search = $this->client->search()->find($params,['page' => $i]);
+                }catch (\Exception $e){
+                    echo 1;
+                    $this->setTickets();
+                }
                 $tickets = $search->results;
                 $this->findCommentsByTickets($tickets,$type);
+
             }
         }
     }

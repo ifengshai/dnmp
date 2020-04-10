@@ -16,13 +16,13 @@ use think\Db;
 use think\Exception;
 use Zendesk\API\HttpClient as ZendeskAPI;
 use function Stringy\create as s;
-
+use fast\Http;
 /**
  * 临时使用的只处理processing的方法
- * Class ZendeskOne
+ * Class ZendeskTwo
  * @package app\api\controller
  */
-class ZendeskOne extends Controller
+class ZendeskTwo extends Controller
 {
     //基本参数配置
     protected $subdomain = "zeelooloptical";
@@ -36,7 +36,7 @@ class ZendeskOne extends Controller
         'others'
     ];
     //匹配自动回复的单词
-    protected $preg_word = ['deliver','delivery','receive','track','ship','shipping','tracking','status','shipment','where','where is','find','update','eta','expected'];
+    protected $preg_word = ['deliver','delivery','track','ship','shipping','tracking','status','shipment','where','where is','update','eta','expected'];
     public $client = null;
     //public $testId = [383401621551,383402124271,383347471012,393708243591,383347496492,394745643811,394627403612,394627403852,394745654451,394627408052,383402007531,394627410752,394745679291];
 
@@ -54,43 +54,11 @@ class ZendeskOne extends Controller
             exception('zendesk链接失败', 100006);
         }
     }
-
-    /**
-     * 测试的代码
-     * @throws Exception
-     * @throws \think\db\exception\DataNotFoundException
-     * @throws \think\db\exception\ModelNotFoundException
-     * @throws \think\exception\DbException
-     */
     public function test()
     {
-        try {
-            // Query Zendesk API to retrieve the ticket details
-             //$id = 86205;
-             //$ticket = $this->client->tickets()->find($id);
-            // $result = $this->client->tickets($id)->comments()->findAll();
-            // $requester_email = $ticket->via->source->from->address;
-            // $count = $result->count;
-            // $comments = $result->comments;
-            // //判断，如果最后一条为发送着的评论，则需要回复，如果为客服或自动回复的，则不需要回复
-            // $last_comment = $comments[$count-1];
-            // $body = strtolower($last_comment->body);
-            // $customr_comment_all = [
-            //     'now' => ' '.$body.' ',
-            //     'first' => ' '.($comments[0])->body.' ',
-            //     'title' => ' '.$ticket->ticket->subject.' '
-            // ];
-            // $get_order_id = $this->getOrderId($customr_comment_all);
-            // $order = $this->findOrderByEmail($requester_email,$get_order_id);
-            // $res = $this->getTrackMsg(41);
-            $track = new Trackingmore();
-            //74890988318622362133
-            $res = $track->getRealtimeTrackingResults('usps', '7489098831862085069');
-            echo json_encode($res);
-            die;
-        } catch (\Zendesk\API\Exceptions\ApiResponseException $e) {
-            echo $e->getMessage().'</br>';
-        }
+        $url = "https://translation.googleapis.com/language/translate/v2?key=AIzaSyCqDt6cu0yCLkKkkutNAm9gHJB3pcHIhKU&source=zh&target=en".'&q='.urlencode('我的士大夫丰富阿萨德额');
+        $res = Http::sendRequest($url);
+        dump($res);
     }
     /**
      * 查询tickets
@@ -100,26 +68,17 @@ class ZendeskOne extends Controller
         $search = [
             'type' => 'ticket',
             'via' => ['mail','web'],
-            'status' => ['new','open'],
-            'tags' => [
-                'keytype' => '-',
-                'value' => '转客服'
-            ], // -排除此tag
+            'status' => ['new'],
             'assignee' => [
                 382940274852,
                 'none'
             ],
-            //'requester' => $this->testId,
-             'updated_at' => [
-                 'valuetype' => '>=',
-                 'value'   => '20minutes',
-             ],//>=意思是3分钟之内，<=是三分钟之外
             'created_at' => [
-                'valuetype' => '>=',
-                'value'   => '2020-04-09T01:00:00Z'
+                'valuetype' => '<=',
+                'value'   => '2020-04-09T06:30:00Z'
             ], //添加创建时间的限制
-            'order_by' => 'updated_at',
-            'sort' => 'desc'
+            'order_by' => 'created_at',
+            'sort' => 'asc'
         ];
         $this->getTickets($search);
         echo 'success';
@@ -167,14 +126,19 @@ class ZendeskOne extends Controller
     public function findCommentsByTickets($tickets)
     {
         foreach($tickets as $key => $ticket){
-//           if($key >= 10){
-//               break;
-//           }
+            if(ZendeskReply::where('email_id',$ticket->id)->find()){
+                continue;
+            }
+            $params = [];
+           if($key >= 50){
+               break;
+           }
             $id = $ticket->id;
             //发送者的id
             $requester_id = $ticket->requester_id;
             //所有的tag
             $tags = $ticket->tags;
+            $subjet = $ticket->subject;
             //email
             $requester_email = $ticket->via->source->from->address;
             try{
@@ -190,167 +154,107 @@ class ZendeskOne extends Controller
             //判断，如果最后一条为发送着的评论，则需要回复，如果为客服或自动回复的，则不需要回复
             $last_comment = $comments[$count-1];
             //if(in_array($requester_id,$this->testId)) {
-                $reply_detail_data = [];
-                if ($last_comment->author_id == $requester_id) {
-                    //邮件的内容
-                    $body = strtolower($last_comment->body);
-                    //开始匹配邮件内容
-                    //查看是否已有自动回复的tag
-                    if (in_array('自动回复', $tags)) { //次类是顾客根据要求回复的内容
-                        file_put_contents('/www/wwwroot/mojing/runtime/log/zendesk2.txt',$ticket->id."\r\n",FILE_APPEND);
-                        $answer_key = 0;
-                        foreach ($this->auto_answer as $key => $answer) {
-                            //回复内容包含自动回复的内容，且相匹配
-                            if (s($body)->contains($answer)) {
-                                $answer_key = $key + 1;
-                                break;//匹配到则跳出循环
-                            }
-                        }
-                        //web时无email时获取最后一条评论里的email，都无email则转客服
+            $reply_detail_data = [];
+            if ($last_comment->author_id == $requester_id) {
+                //邮件的内容
+                $body = strtolower($last_comment->body);
+                //开始匹配邮件内容
+                //匹配到相应的关键字，自动回复消息，修改为pending，回复共客户选择的内容
+                //过滤包含return的
+                if(s($body)->contains('return') || s($subjet)->contains('return')){
+                    continue;
+                }
+                if (s($body)->containsAny($this->preg_word) === true) {
+                    $reply_detail_data = [];
+                    $recent_reply_count = 0;
+                    //判断最近12小时发送的第几封，超过2封，超过2封直接转客服+tag-》多次发送
+                    if($requester_email){
+                        $recent_reply_count = ZendeskReply::where('email',$requester_email)
+                            ->whereTime('create_time','-12 hours')
+                            ->count();
+                    }
+                    if($recent_reply_count >= 2){
+                        $params = [
+                            'tags' => ['自动回复','转客服', '多次发送'],
+                            //'status' => 'open'
+                        ];
+                    }else{
                         if(!$requester_email){
                             $requester_email = $last_comment->via->source->from->address;
                         }
                         //查询订单状态的
-                        if ($answer_key == 1 && $requester_email) {
+                        if ($requester_email) {
                             $params = $this->sendByOrder($ticket,$comments,$body,$requester_email);
-                        } else{
-                            //open，转客服
-                            $params = [
-                                'tags' => ['转客服'],
-                                'status' => 'open'
-                            ];
                         }
-                        //判断是否有主评论，无则不新增
-                        if(!empty($params)){
-                            if($zendesk_reply = ZendeskReply::get(['email_id' => $ticket->id])){
-                                //添加用户的评论
-                                ZendeskReplyDetail::create([
-                                    'reply_id' => $zendesk_reply->id,
-                                    'body' => $last_comment->body,
-                                    'html_body' => $last_comment->html_body,
-                                    'tags' => join(',',array_unique(array_merge($tags, $params['tags']))),
-                                    'status' => $ticket->status,
-                                    'assignee_id' => 382940274852,
-                                    'is_admin' => 2
-                                ]);
-                                //回复评论
-                                $reply_detail_data = [
-                                    'reply_id' => $zendesk_reply->id,
-                                    'body' => $params['comment']['body'] ? $params['comment']['body'] : '',
-                                    'html_body' => $params['comment']['body'] ? $params['comment']['body'] : '',
-                                    'tags' => join(',',array_unique(array_merge($tags, $params['tags']))),
-                                    'status' => $params['status'],
-                                    'assignee_id' => 382940274852,
-                                    'is_admin' => 1
-                                ];
-                            }
-                            //tag合并
-                            $params['tags'] = array_unique(array_merge($tags, $params['tags']));
-                            $params['comment']['author_id'] = 382940274852;
-                            $params['assignee_id'] = 382940274852;
-                            $res = $this->autoUpdate($id, $params);
-                            if($res){
-                                if(!empty($reply_detail_data)){
-                                    $reply_detail_res = ZendeskReplyDetail::create($reply_detail_data);
-                                    if($reply_detail_res){
-                                        //更新主表状态
-                                        ZendeskReply::where('id',$zendesk_reply->id)->update([
-                                            'status' => $reply_detail_data['status'],
-                                            'tags' => join(',',$params['tags'])
-                                        ]);
-                                    }
-                                }
-                            }
-                        }
+                    }
+                    if(!$requester_email) {
+                        continue;
+                    }
+                    $tags = join(',', $params['tags']);
+                    //如果是第一条评论，则把对应的客户内容插入主表，回复内容插入附表，其余不做处理
+                        //主email
+                    $reply_data = [
+                        'email' => $requester_email,
+                        'title' => $ticket->subject,
+                        'email_id' => $ticket->id,
+                        'body' => $last_comment->body,
+                        'html_body' => $last_comment->html_body,
+                        'tags' => $tags,
+                        'status' => $ticket->status,
+                        'requester_id' => $requester_id,
+                        'assignee_id' => $ticket->assignee_id ? $ticket->assignee_id : 0,
+                        'source' => $ticket->via->channel
 
-                    } else {
-                        //匹配到相应的关键字，自动回复消息，修改为pending，回复共客户选择的内容
-                        if (s($body)->containsAny($this->preg_word) === true) {
-                            $reply_detail_data = [];
-                            $recent_reply_count = 0;
-                            //判断最近12小时发送的第几封，超过2封，超过2封直接转客服+tag-》多次发送
-                            if($requester_email){
-                                $recent_reply_count = ZendeskReply::where('email',$requester_email)
-                                    ->whereTime('create_time','-12 hours')
-                                    ->count();
-                            }
-                            if($recent_reply_count >= 2){
-                                $params = [
-                                    'tags' => ['自动回复','转客服', '多次发送'],
-                                    //'status' => 'open'
-                                ];
-                            }else{
-                                //回复模板1：状态pending，增加tag自动回复
-                                $params = [
-                                    'comment' => [
-                                        'body' => config('zendesk.t1')
-                                    ],
-                                    'tags' => ['自动回复'],
-                                    'status' => 'pending'
-                                ];
-                            }
+                    ];
+                    //添加主评论
+                    $zendesk_reply = ZendeskReply::create($reply_data);
+                    //添加回复列表
+                    //回复评论
+                    if($zendesk_reply->id){
+                    foreach($comments as $comment){
+                        ZendeskReplyDetail::create([
+                            'reply_id' => $zendesk_reply->id,
+                            'body' => $comment->body,
+                            'html_body' => $comment->html_body,
+                            'tags' => $tags,
+                            'status' => isset($params['status']) ? $params['status'] : $ticket->status,
+                            'assignee_id' => 382940274852,
+                            'is_admin' => 0
+                        ]);
+                    }
+                    $reply_detail_data = [
+                        'reply_id' => $zendesk_reply->id,
+                        'body' => isset($params['comment']['body']) ? $params['comment']['body']: '',
+                        'html_body' => isset($params['comment']['body']) ? $params['comment']['body']: '',
+                        'tags' => $tags,
+                        'status' => isset($params['status']) ? $params['status'] : $ticket->status,
+                        'assignee_id' => 382940274852,
+                        'is_admin' => 1
+                    ];
+                }
 
-                            file_put_contents('/www/wwwroot/mojing/runtime/log/zendesk.txt',$ticket->id."\r\n",FILE_APPEND);
-                            //如果是第一条评论，则把对应的客户内容插入主表，回复内容插入附表，其余不做处理
-                            if($count == 1){
-                                //主email
-                                $reply_data = [
-                                    'email' => $requester_email,
-                                    'title' => $ticket->subject,
-                                    'email_id' => $ticket->id,
-                                    'body' => $last_comment->body,
-                                    'html_body' => $last_comment->html_body,
-                                    'tags' => join(',',$tags),
-                                    'status' => $ticket->status,
-                                    'requester_id' => $requester_id,
-                                    'assignee_id' => $ticket->assignee_id ? $ticket->assignee_id : 0,
-                                    'source' => $ticket->via->channel
-
-                                ];
-                                //添加主评论
-                                $zendesk_reply = ZendeskReply::create($reply_data);
-                                file_put_contents('/www/wwwroot/mojing/runtime/log/zendeskreply.txt',$zendesk_reply->email_id."\r\n",FILE_APPEND);
-                                if(!$zendesk_reply->email_id){
-                                    file_put_contents('/www/wwwroot/mojing/runtime/log/zendeskreply2.txt',$zendesk_reply->email_id."\r\n",FILE_APPEND);
-                                }
-                                //回复评论
-                                if($zendesk_reply->id){
-                                    $reply_detail_data = [
-                                        'reply_id' => $zendesk_reply->id,
-                                        'body' => $params['comment']['body'],
-                                        'html_body' => $params['comment']['body'],
-                                        'tags' => join(',',array_unique(array_merge($tags, $params['tags']))),
-                                        'status' => isset($params['status']) ? $params['status'] : $ticket->status,
-                                        'assignee_id' => 382940274852,
-                                        'is_admin' => 1
-                                    ];
-                                }
-
-                            }
-                            if (!empty($params)) {
-                                //tag合并
-                                $params['tags'] = array_unique(array_merge($tags, $params['tags']));
-                                $params['comment']['author_id'] = 382940274852;
-                                $params['assignee_id'] = 382940274852;
-                                $res = $this->autoUpdate($id, $params);
-                                if($res){
-                                    if(!empty($reply_detail_data)){
-                                        $reply_detail_res = ZendeskReplyDetail::create($reply_detail_data);
-                                        if($reply_detail_res){
-                                            //更新主表状态
-                                            ZendeskReply::where('id',$zendesk_reply->id)->update([
-                                                'status' => $reply_detail_data['status'],
-                                                'tags' => join(',',$params['tags'])
-                                            ]);
-                                        }
-                                    }
+                }
+                if (!empty($params)) {
+                        //tag合并
+                        $params['tags'] = $tags;
+                        $params['comment']['author_id'] = 382940274852;
+                        $params['assignee_id'] = 382940274852;
+                        $res = $this->autoUpdate($id, $params);
+                        file_put_contents('/www/wwwroot/mojing/runtime/log/zendesktwo.txt',$ticket->id."\r\n",FILE_APPEND);
+                        if($res){
+                            if(!empty($reply_detail_data)){
+                                $reply_detail_res = ZendeskReplyDetail::create($reply_detail_data);
+                                if($reply_detail_res){
+                                    //更新主表状态
+                                    ZendeskReply::where('id',$zendesk_reply->id)->update([
+                                        'status' => $reply_detail_data['status'],
+                                        'tags' => $tags
+                                    ]);
                                 }
                             }
                         }
                     }
-
-                }
-           // }
+            }
         }
     }
 
@@ -365,7 +269,7 @@ class ZendeskOne extends Controller
         try{
             $this->client->tickets()->update($ticket_id, $params);
             if($echo) echo $ticket_id . "\r\n";
-            sleep(1);
+            sleep(2);
         }catch (\Exception $e){
             return false;
             //exception($e->getMessage(), 10001);
@@ -405,7 +309,7 @@ class ZendeskOne extends Controller
                 'comment' => [
                     'body' => config('zendesk.t3')
                 ],
-                'tags' => ['支付失败'],
+                'tags' => ['支付失败','自动回复'],
                 'status' => 'solved'
             ];
         } elseif ($status == 'canceled') {
@@ -414,7 +318,7 @@ class ZendeskOne extends Controller
                 'comment' => [
                     'body' => sprintf(config('zendesk.t7'), $increment_id)
                 ],
-                'tags' => ['取消订单'],
+                'tags' => ['取消订单','自动回复'],
                 'status' => 'solved'
             ];
         } elseif($status == 'processing') {
@@ -422,7 +326,7 @@ class ZendeskOne extends Controller
                 'comment' => [
                     'body' => config('zendesk.t15')
                 ],
-                'tags' => ['未发货'],
+                'tags' => ['未发货','自动回复'],
                 'status' => 'pending'
             ];
             //判断商品下单时间，2月1日前，8,9.2月1日后，转客服
@@ -451,17 +355,11 @@ class ZendeskOne extends Controller
                     'comment' => [
                         'body' => sprintf(config('zendesk.t4'), $res['updated_at'], $res['track_number'], $res['carrier_code'], $res['lastEvent'], $res['lastUpdateTime'])
                     ],
-                    'tags' => ['已签收', '查询物流信息'],
+                    'tags' => ['已签收', '查询物流信息','自动回复'],
                     'status' => 'solved'
                 ];
             } elseif ($res['status'] == 'transit' || $res['status'] == 'pickup') { //判断物流时效
-                $params = [
-                    'comment' => [
-                        'body' => ''
-                    ],
-                    'tags' => [],
-                    'status' => 'pending'
-                ];
+
                 $shipTime = $this->getShipTime($order['order_id']);
                 $diffTime = ceil(( time() - $shipTime ) / (3600 * 24 * 7 ));
                 //根据发货时间进行补偿
@@ -472,7 +370,7 @@ class ZendeskOne extends Controller
                             'body' => sprintf(config('zendesk.t9'), date('Y-m-d H:i',$shipTime), $res['track_number'], $res['carrier_code'], $res['lastEvent'])
                         ],
 
-                        'tags' => ['超时', '查询物流信息'],
+                        'tags' => ['超时', '查询物流信息','自动回复'],
                         'status' => 'pending'
                     ];
                 }elseif($diffTime <= 3 && $diffTime > 2){
@@ -480,7 +378,7 @@ class ZendeskOne extends Controller
                         'comment' => [
                             'body' => sprintf(config('zendesk.t10'), $res['carrier_code'], $res['track_number'], date('Y-m-d H:i',$shipTime))
                         ],
-                        'tags' => ['超时', '查询物流信息'],
+                        'tags' => ['超时', '查询物流信息','自动回复'],
                         'status' => 'pending'
                     ];
                 }elseif($diffTime <= 4 && $diffTime > 3){
@@ -488,7 +386,7 @@ class ZendeskOne extends Controller
                         'comment' => [
                             'body' => config('zendesk.t11')
                         ],
-                        'tags' => ['超时', '查询物流信息'],
+                        'tags' => ['超时', '查询物流信息','自动回复'],
                         'status' => 'pending'
                     ];
                 }elseif($diffTime <= 6 && $diffTime > 4){
@@ -496,7 +394,7 @@ class ZendeskOne extends Controller
                         'comment' => [
                             'body' => config('zendesk.t12')
                         ],
-                        'tags' => ['超时', '查询物流信息'],
+                        'tags' => ['超时', '查询物流信息','自动回复'],
                         'status' => 'pending'
                     ];
                 }elseif($diffTime <= 9 && $diffTime > 6){
@@ -504,7 +402,7 @@ class ZendeskOne extends Controller
                         'comment' => [
                             'body' => config('zendesk.t13')
                         ],
-                        'tags' => ['超时', '查询物流信息'],
+                        'tags' => ['超时', '查询物流信息','自动回复'],
                         'status' => 'pending'
                     ];
                 }elseif($diffTime > 9){
@@ -512,7 +410,7 @@ class ZendeskOne extends Controller
                         'comment' => [
                             'body' => config('zendesk.t14')
                         ],
-                        'tags' => ['超时', '查询物流信息'],
+                        'tags' => ['超时', '查询物流信息','自动回复'],
                         'status' => 'pending'
                     ];
                 }
@@ -528,14 +426,14 @@ class ZendeskOne extends Controller
             } else { //转客服，状态open
                 //状态open，tag转客服
                 $params = [
-                    'tags' => ['转客服', '查询物流信息'],
+                    'tags' => ['转客服', '查询物流信息','自动回复'],
                     'status' => 'open'
                 ];
             }
         } else {
             //状态open，tag转客服
             $params = [
-                'tags' => ['转客服'],
+                'tags' => ['转客服','自动回复'],
                 'status' => 'open'
             ];
         }
@@ -725,7 +623,7 @@ class ZendeskOne extends Controller
     {
         //判断主的只有自动回复的，证明是第一次自动回复但是没有得到回应的，则5小时后自动open并tag转客服
         //每5分钟运行一次
-        $tickets = ZendeskReply::where(['tags' => '自动回复','id' => ['>',2370]])->whereTime('update_time','<=',date('Y-m-d H:i:s',time()-18000))->select();
+        $tickets = ZendeskReply::where(['tags' => '自动回复','id' => ['>',2370]])->whereTime('update_time','>=',date('Y-m-d H:i:s',time()-18000))->select();
         foreach($tickets as $ticket){
             $params = [
                 'tags' => ['转客服', '自动回复'],
@@ -733,10 +631,6 @@ class ZendeskOne extends Controller
                 'assignee_id' => 382940274852
             ];
             $this->autoUpdate($ticket->email_id, $params);
-            ZendeskReply::where('id',$ticket->id)->update([
-                'status' => 'open',
-                'tags' => '转客服,自动回复'
-            ]);
         }
     }
 }
