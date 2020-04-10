@@ -476,7 +476,8 @@ class Notice extends Controller
     {
         $create_time = Zendesk::where('shell',1)->order('id','desc')->limit(1)->value('create_time');
         if($create_time){
-            $create_time = date('Y-m-dTH:i:sZ',(strtotime($create_time) - 8*3600));
+            $create_time = date('Y-m-d H:i:s',(strtotime($create_time) - 8*3600));
+            $create_time = str_replace(' ','T',$create_time).'Z';
         }else{
             $create_time = '2019-12-02T22:09:48Z';
         }
