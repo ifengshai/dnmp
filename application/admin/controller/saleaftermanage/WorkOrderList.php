@@ -80,17 +80,37 @@ class WorkOrderList extends Backend
 
 
         //dump(config('workorder.customer_problem_type'));
-        if(1==1){
-            $this->view->assign('problem_type',config('workorder.customer_problem_type'));//客服问题类型
-        }else{
-            $this->view->assign('problem_type',config('workorder.warehouse_problem_type'));//仓库问题类型
+        if (1 == 1) {
+            $this->view->assign('problem_type', config('workorder.customer_problem_type')); //客服问题类型
+        } else {
+            $this->view->assign('problem_type', config('workorder.warehouse_problem_type')); //仓库问题类型
         }
 
-        $this->view->assign('step', config('workorder.step'));//措施
-        $this->assignconfig('workorder', config('workorder'));//JS专用，整个配置文件
+        $this->view->assign('step', config('workorder.step')); //措施
+        $this->assignconfig('workorder', config('workorder')); //JS专用，整个配置文件
 
-        $this->view->assign('check_coupon', config('workorder.check_coupon'));//不需要审核的优惠券
-        $this->view->assign('need_check_coupon', config('workorder.need_check_coupon'));//需要审核的优惠券
+        $this->view->assign('check_coupon', config('workorder.check_coupon')); //不需要审核的优惠券
+        $this->view->assign('need_check_coupon', config('workorder.need_check_coupon')); //需要审核的优惠券
         return $this->view->fetch();
+    }
+
+    /**
+     * 获取订单sku数据
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/04/10 15:41:09 
+     * @return void
+     */
+    public function get_sku_list()
+    {
+        $ordertype = input('ordertype');
+        $order_number = input('order_number');
+        $skus = $this->model->getSkuList($ordertype, $order_number);
+        if ($skus) {
+            $this->success('操作成功！！', '', $skus);
+        } else {
+            $this->error('未获取到数据！！');
+        }
     }
 }
