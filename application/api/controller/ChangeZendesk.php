@@ -86,7 +86,7 @@ class ChangeZendesk extends Controller
             'prefix'      => 'fa_',
         ];
         $db = Db::connect($database);
-        $tickets = $db->name('zendesk')->where('id','>',10751)->limit(1)->select();
+        $tickets = $db->name('zendesk')->where('id','>',10752)->select();
         foreach($tickets as $ticket){
             if(Zendesk::where('ticket_id',$ticket->ticket_id)->find()){
                 continue;
