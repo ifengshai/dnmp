@@ -73,8 +73,16 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         $('#step' + steparr[j].step_id).parent().show();
                     }
                 }
-                
-            })
+            });
+
+            $(document).on('click', '.step_type', function () {
+                var id = $(this).val();
+                if($(this).prop('checked')){
+                    $('#step_function .step'+id).show();
+                }else{
+                    $('#step_function .step'+id).hide();
+                }
+            });
 
         },
         edit: function () {

@@ -23,6 +23,19 @@
     .form-group-child2 div{
         width: 79%;
     }
+    .form-group-child3{
+        display: none;
+        float: left;
+        width: 32%;
+        margin-top: 10px;
+        margin-left: 1%;
+    }
+    .form-group-child3 label{
+        width: 45%;
+    }
+    .form-group-child3 div{
+        width: 54%;
+    }
     .form-group-content{
         display: flex;
     }
@@ -156,13 +169,13 @@
         </div>
     </div>
 
-    <div class="form-group">
+    <div class="form-group" style="height: 50px;">
         <div class="form-group-content">
             <label class="control-label col-xs-12 col-sm-2" style="width:8%;float: left;">{:__('step')}：</label>
             <div class="radio" style="width: 90%;float: left;">
                 {foreach $step as $k2 => $v2}
                 <label style="display: none;">
-                    <input type="checkbox"  name="row[problem_type_id]" class="step" id="step{$k2}" value="{$k2}">
+                    <input type="checkbox"  name="row[problem_type_id]" class="step_type" id="step{$k2}" value="{$k2}">
                     <span>{$v2}</span>
                 </label>
                 {/foreach}
@@ -172,30 +185,52 @@
 
     <hr style="border-top: 1px solid #000;">
 
+    <div class="form-group" id="step_function">
+        <div class="form-group-child3 step2">
+            <label class="control-label col-xs-12 col-sm-2">{:__('退款金额')}：</label>
+            <div class="col-xs-12 col-sm-8">
+                <input id="c-refund_money" data-rule="required" class="form-control" name="row[refund_money]" type="text" value="">
+            </div>
+        </div>
+        <div class="form-group-child3 step2">
+            <label class="control-label col-xs-12 col-sm-2">{:__('币种')}：</label>
+            <div class="col-xs-12 col-sm-8">
+                <input id="c-order_pay_currency" data-rule="required" class="form-control" name="row[order_pay_currency]" type="text" value="">
+            </div>
+        </div>
+        <div class="form-group-child3 step2">
+            <label class="control-label col-xs-12 col-sm-2">{:__('退款方式')}：</label>
+            <div class="col-xs-12 col-sm-8">
+                <input id="c-refund_way" data-rule="required" class="form-control" name="row[refund_way]" type="text" value="">
+            </div>
+        </div>
 
+        <div class="form-group-child3 step6">
+            <label class="control-label col-xs-12 col-sm-2">{:__('SKU')}：</label>
+            <div class="col-xs-12 col-sm-8">
+                <input id="c-change_sku" data-rule="required" class="form-control" name="row[change_sku]" type="text" value="">
+            </div>
+        </div>
+        <div class="form-group-child3 step6">
+            <label class="control-label col-xs-12 col-sm-2">{:__('数量')}：</label>
+            <div class="col-xs-12 col-sm-8">
+                <input id="c-change_number" data-rule="required" class="form-control" name="row[change_number]" type="text" value="">
+            </div>
+        </div>
 
-
-
-
-
-
-
-    <div class="form-group">
-
-        <div class="form-group-child">
+        <div class="form-group-child3 step8">
             <label class="control-label col-xs-12 col-sm-2">{:__('replenish_increment_id')}：</label>
             <div class="col-xs-12 col-sm-8">
                 <input id="c-replenish_increment_id" data-rule="required" class="form-control" name="row[replenish_increment_id]" type="text" value="">
             </div>
         </div>
-
-        <div class="form-group-child">
+        <div class="form-group-child3 step8">
             <label class="control-label col-xs-12 col-sm-2">{:__('replenish_money')}：</label>
             <div class="col-xs-12 col-sm-8">
                 <input id="c-replenish_money" data-rule="required" class="form-control" name="row[replenish_money]" type="text" value="">
             </div>
         </div>
-        <div class="form-group-child">
+        <div class="form-group-child3 step9">
             <label class="control-label col-xs-12 col-sm-2">{:__('check_coupon')}：</label>
             <div class="col-xs-12 col-sm-8">
                 <select  id="c-check_coupon" class="form-control selectpicker" name="row[check_coupon]">
@@ -206,8 +241,7 @@
                 </select>
             </div>
         </div>
-
-        <div class="form-group-child">
+        <div class="form-group-child3 step9">
             <label class="control-label col-xs-12 col-sm-2">{:__('need_check_coupon')}：</label>
             <div class="col-xs-12 col-sm-8">
                 <select  id="c-need_check_coupon" class="form-control selectpicker" name="row[need_check_coupon]">
@@ -218,55 +252,18 @@
                 </select>
             </div>
         </div>
-
-        <div class="form-group-child">
+        <div class="form-group-child3 step10">
             <label class="control-label col-xs-12 col-sm-2">{:__('integral')}：</label>
             <div class="col-xs-12 col-sm-8">
                 <input id="c-integral" data-rule="required" class="form-control" name="row[integral]" type="text" value="">
             </div>
         </div>
-        <div class="form-group-child">
+        <div class="form-group-child3 step11">
             <label class="control-label col-xs-12 col-sm-2">{:__('refund_logistics_num')}：</label>
             <div class="col-xs-12 col-sm-8">
                 <input id="c-refund_logistics_num" data-rule="required" class="form-control" name="row[refund_logistics_num]" type="text" value="">
             </div>
         </div>
-
-        <div class="form-group-child">
-            <label class="control-label col-xs-12 col-sm-2">{:__('退款金额')}：</label>
-            <div class="col-xs-12 col-sm-8">
-                <input id="c-refund_money" data-rule="required" class="form-control" name="row[refund_money]" type="text" value="">
-            </div>
-        </div>
-        <div class="form-group-child">
-            <label class="control-label col-xs-12 col-sm-2">{:__('币种')}：</label>
-            <div class="col-xs-12 col-sm-8">
-                <input id="c-order_pay_currency" data-rule="required" class="form-control" name="row[order_pay_currency]" type="text" value="">
-            </div>
-        </div>
-        
-        <div class="form-group-child refund">
-            <label class="control-label col-xs-12 col-sm-2">{:__('退款方式')}：</label>
-            <div class="col-xs-12 col-sm-8">
-                <input id="c-refund_way" data-rule="required" class="form-control" name="row[refund_way]" type="text" value="">
-            </div>
-        </div>
-
-        <div class="form-group-child refund">
-            <label class="control-label col-xs-12 col-sm-2">{:__('SKU')}：</label>
-            <div class="col-xs-12 col-sm-8">
-                <input id="c-change_sku" data-rule="required" class="form-control" name="row[change_sku]" type="text" value="">
-            </div>
-        </div>
-
-        <div class="form-group-child refund">
-            <label class="control-label col-xs-12 col-sm-2">{:__('数量')}：</label>
-            <div class="col-xs-12 col-sm-8">
-                <input id="c-change_number" data-rule="required" class="form-control" name="row[change_number]" type="text" value="">
-            </div>
-        </div>
-
-
     </div>
 
 
