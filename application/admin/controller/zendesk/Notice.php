@@ -681,7 +681,6 @@ class Notice extends Controller
             'sort' => 'asc'
         ];
 
-        $id = $this->postData['id'];
         $type = $this->postData['type'];
         if ($type == 'zeelool') {
             $type = 1;
@@ -694,9 +693,11 @@ class Notice extends Controller
         $a = 1;
         foreach($tickets as $key => $ticket){
             $id = $ticket->id;
+            echo $id;
             if($a > 2){
                 break;
             }
+            echo 2;
             $comments = $this->getComments($id);
             //开始插入相关数据
             $tags = $ticket->tags;
@@ -707,7 +708,6 @@ class Notice extends Controller
             if(!$zendesk){
                 return false;
             }
-            echo 1;die;
             //开启事务
             Db::startTrans();
             try {
