@@ -623,8 +623,17 @@ class OrderReturn extends Backend
                 $this->view->assign('order_platform',$order_platform);
 
         }
-        dump(config('serach.platform'));
-        exit;
+        $serviceArr = config('search.platform');
+        $sessionId  = session('admin.id');
+        foreach($serviceArr as $key => $kv){
+             if(in_array($sessionId,$kv)){
+                    $default= $key; 
+             }   
+        }
+        //默认的客服分组值
+        if($default){
+            $this->view->assign("default",$default);
+        }
         $this->view->assign("orderPlatformList", (new MagentoPlatform())->getOrderPlatformList());
         return $this->view->fetch();
     }
