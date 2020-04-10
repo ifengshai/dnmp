@@ -557,7 +557,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                                 });
                             }
                             $(".selectpicker").selectpicker('refresh');
-                        }else if((resultData != false) && (resultData.type == 3)){
+                        }else if((resultData != false) && (resultData.type >= 3)){
                             console.log(resultData);
                             //console.log(resultData.accessory_texture);
                             $("#c-frame_texture").find("option[value="+resultData.accessory_texture+"]").prop("selected", true);
