@@ -495,8 +495,8 @@ class Notice extends Controller
             ],
             'sort' => 'asc'
         ];
+
         $type = $this->postData['type'] == 'zeelool' ? 1 : 2;
-        $type = 1;
         $params = $this->parseStr($search);
         $search = $this->client->search()->find($params);
         $tickets = $search->results;
