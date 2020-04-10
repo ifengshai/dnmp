@@ -177,10 +177,14 @@ class Notice extends Controller
         $tags = \app\admin\model\zendesk\ZendeskTags::where('name', 'in', $tags)->column('id');
         sort($tags);
         $tags = join(',',$tags);
+        $zendesk = Zendesk::where('ticket_id', $id)->find();
+        if(!$zendesk){
+            return false;
+        }
             //开启事务
         Db::startTrans();
         try {
-            $zendesk = Zendesk::where('ticket_id', $id)->find();
+
             //更新主表,目前应该只会更新status，其他不会更新
             $updateData = [
                 'tags' => $tags,
