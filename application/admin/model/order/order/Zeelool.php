@@ -1068,4 +1068,5 @@ class Zeelool extends Model
             ->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')
             ->sum('b.qty_ordered');
     }
+    
 }
