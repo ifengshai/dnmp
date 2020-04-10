@@ -102,6 +102,7 @@ class ChangeZendesk extends Controller
                 $commentData['zid'] = $zendesk->id;
                 ZendeskComments::create($commentData);
             }
+            echo $zendesk->id;
             sleep(1);
         }
     }
