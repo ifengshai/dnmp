@@ -174,13 +174,17 @@ class Notice extends Controller
         $ticket = $this->getTicket($id);
         //开始插入相关数据
         $tags = $ticket->tags;
-        $tags = \app\admin\model\zendesk\ZendeskTags::where('name', 'in', $tags)->column('id');
+        $tags = \app\admin\model\zendesk\ZendeskTags::where('name', 'in', $tags)->distinct(true)->column('id');
         sort($tags);
         $tags = join(',',$tags);
-            //开启事务
+        $zendesk = Zendesk::where('ticket_id', $id)->find();
+        if(!$zendesk){
+            return false;
+        }
+        //开启事务
         Db::startTrans();
         try {
-            $zendesk = Zendesk::where('ticket_id', $id)->find();
+            file_put_contents('/www/wwwroot/mojing_test/runtime/log/a.txt',$id."\r\n",FILE_APPEND);
             //更新主表,目前应该只会更新status，其他不会更新
             $updateData = [
                 'tags' => $tags,
@@ -218,7 +222,9 @@ class Notice extends Controller
                     $updateData['email_cc'] = join(',', $emailCcs);
                 }
             }
+            file_put_contents('/www/wwwroot/mojing_test/runtime/log/a.txt',json_encode($updateData)."\r\n",FILE_APPEND);
             Zendesk::update($updateData, ['id' => $zendesk->id]);
+            file_put_contents('/www/wwwroot/mojing_test/runtime/log/a.txt','2'."\r\n",FILE_APPEND);
             //写入附表
             //如果该ticket的分配时间不是今天，且修改后的状态是open或者new的话，则今天任务数-1
             if (in_array(strtolower($ticket->status), ['open', 'new']) && strtotime($zendesk->assign_time) < strtotime(date('Y-m-d', time()))) {
@@ -468,22 +474,28 @@ class Notice extends Controller
      */
     public function setTickets()
     {
+        $create_time = Zendesk::where('shell',1)->order('id','desc')->limit(1)->value('create_time');
+        if($create_time){
+            $create_time = date('Y-m-d H:i:s',(strtotime($create_time) - 8*3600));
+            $create_time = str_replace(' ','T',$create_time).'Z';
+        }else{
+            $create_time = '2019-12-02T22:09:48Z';
+        }
         $search = [
             'type' => 'ticket',
             'status' => ['new', 'open','pending'],
             'order_by' => 'created_at',
             'created' => [
                 'valuetype' => '<=',
-                'value' => '2020-04-03T09:32:51Z',
+                'value' => '2020-04-10T01:59:34Z',
             ],
             'created' => [
                 'valuetype' => '>=',
-                'value' => '2020-04-02T17:01:51Z'
+                'value' => $create_time
             ],
             'sort' => 'asc'
         ];
         $type = $this->postData['type'] == 'zeelool' ? 1 : 2;
-        $type = 1;
         $params = $this->parseStr($search);
         $search = $this->client->search()->find($params);
         $tickets = $search->results;
@@ -519,96 +531,97 @@ class Notice extends Controller
             //开启事务
 //            Db::startTrans();
 //            try {
-                $assign_id = \app\admin\model\zendesk\ZendeskAgents::where('agent_id',$ticket->assignee_id)->value('admin_id');
-                $tags = ZendeskTags::where('name','in',$ticket->tags)->column('id');
-                sort($tags);
-                if(!Zendesk::where('ticket_id',$ticket->id)->find()) {
-                    //根据用户的id获取用户的信息
-                    $user = $this->client->crasp()->findUser(['id' => $ticket->requester_id]);
-                    $userInfo = $user->user;
-                    $subject = $ticket->subject;
-                    $rawSubject = $ticket->raw_subject;
-                    if(!$ticket->subject && !$ticket->raw_subject){
-                        $subject = $rawSubject = substr($ticket->description,0,62).'...';
+            $assign_id = \app\admin\model\zendesk\ZendeskAgents::where('agent_id',$ticket->assignee_id)->value('admin_id');
+            $tags = ZendeskTags::where('name','in',$ticket->tags)->column('id');
+            sort($tags);
+            if(!Zendesk::where('ticket_id',$ticket->id)->find()) {
+                //根据用户的id获取用户的信息
+                $user = $this->client->crasp()->findUser(['id' => $ticket->requester_id]);
+                $userInfo = $user->user;
+                $subject = $ticket->subject;
+                $rawSubject = $ticket->raw_subject;
+                if(!$ticket->subject && !$ticket->raw_subject){
+                    $subject = $rawSubject = substr($ticket->description,0,62).'...';
+                }
+                // echo $subject;die;
+                //写入主表
+                $zendesk = Zendesk::create([
+                    'ticket_id' => $ticket->id,
+                    'type' => $type,
+                    'channel' => $via->channel,
+                    'email' => $userInfo->email,
+                    'username' => $userInfo->name,
+                    'user_id' => $ticket->requester_id,
+                    'to_email' => $via->source->to->address,
+                    'priority' => $priority,
+                    'status' => array_search(strtolower($ticket->status), config('zendesk.status')),
+                    'tags' => join(',',$tags),
+                    'subject' => $subject,
+                    'raw_subject' => $rawSubject,
+                    'assignee_id' => $ticket->assignee_id ?: 0,
+                    'assign_id' => $assign_id ?: 0,
+                    'due_id' => $assign_id ?: 0,
+                    'rating' => $ticket->satisfaction_rating->score,
+                    'rating_type' => $ticket->satisfaction_rating->score == 'bad' ? 2 : 1,
+                    'comment' => $ticket->satisfaction_rating->comment,
+                    'reason' => $ticket->satisfaction_rating->reason,
+                    'create_time' => date('Y-m-d H:i:s',(strtotime(str_replace(['T','Z'],[' ',''],$ticket->created_at))+8*3600)),
+                    'update_time' => date('Y-m-d H:i:s',(strtotime(str_replace(['T','Z'],[' ',''],$ticket->updated_at))+8*3600)),
+                    'assign_time' => date('Y-m-d H:i:s',(strtotime(str_replace(['T','Z'],[' ',''],$ticket->created_at))+8*3600)),
+                    'shell' => 1
+                ]);
+                $zid = $zendesk->id;
+                //echo $ticket->id."\r\n";
+                $comments = $this->client->tickets($ticket->id)->comments()->findAll();
+                //if($ticket->id != 24) {
+                foreach($comments->comments as $comment){
+                    //获取所有的附件
+                    $attachments = [];
+                    if ($comment->attachments) {
+                        foreach ($comment->attachments as $attachment) {
+                            $attachments[] = $attachment->content_url;
+                        }
                     }
-                   // echo $subject;die;
-                    //写入主表
-                    $zendesk = Zendesk::create([
-                        'ticket_id' => $ticket->id,
-                        'type' => $type,
-                        'channel' => $via->channel,
-                        'email' => $userInfo->email,
-                        'username' => $userInfo->name,
-                        'user_id' => $ticket->requester_id,
-                        'to_email' => $via->source->to->address,
-                        'priority' => $priority,
-                        'status' => array_search(strtolower($ticket->status), config('zendesk.status')),
-                        'tags' => join(',',$tags),
-                        'subject' => $subject,
-                        'raw_subject' => $rawSubject,
-                        'assignee_id' => $ticket->assignee_id ?: 0,
-                        'assign_id' => $assign_id ?: 0,
-                        'due_id' => $assign_id ?: 0,
-                        'rating' => $ticket->satisfaction_rating->score,
-                        'rating_type' => $ticket->satisfaction_rating->score == 'bad' ? 2 : 1,
-                        'comment' => $ticket->satisfaction_rating->comment,
-                        'reason' => $ticket->satisfaction_rating->reason,
-                        'create_time' => str_replace(['T','Z'],[' ',''],$ticket->created_at),
-                        'update_time' => str_replace(['T','Z'],[' ',''],$ticket->updated_at),
-                        'assign_time' => str_replace(['T','Z'],[' ',''],$ticket->created_at),
-                    ]);
-                    $zid = $zendesk->id;
-                    //echo $ticket->id."\r\n";
-                    $comments = $this->client->tickets($ticket->id)->comments()->findAll();
-                    //if($ticket->id != 24) {
-                    foreach($comments->comments as $comment){
-                        //获取所有的附件
-                        $attachments = [];
-                        if ($comment->attachments) {
-                            foreach ($comment->attachments as $attachment) {
-                                $attachments[] = $attachment->content_url;
-                            }
-                        }
-                        $admin_id = $due_id = ZendeskAgents::where('agent_id',$comment->author_id)->value('admin_id');
-                        $is_admin = \app\admin\model\zendesk\ZendeskAccount::where('account_id',$comment->author_id)->find();
-                        //存在分配人，是chat或者voice，并且不是管理员主动创建的
-                        if($ticket->assignee_id && in_array($zendesk->channel,['chat','voice']) && $ticket->assignee_id != $ticket->requester_id) {
-                            ZendeskComments::create([
-                                'ticket_id' => $ticket->id,
-                                'comment_id' => 0,
-                                'zid' => $zid,
-                                'author_id' => $ticket->assignee_id,
-                                'body' => $zendesk->channel.'记录工作量',
-                                'html_body' => $zendesk->channel.'记录工作量',
-                                'is_public' => 1,
-                                'is_admin' => 1,
-                                'attachments' => '',
-                                'is_created' => 1,
-                                'due_id' => ZendeskAgents::where('agent_id',$ticket->assignee_id)->value('admin_id')
-                            ]);
-                        }
-                        $res = ZendeskComments::create([
+                    $admin_id = $due_id = ZendeskAgents::where('agent_id',$comment->author_id)->value('admin_id');
+                    $is_admin = \app\admin\model\zendesk\ZendeskAccount::where('account_id',$comment->author_id)->find();
+                    //存在分配人，是chat或者voice，并且不是管理员主动创建的
+                    if($ticket->assignee_id && in_array($zendesk->channel,['chat','voice']) && $ticket->assignee_id != $ticket->requester_id) {
+                        ZendeskComments::create([
                             'ticket_id' => $ticket->id,
-                            'comment_id' => $comment->id,
+                            'comment_id' => 0,
                             'zid' => $zid,
-                            'author_id' => $comment->author_id,
-                            'body' => $comment->body,
-                            'html_body' => $comment->html_body,
-                            'is_public' => $comment->public ? 1 : 2,
-                            'is_admin' => $is_admin ? 1 : 0,
-                            'attachments' => json($attachments),
+                            'author_id' => $ticket->assignee_id,
+                            'body' => $zendesk->channel.'记录工作量',
+                            'html_body' => $zendesk->channel.'记录工作量',
+                            'is_public' => 1,
+                            'is_admin' => 1,
+                            'attachments' => '',
                             'is_created' => 1,
-                            'create_time' => str_replace(['T','Z'],[' ',''],$comment->created_at),
-                            'update_time' => str_replace(['T','Z'],[' ',''],$comment->created_at),
+                            'due_id' => ZendeskAgents::where('agent_id',$ticket->assignee_id)->value('admin_id')
                         ]);
                     }
-                    echo $zendesk->ticket_id."\r\n";
-                    // }
-                    //sleep(1);
-                    //Db::commit();
+                    $res = ZendeskComments::create([
+                        'ticket_id' => $ticket->id,
+                        'comment_id' => $comment->id,
+                        'zid' => $zid,
+                        'author_id' => $comment->author_id,
+                        'body' => $comment->body,
+                        'html_body' => $comment->html_body,
+                        'is_public' => $comment->public ? 1 : 2,
+                        'is_admin' => $is_admin ? 1 : 0,
+                        'attachments' => json($attachments),
+                        'is_created' => 1,
+                        'create_time' => date('Y-m-d H:i:s',(strtotime(str_replace(['T','Z'],[' ',''],$comment->created_at))+8*3600)),
+                        'update_time' => date('Y-m-d H:i:s',(strtotime(str_replace(['T','Z'],[' ',''],$comment->created_at))+8*3600)),
+                    ]);
                 }
+                echo $zendesk->ticket_id."\r\n";
+                // }
+                //sleep(1);
+                //Db::commit();
+            }
 
-                //写入附表
+            //写入附表
 //            } catch (Exception $e) {
 //                Db::rollback();
 //                $this->error($e->getMessage(), '');
