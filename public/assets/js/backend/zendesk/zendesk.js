@@ -21,7 +21,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                     [
                         {field: 'id', title: __('Id')},
                         {field: 'ticket_id', title: __('Ticket_id')},
-                        {field: 'subject', title: __('Subject'),operate:false,formatter: function(value){return value.toString().substr(0, 60)}},
+                        {field: 'subject', title: __('Subject'),operate:false,formatter: function(value){return value.toString().substr(0, 90)}},
                         {field: 'email', title: __('Email'),operate:'LIKE %...%'},
                         //{field: 'assign_id', title: __('Assgin_id'),operate: false,visible:false},
                         {field: 'admin.nickname', title: __('Assign_id')},
