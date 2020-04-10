@@ -623,6 +623,8 @@ class OrderReturn extends Backend
                 $this->view->assign('order_platform',$order_platform);
 
         }
+        dump(config('serach'));
+        exit;
         $this->view->assign("orderPlatformList", (new MagentoPlatform())->getOrderPlatformList());
         return $this->view->fetch();
     }
