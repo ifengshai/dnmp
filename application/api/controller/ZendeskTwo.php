@@ -130,7 +130,7 @@ class ZendeskTwo extends Controller
                 continue;
             }
             $params = [];
-           if($key >= 200){
+           if($key >= 50){
                break;
            }
             $id = $ticket->id;
