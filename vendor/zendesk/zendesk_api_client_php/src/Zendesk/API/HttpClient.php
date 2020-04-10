@@ -45,6 +45,7 @@ use Zendesk\API\Resources\Core\SlaPolicies;
 use Zendesk\API\Resources\Core\SupportAddresses;
 use Zendesk\API\Resources\Core\SuspendedTickets;
 use Zendesk\API\Resources\Core\Tags;
+use Zendesk\API\Resources\Core\Crasp;
 use Zendesk\API\Resources\Core\Targets;
 use Zendesk\API\Resources\Core\TicketFields;
 use Zendesk\API\Resources\Core\TicketImports;
@@ -272,6 +273,7 @@ class HttpClient
             'supportAddresses'          => SupportAddresses::class,
             'suspendedTickets'          => SuspendedTickets::class,
             'tags'                      => Tags::class,
+            'crasp'                     => Crasp::class,
             'targets'                   => Targets::class,
             'tickets'                   => Tickets::class,
             'ticketFields'              => TicketFields::class,

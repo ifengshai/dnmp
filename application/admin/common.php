@@ -195,10 +195,13 @@ if (!function_exists('build_heading')) {
     }
 }
 
-/**
- * 过滤数组空值
- */
-function trim_value(&$value)
-{
-    $value  =  trim($value);
+if (!function_exists('trim_value')) {
+    /**
+     * 过滤数组空值
+     */
+    function trim_value(&$value)
+    {
+        $value  =  trim($value);
+        return $value;
+    }
 }
