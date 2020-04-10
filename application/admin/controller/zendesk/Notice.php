@@ -691,6 +691,7 @@ class Notice extends Controller
         $params = $this->parseStr($search);
         $search = $this->client->search()->find($params);
         $tickets = $search->results;
+        dump($tickets);die;
         $a = 1;
         foreach($tickets as $key => $ticket){
             $id = $ticket->id;
