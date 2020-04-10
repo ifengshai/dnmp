@@ -174,7 +174,7 @@ class Notice extends Controller
         $ticket = $this->getTicket($id);
         //开始插入相关数据
         $tags = $ticket->tags;
-        $tags = \app\admin\model\zendesk\ZendeskTags::where('name', 'in', $tags)->column('id');
+        $tags = \app\admin\model\zendesk\ZendeskTags::where('name', 'in', $tags)->distinct(true)->column('id');
         sort($tags);
         $tags = join(',',$tags);
         $zendesk = Zendesk::where('ticket_id', $id)->find();
@@ -474,22 +474,27 @@ class Notice extends Controller
      */
     public function setTickets()
     {
+        $create_time = Zendesk::where('shell',1)->order('id','desc')->limit(1)->value('create_time');
+        if($create_time){
+            $create_time = date('Y-m-dTH:i:sZ',(strtotime($create_time) - 8*3600));
+        }else{
+            $create_time = '2019-12-02T22:09:48Z';
+        }
         $search = [
             'type' => 'ticket',
             'status' => ['new', 'open','pending'],
             'order_by' => 'created_at',
             'created' => [
                 'valuetype' => '<=',
-                'value' => '2020-04-03T09:32:51Z',
+                'value' => '2020-04-10T01:59:34Z',
             ],
             'created' => [
                 'valuetype' => '>=',
-                'value' => '2020-04-02T17:01:51Z'
+                'value' => $create_time
             ],
             'sort' => 'asc'
         ];
         $type = $this->postData['type'] == 'zeelool' ? 1 : 2;
-        $type = 1;
         $params = $this->parseStr($search);
         $search = $this->client->search()->find($params);
         $tickets = $search->results;
@@ -559,9 +564,10 @@ class Notice extends Controller
                         'rating_type' => $ticket->satisfaction_rating->score == 'bad' ? 2 : 1,
                         'comment' => $ticket->satisfaction_rating->comment,
                         'reason' => $ticket->satisfaction_rating->reason,
-                        'create_time' => str_replace(['T','Z'],[' ',''],$ticket->created_at),
-                        'update_time' => str_replace(['T','Z'],[' ',''],$ticket->updated_at),
-                        'assign_time' => str_replace(['T','Z'],[' ',''],$ticket->created_at),
+                        'create_time' => date('Y-m-d H:i:s',(strtotime(str_replace(['T','Z'],[' ',''],$ticket->created_at))+8*3600)),
+                        'update_time' => date('Y-m-d H:i:s',(strtotime(str_replace(['T','Z'],[' ',''],$ticket->updated_at))+8*3600)),
+                        'assign_time' => date('Y-m-d H:i:s',(strtotime(str_replace(['T','Z'],[' ',''],$ticket->created_at))+8*3600)),
+                        'shell' => 1
                     ]);
                     $zid = $zendesk->id;
                     //echo $ticket->id."\r\n";
@@ -604,8 +610,8 @@ class Notice extends Controller
                             'is_admin' => $is_admin ? 1 : 0,
                             'attachments' => json($attachments),
                             'is_created' => 1,
-                            'create_time' => str_replace(['T','Z'],[' ',''],$comment->created_at),
-                            'update_time' => str_replace(['T','Z'],[' ',''],$comment->created_at),
+                            'create_time' => date('Y-m-d H:i:s',(strtotime(str_replace(['T','Z'],[' ',''],$comment->created_at))+8*3600)),
+                            'update_time' => date('Y-m-d H:i:s',(strtotime(str_replace(['T','Z'],[' ',''],$comment->created_at))+8*3600)),
                         ]);
                     }
                     echo $zendesk->ticket_id."\r\n";

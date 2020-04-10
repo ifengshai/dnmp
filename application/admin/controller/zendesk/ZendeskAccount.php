@@ -100,8 +100,8 @@ class ZendeskAccount extends Backend
         if($this->request->isAjax()){
             //求出所有的account_id
             $accountIdArr = $this->model->column('account_id');
-            $zeelool_res = (new Notice(request(),['type' => 'zeelool']))->fetchUser(['role'=>'agent']);
-            $voogueme_res = (new Notice(request(),['type' => 'voogueme']))->fetchUser(['role'=>'agent']);
+            $zeelool_res = (new Notice(request(),['type' => 'zeelool']))->fetchUser(['role'=>'admin']);
+            $voogueme_res = (new Notice(request(),['type' => 'voogueme']))->fetchUser(['role'=>'admin']);
             $zeelool_info = $this->object_array($zeelool_res);
             $voogueme_info = $this->object_array($voogueme_res);
             if(!$zeelool_info && !$voogueme_info){
