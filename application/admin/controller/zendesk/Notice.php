@@ -697,35 +697,21 @@ class Notice extends Controller
      */
     public function asycTickets()
     {
-        $search = [
-            'type' => 'ticket',
-            'order_by' => 'created_at',
-            'created' => [
-                'valuetype' => '<=',
-                'value' => '2020-04-10T07:20:38Z',
-            ],
-            'created' => [
-                'valuetype' => '>=',
-                'value' => '2020-04-10T01:48:38Z'
-            ],
-            'sort' => 'asc'
-        ];
-
         $type = $this->postData['type'];
         if ($type == 'zeelool') {
             $type = 1;
         } else {
             $type = 2;
         }
-        $params = $this->parseStr($search);
-        $search = $this->client->search()->find($params);
-        $tickets = $search->results;
         $a = 1;
-        foreach($tickets as $key => $ticket){
+        $ticket_ids = Zendesk::where('status','1,2')->where('type',$type)->where('id','<',10845)->column('ticket_id');
+        foreach($ticket_ids as $ticket_id){
+            $ticket = $this->client->tickets()->find($ticket_id);
+
             $id = $ticket->id;
-//            if($a > 2){
-//                break;
-//            }
+            if($a > 2){
+                break;
+            }
             $comments = $this->getComments($id);
             //开始插入相关数据
             $tags = $ticket->tags;
@@ -813,6 +799,7 @@ class Notice extends Controller
                 Db::rollback();
                 //写入日志
             }
+
         }
 
     }
