@@ -70,6 +70,10 @@ class Notice extends Controller
         //评论s
         $comments = $this->getComments($id);
         $ticket = $this->getTicket($id);
+        //存在已创建的则跳过流程
+        if(Zendesk::where('ticket_id', $id)->find()){
+            return false;
+        }
         $via = $ticket->via;
         $priority = 0;
         if ($ticket->priority) {
@@ -173,10 +177,14 @@ class Notice extends Controller
         $tags = \app\admin\model\zendesk\ZendeskTags::where('name', 'in', $tags)->column('id');
         sort($tags);
         $tags = join(',',$tags);
+        $zendesk = Zendesk::where('ticket_id', $id)->find();
+        if(!$zendesk){
+            return false;
+        }
             //开启事务
         Db::startTrans();
         try {
-            $zendesk = Zendesk::where('ticket_id', $id)->find();
+            file_put_contents('/www/wwwroot/mojing_test/runtime/log/a.txt',$id."\r\n",FILE_APPEND);
             //更新主表,目前应该只会更新status，其他不会更新
             $updateData = [
                 'tags' => $tags,
@@ -214,7 +222,9 @@ class Notice extends Controller
                     $updateData['email_cc'] = join(',', $emailCcs);
                 }
             }
+            file_put_contents('/www/wwwroot/mojing_test/runtime/log/a.txt',json_encode($updateData)."\r\n",FILE_APPEND);
             Zendesk::update($updateData, ['id' => $zendesk->id]);
+            file_put_contents('/www/wwwroot/mojing_test/runtime/log/a.txt','2'."\r\n",FILE_APPEND);
             //写入附表
             //如果该ticket的分配时间不是今天，且修改后的状态是open或者new的话，则今天任务数-1
             if (in_array(strtolower($ticket->status), ['open', 'new']) && strtotime($zendesk->assign_time) < strtotime(date('Y-m-d', time()))) {
@@ -321,6 +331,19 @@ class Notice extends Controller
 
 
     }
+    public function createTicket($params)
+    {
+        try {
+            $res = $this->client->tickets()->create($params);
+            sleep(1);
+        } catch (\Exception $e) {
+            return ['code' => 0, 'message' => $e->getMessage()];
+            //exception($e->getMessage(), 10001);
+        }
+        $event = $res->audit->events;
+        $commentId = $event[0]->id;
+        return ['comment_id' => $commentId, 'ticket_id' => $res->ticket->id,'requester_id' => $res->ticket->requester_id];
+    }
 
     /**
      * 上传附件
@@ -353,6 +376,17 @@ class Notice extends Controller
         } catch (\Exception $e) {
             return ['code' => 0, 'message' => $e->getMessage()];
         }
+    }
+
+    /**
+     * 根据id获取用户信息
+     * @param $userId
+     * @return mixed
+     */
+    public function findUserById($userId)
+    {
+        $user = $this->client->crasp()->findUser(['id' => $userId]);
+        return $user->user;
     }
 
     /**

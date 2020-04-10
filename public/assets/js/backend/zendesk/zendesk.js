@@ -1,6 +1,6 @@
 define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','template'], function ($, undefined, Backend, Table, Form , JqTags , Jqui , Template) {
 
-    
+
     var Controller = {
         index: function () {
             // 初始化表格参数配置
@@ -94,11 +94,75 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                 table.bootstrapTable('refresh', {});
                 return false;
             });
+            // 启动和暂停按钮
+            $(document).on("click", ".btn-start", function () {
+                var url = $(this).data('url');
+                $.post(url,{},function(data){
+                    if(data.code == 1) {
+                        Layer.msg('申请成功');
+                        table.bootstrapTable('refresh', {});
+                    }else{
+                        Layer.msg(data.msg);
+                    }
+
+                },'json')
+                return false;
+                //在table外不可以使用添加.btn-change的方法
+                //只能自己调用Table.api.multi实现
+                //如果操作全部则ids可以置为空
+                // var ids = Table.api.selectedids(table);
+                // Table.api.multi("changestatus", ids.join(","), table, this);
+            });
             // 为表格绑定事件
             Table.api.bindevent(table);
         },
         add: function () {
             Controller.api.bindevent();
+            $(document).on('change','.macro-apply',function(){
+                var id = $(this).val();
+                var email = $('.email').val();
+                var type = $('.search-post-type').val();
+                if(id){
+                    $.ajax({
+                        type: "POST",
+                        url: "zendesk/zendesk_mail_template/getTemplateAdd",
+                        dataType: "json",
+                        cache: false,
+                        async: false,
+                        data: {
+                            id:id,
+                            email: email,
+                            type: type
+                        },
+                        success: function (json) {
+                            //修改回复内容，状态，priority，tags
+                            if(json.template_content){
+                                $('.ticket-content').summernote("code",json.template_content);
+                            }
+                            if(json.mail_status) {
+                                $('.ticket-status').val(json.mail_status);
+                            }
+                            if(json.mail_level) {
+                                $('.ticket-priority').val(json.mail_level);
+                            }
+                            if(json.mail_tag) {
+                                $('.ticket-tags').val(json.mail_tag);
+                            }
+                            if(json.mail_subject) {
+                                $('.ticket-subject').val(json.mail_subject);
+
+                            }
+                            $('.selectpicker ').selectpicker('refresh');
+                            Layer.msg('应用成功');
+                            return false;
+                        },
+                        error: function(json){
+                            return false;
+
+                        }
+                    })
+                }
+            });
         },
         edit: function () {
             Controller.api.bindevent();
@@ -168,25 +232,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                 return false;
             });
 
-            //抄送人标签输入
-            $('#ccs').tagsInput({
-                width: 'auto',
-                defaultText: '输入后回车确认',
-                minInputWidth: 110,
-                height: 'auto',
-                placeholderColor: '#999',
-                autocomplete_url:'zendesk/zendesk/getEmail',
-                onChange:function(input,mail){
-                    var strRegex = /^(\w-*\.*)+@(\w-?)+(\.\w{2,})+$/;
-                    if(mail != undefined){
-                        if(!strRegex.test(mail)){
-                            Layer.msg('请输入正确的邮箱地址');
-                            input.removeTag(mail);
-                        }
-                    }
-                }
-            });
-
             $(document).on('change','.macro-apply',function(){
                 var id = $(this).val();
                 var ticket_id = $('.ticket_id').val();
@@ -230,45 +275,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                     })
                 }
             });
-            $(document).on('click','.post-search',function(){
-               var text = $('.post-search-input').val();
-               var type = $('.search-post-type').val();
-                $.ajax({
-                    type: "POST",
-                    url: "zendesk/zendesk/searchPosts",
-                    dataType: "json",
-                    cache: false,
-                    async: false,
-                    data: {
-                        text: text,
-                        type: type
-                    },
-                    success: function (json) {
-                        $('.search-posts').html(json.html);
-                        $('.show-posts').html(json.post_html);
-                        return false;
-                    },
-                    error: function(json){
-                        return false;
-
-                    }
-                });
-            });
-            $(document).on('click','.card-link',function(){
-               var link = $(this).data('link');
-               var title = $(this).data('title');
-                $('.ticket-content').summernote("createLink",{
-                    text: title,
-                    url: link,
-                    isNowWindow: true
-                });
-                $(this).next('button').show();
-            });
-            $(document).on('mouseenter','.card',function(){
-                var num = $(this).data('num');
-               // console.log(num);
-                $('.show-posts').find('.post-row').eq(num).show().siblings().hide();
-            })
             $(document).on('click','.change-ticket',function(){
                 var title = $(this).data('title');
                 var status = $(this).data('status');
@@ -283,6 +289,65 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
         api: {
             bindevent: function () {
                 Form.api.bindevent($("form[role=form]"));
+                //抄送人标签输入
+                $('#ccs').tagsInput({
+                    width: 'auto',
+                    defaultText: '输入后回车确认',
+                    minInputWidth: 110,
+                    height: 'auto',
+                    placeholderColor: '#999',
+                    autocomplete_url:'zendesk/zendesk/getEmail',
+                    onChange:function(input,mail){
+                        var strRegex = /^(\w-*\.*)+@(\w-?)+(\.\w{2,})+$/;
+                        if(mail != undefined){
+                            if(!strRegex.test(mail)){
+                                Layer.msg('请输入正确的邮箱地址');
+                                input.removeTag(mail);
+                            }
+                        }
+                    }
+                });
+
+                $(document).on('click','.post-search',function(){
+                    var text = $('.post-search-input').val();
+                    var type = $('.search-post-type').val();
+                    $.ajax({
+                        type: "POST",
+                        url: "zendesk/zendesk/searchPosts",
+                        dataType: "json",
+                        cache: false,
+                        async: false,
+                        data: {
+                            text: text,
+                            type: type
+                        },
+                        success: function (json) {
+                            $('.search-posts').html(json.html);
+                            $('.show-posts').html(json.post_html);
+                            return false;
+                        },
+                        error: function(json){
+                            return false;
+
+                        }
+                    });
+                });
+                $(document).on('click','.card-link',function(){
+                    var link = $(this).data('link');
+                    var title = $(this).data('title');
+                    $('.ticket-content').summernote("createLink",{
+                        text: title,
+                        url: link,
+                        isNowWindow: true
+                    });
+                    $(this).next('button').show();
+                });
+                $(document).on('mouseenter','.card',function(){
+                    var num = $(this).data('num');
+                    // console.log(num);
+                    $('.show-posts').find('.post-row').eq(num).show().siblings().hide();
+                })
+
             },
         }
     };
