@@ -130,19 +130,25 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 var str = incrementId.substring(0, 3);
                 //判断站点
                 if (str == '100' || str == '400' || str == '500') {
-                    $("#c-work_platform").val(1);
+                    $("#work_platform").val(1);
                 } else if (str == '130' || str == '430') {
-                    $('#c-work_platform').val(2);
+                    $('#work_platform').val(2);
                 } else if (str == '300' || str == '600') {
-                    $('#c-work_platform').val(3);
+                    $('#work_platform').val(3);
                 }
                 $('.selectpicker ').selectpicker('refresh');
-                var ordertype = $('#c-work_platform').val();
+               
+
+            })
+
+            $('#platform_order').click(function(){
+                var incrementId = $('#c-platform_order').val();
+                var sitetype = $('#work_platform').val();
                 $('#c-order_sku').html('');
                 Backend.api.ajax({
                     url: 'saleaftermanage/work_order_list/get_sku_list',
                     data: {
-                        ordertype: ordertype,
+                        sitetype: sitetype,
                         order_number: incrementId
                     }
                 }, function (data, ret) {
@@ -153,7 +159,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     $('#c-order_sku').append(shtml);
                     $('.selectpicker ').selectpicker('refresh');
                 })
-
             })
 
 
