@@ -21,8 +21,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                     [
                         {field: 'id', title: __('Id')},
                         {field: 'ticket_id', title: __('Ticket_id')},
-                        {field: 'subject', title: __('Subject'),operate:false},
-                        {field: 'email', title: __('Email')},
+                        {field: 'subject', title: __('Subject'),operate:false,formatter: function(value){return value.toString().substr(0, 40)}},
+                        {field: 'email', title: __('Email'),operate:'LIKE %...%'},
                         //{field: 'assign_id', title: __('Assgin_id'),operate: false,visible:false},
                         {field: 'admin.nickname', title: __('Assign_id')},
                         {field: 'status', title: __('Status'), custom: { 1: 'danger', 2: 'success', 3: 'blue', 4: 'orange', 5: 'gray' }, searchList: { 1: 'New', 2: 'Open', 3: 'Pending', 4: 'Solved', 5: 'Close' }, formatter: Table.api.formatter.status },
