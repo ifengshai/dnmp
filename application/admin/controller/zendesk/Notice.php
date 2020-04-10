@@ -71,7 +71,7 @@ class Notice extends Controller
         $comments = $this->getComments($id);
         $ticket = $this->getTicket($id);
         //存在已创建的则跳过流程
-        if(Zendesk::where('ticket_id', $id)->find()){
+        if(Zendesk::where(['ticket_id' => $id,'type' => $type])->find()){
             return false;
         }
         $via = $ticket->via;
@@ -168,6 +168,12 @@ class Notice extends Controller
     {
         $postData = $this->postData;
         $id = $postData['id'];
+        $type = $postData['type'];
+        if ($type == 'zeelool') {
+            $type = 1;
+        } else {
+            $type = 2;
+        }
         //$channel = $postData['channel'];
         //最后一条评论
         $comment = $this->getLastComments($id);
@@ -177,7 +183,8 @@ class Notice extends Controller
         $tags = \app\admin\model\zendesk\ZendeskTags::where('name', 'in', $tags)->distinct(true)->column('id');
         sort($tags);
         $tags = join(',',$tags);
-        $zendesk = Zendesk::where('ticket_id', $id)->find();
+
+        $zendesk = Zendesk::where(['ticket_id' => $id,'type' => $type])->find();
         if(!$zendesk){
             return false;
         }
@@ -674,7 +681,13 @@ class Notice extends Controller
             'sort' => 'asc'
         ];
 
-        $type = $this->postData['type'] == 'zeelool' ? 1 : 2;
+        $id = $this->postData['id'];
+        $type = $this->postData['type'];
+        if ($type == 'zeelool') {
+            $type = 1;
+        } else {
+            $type = 2;
+        }
         $params = $this->parseStr($search);
         $search = $this->client->search()->find($params);
         $tickets = $search->results;
@@ -690,7 +703,7 @@ class Notice extends Controller
             $tags = \app\admin\model\zendesk\ZendeskTags::where('name', 'in', $tags)->distinct(true)->column('id');
             sort($tags);
             $tags = join(',',$tags);
-            $zendesk = Zendesk::where('ticket_id', $id)->find();
+            $zendesk = Zendesk::where(['ticket_id' => $id,'type' => $type])->find();
             if(!$zendesk){
                 return false;
             }
