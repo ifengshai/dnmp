@@ -87,7 +87,8 @@ class WorkOrderList extends Backend
             $this->view->assign('problem_type',config('workorder.warehouse_problem_type'));
         }
 
-        $this->view->assign('step',config('workorder.step'));
+        $this->view->assign('step', config('workorder.step'));
+        $this->assignconfig('workorder', config('workorder'));
         return $this->view->fetch();
     }
     
