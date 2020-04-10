@@ -88,15 +88,18 @@ class ChangeZendesk extends Controller
         $db = Db::connect($database);
         $tickets = $db->name('zendesk')->where('id','>',10751)->limit(1)->select();
         foreach($tickets as $ticket){
+            if(Zendesk::where('ticket_id',$ticket->id)->find()){
+                continue;
+            }
             $data = collection($ticket)->toArray();
             $zid = $data['id'];
             unset($data['id']);
-            $id = Zendesk::create($data);
+            $zendesk = Zendesk::create($data);
             $comments = $db->name('zendeskComments')->where('zid',$zid)->select();
             foreach($comments as $comment){
                 $commentData = collection($comment)->toArray();
                 unset($commentData['id']);
-                $commentData['zid'] = $id;
+                $commentData['zid'] = $zendesk->id;
                 ZendeskComments::create($commentData);
             }
             sleep(1);
