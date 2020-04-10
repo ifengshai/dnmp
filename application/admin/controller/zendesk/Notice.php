@@ -693,11 +693,9 @@ class Notice extends Controller
         $a = 1;
         foreach($tickets as $key => $ticket){
             $id = $ticket->id;
-            echo $id;
             if($a > 2){
                 break;
             }
-            echo 2;
             $comments = $this->getComments($id);
             //开始插入相关数据
             $tags = $ticket->tags;
@@ -705,9 +703,11 @@ class Notice extends Controller
             sort($tags);
             $tags = join(',',$tags);
             $zendesk = Zendesk::where(['ticket_id' => $id,'type' => $type])->find();
+            dump($zendesk);
             if(!$zendesk){
                 return false;
             }
+            echo 1;die;
             //开启事务
             Db::startTrans();
             try {
