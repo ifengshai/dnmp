@@ -481,6 +481,7 @@ class Notice extends Controller
         }else{
             $create_time = '2019-11-26T01:49:54Z';
         }
+        echo $create_time;die;
         $search = [
             'type' => 'ticket',
             'status' => ['new', 'open','pending'],
