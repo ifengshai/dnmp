@@ -691,7 +691,6 @@ class Notice extends Controller
         $params = $this->parseStr($search);
         $search = $this->client->search()->find($params);
         $tickets = $search->results;
-        dump($tickets);die;
         $a = 1;
         foreach($tickets as $key => $ticket){
             $id = $ticket->id;
@@ -749,9 +748,11 @@ class Notice extends Controller
                     }
                 }
                 Zendesk::update($updateData, ['id' => $zendesk->id]);
+                echo 1;
                 //写入附表
                 //查找comment_id是否存在，不存在则添加
                 foreach($comments as $comment){
+                    echo 2;
                     if(!ZendeskComments::where('comment_id',$comment->id)->find()) {
                         $a++;
                         //获取所有的附件
