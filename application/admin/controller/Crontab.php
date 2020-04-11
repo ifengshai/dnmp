@@ -3316,7 +3316,7 @@ order by sfoi.item_id asc limit 1000";
         $item = new \app\admin\model\itemmanage\Item();
         $map['is_open'] = 1;
         $map['is_del'] = 1;
-        $map['item_status'] = 3;
+        $map['item_status'] = 1;
         $map['is_change'] = 0;
         $map['available_stock'] = ['<=', 0];
         $list = $item->where($map)->limit(300)->select();
