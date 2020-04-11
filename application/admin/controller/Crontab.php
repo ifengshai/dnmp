@@ -3174,8 +3174,9 @@ order by sfoi.item_id asc limit 1000";
                 $skus[] = $v['sku'];
             }
         }
-        $item->where(['sku' => ['in',$skus]])->save();        
-        dump($skus);die;
+        $item->where(['sku' => ['in', $skus]])->save();
+        dump($skus);
+        die;
     }
 
     /**
@@ -3343,7 +3344,6 @@ order by sfoi.item_id asc limit 1000";
     }
 
 
-
     /**
      * 修复库存问题
      *
@@ -3352,8 +3352,54 @@ order by sfoi.item_id asc limit 1000";
      * @since 2020/04/11 15:54:25 
      * @return void
      */
-    public function set_product_line()
+    public function set_product_process()
     {
+        $this->zeelool = new \app\admin\model\order\order\Zeelool;
+        $this->voogueme = new \app\admin\model\order\order\Voogueme;
+        $this->nihao = new \app\admin\model\order\order\Nihao;
+        $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
+        $this->item = new \app\admin\model\itemmanage\Item;
         
+        $skus = [
+            'OX406441-02',
+            'OX462594-01',
+            'OX616487-01',
+            'DA488986-01',
+            'OX056342-01',
+            'OP035464-02',
+            'OP069761-02',
+            'OM662855-02',
+            'FM0088-04',
+            'OP070243-02',
+            'OP070243-01',
+            'ER079180-01',
+            'OX197768-02',
+            'OX197768-01',
+            'ER070736-01',
+            'ER673699-01',
+            'ER382671-01',
+            'WM088648-01'
+        ];
+        foreach ($skus as $k => $v) {
+            $zeelool_sku = $this->itemplatformsku->getWebSku($v, 1);
+            $voogueme_sku = $this->itemplatformsku->getWebSku($v, 2);
+            $nihao_sku = $this->itemplatformsku->getWebSku($v, 3);
+
+            $map['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal']];
+            $map['custom_is_delivery_new'] = 0; //是否提货
+            $map['custom_is_match_frame_new'] = 1; //是否配镜架
+            $map['a.created_at'] = ['between', ['2020-01-01 00:00:00', '2020-04-13 23:00:00']]; //时间节点
+            $map['sku'] = $zeelool_sku;
+            $zeelool_qty = $this->zeelool->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->sum('qty_ordered');
+            $map['sku'] = $voogueme_sku;
+            $voogueme_qty = $this->voogueme->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->sum('qty_ordered');
+            $map['sku'] = $nihao_sku;
+            $nihao_qty = $this->nihao->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->sum('qty_ordered');
+
+            $p_map[$k]['sku'] = $v;
+            $p_map[$k]['distribution_occupy_stock'] = $zeelool_qty + $voogueme_qty + $nihao_qty;
+            
+        }
+        dump($p_map);die;
     }
 }
