@@ -157,7 +157,7 @@ class Notice extends Controller
             //写入附表
         } catch (Exception $e) {
             Db::rollback();
-            //file_put_contents('/www/wwwroot/mjz/runtime/a.txt',$e->getMessage()."\r\n",FILE_APPEND);
+            file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$e->getMessage()."\r\n",FILE_APPEND);
             echo $e->getMessage();
         }
     }
