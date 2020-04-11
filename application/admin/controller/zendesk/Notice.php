@@ -531,8 +531,8 @@ class Notice extends Controller
             $template_name = mb_substr(strstr($title,'】'),1);
             $template_category = mb_substr(strstr($title,'】',true),1);
             $template_category = array_search($template_category,config('zendesk.template_category'));
-            if(!$template_name){
-                $template_category = 11;
+            if(!$template_name && !$template_category){
+                $template_category = 14;
                 $template_name = $title;
             }
             $data = [
