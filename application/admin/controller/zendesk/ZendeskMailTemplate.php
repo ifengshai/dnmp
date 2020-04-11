@@ -48,16 +48,7 @@ class ZendeskMailTemplate extends Backend
      */
     private function template_category()
     {
-        $arr = [
-            1=> '售前',
-            2=> '售中',
-            3=> '售后',
-            4=> '物流',
-            5=> '超时',
-            6=> '疫情',
-            7=> '电话',
-            8=> '其他'
-        ];
+        $arr = config('zendesk.template_category');
         return $arr;
     }
     public function _initialize()
@@ -341,7 +332,7 @@ class ZendeskMailTemplate extends Backend
             //获取邮件的信息
             $ticket = \app\admin\model\zendesk\Zendesk::where('ticket_id',$ticket_id)->find();
             //替换模板内容
-            $template['template_content'] = str_replace(['{{username}}','{{email}}'],[$ticket->username,$ticket->email],$template['template_content']);
+            $template['template_content'] = str_replace(['{{username}}','{{email}}','{{ticket_id}}'],[$ticket->username,$ticket->email,$ticket->ticket_id],$template['template_content']);
             //tags合并
             $template['mail_tag'] = array_filter(array_merge(explode(',',$template['mail_tag']),explode(',',$ticket->tags)));
             return json($template);
