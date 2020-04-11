@@ -50,7 +50,8 @@ class Notice extends Controller
             }
 
         } catch (\Exception $e) {
-            exception('zendesk链接失败', 100006);
+            file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$e->getMessage()."\r\n",FILE_APPEND);
+            return true;
         }
     }
     /**
