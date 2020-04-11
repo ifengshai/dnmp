@@ -101,121 +101,248 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
             });
             //增加一行镜片数据
             $(document).on('click','.btn-add-lens',function(){
-                    var contents = '<div class="col-lg-12">' +
-                        '</div>' +
-                        '<div class="col-xs-6 col-md-4" style="margin-left:5.6666%;" >' +
-                        '<div class="panel bg-gray-light">' +
-                        '<div class="panel-body">' +
-                        '<div class="panel-title">' +
-                        '<label class="control-label col-xs-12 col-sm-3">name:</label>' +
-                        '<div class="col-xs-12 col-sm-8">' +
-                        '<input  id="c-item_name"  class="form-control" name="row[lens][original_name][]" type="text" value="">' +
-                        '</div>' +
-                        '</div>' +
-                        '</div>' +
-                        '<div class="panel-body">' +
-                        '<div class="panel-title">' +
-                        '<label class="control-label col-xs-12 col-sm-3">SKU:</label>' +
-                        '<div class="col-xs-12 col-sm-8">' +
-                        '<input  id="c-item_sku" class="form-control" name="row[lens][original_sku][]"  type="text" value="">' +
-                        '</div>' +
-                        '</div>' +
-                        '</div>' +
-                        '<div class="panel-body">' +
-                        '<div class="panel-title">' +
-                        '<label class="control-label col-xs-12 col-sm-3">qty_ordered:</label>' +
-                        '<div class="col-xs-12 col-sm-8">' +
-                        '<input  id="c-item_qty_ordered"  class="form-control" name="row[lens][original_number][]"  type="text" value="">' +
-                        '</div>' +
-                        '</div>' +
-                        '</div>' +
-                        '<div class="panel-body">' +
-                        '<div class="panel-title">' +
-                        '<label class="control-label col-xs-12 col-sm-3">prescription_type:</label>' +
-                        '<div class="col-xs-12 col-sm-8">' +
-                        '<input  id="c-recipe_type"  class="form-control" type="text" name="row[lens][recipe_type][]" value="">' +
-                        '</div>' +
-                        '</div>' +
-                        '</div>' +
-                        '<div class="panel-body">' +
-                        '<div class="panel-title">' +
-                        '<label class="control-label col-xs-12 col-sm-3">lens_type:</label>' +
-                        '<div class="col-xs-12 col-sm-8">' +
-                        '<input  id="c-lens_type"  class="form-control" name="row[lens][lens_type][]" type="text" value="">' +
-                        '</div>' +
-                        '</div>' +
-                        '</div>' +
-                        '<div class="panel-body">' +
-                        '<div class="panel-title">' +
-                        '<label class="control-label col-xs-12 col-sm-3">coating_type:</label>' +
-                        '<div class="col-xs-12 col-sm-8">' +
-                        '<input  id="c-coating_film_type"  class="form-control" name="row[lens][coating_type][]"  type="text" value="">' +
-                        '</div>' +
-                        '</div>' +
-                        '</div>' +
-                        '</div>' +
-                        '</div>' +
-                        '<div class="col-xs-6 col-md-7">' +
-                        '<div class="panel bg-gray-light">' +
-                        '<div class="panel-body">' +
-                        '<div class="ibox-title">' +
-                        '<table id="caigou-table-lens">' +
-                        '<tr>' +
-                        '<td colspan="10" style="text-align: center">Prescription_type</td>' +
-                        '</tr>' +
-                        '<tr>' +
-                        '<td style="text-align: center">value</td>' +
-                        '<td style="text-align: center">SPH</td>' +
-                        '<td style="text-align: center">CYL</td>' +
-                        '<td style="text-align: center">AXI</td>' +
-                        '<td style="text-align: center">ADD</td>' +
-                        '<td style="text-align: center">PD</td>' +
-                        '<td style="text-align: center">Prism Horizontal</td>' +
-                        '<td style="text-align: center">Base Direction</td>' +
-                        '<td style="text-align: center">Prism Vertical</td>' +
-                        '<td style="text-align: center">Base Direction</td>' +
-                        '</tr>' +
-                        '<tr>' +
-                        '<td style="text-align: center">Right(OD)</td>' +
-                        '<td><input id="c-right_SPH" class="form-control" name="row[lens][od_sph][]"  type="text" value=""></td>' +
-                        '<td><input id="c-right_CYL" class="form-control" name="row[lens][od_cyl][]"  type="text" value=""></td>' +
-                        '<td><input id="c-right_AXI" class="form-control" name="row[lens][od_axis][]" type="text" value=""></td>' +
-                        '<td><input id="c-right_ADD" class="form-control" name="row[lens][od_add][]"  type="text" value=""></td>' +
-                        '<td><input id="c-right_PD" class="form-control"  name="row[lens][pd_r][]"    type="text" value=""></td>' +
-                        '<td><input id="c-right_Prism_Horizontal" class="form-control" name="row[lens][od_pv][]"  type="text" value=""></td>' +
-                        '<td><input id="c-right_bd" class="form-control"  type="text" name="row[lens][od_bd][]"  value=""></td>' +
-                        '<td><input id="c-purchase_remark" class="form-control"  type="text" name="row[lens][od_pv_r][]" value=""></td>' +
-                        '<td><input id="c-purchase_remark" class="form-control"  type="text" name="row[lens][od_bd_r][]" value=""></td>' +
-                        '</tr>' +
-                        '<tr>' +
-                        '<td style="text-align: center">Left(OS)</td>' +
-                        '<td><input id="c-left_SPH" class="form-control" name="row[lens][os_sph][]" type="text" value=""></td>' +
-                        '<td><input id="c-left_CYL" class="form-control" name="row[lens][os_cyl][]" type="text" value=""></td>' +
-                        '<td><input id="c-purchase_remark" class="form-control" name="row[lens][os_axis][]"  type="text" value=""></td>' +
-                        '<td><input id="c-purchase_remark" class="form-control" name="row[lens][os_add][]"   type="text" value=""></td>' +
-                        '<td><input id="c-purchase_remark" class="form-control" name="row[lens][pd_l][]"    type="text" value=""></td>' +
-                        '<td><input id="c-purchase_remark" class="form-control" name="row[lens][os_pv][]"   type="text" value=""></td>' +
-                        '<td><input id="c-purchase_remark" class="form-control" name="row[lens][os_bd][]" type="text" value=""></td>' +
-                        '<td><input id="c-purchase_remark" class="form-control" name="row[lens][os_pv_r][]" type="text" value=""></td>' +
-                        '<td><input id="c-purchase_remark" class="form-control" name="row[lens][os_bd_r][]" type="text" value=""></td>' +
-                        '</tr>' +
-                        '</table>' +
-                        '</div>' +
-                        '</div>' +
-                        '</div>' +
-                        '<div>'+
-                        '<a href="javascript:;" class="btn btn-danger btn-del-lens" title="删除"><i class="fa fa-trash"></i>删除</a>'+
-                        '</div>'+
-                        '</div>';
-                     $('.item_lens_info').append(contents);
-
+                    var contents = '<div><div class="step1_function2">\n' +
+                        '                    <div class="step1_function2_child">\n' +
+                        '                        <label class="control-label col-xs-12 col-sm-3">SKU:</label>\n' +
+                        '                        <div class="col-xs-12 col-sm-8">\n' +
+                        '                            <select class="form-control selectpicker" name="row[lens][original_sku][]">\n' +
+                        '                                <option value="0">请选择</option>\n' +
+                        '                            </select>\n' +
+                        '                        </div>\n' +
+                        '                    </div>\n' +
+                        '\n' +
+                        '                    <div class="step1_function2_child">\n' +
+                        '                        <label class="control-label col-xs-12 col-sm-3">Name:</label>\n' +
+                        '                        <div class="col-xs-12 col-sm-8">\n' +
+                        '                            <input class="form-control" name="row[lens][original_name][]" type="text" value="">\n' +
+                        '                        </div>\n' +
+                        '                    </div>\n' +
+                        '                    <div class="step1_function2_child">\n' +
+                        '                        <label class="control-label col-xs-12 col-sm-3">QTY:</label>\n' +
+                        '                        <div class="col-xs-12 col-sm-8">\n' +
+                        '                            <input class="form-control" name="row[lens][original_number][]" type="text" value="">\n' +
+                        '                        </div>\n' +
+                        '                    </div>\n' +
+                        '\n' +
+                        '                    <div class="step1_function2_child">\n' +
+                        '                        <label class="control-label col-xs-12 col-sm-3">prescription_type:</label>\n' +
+                        '                        <div class="col-xs-12 col-sm-8">\n' +
+                        '                            <select class="form-control selectpicker" name="row[lens][recipe_type][]">\n' +
+                        '                                <option value="0">请选择</option>\n' +
+                        '                            </select>\n' +
+                        '                        </div>\n' +
+                        '                    </div>\n' +
+                        '\n' +
+                        '                </div>\n' +
+                        '\n' +
+                        '                <div class="step7_function3">\n' +
+                        '                    <div class="panel-body">\n' +
+                        '                        <div class="step7_function3_child">\n' +
+                        '                            <label class="control-label col-xs-12 col-sm-3">lens_type:</label>\n' +
+                        '                            <div class="col-xs-12 col-sm-8">\n' +
+                        '                                <select class="form-control selectpicker" name="row[lens][lens_type][]">\n' +
+                        '                                    <option value="0">请选择</option>\n' +
+                        '                                </select>\n' +
+                        '                            </div>\n' +
+                        '                        </div>\n' +
+                        '                        <div class="step7_function3_child">\n' +
+                        '                            <label class="control-label col-xs-12 col-sm-3">coating_type:</label>\n' +
+                        '                            <div class="col-xs-12 col-sm-8">\n' +
+                        '                                <select  id="c-coating_type" class="form-control selectpicker" name="row[lens][coating_type][]">\n' +
+                        '                                    <option value="0">请选择</option>\n' +
+                        '                                </select>\n' +
+                        '                            </div>\n' +
+                        '                        </div>\n' +
+                        '                        <table>\n' +
+                        '                            <tbody>\n' +
+                        '                            <tr>\n' +
+                        '                                <td style="text-align: center">value</td>\n' +
+                        '                                <td style="text-align: center">SPH</td>\n' +
+                        '                                <td style="text-align: center">CYL</td>\n' +
+                        '                                <td style="text-align: center">AXI</td>\n' +
+                        '                                <td style="text-align: center">ADD</td>\n' +
+                        '                                <td style="text-align: center">PD</td>\n' +
+                        '                            </tr>\n' +
+                        '                            <tr>\n' +
+                        '                                <td style="text-align: center">Right(OD)</td>\n' +
+                        '                                <td><input class="form-control" name="row[lens][od_sph][]" type="text" value=""></td>\n' +
+                        '                                <td><input class="form-control" name="row[lens][od_cyl][]" type="text" value=""></td>\n' +
+                        '                                <td><input class="form-control" name="row[lens][od_axis][]" type="text" value=""></td>\n' +
+                        '                                <td><input class="form-control" name="row[lens][od_add][]" type="text" value=""></td>\n' +
+                        '                                <td><input class="form-control" name="row[lens][pd_r][]" type="text" value=""></td>\n' +
+                        '                            </tr>\n' +
+                        '                            <tr>\n' +
+                        '                                <td style="text-align: center">Left(OS)</td>\n' +
+                        '                                <td><input class="form-control" name="row[lens][os_sph][]" type="text" value=""></td>\n' +
+                        '                                <td><input class="form-control" name="row[lens][os_cyl][]" type="text" value=""></td>\n' +
+                        '                                <td><input class="form-control" name="row[lens][os_axis][]" type="text" value=""></td>\n' +
+                        '                                <td><input class="form-control" name="row[lens][os_add][]" type="text" value=""></td>\n' +
+                        '                                <td><input class="form-control" name="row[lens][pd_l][]" type="text" value=""></td>\n' +
+                        '                            </tr>\n' +
+                        '\n' +
+                        '                            <tr>\n' +
+                        '                                <td style="text-align: center"></td>\n' +
+                        '                                <td style="text-align: center">Prism Horizontal</td>\n' +
+                        '                                <td style="text-align: center">Base Direction</td>\n' +
+                        '                                <td style="text-align: center">Prism Vertical</td>\n' +
+                        '                                <td style="text-align: center">Base Direction</td>\n' +
+                        '                            </tr>\n' +
+                        '                            <tr>\n' +
+                        '                                <td style="text-align: center">Right(OD)</td>\n' +
+                        '                                <td><input class="form-control" type="text" name="row[lens][od_pv][]" value=""></td>\n' +
+                        '                                <td><input class="form-control" type="text" name="row[lens][od_bd][]" value=""></td>\n' +
+                        '                                <td><input class="form-control" type="text" name="row[lens][od_pv_r][]" value=""></td>\n' +
+                        '                                <td><input class="form-control" type="text" name="row[lens][od_bd_r][]" value=""></td>\n' +
+                        '                            </tr>\n' +
+                        '                            <tr>\n' +
+                        '                                <td style="text-align: center">Left(OS)</td>\n' +
+                        '                                <td><input class="form-control" name="row[lens][os_pv][]" type="text" value=""></td>\n' +
+                        '                                <td><input class="form-control" name="row[lens][os_bd][]" type="text" value=""></td>\n' +
+                        '                                <td><input class="form-control" name="row[lens][os_pv_r][]" type="text" value=""></td>\n' +
+                        '                                <td><input class="form-control" name="row[lens][os_bd_r][]" type="text" value=""></td>\n' +
+                        '                            </tr>\n' +
+                        '                            </tbody>\n' +
+                        '                        </table>\n' +
+                        '                    </div>\n' +
+                        '                </div>\n' +
+                        '\n' +
+                        '                <div class="form-group-child4_del">\n' +
+                        '                    <a href="javascript:;" style="width: 50%;" class="btn btn-danger btn-del-lens" title="删除"><i class="fa fa-trash"></i>删除</a>\n' +
+                        '                </div></div>';
+                     $('#btn-add-lens').after(contents);
+                    Controller.api.bindevent();
             });
             //删除一行镜片数据
             $(document).on('click', '.btn-del-lens', function () {
-                $(this).parent().parent().prev().remove();
                 $(this).parent().parent().remove();
-
             });
+
+            //补发 start
+            $(document).on('click', '.btn-add-supplement', function () {
+                var contents = '<div>\n' +
+                    '                    <div class="step7_function2">\n' +
+                    '                        <div class="step7_function2_child">\n' +
+                    '                            <label class="control-label col-xs-12 col-sm-3">SKU:</label>\n' +
+                    '                            <div class="col-xs-12 col-sm-8">\n' +
+                    '                                <select class="form-control selectpicker" name="row[lens][original_sku][]">\n' +
+                    '                                    <option value="0">请选择</option>\n' +
+                    '                                </select>\n' +
+                    '                            </div>\n' +
+                    '                        </div>\n' +
+                    '\n' +
+                    '                        <div class="step7_function2_child">\n' +
+                    '                            <label class="control-label col-xs-12 col-sm-3">Name:</label>\n' +
+                    '                            <div class="col-xs-12 col-sm-8">\n' +
+                    '                                <input class="form-control" name="row[lens][original_name][]" type="text" value="">\n' +
+                    '                            </div>\n' +
+                    '                        </div>\n' +
+                    '                        <div class="step7_function2_child">\n' +
+                    '                            <label class="control-label col-xs-12 col-sm-3">QTY:</label>\n' +
+                    '                            <div class="col-xs-12 col-sm-8">\n' +
+                    '                                <input class="form-control" name="row[lens][original_number][]" type="text" value="">\n' +
+                    '                            </div>\n' +
+                    '                        </div>\n' +
+                    '                        <div class="step7_function2_child">\n' +
+                    '                            <label class="control-label col-xs-12 col-sm-3">选择已有处方:</label>\n' +
+                    '                            <div class="col-xs-12 col-sm-8">\n' +
+                    '                                <select class="form-control selectpicker" name="row[]">\n' +
+                    '                                    <option value="0">请选择</option>\n' +
+                    '                                </select>\n' +
+                    '                            </div>\n' +
+                    '                        </div>\n' +
+                    '                        <div class="step7_function2_child">\n' +
+                    '                            <label class="control-label col-xs-12 col-sm-3">prescription_type:</label>\n' +
+                    '                            <div class="col-xs-12 col-sm-8">\n' +
+                    '                                <select class="form-control selectpicker" name="row[lens][recipe_type][]">\n' +
+                    '                                    <option value="0">请选择</option>\n' +
+                    '                                </select>\n' +
+                    '                            </div>\n' +
+                    '                        </div>\n' +
+                    '\n' +
+                    '                    </div>\n' +
+                    '\n' +
+                    '                    <div class="step1_function3">\n' +
+                    '                        <div class="panel-body">\n' +
+                    '                            <div class="step1_function3_child">\n' +
+                    '                                <label class="control-label col-xs-12 col-sm-3">lens_type:</label>\n' +
+                    '                                <div class="col-xs-12 col-sm-8">\n' +
+                    '                                    <select class="form-control selectpicker" name="row[lens][lens_type][]">\n' +
+                    '                                        <option value="0">请选择</option>\n' +
+                    '                                    </select>\n' +
+                    '                                </div>\n' +
+                    '                            </div>\n' +
+                    '                            <div class="step1_function3_child">\n' +
+                    '                                <label class="control-label col-xs-12 col-sm-3">coating_type:</label>\n' +
+                    '                                <div class="col-xs-12 col-sm-8">\n' +
+                    '                                    <select  id="c-coating_type" class="form-control selectpicker" name="row[lens][coating_type][]">\n' +
+                    '                                        <option value="0">请选择</option>\n' +
+                    '                                    </select>\n' +
+                    '                                </div>\n' +
+                    '                            </div>\n' +
+                    '                            <table>\n' +
+                    '                                <tbody>\n' +
+                    '                                <tr>\n' +
+                    '                                    <td style="text-align: center">value</td>\n' +
+                    '                                    <td style="text-align: center">SPH</td>\n' +
+                    '                                    <td style="text-align: center">CYL</td>\n' +
+                    '                                    <td style="text-align: center">AXI</td>\n' +
+                    '                                    <td style="text-align: center">ADD</td>\n' +
+                    '                                    <td style="text-align: center">PD</td>\n' +
+                    '                                </tr>\n' +
+                    '                                <tr>\n' +
+                    '                                    <td style="text-align: center">Right(OD)</td>\n' +
+                    '                                    <td><input class="form-control" name="row[lens][od_sph][]" type="text" value=""></td>\n' +
+                    '                                    <td><input class="form-control" name="row[lens][od_cyl][]" type="text" value=""></td>\n' +
+                    '                                    <td><input class="form-control" name="row[lens][od_axis][]" type="text" value=""></td>\n' +
+                    '                                    <td><input class="form-control" name="row[lens][od_add][]" type="text" value=""></td>\n' +
+                    '                                    <td><input class="form-control" name="row[lens][pd_r][]" type="text" value=""></td>\n' +
+                    '                                </tr>\n' +
+                    '                                <tr>\n' +
+                    '                                    <td style="text-align: center">Left(OS)</td>\n' +
+                    '                                    <td><input class="form-control" name="row[lens][os_sph][]" type="text" value=""></td>\n' +
+                    '                                    <td><input class="form-control" name="row[lens][os_cyl][]" type="text" value=""></td>\n' +
+                    '                                    <td><input class="form-control" name="row[lens][os_axis][]" type="text" value=""></td>\n' +
+                    '                                    <td><input class="form-control" name="row[lens][os_add][]" type="text" value=""></td>\n' +
+                    '                                    <td><input class="form-control" name="row[lens][pd_l][]" type="text" value=""></td>\n' +
+                    '                                </tr>\n' +
+                    '\n' +
+                    '                                <tr>\n' +
+                    '                                    <td style="text-align: center"></td>\n' +
+                    '                                    <td style="text-align: center">Prism Horizontal</td>\n' +
+                    '                                    <td style="text-align: center">Base Direction</td>\n' +
+                    '                                    <td style="text-align: center">Prism Vertical</td>\n' +
+                    '                                    <td style="text-align: center">Base Direction</td>\n' +
+                    '                                </tr>\n' +
+                    '                                <tr>\n' +
+                    '                                    <td style="text-align: center">Right(OD)</td>\n' +
+                    '                                    <td><input class="form-control" type="text" name="row[lens][od_pv][]" value=""></td>\n' +
+                    '                                    <td><input class="form-control" type="text" name="row[lens][od_bd][]" value=""></td>\n' +
+                    '                                    <td><input class="form-control" type="text" name="row[lens][od_pv_r][]" value=""></td>\n' +
+                    '                                    <td><input class="form-control" type="text" name="row[lens][od_bd_r][]" value=""></td>\n' +
+                    '                                </tr>\n' +
+                    '                                <tr>\n' +
+                    '                                    <td style="text-align: center">Left(OS)</td>\n' +
+                    '                                    <td><input class="form-control" name="row[lens][os_pv][]" type="text" value=""></td>\n' +
+                    '                                    <td><input class="form-control" name="row[lens][os_bd][]" type="text" value=""></td>\n' +
+                    '                                    <td><input class="form-control" name="row[lens][os_pv_r][]" type="text" value=""></td>\n' +
+                    '                                    <td><input class="form-control" name="row[lens][os_bd_r][]" type="text" value=""></td>\n' +
+                    '                                </tr>\n' +
+                    '                                </tbody>\n' +
+                    '                            </table>\n' +
+                    '                        </div>\n' +
+                    '                    </div>\n' +
+                    '\n' +
+                    '                    <div class="form-group-child4_del" style="margin-bottom: 20px;">\n' +
+                    '                        <a href="javascript:;" style="width: 50%;" class="btn btn-danger btn-del-supplement" title="删除"><i class="fa fa-trash"></i>删除</a>\n' +
+                    '                    </div>\n' +
+                    '                </div>';
+                $('#btn-add-supplement').after(contents);
+                Controller.api.bindevent();
+            });
+            $(document).on('click', '.btn-del-supplement', function () {
+                $(this).parent().parent().remove();
+            });
+            //补发 end
 
             //模糊匹配订单号
             $('#c-platform_order').autocomplete({
