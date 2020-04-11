@@ -289,16 +289,16 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                     area: ['100', '100'],
                     maxmin: true,
                     shade: 0.8,
-                    closeBtn: 0,
+                    closeBtn: true,
                     shadeClose: true,
                     content: href
                 });
-                parent.$(".layui-layer-title")[0].innerText= title;
-                if(status == 5){
-                    $(".layui-layer-footer").hide();
-                }else{
-                    $(".layui-layer-footer").show();
-                }
+                // parent.$(".layui-layer-title")[0].innerText= title;
+                // if(status == 5){
+                //     $(".layui-layer-footer").hide();
+                // }else{
+                //     $(".layui-layer-footer").show();
+                // }
 
             });
         },
