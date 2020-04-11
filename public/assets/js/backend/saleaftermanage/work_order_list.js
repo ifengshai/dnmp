@@ -86,20 +86,20 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     }
                 }
                 var checkID = [];//定义一个空数组
-                $("input[name='row[step]']:checked").each(function(i){
-                    checkID[i] =$(this).val();
+                $("input[name='row[measure_choose_id]']:checked").each(function (i) {
+                    checkID[i] = $(this).val();
                 });
-                for(var m=0;m<checkID.length;m++){
-                    var node = $('.step'+checkID[m]);
-                    if(node.is(':hidden')){
+                for (var m = 0; m < checkID.length; m++) {
+                    var node = $('.step' + checkID[m]);
+                    if (node.is(':hidden')) {
                         node.show();
-                    }else{
+                    } else {
                         node.hide();
-                    }                    
-                    var secondNode = $('.step'+id+'-'+checkID[m]);
-                    if(secondNode.is(':hidden')){
+                    }
+                    var secondNode = $('.step' + id + '-' + checkID[m]);
+                    if (secondNode.is(':hidden')) {
                         secondNode.show();
-                    }else{
+                    } else {
                         secondNode.hide();
                     }
                 }
@@ -107,29 +107,43 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
 
             //根据措施类型显示隐藏
             $(document).on('click', '.step_type', function () {
-                var id = $(this).val();
-                if ($(this).prop('checked')) {
-                    $('#step_function .step' + id).show();
-                } else {
-                    $('#step_function .step' + id).hide();
-
+                // 士卫
+                $('.measure').hide();
+                var problem_type_id = $("input[name='row[problem_type_id]']:checked").val();
+                var checkID = [];//定义一个空数组 
+                var appoint_group = '';
+                $("input[name='row[measure_choose_id]']:checked").each(function (i) {
+                    checkID[i] = $(this).val();
+                    var id = $(this).val();
+                    //获取承接组
+                    appoint_group += $('#step' + id + '-appoint_group').val() + ',';
+                });
+                //一般措施
+                for (var m = 0; m < checkID.length; m++) {
+                    var node = $('.step' + checkID[m]);
+                    if (node.is(':hidden')) {
+                        node.show();
+                    } else {
+                        node.hide();
+                    }
+                    //二级措施
+                    var secondNode = $('.step' + problem_type_id + '-' + checkID[m]);
+                    if (secondNode.is(':hidden')) {
+                        secondNode.show();
+                    } else {
+                        secondNode.hide();
+                    }
                 }
+
+                var id = $(this).val();
 
                 //获取是否需要审核
                 if ($('#step' + id + '-is_check').val() > 0) {
                     $('.check-div').show();
                 }
 
-                var appoint_group = '';
-                $(".step_type").each(function () {
-                    if ($(this).is(":checked")) {
-                        var id = $(this).val();
-                        //获取承接组
-                        appoint_group += $('#step' + id + '-appoint_group').val() + ',';
-                    }
-                })
                 var arr = array_filter(appoint_group.split(','));
-                var username = '';
+                var username = [];
                 var appoint_users = [];
                 //循环根据承接组Key获取对应承接人id
                 for (var i = 0; i < arr.length - 1; i++) {
@@ -137,37 +151,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     appoint_users.push(Config.workorder[arr[i]]);
                     //循环根据承接人id获取对应人名称
                     for (var j = 0; j < appoint_users.length; j++) {
-                        username += Config.users[appoint_users[j]] + ',';
+                        username.push(Config.users[appoint_users[j]]);
                     }
                 }
-                console.log(username);
-                $('#appoint_group_users').html(username);
+                var users = array_filter(username);
+                $('#appoint_group_users').html(users.join(','));
                 $('#recept_person_id').val(appoint_users.join(','));
-                $('#recept_person').val(username);
-
-                // 士卫
-                $('.measure').hide();
-                var problem_type_id = $("input[name='row[problem_type_id]']:checked").val();
-                var checkID = [];//定义一个空数组 
-                $("input[name='row[step]']:checked").each(function(i){
-                    checkID[i] =$(this).val();
-                }); 
-                //一般措施
-                for(var m=0;m<checkID.length;m++){
-                    var node = $('.step'+checkID[m]);
-                    if(node.is(':hidden')){
-                        node.show();
-                    }else{
-                        node.hide();
-                    }
-                //二级措施
-                var secondNode = $('.step'+problem_type_id+'-'+checkID[m]);
-                if(secondNode.is(':hidden')){
-                    secondNode.show();
-                }else{
-                    secondNode.hide();
-                }                                        
-              }       
+                $('#recept_person').val(users.join(','));
             });
 
 
