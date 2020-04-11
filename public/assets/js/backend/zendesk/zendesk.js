@@ -281,21 +281,21 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                 Layer.closeAll();
                 var title = $(this).data('title');
                 var status = $(this).data('status');
-                var href= $(this).data('href');
-
+                var href = $(this).data('href');
+                if(status == 5){
+                    $(".layui-layer-footer").hide();
+                }else{
+                    $(".layui-layer-footer").show();
+                }
                 Layer.open({
                     type: 2,
                     title: title,
-                    area: ['100', '100'],
-                    maxmin: true,
+                    shadeClose: true,
+                    shade: false,
+                    maxmin: true, //开启最大化最小化按钮
+                    area: ['893px', '600px'],
                     content: href
                 });
-                // parent.$(".layui-layer-title")[0].innerText= title;
-                // if(status == 5){
-                //     $(".layui-layer-footer").hide();
-                // }else{
-                //     $(".layui-layer-footer").show();
-                // }
 
             });
         },
