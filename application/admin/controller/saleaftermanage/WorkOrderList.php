@@ -104,9 +104,9 @@ class WorkOrderList extends Backend
      */
     public function get_sku_list()
     {
-        $ordertype = input('ordertype');
+        $sitetype = input('sitetype');
         $order_number = input('order_number');
-        $skus = $this->model->getSkuList($ordertype, $order_number);
+        $skus = $this->model->getSkuList($sitetype, $order_number);
         if ($skus) {
             $this->success('操作成功！！', '', $skus);
         } else {
