@@ -220,7 +220,7 @@
                     <ul class="list-group list-group-unbordered">
                         {foreach name="recentTickets" item="vo"}
                         <li class="list-group-item">
-                            <b><a class="change-ticket" data-status="{$vo->status}" data-title="回复【{$vo->ticket_id}】{$vo->subject}" data-href="{:url('zendesk/zendesk/edit',['ids' => $vo->id,'btn' => 1])}">#{$vo->ticket_id}  {$vo->subject}</a> </b><a class="pull-right">{$vo->status_format}</a>
+                            <b><a class="change-ticket" data-status="{$vo->status}" data-title="回复【{$vo->ticket_id}】{$vo->subject}" href="{:url('zendesk/zendesk/edit',['ids' => $vo->id,'btn' => 1])}">#{$vo->ticket_id}  {$vo->subject}</a> </b><a class="pull-right">{$vo->status_format}</a>
                         </li>
                         {/foreach}
                     </ul>
