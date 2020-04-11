@@ -503,6 +503,64 @@ class Notice extends Controller
         }
     }
 
+    public function getMacros()
+    {
+        //{{ticket.requester.first_name}}
+        //{{ticket.id}}
+
+        $res = $this->client->macros()->findAllActive();
+        $macros = $res->macros;
+        $type = $this->postData['type'] == 'zeelool' ? 1 : 2;
+        foreach($macros as $macro){
+            $data = [];
+            $title = $macro->title;
+            //echo $title;
+            $template_name = substr(strstr($title,'】'),1);
+            $template_category = substr(strstr($title,'】',true),1);
+            $template_category = array_search($template_category,config('zendesk.template_category'));
+            if(!$template_name){
+                $template_category = 11;
+                $template_name = $title;
+            }
+            $data = [
+                'template_platform' => $type,
+                'template_name' => $template_name,
+                'template_description' => $macro->description ? $macro->description : $title,
+                'template_permission' => 1,
+                'template_category' => $template_category,
+                'is_active' => 1,
+                'create_person' => 1,
+                'create_time' => date('Y-m-d H:i:s',time()),
+                'update_time' => date('Y-m-d H:i:s',time()),
+            ];
+            echo $template_name."\r\n";
+            $actions = $macro->actions;
+            foreach($actions as $key => $action){
+                if($action->field == 'comment_value_html'){
+                    $data['template_content'] = str_replace(['{{ticket.requester.first_name}}','{{ticket.id}}'],['{{username}}','{{ticket_id}}'],$action->value);
+                }
+                if($action->field == 'subject'){
+                    $data['mail_subject'] = $action->value;
+                }
+                if($action->field == 'current_tags'){
+                    $tags = explode(' ',$action->value);
+                    $tags = ZendeskTags::where('name','in',$tags)->column('id');
+                    sort($tags);
+                    $data['mail_tag'] = join(',',$tags);
+                }
+                if($action->field == 'status'){
+                    $data['mail_status'] = array_search($action->value, config('zendesk.status'));
+                }
+                if($action->field == 'priority'){
+                    $data['mail_level'] = array_search($action->value, config('zendesk.priority'));
+                }
+            }
+            //dump($data);die;
+            \app\admin\model\zendesk\ZendeskMailTemplate::create($data);
+
+        }
+    }
+
     /**
      * 拉取所有的邮件
      * @return bool
