@@ -278,6 +278,29 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                 }
             });
             $(document).on('click','.change-ticket',function(){
+                Layer.closeAll();
+                Layer.open({
+                    type: 2,
+                    title: false,
+                    closeBtn: 0, //不显示关闭按钮
+                    shade: [0],
+                    area: ['340px', '215px'],
+                    offset: 'rb', //右下角弹出
+                    time: 2000, //2秒后自动关闭
+                    anim: 2,
+                    content: ['test/guodu.html', 'no'], //iframe的url，no代表不显示滚动条
+                    end: function(){ //此处用于演示
+                        layer.open({
+                            type: 2,
+                            title: '很多时候，我们想最大化看，比如像这个页面。',
+                            shadeClose: true,
+                            shade: false,
+                            maxmin: true, //开启最大化最小化按钮
+                            area: ['893px', '600px'],
+                            content: 'zendesk/zendesk/edit/11537'
+                        });
+                    }
+                });
                 var title = $(this).data('title');
                 var status = $(this).data('status');
                 parent.$(".layui-layer-title")[0].innerText= title;
