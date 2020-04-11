@@ -279,9 +279,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
             });
             $(document).on('click','.change-ticket',function(){
                 Layer.closeAll();
-                // var title = $(this).data('title');
+                var title = $(this).data('title');
                 // var status = $(this).data('status');
-                // var href = $(this).data('href');
+                var href = $(this).data('href');
                 // if(status == 5){
                 //     $(".layui-layer-footer").hide();
                 // }else{
