@@ -166,6 +166,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
             });
         },
         edit: function () {
+            Form.api.bindevent($("form[role=form]"));
             Controller.api.bindevent();
             //删除商品数据
             $(document).on('click', '.merge', function () {
