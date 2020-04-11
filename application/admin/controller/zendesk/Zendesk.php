@@ -70,7 +70,7 @@ class Zendesk extends Backend
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             //默认使用
             $orderSet = 'status asc,update_time desc,id desc';
-            if($sort != 'id' && $sort){
+            if($sort != 'zendesk.id' && $sort){
                 $orderSet = "{$sort} {$order}";
             }
             $total = $this->model
