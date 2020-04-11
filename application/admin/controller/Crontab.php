@@ -3359,26 +3359,30 @@ order by sfoi.item_id asc limit 1000";
         $this->nihao = new \app\admin\model\order\order\Nihao;
         $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
         $this->item = new \app\admin\model\itemmanage\Item;
-        
+
         $skus = [
-            'OX406441-02',
-            'OX462594-01',
-            'OX616487-01',
-            'DA488986-01',
-            'OX056342-01',
-            'OP035464-02',
-            'OP069761-02',
-            'OM662855-02',
-            'FM0088-04',
-            'OP070243-02',
-            'OP070243-01',
-            'ER079180-01',
-            'OX197768-02',
-            'OX197768-01',
-            'ER070736-01',
-            'ER673699-01',
-            'ER382671-01',
-            'WM088648-01'
+            'OP01887-04',
+            'OT02145-02',
+            'OT02144-01',
+            'OA02140-01',
+            'OP02128-01',
+            'OP02128-02',
+            'OP02128-03',
+            'OT02138-01',
+            'OA02133-03',
+            'OA02133-02',
+            'OP01863-05',
+            'OP02129-02',
+            'OA01870-04',
+            'OP02126-01',
+            'OA02124-01',
+            'OM02122-01',
+            'OM02122-02',
+            'OM02118-01',
+            'OA02121-01',
+            'OA02121-02',
+            'OP01860-05',
+
         ];
         foreach ($skus as $k => $v) {
             $zeelool_sku = $this->itemplatformsku->getWebSku($v, 1);
@@ -3398,8 +3402,8 @@ order by sfoi.item_id asc limit 1000";
 
             $p_map[$k]['sku'] = $v;
             $p_map[$k]['distribution_occupy_stock'] = $zeelool_qty + $voogueme_qty + $nihao_qty;
-            
         }
-        dump($p_map);die;
+        dump($p_map);
+        die;
     }
 }
