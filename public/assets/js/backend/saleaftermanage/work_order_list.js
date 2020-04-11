@@ -57,32 +57,78 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
 
             //点击事件 #todo::需判断仓库或者客服
             $(document).on('click', '.problem_type', function () {
-                $('.step').attr('checked', false);
-                $('.step').parent().hide();
+                $('.step_type').attr('checked', false);
+                $('.step_type').parent().hide();
+                $('#appoint_group_users').html('');//切换问题类型时清空承接人
+                $('#recept_person_id').val('');//切换问题类型时清空隐藏域承接人id
+                $('#recept_person').val('');//切换问题类型时清空隐藏域承接人
                 var id = $(this).val();
                 //id大于5 默认措施4
                 if (id > 5) {
                     var steparr = Config.workorder['step04'];
                     for (var j = 0; j < steparr.length; j++) {
                         $('#step' + steparr[j].step_id).parent().show();
+                        //读取对应措施配置
+                        $('#step' + steparr[j].step_id + '-is_check').val(steparr[j].is_check);
+                        $('#step' + steparr[j].step_id + '-appoint_group').val((steparr[j].appoint_group).join(','));
                     }
                 } else {
                     var step = Config.workorder.customer_problem_group[id].step;
                     var steparr = Config.workorder[step];
                     for (var j = 0; j < steparr.length; j++) {
                         $('#step' + steparr[j].step_id).parent().show();
+                        //读取对应措施配置
+                        $('#step' + steparr[j].step_id + '-is_check').val(steparr[j].is_check);
+                        $('#step' + steparr[j].step_id + '-appoint_group').val((steparr[j].appoint_group).join(','));
                     }
                 }
             });
 
+
+            //根据措施类型显示隐藏
             $(document).on('click', '.step_type', function () {
                 var id = $(this).val();
                 if ($(this).prop('checked')) {
                     $('#step_function .step' + id).show();
                 } else {
                     $('#step_function .step' + id).hide();
+
                 }
+
+                //获取是否需要审核
+                if ($('#step' + id + '-is_check').val() > 0) {
+                    $('.check-div').show();
+                }
+
+                var appoint_group = '';
+                $(".step_type").each(function () {
+                    if ($(this).is(":checked")) {
+                        var id = $(this).val();
+                        //获取承接组
+                        appoint_group += $('#step' + id + '-appoint_group').val() + ',';
+                    }
+                })
+                var arr = array_filter(appoint_group.split(','));
+                var username = '';
+                var appoint_users = [];
+                //循环根据承接组Key获取对应承接人id
+                for (var i = 0; i < arr.length - 1; i++) {
+                    //循环根据承接组Key获取对应承接人id
+                    appoint_users.push(Config.workorder[arr[i]]);
+                    //循环根据承接人id获取对应人名称
+                    for (var j = 0; j < appoint_users.length; j++) {
+                        username += Config.users[appoint_users[j]] + ',';
+                    }
+                }
+                
+                $('#appoint_group_users').html(username);
+                $('#recept_person_id').val(appoint_users.join(','));
+                $('#recept_person').val(username);
+
+
             });
+
+
             //增加一行镜架数据
             $(document).on('click', '.btn-add-frame', function () {
                 var rows = document.getElementById("caigou-table-sku").rows.length;
@@ -215,3 +261,16 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
     };
     return Controller;
 });
+
+//过滤数组重复项
+function array_filter(arr) {
+    var new_arr = [];
+    for (var i = 0; i < arr.length; i++) {
+        var items = arr[i];
+        //判断元素是否存在于new_arr中，如果不存在则插入到new_arr的最后
+        if ($.inArray(items, new_arr) == -1) {
+            new_arr.push(items);
+        }
+    }
+    return new_arr;
+}

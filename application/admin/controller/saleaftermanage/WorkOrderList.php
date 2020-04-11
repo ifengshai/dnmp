@@ -86,6 +86,11 @@ class WorkOrderList extends Backend
             $this->view->assign('problem_type', config('workorder.warehouse_problem_type')); //仓库问题类型
         }
 
+        //查询用户id对应姓名
+        $admin = new \app\admin\model\Admin();
+        $users = $admin->where('status', 'normal')->column('nickname', 'id');
+        $this->assignconfig('users', $users); //返回用户
+
         $this->view->assign('step', config('workorder.step')); //措施
         $this->assignconfig('workorder', config('workorder')); //JS专用，整个配置文件
 
