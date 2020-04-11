@@ -301,14 +301,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                         });
                     }
                 });
-                var title = $(this).data('title');
-                var status = $(this).data('status');
-                parent.$(".layui-layer-title")[0].innerText= title;
-                if(status == 5){
-                    parent.$(".layui-layer-footer").hide();
-                }else{
-                    parent.$(".layui-layer-footer").show();
-                }
+                // var title = $(this).data('title');
+                // var status = $(this).data('status');
+                // parent.$(".layui-layer-title")[0].innerText= title;
+                // if(status == 5){
+                //     parent.$(".layui-layer-footer").hide();
+                // }else{
+                //     parent.$(".layui-layer-footer").show();
+                // }
             });
         },
         api: {

@@ -135,13 +135,13 @@
                                 {:Form::select('', $templates, null, ['class'=>'form-control selectpicker macro-apply', null,'data-live-search' => true,'id'=>'Entry_status_select'])}
                             </div>
                         </div>
-                        {if condition="$ticket->status != 5 && !$btn"}
+
                         <div class="form-group layer-footer">
                             <div class="col-xs-12 col-sm-8">
                                 <button type="submit" class="btn btn-success btn-embossed disabled">发送邮件</button>
                             </div>
                         </div>
-                        {/if}
+
                         <!-- /.box-body -->
                     </div>
                     <br />
