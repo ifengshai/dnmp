@@ -515,8 +515,8 @@ class Notice extends Controller
             $data = [];
             $title = $macro->title;
             //echo $title;
-            $template_name = substr(strstr($title,'】'),1);
-            $template_category = substr(strstr($title,'】',true),1);
+            $template_name = mb_substr(strstr($title,'】'),1);
+            $template_category = mb_substr(strstr($title,'】',true),1);
             $template_category = array_search($template_category,config('zendesk.template_category'));
             if(!$template_name){
                 $template_category = 11;
@@ -533,7 +533,6 @@ class Notice extends Controller
                 'create_time' => date('Y-m-d H:i:s',time()),
                 'update_time' => date('Y-m-d H:i:s',time()),
             ];
-            echo $template_name."\r\n";
             $actions = $macro->actions;
             foreach($actions as $key => $action){
                 if($action->field == 'comment_value_html'){
