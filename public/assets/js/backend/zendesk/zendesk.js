@@ -300,7 +300,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                     end: function(){ //此处用于演示
                         layer.open({
                             type: 2,
-                            title: title,
+                            title: 'aaaaaa',
                             shadeClose: true,
                             shade: false,
                             maxmin: true, //开启最大化最小化按钮
