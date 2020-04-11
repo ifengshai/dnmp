@@ -83,8 +83,10 @@ class WorkOrderList extends Backend
         $warehouseArr = config('workorder.warehouse_department_rule');
         $checkIsWarehouse = array_intersect($userGroupAccess,$warehouseArr);
         if (!empty($checkIsWarehouse)) {
+            $this->view->assign('work_type',2);
             $this->view->assign('problem_type', config('workorder.warehouse_problem_type')); //仓库问题类型       
         } else {
+            $this->view->assign('work_type',1);
             $this->view->assign('problem_type', config('workorder.customer_problem_type')); //客服问题类型
         }
 
