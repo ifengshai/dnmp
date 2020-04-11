@@ -188,7 +188,7 @@ class Notice extends Controller
 
             $zendesk = Zendesk::where(['ticket_id' => $id,'type' => $type])->find();
             if(!$zendesk){
-                return false;
+                return 'success';
             }
         }catch (Exception $e) {
             file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$id."\r\n",FILE_APPEND);
@@ -196,7 +196,6 @@ class Notice extends Controller
             return true;
             //echo $e->getMessage();
         }
-
         //开启事务
         Db::startTrans();
         try {
@@ -312,7 +311,7 @@ class Notice extends Controller
             file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$id."\r\n",FILE_APPEND);
             file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$e->getMessage()."\r\n",FILE_APPEND);
             Db::rollback();
-            return true;
+            //return true;
             //写入日志
         }
         return 'success';
@@ -330,7 +329,7 @@ class Notice extends Controller
         }catch (\Exception $e) {
             file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$id."\r\n",FILE_APPEND);
             file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$e->getMessage()."\r\n",FILE_APPEND);
-            return true;
+            return 'success';
             //echo $e->getMessage();
         }
     }
@@ -351,7 +350,7 @@ class Notice extends Controller
         }catch (\Exception $e) {
             file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$id."\r\n",FILE_APPEND);
             file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$e->getMessage()."\r\n",FILE_APPEND);
-            return true;
+            return 'success';
             //echo $e->getMessage();
         }
     }
@@ -371,7 +370,7 @@ class Notice extends Controller
         }catch (\Exception $e) {
             file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$id."\r\n",FILE_APPEND);
             file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$e->getMessage()."\r\n",FILE_APPEND);
-            return true;
+            return 'success';
             //echo $e->getMessage();
         }
     }
