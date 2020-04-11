@@ -278,27 +278,38 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                 }
             });
             $(document).on('click','.change-ticket',function(){
-                var index = parent.Layer.getFrameIndex(window.name); //先得到当前iframe层的索引
-
-                var title = $(this).data('title');
+                Layer.closeAll();
+                // var title = $(this).data('title');
                 // var status = $(this).data('status');
-                var href = $(this).data('href');
+                // parent.$(".layui-layer-title")[0].innerText= title;
                 // if(status == 5){
-                //     $(".layui-layer-footer").hide();
+                //     parent.$(".layui-layer-footer").hide();
                 // }else{
-                //     $(".layui-layer-footer").show();
+                //     parent.$(".layui-layer-footer").show();
                 // }
-
-                parent.Layer.close(index); //再执行关闭
                 Layer.open({
                     type: 2,
-                    title: title,
-                    shadeClose: true,
-                    shade: false,
-                    maxmin: true, //开启最大化最小化按钮
-                    area: ['893px', '600px'],
-                    content: href
+                    title: false,
+                    closeBtn: 0, //不显示关闭按钮
+                    shade: [0],
+                    area: ['340px', '215px'],
+                    offset: 'rb', //右下角弹出
+                    time: 2000, //2秒后自动关闭
+                    anim: 2,
+                    content: ['test/guodu.html', 'no'], //iframe的url，no代表不显示滚动条
+                    end: function(){ //此处用于演示
+                        layer.open({
+                            type: 2,
+                            title: title,
+                            shadeClose: true,
+                            shade: false,
+                            maxmin: true, //开启最大化最小化按钮
+                            area: ['893px', '600px'],
+                            content: 'zendesk/zendesk/edit/11537'
+                        });
+                    }
                 });
+
             });
         },
         api: {
