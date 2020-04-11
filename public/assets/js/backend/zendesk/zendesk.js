@@ -278,7 +278,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                 }
             });
             $(document).on('click','.change-ticket',function(){
-                var index = parent.Layer.getFrameIndex(window.name); //先得到当前iframe层的索引
+                var index = Layer.getFrameIndex(window.name); //先得到当前iframe层的索引
 
                 var title = $(this).data('title');
                 // var status = $(this).data('status');
@@ -297,7 +297,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                     area: ['893px', '600px'],
                     content: href
                 });
-                parent.Layer.close(index); //再执行关闭
+                Layer.close(index); //再执行关闭
             });
         },
         api: {
