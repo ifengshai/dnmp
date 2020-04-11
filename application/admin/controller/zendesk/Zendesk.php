@@ -69,6 +69,10 @@ class Zendesk extends Backend
             $this->request->get(['filter' => json_encode($filter)]);
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             //默认使用
+            $orderSet = 'status asc,update_time desc,id desc';
+            if($sort != 'id' && $sort){
+                $orderSet = "{$sort} {$order}";
+            }
             $total = $this->model
                 ->with(['admin'])
                 ->where($where)
@@ -83,7 +87,7 @@ class Zendesk extends Backend
                 ->where($map)
                 ->where($andWhere)
                 ->where('channel','in',['email','web','chat'])
-                ->order('status asc,update_time desc,id desc')
+                ->order($orderSet)
                 ->limit($offset, $limit)
                 ->select();
             $list = collection($list)->toArray();
