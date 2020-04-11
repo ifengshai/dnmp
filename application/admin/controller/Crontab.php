@@ -3344,7 +3344,14 @@ order by sfoi.item_id asc limit 1000";
 
 
 
-
+    /**
+     * 修复库存问题
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/04/11 15:54:25 
+     * @return void
+     */
     public function set_product_line()
     {
         
