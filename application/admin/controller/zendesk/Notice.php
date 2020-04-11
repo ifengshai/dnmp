@@ -325,7 +325,14 @@ class Notice extends Controller
      */
     public function getTicket($id)
     {
-        return $this->client->tickets()->find($id)->ticket;
+        try{
+            return $this->client->tickets()->find($id)->ticket;
+        }catch (\Exception $e) {
+            file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$id."\r\n",FILE_APPEND);
+            file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$e->getMessage()."\r\n",FILE_APPEND);
+            return true;
+            //echo $e->getMessage();
+        }
     }
 
     /**
@@ -336,10 +343,17 @@ class Notice extends Controller
      */
     public function getLastComments($id)
     {
-        $all = $this->client->tickets($id)->comments()->findAll();
-        $comments = $all->comments;
-        $count = $all->count;
-        return $comments[$count - 1];
+        try{
+            $all = $this->client->tickets($id)->comments()->findAll();
+            $comments = $all->comments;
+            $count = $all->count;
+            return $comments[$count - 1];
+        }catch (\Exception $e) {
+            file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$id."\r\n",FILE_APPEND);
+            file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$e->getMessage()."\r\n",FILE_APPEND);
+            return true;
+            //echo $e->getMessage();
+        }
     }
 
     /**
@@ -350,9 +364,16 @@ class Notice extends Controller
      */
     public function getComments($id)
     {
-        $all = $this->client->tickets($id)->comments()->findAll();
-        $comments = $all->comments;
-        return $comments;
+        try{
+            $all = $this->client->tickets($id)->comments()->findAll();
+            $comments = $all->comments;
+            return $comments;
+        }catch (\Exception $e) {
+            file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$id."\r\n",FILE_APPEND);
+            file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$e->getMessage()."\r\n",FILE_APPEND);
+            return true;
+            //echo $e->getMessage();
+        }
     }
 
     /**
