@@ -307,4 +307,23 @@ return [
             'sum' => '30',
         ],
     ],
+    //客服部门角色组ID
+    'customer_department_rule'=>[
+        31,
+        32,
+        33,
+        34,
+        36
+    ],
+    //仓库部门角色组ID
+    'warehouse_department_rule'=>[
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49
+    ]
 ];

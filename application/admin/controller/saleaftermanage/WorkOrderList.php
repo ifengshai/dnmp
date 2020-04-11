@@ -5,6 +5,7 @@ namespace app\admin\controller\saleaftermanage;
 use app\common\controller\Backend;
 use think\Db;
 use think\Exception;
+use app\admin\model\AuthGroupAccess;
 use think\exception\PDOException;
 use think\exception\ValidateException;
 
@@ -76,14 +77,15 @@ class WorkOrderList extends Backend
             }
             $this->error(__('Parameter %s can not be empty', ''));
         }
-
-
-
-        //dump(config('workorder.customer_problem_type'));
-        if (1 == 1) {
-            $this->view->assign('problem_type', config('workorder.customer_problem_type')); //客服问题类型
+        //获取用户ID和所在权限组
+        $userId = session('admin.id');
+        $userGroupAccess = AuthGroupAccess::where(['uid'=>$userId])->column('group_id');
+        $warehouseArr = config('workorder.warehouse_department_rule');
+        $checkIsWarehouse = array_intersect($userGroupAccess,$warehouseArr);
+        if (!empty($checkIsWarehouse)) {
+            $this->view->assign('problem_type', config('workorder.warehouse_problem_type')); //仓库问题类型       
         } else {
-            $this->view->assign('problem_type', config('workorder.warehouse_problem_type')); //仓库问题类型
+            $this->view->assign('problem_type', config('workorder.customer_problem_type')); //客服问题类型
         }
 
         //查询用户id对应姓名
