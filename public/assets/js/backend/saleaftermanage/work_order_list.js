@@ -84,26 +84,28 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 }
             });
             //增加一行镜架数据
-            $(document).on('click', '.btn-add', function () {
-                var rows =  document.getElementById("caigou-table-sku").rows.length;
-                var content = '<tr>'+
-                    '<td><input id="c-original_sku" class="form-control" name="row[item]['+rows+'][original_sku]" type="text"></td>'+
-                    '<td><input id="c-original_number" class="form-control" name="row[item]['+rows+'][original_number]" type="text"></td>'+
-                    '<td><input id="c-change_sku" class="form-control change_sku" name="row[item]['+rows+'][change_sku]" type="text"></td>'+
-                    '<td><input id="c-change_number" class="form-control change_number" name="row[item]['+rows+'][change_number]" type="text"></td>'+
-                    '<td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i> 删除</a></td>'+
+            $(document).on('click', '.btn-add-frame', function () {
+                var rows = document.getElementById("caigou-table-sku").rows.length;
+                var content = '<tr>' +
+                    '<td><input id="c-original_sku" class="form-control" name="row[item][' + rows + '][original_sku]" type="text"></td>' +
+                    '<td><input id="c-original_number" class="form-control" name="row[item][' + rows + '][original_number]" type="text"></td>' +
+                    '<td><input id="c-change_sku" class="form-control change_sku" name="row[item][' + rows + '][change_sku]" type="text"></td>' +
+                    '<td><input id="c-change_number" class="form-control change_number" name="row[item][' + rows + '][change_number]" type="text"></td>' +
+                    '<td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i> 删除</a></td>' +
                     '</tr>';
-                $('.caigou table tbody').append(content);
+                $('#caigou-table-sku tbody').append(content);
             });
+
+
             //删除一行镜架数据
             $(document).on('click', '.btn-del', function () {
                 $(this).parent().parent().remove();
             });
             //增加一行镜片数据
-            $(document).on('click','.btn-add-lens',function(){
-                    var contents = $('#edit_lens').html();
-                     $('#lens_contents').after(contents);
-                    Controller.api.bindevent();
+            $(document).on('click', '.btn-add-lens', function () {
+                var contents = $('#edit_lens').html();
+                $('#lens_contents').after(contents);
+                Controller.api.bindevent();
             });
             //删除一行镜片数据
             $(document).on('click', '.btn-del-lens', function () {
@@ -112,124 +114,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
 
             //补发 start
             $(document).on('click', '.btn-add-supplement', function () {
-                var contents = '<div>\n' +
-                    '                    <div class="step7_function2">\n' +
-                    '                        <div class="step7_function2_child">\n' +
-                    '                            <label class="control-label col-xs-12 col-sm-3">SKU:</label>\n' +
-                    '                            <div class="col-xs-12 col-sm-8">\n' +
-                    '                                <select class="form-control selectpicker" name="row[lens][original_sku][]">\n' +
-                    '                                    <option value="0">请选择</option>\n' +
-                    '                                </select>\n' +
-                    '                            </div>\n' +
-                    '                        </div>\n' +
-                    '\n' +
-                    '                        <div class="step7_function2_child">\n' +
-                    '                            <label class="control-label col-xs-12 col-sm-3">Name:</label>\n' +
-                    '                            <div class="col-xs-12 col-sm-8">\n' +
-                    '                                <input class="form-control" name="row[lens][original_name][]" type="text" value="">\n' +
-                    '                            </div>\n' +
-                    '                        </div>\n' +
-                    '                        <div class="step7_function2_child">\n' +
-                    '                            <label class="control-label col-xs-12 col-sm-3">QTY:</label>\n' +
-                    '                            <div class="col-xs-12 col-sm-8">\n' +
-                    '                                <input class="form-control" name="row[lens][original_number][]" type="text" value="">\n' +
-                    '                            </div>\n' +
-                    '                        </div>\n' +
-                    '                        <div class="step7_function2_child">\n' +
-                    '                            <label class="control-label col-xs-12 col-sm-3">选择已有处方:</label>\n' +
-                    '                            <div class="col-xs-12 col-sm-8">\n' +
-                    '                                <select class="form-control selectpicker" name="row[]">\n' +
-                    '                                    <option value="0">请选择</option>\n' +
-                    '                                </select>\n' +
-                    '                            </div>\n' +
-                    '                        </div>\n' +
-                    '                        <div class="step7_function2_child">\n' +
-                    '                            <label class="control-label col-xs-12 col-sm-3">prescription_type:</label>\n' +
-                    '                            <div class="col-xs-12 col-sm-8">\n' +
-                    '                                <select class="form-control selectpicker" name="row[lens][recipe_type][]">\n' +
-                    '                                    <option value="0">请选择</option>\n' +
-                    '                                </select>\n' +
-                    '                            </div>\n' +
-                    '                        </div>\n' +
-                    '\n' +
-                    '                    </div>\n' +
-                    '\n' +
-                    '                    <div class="step1_function3">\n' +
-                    '                        <div class="panel-body">\n' +
-                    '                            <div class="step1_function3_child">\n' +
-                    '                                <label class="control-label col-xs-12 col-sm-3">lens_type:</label>\n' +
-                    '                                <div class="col-xs-12 col-sm-8">\n' +
-                    '                                    <select class="form-control selectpicker" name="row[lens][lens_type][]">\n' +
-                    '                                        <option value="0">请选择</option>\n' +
-                    '                                    </select>\n' +
-                    '                                </div>\n' +
-                    '                            </div>\n' +
-                    '                            <div class="step1_function3_child">\n' +
-                    '                                <label class="control-label col-xs-12 col-sm-3">coating_type:</label>\n' +
-                    '                                <div class="col-xs-12 col-sm-8">\n' +
-                    '                                    <select  id="c-coating_type" class="form-control selectpicker" name="row[lens][coating_type][]">\n' +
-                    '                                        <option value="0">请选择</option>\n' +
-                    '                                    </select>\n' +
-                    '                                </div>\n' +
-                    '                            </div>\n' +
-                    '                            <table>\n' +
-                    '                                <tbody>\n' +
-                    '                                <tr>\n' +
-                    '                                    <td style="text-align: center">value</td>\n' +
-                    '                                    <td style="text-align: center">SPH</td>\n' +
-                    '                                    <td style="text-align: center">CYL</td>\n' +
-                    '                                    <td style="text-align: center">AXI</td>\n' +
-                    '                                    <td style="text-align: center">ADD</td>\n' +
-                    '                                    <td style="text-align: center">PD</td>\n' +
-                    '                                </tr>\n' +
-                    '                                <tr>\n' +
-                    '                                    <td style="text-align: center">Right(OD)</td>\n' +
-                    '                                    <td><input class="form-control" name="row[lens][od_sph][]" type="text" value=""></td>\n' +
-                    '                                    <td><input class="form-control" name="row[lens][od_cyl][]" type="text" value=""></td>\n' +
-                    '                                    <td><input class="form-control" name="row[lens][od_axis][]" type="text" value=""></td>\n' +
-                    '                                    <td><input class="form-control" name="row[lens][od_add][]" type="text" value=""></td>\n' +
-                    '                                    <td><input class="form-control" name="row[lens][pd_r][]" type="text" value=""></td>\n' +
-                    '                                </tr>\n' +
-                    '                                <tr>\n' +
-                    '                                    <td style="text-align: center">Left(OS)</td>\n' +
-                    '                                    <td><input class="form-control" name="row[lens][os_sph][]" type="text" value=""></td>\n' +
-                    '                                    <td><input class="form-control" name="row[lens][os_cyl][]" type="text" value=""></td>\n' +
-                    '                                    <td><input class="form-control" name="row[lens][os_axis][]" type="text" value=""></td>\n' +
-                    '                                    <td><input class="form-control" name="row[lens][os_add][]" type="text" value=""></td>\n' +
-                    '                                    <td><input class="form-control" name="row[lens][pd_l][]" type="text" value=""></td>\n' +
-                    '                                </tr>\n' +
-                    '\n' +
-                    '                                <tr>\n' +
-                    '                                    <td style="text-align: center"></td>\n' +
-                    '                                    <td style="text-align: center">Prism Horizontal</td>\n' +
-                    '                                    <td style="text-align: center">Base Direction</td>\n' +
-                    '                                    <td style="text-align: center">Prism Vertical</td>\n' +
-                    '                                    <td style="text-align: center">Base Direction</td>\n' +
-                    '                                </tr>\n' +
-                    '                                <tr>\n' +
-                    '                                    <td style="text-align: center">Right(OD)</td>\n' +
-                    '                                    <td><input class="form-control" type="text" name="row[lens][od_pv][]" value=""></td>\n' +
-                    '                                    <td><input class="form-control" type="text" name="row[lens][od_bd][]" value=""></td>\n' +
-                    '                                    <td><input class="form-control" type="text" name="row[lens][od_pv_r][]" value=""></td>\n' +
-                    '                                    <td><input class="form-control" type="text" name="row[lens][od_bd_r][]" value=""></td>\n' +
-                    '                                </tr>\n' +
-                    '                                <tr>\n' +
-                    '                                    <td style="text-align: center">Left(OS)</td>\n' +
-                    '                                    <td><input class="form-control" name="row[lens][os_pv][]" type="text" value=""></td>\n' +
-                    '                                    <td><input class="form-control" name="row[lens][os_bd][]" type="text" value=""></td>\n' +
-                    '                                    <td><input class="form-control" name="row[lens][os_pv_r][]" type="text" value=""></td>\n' +
-                    '                                    <td><input class="form-control" name="row[lens][os_bd_r][]" type="text" value=""></td>\n' +
-                    '                                </tr>\n' +
-                    '                                </tbody>\n' +
-                    '                            </table>\n' +
-                    '                        </div>\n' +
-                    '                    </div>\n' +
-                    '\n' +
-                    '                    <div class="form-group-child4_del" style="margin-bottom: 20px;">\n' +
-                    '                        <a href="javascript:;" style="width: 50%;" class="btn btn-danger btn-del-supplement" title="删除"><i class="fa fa-trash"></i>删除</a>\n' +
-                    '                    </div>\n' +
-                    '                </div>';
-                $('#btn-add-supplement').after(contents);
+                var contents = $('#edit_lens').html();
+                $('#supplement-order').after(contents);
                 Controller.api.bindevent();
             });
             $(document).on('click', '.btn-del-supplement', function () {
@@ -290,11 +176,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     $('#work_platform').val(3);
                 }
                 $('.selectpicker ').selectpicker('refresh');
-               
+
 
             })
 
-            $('#platform_order').click(function(){
+            //根据
+            $('#platform_order').click(function () {
                 var incrementId = $('#c-platform_order').val();
                 var sitetype = $('#work_platform').val();
                 $('#c-order_sku').html('');
