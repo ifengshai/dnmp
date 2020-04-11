@@ -288,6 +288,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                 // }else{
                 //     $(".layui-layer-footer").show();
                 // }
+
+                parent.Layer.close(index); //再执行关闭
                 Layer.open({
                     type: 2,
                     title: title,
@@ -297,7 +299,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                     area: ['893px', '600px'],
                     content: href
                 });
-                Layer.close(index); //再执行关闭
             });
         },
         api: {
