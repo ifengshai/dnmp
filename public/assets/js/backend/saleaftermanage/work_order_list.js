@@ -57,6 +57,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
 
             //点击事件 #todo::需判断仓库或者客服
             $(document).on('click', '.problem_type', function () {
+                $('.measure').hide();
                 $('.step').attr('checked', false);
                 $('.step').parent().hide();
                 var id = $(this).val();
@@ -73,15 +74,49 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         $('#step' + steparr[j].step_id).parent().show();
                     }
                 }
-            });
-
-            $(document).on('click', '.step_type', function () {
-                var id = $(this).val();
-                if ($(this).prop('checked')) {
-                    $('#step_function .step' + id).show();
-                } else {
-                    $('#step_function .step' + id).hide();
+                var checkID = [];//定义一个空数组
+                $("input[name='row[step]']:checked").each(function(i){
+                    checkID[i] =$(this).val();
+                });
+                for(var m=0;m<checkID.length;m++){
+                    var node = $('.step'+checkID[m]);
+                    if(node.is(':hidden')){
+                        node.show();
+                    }else{
+                        node.hide();
+                    }                    
+                    var secondNode = $('.step'+id+'-'+checkID[m]);
+                    if(secondNode.is(':hidden')){
+                        secondNode.show();
+                    }else{
+                        secondNode.hide();
+                    }
                 }
+
+            });
+            $(document).on('click', '.step_type', function () {
+                $('.measure').hide();
+                var problem_type_id = $("input[name='row[problem_type_id]']:checked").val();
+                var checkID = [];//定义一个空数组 
+                $("input[name='row[step]']:checked").each(function(i){
+                    checkID[i] =$(this).val();
+                }); 
+                //一般措施
+                for(var m=0;m<checkID.length;m++){
+                    var node = $('.step'+checkID[m]);
+                    if(node.is(':hidden')){
+                        node.show();
+                    }else{
+                        node.hide();
+                    }
+                //二级措施
+                var secondNode = $('.step'+problem_type_id+'-'+checkID[m]);
+                if(secondNode.is(':hidden')){
+                    secondNode.show();
+                }else{
+                    secondNode.hide();
+                }                                        
+              }           
             });
             //增加一行镜架数据
             $(document).on('click', '.btn-add-frame', function () {
