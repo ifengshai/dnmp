@@ -174,20 +174,28 @@ class Notice extends Controller
         } else {
             $type = 2;
         }
-        //$channel = $postData['channel'];
-        //最后一条评论
-        $comment = $this->getLastComments($id);
-        $ticket = $this->getTicket($id);
-        //开始插入相关数据
-        $tags = $ticket->tags;
-        $tags = \app\admin\model\zendesk\ZendeskTags::where('name', 'in', $tags)->distinct(true)->column('id');
-        sort($tags);
-        $tags = join(',',$tags);
+        try{
+            //$channel = $postData['channel'];
+            //最后一条评论
+            $comment = $this->getLastComments($id);
+            $ticket = $this->getTicket($id);
+            //开始插入相关数据
+            $tags = $ticket->tags;
+            $tags = \app\admin\model\zendesk\ZendeskTags::where('name', 'in', $tags)->distinct(true)->column('id');
+            sort($tags);
+            $tags = join(',',$tags);
 
-        $zendesk = Zendesk::where(['ticket_id' => $id,'type' => $type])->find();
-        if(!$zendesk){
-            return false;
+            $zendesk = Zendesk::where(['ticket_id' => $id,'type' => $type])->find();
+            if(!$zendesk){
+                return false;
+            }
+        }catch (Exception $e) {
+            file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$id."\r\n",FILE_APPEND);
+            file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$e->getMessage()."\r\n",FILE_APPEND);
+            return true;
+            //echo $e->getMessage();
         }
+
         //开启事务
         Db::startTrans();
         try {
@@ -300,11 +308,13 @@ class Notice extends Controller
             }
             Db::commit();
         } catch (Exception $e) {
-            file_put_contents('/www/wwwroot/mojing_test/runtime/log/a.txt',$e->getMessage()."\r\n",FILE_APPEND);
+            file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$id."\r\n",FILE_APPEND);
+            file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$e->getMessage()."\r\n",FILE_APPEND);
             Db::rollback();
+            return true;
             //写入日志
         }
-        echo 'success';
+        return 'success';
     }
 
     /**
