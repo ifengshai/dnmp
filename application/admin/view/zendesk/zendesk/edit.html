@@ -220,7 +220,7 @@
                     <ul class="list-group list-group-unbordered">
                         {foreach name="recentTickets" item="vo"}
                         <li class="list-group-item">
-                            <b><a class="change-ticket btn-dialog btn" data-url="zendesk/zendesk/edit" data-area = '["100%","100%"]' data-status="{$vo->status}" data-title="回复【{$vo->ticket_id}】{$vo->subject}" href="javascript:void(0)">#{$vo->ticket_id}  {$vo->subject}</a> </b><a class="pull-right">{$vo->status_format}</a>
+                            <b><a class="btn-dialog btn" data-url="zendesk/zendesk/edit" data-area = '["100%","100%"]' data-status="{$vo->status}" data-title="回复【{$vo->ticket_id}】{$vo->subject}" href="javascript:void(0)">#{$vo->ticket_id}  {$vo->subject}</a> </b><a class="pull-right">{$vo->status_format}</a>
                         </li>
                         {/foreach}
                     </ul>
