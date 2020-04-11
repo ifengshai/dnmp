@@ -166,7 +166,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
             });
         },
         edit: function () {
-            Form.api.bindevent($("form[role=form]"));
             Controller.api.bindevent();
             //删除商品数据
             $(document).on('click', '.merge', function () {
@@ -278,25 +277,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                 }
             });
             $(document).on('click','.change-ticket',function(){
-                Layer.closeAll();
                 var title = $(this).data('title');
                 var status = $(this).data('status');
-                var href= $(this).data('href');
-
-                Layer.open({
-                    type: 2,
-                    title: title,
-                    area: ['100', '100'],
-                    maxmin: true,
-                    content: href
-                });
-                // parent.$(".layui-layer-title")[0].innerText= title;
-                // if(status == 5){
-                //     $(".layui-layer-footer").hide();
-                // }else{
-                //     $(".layui-layer-footer").show();
-                // }
-
+                parent.$(".layui-layer-title")[0].innerText= title;
+                if(status == 5){
+                    parent.$(".layui-layer-footer").hide();
+                }else{
+                    parent.$(".layui-layer-footer").show();
+                }
             });
         },
         api: {
