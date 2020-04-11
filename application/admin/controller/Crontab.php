@@ -3390,11 +3390,11 @@ order by sfoi.item_id asc limit 1000";
             $map['custom_is_match_frame_new'] = 1; //是否配镜架
             $map['a.created_at'] = ['between', ['2020-01-01 00:00:00', '2020-04-13 23:00:00']]; //时间节点
             $map['sku'] = $zeelool_sku;
-            $zeelool_qty = $this->zeelool->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->sum('qty_ordered');
+            $zeelool_qty = $this->zeelool->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->sum('qty_ordered');
             $map['sku'] = $voogueme_sku;
-            $voogueme_qty = $this->voogueme->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->sum('qty_ordered');
+            $voogueme_qty = $this->voogueme->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->sum('qty_ordered');
             $map['sku'] = $nihao_sku;
-            $nihao_qty = $this->nihao->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->sum('qty_ordered');
+            $nihao_qty = $this->nihao->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->sum('qty_ordered');
 
             $p_map[$k]['sku'] = $v;
             $p_map[$k]['distribution_occupy_stock'] = $zeelool_qty + $voogueme_qty + $nihao_qty;
