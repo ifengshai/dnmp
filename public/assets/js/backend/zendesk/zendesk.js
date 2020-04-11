@@ -305,7 +305,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                             shade: false,
                             maxmin: true, //开启最大化最小化按钮
                             area: ['893px', '600px'],
-                            content: 'zendesk/zendesk/edit/11537'
+                            content: 'zendesk/zendesk/edit/ids/11537'
                         });
                     }
                 });
