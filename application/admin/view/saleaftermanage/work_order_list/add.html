@@ -305,7 +305,7 @@
                     <span><button type="button" id="plupload-work_picture" class="btn btn-danger plupload"
                                   data-input-id="c-work_picture"
                                   data-mimetype="image/gif,image/jpeg,image/png,image/jpg,image/bmp" data-multiple="true"
-                                  data-maxcount="4" data-multipart={"dir":"check"} data-preview-id="p-work_picture"><i class="fa fa-upload"></i>
+                                  data-maxcount="4" data-multipart={"dir":"workorder"} data-preview-id="p-work_picture"><i class="fa fa-upload"></i>
                             {:__('Upload')}</button></span>
                         <span><button type="button" id="fachoose-work_picture" class="btn btn-primary fachoose"
                                       data-input-id="c-work_picture" data-mimetype="image/*" data-multiple="true"
@@ -437,6 +437,9 @@
             <div class="caigou frame-info item_info">
                 <p style="font-size: 16px;"><b>更换镜框</b></p>
                 <div>
+                    <div id="toolbar" class="toolbar">
+                        <a href="javascript:;" class="btn btn-success btn-add" title="增加"><i class="fa fa-plus"></i> 增加</a>
+                    </div>
                     <table class="caigou-table-sku" id="caigou-table-sku">
                         <tr>
                             <th>原SKU</th>
@@ -453,9 +456,7 @@
                             <td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>删除</a></td>
                         </tr>
                     </table>
-                    <div class="form-group-child4_add" id="btn-add-lens">
-                        <a href="javascript:;" style="width: 50%;" class="btn btn-success btn-add" title="增加"><i class="fa fa-plus"></i> 增加</a>
-                    </div>
+                    
                 </div>
             </div>
         </div>
@@ -468,6 +469,9 @@
 
                 <div class="form-group-child4_add" id="btn-add-lens">
                     <a href="javascript:;" style="width: 50%;" class="btn btn-success btn-add-lens" title="增加"><i class="fa fa-plus"></i> 增加</a>
+                </div>
+                <div id="toolbar" class="toolbar">
+                    <a href="javascript:;" class="btn btn-success btn-add-lens" title="增加"><i class="fa fa-plus"></i> 增加</a>
                 </div>
 
                 <div>
