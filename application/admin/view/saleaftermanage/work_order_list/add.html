@@ -409,7 +409,7 @@
             <label class="control-label col-xs-12 col-sm-2" style="width:8%;float: left;">{:__('审核人')}：</label>
             <div class="appoint_group" style="width: 90%;float: left;">
                
-                <input type="hidden" name="row[appoint_group]" class="step_type"  value="">
+                <input type="hidden" name="row[appoint_group]" class="check_person"  value="">
             </div>
         </div>
     </div>
@@ -429,56 +429,56 @@
 
     <div class="form-group" id="step_function">
         <!--小操作 start-->
-        <div class="form-group-child3 step2">
+        <div class="form-group-child3 measure step2" style="display:none;">
             <label class="control-label col-xs-12 col-sm-2">{:__('退款金额')}：</label>
             <div class="col-xs-12 col-sm-8">
                 <input id="c-refund_money" data-rule="required" class="form-control" name="row[refund_money]"
                     type="text" value="">
             </div>
         </div>
-        <div class="form-group-child3 step2">
+        <div class="form-group-child3 measure step2" style="display:none;">
             <label class="control-label col-xs-12 col-sm-2">{:__('币种')}：</label>
             <div class="col-xs-12 col-sm-8">
                 <input id="c-order_pay_currency" data-rule="required" class="form-control"
                     name="row[order_pay_currency]" type="text" value="">
             </div>
         </div>
-        <div class="form-group-child3 step2">
+        <div class="form-group-child3 measure step2" style="display:none;">
             <label class="control-label col-xs-12 col-sm-2">{:__('退款方式')}：</label>
             <div class="col-xs-12 col-sm-8">
                 <input id="c-refund_way" data-rule="required" class="form-control" name="row[refund_way]" type="text"
                     value="">
             </div>
         </div>
-        <div class="form-group-child3 step6">
+        <div class="form-group-child3 measure step6" style="display:none;">
             <label class="control-label col-xs-12 col-sm-2">{:__('SKU')}：</label>
             <div class="col-xs-12 col-sm-8">
                 <input id="c-change_sku" data-rule="required" class="form-control" name="row[change_sku]" type="text"
                     value="">
             </div>
         </div>
-        <div class="form-group-child3 step6">
+        <div class="form-group-child3 measure step6" style="display:none;">
             <label class="control-label col-xs-12 col-sm-2">{:__('数量')}：</label>
             <div class="col-xs-12 col-sm-8">
                 <input id="c-change_number" data-rule="required" class="form-control" name="row[change_number]"
                     type="text" value="">
             </div>
         </div>
-        <div class="form-group-child3 step8">
+        <div class="form-group-child3 measure step8" style="display:none;">
             <label class="control-label col-xs-12 col-sm-2">{:__('补差价订单号')}：</label>
             <div class="col-xs-12 col-sm-8">
                 <input id="c-replenish_increment_id" data-rule="required" class="form-control"
                     name="row[replenish_increment_id]" type="text" value="">
             </div>
         </div>
-        <div class="form-group-child3 step8">
+        <div class="form-group-child3 measure step8" style="display:none;">
             <label class="control-label col-xs-12 col-sm-2">{:__('补差价金额')}：</label>
             <div class="col-xs-12 col-sm-8">
                 <input id="c-replenish_money" data-rule="required" class="form-control" name="row[replenish_money]"
                     type="text" value="">
             </div>
         </div>
-        <div class="form-group-child3 step9">
+        <div class="form-group-child3 measure step9" style="display:none;">
             <label class="control-label col-xs-12 col-sm-2">{:__('不需要审核的优惠券')}：</label>
             <div class="col-xs-12 col-sm-8">
                 <select id="c-check_coupon" class="form-control selectpicker" name="row[check_coupon]">
@@ -489,7 +489,7 @@
                 </select>
             </div>
         </div>
-        <div class="form-group-child3 step9">
+        <div class="form-group-child3 measure step9" style="display:none;">
             <label class="control-label col-xs-12 col-sm-2">{:__('需要审核的优惠券')}：</label>
             <div class="col-xs-12 col-sm-8">
                 <select id="c-need_check_coupon" class="form-control selectpicker" name="row[need_check_coupon]">
@@ -500,14 +500,14 @@
                 </select>
             </div>
         </div>
-        <div class="form-group-child3 step10">
+        <div class="form-group-child3 measure step10" style="display:none;">
             <label class="control-label col-xs-12 col-sm-2">{:__('积分')}：</label>
             <div class="col-xs-12 col-sm-8">
                 <input id="c-integral" data-rule="required" class="form-control" name="row[integral]" type="text"
                     value="">
             </div>
         </div>
-        <div class="form-group-child3 step11">
+        <div class="form-group-child3 measure step11" style="display:none;">
             <label class="control-label col-xs-12 col-sm-2">{:__('退回物流单号')}：</label>
             <div class="col-xs-12 col-sm-8">
                 <input id="c-refund_logistics_num" data-rule="required" class="form-control"
@@ -518,7 +518,8 @@
 
 
         <!--更换镜框 start-->
-        <div class="form-group-child4 " >
+        
+        <div class="form-group-child4 measure step1-1" style="display:none;" >
             <div class="caigou frame-info item_info">
                 <p style="font-size: 16px;"><b>更换镜框</b></p>
                 <div>
@@ -554,7 +555,7 @@
         <!--更换镜框 end-->
 
         <!--更换处方 start-->
-        <div class="form-group-child4" >
+        <div class="form-group-child4 measure step2-1" style="display:none;" >
             <div class="col-xs-12 col-sm-8" style="width: 100%">
                 <p style="font-size: 16px;"><b>更改镜片</b></p>
 
@@ -701,7 +702,7 @@
         <!--更换处方 end-->
 
         <!--取消 start-->
-        <div class="form-group-child4 ">
+        <div class="form-group-child4 measure step3" style="display:none;">
             <div class="caigou item_info" style="margin-top:15px;">
                 <p style="font-size: 16px;"><b>取消订单</b></p>
                 <div>
@@ -727,7 +728,7 @@
         <!--取消 end-->
 
         <!--补发 start-->
-        <div class="form-group-child4">
+        <div class="form-group-child4 measure step7" style="display:none;">
             <div class="col-xs-12 col-sm-8" style="width: 100%">
                 <p style="font-size: 16px;"><b>补发</b></p>
                 

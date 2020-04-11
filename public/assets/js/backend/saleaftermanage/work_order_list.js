@@ -53,6 +53,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
             Table.api.bindevent(table);
         },
         add: function () {
+
             Controller.api.bindevent();
 
             //点击事件 #todo::需判断仓库或者客服
@@ -62,6 +63,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 $('#appoint_group_users').html('');//切换问题类型时清空承接人
                 $('#recept_person_id').val('');//切换问题类型时清空隐藏域承接人id
                 $('#recept_person').val('');//切换问题类型时清空隐藏域承接人
+                $('.measure').hide();
                 var id = $(this).val();
                 //id大于5 默认措施4
                 if (id > 5) {
@@ -75,6 +77,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 } else {
                     var step = Config.workorder.customer_problem_group[id].step;
                     var steparr = Config.workorder[step];
+                    console.log(steparr);
                     for (var j = 0; j < steparr.length; j++) {
                         $('#step' + steparr[j].step_id).parent().show();
                         //读取对应措施配置
@@ -82,8 +85,25 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         $('#step' + steparr[j].step_id + '-appoint_group').val((steparr[j].appoint_group).join(','));
                     }
                 }
-            });
-
+                var checkID = [];//定义一个空数组
+                $("input[name='row[step]']:checked").each(function(i){
+                    checkID[i] =$(this).val();
+                });
+                for(var m=0;m<checkID.length;m++){
+                    var node = $('.step'+checkID[m]);
+                    if(node.is(':hidden')){
+                        node.show();
+                    }else{
+                        node.hide();
+                    }                    
+                    var secondNode = $('.step'+id+'-'+checkID[m]);
+                    if(secondNode.is(':hidden')){
+                        secondNode.show();
+                    }else{
+                        secondNode.hide();
+                    }
+                }
+            })
 
             //根据措施类型显示隐藏
             $(document).on('click', '.step_type', function () {
@@ -120,12 +140,34 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         username += Config.users[appoint_users[j]] + ',';
                     }
                 }
-                
+                console.log(username);
                 $('#appoint_group_users').html(username);
                 $('#recept_person_id').val(appoint_users.join(','));
                 $('#recept_person').val(username);
 
-
+                // 士卫
+                $('.measure').hide();
+                var problem_type_id = $("input[name='row[problem_type_id]']:checked").val();
+                var checkID = [];//定义一个空数组 
+                $("input[name='row[step]']:checked").each(function(i){
+                    checkID[i] =$(this).val();
+                }); 
+                //一般措施
+                for(var m=0;m<checkID.length;m++){
+                    var node = $('.step'+checkID[m]);
+                    if(node.is(':hidden')){
+                        node.show();
+                    }else{
+                        node.hide();
+                    }
+                //二级措施
+                var secondNode = $('.step'+problem_type_id+'-'+checkID[m]);
+                if(secondNode.is(':hidden')){
+                    secondNode.show();
+                }else{
+                    secondNode.hide();
+                }                                        
+              }       
             });
 
 
