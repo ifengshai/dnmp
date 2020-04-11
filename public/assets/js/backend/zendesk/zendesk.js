@@ -57,12 +57,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                                     },
                                     visible: function(row){
                                         //console.log(row.assign_id)
-                                        if( Config.admin_id == 1 || Config.admin_id == 75){
-                                            return true;
-                                        }
-                                        if(row.assign_id != Config.admin_id){
-                                            return false;
-                                        }
+                                        // if( Config.admin_id == 1 || Config.admin_id == 75){
+                                        //     return true;
+                                        // }
+                                        // if(row.assign_id != Config.admin_id){
+                                        //     return false;
+                                        // }
                                         return true;
                                     }
                                 }
