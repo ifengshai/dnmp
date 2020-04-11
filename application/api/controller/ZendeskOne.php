@@ -374,7 +374,6 @@ class ZendeskOne extends Controller
 
 
     }
-
     /**
      * 查询邮件状态发送相关模板
      * @param $ticket
