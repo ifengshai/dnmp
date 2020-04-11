@@ -283,14 +283,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                 var status = $(this).data('status');
                 var href= $(this).data('href');
 
-                layer.open({
+                Layer.open({
                     type: 2,
                     title: title,
                     area: ['100', '100'],
                     maxmin: true,
-                    shade: 0.8,
-                    closeBtn: true,
-                    shadeClose: true,
                     content: href
                 });
                 // parent.$(".layui-layer-title")[0].innerText= title;
