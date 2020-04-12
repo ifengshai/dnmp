@@ -3390,7 +3390,8 @@ order by sfoi.item_id asc limit 1000";
             $p_map['sku'] = $v;
             $data['real_time_qty'] = $stock[$k];
             dump($stock[$k]);
-            $res = $this->item->save($data, $p_map);
+            dump($v);
+            $res = $this->item->where($p_map)->update($data);
         }
         echo $res;
         die;
