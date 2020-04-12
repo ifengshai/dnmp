@@ -3389,8 +3389,6 @@ order by sfoi.item_id asc limit 1000";
         foreach ($skus as $k => $v) {
             $p_map['sku'] = $v;
             $data['real_time_qty'] = $stock[$k];
-            dump($stock[$k]);
-            dump($v);
             $res = $this->item->where($p_map)->update($data);
         }
         echo $res;
@@ -3511,7 +3509,7 @@ order by sfoi.item_id asc limit 1000";
 
             $p_map['sku'] = $v;
             $data['occupy_stock'] = $zeelool_qty + $voogueme_qty + $nihao_qty + $weseeoptical_qty;
-            $res = $this->item->save($data, $p_map);
+            $res = $this->item->where($p_map)->update($data);
         }
         dump($res);
         die;
@@ -3554,7 +3552,7 @@ order by sfoi.item_id asc limit 1000";
             $data['stock'] = $v['real_time_qty'] + $v['distribution_occupy_stock'];
             $data['available_stock'] = ($v['real_time_qty'] + $v['distribution_occupy_stock']) - $v['occupy_stock'];
             $p_map['sku'] = $v['sku'];
-            $res = $this->item->save($data, $p_map);
+            $res = $this->item->where($p_map)->update($data);
         }
         dump($p_map);
         die;
