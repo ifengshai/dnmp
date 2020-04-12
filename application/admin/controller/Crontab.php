@@ -3353,8 +3353,50 @@ order by sfoi.item_id asc limit 1000";
     }
 
 
+    //导入实时库存 第一步
+    public function set_product_relstock()
+    {
+        $skus = [
+            'GSP0017-01',
+            'GSM0034-01',
+            'GSW0033-01',
+            'GST0032-02',
+            'GST0032-01',
+            'GST0031-01',
+            'GSX0030-01',
+            'GSX0029-01',
+            'GSM0028-01',
+            'GSM0027-02',
+            'GSM0027-01',
+            'GSM0026-01',
+            'GSX0025-02',
+        ];
+        $stock = [
+            5,
+            17,
+            5,
+            10,
+            9,
+            7,
+            10,
+            0,
+            0,
+            17,
+            14,
+            16,
+            16
+        ];
+        foreach ($skus as $k => $v) {
+            $p_map['sku'] = $v;
+            $data['real_time_qty'] = $stock[$k];
+            $res = $this->item->save($data, $p_map);
+        }
+        echo $res;
+        die;
+    }
+
     /**
-     * 修复库存问题
+     * 统计配货占用 第二步
      *
      * @Description
      * @author wpl
@@ -3371,27 +3413,19 @@ order by sfoi.item_id asc limit 1000";
         $this->item = new \app\admin\model\itemmanage\Item;
 
         $skus = [
-            'OP01887-04',
-            'OT02145-02',
-            'OT02144-01',
-            'OA02140-01',
-            'OP02128-01',
-            'OP02128-02',
-            'OP02128-03',
-            'OT02138-01',
-            'OA02133-03',
-            'OA02133-02',
-            'OP01863-05',
-            'OP02129-02',
-            'OA01870-04',
-            'OP02126-01',
-            'OA02124-01',
-            'OM02122-01',
-            'OM02122-02',
-            'OM02118-01',
-            'OA02121-01',
-            'OA02121-02',
-            'OP01860-05',
+            'GSP0017-01',
+            'GSM0034-01',
+            'GSW0033-01',
+            'GST0032-02',
+            'GST0032-01',
+            'GST0031-01',
+            'GSX0030-01',
+            'GSX0029-01',
+            'GSM0028-01',
+            'GSM0027-02',
+            'GSM0027-01',
+            'GSM0026-01',
+            'GSX0025-02',
         ];
         foreach ($skus as $k => $v) {
             $zeelool_sku = $this->itemplatformsku->getWebSku($v, 1);
@@ -3417,13 +3451,14 @@ order by sfoi.item_id asc limit 1000";
             $res = $this->item->save($data, $p_map);
         }
 
-        echo $res;die;
+        echo $res;
+        die;
     }
 
 
 
     /**
-     * 订单占用
+     * 订单占用 第三步
      *
      * @Description
      * @author wpl
@@ -3440,27 +3475,19 @@ order by sfoi.item_id asc limit 1000";
         $this->item = new \app\admin\model\itemmanage\Item;
 
         $skus = [
-            'OP01887-04',
-            'OT02145-02',
-            'OT02144-01',
-            'OA02140-01',
-            'OP02128-01',
-            'OP02128-02',
-            'OP02128-03',
-            'OT02138-01',
-            'OA02133-03',
-            'OA02133-02',
-            'OP01863-05',
-            'OP02129-02',
-            'OA01870-04',
-            'OP02126-01',
-            'OA02124-01',
-            'OM02122-01',
-            'OM02122-02',
-            'OM02118-01',
-            'OA02121-01',
-            'OA02121-02',
-            'OP01860-05',
+            'GSP0017-01',
+            'GSM0034-01',
+            'GSW0033-01',
+            'GST0032-02',
+            'GST0032-01',
+            'GST0031-01',
+            'GSX0030-01',
+            'GSX0029-01',
+            'GSM0028-01',
+            'GSM0027-02',
+            'GSM0027-01',
+            'GSM0026-01',
+            'GSX0025-02',
         ];
         foreach ($skus as $k => $v) {
             $zeelool_sku = $this->itemplatformsku->getWebSku($v, 1);
@@ -3480,14 +3507,54 @@ order by sfoi.item_id asc limit 1000";
             $map['sku'] = $wesee_sku;
             $weseeoptical_qty = $this->weseeoptical->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->sum('qty_ordered');
 
-            $p_map[$k]['sku'] = $v;
-            $p_map[$k]['occupy_stock'] = $zeelool_qty + $voogueme_qty + $nihao_qty + $weseeoptical_qty;
-            $p_map[$k]['zeelool_qty'] = $zeelool_qty;
-            $p_map[$k]['voogueme_qty'] = $voogueme_qty;
-            $p_map[$k]['nihao_qty'] = $nihao_qty;
-            $p_map[$k]['weseeoptical_qty'] = $weseeoptical_qty;
-            // $res = $this->item->save($data, $p_map);
+            $p_map['sku'] = $v;
+            $data['occupy_stock'] = $zeelool_qty + $voogueme_qty + $nihao_qty + $weseeoptical_qty;
+            $res = $this->item->save($data, $p_map);
         }
-        dump($p_map);die;
+        dump($res);
+        die;
+    }
+
+    /**
+     * 订单占用 第四步
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/04/11 15:54:25 
+     * @return void
+     */
+    public function set_product_sotck()
+    {
+        $this->zeelool = new \app\admin\model\order\order\Zeelool;
+        $this->voogueme = new \app\admin\model\order\order\Voogueme;
+        $this->nihao = new \app\admin\model\order\order\Nihao;
+        $this->weseeoptical = new \app\admin\model\order\order\Weseeoptical;
+        $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
+        $this->item = new \app\admin\model\itemmanage\Item;
+
+        $skus = [
+            'GSP0017-01',
+            'GSM0034-01',
+            'GSW0033-01',
+            'GST0032-02',
+            'GST0032-01',
+            'GST0031-01',
+            'GSX0030-01',
+            'GSX0029-01',
+            'GSM0028-01',
+            'GSM0027-02',
+            'GSM0027-01',
+            'GSM0026-01',
+            'GSX0025-02',
+        ];
+        $list = $this->item->field('stock,occupy_stock,available_stock,real_time_qty,distribution_occupy_stock')->where(['sku' => ['in', $skus]])->select();
+        foreach ($list as $k => $v) {
+            $data['stock'] = $v['real_time_qty'] + $v['distribution_occupy_stock'];
+            $data['available_stock'] = ($v['real_time_qty'] + $v['distribution_occupy_stock']) - $v['occupy_stock'];
+            $p_map['sku'] = $v['sku'];
+            $res = $this->item->save($data, $p_map);
+        }
+        dump($p_map);
+        die;
     }
 }
