@@ -3470,7 +3470,6 @@ order by sfoi.item_id asc limit 1000";
 
             $map['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal']];
             $map['custom_is_delivery_new'] = 1; //是否提货
-            $map['custom_is_match_frame_new'] = 0; //是否配镜架
             $map['a.created_at'] = ['between', ['2020-01-01 00:00:00', '2020-04-13 23:00:00']]; //时间节点
             $map['sku'] = $zeelool_sku;
             $zeelool_qty = $this->zeelool->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->sum('qty_ordered');
@@ -3483,6 +3482,10 @@ order by sfoi.item_id asc limit 1000";
 
             $p_map[$k]['sku'] = $v;
             $p_map[$k]['occupy_stock'] = $zeelool_qty + $voogueme_qty + $nihao_qty + $weseeoptical_qty;
+            $p_map[$k]['zeelool_qty'] = $zeelool_qty;
+            $p_map[$k]['voogueme_qty'] = $voogueme_qty;
+            $p_map[$k]['nihao_qty'] = $nihao_qty;
+            $p_map[$k]['weseeoptical_qty'] = $weseeoptical_qty;
             // $res = $this->item->save($data, $p_map);
         }
         dump($p_map);die;
