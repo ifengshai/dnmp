@@ -3369,7 +3369,7 @@ order by sfoi.item_id asc limit 1000";
             'GSM0027-02',
             'GSM0027-01',
             'GSM0026-01',
-            'GSX0025-02',
+            'GSX0025-02'
         ];
         $stock = [
             5,
@@ -3389,6 +3389,7 @@ order by sfoi.item_id asc limit 1000";
         foreach ($skus as $k => $v) {
             $p_map['sku'] = $v;
             $data['real_time_qty'] = $stock[$k];
+            dump($stock[$k]);
             $res = $this->item->save($data, $p_map);
         }
         echo $res;
