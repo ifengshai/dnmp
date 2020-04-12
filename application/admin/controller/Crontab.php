@@ -3320,7 +3320,7 @@ order by sfoi.item_id asc limit 1000";
         $map['is_change'] = 0;
         $map['is_new'] = 2;
         $map['available_stock'] = ['<=', 0];
-        $list = $item->where($map)->limit(300)->select();
+        $list = $item->where($map)->limit(500)->select();
         $skus = [];
         foreach ($list as $k => $v) {
             $itemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku();
@@ -3346,6 +3346,7 @@ order by sfoi.item_id asc limit 1000";
             }
         }
         $data['is_change'] = 1;
+        $data['is_open'] = 3;
         $res = $item->save($data, ['sku' => ['in', $skus]]);
         dump($res);
         die;
