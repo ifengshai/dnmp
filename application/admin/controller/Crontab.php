@@ -3549,7 +3549,7 @@ order by sfoi.item_id asc limit 1000";
             'GSM0026-01',
             'GSX0025-02',
         ];
-        $list = $this->item->field('stock,occupy_stock,available_stock,real_time_qty,distribution_occupy_stock')->where(['sku' => ['in', $skus]])->select();
+        $list = $this->item->field('sku,stock,occupy_stock,available_stock,real_time_qty,distribution_occupy_stock')->where(['sku' => ['in', $skus]])->select();
         foreach ($list as $k => $v) {
             $data['stock'] = $v['real_time_qty'] + $v['distribution_occupy_stock'];
             $data['available_stock'] = ($v['real_time_qty'] + $v['distribution_occupy_stock']) - $v['occupy_stock'];
