@@ -3448,7 +3448,9 @@ order by sfoi.item_id asc limit 1000";
 
             $p_map['sku'] = $v;
             $data['distribution_occupy_stock'] = $zeelool_qty + $voogueme_qty + $nihao_qty + $weseeoptical_qty;
-            $res = $this->item->save($data, $p_map);
+            dump($v);
+            dump($data);
+            $res = $this->item->where($p_map)->update($data);
         }
 
         echo $res;
