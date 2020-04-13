@@ -57,6 +57,7 @@ class WorkOrderList extends Backend
                         $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.add' : $name) : $this->modelValidate;
                         $this->model->validateFailException(true)->validate($validate);
                     }
+
                     $result = $this->model->allowField(true)->save($params);
                     Db::commit();
                 } catch (ValidateException $e) {
@@ -83,12 +84,12 @@ class WorkOrderList extends Backend
         $warehouseArr = config('workorder.warehouse_department_rule');
         $checkIsWarehouse = array_intersect($userGroupAccess, $warehouseArr);
         if (!empty($checkIsWarehouse)) {
-            $this->view->assign('work_type', 2);
-            $this->assignconfig('work_type', 2);
+            $this->view->assign('work_type',2);
+            $this->assignconfig('work_type',2);
             $this->view->assign('problem_type', config('workorder.warehouse_problem_type')); //仓库问题类型       
         } else {
-            $this->view->assign('work_type', 1);
-            $this->assignconfig('work_type', 1);
+            $this->view->assign('work_type',1);
+            $this->assignconfig('work_type',1);
             $this->view->assign('problem_type', config('workorder.customer_problem_type')); //客服问题类型
         }
 
@@ -102,6 +103,7 @@ class WorkOrderList extends Backend
 
         $this->view->assign('check_coupon', config('workorder.check_coupon')); //不需要审核的优惠券
         $this->view->assign('need_check_coupon', config('workorder.need_check_coupon')); //需要审核的优惠券
+
         return $this->view->fetch();
     }
 
