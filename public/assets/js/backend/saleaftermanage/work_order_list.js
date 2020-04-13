@@ -200,23 +200,28 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 $(this).parent().parent().remove();
             });
 
-            //赠品
+            //赠品 start
             $(document).on('click', '.btn-add-box', function () {
                 var option = $('#add_box_option').html();
-                var str = '<label class="control-label col-xs-12 col-sm-2">SKU：</label>\n' +
-                    '                <div class="col-xs-12 col-sm-8">\n' +
-                    '                    <div class="dropup">\n' +
-                    '                        <select id="add_box_select" class="selectpicker" name="row[change_sku][]" data-live-search="true" title="请选择">\n' + option +
-                    '                        </select>\n' +
+                var str = '<div><label style="margin-top: 10px;" class="control-label col-xs-12 col-sm-2">SKU：</label>\n' +
+                    '                    <div style="margin-top: 10px;" class="col-xs-12 col-sm-8">\n' +
+                    '                        <div class="dropup">\n' +
+                    '                            <select id="add_box_select" class="selectpicker" name="row[change_sku][]" data-live-search="true" title="请选择">\n' + option +
+                    '                            </select>\n' +
+                    '                        </div>\n' +
                     '                    </div>\n' +
-                    '                </div>\n' +
-                    '                <label class="control-label col-xs-12 col-sm-2">数量：</label>\n' +
-                    '                <div class="col-xs-12 col-sm-8">\n' +
-                    '                    <input id="c-change_number" data-rule="required" class="form-control" name="row[change_number]" type="text" value="">\n' +
-                    '                </div>';
+                    '                    <label style="margin-top: 10px;" class="control-label col-xs-12 col-sm-2">数量：</label>\n' +
+                    '                    <div style="margin-top: 10px;" class="col-xs-12 col-sm-8">\n' +
+                    '                        <input class="form-control" name="row[change_number]" type="text" value="">\n' +
+                    '                        <a href="javascript:;" class="btn btn-danger btn-del-box" title="删除"><i class="fa fa-trash"></i>删除</a>\n' +
+                    '                    </div></div>';
                 $('#add_box').append(str);
                 Controller.api.bindevent();
             });
+            $(document).on('click', '.btn-del-box', function () {
+                $(this).parent().parent().remove();
+            });
+            //赠品 end
 
             //补发 start
             $(document).on('click', '.btn-add-supplement', function () {
