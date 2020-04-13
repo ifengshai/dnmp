@@ -57,6 +57,7 @@ class WorkOrderList extends Backend
                         $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.add' : $name) : $this->modelValidate;
                         $this->model->validateFailException(true)->validate($validate);
                     }
+
                     $result = $this->model->allowField(true)->save($params);
                     Db::commit();
                 } catch (ValidateException $e) {
@@ -79,14 +80,16 @@ class WorkOrderList extends Backend
         }
         //获取用户ID和所在权限组
         $userId = session('admin.id');
-        $userGroupAccess = AuthGroupAccess::where(['uid'=>$userId])->column('group_id');
+        $userGroupAccess = AuthGroupAccess::where(['uid' => $userId])->column('group_id');
         $warehouseArr = config('workorder.warehouse_department_rule');
-        $checkIsWarehouse = array_intersect($userGroupAccess,$warehouseArr);
+        $checkIsWarehouse = array_intersect($userGroupAccess, $warehouseArr);
         if (!empty($checkIsWarehouse)) {
             $this->view->assign('work_type',2);
+            $this->assignconfig('work_type',2);
             $this->view->assign('problem_type', config('workorder.warehouse_problem_type')); //仓库问题类型       
         } else {
             $this->view->assign('work_type',1);
+            $this->assignconfig('work_type',1);
             $this->view->assign('problem_type', config('workorder.customer_problem_type')); //客服问题类型
         }
 

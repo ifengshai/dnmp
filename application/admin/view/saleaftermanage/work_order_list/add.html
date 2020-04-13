@@ -42,8 +42,30 @@
         width: 45%;
     }
 
-    .form-group-child3 div {
+    .form-group-child3 .col-sm-8 {
         width: 54%;
+    }
+
+    .form-group-child5 {
+        /* display: none; */
+        float: left;
+        width: 100%;
+        margin-top: 10px;
+        margin-left: 1%;
+    }
+
+    .form-group-child5 .dropdown-menu{
+        width: 130%;
+    }
+    .form-group-child5 label {
+        width: 8%;
+    }
+
+    .form-group-child5 .col-sm-8 {
+        width: 15%;
+    }
+    .form-group-child5 .toolbar {
+        margin-left: 1%;
     }
 
     .form-group-child4 {
@@ -383,7 +405,7 @@
     </div>
 
     
-    <div class="form-group" style="height: 50px;">
+    <div class="form-group" id='step_id' style="height: 50px;">
         <div class="form-group-content">
             <label class="control-label col-xs-12 col-sm-2" style="width:8%;float: left;">{:__('step')}：</label>
             <div class="radio" style="width: 90%;float: left;">
@@ -402,9 +424,6 @@
     </div>
 
 
-
-
-
     <div class="form-group check-div" style="height: 50px;display: none;">
         <div class="form-group-content">
             <label class="control-label col-xs-12 col-sm-2" style="width:8%;float: left;">{:__('审核人')}：</label>
@@ -414,7 +433,17 @@
             </div>
         </div>
     </div>
-    <div class="form-group" style="height: 50px;">
+    <div class="form-group" id='after_user_group' style="height: 50px;display: none;">
+        <div class="form-group-content">
+            <label class="control-label col-xs-12 col-sm-2" style="width:8%;float: left;">{:__('承接人')}：</label>
+            <div class="appoint_group" style="width: 90%;float: left;">
+               
+                <label class="control-label col-xs-12 col-sm-2" id="after_user" style="text-align: left;"></label>
+                <input type="hidden" name="row[after_user_id]" id="after_user_id"  value="">
+            </div>
+        </div>
+    </div>    
+    <div class="form-group" id="recept_person_group" style="height: 50px;">
         <div class="form-group-content">
             <label class="control-label col-xs-12 col-sm-2" style="width:8%;float: left;">{:__('承接人')}：</label>
             <div class="appoint_group" style="width: 90%;float: left;">
@@ -433,49 +462,65 @@
         <div class="form-group-child3 measure step2" style="display:none;">
             <label class="control-label col-xs-12 col-sm-2">{:__('退款金额')}：</label>
             <div class="col-xs-12 col-sm-8">
-                <input id="c-refund_money" data-rule="required" class="form-control" name="row[refund_money]"
+                <input id="c-refund_money"  class="form-control" name="row[refund_money]"
                     type="text" value="">
             </div>
         </div>
         <div class="form-group-child3 measure step2" style="display:none;">
             <label class="control-label col-xs-12 col-sm-2">{:__('币种')}：</label>
             <div class="col-xs-12 col-sm-8">
-                <input id="c-order_pay_currency" data-rule="required" class="form-control"
+                <input id="c-order_pay_currency"  class="form-control"
                     name="row[order_pay_currency]" type="text" value="">
             </div>
         </div>
         <div class="form-group-child3 measure step2" style="display:none;">
             <label class="control-label col-xs-12 col-sm-2">{:__('退款方式')}：</label>
             <div class="col-xs-12 col-sm-8">
-                <input id="c-refund_way" data-rule="required" class="form-control" name="row[refund_way]" type="text"
+                <input id="c-refund_way"  class="form-control" name="row[refund_way]" type="text"
                     value="">
             </div>
         </div>
-        <div class="form-group-child3 measure step6" style="display:none;">
-            <label class="control-label col-xs-12 col-sm-2">{:__('SKU')}：</label>
-            <div class="col-xs-12 col-sm-8">
-                <input id="c-change_sku" data-rule="required" class="form-control" name="row[change_sku]" type="text"
-                    value="">
+
+        <div class="form-group-child5 measure step6" style="*display:none;">
+            <p style="font-size: 16px;margin-left: 1%;"><b>赠品</b></p>
+            <div class="toolbar">
+                <a href="javascript:;" class="btn btn-success btn-add-box" title="增加"><i class="fa fa-plus"></i>
+                    增加</a>
+            </div>
+            <div id="add_box_option" style="display: none;">
+                <option data-subtext="<span>$4.95</span>&nbsp;&nbsp;&nbsp;<img src='https://cdn.zeelool.com/media/catalog/product//2/_/2_62_1.jpg' width='50%'>" value="1">FP0068-01</option>
+                <option data-subtext="<span>$4.95</span>&nbsp;&nbsp;&nbsp;<img src='https://cdn.zeelool.com/media/catalog/product//2/_/2_62_1.jpg' width='50%'>" value="2">FP0068-02</option>
+                <option data-subtext="<span>$4.95</span>&nbsp;&nbsp;&nbsp;<img src='https://cdn.zeelool.com/media/catalog/product//2/_/2_62_1.jpg' width='50%'>" value="3">FP0068-03</option>
+            </div>
+            <div id="add_box">
+                <label class="control-label col-xs-12 col-sm-2">{:__('SKU')}：</label>
+                <div class="col-xs-12 col-sm-8">
+                    <div class="dropup">
+                        <select id="add_box_select" class="selectpicker" name="row[change_sku][]" data-live-search="true" title="请选择">
+
+                        </select>
+                    </div>
+                </div>
+
+                <label class="control-label col-xs-12 col-sm-2">{:__('数量')}：</label>
+                <div class="col-xs-12 col-sm-8">
+                    <input id="c-change_number"  class="form-control" name="row[change_number]"
+                           type="text" value="">
+                </div>
             </div>
         </div>
-        <div class="form-group-child3 measure step6" style="display:none;">
-            <label class="control-label col-xs-12 col-sm-2">{:__('数量')}：</label>
-            <div class="col-xs-12 col-sm-8">
-                <input id="c-change_number" data-rule="required" class="form-control" name="row[change_number]"
-                    type="text" value="">
-            </div>
-        </div>
+
         <div class="form-group-child3 measure step8" style="display:none;">
             <label class="control-label col-xs-12 col-sm-2">{:__('补差价订单号')}：</label>
             <div class="col-xs-12 col-sm-8">
-                <input id="c-replenish_increment_id" data-rule="required" class="form-control"
+                <input id="c-replenish_increment_id"  class="form-control"
                     name="row[replenish_increment_id]" type="text" value="">
             </div>
         </div>
         <div class="form-group-child3 measure step8" style="display:none;">
             <label class="control-label col-xs-12 col-sm-2">{:__('补差价金额')}：</label>
             <div class="col-xs-12 col-sm-8">
-                <input id="c-replenish_money" data-rule="required" class="form-control" name="row[replenish_money]"
+                <input id="c-replenish_money"  class="form-control" name="row[replenish_money]"
                     type="text" value="">
             </div>
         </div>
@@ -504,14 +549,14 @@
         <div class="form-group-child3 measure step10" style="display:none;">
             <label class="control-label col-xs-12 col-sm-2">{:__('积分')}：</label>
             <div class="col-xs-12 col-sm-8">
-                <input id="c-integral" data-rule="required" class="form-control" name="row[integral]" type="text"
+                <input id="c-integral"  class="form-control" name="row[integral]" type="text"
                     value="">
             </div>
         </div>
         <div class="form-group-child3 measure step11" style="display:none;">
             <label class="control-label col-xs-12 col-sm-2">{:__('退回物流单号')}：</label>
             <div class="col-xs-12 col-sm-8">
-                <input id="c-refund_logistics_num" data-rule="required" class="form-control"
+                <input id="c-refund_logistics_num"  class="form-control"
                     name="row[refund_logistics_num]" type="text" value="">
             </div>
         </div>
@@ -520,7 +565,7 @@
 
         <!--更换镜框 start-->
         
-        <div class="form-group-child4 measure step1-1" style="display:none;" >
+        <div class="form-group-child4 measure step1-1" style="*display:none;" >
             <div class="caigou frame-info item_info">
                 <p style="font-size: 16px;"><b>更换镜框</b></p>
                 <div>
@@ -537,13 +582,13 @@
                             <th>操作</th>
                         </tr>
                         <tr>
-                            <td><input class="form-control" name="row[item]['+m+'][original_sku]" type="text" value="">
+                            <td><input class="form-control" name="row[item][original_sku][]" type="text" value="">
                             </td>
-                            <td><input class="form-control" name="row[item]['+m+'][original_number]" type="text"
+                            <td><input class="form-control" name="row[item][original_number][]" type="text"
                                     value=""></td>
-                            <td><input class="form-control change_sku" name="row[item]['+m+'][change_sku]" type="text">
+                            <td><input class="form-control change_sku" name="row[item][change_sku][]" type="text">
                             </td>
-                            <td><input class="form-control change_number" name="row[item]['+m+'][change_number]"
+                            <td><input class="form-control change_number" name="row[item][change_number][]"
                                     type="text"></td>
                             <td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i
                                         class="fa fa-trash"></i>删除</a></td>
@@ -1077,6 +1122,145 @@
 
         <div class="form-group-child4_del">
             <a href="javascript:;" style="width: 50%;" class="btn btn-danger btn-del-lens" title="删除"><i class="fa fa-trash"></i>删除</a>
+        </div>
+    </div>
+</div>
+
+<div id="replenish_order" style="display: none;">
+    <div>
+        <div class="step7_function2" style="margin-top: 20px;">
+            <div class="step7_function2_child">
+                <label class="control-label col-xs-12 col-sm-3">SKU:</label>
+                <div class="col-xs-12 col-sm-8">
+                    <select class="form-control selectpicker" name="row[lens][original_sku][]">
+                        <option value="0">请选择</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="step7_function2_child">
+                <label class="control-label col-xs-12 col-sm-3">Name:</label>
+                <div class="col-xs-12 col-sm-8">
+                    <input class="form-control" name="row[lens][original_name][]" type="text" value="">
+                </div>
+            </div>
+            <div class="step7_function2_child">
+                <label class="control-label col-xs-12 col-sm-3">QTY:</label>
+                <div class="col-xs-12 col-sm-8">
+                    <input class="form-control" name="row[lens][original_number][]" type="text" value="">
+                </div>
+            </div>
+            <div class="step7_function2_child">
+                <label class="control-label col-xs-12 col-sm-3">选择已有处方:</label>
+                <div class="col-xs-12 col-sm-8">
+                    <select class="form-control selectpicker" name="row[]">
+                        <option value="0">请选择</option>
+                    </select>
+                </div>
+            </div>
+            <div class="step7_function2_child">
+                <label class="control-label col-xs-12 col-sm-3">prescription_type:</label>
+                <div class="col-xs-12 col-sm-8">
+                    <select class="form-control selectpicker" name="row[lens][recipe_type][]">
+                        <option value="0">请选择</option>
+                    </select>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="step1_function3" style="margin-top: 20px;">
+            <div class="panel-body">
+                <div class="step1_function3_child">
+                    <label class="control-label col-xs-12 col-sm-3">lens_type:</label>
+                    <div class="col-xs-12 col-sm-8">
+                        <select class="form-control selectpicker" name="row[lens][lens_type][]">
+                            <option value="0">请选择</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="step1_function3_child">
+                    <label class="control-label col-xs-12 col-sm-3">coating_type:</label>
+                    <div class="col-xs-12 col-sm-8">
+                        <select id="c-coating_type" class="form-control selectpicker"
+                                name="row[lens][coating_type][]">
+                            <option value="0">请选择</option>
+                        </select>
+                    </div>
+                </div>
+                <table>
+                    <tbody>
+                    <tr>
+                        <td style="text-align: center">value</td>
+                        <td style="text-align: center">SPH</td>
+                        <td style="text-align: center">CYL</td>
+                        <td style="text-align: center">AXI</td>
+                        <td style="text-align: center">ADD</td>
+                        <td style="text-align: center">PD</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center">Right(OD)</td>
+                        <td><input class="form-control" name="row[lens][od_sph][]" type="text" value="">
+                        </td>
+                        <td><input class="form-control" name="row[lens][od_cyl][]" type="text" value="">
+                        </td>
+                        <td><input class="form-control" name="row[lens][od_axis][]" type="text"
+                                   value=""></td>
+                        <td><input class="form-control" name="row[lens][od_add][]" type="text" value="">
+                        </td>
+                        <td><input class="form-control" name="row[lens][pd_r][]" type="text" value="">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center">Left(OS)</td>
+                        <td><input class="form-control" name="row[lens][os_sph][]" type="text" value="">
+                        </td>
+                        <td><input class="form-control" name="row[lens][os_cyl][]" type="text" value="">
+                        </td>
+                        <td><input class="form-control" name="row[lens][os_axis][]" type="text"
+                                   value=""></td>
+                        <td><input class="form-control" name="row[lens][os_add][]" type="text" value="">
+                        </td>
+                        <td><input class="form-control" name="row[lens][pd_l][]" type="text" value="">
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td style="text-align: center"></td>
+                        <td style="text-align: center">Prism Horizontal</td>
+                        <td style="text-align: center">Base Direction</td>
+                        <td style="text-align: center">Prism Vertical</td>
+                        <td style="text-align: center">Base Direction</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center">Right(OD)</td>
+                        <td><input class="form-control" type="text" name="row[lens][od_pv][]" value="">
+                        </td>
+                        <td><input class="form-control" type="text" name="row[lens][od_bd][]" value="">
+                        </td>
+                        <td><input class="form-control" type="text" name="row[lens][od_pv_r][]"
+                                   value=""></td>
+                        <td><input class="form-control" type="text" name="row[lens][od_bd_r][]"
+                                   value=""></td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center">Left(OS)</td>
+                        <td><input class="form-control" name="row[lens][os_pv][]" type="text" value="">
+                        </td>
+                        <td><input class="form-control" name="row[lens][os_bd][]" type="text" value="">
+                        </td>
+                        <td><input class="form-control" name="row[lens][os_pv_r][]" type="text"
+                                   value=""></td>
+                        <td><input class="form-control" name="row[lens][os_bd_r][]" type="text"
+                                   value=""></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="form-group-child4_del">
+            <a href="javascript:;" style="width: 50%;" class="btn btn-danger btn-del-supplement" title="删除"><i class="fa fa-trash"></i>删除</a>
         </div>
     </div>
 </div>
