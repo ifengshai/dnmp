@@ -60,7 +60,9 @@
     .form-group-child5 label {
         width: 9%;
     }
-
+    .form-group-child5 input {
+        width: 48%;
+    }
     .form-group-child5 .col-sm-8 {
         width: 15%;
     }
@@ -493,19 +495,22 @@
                 <option data-subtext="<span>$4.95</span>&nbsp;&nbsp;&nbsp;<img src='https://cdn.zeelool.com/media/catalog/product//2/_/2_62_1.jpg' width='50%'>" value="3">FP0068-03</option>
             </div>
             <div id="add_box">
-                <label class="control-label col-xs-12 col-sm-2">{:__('SKU')}：</label>
-                <div class="col-xs-12 col-sm-8">
-                    <div class="dropup">
-                        <select id="add_box_select" class="selectpicker" name="row[change_sku][]" data-live-search="true" title="请选择">
+                <div>
+                    <label style="margin-top: 10px;" class="control-label col-xs-12 col-sm-2">{:__('SKU')}：</label>
+                    <div style="margin-top: 10px;" class="col-xs-12 col-sm-8">
+                        <div class="dropup">
+                            <select id="add_box_select" class="selectpicker" name="row[change_sku][]" data-live-search="true" title="请选择">
 
-                        </select>
+                            </select>
+                        </div>
                     </div>
-                </div>
 
-                <label class="control-label col-xs-12 col-sm-2">{:__('数量')}：</label>
-                <div class="col-xs-12 col-sm-8">
-                    <input id="c-change_number"  class="form-control" name="row[change_number]"
-                           type="text" value="">
+                    <label style="margin-top: 10px;" class="control-label col-xs-12 col-sm-2">{:__('数量')}：</label>
+                    <div style="margin-top: 10px;" class="col-xs-12 col-sm-8">
+                        <input class="form-control" name="row[change_number]"
+                               type="text" value="">
+                        <!--<a href="javascript:;" class="btn btn-danger btn-del-supplement" title="删除"><i class="fa fa-trash"></i>删除</a>-->
+                    </div>
                 </div>
             </div>
         </div>
