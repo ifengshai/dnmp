@@ -280,9 +280,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         order_number: incrementId
                     }
                 }, function (data, ret) {
+                    $('#order_pay_currency').val(data.base_currency_code);
+                    $('#order_pay_method').val(data.method);
                     var shtml = '<option value="">请选择</option>';
-                    for (var i in data) {
-                        shtml += '<option value="' + data[i] + '">' + data[i] + '</option>'
+                    for (var i in data.sku) {
+                        shtml += '<option value="' + data.sku[i] + '">' + data.sku[i] + '</option>'
                     }
                     $('#c-order_sku').append(shtml);
                     $('.selectpicker ').selectpicker('refresh');
