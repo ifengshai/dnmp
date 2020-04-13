@@ -142,9 +142,12 @@ class WorkOrderList extends Backend
         if(request()->isAjax()) {
             $incrementId = input('increment_id');
             $siteType = input('site_type');
+            //获取地址、处方等信息
             $res = $this->model->getAddress($siteType, $incrementId);
+            //请求接口获取lens_type，coating_type，prescription_type等信息
+            $lens = $this->model->getLens($siteType,$res['showPrescriptions']);
             if ($res) {
-                $this->success('操作成功！！', '', $res);
+                $this->success('操作成功！！', '', ['address' => $res,'lens' => $lens]);
             } else {
                 $this->error('未获取到数据！！');
             }

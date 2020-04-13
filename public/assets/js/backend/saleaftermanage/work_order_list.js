@@ -332,7 +332,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     Toastr.error(json.msg);
                                     return false;
                                 }
-                                var data = json.data;
+                                var data = json.data.address;
+                                var lens = json.data.lens;
+                                $('#supplement-order').html(lens.html);
                                 //修改地址
                                 var address = '';
                                 for(var i = 0;i<data.address.length;i++){
@@ -355,11 +357,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
 
                                 }
                                 $('#address_select').html(address);
-                                var prescription = '';
-                                for(var i = 0;i<data.showPrescriptions.length;i++){
-                                    prescription += '<option value="'+i+'">'+data.showPrescriptions[i]+'</option>';
-                                }
-                                $('#prescription_select').html(prescription);
                                 //选择地址切换地址
                                 $('#address_select').change(function(){
                                     var address_id = $(this).val();
@@ -376,7 +373,17 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     $('#c-postcode').val(address.postcode);
                                 })
 
+                                //追加
+                                $('.btn-add-supplement-reissue').click(function(){
+                                    var contents = '<div>'+ lens.html+'<div class="form-group-child4_del"><a href="javascript:;" style="width: 50%;" class="btn btn-danger btn-del-lens" title="删除"><i class="fa fa-trash"></i>删除</a></div></div>';
+                                    $('#supplement-order').after(contents);
+                                    $('.selectpicker ').selectpicker('refresh');
+                                    Controller.api.bindevent();
+                                });
+
+
                                 $('.selectpicker ').selectpicker('refresh');
+                                Controller.api.bindevent();
                             }
                         });
                         //获取
