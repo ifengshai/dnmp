@@ -175,10 +175,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
             $(document).on('click', '.btn-add-frame', function () {
                 var rows = document.getElementById("caigou-table-sku").rows.length;
                 var content = '<tr>' +
-                    '<td><input id="c-original_sku" class="form-control" name="row[item][' + rows + '][original_sku]" type="text"></td>' +
-                    '<td><input id="c-original_number" class="form-control" name="row[item][' + rows + '][original_number]" type="text"></td>' +
-                    '<td><input id="c-change_sku" class="form-control change_sku" name="row[item][' + rows + '][change_sku]" type="text"></td>' +
-                    '<td><input id="c-change_number" class="form-control change_number" name="row[item][' + rows + '][change_number]" type="text"></td>' +
+                    '<td><input class="form-control" name="row[change_frame][original_sku][]" type="text"></td>' +
+                    '<td><input class="form-control" name="row[change_frame][original_number][]" type="text"></td>' +
+                    '<td><input class="form-control change_sku" name="row[change_frame][change_sku][]" type="text"></td>' +
+                    '<td><input class="form-control change_number" name="row[change_frame][change_number][]" type="text"></td>' +
                     '<td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i> 删除</a></td>' +
                     '</tr>';
                 $('#caigou-table-sku tbody').append(content);
@@ -199,6 +199,29 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
             $(document).on('click', '.btn-del-lens', function () {
                 $(this).parent().parent().remove();
             });
+
+            //赠品 start
+            $(document).on('click', '.btn-add-box', function () {
+                var option = $('#add_box_option').html();
+                var str = '<div><label style="margin-top: 10px;" class="control-label col-xs-12 col-sm-2">SKU：</label>\n' +
+                    '                    <div style="margin-top: 10px;" class="col-xs-12 col-sm-8">\n' +
+                    '                        <div class="dropup">\n' +
+                    '                            <select class="selectpicker" name="row[order_change][change_sku][]" data-live-search="true" title="请选择">\n' + option +
+                    '                            </select>\n' +
+                    '                        </div>\n' +
+                    '                    </div>\n' +
+                    '                    <label style="margin-top: 10px;" class="control-label col-xs-12 col-sm-2">数量：</label>\n' +
+                    '                    <div style="margin-top: 10px;" class="col-xs-12 col-sm-8">\n' +
+                    '                        <input class="form-control" name="row[order_change][change_number][]" type="text" value="">\n' +
+                    '                        <a href="javascript:;" class="btn btn-danger btn-del-box" title="删除"><i class="fa fa-trash"></i>删除</a>\n' +
+                    '                    </div></div>';
+                $('#add_box').append(str);
+                Controller.api.bindevent();
+            });
+            $(document).on('click', '.btn-del-box', function () {
+                $(this).parent().parent().remove();
+            });
+            //赠品 end
 
             //补发 start
             $(document).on('click', '.btn-add-supplement', function () {
@@ -265,10 +288,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 }
                 $('.selectpicker ').selectpicker('refresh');
 
-
             })
 
-            //根据
+            //根据订单号获取数据
             $('#platform_order').click(function () {
                 var incrementId = $('#c-platform_order').val();
                 var sitetype = $('#work_platform').val();
@@ -288,10 +310,119 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     }
                     $('#c-order_sku').append(shtml);
                     $('.selectpicker ').selectpicker('refresh');
-                })
+                });
             })
+            //补发点击填充数据
+            $(document).on('click','input[name="row[measure_' +
+                'choose_id]"]',function(){
+                var value = $(this).val();
+                var check = $(this).prop('checked');
+                //补发
+                if(value == 7 && check === true){
+                    var increment_id = $('#c-platform_order').val();
+                    if(increment_id){
+
+                        var site_type = $('#work_platform').val();
+                        //获取补发的信息
+                        $.ajax({
+                            type: "POST",
+                            url: "saleaftermanage/work_order_list/ajaxGetAddress",
+                            dataType: "json",
+                            cache: false,
+                            async: false,
+                            data: {
+                                increment_id: increment_id,
+                                site_type: site_type,
+                            },
+                            success: function (json) {
+                                if(json.code == 0){
+                                    Toastr.error(json.msg);
+                                    return false;
+                                }
+                                var data = json.data.address;
+                                var lens = json.data.lens;
+                                $('#supplement-order').html(lens.html);
+                                //修改地址
+                                var address = '';
+                                for(var i = 0;i<data.address.length;i++){
+                                    if(i == 0){
+                                        address += '<option value="'+i+'" selected>'+data.address[i].address_type+'</option>';
+                                        //补发地址自动填充第一个
+                                        $('#c-firstname').val(data.address[i].firstname);
+                                        $('#c-lastname').val(data.address[i].lastname);
+                                        $('#c-email').val(data.address[i].email);
+                                        $('#c-telephone').val(data.address[i].telephone);
+                                        $('#c-country').val(data.address[i].country_id);
+                                        $('#c-country').change();
+                                        $('#c-region').val(data.address[i].region_id);
+                                        $('#c-city').val(data.address[i].city);
+                                        $('#c-street').val(data.address[i].street);
+                                        $('#c-postcode').val(data.address[i].postcode);
+                                    }else{
+                                        address += '<option value="'+i+'">'+data.address[i].address_type+'</option>';
+                                    }
+
+                                }
+                                $('#address_select').html(address);
+                                //选择地址切换地址
+                                $('#address_select').change(function(){
+                                    var address_id = $(this).val();
+                                    var address = data.address[address_id];
+                                    $('#c-firstname').val(address.firstname);
+                                    $('#c-lastname').val(address.lastname);
+                                    $('#c-email').val(address.email);
+                                    $('#c-telephone').val(address.telephone);
+                                    $('#c-country').val(address.country_id);
+                                    $('#c-country').change();
+                                    $('#c-region').val(address.region_id);
+                                    $('#c-city').val(address.city);
+                                    $('#c-street').val(address.street);
+                                    $('#c-postcode').val(address.postcode);
+                                })
+
+                                //追加
+                                $('.btn-add-supplement-reissue').click(function(){
+                                    var contents = '<div>'+ lens.html+'<div class="form-group-child4_del"><a href="javascript:;" style="width: 50%;" class="btn btn-danger btn-del-lens" title="删除"><i class="fa fa-trash"></i>删除</a></div></div>';
+                                    $('#supplement-order').after(contents);
+                                    $('.selectpicker ').selectpicker('refresh');
+                                    Controller.api.bindevent();
+                                });
 
 
+                                $('.selectpicker ').selectpicker('refresh');
+                                Controller.api.bindevent();
+                            }
+                        });
+                        //获取
+                    }else{
+                        Toastr.error('请选选择订单号……');
+                    }
+                }
+            });
+            //省市二级联动
+            $(document).on('change','#c-country',function(){
+                var id = $(this).val();
+
+                $.ajax({
+                    type: "POST",
+                    url: "saleaftermanage/work_order_list/ajaxGetProvince",
+                    dataType: "json",
+                    cache: false,
+                    async: false,
+                    data: {
+                        country_id: id,
+                    },
+                    success: function (json) {
+                        var data = json.province;
+                        var province = '';
+                        for(var i = 0;i<data.length;i++){
+                            province += '<option value="'+data[i].region_id+'">'+data[i].default_name+'</option>';
+                        }
+                        $('#c-region').html(province);
+                        $('.selectpicker ').selectpicker('refresh');
+                    }
+                });
+            });
 
         },
         edit: function () {

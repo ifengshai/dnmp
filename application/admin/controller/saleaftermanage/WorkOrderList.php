@@ -84,12 +84,12 @@ class WorkOrderList extends Backend
         $warehouseArr = config('workorder.warehouse_department_rule');
         $checkIsWarehouse = array_intersect($userGroupAccess, $warehouseArr);
         if (!empty($checkIsWarehouse)) {
-            $this->view->assign('work_type',2);
-            $this->assignconfig('work_type',2);
+            $this->view->assign('work_type', 2);
+            $this->assignconfig('work_type', 2);
             $this->view->assign('problem_type', config('workorder.warehouse_problem_type')); //仓库问题类型       
         } else {
-            $this->view->assign('work_type',1);
-            $this->assignconfig('work_type',1);
+            $this->view->assign('work_type', 1);
+            $this->assignconfig('work_type', 1);
             $this->view->assign('problem_type', config('workorder.customer_problem_type')); //客服问题类型
         }
 
@@ -104,6 +104,10 @@ class WorkOrderList extends Backend
         $this->view->assign('check_coupon', config('workorder.check_coupon')); //不需要审核的优惠券
         $this->view->assign('need_check_coupon', config('workorder.need_check_coupon')); //需要审核的优惠券
 
+        //获取所有的国家
+        $country = json_decode(file_get_contents('assets/js/country.js'), true);
+        $this->view->assign('country', $country);
+
         return $this->view->fetch();
     }
 
@@ -117,13 +121,52 @@ class WorkOrderList extends Backend
      */
     public function get_sku_list()
     {
-        $sitetype = input('sitetype');
-        $order_number = input('order_number');
-        $skus = $this->model->getSkuList($sitetype, $order_number);
-        if ($skus) {
-            $this->success('操作成功！！', '', $skus);
-        } else {
-            $this->error('未获取到数据！！');
+        if (request()->isAjax()) {
+            $sitetype = input('sitetype');
+            $order_number = input('order_number');
+            $skus = $this->model->getSkuList($sitetype, $order_number);
+            if ($skus) {
+                $this->success('操作成功！！', '', $skus);
+            } else {
+                $this->error('未获取到数据！！');
+            }
         }
+        $this->error('404 not found');
+    }
+
+    /**
+     * 根据处方获取地址信息以及处方信息
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public function ajaxGetAddress()
+    {
+        if (request()->isAjax()) {
+            $incrementId = input('increment_id');
+            $siteType = input('site_type');
+            //获取地址、处方等信息
+            $res = $this->model->getAddress($siteType, $incrementId);
+            //请求接口获取lens_type，coating_type，prescription_type等信息
+            $lens = $this->model->getLens($siteType,$res['showPrescriptions']);
+            if ($res) {
+                $this->success('操作成功！！', '', ['address' => $res,'lens' => $lens]);
+            } else {
+                $this->error('未获取到数据！！');
+            }
+        }
+        $this->error('404 not found');
+    }
+
+    /**
+     * 根据country获取Province
+     * @return array
+     */
+    public function ajaxGetProvince()
+    {
+        $countryId = input('country_id');
+        $country = json_decode(file_get_contents('assets/js/country.js'), true);
+        $province = $country[$countryId];
+        return $province ?: [];
     }
 }
