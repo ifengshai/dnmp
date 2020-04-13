@@ -3303,7 +3303,7 @@ order by sfoi.item_id asc limit 1000";
 
 
     /**
-     * 统计SKU每天的销售数量 
+     * 统计150天无销量SKU 移入回收站
      * @todo 待定
      * @Description
      * @author wpl
