@@ -27,6 +27,7 @@ class WorkOrderList extends Backend
     {
         parent::_initialize();
         $this->model = new \app\admin\model\saleaftermanage\WorkOrderList;
+        $this->step = new \app\admin\model\saleaftermanage\WorkOrderMeasure;
     }
 
     /**
@@ -58,7 +59,50 @@ class WorkOrderList extends Backend
                         $this->model->validateFailException(true)->validate($validate);
                     }
 
+
+
+
                     $result = $this->model->allowField(true)->save($params);
+                    if (false === $result) {
+                        throw new Exception("添加失败！！");
+                    }
+
+                    //循环插入措施
+                    if ($params['measure_choose_id']) {
+                        //措施
+                        $measureList = [];
+                        foreach ($params['measure_choose_id'] as $k => $v) {
+                            $measureList[$k]['work_id'] = $this->model->id;
+                            $measureList[$k]['measure_choose_id'] = $v;
+                            $measureList[$k]['measure_content'] = config('workorder.step')[$v];
+                            $measureList[$k]['create_time'] = date('Y-m-d H:i:s');
+                        }
+                        $res = $this->step->saveAll($measureList);
+                        if (false === $res) {
+                            throw new Exception("添加失败！！");
+                        }
+                    }
+
+                    //循环插入承接人
+                    if ($params['order_recept']) {
+                        $recept_person_id = explode(',', trim($params['order_recept']['recept_person_id'], ','));
+                        $recept_person = explode(',', trim($params['order_recept']['recept_person'], ','));
+                        $recept_group_id = explode(',', trim($params['order_recept']['recept_group_id'], ','));
+                        //措施
+                        $receptList = [];
+                        foreach ($recept_person_id as $k => $v) {
+                            $receptList[$k]['work_id'] = $this->model->id;
+                            $receptList[$k]['measure_choose_id'] = $v;
+                            $receptList[$k]['measure_content'] = config('workorder.step')[$v];
+                            $receptList[$k]['create_time'] = date('Y-m-d H:i:s');
+                        }
+                        $res = $this->step->saveAll($measureList);
+                        if (false === $res) {
+                            throw new Exception("添加失败！！");
+                        }
+                    }
+
+
                     Db::commit();
                 } catch (ValidateException $e) {
                     Db::rollback();

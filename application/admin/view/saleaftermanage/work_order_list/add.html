@@ -413,12 +413,12 @@
             <div class="radio" style="width: 90%;float: left;">
                 {foreach $step as $k2 => $v2}
                 <label style="display: none;" >
-                    <input type="checkbox" name="row[measure_choose_id]" class="step_type" id="step{$k2}" value="{$k2}">
+                    <input type="checkbox" name="row[measure_choose_id][]" class="step_type" id="step{$k2}" value="{$k2}">
                     <span>{$v2}</span>
 
-                    <input type="hidden" name="row[is_check]"  id="step{$k2}-is_check" value="">
+                    <input type="hidden" id="step{$k2}-is_check" value="">
 
-                    <input type="hidden" name="row[appoint_group]"  id="step{$k2}-appoint_group" value="">
+                    <input type="hidden" id="step{$k2}-appoint_group" value="">
                 </label>
                 {/foreach}
             </div>
@@ -436,7 +436,7 @@
         </div>
     </div> -->
 
-    
+
     <div class="form-group" id='after_user_group' style="height: 50px;display: none;">
         <div class="form-group-content">
             <label class="control-label col-xs-12 col-sm-2" style="width:8%;float: left;">{:__('承接人')}：</label>
@@ -453,8 +453,9 @@
             <div class="appoint_group" style="width: 90%;float: left;">
                
                 <label class="control-label col-xs-12 col-sm-2" id="appoint_group_users" style="text-align: left;"></label>
-                <input type="hidden" name="row[recept_person_id]" id="recept_person_id"  value="">
-                <input type="hidden" name="row[recept_person]" id="recept_person"  value="">
+                <input type="hidden" name="row[order_recept][recept_person_id]" id="recept_person_id"  value="">
+                <input type="hidden" name="row[order_recept][recept_person]" id="recept_person"  value="">
+                <input type="hidden" name="row[order_recept][recept_group_id]" id="recept_group_id"  value="">
                
             </div>
         </div>

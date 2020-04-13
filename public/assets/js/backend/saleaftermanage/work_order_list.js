@@ -64,7 +64,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 $('#appoint_group_users').html('');//切换问题类型时清空承接人
                 $('#recept_person_id').val('');//切换问题类型时清空隐藏域承接人id
                 $('#recept_person').val('');//切换问题类型时清空隐藏域承接人
-                $('.measure').hide();                
+                $('.measure').hide();            
+                $('#recept_group_id').val('');    
                 if(2 == Config.work_type){ //如果是仓库人员添加的工单
                     $('#step_id').hide();
                     $('#recept_person_group').hide();
@@ -95,7 +96,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         }
                     }
                     var checkID = [];//定义一个空数组
-                    $("input[name='row[measure_choose_id]']:checked").each(function (i) {
+                    $("input[name='row[measure_choose_id][]']:checked").each(function (i) {
                         checkID[i] = $(this).val();
                     });
                     for (var m = 0; m < checkID.length; m++) {
@@ -122,7 +123,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 var problem_type_id = $("input[name='row[problem_type_id]']:checked").val();
                 var checkID = [];//定义一个空数组 
                 var appoint_group = '';
-                $("input[name='row[measure_choose_id]']:checked").each(function (i) {
+                $("input[name='row[measure_choose_id][]']:checked").each(function (i) {
                     checkID[i] = $(this).val();
                     var id = $(this).val();
                     //获取承接组
@@ -168,6 +169,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 $('#appoint_group_users').html(users.join(','));
                 $('#recept_person_id').val(appoint_users.join(','));
                 $('#recept_person').val(users.join(','));
+                $('#recept_group_id').val(arr.join(','));
             });
 
 
@@ -465,7 +467,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     }
                 }
                 var checkID = [];//定义一个空数组
-                $("input[name='row[measure_choose_id]']:checked").each(function (i) {
+                $("input[name='row[measure_choose_id][]']:checked").each(function (i) {
                     checkID[i] = $(this).val();
                 });
                 for (var m = 0; m < checkID.length; m++) {
