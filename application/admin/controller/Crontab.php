@@ -1453,6 +1453,8 @@ order by sfoi.item_id asc limit 1000";
         $where['b.status'] = 1;
         $supplier_list = $supplier->alias('a')->join(['fa_supplier' => 'b'], 'a.supplier_id=b.id')->column('b.supplier_name,b.purchase_person', 'a.sku');
 
+        //查询产品库正常SKU
+        $skus = $this->item->where(['is_open' => 1, 'is_del' => 1])->column('sku');
 
         //删除无用数组 释放内存
         unset($lists);
@@ -1471,6 +1473,9 @@ order by sfoi.item_id asc limit 1000";
         $F_num = 0;
         $list = [];
         foreach ($data as $k => $val) {
+            if (!in_array($val['true_sku'], $skus)) {
+                continue;
+            }
             $list[$k]['counter'] = $val['counter'] ?? 0;
             $list[$k]['days'] = $val['days'] == 0 ? 1 : $val['days'];
             $list[$k]['created_at'] = $val['created_at'];
