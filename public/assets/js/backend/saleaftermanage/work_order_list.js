@@ -65,8 +65,16 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 $('#recept_person').val('');//切换问题类型时清空隐藏域承接人
                 $('.measure').hide();
                 var id = $(this).val();
+                
+                //判断是客服创建还是仓库创建
+                if (Config.work_type == 1) {
+                    var temp_id = 5;
+                } else if (Config.work_type == 2) {
+                    var temp_id = 4;
+                }
+
                 //id大于5 默认措施4
-                if (id > 5) {
+                if (id > temp_id) {
                     var steparr = Config.workorder['step04'];
                     for (var j = 0; j < steparr.length; j++) {
                         $('#step' + steparr[j].step_id).parent().show();
@@ -75,7 +83,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         $('#step' + steparr[j].step_id + '-appoint_group').val((steparr[j].appoint_group).join(','));
                     }
                 } else {
-                    var step = Config.workorder.customer_problem_group[id].step;
+                    //判断是客服创建还是仓库创建
+                    if (Config.work_type == 1) {
+                        var step = Config.workorder.customer_problem_group[id].step;
+                    } else if (Config.work_type == 2) {
+                        var step = Config.workorder.warehouse_problem_group[id].step;
+                    }
+                    
                     var steparr = Config.workorder[step];
                     console.log(steparr);
                     for (var j = 0; j < steparr.length; j++) {
