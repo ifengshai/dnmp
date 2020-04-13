@@ -118,52 +118,62 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
 
             //根据措施类型显示隐藏
             $(document).on('click', '.step_type', function () {
-                // 士卫
-                $('.measure').hide();
-                var problem_type_id = $("input[name='row[problem_type_id]']:checked").val();
-                var checkID = [];//定义一个空数组 
-                var appoint_group = '';
-                $("input[name='row[measure_choose_id][]']:checked").each(function (i) {
-                    checkID[i] = $(this).val();
+                var incrementId = $('#c-platform_order').val();
+                if (!incrementId) {
+                    Toastr.error('订单号不能为空');
+                    return false;
+                }else{
+                    // 士卫
+                    $('.measure').hide();
+                    var problem_type_id = $("input[name='row[problem_type_id]']:checked").val();
+                    var checkID = [];//定义一个空数组
+                    var appoint_group = '';
+                    $("input[name='row[measure_choose_id][]']:checked").each(function (i) {
+                        checkID[i] = $(this).val();
+                        var id = $(this).val();
+                        //获取承接组
+                        appoint_group += $('#step' + id + '-appoint_group').val() + ',';
+                    });
+                    //一般措施
+                    for (var m = 0; m < checkID.length; m++) {
+                        var node = $('.step' + checkID[m]);
+                        if (node.is(':hidden')) {
+                            node.show();
+                        } else {
+                            node.hide();
+                        }
+                        //二级措施
+                        var secondNode = $('.step' + problem_type_id + '-' + checkID[m]);
+                        if (secondNode.is(':hidden')) {
+                            secondNode.show();
+                        } else {
+                            secondNode.hide();
+                        }
+                    }
+
                     var id = $(this).val();
-                    //获取承接组
-                    appoint_group += $('#step' + id + '-appoint_group').val() + ',';
-                });
-                //一般措施
-                for (var m = 0; m < checkID.length; m++) {
-                    var node = $('.step' + checkID[m]);
-                    if (node.is(':hidden')) {
-                        node.show();
-                    } else {
-                        node.hide();
+
+                    //获取是否需要审核
+                    if ($('#step' + id + '-is_check').val() > 0) {
+                        $('.check-div').show();
                     }
-                    //二级措施
-                    var secondNode = $('.step' + problem_type_id + '-' + checkID[m]);
-                    if (secondNode.is(':hidden')) {
-                        secondNode.show();
-                    } else {
-                        secondNode.hide();
-                    }
-                }
 
-                var id = $(this).val();
-
-                //获取是否需要审核
-                if ($('#step' + id + '-is_check').val() > 0) {
-                    $('.check-div').show();
-                }
-
-                var arr = array_filter(appoint_group.split(','));
-                var username = [];
-                var appoint_users = [];
-                //循环根据承接组Key获取对应承接人id
-                for (var i = 0; i < arr.length - 1; i++) {
+                    var arr = array_filter(appoint_group.split(','));
+                    var username = [];
+                    var appoint_users = [];
                     //循环根据承接组Key获取对应承接人id
-                    appoint_users.push(Config.workorder[arr[i]]);
-                    //循环根据承接人id获取对应人名称
-                    for (var j = 0; j < appoint_users.length; j++) {
-                        username.push(Config.users[appoint_users[j]]);
+                    for (var i = 0; i < arr.length - 1; i++) {
+                        //循环根据承接组Key获取对应承接人id
+                        appoint_users.push(Config.workorder[arr[i]]);
+                        //循环根据承接人id获取对应人名称
+                        for (var j = 0; j < appoint_users.length; j++) {
+                            username.push(Config.users[appoint_users[j]]);
+                        }
                     }
+                    var users = array_filter(username);
+                    $('#appoint_group_users').html(users.join(','));
+                    $('#recept_person_id').val(appoint_users.join(','));
+                    $('#recept_person').val(users.join(','));
                 }
                 var users = array_filter(username);
                 $('#appoint_group_users').html(users.join(','));
@@ -313,6 +323,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 });
             })
             //补发点击填充数据
+            var lens_click_data
             $(document).on('click','input[name="row[measure_' +
                 'choose_id]"]',function(){
                 var value = $(this).val();
@@ -339,7 +350,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     Toastr.error(json.msg);
                                     return false;
                                 }
-                                var data = json.data;
+                                var data = json.data.address;
+                                var lens = json.data.lens;
+                                var prescriptions = data.prescriptions;
+                                $('#supplement-order').html(lens.html);
                                 //修改地址
                                 var address = '';
                                 for(var i = 0;i<data.address.length;i++){
@@ -362,11 +376,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
 
                                 }
                                 $('#address_select').html(address);
-                                var prescription = '';
-                                for(var i = 0;i<data.showPrescriptions.length;i++){
-                                    prescription += '<option value="'+i+'">'+data.showPrescriptions[i]+'</option>';
-                                }
-                                $('#prescription_select').html(prescription);
                                 //选择地址切换地址
                                 $('#address_select').change(function(){
                                     var address_id = $(this).val();
@@ -383,7 +392,73 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     $('#c-postcode').val(address.postcode);
                                 })
 
+                                //追加
+                                lens_click_data = '<div class="margin-top:10px;">'+ lens.html+'<div class="form-group-child4_del"><a href="javascript:;" style="width: 50%;" class="btn btn-danger btn-del-lens" title="删除"><i class="fa fa-trash"></i>删除</a></div></div>';
+
+
+                                //处方选择填充
+                                $(document).on('change','#prescription_select',function(){
+                                    var val = $(this).val();
+                                    var prescription = prescriptions[val];
+                                    var prescription_div = $(this).parents('.step7_function2').next('.step1_function3');
+                                    prescription_div.find('input[name="row[replacement][od_sph][]"]').val(prescription.od_sph);
+                                    prescription_div.find('input[name="row[replacement][os_sph][]"]').val(prescription.os_sph);
+                                    prescription_div.find('input[name="row[replacement][os_cyl][]"]').val(prescription.os_cyl);
+                                    prescription_div.find('input[name="row[replacement][od_cyl][]"]').val(prescription.od_cyl);
+                                    prescription_div.find('input[name="row[replacement][od_axis][]"]').val(prescription.od_axis);
+                                    prescription_div.find('input[name="row[replacement][os_axis][]"]').val(prescription.os_axis);
+
+                                    //$(this).parents('.step7_function2').val('')
+                                    $(this).parents('.step7_function2').find('select[name="row[replacement][recipe_type][]"]').val(prescription.prescription_type);
+                                    prescription_div.find('select[name="row[replacement][coating_type][]"]').val(prescription.coating_id);
+                                    prescription_div.find('select[name="row[replacement][lens_type][]"]').val(prescription.index_id);
+
+                                    //add，pd添加
+                                    if(prescription.hasOwnProperty("total_add")){
+                                        prescription_div.find('input[name="row[replacement][od_add][]"]').val(prescription.total_add);
+                                        //prescription_div.find('input[name="row[replacement][os_add][]"]').attr('disabled',true);
+                                    }else{
+                                        prescription_div.find('input[name="row[replacement][od_add][]"]').val(prescription.od_add);
+                                        prescription_div.find('input[name="row[replacement][os_add][]"]').val(prescription.os_add);
+                                    }
+                                    if(prescription.hasOwnProperty("pd")){
+                                        prescription_div.find('input[name="row[replacement][pd_r][]"]').val(prescription.pd_r);
+                                        //prescription_div.find('input[name="row[replacement][pd_l][]"]').attr('disabled',true);
+                                    }else{
+                                        prescription_div.find('input[name="row[replacement][pd_r][]"]').val(prescription.pd_r);
+                                        prescription_div.find('input[name="row[replacement][pd_l][]"]').val(prescription.pd_l);
+                                    }
+                                    //
+                                    if(prescription.hasOwnProperty("od_pv")){
+                                        prescription_div.find('input[name="row[replacement][od_pv][]"]').val(prescription.od_pv);
+                                    }
+                                    if(prescription.hasOwnProperty("od_bd")){
+                                        prescription_div.find('input[name="row[replacement][od_bd][]"]').val(prescription.od_bd);
+                                    }
+                                    if(prescription.hasOwnProperty("od_pv_r")){
+                                        prescription_div.find('input[name="row[replacement][od_pv_r][]"]').val(prescription.od_pv_r);
+                                    }
+                                    if(prescription.hasOwnProperty("od_bd_r")){
+                                        prescription_div.find('input[name="row[replacement][od_bd_r][]"]').val(prescription.od_bd_r);
+                                    }
+                                    if(prescription.hasOwnProperty("os_pv")){
+                                        prescription_div.find('input[name="row[replacement][os_pv][]"]').val(prescription.os_pv);
+                                    }
+                                    if(prescription.hasOwnProperty("os_bd")){
+                                        prescription_div.find('input[name="row[replacement][os_bd][]"]').val(prescription.os_bd);
+                                    }
+                                    if(prescription.hasOwnProperty("os_pv_r")){
+                                        prescription_div.find('input[name="row[replacement][os_pv_r][]"]').val(prescription.os_pv_r);
+                                    }
+                                    if(prescription.hasOwnProperty("od_pv")){
+                                        prescription_div.find('input[name="row[replacement][os_bd_r][]"]').val(prescription.os_bd_r);
+                                    }
+                                    $('.selectpicker ').selectpicker('refresh');
+                                })
+
+
                                 $('.selectpicker ').selectpicker('refresh');
+                                Controller.api.bindevent();
                             }
                         });
                         //获取
@@ -392,6 +467,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     }
                 }
             });
+
+            $(document).on('click','.btn-add-supplement-reissue',function(){
+                $('#supplement-order').after(lens_click_data);
+                $('.selectpicker ').selectpicker('refresh');
+                Controller.api.bindevent();
+            });
+
             //省市二级联动
             $(document).on('change','#c-country',function(){
                 var id = $(this).val();

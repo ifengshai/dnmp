@@ -2,6 +2,7 @@
 
 namespace app\admin\model\saleaftermanage;
 
+use fast\Http;
 use think\Model;
 use Util\NihaoPrescriptionDetailHelper;
 use Util\VooguemePrescriptionDetailHelper;
@@ -113,5 +114,61 @@ class WorkOrderList extends Model
             $showPrescriptions[] = $prescription['prescription_type'] . '--' . $prescription['index_type'];
         }
         return $address ? compact('address','prescriptions','showPrescriptions') : [];
+    }
+    public function getLens($siteType, $showPrescriptions)
+    {
+        $url = '';
+        $key = $siteType . '_getlens';
+        $data = session($key);
+        if(!$data){
+            //处方信息
+            switch ($siteType) {
+                case 1:
+                    $url = 'https://www.zeelool.com/';
+                    break;
+                case 2:
+                    $url = 'https://pc.voogueme.com/';
+                    break;
+                case 3:
+                    $url = 'https://www.nihaooptical.com/';
+                    break;
+                case 5:
+                    $url = 'https://www.eseeoptical.com/';
+                    break;
+                default:
+                    return false;
+                    break;
+            }
+            $url = $url . 'api/mojing/getLens';
+            //$res = Http::post($url, []);
+            //模拟数据
+            $res['data'] = [
+                'skus' => [],
+                'prescription_type' => ['SingleVision','NonPrescription'],
+                'lens_type' => ['refractive_5','refractive_2','refractive_3'],
+                'coating_type' => ['coating_2','coating_1','coating_3']
+            ];
+            $data = $res['data'];
+            session($key, $data, 3600*24);
+        }
+        $original_sku = $prescription_type = $prescriptions = $lens_type = $coating_type = '';
+        foreach($data['skus'] as $key => $val){
+            $original_sku .= "<option value='{$val}'>{$val}</option>";
+        }
+        foreach($data['prescription_type'] as $key => $val){
+            $prescription_type .= "<option value='{$val}'>{$val}</option>";
+        }
+        foreach($data['lens_type'] as $key => $val){
+            $lens_type .= "<option value='{$val}'>{$val}</option>";
+        }
+        foreach($data['coating_type'] as $key => $val){
+            $coating_type .= "<option value='{$val}'>{$val}</option>";
+        }
+        foreach($showPrescriptions as $key => $val){
+            $prescriptions .= "<option value='{$key}'>{$val}</option>";
+        }
+        //拼接html页面
+        $html = (new \think\View())->fetch('saleaftermanage/work_order_list/ajax_reissue_add',compact('original_sku','prescription_type','lens_type','coating_type','prescriptions'));
+        return ['data' => $data,'html' => $html];
     }
 }
