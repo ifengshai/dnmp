@@ -204,6 +204,24 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 $(this).parent().parent().remove();
             });
 
+            //赠品
+            $(document).on('click', '.btn-add-box', function () {
+                var option = $('#add_box_option').html();
+                var str = '<label class="control-label col-xs-12 col-sm-2">SKU：</label>\n' +
+                    '                <div class="col-xs-12 col-sm-8">\n' +
+                    '                    <div class="dropup">\n' +
+                    '                        <select id="add_box_select" class="selectpicker" name="row[change_sku][]" data-live-search="true" title="请选择">\n' + option +
+                    '                        </select>\n' +
+                    '                    </div>\n' +
+                    '                </div>\n' +
+                    '                <label class="control-label col-xs-12 col-sm-2">数量：</label>\n' +
+                    '                <div class="col-xs-12 col-sm-8">\n' +
+                    '                    <input id="c-change_number" data-rule="required" class="form-control" name="row[change_number]" type="text" value="">\n' +
+                    '                </div>';
+                $('#add_box').append(str);
+                Controller.api.bindevent();
+            });
+
             //补发 start
             $(document).on('click', '.btn-add-supplement', function () {
                 var contents = $('#replenish_order').html();

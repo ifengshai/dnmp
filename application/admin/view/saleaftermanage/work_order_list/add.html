@@ -41,8 +41,30 @@
         width: 45%;
     }
 
-    .form-group-child3 div {
+    .form-group-child3 .col-sm-8 {
         width: 54%;
+    }
+
+    .form-group-child5 {
+        /* display: none; */
+        float: left;
+        width: 100%;
+        margin-top: 10px;
+        margin-left: 1%;
+    }
+
+    .form-group-child5 .dropdown-menu{
+        width: 130%;
+    }
+    .form-group-child5 label {
+        width: 8%;
+    }
+
+    .form-group-child5 .col-sm-8 {
+        width: 15%;
+    }
+    .form-group-child5 .toolbar {
+        margin-left: 1%;
     }
 
     .form-group-child4 {
@@ -450,20 +472,35 @@
                     value="">
             </div>
         </div>
-        <div class="form-group-child3 measure step6" style="display:none;">
-            <label class="control-label col-xs-12 col-sm-2">{:__('SKU')}：</label>
-            <div class="col-xs-12 col-sm-8">
-                <input id="c-change_sku" data-rule="required" class="form-control" name="row[change_sku]" type="text"
-                    value="">
+        <div class="form-group-child5 measure step6" style="*display:none;">
+            <p style="font-size: 16px;margin-left: 1%;"><b>赠品</b></p>
+            <div class="toolbar">
+                <a href="javascript:;" class="btn btn-success btn-add-box" title="增加"><i class="fa fa-plus"></i>
+                    增加</a>
+            </div>
+            <div id="add_box_option" style="display: none;">
+                <option data-subtext="<span>$4.95</span>&nbsp;&nbsp;&nbsp;<img src='https://cdn.zeelool.com/media/catalog/product//2/_/2_62_1.jpg' width='50%'>" value="1">FP0068-01</option>
+                <option data-subtext="<span>$4.95</span>&nbsp;&nbsp;&nbsp;<img src='https://cdn.zeelool.com/media/catalog/product//2/_/2_62_1.jpg' width='50%'>" value="2">FP0068-02</option>
+                <option data-subtext="<span>$4.95</span>&nbsp;&nbsp;&nbsp;<img src='https://cdn.zeelool.com/media/catalog/product//2/_/2_62_1.jpg' width='50%'>" value="3">FP0068-03</option>
+            </div>
+            <div id="add_box">
+                <label class="control-label col-xs-12 col-sm-2">{:__('SKU')}：</label>
+                <div class="col-xs-12 col-sm-8">
+                    <div class="dropup">
+                        <select id="add_box_select" class="selectpicker" name="row[change_sku][]" data-live-search="true" title="请选择">
+
+                        </select>
+                    </div>
+                </div>
+
+                <label class="control-label col-xs-12 col-sm-2">{:__('数量')}：</label>
+                <div class="col-xs-12 col-sm-8">
+                    <input id="c-change_number" data-rule="required" class="form-control" name="row[change_number]"
+                           type="text" value="">
+                </div>
             </div>
         </div>
-        <div class="form-group-child3 measure step6" style="display:none;">
-            <label class="control-label col-xs-12 col-sm-2">{:__('数量')}：</label>
-            <div class="col-xs-12 col-sm-8">
-                <input id="c-change_number" data-rule="required" class="form-control" name="row[change_number]"
-                    type="text" value="">
-            </div>
-        </div>
+
         <div class="form-group-child3 measure step8" style="display:none;">
             <label class="control-label col-xs-12 col-sm-2">{:__('补差价订单号')}：</label>
             <div class="col-xs-12 col-sm-8">
@@ -519,7 +556,7 @@
 
         <!--更换镜框 start-->
         
-        <div class="form-group-child4 measure step1-1" style="display:none;" >
+        <div class="form-group-child4 measure step1-1" style="*display:none;" >
             <div class="caigou frame-info item_info">
                 <p style="font-size: 16px;"><b>更换镜框</b></p>
                 <div>
