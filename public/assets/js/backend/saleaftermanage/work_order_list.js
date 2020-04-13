@@ -285,7 +285,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
 
             })
 
-            //根据
+            //根据订单号获取数据
             $('#platform_order').click(function () {
                 var incrementId = $('#c-platform_order').val();
                 var sitetype = $('#work_platform').val();
