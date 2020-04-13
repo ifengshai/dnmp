@@ -318,6 +318,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 });
             })
             //补发点击填充数据
+            var lens_click_data
             $(document).on('click','input[name="row[measure_' +
                 'choose_id]"]',function(){
                 var value = $(this).val();
@@ -387,12 +388,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                 })
 
                                 //追加
-                                $('.btn-add-supplement-reissue').click(function(){
-                                    var contents = '<div class="margin-top:10px;">'+ lens.html+'<div class="form-group-child4_del"><a href="javascript:;" style="width: 50%;" class="btn btn-danger btn-del-lens" title="删除"><i class="fa fa-trash"></i>删除</a></div></div>';
-                                    $('#supplement-order').after(contents);
-                                    $('.selectpicker ').selectpicker('refresh');
-                                    Controller.api.bindevent();
-                                });
+                                lens_click_data = '<div class="margin-top:10px;">'+ lens.html+'<div class="form-group-child4_del"><a href="javascript:;" style="width: 50%;" class="btn btn-danger btn-del-lens" title="删除"><i class="fa fa-trash"></i>删除</a></div></div>';
+
+
                                 //处方选择填充
                                 $(document).on('change','#prescription_select',function(){
                                     var val = $(this).val();
@@ -464,6 +462,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     }
                 }
             });
+
+            $(document).on('click','.btn-add-supplement-reissue',function(){
+                $('#supplement-order').after(lens_click_data);
+                $('.selectpicker ').selectpicker('refresh');
+                Controller.api.bindevent();
+            });
+
             //省市二级联动
             $(document).on('change','#c-country',function(){
                 var id = $(this).val();

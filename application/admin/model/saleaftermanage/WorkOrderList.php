@@ -151,7 +151,7 @@ class WorkOrderList extends Model
             $data = $res['data'];
             session($key, $data, 3600*24);
         }
-        $original_sku = $prescription_type = $prescriptions = $lens_type = $coating_type = '<option value="">请选择</option>';
+        $original_sku = $prescription_type = $prescriptions = $lens_type = $coating_type = '';
         foreach($data['skus'] as $key => $val){
             $original_sku .= "<option value='{$val}'>{$val}</option>";
         }
@@ -168,144 +168,7 @@ class WorkOrderList extends Model
             $prescriptions .= "<option value='{$key}'>{$val}</option>";
         }
         //拼接html页面
-        $html = <<<Crasp
-            <div>
-                        <div class="step7_function2" style="margin-top:10px;">
-                            <div class="step7_function2_child">
-                                <label class="control-label col-xs-12 col-sm-3">SKU:</label>
-                                <div class="col-xs-12 col-sm-8">
-                                    <select class="form-control selectpicker" name="row[replacement][original_sku][]">
-                                        {$original_sku}
-                                    </select>
-                                </div>
-                            </div>
-    
-                            <div class="step7_function2_child">
-                                <label class="control-label col-xs-12 col-sm-3">Name:</label>
-                                <div class="col-xs-12 col-sm-8">
-                                    <input class="form-control" name="row[replacement][original_name][]" type="text" value="">
-                                </div>
-                            </div>
-                            <div class="step7_function2_child">
-                                <label class="control-label col-xs-12 col-sm-3">QTY:</label>
-                                <div class="col-xs-12 col-sm-8">
-                                    <input class="form-control" name="row[replacement][original_number][]" type="text" value="">
-                                </div>
-                            </div>
-                            <div class="step7_function2_child">
-                                <label class="control-label col-xs-12 col-sm-3">选择已有处方:</label>
-                                <div class="col-xs-12 col-sm-8">
-                                    <select id="prescription_select" class="form-control selectpicker">
-                                        {$prescriptions}
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="step7_function2_child">
-                                <label class="control-label col-xs-12 col-sm-3">prescription_type:</label>
-                                <div class="col-xs-12 col-sm-8">
-                                    <select class="form-control selectpicker" name="row[replacement][recipe_type][]">
-                                        {$prescription_type}
-                                    </select>
-                                </div>
-                            </div>
-    
-                        </div>
-    
-                        <div class="step1_function3"  style="margin-top:10px;">
-                            <div class="panel-body">
-                                <div class="step1_function3_child">
-                                    <label class="control-label col-xs-12 col-sm-3">lens_type:</label>
-                                    <div class="col-xs-12 col-sm-8">
-                                        <select class="form-control selectpicker" name="row[replacement][lens_type][]">
-                                            {$lens_type}
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="step1_function3_child">
-                                    <label class="control-label col-xs-12 col-sm-3">coating_type:</label>
-                                    <div class="col-xs-12 col-sm-8">
-                                        <select id="c-coating_type" class="form-control selectpicker"
-                                            name="row[replacement][coating_type][]">
-                                            {$coating_type}
-                                        </select>
-                                    </div>
-                                </div>
-                                <table>
-                                    <tbody>
-                                        <tr>
-                                            <td style="text-align: center">value</td>
-                                            <td style="text-align: center">SPH</td>
-                                            <td style="text-align: center">CYL</td>
-                                            <td style="text-align: center">AXI</td>
-                                            <td style="text-align: center">ADD</td>
-                                            <td style="text-align: center">PD</td>
-                                        </tr>
-                                        <tr>
-                                            <td style="text-align: center">Right(OD)</td>
-                                            <td><input class="form-control" name="row[replacement][od_sph][]" type="text" value="">
-                                            </td>
-                                            <td><input class="form-control" name="row[replacement][od_cyl][]" type="text" value="">
-                                            </td>
-                                            <td><input class="form-control" name="row[replacement][od_axis][]" type="text"
-                                                    value=""></td>
-                                            <td><input class="form-control" name="row[replacement][od_add][]" type="text" value="">
-                                            </td>
-                                            <td><input class="form-control" name="row[replacement][pd_r][]" type="text" value="">
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td style="text-align: center">Left(OS)</td>
-                                            <td><input class="form-control" name="row[replacement][os_sph][]" type="text" value="">
-                                            </td>
-                                            <td><input class="form-control" name="row[replacement][os_cyl][]" type="text" value="">
-                                            </td>
-                                            <td><input class="form-control" name="row[replacement][os_axis][]" type="text"
-                                                    value=""></td>
-                                            <td><input class="form-control" name="row[replacement][os_add][]" type="text" value="">
-                                            </td>
-                                            <td><input class="form-control" name="row[replacement][pd_l][]" type="text" value="">
-                                            </td>
-                                        </tr>
-    
-                                        <tr>
-                                            <td style="text-align: center"></td>
-                                            <td style="text-align: center">Prism Horizontal</td>
-                                            <td style="text-align: center">Base Direction</td>
-                                            <td style="text-align: center">Prism Vertical</td>
-                                            <td style="text-align: center">Base Direction</td>
-                                        </tr>
-                                        <tr>
-                                            <td style="text-align: center">Right(OD)</td>
-                                            <td><input class="form-control" type="text" name="row[replacement][od_pv][]" value="">
-                                            </td>
-                                            <td><input class="form-control" type="text" name="row[replacement][od_bd][]" value="">
-                                            </td>
-                                            <td><input class="form-control" type="text" name="row[replacement][od_pv_r][]"
-                                                    value=""></td>
-                                            <td><input class="form-control" type="text" name="row[replacement][od_bd_r][]"
-                                                    value=""></td>
-                                        </tr>
-                                        <tr>
-                                            <td style="text-align: center">Left(OS)</td>
-                                            <td><input class="form-control" name="row[replacement][os_pv][]" type="text" value="">
-                                            </td>
-                                            <td><input class="form-control" name="row[replacement][os_bd][]" type="text" value="">
-                                            </td>
-                                            <td><input class="form-control" name="row[replacement][os_pv_r][]" type="text"
-                                                    value=""></td>
-                                            <td><input class="form-control" name="row[replacement][os_bd_r][]" type="text"
-                                                    value=""></td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-    
-                        <div class="form-group-child4_del">
-                            <!--<a href="javascript:;" style="width: 50%;" class="btn btn-danger btn-del-supplement" title="删除"><i class="fa fa-trash"></i>删除</a>-->
-                        </div>
-                    </div>
-Crasp;
+        $html = (new \think\View())->fetch('saleaftermanage/work_order_list/ajax_reissue_add',compact('original_sku','prescription_type','lens_type','coating_type','prescriptions'));
         return ['data' => $data,'html' => $html];
     }
 }
