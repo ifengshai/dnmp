@@ -255,7 +255,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 }
                 $('.selectpicker ').selectpicker('refresh');
 
-
             })
 
             //根据
@@ -276,10 +275,112 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     }
                     $('#c-order_sku').append(shtml);
                     $('.selectpicker ').selectpicker('refresh');
-                })
+                });
             })
+            //补发点击填充数据
+            $(document).on('click','input[name="row[measure_' +
+                'choose_id]"]',function(){
+                var value = $(this).val();
+                var check = $(this).prop('checked');
+                //补发
+                if(value == 7 && check === true){
+                    var increment_id = $('#c-platform_order').val();
+                    if(increment_id){
 
+                        var site_type = $('#work_platform').val();
+                        //获取补发的信息
+                        $.ajax({
+                            type: "POST",
+                            url: "saleaftermanage/work_order_list/ajaxGetAddress",
+                            dataType: "json",
+                            cache: false,
+                            async: false,
+                            data: {
+                                increment_id: increment_id,
+                                site_type: site_type,
+                            },
+                            success: function (json) {
+                                if(json.code == 0){
+                                    Toastr.error(json.msg);
+                                    return false;
+                                }
+                                var data = json.data;
+                                //修改地址
+                                var address = '';
+                                for(var i = 0;i<data.address.length;i++){
+                                    if(i == 0){
+                                        address += '<option value="'+i+'" selected>'+data.address[i].address_type+'</option>';
+                                        //补发地址自动填充第一个
+                                        $('#c-firstname').val(data.address[i].firstname);
+                                        $('#c-lastname').val(data.address[i].lastname);
+                                        $('#c-email').val(data.address[i].email);
+                                        $('#c-telephone').val(data.address[i].telephone);
+                                        $('#c-country').val(data.address[i].country_id);
+                                        $('#c-country').change();
+                                        $('#c-region').val(data.address[i].region_id);
+                                        $('#c-city').val(data.address[i].city);
+                                        $('#c-street').val(data.address[i].street);
+                                        $('#c-postcode').val(data.address[i].postcode);
+                                    }else{
+                                        address += '<option value="'+i+'">'+data.address[i].address_type+'</option>';
+                                    }
 
+                                }
+                                $('#address_select').html(address);
+                                var prescription = '';
+                                for(var i = 0;i<data.showPrescriptions.length;i++){
+                                    prescription += '<option value="'+i+'">'+data.showPrescriptions[i]+'</option>';
+                                }
+                                $('#prescription_select').html(prescription);
+                                //选择地址切换地址
+                                $('#address_select').change(function(){
+                                    var address_id = $(this).val();
+                                    var address = data.address[address_id];
+                                    $('#c-firstname').val(address.firstname);
+                                    $('#c-lastname').val(address.lastname);
+                                    $('#c-email').val(address.email);
+                                    $('#c-telephone').val(address.telephone);
+                                    $('#c-country').val(address.country_id);
+                                    $('#c-country').change();
+                                    $('#c-region').val(address.region_id);
+                                    $('#c-city').val(address.city);
+                                    $('#c-street').val(address.street);
+                                    $('#c-postcode').val(address.postcode);
+                                })
+
+                                $('.selectpicker ').selectpicker('refresh');
+                            }
+                        });
+                        //获取
+                    }else{
+                        Toastr.error('请选选择订单号……');
+                    }
+                }
+            });
+            //省市二级联动
+            $(document).on('change','#c-country',function(){
+                var id = $(this).val();
+
+                $.ajax({
+                    type: "POST",
+                    url: "saleaftermanage/work_order_list/ajaxGetProvince",
+                    dataType: "json",
+                    cache: false,
+                    async: false,
+                    data: {
+                        country_id: id,
+                    },
+                    success: function (json) {
+                        var data = json.province;
+                        var province = '';
+                        for(var i = 0;i<data.length;i++){
+                            province += '<option value="'+data[i].region_id+'">'+data[i].default_name+'</option>';
+                        }
+                        $('#c-region').html(province);
+                        $('.selectpicker ').selectpicker('refresh');
+                    }
+                });
+            });
 
         },
         edit: function () {

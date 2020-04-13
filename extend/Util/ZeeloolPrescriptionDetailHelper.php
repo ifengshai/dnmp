@@ -146,7 +146,10 @@ class ZeeloolPrescriptionDetailHelper{
 			$items[$item_key]['total'] = $final_params['total'] = $product_options['info_buyRequest']['tmplens']['total'];
 			$items[$item_key]['total_old'] = $final_params['total_old'] = $product_options['info_buyRequest']['tmplens']['total_old'];
 			$items[$item_key]['options']  = $product_options['options'];
-			$items[$item_key]['cart_currency'] = $product_options['info_buyRequest']['cart_currency'];  
+			$items[$item_key]['cart_currency'] = $product_options['info_buyRequest']['cart_currency'];
+            $items[$item_key]['index_type'] = $final_params['index_type'] = $product_options['info_buyRequest']['tmplens']['index_type'];
+            $items[$item_key]['coating_id'] = $final_params['coating_id'] = $product_options['info_buyRequest']['tmplens']['coating_id'];
+            $items[$item_key]['coatiing_name'] = $final_params['coatiing_name'] = $product_options['info_buyRequest']['tmplens']['coatiing_name'];
 
 			$prescription_params = $product_options['info_buyRequest']['tmplens']['prescription'];
             // dump($prescription_params);

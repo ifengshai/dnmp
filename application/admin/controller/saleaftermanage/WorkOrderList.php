@@ -100,6 +100,11 @@ class WorkOrderList extends Backend
 
         $this->view->assign('check_coupon', config('workorder.check_coupon')); //不需要审核的优惠券
         $this->view->assign('need_check_coupon', config('workorder.need_check_coupon')); //需要审核的优惠券
+
+        //获取所有的国家
+        $country = json_decode(file_get_contents('assets/js/country.js'),true);
+        $this->view->assign('country', $country);
+
         return $this->view->fetch();
     }
 
@@ -121,5 +126,38 @@ class WorkOrderList extends Backend
         } else {
             $this->error('未获取到数据！！');
         }
+    }
+
+    /**
+     * 根据处方获取地址信息以及处方信息
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public function ajaxGetAddress()
+    {
+        if(request()->isAjax()) {
+            $incrementId = input('increment_id');
+            $siteType = input('site_type');
+            $res = $this->model->getAddress($siteType, $incrementId);
+            if ($res) {
+                $this->success('操作成功！！', '', $res);
+            } else {
+                $this->error('未获取到数据！！');
+            }
+        }
+        $this->error('404 not found');
+    }
+
+    /**
+     * 根据country获取Province
+     * @return array
+     */
+    public function ajaxGetProvince()
+    {
+        $countryId = input('country_id');
+        $country = json_decode(file_get_contents('assets/js/country.js'),true);
+        $province = $country[$countryId];
+        return $province ?: [];
     }
 }
