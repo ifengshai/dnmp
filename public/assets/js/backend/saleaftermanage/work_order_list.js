@@ -192,7 +192,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
 
             //补发 start
             $(document).on('click', '.btn-add-supplement', function () {
-                var contents = $('#edit_lens').html();
+                var contents = $('#replenish_order').html();
                 $('#supplement-order').after(contents);
                 Controller.api.bindevent();
             });
