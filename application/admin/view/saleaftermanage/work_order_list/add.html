@@ -499,7 +499,7 @@
                     <label style="margin-top: 10px;" class="control-label col-xs-12 col-sm-2">{:__('SKU')}：</label>
                     <div style="margin-top: 10px;" class="col-xs-12 col-sm-8">
                         <div class="dropup">
-                            <select id="add_box_select" class="selectpicker" name="row[change_sku][]" data-live-search="true" title="请选择">
+                            <select class="selectpicker" name="row[order_change][change_sku][]" data-live-search="true" title="请选择">
 
                             </select>
                         </div>
@@ -507,8 +507,7 @@
 
                     <label style="margin-top: 10px;" class="control-label col-xs-12 col-sm-2">{:__('数量')}：</label>
                     <div style="margin-top: 10px;" class="col-xs-12 col-sm-8">
-                        <input class="form-control" name="row[change_number]"
-                               type="text" value="">
+                        <input class="form-control" name="row[order_change][change_number][]" type="text" value="">
                         <!--<a href="javascript:;" class="btn btn-danger btn-del-supplement" title="删除"><i class="fa fa-trash"></i>删除</a>-->
                     </div>
                 </div>
@@ -518,8 +517,7 @@
         <div class="form-group-child3 measure step8" style="display:none;">
             <label class="control-label col-xs-12 col-sm-2">{:__('补差价订单号')}：</label>
             <div class="col-xs-12 col-sm-8">
-                <input id="c-replenish_increment_id"  class="form-control"
-                    name="row[replenish_increment_id]" type="text" value="">
+                <input id="c-replenish_increment_id"  class="form-control" name="row[replenish_increment_id]" type="text" value="">
             </div>
         </div>
         <div class="form-group-child3 measure step8" style="display:none;">
@@ -532,7 +530,7 @@
         <div class="form-group-child3 measure step9" style="display:none;">
             <label class="control-label col-xs-12 col-sm-2">{:__('不需要审核的优惠券')}：</label>
             <div class="col-xs-12 col-sm-8">
-                <select id="c-check_coupon" class="form-control selectpicker" name="row[check_coupon]">
+                <select id="c-check_coupon" class="form-control selectpicker" name="row[coupon_id]">
                     <option value="0">请选择</option>
                     {foreach $check_coupon as $k3 => $v3}
                     <option value="{$v3.id}">{$v3.desc}</option>
@@ -543,7 +541,7 @@
         <div class="form-group-child3 measure step9" style="display:none;">
             <label class="control-label col-xs-12 col-sm-2">{:__('需要审核的优惠券')}：</label>
             <div class="col-xs-12 col-sm-8">
-                <select id="c-need_check_coupon" class="form-control selectpicker" name="row[need_check_coupon]">
+                <select id="c-need_check_coupon" class="form-control selectpicker" name="row[need_coupon_id]">
                     <option value="0">请选择</option>
                     {foreach $need_check_coupon as $k3 => $v3}
                     <option value="{$v3.id}">{$v3.desc}</option>
@@ -554,15 +552,14 @@
         <div class="form-group-child3 measure step10" style="display:none;">
             <label class="control-label col-xs-12 col-sm-2">{:__('积分')}：</label>
             <div class="col-xs-12 col-sm-8">
-                <input id="c-integral"  class="form-control" name="row[integral]" type="text"
+                <input class="form-control" name="row[integral]" type="text"
                     value="">
             </div>
         </div>
         <div class="form-group-child3 measure step11" style="display:none;">
             <label class="control-label col-xs-12 col-sm-2">{:__('退回物流单号')}：</label>
             <div class="col-xs-12 col-sm-8">
-                <input id="c-refund_logistics_num"  class="form-control"
-                    name="row[refund_logistics_num]" type="text" value="">
+                <input  class="form-control" name="row[refund_logistics_num]" type="text" value="">
             </div>
         </div>
         <!--小操作 end-->
@@ -587,13 +584,13 @@
                             <th>操作</th>
                         </tr>
                         <tr>
-                            <td><input class="form-control" name="row[item][original_sku][]" type="text" value="">
+                            <td><input class="form-control" name="row[change_frame][original_sku][]" type="text" value="">
                             </td>
-                            <td><input class="form-control" name="row[item][original_number][]" type="text"
+                            <td><input class="form-control" name="row[change_frame][original_number][]" type="text"
                                     value=""></td>
-                            <td><input class="form-control change_sku" name="row[item][change_sku][]" type="text">
+                            <td><input class="form-control change_sku" name="row[change_frame][change_sku][]" type="text">
                             </td>
-                            <td><input class="form-control change_number" name="row[item][change_number][]"
+                            <td><input class="form-control change_number" name="row[change_frame][change_number][]"
                                     type="text"></td>
                             <td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i
                                         class="fa fa-trash"></i>删除</a></td>
@@ -620,7 +617,7 @@
                             <div class="step1_function2_child">
                                 <label class="control-label col-xs-12 col-sm-3">SKU:</label>
                                 <div class="col-xs-12 col-sm-8">
-                                    <select class="form-control selectpicker" name="row[lens][original_sku][]">
+                                    <select class="form-control selectpicker" name="row[change_lens][original_sku][]">
                                         <option value="0">请选择</option>
                                     </select>
                                 </div>
@@ -629,20 +626,20 @@
                             <div class="step1_function2_child">
                                 <label class="control-label col-xs-12 col-sm-3">Name:</label>
                                 <div class="col-xs-12 col-sm-8">
-                                    <input class="form-control" name="row[lens][original_name][]" type="text" value="">
+                                    <input class="form-control" name="row[change_lens][original_name][]" type="text" value="">
                                 </div>
                             </div>
                             <div class="step1_function2_child">
                                 <label class="control-label col-xs-12 col-sm-3">QTY:</label>
                                 <div class="col-xs-12 col-sm-8">
-                                    <input class="form-control" name="row[lens][original_number][]" type="text" value="">
+                                    <input class="form-control" name="row[change_lens][original_number][]" type="text" value="">
                                 </div>
                             </div>
     
                             <div class="step1_function2_child">
                                 <label class="control-label col-xs-12 col-sm-3">prescription_type:</label>
                                 <div class="col-xs-12 col-sm-8">
-                                    <select class="form-control selectpicker" name="row[lens][recipe_type][]">
+                                    <select class="form-control selectpicker" name="row[change_lens][recipe_type][]">
                                         <option value="0">请选择</option>
                                     </select>
                                 </div>
@@ -655,7 +652,7 @@
                                 <div class="step7_function3_child">
                                     <label class="control-label col-xs-12 col-sm-3">lens_type:</label>
                                     <div class="col-xs-12 col-sm-8">
-                                        <select class="form-control selectpicker" name="row[lens][lens_type][]">
+                                        <select class="form-control selectpicker" name="row[change_lens][lens_type][]">
                                             <option value="0">请选择</option>
                                         </select>
                                     </div>
@@ -664,7 +661,7 @@
                                     <label class="control-label col-xs-12 col-sm-3">coating_type:</label>
                                     <div class="col-xs-12 col-sm-8">
                                         <select id="c-coating_type" class="form-control selectpicker"
-                                            name="row[lens][coating_type][]">
+                                            name="row[change_lens][coating_type][]">
                                             <option value="0">请选择</option>
                                         </select>
                                     </div>
@@ -681,28 +678,28 @@
                                         </tr>
                                         <tr>
                                             <td style="text-align: center">Right(OD)</td>
-                                            <td><input class="form-control" name="row[lens][od_sph][]" type="text" value="">
+                                            <td><input class="form-control" name="row[change_lens][od_sph][]" type="text" value="">
                                             </td>
-                                            <td><input class="form-control" name="row[lens][od_cyl][]" type="text" value="">
+                                            <td><input class="form-control" name="row[change_lens][od_cyl][]" type="text" value="">
                                             </td>
-                                            <td><input class="form-control" name="row[lens][od_axis][]" type="text"
+                                            <td><input class="form-control" name="row[change_lens][od_axis][]" type="text"
                                                     value=""></td>
-                                            <td><input class="form-control" name="row[lens][od_add][]" type="text" value="">
+                                            <td><input class="form-control" name="row[change_lens][od_add][]" type="text" value="">
                                             </td>
-                                            <td><input class="form-control" name="row[lens][pd_r][]" type="text" value="">
+                                            <td><input class="form-control" name="row[change_lens][pd_r][]" type="text" value="">
                                             </td>
                                         </tr>
                                         <tr>
                                             <td style="text-align: center">Left(OS)</td>
-                                            <td><input class="form-control" name="row[lens][os_sph][]" type="text" value="">
+                                            <td><input class="form-control" name="row[change_lens][os_sph][]" type="text" value="">
                                             </td>
-                                            <td><input class="form-control" name="row[lens][os_cyl][]" type="text" value="">
+                                            <td><input class="form-control" name="row[change_lens][os_cyl][]" type="text" value="">
                                             </td>
-                                            <td><input class="form-control" name="row[lens][os_axis][]" type="text"
+                                            <td><input class="form-control" name="row[change_lens][os_axis][]" type="text"
                                                     value=""></td>
-                                            <td><input class="form-control" name="row[lens][os_add][]" type="text" value="">
+                                            <td><input class="form-control" name="row[change_lens][os_add][]" type="text" value="">
                                             </td>
-                                            <td><input class="form-control" name="row[lens][pd_l][]" type="text" value="">
+                                            <td><input class="form-control" name="row[change_lens][pd_l][]" type="text" value="">
                                             </td>
                                         </tr>
     
@@ -715,24 +712,24 @@
                                         </tr>
                                         <tr>
                                             <td style="text-align: center">Right(OD)</td>
-                                            <td><input class="form-control" type="text" name="row[lens][od_pv][]" value="">
+                                            <td><input class="form-control" type="text" name="row[change_lens][od_pv][]" value="">
                                             </td>
-                                            <td><input class="form-control" type="text" name="row[lens][od_bd][]" value="">
+                                            <td><input class="form-control" type="text" name="row[change_lens][od_bd][]" value="">
                                             </td>
-                                            <td><input class="form-control" type="text" name="row[lens][od_pv_r][]"
+                                            <td><input class="form-control" type="text" name="row[change_lens][od_pv_r][]"
                                                     value=""></td>
-                                            <td><input class="form-control" type="text" name="row[lens][od_bd_r][]"
+                                            <td><input class="form-control" type="text" name="row[change_lens][od_bd_r][]"
                                                     value=""></td>
                                         </tr>
                                         <tr>
                                             <td style="text-align: center">Left(OS)</td>
-                                            <td><input class="form-control" name="row[lens][os_pv][]" type="text" value="">
+                                            <td><input class="form-control" name="row[change_lens][os_pv][]" type="text" value="">
                                             </td>
-                                            <td><input class="form-control" name="row[lens][os_bd][]" type="text" value="">
+                                            <td><input class="form-control" name="row[change_lens][os_bd][]" type="text" value="">
                                             </td>
-                                            <td><input class="form-control" name="row[lens][os_pv_r][]" type="text"
+                                            <td><input class="form-control" name="row[change_lens][os_pv_r][]" type="text"
                                                     value=""></td>
-                                            <td><input class="form-control" name="row[lens][os_bd_r][]" type="text"
+                                            <td><input class="form-control" name="row[change_lens][os_bd_r][]" type="text"
                                                     value=""></td>
                                         </tr>
                                     </tbody>
@@ -764,13 +761,10 @@
                         </tr>
                         <tr>
                             <td>
-                                <input class="form-control" name="row[item][{$k+1}][id]" type="hidden"
-                                    value="{$sku.id}">
-                                <input id="c-original_sku" class="form-control" name="row[item][{$k+1}][original_sku]"
-                                    type="text" value="">
+                                <input class="form-control" name="row[cancel_order][original_sku][]" type="text" value="">
                             </td>
                             <td><input id="c-original_number" class="form-control"
-                                    name="row[item][{$k+1}][original_number]" type="text" value=""></td>
+                                    name="row[cancel_order][original_number][]" type="text" value=""></td>
                         </tr>
                     </table>
                 </div>
@@ -795,25 +789,25 @@
                     <div class="step7_function1_child">
                         <label class="control-label col-xs-12 col-sm-3">{:__('Fast name')}：</label>
                         <div class="col-xs-12 col-sm-8">
-                            <input id="c-firstname" class="form-control" name="row[]" type="text" value="row[address][firstname]">
+                            <input id="c-firstname" class="form-control" name="row[address][firstname]" type="text" value="">
                         </div>
                     </div>
                     <div class="step7_function1_child">
                         <label class="control-label col-xs-12 col-sm-3">{:__('Last name')}：</label>
                         <div class="col-xs-12 col-sm-8">
-                            <input id="c-lastname" class="form-control" name="row[]" type="text" value="row[address][lastname]">
+                            <input id="c-lastname" class="form-control" name="row[address][lastname]" type="text" value="">
                         </div>
                     </div>
                     <div class="step7_function1_child">
                         <label class="control-label col-xs-12 col-sm-3">{:__('Email')}：</label>
                         <div class="col-xs-12 col-sm-8">
-                            <input id="c-email" class="form-control" name="row[]" type="text" value="row[address][email]">
+                            <input id="c-email" class="form-control" name="row[address][email]" type="text" value="">
                         </div>
                     </div>
                     <div class="step7_function1_child">
                         <label class="control-label col-xs-12 col-sm-3">{:__('Tel')}：</label>
                         <div class="col-xs-12 col-sm-8">
-                            <input id="c-telephone" class="form-control" name="row[]" type="text" value="row[address][telephone]">
+                            <input id="c-telephone" class="form-control" name="row[address][telephone]" type="text" value="">
                         </div>
                     </div>
                     <div class="step7_function1_child">
@@ -868,7 +862,7 @@
                             <div class="step7_function2_child">
                                 <label class="control-label col-xs-12 col-sm-3">SKU:</label>
                                 <div class="col-xs-12 col-sm-8">
-                                    <select class="form-control selectpicker" name="row[lens][original_sku][]">
+                                    <select class="form-control selectpicker" name="row[replacement][original_sku][]">
                                         <option value="0">请选择</option>
                                     </select>
                                 </div>
@@ -877,19 +871,19 @@
                             <div class="step7_function2_child">
                                 <label class="control-label col-xs-12 col-sm-3">Name:</label>
                                 <div class="col-xs-12 col-sm-8">
-                                    <input class="form-control" name="row[lens][original_name][]" type="text" value="">
+                                    <input class="form-control" name="row[replacement][original_name][]" type="text" value="">
                                 </div>
                             </div>
                             <div class="step7_function2_child">
                                 <label class="control-label col-xs-12 col-sm-3">QTY:</label>
                                 <div class="col-xs-12 col-sm-8">
-                                    <input class="form-control" name="row[lens][original_number][]" type="text" value="">
+                                    <input class="form-control" name="row[replacement][original_number][]" type="text" value="">
                                 </div>
                             </div>
                             <div class="step7_function2_child">
                                 <label class="control-label col-xs-12 col-sm-3">选择已有处方:</label>
                                 <div class="col-xs-12 col-sm-8">
-                                    <select id="prescription_select" class="form-control selectpicker" name="row[]">
+                                    <select id="prescription_select" class="form-control selectpicker">
                                         <option value="0">请选择</option>
                                     </select>
                                 </div>
@@ -897,7 +891,7 @@
                             <div class="step7_function2_child">
                                 <label class="control-label col-xs-12 col-sm-3">prescription_type:</label>
                                 <div class="col-xs-12 col-sm-8">
-                                    <select class="form-control selectpicker" name="row[lens][recipe_type][]">
+                                    <select class="form-control selectpicker" name="row[replacement][recipe_type][]">
                                         <option value="">请选择</option>
                                     </select>
                                 </div>
@@ -910,7 +904,7 @@
                                 <div class="step1_function3_child">
                                     <label class="control-label col-xs-12 col-sm-3">lens_type:</label>
                                     <div class="col-xs-12 col-sm-8">
-                                        <select class="form-control selectpicker" name="row[lens][lens_type][]">
+                                        <select class="form-control selectpicker" name="row[replacement][lens_type][]">
                                             <option value="0">请选择</option>
                                         </select>
                                     </div>
@@ -919,7 +913,7 @@
                                     <label class="control-label col-xs-12 col-sm-3">coating_type:</label>
                                     <div class="col-xs-12 col-sm-8">
                                         <select id="c-coating_type" class="form-control selectpicker"
-                                            name="row[lens][coating_type][]">
+                                            name="row[replacement][coating_type][]">
                                             <option value="0">请选择</option>
                                         </select>
                                     </div>
@@ -936,28 +930,28 @@
                                         </tr>
                                         <tr>
                                             <td style="text-align: center">Right(OD)</td>
-                                            <td><input class="form-control" name="row[lens][od_sph][]" type="text" value="">
+                                            <td><input class="form-control" name="row[replacement][od_sph][]" type="text" value="">
                                             </td>
-                                            <td><input class="form-control" name="row[lens][od_cyl][]" type="text" value="">
+                                            <td><input class="form-control" name="row[replacement][od_cyl][]" type="text" value="">
                                             </td>
-                                            <td><input class="form-control" name="row[lens][od_axis][]" type="text"
+                                            <td><input class="form-control" name="row[replacement][od_axis][]" type="text"
                                                     value=""></td>
-                                            <td><input class="form-control" name="row[lens][od_add][]" type="text" value="">
+                                            <td><input class="form-control" name="row[replacement][od_add][]" type="text" value="">
                                             </td>
-                                            <td><input class="form-control" name="row[lens][pd_r][]" type="text" value="">
+                                            <td><input class="form-control" name="row[replacement][pd_r][]" type="text" value="">
                                             </td>
                                         </tr>
                                         <tr>
                                             <td style="text-align: center">Left(OS)</td>
-                                            <td><input class="form-control" name="row[lens][os_sph][]" type="text" value="">
+                                            <td><input class="form-control" name="row[replacement][os_sph][]" type="text" value="">
                                             </td>
-                                            <td><input class="form-control" name="row[lens][os_cyl][]" type="text" value="">
+                                            <td><input class="form-control" name="row[replacement][os_cyl][]" type="text" value="">
                                             </td>
-                                            <td><input class="form-control" name="row[lens][os_axis][]" type="text"
+                                            <td><input class="form-control" name="row[replacement][os_axis][]" type="text"
                                                     value=""></td>
-                                            <td><input class="form-control" name="row[lens][os_add][]" type="text" value="">
+                                            <td><input class="form-control" name="row[replacement][os_add][]" type="text" value="">
                                             </td>
-                                            <td><input class="form-control" name="row[lens][pd_l][]" type="text" value="">
+                                            <td><input class="form-control" name="row[replacement][pd_l][]" type="text" value="">
                                             </td>
                                         </tr>
     
@@ -970,24 +964,24 @@
                                         </tr>
                                         <tr>
                                             <td style="text-align: center">Right(OD)</td>
-                                            <td><input class="form-control" type="text" name="row[lens][od_pv][]" value="">
+                                            <td><input class="form-control" type="text" name="row[replacement][od_pv][]" value="">
                                             </td>
-                                            <td><input class="form-control" type="text" name="row[lens][od_bd][]" value="">
+                                            <td><input class="form-control" type="text" name="row[replacement][od_bd][]" value="">
                                             </td>
-                                            <td><input class="form-control" type="text" name="row[lens][od_pv_r][]"
+                                            <td><input class="form-control" type="text" name="row[replacement][od_pv_r][]"
                                                     value=""></td>
-                                            <td><input class="form-control" type="text" name="row[lens][od_bd_r][]"
+                                            <td><input class="form-control" type="text" name="row[replacement][od_bd_r][]"
                                                     value=""></td>
                                         </tr>
                                         <tr>
                                             <td style="text-align: center">Left(OS)</td>
-                                            <td><input class="form-control" name="row[lens][os_pv][]" type="text" value="">
+                                            <td><input class="form-control" name="row[replacement][os_pv][]" type="text" value="">
                                             </td>
-                                            <td><input class="form-control" name="row[lens][os_bd][]" type="text" value="">
+                                            <td><input class="form-control" name="row[replacement][os_bd][]" type="text" value="">
                                             </td>
-                                            <td><input class="form-control" name="row[lens][os_pv_r][]" type="text"
+                                            <td><input class="form-control" name="row[replacement][os_pv_r][]" type="text"
                                                     value=""></td>
-                                            <td><input class="form-control" name="row[lens][os_bd_r][]" type="text"
+                                            <td><input class="form-control" name="row[replacement][os_bd_r][]" type="text"
                                                     value=""></td>
                                         </tr>
                                     </tbody>
@@ -1024,7 +1018,7 @@
             <div class="step1_function2_child">
                 <label class="control-label col-xs-12 col-sm-3">SKU:</label>
                 <div class="col-xs-12 col-sm-8">
-                    <select class="form-control selectpicker" name="row[lens][original_sku][]">
+                    <select class="form-control selectpicker" name="row[change_lens][original_sku][]">
                         <option value="0">请选择</option>
                     </select>
                 </div>
@@ -1033,20 +1027,20 @@
             <div class="step1_function2_child">
                 <label class="control-label col-xs-12 col-sm-3">Name:</label>
                 <div class="col-xs-12 col-sm-8">
-                    <input class="form-control" name="row[lens][original_name][]" type="text" value="">
+                    <input class="form-control" name="row[change_lens][original_name][]" type="text" value="">
                 </div>
             </div>
             <div class="step1_function2_child">
                 <label class="control-label col-xs-12 col-sm-3">QTY:</label>
                 <div class="col-xs-12 col-sm-8">
-                    <input class="form-control" name="row[lens][original_number][]" type="text" value="">
+                    <input class="form-control" name="row[change_lens][original_number][]" type="text" value="">
                 </div>
             </div>
 
             <div class="step1_function2_child">
                 <label class="control-label col-xs-12 col-sm-3">prescription_type:</label>
                 <div class="col-xs-12 col-sm-8">
-                    <select class="form-control selectpicker" name="row[lens][recipe_type][]">
+                    <select class="form-control selectpicker" name="row[change_lens][recipe_type][]">
                         <option value="0">请选择</option>
                     </select>
                 </div>
@@ -1059,7 +1053,7 @@
                 <div class="step7_function3_child">
                     <label class="control-label col-xs-12 col-sm-3">lens_type:</label>
                     <div class="col-xs-12 col-sm-8">
-                        <select class="form-control selectpicker" name="row[lens][lens_type][]">
+                        <select class="form-control selectpicker" name="row[change_lens][lens_type][]">
                             <option value="0">请选择</option>
                         </select>
                     </div>
@@ -1067,7 +1061,7 @@
                 <div class="step7_function3_child">
                     <label class="control-label col-xs-12 col-sm-3">coating_type:</label>
                     <div class="col-xs-12 col-sm-8">
-                        <select id="c-coating_type" class="form-control selectpicker" name="row[lens][coating_type][]">
+                        <select id="c-coating_type" class="form-control selectpicker" name="row[change_lens][coating_type][]">
                             <option value="0">请选择</option>
                         </select>
                     </div>
@@ -1084,19 +1078,19 @@
                         </tr>
                         <tr>
                             <td style="text-align: center">Right(OD)</td>
-                            <td><input class="form-control" name="row[lens][od_sph][]" type="text" value=""></td>
-                            <td><input class="form-control" name="row[lens][od_cyl][]" type="text" value=""></td>
-                            <td><input class="form-control" name="row[lens][od_axis][]" type="text" value=""></td>
-                            <td><input class="form-control" name="row[lens][od_add][]" type="text" value=""></td>
-                            <td><input class="form-control" name="row[lens][pd_r][]" type="text" value=""></td>
+                            <td><input class="form-control" name="row[change_lens][od_sph][]" type="text" value=""></td>
+                            <td><input class="form-control" name="row[change_lens][od_cyl][]" type="text" value=""></td>
+                            <td><input class="form-control" name="row[change_lens][od_axis][]" type="text" value=""></td>
+                            <td><input class="form-control" name="row[change_lens][od_add][]" type="text" value=""></td>
+                            <td><input class="form-control" name="row[change_lens][pd_r][]" type="text" value=""></td>
                         </tr>
                         <tr>
                             <td style="text-align: center">Left(OS)</td>
-                            <td><input class="form-control" name="row[lens][os_sph][]" type="text" value=""></td>
-                            <td><input class="form-control" name="row[lens][os_cyl][]" type="text" value=""></td>
-                            <td><input class="form-control" name="row[lens][os_axis][]" type="text" value=""></td>
-                            <td><input class="form-control" name="row[lens][os_add][]" type="text" value=""></td>
-                            <td><input class="form-control" name="row[lens][pd_l][]" type="text" value=""></td>
+                            <td><input class="form-control" name="row[change_lens][os_sph][]" type="text" value=""></td>
+                            <td><input class="form-control" name="row[change_lens][os_cyl][]" type="text" value=""></td>
+                            <td><input class="form-control" name="row[change_lens][os_axis][]" type="text" value=""></td>
+                            <td><input class="form-control" name="row[change_lens][os_add][]" type="text" value=""></td>
+                            <td><input class="form-control" name="row[change_lens][pd_l][]" type="text" value=""></td>
                         </tr>
 
                         <tr>
@@ -1108,17 +1102,17 @@
                         </tr>
                         <tr>
                             <td style="text-align: center">Right(OD)</td>
-                            <td><input class="form-control" type="text" name="row[lens][od_pv][]" value=""></td>
-                            <td><input class="form-control" type="text" name="row[lens][od_bd][]" value=""></td>
-                            <td><input class="form-control" type="text" name="row[lens][od_pv_r][]" value=""></td>
-                            <td><input class="form-control" type="text" name="row[lens][od_bd_r][]" value=""></td>
+                            <td><input class="form-control" type="text" name="row[change_lens][od_pv][]" value=""></td>
+                            <td><input class="form-control" type="text" name="row[change_lens][od_bd][]" value=""></td>
+                            <td><input class="form-control" type="text" name="row[change_lens][od_pv_r][]" value=""></td>
+                            <td><input class="form-control" type="text" name="row[change_lens][od_bd_r][]" value=""></td>
                         </tr>
                         <tr>
                             <td style="text-align: center">Left(OS)</td>
-                            <td><input class="form-control" name="row[lens][os_pv][]" type="text" value=""></td>
-                            <td><input class="form-control" name="row[lens][os_bd][]" type="text" value=""></td>
-                            <td><input class="form-control" name="row[lens][os_pv_r][]" type="text" value=""></td>
-                            <td><input class="form-control" name="row[lens][os_bd_r][]" type="text" value=""></td>
+                            <td><input class="form-control" name="row[change_lens][os_pv][]" type="text" value=""></td>
+                            <td><input class="form-control" name="row[change_lens][os_bd][]" type="text" value=""></td>
+                            <td><input class="form-control" name="row[change_lens][os_pv_r][]" type="text" value=""></td>
+                            <td><input class="form-control" name="row[change_lens][os_bd_r][]" type="text" value=""></td>
                         </tr>
                     </tbody>
                 </table>
@@ -1137,7 +1131,7 @@
             <div class="step7_function2_child">
                 <label class="control-label col-xs-12 col-sm-3">SKU:</label>
                 <div class="col-xs-12 col-sm-8">
-                    <select class="form-control selectpicker" name="row[lens][original_sku][]">
+                    <select class="form-control selectpicker" name="row[replacement][original_sku][]">
                         <option value="0">请选择</option>
                     </select>
                 </div>
@@ -1146,19 +1140,19 @@
             <div class="step7_function2_child">
                 <label class="control-label col-xs-12 col-sm-3">Name:</label>
                 <div class="col-xs-12 col-sm-8">
-                    <input class="form-control" name="row[lens][original_name][]" type="text" value="">
+                    <input class="form-control" name="row[replacement][original_name][]" type="text" value="">
                 </div>
             </div>
             <div class="step7_function2_child">
                 <label class="control-label col-xs-12 col-sm-3">QTY:</label>
                 <div class="col-xs-12 col-sm-8">
-                    <input class="form-control" name="row[lens][original_number][]" type="text" value="">
+                    <input class="form-control" name="row[replacement][original_number][]" type="text" value="">
                 </div>
             </div>
             <div class="step7_function2_child">
                 <label class="control-label col-xs-12 col-sm-3">选择已有处方:</label>
                 <div class="col-xs-12 col-sm-8">
-                    <select class="form-control selectpicker" name="row[]">
+                    <select class="form-control selectpicker">
                         <option value="0">请选择</option>
                     </select>
                 </div>
@@ -1166,7 +1160,7 @@
             <div class="step7_function2_child">
                 <label class="control-label col-xs-12 col-sm-3">prescription_type:</label>
                 <div class="col-xs-12 col-sm-8">
-                    <select class="form-control selectpicker" name="row[lens][recipe_type][]">
+                    <select class="form-control selectpicker" name="row[replacement][recipe_type][]">
                         <option value="0">请选择</option>
                     </select>
                 </div>
@@ -1179,7 +1173,7 @@
                 <div class="step1_function3_child">
                     <label class="control-label col-xs-12 col-sm-3">lens_type:</label>
                     <div class="col-xs-12 col-sm-8">
-                        <select class="form-control selectpicker" name="row[lens][lens_type][]">
+                        <select class="form-control selectpicker" name="row[replacement][lens_type][]">
                             <option value="0">请选择</option>
                         </select>
                     </div>
@@ -1188,7 +1182,7 @@
                     <label class="control-label col-xs-12 col-sm-3">coating_type:</label>
                     <div class="col-xs-12 col-sm-8">
                         <select id="c-coating_type" class="form-control selectpicker"
-                                name="row[lens][coating_type][]">
+                                name="row[replacement][coating_type][]">
                             <option value="0">请选择</option>
                         </select>
                     </div>
@@ -1205,28 +1199,28 @@
                     </tr>
                     <tr>
                         <td style="text-align: center">Right(OD)</td>
-                        <td><input class="form-control" name="row[lens][od_sph][]" type="text" value="">
+                        <td><input class="form-control" name="row[replacement][od_sph][]" type="text" value="">
                         </td>
-                        <td><input class="form-control" name="row[lens][od_cyl][]" type="text" value="">
+                        <td><input class="form-control" name="row[replacement][od_cyl][]" type="text" value="">
                         </td>
-                        <td><input class="form-control" name="row[lens][od_axis][]" type="text"
+                        <td><input class="form-control" name="row[replacement][od_axis][]" type="text"
                                    value=""></td>
-                        <td><input class="form-control" name="row[lens][od_add][]" type="text" value="">
+                        <td><input class="form-control" name="row[replacement][od_add][]" type="text" value="">
                         </td>
-                        <td><input class="form-control" name="row[lens][pd_r][]" type="text" value="">
+                        <td><input class="form-control" name="row[replacement][pd_r][]" type="text" value="">
                         </td>
                     </tr>
                     <tr>
                         <td style="text-align: center">Left(OS)</td>
-                        <td><input class="form-control" name="row[lens][os_sph][]" type="text" value="">
+                        <td><input class="form-control" name="row[replacement][os_sph][]" type="text" value="">
                         </td>
-                        <td><input class="form-control" name="row[lens][os_cyl][]" type="text" value="">
+                        <td><input class="form-control" name="row[replacement][os_cyl][]" type="text" value="">
                         </td>
-                        <td><input class="form-control" name="row[lens][os_axis][]" type="text"
+                        <td><input class="form-control" name="row[replacement][os_axis][]" type="text"
                                    value=""></td>
-                        <td><input class="form-control" name="row[lens][os_add][]" type="text" value="">
+                        <td><input class="form-control" name="row[replacement][os_add][]" type="text" value="">
                         </td>
-                        <td><input class="form-control" name="row[lens][pd_l][]" type="text" value="">
+                        <td><input class="form-control" name="row[replacement][pd_l][]" type="text" value="">
                         </td>
                     </tr>
 
@@ -1239,24 +1233,24 @@
                     </tr>
                     <tr>
                         <td style="text-align: center">Right(OD)</td>
-                        <td><input class="form-control" type="text" name="row[lens][od_pv][]" value="">
+                        <td><input class="form-control" type="text" name="row[replacement][od_pv][]" value="">
                         </td>
-                        <td><input class="form-control" type="text" name="row[lens][od_bd][]" value="">
+                        <td><input class="form-control" type="text" name="row[replacement][od_bd][]" value="">
                         </td>
-                        <td><input class="form-control" type="text" name="row[lens][od_pv_r][]"
+                        <td><input class="form-control" type="text" name="row[replacement][od_pv_r][]"
                                    value=""></td>
-                        <td><input class="form-control" type="text" name="row[lens][od_bd_r][]"
+                        <td><input class="form-control" type="text" name="row[replacement][od_bd_r][]"
                                    value=""></td>
                     </tr>
                     <tr>
                         <td style="text-align: center">Left(OS)</td>
-                        <td><input class="form-control" name="row[lens][os_pv][]" type="text" value="">
+                        <td><input class="form-control" name="row[replacement][os_pv][]" type="text" value="">
                         </td>
-                        <td><input class="form-control" name="row[lens][os_bd][]" type="text" value="">
+                        <td><input class="form-control" name="row[replacement][os_bd][]" type="text" value="">
                         </td>
-                        <td><input class="form-control" name="row[lens][os_pv_r][]" type="text"
+                        <td><input class="form-control" name="row[replacement][os_pv_r][]" type="text"
                                    value=""></td>
-                        <td><input class="form-control" name="row[lens][os_bd_r][]" type="text"
+                        <td><input class="form-control" name="row[replacement][os_bd_r][]" type="text"
                                    value=""></td>
                     </tr>
                     </tbody>

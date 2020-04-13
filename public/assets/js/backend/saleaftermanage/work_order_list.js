@@ -175,10 +175,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
             $(document).on('click', '.btn-add-frame', function () {
                 var rows = document.getElementById("caigou-table-sku").rows.length;
                 var content = '<tr>' +
-                    '<td><input id="c-original_sku" class="form-control" name="row[item][' + rows + '][original_sku]" type="text"></td>' +
-                    '<td><input id="c-original_number" class="form-control" name="row[item][' + rows + '][original_number]" type="text"></td>' +
-                    '<td><input id="c-change_sku" class="form-control change_sku" name="row[item][' + rows + '][change_sku]" type="text"></td>' +
-                    '<td><input id="c-change_number" class="form-control change_number" name="row[item][' + rows + '][change_number]" type="text"></td>' +
+                    '<td><input class="form-control" name="row[change_frame][original_sku][]" type="text"></td>' +
+                    '<td><input class="form-control" name="row[change_frame][original_number][]" type="text"></td>' +
+                    '<td><input class="form-control change_sku" name="row[change_frame][change_sku][]" type="text"></td>' +
+                    '<td><input class="form-control change_number" name="row[change_frame][change_number][]" type="text"></td>' +
                     '<td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i> 删除</a></td>' +
                     '</tr>';
                 $('#caigou-table-sku tbody').append(content);
@@ -206,13 +206,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 var str = '<div><label style="margin-top: 10px;" class="control-label col-xs-12 col-sm-2">SKU：</label>\n' +
                     '                    <div style="margin-top: 10px;" class="col-xs-12 col-sm-8">\n' +
                     '                        <div class="dropup">\n' +
-                    '                            <select id="add_box_select" class="selectpicker" name="row[change_sku][]" data-live-search="true" title="请选择">\n' + option +
+                    '                            <select class="selectpicker" name="row[order_change][change_sku][]" data-live-search="true" title="请选择">\n' + option +
                     '                            </select>\n' +
                     '                        </div>\n' +
                     '                    </div>\n' +
                     '                    <label style="margin-top: 10px;" class="control-label col-xs-12 col-sm-2">数量：</label>\n' +
                     '                    <div style="margin-top: 10px;" class="col-xs-12 col-sm-8">\n' +
-                    '                        <input class="form-control" name="row[change_number]" type="text" value="">\n' +
+                    '                        <input class="form-control" name="row[order_change][change_number][]" type="text" value="">\n' +
                     '                        <a href="javascript:;" class="btn btn-danger btn-del-box" title="删除"><i class="fa fa-trash"></i>删除</a>\n' +
                     '                    </div></div>';
                 $('#add_box').append(str);
