@@ -401,9 +401,6 @@
     </div>
 
 
-
-
-
     <div class="form-group check-div" style="height: 50px;display: none;">
         <div class="form-group-content">
             <label class="control-label col-xs-12 col-sm-2" style="width:8%;float: left;">{:__('审核人')}：</label>
@@ -536,13 +533,13 @@
                             <th>操作</th>
                         </tr>
                         <tr>
-                            <td><input class="form-control" name="row[item]['+m+'][original_sku]" type="text" value="">
+                            <td><input class="form-control" name="row[item][original_sku][]" type="text" value="">
                             </td>
-                            <td><input class="form-control" name="row[item]['+m+'][original_number]" type="text"
+                            <td><input class="form-control" name="row[item][original_number][]" type="text"
                                     value=""></td>
-                            <td><input class="form-control change_sku" name="row[item]['+m+'][change_sku]" type="text">
+                            <td><input class="form-control change_sku" name="row[item][change_sku][]" type="text">
                             </td>
-                            <td><input class="form-control change_number" name="row[item]['+m+'][change_number]"
+                            <td><input class="form-control change_number" name="row[item][change_number][]"
                                     type="text"></td>
                             <td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i
                                         class="fa fa-trash"></i>删除</a></td>
