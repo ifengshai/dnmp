@@ -55,52 +55,61 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
         add: function () {
 
             Controller.api.bindevent();
-
             //点击事件 #todo::需判断仓库或者客服
             $(document).on('click', '.problem_type', function () {
+                //读取是谁添加的配置console.log(Config.work_type);
                 $('.step_type').attr('checked', false);
                 $('.step_type').parent().hide();
                 $('#appoint_group_users').html('');//切换问题类型时清空承接人
                 $('#recept_person_id').val('');//切换问题类型时清空隐藏域承接人id
                 $('#recept_person').val('');//切换问题类型时清空隐藏域承接人
-                $('.measure').hide();
-                var id = $(this).val();
-                //id大于5 默认措施4
-                if (id > 5) {
-                    var steparr = Config.workorder['step04'];
-                    for (var j = 0; j < steparr.length; j++) {
-                        $('#step' + steparr[j].step_id).parent().show();
-                        //读取对应措施配置
-                        $('#step' + steparr[j].step_id + '-is_check').val(steparr[j].is_check);
-                        $('#step' + steparr[j].step_id + '-appoint_group').val((steparr[j].appoint_group).join(','));
-                    }
-                } else {
-                    var step = Config.workorder.customer_problem_group[id].step;
-                    var steparr = Config.workorder[step];
-                    console.log(steparr);
-                    for (var j = 0; j < steparr.length; j++) {
-                        $('#step' + steparr[j].step_id).parent().show();
-                        //读取对应措施配置
-                        $('#step' + steparr[j].step_id + '-is_check').val(steparr[j].is_check);
-                        $('#step' + steparr[j].step_id + '-appoint_group').val((steparr[j].appoint_group).join(','));
-                    }
-                }
-                var checkID = [];//定义一个空数组
-                $("input[name='row[measure_choose_id]']:checked").each(function (i) {
-                    checkID[i] = $(this).val();
-                });
-                for (var m = 0; m < checkID.length; m++) {
-                    var node = $('.step' + checkID[m]);
-                    if (node.is(':hidden')) {
-                        node.show();
+                $('.measure').hide();                
+                if(2 == Config.work_type){ //如果是仓库人员添加的工单
+                    $('#step_id').hide();
+                    $('#recept_person_group').hide();
+                    $('#after_user_group').show();                    
+                    $('#after_user_id').val(Config.workorder.copy_group);
+                    $('#after_user').html(Config.users[Config.workorder.copy_group]);
+                }else{ //如果是客服人员添加的工单
+
+                    var id = $(this).val();
+                    //id大于5 默认措施4
+                    if (id > 5) {
+                        var steparr = Config.workorder['step04'];
+                        for (var j = 0; j < steparr.length; j++) {
+                            $('#step' + steparr[j].step_id).parent().show();
+                            //读取对应措施配置
+                            $('#step' + steparr[j].step_id + '-is_check').val(steparr[j].is_check);
+                            $('#step' + steparr[j].step_id + '-appoint_group').val((steparr[j].appoint_group).join(','));
+                        }
                     } else {
-                        node.hide();
+                        var step = Config.workorder.customer_problem_group[id].step;
+                        var steparr = Config.workorder[step];
+                        console.log(steparr);
+                        for (var j = 0; j < steparr.length; j++) {
+                            $('#step' + steparr[j].step_id).parent().show();
+                            //读取对应措施配置
+                            $('#step' + steparr[j].step_id + '-is_check').val(steparr[j].is_check);
+                            $('#step' + steparr[j].step_id + '-appoint_group').val((steparr[j].appoint_group).join(','));
+                        }
                     }
-                    var secondNode = $('.step' + id + '-' + checkID[m]);
-                    if (secondNode.is(':hidden')) {
-                        secondNode.show();
-                    } else {
-                        secondNode.hide();
+                    var checkID = [];//定义一个空数组
+                    $("input[name='row[measure_choose_id]']:checked").each(function (i) {
+                        checkID[i] = $(this).val();
+                    });
+                    for (var m = 0; m < checkID.length; m++) {
+                        var node = $('.step' + checkID[m]);
+                        if (node.is(':hidden')) {
+                            node.show();
+                        } else {
+                            node.hide();
+                        }
+                        var secondNode = $('.step' + id + '-' + checkID[m]);
+                        if (secondNode.is(':hidden')) {
+                            secondNode.show();
+                        } else {
+                            secondNode.hide();
+                        }
                     }
                 }
             })
