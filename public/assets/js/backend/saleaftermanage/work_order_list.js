@@ -25,7 +25,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     [
                         { checkbox: true },
                         { field: 'id', title: __('Id') },
-                        { field: 'work_platform', title: __('Work_platform') },
+                        { field: 'work_platform', title: __('work_platform'), custom: { 1: 'blue', 2: 'danger', 3: 'orange' }, searchList: { 1: 'Zeelool', 2: 'Voogueme', 3: 'Nihao' }, formatter: Table.api.formatter.status },
+
                         { field: 'work_type', title: __('Work_type') },
                         { field: 'platform_order', title: __('Platform_order') },
                         { field: 'order_pay_currency', title: __('Order_pay_currency') },
