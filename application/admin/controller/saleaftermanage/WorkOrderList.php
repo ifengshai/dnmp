@@ -79,9 +79,9 @@ class WorkOrderList extends Backend
         }
         //获取用户ID和所在权限组
         $userId = session('admin.id');
-        $userGroupAccess = AuthGroupAccess::where(['uid'=>$userId])->column('group_id');
+        $userGroupAccess = AuthGroupAccess::where(['uid' => $userId])->column('group_id');
         $warehouseArr = config('workorder.warehouse_department_rule');
-        $checkIsWarehouse = array_intersect($userGroupAccess,$warehouseArr);
+        $checkIsWarehouse = array_intersect($userGroupAccess, $warehouseArr);
         if (!empty($checkIsWarehouse)) {
             $this->view->assign('work_type',2);
             $this->assignconfig('work_type',2);

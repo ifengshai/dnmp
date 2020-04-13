@@ -55,6 +55,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
         add: function () {
 
             Controller.api.bindevent();
+
             //点击事件 #todo::需判断仓库或者客服
             $(document).on('click', '.problem_type', function () {
                 //读取是谁添加的配置console.log(Config.work_type);
