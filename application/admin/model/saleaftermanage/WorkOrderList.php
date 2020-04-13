@@ -144,7 +144,7 @@ class WorkOrderList extends Model
             //模拟数据
             $res['data'] = [
                 'skus' => [],
-                'prescription_type' => ['singlevision','nonprescription'],
+                'prescription_type' => ['SingleVision','NonPrescription'],
                 'lens_type' => ['refractive_5','refractive_2','refractive_3'],
                 'coating_type' => ['coating_2','coating_1','coating_3']
             ];
@@ -170,11 +170,11 @@ class WorkOrderList extends Model
         //拼接html页面
         $html = <<<Crasp
             <div>
-                        <div class="step7_function2">
+                        <div class="step7_function2" style="margin-top:10px;">
                             <div class="step7_function2_child">
                                 <label class="control-label col-xs-12 col-sm-3">SKU:</label>
                                 <div class="col-xs-12 col-sm-8">
-                                    <select class="form-control selectpicker" name="row[lens][original_sku][]">
+                                    <select class="form-control selectpicker" name="row[replacement][original_sku][]">
                                         {$original_sku}
                                     </select>
                                 </div>
@@ -183,19 +183,19 @@ class WorkOrderList extends Model
                             <div class="step7_function2_child">
                                 <label class="control-label col-xs-12 col-sm-3">Name:</label>
                                 <div class="col-xs-12 col-sm-8">
-                                    <input class="form-control" name="row[lens][original_name][]" type="text" value="">
+                                    <input class="form-control" name="row[replacement][original_name][]" type="text" value="">
                                 </div>
                             </div>
                             <div class="step7_function2_child">
                                 <label class="control-label col-xs-12 col-sm-3">QTY:</label>
                                 <div class="col-xs-12 col-sm-8">
-                                    <input class="form-control" name="row[lens][original_number][]" type="text" value="">
+                                    <input class="form-control" name="row[replacement][original_number][]" type="text" value="">
                                 </div>
                             </div>
                             <div class="step7_function2_child">
                                 <label class="control-label col-xs-12 col-sm-3">选择已有处方:</label>
                                 <div class="col-xs-12 col-sm-8">
-                                    <select id="prescription_select" class="form-control selectpicker" name="row[]">
+                                    <select id="prescription_select" class="form-control selectpicker">
                                         {$prescriptions}
                                     </select>
                                 </div>
@@ -203,7 +203,7 @@ class WorkOrderList extends Model
                             <div class="step7_function2_child">
                                 <label class="control-label col-xs-12 col-sm-3">prescription_type:</label>
                                 <div class="col-xs-12 col-sm-8">
-                                    <select class="form-control selectpicker" name="row[lens][prescription_type][]">
+                                    <select class="form-control selectpicker" name="row[replacement][recipe_type][]">
                                         {$prescription_type}
                                     </select>
                                 </div>
@@ -211,13 +211,13 @@ class WorkOrderList extends Model
     
                         </div>
     
-                        <div class="step1_function3">
+                        <div class="step1_function3"  style="margin-top:10px;">
                             <div class="panel-body">
                                 <div class="step1_function3_child">
                                     <label class="control-label col-xs-12 col-sm-3">lens_type:</label>
                                     <div class="col-xs-12 col-sm-8">
-                                        <select class="form-control selectpicker" name="row[lens][lens_type][]">
-                                           {$lens_type}
+                                        <select class="form-control selectpicker" name="row[replacement][lens_type][]">
+                                            {$lens_type}
                                         </select>
                                     </div>
                                 </div>
@@ -225,7 +225,7 @@ class WorkOrderList extends Model
                                     <label class="control-label col-xs-12 col-sm-3">coating_type:</label>
                                     <div class="col-xs-12 col-sm-8">
                                         <select id="c-coating_type" class="form-control selectpicker"
-                                            name="row[lens][coating_type][]">
+                                            name="row[replacement][coating_type][]">
                                             {$coating_type}
                                         </select>
                                     </div>
@@ -242,28 +242,28 @@ class WorkOrderList extends Model
                                         </tr>
                                         <tr>
                                             <td style="text-align: center">Right(OD)</td>
-                                            <td><input class="form-control" name="row[lens][od_sph][]" type="text" value="">
+                                            <td><input class="form-control" name="row[replacement][od_sph][]" type="text" value="">
                                             </td>
-                                            <td><input class="form-control" name="row[lens][od_cyl][]" type="text" value="">
+                                            <td><input class="form-control" name="row[replacement][od_cyl][]" type="text" value="">
                                             </td>
-                                            <td><input class="form-control" name="row[lens][od_axis][]" type="text"
+                                            <td><input class="form-control" name="row[replacement][od_axis][]" type="text"
                                                     value=""></td>
-                                            <td><input class="form-control" name="row[lens][od_add][]" type="text" value="">
+                                            <td><input class="form-control" name="row[replacement][od_add][]" type="text" value="">
                                             </td>
-                                            <td><input class="form-control" name="row[lens][pd_r][]" type="text" value="">
+                                            <td><input class="form-control" name="row[replacement][pd_r][]" type="text" value="">
                                             </td>
                                         </tr>
                                         <tr>
                                             <td style="text-align: center">Left(OS)</td>
-                                            <td><input class="form-control" name="row[lens][os_sph][]" type="text" value="">
+                                            <td><input class="form-control" name="row[replacement][os_sph][]" type="text" value="">
                                             </td>
-                                            <td><input class="form-control" name="row[lens][os_cyl][]" type="text" value="">
+                                            <td><input class="form-control" name="row[replacement][os_cyl][]" type="text" value="">
                                             </td>
-                                            <td><input class="form-control" name="row[lens][os_axis][]" type="text"
+                                            <td><input class="form-control" name="row[replacement][os_axis][]" type="text"
                                                     value=""></td>
-                                            <td><input class="form-control" name="row[lens][os_add][]" type="text" value="">
+                                            <td><input class="form-control" name="row[replacement][os_add][]" type="text" value="">
                                             </td>
-                                            <td><input class="form-control" name="row[lens][pd_l][]" type="text" value="">
+                                            <td><input class="form-control" name="row[replacement][pd_l][]" type="text" value="">
                                             </td>
                                         </tr>
     
@@ -276,24 +276,24 @@ class WorkOrderList extends Model
                                         </tr>
                                         <tr>
                                             <td style="text-align: center">Right(OD)</td>
-                                            <td><input class="form-control" type="text" name="row[lens][od_pv][]" value="">
+                                            <td><input class="form-control" type="text" name="row[replacement][od_pv][]" value="">
                                             </td>
-                                            <td><input class="form-control" type="text" name="row[lens][od_bd][]" value="">
+                                            <td><input class="form-control" type="text" name="row[replacement][od_bd][]" value="">
                                             </td>
-                                            <td><input class="form-control" type="text" name="row[lens][od_pv_r][]"
+                                            <td><input class="form-control" type="text" name="row[replacement][od_pv_r][]"
                                                     value=""></td>
-                                            <td><input class="form-control" type="text" name="row[lens][od_bd_r][]"
+                                            <td><input class="form-control" type="text" name="row[replacement][od_bd_r][]"
                                                     value=""></td>
                                         </tr>
                                         <tr>
                                             <td style="text-align: center">Left(OS)</td>
-                                            <td><input class="form-control" name="row[lens][os_pv][]" type="text" value="">
+                                            <td><input class="form-control" name="row[replacement][os_pv][]" type="text" value="">
                                             </td>
-                                            <td><input class="form-control" name="row[lens][os_bd][]" type="text" value="">
+                                            <td><input class="form-control" name="row[replacement][os_bd][]" type="text" value="">
                                             </td>
-                                            <td><input class="form-control" name="row[lens][os_pv_r][]" type="text"
+                                            <td><input class="form-control" name="row[replacement][os_pv_r][]" type="text"
                                                     value=""></td>
-                                            <td><input class="form-control" name="row[lens][os_bd_r][]" type="text"
+                                            <td><input class="form-control" name="row[replacement][os_bd_r][]" type="text"
                                                     value=""></td>
                                         </tr>
                                     </tbody>
