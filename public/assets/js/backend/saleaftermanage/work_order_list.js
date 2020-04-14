@@ -325,16 +325,15 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
             })
             //补发点击填充数据
             var lens_click_data
-            $(document).on('click','input[name="row[measure_' +
-                'choose_id]"]',function(){
+            $(document).on('click','input[name="row[measure_choose_id][]"]',function(){
+
                 var value = $(this).val();
                 var check = $(this).prop('checked');
-                //补发
-                if(value == 7 && check === true){
-                    var increment_id = $('#c-platform_order').val();
-                    if(increment_id){
-
-                        var site_type = $('#work_platform').val();
+                var increment_id = $('#c-platform_order').val();
+                if(increment_id){
+                    var site_type = $('#work_platform').val();
+                    //补发
+                    if(value == 7 && check === true){
                         //获取补发的信息
                         $.ajax({
                             type: "POST",
@@ -423,7 +422,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                         prescription_div.find('input[name="row[replacement][os_add][]"]').val(prescription.os_add);
                                     }
                                     if(prescription.hasOwnProperty("pd")){
-                                        prescription_div.find('input[name="row[replacement][pd_r][]"]').val(prescription.pd_r);
+                                        prescription_div.find('input[name="row[replacement][pd_r][]"]').val(prescription.pd);
                                         //prescription_div.find('input[name="row[replacement][pd_l][]"]').attr('disabled',true);
                                     }else{
                                         prescription_div.find('input[name="row[replacement][pd_r][]"]').val(prescription.pd_r);
@@ -462,11 +461,25 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                 Controller.api.bindevent();
                             }
                         });
-                        //获取
-                    }else{
-                        Toastr.error('请选选择订单号……');
                     }
+                    //更加镜架的更改
+                    var question = $('input[name="row[problem_type_id]"]:checked').val();
+                    if(value == 1 && question == 2 && check === true){
+                        Backend.api.ajax({
+                            url: 'saleaftermanage/work_order_list/ajaxGetChangeLens',
+                            data: {
+                                increment_id: increment_id,
+                                site_type: site_type,
+                            }
+                        }, function (data, ret) {
+                            $('#lens_contents').html(data.html);
+                            $('.selectpicker ').selectpicker('refresh');
+                        });
+                    }
+                }else{
+                    Toastr.error('请选选择订单号……');
                 }
+
             });
 
             $(document).on('click','.btn-add-supplement-reissue',function(){

@@ -192,7 +192,7 @@ class WorkOrderList extends Backend
             //获取地址、处方等信息
             $res = $this->model->getAddress($siteType, $incrementId);
             //请求接口获取lens_type，coating_type，prescription_type等信息
-            $lens = $this->model->getLens($siteType,$res['showPrescriptions']);
+            $lens = $this->model->getReissueLens($siteType,$res['showPrescriptions']);
             if ($res) {
                 $this->success('操作成功！！', '', ['address' => $res,'lens' => $lens]);
             } else {
@@ -212,5 +212,26 @@ class WorkOrderList extends Backend
         $country = json_decode(file_get_contents('assets/js/country.js'), true);
         $province = $country[$countryId];
         return $province ?: [];
+    }
+
+    /**
+     * 获取更改镜片的数据
+     * @throws Exception
+     */
+    public function ajaxGetChangeLens()
+    {
+        if (request()->isAjax()) {
+            $incrementId = input('increment_id');
+            $siteType = input('site_type');
+            //获取地址、处方等信息
+            $res = $this->model->getAddress($siteType, $incrementId);
+            $lens = $this->model->getReissueLens($siteType,$res['prescriptions'],2);
+            if ($res) {
+                $this->success('操作成功！！', '', $lens);
+            } else {
+                $this->error('未获取到数据！！');
+            }
+        }
+        $this->error('404 not found');
     }
 }
