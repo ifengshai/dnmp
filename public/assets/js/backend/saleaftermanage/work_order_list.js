@@ -501,6 +501,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     var val = $(this).val();
                                     var prescription = prescriptions[val];
                                     var prescription_div = $(this).parents('.step7_function2').next('.step1_function3');
+                                    prescription_div.find('input').val('');
                                     prescription_div.find('input[name="row[replacement][od_sph][]"]').val(prescription.od_sph);
                                     prescription_div.find('input[name="row[replacement][os_sph][]"]').val(prescription.os_sph);
                                     prescription_div.find('input[name="row[replacement][os_cyl][]"]').val(prescription.os_cyl);
