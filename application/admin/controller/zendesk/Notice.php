@@ -605,7 +605,7 @@ class Notice extends Controller
         $search = [
             'type' => 'ticket',
             'order_by' => 'created_at',
-            'status' => ['open','pending'],
+            'status' => ['open'],
             'assignee' => 'complaint@zeelool.com',
             'sort' => 'asc'
         ];
