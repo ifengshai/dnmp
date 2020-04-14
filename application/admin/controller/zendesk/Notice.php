@@ -605,24 +605,27 @@ class Notice extends Controller
         $search = [
             'type' => 'ticket',
             'order_by' => 'created_at',
-            'created' => [
-                'valuetype' => '<=',
-                'value' => '2020-04-10T07:20:38Z',
-            ],
-            'created' => [
-                'valuetype' => '>=',
-                'value' => '2020-04-10T01:48:38Z'
+            'status' => ['open'],
+            'assignee' => [
+                'wangyian@nextmar.com',
+                'yuanqianqian@nextmar.com',
+                'mayumeng@nextmar.com',
+                'wufan@nextmar.com',
+                'zhaojinjin@nextmar.com',
+                'lisen@nextmar.com',
+                'liumengnan@nextmar.com'
             ],
             'sort' => 'asc'
         ];
-
-        $type = $this->postData['type'] == 'zeelool' ? 1 : 2;
+        //$type = $this->postData['type'] == 'zeelool' ? 1 : 2;
+        $type = 1;
         $params = $this->parseStr($search);
         $search = $this->client->search()->find($params);
         $tickets = $search->results;
         if (!$search->count) {
             return true;
         }
+        echo $search->count;
         $page = ceil($search->count / 100 );
         //先获取第一页的,一次100条
         $this->findCommentsByTickets($tickets,$type);
@@ -632,7 +635,7 @@ class Notice extends Controller
                 try{
                     $search = $this->client->search()->find($params,['page' => $i]);
                 }catch (\Exception $e){
-                    echo 1;
+                    echo $e->getMessage();
                     $this->setTickets();
                 }
                 $tickets = $search->results;
@@ -649,7 +652,9 @@ class Notice extends Controller
      */
     public function findCommentsByTickets($tickets,$type)
     {
+        $key = 0;
         foreach($tickets as $ticket){
+            ++$key;
             $via = $ticket->via;
             $priority = 0;
             if ($ticket->priority) {
@@ -661,7 +666,10 @@ class Notice extends Controller
             $assign_id = \app\admin\model\zendesk\ZendeskAgents::where('agent_id',$ticket->assignee_id)->value('admin_id');
             $tags = ZendeskTags::where('name','in',$ticket->tags)->column('id');
             sort($tags);
-            if(!Zendesk::where('ticket_id',$ticket->id)->find()) {
+            echo $ticket->id."\r\n";
+//            echo $key."\r\n";
+            if(!Zendesk::where(['ticket_id' => $ticket->id, 'type' => $type])->find()) {
+                echo $ticket->id."\r\n";
                 //根据用户的id获取用户的信息
                 $user = $this->client->crasp()->findUser(['id' => $ticket->requester_id]);
                 $userInfo = $user->user;
@@ -743,6 +751,7 @@ class Notice extends Controller
                     ]);
                 }
                 echo $zendesk->ticket_id."\r\n";
+                usleep(100);
                 // }
                 //sleep(1);
                 //Db::commit();
@@ -795,7 +804,7 @@ class Notice extends Controller
             $type = 2;
         }
         $a = 1;
-        $ticket_ids = Zendesk::where('status','1,2')->where('type',$type)->where('id','<',10845)->column('ticket_id');
+        $ticket_ids = Zendesk::where('ticket_id','in','105010,104326,105024,104644,104913,105119')->where('type',$type)->column('ticket_id');
         foreach($ticket_ids as $ticket_id){
             $ticket = $this->client->tickets()->find($ticket_id)->ticket;
 
@@ -820,13 +829,14 @@ class Notice extends Controller
                 //更新主表,目前应该只会更新status，其他不会更新
                 $updateData = [
                     'tags' => $tags,
-                    'status' => array_search(strtolower($ticket->status), config('zendesk.status'))
+                    'status' => array_search(strtolower($ticket->status), config('zendesk.status')),
+                    'update_time' => date('Y-m-d H:i:s',(strtotime(str_replace(['T','Z'],[' ',''],$ticket->updated_at))+8*3600)),
                 ];
                 //如果分配人修改，则同步修改分配人
                 if($zendesk->assignee_id != $ticket->assignee_id && $ticket->assignee_id){
 
                     $updateData['assignee_id'] = $ticket->assignee_id;
-                    $updateData['assign_id'] = ZendeskAgents::where('agent_id',$ticket->assignee_id)->value('admin_id');
+                    $updateData['assign_id'] = $updateData['due_id'] = ZendeskAgents::where('agent_id',$ticket->assignee_id)->value('admin_id');
                 }
                 //更新rating,如果存在的话
                 if(!$zendesk->rating && $ticket->satisfaction_rating) {
