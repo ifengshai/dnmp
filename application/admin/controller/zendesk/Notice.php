@@ -605,14 +605,8 @@ class Notice extends Controller
         $search = [
             'type' => 'ticket',
             'order_by' => 'created_at',
-            'created' => [
-                'valuetype' => '<=',
-                'value' => '2020-04-10T07:20:38Z',
-            ],
-            'created' => [
-                'valuetype' => '>=',
-                'value' => '2020-04-10T01:48:38Z'
-            ],
+            'status' => ['open','pending'],
+            'assignee' => 'complaint@zeelool.com',
             'sort' => 'asc'
         ];
 
@@ -743,6 +737,7 @@ class Notice extends Controller
                     ]);
                 }
                 echo $zendesk->ticket_id."\r\n";
+                usleep(100);
                 // }
                 //sleep(1);
                 //Db::commit();
@@ -827,7 +822,7 @@ class Notice extends Controller
                 if($zendesk->assignee_id != $ticket->assignee_id && $ticket->assignee_id){
 
                     $updateData['assignee_id'] = $ticket->assignee_id;
-                    $updateData['assign_id'] = ZendeskAgents::where('agent_id',$ticket->assignee_id)->value('admin_id');
+                    $updateData['assign_id'] = $updateData['due_id'] = ZendeskAgents::where('agent_id',$ticket->assignee_id)->value('admin_id');
                 }
                 //更新rating,如果存在的话
                 if(!$zendesk->rating && $ticket->satisfaction_rating) {
