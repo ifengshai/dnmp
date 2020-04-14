@@ -48,7 +48,6 @@ class WorkOrderList extends Backend
             $params = $this->request->post("row/a");
             if ($params) {
                 $params = $this->preExcludeFields($params);
-
                 if ($this->dataLimit && $this->dataLimitFieldAutoFill) {
                     $params[$this->dataLimitField] = $this->auth->id;
                 }
@@ -152,6 +151,72 @@ class WorkOrderList extends Backend
         $country = json_decode(file_get_contents('assets/js/country.js'), true);
         $this->view->assign('country', $country);
 
+        return $this->view->fetch();
+    }
+    /**
+     * 编辑
+     *
+     * @Description
+     * @author lsw
+     * @since 2020/04/14 15:00:19 
+     * @param [type] $ids
+     * @return void
+     */
+    public function edit($ids = null)
+    {
+        $row = $this->model->get($ids);
+        if (!$row) {
+            $this->error(__('No Results were found'));
+        }
+        $adminIds = $this->getDataLimitAdminIds();
+        if (is_array($adminIds)) {
+            if (!in_array($row[$this->dataLimitField], $adminIds)) {
+                $this->error(__('You have no permission'));
+            }
+        }
+        if ($this->request->isPost()) {
+            $params = $this->request->post("row/a");
+            if ($params) {
+                $params = $this->preExcludeFields($params);
+                $result = false;
+                Db::startTrans();
+                try {
+                    //是否采用模型验证
+                    if ($this->modelValidate) {
+                        $name = str_replace("\\model\\", "\\validate\\", get_class($this->model));
+                        $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.edit' : $name) : $this->modelValidate;
+                        $row->validateFailException(true)->validate($validate);
+                    }
+                    $result = $row->allowField(true)->save($params);
+                    Db::commit();
+                } catch (ValidateException $e) {
+                    Db::rollback();
+                    $this->error($e->getMessage());
+                } catch (PDOException $e) {
+                    Db::rollback();
+                    $this->error($e->getMessage());
+                } catch (Exception $e) {
+                    Db::rollback();
+                    $this->error($e->getMessage());
+                }
+                if ($result !== false) {
+                    $this->success();
+                } else {
+                    $this->error(__('No rows were updated'));
+                }
+            }
+            $this->error(__('Parameter %s can not be empty', ''));
+        }
+        $this->view->assign("row", $row);
+        if(1 == $row->work_type ){ //判断工单类型，客服工单
+            $this->view->assign('work_type', 1);
+            $this->assignconfig('work_type', 1);
+            $this->view->assign('problem_type', config('workorder.customer_problem_type')); //客服问题类型          
+        }else{ //仓库工单
+            $this->view->assign('work_type', 2);
+            $this->assignconfig('work_type', 2);  
+            $this->view->assign('problem_type', config('workorder.warehouse_problem_type')); //仓库问题类型
+        }
         return $this->view->fetch();
     }
 
