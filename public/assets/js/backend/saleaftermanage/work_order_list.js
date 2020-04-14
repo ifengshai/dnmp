@@ -118,6 +118,16 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                             secondNode.hide();
                         }
                     }
+                    //判断更换镜框的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 start
+                    if(!$('.step1-1').is(':hidden')){
+                        changeFrame()
+                    }
+                    //判断更换镜框的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end
+                    //判断取消订单的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 start
+                    if(!$('.step3').is(':hidden')){
+                        cancelOrder();
+                    }
+                    //判断取消订单的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end                   
                 }
             })
 
@@ -155,7 +165,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                             secondNode.hide();
                         }
                     }
-
                     var id = $(this).val();
 
                     //获取是否需要审核
@@ -179,15 +188,94 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     $('#appoint_group_users').html(users.join(','));
                     $('#recept_person_id').val(appoint_users.join(','));
                     $('#recept_person').val(users.join(','));
+                    $('#recept_group_id').val(arr.join(','));
+                    //判断更换镜框的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 start
+                    if(!$('.step1-1').is(':hidden')){
+                        changeFrame();
+                    }
+                    //判断更换镜框的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end
+                    //判断取消订单的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 start
+                    if(!$('.step3').is(':hidden')){
+                        cancelOrder();
+                    }
+                    //判断取消订单的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end
                 }
-                var users = array_filter(username);
-                $('#appoint_group_users').html(users.join(','));
-                $('#recept_person_id').val(appoint_users.join(','));
-                $('#recept_person').val(users.join(','));
-                $('#recept_group_id').val(arr.join(','));
             });
-
-
+            //js 函数读取更换镜架信息
+            function changeFrame(){
+                var ordertype = $('#work_platform').val();
+                var order_number = $('#c-platform_order').val();
+                if(!order_number){
+                    return false;
+                }
+                if(ordertype<=0){
+                    Layer.alert('请选择正确的平台');
+                    return false;
+                }
+                Backend.api.ajax({
+                    url:'saleaftermanage/work_order_list/ajax_get_order',
+                    data:{ordertype:ordertype,order_number:order_number}
+                }, function(data, ret){
+                    //删除添加的tr
+                    $('#change-frame tr:gt(0)').remove();
+                    var item = ret.data;
+                    var Str = '';
+                    for(var j = 0,len = item.length; j <len; j++) {
+                        var newItem = item[j];
+                        var m = j+1;
+                        Str +='<tr>';
+                        Str +='<td><input  class="form-control" name="row[change_frame]['+m+'][original_sku]" type="text" value="'+newItem.sku+'"></td>';
+                        Str +='<td><input  class="form-control" name="row[change_frame]['+m+'][original_number]" type="text" value="'+Math.round(newItem.qty_ordered)+'"></td>';
+                        Str +='<td><input  class="form-control" name="row[change_frame]['+m+'][change_sku]" type="text"></td>';
+                        Str +='<td><input  class="form-control" name="row[change_frame]['+m+'][change_number]" type="text"></td>';
+                        Str +='<td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>删除</a></td>';
+                        Str += '</tr>';
+                    }
+                    $("#change-frame tbody").append(Str);
+                    return false;
+                }, function(data, ret){
+                    //失败的回调
+                    alert(ret.msg);
+                    console.log(ret);
+                    return false;
+                });                   
+            }
+            //js 函数读取取消订单信息
+            function cancelOrder(){
+                var ordertype = $('#work_platform').val();
+                var order_number = $('#c-platform_order').val();
+                if(!order_number){
+                    return false;
+                }
+                if(ordertype<=0){
+                    Layer.alert('请选择正确的平台');
+                    return false;
+                }
+                Backend.api.ajax({
+                    url:'saleaftermanage/work_order_list/ajax_get_order',
+                    data:{ordertype:ordertype,order_number:order_number}
+                }, function(data, ret){
+                    //删除添加的tr
+                    $('#cancel-order tr:gt(0)').remove();
+                    var item = ret.data;
+                    var Str = '';
+                    for(var j = 0,len = item.length; j <len; j++) {
+                        var newItem = item[j];
+                        var m = j+1;
+                        Str +='<tr>';
+                        Str +='<td><input  class="form-control" readonly name="row[item]['+m+'][original_sku]" type="text" value="'+newItem.sku+'"></td>';
+                        Str +='<td><input  class="form-control" name="row[item]['+m+'][original_number]"  type="text" value="'+Math.round(newItem.qty_ordered)+'"></td>';
+                        Str += '</tr>';
+                    }
+                    $("#cancel-order tbody").append(Str);
+                    return false;
+                }, function(data, ret){
+                    //失败的回调
+                    alert(ret.msg);
+                    console.log(ret);
+                    return false;
+                });                   
+            }            
             //增加一行镜架数据
             $(document).on('click', '.btn-add-frame', function () {
                 var rows = document.getElementById("caigou-table-sku").rows.length;
@@ -319,26 +407,37 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         order_number: incrementId
                     }
                 }, function (data, ret) {
+                    $('#order_pay_currency').val(data.base_currency_code);
+                    $('#order_pay_method').val(data.method);
                     var shtml = '<option value="">请选择</option>';
-                    for (var i in data) {
-                        shtml += '<option value="' + data[i] + '">' + data[i] + '</option>'
+                    for (var i in data.sku) {
+                        shtml += '<option value="' + data.sku[i] + '">' + data.sku[i] + '</option>'
                     }
                     $('#c-order_sku').append(shtml);
                     $('.selectpicker ').selectpicker('refresh');
+                    //判断更换镜框的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 start
+                    if(!$('.step1-1').is(':hidden')){
+                        changeFrame()
+                    }
+                    //判断更换镜框的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end
+                    //判断取消订单的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 start
+                    if(!$('.step3').is(':hidden')){
+                        cancelOrder();
+                    }
+                    //判断取消订单的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end                                        
                 });
             })
             //补发点击填充数据
             var lens_click_data
-            $(document).on('click','input[name="row[measure_' +
-                'choose_id]"]',function(){
+            $(document).on('click','input[name="row[measure_choose_id][]"]',function(){
+
                 var value = $(this).val();
                 var check = $(this).prop('checked');
-                //补发
-                if(value == 7 && check === true){
-                    var increment_id = $('#c-platform_order').val();
-                    if(increment_id){
-
-                        var site_type = $('#work_platform').val();
+                var increment_id = $('#c-platform_order').val();
+                if(increment_id){
+                    var site_type = $('#work_platform').val();
+                    //补发
+                    if(value == 7 && check === true){
                         //获取补发的信息
                         $.ajax({
                             type: "POST",
@@ -427,7 +526,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                         prescription_div.find('input[name="row[replacement][os_add][]"]').val(prescription.os_add);
                                     }
                                     if(prescription.hasOwnProperty("pd")){
-                                        prescription_div.find('input[name="row[replacement][pd_r][]"]').val(prescription.pd_r);
+                                        prescription_div.find('input[name="row[replacement][pd_r][]"]').val(prescription.pd);
                                         //prescription_div.find('input[name="row[replacement][pd_l][]"]').attr('disabled',true);
                                     }else{
                                         prescription_div.find('input[name="row[replacement][pd_r][]"]').val(prescription.pd_r);
@@ -466,11 +565,25 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                 Controller.api.bindevent();
                             }
                         });
-                        //获取
-                    }else{
-                        Toastr.error('请选选择订单号……');
                     }
+                    //更加镜架的更改
+                    var question = $('input[name="row[problem_type_id]"]:checked').val();
+                    if(value == 1 && question == 2 && check === true){
+                        Backend.api.ajax({
+                            url: 'saleaftermanage/work_order_list/ajaxGetChangeLens',
+                            data: {
+                                increment_id: increment_id,
+                                site_type: site_type,
+                            }
+                        }, function (data, ret) {
+                            $('#lens_contents').html(data.html);
+                            $('.selectpicker ').selectpicker('refresh');
+                        });
+                    }
+                }else{
+                    Toastr.error('请选选择订单号……');
                 }
+
             });
 
             $(document).on('click','.btn-add-supplement-reissue',function(){
