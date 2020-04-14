@@ -644,7 +644,9 @@ class Notice extends Controller
      */
     public function findCommentsByTickets($tickets,$type)
     {
+        $key = 0;
         foreach($tickets as $ticket){
+            ++$key;
             $via = $ticket->via;
             $priority = 0;
             if ($ticket->priority) {
@@ -657,6 +659,7 @@ class Notice extends Controller
             $tags = ZendeskTags::where('name','in',$ticket->tags)->column('id');
             sort($tags);
             echo $ticket->id."\r\n";
+            echo $key."\r\n";
             if(!Zendesk::where(['ticket_id' => $ticket->id, 'type' => $type])->find()) {
                 echo $ticket->id."\r\n";
                 //根据用户的id获取用户的信息
@@ -793,7 +796,7 @@ class Notice extends Controller
             $type = 2;
         }
         $a = 1;
-        $ticket_ids = Zendesk::where('status','2')->where('type',$type)->column('ticket_id');
+        $ticket_ids = Zendesk::where('ticket_id','in','101109,101821,105246,105355,105359,105366,105372,105420,105433,105460,105497,105499,105504')->where('type',$type)->column('ticket_id');
         foreach($ticket_ids as $ticket_id){
             $ticket = $this->client->tickets()->find($ticket_id)->ticket;
 
