@@ -71,7 +71,7 @@ class WorkOrderList extends Model
         if(!$sku && !$orderInfo){
             return [];
         }
-        $result['sku'] = $sku;
+        $result['sku'] = array_unique($sku);
         $result['base_currency_code'] = $orderInfo['base_currency_code'];
         $result['method']             = $orderInfo['method'];
         return $result ? $result : [];
