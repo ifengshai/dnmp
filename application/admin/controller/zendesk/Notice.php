@@ -626,7 +626,7 @@ class Notice extends Controller
                 try{
                     $search = $this->client->search()->find($params,['page' => $i]);
                 }catch (\Exception $e){
-                    echo 1;
+                    echo $e->getMessage();
                     $this->setTickets();
                 }
                 $tickets = $search->results;
