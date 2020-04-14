@@ -20,20 +20,25 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                     [
                         {field: 'id', title: __('Id'),sortable: true},
                         {field: 'ticket_id', title: __('Ticket_id'),sortable: true},
-                        {field: 'subject', title: __('Subject'),operate:false,formatter: function(value){return value.toString().substr(0, 90)}},
+                        {field: 'subject', title: __('Subject'),operate:false,formatter: function(value){return value.toString().substr(0, 100)}},
                         {field: 'email', title: __('Email'),operate:'LIKE %...%'},
                         //{field: 'assign_id', title: __('Assgin_id'),operate: false,visible:false},
-                        {field: 'admin.nickname', title: __('Assign_id')},
-                        {field: 'status', title: __('Status'), custom: { 1: 'danger', 2: 'success', 3: 'blue', 4: 'orange', 5: 'gray' }, searchList: { 1: 'New', 2: 'Open', 3: 'Pending', 4: 'Solved', 5: 'Close' }, formatter: Table.api.formatter.status },
+                        {
+                            field: 'admin.nickname',
+                            title: __('Assign_id'),
+                            align: 'left',
+                            searchList: $.getJSON('zendesk/zendesk_agents/getAgentsList')
+                        },
+                        {field: 'status', title: __('Status'), custom: { 1: 'danger', 2: 'success', 3: 'blue', 4: 'orange', 5: 'gray' , 6: 'success' }, searchList: { 1: 'New', 2: 'Open', 3: 'Pending', 4: 'Solved', 5: 'Close', 6: 'New + Open' }, formatter: Table.api.formatter.status },
                         {
                             field: 'tags', title: __('Tags'), searchList: function (column) {
                                 return Template('tagstpl', {});
                             },visible: false
                         },
-                        {field: 'tag_format', title: __('Tags'),operate:false},
                         {field: 'priority', title: __('priority'), custom: { 0: 'success', 1: 'gray', 2: 'yellow', 3: 'blue', 4: 'danger' }, searchList: { 0: '无', 1: 'Low', 2: 'Normal', 3: 'High', 4: 'Urgent' }, formatter: Table.api.formatter.status },
                         {field: 'channel', title: __('Channel')},
                         {field: 'type', title: __('type'), custom: { 1: 'yellow', 2: 'blue' }, searchList: { 1: 'Zeelool', 2: 'Voogueme' }, formatter: Table.api.formatter.status },
+                        {field: 'create_time', title: __('Create_time'), operate:'RANGE', addclass:'datetimerange',sortable: true},
                         {field: 'update_time', title: __('Update_time'), operate:'RANGE', addclass:'datetimerange',sortable: true},
                         {
                             field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [

@@ -197,4 +197,13 @@ class ZendeskAgents extends Backend
         }
         $this->error('not found');
     }
+    public function getAgentsList()
+    {
+        $agents = $this->model->with('admin')->select();
+        $res = [];
+        foreach($agents as $agent){
+            $res[] = $agent->admin->nickname;
+        }
+        return $res;
+    }
 }
