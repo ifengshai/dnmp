@@ -26,26 +26,30 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         { checkbox: true },
                         { field: 'id', title: __('Id') },
                         { field: 'work_platform', title: __('work_platform'), custom: { 1: 'blue', 2: 'danger', 3: 'orange' }, searchList: { 1: 'Zeelool', 2: 'Voogueme', 3: 'Nihao' }, formatter: Table.api.formatter.status },
-
-                        { field: 'work_type', title: __('Work_type') },
+                        { field: 'work_type_str', title: __('Work_type') },
                         { field: 'platform_order', title: __('Platform_order') },
-                        { field: 'order_pay_currency', title: __('Order_pay_currency') },
                         { field: 'order_sku', title: __('Order_sku') },
-                        { field: 'work_status', title: __('Work_status') },
-                        { field: 'work_level', title: __('Work_level') },
-                        { field: 'problem_type_id', title: __('Problem_type_id') },
+                        { field: 'work_level', title: __('Work_level'), custom: { 1: 'success', 2: 'orange', 3: 'danger' }, searchList: { 1: '低', 2: '中', 3: '高' }, formatter: Table.api.formatter.status },
                         { field: 'problem_type_content', title: __('Problem_type_content') },
-                        { field: 'problem_description', title: __('Problem_description') },
-                        { field: 'create_id', title: __('Create_id') },
-                        { field: 'handle_person', title: __('Handle_person') },
-                        { field: 'is_check', title: __('Is_check') },
-                        { field: 'check_person_id', title: __('Check_person_id') },
+                        { field: 'create_user_name', title: __('create_user_name') },
+                        { field: 'is_check', title: __('Is_check'), custom: { 0: 'black', 1: 'success'}, searchList: { 0: '否', 1: '是'}, formatter: Table.api.formatter.status },
+
+                        { field: 'assign_user_name', title: __('Assign_user_id') },
+
                         { field: 'operation_person', title: __('Operation_person') },
-                        { field: 'shenhe_beizhu', title: __('Shenhe_beizhu') },
-                        { field: 'create_time', title: __('Create_time'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime },
+
+
+                        { field: 'shenhe_beizhu', title: __('deal_with') },
+
+
+                       /* { field: 'create_time', title: __('Create_time'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime },
                         { field: 'check_time', title: __('Check_time'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime },
-                        { field: 'complete_time', title: __('Complete_time'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime },
-                        { field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate }
+                        { field: 'complete_time', title: __('Complete_time'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime },*/
+
+
+                        { field: 'work_status', title: __('Work_status') },
+
+                        { field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate },
                     ]
                 ]
             });
