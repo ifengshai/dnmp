@@ -656,6 +656,7 @@ class Notice extends Controller
             $assign_id = \app\admin\model\zendesk\ZendeskAgents::where('agent_id',$ticket->assignee_id)->value('admin_id');
             $tags = ZendeskTags::where('name','in',$ticket->tags)->column('id');
             sort($tags);
+            echo $ticket->id."\r\n";
             if(!Zendesk::where(['ticket_id' => $ticket->id, 'type' => $type])->find()) {
                 echo $ticket->id."\r\n";
                 //根据用户的id获取用户的信息
