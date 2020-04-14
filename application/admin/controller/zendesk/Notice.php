@@ -645,7 +645,6 @@ class Notice extends Controller
     public function findCommentsByTickets($tickets,$type)
     {
         foreach($tickets as $ticket){
-            echo 1;
             $via = $ticket->via;
             $priority = 0;
             if ($ticket->priority) {
@@ -658,6 +657,7 @@ class Notice extends Controller
             $tags = ZendeskTags::where('name','in',$ticket->tags)->column('id');
             sort($tags);
             if(!Zendesk::where(['ticket_id' => $ticket->id, 'type' => $type])->find()) {
+                echo $ticket->id."\r\n";
                 //根据用户的id获取用户的信息
                 $user = $this->client->crasp()->findUser(['id' => $ticket->requester_id]);
                 $userInfo = $user->user;
