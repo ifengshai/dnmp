@@ -12,6 +12,7 @@ use Util\NihaoPrescriptionDetailHelper;
 use Util\ZeeloolPrescriptionDetailHelper;
 use Util\VooguemePrescriptionDetailHelper;
 use Util\WeseeopticalPrescriptionDetailHelper;
+
 /**
  * 售后工单列管理
  *
@@ -31,6 +32,7 @@ class WorkOrderList extends Backend
         parent::_initialize();
         $this->model = new \app\admin\model\saleaftermanage\WorkOrderList;
         $this->step = new \app\admin\model\saleaftermanage\WorkOrderMeasure;
+        $this->recept = new \app\admin\model\saleaftermanage\WorkOrderRecept;
     }
 
     /**
@@ -112,14 +114,26 @@ class WorkOrderList extends Backend
                         $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.add' : $name) : $this->modelValidate;
                         $this->model->validateFailException(true)->validate($validate);
                     }
+            
                     $params['create_user_name'] = session('admin.nickname');
+                    //判断工单类型 1客服 2仓库
+                    if ($params['work_type'] == 1) {
+                        $params['problem_type_content'] = config('workorder.customer_problem_type')[$params['problem_type_id']];
+                    } elseif ($params['work_type'] == 2) {
+                        $params['problem_type_content'] = config('workorder.warehouse_problem_type')[$params['problem_type_id']];
+                        $params['after_user_id'] = config('workorder.copy_group');//经手人
+                    }
+                    $params['create_user_id'] = session('admin.id');
+                    $params['create_time'] = date('Y-m-d H:i:s');
+                   
                     $result = $this->model->allowField(true)->save($params);
                     if (false === $result) {
                         throw new Exception("添加失败！！");
                     }
 
                     //循环插入措施
-                    if ($params['measure_choose_id']) {
+                    if (count(array_filter($params['measure_choose_id'])) > 0) {
+
                         //措施
                         $measureList = [];
                         foreach ($params['measure_choose_id'] as $k => $v) {
@@ -127,32 +141,32 @@ class WorkOrderList extends Backend
                             $measureList[$k]['measure_choose_id'] = $v;
                             $measureList[$k]['measure_content'] = config('workorder.step')[$v];
                             $measureList[$k]['create_time'] = date('Y-m-d H:i:s');
+
+                            //根据措施读取承接组、承接人 默认是客服问题组配置
+                            $appoint_ids = $params['order_recept']['appoint_ids'][$v];
+                            $appoint_users = $params['order_recept']['appoint_users'][$v];
+                            $appoint_group = $params['order_recept']['appoint_group'][$v];
+                            //循环插入承接人
+                            $appointList = [];
+                            foreach ($appoint_ids as $key => $val) {
+                                $appointList[$key]['work_id'] = $this->model->id;
+                                $appointList[$key]['measure_id'] = $v;
+                                $appointList[$key]['recept_group_id'] = $appoint_group[$key];
+                                $appointList[$key]['recept_person_id'] = $val;
+                                $appointList[$key]['recept_person'] = $appoint_users[$key];
+                                $appointList[$key]['create_time'] = date('Y-m-d H:i:s');
+                            }
+                            $receptRes = $this->recept->saveAll($appointList);
+                            if (false === $receptRes) {
+                                throw new Exception("添加失败！！");
+                            } 
                         }
+
                         $res = $this->step->saveAll($measureList);
                         if (false === $res) {
                             throw new Exception("添加失败！！");
                         }
                     }
-
-                    //循环插入承接人
-                    if ($params['order_recept']) {
-                        $recept_person_id = explode(',', trim($params['order_recept']['recept_person_id'], ','));
-                        $recept_person = explode(',', trim($params['order_recept']['recept_person'], ','));
-                        $recept_group_id = explode(',', trim($params['order_recept']['recept_group_id'], ','));
-                        //措施
-                        $receptList = [];
-                        foreach ($recept_person_id as $k => $v) {
-                            $receptList[$k]['work_id'] = $this->model->id;
-                            $receptList[$k]['measure_choose_id'] = $v;
-                            $receptList[$k]['measure_content'] = config('workorder.step')[$v];
-                            $receptList[$k]['create_time'] = date('Y-m-d H:i:s');
-                        }
-                        $res = $this->step->saveAll($measureList);
-                        if (false === $res) {
-                            throw new Exception("添加失败！！");
-                        }
-                    }
-
 
                     Db::commit();
                 } catch (ValidateException $e) {
@@ -260,13 +274,13 @@ class WorkOrderList extends Backend
             $this->error(__('Parameter %s can not be empty', ''));
         }
         $this->view->assign("row", $row);
-        if(1 == $row->work_type ){ //判断工单类型，客服工单
+        if (1 == $row->work_type) { //判断工单类型，客服工单
             $this->view->assign('work_type', 1);
             $this->assignconfig('work_type', 1);
             $this->view->assign('problem_type', config('workorder.customer_problem_type')); //客服问题类型          
-        }else{ //仓库工单
+        } else { //仓库工单
             $this->view->assign('work_type', 2);
-            $this->assignconfig('work_type', 2);  
+            $this->assignconfig('work_type', 2);
             $this->view->assign('problem_type', config('workorder.warehouse_problem_type')); //仓库问题类型
         }
         return $this->view->fetch();
@@ -311,7 +325,7 @@ class WorkOrderList extends Backend
             //请求接口获取lens_type，coating_type，prescription_type等信息
             $lens = $this->model->getReissueLens($siteType,$res['showPrescriptions']);
             if ($res) {
-                $this->success('操作成功！！', '', ['address' => $res,'lens' => $lens]);
+                $this->success('操作成功！！', '', ['address' => $res, 'lens' => $lens]);
             } else {
                 $this->error('未获取到数据！！');
             }
@@ -382,14 +396,14 @@ class WorkOrderList extends Backend
      * @since 2020/04/13 17:28:49 
      * @return void
      */
-    public function ajax_get_order($ordertype=null,$order_number=null)
+    public function ajax_get_order($ordertype = null, $order_number = null)
     {
-        if($this->request->isAjax()){
-            if($ordertype<1 || $ordertype>5){ //不在平台之内
-                return $this->error('选择平台错误,请重新选择','','error',0);
+        if ($this->request->isAjax()) {
+            if ($ordertype < 1 || $ordertype > 5) { //不在平台之内
+                return $this->error('选择平台错误,请重新选择', '', 'error', 0);
             }
-            if(!$order_number){
-                return  $this->error('订单号不存在，请重新选择','','error',0);
+            if (!$order_number) {
+                return  $this->error('订单号不存在，请重新选择', '', 'error', 0);
             }
             if ($ordertype == 1) {
                 $result = ZeeloolPrescriptionDetailHelper::get_one_by_increment_id($order_number);
@@ -397,14 +411,14 @@ class WorkOrderList extends Backend
                 $result = VooguemePrescriptionDetailHelper::get_one_by_increment_id($order_number);
             } elseif ($ordertype == 3) {
                 $result = NihaoPrescriptionDetailHelper::get_one_by_increment_id($order_number);
-            }elseif(5 == $ordertype){
+            } elseif (5 == $ordertype) {
                 $result = WeseeopticalPrescriptionDetailHelper::get_one_by_increment_id($order_number);
             }
-            if(!$result){
-                return $this->error('找不到这个订单,请重新尝试','','error',0);
+            if (!$result) {
+                return $this->error('找不到这个订单,请重新尝试', '', 'error', 0);
             }
-                return $this->success('','',$result,0);
-        }else{
+            return $this->success('', '', $result, 0);
+        } else {
             return $this->error('404 Not Found');
         }
     }
