@@ -8,7 +8,10 @@ use think\Exception;
 use app\admin\model\AuthGroupAccess;
 use think\exception\PDOException;
 use think\exception\ValidateException;
-
+use Util\NihaoPrescriptionDetailHelper;
+use Util\ZeeloolPrescriptionDetailHelper;
+use Util\VooguemePrescriptionDetailHelper;
+use Util\WeseeopticalPrescriptionDetailHelper;
 /**
  * 售后工单列管理
  *
@@ -168,5 +171,39 @@ class WorkOrderList extends Backend
         $country = json_decode(file_get_contents('assets/js/country.js'), true);
         $province = $country[$countryId];
         return $province ?: [];
+    }
+    /**
+     * 获取订单order的镜框等信息
+     *
+     * @Description
+     * @author lsw
+     * @since 2020/04/13 17:28:49 
+     * @return void
+     */
+    public function ajax_get_order($ordertype=null,$order_number=null)
+    {
+        if($this->request->isAjax()){
+            if($ordertype<1 || $ordertype>5){ //不在平台之内
+                return $this->error('选择平台错误,请重新选择','','error',0);
+            }
+            if(!$order_number){
+                return  $this->error('订单号不存在，请重新选择','','error',0);
+            }
+            if ($ordertype == 1) {
+                $result = ZeeloolPrescriptionDetailHelper::get_one_by_increment_id($order_number);
+            } elseif ($ordertype == 2) {
+                $result = VooguemePrescriptionDetailHelper::get_one_by_increment_id($order_number);
+            } elseif ($ordertype == 3) {
+                $result = NihaoPrescriptionDetailHelper::get_one_by_increment_id($order_number);
+            }elseif(5 == $ordertype){
+                $result = WeseeopticalPrescriptionDetailHelper::get_one_by_increment_id($order_number);
+            }
+            if(!$result){
+                return $this->error('找不到这个订单,请重新尝试','','error',0);
+            }
+                return $this->success('','',$result,0);
+        }else{
+            return $this->error('404 Not Found');
+        }
     }
 }
