@@ -40,6 +40,58 @@ class WorkOrderList extends Backend
      */
 
     /**
+     * 查看
+     */
+    public function index()
+    {
+        //设置过滤方法
+        $this->request->filter(['strip_tags']);
+        if ($this->request->isAjax()) {
+            //如果发送的来源是Selectpage，则转发到Selectpage
+            if ($this->request->request('keyField')) {
+                return $this->selectpage();
+            }
+            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            $total = $this->model
+                ->where($where)
+                ->order($sort, $order)
+                ->count();
+
+            $list = $this->model
+                ->where($where)
+                ->order($sort, $order)
+                ->limit($offset, $limit)
+                ->select();
+
+            $list = collection($list)->toArray();
+
+            $admin = new \app\admin\model\Admin();
+            $user_list = $admin->where('status', 'normal')->column('nickname', 'id');
+            $user_list = collection($user_list)->toArray();
+
+            foreach ($list as $k => $v){
+                if($v['work_type'] == 1){
+                    $list[$k]['work_type_str'] = '客服工单';
+                }else{
+                    $list[$k]['work_type_str'] = '仓库工单';
+                }
+
+                if($v['is_check'] == 1){
+                    $list[$k]['assign_user_name'] = $user_list[$v['assign_user_id']];
+                }
+
+
+            }
+
+
+            $result = array("total" => $total, "rows" => $list);
+
+            return json($result);
+        }
+        return $this->view->fetch();
+    }
+
+    /**
      * 添加
      */
     public function add()
