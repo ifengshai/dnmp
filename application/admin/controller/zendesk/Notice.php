@@ -609,8 +609,8 @@ class Notice extends Controller
             'assignee' => 'complaint@zeelool.com',
             'sort' => 'asc'
         ];
-
-        $type = $this->postData['type'] == 'zeelool' ? 1 : 2;
+        //$type = $this->postData['type'] == 'zeelool' ? 1 : 2;
+        $type = 1;
         $params = $this->parseStr($search);
         $search = $this->client->search()->find($params);
         $tickets = $search->results;
@@ -655,7 +655,7 @@ class Notice extends Controller
             $assign_id = \app\admin\model\zendesk\ZendeskAgents::where('agent_id',$ticket->assignee_id)->value('admin_id');
             $tags = ZendeskTags::where('name','in',$ticket->tags)->column('id');
             sort($tags);
-            if(!Zendesk::where('ticket_id',$ticket->id)->find()) {
+            if(!Zendesk::where(['ticket_id' => $ticket->id, 'type' => $type])->find()) {
                 //根据用户的id获取用户的信息
                 $user = $this->client->crasp()->findUser(['id' => $ticket->requester_id]);
                 $userInfo = $user->user;
