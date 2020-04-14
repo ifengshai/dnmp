@@ -26,26 +26,30 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         { checkbox: true },
                         { field: 'id', title: __('Id') },
                         { field: 'work_platform', title: __('work_platform'), custom: { 1: 'blue', 2: 'danger', 3: 'orange' }, searchList: { 1: 'Zeelool', 2: 'Voogueme', 3: 'Nihao' }, formatter: Table.api.formatter.status },
-
-                        { field: 'work_type', title: __('Work_type') },
+                        { field: 'work_type_str', title: __('Work_type') },
                         { field: 'platform_order', title: __('Platform_order') },
-                        { field: 'order_pay_currency', title: __('Order_pay_currency') },
                         { field: 'order_sku', title: __('Order_sku') },
-                        { field: 'work_status', title: __('Work_status') },
-                        { field: 'work_level', title: __('Work_level') },
-                        { field: 'problem_type_id', title: __('Problem_type_id') },
+                        { field: 'work_level', title: __('Work_level'), custom: { 1: 'success', 2: 'orange', 3: 'danger' }, searchList: { 1: '低', 2: '中', 3: '高' }, formatter: Table.api.formatter.status },
                         { field: 'problem_type_content', title: __('Problem_type_content') },
-                        { field: 'problem_description', title: __('Problem_description') },
-                        { field: 'create_id', title: __('Create_id') },
-                        { field: 'handle_person', title: __('Handle_person') },
-                        { field: 'is_check', title: __('Is_check') },
-                        { field: 'check_person_id', title: __('Check_person_id') },
+                        { field: 'create_user_name', title: __('create_user_name') },
+                        { field: 'is_check', title: __('Is_check'), custom: { 0: 'black', 1: 'success'}, searchList: { 0: '否', 1: '是'}, formatter: Table.api.formatter.status },
+
+                        { field: 'assign_user_name', title: __('Assign_user_id') },
+
                         { field: 'operation_person', title: __('Operation_person') },
-                        { field: 'shenhe_beizhu', title: __('Shenhe_beizhu') },
-                        { field: 'create_time', title: __('Create_time'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime },
+
+
+                        { field: 'shenhe_beizhu', title: __('deal_with') },
+
+
+                       /* { field: 'create_time', title: __('Create_time'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime },
                         { field: 'check_time', title: __('Check_time'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime },
-                        { field: 'complete_time', title: __('Complete_time'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime },
-                        { field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate }
+                        { field: 'complete_time', title: __('Complete_time'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime },*/
+
+
+                        { field: 'work_status', title: __('Work_status') },
+
+                        { field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate },
                     ]
                 ]
             });
@@ -443,15 +447,15 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
             })
             //补发点击填充数据
             var lens_click_data
-            $(document).on('click', 'input[name="row[measure_choose_id]"]', function () {
+            $(document).on('click','input[name="row[measure_choose_id][]"]',function(){
+
                 var value = $(this).val();
                 var check = $(this).prop('checked');
-                //补发
-                if (value == 7 && check === true) {
-                    var increment_id = $('#c-platform_order').val();
-                    if (increment_id) {
-
-                        var site_type = $('#work_platform').val();
+                var increment_id = $('#c-platform_order').val();
+                if(increment_id){
+                    var site_type = $('#work_platform').val();
+                    //补发
+                    if(value == 7 && check === true){
                         //获取补发的信息
                         $.ajax({
                             type: "POST",
@@ -519,6 +523,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     var val = $(this).val();
                                     var prescription = prescriptions[val];
                                     var prescription_div = $(this).parents('.step7_function2').next('.step1_function3');
+                                    prescription_div.find('input').val('');
                                     prescription_div.find('input[name="row[replacement][od_sph][]"]').val(prescription.od_sph);
                                     prescription_div.find('input[name="row[replacement][os_sph][]"]').val(prescription.os_sph);
                                     prescription_div.find('input[name="row[replacement][os_cyl][]"]').val(prescription.os_cyl);
@@ -539,8 +544,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                         prescription_div.find('input[name="row[replacement][od_add][]"]').val(prescription.od_add);
                                         prescription_div.find('input[name="row[replacement][os_add][]"]').val(prescription.os_add);
                                     }
-                                    if (prescription.hasOwnProperty("pd")) {
-                                        prescription_div.find('input[name="row[replacement][pd_r][]"]').val(prescription.pd_r);
+                                    if(prescription.hasOwnProperty("pd")){
+                                        prescription_div.find('input[name="row[replacement][pd_r][]"]').val(prescription.pd);
                                         //prescription_div.find('input[name="row[replacement][pd_l][]"]').attr('disabled',true);
                                     } else {
                                         prescription_div.find('input[name="row[replacement][pd_r][]"]').val(prescription.pd_r);
@@ -579,11 +584,25 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                 Controller.api.bindevent();
                             }
                         });
-                        //获取
-                    } else {
-                        Toastr.error('请选选择订单号……');
                     }
+                    //更加镜架的更改
+                    var question = $('input[name="row[problem_type_id]"]:checked').val();
+                    if(value == 1 && question == 2 && check === true){
+                        Backend.api.ajax({
+                            url: 'saleaftermanage/work_order_list/ajaxGetChangeLens',
+                            data: {
+                                increment_id: increment_id,
+                                site_type: site_type,
+                            }
+                        }, function (data, ret) {
+                            $('#lens_contents').html(data.html);
+                            $('.selectpicker ').selectpicker('refresh');
+                        });
+                    }
+                }else{
+                    Toastr.error('请选选择订单号……');
                 }
+
             });
 
             $(document).on('click', '.btn-add-supplement-reissue', function () {

@@ -42,6 +42,58 @@ class WorkOrderList extends Backend
      */
 
     /**
+     * 查看
+     */
+    public function index()
+    {
+        //设置过滤方法
+        $this->request->filter(['strip_tags']);
+        if ($this->request->isAjax()) {
+            //如果发送的来源是Selectpage，则转发到Selectpage
+            if ($this->request->request('keyField')) {
+                return $this->selectpage();
+            }
+            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            $total = $this->model
+                ->where($where)
+                ->order($sort, $order)
+                ->count();
+
+            $list = $this->model
+                ->where($where)
+                ->order($sort, $order)
+                ->limit($offset, $limit)
+                ->select();
+
+            $list = collection($list)->toArray();
+
+            $admin = new \app\admin\model\Admin();
+            $user_list = $admin->where('status', 'normal')->column('nickname', 'id');
+            $user_list = collection($user_list)->toArray();
+
+            foreach ($list as $k => $v){
+                if($v['work_type'] == 1){
+                    $list[$k]['work_type_str'] = '客服工单';
+                }else{
+                    $list[$k]['work_type_str'] = '仓库工单';
+                }
+
+                if($v['is_check'] == 1){
+                    $list[$k]['assign_user_name'] = $user_list[$v['assign_user_id']];
+                }
+
+
+            }
+
+
+            $result = array("total" => $total, "rows" => $list);
+
+            return json($result);
+        }
+        return $this->view->fetch();
+    }
+
+    /**
      * 添加
      */
     public function add()
@@ -271,7 +323,7 @@ class WorkOrderList extends Backend
             //获取地址、处方等信息
             $res = $this->model->getAddress($siteType, $incrementId);
             //请求接口获取lens_type，coating_type，prescription_type等信息
-            $lens = $this->model->getLens($siteType, $res['showPrescriptions']);
+            $lens = $this->model->getReissueLens($siteType,$res['showPrescriptions']);
             if ($res) {
                 $this->success('操作成功！！', '', ['address' => $res, 'lens' => $lens]);
             } else {
@@ -291,6 +343,27 @@ class WorkOrderList extends Backend
         $country = json_decode(file_get_contents('assets/js/country.js'), true);
         $province = $country[$countryId];
         return $province ?: [];
+    }
+
+    /**
+     * 获取更改镜片的数据
+     * @throws Exception
+     */
+    public function ajaxGetChangeLens()
+    {
+        if (request()->isAjax()) {
+            $incrementId = input('increment_id');
+            $siteType = input('site_type');
+            //获取地址、处方等信息
+            $res = $this->model->getAddress($siteType, $incrementId);
+            $lens = $this->model->getReissueLens($siteType, $res['prescriptions'], 2);
+            if ($res) {
+                $this->success('操作成功！！', '', $lens);
+            } else {
+                $this->error('未获取到数据！！');
+            }
+        }
+        $this->error('404 not found');
     }
     /**
      * 获取订单order的镜框等信息
