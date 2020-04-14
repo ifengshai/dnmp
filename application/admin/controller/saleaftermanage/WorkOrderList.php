@@ -351,6 +351,29 @@ class WorkOrderList extends Backend
         }
         $this->error('404 not found');
     }
+
+    /**
+     * ajax根据prescription_type获取镜片信息
+     */
+    public function ajaxGetLensType()
+    {
+        if (request()->isAjax()) {
+            $siteType = input('site_type');
+            $prescriptionType = input('prescription_type');
+            $key = $siteType . '_getlens';
+            $data = session($key);
+            if(!$data){
+                $data = $this->model->getLensData($siteType);
+            }
+            $lensType = $data['lens_list'][$prescriptionType] ?: [];
+            if ($lensType) {
+                $this->success('操作成功！！', '', $lensType);
+            } else {
+                $this->error('未获取到数据！！');
+            }
+        }
+        $this->error('404 not found');
+    }
     /**
      * 获取订单order的镜框等信息
      *

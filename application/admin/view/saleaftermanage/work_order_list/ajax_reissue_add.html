@@ -1,6 +1,6 @@
 {if condition="$type eq 1"}
 <div>
-    <div class="step7_function2" style="margin-top:10px;">
+    <div class="step7_function2 prescription_type_step" style="margin-top:10px;">
         <div class="step7_function2_child">
             <label class="control-label col-xs-12 col-sm-3">SKU:</label>
             <div class="col-xs-12 col-sm-8">
@@ -32,9 +32,9 @@
         <div class="step7_function2_child">
             <label class="control-label col-xs-12 col-sm-3">prescription_type:</label>
             <div class="col-xs-12 col-sm-8">
-                <select class="form-control selectpicker" name="row[replacement][recipe_type][]"  title="请选择">
-                    {foreach name="prescription_type" item="val"}
-                        <option value='{$val}'>{$val}</option>
+                <select class="form-control selectpicker prescription_type" name="row[replacement][recipe_type][]"  title="请选择">
+                    {foreach name="prescription" item="val" key="key"}
+                        <option value='{$key}'>{$key}</option>
                     {/foreach}
                 </select>
             </div>
@@ -47,10 +47,8 @@
             <div class="step1_function3_child">
                 <label class="control-label col-xs-12 col-sm-3">lens_type:</label>
                 <div class="col-xs-12 col-sm-8">
-                    <select class="form-control selectpicker" name="row[replacement][lens_type][]"  title="请选择">
-                        {foreach name="lens_type" item="val"}
-                        <option value='{$val}'>{$val}</option>
-                        {/foreach}
+                    <select id="lens_type" class="form-control selectpicker" name="row[replacement][lens_type][]"  title="请选择">
+
                     </select>
                 </div>
             </div>
@@ -143,7 +141,7 @@
 {else / }
 {foreach name="$showPrescriptions" item="vo" key="key"}
 <div>
-    <div class="step1_function2">
+    <div class="step1_function2 prescription_type_step">
         <div class="step1_function2_child">
             <label class="control-label col-xs-12 col-sm-3">SKU:</label>
             <div class="col-xs-12 col-sm-8">
@@ -167,9 +165,9 @@
         <div class="step1_function2_child">
             <label class="control-label col-xs-12 col-sm-3">prescription_type:</label>
             <div class="col-xs-12 col-sm-8">
-                <select class="form-control selectpicker" name="row[change_lens][recipe_type][]"  title="请选择">
-                    {foreach name="prescription_type" item="val"}
-                    <option value='{$val}' {$val == $vo['prescription_type'] ? 'selected' : ''}>{$val}</option>
+                <select class="form-control selectpicker prescription_type" name="row[change_lens][recipe_type][]"  title="请选择">
+                    {foreach name="prescription" item="val" key="key"}
+                    <option value='{$key}' {$key == $vo['prescription_type'] ? 'selected' : ''}>{$key}</option>
                     {/foreach}
                 </select>
             </div>
@@ -182,9 +180,9 @@
             <div class="step7_function3_child">
                 <label class="control-label col-xs-12 col-sm-3">lens_type:</label>
                 <div class="col-xs-12 col-sm-8">
-                    <select class="form-control selectpicker" name="row[change_lens][lens_type][]"  title="请选择">
-                        {foreach name="lens_type" item="val"}
-                        <option value='{$val}' {$val == $vo['index_id'] ? 'selected' : ''}>{$val}</option>
+                    <select  id="lens_type" class="form-control selectpicker" name="row[change_lens][lens_type][]"  title="请选择">
+                        {foreach name="prescription[$vo['prescription_type']]" item="val"}
+                        <option value='{$val["lens_id"]}' {$val["lens_id"] == $vo['index_id'] ? 'selected' : ''}>{$val['lens_data_name']}</option>
                         {/foreach}
                     </select>
                 </div>

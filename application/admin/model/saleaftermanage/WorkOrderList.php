@@ -135,53 +135,55 @@ class WorkOrderList extends Model
     public function getReissueLens($siteType, $showPrescriptions, $type = 1)
     {
         $url = '';
-//        $key = $siteType . '_getlens';
-//        $data = session($key);
-//        if(!$data){
-            //处方信息
-            switch ($siteType) {
-                case 1:
-                    $url = 'http://z.zhaokuangyi.com/';
-                    break;
-                case 2:
-                    $url = 'http://api.voogueme.com/';
-                    break;
-                case 3:
-                    $url = 'http://www.nihaooptical.com/';
-                    break;
-                case 5:
-                    $url = 'http://www.eseeoptical.com/';
-                    break;
-                default:
-                    return false;
-                    break;
-            }
-            $url = $url . 'magic/product/lensData';
-            $res = json_decode(Http::get($url, []),true);
-            //模拟数据
-            $res['data'] = [
-                'prescription_type' => ['SingleVision','NonPrescription'],
-                'lens_type' => ['refractive_5','refractive_2','refractive_3'],
-                'coating_list' => $res['data']['coating_list']
-            ];
-            $data = $res['data'];
-            //session($key, $data, 3600*24);
-        //}
+        $key = $siteType . '_getlens';
+        $data = session($key);
+        if(!$data){
+            $data = $this->getLensData($siteType);
+            session($key, $data, 3600*24);
+        }
 
-        $original_sku = $prescription_type = $prescriptions = $lens_type = $coating_type = '';
+        $prescription = $prescriptions = $coating_type = '';
 
-        $prescription_type = $data['prescription_type'];
-        $lens_type = $data['lens_type'];
+        $prescription = $data['lens_list'];
         $coating_type = $data['coating_list'];
         if($type == 1){
             foreach($showPrescriptions as $key => $val){
                 $prescriptions .= "<option value='{$key}'>{$val}</option>";
             }
             //拼接html页面
-            $html = (new \think\View())->fetch('saleaftermanage/work_order_list/ajax_reissue_add',compact('prescription_type','lens_type','coating_type','prescriptions','type'));
+            $html = (new \think\View())->fetch('saleaftermanage/work_order_list/ajax_reissue_add',compact('prescription','coating_type','prescriptions','type'));
         }else{
-            $html = (new \think\View())->fetch('saleaftermanage/work_order_list/ajax_reissue_add',compact('showPrescriptions','original_sku','prescription_type','lens_type','coating_type','prescriptions','type'));
+            $html = (new \think\View())->fetch('saleaftermanage/work_order_list/ajax_reissue_add',compact('showPrescriptions','prescription','coating_type','prescriptions','type'));
         }
         return ['data' => $data,'html' => $html];
+    }
+
+    /**
+     * 获取lensdata数据
+     * @param $siteType
+     * @return bool
+     */
+    public function getLensData($siteType)
+    {
+        switch ($siteType) {
+            case 1:
+                $url = 'http://z.zhaokuangyi.com/';
+                break;
+            case 2:
+                $url = 'http://api.voogueme.com/';
+                break;
+            case 3:
+                $url = 'http://nh.zhaokuangyi.com/';
+                break;
+            case 5:
+                $url = 'http://www.eseeoptical.com/';
+                break;
+            default:
+                return false;
+                break;
+        }
+        $url = $url . 'magic/product/lensData';
+        $res = json_decode(Http::get($url, []),true);
+        return $res['data'];
     }
 }

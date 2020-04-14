@@ -515,6 +515,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
 
                                     //$(this).parents('.step7_function2').val('')
                                     $(this).parents('.step7_function2').find('select[name="row[replacement][recipe_type][]"]').val(prescription.prescription_type);
+                                    $(this).parents('.step7_function2').find('select[name="row[replacement][recipe_type][]"]').change();
                                     prescription_div.find('select[name="row[replacement][coating_type][]"]').val(prescription.coating_id);
                                     prescription_div.find('select[name="row[replacement][lens_type][]"]').val(prescription.index_id);
 
@@ -592,6 +593,32 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 $('.selectpicker ').selectpicker('refresh');
                 Controller.api.bindevent();
             });
+            //根据prescription_type获取lens_type
+            $(document).on('change','select[name="row[replacement][recipe_type][]"],select[name="row[change_lens][recipe_type][]"]',function(){
+                 var sitetype = $('#work_platform').val();
+                 var prescription_type = $(this).val();
+                 var that = $(this);
+                Backend.api.ajax({
+                    url: 'saleaftermanage/work_order_list/ajaxGetLensType',
+                    data: {
+                        site_type: sitetype,
+                        prescription_type: prescription_type
+                    }
+                }, function (data, ret) {
+                    var prescription_div = that.parents('.prescription_type_step').next('div');
+                    var lens_type;
+                    for(var i = 0;i<data.length;i++){
+                        lens_type += '<option value="'+data[i].lens_id+'">'+data[i].lens_data_name+'</option>';
+                    }
+                    prescription_div.find('#lens_type').html(lens_type);
+                    $('.selectpicker ').selectpicker('refresh');
+                }, function (data, ret) {
+                        var prescription_div = that.parents('.prescription_type_step').next('div');
+                        prescription_div.find('#lens_type').html('');
+                        $('.selectpicker ').selectpicker('refresh');
+                    }
+                );
+            })
 
             //省市二级联动
             $(document).on('change','#c-country',function(){
