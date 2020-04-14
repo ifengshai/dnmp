@@ -61,11 +61,20 @@ class WorkOrderList extends Model
                 return false;
                 break;
         }
-        $result = $this->model->alias('a')
+        $sku = $this->model->alias('a')
             ->where('increment_id', $increment_id)
             ->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')
             ->column('sku');
-        return $result ? array_unique($result) : [];
+        $orderInfo = $this->model->alias('a')->where('increment_id',$increment_id)
+        ->join(['sales_flat_order_payment' => 'c'],'a.entity_id=c.parent_id')
+        ->field('a.base_currency_code,c.method')->find(); 
+        if(!$sku && !$orderInfo){
+            return [];
+        }
+        $result['sku'] = $sku;
+        $result['base_currency_code'] = $orderInfo['base_currency_code'];
+        $result['method']             = $orderInfo['method'];
+        return $result ? $result : [];
     }
 
     /**
