@@ -795,7 +795,7 @@ class Notice extends Controller
             $type = 2;
         }
         $a = 1;
-        $ticket_ids = Zendesk::where('status','1,2')->where('type',$type)->where('id','<',10845)->column('ticket_id');
+        $ticket_ids = Zendesk::where('status','2,3')->where('type',$type)->column('ticket_id');
         foreach($ticket_ids as $ticket_id){
             $ticket = $this->client->tickets()->find($ticket_id)->ticket;
 
@@ -820,7 +820,8 @@ class Notice extends Controller
                 //更新主表,目前应该只会更新status，其他不会更新
                 $updateData = [
                     'tags' => $tags,
-                    'status' => array_search(strtolower($ticket->status), config('zendesk.status'))
+                    'status' => array_search(strtolower($ticket->status), config('zendesk.status')),
+                    'update_time' => date('Y-m-d H:i:s',(strtotime(str_replace(['T','Z'],[' ',''],$ticket->updated_at))+8*3600)),
                 ];
                 //如果分配人修改，则同步修改分配人
                 if($zendesk->assignee_id != $ticket->assignee_id && $ticket->assignee_id){
