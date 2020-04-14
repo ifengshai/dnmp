@@ -795,7 +795,7 @@ class Notice extends Controller
             $type = 2;
         }
         $a = 1;
-        $ticket_ids = Zendesk::where('status','2,3')->where('type',$type)->column('ticket_id');
+        $ticket_ids = Zendesk::where('status','2')->where('type',$type)->column('ticket_id');
         foreach($ticket_ids as $ticket_id){
             $ticket = $this->client->tickets()->find($ticket_id)->ticket;
 
