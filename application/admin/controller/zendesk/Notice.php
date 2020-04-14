@@ -606,7 +606,7 @@ class Notice extends Controller
             'type' => 'ticket',
             'order_by' => 'created_at',
             'status' => ['open'],
-            'assignee' => 'complaint@zeelool.com',
+            'assignee' => 'hanyuwei@nextmar.com',
             'sort' => 'asc'
         ];
         //$type = $this->postData['type'] == 'zeelool' ? 1 : 2;
@@ -658,8 +658,8 @@ class Notice extends Controller
             $assign_id = \app\admin\model\zendesk\ZendeskAgents::where('agent_id',$ticket->assignee_id)->value('admin_id');
             $tags = ZendeskTags::where('name','in',$ticket->tags)->column('id');
             sort($tags);
-            echo $ticket->id."\r\n";
-            echo $key."\r\n";
+//            echo $ticket->id."\r\n";
+//            echo $key."\r\n";
             if(!Zendesk::where(['ticket_id' => $ticket->id, 'type' => $type])->find()) {
                 echo $ticket->id."\r\n";
                 //根据用户的id获取用户的信息
