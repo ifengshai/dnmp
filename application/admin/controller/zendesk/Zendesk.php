@@ -66,10 +66,6 @@ class Zendesk extends Backend
                 $andWhere = "FIND_IN_SET({$filter['tags']},tags)";
                 unset($filter['tags']);
             }
-            if($filter['status'] == 6) {
-                $map['zendesk.status'] = ['in', [1, 2]];
-                unset($filter['status']);
-            }
             $this->request->get(['filter' => json_encode($filter)]);
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             //默认使用
