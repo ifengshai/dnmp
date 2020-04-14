@@ -67,7 +67,7 @@ class Zendesk extends Backend
                 unset($filter['tags']);
             }
             if($filter['status'] == 6) {
-                $andWhere = "status in (1,2)";
+                $andWhere .= "status in (1,2)";
                 unset($filter['status']);
             }
             $this->request->get(['filter' => json_encode($filter)]);
