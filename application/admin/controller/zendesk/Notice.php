@@ -617,6 +617,7 @@ class Notice extends Controller
         if (!$search->count) {
             return true;
         }
+        echo $search->count;
         $page = ceil($search->count / 100 );
         //先获取第一页的,一次100条
         $this->findCommentsByTickets($tickets,$type);
@@ -644,6 +645,7 @@ class Notice extends Controller
     public function findCommentsByTickets($tickets,$type)
     {
         foreach($tickets as $ticket){
+            echo 1;
             $via = $ticket->via;
             $priority = 0;
             if ($ticket->priority) {
