@@ -179,7 +179,7 @@ class Notice extends Controller
         try{
             //$channel = $postData['channel'];
             //最后一条评论
-            $comment = $this->getLastComments($id);
+            $comments = $this->getComments($id);
             $ticket = $this->getTicket($id);
             //开始插入相关数据
             $tags = $ticket->tags;
@@ -284,28 +284,30 @@ class Notice extends Controller
                 }
             }
             //查找comment_id是否存在，不存在则添加
-            if(!ZendeskComments::where('comment_id',$comment->id)->find()) {
-                //获取所有的附件
-                $attachments = [];
-                if ($comment->attachments) {
-                    foreach ($comment->attachments as $attachment) {
-                        $attachments[] = $attachment->content_url;
+            foreach($comments as $comment) {
+                if (!ZendeskComments::where('comment_id', $comment->id)->find()) {
+                    //获取所有的附件
+                    $attachments = [];
+                    if ($comment->attachments) {
+                        foreach ($comment->attachments as $attachment) {
+                            $attachments[] = $attachment->content_url;
+                        }
                     }
+                    $admin_id = $due_id = ZendeskAgents::where('agent_id', $comment->author_id)->value('admin_id');
+                    ZendeskComments::create([
+                        'ticket_id' => $id,
+                        'zid' => $zendesk->id,
+                        'comment_id' => $comment->id,
+                        'author_id' => $comment->author_id,
+                        'body' => $comment->body,
+                        'html_body' => $comment->html_body,
+                        'is_public' => $comment->public ? 1 : 2,
+                        'is_admin' => $admin_id ? 1 : 0,
+                        'attachments' => join(',', $attachments),
+                        'is_created' => 2,
+                        'due_id' => $due_id ? $due_id : 0
+                    ]);
                 }
-                $admin_id = $due_id = ZendeskAgents::where('agent_id',$comment->author_id)->value('admin_id');
-                ZendeskComments::create([
-                    'ticket_id' => $id,
-                    'zid' => $zendesk->id,
-                    'comment_id' => $comment->id,
-                    'author_id' => $comment->author_id,
-                    'body' => $comment->body,
-                    'html_body' => $comment->html_body,
-                    'is_public' => $comment->public ? 1 : 2,
-                    'is_admin' => $admin_id ? 1 : 0,
-                    'attachments' => join(',',$attachments),
-                    'is_created' => 2,
-                    'due_id' => $due_id ? $due_id : 0
-                ]);
             }
             Db::commit();
         } catch (Exception $e) {
