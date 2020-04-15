@@ -75,7 +75,7 @@ class ZendeskTwo extends Controller
             ],
             'created_at' => [
                 'valuetype' => '<=',
-                'value'   => '2020-04-09T06:30:00Z'
+                'value'   => '2020-04-14T16:00:00Z'
             ], //添加创建时间的限制
             'order_by' => 'created_at',
             'sort' => 'asc'
@@ -97,6 +97,7 @@ class ZendeskTwo extends Controller
     {
         $params = $this->parseStr($array);
         $search = $this->client->search()->find($params);
+
         $tickets = $search->results;
         if(!$search->count){
             return true;
@@ -164,7 +165,7 @@ class ZendeskTwo extends Controller
                 if(s($body)->contains('return') || s($subjet)->contains('return')){
                     continue;
                 }
-                if (s($body)->containsAny($this->preg_word) === true) {
+                if (s($body)->containsAny($this->preg_word) === true || s($subjet)->containsAny($this->preg_word) === true) {
                     $reply_detail_data = [];
                     $recent_reply_count = 0;
                     //判断最近12小时发送的第几封，超过2封，超过2封直接转客服+tag-》多次发送
@@ -269,7 +270,7 @@ class ZendeskTwo extends Controller
         try{
             $this->client->tickets()->update($ticket_id, $params);
             if($echo) echo $ticket_id . "\r\n";
-            sleep(2);
+            sleep(1);
         }catch (\Exception $e){
             return false;
             //exception($e->getMessage(), 10001);
