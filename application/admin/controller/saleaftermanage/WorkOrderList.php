@@ -140,6 +140,7 @@ class WorkOrderList extends Backend
                         $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.add' : $name) : $this->modelValidate;
                         $this->model->validateFailException(true)->validate($validate);
                     }
+                    //dump($params);die;
                     //判断工单类型 1客服 2仓库
                     if ($params['work_type'] == 1) {
                         $params['problem_type_content'] = config('workorder.customer_problem_type')[$params['problem_type_id']];
@@ -184,7 +185,8 @@ class WorkOrderList extends Backend
                     if (false === $result) {
                         throw new Exception("添加失败！！");
                     }
-
+                    //修改镜架操作
+                    $this->model->changeLens($params,$this->model->getLastInsID());
                     //循环插入措施
                     if (count(array_filter($params['measure_choose_id'])) > 0) {
 
@@ -211,6 +213,7 @@ class WorkOrderList extends Backend
                                     $appointList[$key]['recept_person_id'] = session('admin.id');
                                     $appointList[$key]['recept_person'] = session('admin.nickname');
                                 } else {
+
                                     $appointList[$key]['recept_group_id'] = $appoint_group[$key];
                                     $appointList[$key]['recept_person_id'] = $val;
                                     $appointList[$key]['recept_person'] = $appoint_users[$key];
