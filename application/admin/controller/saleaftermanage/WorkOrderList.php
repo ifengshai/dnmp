@@ -44,6 +44,9 @@ class WorkOrderList extends Backend
         $this->view->assign('country', $country);
         $this->recept = new \app\admin\model\saleaftermanage\WorkOrderRecept;
         $this->item = new \app\admin\model\itemmanage\Item;
+
+        //获取当前登录用户所属主管id
+        $this->assign_user_id = searchForId(session('admin.id'), config('workorder.kefumanage'));
     }
 
     /**
@@ -134,6 +137,7 @@ class WorkOrderList extends Backend
                 $result = false;
                 Db::startTrans();
                 try {
+                 
                     //是否采用模型验证
                     if ($this->modelValidate) {
                         $name = str_replace("\\model\\", "\\validate\\", get_class($this->model));
@@ -176,7 +180,7 @@ class WorkOrderList extends Backend
                         //需要审核
                         $params['is_check'] = 1;
                         //创建人对应主管
-                        $params['assign_user_id'] = array_search(session('admin.id'), config('workorder.kefumanage'));
+                        $params['assign_user_id'] = $this->assign_user_id;
                     }
 
 
@@ -194,10 +198,9 @@ class WorkOrderList extends Backend
                             $params['assign_user_id'] = config('workorder.customer_manager');
                         } else {
                             //创建人对应主管
-                            $params['assign_user_id'] = array_search(session('admin.id'), config('workorder.kefumanage'));
+                            $params['assign_user_id'] = $this->assign_user_id;
                         }
                     }
-
                     $params['create_user_name'] = session('admin.nickname');
                     $params['create_user_id'] = session('admin.id');
                     $params['create_time'] = date('Y-m-d H:i:s');
@@ -288,24 +291,20 @@ class WorkOrderList extends Backend
                     //判断是否选中取消措施
                     if ($params['cancel_order'] && in_array(3, array_filter($params['measure_choose_id']))) {
 
-                        foreach ($params['change_frame'] as $k => $v) {
-                            if (!$v['change_sku']) {
-                                continue;
-                            }
+                        foreach ($params['cancel_order']['original_sku'] as $k => $v) {
+                           
                             $orderChangeList[$k]['work_id'] = $this->model->id;
                             $orderChangeList[$k]['increment_id'] = $params['platform_order'];
                             $orderChangeList[$k]['platform_type'] = $params['work_type'];
-                            $orderChangeList[$k]['original_sku'] = $v['original_sku'];
-                            $orderChangeList[$k]['original_number'] = $v['original_number'];
-                            $orderChangeList[$k]['change_sku'] = $v['change_sku'];
-                            $orderChangeList[$k]['change_number'] = $v['change_number'];
-                            $orderChangeList[$k]['change_type'] = 1;
+                            $orderChangeList[$k]['original_sku'] = $v;
+                            $orderChangeList[$k]['original_number'] = $params['cancel_order']['original_number'][$k];
+                            $orderChangeList[$k]['change_type'] = 3;
                             $orderChangeList[$k]['create_person'] = session('admin.nickname');
                             $orderChangeList[$k]['create_time'] = date('Y-m-d H:i:s');
                             $orderChangeList[$k]['update_time'] = date('Y-m-d H:i:s');
                         }
-                        $orderChangeRes = $this->order_change->saveAll($orderChangeList);
-                        if (false === $orderChangeRes) {
+                        $cancelOrderRes = $this->order_change->saveAll($orderChangeList);
+                        if (false === $cancelOrderRes) {
                             throw new Exception("添加失败！！");
                         }
                     }
