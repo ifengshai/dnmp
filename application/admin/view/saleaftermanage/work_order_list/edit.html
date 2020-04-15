@@ -331,7 +331,7 @@
             <label class="control-label col-xs-12 col-sm-2">{:__('platform_order')}：</label>
             <div class="col-xs-12 col-sm-8">
                 <input style="width: 60%;" id="c-platform_order" class="form-control" name="row[platform_order]"
-                    type="text" value="">
+                    type="text" value="{$row.platform_order}" readonly>
                 <button type="button" id="platform_order" class="btn btn-success"
                     style="padding: 5px 12px;">载入数据</button>
             </div>
@@ -341,9 +341,11 @@
         <div class="form-group-child">
             <label class="control-label col-xs-12 col-sm-2">{:__('order_sku')}：</label>
             <div class="col-xs-12 col-sm-8">
-                <select id="c-order_sku" class="form-control selectpicker" multiple name="row[order_sku]">
+                <!-- <select id="c-order_sku" class="form-control selectpicker" multiple name="row[order_sku]">
 
-                </select>
+                </select> -->
+                <input style="width: 60%;" id="c-platform_order" class="form-control" name="row[order_sku]"
+                    type="text" value="{$row.order_sku}" readonly>                
             </div>
         </div>
 
@@ -362,7 +364,7 @@
             <label class="control-label col-xs-12 col-sm-2">{:__('problem_description')}：</label>
             <div class="col-xs-12 col-sm-8" style="width: 83%;">
                 <textarea id="c-problem_description" style="resize:none;height: 142px;" class="form-control " rows="5"
-                    name="row[problem_description]" cols="50"></textarea>
+                    name="row[problem_description]" cols="50">{$row.problem_description}</textarea>
             </div>
         </div>
 

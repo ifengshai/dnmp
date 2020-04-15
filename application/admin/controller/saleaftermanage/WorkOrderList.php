@@ -32,6 +32,15 @@ class WorkOrderList extends Backend
         parent::_initialize();
         $this->model = new \app\admin\model\saleaftermanage\WorkOrderList;
         $this->step = new \app\admin\model\saleaftermanage\WorkOrderMeasure;
+        $this->view->assign('step', config('workorder.step')); //措施
+        $this->assignconfig('workorder', config('workorder')); //JS专用，整个配置文件
+
+        $this->view->assign('check_coupon', config('workorder.check_coupon')); //不需要审核的优惠券
+        $this->view->assign('need_check_coupon', config('workorder.need_check_coupon')); //需要审核的优惠券
+
+        //获取所有的国家
+        $country = json_decode(file_get_contents('assets/js/country.js'), true);
+        $this->view->assign('country', $country);        
         $this->recept = new \app\admin\model\saleaftermanage\WorkOrderRecept;
     }
 
@@ -40,6 +49,18 @@ class WorkOrderList extends Backend
      * 因此在当前控制器中可不用编写增删改查的代码,除非需要自己控制这部分逻辑
      * 需要将application/admin/library/traits/Backend.php中对应的方法复制到当前控制器,然后进行修改
      */
+
+    //根据主记录id，获取措施相关信息
+    public function sel_order_recept($id){
+        $step = $this->step->where('work_id',$id)->select();
+        $step_arr = collection($step)->toArray();
+        foreach ($step_arr as $k => $v){
+            $recept = $this->recept->where('measure_id',$v['id'])->select();
+            $recept_arr = collection($recept)->toArray();
+            $step_arr[$k]['recept'] = $recept_arr;
+        }
+        return $step_arr;
+    }
 
     /**
      * 查看
@@ -71,8 +92,10 @@ class WorkOrderList extends Backend
             $user_list = $admin->where('status', 'normal')->column('nickname', 'id');
             $user_list = collection($user_list)->toArray();
 
-            foreach ($list as $k => $v) {
-                if ($v['work_type'] == 1) {
+
+
+            foreach ($list as $k => $v){
+                if($v['work_type'] == 1){
                     $list[$k]['work_type_str'] = '客服工单';
                 } else {
                     $list[$k]['work_type_str'] = '仓库工单';
@@ -81,6 +104,9 @@ class WorkOrderList extends Backend
                 if ($v['is_check'] == 1) {
                     $list[$k]['assign_user_name'] = $user_list[$v['assign_user_id']];
                 }
+
+                $list[$k]['step_num'] = $this->sel_order_recept($v['id']);
+
             }
 
 
@@ -90,6 +116,8 @@ class WorkOrderList extends Backend
         }
         return $this->view->fetch();
     }
+
+
 
     /**
      * 添加
@@ -240,19 +268,9 @@ class WorkOrderList extends Backend
         $admin = new \app\admin\model\Admin();
         $users = $admin->where('status', 'normal')->column('nickname', 'id');
         $this->assignconfig('users', $users); //返回用户
-
-        $this->view->assign('step', config('workorder.step')); //措施
-        $this->assignconfig('workorder', config('workorder')); //JS专用，整个配置文件
-
-        $this->view->assign('check_coupon', config('workorder.check_coupon')); //不需要审核的优惠券
-        $this->view->assign('need_check_coupon', config('workorder.need_check_coupon')); //需要审核的优惠券
-
-        //获取所有的国家
-        $country = json_decode(file_get_contents('assets/js/country.js'), true);
-        $this->view->assign('country', $country);
-
         return $this->view->fetch();
     }
+    
     /**
      * 编辑
      *
@@ -267,6 +285,9 @@ class WorkOrderList extends Backend
         $row = $this->model->get($ids);
         if (!$row) {
             $this->error(__('No Results were found'));
+        }
+        if($row['create_user_id'] != session('admin.id')){
+            return $this->error(__('非本人创建不能编辑'));
         }
         $adminIds = $this->getDataLimitAdminIds();
         if (is_array($adminIds)) {
@@ -399,6 +420,29 @@ class WorkOrderList extends Backend
         }
         $this->error('404 not found');
     }
+
+    /**
+     * ajax根据prescription_type获取镜片信息
+     */
+    public function ajaxGetLensType()
+    {
+        if (request()->isAjax()) {
+            $siteType = input('site_type');
+            $prescriptionType = input('prescription_type');
+            $key = $siteType . '_getlens';
+            $data = session($key);
+            if(!$data){
+                $data = $this->model->getLensData($siteType);
+            }
+            $lensType = $data['lens_list'][$prescriptionType] ?: [];
+            if ($lensType) {
+                $this->success('操作成功！！', '', $lensType);
+            } else {
+                $this->error('未获取到数据！！');
+            }
+        }
+        $this->error('404 not found');
+    }
     /**
      * 获取订单order的镜框等信息
      *
@@ -425,11 +469,17 @@ class WorkOrderList extends Backend
             } elseif (5 == $ordertype) {
                 $result = WeseeopticalPrescriptionDetailHelper::get_one_by_increment_id($order_number);
             }
-            if (!$result) {
-                return $this->error('找不到这个订单,请重新尝试', '', 'error', 0);
+            if(!$result){
+                $this->error('找不到这个订单,请重新尝试','','error',0);
             }
-            return $this->success('', '', $result, 0);
-        } else {
+            $arr = [];
+            foreach($result as $val){
+                for($i=0;$i<$val['qty_ordered'];$i++){
+                    $arr[] = $val['sku'];
+                }
+            }
+            return $this->success('','',$arr,0);
+        }else{
             return $this->error('404 Not Found');
         }
     }
