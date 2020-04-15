@@ -480,6 +480,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                 var lens = json.data.lens;
                                 var prescriptions = data.prescriptions;
                                 $('#supplement-order').html(lens.html);
+                                var order_pay_currency = $('#order_pay_currency').val();
                                 //修改地址
                                 var address = '';
                                 for (var i = 0; i < data.address.length; i++) {
@@ -496,6 +497,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                         $('#c-city').val(data.address[i].city);
                                         $('#c-street').val(data.address[i].street);
                                         $('#c-postcode').val(data.address[i].postcode);
+                                        $('#c-currency_code').val(order_pay_currency);
                                     } else {
                                         address += '<option value="' + i + '">' + data.address[i].address_type + '</option>';
                                     }
