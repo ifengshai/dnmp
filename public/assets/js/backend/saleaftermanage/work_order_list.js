@@ -4,6 +4,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
         index: function () {
             // 初始化表格参数配置
             Table.api.init({
+                showJumpto: true,
+                searchFormVisible: true,
+                pageList: [10, 25, 50, 100],
                 extend: {
                     index_url: 'saleaftermanage/work_order_list/index' + location.search,
                     add_url: 'saleaftermanage/work_order_list/add',

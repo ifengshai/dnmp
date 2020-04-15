@@ -97,11 +97,11 @@ class WorkOrderList extends Backend
             foreach ($list as $k => $v){
                 if($v['work_type'] == 1){
                     $list[$k]['work_type_str'] = '客服工单';
-                }else{
+                } else {
                     $list[$k]['work_type_str'] = '仓库工单';
                 }
 
-                if($v['is_check'] == 1){
+                if ($v['is_check'] == 1) {
                     $list[$k]['assign_user_name'] = $user_list[$v['assign_user_id']];
                 }
 
@@ -140,18 +140,46 @@ class WorkOrderList extends Backend
                         $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.add' : $name) : $this->modelValidate;
                         $this->model->validateFailException(true)->validate($validate);
                     }
-            
-                    $params['create_user_name'] = session('admin.nickname');
                     //判断工单类型 1客服 2仓库
                     if ($params['work_type'] == 1) {
                         $params['problem_type_content'] = config('workorder.customer_problem_type')[$params['problem_type_id']];
                     } elseif ($params['work_type'] == 2) {
                         $params['problem_type_content'] = config('workorder.warehouse_problem_type')[$params['problem_type_id']];
-                        $params['after_user_id'] = config('workorder.copy_group');//经手人
+                        $params['after_user_id'] = config('workorder.copy_group'); //经手人
                     }
+
+
+                    //判断审核人
+                    if ($params['is_check'] == 1 || $params['need_coupon_id']) {
+                        /**
+                         * 1、退款金额大于30 经理审核
+                         * 2、赠品数量大于1 经理审核
+                         * 3、补发数量大于1 经理审核
+                         * 4、优惠券等于100% 经理审核  50%主管审核 固定额度无需审核
+                         */
+                        $coupon = config('workorder.need_check_coupon')[$params['need_coupon_id']]['sum'];
+                        if ($params['refund_money'] > 30 || array_sum($params['replacement']['original_number']) > 1 || $coupon == 100) {
+                            //客服经理
+                            $params['assign_user_id'] = config('workorder.customer_manager');
+                        } else {
+                            //创建人对应主管
+                            $params['assign_user_id'] = array_search(session('admin.id'), config('workorder.kefumanage'));
+                        }
+                    }
+
+                    //如果积分大于200需要审核
+                    if ($params['integral'] > 200) {
+                        //需要审核
+                        $params['is_check'] = 1;
+                        //创建人对应主管
+                        $params['assign_user_id'] = array_search(session('admin.id'), config('workorder.kefumanage'));
+                    }
+
+                    $params['create_user_name'] = session('admin.nickname');
                     $params['create_user_id'] = session('admin.id');
                     $params['create_time'] = date('Y-m-d H:i:s');
-                   
+                    $params['order_sku'] = implode(',', $params['order_sku']);
+
                     $result = $this->model->allowField(true)->save($params);
                     if (false === $result) {
                         throw new Exception("添加失败！！");
@@ -177,15 +205,23 @@ class WorkOrderList extends Backend
                             foreach ($appoint_ids as $key => $val) {
                                 $appointList[$key]['work_id'] = $this->model->id;
                                 $appointList[$key]['measure_id'] = $v;
-                                $appointList[$key]['recept_group_id'] = $appoint_group[$key];
-                                $appointList[$key]['recept_person_id'] = $val;
-                                $appointList[$key]['recept_person'] = $appoint_users[$key];
+                                //如果没有承接人 默认为创建人
+                                if ($val == 'undefined') {
+                                    $appointList[$key]['recept_group_id'] = array_search(session('admin.id'), config('workorder.kefumanage'));
+                                    $appointList[$key]['recept_person_id'] = session('admin.id');
+                                    $appointList[$key]['recept_person'] = session('admin.nickname');
+                                } else {
+                                    $appointList[$key]['recept_group_id'] = $appoint_group[$key];
+                                    $appointList[$key]['recept_person_id'] = $val;
+                                    $appointList[$key]['recept_person'] = $appoint_users[$key];
+                                }
+
                                 $appointList[$key]['create_time'] = date('Y-m-d H:i:s');
                             }
                             $receptRes = $this->recept->saveAll($appointList);
                             if (false === $receptRes) {
                                 throw new Exception("添加失败！！");
-                            } 
+                            }
                         }
 
                         $res = $this->step->saveAll($measureList);
@@ -234,6 +270,7 @@ class WorkOrderList extends Backend
         $this->assignconfig('users', $users); //返回用户
         return $this->view->fetch();
     }
+    
     /**
      * 编辑
      *
@@ -350,7 +387,7 @@ class WorkOrderList extends Backend
             //获取地址、处方等信息
             $res = $this->model->getAddress($siteType, $incrementId);
             //请求接口获取lens_type，coating_type，prescription_type等信息
-            $lens = $this->model->getReissueLens($siteType,$res['showPrescriptions']);
+            $lens = $this->model->getReissueLens($siteType, $res['showPrescriptions']);
             if ($res) {
                 $this->success('操作成功！！', '', ['address' => $res, 'lens' => $lens]);
             } else {
