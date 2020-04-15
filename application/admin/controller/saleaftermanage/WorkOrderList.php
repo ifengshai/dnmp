@@ -31,6 +31,15 @@ class WorkOrderList extends Backend
         parent::_initialize();
         $this->model = new \app\admin\model\saleaftermanage\WorkOrderList;
         $this->step = new \app\admin\model\saleaftermanage\WorkOrderMeasure;
+        $this->view->assign('step', config('workorder.step')); //措施
+        $this->assignconfig('workorder', config('workorder')); //JS专用，整个配置文件
+
+        $this->view->assign('check_coupon', config('workorder.check_coupon')); //不需要审核的优惠券
+        $this->view->assign('need_check_coupon', config('workorder.need_check_coupon')); //需要审核的优惠券
+
+        //获取所有的国家
+        $country = json_decode(file_get_contents('assets/js/country.js'), true);
+        $this->view->assign('country', $country);        
     }
 
     /**
@@ -140,17 +149,6 @@ class WorkOrderList extends Backend
         $admin = new \app\admin\model\Admin();
         $users = $admin->where('status', 'normal')->column('nickname', 'id');
         $this->assignconfig('users', $users); //返回用户
-
-        $this->view->assign('step', config('workorder.step')); //措施
-        $this->assignconfig('workorder', config('workorder')); //JS专用，整个配置文件
-
-        $this->view->assign('check_coupon', config('workorder.check_coupon')); //不需要审核的优惠券
-        $this->view->assign('need_check_coupon', config('workorder.need_check_coupon')); //需要审核的优惠券
-
-        //获取所有的国家
-        $country = json_decode(file_get_contents('assets/js/country.js'), true);
-        $this->view->assign('country', $country);
-
         return $this->view->fetch();
     }
     /**
@@ -167,6 +165,9 @@ class WorkOrderList extends Backend
         $row = $this->model->get($ids);
         if (!$row) {
             $this->error(__('No Results were found'));
+        }
+        if($row['create_user_id'] != session('admin.id')){
+            return $this->error(__('非本人创建不能编辑'));
         }
         $adminIds = $this->getDataLimitAdminIds();
         if (is_array($adminIds)) {
@@ -305,9 +306,15 @@ class WorkOrderList extends Backend
                 $result = WeseeopticalPrescriptionDetailHelper::get_one_by_increment_id($order_number);
             }
             if(!$result){
-                return $this->error('找不到这个订单,请重新尝试','','error',0);
+                $this->error('找不到这个订单,请重新尝试','','error',0);
             }
-                return $this->success('','',$result,0);
+            $arr = [];
+            foreach($result as $val){
+                for($i=0;$i<$val['qty_ordered'];$i++){
+                    $arr[] = $val['sku'];
+                }
+            }
+            return $this->success('','',$arr,0);
         }else{
             return $this->error('404 Not Found');
         }

@@ -215,16 +215,16 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     //删除添加的tr
                     $('#change-frame tr:gt(0)').remove();
                     var item = ret.data;
+                    console.log(item);
                     var Str = '';
                     for(var j = 0,len = item.length; j <len; j++) {
-                        var newItem = item[j];
                         var m = j+1;
                         Str +='<tr>';
-                        Str +='<td><input  class="form-control" name="row[change_frame]['+m+'][original_sku]" type="text" value="'+newItem.sku+'"></td>';
-                        Str +='<td><input  class="form-control" name="row[change_frame]['+m+'][original_number]" type="text" value="'+Math.round(newItem.qty_ordered)+'"></td>';
+                        Str +='<td><input  class="form-control" name="row[change_frame]['+m+'][original_sku]" type="text" value="'+item[j]+'" readonly></td>';
+                        Str +='<td><input  class="form-control" name="row[change_frame]['+m+'][original_number]" type="text" value="1" readonly></td>';
                         Str +='<td><input  class="form-control" name="row[change_frame]['+m+'][change_sku]" type="text"></td>';
-                        Str +='<td><input  class="form-control" name="row[change_frame]['+m+'][change_number]" type="text"></td>';
-                        Str +='<td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>删除</a></td>';
+                        Str +='<td><input  class="form-control" name="row[change_frame]['+m+'][change_number]" type="text" value="1" readonly></td>';
+                        // Str +='<td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>删除</a></td>';
                         Str += '</tr>';
                     }
                     $("#change-frame tbody").append(Str);
@@ -256,11 +256,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     var item = ret.data;
                     var Str = '';
                     for(var j = 0,len = item.length; j <len; j++) {
-                        var newItem = item[j];
                         var m = j+1;
                         Str +='<tr>';
-                        Str +='<td><input  class="form-control" readonly name="row[item]['+m+'][original_sku]" type="text" value="'+newItem.sku+'"></td>';
-                        Str +='<td><input  class="form-control" name="row[item]['+m+'][original_number]"  type="text" value="'+Math.round(newItem.qty_ordered)+'"></td>';
+                        Str +='<td><input  class="form-control" readonly name="row[item]['+m+'][original_sku]" type="text" value="'+item[j]+'" readonly></td>';
+                        Str +='<td><input  class="form-control" name="row[item]['+m+'][original_number]"  type="text" value="1" readonly></td>';
+                        Str +='<td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>删除</a></td>';
                         Str += '</tr>';
                     }
                     $("#cancel-order tbody").append(Str);
