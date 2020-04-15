@@ -16,6 +16,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
             table.bootstrapTable({
                 url: $.fn.bootstrapTable.defaults.extend.index_url,
                 pk: 'id',
+                search: false,
+                showToggle:false,
+                cardView: false,
+                searchFormVisible: true,
                 columns: [
                     [
                         {field: 'id', title: __('Id'),sortable: true},

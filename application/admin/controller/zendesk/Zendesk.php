@@ -90,6 +90,7 @@ class Zendesk extends Backend
                         //获取所有的账号admin_id
                         $admin_ids = ZendeskAgents::column('admin_id');
                         $map['zendesk.assign_id'] = ['not in',$admin_ids];
+                        $map['zendesk.status'] = ['in', [1, 2]];
                         break;
                 }
             }
@@ -620,6 +621,7 @@ Please close this window and try again.");
                     'status' => '5',
                     'tags' => $tagIds,
                     'assignee_id' => $agent_id,
+                    'assign_id' => $agent_id,
                     'due_id' => session('admin.id'),
                 ]);
 
@@ -635,6 +637,7 @@ Please close this window and try again.");
                 //合并的添加评论content
                 $this->model->where('ticket_id', $ticket)->update([
                     'assignee_id' => $agent_id,
+                    'assign_id' => $agent_id,
                     'due_id' => session('admin.id'),
                 ]);
                 $zid = $this->model->where('ticket_id', $ticket)->value('id');
