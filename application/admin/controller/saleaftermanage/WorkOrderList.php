@@ -206,7 +206,8 @@ class WorkOrderList extends Backend
                     if (false === $result) {
                         throw new Exception("添加失败！！");
                     }
-
+                    //修改镜架操作
+                    $this->model->changeLens($params,$this->model->getLastInsID());
                     //循环插入措施
                     if (count(array_filter($params['measure_choose_id'])) > 0) {
 
@@ -233,6 +234,7 @@ class WorkOrderList extends Backend
                                     $appointList[$key]['recept_person_id'] = session('admin.id');
                                     $appointList[$key]['recept_person'] = session('admin.nickname');
                                 } else {
+
                                     $appointList[$key]['recept_group_id'] = $appoint_group[$key];
                                     $appointList[$key]['recept_person_id'] = $val;
                                     $appointList[$key]['recept_person'] = $appoint_users[$key];
@@ -486,6 +488,30 @@ class WorkOrderList extends Backend
             //获取地址、处方等信息
             $res = $this->model->getAddress($siteType, $incrementId);
             $lens = $this->model->getReissueLens($siteType, $res['prescriptions'], 2);
+            if ($res) {
+                $this->success('操作成功！！', '', $lens);
+            } else {
+                $this->error('未获取到数据！！');
+            }
+        }
+        $this->error('404 not found');
+    }
+
+    /**
+     * 赠品表单
+     * @throws Exception
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public function ajaxGetGiftLens()
+    {
+        if (request()->isAjax()) {
+            $incrementId = input('increment_id');
+            $siteType = input('site_type');
+            //获取地址、处方等信息
+            $res = $this->model->getAddress($siteType, $incrementId);
+            $lens = $this->model->getReissueLens($siteType, $res['prescriptions'], 3);
             if ($res) {
                 $this->success('操作成功！！', '', $lens);
             } else {
