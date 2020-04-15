@@ -150,7 +150,8 @@ class Notice extends Controller
                     'is_admin' => $admin_id ? 1 : 0,
                     'attachments' => json($attachments),
                     'is_created' => 1,
-                    'due_id' => $due_id ? $due_id : 0
+                    'due_id' => $due_id ? $due_id : 0,
+                    'attachments' => join(',',$attachments)
                 ]);
             }
             Db::commit();
@@ -301,7 +302,7 @@ class Notice extends Controller
                     'html_body' => $comment->html_body,
                     'is_public' => $comment->public ? 1 : 2,
                     'is_admin' => $admin_id ? 1 : 0,
-                    'attachments' => json($attachments),
+                    'attachments' => join(',',$attachments),
                     'is_created' => 2,
                     'due_id' => $due_id ? $due_id : 0
                 ]);
