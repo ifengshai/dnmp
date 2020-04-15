@@ -175,6 +175,7 @@ class ZendeskOne extends Controller
             $requester_id = $ticket->requester_id;
             //所有的tag
             $tags = $ticket->tags;
+            $subject = $ticket->subject;
             //email
             $requester_email = $ticket->via->source->from->address;
             try{
@@ -265,7 +266,7 @@ class ZendeskOne extends Controller
 
                     } else {
                         //匹配到相应的关键字，自动回复消息，修改为pending，回复共客户选择的内容
-                        if (s($body)->containsAny($this->preg_word) === true) {
+                        if (s($body)->containsAny($this->preg_word) === true || s($subject)->containsAny($this->preg_word) === true) {
                             $reply_detail_data = [];
                             $recent_reply_count = 0;
                             //判断最近12小时发送的第几封，超过2封，超过2封直接转客服+tag-》多次发送
