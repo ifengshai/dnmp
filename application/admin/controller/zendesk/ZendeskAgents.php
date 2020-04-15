@@ -1,14 +1,11 @@
 <?php
 
 namespace app\admin\controller\zendesk;
-use think\Db;
+
 use app\admin\model\Admin;
-use app\admin\model\zendesk\Zendesk;
-use app\common\controller\Backend;
 use app\admin\model\zendesk\ZendeskAccount;
-use think\Exception;
-use think\exception\PDOException;
-use think\exception\ValidateException;
+use app\common\controller\Backend;
+use think\Db;
 /**
  * 
  *
@@ -36,9 +33,7 @@ class ZendeskAgents extends Backend
             1 => '邮件组',
             2 => '电话组'
         ];
-        //$user = Admin::where('status','normal')->column('nickname','id');
-        $user = (new Admin())->getStaffListss();
-        
+        $user = Admin::where('status','normal')->column('nickname','id');
         $this->assign(compact('type','agent_type','user'));
     }
     
@@ -58,13 +53,13 @@ class ZendeskAgents extends Backend
             }
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
-                ->with(['admin'])
+                ->with(['admin','agent'])
                 ->where($where)
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->model
-                ->with(['admin'])
+                ->with(['admin','agent'])
                 ->where($where)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
@@ -83,23 +78,12 @@ class ZendeskAgents extends Backend
      */
     public function add()
     {
-        $account = (new ZendeskAccount())->getAccountList(1);
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
             if ($params) {
                 $params = $this->preExcludeFields($params);
-
                 if ($this->dataLimit && $this->dataLimitFieldAutoFill) {
                     $params[$this->dataLimitField] = $this->auth->id;
-                }
-                if(!empty($params['name'])){
-                    //获取平台绑定信息
-                    $zeedeskAccount = (new ZendeskAccount())->getNameById($params['name']);
-                    if($zeedeskAccount){
-                        $params['name']     = $zeedeskAccount['account_user'];
-                        $params['agent_id'] = $zeedeskAccount['account_id'];
-                        $zeedeskAccountId   = $zeedeskAccount['id'];
-                    }
                 }
                 $result = false;
                 Db::startTrans();
@@ -123,8 +107,8 @@ class ZendeskAgents extends Backend
                     $this->error($e->getMessage());
                 }
                 if ($result !== false) {
-                    //更新账户信息
-                    Db::name('zendesk_account')->where(['id'=>$zeedeskAccountId])->update(['is_used'=>2]);
+                    //is_used变为2
+                    ZendeskAccount::where('account_id',$params['agent_id'])->setField('is_used',2);
                     $this->success();
                 } else {
                     $this->error(__('No rows were inserted'));
@@ -132,15 +116,14 @@ class ZendeskAgents extends Backend
             }
             $this->error(__('Parameter %s can not be empty', ''));
         }
-        $this->assign('account',$account);
         return $this->view->fetch();
-    } 
+    }
+
     /**
      * 编辑
      */
     public function edit($ids = null)
     {
-        $account = (new ZendeskAccount())->getAccountList(1,2);
         $row = $this->model->get($ids);
         if (!$row) {
             $this->error(__('No Results were found'));
@@ -152,18 +135,10 @@ class ZendeskAgents extends Backend
             }
         }
         if ($this->request->isPost()) {
+            $agent_id = $row->agent_id;
             $params = $this->request->post("row/a");
             if ($params) {
                 $params = $this->preExcludeFields($params);
-                if(!empty($params['name'])){
-                    //获取平台绑定信息
-                    $zeedeskAccount = (new ZendeskAccount())->getNameById($params['name']);
-                    if($zeedeskAccount){
-                        $params['name']     = $zeedeskAccount['account_user'];
-                        $params['agent_id'] = $zeedeskAccount['account_id'];
-                        $zeedeskAccountId   = $zeedeskAccount['id'];
-                    }
-                }
                 $result = false;
                 Db::startTrans();
                 try {
@@ -186,7 +161,9 @@ class ZendeskAgents extends Backend
                     $this->error($e->getMessage());
                 }
                 if ($result !== false) {
-                    Db::name('zendesk_account')->where(['id'=>$zeedeskAccountId])->update(['is_used'=>2]);                    
+                    //is_used变为2
+                    ZendeskAccount::where('account_id',$params['agent_id'])->setField('is_used',2);
+                    ZendeskAccount::where('account_id',$agent_id)->setField('is_used',1);
                     $this->success();
                 } else {
                     $this->error(__('No rows were updated'));
@@ -194,33 +171,47 @@ class ZendeskAgents extends Backend
             }
             $this->error(__('Parameter %s can not be empty', ''));
         }
-        //默认z站的zeedesk账号
-        $this->assign('account',$account);
+        $agents = ZendeskAccount::where('account_type',$row->type)->field('account_id,account_user')->select();
         $this->view->assign("row", $row);
+        $this->view->assign("agents", $agents);
         return $this->view->fetch();
     }
+
     /**
-     * 异步获取zendesk账户信息
-     *
-     * @Description
-     * @author lsw
-     * @since 2020/03/30 15:43:59 
-     * @return void
+     * ajax获取zendesk管理员列表
+     * @return string
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
      */
-    public function get_zendesk_account()
+    public function getAgents()
     {
-        if ($this->request->isAjax()) {
-            $platform = $this->request->post('platform');
-            if (!$platform) {
-                return $this->error('没有选择站点,请重新尝试', '', 'error', 0);
+        if($this->request->isPost()) {
+            $type = input('type');
+            $agents = ZendeskAccount::where(['account_type' => $type, 'is_used' => 1])->field('account_id,account_user')->select();
+            $html = '<option value="">请选择</option>';
+            foreach($agents as $agent){
+                $html .= "<option value='{$agent->account_id}'>{$agent->account_user}</option>";
             }
-            $result = (new ZendeskAccount())->getAccountList($platform);
-            if (!$result) {
-                return $this->error('这个站点没有账户', '', 'error', 0);
-            }
-            return $this->success('', '', $result, 0);
-        } else {
-            return $this->error('请求错误,请重新尝试', '', 'error', 0);
-        }       
+            return $html;
+        }
+        $this->error('not found');
+    }
+
+    /**
+     * zendesk列表筛选获取列表
+     * @return array
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public function getAgentsList()
+    {
+        $agents = $this->model->with('admin')->select();
+        $res = [];
+        foreach($agents as $agent){
+            $res[] = $agent->admin->nickname;
+        }
+        return $res;
     }
 }

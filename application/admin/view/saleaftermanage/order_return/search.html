@@ -89,12 +89,17 @@ table.altrowstable tr:nth-child(even){
                                         <label class="control-label col-xs-4">订单平台</label>
                                         <div class="col-xs-8">
                                             <select  id="c-order_platform" data-rule="required" class="form-control" name="order_platform">
-                                                {foreach name="orderPlatformList" item="vo"}
-                                                {if $key == $order_platform}
-                                                <option value="{$key}" selected="selected">{$vo}</option>
-                                                {else}
-                                                <option value="{$key}">{$vo}</option>
+                                                {foreach name="orderPlatformList" item="vo" key='k'}
+                                                {if $k == $order_platform}
+                                                <option value="{$k}" selected="selected">{$vo}</option>
+                                                {else}                                                
+                                                <option value="{$k}">{$vo}</option>
                                                 {/if}
+                                                {present name="default"}
+                                                {if condition="$default == $k && !isset($order_platform)"}
+                                                <option value="{$k}" selected="selected">{$vo}</option>
+                                                {/if}
+                                                {/present}
                                                 {/foreach}
                                             </select>
                                         </div>
@@ -423,7 +428,7 @@ table.altrowstable tr:nth-child(even){
                              <tr>
 								 <td style="text-align: center; vertical-align: middle;">{$orderInfoList.order_type}</td>
                                  <!-- <td style="text-align: center; vertical-align: middle;">{$orderInfoList.entity_id}</td> -->
-                                 <input type="hidden" id="entity_id" value="{$orderInfoList.entity_id}"/>
+                                 <input type="hidden"  value="{$orderInfoList.entity_id}"/>
                                  <td style="text-align: center; vertical-align: middle;">{$orderInfoList.increment_id}</td>
                                  <td style="text-align: center; vertical-align: middle;"><a href="javascript:void(0)" class="track-number">{$orderInfoList.track_number}</a></td>
                                  <td style="text-align: center; vertical-align: middle;">{$orderInfoList.title}</td>

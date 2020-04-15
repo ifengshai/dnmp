@@ -29,7 +29,7 @@
                     <div class="box-body">
                         <strong>CCs</strong>
                         <p class="text-muted">
-                            <input  data-rule="required" class="form-control" id='ccs' name="row[email_cc]" type="text" value="{$rows.email_cc}">
+                            <input   class="form-control" id='ccs' name="row[email_cc]" type="text" value="{$rows.email_cc}">
                         </p>
 
                         <hr>
@@ -42,7 +42,15 @@
 
                         <strong>priority</strong>
                         <p class="text-muted">
-                            {:Form::select('row[priority]', config('zendesk.priority'), $ticket->priority, ['class'=>'form-control selectpicker ticket-priority', null,'data-live-search' => true,'id'=>'Entry_priority_select'])}
+                            <select class="form-control ticket-priority selectpicker" data-live-search="1" data-rule="required" name="row[priority]">
+                                {if condition="$ticket->priority == 0"}
+                                <option value="0" {$ticket->priority == 0 ? 'selected' : ''}>- </option>
+                                {/if}
+                                <option value="1" {$ticket->priority == 1 ? 'selected' : ''}>low</option>
+                                <option value="2" {$ticket->priority == 2 ? 'selected' : ''}>normal</option>
+                                <option value="3" {$ticket->priority == 3 ? 'selected' : ''}>high</option>
+                                <option value="4" {$ticket->priority == 4 ? 'selected' : ''}>urgent</option>
+                            </select>
                         </p>
                     </div>
                     <!-- /.box-body -->
@@ -50,13 +58,13 @@
                 <!-- /.box -->
             </div>
             <!-- /.col -->
-            <div class="col-md-7">
+            <div class="col-md-7 col-center">
                 <div class="nav-tabs-custom">
                     <div class="box box-solid">
                         <!-- /.box-header -->
                         <div class="box-body">
                             <div class="user-block pull-left">
-                                <img class="img-circle img-bordered-sm" src="../../dist/img/user7-128x128.jpg" alt="User Image">
+                                <img class="img-circle img-bordered-sm" src="/assets/img/avatar.png" alt="User Image">
                                 <span class="username">
                                   <span href="#"><input id="c-subject" data-rule="required" value="{$ticket->subject}" class="form-control ticket-subject" name="row[subject]" type="text"></span>
                                 </span>
@@ -68,7 +76,7 @@
                                 </button>
                             </div>
                         </div>
-                        {if condition="$ticket->rating"}
+                        {if condition="in_array($ticket->rating,['bad','good'])"}
                         <div class="callout" style="background-color:#fffcf3;">
                             <h4>Rating! <button type="button" class="btn btn-block btn-warning btn-flat">{$ticket->rating}</button></h4>
                             {$ticket->comment}
@@ -83,7 +91,14 @@
                         <div class="form-group">
                             <label class="control-label col-xs-12 col-sm-2">{:__('Status')}</label>
                             <div class="col-xs-12 col-sm-8">
-                                {:Form::select('row[status]', config('zendesk.status'), $ticket->status, ['class'=>'form-control selectpicker ticket-status', null,'data-live-search' => true,'id'=>'Entry_status_select'])}
+                                <select class="form-control ticket-status selectpicker" data-live-search="1" data-rule="required" name="row[status]">
+                                    {if condition="$ticket->status ==1"}
+                                    <option value="1" {$ticket->status == 1 ? 'selected' : ''}>new</option>
+                                    {/if}
+                                    <option value="2" {$ticket->status == 2 ? 'selected' : ''}>open</option>
+                                    <option value="3" {$ticket->status == 3 ? 'selected' : ''}>pending</option>
+                                    <option value="4" {$ticket->status == 4 ? 'selected' : ''}>solved</option>
+                                </select>
                             </div>
                         </div>
                         <div class="form-group">
@@ -95,9 +110,9 @@
                         <div class="form-group">
                             <label for="c-image" class="control-label col-xs-12 col-sm-2">上传附件:</label>
                             <div class="col-xs-12 col-sm-8">
-                                <div class="input-group">
+                                <div class="input-group uploadBox">
                                     <input id="c-image" class="form-control" size="35" name="row[image]" type="text" value="">
-                                    <div class="input-group-addon no-border no-padding">
+                                    <div class="input-group-addon no-border no-padding upload">
                                         <span><button type="button" id="plupload-image" class="btn btn-danger plupload" data-input-id="c-image" data-mimetype="*" data-multiple="true"  data-preview-id="p-image"><i class="fa fa-upload"></i> {:__('Upload')}</button></span>
                                     </div>
                                     <span class="msg-box n-right"></span>
@@ -120,11 +135,13 @@
                                 {:Form::select('', $templates, null, ['class'=>'form-control selectpicker macro-apply', null,'data-live-search' => true,'id'=>'Entry_status_select'])}
                             </div>
                         </div>
+                        {if condition="$ticket->status != 5 && !$btn"}
                         <div class="form-group layer-footer">
                             <div class="col-xs-12 col-sm-8">
                                 <button type="submit" class="btn btn-success btn-embossed disabled">发送邮件</button>
                             </div>
                         </div>
+                        {/if}
                         <!-- /.box-body -->
                     </div>
                     <br />
@@ -134,10 +151,14 @@
                             {foreach name="comments" item="vo"}
                             <div class="post">
                                 <div class="user-block">
-                                    <img class="img-circle img-bordered-sm" src="../../dist/img/user1-128x128.jpg" alt="user image">
+                                    {if condition="$vo['is_admin']"}
+                                    <img class="img-circle img-bordered-sm" src="{:session('admin.avatar')}" alt="user image">
+                                    {else/}
+                                    <img class="img-circle img-bordered-sm" src="/assets/img/avatar.png" alt="user image">
+                                    {/if}
                                     <span class="username">
                                         {if condition="$vo['is_admin']"}
-                                      <a href="#">{$vo->agent->name}</a>
+                                      <a href="#">{$vo->agent->agent->account_user}</a>
                                         {else/}
                                         <a href="#">{$ticket->username}</a>
                                         {/if}
@@ -145,7 +166,7 @@
                                     <span class="description">{$vo->update_time}</span>
                                 </div>
                                 <!-- /.user-block -->
-                                <div style="margin:0px 0px 0px 50px;">
+                                <div style="margin:0px 0px 0px 70px;">
                                    {$vo->html_body}
                                     {if condition="$vo.attachments"}
                                     <ul class="mailbox-attachments clearfix">
@@ -199,7 +220,7 @@
                     <ul class="list-group list-group-unbordered">
                         {foreach name="recentTickets" item="vo"}
                         <li class="list-group-item">
-                            <b>#{$vo->ticket_id}  {$vo->subject}</b> <a class="pull-right">{$vo->status_format}</a>
+                            <b><a class="change-ticket" data-status="{$vo->status}" data-title="回复【{$vo->ticket_id}】{$vo->subject}" href="{:url('zendesk/zendesk/edit',['ids' => $vo->id,'btn' => 1])}">#{$vo->ticket_id}  {$vo->subject}</a> </b><a class="pull-right">{$vo->status_format}</a>
                         </li>
                         {/foreach}
                     </ul>
@@ -227,24 +248,16 @@
                             <th>Amount</th>
                             <th>Status</th>
                         </tr>
+                        {foreach name="orders" item="vo"}
                         <tr>
-                            <td>100184275</td>
-                            <td>1/30/2020</td>
-                            <td>$80.76</td>
-                            <td>Processing</td>
+
+                            <td><a href="{$orderUrl}{$vo->entity_id}" target="_blank">{$vo->increment_id}</a></td>
+                            <td>{$vo->created_at|strtotime|date='d/m/Y',###}</td>
+                            <td>{$vo->order_currency_code}{$vo->grand_total|substr=0,-2}</td>
+                            <td>{$vo->status}</td>
                         </tr>
-                        <tr>
-                            <td>100184275</td>
-                            <td>1/30/2020</td>
-                            <td>$80.76</td>
-                            <td>Processing</td>
-                        </tr>
-                        <tr>
-                            <td>100184275</td>
-                            <td>1/30/2020</td>
-                            <td>$80.76</td>
-                            <td>Processing</td>
-                        </tr>
+                        {/foreach}
+                        <tr><td  style="width: 100px;text-align: center;"><a href="{:config('zendesk.check_order_info_url')}" target="_blank">查看用户信息</a></td></tr>
                     </table>
                 </div>
                 <!-- /.box-body -->
@@ -424,4 +437,40 @@
     <input type="hidden" class="ticket_id" value="{$ticket->ticket_id}">
     <input type="hidden" class="search-post-type" value="{$ticket->type}">
 </section>
+<style>
+    .col-center{
+        border-right: 2px solid #ccc;
+        border-left: 2px solid #ccc;
+    }
+    .col-center .box-body{
+        padding: 10px 8.5%!important;
+    }
+    .col-center .description{
+        margin-top: 10px;
+        margin-left: 67px;
+    }
+    .col-center .username{
+        margin-left: 67px;
+    }
+    .col-center .form-group{
+        margin-bottom: 20px!important;
+    }
+    .col-center .tab-content{
+        padding: 10px 9.5%;
+    }
+    .col-center .box-solid{
+        padding-bottom: 10px;
+    }
+    .col-center .upload{
+        margin-left: 10px;
+    }
+    .col-center .uploadBox{
+        display: flex;
+        justify-content: space-between;
+        width: 90%;
+    }
+    .col-center .uploadBox input{
+        width: 96%;
+    }
+</style>
 <!-- /.content -->

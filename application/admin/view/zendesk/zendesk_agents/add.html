@@ -2,19 +2,24 @@
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">{:__('admin.nickname')}:</label>
         <div class="col-xs-12 col-sm-8">
-            {:Form::select('row[admin_id]', $user, null, ['class'=>'form-control', 'data-rule'=>'required','data-live-search' => true,'id'=>'admin_id'])}
+            {:Form::select('row[admin_id]', $user, null, ['class'=>'form-control selectpicker', 'data-rule'=>'required','data-live-search' => true,'id'=>'admin_id'])}
         </div>
     </div>
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">{:__('Type')}:</label>
         <div class="col-xs-12 col-sm-8">
-            {:Form::select('row[type]', $type, null, ['class'=>'form-control', 'data-rule'=>'required','data-live-search' => true,'id'=>'type'])}
+            <select class="form-control site-type" data-live-search="1"  name="row[type]" data-rule="required">
+                <option value="">请选择</option>
+                <option value="1">zeelool</option>
+                <option value="2">voogueme</option>
+            </select>
         </div>
     </div>
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">{:__('Name')}:</label>
         <div class="col-xs-12 col-sm-8">
-            {:Form::select('row[name]', $account, null, ['class'=>'form-control selectpicker', 'data-rule'=>'required','data-live-search' => true,'id'=>'name'])}
+            <select class="form-control account-select" data-live-search="1" data-rule="required" name="row[agent_id]">
+            </select>
         </div>
     </div>
     <div class="form-group">

@@ -17,6 +17,15 @@ class ZendeskTags extends Backend
      * @var \app\admin\model\zendesk\ZendeskTags
      */
     protected $model = null;
+    /**
+     * 是否开启Validate验证
+     */
+    protected $modelValidate = true;
+
+    /**
+     * 是否开启模型场景验证
+     */
+    protected $modelSceneValidate = true;
 
     public function _initialize()
     {
@@ -30,6 +39,4 @@ class ZendeskTags extends Backend
      * 因此在当前控制器中可不用编写增删改查的代码,除非需要自己控制这部分逻辑
      * 需要将application/admin/library/traits/Backend.php中对应的方法复制到当前控制器,然后进行修改
      */
-
-
 }

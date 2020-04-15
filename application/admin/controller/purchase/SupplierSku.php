@@ -449,8 +449,13 @@ class SupplierSku extends Backend
 
                 session($path, $result);
             }
-            
+           
             $list = [];
+            if (!$result->productInfo->skuInfos) {
+                $result = array("total" => 0, "rows" => $list);
+                return json($result);
+            }
+
             foreach ($result->productInfo->skuInfos as $k => $v) {
                 $list[$k]['id'] = $k + 1;
                 $list[$k]['title'] = $result->productInfo->subject;

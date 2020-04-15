@@ -93,7 +93,7 @@ class Item extends Model
                     }
                 }
                 $result['itemArr'] = $arr;
-            } elseif (3 == $type) { //配饰类型
+            } elseif (3 <= $type) { //配饰类型
                 $arr = $this->alias('m')->where('origin_sku', '=', $result['origin_sku'])->join('item_attribute a', 'm.id=a.item_id')->field('m.name,m.price,a.accessory_color')->select();
                 $result['itemArr'] = $arr;
             }
@@ -110,7 +110,7 @@ class Item extends Model
     {
         $map['is_del'] = 1;
         $map['is_open'] = 1;
-        return $this->where($map)->cache(3600)->column('sku', 'id');
+        return $this->where($map)->column('sku', 'id');
     }
 
     /***
@@ -632,7 +632,7 @@ class Item extends Model
         $where['b.is_del']  = 1;
         return $this->where($where)->alias('a')
             ->join(['fa_item_category' => 'b'], 'a.category_id=b.id')
-            ->cache(86400)->column('a.available_stock,a.name,b.name as type_name', 'sku');
+            ->column('a.available_stock,a.name,b.name as type_name', 'sku');
     }
 
     /**

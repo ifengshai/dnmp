@@ -23,7 +23,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 sortable: true,
                 columns: [
                     [
-                        {checkbox: true},
                         {field: 'id', title: __('Id')},
                         {field: 'name', title: __('Name')},
                         {field: 'count', title: __('Count'),sortable: true},

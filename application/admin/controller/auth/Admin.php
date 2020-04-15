@@ -284,16 +284,7 @@ class Admin extends Backend
         {
             $params = $this->request->post("row/a");
             if ($params)
-            {
-                if ($params['password'])
-                {
-                    $params['salt'] = Random::alnum();
-                    $params['password'] = md5(md5($params['password']) . $params['salt']);
-                }
-                else
-                {
-                    unset($params['password'], $params['salt']);
-                }
+            { 
                 //这里需要针对username和email做唯一验证
                 $adminValidate = \think\Loader::validate('Admin');
                 $adminValidate->rule([
