@@ -93,11 +93,11 @@
                             <div class="col-xs-12 col-sm-8">
                                 <select class="form-control ticket-status selectpicker" data-live-search="1" data-rule="required" name="row[status]">
                                     {if condition="$ticket->status ==1"}
-                                    <option value="1" {$ticket->status == 1 ? 'selected' : ''}>new</option>
+                                    <option value="1">new</option>
                                     {/if}
-                                    <option value="2" {$ticket->status == 2 ? 'selected' : ''}>open</option>
-                                    <option value="3" {$ticket->status == 3 ? 'selected' : ''}>pending</option>
-                                    <option value="4" {$ticket->status == 4 ? 'selected' : ''}>solved</option>
+                                    <option value="2">open</option>
+                                    <option value="3" selected>pending</option>
+                                    <option value="4">solved</option>
                                 </select>
                             </div>
                         </div>
