@@ -41,6 +41,18 @@ class WorkOrderList extends Backend
      * 需要将application/admin/library/traits/Backend.php中对应的方法复制到当前控制器,然后进行修改
      */
 
+    //根据主记录id，获取措施相关信息
+    public function sel_order_recept($id){
+        $step = $this->step->where('work_id',$id)->select();
+        $step_arr = collection($step)->toArray();
+        foreach ($step_arr as $k => $v){
+            $recept = $this->recept->where('measure_id',$v['id'])->select();
+            $recept_arr = collection($recept)->toArray();
+            $step_arr[$k]['recept'] = $recept_arr;
+        }
+        return $step_arr;
+    }
+
     /**
      * 查看
      */
@@ -71,6 +83,8 @@ class WorkOrderList extends Backend
             $user_list = $admin->where('status', 'normal')->column('nickname', 'id');
             $user_list = collection($user_list)->toArray();
 
+
+
             foreach ($list as $k => $v){
                 if($v['work_type'] == 1){
                     $list[$k]['work_type_str'] = '客服工单';
@@ -82,6 +96,7 @@ class WorkOrderList extends Backend
                     $list[$k]['assign_user_name'] = $user_list[$v['assign_user_id']];
                 }
 
+                $list[$k]['step_num'] = $this->sel_order_recept($v['id']);
 
             }
 
@@ -92,6 +107,8 @@ class WorkOrderList extends Backend
         }
         return $this->view->fetch();
     }
+
+
 
     /**
      * 添加
