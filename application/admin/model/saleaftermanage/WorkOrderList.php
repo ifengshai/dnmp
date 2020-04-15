@@ -205,9 +205,15 @@ class WorkOrderList extends Model
             if($measure == 1){
                 $changeLens = $params['change_lens'];
                 $change_type = 2;
-            }elseif($measure == 2){
+            }elseif($measure == 2){ //赠品
                 $changeLens = $params['gift'];
-                $change_type = 3;
+                $change_type = 4;
+            }elseif($measure == 3){ //补发
+                $changeLens = $params['original_sku'];
+                $change_type = 5;
+                if(!$params['address']['shipping_type']){
+                    exception('请选择运输方式');
+                }
             }
 
             $original_skus = $changeLens['original_sku'];
@@ -215,6 +221,8 @@ class WorkOrderList extends Model
                 exception('sss');
             }
             //循环插入数据
+            $changeSkuIds = [];
+            $changeSkuData = [];
             foreach($original_skus as $key => $val){
                 if(!$val){
                     exception('sku不能为空');
@@ -259,7 +267,53 @@ class WorkOrderList extends Model
                     'update_time' => date('Y-m-d H:i:s'),
                     'create_time' => date('Y-m-d H:i:s')
                 ];
-                WorkOrderChangeSku::create($data);
+                //补发
+                if($change_type == 5){
+                    $data['email'] = $params['address']['email'];
+                    $data['userinfo_option'] = serialize($params['address']);
+                    $changeSkuData[] = $data;
+                }
+                $res = WorkOrderChangeSku::create($data);
+                $changeSkuIds[] = $res->id;
+            }
+            //补发提交数据获取补发订单的id
+            if($change_type == 5){ //获取data值
+                $postData = [
+                    'currency_code' => $params['address']['currenccy_code'],
+                    'country' => $params['address']['country_id'],
+                    'shipping_type' => $params['address']['shipping_type'],
+                    'telephone' => $params['address']['telephone'],
+                    'email' => $params['address']['email'],
+                    'first_name' => $params['address']['firstname'],
+                    'last_name' => $params['address']['lastname'],
+                    'postcode' => $params['address']['postcode'],
+                    'city' => $params['address']['city'],
+                    'street' => $params['address']['street'],
+                    'region_code' => $params['address']['region_id'],
+                ];
+                //后续写补单接口
+                foreach($changeSkuData as  $change){
+                    $postData['product'][] = [
+                        'sku' => $change['original_sku'],
+                        'sku' => $change['original_sku'],
+                        'sku' => $change['original_sku'],
+                        'sku' => $change['original_sku'],
+                        'sku' => $change['original_sku'],
+                        'sku' => $change['original_sku'],
+                        'sku' => $change['original_sku'],
+                        'sku' => $change['original_sku'],
+                        'sku' => $change['original_sku'],
+                        'sku' => $change['original_sku'],
+                        'sku' => $change['original_sku'],
+                        'sku' => $change['original_sku'],
+                        'sku' => $change['original_sku'],
+                        'sku' => $change['original_sku'],
+                        'sku' => $change['original_sku'],
+                        'sku' => $change['original_sku'],
+                        'sku' => $change['original_sku'],
+                        'sku' => $change['original_sku'],
+                    ];
+                }
             }
             Db::commit();
         }catch (\Exception $e){
