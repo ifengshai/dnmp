@@ -252,23 +252,23 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
             });
 
             //赠品 start
-            $(document).on('click', '.btn-add-box', function () {
-                var option = $('#add_box_option').html();
-                var str = '<div><label style="margin-top: 10px;" class="control-label col-xs-12 col-sm-2">SKU：</label>\n' +
-                    '                    <div style="margin-top: 10px;" class="col-xs-12 col-sm-8">\n' +
-                    '                        <div class="dropup">\n' +
-                    '                            <select class="selectpicker" name="row[order_change][change_sku][]" data-live-search="true" title="请选择">\n' + option +
-                    '                            </select>\n' +
-                    '                        </div>\n' +
-                    '                    </div>\n' +
-                    '                    <label style="margin-top: 10px;" class="control-label col-xs-12 col-sm-2">数量：</label>\n' +
-                    '                    <div style="margin-top: 10px;" class="col-xs-12 col-sm-8">\n' +
-                    '                        <input class="form-control" name="row[order_change][change_number][]" type="text" value="">\n' +
-                    '                        <a href="javascript:;" class="btn btn-danger btn-del-box" title="删除"><i class="fa fa-trash"></i>删除</a>\n' +
-                    '                    </div></div>';
-                $('#add_box').append(str);
-                Controller.api.bindevent();
-            });
+            // $(document).on('click', '.btn-add-box', function () {
+            //     var option = $('#add_box_option').html();
+            //     var str = '<div><label style="margin-top: 10px;" class="control-label col-xs-12 col-sm-2">SKU：</label>\n' +
+            //         '                    <div style="margin-top: 10px;" class="col-xs-12 col-sm-8">\n' +
+            //         '                        <div class="dropup">\n' +
+            //         '                            <select class="selectpicker" name="row[order_change][change_sku][]" data-live-search="true" title="请选择">\n' + option +
+            //         '                            </select>\n' +
+            //         '                        </div>\n' +
+            //         '                    </div>\n' +
+            //         '                    <label style="margin-top: 10px;" class="control-label col-xs-12 col-sm-2">数量：</label>\n' +
+            //         '                    <div style="margin-top: 10px;" class="col-xs-12 col-sm-8">\n' +
+            //         '                        <input class="form-control" name="row[order_change][change_number][]" type="text" value="">\n' +
+            //         '                        <a href="javascript:;" class="btn btn-danger btn-del-box" title="删除"><i class="fa fa-trash"></i>删除</a>\n' +
+            //         '                    </div></div>';
+            //     $('#add_box').append(str);
+            //     Controller.api.bindevent();
+            // });
             $(document).on('click', '.btn-del-box', function () {
                 $(this).parent().parent().remove();
             });
@@ -374,7 +374,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 });
             })
             //补发点击填充数据
-            var lens_click_data
+            var lens_click_data;
+            var gift_click_data;
             $(document).on('click','input[name="row[measure_choose_id][]"]',function(){
 
                 var value = $(this).val();
@@ -528,19 +529,39 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                             $('.selectpicker ').selectpicker('refresh');
                         });
                     }
+                    //赠品
+                    if(value == 6 && check == true){
+                        Backend.api.ajax({
+                            url: 'saleaftermanage/work_order_list/ajaxGetGiftLens',
+                            data: {
+                                increment_id: increment_id,
+                                site_type: site_type,
+                            }
+                        }, function (data, ret) {
+                            $('.add_gift').html(data.html);
+                            //追加
+                            gift_click_data = '<div class="margin-top:10px;">' + data.html + '<div class="form-group-child4_del"><a href="javascript:;" style="width: 50%;" class="btn btn-danger btn-del-lens" title="删除"><i class="fa fa-trash"></i>删除</a></div></div>';
+                            $('.selectpicker ').selectpicker('refresh');
+                        });
+                    }
                 }else{
                     Toastr.error('请选选择订单号……');
                 }
 
             });
 
+            $(document).on('click', '.btn-add-box', function () {
+                $('.add_gift').after(gift_click_data);
+                $('.selectpicker ').selectpicker('refresh');
+                Controller.api.bindevent();
+            });
             $(document).on('click', '.btn-add-supplement-reissue', function () {
                 $('#supplement-order').after(lens_click_data);
                 $('.selectpicker ').selectpicker('refresh');
                 Controller.api.bindevent();
             });
             //根据prescription_type获取lens_type
-            $(document).on('change','select[name="row[replacement][recipe_type][]"],select[name="row[change_lens][recipe_type][]"]',function(){
+            $(document).on('change','select[name="row[replacement][recipe_type][]"],select[name="row[change_lens][recipe_type][]"],select[name="row[gift][recipe_type][]"]',function(){
                  var sitetype = $('#work_platform').val();
                  var prescription_type = $(this).val();
                  var that = $(this);
