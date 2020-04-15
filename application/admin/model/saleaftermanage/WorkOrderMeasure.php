@@ -21,6 +21,17 @@ class WorkOrderMeasure extends Model
 
     // 追加属性
     protected $append = [];
-
-
+    /**
+     * 求出工单的措施列表
+     *
+     * @Description
+     * @author lsw
+     * @since 2020/04/15 16:25:24 
+     * @param [type] $id
+     * @return void
+     */
+     static public function workMeasureList($id)
+    {
+        return WorkOrderMeasure::where(['work_id'=>$id])->column('measure_choose_id');
+    }
 }

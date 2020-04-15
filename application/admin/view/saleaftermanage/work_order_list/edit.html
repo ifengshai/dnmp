@@ -319,11 +319,11 @@
 
     <input type="hidden" name="row[work_type]" value="{$work_type}" />
     <!--工单类型，1 客服工单，2 仓库工单-->
-    <input type="hidden" name="row[order_pay_currency]" id='order_pay_currency' value="" />
+    <input type="hidden" name="row[order_pay_currency]" id='order_pay_currency' value="{$row.order_pay_currency}" />
     <!--订单支付的货币类型 根据订单号读出来-->
-    <input type="hidden" name="row[order_pay_method]" id='order_pay_method' value="" />
+    <input type="hidden" name="row[order_pay_method]" id='order_pay_method' value="{$row.order_pay_method}" />
     <!--订单支付的支付方式 根据订单号读出来-->
-    <input type="hidden" id='work_platform' name="row[work_platform]" value="" />
+    <input type="hidden" id='work_platform' name="row[work_platform]" value="{$row.work_platform}" />
     <!--站点类型-->
 
     <div class="form-group">
