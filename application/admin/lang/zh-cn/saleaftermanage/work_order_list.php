@@ -33,6 +33,7 @@ return [
     'refund_logistics_num'        => '退回物流单号',
     'create_user_name'        => '创建人',
     'deal_with'        => '承接人',
+    'Assign_user_id'        => '指定审核人',
 
 
 ];
