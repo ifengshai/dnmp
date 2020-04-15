@@ -40,5 +40,19 @@
                 <option value="{$i}">{$vo}</option>
                 {/foreach}
             </select>
+
     </form>
 </script>
+<script id="statustypetpl" type="text/html">
+    <!--form表单必须添加form-commsearch这个类-->
+    <form action="" class="form-commonsearch">
+        <!--给select一个固定的高度-->
+        <select id="c-statustype" class="form-control selectpicker" name="statustype" data-title="请选择">
+            <option value="1">待处理</option>
+            <option value="2">新增</option>
+            <option value="3">已处理</option>
+            <option value="4">待分配</option>
+        </select>
+    </form>
+</script>
+

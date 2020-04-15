@@ -35,6 +35,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                                 return Template('tagstpl', {});
                             },visible: false
                         },
+                        {
+                            field: 'status_type', title: __('类型'),custom: { 1: 'danger', 2: 'success', 3: 'blue', 4: 'orange' }, searchList: { 1: '待处理', 2: '新增', 3: '已处理', 4: '待分配' }, formatter: Table.api.formatter.status,visible:false
+                        },
                         {field: 'priority', title: __('priority'), custom: { 0: 'success', 1: 'gray', 2: 'yellow', 3: 'blue', 4: 'danger' }, searchList: { 0: '无', 1: 'Low', 2: 'Normal', 3: 'High', 4: 'Urgent' }, formatter: Table.api.formatter.status },
                         {field: 'channel', title: __('Channel')},
                         {field: 'type', title: __('type'), custom: { 1: 'yellow', 2: 'blue' }, searchList: { 1: 'Zeelool', 2: 'Voogueme' }, formatter: Table.api.formatter.status },
@@ -100,6 +103,15 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                 table.bootstrapTable('refresh', {});
                 return false;
             });
+            //判断搜索时的条件
+            $('.form-commonsearch .btn-success').on('click',function(){
+                var status_type = $('.form-commonsearch').find('select[name="status_type"]').val();
+                var create_time = $('#update_time').val();
+                if(status_type == 2 && !create_time){
+                    Toastr.error('请选择更新时间');
+                    return false;
+                }
+            })
             // 启动和暂停按钮
             $(document).on("click", ".btn-start", function () {
                 var url = $(this).data('url');
@@ -143,7 +155,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                         success: function (json) {
                             //修改回复内容，状态，priority，tags
                             if(json.template_content){
-                                $('.ticket-content').summernote("code",json.template_content);
+                                $('.ticket-content').summernote("pasteHTML",json.template_content);
                             }
                             if(json.mail_status) {
                                 $('.ticket-status').val(json.mail_status);
@@ -255,7 +267,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                         success: function (json) {
                             //修改回复内容，状态，priority，tags
                             if(json.template_content){
-                                $('.ticket-content').summernote("code",json.template_content);
+                                $('.ticket-content').summernote("pasteHTML",json.template_content);
                             }
                             if(json.mail_status) {
                                 $('.ticket-status').val(json.mail_status);

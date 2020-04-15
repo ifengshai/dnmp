@@ -62,6 +62,37 @@ class Zendesk extends Backend
                 $map['zendesk.assign_id'] = session('admin.id');
                 $map['zendesk.status'] = ['in', [1, 2]];
             }
+            //类型筛选
+            if($filter['status_type']){
+//                待处理：new;open状态下的工单
+//                新增：update时间为选择时间，new、open状态的工单
+//                已处理：public comment
+//                待分配：没有承接人的工单
+                $status_type = $filter['status_type'];
+                unset($filter['status_type']);
+                switch($status_type){
+                    case 1:
+                        $map['zendesk.status'] = ['in', [1, 2]];
+                        break;
+                    case 2:
+                        $update_time = $filter['update_time'] ?? '';
+                        if(!$update_time){
+                            $this->error('请选择更新时间');
+                        }
+                        $map['zendesk.status'] = ['in', [1, 2]];
+                        break;
+                    case 3:
+                        //获取public =1 is_admin=1的zid列表
+                        $zids = ZendeskComments::where(['is_public' => 1,'is_admin' => 1])->column('zid');
+                        $map['zendesk.id'] = ['in',$zids];
+                        break;
+                    case 4:
+                        //获取所有的账号admin_id
+                        $admin_ids = ZendeskAgents::column('admin_id');
+                        $map['zendesk.assign_id'] = ['not in',$admin_ids];
+                        break;
+                }
+            }
             if($filter['tags']) {
                 $andWhere = "FIND_IN_SET({$filter['tags']},tags)";
                 unset($filter['tags']);

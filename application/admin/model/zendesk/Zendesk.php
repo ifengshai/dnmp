@@ -23,7 +23,8 @@ class Zendesk extends Model
     protected $append = [
         'tag_format',
         'status_format',
-        'username_format'
+        'username_format',
+        'status_type'
     ];
 
     protected static function init()
@@ -67,6 +68,15 @@ class Zendesk extends Model
     public function getStatusFormatAttr($value, $data)
     {
         return config('zendesk.status')[$data['status']];
+    }
+    public function getStatusTypeAttr($value, $data)
+    {
+        return [
+            1 => '待处理',
+            2 => '新增',
+            3 => '已处理',
+            4 => '待分配'
+        ];
     }
 
     public function getUsernameFormatAttr($value, $data)
