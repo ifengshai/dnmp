@@ -12,7 +12,7 @@ use Util\NihaoPrescriptionDetailHelper;
 use Util\ZeeloolPrescriptionDetailHelper;
 use Util\VooguemePrescriptionDetailHelper;
 use Util\WeseeopticalPrescriptionDetailHelper;
-
+use app\admin\model\saleaftermanage\WorkOrderMeasure;
 /**
  * 售后工单列管理
  *
@@ -40,7 +40,11 @@ class WorkOrderList extends Backend
 
         //获取所有的国家
         $country = json_decode(file_get_contents('assets/js/country.js'), true);
-        $this->view->assign('country', $country);        
+        $this->view->assign('country', $country);
+        //查询用户id对应姓名
+        $admin = new \app\admin\model\Admin();
+        $users = $admin->where('status', 'normal')->column('nickname', 'id');
+        $this->assignconfig('users', $users); //返回用户        
         $this->recept = new \app\admin\model\saleaftermanage\WorkOrderRecept;
     }
 
@@ -341,12 +345,27 @@ class WorkOrderList extends Backend
             $this->assignconfig('work_type', 2);
             $this->view->assign('problem_type', config('workorder.warehouse_problem_type')); //仓库问题类型
         }
+            //求出订单sku列表,传输到页面当中
             $skus = $this->model->getSkuList($row->work_platform, $row->platform_order);
-            $arrSkus = [];
-            foreach($skus['sku'] as $val){
-                $arrSkus[$val] = $val;
+            if(is_array($skus['sku'])){
+                $arrSkus = [];
+                foreach($skus['sku'] as $val){
+                    $arrSkus[$val] = $val;
+                }
+                $this->view->assign('skus',$arrSkus);
             }
-            $this->view->assign('skus',$arrSkus);
+            //把问题类型传递到js页面
+            if(!empty($row->problem_type_id)){
+                $this->assignconfig('problem_type_id',$row->problem_type_id);
+            }
+            
+            //求出工单选择的措施传递到js页面
+            $measureList = WorkOrderMeasure::workMeasureList($row->id);
+            // dump(!empty($measureList));
+            // exit;
+            if(!empty($measureList)){
+                $this->assignconfig('measureList',$measureList);
+            }
             return $this->view->fetch();
     }
 
