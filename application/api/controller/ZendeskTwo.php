@@ -97,6 +97,7 @@ class ZendeskTwo extends Controller
      */
     protected function getTickets(Array $array)
     {
+        echo 1;
         $params = $this->parseStr($array);
         $search = $this->client->search()->find($params);
 
@@ -137,6 +138,7 @@ class ZendeskTwo extends Controller
 //               break;
 //           }
             $id = $ticket->id;
+            echo $id."\r\n";
             //发送者的id
             $requester_id = $ticket->requester_id;
             //所有的tag
