@@ -197,6 +197,14 @@ class ZendeskAgents extends Backend
         }
         $this->error('not found');
     }
+
+    /**
+     * zendesk列表筛选获取列表
+     * @return array
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
     public function getAgentsList()
     {
         $agents = $this->model->with('admin')->select();

@@ -127,11 +127,11 @@ class Zendesk extends Backend
                     $type = input('type');
                     $siteName = 'zeelool';
                     if($type == 2) {
-                        $siteName = 'zeelool';
+                        $siteName = 'voogueme';
                     }
                     $tags = ZendeskTags::where('id', 'in', $params['tags'])->column('name');
                     $status = config('zendesk.status')[$params['status']];
-                    $author_id = $assignee_id = ZendeskAgents::where(['admin_id' => session('admin.id'), 'agent_type' => $type])->value('agent_id');
+                    $author_id = $assignee_id = ZendeskAgents::where(['admin_id' => session('admin.id'), 'type' => $type])->value('agent_id');
                     if (!$author_id) {
                         throw new Exception('请将用户先绑定zendesk的账号', 10001);
                     }
@@ -196,7 +196,7 @@ class Zendesk extends Backend
                         throw new Exception($res['message'], 10001);
                     }
                     //开始写入数据库
-                    $agent_id = ZendeskAgents::where('admin_id', session('admin.id'))->value('agent_id');
+                    $agent_id = ZendeskAgents::where(['admin_id' => session('admin.id'), 'type' => $type])->value('agent_id');
                     //对tag进行排序
                     $zendeskTags = $params['tags'];
                     sort($zendeskTags);
@@ -317,7 +317,7 @@ class Zendesk extends Backend
                     //status
                     $tags = ZendeskTags::where('id', 'in', $params['tags'])->column('name');
                     $status = config('zendesk.status')[$params['status']];
-                    $author_id = $assignee_id = ZendeskAgents::where(['admin_id' => session('admin.id'), 'agent_type' => $ticket->type])->value('agent_id');
+                    $author_id = $assignee_id = ZendeskAgents::where(['admin_id' => session('admin.id'), 'type' => $ticket->type])->value('agent_id');
                     if (!$author_id) {
                         throw new Exception('请将用户先绑定zendesk的账号', 10001);
                     }
@@ -377,7 +377,7 @@ class Zendesk extends Backend
                         throw new Exception($res['message'], 10001);
                     }
                     //开始写入数据库
-                    $agent_id = ZendeskAgents::where('admin_id', session('admin.id'))->value('agent_id');
+                    $agent_id = ZendeskAgents::where(['admin_id' => session('admin.id'), 'type' => $ticket->type])->value('agent_id');
                     //对tag进行排序
                     $zendeskTags = $params['tags'];
                     sort($zendeskTags);
@@ -541,6 +541,15 @@ Please close this window and try again.");
             $source_comment = $params['merge_to'];
             $target_comment_is_public = isset($params['merge_in_check']) ? true : false;
             $source_comment_is_public = isset($params['merge_to_check']) ? true : false;
+            //获取邮件的type类型，是v还是z站
+            $type = $this->model->where('ticket_id', $ticket)->value('type');
+            $siteName = '';
+            if($type == 1){
+                $siteName = 'zeelool';
+            }elseif($type == 2){
+                $siteName = 'voogueme';
+            }
+
             $data = [
                 'ids' => [$ids],
                 'target_comment_is_public' => $target_comment_is_public,
@@ -556,7 +565,7 @@ Please close this window and try again.");
             $result = false;
             try {
                 //合并工单
-                $result = (new Notice(request(), ['type' => 'zeelool']))->merge($ticket, $data);
+                $result = (new Notice(request(), ['type' => $siteName]))->merge($ticket, $data);
                 if (isset($result['code'])) {
                     throw new Exception($result['message'], 10001);
                 }
@@ -573,7 +582,7 @@ Please close this window and try again.");
                     $tagIds = $tagId;
                 }
 
-                $agent_id = ZendeskAgents::where('admin_id', session('admin.id'))->value('agent_id');
+                $agent_id = ZendeskAgents::where(['admin_id' => session('admin.id'),'type' => $type])->value('agent_id');
                 $zid = $this->model->where('ticket_id', $ids)->value('id');
                 //被合并的状态closed，添加content，tag：closed_by_merge
                 $this->model->where('ticket_id', $ids)->update([
