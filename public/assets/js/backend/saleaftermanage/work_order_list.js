@@ -618,6 +618,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
              //如果问题类型存在，显示问题类型和措施
             if(Config.problem_type_id){ 
                 var id = Config.problem_type_id;
+                //row[problem_type_id]
+                $("input[name='row[problem_type_id]'][value='"+id+"']").attr("checked",true);
                 //id大于5 默认措施4
                 if (id > 5) {
                     var steparr = Config.workorder['step04'];
@@ -641,6 +643,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 if(Config.measureList){
                     var checkID = Config.measureList;//措施列表赋值给checkID
                     for (var m = 0; m < checkID.length; m++) {
+                        $("input[name='row[measure_choose_id][]'][value='"+checkID[m]+"']").attr("checked",true);
                         var node = $('.step' + checkID[m]);
                         if (node.is(':hidden')) {
                             node.show();
@@ -666,13 +669,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 }
                 //判断取消订单的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end
             }
-            //如果措施存在
-            if(Config.measureList){
-
-            }
-            console.log(Config.problem_type_id);
-            console.log(Config.measureList);
-            
         },
         //处理任务
         process: function () {

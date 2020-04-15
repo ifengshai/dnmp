@@ -456,6 +456,10 @@ class WorkOrderList extends Backend
             if(!empty($measureList)){
                 $this->assignconfig('measureList',$measureList);
             }
+            //查询用户id对应姓名
+            $admin = new \app\admin\model\Admin();
+            $users = $admin->where('status', 'normal')->column('nickname', 'id');
+            $this->assignconfig('users', $users); //返回用户            
             return $this->view->fetch();
     }
 
