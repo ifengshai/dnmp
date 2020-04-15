@@ -12,7 +12,7 @@ use Util\NihaoPrescriptionDetailHelper;
 use Util\ZeeloolPrescriptionDetailHelper;
 use Util\VooguemePrescriptionDetailHelper;
 use Util\WeseeopticalPrescriptionDetailHelper;
-
+use app\admin\model\saleaftermanage\WorkOrderMeasure;
 /**
  * 售后工单列管理
  *
@@ -207,7 +207,7 @@ class WorkOrderList extends Backend
                         throw new Exception("添加失败！！");
                     }
                     //修改镜架操作
-                    $this->model->changeLens($params, $this->model->getLastInsID());
+                    // $this->model->changeLens($params, $this->model->getLastInsID());
 
                     //循环插入措施
                     if (count(array_filter($params['measure_choose_id'])) > 0) {
@@ -285,8 +285,8 @@ class WorkOrderList extends Backend
 
                     //循环插入取消订单数据
                     $orderChangeList = [];
-                    //判断是否选中更改镜框问题类型
-                    if ($params['cancel_order'] && $params['problem_type_id'] == 1) {
+                    //判断是否选中取消措施
+                    if ($params['cancel_order'] && in_array(3, array_filter($params['measure_choose_id']))) {
 
                         foreach ($params['change_frame'] as $k => $v) {
                             if (!$v['change_sku']) {
@@ -435,13 +435,28 @@ class WorkOrderList extends Backend
             $this->assignconfig('work_type', 2);
             $this->view->assign('problem_type', config('workorder.warehouse_problem_type')); //仓库问题类型
         }
-        $skus = $this->model->getSkuList($row->work_platform, $row->platform_order);
-        $arrSkus = [];
-        foreach ($skus['sku'] as $val) {
-            $arrSkus[$val] = $val;
-        }
-        $this->view->assign('skus', $arrSkus);
-        return $this->view->fetch();
+            //求出订单sku列表,传输到页面当中
+            $skus = $this->model->getSkuList($row->work_platform, $row->platform_order);
+            if(is_array($skus['sku'])){
+                $arrSkus = [];
+                foreach($skus['sku'] as $val){
+                    $arrSkus[$val] = $val;
+                }
+                $this->view->assign('skus',$arrSkus);
+            }
+            //把问题类型传递到js页面
+            if(!empty($row->problem_type_id)){
+                $this->assignconfig('problem_type_id',$row->problem_type_id);
+            }
+            
+            //求出工单选择的措施传递到js页面
+            $measureList = WorkOrderMeasure::workMeasureList($row->id);
+            // dump(!empty($measureList));
+            // exit;
+            if(!empty($measureList)){
+                $this->assignconfig('measureList',$measureList);
+            }
+            return $this->view->fetch();
     }
 
     /**
