@@ -98,7 +98,7 @@ class ZendeskTwo extends Controller
     protected function getTickets(Array $array)
     {
         $params = $this->parseStr($array);
-        $search = $this->client->search()->find($params,['page' => 2]);
+        $search = $this->client->search()->find($params,['page' => 3]);
 
         $tickets = $search->results;
         if(!$search->count){
