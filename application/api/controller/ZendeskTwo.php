@@ -56,9 +56,11 @@ class ZendeskTwo extends Controller
     }
     public function test()
     {
-        $url = "https://translation.googleapis.com/language/translate/v2?key=AIzaSyCqDt6cu0yCLkKkkutNAm9gHJB3pcHIhKU&source=zh&target=en".'&q='.urlencode('我的士大夫丰富阿萨德额');
+        $url = "https://translation.googleapis.com/language/translate/v2?key=AIzaSyCqDt6cu0yCLkKkkutNAm9gHJB3pcHIhKU&source=zh&target=en".'&q='.urlencode('【】this is a ');
         $res = Http::sendRequest($url);
-        dump($res);
+        $data = json_decode($res['msg'],true);
+        //dump($data);
+        echo $data['data']['translations'][0]['translatedText'];
     }
     /**
      * 查询tickets
@@ -469,10 +471,13 @@ class ZendeskTwo extends Controller
         $lastUpdateTime = $data['lastUpdateTime']; //物流最新跟新时间
         $StatusDescription = isset($data['origin_info']['trackinfo'][0]['StatusDescription']) ? $data['origin_info']['trackinfo'][0]['StatusDescription'] : '';
         $lastEvent = $data['lastEvent'] ? $data['lastEvent'] : $StatusDescription;
+        $url = "https://translation.googleapis.com/language/translate/v2?key=AIzaSyCqDt6cu0yCLkKkkutNAm9gHJB3pcHIhKU&source=zh&target=en".'&q='.urlencode($lastEvent);
+        $english = Http::sendRequest($url);
+        $englishData = json_decode($english['msg'],true);
         $res = [
             'status' => $data['status'],
             'lastUpdateTime' => $lastUpdateTime,
-            'lastEvent' => $lastEvent,
+            'lastEvent' => $englishData['data']['translations'][0]['translatedText'],
             'carrier_code' => $data['carrier_code'],
             'updated_at' => $track_result['updated_at'],
             'track_number' => $track_result['track_number']
