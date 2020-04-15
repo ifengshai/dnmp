@@ -131,6 +131,7 @@ class ZendeskTwo extends Controller
     {
         foreach($tickets as $key => $ticket){
             if(ZendeskReply::where('email_id',$ticket->id)->find()){
+                echo $ticket->id."\r\n";
                 continue;
             }
             $params = [];
@@ -138,7 +139,7 @@ class ZendeskTwo extends Controller
 //               break;
 //           }
             $id = $ticket->id;
-            echo $id."\r\n";
+            //echo $id."\r\n";
             //发送者的id
             $requester_id = $ticket->requester_id;
             //所有的tag
