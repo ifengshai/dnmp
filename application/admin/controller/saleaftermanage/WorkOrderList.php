@@ -149,7 +149,7 @@ class WorkOrderList extends Backend
                     if ($params['change_frame'] && $params['problem_type_id'] == 1) {
                         //判断SKU是否有库存
                     }
-                    
+
 
                     //判断工单类型 1客服 2仓库
                     if ($params['work_type'] == 1) {
@@ -207,7 +207,8 @@ class WorkOrderList extends Backend
                         throw new Exception("添加失败！！");
                     }
                     //修改镜架操作
-                    $this->model->changeLens($params,$this->model->getLastInsID());
+                    $this->model->changeLens($params, $this->model->getLastInsID());
+
                     //循环插入措施
                     if (count(array_filter($params['measure_choose_id'])) > 0) {
 
@@ -255,12 +256,38 @@ class WorkOrderList extends Backend
                         }
                     }
 
-
                     //循环插入更换镜框数据
                     $orderChangeList = [];
                     //判断是否选中更改镜框问题类型
                     if ($params['change_frame'] && $params['problem_type_id'] == 1) {
-                       
+
+                        foreach ($params['change_frame'] as $k => $v) {
+                            if (!$v['change_sku']) {
+                                continue;
+                            }
+                            $orderChangeList[$k]['work_id'] = $this->model->id;
+                            $orderChangeList[$k]['increment_id'] = $params['platform_order'];
+                            $orderChangeList[$k]['platform_type'] = $params['work_type'];
+                            $orderChangeList[$k]['original_sku'] = $v['original_sku'];
+                            $orderChangeList[$k]['original_number'] = $v['original_number'];
+                            $orderChangeList[$k]['change_sku'] = $v['change_sku'];
+                            $orderChangeList[$k]['change_number'] = $v['change_number'];
+                            $orderChangeList[$k]['change_type'] = 1;
+                            $orderChangeList[$k]['create_person'] = session('admin.nickname');
+                            $orderChangeList[$k]['create_time'] = date('Y-m-d H:i:s');
+                            $orderChangeList[$k]['update_time'] = date('Y-m-d H:i:s');
+                        }
+                        $orderChangeRes = $this->order_change->saveAll($orderChangeList);
+                        if (false === $orderChangeRes) {
+                            throw new Exception("添加失败！！");
+                        }
+                    }
+
+                    //循环插入取消订单数据
+                    $orderChangeList = [];
+                    //判断是否选中更改镜框问题类型
+                    if ($params['cancel_order'] && $params['problem_type_id'] == 1) {
+
                         foreach ($params['change_frame'] as $k => $v) {
                             if (!$v['change_sku']) {
                                 continue;
@@ -335,7 +362,7 @@ class WorkOrderList extends Backend
      */
     protected function skuIsStock($skus)
     {
-       
+
     }
 
     /**
