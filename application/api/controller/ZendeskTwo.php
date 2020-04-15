@@ -133,9 +133,9 @@ class ZendeskTwo extends Controller
                 continue;
             }
             $params = [];
-           if($key >= 50){
-               break;
-           }
+//           if($key >= 50){
+//               break;
+//           }
             $id = $ticket->id;
             //发送者的id
             $requester_id = $ticket->requester_id;
@@ -272,7 +272,7 @@ class ZendeskTwo extends Controller
         try{
             $this->client->tickets()->update($ticket_id, $params);
             if($echo) echo $ticket_id . "\r\n";
-            sleep(1);
+            sleep(3);
         }catch (\Exception $e){
             return false;
             //exception($e->getMessage(), 10001);
