@@ -385,6 +385,30 @@ class WorkOrderList extends Backend
     }
 
     /**
+     * 赠品表单
+     * @throws Exception
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public function ajaxGetGiftLens()
+    {
+        if (request()->isAjax()) {
+            $incrementId = input('increment_id');
+            $siteType = input('site_type');
+            //获取地址、处方等信息
+            $res = $this->model->getAddress($siteType, $incrementId);
+            $lens = $this->model->getReissueLens($siteType, $res['prescriptions'], 3);
+            if ($res) {
+                $this->success('操作成功！！', '', $lens);
+            } else {
+                $this->error('未获取到数据！！');
+            }
+        }
+        $this->error('404 not found');
+    }
+
+    /**
      * ajax根据prescription_type获取镜片信息
      */
     public function ajaxGetLensType()

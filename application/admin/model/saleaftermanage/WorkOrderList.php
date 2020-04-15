@@ -152,6 +152,8 @@ class WorkOrderList extends Model
             }
             //拼接html页面
             $html = (new \think\View())->fetch('saleaftermanage/work_order_list/ajax_reissue_add',compact('prescription','coating_type','prescriptions','type'));
+        }elseif($type == 2){
+            $html = (new \think\View())->fetch('saleaftermanage/work_order_list/ajax_reissue_add',compact('showPrescriptions','prescription','coating_type','prescriptions','type'));
         }else{
             $html = (new \think\View())->fetch('saleaftermanage/work_order_list/ajax_reissue_add',compact('showPrescriptions','prescription','coating_type','prescriptions','type'));
         }
