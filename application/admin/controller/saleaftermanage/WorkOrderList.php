@@ -261,6 +261,9 @@ class WorkOrderList extends Backend
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
             if ($params) {
+                if($params['order_sku']){
+                    $params['order_sku'] = implode(',',$params['order_sku']);
+                }
                 $params = $this->preExcludeFields($params);
                 $result = false;
                 Db::startTrans();
@@ -301,7 +304,13 @@ class WorkOrderList extends Backend
             $this->assignconfig('work_type', 2);
             $this->view->assign('problem_type', config('workorder.warehouse_problem_type')); //仓库问题类型
         }
-        return $this->view->fetch();
+            $skus = $this->model->getSkuList($row->work_platform, $row->platform_order);
+            $arrSkus = [];
+            foreach($skus['sku'] as $val){
+                $arrSkus[$val] = $val;
+            }
+            $this->view->assign('skus',$arrSkus);
+            return $this->view->fetch();
     }
 
     /**

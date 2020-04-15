@@ -342,10 +342,9 @@
             <label class="control-label col-xs-12 col-sm-2">{:__('order_sku')}：</label>
             <div class="col-xs-12 col-sm-8">
                 <!-- <select id="c-order_sku" class="form-control selectpicker" multiple name="row[order_sku]">
-
-                </select> -->
-                <input style="width: 60%;" id="c-platform_order" class="form-control" name="row[order_sku]"
-                    type="text" value="{$row.order_sku}" readonly>                
+                    {:build_select('row[order_sku][]', $skus, $row.order_sku,['class'=>'form-control selectpicker','data-live-search' => true,'multiple'=>'multiple'])}
+                </select>                -->
+                {:build_select('row[order_sku][]', $skus, $row.order_sku,['class'=>'form-control selectpicker','multiple'=>'multiple'])}
             </div>
         </div>
 
@@ -353,10 +352,10 @@
             <label class="control-label col-xs-12 col-sm-2">{:__('work_level')}：</label>
             <div class="col-xs-12 col-sm-8">
                 <select id="c-work_level" class="form-control selectpicker" name="row[work_level]">
-                    <option value="1">低</option>
-                    <option value="2">中</option>
-                    <option value="3">高</option>
-                </select>
+                    <option value="1" {eq name="1" value="$row.work_level"}selected{/eq}>低</option>
+                    <option value="2" {eq name="2" value="$row.work_level"}selected{/eq}>中</option>
+                    <option value="3" {eq name="3" value="$row.work_level"}selected{/eq}>高</option>
+                </select>                
             </div>
         </div>
 
