@@ -26,26 +26,30 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         { checkbox: true },
                         { field: 'id', title: __('Id') },
                         { field: 'work_platform', title: __('work_platform'), custom: { 1: 'blue', 2: 'danger', 3: 'orange' }, searchList: { 1: 'Zeelool', 2: 'Voogueme', 3: 'Nihao' }, formatter: Table.api.formatter.status },
-
-                        { field: 'work_type', title: __('Work_type') },
+                        { field: 'work_type_str', title: __('Work_type') },
                         { field: 'platform_order', title: __('Platform_order') },
-                        { field: 'order_pay_currency', title: __('Order_pay_currency') },
                         { field: 'order_sku', title: __('Order_sku') },
-                        { field: 'work_status', title: __('Work_status') },
-                        { field: 'work_level', title: __('Work_level') },
-                        { field: 'problem_type_id', title: __('Problem_type_id') },
+                        { field: 'work_level', title: __('Work_level'), custom: { 1: 'success', 2: 'orange', 3: 'danger' }, searchList: { 1: '低', 2: '中', 3: '高' }, formatter: Table.api.formatter.status },
                         { field: 'problem_type_content', title: __('Problem_type_content') },
-                        { field: 'problem_description', title: __('Problem_description') },
-                        { field: 'create_id', title: __('Create_id') },
-                        { field: 'handle_person', title: __('Handle_person') },
-                        { field: 'is_check', title: __('Is_check') },
-                        { field: 'check_person_id', title: __('Check_person_id') },
+                        { field: 'create_user_name', title: __('create_user_name') },
+                        { field: 'is_check', title: __('Is_check'), custom: { 0: 'black', 1: 'success'}, searchList: { 0: '否', 1: '是'}, formatter: Table.api.formatter.status },
+
+                        { field: 'assign_user_name', title: __('Assign_user_id') },
+
                         { field: 'operation_person', title: __('Operation_person') },
-                        { field: 'shenhe_beizhu', title: __('Shenhe_beizhu') },
-                        { field: 'create_time', title: __('Create_time'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime },
+
+
+                        { field: 'shenhe_beizhu', title: __('deal_with') },
+
+
+                       /* { field: 'create_time', title: __('Create_time'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime },
                         { field: 'check_time', title: __('Check_time'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime },
-                        { field: 'complete_time', title: __('Complete_time'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime },
-                        { field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate }
+                        { field: 'complete_time', title: __('Complete_time'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime },*/
+
+
+                        { field: 'work_status', title: __('Work_status') },
+
+                        { field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate },
                     ]
                 ]
             });
@@ -65,15 +69,15 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 $('#appoint_group_users').html('');//切换问题类型时清空承接人
                 $('#recept_person_id').val('');//切换问题类型时清空隐藏域承接人id
                 $('#recept_person').val('');//切换问题类型时清空隐藏域承接人
-                $('.measure').hide();            
-                $('#recept_group_id').val('');    
-                if(2 == Config.work_type){ //如果是仓库人员添加的工单
+                $('.measure').hide();
+                $('#recept_group_id').val('');
+                if (2 == Config.work_type) { //如果是仓库人员添加的工单
                     $('#step_id').hide();
                     $('#recept_person_group').hide();
-                    $('#after_user_group').show();                    
+                    $('#after_user_group').show();
                     $('#after_user_id').val(Config.workorder.copy_group);
                     $('#after_user').html(Config.users[Config.workorder.copy_group]);
-                }else{ //如果是客服人员添加的工单
+                } else { //如果是客服人员添加的工单
 
                     var id = $(this).val();
                     //id大于5 默认措施4
@@ -115,12 +119,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         }
                     }
                     //判断更换镜框的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 start
-                    if(!$('.step1-1').is(':hidden')){
+                    if (!$('.step1-1').is(':hidden')) {
                         changeFrame()
                     }
                     //判断更换镜框的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end
                     //判断取消订单的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 start
-                    if(!$('.step3').is(':hidden')){
+                    if (!$('.step3').is(':hidden')) {
                         cancelOrder();
                     }
                     //判断取消订单的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end                   
@@ -129,22 +133,46 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
 
             //根据措施类型显示隐藏
             $(document).on('click', '.step_type', function () {
+                $("#input-hidden").html('');
                 var incrementId = $('#c-platform_order').val();
                 if (!incrementId) {
                     Toastr.error('订单号不能为空');
                     return false;
-                }else{
-                    // 士卫
+                } else {
                     $('.measure').hide();
                     var problem_type_id = $("input[name='row[problem_type_id]']:checked").val();
                     var checkID = [];//定义一个空数组
                     var appoint_group = '';
+                    var input_content = '';
                     $("input[name='row[measure_choose_id][]']:checked").each(function (i) {
                         checkID[i] = $(this).val();
                         var id = $(this).val();
                         //获取承接组
                         appoint_group += $('#step' + id + '-appoint_group').val() + ',';
+                        var group = $('#step' + id + '-appoint_group').val();
+                        var group_arr = group.split(',')
+                        var appoint_users = [];
+                        var appoint_val = [];
+                        for (var i = 0; i < group_arr.length; i++) {
+                            //循环根据承接组Key获取对应承接人id
+                            appoint_users.push(Config.workorder[group_arr[i]]);
+                            appoint_val[Config.workorder[group_arr[i]]] = group_arr[i];
+                        }
+
+                        //循环根据承接人id获取对应人名称
+                        for (var j = 0; j < appoint_users.length; j++) {
+                            input_content += '<input type="hidden" name="row[order_recept][appoint_group][' + id + '][]" value="' + appoint_val[appoint_users[j]] + '"/>';
+                            input_content += '<input type="hidden" name="row[order_recept][appoint_ids][' + id + '][]" value="' + appoint_users[j] + '"/>';
+                            input_content += '<input type="hidden" name="row[order_recept][appoint_users][' + id + '][]" value="' + Config.users[appoint_users[j]] + '"/>';
+                        }
+
+                        //获取是否需要审核
+                        if ($('#step' + id + '-is_check').val() > 0) {
+                            $('#is_check').val(1);
+                        }
                     });
+                    //追加到元素之后
+                    $("#input-hidden").append(input_content);
                     //一般措施
                     for (var m = 0; m < checkID.length; m++) {
                         var node = $('.step' + checkID[m]);
@@ -162,12 +190,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         }
                     }
                     var id = $(this).val();
-
-                    //获取是否需要审核
-                    if ($('#step' + id + '-is_check').val() > 0) {
-                        $('.check-div').show();
-                    }
-
                     var arr = array_filter(appoint_group.split(','));
                     var username = [];
                     var appoint_users = [];
@@ -175,43 +197,43 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     for (var i = 0; i < arr.length - 1; i++) {
                         //循环根据承接组Key获取对应承接人id
                         appoint_users.push(Config.workorder[arr[i]]);
-                        //循环根据承接人id获取对应人名称
-                        for (var j = 0; j < appoint_users.length; j++) {
-                            username.push(Config.users[appoint_users[j]]);
-                        }
                     }
+
+                    //循环根据承接人id获取对应人名称
+                    for (var j = 0; j < appoint_users.length; j++) {
+                        username.push(Config.users[appoint_users[j]]);
+                    }
+
                     var users = array_filter(username);
                     $('#appoint_group_users').html(users.join(','));
-                    $('#recept_person_id').val(appoint_users.join(','));
-                    $('#recept_person').val(users.join(','));
-                    $('#recept_group_id').val(arr.join(','));
+
                     //判断更换镜框的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 start
-                    if(!$('.step1-1').is(':hidden')){
+                    if (!$('.step1-1').is(':hidden')) {
                         changeFrame();
                     }
                     //判断更换镜框的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end
                     //判断取消订单的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 start
-                    if(!$('.step3').is(':hidden')){
+                    if (!$('.step3').is(':hidden')) {
                         cancelOrder();
                     }
                     //判断取消订单的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end
                 }
             });
             //js 函数读取更换镜架信息
-            function changeFrame(){
+            function changeFrame() {
                 var ordertype = $('#work_platform').val();
                 var order_number = $('#c-platform_order').val();
-                if(!order_number){
+                if (!order_number) {
                     return false;
                 }
-                if(ordertype<=0){
+                if (ordertype <= 0) {
                     Layer.alert('请选择正确的平台');
                     return false;
                 }
                 Backend.api.ajax({
-                    url:'saleaftermanage/work_order_list/ajax_get_order',
-                    data:{ordertype:ordertype,order_number:order_number}
-                }, function(data, ret){
+                    url: 'saleaftermanage/work_order_list/ajax_get_order',
+                    data: { ordertype: ordertype, order_number: order_number }
+                }, function (data, ret) {
                     //删除添加的tr
                     $('#change-frame tr:gt(0)').remove();
                     var item = ret.data;
@@ -229,28 +251,28 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     }
                     $("#change-frame tbody").append(Str);
                     return false;
-                }, function(data, ret){
+                }, function (data, ret) {
                     //失败的回调
                     alert(ret.msg);
                     console.log(ret);
                     return false;
-                });                   
+                });
             }
             //js 函数读取取消订单信息
-            function cancelOrder(){
+            function cancelOrder() {
                 var ordertype = $('#work_platform').val();
                 var order_number = $('#c-platform_order').val();
-                if(!order_number){
+                if (!order_number) {
                     return false;
                 }
-                if(ordertype<=0){
+                if (ordertype <= 0) {
                     Layer.alert('请选择正确的平台');
                     return false;
                 }
                 Backend.api.ajax({
-                    url:'saleaftermanage/work_order_list/ajax_get_order',
-                    data:{ordertype:ordertype,order_number:order_number}
-                }, function(data, ret){
+                    url: 'saleaftermanage/work_order_list/ajax_get_order',
+                    data: { ordertype: ordertype, order_number: order_number }
+                }, function (data, ret) {
                     //删除添加的tr
                     $('#cancel-order tr:gt(0)').remove();
                     var item = ret.data;
@@ -265,13 +287,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     }
                     $("#cancel-order tbody").append(Str);
                     return false;
-                }, function(data, ret){
+                }, function (data, ret) {
                     //失败的回调
                     alert(ret.msg);
                     console.log(ret);
                     return false;
-                });                   
-            }            
+                });
+            }
             //增加一行镜架数据
             $(document).on('click', '.btn-add-frame', function () {
                 var rows = document.getElementById("caigou-table-sku").rows.length;
@@ -412,12 +434,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     $('#c-order_sku').append(shtml);
                     $('.selectpicker ').selectpicker('refresh');
                     //判断更换镜框的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 start
-                    if(!$('.step1-1').is(':hidden')){
+                    if (!$('.step1-1').is(':hidden')) {
                         changeFrame()
                     }
                     //判断更换镜框的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end
                     //判断取消订单的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 start
-                    if(!$('.step3').is(':hidden')){
+                    if (!$('.step3').is(':hidden')) {
                         cancelOrder();
                     }
                     //判断取消订单的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end                                        
@@ -425,16 +447,15 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
             })
             //补发点击填充数据
             var lens_click_data
-            $(document).on('click','input[name="row[measure_' +
-                'choose_id]"]',function(){
+            $(document).on('click','input[name="row[measure_choose_id][]"]',function(){
+
                 var value = $(this).val();
                 var check = $(this).prop('checked');
-                //补发
-                if(value == 7 && check === true){
-                    var increment_id = $('#c-platform_order').val();
-                    if(increment_id){
-
-                        var site_type = $('#work_platform').val();
+                var increment_id = $('#c-platform_order').val();
+                if(increment_id){
+                    var site_type = $('#work_platform').val();
+                    //补发
+                    if(value == 7 && check === true){
                         //获取补发的信息
                         $.ajax({
                             type: "POST",
@@ -447,7 +468,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                 site_type: site_type,
                             },
                             success: function (json) {
-                                if(json.code == 0){
+                                if (json.code == 0) {
                                     Toastr.error(json.msg);
                                     return false;
                                 }
@@ -457,9 +478,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                 $('#supplement-order').html(lens.html);
                                 //修改地址
                                 var address = '';
-                                for(var i = 0;i<data.address.length;i++){
-                                    if(i == 0){
-                                        address += '<option value="'+i+'" selected>'+data.address[i].address_type+'</option>';
+                                for (var i = 0; i < data.address.length; i++) {
+                                    if (i == 0) {
+                                        address += '<option value="' + i + '" selected>' + data.address[i].address_type + '</option>';
                                         //补发地址自动填充第一个
                                         $('#c-firstname').val(data.address[i].firstname);
                                         $('#c-lastname').val(data.address[i].lastname);
@@ -471,14 +492,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                         $('#c-city').val(data.address[i].city);
                                         $('#c-street').val(data.address[i].street);
                                         $('#c-postcode').val(data.address[i].postcode);
-                                    }else{
-                                        address += '<option value="'+i+'">'+data.address[i].address_type+'</option>';
+                                    } else {
+                                        address += '<option value="' + i + '">' + data.address[i].address_type + '</option>';
                                     }
 
                                 }
                                 $('#address_select').html(address);
                                 //选择地址切换地址
-                                $('#address_select').change(function(){
+                                $('#address_select').change(function () {
                                     var address_id = $(this).val();
                                     var address = data.address[address_id];
                                     $('#c-firstname').val(address.firstname);
@@ -494,14 +515,15 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                 })
 
                                 //追加
-                                lens_click_data = '<div class="margin-top:10px;">'+ lens.html+'<div class="form-group-child4_del"><a href="javascript:;" style="width: 50%;" class="btn btn-danger btn-del-lens" title="删除"><i class="fa fa-trash"></i>删除</a></div></div>';
+                                lens_click_data = '<div class="margin-top:10px;">' + lens.html + '<div class="form-group-child4_del"><a href="javascript:;" style="width: 50%;" class="btn btn-danger btn-del-lens" title="删除"><i class="fa fa-trash"></i>删除</a></div></div>';
 
 
                                 //处方选择填充
-                                $(document).on('change','#prescription_select',function(){
+                                $(document).on('change', '#prescription_select', function () {
                                     var val = $(this).val();
                                     var prescription = prescriptions[val];
                                     var prescription_div = $(this).parents('.step7_function2').next('.step1_function3');
+                                    prescription_div.find('input').val('');
                                     prescription_div.find('input[name="row[replacement][od_sph][]"]').val(prescription.od_sph);
                                     prescription_div.find('input[name="row[replacement][os_sph][]"]').val(prescription.os_sph);
                                     prescription_div.find('input[name="row[replacement][os_cyl][]"]').val(prescription.os_cyl);
@@ -511,47 +533,48 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
 
                                     //$(this).parents('.step7_function2').val('')
                                     $(this).parents('.step7_function2').find('select[name="row[replacement][recipe_type][]"]').val(prescription.prescription_type);
+                                    $(this).parents('.step7_function2').find('select[name="row[replacement][recipe_type][]"]').change();
                                     prescription_div.find('select[name="row[replacement][coating_type][]"]').val(prescription.coating_id);
                                     prescription_div.find('select[name="row[replacement][lens_type][]"]').val(prescription.index_id);
 
                                     //add，pd添加
-                                    if(prescription.hasOwnProperty("total_add")){
+                                    if (prescription.hasOwnProperty("total_add")) {
                                         prescription_div.find('input[name="row[replacement][od_add][]"]').val(prescription.total_add);
                                         //prescription_div.find('input[name="row[replacement][os_add][]"]').attr('disabled',true);
-                                    }else{
+                                    } else {
                                         prescription_div.find('input[name="row[replacement][od_add][]"]').val(prescription.od_add);
                                         prescription_div.find('input[name="row[replacement][os_add][]"]').val(prescription.os_add);
                                     }
                                     if(prescription.hasOwnProperty("pd")){
-                                        prescription_div.find('input[name="row[replacement][pd_r][]"]').val(prescription.pd_r);
+                                        prescription_div.find('input[name="row[replacement][pd_r][]"]').val(prescription.pd);
                                         //prescription_div.find('input[name="row[replacement][pd_l][]"]').attr('disabled',true);
-                                    }else{
+                                    } else {
                                         prescription_div.find('input[name="row[replacement][pd_r][]"]').val(prescription.pd_r);
                                         prescription_div.find('input[name="row[replacement][pd_l][]"]').val(prescription.pd_l);
                                     }
                                     //
-                                    if(prescription.hasOwnProperty("od_pv")){
+                                    if (prescription.hasOwnProperty("od_pv")) {
                                         prescription_div.find('input[name="row[replacement][od_pv][]"]').val(prescription.od_pv);
                                     }
-                                    if(prescription.hasOwnProperty("od_bd")){
+                                    if (prescription.hasOwnProperty("od_bd")) {
                                         prescription_div.find('input[name="row[replacement][od_bd][]"]').val(prescription.od_bd);
                                     }
-                                    if(prescription.hasOwnProperty("od_pv_r")){
+                                    if (prescription.hasOwnProperty("od_pv_r")) {
                                         prescription_div.find('input[name="row[replacement][od_pv_r][]"]').val(prescription.od_pv_r);
                                     }
-                                    if(prescription.hasOwnProperty("od_bd_r")){
+                                    if (prescription.hasOwnProperty("od_bd_r")) {
                                         prescription_div.find('input[name="row[replacement][od_bd_r][]"]').val(prescription.od_bd_r);
                                     }
-                                    if(prescription.hasOwnProperty("os_pv")){
+                                    if (prescription.hasOwnProperty("os_pv")) {
                                         prescription_div.find('input[name="row[replacement][os_pv][]"]').val(prescription.os_pv);
                                     }
-                                    if(prescription.hasOwnProperty("os_bd")){
+                                    if (prescription.hasOwnProperty("os_bd")) {
                                         prescription_div.find('input[name="row[replacement][os_bd][]"]').val(prescription.os_bd);
                                     }
-                                    if(prescription.hasOwnProperty("os_pv_r")){
+                                    if (prescription.hasOwnProperty("os_pv_r")) {
                                         prescription_div.find('input[name="row[replacement][os_pv_r][]"]').val(prescription.os_pv_r);
                                     }
-                                    if(prescription.hasOwnProperty("od_pv")){
+                                    if (prescription.hasOwnProperty("od_pv")) {
                                         prescription_div.find('input[name="row[replacement][os_bd_r][]"]').val(prescription.os_bd_r);
                                     }
                                     $('.selectpicker ').selectpicker('refresh');
@@ -562,21 +585,61 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                 Controller.api.bindevent();
                             }
                         });
-                        //获取
-                    }else{
-                        Toastr.error('请选选择订单号……');
                     }
+                    //更加镜架的更改
+                    var question = $('input[name="row[problem_type_id]"]:checked').val();
+                    if(value == 1 && question == 2 && check === true){
+                        Backend.api.ajax({
+                            url: 'saleaftermanage/work_order_list/ajaxGetChangeLens',
+                            data: {
+                                increment_id: increment_id,
+                                site_type: site_type,
+                            }
+                        }, function (data, ret) {
+                            $('#lens_contents').html(data.html);
+                            $('.selectpicker ').selectpicker('refresh');
+                        });
+                    }
+                }else{
+                    Toastr.error('请选选择订单号……');
                 }
+
             });
 
-            $(document).on('click','.btn-add-supplement-reissue',function(){
+            $(document).on('click', '.btn-add-supplement-reissue', function () {
                 $('#supplement-order').after(lens_click_data);
                 $('.selectpicker ').selectpicker('refresh');
                 Controller.api.bindevent();
             });
+            //根据prescription_type获取lens_type
+            $(document).on('change','select[name="row[replacement][recipe_type][]"],select[name="row[change_lens][recipe_type][]"]',function(){
+                 var sitetype = $('#work_platform').val();
+                 var prescription_type = $(this).val();
+                 var that = $(this);
+                Backend.api.ajax({
+                    url: 'saleaftermanage/work_order_list/ajaxGetLensType',
+                    data: {
+                        site_type: sitetype,
+                        prescription_type: prescription_type
+                    }
+                }, function (data, ret) {
+                    var prescription_div = that.parents('.prescription_type_step').next('div');
+                    var lens_type;
+                    for(var i = 0;i<data.length;i++){
+                        lens_type += '<option value="'+data[i].lens_id+'">'+data[i].lens_data_name+'</option>';
+                    }
+                    prescription_div.find('#lens_type').html(lens_type);
+                    $('.selectpicker ').selectpicker('refresh');
+                }, function (data, ret) {
+                        var prescription_div = that.parents('.prescription_type_step').next('div');
+                        prescription_div.find('#lens_type').html('');
+                        $('.selectpicker ').selectpicker('refresh');
+                    }
+                );
+            })
 
             //省市二级联动
-            $(document).on('change','#c-country',function(){
+            $(document).on('change', '#c-country', function () {
                 var id = $(this).val();
 
                 $.ajax({
@@ -591,8 +654,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     success: function (json) {
                         var data = json.province;
                         var province = '';
-                        for(var i = 0;i<data.length;i++){
-                            province += '<option value="'+data[i].region_id+'">'+data[i].default_name+'</option>';
+                        for (var i = 0; i < data.length; i++) {
+                            province += '<option value="' + data[i].region_id + '">' + data[i].default_name + '</option>';
                         }
                         $('#c-region').html(province);
                         $('.selectpicker ').selectpicker('refresh');
@@ -605,7 +668,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
             Controller.api.bindevent();
         },
         //处理任务
-        process:function(){
+        process: function () {
             //点击事件 #todo::需判断仓库或者客服
             $(document).on('click', '.problem_type', function () {
                 $('.step_type').attr('checked', false);
@@ -615,7 +678,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 $('#recept_person').val('');//切换问题类型时清空隐藏域承接人
                 $('.measure').hide();
                 var id = $(this).val();
-                
+
                 //判断是客服创建还是仓库创建
                 if (Config.work_type == 1) {
                     var temp_id = 5;
@@ -639,7 +702,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     } else if (Config.work_type == 2) {
                         var step = Config.workorder.warehouse_problem_group[id].step;
                     }
-                    
+
                     var steparr = Config.workorder[step];
                     console.log(steparr);
                     for (var j = 0; j < steparr.length; j++) {

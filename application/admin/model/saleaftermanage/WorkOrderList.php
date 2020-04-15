@@ -71,7 +71,7 @@ class WorkOrderList extends Model
         if(!$sku && !$orderInfo){
             return [];
         }
-        $result['sku'] = $sku;
+        $result['sku'] = array_unique($sku);
         $result['base_currency_code'] = $orderInfo['base_currency_code'];
         $result['method']             = $orderInfo['method'];
         return $result ? $result : [];
@@ -124,60 +124,66 @@ class WorkOrderList extends Model
         }
         return $address ? compact('address','prescriptions','showPrescriptions') : [];
     }
-    public function getLens($siteType, $showPrescriptions)
+
+    /**
+     * 获取修改处方
+     * @param $siteType
+     * @param $showPrescriptions
+     * @return array|bool
+     * @throws \think\Exception
+     */
+    public function getReissueLens($siteType, $showPrescriptions, $type = 1)
     {
         $url = '';
         $key = $siteType . '_getlens';
         $data = session($key);
         if(!$data){
-            //处方信息
-            switch ($siteType) {
-                case 1:
-                    $url = 'https://www.zeelool.com/';
-                    break;
-                case 2:
-                    $url = 'https://pc.voogueme.com/';
-                    break;
-                case 3:
-                    $url = 'https://www.nihaooptical.com/';
-                    break;
-                case 5:
-                    $url = 'https://www.eseeoptical.com/';
-                    break;
-                default:
-                    return false;
-                    break;
-            }
-            $url = $url . 'api/mojing/getLens';
-            //$res = Http::post($url, []);
-            //模拟数据
-            $res['data'] = [
-                'skus' => [],
-                'prescription_type' => ['SingleVision','NonPrescription'],
-                'lens_type' => ['refractive_5','refractive_2','refractive_3'],
-                'coating_type' => ['coating_2','coating_1','coating_3']
-            ];
-            $data = $res['data'];
+            $data = $this->getLensData($siteType);
             session($key, $data, 3600*24);
         }
-        $original_sku = $prescription_type = $prescriptions = $lens_type = $coating_type = '';
-        foreach($data['skus'] as $key => $val){
-            $original_sku .= "<option value='{$val}'>{$val}</option>";
+
+        $prescription = $prescriptions = $coating_type = '';
+
+        $prescription = $data['lens_list'];
+        $coating_type = $data['coating_list'];
+        if($type == 1){
+            foreach($showPrescriptions as $key => $val){
+                $prescriptions .= "<option value='{$key}'>{$val}</option>";
+            }
+            //拼接html页面
+            $html = (new \think\View())->fetch('saleaftermanage/work_order_list/ajax_reissue_add',compact('prescription','coating_type','prescriptions','type'));
+        }else{
+            $html = (new \think\View())->fetch('saleaftermanage/work_order_list/ajax_reissue_add',compact('showPrescriptions','prescription','coating_type','prescriptions','type'));
         }
-        foreach($data['prescription_type'] as $key => $val){
-            $prescription_type .= "<option value='{$val}'>{$val}</option>";
-        }
-        foreach($data['lens_type'] as $key => $val){
-            $lens_type .= "<option value='{$val}'>{$val}</option>";
-        }
-        foreach($data['coating_type'] as $key => $val){
-            $coating_type .= "<option value='{$val}'>{$val}</option>";
-        }
-        foreach($showPrescriptions as $key => $val){
-            $prescriptions .= "<option value='{$key}'>{$val}</option>";
-        }
-        //拼接html页面
-        $html = (new \think\View())->fetch('saleaftermanage/work_order_list/ajax_reissue_add',compact('original_sku','prescription_type','lens_type','coating_type','prescriptions'));
         return ['data' => $data,'html' => $html];
+    }
+
+    /**
+     * 获取lensdata数据
+     * @param $siteType
+     * @return bool
+     */
+    public function getLensData($siteType)
+    {
+        switch ($siteType) {
+            case 1:
+                $url = 'http://z.zhaokuangyi.com/';
+                break;
+            case 2:
+                $url = 'http://api.voogueme.com/';
+                break;
+            case 3:
+                $url = 'http://nh.zhaokuangyi.com/';
+                break;
+            case 5:
+                $url = 'http://www.eseeoptical.com/';
+                break;
+            default:
+                return false;
+                break;
+        }
+        $url = $url . 'magic/product/lensData';
+        $res = json_decode(Http::get($url, []),true);
+        return $res['data'];
     }
 }
