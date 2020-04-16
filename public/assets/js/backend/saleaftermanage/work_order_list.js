@@ -31,28 +31,405 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         { field: 'work_platform', title: __('work_platform'), custom: { 1: 'blue', 2: 'danger', 3: 'orange' }, searchList: { 1: 'Zeelool', 2: 'Voogueme', 3: 'Nihao' }, formatter: Table.api.formatter.status },
                         { field: 'work_type_str', title: __('Work_type') },
                         { field: 'platform_order', title: __('Platform_order') },
-                        { field: 'order_sku', title: __('Order_sku') },
+                        /*{ field: 'order_sku', title: __('Order_sku') },*/
+
+                        {
+                            field: 'order_sku',
+                            title: __('Order_sku'),
+                            operate: false,
+                            formatter: function (value, rows) {
+                                var all_user_name = '';
+                                if(value){
+                                    for(i = 0,len = rows.order_sku_arr.length; i < len; i++){
+                                        all_user_name += '<div class="step_recept"><b class="recept">'+ rows.order_sku_arr[i] + '</b></div>';
+                                    }
+                                }else{
+                                    all_user_name = '-';
+                                }
+                                return all_user_name;
+                            },
+                        },
+
                         { field: 'work_level', title: __('Work_level'), custom: { 1: 'success', 2: 'orange', 3: 'danger' }, searchList: { 1: '低', 2: '中', 3: '高' }, formatter: Table.api.formatter.status },
                         { field: 'problem_type_content', title: __('Problem_type_content') },
-                        { field: 'create_user_name', title: __('create_user_name') },
                         { field: 'is_check', title: __('Is_check'), custom: { 0: 'black', 1: 'success'}, searchList: { 0: '否', 1: '是'}, formatter: Table.api.formatter.status },
 
-                        { field: 'assign_user_name', title: __('Assign_user_id') },
+                        /*{ field: 'create_user_name', title: __('create_user_name') },*/
+                        {
+                            field: 'create_user_name',
+                            title: __('about_user'),
+                            operate: false,
+                            formatter: function (value, rows) {
+                                var all_user_name = '';
+                                all_user_name += '<div class="step_recept"><b class="step">工单创建人：</b><b class="recept">'+ rows.create_user_name + '</b></div>';
+                                if(rows.is_check == 1){
+                                    all_user_name += '<div class="step_recept"><b class="step">直接审核人：</b><b class="recept">'+ rows.assign_user_name + '</b></div>';
+                                    if(rows.operation_user_id != 0){
+                                        all_user_name += '<div class="step_recept"><b class="step">实际审核人：</b><b class="recept">'+ rows.operation_user_name + '</b></div>';
+                                    }
 
-                        { field: 'operation_person', title: __('Operation_person') },
+                                }
 
+                                return all_user_name;
+                            },
+                        },
+                        {
+                            field: 'after_user_id',
+                            title: __('recept_user'),
+                            operate: false,
+                            formatter: function (value, rows) {
+                                var all_user_name = '';
 
-                        { field: 'shenhe_beizhu', title: __('deal_with') },
+                                if(rows.work_type == 2 && rows.is_after_deal_with == 0){
+                                    all_user_name += '<div class="step_recept"><b class="recept">'+ rows.after_user_name + '</b></div>';
+                                }else{
+                                    if(rows.step_num){
+                                        for(i = 0,len = rows.step_num.length; i < len; i++){
+                                            if(rows.step_num[i].recept_user == ''){
+                                                rows.step_num[i].recept_user = 'system';
+                                            }
+                                            all_user_name += '<div class="step_recept"><b class="step">'+rows.step_num[i].measure_content+'：</b><b class="recept">'+ rows.step_num[i].recept_user + '</b></div>';
+                                        }
+                                    }
+                                }
+                                return all_user_name;
+                            },
+                        },
+                        {
+                            field: 'step_num',
+                            title: __('step_status'),
+                            operate: false,
+                            formatter: function (value, rows) {
+                                var all_user_name = '';
+                                if(value){
+                                    for(i = 0,len = value.length; i < len; i++){
+                                        if(value[i].operation_type == 0){
+                                            all_user_name += '<div class="step_recept"><b class="step">'+value[i].measure_content+'：</b><b class="recept">未处理</b></div>';
+                                        }
+                                        if(value[i].operation_type == 1){
+                                            all_user_name += '<div class="step_recept"><b class="step">'+value[i].measure_content+'：</b><b class="recept">处理成功</b></div>';
+                                        }
+                                        if(value[i].operation_type == 2){
+                                            all_user_name += '<div class="step_recept"><b class="step">'+value[i].measure_content+'：</b><b class="recept">处理失败</b></div>';
+                                        }
+                                    }
+                                }
+                                return all_user_name;
+                            },
+                        },
 
+                        { field: 'work_status', title: __('work_status'), custom: { 0: 'black', 1:'danger', 2: 'success',4: 'success' , 3: 'success',5: 'success',6: 'success', 7: 'success',8: 'success' }, searchList: { 0: '已取消', 1: '新建', 2: '待审核', 4: '审核拒绝',3: '待处理',5: '部分处理',6: '处理完成',7: '处理失败',8: '已撤销'}, formatter: Table.api.formatter.status },
+                        {
+                            field: 'create_time',
+                            title: __('time_str'),
+                            operate: false,
+                            formatter: function (value, rows) {
+                                var all_user_name = '';
+                                all_user_name += '<div class="step_recept"><b class="step">创建时间：</b><b class="recept">'+ value + '</b></div>';
+
+                                return all_user_name;
+                            },
+                        },
 
                        /* { field: 'create_time', title: __('Create_time'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime },
                         { field: 'check_time', title: __('Check_time'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime },
                         { field: 'complete_time', title: __('Complete_time'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime },*/
+                        {
+                            field: 'buttons',
+                            width: "120px",
+                            operate:false,
+                            title: __('操作'),
+                            table: table,
+                            events: Table.api.events.operate,
+                            buttons: [
+                                {
+                                    name: 'del',
+                                    text: __('删除'),
+                                    title: __('删除'),
+                                    classname: 'btn btn-xs btn-success btn-magic btn-ajax',
+                                    url: 'demand/it_web_demand/del',
+                                    success: function (data, ret) {
+                                        table.bootstrapTable('refresh');
+                                    },
+                                    callback: function (data) {
+                                    },
+                                    visible: function(row){
+                                        if(row.status == 1 || row.status == 2){
+                                            if(row.demand_del && row.is_entry_user_hidden == 1){//操作权限
+                                                return true;
+                                            }
+                                        }else{
+                                            return false;
+                                        }
+                                    }
+                                },
+                                {
+                                    name: 'edit',
+                                    text: __('编辑'),
+                                    title: __('编辑'),
+                                    classname: 'btn btn-xs btn-primary btn-dialog',
+                                    url: 'demand/it_web_demand/edit/demand_type/2',
+                                    success: function (data, ret) {
+                                        table.bootstrapTable('refresh');
+                                    },
+                                    callback: function (data) {
+                                    },
+                                    visible: function(row){
+                                        if(row.status == 1 || row.status == 2){
+                                            if(row.demand_del && row.is_entry_user_hidden == 1){//操作权限
+                                                return true;
+                                            }
+                                        }else{
+                                            return false;
+                                        }
+                                    }
+                                },
+                                {
+                                    name: 'test_distribution',
+                                    text: __('测试确认'),
+                                    title: __('测试确认'),
+                                    classname: 'btn btn-xs btn-primary btn-dialog',
+                                    url: 'demand/it_web_demand/test_distribution/demand_type/2',
+                                    callback: function (data) {
+                                    },
+                                    visible: function(row){
+                                        if(row.status == 1){
+                                            if(row.demand_test_distribution){//操作权限
+                                                return true;
+                                            }
+                                        }else{
+                                            return false;
+                                        }
+                                    }
+                                },
+                                {
+                                    name: 'through_demand',
+                                    text: __('通过'),
+                                    title: __('通过'),
+                                    classname: 'btn btn-xs btn-success btn-magic btn-ajax',
+                                    icon: 'fa fa-magic',
+                                    url: 'demand/it_web_demand/through_demand',
+                                    success: function (data, ret) {
+                                        table.bootstrapTable('refresh');
+                                    },
+                                    error: function (data, ret) {
+                                        console.log(data, ret);
+                                        Layer.alert(ret.msg);
+                                        return false;
+                                    },
+                                    visible: function(row){
+                                        if(row.status == 2){
+                                            if(row.demand_through_demand){//操作权限
+                                                return true;
+                                            }
+                                        }else{
+                                            return false;
+                                        }
+                                    }
+                                },
+                                {
+                                    name: 'group_finish',
+                                    text: __('完成'),
+                                    title: __('完成'),
+                                    classname: 'btn btn-xs btn-primary btn-dialog',
+                                    url: 'demand/it_web_demand/group_finish/demand_type/2',
+                                    callback: function (data) {
+                                    },
+                                    visible: function(row){
+                                        if(row.status == 3){
+                                            if(row.demand_finish){//操作权限
+                                                if(row.web_designer_group == 0 && row.phper_group == 0 && row.app_group == 0){
+                                                    return false;
+                                                }else{
+                                                    return true;
+                                                }
+                                            }
+                                        }
+                                    }
+                                },
+                                {
+                                    name: 'test_record_bug',
+                                    text: __('记录问题'),
+                                    title: __('记录问题'),
+                                    classname: 'btn btn-xs btn-primary btn-dialog',
+                                    url: 'demand/it_web_demand/test_record_bug',
+                                    callback: function (data) {
+                                    },
+                                    visible: function(row){
+                                        if(row.status == 4){
+                                            if(row.demand_test_record_bug && row.is_test_record_hidden == 1){//操作权限及显示权限
+                                                if(row.test_is_finish == 0){
+                                                    return true;
+                                                }else{
+                                                    return false;
+                                                }
+                                            }
+                                        }
+                                    }
+                                },
+                                {
+                                    name: 'test_group_finish',
+                                    text: __('通过测试'),
+                                    title: __('通过测试'),
+                                    classname: 'btn btn-xs btn-success btn-magic btn-ajax',
+                                    url: 'demand/it_web_demand/test_group_finish',
+                                    confirm: '请确定是否  <b>通过测试</b>',
+                                    success: function (data, ret) {
+                                        table.bootstrapTable('refresh');
+                                        //如果需要阻止成功提示，则必须使用return false;
+                                        //return false;
+                                    },
+                                    error: function (data, ret) {
+                                        console.log(data, ret);
+                                        Layer.alert(ret.msg);
+                                        return false;
+                                    },
+                                    visible: function(row){
+                                        if(row.status == 4){
+                                            if(row.demand_test_finish && row.is_test_finish_hidden == 1){//操作权限及显示权限
+                                                if(row.test_group == 1 && row.test_is_finish == 0){
+                                                    return true;
+                                                }else{
+                                                    return false;
+                                                }
+                                            }
+                                        }
 
+                                    }
+                                },
+                                {
+                                    name: 'add',
+                                    text: __('提出人确认'),
+                                    title: __('提出人确认'),
+                                    classname: 'btn btn-xs btn-success btn-magic btn-ajax',
+                                    icon: 'fa fa-magic',
+                                    url: 'demand/it_web_demand/add/is_user_confirm/1',
+                                    confirm: '确认本需求？',
+                                    success: function (data, ret) {
+                                        table.bootstrapTable('refresh');
+                                    },
+                                    error: function (data, ret) {
+                                        console.log(data, ret);
+                                        Layer.alert(ret.msg);
+                                        return false;
+                                    },
+                                    visible: function(row){
+                                        if(row.status == 4 || row.status == 5){
+                                            if(row.demand_add && row.is_entry_user_hidden == 1){//操作权限及显示权限
+                                                if(row.test_group == 1){
+                                                    if(row.entry_user_confirm == 0){
+                                                        return true;
+                                                    }
+                                                }
+                                            }
+                                        }else{
+                                            return false;
+                                        }
+                                    }
+                                },
+                                {
+                                    name: 'add_online',
+                                    text: __('上线'),
+                                    title: __('上线'),
+                                    classname: 'btn btn-xs btn-success btn-magic btn-ajax',
+                                    icon: 'fa fa-magic',
+                                    url: 'demand/it_web_demand/add_online',
+                                    confirm: '确定上线？',
+                                    success: function (data, ret) {
+                                        table.bootstrapTable('refresh');
+                                    },
+                                    error: function (data, ret) {
+                                        console.log(data, ret);
+                                        Layer.alert(ret.msg);
+                                        return false;
+                                    },
+                                    visible: function(row){
+                                        if(row.status == 5){
+                                            if(row.demand_add_online){//操作权限
+                                                if(row.test_group == 1){
+                                                    if(row.entry_user_confirm == 0){
+                                                        return false;
+                                                    }else{
+                                                        return true;
+                                                    }
+                                                }else{
+                                                    return true;
+                                                }
+                                            }
+                                        }else{
+                                            return false;
+                                        }
+                                    }
+                                },
+                                {
+                                    name: 'test_record_bug',
+                                    text: __('记录问题'),
+                                    title: __('记录回归测试问题'),
+                                    classname: 'btn btn-xs btn-primary btn-dialog',
+                                    url: 'demand/it_web_demand/test_record_bug',
+                                    callback: function (data) {
+                                    },
+                                    visible: function(row){
+                                        if(row.status == 6){
+                                            if(row.demand_test_record_bug && row.is_test_record_hidden == 1){//操作权限及显示权限
+                                                if(row.return_test_is_finish == 0){
+                                                    return true;
+                                                }else{
+                                                    return false;
+                                                }
+                                            }
+                                        }
+                                    }
+                                },
+                                {
+                                    name: 'test_group_finish',
+                                    text: __('通过测试'),
+                                    title: __('通过回归测试'),
+                                    classname: 'btn btn-xs btn-success btn-magic btn-ajax',
+                                    url: 'demand/it_web_demand/test_group_finish/is_all_test/1',
+                                    confirm: '请确定是否  <b>通过测试</b>',
+                                    success: function (data, ret) {
+                                        table.bootstrapTable('refresh');
+                                        //如果需要阻止成功提示，则必须使用return false;
+                                        //return false;
+                                    },
+                                    error: function (data, ret) {
+                                        console.log(data, ret);
+                                        Layer.alert(ret.msg);
+                                        return false;
+                                    },
+                                    visible: function(row){
+                                        if(row.status == 6){
+                                            if(row.demand_test_finish && row.is_test_finish_hidden == 1){//操作权限及显示权限
+                                                if(row.test_group == 1 && row.return_test_is_finish == 0){
+                                                    return true;
+                                                }else{
+                                                    return false;
+                                                }
+                                            }
+                                        }
 
-                        { field: 'work_status', title: __('Work_status') },
-
-                        { field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate },
+                                    }
+                                },
+                                {
+                                    name: 'detail_log',
+                                    text: __('详情记录'),
+                                    title: __('详情记录'),
+                                    classname: 'btn btn-xs btn-primary btn-dialog',
+                                    url: 'demand/it_web_demand/detail_log/demand_type/2',
+                                    callback: function (data) {
+                                    },
+                                    visible: function(row){
+                                        if(row.status == 7){
+                                            return true;
+                                        }else{
+                                            return false;
+                                        }
+                                    }
+                                },
+                            ],
+                            formatter: Table.api.formatter.buttons
+                        },
                     ]
                 ]
             });
