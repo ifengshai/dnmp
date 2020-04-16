@@ -170,9 +170,13 @@ class WorkOrderList extends Model
     }
 
     /**
-     * 获取lensdata数据
+     * http请求
      * @param $siteType
+     * @param $pathinfo
+     * @param array $params
+     * @param string $method
      * @return bool
+     * @throws \Exception
      */
     public function httpRequest($siteType, $pathinfo, $params = [], $method = 'GET')
     {
@@ -201,7 +205,7 @@ class WorkOrderList extends Model
             } else {
                 $res = json_decode(Http::post($url, $params), true);
             }
-            if ($res['code'] == 200) {
+            if($res['status'] == 200){
                 return $res['data'];
             }
             exception($res['msg']);
@@ -211,105 +215,116 @@ class WorkOrderList extends Model
     }
 
     /**
-     * 更改镜框，赠品
+     * 更改镜片，赠品，
      * @param $params
      * @param $work_id
      * @throws \Exception
      */
     public function changeLens($params, $work_id)
     {
-        Db::startTrans();
-        $measure = 3;
-        try {
-            //如果是更改镜片
-            if ($measure == 1) {
-                $changeLens = $params['change_lens'];
-                $change_type = 2;
-            } elseif ($measure == 2) { //赠品
-                $changeLens = $params['gift'];
-                $change_type = 4;
-            } elseif ($measure == 3) { //补发
-                $changeLens = $params['replacement'];
-                $change_type = 5;
-                if (!$params['address']['shipping_type']) {
-                    exception('请选择运输方式');
-                }
-            }
-            $original_skus = $changeLens['original_sku'];
-            if (!is_array($original_skus)) {
-                exception('sss');
-            }
-            //循环插入数据
-            $changeSkuIds = [];
-            $changeSkuData = [];
-            foreach ($original_skus as $key => $val) {
-                if (!$val) {
-                    exception('sku不能为空');
-                }
-                $type = $params['work_platform'];
-                $lensId = $changeLens['lens_type'][$key];
-                $colorId = $changeLens['color_id'][$key];
-                $coatingId = $changeLens['coating_type'][$key];
-                $recipe_type = $changeLens['recipe_type'][$key];
-                $lensCoatName = $this->getLensCoatingName($type, $lensId, $coatingId, $colorId, $recipe_type);
-                $data = [
-                    'work_id' => $work_id,
-                    'increment_id' => $params['platform_order'],
-                    'platform_type' => $type,
-                    'original_name' => $changeLens['original_name'][$key] ?? '',
-                    'original_sku' => $changeLens['original_sku'][$key],
-                    'original_number' => intval($changeLens['original_number'][$key]),
-                    'change_type' => $change_type,
-                    'change_sku' => $changeLens['original_sku'][$key],
-                    'change_number' => intval($changeLens['original_number'][$key]),
-                    'recipe_type' => $recipe_type,
-                    'lens_type' => $lensCoatName['lensName'],
-                    'coating_type' => $lensCoatName['coatingName'],
-                    'od_sph' => $changeLens['od_sph'][$key],
-                    'od_cyl' => $changeLens['od_cyl'][$key],
-                    'od_axis' => $changeLens['od_axis'][$key],
-                    'od_add' => $changeLens['od_add'][$key],
-                    'pd_r' => $changeLens['pd_r'][$key],
-                    'od_pv' => $changeLens['od_pv'][$key],
-                    'od_bd' => $changeLens['od_bd'][$key],
-                    'od_pv_r' => $changeLens['od_pv_r'][$key],
-                    'od_bd_r' => $changeLens['od_bd_r'][$key],
-                    'os_sph' => $changeLens['os_sph'][$key],
-                    'os_cyl' => $changeLens['os_cyl'][$key],
-                    'os_axis' => $changeLens['os_axis'][$key],
-                    'os_add' => $changeLens['os_add'][$key],
-                    'pd_l' => $changeLens['pd_l'][$key],
-                    'os_pv' => $changeLens['os_pv'][$key],
-                    'os_bd' => $changeLens['os_bd'][$key],
-                    'os_pv_r' => $changeLens['os_pv_r'][$key],
-                    'os_bd_r' => $changeLens['os_bd_r'][$key],
-                    'create_person' => session('admin.nickname'),
-                    'update_time' => date('Y-m-d H:i:s'),
-                    'create_time' => date('Y-m-d H:i:s')
-                ];
-                //补发
-                if ($change_type == 5) {
-                    $data['email'] = $params['address']['email'];
-                    $data['userinfo_option'] = serialize($params['address']);
-                    $prescriptionOption = [
-                        'prescription_type' => $recipe_type,
-                        'lens_id' => $lensId,
-                        'lens_name' => $lensCoatName['lensName'],
-                        'lens_type' => $lensCoatName['lensType'],
-                        'coating_id' => $coatingId,
-                        'coating_name' => $lensCoatName['coatingName'],
-                        'color_id' => $colorId,
-                        'color_name' => $lensCoatName['colorName'],
-                    ];
-                    $data['prescription_option'] = serialize($prescriptionOption);
-                }
-                WorkOrderChangeSku::create($data);
-            }
-            Db::commit();
-        } catch (\Exception $e) {
-            Db::rollback();
-            exception($e->getMessage());
+        $measure = '';
+        //修改镜片
+        if($params['problem_type_id'] == 2 && in_array(1, array_filter($params['measure_choose_id']))){
+            $measure = 1;
+        }elseif(in_array(6, array_filter($params['measure_choose_id']))){ //赠品
+            $measure = 2;
+        }elseif(in_array(7, array_filter($params['measure_choose_id']))){ //补发
+            $measure = 3;
         }
+        if($measure){
+            Db::startTrans();
+            try {
+                //如果是更改镜片
+                if ($measure == 1) {
+                    $changeLens = $params['change_lens'];
+                    $change_type = 2;
+                } elseif ($measure == 2) { //赠品
+                    $changeLens = $params['gift'];
+                    $change_type = 4;
+                } elseif ($measure == 3) { //补发
+                    $changeLens = $params['replacement'];
+                    $change_type = 5;
+                    if (!$params['address']['shipping_type']) {
+                        exception('请选择运输方式');
+                    }
+                }
+                $original_skus = $changeLens['original_sku'];
+                if (!is_array($original_skus)) {
+                    exception('sss');
+                }
+                //循环插入数据
+                $changeSkuIds = [];
+                $changeSkuData = [];
+                foreach ($original_skus as $key => $val) {
+                    if (!$val) {
+                        exception('sku不能为空');
+                    }
+                    $type = $params['work_platform'];
+                    $lensId = $changeLens['lens_type'][$key];
+                    $colorId = $changeLens['color_id'][$key];
+                    $coatingId = $changeLens['coating_type'][$key];
+                    $recipe_type = $changeLens['recipe_type'][$key];
+                    $lensCoatName = $this->getLensCoatingName($type, $lensId, $coatingId, $colorId, $recipe_type);
+                    $data = [
+                        'work_id' => $work_id,
+                        'increment_id' => $params['platform_order'],
+                        'platform_type' => $type,
+                        'original_name' => $changeLens['original_name'][$key] ?? '',
+                        'original_sku' => $changeLens['original_sku'][$key],
+                        'original_number' => intval($changeLens['original_number'][$key]),
+                        'change_type' => $change_type,
+                        'change_sku' => $changeLens['original_sku'][$key],
+                        'change_number' => intval($changeLens['original_number'][$key]),
+                        'recipe_type' => $recipe_type,
+                        'lens_type' => $lensCoatName['lensName'],
+                        'coating_type' => $lensCoatName['coatingName'],
+                        'od_sph' => $changeLens['od_sph'][$key],
+                        'od_cyl' => $changeLens['od_cyl'][$key],
+                        'od_axis' => $changeLens['od_axis'][$key],
+                        'od_add' => $changeLens['od_add'][$key],
+                        'pd_r' => $changeLens['pd_r'][$key],
+                        'od_pv' => $changeLens['od_pv'][$key],
+                        'od_bd' => $changeLens['od_bd'][$key],
+                        'od_pv_r' => $changeLens['od_pv_r'][$key],
+                        'od_bd_r' => $changeLens['od_bd_r'][$key],
+                        'os_sph' => $changeLens['os_sph'][$key],
+                        'os_cyl' => $changeLens['os_cyl'][$key],
+                        'os_axis' => $changeLens['os_axis'][$key],
+                        'os_add' => $changeLens['os_add'][$key],
+                        'pd_l' => $changeLens['pd_l'][$key],
+                        'os_pv' => $changeLens['os_pv'][$key],
+                        'os_bd' => $changeLens['os_bd'][$key],
+                        'os_pv_r' => $changeLens['os_pv_r'][$key],
+                        'os_bd_r' => $changeLens['os_bd_r'][$key],
+                        'create_person' => session('admin.nickname'),
+                        'update_time' => date('Y-m-d H:i:s'),
+                        'create_time' => date('Y-m-d H:i:s')
+                    ];
+                    //补发
+                    if ($change_type == 5) {
+                        $data['email'] = $params['address']['email'];
+                        $data['userinfo_option'] = serialize($params['address']);
+                        $prescriptionOption = [
+                            'prescription_type' => $recipe_type,
+                            'lens_id' => $lensId,
+                            'lens_name' => $lensCoatName['lensName'],
+                            'lens_type' => $lensCoatName['lensType'],
+                            'coating_id' => $coatingId,
+                            'coating_name' => $lensCoatName['coatingName'],
+                            'color_id' => $colorId,
+                            'color_name' => $lensCoatName['colorName'],
+                        ];
+                        $data['prescription_option'] = serialize($prescriptionOption);
+                    }
+                    WorkOrderChangeSku::create($data);
+                }
+                Db::commit();
+            } catch (\Exception $e) {
+                Db::rollback();
+                exception($e->getMessage());
+            }
+        }
+
     }
 
     /**
@@ -472,17 +487,39 @@ class WorkOrderList extends Model
      */
     public function presentIntegral($work_id)
     {
-        $work = $this->model->find($work_id);
+        $work = self::find($work_id);
         $postData = [
             'email' => $work->email,
             'ordernum' => $work->platform_order,
             'point' => $work->integral,
-            'content' => '测试'
+            'content' => $work->integral_describe
         ];
         try {
             $res = $this->httpRequest($work['work_platform'], 'magic/promotion/bonusPoints', $postData, 'POST');
             return true;
         } catch (Exception $e) {
+            exception($e->getMessage());
+        }
+    }
+
+    /**
+     * 领取优惠券
+     * @param $work_id
+     * @return bool
+     * @throws \Exception
+     */
+    public function presentCoupon($work_id)
+    {
+        $work = self::find($work_id);
+        $postData = [
+            'rule_id' => $work->coupon_id
+        ];
+        try{
+            $res = $this->httpRequest($work['work_platform'],'magic/promotion/receive',$postData,'POST');
+            $work->coupon_str = $res['coupon_code'];
+            $work->save();
+            return true;
+        }catch (Exception $e){
             exception($e->getMessage());
         }
     }
