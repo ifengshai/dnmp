@@ -493,7 +493,7 @@ class WorkOrderList extends Model
             'email' => $work->email,
             'ordernum' => $work->platform_order,
             'point' => $work->integral,
-            'content' => '测试'
+            'content' => $work->integral_describe
         ];
         try{
             $res = $this->httpRequest($work['work_platform'],'magic/promotion/bonusPoints',$postData,'POST');

@@ -180,7 +180,6 @@ class WorkOrderList extends Backend
                         throw new Exception("措施不能为空");
                     }
 
-                    $params['is_check'] = '';
                     //更换镜框判断是否有库存
                     if ($params['change_frame'] && $params['problem_type_id'] == 1) {
                         //判断SKU是否有库存
@@ -381,7 +380,7 @@ class WorkOrderList extends Backend
                         }
                     }
                     //不需要审核时直接发送积分，赠送优惠券
-                    if(!$params['is_check']){
+                    if($params['is_check'] != 1){
                         //赠送积分
                         if(in_array(10, array_filter($params['measure_choose_id']))){
                             $this->model->presentIntegral($this->model->id);
