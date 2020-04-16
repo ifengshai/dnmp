@@ -3361,11 +3361,37 @@ order by sfoi.item_id asc limit 1000";
     //导入实时库存 第一步
     public function set_product_relstock()
     {
-        $str = 'OP01899-01';
+        $str = 'OT02018-01
+        OM01454-02
+        VFP0270-01
+        FOP0536-01
+        OT02078-01
+        OA01901-02
+        VFT0269-02
+        OA01854-01
+        OM01935-01
+        FA0802-04
+        FX0872-01
+        OT0239668-02
+        OT0239668-03
+        OT0239668-04';
         $skus = explode('
         ', $str);
 
         $stock = [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
             0
         ];
 
@@ -3395,7 +3421,20 @@ order by sfoi.item_id asc limit 1000";
         $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
         $this->item = new \app\admin\model\itemmanage\Item;
 
-        $str = 'OP01899-01';
+        $str = 'OT02018-01
+        OM01454-02
+        VFP0270-01
+        FOP0536-01
+        OT02078-01
+        OA01901-02
+        VFT0269-02
+        OA01854-01
+        OM01935-01
+        FA0802-04
+        FX0872-01
+        OT0239668-02
+        OT0239668-03
+        OT0239668-04';
         $skus = explode('
         ', $str);
         foreach ($skus as $k => $v) {
@@ -3447,7 +3486,20 @@ order by sfoi.item_id asc limit 1000";
         $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
         $this->item = new \app\admin\model\itemmanage\Item;
 
-        $str = 'OP01899-01';
+        $str = 'OT02018-01
+        OM01454-02
+        VFP0270-01
+        FOP0536-01
+        OT02078-01
+        OA01901-02
+        VFT0269-02
+        OA01854-01
+        OM01935-01
+        FA0802-04
+        FX0872-01
+        OT0239668-02
+        OT0239668-03
+        OT0239668-04';
         $skus = explode('
         ', $str);
         foreach ($skus as $k => $v) {
@@ -3493,7 +3545,20 @@ order by sfoi.item_id asc limit 1000";
         $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
         $this->item = new \app\admin\model\itemmanage\Item;
 
-        $str = 'OP01899-01';
+        $str = 'OT02018-01
+        OM01454-02
+        VFP0270-01
+        FOP0536-01
+        OT02078-01
+        OA01901-02
+        VFT0269-02
+        OA01854-01
+        OM01935-01
+        FA0802-04
+        FX0872-01
+        OT0239668-02
+        OT0239668-03
+        OT0239668-04';
         $skus = explode('
         ', $str);
         $list = $this->item->field('sku,stock,occupy_stock,available_stock,real_time_qty,distribution_occupy_stock')->where(['sku' => ['in', $skus]])->select();
