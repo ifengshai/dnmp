@@ -180,6 +180,7 @@ class WorkOrderList extends Backend
                         throw new Exception("措施不能为空");
                     }
 
+                    $params['is_check'] = '';
                     //更换镜框判断是否有库存
                     if ($params['change_frame'] && $params['problem_type_id'] == 1) {
                         //判断SKU是否有库存
@@ -306,7 +307,7 @@ class WorkOrderList extends Backend
                                 throw new Exception("添加失败！！");
                             }
                             //更改镜片，补发，赠品
-                            $this->model->changeLens($params, $this->model->getLastInsID());
+                            $this->model->changeLens($params, $this->model->id);
                         }
                     }
 
@@ -360,6 +361,17 @@ class WorkOrderList extends Backend
                         $cancelOrderRes = $this->order_change->saveAll($orderChangeList);
                         if (false === $cancelOrderRes) {
                             throw new Exception("添加失败！！");
+                        }
+                    }
+                    //不需要审核时直接发送积分，赠送优惠券
+                    if(!$params['is_check']){
+                        //赠送积分
+                        if(in_array(10, array_filter($params['measure_choose_id']))){
+                            $this->model->presentIntegral($this->model->id);
+                        }
+                        //直接发送优惠券
+                        if(in_array(9, array_filter($params['measure_choose_id']))){
+                            $this->model->presentCoupon($this->model->id);
                         }
                     }
 
