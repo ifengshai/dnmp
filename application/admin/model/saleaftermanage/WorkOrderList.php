@@ -5,6 +5,7 @@ namespace app\admin\model\saleaftermanage;
 use fast\Http;
 use think\Cache;
 use think\Db;
+use think\Exception;
 use think\Model;
 use Util\NihaoPrescriptionDetailHelper;
 use Util\VooguemePrescriptionDetailHelper;
@@ -144,7 +145,7 @@ class WorkOrderList extends Model
         $key = $siteType . '_getlens';
         $data = Cache::get($key);
         if (!$data) {
-            $data = $this->getLensData($siteType);
+            $data = $this->httpRequest($siteType,'magic/product/lensData');
             Cache::set($key, $data, 3600 * 24);
         }
 
@@ -173,7 +174,7 @@ class WorkOrderList extends Model
      * @param $siteType
      * @return bool
      */
-    public function getLensData($siteType)
+    public function httpRequest($siteType,$pathinfo,$params = [],$method = 'GET')
     {
         switch ($siteType) {
             case 1:
@@ -192,9 +193,22 @@ class WorkOrderList extends Model
                 return false;
                 break;
         }
-        $url = $url . 'magic/product/lensData';
-        $res = json_decode(Http::get($url, []), true);
-        return $res['data'];
+        //echo json_encode($params);die;
+        $url = $url . $pathinfo;
+        try{
+            if($method == 'GET'){
+                $res = json_decode(Http::get($url, []), true);
+            }else{
+                $res = json_decode(Http::post($url, $params), true);
+            }
+            if($res['code'] == 200){
+                return $res['data'];
+            }
+            exception($res['msg']);
+        }catch (Exception $e){
+            exception($e->getMessage());
+        }
+
     }
 
     /**
@@ -206,7 +220,7 @@ class WorkOrderList extends Model
     public function changeLens($params, $work_id)
     {
         Db::startTrans();
-        $measure = 5;
+        $measure = 3;
         try {
             //如果是更改镜片
             if ($measure == 1) {
@@ -216,13 +230,12 @@ class WorkOrderList extends Model
                 $changeLens = $params['gift'];
                 $change_type = 4;
             } elseif ($measure == 3) { //补发
-                $changeLens = $params['original_sku'];
+                $changeLens = $params['replacement'];
                 $change_type = 5;
                 if (!$params['address']['shipping_type']) {
                     exception('请选择运输方式');
                 }
             }
-
             $original_skus = $changeLens['original_sku'];
             if (!is_array($original_skus)) {
                 exception('sss');
@@ -286,7 +299,7 @@ class WorkOrderList extends Model
                         'lens_type' => $lensCoatName['lensType'],
                         'coating_id' => $coatingId,
                         'coating_name' => $lensCoatName['coatingName'],
-                        'color_id' => $lensCoatName['colorId'],
+                        'color_id' => $colorId,
                         'color_name' => $lensCoatName['colorName'],
                     ];
                     $data['prescription_option'] = serialize($prescriptionOption);
@@ -313,7 +326,7 @@ class WorkOrderList extends Model
         $key = $siteType . '_getlens';
         $data = Cache::get($key);
         if (!$data) {
-            $data = $this->getLensData($siteType);
+            $data = $this->httpRequest($siteType,'magic/product/lensData');
             Cache::set($key, $data, 3600 * 24);
         }
         $prescription = $data['lens_list'];
@@ -356,5 +369,122 @@ class WorkOrderList extends Model
             }
         }
         return ['lensName' => $lensName, 'lensType' => $lensType, 'colorName' => $colorName, 'coatingName' => $coatingName];
+    }
+
+    /**
+     * 创建补发单
+     * @param $siteType
+     * @param $work_id
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public function createOrder($siteType,$work_id)
+    {
+        $changeSkus = WorkOrderChangeSku::where(['work_id' => $work_id, 'change_type' => 5])->select();
+        $postData = $postDataCommon = [];
+        foreach($changeSkus as $key =>  $changeSku){
+            $address = unserialize($changeSku['userinfo_option']);
+            $prescriptions = unserialize($changeSku['prescription_option']);
+            $postDataCommon = [
+                'currency_code' => $address['currency_code'],
+                'country' => $address['country_id'],
+                'shipping_type' => $address['shipping_type'],
+                'telephone' => $address['telephone'],
+                'email' => $address['email'],
+                'first_name' => $address['firstname'],
+                'last_name' => $address['lastname'],
+                'postcode' => $address['postcode'],
+                'city' => $address['city'],
+                'region_code' => $address['region_id'],
+                'street' => $address['street'],
+            ];
+            $pdCheck = $pd = $prismcheck = '';
+            $pd_r = $pd_l = '';
+            if($changeSku['pd_r'] && $changeSku['pd_l']){
+                $pdCheck = 'on';
+                $pd_r = $changeSku['pd_r'];
+                $pd_l = $changeSku['pd_l'];
+            }else{
+                $pd = $changeSku['pd_r'] ?: $changeSku['pd_l'];
+            }
+            $od_pv = $changeSku['od_pv'];
+            $os_pv = $changeSku['os_pv'];
+            $od_bd = $changeSku['od_bd'];
+            $os_bd = $changeSku['os_bd'];
+            $od_pv_r = $changeSku['od_pv_r'];
+            $os_pv_r = $changeSku['os_pv_r'];
+            $od_bd_r = $changeSku['od_bd_r'];
+            $os_bd_r = $changeSku['os_bd_r'];
+            if($od_pv || $os_pv || $od_bd || $os_bd || $od_pv_r || $os_pv_r || $od_bd_r || $os_bd_r ){
+                $prismcheck = 'on';
+            }
+            $postData['product'][$key] = [
+                'sku' => $changeSku['original_sku'],
+                'qty' => $changeSku['original_number'],
+                'prescription_type' => $changeSku['recipe_type'],
+                'is_frame_only' => $changeSku['recipe_type'],
+                'od_sph' => $changeSku['od_sph'],
+                'od_sph' => $changeSku['od_sph'],
+                'od_cyl' => $changeSku['od_cyl'],
+                'os_cyl' => $changeSku['os_cyl'],
+                'od_axis' => $changeSku['od_axis'],
+                'od_axis' => $changeSku['od_axis'],
+                'od_add' => $changeSku['od_add'],
+                'os_add' => $changeSku['os_add'],
+                'pd' => $pd,
+                'pdcheck' => $pdCheck,
+                'pd_r' => $pd_r,
+                'pd_l' => $pd_l,
+                'prismcheck' => $prismcheck,
+                'od_pv' => $changeSku['od_pv'],
+                'os_pv' => $changeSku['os_pv'],
+                'od_bd' => $changeSku['od_bd'],
+                'os_bd' => $changeSku['os_bd'],
+                'od_pv_r' => $changeSku['od_pv_r'],
+                'os_pv_r' => $changeSku['os_pv_r'],
+                'od_bd_r' => $changeSku['od_bd_r'],
+                'os_bd_r' => $changeSku['os_bd_r'],
+                'lens_id' => $prescriptions['lens_id'],
+                'lens_name' => $prescriptions['lens_name'],
+                'lens_type' => $prescriptions['lens_type'],
+                'coating_id' => $prescriptions['coating_id'],
+                'coating_name' => $prescriptions['coating_name'],
+                'color_id' => $prescriptions['color_id'],
+                'color_name' => $prescriptions['color_name'],
+            ];
+        }
+        $postData = array_merge($postData,$postDataCommon);
+        try{
+            $res = $this->httpRequest($siteType,'magic/order/createOrder',$postData,'POST');
+            $increment_id = $res['increment_id'];
+            //replacement_order添加补发的订单号
+            WorkOrderChangeSku::where(['work_id' => $work_id, 'change_type' => 5])->setField('replacement_order',$increment_id);
+        }catch (Exception $e){
+            exception($e->getMessage());
+        }
+    }
+
+    /**
+     * 赠送积分
+     * @param $work_id
+     * @return bool
+     * @throws \Exception
+     */
+    public function presentIntegral($work_id)
+    {
+        $work = $this->model->find($work_id);
+        $postData = [
+            'email' => $work->email,
+            'ordernum' => $work->platform_order,
+            'point' => $work->integral,
+            'content' => '测试'
+        ];
+        try{
+            $res = $this->httpRequest($work['work_platform'],'magic/promotion/bonusPoints',$postData,'POST');
+            return true;
+        }catch (Exception $e){
+            exception($e->getMessage());
+        }
     }
 }

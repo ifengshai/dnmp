@@ -251,7 +251,7 @@ class WorkOrderList extends Backend
                         throw new Exception("添加失败！！");
                     }
                     //修改镜架操作
-                    // $this->model->changeLens($params, $this->model->getLastInsID());
+                     //$this->model->changeLens($params, $this->model->getLastInsID());
 
                     //循环插入措施
                     if (count(array_filter($params['measure_choose_id'])) > 0) {
@@ -639,8 +639,8 @@ class WorkOrderList extends Backend
             $key = $siteType . '_getlens';
             $data = Cache::get($key);
             if (!$data) {
-                $data = $this->model->getLensData($siteType);
-                Cache::set($key, $data, 3600 * 24);
+                $data = $this->model->httpRequest($siteType,'magic/product/lensData');
+                Cache::set($key, $data, 3600*24);
             }
             if ($color_id) {
                 $lensType = $data['lens_color_list'] ?: [];
