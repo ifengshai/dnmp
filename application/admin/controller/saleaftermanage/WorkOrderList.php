@@ -714,7 +714,7 @@ class WorkOrderList extends Backend
      * @since 2020/04/16 10:29:02 
      * @return void
      */
-    public function ajax_edit_order($ordertype = null, $order_number = null, $work_id = null)
+    public function ajax_edit_order($ordertype = null, $order_number = null, $work_id = null,$change_type=null)
     {
         if ($this->request->isAjax()) {
             if ($ordertype < 1 || $ordertype > 5) { //不在平台之内
@@ -726,7 +726,7 @@ class WorkOrderList extends Backend
             if (!$work_id) {
                 return $this->error('工单不存在，请重新选择', '', 'error', 0);
             }
-            $result = WorkOrderChangeSku::getOrderChangeSku($work_id, $ordertype, $order_number);
+            $result = WorkOrderChangeSku::getOrderChangeSku($work_id, $ordertype, $order_number,$change_type);
             if (!$result) {
                 if ($ordertype == 1) {
                     $result = ZeeloolPrescriptionDetailHelper::get_one_by_increment_id($order_number);
@@ -821,5 +821,44 @@ class WorkOrderList extends Backend
             $this->assignconfig('measureList', $measureList);
         }
         return $this->view->fetch();
+    }
+    /**
+     * 获取工单的更改镜片、补发、赠品的信息
+     *
+     * @Description
+     * @author lsw
+     * @since 2020/04/16 16:49:21 
+     * @param [type] $work_id
+     * @param [type] $order_number
+     * @param [type] $change_type
+     * @return void
+     */
+    public function ajax_change_order($work_id=null,$order_type=null,$order_number=null,$change_type=null)
+    {
+        if ($this->request->isAjax()) {
+            if ($order_type < 1 || $order_type > 5) { //不在平台之内
+                return $this->error('选择平台错误,请重新选择', '', 'error', 0);
+            }
+            if (!$order_number) {
+                return  $this->error('订单号不存在，请重新选择', '', 'error', 0);
+            }
+            if (!$work_id) {
+                return $this->error('工单不存在，请重新选择', '', 'error', 0);
+            }
+            $result = WorkOrderChangeSku::getOrderChangeSku($work_id, $order_type, $order_number,$change_type);
+            if ($result) {
+                $result = collection($result)->toArray();
+            }else{
+                $this->error('找不到这个订单,请重新尝试', '', 'error', 0);
+            }
+            dump($result);
+            exit;
+            $arr = [];
+            foreach ($result as $key => $val) {
+            }
+            return $this->success('', '', $arr, 0);
+        } else {
+            return $this->error('404 Not Found');
+        }
     }
 }

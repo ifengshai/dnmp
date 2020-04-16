@@ -1367,6 +1367,16 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     cancelOrder(1, work_id);
                 }
                 //判断取消订单的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end
+                //判断更换处方的状态，如果显示的话把数据带出来，如果隐藏则不显示镜架数据 start
+                if(!$('.edit_lens').is(':hidden')){
+
+                }
+                //判断更换处方的状态，如果显示的话把数据带出来，如果隐藏则不显示镜架数据 end
+                //判断补发订单的状态，如果显示的话把数据带出来，如果隐藏则不显示补发数据 start
+                if(!$('.replenish_order').is(':hidden')){
+                    changeOrder(work_id,5);
+                }
+                //判断补发订单的状态，如果显示的话把数据带出来，如果隐藏则不显示补发数据 end
             }                
           },
         }
@@ -1399,7 +1409,7 @@ function changeFrame(is_edit = 0, work_id = 0) {
     }
     if (1 == is_edit) { //是编辑的话
         var urls = 'saleaftermanage/work_order_list/ajax_edit_order';
-        var datas = { ordertype: ordertype, order_number: order_number, work_id: work_id };
+        var datas = { ordertype: ordertype, order_number: order_number, work_id: work_id,change_type:1};
     } else { //是新增的话
         var urls = 'saleaftermanage/work_order_list/ajax_get_order';
         var datas = { ordertype: ordertype, order_number: order_number };
@@ -1456,7 +1466,7 @@ function cancelOrder(is_edit = 0, work_id = 0) {
     }
     if (1 == is_edit) {
         var urls = 'saleaftermanage/work_order_list/ajax_edit_order';
-        var datas = { ordertype: ordertype, order_number: order_number, work_id: work_id };
+        var datas = { ordertype: ordertype, order_number: order_number, work_id: work_id,change_type:3};
     } else {
         var urls = 'saleaftermanage/work_order_list/ajax_get_order';
         var datas = { ordertype: ordertype, order_number: order_number };
@@ -1480,6 +1490,40 @@ function cancelOrder(is_edit = 0, work_id = 0) {
             $("#cancel-order tbody").append(Str);
             return false;
         }
+        for (var j = 0, len = item.length; j < len; j++) {
+            Str += '<tr>';
+            Str += '<td><input  class="form-control" readonly name="row[cancel_order][original_sku][]" type="text" value="' + item[j] + '" readonly></td>';
+            Str += '<td><input  class="form-control" name="row[cancel_order][original_number][]"  type="text" value="1" readonly></td>';
+            Str += '<td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>删除</a></td>';
+            Str += '</tr>';
+        }
+        $("#cancel-order tbody").append(Str);
+        return false;
+    }, function (data, ret) {
+        //失败的回调
+        alert(ret.msg);
+        console.log(ret);
+        return false;
+    });
+}
+function changeOrder(work_id,change_type){
+    var ordertype = $('#work_platform').val();
+    var order_number = $('#c-platform_order').val();
+    if (!order_number) {
+        return false;
+    }
+    if (ordertype <= 0) {
+        Layer.alert('请选择正确的平台');
+        return false;
+    }
+    Backend.api.ajax({
+        url: 'saleaftermanage/work_order_list/ajax_change_order',
+        data: { change_type: change_type, order_number: order_number, work_id: work_id,order_type:ordertype}
+    }, function (data, ret) {
+        //删除添加的tr
+        $('#cancel-order tr:gt(0)').remove();
+        var item = ret.data;
+        var Str = '';
         for (var j = 0, len = item.length; j < len; j++) {
             Str += '<tr>';
             Str += '<td><input  class="form-control" readonly name="row[cancel_order][original_sku][]" type="text" value="' + item[j] + '" readonly></td>';
