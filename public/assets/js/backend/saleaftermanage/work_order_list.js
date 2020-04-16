@@ -1081,6 +1081,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
         edit: function () {
             Controller.api.bindevent();
         },
+        detail:function(){
+            Controller.api.bindevent();
+        },
         //处理任务
         process: function () {
             //点击事件 #todo::需判断仓库或者客服
