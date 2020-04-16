@@ -39,11 +39,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                             operate: false,
                             formatter: function (value, rows) {
                                 var all_user_name = '';
-                                if(value){
-                                    for(i = 0,len = rows.order_sku_arr.length; i < len; i++){
-                                        all_user_name += '<div class="step_recept"><b class="recept">'+ rows.order_sku_arr[i] + '</b></div>';
+                                if (value) {
+                                    for (i = 0, len = rows.order_sku_arr.length; i < len; i++) {
+                                        all_user_name += '<div class="step_recept"><b class="recept">' + rows.order_sku_arr[i] + '</b></div>';
                                     }
-                                }else{
+                                } else {
                                     all_user_name = '-';
                                 }
                                 return all_user_name;
@@ -52,7 +52,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
 
                         { field: 'work_level', title: __('Work_level'), custom: { 1: 'success', 2: 'orange', 3: 'danger' }, searchList: { 1: '低', 2: '中', 3: '高' }, formatter: Table.api.formatter.status },
                         { field: 'problem_type_content', title: __('Problem_type_content') },
-                        { field: 'is_check', title: __('Is_check'), custom: { 0: 'black', 1: 'success'}, searchList: { 0: '否', 1: '是'}, formatter: Table.api.formatter.status },
+                        { field: 'is_check', title: __('Is_check'), custom: { 0: 'black', 1: 'success' }, searchList: { 0: '否', 1: '是' }, formatter: Table.api.formatter.status },
 
                         /*{ field: 'create_user_name', title: __('create_user_name') },*/
                         {
@@ -61,11 +61,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                             operate: false,
                             formatter: function (value, rows) {
                                 var all_user_name = '';
-                                all_user_name += '<div class="step_recept"><b class="step">工单创建人：</b><b class="recept">'+ rows.create_user_name + '</b></div>';
-                                if(rows.is_check == 1){
-                                    all_user_name += '<div class="step_recept"><b class="step">直接审核人：</b><b class="recept">'+ rows.assign_user_name + '</b></div>';
-                                    if(rows.operation_user_id != 0){
-                                        all_user_name += '<div class="step_recept"><b class="step">实际审核人：</b><b class="recept">'+ rows.operation_user_name + '</b></div>';
+                                all_user_name += '<div class="step_recept"><b class="step">工单创建人：</b><b class="recept">' + rows.create_user_name + '</b></div>';
+                                if (rows.is_check == 1) {
+                                    all_user_name += '<div class="step_recept"><b class="step">直接审核人：</b><b class="recept">' + rows.assign_user_name + '</b></div>';
+                                    if (rows.operation_user_id != 0) {
+                                        all_user_name += '<div class="step_recept"><b class="step">实际审核人：</b><b class="recept">' + rows.operation_user_name + '</b></div>';
                                     }
 
                                 }
@@ -80,15 +80,15 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                             formatter: function (value, rows) {
                                 var all_user_name = '';
 
-                                if(rows.work_type == 2 && rows.is_after_deal_with == 0){
-                                    all_user_name += '<div class="step_recept"><b class="recept">'+ rows.after_user_name + '</b></div>';
-                                }else{
-                                    if(rows.step_num){
-                                        for(i = 0,len = rows.step_num.length; i < len; i++){
-                                            if(rows.step_num[i].recept_user == ''){
+                                if (rows.work_type == 2 && rows.is_after_deal_with == 0) {
+                                    all_user_name += '<div class="step_recept"><b class="recept">' + rows.after_user_name + '</b></div>';
+                                } else {
+                                    if (rows.step_num) {
+                                        for (i = 0, len = rows.step_num.length; i < len; i++) {
+                                            if (rows.step_num[i].recept_user == '') {
                                                 rows.step_num[i].recept_user = 'system';
                                             }
-                                            all_user_name += '<div class="step_recept"><b class="step">'+rows.step_num[i].measure_content+'：</b><b class="recept">'+ rows.step_num[i].recept_user + '</b></div>';
+                                            all_user_name += '<div class="step_recept"><b class="step">' + rows.step_num[i].measure_content + '：</b><b class="recept">' + rows.step_num[i].recept_user + '</b></div>';
                                         }
                                     }
                                 }
@@ -101,16 +101,16 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                             operate: false,
                             formatter: function (value, rows) {
                                 var all_user_name = '';
-                                if(value){
-                                    for(i = 0,len = value.length; i < len; i++){
-                                        if(value[i].operation_type == 0){
-                                            all_user_name += '<div class="step_recept"><b class="step">'+value[i].measure_content+'：</b><b class="recept">未处理</b></div>';
+                                if (value) {
+                                    for (i = 0, len = value.length; i < len; i++) {
+                                        if (value[i].operation_type == 0) {
+                                            all_user_name += '<div class="step_recept"><b class="step">' + value[i].measure_content + '：</b><b class="recept">未处理</b></div>';
                                         }
-                                        if(value[i].operation_type == 1){
-                                            all_user_name += '<div class="step_recept"><b class="step">'+value[i].measure_content+'：</b><b class="recept">处理成功</b></div>';
+                                        if (value[i].operation_type == 1) {
+                                            all_user_name += '<div class="step_recept"><b class="step">' + value[i].measure_content + '：</b><b class="recept">处理成功</b></div>';
                                         }
-                                        if(value[i].operation_type == 2){
-                                            all_user_name += '<div class="step_recept"><b class="step">'+value[i].measure_content+'：</b><b class="recept">处理失败</b></div>';
+                                        if (value[i].operation_type == 2) {
+                                            all_user_name += '<div class="step_recept"><b class="step">' + value[i].measure_content + '：</b><b class="recept">处理失败</b></div>';
                                         }
                                     }
                                 }
@@ -118,26 +118,26 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                             },
                         },
 
-                        { field: 'work_status', title: __('work_status'), custom: { 0: 'black', 1:'danger', 2: 'success',4: 'success' , 3: 'success',5: 'success',6: 'success', 7: 'success',8: 'success' }, searchList: { 0: '已取消', 1: '新建', 2: '待审核', 4: '审核拒绝',3: '待处理',5: '部分处理',6: '处理完成',7: '处理失败',8: '已撤销'}, formatter: Table.api.formatter.status },
+                        { field: 'work_status', title: __('work_status'), custom: { 0: 'black', 1: 'danger', 2: 'success', 4: 'success', 3: 'success', 5: 'success', 6: 'success', 7: 'success', 8: 'success' }, searchList: { 0: '已取消', 1: '新建', 2: '待审核', 4: '审核拒绝', 3: '待处理', 5: '部分处理', 6: '处理完成', 7: '处理失败', 8: '已撤销' }, formatter: Table.api.formatter.status },
                         {
                             field: 'create_time',
                             title: __('time_str'),
                             operate: false,
                             formatter: function (value, rows) {
                                 var all_user_name = '';
-                                all_user_name += '<div class="step_recept"><b class="step">创建时间：</b><b class="recept">'+ value + '</b></div>';
+                                all_user_name += '<div class="step_recept"><b class="step">创建时间：</b><b class="recept">' + value + '</b></div>';
 
                                 return all_user_name;
                             },
                         },
 
-                       /* { field: 'create_time', title: __('Create_time'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime },
-                        { field: 'check_time', title: __('Check_time'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime },
-                        { field: 'complete_time', title: __('Complete_time'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime },*/
+                        /* { field: 'create_time', title: __('Create_time'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime },
+                         { field: 'check_time', title: __('Check_time'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime },
+                         { field: 'complete_time', title: __('Complete_time'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime },*/
                         {
                             field: 'buttons',
                             width: "120px",
-                            operate:false,
+                            operate: false,
                             title: __('操作'),
                             table: table,
                             events: Table.api.events.operate,
@@ -153,12 +153,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     },
                                     callback: function (data) {
                                     },
-                                    visible: function(row){
-                                        if(row.status == 1 || row.status == 2){
-                                            if(row.demand_del && row.is_entry_user_hidden == 1){//操作权限
+                                    visible: function (row) {
+                                        if (row.status == 1 || row.status == 2) {
+                                            if (row.demand_del && row.is_entry_user_hidden == 1) {//操作权限
                                                 return true;
                                             }
-                                        }else{
+                                        } else {
                                             return false;
                                         }
                                     }
@@ -174,12 +174,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     },
                                     callback: function (data) {
                                     },
-                                    visible: function(row){
-                                        if(row.status == 1 || row.status == 2){
-                                            if(row.demand_del && row.is_entry_user_hidden == 1){//操作权限
+                                    visible: function (row) {
+                                        if (row.status == 1 || row.status == 2) {
+                                            if (row.demand_del && row.is_entry_user_hidden == 1) {//操作权限
                                                 return true;
                                             }
-                                        }else{
+                                        } else {
                                             return false;
                                         }
                                     }
@@ -192,12 +192,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     url: 'demand/it_web_demand/test_distribution/demand_type/2',
                                     callback: function (data) {
                                     },
-                                    visible: function(row){
-                                        if(row.status == 1){
-                                            if(row.demand_test_distribution){//操作权限
+                                    visible: function (row) {
+                                        if (row.status == 1) {
+                                            if (row.demand_test_distribution) {//操作权限
                                                 return true;
                                             }
-                                        }else{
+                                        } else {
                                             return false;
                                         }
                                     }
@@ -217,12 +217,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                         Layer.alert(ret.msg);
                                         return false;
                                     },
-                                    visible: function(row){
-                                        if(row.status == 2){
-                                            if(row.demand_through_demand){//操作权限
+                                    visible: function (row) {
+                                        if (row.status == 2) {
+                                            if (row.demand_through_demand) {//操作权限
                                                 return true;
                                             }
-                                        }else{
+                                        } else {
                                             return false;
                                         }
                                     }
@@ -235,12 +235,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     url: 'demand/it_web_demand/group_finish/demand_type/2',
                                     callback: function (data) {
                                     },
-                                    visible: function(row){
-                                        if(row.status == 3){
-                                            if(row.demand_finish){//操作权限
-                                                if(row.web_designer_group == 0 && row.phper_group == 0 && row.app_group == 0){
+                                    visible: function (row) {
+                                        if (row.status == 3) {
+                                            if (row.demand_finish) {//操作权限
+                                                if (row.web_designer_group == 0 && row.phper_group == 0 && row.app_group == 0) {
                                                     return false;
-                                                }else{
+                                                } else {
                                                     return true;
                                                 }
                                             }
@@ -255,12 +255,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     url: 'demand/it_web_demand/test_record_bug',
                                     callback: function (data) {
                                     },
-                                    visible: function(row){
-                                        if(row.status == 4){
-                                            if(row.demand_test_record_bug && row.is_test_record_hidden == 1){//操作权限及显示权限
-                                                if(row.test_is_finish == 0){
+                                    visible: function (row) {
+                                        if (row.status == 4) {
+                                            if (row.demand_test_record_bug && row.is_test_record_hidden == 1) {//操作权限及显示权限
+                                                if (row.test_is_finish == 0) {
                                                     return true;
-                                                }else{
+                                                } else {
                                                     return false;
                                                 }
                                             }
@@ -284,12 +284,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                         Layer.alert(ret.msg);
                                         return false;
                                     },
-                                    visible: function(row){
-                                        if(row.status == 4){
-                                            if(row.demand_test_finish && row.is_test_finish_hidden == 1){//操作权限及显示权限
-                                                if(row.test_group == 1 && row.test_is_finish == 0){
+                                    visible: function (row) {
+                                        if (row.status == 4) {
+                                            if (row.demand_test_finish && row.is_test_finish_hidden == 1) {//操作权限及显示权限
+                                                if (row.test_group == 1 && row.test_is_finish == 0) {
                                                     return true;
-                                                }else{
+                                                } else {
                                                     return false;
                                                 }
                                             }
@@ -313,16 +313,16 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                         Layer.alert(ret.msg);
                                         return false;
                                     },
-                                    visible: function(row){
-                                        if(row.status == 4 || row.status == 5){
-                                            if(row.demand_add && row.is_entry_user_hidden == 1){//操作权限及显示权限
-                                                if(row.test_group == 1){
-                                                    if(row.entry_user_confirm == 0){
+                                    visible: function (row) {
+                                        if (row.status == 4 || row.status == 5) {
+                                            if (row.demand_add && row.is_entry_user_hidden == 1) {//操作权限及显示权限
+                                                if (row.test_group == 1) {
+                                                    if (row.entry_user_confirm == 0) {
                                                         return true;
                                                     }
                                                 }
                                             }
-                                        }else{
+                                        } else {
                                             return false;
                                         }
                                     }
@@ -343,20 +343,20 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                         Layer.alert(ret.msg);
                                         return false;
                                     },
-                                    visible: function(row){
-                                        if(row.status == 5){
-                                            if(row.demand_add_online){//操作权限
-                                                if(row.test_group == 1){
-                                                    if(row.entry_user_confirm == 0){
+                                    visible: function (row) {
+                                        if (row.status == 5) {
+                                            if (row.demand_add_online) {//操作权限
+                                                if (row.test_group == 1) {
+                                                    if (row.entry_user_confirm == 0) {
                                                         return false;
-                                                    }else{
+                                                    } else {
                                                         return true;
                                                     }
-                                                }else{
+                                                } else {
                                                     return true;
                                                 }
                                             }
-                                        }else{
+                                        } else {
                                             return false;
                                         }
                                     }
@@ -369,12 +369,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     url: 'demand/it_web_demand/test_record_bug',
                                     callback: function (data) {
                                     },
-                                    visible: function(row){
-                                        if(row.status == 6){
-                                            if(row.demand_test_record_bug && row.is_test_record_hidden == 1){//操作权限及显示权限
-                                                if(row.return_test_is_finish == 0){
+                                    visible: function (row) {
+                                        if (row.status == 6) {
+                                            if (row.demand_test_record_bug && row.is_test_record_hidden == 1) {//操作权限及显示权限
+                                                if (row.return_test_is_finish == 0) {
                                                     return true;
-                                                }else{
+                                                } else {
                                                     return false;
                                                 }
                                             }
@@ -398,12 +398,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                         Layer.alert(ret.msg);
                                         return false;
                                     },
-                                    visible: function(row){
-                                        if(row.status == 6){
-                                            if(row.demand_test_finish && row.is_test_finish_hidden == 1){//操作权限及显示权限
-                                                if(row.test_group == 1 && row.return_test_is_finish == 0){
+                                    visible: function (row) {
+                                        if (row.status == 6) {
+                                            if (row.demand_test_finish && row.is_test_finish_hidden == 1) {//操作权限及显示权限
+                                                if (row.test_group == 1 && row.return_test_is_finish == 0) {
                                                     return true;
-                                                }else{
+                                                } else {
                                                     return false;
                                                 }
                                             }
@@ -419,10 +419,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     url: 'demand/it_web_demand/detail_log/demand_type/2',
                                     callback: function (data) {
                                     },
-                                    visible: function(row){
-                                        if(row.status == 7){
+                                    visible: function (row) {
+                                        if (row.status == 7) {
                                             return true;
-                                        }else{
+                                        } else {
                                             return false;
                                         }
                                     }
@@ -436,10 +436,44 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
 
             // 为表格绑定事件
             Table.api.bindevent(table);
+            //选项卡切换
+            $('.panel-heading a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+                var field = $(this).data("field");
+                var value = $(this).data("value");
+                var options = table.bootstrapTable('getOptions');
+                options.pageNumber = 1;
+                var queryParams = options.queryParams;
+                options.queryParams = function (params) {
+                    var params = queryParams(params);
+                    var filter = params.filter ? JSON.parse(params.filter) : {};
+                    var op = params.op ? JSON.parse(params.op) : {};
+                    if (field == 'create_person') {
+                        delete filter.recept_person_id;
+                        filter[field] = value;
+                    } else if (field == 'recept_person_id') {
+                        delete filter.create_person;
+                        filter[field] = value;
+                    } else {
+                        delete filter.recept_person_id;
+                        delete filter.create_person;
+                    }
+                    params.filter = JSON.stringify(filter);
+                    params.op = JSON.stringify(op);
+                    return params;
+                };
+                table.bootstrapTable('refresh', {});
+                return false;
+            });
+
         },
         add: function () {
 
             Controller.api.bindevent();
+
+            //提交审核按钮
+            $('.btn-status').click(function () {
+                $('.status').val(2);
+            })
 
             //点击事件 #todo::需判断仓库或者客服
             $(document).on('click', '.problem_type', function () {
@@ -585,7 +619,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     }
 
                     var users = array_filter(username);
+                    var appoint_users = array_filter(appoint_users);
                     $('#appoint_group_users').html(users.join(','));
+                    $('#recept_person_id').val(appoint_users.join(','));
 
                     //判断更换镜框的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 start
                     if (!$('.step1-1').is(':hidden')) {
@@ -610,12 +646,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     '<td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i> 删除</a></td>' +
                     '</tr>';
                 $('#caigou-table-sku tbody').append(content);
-            });
-
-
-            //删除一行镜架数据
-            $(document).on('click', '.btn-del', function () {
-                $(this).parent().parent().remove();
             });
             //增加一行镜片数据
             $(document).on('click', '.btn-add-lens', function () {
@@ -732,6 +762,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 }, function (data, ret) {
                     $('#order_pay_currency').val(data.base_currency_code);
                     $('#order_pay_method').val(data.method);
+                    $('#c-refund_way').val(data.method);
                     $('#customer_email').val(data.customer_email);
                     var shtml = '<option value="">请选择</option>';
                     for (var i in data.sku) {
@@ -888,7 +919,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
 
 
                 //判断是否是彩色镜片
-                if(prescription.color_id > 0){
+                if (prescription.color_id > 0) {
                     prescription_div.find('#color_type').val(prescription.color_id);
                     prescription_div.find('#color_type').change();
                 }
@@ -901,7 +932,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     prescription_div.find('input[name="row[replacement][od_add][]"]').val(prescription.od_add);
                     prescription_div.find('input[name="row[replacement][os_add][]"]').val(prescription.os_add);
                 }
-                if(prescription.hasOwnProperty("pd")){
+                if (prescription.hasOwnProperty("pd")) {
                     prescription_div.find('input[name="row[replacement][pd_r][]"]').val(prescription.pd);
                     //prescription_div.find('input[name="row[replacement][pd_l][]"]').attr('disabled',true);
                 } else {
@@ -950,6 +981,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
             $(document).on('change', 'select[name="row[replacement][recipe_type][]"],select[name="row[change_lens][recipe_type][]"],select[name="row[gift][recipe_type][]"]', function () {
                 var sitetype = $('#work_platform').val();
                 var prescription_type = $(this).val();
+                if (!sitetype || !prescription_type) {
+                    return false;
+                }
                 var that = $(this);
                 Backend.api.ajax({
                     url: 'saleaftermanage/work_order_list/ajaxGetLensType',
@@ -974,36 +1008,38 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 );
             });
             //根据color_type获取lens_type
-            $(document).on('change','select[name="row[replacement][color_id][]"],select[name="row[change_lens][color_id][]"],select[name="row[gift][color_id][]"]',function(){
+            $(document).on('change', 'select[name="row[replacement][color_id][]"],select[name="row[change_lens][color_id][]"],select[name="row[gift][color_id][]"]', function () {
                 var sitetype = $('#work_platform').val();
                 var color_id = $(this).val();
                 var that = $(this);
                 Backend.api.ajax({
-                        url: 'saleaftermanage/work_order_list/ajaxGetLensType',
-                        data: {
-                            site_type: sitetype,
-                            color_id: color_id
-                        }
-                    }, function (data, ret) {
-                        var prescription_div = that.parents('.panel-body');
-                        var color_type;
-                        for(var i = 0;i<data.length;i++){
-                            color_type += '<option value="'+data[i].lens_id+'">'+data[i].lens_data_name+'</option>';
-                        }
-                        prescription_div.find('#lens_type').html(color_type);
-                        $('.selectpicker ').selectpicker('refresh');
-                    }, function (data, ret) {
-                        var prescription_div = that.parents('.step1_function3');
-                        prescription_div.find('#lens_type').html('');
-                        $('.selectpicker ').selectpicker('refresh');
+                    url: 'saleaftermanage/work_order_list/ajaxGetLensType',
+                    data: {
+                        site_type: sitetype,
+                        color_id: color_id
                     }
+                }, function (data, ret) {
+                    var prescription_div = that.parents('.panel-body');
+                    var color_type;
+                    for (var i = 0; i < data.length; i++) {
+                        color_type += '<option value="' + data[i].lens_id + '">' + data[i].lens_data_name + '</option>';
+                    }
+                    prescription_div.find('#lens_type').html(color_type);
+                    $('.selectpicker ').selectpicker('refresh');
+                }, function (data, ret) {
+                    var prescription_div = that.parents('.step1_function3');
+                    prescription_div.find('#lens_type').html('');
+                    $('.selectpicker ').selectpicker('refresh');
+                }
                 );
             })
 
             //省市二级联动
             $(document).on('change', '#c-country', function () {
                 var id = $(this).val();
-
+                if (!id) {
+                    return false;
+                }
                 $.ajax({
                     type: "POST",
                     url: "saleaftermanage/work_order_list/ajaxGetProvince",
@@ -1031,6 +1067,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
             //如果问题类型存在，显示问题类型和措施
             if (Config.problem_type_id) {
                 var id = Config.problem_type_id;
+                var work_id = $('#work_id').val();
+                //row[problem_type_id]
+                $("input[name='row[problem_type_id]'][value='" + id + "']").attr("checked", true);
                 //id大于5 默认措施4
                 if (id > 5) {
                     var steparr = Config.workorder['step04'];
@@ -1054,6 +1093,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 if (Config.measureList) {
                     var checkID = Config.measureList;//措施列表赋值给checkID
                     for (var m = 0; m < checkID.length; m++) {
+                        $("input[name='row[measure_choose_id][]'][value='" + checkID[m] + "']").attr("checked", true);
                         var node = $('.step' + checkID[m]);
                         if (node.is(':hidden')) {
                             node.show();
@@ -1070,22 +1110,15 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 }
                 //判断更换镜框的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 start
                 if (!$('.step1-1').is(':hidden')) {
-                    changeFrame()
+                    changeFrame(1, work_id)
                 }
                 //判断更换镜框的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end
                 //判断取消订单的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 start
                 if (!$('.step3').is(':hidden')) {
-                    cancelOrder();
+                    cancelOrder(1, work_id);
                 }
                 //判断取消订单的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end
             }
-            //如果措施存在
-            if (Config.measureList) {
-
-            }
-            console.log(Config.problem_type_id);
-            console.log(Config.measureList);
-
         },
         //处理任务
         process: function () {
@@ -1155,6 +1188,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
         api: {
             bindevent: function () {
                 Form.api.bindevent($("form[role=form]"));
+                //删除一行镜架数据
+                $(document).on('click', '.btn-del', function () {
+                    $(this).parent().parent().remove();
+                });
                 //点击事件 #todo::需判断仓库或者客服
                 $(document).on('click', '.problem_type', function () {
                     //读取是谁添加的配置console.log(Config.work_type);
@@ -1332,7 +1369,7 @@ function array_filter(arr) {
     return new_arr;
 }
 //js 函数读取更换镜架信息
-function changeFrame() {
+function changeFrame(is_edit = 0, work_id = 0) {
     var ordertype = $('#work_platform').val();
     var order_number = $('#c-platform_order').val();
     if (!order_number) {
@@ -1342,17 +1379,35 @@ function changeFrame() {
         Layer.alert('请选择正确的平台');
         return false;
     }
+    if (1 == is_edit) { //是编辑的话
+        var urls = 'saleaftermanage/work_order_list/ajax_edit_order';
+        var datas = { ordertype: ordertype, order_number: order_number, work_id: work_id };
+    } else { //是新增的话
+        var urls = 'saleaftermanage/work_order_list/ajax_get_order';
+        var datas = { ordertype: ordertype, order_number: order_number };
+    }
     Backend.api.ajax({
-        url: 'saleaftermanage/work_order_list/ajax_get_order',
-        data: { ordertype: ordertype, order_number: order_number }
+        url: urls,
+        data: datas
     }, function (data, ret) {
         //删除添加的tr
         $('#change-frame tr:gt(0)').remove();
         var item = ret.data;
-        console.log(item);
         var Str = '';
+        if (1 == is_edit) {
+            for (var j = 0, len = item.length; j < len; j++) {
+                Str += '<tr>';
+                Str += '<td><input  class="form-control" name="row[change_frame][original_sku][]" type="text" value="' + item[j].original_sku + '" readonly></td>';
+                Str += '<td><input  class="form-control" name="row[change_frame][original_number][]" type="text" value="1" readonly></td>';
+                Str += '<td><input  class="form-control" name="row[change_frame][change_sku][]" type="text" value="' + item[j].change_sku + '"></td>';
+                Str += '<td><input  class="form-control" name="row[change_frame][change_number][]" type="text" value="1" readonly></td>';
+                // Str +='<td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>删除</a></td>';
+                Str += '</tr>';
+            }
+            $("#change-frame tbody").append(Str);
+            return false;
+        }
         for (var j = 0, len = item.length; j < len; j++) {
-            var m = j + 1;
             Str += '<tr>';
             Str += '<td><input  class="form-control" name="row[change_frame][original_sku][]" type="text" value="' + item[j] + '" readonly></td>';
             Str += '<td><input  class="form-control" name="row[change_frame][original_number][]" type="text" value="1" readonly></td>';
@@ -1371,7 +1426,7 @@ function changeFrame() {
     });
 }
 //js 函数读取取消订单信息
-function cancelOrder() {
+function cancelOrder(is_edit = 0, work_id = 0) {
     var ordertype = $('#work_platform').val();
     var order_number = $('#c-platform_order').val();
     if (!order_number) {
@@ -1381,16 +1436,33 @@ function cancelOrder() {
         Layer.alert('请选择正确的平台');
         return false;
     }
+    if (1 == is_edit) {
+        var urls = 'saleaftermanage/work_order_list/ajax_edit_order';
+        var datas = { ordertype: ordertype, order_number: order_number, work_id: work_id };
+    } else {
+        var urls = 'saleaftermanage/work_order_list/ajax_get_order';
+        var datas = { ordertype: ordertype, order_number: order_number };
+    }
     Backend.api.ajax({
-        url: 'saleaftermanage/work_order_list/ajax_get_order',
-        data: { ordertype: ordertype, order_number: order_number }
+        url: urls,
+        data: datas
     }, function (data, ret) {
         //删除添加的tr
         $('#cancel-order tr:gt(0)').remove();
         var item = ret.data;
         var Str = '';
+        if (1 == is_edit) {
+            for (var j = 0, len = item.length; j < len; j++) {
+                Str += '<tr>';
+                Str += '<td><input  class="form-control" readonly name="row[cancel_order][original_sku][]" type="text" value="' + item[j].original_sku + '" readonly></td>';
+                Str += '<td><input  class="form-control" name="row[cancel_order][original_number][]"  type="text" value="1" readonly></td>';
+                Str += '<td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>删除</a></td>';
+                Str += '</tr>';
+            }
+            $("#cancel-order tbody").append(Str);
+            return false;
+        }
         for (var j = 0, len = item.length; j < len; j++) {
-            var m = j + 1;
             Str += '<tr>';
             Str += '<td><input  class="form-control" readonly name="row[cancel_order][original_sku][]" type="text" value="' + item[j] + '" readonly></td>';
             Str += '<td><input  class="form-control" name="row[cancel_order][original_number][]"  type="text" value="1" readonly></td>';

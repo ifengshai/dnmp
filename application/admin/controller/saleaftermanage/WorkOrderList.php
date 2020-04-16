@@ -14,6 +14,7 @@ use Util\ZeeloolPrescriptionDetailHelper;
 use Util\VooguemePrescriptionDetailHelper;
 use Util\WeseeopticalPrescriptionDetailHelper;
 use app\admin\model\saleaftermanage\WorkOrderMeasure;
+use app\admin\model\saleaftermanage\WorkOrderChangeSku;
 
 /**
  * 售后工单列管理
@@ -49,6 +50,8 @@ class WorkOrderList extends Backend
 
         //获取当前登录用户所属主管id
         $this->assign_user_id = searchForId(session('admin.id'), config('workorder.kefumanage'));
+        //选项卡
+        $this->view->assign('getTabList',$this->model->getTabList());
     }
 
     /**
@@ -58,13 +61,14 @@ class WorkOrderList extends Backend
      */
 
     //根据主记录id，获取措施相关信息
-    protected function sel_order_recept($id){
-        $step = $this->step->where('work_id',$id)->select();
+    protected function sel_order_recept($id)
+    {
+        $step = $this->step->where('work_id', $id)->select();
         $step_arr = collection($step)->toArray();
-        foreach ($step_arr as $k => $v){
-            $recept = $this->recept->where('measure_id',$v['id'])->where('work_id',$id)->select();
+        foreach ($step_arr as $k => $v) {
+            $recept = $this->recept->where('measure_id', $v['id'])->where('work_id', $id)->select();
             $recept_arr = collection($recept)->toArray();
-            $step_arr[$k]['recept_user'] = implode(',',array_column($recept_arr, 'recept_person'));
+            $step_arr[$k]['recept_user'] = implode(',', array_column($recept_arr, 'recept_person'));
             $step_arr[$k]['recept'] = $recept_arr;
         }
         return $step_arr;
@@ -98,10 +102,7 @@ class WorkOrderList extends Backend
 
             $admin = new \app\admin\model\Admin();
             $user_list = $admin->where('status', 'normal')->column('nickname', 'id');
-            $user_list = collection($user_list)->toArray();
-
-
-
+            
             foreach ($list as $k => $v) {
                 //排列sku
                 if ($v['order_sku']) {
@@ -134,7 +135,6 @@ class WorkOrderList extends Backend
                 $list[$k]['create_time'] = date('Y-m-d H:i', strtotime($v['create_time']));
             }
 
-
             $result = array("total" => $total, "rows" => $list);
 
             return json($result);
@@ -165,7 +165,7 @@ class WorkOrderList extends Backend
                         $this->model->validateFailException(true)->validate($validate);
                     }
                     //判断是否选择措施
-                    if (count(array_filter($params['measure_choose_id'])) < 1) {
+                    if (count(array_filter($params['measure_choose_id'])) < 1 && $params['work_type'] == 1) {
                         throw new Exception("措施不能为空");
                     }
 
@@ -182,9 +182,8 @@ class WorkOrderList extends Backend
                         $params['problem_type_content'] = config('workorder.customer_problem_type')[$params['problem_type_id']];
                     } elseif ($params['work_type'] == 2) {
                         $params['problem_type_content'] = config('workorder.warehouse_problem_type')[$params['problem_type_id']];
-                        $params['after_user_id'] = config('workorder.copy_group'); //经手人
+                        $params['after_user_id'] = implode(',', config('workorder.copy_group')); //经手人
                     }
-
                     //判断是否选择退款措施
                     if (!in_array(2, array_filter($params['measure_choose_id']))) {
                         unset($params['refund_money']);
@@ -258,12 +257,17 @@ class WorkOrderList extends Backend
                     if (count(array_filter($params['measure_choose_id'])) > 0) {
 
                         //措施
-                        $measureList = [];
                         foreach ($params['measure_choose_id'] as $k => $v) {
-                            $measureList[$k]['work_id'] = $this->model->id;
-                            $measureList[$k]['measure_choose_id'] = $v;
-                            $measureList[$k]['measure_content'] = config('workorder.step')[$v];
-                            $measureList[$k]['create_time'] = date('Y-m-d H:i:s');
+                            $measureList['work_id'] = $this->model->id;
+                            $measureList['measure_choose_id'] = $v;
+                            $measureList['measure_content'] = config('workorder.step')[$v];
+                            $measureList['create_time'] = date('Y-m-d H:i:s');
+
+                            //插入措施表
+                            $res = $this->step->insertGetId($measureList);
+                            if (false === $res) {
+                                throw new Exception("添加失败！！");
+                            }
 
                             //根据措施读取承接组、承接人 默认是客服问题组配置
                             $appoint_ids = $params['order_recept']['appoint_ids'][$v];
@@ -273,7 +277,7 @@ class WorkOrderList extends Backend
                             $appointList = [];
                             foreach ($appoint_ids as $key => $val) {
                                 $appointList[$key]['work_id'] = $this->model->id;
-                                $appointList[$key]['measure_id'] = $v;
+                                $appointList[$key]['measure_id'] = $res;
                                 //如果没有承接人 默认为创建人
                                 if ($val == 'undefined') {
                                     $appointList[$key]['recept_group_id'] = $this->assign_user_id;
@@ -293,11 +297,6 @@ class WorkOrderList extends Backend
                             if (false === $receptRes) {
                                 throw new Exception("添加失败！！");
                             }
-                        }
-                        //插入措施表
-                        $res = $this->step->saveAll($measureList);
-                        if (false === $res) {
-                            throw new Exception("添加失败！！");
                         }
                     }
 
@@ -503,6 +502,11 @@ class WorkOrderList extends Backend
             foreach ($skus['sku'] as $val) {
                 $arrSkus[$val] = $val;
             }
+            //查询用户id对应姓名
+            $admin = new \app\admin\model\Admin();
+            $users = $admin->where('status', 'normal')->column('nickname', 'id');
+            $this->assignconfig('users', $users); //返回用户            
+            return $this->view->fetch();
             $this->view->assign('skus', $arrSkus);
         }
         //把问题类型传递到js页面
@@ -631,17 +635,17 @@ class WorkOrderList extends Backend
     {
         if (request()->isAjax()) {
             $siteType = input('site_type');
-            $prescriptionType = input('prescription_type','');
-            $color_id = input('color_id','');
+            $prescriptionType = input('prescription_type', '');
+            $color_id = input('color_id', '');
             $key = $siteType . '_getlens';
             $data = Cache::get($key);
             if (!$data) {
                 $data = $this->model->httpRequest($siteType,'magic/product/lensData');
                 Cache::set($key, $data, 3600*24);
             }
-            if($color_id){
+            if ($color_id) {
                 $lensType = $data['lens_color_list'] ?: [];
-            }else{
+            } else {
                 $lensType = $data['lens_list'][$prescriptionType] ?: [];
             }
             if ($lensType) {
@@ -692,8 +696,59 @@ class WorkOrderList extends Backend
             return $this->error('404 Not Found');
         }
     }
-    public function test()
+    /**
+     * 获取已经添加工单中的订单信息
+     *
+     * @Description
+     * @author lsw
+     * @since 2020/04/16 10:29:02 
+     * @return void
+     */
+    public function ajax_edit_order($ordertype = null, $order_number = null, $work_id = null)
     {
-        $this->model->createOrder(1,224);
+        if ($this->request->isAjax()) {
+            if ($ordertype < 1 || $ordertype > 5) { //不在平台之内
+                return $this->error('选择平台错误,请重新选择', '', 'error', 0);
+            }
+            if (!$order_number) {
+                return  $this->error('订单号不存在，请重新选择', '', 'error', 0);
+            }
+            if (!$work_id) {
+                return $this->error('工单不存在，请重新选择', '', 'error', 0);
+            }
+            $result = WorkOrderChangeSku::getOrderChangeSku($work_id, $ordertype, $order_number);
+            if (!$result) {
+                if ($ordertype == 1) {
+                    $result = ZeeloolPrescriptionDetailHelper::get_one_by_increment_id($order_number);
+                } elseif ($ordertype == 2) {
+                    $result = VooguemePrescriptionDetailHelper::get_one_by_increment_id($order_number);
+                } elseif ($ordertype == 3) {
+                    $result = NihaoPrescriptionDetailHelper::get_one_by_increment_id($order_number);
+                } elseif (5 == $ordertype) {
+                    $result = WeseeopticalPrescriptionDetailHelper::get_one_by_increment_id($order_number);
+                }
+            } else {
+                $result = collection($result)->toArray();
+            }
+            if (!$result) {
+                $this->error('找不到这个订单,请重新尝试', '', 'error', 0);
+            }
+            $arr = [];
+            foreach ($result as $key => $val) {
+                if (!$val['qty_ordered']) {
+                    $arr[$key]['original_sku'] = $val['original_sku'];
+                    $arr[$key]['original_number'] = $val['original_number'];
+                    $arr[$key]['change_sku'] = $val['change_sku'];
+                    $arr[$key]['change_number'] = $val['change_number'];
+                } else {
+                    for ($i = 0; $i < $val['qty_ordered']; $i++) {
+                        $arr[] = $val['sku'];
+                    }
+                }
+            }
+            return $this->success('', '', $arr, 0);
+        } else {
+            return $this->error('404 Not Found');
+        }
     }
 }
