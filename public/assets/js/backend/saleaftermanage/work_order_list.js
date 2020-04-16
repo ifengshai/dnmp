@@ -440,8 +440,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
             $('.panel-heading a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
                 var field = $(this).data("field");
                 var value = $(this).data("value");
-                console.log(field);
-                console.log(value);
                 var options = table.bootstrapTable('getOptions');
                 options.pageNumber = 1;
                 var queryParams = options.queryParams;
@@ -450,13 +448,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     var filter = params.filter ? JSON.parse(params.filter) : {};
                     var op = params.op ? JSON.parse(params.op) : {};
                     if (field == 'create_person') {
-                        delete filter.rep_id;
+                        delete filter.recept_person_id;
                         filter[field] = value;
-                    } else if (field == 'rep_id') {
+                    } else if (field == 'recept_person_id') {
                         delete filter.create_person;
                         filter[field] = value;
                     } else {
-                        delete filter.rep_id;
+                        delete filter.recept_person_id;
                         delete filter.create_person;
                     }
                     params.filter = JSON.stringify(filter);
@@ -621,7 +619,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     }
 
                     var users = array_filter(username);
+                    var appoint_users = array_filter(appoint_users);
                     $('#appoint_group_users').html(users.join(','));
+                    $('#recept_person_id').val(appoint_users.join(','));
 
                     //判断更换镜框的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 start
                     if (!$('.step1-1').is(':hidden')) {

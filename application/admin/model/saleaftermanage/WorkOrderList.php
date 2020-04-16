@@ -33,7 +33,7 @@ class WorkOrderList extends Model
     {
         return [
             ['name' => '我创建的任务', 'field' => 'create_user_name', 'value' => session('admin.nickname')],
-            ['name' => '我的任务', 'field' => 'rep_id', 'value' => session('admin.id')],
+            ['name' => '我的任务', 'field' => 'recept_person_id', 'value' => session('admin.id')],
         ];
     }
 
