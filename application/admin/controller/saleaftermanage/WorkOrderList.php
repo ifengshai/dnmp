@@ -51,7 +51,7 @@ class WorkOrderList extends Backend
         //获取当前登录用户所属主管id
         $this->assign_user_id = searchForId(session('admin.id'), config('workorder.kefumanage'));
         //选项卡
-        $this->view->assign('getTabList',$this->model->getTabList());
+        $this->view->assign('getTabList', $this->model->getTabList());
     }
 
     /**
@@ -86,23 +86,34 @@ class WorkOrderList extends Backend
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
+
+            //选项卡我的任务切换
+            $filter = json_decode($this->request->get('filter'), true);
+            if ($filter['recept_person_id']) {
+                //承接 经手 审核 包含用户id
+                $map[] = ['exp', Db::raw("FIND_IN_SET( {$filter['recept_person_id']}, recept_person_id ) or after_user_id = {$filter['recept_person_id']} or assign_user_id = {$filter['recept_person_id']}")];
+                unset($filter['recept_person_id']);
+                $this->request->get(['filter' => json_encode($filter)]);
+            }
+
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
                 ->where($where)
+                ->where($map)
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->model
                 ->where($where)
+                ->where($map)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
-
             $list = collection($list)->toArray();
 
             $admin = new \app\admin\model\Admin();
             $user_list = $admin->where('status', 'normal')->column('nickname', 'id');
-            
+
             foreach ($list as $k => $v) {
                 //排列sku
                 if ($v['order_sku']) {
@@ -221,7 +232,7 @@ class WorkOrderList extends Backend
                     //判断优惠券 需要审核的优惠券
                     if ($params['need_coupon_id'] && in_array(9, array_filter($params['measure_choose_id']))) {
                         $params['coupon_id'] = $params['need_coupon_id'];
-                        $params['coupon_describe'] = config('workorder.check_coupon')[$params['need_coupon_id']]['desc'];
+                        $params['coupon_describe'] = config('workorder.need_check_coupon')[$params['need_coupon_id']]['desc'];
                     }
 
                     //判断审核人
@@ -241,7 +252,7 @@ class WorkOrderList extends Backend
                             $params['assign_user_id'] = $this->assign_user_id;
                         }
                     }
-
+                    $params['recept_person_id'] = $params['recept_person_id'] ?: session('admin.id');
                     $params['create_user_name'] = session('admin.nickname');
                     $params['create_user_id'] = session('admin.id');
                     $params['create_time'] = date('Y-m-d H:i:s');

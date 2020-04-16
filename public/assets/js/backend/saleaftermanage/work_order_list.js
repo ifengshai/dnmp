@@ -497,7 +497,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 $('.step_type').attr('checked', false);
                 $('.step_type').parent().hide();
                 $('#appoint_group_users').html('');//切换问题类型时清空承接人
-                $('#recept_person_id').val('');//切换问题类型时清空隐藏域承接人id
                 $('#recept_person').val('');//切换问题类型时清空隐藏域承接人
                 $('.measure').hide();
                 $('#recept_group_id').val('');
@@ -638,7 +637,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     var appoint_users = array_filter(appoint_users);
                     $('#appoint_group_users').html(users.join(','));
                     $('#recept_person_id').val(appoint_users.join(','));
-
+                   
                     //判断更换镜框的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 start
                     if (!$('.step1-1').is(':hidden')) {
                         changeFrame();
