@@ -376,6 +376,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
             //补发点击填充数据
             var lens_click_data;
             var gift_click_data;
+            var prescriptions;
             $(document).on('click','input[name="row[measure_choose_id][]"]',function(){
 
                 var value = $(this).val();
@@ -403,7 +404,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                 }
                                 var data = json.data.address;
                                 var lens = json.data.lens;
-                                var prescriptions = data.prescriptions;
+                                prescriptions = data.prescriptions;
                                 $('#supplement-order').html(lens.html);
                                 var order_pay_currency = $('#order_pay_currency').val();
                                 //修改地址
@@ -449,67 +450,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                 lens_click_data = '<div class="margin-top:10px;">' + lens.html + '<div class="form-group-child4_del"><a href="javascript:;" style="width: 50%;" class="btn btn-danger btn-del-lens" title="删除"><i class="fa fa-trash"></i>删除</a></div></div>';
 
 
-                                //处方选择填充
-                                $(document).on('change', '#prescription_select', function () {
-                                    var val = $(this).val();
-                                    var prescription = prescriptions[val];
-                                    var prescription_div = $(this).parents('.step7_function2').next('.step1_function3');
-                                    prescription_div.find('input').val('');
-                                    prescription_div.find('input[name="row[replacement][od_sph][]"]').val(prescription.od_sph);
-                                    prescription_div.find('input[name="row[replacement][os_sph][]"]').val(prescription.os_sph);
-                                    prescription_div.find('input[name="row[replacement][os_cyl][]"]').val(prescription.os_cyl);
-                                    prescription_div.find('input[name="row[replacement][od_cyl][]"]').val(prescription.od_cyl);
-                                    prescription_div.find('input[name="row[replacement][od_axis][]"]').val(prescription.od_axis);
-                                    prescription_div.find('input[name="row[replacement][os_axis][]"]').val(prescription.os_axis);
 
-                                    //$(this).parents('.step7_function2').val('')
-                                    $(this).parents('.step7_function2').find('select[name="row[replacement][recipe_type][]"]').val(prescription.prescription_type);
-                                    $(this).parents('.step7_function2').find('select[name="row[replacement][recipe_type][]"]').change();
-                                    prescription_div.find('select[name="row[replacement][coating_type][]"]').val(prescription.coating_id);
-                                    prescription_div.find('select[name="row[replacement][lens_type][]"]').val(prescription.index_id);
-
-                                    //add，pd添加
-                                    if (prescription.hasOwnProperty("total_add")) {
-                                        prescription_div.find('input[name="row[replacement][od_add][]"]').val(prescription.total_add);
-                                        //prescription_div.find('input[name="row[replacement][os_add][]"]').attr('disabled',true);
-                                    } else {
-                                        prescription_div.find('input[name="row[replacement][od_add][]"]').val(prescription.od_add);
-                                        prescription_div.find('input[name="row[replacement][os_add][]"]').val(prescription.os_add);
-                                    }
-                                    if(prescription.hasOwnProperty("pd")){
-                                        prescription_div.find('input[name="row[replacement][pd_r][]"]').val(prescription.pd);
-                                        //prescription_div.find('input[name="row[replacement][pd_l][]"]').attr('disabled',true);
-                                    } else {
-                                        prescription_div.find('input[name="row[replacement][pd_r][]"]').val(prescription.pd_r);
-                                        prescription_div.find('input[name="row[replacement][pd_l][]"]').val(prescription.pd_l);
-                                    }
-                                    //
-                                    if (prescription.hasOwnProperty("od_pv")) {
-                                        prescription_div.find('input[name="row[replacement][od_pv][]"]').val(prescription.od_pv);
-                                    }
-                                    if (prescription.hasOwnProperty("od_bd")) {
-                                        prescription_div.find('input[name="row[replacement][od_bd][]"]').val(prescription.od_bd);
-                                    }
-                                    if (prescription.hasOwnProperty("od_pv_r")) {
-                                        prescription_div.find('input[name="row[replacement][od_pv_r][]"]').val(prescription.od_pv_r);
-                                    }
-                                    if (prescription.hasOwnProperty("od_bd_r")) {
-                                        prescription_div.find('input[name="row[replacement][od_bd_r][]"]').val(prescription.od_bd_r);
-                                    }
-                                    if (prescription.hasOwnProperty("os_pv")) {
-                                        prescription_div.find('input[name="row[replacement][os_pv][]"]').val(prescription.os_pv);
-                                    }
-                                    if (prescription.hasOwnProperty("os_bd")) {
-                                        prescription_div.find('input[name="row[replacement][os_bd][]"]').val(prescription.os_bd);
-                                    }
-                                    if (prescription.hasOwnProperty("os_pv_r")) {
-                                        prescription_div.find('input[name="row[replacement][os_pv_r][]"]').val(prescription.os_pv_r);
-                                    }
-                                    if (prescription.hasOwnProperty("od_pv")) {
-                                        prescription_div.find('input[name="row[replacement][os_bd_r][]"]').val(prescription.os_bd_r);
-                                    }
-                                    $('.selectpicker ').selectpicker('refresh');
-                                })
 
 
                                 $('.selectpicker ').selectpicker('refresh');
@@ -551,7 +492,76 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 }
 
             });
+            //处方选择填充
+            $(document).on('change', '#prescription_select', function () {
+                var val = $(this).val();
+                var prescription = prescriptions[val];
 
+                var prescription_div = $(this).parents('.step7_function2').next('.step1_function3');
+                prescription_div.find('input').val('');
+                prescription_div.find('input[name="row[replacement][od_sph][]"]').val(prescription.od_sph);
+                prescription_div.find('input[name="row[replacement][os_sph][]"]').val(prescription.os_sph);
+                prescription_div.find('input[name="row[replacement][os_cyl][]"]').val(prescription.os_cyl);
+                prescription_div.find('input[name="row[replacement][od_cyl][]"]').val(prescription.od_cyl);
+                prescription_div.find('input[name="row[replacement][od_axis][]"]').val(prescription.od_axis);
+                prescription_div.find('input[name="row[replacement][os_axis][]"]').val(prescription.os_axis);
+
+                //$(this).parents('.step7_function2').val('')
+                $(this).parents('.step7_function2').find('select[name="row[replacement][recipe_type][]"]').val(prescription.prescription_type);
+                $(this).parents('.step7_function2').find('select[name="row[replacement][recipe_type][]"]').change();
+                prescription_div.find('select[name="row[replacement][coating_type][]"]').val(prescription.coating_id);
+
+
+
+                //判断是否是彩色镜片
+                if(prescription.color_id > 0){
+                    prescription_div.find('#color_type').val(prescription.color_id);
+                    prescription_div.find('#color_type').change();
+                }
+                prescription_div.find('#lens_type').val(prescription.index_id);
+                //add，pd添加
+                if (prescription.hasOwnProperty("total_add")) {
+                    prescription_div.find('input[name="row[replacement][od_add][]"]').val(prescription.total_add);
+                    //prescription_div.find('input[name="row[replacement][os_add][]"]').attr('disabled',true);
+                } else {
+                    prescription_div.find('input[name="row[replacement][od_add][]"]').val(prescription.od_add);
+                    prescription_div.find('input[name="row[replacement][os_add][]"]').val(prescription.os_add);
+                }
+                if(prescription.hasOwnProperty("pd")){
+                    prescription_div.find('input[name="row[replacement][pd_r][]"]').val(prescription.pd);
+                    //prescription_div.find('input[name="row[replacement][pd_l][]"]').attr('disabled',true);
+                } else {
+                    prescription_div.find('input[name="row[replacement][pd_r][]"]').val(prescription.pd_r);
+                    prescription_div.find('input[name="row[replacement][pd_l][]"]').val(prescription.pd_l);
+                }
+                //
+                if (prescription.hasOwnProperty("od_pv")) {
+                    prescription_div.find('input[name="row[replacement][od_pv][]"]').val(prescription.od_pv);
+                }
+                if (prescription.hasOwnProperty("od_bd")) {
+                    prescription_div.find('input[name="row[replacement][od_bd][]"]').val(prescription.od_bd);
+                }
+                if (prescription.hasOwnProperty("od_pv_r")) {
+                    prescription_div.find('input[name="row[replacement][od_pv_r][]"]').val(prescription.od_pv_r);
+                }
+                if (prescription.hasOwnProperty("od_bd_r")) {
+                    prescription_div.find('input[name="row[replacement][od_bd_r][]"]').val(prescription.od_bd_r);
+                }
+                if (prescription.hasOwnProperty("os_pv")) {
+                    prescription_div.find('input[name="row[replacement][os_pv][]"]').val(prescription.os_pv);
+                }
+                if (prescription.hasOwnProperty("os_bd")) {
+                    prescription_div.find('input[name="row[replacement][os_bd][]"]').val(prescription.os_bd);
+                }
+                if (prescription.hasOwnProperty("os_pv_r")) {
+                    prescription_div.find('input[name="row[replacement][os_pv_r][]"]').val(prescription.os_pv_r);
+                }
+                if (prescription.hasOwnProperty("od_pv")) {
+                    prescription_div.find('input[name="row[replacement][os_bd_r][]"]').val(prescription.os_bd_r);
+                }
+
+                $('.selectpicker ').selectpicker('refresh');
+            })
             $(document).on('click', '.btn-add-box', function () {
                 $('.add_gift').after(gift_click_data);
                 $('.selectpicker ').selectpicker('refresh');
@@ -580,9 +590,36 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         lens_type += '<option value="'+data[i].lens_id+'">'+data[i].lens_data_name+'</option>';
                     }
                     prescription_div.find('#lens_type').html(lens_type);
+                    prescription_div.find('#color_type').val('');
                     $('.selectpicker ').selectpicker('refresh');
                 }, function (data, ret) {
                         var prescription_div = that.parents('.prescription_type_step').next('div');
+                        prescription_div.find('#lens_type').html('');
+                        $('.selectpicker ').selectpicker('refresh');
+                    }
+                );
+            });
+            //根据color_type获取lens_type
+            $(document).on('change','select[name="row[replacement][color_id][]"],select[name="row[change_lens][color_id][]"],select[name="row[gift][color_id][]"]',function(){
+                var sitetype = $('#work_platform').val();
+                var color_id = $(this).val();
+                var that = $(this);
+                Backend.api.ajax({
+                        url: 'saleaftermanage/work_order_list/ajaxGetLensType',
+                        data: {
+                            site_type: sitetype,
+                            color_id: color_id
+                        }
+                    }, function (data, ret) {
+                        var prescription_div = that.parents('.panel-body');
+                        var color_type;
+                        for(var i = 0;i<data.length;i++){
+                            color_type += '<option value="'+data[i].lens_id+'">'+data[i].lens_data_name+'</option>';
+                        }
+                        prescription_div.find('#lens_type').html(color_type);
+                        $('.selectpicker ').selectpicker('refresh');
+                    }, function (data, ret) {
+                        var prescription_div = that.parents('.step1_function3');
                         prescription_div.find('#lens_type').html('');
                         $('.selectpicker ').selectpicker('refresh');
                     }
