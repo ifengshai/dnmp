@@ -57,7 +57,7 @@ class WorkOrderList extends Backend
      */
 
     //根据主记录id，获取措施相关信息
-    public function sel_order_recept($id){
+    protected function sel_order_recept($id){
         $step = $this->step->where('work_id',$id)->select();
         $step_arr = collection($step)->toArray();
         foreach ($step_arr as $k => $v){
