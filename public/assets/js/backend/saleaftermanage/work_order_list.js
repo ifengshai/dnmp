@@ -151,7 +151,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     icon: 'fa fa-list',
                                     url: 'saleaftermanage/work_order_list/detail',
                                     callback: function (data) {
-                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), {title: "回传数据"});
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
                                     },
                                     visible: function (row) {
                                         //返回true时按钮显示,返回false隐藏
@@ -201,248 +201,23 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     }
                                 },
                                 {
-                                    name: 'test_distribution',
-                                    text: __('测试确认'),
-                                    title: __('测试确认'),
-                                    classname: 'btn btn-xs btn-primary btn-dialog',
-                                    url: 'demand/it_web_demand/test_distribution/demand_type/2',
+                                    name: 'process',
+                                    text: __('处理'),
+                                    title: __('处理'),
+                                    classname: 'btn btn-xs btn-success btn-dialog',
+                                    url: 'saleaftermanage/work_order_list/add',
+                                    extend: 'data-area = \'["100%","100%"]\'',
                                     callback: function (data) {
                                     },
                                     visible: function (row) {
+                                        return true;
                                         if (row.status == 1) {
-                                            if (row.demand_test_distribution) {//操作权限
-                                                return true;
-                                            }
-                                        } else {
-                                            return false;
-                                        }
-                                    }
-                                },
-                                {
-                                    name: 'through_demand',
-                                    text: __('通过'),
-                                    title: __('通过'),
-                                    classname: 'btn btn-xs btn-success btn-magic btn-ajax',
-                                    icon: 'fa fa-magic',
-                                    url: 'demand/it_web_demand/through_demand',
-                                    success: function (data, ret) {
-                                        table.bootstrapTable('refresh');
-                                    },
-                                    error: function (data, ret) {
-                                        console.log(data, ret);
-                                        Layer.alert(ret.msg);
-                                        return false;
-                                    },
-                                    visible: function (row) {
-                                        if (row.status == 2) {
-                                            if (row.demand_through_demand) {//操作权限
-                                                return true;
-                                            }
-                                        } else {
-                                            return false;
-                                        }
-                                    }
-                                },
-                                {
-                                    name: 'group_finish',
-                                    text: __('完成'),
-                                    title: __('完成'),
-                                    classname: 'btn btn-xs btn-primary btn-dialog',
-                                    url: 'demand/it_web_demand/group_finish/demand_type/2',
-                                    callback: function (data) {
-                                    },
-                                    visible: function (row) {
-                                        if (row.status == 3) {
-                                            if (row.demand_finish) {//操作权限
-                                                if (row.web_designer_group == 0 && row.phper_group == 0 && row.app_group == 0) {
-                                                    return false;
-                                                } else {
-                                                    return true;
-                                                }
-                                            }
-                                        }
-                                    }
-                                },
-                                {
-                                    name: 'test_record_bug',
-                                    text: __('记录问题'),
-                                    title: __('记录问题'),
-                                    classname: 'btn btn-xs btn-primary btn-dialog',
-                                    url: 'demand/it_web_demand/test_record_bug',
-                                    callback: function (data) {
-                                    },
-                                    visible: function (row) {
-                                        if (row.status == 4) {
-                                            if (row.demand_test_record_bug && row.is_test_record_hidden == 1) {//操作权限及显示权限
-                                                if (row.test_is_finish == 0) {
-                                                    return true;
-                                                } else {
-                                                    return false;
-                                                }
-                                            }
-                                        }
-                                    }
-                                },
-                                {
-                                    name: 'test_group_finish',
-                                    text: __('通过测试'),
-                                    title: __('通过测试'),
-                                    classname: 'btn btn-xs btn-success btn-magic btn-ajax',
-                                    url: 'demand/it_web_demand/test_group_finish',
-                                    confirm: '请确定是否  <b>通过测试</b>',
-                                    success: function (data, ret) {
-                                        table.bootstrapTable('refresh');
-                                        //如果需要阻止成功提示，则必须使用return false;
-                                        //return false;
-                                    },
-                                    error: function (data, ret) {
-                                        console.log(data, ret);
-                                        Layer.alert(ret.msg);
-                                        return false;
-                                    },
-                                    visible: function (row) {
-                                        if (row.status == 4) {
-                                            if (row.demand_test_finish && row.is_test_finish_hidden == 1) {//操作权限及显示权限
-                                                if (row.test_group == 1 && row.test_is_finish == 0) {
-                                                    return true;
-                                                } else {
-                                                    return false;
-                                                }
-                                            }
-                                        }
 
-                                    }
-                                },
-                                {
-                                    name: 'add',
-                                    text: __('提出人确认'),
-                                    title: __('提出人确认'),
-                                    classname: 'btn btn-xs btn-success btn-magic btn-ajax',
-                                    icon: 'fa fa-magic',
-                                    url: 'demand/it_web_demand/add/is_user_confirm/1',
-                                    confirm: '确认本需求？',
-                                    success: function (data, ret) {
-                                        table.bootstrapTable('refresh');
-                                    },
-                                    error: function (data, ret) {
-                                        console.log(data, ret);
-                                        Layer.alert(ret.msg);
-                                        return false;
-                                    },
-                                    visible: function (row) {
-                                        if (row.status == 4 || row.status == 5) {
-                                            if (row.demand_add && row.is_entry_user_hidden == 1) {//操作权限及显示权限
-                                                if (row.test_group == 1) {
-                                                    if (row.entry_user_confirm == 0) {
-                                                        return true;
-                                                    }
-                                                }
-                                            }
                                         } else {
                                             return false;
                                         }
                                     }
-                                },
-                                {
-                                    name: 'add_online',
-                                    text: __('上线'),
-                                    title: __('上线'),
-                                    classname: 'btn btn-xs btn-success btn-magic btn-ajax',
-                                    icon: 'fa fa-magic',
-                                    url: 'demand/it_web_demand/add_online',
-                                    confirm: '确定上线？',
-                                    success: function (data, ret) {
-                                        table.bootstrapTable('refresh');
-                                    },
-                                    error: function (data, ret) {
-                                        console.log(data, ret);
-                                        Layer.alert(ret.msg);
-                                        return false;
-                                    },
-                                    visible: function (row) {
-                                        if (row.status == 5) {
-                                            if (row.demand_add_online) {//操作权限
-                                                if (row.test_group == 1) {
-                                                    if (row.entry_user_confirm == 0) {
-                                                        return false;
-                                                    } else {
-                                                        return true;
-                                                    }
-                                                } else {
-                                                    return true;
-                                                }
-                                            }
-                                        } else {
-                                            return false;
-                                        }
-                                    }
-                                },
-                                {
-                                    name: 'test_record_bug',
-                                    text: __('记录问题'),
-                                    title: __('记录回归测试问题'),
-                                    classname: 'btn btn-xs btn-primary btn-dialog',
-                                    url: 'demand/it_web_demand/test_record_bug',
-                                    callback: function (data) {
-                                    },
-                                    visible: function (row) {
-                                        if (row.status == 6) {
-                                            if (row.demand_test_record_bug && row.is_test_record_hidden == 1) {//操作权限及显示权限
-                                                if (row.return_test_is_finish == 0) {
-                                                    return true;
-                                                } else {
-                                                    return false;
-                                                }
-                                            }
-                                        }
-                                    }
-                                },
-                                {
-                                    name: 'test_group_finish',
-                                    text: __('通过测试'),
-                                    title: __('通过回归测试'),
-                                    classname: 'btn btn-xs btn-success btn-magic btn-ajax',
-                                    url: 'demand/it_web_demand/test_group_finish/is_all_test/1',
-                                    confirm: '请确定是否  <b>通过测试</b>',
-                                    success: function (data, ret) {
-                                        table.bootstrapTable('refresh');
-                                        //如果需要阻止成功提示，则必须使用return false;
-                                        //return false;
-                                    },
-                                    error: function (data, ret) {
-                                        console.log(data, ret);
-                                        Layer.alert(ret.msg);
-                                        return false;
-                                    },
-                                    visible: function (row) {
-                                        if (row.status == 6) {
-                                            if (row.demand_test_finish && row.is_test_finish_hidden == 1) {//操作权限及显示权限
-                                                if (row.test_group == 1 && row.return_test_is_finish == 0) {
-                                                    return true;
-                                                } else {
-                                                    return false;
-                                                }
-                                            }
-                                        }
-
-                                    }
-                                },
-                                {
-                                    name: 'detail_log',
-                                    text: __('详情记录'),
-                                    title: __('详情记录'),
-                                    classname: 'btn btn-xs btn-primary btn-dialog',
-                                    url: 'demand/it_web_demand/detail_log/demand_type/2',
-                                    callback: function (data) {
-                                    },
-                                    visible: function (row) {
-                                        if (row.status == 7) {
-                                            return true;
-                                        } else {
-                                            return false;
-                                        }
-                                    }
-                                },
+                                }
                             ],
                             formatter: Table.api.formatter.buttons
                         },
@@ -637,7 +412,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     var appoint_users = array_filter(appoint_users);
                     $('#appoint_group_users').html(users.join(','));
                     $('#recept_person_id').val(appoint_users.join(','));
-                   
+
                     //判断更换镜框的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 start
                     if (!$('.step1-1').is(':hidden')) {
                         changeFrame();
@@ -1080,11 +855,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
         edit: function () {
             Controller.api.bindevent();
         },
-        detail:function(){
+        detail: function () {
             Controller.api.bindevent();
         },
         //处理任务
         process: function () {
+            Controller.api.bindevent();
             //点击事件 #todo::需判断仓库或者客服
             $(document).on('click', '.problem_type', function () {
                 $('.step_type').attr('checked', false);
@@ -1313,62 +1089,75 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         //判断取消订单的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end
                     }
                 });
-            //如果问题类型存在，显示问题类型和措施
-            if (Config.problem_type_id) {
-                var id = Config.problem_type_id;
-                var work_id = $('#work_id').val();
-                //row[problem_type_id]
-                $("input[name='row[problem_type_id]'][value='" + id + "']").attr("checked", true);
-                //id大于5 默认措施4
-                if (id > 5) {
-                    var steparr = Config.workorder['step04'];
-                    for (var j = 0; j < steparr.length; j++) {
-                        $('#step' + steparr[j].step_id).parent().show();
-                        //读取对应措施配置
-                        $('#step' + steparr[j].step_id + '-is_check').val(steparr[j].is_check);
-                        $('#step' + steparr[j].step_id + '-appoint_group').val((steparr[j].appoint_group).join(','));
+
+                //如果问题类型存在，显示问题类型和措施
+                if (Config.problem_type_id) {
+                    var id = Config.problem_type_id;
+                    var work_id = $('#work_id').val();
+                    //row[problem_type_id]
+                    $("input[name='row[problem_type_id]'][value='" + id + "']").attr("checked", true);
+
+                    //判断是客服创建还是仓库创建
+                    if (Config.work_type == 1) {
+                        var temp_id = 5;
+                    } else if (Config.work_type == 2) {
+                        var temp_id = 4;
                     }
-                } else {
-                    var step = Config.workorder.customer_problem_group[id].step;
-                    var steparr = Config.workorder[step];
-                    console.log(steparr);
-                    for (var j = 0; j < steparr.length; j++) {
-                        $('#step' + steparr[j].step_id).parent().show();
-                        //读取对应措施配置
-                        $('#step' + steparr[j].step_id + '-is_check').val(steparr[j].is_check);
-                        $('#step' + steparr[j].step_id + '-appoint_group').val((steparr[j].appoint_group).join(','));
-                    }
-                }
-                if (Config.measureList) {
-                    var checkID = Config.measureList;//措施列表赋值给checkID
-                    for (var m = 0; m < checkID.length; m++) {
-                        $("input[name='row[measure_choose_id][]'][value='" + checkID[m] + "']").attr("checked", true);
-                        var node = $('.step' + checkID[m]);
-                        if (node.is(':hidden')) {
-                            node.show();
-                        } else {
-                            node.hide();
+
+                    //id大于5 默认措施4
+                    if (id > temp_id) {
+                        var steparr = Config.workorder['step04'];
+                        for (var j = 0; j < steparr.length; j++) {
+                            $('#step' + steparr[j].step_id).parent().show();
+                            //读取对应措施配置
+                            $('#step' + steparr[j].step_id + '-is_check').val(steparr[j].is_check);
+                            $('#step' + steparr[j].step_id + '-appoint_group').val((steparr[j].appoint_group).join(','));
                         }
-                        var secondNode = $('.step' + id + '-' + checkID[m]);
-                        if (secondNode.is(':hidden')) {
-                            secondNode.show();
-                        } else {
-                            secondNode.hide();
+                    } else {
+                        //判断是客服创建还是仓库创建
+                        if (Config.work_type == 1) {
+                            var step = Config.workorder.customer_problem_group[id].step;
+                        } else if (Config.work_type == 2) {
+                            var step = Config.workorder.warehouse_problem_group[id].step;
+                        }
+                        var steparr = Config.workorder[step];
+                        for (var j = 0; j < steparr.length; j++) {
+                            $('#step' + steparr[j].step_id).parent().show();
+                            //读取对应措施配置
+                            $('#step' + steparr[j].step_id + '-is_check').val(steparr[j].is_check);
+                            $('#step' + steparr[j].step_id + '-appoint_group').val((steparr[j].appoint_group).join(','));
                         }
                     }
+                    if (Config.measureList) {
+                        var checkID = Config.measureList;//措施列表赋值给checkID
+                        for (var m = 0; m < checkID.length; m++) {
+                            $("input[name='row[measure_choose_id][]'][value='" + checkID[m] + "']").attr("checked", true);
+                            var node = $('.step' + checkID[m]);
+                            if (node.is(':hidden')) {
+                                node.show();
+                            } else {
+                                node.hide();
+                            }
+                            var secondNode = $('.step' + id + '-' + checkID[m]);
+                            if (secondNode.is(':hidden')) {
+                                secondNode.show();
+                            } else {
+                                secondNode.hide();
+                            }
+                        }
+                    }
+                    //判断更换镜框的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 start
+                    if (!$('.step1-1').is(':hidden')) {
+                        changeFrame(1, work_id)
+                    }
+                    //判断更换镜框的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end
+                    //判断取消订单的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 start
+                    if (!$('.step3').is(':hidden')) {
+                        cancelOrder(1, work_id);
+                    }
+                    //判断取消订单的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end
                 }
-                //判断更换镜框的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 start
-                if (!$('.step1-1').is(':hidden')) {
-                    changeFrame(1, work_id)
-                }
-                //判断更换镜框的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end
-                //判断取消订单的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 start
-                if (!$('.step3').is(':hidden')) {
-                    cancelOrder(1, work_id);
-                }
-                //判断取消订单的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end
-            }                
-          },
+            },
         }
     };
     return Controller;

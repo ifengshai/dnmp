@@ -156,7 +156,7 @@ class WorkOrderList extends Backend
     /**
      * 添加
      */
-    public function add()
+    public function add($ids = null)
     {
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
@@ -252,6 +252,10 @@ class WorkOrderList extends Backend
                             $params['assign_user_id'] = $this->assign_user_id;
                         }
                     }
+
+                    if ($params['work_status'] == 2) {
+                        $params['submit_time'] = date('Y-m-d H:i:s');
+                    }
                     $params['recept_person_id'] = $params['recept_person_id'] ?: session('admin.id');
                     $params['create_user_name'] = session('admin.nickname');
                     $params['create_user_id'] = session('admin.id');
@@ -262,7 +266,7 @@ class WorkOrderList extends Backend
                         throw new Exception("添加失败！！");
                     }
                     //修改镜架操作
-                     //$this->model->changeLens($params, $this->model->getLastInsID());
+                    //$this->model->changeLens($params, $this->model->getLastInsID());
 
                     //循环插入措施
                     if (count(array_filter($params['measure_choose_id'])) > 0) {
@@ -384,20 +388,63 @@ class WorkOrderList extends Backend
             }
             $this->error(__('Parameter %s can not be empty', ''));
         }
-        //获取用户ID和所在权限组
-        $userId = session('admin.id');
-        $userGroupAccess = AuthGroupAccess::where(['uid' => $userId])->column('group_id');
-        $warehouseArr = config('workorder.warehouse_department_rule');
-        $checkIsWarehouse = array_intersect($userGroupAccess, $warehouseArr);
-        if (!empty($checkIsWarehouse)) {
-            $this->view->assign('work_type', 2);
-            $this->assignconfig('work_type', 2);
-            $this->view->assign('problem_type', config('workorder.warehouse_problem_type')); //仓库问题类型       
+        if ($ids) {
+            $row = $this->model->get($ids);
+            //求出订单sku列表,传输到页面当中
+            $skus = $this->model->getSkuList($row->work_platform, $row->platform_order);
+            if (is_array($skus['sku'])) {
+                $arrSkus = [];
+                foreach ($skus['sku'] as $val) {
+                    $arrSkus[$val] = $val;
+                }
+                //查询用户id对应姓名
+                $admin = new \app\admin\model\Admin();
+                $users = $admin->where('status', 'normal')->column('nickname', 'id');
+                $this->assignconfig('users', $users); //返回用户            
+                $this->view->assign('skus', $arrSkus);
+            }
+
+            if (1 == $row->work_type) { //判断工单类型，客服工单
+                $this->view->assign('work_type', 1);
+                $this->assignconfig('work_type', 1);
+                $this->view->assign('problem_type', config('workorder.customer_problem_type')); //客服问题类型          
+            } else { //仓库工单
+                $this->view->assign('work_type', 2);
+                $this->assignconfig('work_type', 2);
+                $this->view->assign('problem_type', config('workorder.warehouse_problem_type')); //仓库问题类型
+            }
+
+            //把问题类型传递到js页面
+            if (!empty($row->problem_type_id)) {
+                $this->assignconfig('problem_type_id', $row->problem_type_id);
+            }
+            $this->assignconfig('work_type', $row->work_type);
+            //求出工单选择的措施传递到js页面
+            $measureList = WorkOrderMeasure::workMeasureList($row->id);
+            // dump(!empty($measureList));
+            // exit;
+            if (!empty($measureList)) {
+                $this->assignconfig('measureList', $measureList);
+            }
+            $this->view->assign('row', $row);
         } else {
-            $this->view->assign('work_type', 1);
-            $this->assignconfig('work_type', 1);
-            $this->view->assign('problem_type', config('workorder.customer_problem_type')); //客服问题类型
+            //获取用户ID和所在权限组
+            $userId = session('admin.id');
+            $userGroupAccess = AuthGroupAccess::where(['uid' => $userId])->column('group_id');
+            $warehouseArr = config('workorder.warehouse_department_rule');
+            $checkIsWarehouse = array_intersect($userGroupAccess, $warehouseArr);
+            if (!empty($checkIsWarehouse)) {
+                $this->view->assign('work_type', 2);
+                $this->assignconfig('work_type', 2);
+                $this->view->assign('problem_type', config('workorder.warehouse_problem_type')); //仓库问题类型   
+            } else {
+                $this->view->assign('work_type', 1);
+                $this->assignconfig('work_type', 1);
+                $this->view->assign('problem_type', config('workorder.customer_problem_type')); //客服问题类型
+            }
         }
+
+
 
         //查询用户id对应姓名
         $admin = new \app\admin\model\Admin();
@@ -650,8 +697,8 @@ class WorkOrderList extends Backend
             $key = $siteType . '_getlens';
             $data = Cache::get($key);
             if (!$data) {
-                $data = $this->model->httpRequest($siteType,'magic/product/lensData');
-                Cache::set($key, $data, 3600*24);
+                $data = $this->model->httpRequest($siteType, 'magic/product/lensData');
+                Cache::set($key, $data, 3600 * 24);
             }
             if ($color_id) {
                 $lensType = $data['lens_color_list'] ?: [];
@@ -770,7 +817,7 @@ class WorkOrderList extends Backend
      * @param [type] $ids
      * @return void
      */
-    public function detail($ids=null)
+    public function detail($ids = null)
     {
         $row = $this->model->get($ids);
         if (!$row) {
@@ -813,6 +860,108 @@ class WorkOrderList extends Backend
             $this->assignconfig('problem_type_id', $row->problem_type_id);
         }
 
+        //求出工单选择的措施传递到js页面
+        $measureList = WorkOrderMeasure::workMeasureList($row->id);
+        // dump(!empty($measureList));
+        // exit;
+        if (!empty($measureList)) {
+            $this->assignconfig('measureList', $measureList);
+        }
+        return $this->view->fetch();
+    }
+
+    /**
+     * 处理任务
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/04/16 16:29:30 
+     * @param [type] $ids
+     * @return void
+     */
+    public function process($ids = null)
+    {
+        $row = $this->model->get($ids);
+        if (!$row) {
+            $this->error(__('No Results were found'));
+        }
+        $recept_person_id = explode(',', $row['recept_person_id']);
+        // if (!in_array(session('admin.id'), $recept_person_id) && $row['after_user_id'] != session('admin.id')) {
+        //     return $this->error(__('对应承接人才能处理任务'));
+        // }
+        $adminIds = $this->getDataLimitAdminIds();
+        if (is_array($adminIds)) {
+            if (!in_array($row[$this->dataLimitField], $adminIds)) {
+                $this->error(__('You have no permission'));
+            }
+        }
+
+        if ($this->request->isPost()) {
+            $params = $this->request->post("row/a");
+            if ($params) {
+                if ($params['order_sku']) {
+                    $params['order_sku'] = implode(',', $params['order_sku']);
+                }
+                $params = $this->preExcludeFields($params);
+                $result = false;
+                Db::startTrans();
+                try {
+                    //是否采用模型验证
+                    if ($this->modelValidate) {
+                        $name = str_replace("\\model\\", "\\validate\\", get_class($this->model));
+                        $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.edit' : $name) : $this->modelValidate;
+                        $row->validateFailException(true)->validate($validate);
+                    }
+                    $result = $row->allowField(true)->save($params);
+                    Db::commit();
+                } catch (ValidateException $e) {
+                    Db::rollback();
+                    $this->error($e->getMessage());
+                } catch (PDOException $e) {
+                    Db::rollback();
+                    $this->error($e->getMessage());
+                } catch (Exception $e) {
+                    Db::rollback();
+                    $this->error($e->getMessage());
+                }
+                if ($result !== false) {
+                    $this->success();
+                } else {
+                    $this->error(__('No rows were updated'));
+                }
+            }
+            $this->error(__('Parameter %s can not be empty', ''));
+        }
+
+        $this->view->assign("row", $row);
+        if (1 == $row->work_type) { //判断工单类型，客服工单
+            $this->view->assign('work_type', 1);
+            $this->assignconfig('work_type', 1);
+            $this->view->assign('problem_type', config('workorder.customer_problem_type')); //客服问题类型          
+        } else { //仓库工单
+            $this->view->assign('work_type', 2);
+            $this->assignconfig('work_type', 2);
+            $this->view->assign('problem_type', config('workorder.warehouse_problem_type')); //仓库问题类型
+        }
+        //求出订单sku列表,传输到页面当中
+        $skus = $this->model->getSkuList($row->work_platform, $row->platform_order);
+        if (is_array($skus['sku'])) {
+            $arrSkus = [];
+            foreach ($skus['sku'] as $val) {
+                $arrSkus[$val] = $val;
+            }
+            //查询用户id对应姓名
+            $admin = new \app\admin\model\Admin();
+            $users = $admin->where('status', 'normal')->column('nickname', 'id');
+            $this->assignconfig('users', $users); //返回用户            
+            $this->view->assign('skus', $arrSkus);
+        }
+
+        //把问题类型传递到js页面
+        if (!empty($row->problem_type_id)) {
+            $this->assignconfig('problem_type_id', $row->problem_type_id);
+        }
+        $this->assignconfig('work_type', $row->work_type);
         //求出工单选择的措施传递到js页面
         $measureList = WorkOrderMeasure::workMeasureList($row->id);
         // dump(!empty($measureList));

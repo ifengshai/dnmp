@@ -145,7 +145,7 @@ class WorkOrderList extends Model
         $key = $siteType . '_getlens';
         $data = Cache::get($key);
         if (!$data) {
-            $data = $this->httpRequest($siteType,'magic/product/lensData');
+            $data = $this->httpRequest($siteType, 'magic/product/lensData');
             Cache::set($key, $data, 3600 * 24);
         }
 
@@ -174,7 +174,7 @@ class WorkOrderList extends Model
      * @param $siteType
      * @return bool
      */
-    public function httpRequest($siteType,$pathinfo,$params = [],$method = 'GET')
+    public function httpRequest($siteType, $pathinfo, $params = [], $method = 'GET')
     {
         switch ($siteType) {
             case 1:
@@ -195,20 +195,19 @@ class WorkOrderList extends Model
         }
         //echo json_encode($params);die;
         $url = $url . $pathinfo;
-        try{
-            if($method == 'GET'){
+        try {
+            if ($method == 'GET') {
                 $res = json_decode(Http::get($url, []), true);
-            }else{
+            } else {
                 $res = json_decode(Http::post($url, $params), true);
             }
-            if($res['code'] == 200){
+            if ($res['code'] == 200) {
                 return $res['data'];
             }
             exception($res['msg']);
-        }catch (Exception $e){
+        } catch (Exception $e) {
             exception($e->getMessage());
         }
-
     }
 
     /**
@@ -326,7 +325,7 @@ class WorkOrderList extends Model
         $key = $siteType . '_getlens';
         $data = Cache::get($key);
         if (!$data) {
-            $data = $this->httpRequest($siteType,'magic/product/lensData');
+            $data = $this->httpRequest($siteType, 'magic/product/lensData');
             Cache::set($key, $data, 3600 * 24);
         }
         $prescription = $data['lens_list'];
@@ -379,11 +378,11 @@ class WorkOrderList extends Model
      * @throws \think\db\exception\ModelNotFoundException
      * @throws \think\exception\DbException
      */
-    public function createOrder($siteType,$work_id)
+    public function createOrder($siteType, $work_id)
     {
         $changeSkus = WorkOrderChangeSku::where(['work_id' => $work_id, 'change_type' => 5])->select();
         $postData = $postDataCommon = [];
-        foreach($changeSkus as $key =>  $changeSku){
+        foreach ($changeSkus as $key =>  $changeSku) {
             $address = unserialize($changeSku['userinfo_option']);
             $prescriptions = unserialize($changeSku['prescription_option']);
             $postDataCommon = [
@@ -401,11 +400,11 @@ class WorkOrderList extends Model
             ];
             $pdCheck = $pd = $prismcheck = '';
             $pd_r = $pd_l = '';
-            if($changeSku['pd_r'] && $changeSku['pd_l']){
+            if ($changeSku['pd_r'] && $changeSku['pd_l']) {
                 $pdCheck = 'on';
                 $pd_r = $changeSku['pd_r'];
                 $pd_l = $changeSku['pd_l'];
-            }else{
+            } else {
                 $pd = $changeSku['pd_r'] ?: $changeSku['pd_l'];
             }
             $od_pv = $changeSku['od_pv'];
@@ -416,7 +415,7 @@ class WorkOrderList extends Model
             $os_pv_r = $changeSku['os_pv_r'];
             $od_bd_r = $changeSku['od_bd_r'];
             $os_bd_r = $changeSku['os_bd_r'];
-            if($od_pv || $os_pv || $od_bd || $os_bd || $od_pv_r || $os_pv_r || $od_bd_r || $os_bd_r ){
+            if ($od_pv || $os_pv || $od_bd || $os_bd || $od_pv_r || $os_pv_r || $od_bd_r || $os_bd_r) {
                 $prismcheck = 'on';
             }
             $postData['product'][$key] = [
@@ -454,13 +453,13 @@ class WorkOrderList extends Model
                 'color_name' => $prescriptions['color_name'],
             ];
         }
-        $postData = array_merge($postData,$postDataCommon);
-        try{
-            $res = $this->httpRequest($siteType,'magic/order/createOrder',$postData,'POST');
+        $postData = array_merge($postData, $postDataCommon);
+        try {
+            $res = $this->httpRequest($siteType, 'magic/order/createOrder', $postData, 'POST');
             $increment_id = $res['increment_id'];
             //replacement_order添加补发的订单号
-            WorkOrderChangeSku::where(['work_id' => $work_id, 'change_type' => 5])->setField('replacement_order',$increment_id);
-        }catch (Exception $e){
+            WorkOrderChangeSku::where(['work_id' => $work_id, 'change_type' => 5])->setField('replacement_order', $increment_id);
+        } catch (Exception $e) {
             exception($e->getMessage());
         }
     }
@@ -480,10 +479,10 @@ class WorkOrderList extends Model
             'point' => $work->integral,
             'content' => '测试'
         ];
-        try{
-            $res = $this->httpRequest($work['work_platform'],'magic/promotion/bonusPoints',$postData,'POST');
+        try {
+            $res = $this->httpRequest($work['work_platform'], 'magic/promotion/bonusPoints', $postData, 'POST');
             return true;
-        }catch (Exception $e){
+        } catch (Exception $e) {
             exception($e->getMessage());
         }
     }
