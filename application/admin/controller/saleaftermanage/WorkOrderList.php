@@ -234,7 +234,7 @@ class WorkOrderList extends Backend
                                 $appointList[$key]['measure_id'] = $v;
                                 //如果没有承接人 默认为创建人
                                 if ($val == 'undefined') {
-                                    $appointList[$key]['recept_group_id'] = array_search(session('admin.id'), config('workorder.kefumanage'));
+                                    $appointList[$key]['recept_group_id'] = $this->assign_user_id;
                                     $appointList[$key]['recept_person_id'] = session('admin.id');
                                     $appointList[$key]['recept_person'] = session('admin.nickname');
                                 } else {
