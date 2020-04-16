@@ -250,9 +250,6 @@ class WorkOrderList extends Backend
                     if (false === $result) {
                         throw new Exception("添加失败！！");
                     }
-                    //修改镜架操作
-                     //$this->model->changeLens($params, $this->model->getLastInsID());
-
                     //循环插入措施
                     if (count(array_filter($params['measure_choose_id'])) > 0) {
 
@@ -297,6 +294,8 @@ class WorkOrderList extends Backend
                             if (false === $receptRes) {
                                 throw new Exception("添加失败！！");
                             }
+                            //更改镜片，补发，赠品
+                            $this->model->changeLens($params, $this->model->getLastInsID());
                         }
                     }
 
@@ -750,5 +749,11 @@ class WorkOrderList extends Backend
         } else {
             return $this->error('404 Not Found');
         }
+    }
+    public function test()
+    {
+        //$this->model->presentCoupon(235);
+        $this->model->presentIntegral(233);
+        //$this->model->createOrder(1,224);
     }
 }
