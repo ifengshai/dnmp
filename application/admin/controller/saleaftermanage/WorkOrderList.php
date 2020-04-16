@@ -262,7 +262,7 @@ class WorkOrderList extends Backend
                         throw new Exception("添加失败！！");
                     }
                     //修改镜架操作
-                    // $this->model->changeLens($params, $this->model->getLastInsID());
+                     //$this->model->changeLens($params, $this->model->getLastInsID());
 
                     //循环插入措施
                     if (count(array_filter($params['measure_choose_id'])) > 0) {
@@ -517,7 +517,6 @@ class WorkOrderList extends Backend
             $admin = new \app\admin\model\Admin();
             $users = $admin->where('status', 'normal')->column('nickname', 'id');
             $this->assignconfig('users', $users); //返回用户            
-            return $this->view->fetch();
             $this->view->assign('skus', $arrSkus);
         }
         //把问题类型传递到js页面
@@ -651,8 +650,8 @@ class WorkOrderList extends Backend
             $key = $siteType . '_getlens';
             $data = Cache::get($key);
             if (!$data) {
-                $data = $this->model->getLensData($siteType);
-                Cache::set($key, $data, 3600 * 24);
+                $data = $this->model->httpRequest($siteType,'magic/product/lensData');
+                Cache::set($key, $data, 3600*24);
             }
             if ($color_id) {
                 $lensType = $data['lens_color_list'] ?: [];
@@ -761,5 +760,66 @@ class WorkOrderList extends Backend
         } else {
             return $this->error('404 Not Found');
         }
+    }
+    /**
+     * 工单详情
+     *
+     * @Description
+     * @author lsw
+     * @since 2020/04/16 15:33:36 
+     * @param [type] $ids
+     * @return void
+     */
+    public function detail($ids=null)
+    {
+        $row = $this->model->get($ids);
+        if (!$row) {
+            $this->error(__('No Results were found'));
+        }
+        if ($row['create_user_id'] != session('admin.id')) {
+            return $this->error(__('非本人创建不能编辑'));
+        }
+        $adminIds = $this->getDataLimitAdminIds();
+        if (is_array($adminIds)) {
+            if (!in_array($row[$this->dataLimitField], $adminIds)) {
+                $this->error(__('You have no permission'));
+            }
+        }
+        $this->view->assign("row", $row);
+        if (1 == $row->work_type) { //判断工单类型，客服工单
+            $this->view->assign('work_type', 1);
+            $this->assignconfig('work_type', 1);
+            $this->view->assign('problem_type', config('workorder.customer_problem_type')); //客服问题类型          
+        } else { //仓库工单
+            $this->view->assign('work_type', 2);
+            $this->assignconfig('work_type', 2);
+            $this->view->assign('problem_type', config('workorder.warehouse_problem_type')); //仓库问题类型
+        }
+        //求出订单sku列表,传输到页面当中
+        $skus = $this->model->getSkuList($row->work_platform, $row->platform_order);
+        if (is_array($skus['sku'])) {
+            $arrSkus = [];
+            foreach ($skus['sku'] as $val) {
+                $arrSkus[$val] = $val;
+            }
+            //查询用户id对应姓名
+            $admin = new \app\admin\model\Admin();
+            $users = $admin->where('status', 'normal')->column('nickname', 'id');
+            $this->assignconfig('users', $users); //返回用户            
+            $this->view->assign('skus', $arrSkus);
+        }
+        //把问题类型传递到js页面
+        if (!empty($row->problem_type_id)) {
+            $this->assignconfig('problem_type_id', $row->problem_type_id);
+        }
+
+        //求出工单选择的措施传递到js页面
+        $measureList = WorkOrderMeasure::workMeasureList($row->id);
+        // dump(!empty($measureList));
+        // exit;
+        if (!empty($measureList)) {
+            $this->assignconfig('measureList', $measureList);
+        }
+        return $this->view->fetch();
     }
 }
