@@ -66,15 +66,16 @@ class WorkOrderList extends Model
             ->where('increment_id', $increment_id)
             ->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')
             ->column('sku');
-        $orderInfo = $this->model->alias('a')->where('increment_id',$increment_id)
-        ->join(['sales_flat_order_payment' => 'c'],'a.entity_id=c.parent_id')
-        ->field('a.base_currency_code,c.method')->find(); 
-        if(!$sku && !$orderInfo){
+        $orderInfo = $this->model->alias('a')->where('increment_id', $increment_id)
+            ->join(['sales_flat_order_payment' => 'c'], 'a.entity_id=c.parent_id')
+            ->field('a.base_currency_code,c.method,a.customer_email')->find();
+        if (!$sku && !$orderInfo) {
             return [];
         }
         $result['sku'] = array_unique($sku);
         $result['base_currency_code'] = $orderInfo['base_currency_code'];
         $result['method']             = $orderInfo['method'];
+        $result['customer_email']     = $orderInfo['customer_email'];
         return $result ? $result : [];
     }
 
@@ -120,10 +121,10 @@ class WorkOrderList extends Model
             ->order('b.entity_id desc')
             ->select();
         $showPrescriptions = [];
-        foreach($prescriptions as $prescription){
+        foreach ($prescriptions as $prescription) {
             $showPrescriptions[] = $prescription['prescription_type'] . '--' . $prescription['index_type'];
         }
-        return $address ? compact('address','prescriptions','showPrescriptions') : [];
+        return $address ? compact('address', 'prescriptions', 'showPrescriptions') : [];
     }
 
     /**
@@ -138,27 +139,29 @@ class WorkOrderList extends Model
         $url = '';
         $key = $siteType . '_getlens';
         $data = Cache::get($key);
-        if(!$data){
+        if (!$data) {
             $data = $this->getLensData($siteType);
-            Cache::set($key, $data, 3600*24);
+            Cache::set($key, $data, 3600 * 24);
         }
 
         $prescription = $prescriptions = $coating_type = '';
 
         $prescription = $data['lens_list'];
+        $colorList = $data['color_list'];
+        $lensColorList = $data['lens_color_list'];
         $coating_type = $data['coating_list'];
-        if($type == 1){
-            foreach($showPrescriptions as $key => $val){
+        if ($type == 1) {
+            foreach ($showPrescriptions as $key => $val) {
                 $prescriptions .= "<option value='{$key}'>{$val}</option>";
             }
             //拼接html页面
-            $html = (new \think\View())->fetch('saleaftermanage/work_order_list/ajax_reissue_add',compact('prescription','coating_type','prescriptions','type'));
+            $html = (new \think\View())->fetch('saleaftermanage/work_order_list/ajax_reissue_add',compact('prescription','coating_type','prescriptions','colorList','type'));
         }elseif($type == 2){
-            $html = (new \think\View())->fetch('saleaftermanage/work_order_list/ajax_reissue_add',compact('showPrescriptions','prescription','coating_type','prescriptions','type'));
+            $html = (new \think\View())->fetch('saleaftermanage/work_order_list/ajax_reissue_add',compact('showPrescriptions','prescription','coating_type','prescriptions','colorList','lensColorList','type'));
         }else{
-            $html = (new \think\View())->fetch('saleaftermanage/work_order_list/ajax_reissue_add',compact('showPrescriptions','prescription','coating_type','prescriptions','type'));
+            $html = (new \think\View())->fetch('saleaftermanage/work_order_list/ajax_reissue_add',compact('showPrescriptions','prescription','coating_type','prescriptions','colorList','type'));
         }
-        return ['data' => $data,'html' => $html];
+        return ['data' => $data, 'html' => $html];
     }
 
     /**
@@ -186,7 +189,7 @@ class WorkOrderList extends Model
                 break;
         }
         $url = $url . 'magic/product/lensData';
-        $res = json_decode(Http::get($url, []),true);
+        $res = json_decode(Http::get($url, []), true);
         return $res['data'];
     }
 
@@ -196,42 +199,43 @@ class WorkOrderList extends Model
      * @param $work_id
      * @throws \Exception
      */
-    public function changeLens($params,$work_id)
+    public function changeLens($params, $work_id)
     {
         Db::startTrans();
-        $measure = 2;
-        try{
+        $measure = 5;
+        try {
             //如果是更改镜片
-            if($measure == 1){
+            if ($measure == 1) {
                 $changeLens = $params['change_lens'];
                 $change_type = 2;
-            }elseif($measure == 2){ //赠品
+            } elseif ($measure == 2) { //赠品
                 $changeLens = $params['gift'];
                 $change_type = 4;
-            }elseif($measure == 3){ //补发
+            } elseif ($measure == 3) { //补发
                 $changeLens = $params['original_sku'];
                 $change_type = 5;
-                if(!$params['address']['shipping_type']){
+                if (!$params['address']['shipping_type']) {
                     exception('请选择运输方式');
                 }
             }
 
             $original_skus = $changeLens['original_sku'];
-            if(!is_array($original_skus)){
+            if (!is_array($original_skus)) {
                 exception('sss');
             }
             //循环插入数据
             $changeSkuIds = [];
             $changeSkuData = [];
-            foreach($original_skus as $key => $val){
-                if(!$val){
+            foreach ($original_skus as $key => $val) {
+                if (!$val) {
                     exception('sku不能为空');
                 }
                 $type = $params['work_platform'];
                 $lensId = $changeLens['lens_type'][$key];
+                $colorId = $changeLens['color_id'][$key];
                 $coatingId = $changeLens['coating_type'][$key];
                 $recipe_type = $changeLens['recipe_type'][$key];
-                $lensCoatName = $this->getLensCoatingName($type,$lensId,$coatingId,$recipe_type);
+                $lensCoatName = $this->getLensCoatingName($type,$lensId,$coatingId,$colorId,$recipe_type);
                 $data = [
                     'work_id' => $work_id,
                     'increment_id' => $params['platform_order'],
@@ -268,55 +272,25 @@ class WorkOrderList extends Model
                     'create_time' => date('Y-m-d H:i:s')
                 ];
                 //补发
-                if($change_type == 5){
+                if ($change_type == 5) {
                     $data['email'] = $params['address']['email'];
                     $data['userinfo_option'] = serialize($params['address']);
-                    $changeSkuData[] = $data;
-                }
-                $res = WorkOrderChangeSku::create($data);
-                $changeSkuIds[] = $res->id;
-            }
-            //补发提交数据获取补发订单的id
-            if($change_type == 5){ //获取data值
-                $postData = [
-                    'currency_code' => $params['address']['currenccy_code'],
-                    'country' => $params['address']['country_id'],
-                    'shipping_type' => $params['address']['shipping_type'],
-                    'telephone' => $params['address']['telephone'],
-                    'email' => $params['address']['email'],
-                    'first_name' => $params['address']['firstname'],
-                    'last_name' => $params['address']['lastname'],
-                    'postcode' => $params['address']['postcode'],
-                    'city' => $params['address']['city'],
-                    'street' => $params['address']['street'],
-                    'region_code' => $params['address']['region_id'],
-                ];
-                //后续写补单接口
-                foreach($changeSkuData as  $change){
-                    $postData['product'][] = [
-                        'sku' => $change['original_sku'],
-                        'sku' => $change['original_sku'],
-                        'sku' => $change['original_sku'],
-                        'sku' => $change['original_sku'],
-                        'sku' => $change['original_sku'],
-                        'sku' => $change['original_sku'],
-                        'sku' => $change['original_sku'],
-                        'sku' => $change['original_sku'],
-                        'sku' => $change['original_sku'],
-                        'sku' => $change['original_sku'],
-                        'sku' => $change['original_sku'],
-                        'sku' => $change['original_sku'],
-                        'sku' => $change['original_sku'],
-                        'sku' => $change['original_sku'],
-                        'sku' => $change['original_sku'],
-                        'sku' => $change['original_sku'],
-                        'sku' => $change['original_sku'],
-                        'sku' => $change['original_sku'],
+                    $prescriptionOption = [
+                        'prescription_type' => $recipe_type,
+                        'lens_id' => $lensId,
+                        'lens_name' => $lensCoatName['lensName'],
+                        'lens_type' => $lensCoatName['lensType'],
+                        'coating_id' => $coatingId,
+                        'coating_name' => $lensCoatName['coatingName'],
+                        'color_id' => $lensCoatName['colorId'],
+                        'color_name' => $lensCoatName['colorName'],
                     ];
+                    $data['prescription_option'] = serialize($prescriptionOption);
                 }
+                WorkOrderChangeSku::create($data);
             }
             Db::commit();
-        }catch (\Exception $e){
+        } catch (\Exception $e) {
             Db::rollback();
             exception($e->getMessage());
         }
@@ -330,31 +304,53 @@ class WorkOrderList extends Model
      * @param $prescription_type
      * @return array
      */
-    public function getLensCoatingName($siteType,$lens_id,$coating_id,$prescription_type)
+    public function getLensCoatingName($siteType,$lens_id,$coating_id,$colorId,$prescription_type)
     {
         $key = $siteType . '_getlens';
         $data = Cache::get($key);
-        if(!$data){
+        if (!$data) {
             $data = $this->getLensData($siteType);
-            Cache::set($key, $data, 3600*24);
+            Cache::set($key, $data, 3600 * 24);
         }
         $prescription = $data['lens_list'];
         $coatingLists = $data['coating_list'];
+        $colorList = $data['color_list'];
+        $lensColorList = $data['lens_color_list'];
         //返回lensName
         $lens = $prescription[$prescription_type] ?? [];
-        $lensName = $coatingName = '';
-        foreach($lens as $len){
-            if($len['lens_id'] == $lens_id){
-                $lensName = $len['lens_data_name'];
-                break;
+        $lensName = $coatingName = $colorName = $lensType = '';
+        if(!$colorId){
+            foreach ($lens as $len) {
+                if ($len['lens_id'] == $lens_id) {
+                    $lensName = $len['lens_data_name'];
+                    $lensType = $len['lens_data_index'];
+                    break;
+                }
+            }
+        }else{
+            //colorname
+            foreach($colorList as $key => $val){
+                if($val['id'] == $colorId){
+                    $colorName = $val['name'];
+                    break;
+                }
+            }
+            //lensName
+            foreach($lensColorList as $val){
+                if($val['lens_id'] == $lens_id){
+                    $lensName = $val['lens_data_name']."({$colorName})";
+                    $lensType = $val['lens_data_index'];
+                    break;
+                }
             }
         }
-        foreach($coatingLists as $coatingList){
-            if($coatingList['id'] == $coating_id){
+
+        foreach ($coatingLists as $coatingList) {
+            if ($coatingList['id'] == $coating_id) {
                 $coatingName = $coatingList['name'];
                 break;
             }
         }
-        return ['lensName' => $lensName,'coatingName' => $coatingName];
+        return ['lensName' => $lensName,'lensType' => $lensType,'colorName' => $colorName,'coatingName' => $coatingName];
     }
 }

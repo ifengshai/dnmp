@@ -135,6 +135,7 @@ class ZeeloolPrescriptionDetailHelper{
 			$final_params['coatiing_price'] = $product_options['info_buyRequest']['tmplens']['coatiing_price'];
 			//添加color-name 参数	
 			$final_params['color_name']  = isset($product_options['info_buyRequest']['tmplens']['color_name']) ? $product_options['info_buyRequest']['tmplens']['color_name'] : '';
+            $final_params['color_id']  = isset($product_options['info_buyRequest']['tmplens']['color_id']) ? $product_options['info_buyRequest']['tmplens']['color_id'] : '';
 
 			$items[$item_key]['frame_regural_price'] = $final_params['frame_regural_price'] = $product_options['info_buyRequest']['tmplens']['frame_regural_price'];
 			$items[$item_key]['is_special_price'] = $final_params['is_special_price'] = $product_options['info_buyRequest']['tmplens']['is_special_price'];
@@ -150,6 +151,7 @@ class ZeeloolPrescriptionDetailHelper{
             $items[$item_key]['index_type'] = $final_params['index_type'] = $product_options['info_buyRequest']['tmplens']['index_type'];
             $items[$item_key]['coating_id'] = $final_params['coating_id'] = $product_options['info_buyRequest']['tmplens']['coating_id'];
             $items[$item_key]['coatiing_name'] = $final_params['coatiing_name'] = $product_options['info_buyRequest']['tmplens']['coatiing_name'];
+            $items[$item_key]['color_id'] = $final_params['color_id'] ?: '';
 
 			$prescription_params = $product_options['info_buyRequest']['tmplens']['prescription'];
             // dump($prescription_params);
