@@ -31,28 +31,405 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         { field: 'work_platform', title: __('work_platform'), custom: { 1: 'blue', 2: 'danger', 3: 'orange' }, searchList: { 1: 'Zeelool', 2: 'Voogueme', 3: 'Nihao' }, formatter: Table.api.formatter.status },
                         { field: 'work_type_str', title: __('Work_type') },
                         { field: 'platform_order', title: __('Platform_order') },
-                        { field: 'order_sku', title: __('Order_sku') },
+                        /*{ field: 'order_sku', title: __('Order_sku') },*/
+
+                        {
+                            field: 'order_sku',
+                            title: __('Order_sku'),
+                            operate: false,
+                            formatter: function (value, rows) {
+                                var all_user_name = '';
+                                if(value){
+                                    for(i = 0,len = rows.order_sku_arr.length; i < len; i++){
+                                        all_user_name += '<div class="step_recept"><b class="recept">'+ rows.order_sku_arr[i] + '</b></div>';
+                                    }
+                                }else{
+                                    all_user_name = '-';
+                                }
+                                return all_user_name;
+                            },
+                        },
+
                         { field: 'work_level', title: __('Work_level'), custom: { 1: 'success', 2: 'orange', 3: 'danger' }, searchList: { 1: '低', 2: '中', 3: '高' }, formatter: Table.api.formatter.status },
                         { field: 'problem_type_content', title: __('Problem_type_content') },
-                        { field: 'create_user_name', title: __('create_user_name') },
                         { field: 'is_check', title: __('Is_check'), custom: { 0: 'black', 1: 'success'}, searchList: { 0: '否', 1: '是'}, formatter: Table.api.formatter.status },
 
-                        { field: 'assign_user_name', title: __('Assign_user_id') },
+                        /*{ field: 'create_user_name', title: __('create_user_name') },*/
+                        {
+                            field: 'create_user_name',
+                            title: __('about_user'),
+                            operate: false,
+                            formatter: function (value, rows) {
+                                var all_user_name = '';
+                                all_user_name += '<div class="step_recept"><b class="step">工单创建人：</b><b class="recept">'+ rows.create_user_name + '</b></div>';
+                                if(rows.is_check == 1){
+                                    all_user_name += '<div class="step_recept"><b class="step">直接审核人：</b><b class="recept">'+ rows.assign_user_name + '</b></div>';
+                                    if(rows.operation_user_id != 0){
+                                        all_user_name += '<div class="step_recept"><b class="step">实际审核人：</b><b class="recept">'+ rows.operation_user_name + '</b></div>';
+                                    }
 
-                        { field: 'operation_person', title: __('Operation_person') },
+                                }
 
+                                return all_user_name;
+                            },
+                        },
+                        {
+                            field: 'after_user_id',
+                            title: __('recept_user'),
+                            operate: false,
+                            formatter: function (value, rows) {
+                                var all_user_name = '';
 
-                        { field: 'shenhe_beizhu', title: __('deal_with') },
+                                if(rows.work_type == 2 && rows.is_after_deal_with == 0){
+                                    all_user_name += '<div class="step_recept"><b class="recept">'+ rows.after_user_name + '</b></div>';
+                                }else{
+                                    if(rows.step_num){
+                                        for(i = 0,len = rows.step_num.length; i < len; i++){
+                                            if(rows.step_num[i].recept_user == ''){
+                                                rows.step_num[i].recept_user = 'system';
+                                            }
+                                            all_user_name += '<div class="step_recept"><b class="step">'+rows.step_num[i].measure_content+'：</b><b class="recept">'+ rows.step_num[i].recept_user + '</b></div>';
+                                        }
+                                    }
+                                }
+                                return all_user_name;
+                            },
+                        },
+                        {
+                            field: 'step_num',
+                            title: __('step_status'),
+                            operate: false,
+                            formatter: function (value, rows) {
+                                var all_user_name = '';
+                                if(value){
+                                    for(i = 0,len = value.length; i < len; i++){
+                                        if(value[i].operation_type == 0){
+                                            all_user_name += '<div class="step_recept"><b class="step">'+value[i].measure_content+'：</b><b class="recept">未处理</b></div>';
+                                        }
+                                        if(value[i].operation_type == 1){
+                                            all_user_name += '<div class="step_recept"><b class="step">'+value[i].measure_content+'：</b><b class="recept">处理成功</b></div>';
+                                        }
+                                        if(value[i].operation_type == 2){
+                                            all_user_name += '<div class="step_recept"><b class="step">'+value[i].measure_content+'：</b><b class="recept">处理失败</b></div>';
+                                        }
+                                    }
+                                }
+                                return all_user_name;
+                            },
+                        },
 
+                        { field: 'work_status', title: __('work_status'), custom: { 0: 'black', 1:'danger', 2: 'success',4: 'success' , 3: 'success',5: 'success',6: 'success', 7: 'success',8: 'success' }, searchList: { 0: '已取消', 1: '新建', 2: '待审核', 4: '审核拒绝',3: '待处理',5: '部分处理',6: '处理完成',7: '处理失败',8: '已撤销'}, formatter: Table.api.formatter.status },
+                        {
+                            field: 'create_time',
+                            title: __('time_str'),
+                            operate: false,
+                            formatter: function (value, rows) {
+                                var all_user_name = '';
+                                all_user_name += '<div class="step_recept"><b class="step">创建时间：</b><b class="recept">'+ value + '</b></div>';
+
+                                return all_user_name;
+                            },
+                        },
 
                        /* { field: 'create_time', title: __('Create_time'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime },
                         { field: 'check_time', title: __('Check_time'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime },
                         { field: 'complete_time', title: __('Complete_time'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime },*/
+                        {
+                            field: 'buttons',
+                            width: "120px",
+                            operate:false,
+                            title: __('操作'),
+                            table: table,
+                            events: Table.api.events.operate,
+                            buttons: [
+                                {
+                                    name: 'del',
+                                    text: __('删除'),
+                                    title: __('删除'),
+                                    classname: 'btn btn-xs btn-success btn-magic btn-ajax',
+                                    url: 'demand/it_web_demand/del',
+                                    success: function (data, ret) {
+                                        table.bootstrapTable('refresh');
+                                    },
+                                    callback: function (data) {
+                                    },
+                                    visible: function(row){
+                                        if(row.status == 1 || row.status == 2){
+                                            if(row.demand_del && row.is_entry_user_hidden == 1){//操作权限
+                                                return true;
+                                            }
+                                        }else{
+                                            return false;
+                                        }
+                                    }
+                                },
+                                {
+                                    name: 'edit',
+                                    text: __('编辑'),
+                                    title: __('编辑'),
+                                    classname: 'btn btn-xs btn-primary btn-dialog',
+                                    url: 'demand/it_web_demand/edit/demand_type/2',
+                                    success: function (data, ret) {
+                                        table.bootstrapTable('refresh');
+                                    },
+                                    callback: function (data) {
+                                    },
+                                    visible: function(row){
+                                        if(row.status == 1 || row.status == 2){
+                                            if(row.demand_del && row.is_entry_user_hidden == 1){//操作权限
+                                                return true;
+                                            }
+                                        }else{
+                                            return false;
+                                        }
+                                    }
+                                },
+                                {
+                                    name: 'test_distribution',
+                                    text: __('测试确认'),
+                                    title: __('测试确认'),
+                                    classname: 'btn btn-xs btn-primary btn-dialog',
+                                    url: 'demand/it_web_demand/test_distribution/demand_type/2',
+                                    callback: function (data) {
+                                    },
+                                    visible: function(row){
+                                        if(row.status == 1){
+                                            if(row.demand_test_distribution){//操作权限
+                                                return true;
+                                            }
+                                        }else{
+                                            return false;
+                                        }
+                                    }
+                                },
+                                {
+                                    name: 'through_demand',
+                                    text: __('通过'),
+                                    title: __('通过'),
+                                    classname: 'btn btn-xs btn-success btn-magic btn-ajax',
+                                    icon: 'fa fa-magic',
+                                    url: 'demand/it_web_demand/through_demand',
+                                    success: function (data, ret) {
+                                        table.bootstrapTable('refresh');
+                                    },
+                                    error: function (data, ret) {
+                                        console.log(data, ret);
+                                        Layer.alert(ret.msg);
+                                        return false;
+                                    },
+                                    visible: function(row){
+                                        if(row.status == 2){
+                                            if(row.demand_through_demand){//操作权限
+                                                return true;
+                                            }
+                                        }else{
+                                            return false;
+                                        }
+                                    }
+                                },
+                                {
+                                    name: 'group_finish',
+                                    text: __('完成'),
+                                    title: __('完成'),
+                                    classname: 'btn btn-xs btn-primary btn-dialog',
+                                    url: 'demand/it_web_demand/group_finish/demand_type/2',
+                                    callback: function (data) {
+                                    },
+                                    visible: function(row){
+                                        if(row.status == 3){
+                                            if(row.demand_finish){//操作权限
+                                                if(row.web_designer_group == 0 && row.phper_group == 0 && row.app_group == 0){
+                                                    return false;
+                                                }else{
+                                                    return true;
+                                                }
+                                            }
+                                        }
+                                    }
+                                },
+                                {
+                                    name: 'test_record_bug',
+                                    text: __('记录问题'),
+                                    title: __('记录问题'),
+                                    classname: 'btn btn-xs btn-primary btn-dialog',
+                                    url: 'demand/it_web_demand/test_record_bug',
+                                    callback: function (data) {
+                                    },
+                                    visible: function(row){
+                                        if(row.status == 4){
+                                            if(row.demand_test_record_bug && row.is_test_record_hidden == 1){//操作权限及显示权限
+                                                if(row.test_is_finish == 0){
+                                                    return true;
+                                                }else{
+                                                    return false;
+                                                }
+                                            }
+                                        }
+                                    }
+                                },
+                                {
+                                    name: 'test_group_finish',
+                                    text: __('通过测试'),
+                                    title: __('通过测试'),
+                                    classname: 'btn btn-xs btn-success btn-magic btn-ajax',
+                                    url: 'demand/it_web_demand/test_group_finish',
+                                    confirm: '请确定是否  <b>通过测试</b>',
+                                    success: function (data, ret) {
+                                        table.bootstrapTable('refresh');
+                                        //如果需要阻止成功提示，则必须使用return false;
+                                        //return false;
+                                    },
+                                    error: function (data, ret) {
+                                        console.log(data, ret);
+                                        Layer.alert(ret.msg);
+                                        return false;
+                                    },
+                                    visible: function(row){
+                                        if(row.status == 4){
+                                            if(row.demand_test_finish && row.is_test_finish_hidden == 1){//操作权限及显示权限
+                                                if(row.test_group == 1 && row.test_is_finish == 0){
+                                                    return true;
+                                                }else{
+                                                    return false;
+                                                }
+                                            }
+                                        }
 
+                                    }
+                                },
+                                {
+                                    name: 'add',
+                                    text: __('提出人确认'),
+                                    title: __('提出人确认'),
+                                    classname: 'btn btn-xs btn-success btn-magic btn-ajax',
+                                    icon: 'fa fa-magic',
+                                    url: 'demand/it_web_demand/add/is_user_confirm/1',
+                                    confirm: '确认本需求？',
+                                    success: function (data, ret) {
+                                        table.bootstrapTable('refresh');
+                                    },
+                                    error: function (data, ret) {
+                                        console.log(data, ret);
+                                        Layer.alert(ret.msg);
+                                        return false;
+                                    },
+                                    visible: function(row){
+                                        if(row.status == 4 || row.status == 5){
+                                            if(row.demand_add && row.is_entry_user_hidden == 1){//操作权限及显示权限
+                                                if(row.test_group == 1){
+                                                    if(row.entry_user_confirm == 0){
+                                                        return true;
+                                                    }
+                                                }
+                                            }
+                                        }else{
+                                            return false;
+                                        }
+                                    }
+                                },
+                                {
+                                    name: 'add_online',
+                                    text: __('上线'),
+                                    title: __('上线'),
+                                    classname: 'btn btn-xs btn-success btn-magic btn-ajax',
+                                    icon: 'fa fa-magic',
+                                    url: 'demand/it_web_demand/add_online',
+                                    confirm: '确定上线？',
+                                    success: function (data, ret) {
+                                        table.bootstrapTable('refresh');
+                                    },
+                                    error: function (data, ret) {
+                                        console.log(data, ret);
+                                        Layer.alert(ret.msg);
+                                        return false;
+                                    },
+                                    visible: function(row){
+                                        if(row.status == 5){
+                                            if(row.demand_add_online){//操作权限
+                                                if(row.test_group == 1){
+                                                    if(row.entry_user_confirm == 0){
+                                                        return false;
+                                                    }else{
+                                                        return true;
+                                                    }
+                                                }else{
+                                                    return true;
+                                                }
+                                            }
+                                        }else{
+                                            return false;
+                                        }
+                                    }
+                                },
+                                {
+                                    name: 'test_record_bug',
+                                    text: __('记录问题'),
+                                    title: __('记录回归测试问题'),
+                                    classname: 'btn btn-xs btn-primary btn-dialog',
+                                    url: 'demand/it_web_demand/test_record_bug',
+                                    callback: function (data) {
+                                    },
+                                    visible: function(row){
+                                        if(row.status == 6){
+                                            if(row.demand_test_record_bug && row.is_test_record_hidden == 1){//操作权限及显示权限
+                                                if(row.return_test_is_finish == 0){
+                                                    return true;
+                                                }else{
+                                                    return false;
+                                                }
+                                            }
+                                        }
+                                    }
+                                },
+                                {
+                                    name: 'test_group_finish',
+                                    text: __('通过测试'),
+                                    title: __('通过回归测试'),
+                                    classname: 'btn btn-xs btn-success btn-magic btn-ajax',
+                                    url: 'demand/it_web_demand/test_group_finish/is_all_test/1',
+                                    confirm: '请确定是否  <b>通过测试</b>',
+                                    success: function (data, ret) {
+                                        table.bootstrapTable('refresh');
+                                        //如果需要阻止成功提示，则必须使用return false;
+                                        //return false;
+                                    },
+                                    error: function (data, ret) {
+                                        console.log(data, ret);
+                                        Layer.alert(ret.msg);
+                                        return false;
+                                    },
+                                    visible: function(row){
+                                        if(row.status == 6){
+                                            if(row.demand_test_finish && row.is_test_finish_hidden == 1){//操作权限及显示权限
+                                                if(row.test_group == 1 && row.return_test_is_finish == 0){
+                                                    return true;
+                                                }else{
+                                                    return false;
+                                                }
+                                            }
+                                        }
 
-                        { field: 'work_status', title: __('Work_status') },
-
-                        { field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate },
+                                    }
+                                },
+                                {
+                                    name: 'detail_log',
+                                    text: __('详情记录'),
+                                    title: __('详情记录'),
+                                    classname: 'btn btn-xs btn-primary btn-dialog',
+                                    url: 'demand/it_web_demand/detail_log/demand_type/2',
+                                    callback: function (data) {
+                                    },
+                                    visible: function(row){
+                                        if(row.status == 7){
+                                            return true;
+                                        }else{
+                                            return false;
+                                        }
+                                    }
+                                },
+                            ],
+                            formatter: Table.api.formatter.buttons
+                        },
                     ]
                 ]
             });
@@ -355,6 +732,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 }, function (data, ret) {
                     $('#order_pay_currency').val(data.base_currency_code);
                     $('#order_pay_method').val(data.method);
+                    $('#customer_email').val(data.customer_email);
                     var shtml = '<option value="">请选择</option>';
                     for (var i in data.sku) {
                         shtml += '<option value="' + data.sku[i] + '">' + data.sku[i] + '</option>'
@@ -377,15 +755,15 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
             var lens_click_data;
             var gift_click_data;
             var prescriptions;
-            $(document).on('click','input[name="row[measure_choose_id][]"]',function(){
+            $(document).on('click', 'input[name="row[measure_choose_id][]"]', function () {
 
                 var value = $(this).val();
                 var check = $(this).prop('checked');
                 var increment_id = $('#c-platform_order').val();
-                if(increment_id){
+                if (increment_id) {
                     var site_type = $('#work_platform').val();
                     //补发
-                    if(value == 7 && check === true){
+                    if (value == 7 && check === true) {
                         //获取补发的信息
                         $.ajax({
                             type: "POST",
@@ -449,10 +827,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                 //追加
                                 lens_click_data = '<div class="margin-top:10px;">' + lens.html + '<div class="form-group-child4_del"><a href="javascript:;" style="width: 50%;" class="btn btn-danger btn-del-lens" title="删除"><i class="fa fa-trash"></i>删除</a></div></div>';
 
-
-
-
-
                                 $('.selectpicker ').selectpicker('refresh');
                                 Controller.api.bindevent();
                             }
@@ -460,7 +834,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     }
                     //更加镜架的更改
                     var question = $('input[name="row[problem_type_id]"]:checked').val();
-                    if(value == 1 && question == 2 && check === true){
+                    if (value == 1 && question == 2 && check === true) {
                         Backend.api.ajax({
                             url: 'saleaftermanage/work_order_list/ajaxGetChangeLens',
                             data: {
@@ -473,7 +847,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         });
                     }
                     //赠品
-                    if(value == 6 && check == true){
+                    if (value == 6 && check == true) {
                         Backend.api.ajax({
                             url: 'saleaftermanage/work_order_list/ajaxGetGiftLens',
                             data: {
@@ -487,7 +861,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                             $('.selectpicker ').selectpicker('refresh');
                         });
                     }
-                }else{
+                } else {
                     Toastr.error('请选选择订单号……');
                 }
 
@@ -573,10 +947,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 Controller.api.bindevent();
             });
             //根据prescription_type获取lens_type
-            $(document).on('change','select[name="row[replacement][recipe_type][]"],select[name="row[change_lens][recipe_type][]"],select[name="row[gift][recipe_type][]"]',function(){
-                 var sitetype = $('#work_platform').val();
-                 var prescription_type = $(this).val();
-                 var that = $(this);
+            $(document).on('change', 'select[name="row[replacement][recipe_type][]"],select[name="row[change_lens][recipe_type][]"],select[name="row[gift][recipe_type][]"]', function () {
+                var sitetype = $('#work_platform').val();
+                var prescription_type = $(this).val();
+                var that = $(this);
                 Backend.api.ajax({
                     url: 'saleaftermanage/work_order_list/ajaxGetLensType',
                     data: {
@@ -586,17 +960,17 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 }, function (data, ret) {
                     var prescription_div = that.parents('.prescription_type_step').next('div');
                     var lens_type;
-                    for(var i = 0;i<data.length;i++){
-                        lens_type += '<option value="'+data[i].lens_id+'">'+data[i].lens_data_name+'</option>';
+                    for (var i = 0; i < data.length; i++) {
+                        lens_type += '<option value="' + data[i].lens_id + '">' + data[i].lens_data_name + '</option>';
                     }
                     prescription_div.find('#lens_type').html(lens_type);
                     prescription_div.find('#color_type').val('');
                     $('.selectpicker ').selectpicker('refresh');
                 }, function (data, ret) {
-                        var prescription_div = that.parents('.prescription_type_step').next('div');
-                        prescription_div.find('#lens_type').html('');
-                        $('.selectpicker ').selectpicker('refresh');
-                    }
+                    var prescription_div = that.parents('.prescription_type_step').next('div');
+                    prescription_div.find('#lens_type').html('');
+                    $('.selectpicker ').selectpicker('refresh');
+                }
                 );
             });
             //根据color_type获取lens_type
@@ -654,8 +1028,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
         },
         edit: function () {
             Controller.api.bindevent();
-             //如果问题类型存在，显示问题类型和措施
-            if(Config.problem_type_id){ 
+            //如果问题类型存在，显示问题类型和措施
+            if (Config.problem_type_id) {
                 var id = Config.problem_type_id;
                 //id大于5 默认措施4
                 if (id > 5) {
@@ -677,7 +1051,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         $('#step' + steparr[j].step_id + '-appoint_group').val((steparr[j].appoint_group).join(','));
                     }
                 }
-                if(Config.measureList){
+                if (Config.measureList) {
                     var checkID = Config.measureList;//措施列表赋值给checkID
                     for (var m = 0; m < checkID.length; m++) {
                         var node = $('.step' + checkID[m]);
@@ -706,12 +1080,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 //判断取消订单的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end
             }
             //如果措施存在
-            if(Config.measureList){
+            if (Config.measureList) {
 
             }
             console.log(Config.problem_type_id);
             console.log(Config.measureList);
-            
+
         },
         //处理任务
         process: function () {
@@ -781,165 +1155,165 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
         api: {
             bindevent: function () {
                 Form.api.bindevent($("form[role=form]"));
-            //点击事件 #todo::需判断仓库或者客服
-            $(document).on('click', '.problem_type', function () {
-                //读取是谁添加的配置console.log(Config.work_type);
-                $('.step_type').attr('checked', false);
-                $('.step_type').parent().hide();
-                $('#appoint_group_users').html('');//切换问题类型时清空承接人
-                $('#recept_person_id').val('');//切换问题类型时清空隐藏域承接人id
-                $('#recept_person').val('');//切换问题类型时清空隐藏域承接人
-                $('.measure').hide();
-                $('#recept_group_id').val('');
-                if (2 == Config.work_type) { //如果是仓库人员添加的工单
-                    $('#step_id').hide();
-                    $('#recept_person_group').hide();
-                    $('#after_user_group').show();
-                    $('#after_user_id').val(Config.workorder.copy_group);
-                    $('#after_user').html(Config.users[Config.workorder.copy_group]);
-                } else { //如果是客服人员添加的工单
-
-                    var id = $(this).val();
-                    //id大于5 默认措施4
-                    if (id > 5) {
-                        var steparr = Config.workorder['step04'];
-                        for (var j = 0; j < steparr.length; j++) {
-                            $('#step' + steparr[j].step_id).parent().show();
-                            //读取对应措施配置
-                            $('#step' + steparr[j].step_id + '-is_check').val(steparr[j].is_check);
-                            $('#step' + steparr[j].step_id + '-appoint_group').val((steparr[j].appoint_group).join(','));
-                        }
-                    } else {
-                        var step = Config.workorder.customer_problem_group[id].step;
-                        var steparr = Config.workorder[step];
-                        console.log(steparr);
-                        for (var j = 0; j < steparr.length; j++) {
-                            $('#step' + steparr[j].step_id).parent().show();
-                            //读取对应措施配置
-                            $('#step' + steparr[j].step_id + '-is_check').val(steparr[j].is_check);
-                            $('#step' + steparr[j].step_id + '-appoint_group').val((steparr[j].appoint_group).join(','));
-                        }
-                    }
-                    var checkID = [];//定义一个空数组
-                    $("input[name='row[measure_choose_id][]']:checked").each(function (i) {
-                        checkID[i] = $(this).val();
-                    });
-                    for (var m = 0; m < checkID.length; m++) {
-                        var node = $('.step' + checkID[m]);
-                        if (node.is(':hidden')) {
-                            node.show();
-                        } else {
-                            node.hide();
-                        }
-                        var secondNode = $('.step' + id + '-' + checkID[m]);
-                        if (secondNode.is(':hidden')) {
-                            secondNode.show();
-                        } else {
-                            secondNode.hide();
-                        }
-                    }
-                    //判断更换镜框的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 start
-                    if (!$('.step1-1').is(':hidden')) {
-                        changeFrame()
-                    }
-                    //判断更换镜框的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end
-                    //判断取消订单的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 start
-                    if (!$('.step3').is(':hidden')) {
-                        cancelOrder();
-                    }
-                    //判断取消订单的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end                   
-                }
-            })
-
-            //根据措施类型显示隐藏
-            $(document).on('click', '.step_type', function () {
-                $("#input-hidden").html('');
-                var incrementId = $('#c-platform_order').val();
-                if (!incrementId) {
-                    Toastr.error('订单号不能为空');
-                    return false;
-                } else {
+                //点击事件 #todo::需判断仓库或者客服
+                $(document).on('click', '.problem_type', function () {
+                    //读取是谁添加的配置console.log(Config.work_type);
+                    $('.step_type').attr('checked', false);
+                    $('.step_type').parent().hide();
+                    $('#appoint_group_users').html('');//切换问题类型时清空承接人
+                    $('#recept_person_id').val('');//切换问题类型时清空隐藏域承接人id
+                    $('#recept_person').val('');//切换问题类型时清空隐藏域承接人
                     $('.measure').hide();
-                    var problem_type_id = $("input[name='row[problem_type_id]']:checked").val();
-                    var checkID = [];//定义一个空数组
-                    var appoint_group = '';
-                    var input_content = '';
-                    $("input[name='row[measure_choose_id][]']:checked").each(function (i) {
-                        checkID[i] = $(this).val();
+                    $('#recept_group_id').val('');
+                    if (2 == Config.work_type) { //如果是仓库人员添加的工单
+                        $('#step_id').hide();
+                        $('#recept_person_group').hide();
+                        $('#after_user_group').show();
+                        $('#after_user_id').val(Config.workorder.copy_group);
+                        $('#after_user').html(Config.users[Config.workorder.copy_group]);
+                    } else { //如果是客服人员添加的工单
+
                         var id = $(this).val();
-                        //获取承接组
-                        appoint_group += $('#step' + id + '-appoint_group').val() + ',';
-                        var group = $('#step' + id + '-appoint_group').val();
-                        var group_arr = group.split(',')
+                        //id大于5 默认措施4
+                        if (id > 5) {
+                            var steparr = Config.workorder['step04'];
+                            for (var j = 0; j < steparr.length; j++) {
+                                $('#step' + steparr[j].step_id).parent().show();
+                                //读取对应措施配置
+                                $('#step' + steparr[j].step_id + '-is_check').val(steparr[j].is_check);
+                                $('#step' + steparr[j].step_id + '-appoint_group').val((steparr[j].appoint_group).join(','));
+                            }
+                        } else {
+                            var step = Config.workorder.customer_problem_group[id].step;
+                            var steparr = Config.workorder[step];
+                            console.log(steparr);
+                            for (var j = 0; j < steparr.length; j++) {
+                                $('#step' + steparr[j].step_id).parent().show();
+                                //读取对应措施配置
+                                $('#step' + steparr[j].step_id + '-is_check').val(steparr[j].is_check);
+                                $('#step' + steparr[j].step_id + '-appoint_group').val((steparr[j].appoint_group).join(','));
+                            }
+                        }
+                        var checkID = [];//定义一个空数组
+                        $("input[name='row[measure_choose_id][]']:checked").each(function (i) {
+                            checkID[i] = $(this).val();
+                        });
+                        for (var m = 0; m < checkID.length; m++) {
+                            var node = $('.step' + checkID[m]);
+                            if (node.is(':hidden')) {
+                                node.show();
+                            } else {
+                                node.hide();
+                            }
+                            var secondNode = $('.step' + id + '-' + checkID[m]);
+                            if (secondNode.is(':hidden')) {
+                                secondNode.show();
+                            } else {
+                                secondNode.hide();
+                            }
+                        }
+                        //判断更换镜框的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 start
+                        if (!$('.step1-1').is(':hidden')) {
+                            changeFrame()
+                        }
+                        //判断更换镜框的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end
+                        //判断取消订单的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 start
+                        if (!$('.step3').is(':hidden')) {
+                            cancelOrder();
+                        }
+                        //判断取消订单的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end                   
+                    }
+                })
+
+                //根据措施类型显示隐藏
+                $(document).on('click', '.step_type', function () {
+                    $("#input-hidden").html('');
+                    var incrementId = $('#c-platform_order').val();
+                    if (!incrementId) {
+                        Toastr.error('订单号不能为空');
+                        return false;
+                    } else {
+                        $('.measure').hide();
+                        var problem_type_id = $("input[name='row[problem_type_id]']:checked").val();
+                        var checkID = [];//定义一个空数组
+                        var appoint_group = '';
+                        var input_content = '';
+                        $("input[name='row[measure_choose_id][]']:checked").each(function (i) {
+                            checkID[i] = $(this).val();
+                            var id = $(this).val();
+                            //获取承接组
+                            appoint_group += $('#step' + id + '-appoint_group').val() + ',';
+                            var group = $('#step' + id + '-appoint_group').val();
+                            var group_arr = group.split(',')
+                            var appoint_users = [];
+                            var appoint_val = [];
+                            for (var i = 0; i < group_arr.length; i++) {
+                                //循环根据承接组Key获取对应承接人id
+                                appoint_users.push(Config.workorder[group_arr[i]]);
+                                appoint_val[Config.workorder[group_arr[i]]] = group_arr[i];
+                            }
+
+                            //循环根据承接人id获取对应人名称
+                            for (var j = 0; j < appoint_users.length; j++) {
+                                input_content += '<input type="hidden" name="row[order_recept][appoint_group][' + id + '][]" value="' + appoint_val[appoint_users[j]] + '"/>';
+                                input_content += '<input type="hidden" name="row[order_recept][appoint_ids][' + id + '][]" value="' + appoint_users[j] + '"/>';
+                                input_content += '<input type="hidden" name="row[order_recept][appoint_users][' + id + '][]" value="' + Config.users[appoint_users[j]] + '"/>';
+                            }
+
+                            //获取是否需要审核
+                            if ($('#step' + id + '-is_check').val() > 0) {
+                                $('#is_check').val(1);
+                            }
+                        });
+                        //追加到元素之后
+                        $("#input-hidden").append(input_content);
+                        //一般措施
+                        for (var m = 0; m < checkID.length; m++) {
+                            var node = $('.step' + checkID[m]);
+                            if (node.is(':hidden')) {
+                                node.show();
+                            } else {
+                                node.hide();
+                            }
+                            //二级措施
+                            var secondNode = $('.step' + problem_type_id + '-' + checkID[m]);
+                            if (secondNode.is(':hidden')) {
+                                secondNode.show();
+                            } else {
+                                secondNode.hide();
+                            }
+                        }
+                        var id = $(this).val();
+                        var arr = array_filter(appoint_group.split(','));
+                        var username = [];
                         var appoint_users = [];
-                        var appoint_val = [];
-                        for (var i = 0; i < group_arr.length; i++) {
+                        //循环根据承接组Key获取对应承接人id
+                        for (var i = 0; i < arr.length - 1; i++) {
                             //循环根据承接组Key获取对应承接人id
-                            appoint_users.push(Config.workorder[group_arr[i]]);
-                            appoint_val[Config.workorder[group_arr[i]]] = group_arr[i];
+                            appoint_users.push(Config.workorder[arr[i]]);
                         }
 
                         //循环根据承接人id获取对应人名称
                         for (var j = 0; j < appoint_users.length; j++) {
-                            input_content += '<input type="hidden" name="row[order_recept][appoint_group][' + id + '][]" value="' + appoint_val[appoint_users[j]] + '"/>';
-                            input_content += '<input type="hidden" name="row[order_recept][appoint_ids][' + id + '][]" value="' + appoint_users[j] + '"/>';
-                            input_content += '<input type="hidden" name="row[order_recept][appoint_users][' + id + '][]" value="' + Config.users[appoint_users[j]] + '"/>';
+                            username.push(Config.users[appoint_users[j]]);
                         }
 
-                        //获取是否需要审核
-                        if ($('#step' + id + '-is_check').val() > 0) {
-                            $('#is_check').val(1);
-                        }
-                    });
-                    //追加到元素之后
-                    $("#input-hidden").append(input_content);
-                    //一般措施
-                    for (var m = 0; m < checkID.length; m++) {
-                        var node = $('.step' + checkID[m]);
-                        if (node.is(':hidden')) {
-                            node.show();
-                        } else {
-                            node.hide();
-                        }
-                        //二级措施
-                        var secondNode = $('.step' + problem_type_id + '-' + checkID[m]);
-                        if (secondNode.is(':hidden')) {
-                            secondNode.show();
-                        } else {
-                            secondNode.hide();
-                        }
-                    }
-                    var id = $(this).val();
-                    var arr = array_filter(appoint_group.split(','));
-                    var username = [];
-                    var appoint_users = [];
-                    //循环根据承接组Key获取对应承接人id
-                    for (var i = 0; i < arr.length - 1; i++) {
-                        //循环根据承接组Key获取对应承接人id
-                        appoint_users.push(Config.workorder[arr[i]]);
-                    }
+                        var users = array_filter(username);
+                        $('#appoint_group_users').html(users.join(','));
 
-                    //循环根据承接人id获取对应人名称
-                    for (var j = 0; j < appoint_users.length; j++) {
-                        username.push(Config.users[appoint_users[j]]);
+                        //判断更换镜框的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 start
+                        if (!$('.step1-1').is(':hidden')) {
+                            changeFrame();
+                        }
+                        //判断更换镜框的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end
+                        //判断取消订单的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 start
+                        if (!$('.step3').is(':hidden')) {
+                            cancelOrder();
+                        }
+                        //判断取消订单的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end
                     }
-
-                    var users = array_filter(username);
-                    $('#appoint_group_users').html(users.join(','));
-
-                    //判断更换镜框的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 start
-                    if (!$('.step1-1').is(':hidden')) {
-                        changeFrame();
-                    }
-                    //判断更换镜框的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end
-                    //判断取消订单的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 start
-                    if (!$('.step3').is(':hidden')) {
-                        cancelOrder();
-                    }
-                    //判断取消订单的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end
-                }
-            });                            
-          },
+                });
+            },
         }
     };
     return Controller;
@@ -977,13 +1351,13 @@ function changeFrame() {
         var item = ret.data;
         console.log(item);
         var Str = '';
-        for(var j = 0,len = item.length; j <len; j++) {
-            var m = j+1;
-            Str +='<tr>';
-            Str +='<td><input  class="form-control" name="row[change_frame][original_sku][]" type="text" value="'+item[j]+'" readonly></td>';
-            Str +='<td><input  class="form-control" name="row[change_frame][original_number][]" type="text" value="1" readonly></td>';
-            Str +='<td><input  class="form-control" name="row[change_frame][change_sku][]" type="text"></td>';
-            Str +='<td><input  class="form-control" name="row[change_frame][change_number][]" type="text" value="1" readonly></td>';
+        for (var j = 0, len = item.length; j < len; j++) {
+            var m = j + 1;
+            Str += '<tr>';
+            Str += '<td><input  class="form-control" name="row[change_frame][original_sku][]" type="text" value="' + item[j] + '" readonly></td>';
+            Str += '<td><input  class="form-control" name="row[change_frame][original_number][]" type="text" value="1" readonly></td>';
+            Str += '<td><input  class="form-control" name="row[change_frame][change_sku][]" type="text"></td>';
+            Str += '<td><input  class="form-control" name="row[change_frame][change_number][]" type="text" value="1" readonly></td>';
             // Str +='<td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>删除</a></td>';
             Str += '</tr>';
         }
@@ -1015,12 +1389,12 @@ function cancelOrder() {
         $('#cancel-order tr:gt(0)').remove();
         var item = ret.data;
         var Str = '';
-        for(var j = 0,len = item.length; j <len; j++) {
-            var m = j+1;
-            Str +='<tr>';
-            Str +='<td><input  class="form-control" readonly name="row[cancel_order][original_sku][]" type="text" value="'+item[j]+'" readonly></td>';
-            Str +='<td><input  class="form-control" name="row[cancel_order][original_number][]"  type="text" value="1" readonly></td>';
-            Str +='<td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>删除</a></td>';
+        for (var j = 0, len = item.length; j < len; j++) {
+            var m = j + 1;
+            Str += '<tr>';
+            Str += '<td><input  class="form-control" readonly name="row[cancel_order][original_sku][]" type="text" value="' + item[j] + '" readonly></td>';
+            Str += '<td><input  class="form-control" name="row[cancel_order][original_number][]"  type="text" value="1" readonly></td>';
+            Str += '<td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>删除</a></td>';
             Str += '</tr>';
         }
         $("#cancel-order tbody").append(Str);

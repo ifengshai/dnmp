@@ -195,10 +195,38 @@ if (!function_exists('build_heading')) {
     }
 }
 
-/**
- * 过滤数组空值
- */
-function trim_value(&$value)
-{
-    $value  =  trim($value);
+if (!function_exists('trim_value')) {
+    /**
+     * 过滤数组空值
+     */
+    function trim_value(&$value)
+    {
+        $value  =  trim($value);
+        return $value;
+    }
+}
+
+
+if (!function_exists('searchForId')) {
+    /**
+     * 二维数据根据值获取数组key
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/04/15 18:09:59 
+     * @param [type] $id
+     * @param [type] $array
+     * @return void
+     */
+    function searchForId($id, $array)
+    {
+        foreach ($array as $key => $val) {
+            foreach($val as $v) {
+                if ($v == $id) {
+                    return $key;
+                }
+            }
+        }
+        return null;
+    }
 }
