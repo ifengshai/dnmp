@@ -171,8 +171,10 @@ class WorkOrderList extends Backend
                     //更换镜框判断是否有库存
                     if ($params['change_frame'] && $params['problem_type_id'] == 1) {
                         //判断SKU是否有库存
-                    }
+                        $skus = $params['change_frame']['change_sku'];
 
+                        $this->skuIsStock($skus, $params['work_type']);
+                    }
 
                     //判断工单类型 1客服 2仓库
                     if ($params['work_type'] == 1) {
@@ -182,15 +184,11 @@ class WorkOrderList extends Backend
                         $params['after_user_id'] = config('workorder.copy_group'); //经手人
                     }
 
-
-
                     //判断是否选择退款措施
                     if (!in_array(2, array_filter($params['measure_choose_id']))) {
                         unset($params['refund_money']);
                         unset($params['refund_way']);
                     }
-
-
 
                     //判断是否选择补价措施
                     if (!in_array(8, array_filter($params['measure_choose_id']))) {
@@ -198,7 +196,15 @@ class WorkOrderList extends Backend
                         unset($params['replenish_money']);
                     }
 
+                    //判断是否选择积分措施
+                    if (!in_array(10, array_filter($params['measure_choose_id']))) {
+                        unset($params['integral']);
+                    }
 
+                    //判断是否选择退件措施
+                    if (!in_array(11, array_filter($params['measure_choose_id']))) {
+                        unset($params['refund_logistics_num']);
+                    }
 
                     //如果积分大于200需要审核
                     if ($params['integral'] > 200) {
@@ -209,11 +215,11 @@ class WorkOrderList extends Backend
                     }
 
                     //判断优惠券 不需要审核的优惠券
-                    if ($params['coupon_id']) {
+                    if ($params['coupon_id'] && in_array(9, array_filter($params['measure_choose_id']))) {
                         $params['coupon_describe'] = config('workorder.check_coupon')[$params['coupon_id']]['desc'];
                     }
-
-                    if ($params['need_coupon_id']) {
+                    //判断优惠券 需要审核的优惠券
+                    if ($params['need_coupon_id'] && in_array(9, array_filter($params['measure_choose_id']))) {
                         $params['coupon_id'] = $params['need_coupon_id'];
                         $params['coupon_describe'] = config('workorder.check_coupon')[$params['need_coupon_id']]['desc'];
                     }
@@ -235,6 +241,7 @@ class WorkOrderList extends Backend
                             $params['assign_user_id'] = $this->assign_user_id;
                         }
                     }
+
                     $params['create_user_name'] = session('admin.nickname');
                     $params['create_user_id'] = session('admin.id');
                     $params['create_time'] = date('Y-m-d H:i:s');
@@ -297,18 +304,21 @@ class WorkOrderList extends Backend
                     $orderChangeList = [];
                     //判断是否选中更改镜框问题类型
                     if ($params['change_frame'] && $params['problem_type_id'] == 1) {
-
-                        foreach ($params['change_frame'] as $k => $v) {
-                            if (!$v['change_sku']) {
+                        $original_sku = $params['change_frame']['original_sku'];
+                        $original_number = $params['change_frame']['original_number'];
+                        $change_sku = $params['change_frame']['change_sku'];
+                        $change_number = $params['change_frame']['change_number'];
+                        foreach ($change_sku as $k => $v) {
+                            if (!$v) {
                                 continue;
                             }
                             $orderChangeList[$k]['work_id'] = $this->model->id;
                             $orderChangeList[$k]['increment_id'] = $params['platform_order'];
                             $orderChangeList[$k]['platform_type'] = $params['work_type'];
-                            $orderChangeList[$k]['original_sku'] = $v['original_sku'];
-                            $orderChangeList[$k]['original_number'] = $v['original_number'];
-                            $orderChangeList[$k]['change_sku'] = $v['change_sku'];
-                            $orderChangeList[$k]['change_number'] = $v['change_number'];
+                            $orderChangeList[$k]['original_sku'] = $original_sku[$k];
+                            $orderChangeList[$k]['original_number'] = $original_number[$k];
+                            $orderChangeList[$k]['change_sku'] = $v;
+                            $orderChangeList[$k]['change_number'] = $change_number[$k];
                             $orderChangeList[$k]['change_type'] = 1;
                             $orderChangeList[$k]['create_person'] = session('admin.nickname');
                             $orderChangeList[$k]['create_time'] = date('Y-m-d H:i:s');
@@ -390,11 +400,29 @@ class WorkOrderList extends Backend
      *
      * @Description
      * @author wpl
-     * @since 2020/04/15 16:44:22 
+     * @since 2020/04/16 10:59:53 
+     * @param [type] $skus sku数组
+     * @param [type] $siteType 站点类型
      * @return void
      */
-    protected function skuIsStock($skus)
+    protected function skuIsStock($skus = [], $siteType)
     {
+        if (!array_filter($skus)) {
+            throw new Exception("SKU不能为空");
+        }
+
+        $itemPlatFormSku = new \app\admin\model\itemmanage\ItemPlatformSku();
+        //根据平台sku转sku
+        foreach (array_filter($skus) as $v) {
+            //转换sku
+            $sku = $itemPlatFormSku->getTrueSku($v, $siteType);
+            //查询库存
+            $stock = $this->item->where(['is_open' => 1, 'is_del' => 1, 'sku' => $sku])->value('available_stock');
+            if ($stock <= 0) {
+                throw new Exception($v . '暂无库存！！');
+            }
+        }
+        return true;
     }
 
     /**
