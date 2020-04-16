@@ -183,14 +183,14 @@ return [
         ],
         [
             'step_id' => 9,//优惠券
-            'is_check' => 1,
+            'is_check' => 0,
             'appoint_group' => [ //空代表承接给创建人
             ],
         ],
 
         [
             'step_id' => 10,//积分
-            'is_check' => 1,
+            'is_check' => 0,
             'appoint_group' => [//空代表承接给创建人
             ],
         ],
@@ -252,6 +252,7 @@ return [
         ],
         //韩雨薇组
         117 => [
+            1,
             108, //吴帆
             126, //李闯
             87, //王一安
@@ -260,6 +261,9 @@ return [
             131  //王骜
         ]
     ],
+
+    //客服经理id
+    'customer_manager' => 75,
 
     //不需要审核的优惠券
     'check_coupon' => [
@@ -286,26 +290,16 @@ return [
     ],
     //需要审核的优惠券
     'need_check_coupon' => [
-        '1' => [
+        '5' => [
             'id' => '5',
-            'desc' => '15% off',
-            'sum' => '15',
+            'desc' => 'half',
+            'sum' => '50',
         ],
-        '2' => [
+        '6' => [
             'id' => '6',
-            'desc' => '20% off',
-            'sum' => '20',
-        ],
-        '3' => [
-            'id' => '7',
-            'desc' => '25% off',
-            'sum' => '25',
-        ],
-        '4' => [
-            'id' => '8',
-            'desc' => '30% off',
-            'sum' => '30',
-        ],
+            'desc' => 'all',
+            'sum' => '100',
+        ]
     ],
     //客服部门角色组ID
     'customer_department_rule'=>[
