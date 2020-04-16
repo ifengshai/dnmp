@@ -14,11 +14,7 @@ use Util\ZeeloolPrescriptionDetailHelper;
 use Util\VooguemePrescriptionDetailHelper;
 use Util\WeseeopticalPrescriptionDetailHelper;
 use app\admin\model\saleaftermanage\WorkOrderMeasure;
-<<<<<<< HEAD
 use app\admin\model\saleaftermanage\WorkOrderChangeSku;
-=======
-
->>>>>>> 7cd835211c0c37350552477425c23f24f43d3708
 /**
  * 售后工单列管理
  *
@@ -508,13 +504,11 @@ class WorkOrderList extends Backend
             foreach ($skus['sku'] as $val) {
                 $arrSkus[$val] = $val;
             }
-<<<<<<< HEAD
             //查询用户id对应姓名
             $admin = new \app\admin\model\Admin();
             $users = $admin->where('status', 'normal')->column('nickname', 'id');
             $this->assignconfig('users', $users); //返回用户            
             return $this->view->fetch();
-=======
             $this->view->assign('skus', $arrSkus);
         }
         //把问题类型传递到js页面
@@ -530,7 +524,6 @@ class WorkOrderList extends Backend
             $this->assignconfig('measureList', $measureList);
         }
         return $this->view->fetch();
->>>>>>> 7cd835211c0c37350552477425c23f24f43d3708
     }
 
     /**
