@@ -14,6 +14,7 @@ use Util\ZeeloolPrescriptionDetailHelper;
 use Util\VooguemePrescriptionDetailHelper;
 use Util\WeseeopticalPrescriptionDetailHelper;
 use app\admin\model\saleaftermanage\WorkOrderMeasure;
+use app\admin\model\saleaftermanage\WorkOrderChangeSku;
 
 /**
  * 售后工单列管理
@@ -376,7 +377,7 @@ class WorkOrderList extends Backend
         $userGroupAccess = AuthGroupAccess::where(['uid' => $userId])->column('group_id');
         $warehouseArr = config('workorder.warehouse_department_rule');
         $checkIsWarehouse = array_intersect($userGroupAccess, $warehouseArr);
-        if (1 == 1) {
+        if (!empty($checkIsWarehouse)) {
             $this->view->assign('work_type', 2);
             $this->assignconfig('work_type', 2);
             $this->view->assign('problem_type', config('workorder.warehouse_problem_type')); //仓库问题类型       
@@ -500,6 +501,11 @@ class WorkOrderList extends Backend
             foreach ($skus['sku'] as $val) {
                 $arrSkus[$val] = $val;
             }
+            //查询用户id对应姓名
+            $admin = new \app\admin\model\Admin();
+            $users = $admin->where('status', 'normal')->column('nickname', 'id');
+            $this->assignconfig('users', $users); //返回用户            
+            return $this->view->fetch();
             $this->view->assign('skus', $arrSkus);
         }
         //把问题类型传递到js页面
@@ -682,6 +688,61 @@ class WorkOrderList extends Backend
             foreach ($result as $val) {
                 for ($i = 0; $i < $val['qty_ordered']; $i++) {
                     $arr[] = $val['sku'];
+                }
+            }
+            return $this->success('', '', $arr, 0);
+        } else {
+            return $this->error('404 Not Found');
+        }
+    }
+    /**
+     * 获取已经添加工单中的订单信息
+     *
+     * @Description
+     * @author lsw
+     * @since 2020/04/16 10:29:02 
+     * @return void
+     */
+    public function ajax_edit_order($ordertype = null, $order_number = null, $work_id = null)
+    {
+        if ($this->request->isAjax()) {
+            if ($ordertype < 1 || $ordertype > 5) { //不在平台之内
+                return $this->error('选择平台错误,请重新选择', '', 'error', 0);
+            }
+            if (!$order_number) {
+                return  $this->error('订单号不存在，请重新选择', '', 'error', 0);
+            }
+            if (!$work_id) {
+                return $this->error('工单不存在，请重新选择', '', 'error', 0);
+            }
+            $result = WorkOrderChangeSku::getOrderChangeSku($work_id, $ordertype, $order_number);
+            if (!$result) {
+                if ($ordertype == 1) {
+                    $result = ZeeloolPrescriptionDetailHelper::get_one_by_increment_id($order_number);
+                } elseif ($ordertype == 2) {
+                    $result = VooguemePrescriptionDetailHelper::get_one_by_increment_id($order_number);
+                } elseif ($ordertype == 3) {
+                    $result = NihaoPrescriptionDetailHelper::get_one_by_increment_id($order_number);
+                } elseif (5 == $ordertype) {
+                    $result = WeseeopticalPrescriptionDetailHelper::get_one_by_increment_id($order_number);
+                }
+            } else {
+                $result = collection($result)->toArray();
+            }
+            if (!$result) {
+                $this->error('找不到这个订单,请重新尝试', '', 'error', 0);
+            }
+            $arr = [];
+            foreach ($result as $key => $val) {
+                if (!$val['qty_ordered']) {
+                    $arr[$key]['original_sku'] = $val['original_sku'];
+                    $arr[$key]['original_number'] = $val['original_number'];
+                    $arr[$key]['change_sku'] = $val['change_sku'];
+                    $arr[$key]['change_number'] = $val['change_number'];
+                } else {
+                    for ($i = 0; $i < $val['qty_ordered']; $i++) {
+                        $arr[] = $val['sku'];
+                    }
                 }
             }
             return $this->success('', '', $arr, 0);

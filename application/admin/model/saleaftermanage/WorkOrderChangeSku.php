@@ -21,6 +21,23 @@ class WorkOrderChangeSku extends Model
 
     // 追加属性
     protected $append = [];
-
+    /**
+     * 获取一个工单的镜框变化表
+     *
+     * @Description
+     * @author lsw
+     * @since 2020/04/16 10:46:27 
+     * @param [type] $work_id
+     * @param [type] $ordertype
+     * @param [type] $order_number
+     * @return void
+     */
+    public function getOrderChangeSku($work_id,$ordertype,$order_number)
+    {
+        $where['work_id'] = $work_id;
+        $where['platform_type'] = $ordertype;
+        $where['increment_id'] = $order_number;
+        return WorkOrderChangeSku :: where($where)->select();
+    }
 
 }

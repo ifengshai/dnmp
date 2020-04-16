@@ -616,12 +616,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     '</tr>';
                 $('#caigou-table-sku tbody').append(content);
             });
-
-
-            //删除一行镜架数据
-            $(document).on('click', '.btn-del', function () {
-                $(this).parent().parent().remove();
-            });
             //增加一行镜片数据
             $(document).on('click', '.btn-add-lens', function () {
                 var contents = $('#edit_lens').html();
@@ -1042,6 +1036,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
             //如果问题类型存在，显示问题类型和措施
             if (Config.problem_type_id) {
                 var id = Config.problem_type_id;
+                var work_id = $('#work_id').val();
+                //row[problem_type_id]
+                $("input[name='row[problem_type_id]'][value='"+id+"']").attr("checked",true);
                 //id大于5 默认措施4
                 if (id > 5) {
                     var steparr = Config.workorder['step04'];
@@ -1065,6 +1062,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 if (Config.measureList) {
                     var checkID = Config.measureList;//措施列表赋值给checkID
                     for (var m = 0; m < checkID.length; m++) {
+                        $("input[name='row[measure_choose_id][]'][value='"+checkID[m]+"']").attr("checked",true);
                         var node = $('.step' + checkID[m]);
                         if (node.is(':hidden')) {
                             node.show();
@@ -1081,22 +1079,15 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 }
                 //判断更换镜框的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 start
                 if (!$('.step1-1').is(':hidden')) {
-                    changeFrame()
+                    changeFrame(1,work_id)
                 }
                 //判断更换镜框的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end
                 //判断取消订单的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 start
                 if (!$('.step3').is(':hidden')) {
-                    cancelOrder();
+                    cancelOrder(1,work_id);
                 }
                 //判断取消订单的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end
             }
-            //如果措施存在
-            if (Config.measureList) {
-
-            }
-            console.log(Config.problem_type_id);
-            console.log(Config.measureList);
-
         },
         //处理任务
         process: function () {
@@ -1166,23 +1157,27 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
         api: {
             bindevent: function () {
                 Form.api.bindevent($("form[role=form]"));
-                //点击事件 #todo::需判断仓库或者客服
-                $(document).on('click', '.problem_type', function () {
-                    //读取是谁添加的配置console.log(Config.work_type);
-                    $('.step_type').attr('checked', false);
-                    $('.step_type').parent().hide();
-                    $('#appoint_group_users').html('');//切换问题类型时清空承接人
-                    $('#recept_person_id').val('');//切换问题类型时清空隐藏域承接人id
-                    $('#recept_person').val('');//切换问题类型时清空隐藏域承接人
-                    $('.measure').hide();
-                    $('#recept_group_id').val('');
-                    if (2 == Config.work_type) { //如果是仓库人员添加的工单
-                        $('#step_id').hide();
-                        $('#recept_person_group').hide();
-                        $('#after_user_group').show();
-                        $('#after_user_id').val(Config.workorder.copy_group);
-                        $('#after_user').html(Config.users[Config.workorder.copy_group]);
-                    } else { //如果是客服人员添加的工单
+                //删除一行镜架数据
+                $(document).on('click', '.btn-del', function () {
+                    $(this).parent().parent().remove();
+                });                
+            //点击事件 #todo::需判断仓库或者客服
+            $(document).on('click', '.problem_type', function () {
+                //读取是谁添加的配置console.log(Config.work_type);
+                $('.step_type').attr('checked', false);
+                $('.step_type').parent().hide();
+                $('#appoint_group_users').html('');//切换问题类型时清空承接人
+                $('#recept_person_id').val('');//切换问题类型时清空隐藏域承接人id
+                $('#recept_person').val('');//切换问题类型时清空隐藏域承接人
+                $('.measure').hide();
+                $('#recept_group_id').val('');
+                if (2 == Config.work_type) { //如果是仓库人员添加的工单
+                    $('#step_id').hide();
+                    $('#recept_person_group').hide();
+                    $('#after_user_group').show();
+                    $('#after_user_id').val(Config.workorder.copy_group);
+                    $('#after_user').html(Config.users[Config.workorder.copy_group]);
+                } else { //如果是客服人员添加的工单
 
                         var id = $(this).val();
                         //id大于5 默认措施4
@@ -1343,7 +1338,7 @@ function array_filter(arr) {
     return new_arr;
 }
 //js 函数读取更换镜架信息
-function changeFrame() {
+function changeFrame(is_edit=0,work_id=0) {
     var ordertype = $('#work_platform').val();
     var order_number = $('#c-platform_order').val();
     if (!order_number) {
@@ -1353,22 +1348,40 @@ function changeFrame() {
         Layer.alert('请选择正确的平台');
         return false;
     }
+    if(1 == is_edit){ //是编辑的话
+        var urls  = 'saleaftermanage/work_order_list/ajax_edit_order';
+        var datas = { ordertype: ordertype, order_number: order_number,work_id:work_id }; 
+    }else{ //是新增的话
+        var urls  = 'saleaftermanage/work_order_list/ajax_get_order';
+        var datas = { ordertype: ordertype, order_number: order_number };
+    }
     Backend.api.ajax({
-        url: 'saleaftermanage/work_order_list/ajax_get_order',
-        data: { ordertype: ordertype, order_number: order_number }
+        url: urls,
+        data: datas
     }, function (data, ret) {
         //删除添加的tr
         $('#change-frame tr:gt(0)').remove();
         var item = ret.data;
-        console.log(item);
         var Str = '';
-        for (var j = 0, len = item.length; j < len; j++) {
-            var m = j + 1;
-            Str += '<tr>';
-            Str += '<td><input  class="form-control" name="row[change_frame][original_sku][]" type="text" value="' + item[j] + '" readonly></td>';
-            Str += '<td><input  class="form-control" name="row[change_frame][original_number][]" type="text" value="1" readonly></td>';
-            Str += '<td><input  class="form-control" name="row[change_frame][change_sku][]" type="text"></td>';
-            Str += '<td><input  class="form-control" name="row[change_frame][change_number][]" type="text" value="1" readonly></td>';
+        if(1 == is_edit){
+            for(var j = 0,len = item.length; j <len; j++) {
+                Str +='<tr>';
+                Str +='<td><input  class="form-control" name="row[change_frame][original_sku][]" type="text" value="'+item[j].original_sku+'" readonly></td>';
+                Str +='<td><input  class="form-control" name="row[change_frame][original_number][]" type="text" value="1" readonly></td>';
+                Str +='<td><input  class="form-control" name="row[change_frame][change_sku][]" type="text" value="'+item[j].change_sku+'"></td>';
+                Str +='<td><input  class="form-control" name="row[change_frame][change_number][]" type="text" value="1" readonly></td>';
+                // Str +='<td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>删除</a></td>';
+                Str += '</tr>';
+            }
+            $("#change-frame tbody").append(Str);
+            return false;            
+        }
+        for(var j = 0,len = item.length; j <len; j++) {
+            Str +='<tr>';
+            Str +='<td><input  class="form-control" name="row[change_frame][original_sku][]" type="text" value="'+item[j]+'" readonly></td>';
+            Str +='<td><input  class="form-control" name="row[change_frame][original_number][]" type="text" value="1" readonly></td>';
+            Str +='<td><input  class="form-control" name="row[change_frame][change_sku][]" type="text"></td>';
+            Str +='<td><input  class="form-control" name="row[change_frame][change_number][]" type="text" value="1" readonly></td>';
             // Str +='<td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>删除</a></td>';
             Str += '</tr>';
         }
@@ -1382,7 +1395,7 @@ function changeFrame() {
     });
 }
 //js 函数读取取消订单信息
-function cancelOrder() {
+function cancelOrder(is_edit=0,work_id=0) {
     var ordertype = $('#work_platform').val();
     var order_number = $('#c-platform_order').val();
     if (!order_number) {
@@ -1392,20 +1405,37 @@ function cancelOrder() {
         Layer.alert('请选择正确的平台');
         return false;
     }
+    if(1 == is_edit){
+        var urls  = 'saleaftermanage/work_order_list/ajax_edit_order';
+        var datas = { ordertype: ordertype, order_number: order_number,work_id:work_id }; 
+    }else{
+        var urls  = 'saleaftermanage/work_order_list/ajax_get_order';
+        var datas = { ordertype: ordertype, order_number: order_number };
+    }
     Backend.api.ajax({
-        url: 'saleaftermanage/work_order_list/ajax_get_order',
-        data: { ordertype: ordertype, order_number: order_number }
+        url: urls,
+        data: datas
     }, function (data, ret) {
         //删除添加的tr
         $('#cancel-order tr:gt(0)').remove();
         var item = ret.data;
         var Str = '';
-        for (var j = 0, len = item.length; j < len; j++) {
-            var m = j + 1;
-            Str += '<tr>';
-            Str += '<td><input  class="form-control" readonly name="row[cancel_order][original_sku][]" type="text" value="' + item[j] + '" readonly></td>';
-            Str += '<td><input  class="form-control" name="row[cancel_order][original_number][]"  type="text" value="1" readonly></td>';
-            Str += '<td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>删除</a></td>';
+        if(1 == is_edit){
+            for(var j = 0,len = item.length; j <len; j++) {
+                Str +='<tr>';
+                Str +='<td><input  class="form-control" readonly name="row[cancel_order][original_sku][]" type="text" value="'+item[j].original_sku+'" readonly></td>';
+                Str +='<td><input  class="form-control" name="row[cancel_order][original_number][]"  type="text" value="1" readonly></td>';
+                Str +='<td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>删除</a></td>';
+                Str += '</tr>';
+            }
+            $("#cancel-order tbody").append(Str);
+            return false;            
+        }        
+        for(var j = 0,len = item.length; j <len; j++) {
+            Str +='<tr>';
+            Str +='<td><input  class="form-control" readonly name="row[cancel_order][original_sku][]" type="text" value="'+item[j]+'" readonly></td>';
+            Str +='<td><input  class="form-control" name="row[cancel_order][original_number][]"  type="text" value="1" readonly></td>';
+            Str +='<td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>删除</a></td>';
             Str += '</tr>';
         }
         $("#cancel-order tbody").append(Str);
