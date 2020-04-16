@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'Id'                   => '自增ID',
+    'Id'                   => 'ID',
     'Work_platform'        => '工单平台',
     'Work_type'            => '工单类型',
     'platform_order'       => '订单号',
@@ -16,7 +16,7 @@ return [
     'Create_id'            => '创建人ID',
 
     'Handle_person'        => '工单经手人',
-    'Is_check'             => '是否需要审核',
+    'Is_check'             => '是否审核',
     'Check_person_id'      => '指派审核人',
     'Operation_person'     => '实际审核人',
     'Shenhe_beizhu'        => '审核人备注',
@@ -33,7 +33,11 @@ return [
     'refund_logistics_num'        => '退回物流单号',
     'create_user_name'        => '创建人',
     'deal_with'        => '承接人',
-    'Assign_user_id'        => '指定审核人',
+    'Assign_user_id'        => '审核人',
+    'recept_user'        => '承接人',
+    'step_status'        => '措施状态',
+    'about_user'        => '相关人员',
+    'time_str'        => '时间',
 
 
 ];

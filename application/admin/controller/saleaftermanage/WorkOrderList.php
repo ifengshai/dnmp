@@ -46,8 +46,9 @@ class WorkOrderList extends Backend
         $step = $this->step->where('work_id',$id)->select();
         $step_arr = collection($step)->toArray();
         foreach ($step_arr as $k => $v){
-            $recept = $this->recept->where('measure_id',$v['id'])->select();
+            $recept = $this->recept->where('measure_id',$v['id'])->where('work_id',$id)->select();
             $recept_arr = collection($recept)->toArray();
+            $step_arr[$k]['recept_user'] = implode(',',array_column($recept_arr, 'recept_person'));
             $step_arr[$k]['recept'] = $recept_arr;
         }
         return $step_arr;
@@ -86,17 +87,35 @@ class WorkOrderList extends Backend
 
 
             foreach ($list as $k => $v){
+                //排列sku
+                if($v['order_sku']){
+                    $list[$k]['order_sku_arr'] = explode(',',$v['order_sku']);
+                }
+
+                //取经手人
+                if($v['after_user_id'] != 0){
+                    $list[$k]['after_user_name'] = $user_list[$v['after_user_id']];
+                }
+
+                //工单类型
                 if($v['work_type'] == 1){
                     $list[$k]['work_type_str'] = '客服工单';
                 }else{
                     $list[$k]['work_type_str'] = '仓库工单';
                 }
 
+                //是否审核
                 if($v['is_check'] == 1){
                     $list[$k]['assign_user_name'] = $user_list[$v['assign_user_id']];
+                    if($v['operation_user_id'] != 0){
+                        $list[$k]['operation_user_name'] = $user_list[$v['operation_user_id']];
+                    }
                 }
 
-                $list[$k]['step_num'] = $this->sel_order_recept($v['id']);
+                $list[$k]['step_num'] = $this->sel_order_recept($v['id']);//获取措施相关记录
+
+                //格式化时间
+                $list[$k]['create_time'] = date('Y-m-d H:i',strtotime($v['create_time']));
 
             }
 
