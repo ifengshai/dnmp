@@ -188,6 +188,23 @@ class WorkOrderList extends Backend
 
                         $this->skuIsStock($skus, $params['work_type']);
                     }
+                    //判断赠品是否有库存
+                    //判断补发是否有库存
+                    if(in_array(7, array_filter($params['measure_choose_id'])) || in_array(6, array_filter($params['measure_choose_id']))){
+                        if(in_array(7, array_filter($params['measure_choose_id']))){
+                            $originalSkus = $params['replacement']['original_sku'];
+                            $originalNums = $params['replacement']['original_number'];
+                        }else{
+                            $originalSkus = $params['gift']['original_sku'];
+                            $originalNums = $params['gift']['original_number'];
+                        }
+
+                        foreach($originalSkus as $key => $originalSku){
+                            if(!$originalSku) exception('sku不能为空');
+                            if(!$originalNums[$key]) exception('数量必须大于0');
+                            $this->skuIsStock([$originalSku], $params['work_type'],$originalNums[$key]);
+                        }
+                    }
 
                     //判断工单类型 1客服 2仓库
                     if ($params['work_type'] == 1) {
@@ -427,7 +444,7 @@ class WorkOrderList extends Backend
      * @param [type] $siteType 站点类型
      * @return void
      */
-    protected function skuIsStock($skus = [], $siteType)
+    protected function skuIsStock($skus = [], $siteType, $num = 0)
     {
         if (!array_filter($skus)) {
             throw new Exception("SKU不能为空");
@@ -440,7 +457,7 @@ class WorkOrderList extends Backend
             $sku = $itemPlatFormSku->getTrueSku($v, $siteType);
             //查询库存
             $stock = $this->item->where(['is_open' => 1, 'is_del' => 1, 'sku' => $sku])->value('available_stock');
-            if ($stock <= 0) {
+            if ($stock <= $num) {
                 throw new Exception($v . '暂无库存！！');
             }
         }
