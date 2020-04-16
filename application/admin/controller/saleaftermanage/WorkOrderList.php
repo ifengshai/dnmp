@@ -180,12 +180,30 @@ class WorkOrderList extends Backend
                         throw new Exception("措施不能为空");
                     }
 
+                    $params['is_check'] = '';
                     //更换镜框判断是否有库存
                     if ($params['change_frame'] && $params['problem_type_id'] == 1) {
                         //判断SKU是否有库存
                         $skus = $params['change_frame']['change_sku'];
 
                         $this->skuIsStock($skus, $params['work_type']);
+                    }
+                    //判断赠品是否有库存
+                    //判断补发是否有库存
+                    if(in_array(7, array_filter($params['measure_choose_id'])) || in_array(6, array_filter($params['measure_choose_id']))){
+                        if(in_array(7, array_filter($params['measure_choose_id']))){
+                            $originalSkus = $params['replacement']['original_sku'];
+                            $originalNums = $params['replacement']['original_number'];
+                        }else{
+                            $originalSkus = $params['gift']['original_sku'];
+                            $originalNums = $params['gift']['original_number'];
+                        }
+
+                        foreach($originalSkus as $key => $originalSku){
+                            if(!$originalSku) exception('sku不能为空');
+                            if(!$originalNums[$key]) exception('数量必须大于0');
+                            $this->skuIsStock([$originalSku], $params['work_type'],$originalNums[$key]);
+                        }
                     }
 
                     //判断工单类型 1客服 2仓库
@@ -261,9 +279,6 @@ class WorkOrderList extends Backend
                     if (false === $result) {
                         throw new Exception("添加失败！！");
                     }
-                    //修改镜架操作
-                     //$this->model->changeLens($params, $this->model->getLastInsID());
-
                     //循环插入措施
                     if (count(array_filter($params['measure_choose_id'])) > 0) {
 
@@ -308,6 +323,8 @@ class WorkOrderList extends Backend
                             if (false === $receptRes) {
                                 throw new Exception("添加失败！！");
                             }
+                            //更改镜片，补发，赠品
+                            $this->model->changeLens($params, $this->model->id);
                         }
                     }
 
@@ -363,6 +380,17 @@ class WorkOrderList extends Backend
                             throw new Exception("添加失败！！");
                         }
                     }
+                    //不需要审核时直接发送积分，赠送优惠券
+                    if(!$params['is_check']){
+                        //赠送积分
+                        if(in_array(10, array_filter($params['measure_choose_id']))){
+                            $this->model->presentIntegral($this->model->id);
+                        }
+                        //直接发送优惠券
+                        if(in_array(9, array_filter($params['measure_choose_id']))){
+                            $this->model->presentCoupon($this->model->id);
+                        }
+                    }
 
 
                     Db::commit();
@@ -416,7 +444,7 @@ class WorkOrderList extends Backend
      * @param [type] $siteType 站点类型
      * @return void
      */
-    protected function skuIsStock($skus = [], $siteType)
+    protected function skuIsStock($skus = [], $siteType, $num = 0)
     {
         if (!array_filter($skus)) {
             throw new Exception("SKU不能为空");
@@ -429,7 +457,7 @@ class WorkOrderList extends Backend
             $sku = $itemPlatFormSku->getTrueSku($v, $siteType);
             //查询库存
             $stock = $this->item->where(['is_open' => 1, 'is_del' => 1, 'sku' => $sku])->value('available_stock');
-            if ($stock <= 0) {
+            if ($stock <= $num) {
                 throw new Exception($v . '暂无库存！！');
             }
         }
@@ -760,6 +788,17 @@ class WorkOrderList extends Backend
         } else {
             return $this->error('404 Not Found');
         }
+    }
+
+    /**
+     * 测试
+     * @throws \Exception
+     */
+    public function test()
+    {
+        //$this->model->presentCoupon(235);
+        $this->model->presentIntegral(233);
+        //$this->model->createOrder(1,224);
     }
     /**
      * 工单详情
