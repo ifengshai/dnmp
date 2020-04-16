@@ -143,6 +143,22 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                             events: Table.api.events.operate,
                             buttons: [
                                 {
+                                    name: 'detail',
+                                    text: '详情',
+                                    title: __('查看详情'),
+                                    extend: 'data-area = \'["100%","100%"]\'',
+                                    classname: 'btn btn-xs btn-primary btn-dialog',
+                                    icon: 'fa fa-list',
+                                    url: 'saleaftermanage/work_order_list/detail',
+                                    callback: function (data) {
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), {title: "回传数据"});
+                                    },
+                                    visible: function (row) {
+                                        //返回true时按钮显示,返回false隐藏
+                                        return true;
+                                    }
+                                },
+                                {
                                     name: 'del',
                                     text: __('删除'),
                                     title: __('删除'),
@@ -481,7 +497,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 $('.step_type').attr('checked', false);
                 $('.step_type').parent().hide();
                 $('#appoint_group_users').html('');//切换问题类型时清空承接人
-                $('#recept_person_id').val('');//切换问题类型时清空隐藏域承接人id
                 $('#recept_person').val('');//切换问题类型时清空隐藏域承接人
                 $('.measure').hide();
                 $('#recept_group_id').val('');
@@ -622,7 +637,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     var appoint_users = array_filter(appoint_users);
                     $('#appoint_group_users').html(users.join(','));
                     $('#recept_person_id').val(appoint_users.join(','));
-
+                   
                     //判断更换镜框的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 start
                     if (!$('.step1-1').is(':hidden')) {
                         changeFrame();
@@ -1064,61 +1079,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
         },
         edit: function () {
             Controller.api.bindevent();
-            //如果问题类型存在，显示问题类型和措施
-            if (Config.problem_type_id) {
-                var id = Config.problem_type_id;
-                var work_id = $('#work_id').val();
-                //row[problem_type_id]
-                $("input[name='row[problem_type_id]'][value='" + id + "']").attr("checked", true);
-                //id大于5 默认措施4
-                if (id > 5) {
-                    var steparr = Config.workorder['step04'];
-                    for (var j = 0; j < steparr.length; j++) {
-                        $('#step' + steparr[j].step_id).parent().show();
-                        //读取对应措施配置
-                        $('#step' + steparr[j].step_id + '-is_check').val(steparr[j].is_check);
-                        $('#step' + steparr[j].step_id + '-appoint_group').val((steparr[j].appoint_group).join(','));
-                    }
-                } else {
-                    var step = Config.workorder.customer_problem_group[id].step;
-                    var steparr = Config.workorder[step];
-                    console.log(steparr);
-                    for (var j = 0; j < steparr.length; j++) {
-                        $('#step' + steparr[j].step_id).parent().show();
-                        //读取对应措施配置
-                        $('#step' + steparr[j].step_id + '-is_check').val(steparr[j].is_check);
-                        $('#step' + steparr[j].step_id + '-appoint_group').val((steparr[j].appoint_group).join(','));
-                    }
-                }
-                if (Config.measureList) {
-                    var checkID = Config.measureList;//措施列表赋值给checkID
-                    for (var m = 0; m < checkID.length; m++) {
-                        $("input[name='row[measure_choose_id][]'][value='" + checkID[m] + "']").attr("checked", true);
-                        var node = $('.step' + checkID[m]);
-                        if (node.is(':hidden')) {
-                            node.show();
-                        } else {
-                            node.hide();
-                        }
-                        var secondNode = $('.step' + id + '-' + checkID[m]);
-                        if (secondNode.is(':hidden')) {
-                            secondNode.show();
-                        } else {
-                            secondNode.hide();
-                        }
-                    }
-                }
-                //判断更换镜框的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 start
-                if (!$('.step1-1').is(':hidden')) {
-                    changeFrame(1, work_id)
-                }
-                //判断更换镜框的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end
-                //判断取消订单的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 start
-                if (!$('.step3').is(':hidden')) {
-                    cancelOrder(1, work_id);
-                }
-                //判断取消订单的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end
-            }
+        },
+        detail:function(){
+            Controller.api.bindevent();
         },
         //处理任务
         process: function () {
@@ -1350,7 +1313,62 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         //判断取消订单的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end
                     }
                 });
-            },
+            //如果问题类型存在，显示问题类型和措施
+            if (Config.problem_type_id) {
+                var id = Config.problem_type_id;
+                var work_id = $('#work_id').val();
+                //row[problem_type_id]
+                $("input[name='row[problem_type_id]'][value='" + id + "']").attr("checked", true);
+                //id大于5 默认措施4
+                if (id > 5) {
+                    var steparr = Config.workorder['step04'];
+                    for (var j = 0; j < steparr.length; j++) {
+                        $('#step' + steparr[j].step_id).parent().show();
+                        //读取对应措施配置
+                        $('#step' + steparr[j].step_id + '-is_check').val(steparr[j].is_check);
+                        $('#step' + steparr[j].step_id + '-appoint_group').val((steparr[j].appoint_group).join(','));
+                    }
+                } else {
+                    var step = Config.workorder.customer_problem_group[id].step;
+                    var steparr = Config.workorder[step];
+                    console.log(steparr);
+                    for (var j = 0; j < steparr.length; j++) {
+                        $('#step' + steparr[j].step_id).parent().show();
+                        //读取对应措施配置
+                        $('#step' + steparr[j].step_id + '-is_check').val(steparr[j].is_check);
+                        $('#step' + steparr[j].step_id + '-appoint_group').val((steparr[j].appoint_group).join(','));
+                    }
+                }
+                if (Config.measureList) {
+                    var checkID = Config.measureList;//措施列表赋值给checkID
+                    for (var m = 0; m < checkID.length; m++) {
+                        $("input[name='row[measure_choose_id][]'][value='" + checkID[m] + "']").attr("checked", true);
+                        var node = $('.step' + checkID[m]);
+                        if (node.is(':hidden')) {
+                            node.show();
+                        } else {
+                            node.hide();
+                        }
+                        var secondNode = $('.step' + id + '-' + checkID[m]);
+                        if (secondNode.is(':hidden')) {
+                            secondNode.show();
+                        } else {
+                            secondNode.hide();
+                        }
+                    }
+                }
+                //判断更换镜框的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 start
+                if (!$('.step1-1').is(':hidden')) {
+                    changeFrame(1, work_id)
+                }
+                //判断更换镜框的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end
+                //判断取消订单的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 start
+                if (!$('.step3').is(':hidden')) {
+                    cancelOrder(1, work_id);
+                }
+                //判断取消订单的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end
+            }                
+          },
         }
     };
     return Controller;

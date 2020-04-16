@@ -51,7 +51,7 @@ class WorkOrderList extends Backend
         //获取当前登录用户所属主管id
         $this->assign_user_id = searchForId(session('admin.id'), config('workorder.kefumanage'));
         //选项卡
-        $this->view->assign('getTabList',$this->model->getTabList());
+        $this->view->assign('getTabList', $this->model->getTabList());
     }
 
     /**
@@ -86,23 +86,34 @@ class WorkOrderList extends Backend
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
+
+            //选项卡我的任务切换
+            $filter = json_decode($this->request->get('filter'), true);
+            if ($filter['recept_person_id']) {
+                //承接 经手 审核 包含用户id
+                $map[] = ['exp', Db::raw("FIND_IN_SET( {$filter['recept_person_id']}, recept_person_id ) or after_user_id = {$filter['recept_person_id']} or assign_user_id = {$filter['recept_person_id']}")];
+                unset($filter['recept_person_id']);
+                $this->request->get(['filter' => json_encode($filter)]);
+            }
+
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
                 ->where($where)
+                ->where($map)
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->model
                 ->where($where)
+                ->where($map)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
-
             $list = collection($list)->toArray();
 
             $admin = new \app\admin\model\Admin();
             $user_list = $admin->where('status', 'normal')->column('nickname', 'id');
-            
+
             foreach ($list as $k => $v) {
                 //排列sku
                 if ($v['order_sku']) {
@@ -221,7 +232,7 @@ class WorkOrderList extends Backend
                     //判断优惠券 需要审核的优惠券
                     if ($params['need_coupon_id'] && in_array(9, array_filter($params['measure_choose_id']))) {
                         $params['coupon_id'] = $params['need_coupon_id'];
-                        $params['coupon_describe'] = config('workorder.check_coupon')[$params['need_coupon_id']]['desc'];
+                        $params['coupon_describe'] = config('workorder.need_check_coupon')[$params['need_coupon_id']]['desc'];
                     }
 
                     //判断审核人
@@ -241,7 +252,7 @@ class WorkOrderList extends Backend
                             $params['assign_user_id'] = $this->assign_user_id;
                         }
                     }
-
+                    $params['recept_person_id'] = $params['recept_person_id'] ?: session('admin.id');
                     $params['create_user_name'] = session('admin.nickname');
                     $params['create_user_id'] = session('admin.id');
                     $params['create_time'] = date('Y-m-d H:i:s');
@@ -505,7 +516,6 @@ class WorkOrderList extends Backend
             $admin = new \app\admin\model\Admin();
             $users = $admin->where('status', 'normal')->column('nickname', 'id');
             $this->assignconfig('users', $users); //返回用户            
-            return $this->view->fetch();
             $this->view->assign('skus', $arrSkus);
         }
         //把问题类型传递到js页面
@@ -750,10 +760,76 @@ class WorkOrderList extends Backend
             return $this->error('404 Not Found');
         }
     }
+
+    /**
+     * 测试
+     * @throws \Exception
+     */
     public function test()
     {
         //$this->model->presentCoupon(235);
         $this->model->presentIntegral(233);
         //$this->model->createOrder(1,224);
+    }
+    /**
+     * 工单详情
+     *
+     * @Description
+     * @author lsw
+     * @since 2020/04/16 15:33:36 
+     * @param [type] $ids
+     * @return void
+     */
+    public function detail($ids=null)
+    {
+        $row = $this->model->get($ids);
+        if (!$row) {
+            $this->error(__('No Results were found'));
+        }
+        if ($row['create_user_id'] != session('admin.id')) {
+            return $this->error(__('非本人创建不能编辑'));
+        }
+        $adminIds = $this->getDataLimitAdminIds();
+        if (is_array($adminIds)) {
+            if (!in_array($row[$this->dataLimitField], $adminIds)) {
+                $this->error(__('You have no permission'));
+            }
+        }
+        $this->view->assign("row", $row);
+        if (1 == $row->work_type) { //判断工单类型，客服工单
+            $this->view->assign('work_type', 1);
+            $this->assignconfig('work_type', 1);
+            $this->view->assign('problem_type', config('workorder.customer_problem_type')); //客服问题类型          
+        } else { //仓库工单
+            $this->view->assign('work_type', 2);
+            $this->assignconfig('work_type', 2);
+            $this->view->assign('problem_type', config('workorder.warehouse_problem_type')); //仓库问题类型
+        }
+        //求出订单sku列表,传输到页面当中
+        $skus = $this->model->getSkuList($row->work_platform, $row->platform_order);
+        if (is_array($skus['sku'])) {
+            $arrSkus = [];
+            foreach ($skus['sku'] as $val) {
+                $arrSkus[$val] = $val;
+            }
+            //查询用户id对应姓名
+            $admin = new \app\admin\model\Admin();
+            $users = $admin->where('status', 'normal')->column('nickname', 'id');
+            $this->assignconfig('users', $users); //返回用户            
+            $this->view->assign('skus', $arrSkus);
+        }
+        //把问题类型传递到js页面
+        if (!empty($row->problem_type_id)) {
+            $this->assignconfig('problem_type_id', $row->problem_type_id);
+        }
+
+        //求出工单选择的措施传递到js页面
+        $measureList = WorkOrderMeasure::workMeasureList($row->id);
+        // dump(!empty($measureList));
+        // exit;
+        if (!empty($measureList)) {
+            $this->assignconfig('measureList', $measureList);
+        }
+        return $this->view->fetch();
     }
 }
