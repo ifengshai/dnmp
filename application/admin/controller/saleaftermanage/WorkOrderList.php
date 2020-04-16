@@ -57,13 +57,14 @@ class WorkOrderList extends Backend
      */
 
     //根据主记录id，获取措施相关信息
-    protected function sel_order_recept($id){
-        $step = $this->step->where('work_id',$id)->select();
+    protected function sel_order_recept($id)
+    {
+        $step = $this->step->where('work_id', $id)->select();
         $step_arr = collection($step)->toArray();
-        foreach ($step_arr as $k => $v){
-            $recept = $this->recept->where('measure_id',$v['id'])->where('work_id',$id)->select();
+        foreach ($step_arr as $k => $v) {
+            $recept = $this->recept->where('measure_id', $v['id'])->where('work_id', $id)->select();
             $recept_arr = collection($recept)->toArray();
-            $step_arr[$k]['recept_user'] = implode(',',array_column($recept_arr, 'recept_person'));
+            $step_arr[$k]['recept_user'] = implode(',', array_column($recept_arr, 'recept_person'));
             $step_arr[$k]['recept'] = $recept_arr;
         }
         return $step_arr;
@@ -257,12 +258,17 @@ class WorkOrderList extends Backend
                     if (count(array_filter($params['measure_choose_id'])) > 0) {
 
                         //措施
-                        $measureList = [];
                         foreach ($params['measure_choose_id'] as $k => $v) {
-                            $measureList[$k]['work_id'] = $this->model->id;
-                            $measureList[$k]['measure_choose_id'] = $v;
-                            $measureList[$k]['measure_content'] = config('workorder.step')[$v];
-                            $measureList[$k]['create_time'] = date('Y-m-d H:i:s');
+                            $measureList['work_id'] = $this->model->id;
+                            $measureList['measure_choose_id'] = $v;
+                            $measureList['measure_content'] = config('workorder.step')[$v];
+                            $measureList['create_time'] = date('Y-m-d H:i:s');
+
+                            //插入措施表
+                            $res = $this->step->insertGetId($measureList);
+                            if (false === $res) {
+                                throw new Exception("添加失败！！");
+                            }
 
                             //根据措施读取承接组、承接人 默认是客服问题组配置
                             $appoint_ids = $params['order_recept']['appoint_ids'][$v];
@@ -272,7 +278,7 @@ class WorkOrderList extends Backend
                             $appointList = [];
                             foreach ($appoint_ids as $key => $val) {
                                 $appointList[$key]['work_id'] = $this->model->id;
-                                $appointList[$key]['measure_id'] = $v;
+                                $appointList[$key]['measure_id'] = $res;
                                 //如果没有承接人 默认为创建人
                                 if ($val == 'undefined') {
                                     $appointList[$key]['recept_group_id'] = $this->assign_user_id;
@@ -292,11 +298,6 @@ class WorkOrderList extends Backend
                             if (false === $receptRes) {
                                 throw new Exception("添加失败！！");
                             }
-                        }
-                        //插入措施表
-                        $res = $this->step->saveAll($measureList);
-                        if (false === $res) {
-                            throw new Exception("添加失败！！");
                         }
                     }
 
@@ -378,7 +379,7 @@ class WorkOrderList extends Backend
         $userGroupAccess = AuthGroupAccess::where(['uid' => $userId])->column('group_id');
         $warehouseArr = config('workorder.warehouse_department_rule');
         $checkIsWarehouse = array_intersect($userGroupAccess, $warehouseArr);
-        if (!empty($checkIsWarehouse)) {
+        if (1==1) {
             $this->view->assign('work_type', 2);
             $this->assignconfig('work_type', 2);
             $this->view->assign('problem_type', config('workorder.warehouse_problem_type')); //仓库问题类型       
