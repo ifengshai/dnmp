@@ -14,11 +14,6 @@ use Util\WeseeopticalPrescriptionDetailHelper;
 
 class WorkOrderList extends Model
 {
-
-
-
-
-
     // 表名
     protected $name = 'work_order_list';
 
@@ -32,6 +27,15 @@ class WorkOrderList extends Model
 
     // 追加属性
     protected $append = [];
+
+    //获取选项卡列表
+    public function getTabList()
+    {
+        return [
+            ['name' => '我创建的任务', 'field' => 'create_user_name', 'value' => session('admin.nickname')],
+            ['name' => '我的任务', 'field' => 'rep_id', 'value' => session('admin.id')],
+        ];
+    }
 
     /**
      * 根据订单号获取SKU列表
@@ -155,11 +159,11 @@ class WorkOrderList extends Model
                 $prescriptions .= "<option value='{$key}'>{$val}</option>";
             }
             //拼接html页面
-            $html = (new \think\View())->fetch('saleaftermanage/work_order_list/ajax_reissue_add',compact('prescription','coating_type','prescriptions','colorList','type'));
-        }elseif($type == 2){
-            $html = (new \think\View())->fetch('saleaftermanage/work_order_list/ajax_reissue_add',compact('showPrescriptions','prescription','coating_type','prescriptions','colorList','lensColorList','type'));
-        }else{
-            $html = (new \think\View())->fetch('saleaftermanage/work_order_list/ajax_reissue_add',compact('showPrescriptions','prescription','coating_type','prescriptions','colorList','type'));
+            $html = (new \think\View())->fetch('saleaftermanage/work_order_list/ajax_reissue_add', compact('prescription', 'coating_type', 'prescriptions', 'colorList', 'type'));
+        } elseif ($type == 2) {
+            $html = (new \think\View())->fetch('saleaftermanage/work_order_list/ajax_reissue_add', compact('showPrescriptions', 'prescription', 'coating_type', 'prescriptions', 'colorList', 'lensColorList', 'type'));
+        } else {
+            $html = (new \think\View())->fetch('saleaftermanage/work_order_list/ajax_reissue_add', compact('showPrescriptions', 'prescription', 'coating_type', 'prescriptions', 'colorList', 'type'));
         }
         return ['data' => $data, 'html' => $html];
     }
@@ -235,7 +239,7 @@ class WorkOrderList extends Model
                 $colorId = $changeLens['color_id'][$key];
                 $coatingId = $changeLens['coating_type'][$key];
                 $recipe_type = $changeLens['recipe_type'][$key];
-                $lensCoatName = $this->getLensCoatingName($type,$lensId,$coatingId,$colorId,$recipe_type);
+                $lensCoatName = $this->getLensCoatingName($type, $lensId, $coatingId, $colorId, $recipe_type);
                 $data = [
                     'work_id' => $work_id,
                     'increment_id' => $params['platform_order'],
@@ -304,7 +308,7 @@ class WorkOrderList extends Model
      * @param $prescription_type
      * @return array
      */
-    public function getLensCoatingName($siteType,$lens_id,$coating_id,$colorId,$prescription_type)
+    public function getLensCoatingName($siteType, $lens_id, $coating_id, $colorId, $prescription_type)
     {
         $key = $siteType . '_getlens';
         $data = Cache::get($key);
@@ -319,7 +323,7 @@ class WorkOrderList extends Model
         //返回lensName
         $lens = $prescription[$prescription_type] ?? [];
         $lensName = $coatingName = $colorName = $lensType = '';
-        if(!$colorId){
+        if (!$colorId) {
             foreach ($lens as $len) {
                 if ($len['lens_id'] == $lens_id) {
                     $lensName = $len['lens_data_name'];
@@ -327,18 +331,18 @@ class WorkOrderList extends Model
                     break;
                 }
             }
-        }else{
+        } else {
             //colorname
-            foreach($colorList as $key => $val){
-                if($val['id'] == $colorId){
+            foreach ($colorList as $key => $val) {
+                if ($val['id'] == $colorId) {
                     $colorName = $val['name'];
                     break;
                 }
             }
             //lensName
-            foreach($lensColorList as $val){
-                if($val['lens_id'] == $lens_id){
-                    $lensName = $val['lens_data_name']."({$colorName})";
+            foreach ($lensColorList as $val) {
+                if ($val['lens_id'] == $lens_id) {
+                    $lensName = $val['lens_data_name'] . "({$colorName})";
                     $lensType = $val['lens_data_index'];
                     break;
                 }
@@ -351,6 +355,6 @@ class WorkOrderList extends Model
                 break;
             }
         }
-        return ['lensName' => $lensName,'lensType' => $lensType,'colorName' => $colorName,'coatingName' => $coatingName];
+        return ['lensName' => $lensName, 'lensType' => $lensType, 'colorName' => $colorName, 'coatingName' => $coatingName];
     }
 }

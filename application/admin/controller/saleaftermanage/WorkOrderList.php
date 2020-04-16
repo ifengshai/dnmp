@@ -50,6 +50,8 @@ class WorkOrderList extends Backend
 
         //获取当前登录用户所属主管id
         $this->assign_user_id = searchForId(session('admin.id'), config('workorder.kefumanage'));
+        //选项卡
+        $this->view->assign('getTabList',$this->model->getTabList());
     }
 
     /**
@@ -100,8 +102,7 @@ class WorkOrderList extends Backend
 
             $admin = new \app\admin\model\Admin();
             $user_list = $admin->where('status', 'normal')->column('nickname', 'id');
-            $user_list = collection($user_list)->toArray();
-
+            
             foreach ($list as $k => $v) {
                 //排列sku
                 if ($v['order_sku']) {
