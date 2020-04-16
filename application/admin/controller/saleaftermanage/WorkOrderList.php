@@ -101,8 +101,6 @@ class WorkOrderList extends Backend
             $user_list = $admin->where('status', 'normal')->column('nickname', 'id');
             $user_list = collection($user_list)->toArray();
 
-
-
             foreach ($list as $k => $v) {
                 //排列sku
                 if ($v['order_sku']) {
@@ -135,7 +133,6 @@ class WorkOrderList extends Backend
                 $list[$k]['create_time'] = date('Y-m-d H:i', strtotime($v['create_time']));
             }
 
-
             $result = array("total" => $total, "rows" => $list);
 
             return json($result);
@@ -166,7 +163,7 @@ class WorkOrderList extends Backend
                         $this->model->validateFailException(true)->validate($validate);
                     }
                     //判断是否选择措施
-                    if (count(array_filter($params['measure_choose_id'])) < 1) {
+                    if (count(array_filter($params['measure_choose_id'])) < 1 && $params['work_type'] == 1) {
                         throw new Exception("措施不能为空");
                     }
 
@@ -183,9 +180,8 @@ class WorkOrderList extends Backend
                         $params['problem_type_content'] = config('workorder.customer_problem_type')[$params['problem_type_id']];
                     } elseif ($params['work_type'] == 2) {
                         $params['problem_type_content'] = config('workorder.warehouse_problem_type')[$params['problem_type_id']];
-                        $params['after_user_id'] = config('workorder.copy_group'); //经手人
+                        $params['after_user_id'] = implode(',', config('workorder.copy_group')); //经手人
                     }
-
                     //判断是否选择退款措施
                     if (!in_array(2, array_filter($params['measure_choose_id']))) {
                         unset($params['refund_money']);
@@ -380,7 +376,7 @@ class WorkOrderList extends Backend
         $userGroupAccess = AuthGroupAccess::where(['uid' => $userId])->column('group_id');
         $warehouseArr = config('workorder.warehouse_department_rule');
         $checkIsWarehouse = array_intersect($userGroupAccess, $warehouseArr);
-        if (1==1) {
+        if (1 == 1) {
             $this->view->assign('work_type', 2);
             $this->assignconfig('work_type', 2);
             $this->view->assign('problem_type', config('workorder.warehouse_problem_type')); //仓库问题类型       
@@ -632,17 +628,17 @@ class WorkOrderList extends Backend
     {
         if (request()->isAjax()) {
             $siteType = input('site_type');
-            $prescriptionType = input('prescription_type','');
-            $color_id = input('color_id','');
+            $prescriptionType = input('prescription_type', '');
+            $color_id = input('color_id', '');
             $key = $siteType . '_getlens';
             $data = Cache::get($key);
             if (!$data) {
                 $data = $this->model->getLensData($siteType);
-                Cache::set($key, $data, 3600*24);
+                Cache::set($key, $data, 3600 * 24);
             }
-            if($color_id){
+            if ($color_id) {
                 $lensType = $data['lens_color_list'] ?: [];
-            }else{
+            } else {
                 $lensType = $data['lens_list'][$prescriptionType] ?: [];
             }
             if ($lensType) {
