@@ -189,19 +189,19 @@ class WorkOrderList extends Backend
                     }
                     //判断赠品是否有库存
                     //判断补发是否有库存
-                    if(in_array(7, array_filter($params['measure_choose_id'])) || in_array(6, array_filter($params['measure_choose_id']))){
-                        if(in_array(7, array_filter($params['measure_choose_id']))){
+                    if (in_array(7, array_filter($params['measure_choose_id'])) || in_array(6, array_filter($params['measure_choose_id']))) {
+                        if (in_array(7, array_filter($params['measure_choose_id']))) {
                             $originalSkus = $params['replacement']['original_sku'];
                             $originalNums = $params['replacement']['original_number'];
-                        }else{
+                        } else {
                             $originalSkus = $params['gift']['original_sku'];
                             $originalNums = $params['gift']['original_number'];
                         }
 
-                        foreach($originalSkus as $key => $originalSku){
-                            if(!$originalSku) exception('sku不能为空');
-                            if(!$originalNums[$key]) exception('数量必须大于0');
-                            $this->skuIsStock([$originalSku], $params['work_type'],$originalNums[$key]);
+                        foreach ($originalSkus as $key => $originalSku) {
+                            if (!$originalSku) exception('sku不能为空');
+                            if (!$originalNums[$key]) exception('数量必须大于0');
+                            $this->skuIsStock([$originalSku], $params['work_type'], $originalNums[$key]);
                         }
                     }
 
@@ -272,6 +272,11 @@ class WorkOrderList extends Backend
 
                     if ($params['work_status'] == 2) {
                         $params['submit_time'] = date('Y-m-d H:i:s');
+                    }
+
+                    //判断如果不需要审核 工单状态默认为审核通过
+                    if ($params['is_check'] == 0 && $params['work_status'] == 2) {
+                        $params['work_status'] = 3;
                     }
                     $params['recept_person_id'] = $params['recept_person_id'] ?: session('admin.id');
                     $params['create_user_name'] = session('admin.nickname');
@@ -384,13 +389,13 @@ class WorkOrderList extends Backend
                         }
                     }
                     //不需要审核时直接发送积分，赠送优惠券
-                    if($params['is_check'] != 1){
+                    if ($params['is_check'] != 1) {
                         //赠送积分
-                        if(in_array(10, array_filter($params['measure_choose_id']))){
+                        if (in_array(10, array_filter($params['measure_choose_id']))) {
                             $this->model->presentIntegral($this->model->id);
                         }
                         //直接发送优惠券
-                        if(in_array(9, array_filter($params['measure_choose_id']))){
+                        if (in_array(9, array_filter($params['measure_choose_id']))) {
                             $this->model->presentCoupon($this->model->id);
                         }
                     }
@@ -844,7 +849,7 @@ class WorkOrderList extends Backend
     {
         //$this->model->presentCoupon(235);
         //$this->model->presentIntegral(233);
-        $this->model->createOrder(1,224);
+        $this->model->createOrder(1, 224);
     }
     /**
      * 工单详情

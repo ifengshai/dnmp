@@ -355,7 +355,7 @@
                 {if $row.order_sku}
                 {:build_select('row[order_sku][]', $skus, $row.order_sku, ['class'=>'form-control selectpicker','multiple'=>'multiple','disabled'=>'disabled'])}
                 {else/}
-                {:build_select('row[order_sku][]', $skus, $row.order_sku, ['class'=>'form-control selectpicker','multiple'=>'multiple'])}
+                {:build_select('row[order_sku][]', $skus, $row.order_sku, ['class'=>'form-control selectpicker','multiple'=>'multiple','id'=>'c-order_sku'])}
                 {/if}
             </div>
         </div>

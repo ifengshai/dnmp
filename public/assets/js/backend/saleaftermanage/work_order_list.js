@@ -373,6 +373,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         //获取是否需要审核
                         if ($('#step' + id + '-is_check').val() > 0) {
                             $('#is_check').val(1);
+                        } else {
+                            $('#is_check').val(0);
                         }
                     });
                     //追加到元素之后
