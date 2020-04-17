@@ -14,7 +14,7 @@ return [
     | 【必填】应用 AppKey
     |-----------------------------------------------------------
     */
-    'app_key' => 'dingualdghgy6bzjm8z5',
+    'app_key' => 'dinge51fl8wubuih963a',
     
     //应用id
     'agent_id' => '639788145',
