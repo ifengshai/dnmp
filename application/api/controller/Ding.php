@@ -11,6 +11,7 @@ namespace app\api\controller;
 use app\admin\model\Admin;
 use app\admin\model\AuthGroup;
 use app\admin\model\AuthGroupAccess;
+use app\admin\model\Department;
 use fast\Random;
 use think\Controller;
 use EasyDingTalk\Application;
@@ -102,7 +103,7 @@ class Ding extends Controller
                     foreach ($deptIds as $deptId) {
                         //获取部门详情
                         $department = $this->app->department->get($deptId);
-                        AuthGroup::deptAdd($department);
+                        Department::deptAdd($department);
                     }
                     break;
                 case 'org_dept_modify':
@@ -111,14 +112,14 @@ class Ding extends Controller
                     foreach ($deptIds as $deptId) {
                         //获取部门详情
                         $department = $this->app->department->get($deptId);
-                        AuthGroup::deptUpdate($department);
+                        Department::deptUpdate($department);
                     }
                     break;
                 case 'org_dept_modify':
                     //删除部门
                     $deptIds = $payload['DeptId'];
                     foreach ($deptIds as $deptId) {
-                        AuthGroup::deptDelete($deptId);
+                        Department::deptDelete($deptId);
                     }
                     break;
             }
@@ -139,20 +140,19 @@ class Ding extends Controller
         if ($departments['errcode'] === 0 && !empty($departments['department'])) {
             foreach ($departments['department'] as $department) {
                 //查找是否存在，已存在的不创建
-                $authGroupId = AuthGroup::where('department_id', $department['id'])->value('id');
-                if (!$authGroupId) {
+                $depart = Department::where('department_id',$department['id'])->value('id');
+                if (!$depart) {
                     $data = [
                         'name' => $department['name'],
                         'pid' => $pid,
-                        'status' => 'normal',
                         'department_id' => $department['id'],
-                        'parentid' => $department['parentid'],
+                        'parentid' => $department['parentid']
                     ];
-                    $authGroup = AuthGroup::create($data);
-                    $authGroupId = $authGroup->id;
+                    $depart = Department::create($data);
+                    $departId = $depart->id;
                 }
-                echo $authGroupId;
-                $this->setDepartment($department['id'], $authGroupId);
+                echo $departId;
+                $this->setDepartment($department['id'], $departId);
             }
         }
     }
@@ -179,7 +179,8 @@ class Ding extends Controller
                             'position' => $user['position'],
                             'mobile' => $user['mobile'],
                             'userid' => $user['userid'],
-                            'unionid' => $user['unionid']
+                            'unionid' => $user['unionid'],
+                            'department_id' => $departmentId
                         ];
                         $userAdd = Admin::update($data);
                     } else {
@@ -197,18 +198,11 @@ class Ding extends Controller
                             'position' => $user['position'],
                             'mobile' => $user['mobile'],
                             'userid' => $user['userid'],
-                            'unionid' => $user['unionid']
+                            'unionid' => $user['unionid'],
+                            'department_id' => $departmentId
                         ];
                         $userAdd = Admin::create($data);
                     }
-                    //添加或新增
-                    $groupId = AuthGroup::where('department_id', $departmentId)->value('id');
-                    //分配角色
-                    $accessData = [
-                        'uid' => $userAdd->id,
-                        'group_id' => $groupId
-                    ];
-                    AuthGroupAccess::create($accessData);
                     echo $userAdd->id;
                 }
             }
