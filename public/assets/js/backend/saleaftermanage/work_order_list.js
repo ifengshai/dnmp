@@ -210,9 +210,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     callback: function (data) {
                                     },
                                     visible: function (row) {
-                                        return true;
-                                        if (row.status == 1) {
-
+                                        if (row.work_type == 2 && row.is_after_deal_with == 0) {
+                                            return true;
                                         } else {
                                             return false;
                                         }
@@ -379,6 +378,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     });
                     //追加到元素之后
                     $("#input-hidden").append(input_content);
+
+                    
+
                     //一般措施
                     for (var m = 0; m < checkID.length; m++) {
                         var node = $('.step' + checkID[m]);
@@ -395,6 +397,21 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                             secondNode.hide();
                         }
                     }
+
+                    //判断如果为处理任务时
+                    if (Config.ids) {
+                        if (problem_type_id == 1) {
+                            $('.measure').hide();
+                            $('.step2-1').show();
+                        } else if (problem_type_id == 2) {
+                            $('.measure').hide();
+                            $('.step1-1').show();
+                        }  else if (problem_type_id == 3) {
+                            $('.measure').hide();
+                            $('.step1-1').show();
+                        }
+                    }
+
                     var id = $(this).val();
                     var arr = array_filter(appoint_group.split(','));
                     var username = [];
@@ -1143,6 +1160,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                             }
                         }
                     }
+
                     //判断更换镜框的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 start
                     if (!$('.step1-1').is(':hidden')) {
                         changeFrame(1, work_id)
@@ -1153,6 +1171,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         cancelOrder(1, work_id);
                     }
                     //判断取消订单的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end
+
+                    
                 }
             },
         }
@@ -1180,7 +1200,7 @@ function changeFrame(is_edit = 0, work_id = 0) {
         return false;
     }
     if (ordertype <= 0) {
-        Layer.alert('请选择正确的平台');
+        Toastr.error('请选择正确的平台');
         return false;
     }
     if (1 == is_edit) { //是编辑的话
@@ -1194,6 +1214,9 @@ function changeFrame(is_edit = 0, work_id = 0) {
         url: urls,
         data: datas
     }, function (data, ret) {
+        if (!data) {
+            return false;
+        }
         //删除添加的tr
         $('#change-frame tr:gt(0)').remove();
         var item = ret.data;
@@ -1224,8 +1247,7 @@ function changeFrame(is_edit = 0, work_id = 0) {
         return false;
     }, function (data, ret) {
         //失败的回调
-        alert(ret.msg);
-        //console.log(ret);
+        Toastr.error(ret.msg);
         return false;
     });
 }
@@ -1237,7 +1259,7 @@ function cancelOrder(is_edit = 0, work_id = 0) {
         return false;
     }
     if (ordertype <= 0) {
-        Layer.alert('请选择正确的平台');
+        Toastr.error('请选择正确的平台');
         return false;
     }
     if (1 == is_edit) {
@@ -1277,8 +1299,7 @@ function cancelOrder(is_edit = 0, work_id = 0) {
         return false;
     }, function (data, ret) {
         //失败的回调
-        alert(ret.msg);
-        //console.log(ret);
+        Toastr.error(ret.msg);
         return false;
     });
 }
