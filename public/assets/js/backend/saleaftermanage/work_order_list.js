@@ -1340,22 +1340,72 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     }
                 }
                 if (Config.measureList) {
-                    var checkID = Config.measureList;//措施列表赋值给checkID
-                    for (var m = 0; m < checkID.length; m++) {
-                        $("input[name='row[measure_choose_id][]'][value='" + checkID[m] + "']").attr("checked", true);
-                        var node = $('.step' + checkID[m]);
+                    var checkIDss = Config.measureList;//措施列表赋值给checkID
+                    for (var m = 0; m < checkIDss.length; m++) {
+                        $("input[name='row[measure_choose_id][]'][value='" + checkIDss[m] + "']").attr("checked", true);
+                        var node = $('.step' + checkIDss[m]);
                         if (node.is(':hidden')) {
                             node.show();
                         } else {
                             node.hide();
                         }
-                        var secondNode = $('.step' + id + '-' + checkID[m]);
+                        var secondNode = $('.step' + id + '-' + checkIDss[m]);
                         if (secondNode.is(':hidden')) {
                             secondNode.show();
                         } else {
                             secondNode.hide();
                         }
                     }
+                    var checkID = [];//定义一个空数组
+                    var appoint_group = '';
+                    var input_content = '';
+                    $("input[name='row[measure_choose_id][]']:checked").each(function (i) {
+                        checkID[i] = $(this).val();
+                        var id = $(this).val();
+                        //获取承接组
+                        appoint_group += $('#step' + id + '-appoint_group').val() + ',';
+                        var group = $('#step' + id + '-appoint_group').val();
+                        var group_arr = group.split(',')
+                        var appoint_users = [];
+                        var appoint_val = [];
+                        for (var i = 0; i < group_arr.length; i++) {
+                            //循环根据承接组Key获取对应承接人id
+                            appoint_users.push(Config.workorder[group_arr[i]]);
+                            appoint_val[Config.workorder[group_arr[i]]] = group_arr[i];
+                        }
+
+                        //循环根据承接人id获取对应人名称
+                        for (var j = 0; j < appoint_users.length; j++) {
+                            input_content += '<input type="hidden" name="row[order_recept][appoint_group][' + id + '][]" value="' + appoint_val[appoint_users[j]] + '"/>';
+                            input_content += '<input type="hidden" name="row[order_recept][appoint_ids][' + id + '][]" value="' + appoint_users[j] + '"/>';
+                            input_content += '<input type="hidden" name="row[order_recept][appoint_users][' + id + '][]" value="' + Config.users[appoint_users[j]] + '"/>';
+                        }
+
+                        //获取是否需要审核
+                        if ($('#step' + id + '-is_check').val() > 0) {
+                            $('#is_check').val(1);
+                        }
+                    });
+                    //追加到元素之后
+                    $("#input-hidden").append(input_content);
+                    var arr = array_filter(appoint_group.split(','));
+                    var username = [];
+                    var appoint_users = [];
+                    //循环根据承接组Key获取对应承接人id
+                    for (var i = 0; i < arr.length - 1; i++) {
+                        //循环根据承接组Key获取对应承接人id
+                        appoint_users.push(Config.workorder[arr[i]]);
+                    }
+
+                    //循环根据承接人id获取对应人名称
+                    for (var j = 0; j < appoint_users.length; j++) {
+                        username.push(Config.users[appoint_users[j]]);
+                    }
+
+                    var users = array_filter(username);
+                    var appoint_users = array_filter(appoint_users);
+                    $('#appoint_group_users').html(users.join(','));
+                    $('#recept_person_id').val(appoint_users.join(','));                    
                 }
                 //判断更换镜框的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 start
                 if (!$('.step1-1').is(':hidden')) {
@@ -1368,18 +1418,157 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 }
                 //判断取消订单的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end
                 //判断更换处方的状态，如果显示的话把数据带出来，如果隐藏则不显示镜架数据 start
-                if(!$('.edit_lens').is(':hidden')){
-
+                if(!$('.step2-1').is(':hidden')){
+                    changeOrder(work_id,2);
                 }
                 //判断更换处方的状态，如果显示的话把数据带出来，如果隐藏则不显示镜架数据 end
                 //判断补发订单的状态，如果显示的话把数据带出来，如果隐藏则不显示补发数据 start
-                if(!$('.replenish_order').is(':hidden')){
+                if(!$('.step7').is(':hidden')){
                     changeOrder(work_id,5);
                 }
                 //判断补发订单的状态，如果显示的话把数据带出来，如果隐藏则不显示补发数据 end
-            }                
-          },
-        }
+                //判断赠品信息的状态，如果显示的话把数据带出来，如果隐藏的话则不显示赠品数据  start
+                if(!$('.step6').is(':hidden')){
+                    changeOrder(work_id,4);
+                }
+                //判断赠品信息的状态，如果显示的话把数据带出来，如果隐藏的话则不显示赠品数据 end
+            }
+            function changeOrder(work_id,change_type){
+                var ordertype = $('#work_platform').val();
+                var order_number = $('#c-platform_order').val();
+                if (!order_number) {
+                    return false;
+                }
+                if (ordertype <= 0) {
+                    Layer.alert('请选择正确的平台');
+                    return false;
+                }
+                Backend.api.ajax({
+                    url: 'saleaftermanage/work_order_list/ajax_change_order',
+                    data: { change_type: change_type, order_number: order_number, work_id: work_id,order_type:ordertype}
+                }, function (json, ret) {
+                    //补发订单信息
+                    if(5 == change_type){
+                        //读取的订单地址信息
+                        var data = json.address;
+                        //读取的订单镜片信息
+                        var lens = json.lens;
+                        //读取的存入数据库的地址
+                        var real_address = json.arr;
+                        console.log(json);
+                        prescriptions = data.prescriptions;
+                        $('#supplement-order').html(lens.html);
+                        var order_pay_currency = $('#order_pay_currency').val();
+                        //修改地址
+                        var address = '';
+                        if(real_address){
+                            $('#c-firstname').val(real_address.firstname);
+                            $('#c-lastname').val(real_address.lastname);
+                            $('#c-email').val(real_address.email);
+                            $('#c-telephone').val(real_address.telephone);
+                            $('#c-country').val(real_address.country_id);
+                            $('#c-country').change();
+                            $('#c-region').val(real_address.region_id);
+                            $('#c-city').val(real_address.city);
+                            $('#c-street').val(real_address.street);
+                            $('#c-postcode').val(real_address.postcode);
+                            $('#c-currency_code').val(order_pay_currency);
+                            console.log(real_address.shipping_type);
+                            $('#shipping_type').val(real_address.shipping_type);
+                            for (var i = 0; i < data.address.length; i++) {
+                                if (i == real_address.address_type) {
+                                    address += '<option value="' + i + '" selected>' + data.address[i].address_type + '</option>';
+                                } else {
+                                    address += '<option value="' + i + '">' + data.address[i].address_type + '</option>';
+                                }    
+                          }
+                        }else{
+                            for (var i = 0; i < data.address.length; i++) {
+                                if (i == 0) {
+                                    address += '<option value="' + i + '" selected>' + data.address[i].address_type + '</option>';
+                                    //补发地址自动填充第一个
+                                    $('#c-firstname').val(data.address[i].firstname);
+                                    $('#c-lastname').val(data.address[i].lastname);
+                                    $('#c-email').val(data.address[i].email);
+                                    $('#c-telephone').val(data.address[i].telephone);
+                                    $('#c-country').val(data.address[i].country_id);
+                                    $('#c-country').change();
+                                    $('#c-region').val(data.address[i].region_id);
+                                    $('#c-city').val(data.address[i].city);
+                                    $('#c-street').val(data.address[i].street);
+                                    $('#c-postcode').val(data.address[i].postcode);
+                                    $('#c-currency_code').val(order_pay_currency);
+                                } else {
+                                    address += '<option value="' + i + '">' + data.address[i].address_type + '</option>';
+                                }
+                
+                            }
+                        }
+                        $('#address_select').html(address);
+                        //选择地址切换地址
+                        $('#address_select').change(function () {
+                            var address_id = $(this).val();
+                            var address = data.address[address_id];
+                            $('#c-firstname').val(address.firstname);
+                            $('#c-lastname').val(address.lastname);
+                            $('#c-email').val(address.email);
+                            $('#c-telephone').val(address.telephone);
+                            $('#c-country').val(address.country_id);
+                            $('#c-country').change();
+                            $('#c-region').val(address.region_id);
+                            $('#c-city').val(address.city);
+                            $('#c-street').val(address.street);
+                            $('#c-postcode').val(address.postcode);
+                        })
+            
+                        //追加
+                        lens_click_data = '<div class="margin-top:10px;">' + lens.html + '<div class="form-group-child4_del"><a href="javascript:;" style="width: 50%;" class="btn btn-danger btn-del-lens" title="删除"><i class="fa fa-trash"></i>删除</a></div></div>';
+            
+                        $('.selectpicker ').selectpicker('refresh');
+                        //Controller.api.bindevent();            
+                    }else if(2 == change_type){ //更换镜架信息
+                        $('#lens_contents').html(json.html);
+                        $('.selectpicker').selectpicker('refresh');                       
+                    }else if(4 == change_type){
+                        $('.add_gift').html(json.html);
+                        //追加
+                        gift_click_data = '<div class="margin-top:10px;">' + json.html + '<div class="form-group-child4_del"><a href="javascript:;" style="width: 50%;" class="btn btn-danger btn-del-lens" title="删除"><i class="fa fa-trash"></i>删除</a></div></div>';
+                        $('.selectpicker ').selectpicker('refresh');                        
+                    }
+                }, function (data, ret) {
+                    //失败的回调
+                    alert(ret.msg);
+                    console.log(ret);
+                    return false;
+                });
+            }
+            $(document).on('change', '#c-country', function () {
+                var id = $(this).val();
+                if (!id) {
+                    return false;
+                }
+                $.ajax({
+                    type: "POST",
+                    url: "saleaftermanage/work_order_list/ajaxGetProvince",
+                    dataType: "json",
+                    cache: false,
+                    async: false,
+                    data: {
+                        country_id: id,
+                    },
+                    success: function (json) {
+                        var data = json.province;
+                        var province = '';
+                        for (var i = 0; i < data.length; i++) {
+                            province += '<option value="' + data[i].region_id + '">' + data[i].default_name + '</option>';
+                        }
+                        $('#c-region').html(province);
+                        $('.selectpicker ').selectpicker('refresh');
+                    }
+                });
+            });                                        
+          },          
+      }
     };
     return Controller;
 });
@@ -1490,40 +1679,6 @@ function cancelOrder(is_edit = 0, work_id = 0) {
             $("#cancel-order tbody").append(Str);
             return false;
         }
-        for (var j = 0, len = item.length; j < len; j++) {
-            Str += '<tr>';
-            Str += '<td><input  class="form-control" readonly name="row[cancel_order][original_sku][]" type="text" value="' + item[j] + '" readonly></td>';
-            Str += '<td><input  class="form-control" name="row[cancel_order][original_number][]"  type="text" value="1" readonly></td>';
-            Str += '<td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>删除</a></td>';
-            Str += '</tr>';
-        }
-        $("#cancel-order tbody").append(Str);
-        return false;
-    }, function (data, ret) {
-        //失败的回调
-        alert(ret.msg);
-        console.log(ret);
-        return false;
-    });
-}
-function changeOrder(work_id,change_type){
-    var ordertype = $('#work_platform').val();
-    var order_number = $('#c-platform_order').val();
-    if (!order_number) {
-        return false;
-    }
-    if (ordertype <= 0) {
-        Layer.alert('请选择正确的平台');
-        return false;
-    }
-    Backend.api.ajax({
-        url: 'saleaftermanage/work_order_list/ajax_change_order',
-        data: { change_type: change_type, order_number: order_number, work_id: work_id,order_type:ordertype}
-    }, function (data, ret) {
-        //删除添加的tr
-        $('#cancel-order tr:gt(0)').remove();
-        var item = ret.data;
-        var Str = '';
         for (var j = 0, len = item.length; j < len; j++) {
             Str += '<tr>';
             Str += '<td><input  class="form-control" readonly name="row[cancel_order][original_sku][]" type="text" value="' + item[j] + '" readonly></td>';
