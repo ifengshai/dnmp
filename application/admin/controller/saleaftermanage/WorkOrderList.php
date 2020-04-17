@@ -853,7 +853,8 @@ class WorkOrderList extends Backend
     {
         //$this->model->presentCoupon(235);
         //$this->model->presentIntegral(233);
-        $this->model->createOrder(1, 224);
+        $this->model->createOrder(3, 298);
+        //$this->model->createOrder(1, 265);
     }
     /**
      * 工单详情

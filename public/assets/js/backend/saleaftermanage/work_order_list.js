@@ -296,7 +296,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     } else {
                         var step = Config.workorder.customer_problem_group[id].step;
                         var steparr = Config.workorder[step];
-                        console.log(steparr);
+                        //console.log(steparr);
                         for (var j = 0; j < steparr.length; j++) {
                             $('#step' + steparr[j].step_id).parent().show();
                             //读取对应措施配置
@@ -599,8 +599,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     Toastr.error(json.msg);
                                     return false;
                                 }
-                                var data = json.data.address;
-                                var lens = json.data.lens;
+                                var data = json.address;
+                                var lens = json.lens;
                                 prescriptions = data.prescriptions;
                                 $('#supplement-order').html(lens.html);
                                 var order_pay_currency = $('#order_pay_currency').val();
@@ -893,7 +893,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     }
 
                     var steparr = Config.workorder[step];
-                    console.log(steparr);
+                    //console.log(steparr);
                     for (var j = 0; j < steparr.length; j++) {
                         $('#step' + steparr[j].step_id).parent().show();
                         //读取对应措施配置
@@ -959,7 +959,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         } else {
                             var step = Config.workorder.customer_problem_group[id].step;
                             var steparr = Config.workorder[step];
-                            console.log(steparr);
+                            //console.log(steparr);
                             for (var j = 0; j < steparr.length; j++) {
                                 $('#step' + steparr[j].step_id).parent().show();
                                 //读取对应措施配置
@@ -1225,7 +1225,7 @@ function changeFrame(is_edit = 0, work_id = 0) {
     }, function (data, ret) {
         //失败的回调
         alert(ret.msg);
-        console.log(ret);
+        //console.log(ret);
         return false;
     });
 }
@@ -1278,7 +1278,7 @@ function cancelOrder(is_edit = 0, work_id = 0) {
     }, function (data, ret) {
         //失败的回调
         alert(ret.msg);
-        console.log(ret);
+        //console.log(ret);
         return false;
     });
 }
