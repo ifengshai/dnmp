@@ -37,7 +37,7 @@ class Ding extends Controller
     {
         $params = [
             'call_back_tag' => ['user_add_org', 'user_modify_org', 'user_leave_org', 'org_dept_create', 'org_dept_modify', 'org_dept_remove'],
-            'url' => 'http://xms.crasphter.cn/api/ding/receive',
+            'url' => 'http://mojing.mruilove.com/api/ding/receive',
         ];
         $this->app->callback->register($params);
     }
@@ -51,7 +51,7 @@ class Ding extends Controller
     {
         $params = [
             'call_back_tag' => ['user_add_org', 'user_modify_org', 'user_leave_org', 'org_dept_create', 'org_dept_modify', 'org_dept_remove'],
-            'url' => 'http://xms.crasphter.cn/api/ding/receive',
+            'url' => 'http://mojing.mruilove.com/api/ding/receive',
         ];
         $this->app->callback->update($params);
     }
@@ -65,7 +65,6 @@ class Ding extends Controller
         // 获取 server 实例
         $server = $this->app->server;
         $server->push(function ($payload) {
-            file_put_contents('/www/wwwroot/mjz/runtime/log/a.txt', json_encode($payload) . "\r\n", FILE_APPEND);
             $type = $payload['EventType'];
             switch ($type) {
                 //添加用户
