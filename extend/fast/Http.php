@@ -18,7 +18,7 @@ class Http
     public static function post($url, $params = [], $options = [])
     {
         $req = self::sendRequest($url, $params, 'POST', $options);
-        return $req['ret'] ? $req['msg'] : '';
+        return $req['ret'] ? $req['msg'] : json_encode(['status' => $req['errno'],'msg' => $req['msg']]);
     }
 
     /**
@@ -31,7 +31,7 @@ class Http
     public static function get($url, $params = [], $options = [])
     {
         $req = self::sendRequest($url, $params, 'GET', $options);
-        return $req['ret'] ? $req['msg'] : '';
+        return $req['ret'] ? $req['msg'] : json_encode(['status' => $req['errno'],'msg' => $req['msg']]);
     }
 
     /**

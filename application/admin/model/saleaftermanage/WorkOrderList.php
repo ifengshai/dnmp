@@ -188,7 +188,7 @@ class WorkOrderList extends Model
                 $url = 'http://api.voogueme.com/';
                 break;
             case 3:
-                $url = 'http://nh.zhaokuangyi.com/';
+                $url = 'https://nh.zhaokuangyi.com/';
                 break;
             case 5:
                 $url = 'http://www.eseeoptical.com/';
