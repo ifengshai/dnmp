@@ -388,8 +388,8 @@ class WorkOrderList extends Backend
                             throw new Exception("添加失败！！");
                         }
                     }
-                    //不需要审核时直接发送积分，赠送优惠券
-                    if ($params['is_check'] != 1) {
+                    //不需要审核且是非草稿状态时直接发送积分，赠送优惠券
+                    if ($params['is_check'] != 1 && $this->model->work_status != 1) {
                         //赠送积分
                         if (in_array(10, array_filter($params['measure_choose_id']))) {
                             $this->model->presentIntegral($this->model->id);
@@ -399,8 +399,11 @@ class WorkOrderList extends Backend
                             $this->model->presentCoupon($this->model->id);
                         }
                     }
-                    //进入审核阶段
-                    $this->model->checkWork($this->model->id);
+                    //非草稿状态进入审核阶段
+                    if($this->model->work_status != 1){
+                        $this->model->checkWork($this->model->id);
+                    }
+
 
                     Db::commit();
                 } catch (ValidateException $e) {
