@@ -11,6 +11,7 @@ use Util\NihaoPrescriptionDetailHelper;
 use Util\VooguemePrescriptionDetailHelper;
 use Util\ZeeloolPrescriptionDetailHelper;
 use Util\WeseeopticalPrescriptionDetailHelper;
+use GuzzleHttp\Client;
 
 
 class WorkOrderList extends Model
@@ -197,14 +198,18 @@ class WorkOrderList extends Model
                 return false;
                 break;
         }
-        //echo json_encode($params);die;
         $url = $url . $pathinfo;
+        $client = new Client();
         try {
             if ($method == 'GET') {
-                $res = json_decode(Http::get($url, $params), true);
+                $response = $client->request('GET', $url, array('query'=>$params));
             } else {
-                $res = json_decode(Http::post($url, $params));
+                $response = $client->request('POST', $url, array('form_params'=>$params));
             }
+            $body = $response->getBody();
+
+            $stringBody = (string) $body;
+            $res = json_decode($stringBody,true);
             if($res['status'] == 200){
                 return $res['data'];
             }

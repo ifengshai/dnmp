@@ -31,6 +31,7 @@ class Http
     public static function get($url, $params = [], $options = [])
     {
         $req = self::sendRequest($url, $params, 'GET', $options);
+        echo $url;die;
         return $req['ret'] ? $req['msg'] : json_encode(['status' => $req['errno'],'msg' => $req['msg']]);
     }
 
