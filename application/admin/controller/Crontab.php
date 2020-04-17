@@ -1234,10 +1234,10 @@ order by sfoi.item_id asc limit 1000";
         $nihao_model->table('sales_flat_quote')->query("set time_zone='+8:00'");
         $nihao_model->table('customer_entity')->query("set time_zone='+8:00'");
         //计算前一天的销量
-        $stime = date("Y-m-d 00:00:00", strtotime("-1 day"));
-        $etime = date("Y-m-d 23:59:59", strtotime("-1 day"));
+        $stime = date("Y-m-d 00:00:00", strtotime("-2 day"));
+        $etime = date("Y-m-d 23:59:59", strtotime("-2 day"));
         $map['created_at'] = $date['created_at'] = $update['updated_at'] =  ['between', [$stime, $etime]];
-        $map['status'] = ['in', ['processing', 'complete', 'creditcard_proccessing']];
+        $map['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
         $zeelool_count = $zeelool_model->table('sales_flat_order')->where($map)->count(1);
         $zeelool_total = $zeelool_model->table('sales_flat_order')->where($map)->sum('base_grand_total');
         //zeelool客单价
