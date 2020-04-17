@@ -29,7 +29,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         { checkbox: true },
                         { field: 'id', title: __('Id') },
                         { field: 'work_platform', title: __('work_platform'), custom: { 1: 'blue', 2: 'danger', 3: 'orange' }, searchList: { 1: 'Zeelool', 2: 'Voogueme', 3: 'Nihao' }, formatter: Table.api.formatter.status },
-                        { field: 'work_type_str', title: __('Work_type') },
+                        { field: 'work_type_str', title: __('Work_type'), operate: false },
+                        { field: 'work_type', title: __('Work_type'), searchList: { 1: '客服工单', 2: '仓库工单' }, visible: false, formatter: Table.api.formatter.status },
                         { field: 'platform_order', title: __('Platform_order') },
                         /*{ field: 'order_sku', title: __('Order_sku') },*/
 
@@ -126,6 +127,20 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                             formatter: function (value, rows) {
                                 var all_user_name = '';
                                 all_user_name += '<div class="step_recept"><b class="step">创建时间：</b><b class="recept">' + value + '</b></div>';
+                                if (rows.submit_time) {
+                                    all_user_name += '<br><div class="step_recept"><b class="step">提交时间：</b><b class="recept">' + rows.submit_time + '</b></div>';
+                                }
+                                if (rows.check_time) {
+                                    all_user_name += '<br><div class="step_recept"><b class="step">审核时间：</b><b class="recept">' + rows.check_time + '</b></div>';
+                                }
+
+                                if (rows.complete_time) {
+                                    all_user_name += '<br><div class="step_recept"><b class="step">完成时间：</b><b class="recept">' + rows.complete_time + '</b></div>';
+                                }
+
+                                if (rows.cancel_time) {
+                                    all_user_name += '<br><div class="step_recept"><b class="step">取消时间：</b><b class="recept">' + rows.cancel_time + '</b></div>';
+                                }
 
                                 return all_user_name;
                             },
@@ -158,27 +173,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                         return true;
                                     }
                                 },
-                                {
-                                    name: 'del',
-                                    text: __('删除'),
-                                    title: __('删除'),
-                                    classname: 'btn btn-xs btn-success btn-magic btn-ajax',
-                                    url: 'demand/it_web_demand/del',
-                                    success: function (data, ret) {
-                                        table.bootstrapTable('refresh');
-                                    },
-                                    callback: function (data) {
-                                    },
-                                    visible: function (row) {
-                                        if (row.status == 1 || row.status == 2) {
-                                            if (row.demand_del && row.is_entry_user_hidden == 1) {//操作权限
-                                                return true;
-                                            }
-                                        } else {
-                                            return false;
-                                        }
-                                    }
-                                },
+
                                 {
                                     name: 'edit',
                                     text: __('编辑'),
@@ -191,6 +186,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     callback: function (data) {
                                     },
                                     visible: function (row) {
+
                                         if (row.status == 1 || row.status == 2) {
                                             if (row.demand_del && row.is_entry_user_hidden == 1) {//操作权限
                                                 return true;
@@ -210,7 +206,67 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     callback: function (data) {
                                     },
                                     visible: function (row) {
-                                        if (row.work_type == 2 && row.is_after_deal_with == 0) {
+                                        if (row.work_type == 2 && row.is_after_deal_with == 0 && row.work_type != 6) {
+                                            return true;
+                                        } else {
+                                            return false;
+                                        }
+                                    }
+                                },
+                                {
+                                    name: 'submit',
+                                    text: __('提交'),
+                                    title: __('提交'),
+                                    classname: 'btn btn-xs btn-success btn-ajax',
+                                    url: 'saleaftermanage/work_order_list/setStatus/work_status/2',
+                                    extend: 'data-area = \'["100%","100%"]\'',
+                                    success: function (data, ret) {
+                                        table.bootstrapTable('refresh');
+                                    },
+                                    callback: function (data) {
+                                    },
+                                    visible: function (row) {
+                                        if (row.work_status == 0) {
+                                            return true;
+                                        } else {
+                                            return false;
+                                        }
+                                    }
+                                },
+                                {
+                                    name: 'cancel',
+                                    text: __('取消'),
+                                    title: __('取消'),
+                                    classname: 'btn btn-xs btn-danger btn-ajax',
+                                    url: 'saleaftermanage/work_order_list/setStatus/work_status/2',
+                                    extend: 'data-area = \'["100%","100%"]\'',
+                                    success: function (data, ret) {
+                                        table.bootstrapTable('refresh');
+                                    },
+                                    callback: function (data) {
+                                    },
+                                    visible: function (row) {
+                                        if (row.work_status == 0) {
+                                            return true;
+                                        } else {
+                                            return false;
+                                        }
+                                    }
+                                },
+                                {
+                                    name: 'cancel',
+                                    text: __('撤销'),
+                                    title: __('撤销'),
+                                    classname: 'btn btn-xs btn-danger btn-ajax',
+                                    url: 'saleaftermanage/work_order_list/setStatus/work_status/8',
+                                    extend: 'data-area = \'["100%","100%"]\'',
+                                    success: function (data, ret) {
+                                        table.bootstrapTable('refresh');
+                                    },
+                                    callback: function (data) {
+                                    },
+                                    visible: function (row) {
+                                        if (row.work_status != 6 && row.work_status != 8 && row.work_status != 1 && row.work_status != 0) {
                                             return true;
                                         } else {
                                             return false;
@@ -254,6 +310,29 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 table.bootstrapTable('refresh', {});
                 return false;
             });
+
+
+            // //审核通过
+            // $(document).on('click', '.btn-open', function () {
+            //     var ids = Table.api.selectedids(table);
+            //     Backend.api.ajax({
+            //         url: 'saleaftermanage/work_order_list/setStatus//8',
+            //         data: { ids: ids, work_status: 3 }
+            //     }, function (data, ret) {
+            //         table.bootstrapTable('refresh');
+            //     });
+            // })
+
+            // //审核拒绝
+            // $(document).on('click', '.btn-close', function () {
+            //     var ids = Table.api.selectedids(table);
+            //     Backend.api.ajax({
+            //         url: Config.moduleurl + '/purchase/purchase_order/setStatus',
+            //         data: { ids: ids, status: 3 }
+            //     }, function (data, ret) {
+            //         table.bootstrapTable('refresh');
+            //     });
+            // })
 
         },
         add: function () {
@@ -379,7 +458,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     //追加到元素之后
                     $("#input-hidden").append(input_content);
 
-                    
+
 
                     //一般措施
                     for (var m = 0; m < checkID.length; m++) {
@@ -406,7 +485,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         } else if (problem_type_id == 2) {
                             $('.measure').hide();
                             $('.step1-1').show();
-                        }  else if (problem_type_id == 3) {
+                        } else if (problem_type_id == 3) {
                             $('.measure').hide();
                             $('.step1-1').show();
                         }
@@ -611,60 +690,60 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                 increment_id: increment_id,
                                 site_type: site_type,
                             }
-                        }, function (json,ret) {
-                                if (json.code == 0) {
-                                    Toastr.error(json.msg);
-                                    return false;
-                                }
-                                var data = json.address;
-                                var lens = json.lens;
-                                prescriptions = data.prescriptions;
-                                $('#supplement-order').html(lens.html);
-                                var order_pay_currency = $('#order_pay_currency').val();
-                                //修改地址
-                                var address = '';
-                                for (var i = 0; i < data.address.length; i++) {
-                                    if (i == 0) {
-                                        address += '<option value="' + i + '" selected>' + data.address[i].address_type + '</option>';
-                                        //补发地址自动填充第一个
-                                        $('#c-firstname').val(data.address[i].firstname);
-                                        $('#c-lastname').val(data.address[i].lastname);
-                                        $('#c-email').val(data.address[i].email);
-                                        $('#c-telephone').val(data.address[i].telephone);
-                                        $('#c-country').val(data.address[i].country_id);
-                                        $('#c-country').change();
-                                        $('#c-region').val(data.address[i].region_id);
-                                        $('#c-city').val(data.address[i].city);
-                                        $('#c-street').val(data.address[i].street);
-                                        $('#c-postcode').val(data.address[i].postcode);
-                                        $('#c-currency_code').val(order_pay_currency);
-                                    } else {
-                                        address += '<option value="' + i + '">' + data.address[i].address_type + '</option>';
-                                    }
-
-                                }
-                                $('#address_select').html(address);
-                                //选择地址切换地址
-                                $('#address_select').change(function () {
-                                    var address_id = $(this).val();
-                                    var address = data.address[address_id];
-                                    $('#c-firstname').val(address.firstname);
-                                    $('#c-lastname').val(address.lastname);
-                                    $('#c-email').val(address.email);
-                                    $('#c-telephone').val(address.telephone);
-                                    $('#c-country').val(address.country_id);
+                        }, function (json, ret) {
+                            if (json.code == 0) {
+                                Toastr.error(json.msg);
+                                return false;
+                            }
+                            var data = json.address;
+                            var lens = json.lens;
+                            prescriptions = data.prescriptions;
+                            $('#supplement-order').html(lens.html);
+                            var order_pay_currency = $('#order_pay_currency').val();
+                            //修改地址
+                            var address = '';
+                            for (var i = 0; i < data.address.length; i++) {
+                                if (i == 0) {
+                                    address += '<option value="' + i + '" selected>' + data.address[i].address_type + '</option>';
+                                    //补发地址自动填充第一个
+                                    $('#c-firstname').val(data.address[i].firstname);
+                                    $('#c-lastname').val(data.address[i].lastname);
+                                    $('#c-email').val(data.address[i].email);
+                                    $('#c-telephone').val(data.address[i].telephone);
+                                    $('#c-country').val(data.address[i].country_id);
                                     $('#c-country').change();
-                                    $('#c-region').val(address.region_id);
-                                    $('#c-city').val(address.city);
-                                    $('#c-street').val(address.street);
-                                    $('#c-postcode').val(address.postcode);
-                                })
+                                    $('#c-region').val(data.address[i].region_id);
+                                    $('#c-city').val(data.address[i].city);
+                                    $('#c-street').val(data.address[i].street);
+                                    $('#c-postcode').val(data.address[i].postcode);
+                                    $('#c-currency_code').val(order_pay_currency);
+                                } else {
+                                    address += '<option value="' + i + '">' + data.address[i].address_type + '</option>';
+                                }
 
-                                //追加
-                                lens_click_data = '<div class="margin-top:10px;">' + lens.html + '<div class="form-group-child4_del"><a href="javascript:;" style="width: 50%;" class="btn btn-danger btn-del-lens" title="删除"><i class="fa fa-trash"></i>删除</a></div></div>';
+                            }
+                            $('#address_select').html(address);
+                            //选择地址切换地址
+                            $('#address_select').change(function () {
+                                var address_id = $(this).val();
+                                var address = data.address[address_id];
+                                $('#c-firstname').val(address.firstname);
+                                $('#c-lastname').val(address.lastname);
+                                $('#c-email').val(address.email);
+                                $('#c-telephone').val(address.telephone);
+                                $('#c-country').val(address.country_id);
+                                $('#c-country').change();
+                                $('#c-region').val(address.region_id);
+                                $('#c-city').val(address.city);
+                                $('#c-street').val(address.street);
+                                $('#c-postcode').val(address.postcode);
+                            })
 
-                                $('.selectpicker ').selectpicker('refresh');
-                                Controller.api.bindevent();
+                            //追加
+                            lens_click_data = '<div class="margin-top:10px;">' + lens.html + '<div class="form-group-child4_del"><a href="javascript:;" style="width: 50%;" class="btn btn-danger btn-del-lens" title="删除"><i class="fa fa-trash"></i>删除</a></div></div>';
+
+                            $('.selectpicker ').selectpicker('refresh');
+                            Controller.api.bindevent();
                         });
                     }
                     //更加镜架的更改
@@ -941,6 +1020,25 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
         api: {
             bindevent: function () {
                 Form.api.bindevent($("form[role=form]"));
+
+                //优惠券下拉切换
+                $(document).on('change', '#c-check_coupon', function () {
+                    if ($('#c-check_coupon').val()) {
+                        $('#c-need_check_coupon').val('');
+                        $('.selectpicker ').selectpicker('refresh');
+                    }
+                })
+
+                //优惠券下拉切换
+                $(document).on('change', '#c-need_check_coupon', function () {
+                    if ($('#c-need_check_coupon').val()) {
+                        $('#c-check_coupon').val('');
+                        $('.selectpicker ').selectpicker('refresh');
+                    }
+                })
+
+
+
                 //删除一行镜架数据
                 $(document).on('click', '.btn-del', function () {
                     $(this).parent().parent().remove();
@@ -1172,7 +1270,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     }
                     //判断取消订单的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end
 
-                    
+
                 }
             },
         }

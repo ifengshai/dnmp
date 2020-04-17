@@ -141,9 +141,6 @@ class WorkOrderList extends Backend
                 }
 
                 $list[$k]['step_num'] = $this->sel_order_recept($v['id']); //获取措施相关记录
-
-                //格式化时间
-                $list[$k]['create_time'] = date('Y-m-d H:i', strtotime($v['create_time']));
             }
 
             $result = array("total" => $total, "rows" => $list);
@@ -282,7 +279,7 @@ class WorkOrderList extends Backend
                     if (($params['is_check'] == 0 && $params['work_status'] == 2) || ($params['work_type'] == 2 && $params['work_status'] == 2)) {
                         $params['work_status'] = 3;
                     }
-                    
+
                     //如果为真则为处理任务
                     if (!$params['id']) {
                         $params['recept_person_id'] = $params['recept_person_id'] ?: session('admin.id');
@@ -359,10 +356,10 @@ class WorkOrderList extends Backend
 
                     //循环插入更换镜框数据
                     $orderChangeList = [];
-                    
+
                     //判断是否选中更改镜框问题类型
                     if ($params['change_frame']) {
-                       
+
                         if (($params['problem_type_id'] == 1 && $params['work_type'] == 1) || ($params['problem_type_id'] == 2 && $params['work_type'] == 2) || ($params['problem_type_id'] == 3 && $params['work_type'] == 2)) {
                             $original_sku = $params['change_frame']['original_sku'];
                             $original_number = $params['change_frame']['original_number'];
@@ -425,7 +422,7 @@ class WorkOrderList extends Backend
                         }
                     }
                     //非草稿状态进入审核阶段
-                    if($this->model->work_status != 1){
+                    if ($this->model->work_status != 1) {
                         $this->model->checkWork($this->model->id);
                     }
 
@@ -957,7 +954,41 @@ class WorkOrderList extends Backend
         }
     }
 
-     /* 处理任务
+    /**
+     * 提交修改工单状态
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/04/17 17:16:55 
+     * @return void
+     */
+    public function setStatus($ids = null)
+    {
+        $row = $this->model->get($ids);
+        if (!$row) {
+            $this->error(__('No Results were found'));
+        }
+
+        if (request()->isAjax()) {
+            $status = input('work_status');
+            $params['work_status'] = $status;
+            if ($params['work_status'] == 2) {
+                $params['submit_time'] = date('Y-m-d H:i:s');
+            } elseif($params['work_status'] == 0 || $params['work_status'] == 8) {
+                $params['cancel_time'] = date('Y-m-d H:i:s');
+                $params['cancel_person'] = session('admin.nickname');
+            } 
+            $result = $row->allowField(true)->save($params);
+            if (false !== $result) {
+                $this->success('操作成功！！');
+            } else {
+                $this->error('操作失败！！');
+            }
+        }
+        $this->error('404 not found');
+    }
+
+    /* 处理任务
      *
      * @Description
      * @author wpl

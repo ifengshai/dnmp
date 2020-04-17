@@ -222,10 +222,10 @@ class WorkOrderList extends Model
      */
     public function changeLens($params, $work_id)
     {
+
         $measure = '';
         //修改镜片
-        if(($params['work_type'] == 1 || $params['work_type'] == 2
-            ) && $params['problem_type_id'] == 2 && in_array(1, array_filter($params['measure_choose_id']))){
+        if(($params['work_type'] == 1 || $params['work_type'] == 2) && $params['problem_type_id'] == 2 && in_array(1, array_filter($params['measure_choose_id']))){
             $measure = 1;
         }elseif(in_array(6, array_filter($params['measure_choose_id']))){ //赠品
             $measure = 2;
@@ -549,7 +549,7 @@ class WorkOrderList extends Model
             $time = date('Y-m-d H:i:s');
             $admin_id = session('admin.id');
             //不需要审核的，
-            if($work->is_check == 0){
+            if(($work->is_check == 0 && $work->work_type == 1) || ($work->is_check == 0 && $work->work_type == 2 && $work->is_after_deal_with == 1)){
                 //如果承接人是自己的话表示处理完成，不是自己的不做处理
                 $orderRecepts = WorkOrderRecept::where('work_id',$work_id)->select();
                 $allComplete = 1;
