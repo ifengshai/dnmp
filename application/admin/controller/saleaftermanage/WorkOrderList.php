@@ -390,7 +390,8 @@ class WorkOrderList extends Backend
                             $this->model->presentCoupon($this->model->id);
                         }
                     }
-
+                    //进入审核阶段
+                    $this->model->checkWork($this->model->id);
 
                     Db::commit();
                 } catch (ValidateException $e) {
@@ -859,5 +860,19 @@ class WorkOrderList extends Backend
             $this->assignconfig('measureList', $measureList);
         }
         return $this->view->fetch();
+    }
+
+    /**
+     * 审核
+     */
+    public function checkWork($ids = null)
+    {
+        $params = input('post.row/a');
+        try{
+            $this->model->checkWork($ids,$params);
+        }catch (Exception $e){
+            exception('操作失败，请重试');
+        }
+
     }
 }

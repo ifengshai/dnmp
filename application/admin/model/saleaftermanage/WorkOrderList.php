@@ -524,4 +524,89 @@ class WorkOrderList extends Model
             exception($e->getMessage());
         }
     }
+
+    /**
+     * 审核
+     * @param $work_id
+     * @param array $params
+     * @return bool
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public function checkWork($work_id,$params = [])
+    {
+        $work = self::find($work_id);
+
+        //判断是否已审核
+        if($work->check_time) return true;
+        Db::startTrans();
+        try{
+            $time = date('Y-m-d H:i:s');
+            $admin_id = session('admin.id');
+            //不需要审核的，
+            if($work->is_check == 0){
+                //如果承接人是自己的话表示处理完成，不是自己的不做处理
+                $orderRecepts = WorkOrderRecept::where('work_id',$work_id)->select();
+                $allComplete = 1;
+                foreach($orderRecepts as $orderRecept){
+                    //承接人是自己，则措施，承接默认完成
+                    if($orderRecept->recept_person_id == $admin_id){
+                        WorkOrderRecept::where('id',$orderRecept->id)->update(['recept_status' => 2,'finish_time' => $time,'note' => '自动处理完成']);
+                        WorkOrderMeasure::where('id',$orderRecept->measure_id)->update(['operation_type' => 1, 'operation_time' => $time]);
+                    }else{
+                        $allComplete = 0;
+                    }
+                }
+                $work->check_note = '系统自动审核通过';
+                $work->check_time = $time;
+                $work->submit_time = $time;
+                if($allComplete == 1){
+                    //处理完成
+                    $work->work_status = 6;
+                    $work->complete_time = $time;
+                }else{
+                    //部分处理
+                    $work->work_status = 5;
+                }
+                $work->save();
+                //工单备注表
+                $remarkData = [
+                    'work_id' => $work_id,
+                    'remark_type' => 1,
+                    'remark_record' => '系统自动审核通过',
+                    'create_person_id' => $admin_id,
+                    'create_person' => session('admin.nickname'),
+                    'create_time' => $time
+                ];
+                WorkOrderRemark::create($remarkData);
+            }
+            //需要审核的
+            if($work->is_check == 1){
+                $work_status = $params['work_status'];
+                $work->work_status = $work_status;
+                $work->operation_user_id = $admin_id;
+                $work->check_note = $params['check_note'];
+                $work->submit_time = $time;
+                $work->check_time = $time;
+                $work->save();
+
+                //工单备注表
+                $remarkData = [
+                    'work_id' => $work_id,
+                    'remark_type' => 1,
+                    'remark_record' => $params['check_note'],
+                    'create_person_id' => $admin_id,
+                    'create_person' => session('admin.nickname'),
+                    'create_time' => $time
+                ];
+                WorkOrderRemark::create($remarkData);
+            }
+            Db::commit();
+        }catch(Exception $e){
+            Db::rollback();
+            exception($e->getMessage());
+        }
+
+    }
 }
