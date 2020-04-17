@@ -201,14 +201,14 @@ class WorkOrderList extends Model
         $url = $url . $pathinfo;
         try {
             if ($method == 'GET') {
-                $res = json_decode(Http::get($url, []), true);
+                $res = json_decode(Http::get($url, $params), true);
             } else {
-                $res = json_decode(Http::post($url, $params), true);
+                $res = json_decode(Http::post($url, $params));
             }
             if($res['status'] == 200){
                 return $res['data'];
             }
-            exception($res['msg']);
+            exception($res['msg'].'   error_code:'.$res['status']);
         } catch (Exception $e) {
             exception($e->getMessage());
         }
@@ -224,7 +224,8 @@ class WorkOrderList extends Model
     {
         $measure = '';
         //修改镜片
-        if($params['problem_type_id'] == 2 && in_array(1, array_filter($params['measure_choose_id']))){
+        if(($params['work_type'] == 1 || $params['work_type'] == 2
+            ) && $params['problem_type_id'] == 2 && in_array(1, array_filter($params['measure_choose_id']))){
             $measure = 1;
         }elseif(in_array(6, array_filter($params['measure_choose_id']))){ //赠品
             $measure = 2;
@@ -410,7 +411,7 @@ class WorkOrderList extends Model
                 'last_name' => $address['lastname'],
                 'postcode' => $address['postcode'],
                 'city' => $address['city'],
-                'region_code' => $address['region_id'],
+                'region_id' => $address['region_id'],
                 'street' => $address['street'],
             ];
             $pdCheck = $pd = $prismcheck = '';
@@ -433,17 +434,21 @@ class WorkOrderList extends Model
             if ($od_pv || $os_pv || $od_bd || $os_bd || $od_pv_r || $os_pv_r || $od_bd_r || $os_bd_r) {
                 $prismcheck = 'on';
             }
+            $is_frame_only = 0;
+            if($prescriptions['lens_id'] || $prescriptions['coating_id'] || $prescriptions['color_id']){
+                $is_frame_only = 1;
+            }
             $postData['product'][$key] = [
                 'sku' => $changeSku['original_sku'],
                 'qty' => $changeSku['original_number'],
                 'prescription_type' => $changeSku['recipe_type'],
-                'is_frame_only' => $changeSku['recipe_type'],
+                'is_frame_only' => $is_frame_only,
                 'od_sph' => $changeSku['od_sph'],
-                'od_sph' => $changeSku['od_sph'],
+                'os_sph' => $changeSku['os_sph'],
                 'od_cyl' => $changeSku['od_cyl'],
                 'os_cyl' => $changeSku['os_cyl'],
                 'od_axis' => $changeSku['od_axis'],
-                'od_axis' => $changeSku['od_axis'],
+                'os_axis' => $changeSku['os_axis'],
                 'od_add' => $changeSku['od_add'],
                 'os_add' => $changeSku['os_add'],
                 'pd' => $pd,
@@ -470,7 +475,7 @@ class WorkOrderList extends Model
         }
         $postData = array_merge($postData, $postDataCommon);
         try {
-            $res = $this->httpRequest($siteType, 'magic/order/createOrder', $postData, 'POST');
+            $res = $this->httpRequest($siteType, 'magic/order/createOrder', $postData, 'GET');
             $increment_id = $res['increment_id'];
             //replacement_order添加补发的订单号
             WorkOrderChangeSku::where(['work_id' => $work_id, 'change_type' => 5])->setField('replacement_order', $increment_id);
@@ -522,5 +527,93 @@ class WorkOrderList extends Model
         }catch (Exception $e){
             exception($e->getMessage());
         }
+    }
+
+    /**
+     * 审核
+     * @param $work_id
+     * @param array $params
+     * @return bool
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public function checkWork($work_id,$params = [])
+    {
+        $work = self::find($work_id);
+
+        //判断是否已审核
+        if($work->check_time) return true;
+        Db::startTrans();
+        try{
+            $time = date('Y-m-d H:i:s');
+            $admin_id = session('admin.id');
+            //不需要审核的，
+            if($work->is_check == 0){
+                //如果承接人是自己的话表示处理完成，不是自己的不做处理
+                $orderRecepts = WorkOrderRecept::where('work_id',$work_id)->select();
+                $allComplete = 1;
+                foreach($orderRecepts as $orderRecept){
+                    //承接人是自己，则措施，承接默认完成
+                    if($orderRecept->recept_person_id == $admin_id){
+                        WorkOrderRecept::where('id',$orderRecept->id)->update(['recept_status' => 2,'finish_time' => $time,'note' => '自动处理完成']);
+                        WorkOrderMeasure::where('id',$orderRecept->measure_id)->update(['operation_type' => 1, 'operation_time' => $time]);
+                    }else{
+                        $allComplete = 0;
+                    }
+                }
+                $work->check_note = '系统自动审核通过';
+                $work->check_time = $time;
+                $work->submit_time = $time;
+                if($allComplete == 1){
+                    //处理完成
+                    $work->work_status = 6;
+                    $work->complete_time = $time;
+                }else{
+                    //部分处理
+                    $work->work_status = 5;
+                }
+                $work->save();
+                //工单备注表
+                $remarkData = [
+                    'work_id' => $work_id,
+                    'remark_type' => 1,
+                    'remark_record' => '系统自动审核通过',
+                    'create_person_id' => $admin_id,
+                    'create_person' => session('admin.nickname'),
+                    'create_time' => $time
+                ];
+                WorkOrderRemark::create($remarkData);
+            }
+            //需要审核的，有参数才进行审核处理，其余跳过
+            if(!empty($params)){
+                if($work->is_check == 1){
+                    $work_status = $params['work_status'];
+                    $work->work_status = $work_status;
+                    $work->operation_user_id = $admin_id;
+                    $work->check_note = $params['check_note'];
+                    $work->submit_time = $time;
+                    $work->check_time = $time;
+                    $work->save();
+
+                    //工单备注表
+                    $remarkData = [
+                        'work_id' => $work_id,
+                        'remark_type' => 1,
+                        'remark_record' => $params['check_note'],
+                        'create_person_id' => $admin_id,
+                        'create_person' => session('admin.nickname'),
+                        'create_time' => $time
+                    ];
+                    WorkOrderRemark::create($remarkData);
+                }
+            }
+
+            Db::commit();
+        }catch(Exception $e){
+            Db::rollback();
+            exception($e->getMessage());
+        }
+
     }
 }

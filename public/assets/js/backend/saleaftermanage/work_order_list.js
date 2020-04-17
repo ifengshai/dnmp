@@ -104,10 +104,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                 if (value) {
                                     for (i = 0, len = value.length; i < len; i++) {
                                         if (value[i].operation_type == 0) {
-                                            all_user_name += '<div class="step_recept"><b class="step">' + value[i].measure_content + '：</b><b class="recept">未处理</b></div>';
+                                            all_user_name += '<div class="step_recept"><b class="step">' + value[i].measure_content + '：</b><b class="recept text-red">未处理</b></div>';
                                         }
                                         if (value[i].operation_type == 1) {
-                                            all_user_name += '<div class="step_recept"><b class="step">' + value[i].measure_content + '：</b><b class="recept">处理成功</b></div>';
+                                            all_user_name += '<div class="step_recept"><b class="step">' + value[i].measure_content + '：</b><b class="recept text-green">处理成功</b></div>';
                                         }
                                         if (value[i].operation_type == 2) {
                                             all_user_name += '<div class="step_recept"><b class="step">' + value[i].measure_content + '：</b><b class="recept">处理失败</b></div>';
@@ -295,7 +295,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     } else {
                         var step = Config.workorder.customer_problem_group[id].step;
                         var steparr = Config.workorder[step];
-                        console.log(steparr);
+                        //console.log(steparr);
                         for (var j = 0; j < steparr.length; j++) {
                             $('#step' + steparr[j].step_id).parent().show();
                             //读取对应措施配置
@@ -605,23 +605,19 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     //补发
                     if (value == 7 && check === true) {
                         //获取补发的信息
-                        $.ajax({
-                            type: "POST",
-                            url: "saleaftermanage/work_order_list/ajaxGetAddress",
-                            dataType: "json",
-                            cache: false,
-                            async: false,
+                        Backend.api.ajax({
+                            url: 'saleaftermanage/work_order_list/ajaxGetAddress',
                             data: {
                                 increment_id: increment_id,
                                 site_type: site_type,
-                            },
-                            success: function (json) {
+                            }
+                        }, function (json,ret) {
                                 if (json.code == 0) {
                                     Toastr.error(json.msg);
                                     return false;
                                 }
-                                var data = json.data.address;
-                                var lens = json.data.lens;
+                                var data = json.address;
+                                var lens = json.lens;
                                 prescriptions = data.prescriptions;
                                 $('#supplement-order').html(lens.html);
                                 var order_pay_currency = $('#order_pay_currency').val();
@@ -669,7 +665,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
 
                                 $('.selectpicker ').selectpicker('refresh');
                                 Controller.api.bindevent();
-                            }
                         });
                     }
                     //更加镜架的更改
@@ -915,7 +910,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     }
 
                     var steparr = Config.workorder[step];
-                    console.log(steparr);
+                    //console.log(steparr);
                     for (var j = 0; j < steparr.length; j++) {
                         $('#step' + steparr[j].step_id).parent().show();
                         //读取对应措施配置
@@ -981,7 +976,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         } else {
                             var step = Config.workorder.customer_problem_group[id].step;
                             var steparr = Config.workorder[step];
-                            console.log(steparr);
+                            //console.log(steparr);
                             for (var j = 0; j < steparr.length; j++) {
                                 $('#step' + steparr[j].step_id).parent().show();
                                 //读取对应措施配置
