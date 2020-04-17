@@ -226,6 +226,11 @@
         width: 32%;
     }
 
+    .step6_function2_child {
+        padding: 24px;
+        float: left;
+        width: 100%;
+    }
     .step7_function2_child {
         padding: 8px;
         float: left;
@@ -235,8 +240,14 @@
     .step7_function2_child label {
         width: 40%;
     }
+    .step6_function2_child label {
+        width: 40%;
+    }
 
     .step7_function2_child div {
+        width: 58%;
+    }
+    .step6_function2_child div {
         width: 58%;
     }
 
@@ -508,7 +519,7 @@
             </div>
             <div class="add_gift" id="add_box_option">
                 <div class="step7_function2 prescription_type_step" style="margin-top:10px;">
-                    <div class="step7_function2_child">
+                    <div class="step6_function2_child">
                         <label class="control-label col-xs-12 col-sm-3">SKU:</label>
                         <div class="col-xs-12 col-sm-8">
                             <input class="form-control" name="row[gift][original_sku][]" type="text" value="">
@@ -516,13 +527,13 @@
                         </div>
                     </div>
 
-                    <div class="step7_function2_child">
+                    <div class="step6_function2_child">
                         <label class="control-label col-xs-12 col-sm-3">QTY:</label>
                         <div class="col-xs-12 col-sm-8">
                             <input class="form-control" name="row[gift][original_number][]" type="text" value="">
                         </div>
                     </div>
-                    <div class="step7_function2_child">
+                    <div class="step6_function2_child">
                         <label class="control-label col-xs-12 col-sm-3">prescription_type:</label>
                         <div class="col-xs-12 col-sm-8">
                             <select class="form-control selectpicker prescription_type" name="row[gift][recipe_type][]"
@@ -536,6 +547,13 @@
 
                 <div class="step1_function3" style="margin-top:10px;">
                     <div class="panel-body">
+                        <div class="step1_function3_child">
+                            <label class="control-label col-xs-12 col-sm-3">color_type:</label>
+                            <div class="col-xs-12 col-sm-8">
+                                <select id="color_type" class="form-control selectpicker" name="row[gift][color_id][]"  title="请选择">
+                                </select>
+                            </div>
+                        </div>
                         <div class="step1_function3_child">
                             <label class="control-label col-xs-12 col-sm-3">lens_type:</label>
                             <div class="col-xs-12 col-sm-8">
@@ -802,6 +820,13 @@
 
                     <div class="step7_function3">
                         <div class="panel-body">
+                            <div class="step7_function3_child">
+                                <label class="control-label col-xs-12 col-sm-3">color_type:</label>
+                                <div class="col-xs-12 col-sm-8">
+                                    <select id="color_type" class="form-control selectpicker" name="row[gift][color_id][]"  title="请选择">
+                                    </select>
+                                </div>
+                            </div>
                             <div class="step7_function3_child">
                                 <label class="control-label col-xs-12 col-sm-3">lens_type:</label>
                                 <div class="col-xs-12 col-sm-8">
@@ -1090,6 +1115,13 @@
 
                     <div class="step1_function3">
                         <div class="panel-body">
+                            <div class="step1_function3_child">
+                                <label class="control-label col-xs-12 col-sm-3">color_type:</label>
+                                <div class="col-xs-12 col-sm-8">
+                                    <select id="color_type" class="form-control selectpicker" name="row[gift][color_id][]"  title="请选择">
+                                    </select>
+                                </div>
+                            </div>
                             <div class="step1_function3_child">
                                 <label class="control-label col-xs-12 col-sm-3">lens_type:</label>
                                 <div class="col-xs-12 col-sm-8">

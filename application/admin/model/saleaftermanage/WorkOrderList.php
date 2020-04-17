@@ -580,27 +580,30 @@ class WorkOrderList extends Model
                 ];
                 WorkOrderRemark::create($remarkData);
             }
-            //需要审核的
-            if($work->is_check == 1){
-                $work_status = $params['work_status'];
-                $work->work_status = $work_status;
-                $work->operation_user_id = $admin_id;
-                $work->check_note = $params['check_note'];
-                $work->submit_time = $time;
-                $work->check_time = $time;
-                $work->save();
+            //需要审核的，有参数才进行审核处理，其余跳过
+            if(!empty($params)){
+                if($work->is_check == 1){
+                    $work_status = $params['work_status'];
+                    $work->work_status = $work_status;
+                    $work->operation_user_id = $admin_id;
+                    $work->check_note = $params['check_note'];
+                    $work->submit_time = $time;
+                    $work->check_time = $time;
+                    $work->save();
 
-                //工单备注表
-                $remarkData = [
-                    'work_id' => $work_id,
-                    'remark_type' => 1,
-                    'remark_record' => $params['check_note'],
-                    'create_person_id' => $admin_id,
-                    'create_person' => session('admin.nickname'),
-                    'create_time' => $time
-                ];
-                WorkOrderRemark::create($remarkData);
+                    //工单备注表
+                    $remarkData = [
+                        'work_id' => $work_id,
+                        'remark_type' => 1,
+                        'remark_record' => $params['check_note'],
+                        'create_person_id' => $admin_id,
+                        'create_person' => session('admin.nickname'),
+                        'create_time' => $time
+                    ];
+                    WorkOrderRemark::create($remarkData);
+                }
             }
+
             Db::commit();
         }catch(Exception $e){
             Db::rollback();
