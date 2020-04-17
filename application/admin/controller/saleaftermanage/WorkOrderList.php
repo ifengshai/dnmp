@@ -920,11 +920,12 @@ class WorkOrderList extends Backend
     public function checkWork($ids = null)
     {
         $params = input('post.row/a');
-        try{
-            $this->model->checkWork($ids,$params);
-        }catch (Exception $e){
+        try {
+            $this->model->checkWork($ids, $params);
+        } catch (Exception $e) {
             exception('操作失败，请重试');
         }
+    }
 
      /* 处理任务
      *
