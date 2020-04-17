@@ -29,7 +29,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         { checkbox: true },
                         { field: 'id', title: __('Id') },
                         { field: 'work_platform', title: __('work_platform'), custom: { 1: 'blue', 2: 'danger', 3: 'orange' }, searchList: { 1: 'Zeelool', 2: 'Voogueme', 3: 'Nihao' }, formatter: Table.api.formatter.status },
-                        { field: 'work_type_str', title: __('Work_type') },
+                        { field: 'work_type_str', title: __('Work_type'), operate: false },
+                        { field: 'work_type', title: __('Work_type'), searchList: { 1: '客服工单', 2: '仓库工单' }, visible: false, formatter: Table.api.formatter.status },
                         { field: 'platform_order', title: __('Platform_order') },
                         /*{ field: 'order_sku', title: __('Order_sku') },*/
 
@@ -104,10 +105,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                 if (value) {
                                     for (i = 0, len = value.length; i < len; i++) {
                                         if (value[i].operation_type == 0) {
-                                            all_user_name += '<div class="step_recept"><b class="step">' + value[i].measure_content + '：</b><b class="recept">未处理</b></div>';
+                                            all_user_name += '<div class="step_recept"><b class="step">' + value[i].measure_content + '：</b><b class="recept text-red">未处理</b></div>';
                                         }
                                         if (value[i].operation_type == 1) {
-                                            all_user_name += '<div class="step_recept"><b class="step">' + value[i].measure_content + '：</b><b class="recept">处理成功</b></div>';
+                                            all_user_name += '<div class="step_recept"><b class="step">' + value[i].measure_content + '：</b><b class="recept text-green">处理成功</b></div>';
                                         }
                                         if (value[i].operation_type == 2) {
                                             all_user_name += '<div class="step_recept"><b class="step">' + value[i].measure_content + '：</b><b class="recept">处理失败</b></div>';
@@ -126,6 +127,20 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                             formatter: function (value, rows) {
                                 var all_user_name = '';
                                 all_user_name += '<div class="step_recept"><b class="step">创建时间：</b><b class="recept">' + value + '</b></div>';
+                                if (rows.submit_time) {
+                                    all_user_name += '<br><div class="step_recept"><b class="step">提交时间：</b><b class="recept">' + rows.submit_time + '</b></div>';
+                                }
+                                if (rows.check_time) {
+                                    all_user_name += '<br><div class="step_recept"><b class="step">审核时间：</b><b class="recept">' + rows.check_time + '</b></div>';
+                                }
+
+                                if (rows.complete_time) {
+                                    all_user_name += '<br><div class="step_recept"><b class="step">完成时间：</b><b class="recept">' + rows.complete_time + '</b></div>';
+                                }
+
+                                if (rows.cancel_time) {
+                                    all_user_name += '<br><div class="step_recept"><b class="step">取消时间：</b><b class="recept">' + rows.cancel_time + '</b></div>';
+                                }
 
                                 return all_user_name;
                             },
@@ -151,34 +166,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     icon: 'fa fa-list',
                                     url: 'saleaftermanage/work_order_list/detail',
                                     callback: function (data) {
-                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), {title: "回传数据"});
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
                                     },
                                     visible: function (row) {
                                         //返回true时按钮显示,返回false隐藏
                                         return true;
                                     }
                                 },
-                                {
-                                    name: 'del',
-                                    text: __('删除'),
-                                    title: __('删除'),
-                                    classname: 'btn btn-xs btn-success btn-magic btn-ajax',
-                                    url: 'demand/it_web_demand/del',
-                                    success: function (data, ret) {
-                                        table.bootstrapTable('refresh');
-                                    },
-                                    callback: function (data) {
-                                    },
-                                    visible: function (row) {
-                                        if (row.status == 1 || row.status == 2) {
-                                            if (row.demand_del && row.is_entry_user_hidden == 1) {//操作权限
-                                                return true;
-                                            }
-                                        } else {
-                                            return false;
-                                        }
-                                    }
-                                },
+
                                 {
                                     name: 'edit',
                                     text: __('编辑'),
@@ -191,6 +186,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     callback: function (data) {
                                     },
                                     visible: function (row) {
+
                                         if (row.status == 1 || row.status == 2) {
                                             if (row.demand_del && row.is_entry_user_hidden == 1) {//操作权限
                                                 return true;
@@ -201,248 +197,82 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     }
                                 },
                                 {
-                                    name: 'test_distribution',
-                                    text: __('测试确认'),
-                                    title: __('测试确认'),
-                                    classname: 'btn btn-xs btn-primary btn-dialog',
-                                    url: 'demand/it_web_demand/test_distribution/demand_type/2',
+                                    name: 'process',
+                                    text: __('处理'),
+                                    title: __('处理'),
+                                    classname: 'btn btn-xs btn-success btn-dialog',
+                                    url: 'saleaftermanage/work_order_list/add',
+                                    extend: 'data-area = \'["100%","100%"]\'',
                                     callback: function (data) {
                                     },
                                     visible: function (row) {
-                                        if (row.status == 1) {
-                                            if (row.demand_test_distribution) {//操作权限
-                                                return true;
-                                            }
-                                        } else {
-                                            return false;
-                                        }
-                                    }
-                                },
-                                {
-                                    name: 'through_demand',
-                                    text: __('通过'),
-                                    title: __('通过'),
-                                    classname: 'btn btn-xs btn-success btn-magic btn-ajax',
-                                    icon: 'fa fa-magic',
-                                    url: 'demand/it_web_demand/through_demand',
-                                    success: function (data, ret) {
-                                        table.bootstrapTable('refresh');
-                                    },
-                                    error: function (data, ret) {
-                                        console.log(data, ret);
-                                        Layer.alert(ret.msg);
-                                        return false;
-                                    },
-                                    visible: function (row) {
-                                        if (row.status == 2) {
-                                            if (row.demand_through_demand) {//操作权限
-                                                return true;
-                                            }
-                                        } else {
-                                            return false;
-                                        }
-                                    }
-                                },
-                                {
-                                    name: 'group_finish',
-                                    text: __('完成'),
-                                    title: __('完成'),
-                                    classname: 'btn btn-xs btn-primary btn-dialog',
-                                    url: 'demand/it_web_demand/group_finish/demand_type/2',
-                                    callback: function (data) {
-                                    },
-                                    visible: function (row) {
-                                        if (row.status == 3) {
-                                            if (row.demand_finish) {//操作权限
-                                                if (row.web_designer_group == 0 && row.phper_group == 0 && row.app_group == 0) {
-                                                    return false;
-                                                } else {
-                                                    return true;
-                                                }
-                                            }
-                                        }
-                                    }
-                                },
-                                {
-                                    name: 'test_record_bug',
-                                    text: __('记录问题'),
-                                    title: __('记录问题'),
-                                    classname: 'btn btn-xs btn-primary btn-dialog',
-                                    url: 'demand/it_web_demand/test_record_bug',
-                                    callback: function (data) {
-                                    },
-                                    visible: function (row) {
-                                        if (row.status == 4) {
-                                            if (row.demand_test_record_bug && row.is_test_record_hidden == 1) {//操作权限及显示权限
-                                                if (row.test_is_finish == 0) {
-                                                    return true;
-                                                } else {
-                                                    return false;
-                                                }
-                                            }
-                                        }
-                                    }
-                                },
-                                {
-                                    name: 'test_group_finish',
-                                    text: __('通过测试'),
-                                    title: __('通过测试'),
-                                    classname: 'btn btn-xs btn-success btn-magic btn-ajax',
-                                    url: 'demand/it_web_demand/test_group_finish',
-                                    confirm: '请确定是否  <b>通过测试</b>',
-                                    success: function (data, ret) {
-                                        table.bootstrapTable('refresh');
-                                        //如果需要阻止成功提示，则必须使用return false;
-                                        //return false;
-                                    },
-                                    error: function (data, ret) {
-                                        console.log(data, ret);
-                                        Layer.alert(ret.msg);
-                                        return false;
-                                    },
-                                    visible: function (row) {
-                                        if (row.status == 4) {
-                                            if (row.demand_test_finish && row.is_test_finish_hidden == 1) {//操作权限及显示权限
-                                                if (row.test_group == 1 && row.test_is_finish == 0) {
-                                                    return true;
-                                                } else {
-                                                    return false;
-                                                }
-                                            }
-                                        }
-
-                                    }
-                                },
-                                {
-                                    name: 'add',
-                                    text: __('提出人确认'),
-                                    title: __('提出人确认'),
-                                    classname: 'btn btn-xs btn-success btn-magic btn-ajax',
-                                    icon: 'fa fa-magic',
-                                    url: 'demand/it_web_demand/add/is_user_confirm/1',
-                                    confirm: '确认本需求？',
-                                    success: function (data, ret) {
-                                        table.bootstrapTable('refresh');
-                                    },
-                                    error: function (data, ret) {
-                                        console.log(data, ret);
-                                        Layer.alert(ret.msg);
-                                        return false;
-                                    },
-                                    visible: function (row) {
-                                        if (row.status == 4 || row.status == 5) {
-                                            if (row.demand_add && row.is_entry_user_hidden == 1) {//操作权限及显示权限
-                                                if (row.test_group == 1) {
-                                                    if (row.entry_user_confirm == 0) {
-                                                        return true;
-                                                    }
-                                                }
-                                            }
-                                        } else {
-                                            return false;
-                                        }
-                                    }
-                                },
-                                {
-                                    name: 'add_online',
-                                    text: __('上线'),
-                                    title: __('上线'),
-                                    classname: 'btn btn-xs btn-success btn-magic btn-ajax',
-                                    icon: 'fa fa-magic',
-                                    url: 'demand/it_web_demand/add_online',
-                                    confirm: '确定上线？',
-                                    success: function (data, ret) {
-                                        table.bootstrapTable('refresh');
-                                    },
-                                    error: function (data, ret) {
-                                        console.log(data, ret);
-                                        Layer.alert(ret.msg);
-                                        return false;
-                                    },
-                                    visible: function (row) {
-                                        if (row.status == 5) {
-                                            if (row.demand_add_online) {//操作权限
-                                                if (row.test_group == 1) {
-                                                    if (row.entry_user_confirm == 0) {
-                                                        return false;
-                                                    } else {
-                                                        return true;
-                                                    }
-                                                } else {
-                                                    return true;
-                                                }
-                                            }
-                                        } else {
-                                            return false;
-                                        }
-                                    }
-                                },
-                                {
-                                    name: 'test_record_bug',
-                                    text: __('记录问题'),
-                                    title: __('记录回归测试问题'),
-                                    classname: 'btn btn-xs btn-primary btn-dialog',
-                                    url: 'demand/it_web_demand/test_record_bug',
-                                    callback: function (data) {
-                                    },
-                                    visible: function (row) {
-                                        if (row.status == 6) {
-                                            if (row.demand_test_record_bug && row.is_test_record_hidden == 1) {//操作权限及显示权限
-                                                if (row.return_test_is_finish == 0) {
-                                                    return true;
-                                                } else {
-                                                    return false;
-                                                }
-                                            }
-                                        }
-                                    }
-                                },
-                                {
-                                    name: 'test_group_finish',
-                                    text: __('通过测试'),
-                                    title: __('通过回归测试'),
-                                    classname: 'btn btn-xs btn-success btn-magic btn-ajax',
-                                    url: 'demand/it_web_demand/test_group_finish/is_all_test/1',
-                                    confirm: '请确定是否  <b>通过测试</b>',
-                                    success: function (data, ret) {
-                                        table.bootstrapTable('refresh');
-                                        //如果需要阻止成功提示，则必须使用return false;
-                                        //return false;
-                                    },
-                                    error: function (data, ret) {
-                                        console.log(data, ret);
-                                        Layer.alert(ret.msg);
-                                        return false;
-                                    },
-                                    visible: function (row) {
-                                        if (row.status == 6) {
-                                            if (row.demand_test_finish && row.is_test_finish_hidden == 1) {//操作权限及显示权限
-                                                if (row.test_group == 1 && row.return_test_is_finish == 0) {
-                                                    return true;
-                                                } else {
-                                                    return false;
-                                                }
-                                            }
-                                        }
-
-                                    }
-                                },
-                                {
-                                    name: 'detail_log',
-                                    text: __('详情记录'),
-                                    title: __('详情记录'),
-                                    classname: 'btn btn-xs btn-primary btn-dialog',
-                                    url: 'demand/it_web_demand/detail_log/demand_type/2',
-                                    callback: function (data) {
-                                    },
-                                    visible: function (row) {
-                                        if (row.status == 7) {
+                                        if (row.work_type == 2 && row.is_after_deal_with == 0 && row.work_type != 6) {
                                             return true;
                                         } else {
                                             return false;
                                         }
                                     }
                                 },
+                                {
+                                    name: 'submit',
+                                    text: __('提交'),
+                                    title: __('提交'),
+                                    classname: 'btn btn-xs btn-success btn-ajax',
+                                    url: 'saleaftermanage/work_order_list/setStatus/work_status/2',
+                                    extend: 'data-area = \'["100%","100%"]\'',
+                                    success: function (data, ret) {
+                                        table.bootstrapTable('refresh');
+                                    },
+                                    callback: function (data) {
+                                    },
+                                    visible: function (row) {
+                                        if (row.work_status == 0) {
+                                            return true;
+                                        } else {
+                                            return false;
+                                        }
+                                    }
+                                },
+                                {
+                                    name: 'cancel',
+                                    text: __('取消'),
+                                    title: __('取消'),
+                                    classname: 'btn btn-xs btn-danger btn-ajax',
+                                    url: 'saleaftermanage/work_order_list/setStatus/work_status/2',
+                                    extend: 'data-area = \'["100%","100%"]\'',
+                                    success: function (data, ret) {
+                                        table.bootstrapTable('refresh');
+                                    },
+                                    callback: function (data) {
+                                    },
+                                    visible: function (row) {
+                                        if (row.work_status == 0) {
+                                            return true;
+                                        } else {
+                                            return false;
+                                        }
+                                    }
+                                },
+                                {
+                                    name: 'cancel',
+                                    text: __('撤销'),
+                                    title: __('撤销'),
+                                    classname: 'btn btn-xs btn-danger btn-ajax',
+                                    url: 'saleaftermanage/work_order_list/setStatus/work_status/8',
+                                    extend: 'data-area = \'["100%","100%"]\'',
+                                    success: function (data, ret) {
+                                        table.bootstrapTable('refresh');
+                                    },
+                                    callback: function (data) {
+                                    },
+                                    visible: function (row) {
+                                        if (row.work_status != 6 && row.work_status != 8 && row.work_status != 1 && row.work_status != 0) {
+                                            return true;
+                                        } else {
+                                            return false;
+                                        }
+                                    }
+                                }
                             ],
                             formatter: Table.api.formatter.buttons
                         },
@@ -480,6 +310,29 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 table.bootstrapTable('refresh', {});
                 return false;
             });
+
+
+            // //审核通过
+            // $(document).on('click', '.btn-open', function () {
+            //     var ids = Table.api.selectedids(table);
+            //     Backend.api.ajax({
+            //         url: 'saleaftermanage/work_order_list/setStatus//8',
+            //         data: { ids: ids, work_status: 3 }
+            //     }, function (data, ret) {
+            //         table.bootstrapTable('refresh');
+            //     });
+            // })
+
+            // //审核拒绝
+            // $(document).on('click', '.btn-close', function () {
+            //     var ids = Table.api.selectedids(table);
+            //     Backend.api.ajax({
+            //         url: Config.moduleurl + '/purchase/purchase_order/setStatus',
+            //         data: { ids: ids, status: 3 }
+            //     }, function (data, ret) {
+            //         table.bootstrapTable('refresh');
+            //     });
+            // })
 
         },
         add: function () {
@@ -521,7 +374,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     } else {
                         var step = Config.workorder.customer_problem_group[id].step;
                         var steparr = Config.workorder[step];
-                        console.log(steparr);
+                        //console.log(steparr);
                         for (var j = 0; j < steparr.length; j++) {
                             $('#step' + steparr[j].step_id).parent().show();
                             //读取对应措施配置
@@ -598,10 +451,15 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         //获取是否需要审核
                         if ($('#step' + id + '-is_check').val() > 0) {
                             $('#is_check').val(1);
+                        } else {
+                            $('#is_check').val(0);
                         }
                     });
                     //追加到元素之后
                     $("#input-hidden").append(input_content);
+
+
+
                     //一般措施
                     for (var m = 0; m < checkID.length; m++) {
                         var node = $('.step' + checkID[m]);
@@ -618,6 +476,21 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                             secondNode.hide();
                         }
                     }
+
+                    //判断如果为处理任务时
+                    if (Config.ids) {
+                        if (problem_type_id == 1) {
+                            $('.measure').hide();
+                            $('.step2-1').show();
+                        } else if (problem_type_id == 2) {
+                            $('.measure').hide();
+                            $('.step1-1').show();
+                        } else if (problem_type_id == 3) {
+                            $('.measure').hide();
+                            $('.step1-1').show();
+                        }
+                    }
+
                     var id = $(this).val();
                     var arr = array_filter(appoint_group.split(','));
                     var username = [];
@@ -637,7 +510,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     var appoint_users = array_filter(appoint_users);
                     $('#appoint_group_users').html(users.join(','));
                     $('#recept_person_id').val(appoint_users.join(','));
-                   
+
                     //判断更换镜框的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 start
                     if (!$('.step1-1').is(':hidden')) {
                         changeFrame();
@@ -811,71 +684,66 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     //补发
                     if (value == 7 && check === true) {
                         //获取补发的信息
-                        $.ajax({
-                            type: "POST",
-                            url: "saleaftermanage/work_order_list/ajaxGetAddress",
-                            dataType: "json",
-                            cache: false,
-                            async: false,
+                        Backend.api.ajax({
+                            url: 'saleaftermanage/work_order_list/ajaxGetAddress',
                             data: {
                                 increment_id: increment_id,
                                 site_type: site_type,
-                            },
-                            success: function (json) {
-                                if (json.code == 0) {
-                                    Toastr.error(json.msg);
-                                    return false;
-                                }
-                                var data = json.data.address;
-                                var lens = json.data.lens;
-                                prescriptions = data.prescriptions;
-                                $('#supplement-order').html(lens.html);
-                                var order_pay_currency = $('#order_pay_currency').val();
-                                //修改地址
-                                var address = '';
-                                for (var i = 0; i < data.address.length; i++) {
-                                    if (i == 0) {
-                                        address += '<option value="' + i + '" selected>' + data.address[i].address_type + '</option>';
-                                        //补发地址自动填充第一个
-                                        $('#c-firstname').val(data.address[i].firstname);
-                                        $('#c-lastname').val(data.address[i].lastname);
-                                        $('#c-email').val(data.address[i].email);
-                                        $('#c-telephone').val(data.address[i].telephone);
-                                        $('#c-country').val(data.address[i].country_id);
-                                        $('#c-country').change();
-                                        $('#c-region').val(data.address[i].region_id);
-                                        $('#c-city').val(data.address[i].city);
-                                        $('#c-street').val(data.address[i].street);
-                                        $('#c-postcode').val(data.address[i].postcode);
-                                        $('#c-currency_code').val(order_pay_currency);
-                                    } else {
-                                        address += '<option value="' + i + '">' + data.address[i].address_type + '</option>';
-                                    }
-
-                                }
-                                $('#address_select').html(address);
-                                //选择地址切换地址
-                                $('#address_select').change(function () {
-                                    var address_id = $(this).val();
-                                    var address = data.address[address_id];
-                                    $('#c-firstname').val(address.firstname);
-                                    $('#c-lastname').val(address.lastname);
-                                    $('#c-email').val(address.email);
-                                    $('#c-telephone').val(address.telephone);
-                                    $('#c-country').val(address.country_id);
-                                    $('#c-country').change();
-                                    $('#c-region').val(address.region_id);
-                                    $('#c-city').val(address.city);
-                                    $('#c-street').val(address.street);
-                                    $('#c-postcode').val(address.postcode);
-                                })
-
-                                //追加
-                                lens_click_data = '<div class="margin-top:10px;">' + lens.html + '<div class="form-group-child4_del"><a href="javascript:;" style="width: 50%;" class="btn btn-danger btn-del-lens" title="删除"><i class="fa fa-trash"></i>删除</a></div></div>';
-
-                                $('.selectpicker ').selectpicker('refresh');
-                                Controller.api.bindevent();
                             }
+                        }, function (json, ret) {
+                            if (json.code == 0) {
+                                Toastr.error(json.msg);
+                                return false;
+                            }
+                            var data = json.address;
+                            var lens = json.lens;
+                            prescriptions = data.prescriptions;
+                            $('#supplement-order').html(lens.html);
+                            var order_pay_currency = $('#order_pay_currency').val();
+                            //修改地址
+                            var address = '';
+                            for (var i = 0; i < data.address.length; i++) {
+                                if (i == 0) {
+                                    address += '<option value="' + i + '" selected>' + data.address[i].address_type + '</option>';
+                                    //补发地址自动填充第一个
+                                    $('#c-firstname').val(data.address[i].firstname);
+                                    $('#c-lastname').val(data.address[i].lastname);
+                                    $('#c-email').val(data.address[i].email);
+                                    $('#c-telephone').val(data.address[i].telephone);
+                                    $('#c-country').val(data.address[i].country_id);
+                                    $('#c-country').change();
+                                    $('#c-region').val(data.address[i].region_id);
+                                    $('#c-city').val(data.address[i].city);
+                                    $('#c-street').val(data.address[i].street);
+                                    $('#c-postcode').val(data.address[i].postcode);
+                                    $('#c-currency_code').val(order_pay_currency);
+                                } else {
+                                    address += '<option value="' + i + '">' + data.address[i].address_type + '</option>';
+                                }
+
+                            }
+                            $('#address_select').html(address);
+                            //选择地址切换地址
+                            $('#address_select').change(function () {
+                                var address_id = $(this).val();
+                                var address = data.address[address_id];
+                                $('#c-firstname').val(address.firstname);
+                                $('#c-lastname').val(address.lastname);
+                                $('#c-email').val(address.email);
+                                $('#c-telephone').val(address.telephone);
+                                $('#c-country').val(address.country_id);
+                                $('#c-country').change();
+                                $('#c-region').val(address.region_id);
+                                $('#c-city').val(address.city);
+                                $('#c-street').val(address.street);
+                                $('#c-postcode').val(address.postcode);
+                            })
+
+                            //追加
+                            lens_click_data = '<div class="margin-top:10px;">' + lens.html + '<div class="form-group-child4_del"><a href="javascript:;" style="width: 50%;" class="btn btn-danger btn-del-lens" title="删除"><i class="fa fa-trash"></i>删除</a></div></div>';
+
+                            $('.selectpicker ').selectpicker('refresh');
+                            Controller.api.bindevent();
                         });
                     }
                     //更加镜架的更改
@@ -1080,11 +948,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
         edit: function () {
             Controller.api.bindevent();
         },
-        detail:function(){
+        detail: function () {
             Controller.api.bindevent();
         },
         //处理任务
         process: function () {
+            Controller.api.bindevent();
             //点击事件 #todo::需判断仓库或者客服
             $(document).on('click', '.problem_type', function () {
                 $('.step_type').attr('checked', false);
@@ -1120,7 +989,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     }
 
                     var steparr = Config.workorder[step];
-                    console.log(steparr);
+                    //console.log(steparr);
                     for (var j = 0; j < steparr.length; j++) {
                         $('#step' + steparr[j].step_id).parent().show();
                         //读取对应措施配置
@@ -1151,6 +1020,25 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
         api: {
             bindevent: function () {
                 Form.api.bindevent($("form[role=form]"));
+
+                //优惠券下拉切换
+                $(document).on('change', '#c-check_coupon', function () {
+                    if ($('#c-check_coupon').val()) {
+                        $('#c-need_check_coupon').val('');
+                        $('.selectpicker ').selectpicker('refresh');
+                    }
+                })
+
+                //优惠券下拉切换
+                $(document).on('change', '#c-need_check_coupon', function () {
+                    if ($('#c-need_check_coupon').val()) {
+                        $('#c-check_coupon').val('');
+                        $('.selectpicker ').selectpicker('refresh');
+                    }
+                })
+
+
+
                 //删除一行镜架数据
                 $(document).on('click', '.btn-del', function () {
                     $(this).parent().parent().remove();
@@ -1186,7 +1074,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         } else {
                             var step = Config.workorder.customer_problem_group[id].step;
                             var steparr = Config.workorder[step];
-                            console.log(steparr);
+                            //console.log(steparr);
                             for (var j = 0; j < steparr.length; j++) {
                                 $('#step' + steparr[j].step_id).parent().show();
                                 //读取对应措施配置
@@ -1313,262 +1201,314 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         //判断取消订单的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end
                     }
                 });
-            //如果问题类型存在，显示问题类型和措施
-            if (Config.problem_type_id) {
-                var id = Config.problem_type_id;
-                var work_id = $('#work_id').val();
-                //row[problem_type_id]
-                $("input[name='row[problem_type_id]'][value='" + id + "']").attr("checked", true);
-                //id大于5 默认措施4
-                if (id > 5) {
-                    var steparr = Config.workorder['step04'];
-                    for (var j = 0; j < steparr.length; j++) {
-                        $('#step' + steparr[j].step_id).parent().show();
-                        //读取对应措施配置
-                        $('#step' + steparr[j].step_id + '-is_check').val(steparr[j].is_check);
-                        $('#step' + steparr[j].step_id + '-appoint_group').val((steparr[j].appoint_group).join(','));
+
+                //如果问题类型存在，显示问题类型和措施
+                if (Config.problem_type_id) {
+                    var id = Config.problem_type_id;
+                    var work_id = $('#work_id').val();
+                    //row[problem_type_id]
+                    $("input[name='row[problem_type_id]'][value='" + id + "']").attr("checked", true);
+
+                    //判断是客服创建还是仓库创建
+                    if (Config.work_type == 1) {
+                        var temp_id = 5;
+                    } else if (Config.work_type == 2) {
+                        var temp_id = 4;
                     }
-                } else {
-                    var step = Config.workorder.customer_problem_group[id].step;
-                    var steparr = Config.workorder[step];
-                    console.log(steparr);
-                    for (var j = 0; j < steparr.length; j++) {
-                        $('#step' + steparr[j].step_id).parent().show();
-                        //读取对应措施配置
-                        $('#step' + steparr[j].step_id + '-is_check').val(steparr[j].is_check);
-                        $('#step' + steparr[j].step_id + '-appoint_group').val((steparr[j].appoint_group).join(','));
+
+                    //id大于5 默认措施4
+                    if (id > temp_id) {
+                        var steparr = Config.workorder['step04'];
+                        for (var j = 0; j < steparr.length; j++) {
+                            $('#step' + steparr[j].step_id).parent().show();
+                            //读取对应措施配置
+                            $('#step' + steparr[j].step_id + '-is_check').val(steparr[j].is_check);
+                            $('#step' + steparr[j].step_id + '-appoint_group').val((steparr[j].appoint_group).join(','));
+                        }
+                    } else {
+                        //判断是客服创建还是仓库创建
+                        if (Config.work_type == 1) {
+                            var step = Config.workorder.customer_problem_group[id].step;
+                        } else if (Config.work_type == 2) {
+                            var step = Config.workorder.warehouse_problem_group[id].step;
+                        }
+                        var steparr = Config.workorder[step];
+                        for (var j = 0; j < steparr.length; j++) {
+                            $('#step' + steparr[j].step_id).parent().show();
+                            //读取对应措施配置
+                            $('#step' + steparr[j].step_id + '-is_check').val(steparr[j].is_check);
+                            $('#step' + steparr[j].step_id + '-appoint_group').val((steparr[j].appoint_group).join(','));
+                        }
                     }
-                }
-                if (Config.measureList) {
-                    var checkIDss = Config.measureList;//措施列表赋值给checkID
-                    for (var m = 0; m < checkIDss.length; m++) {
-                        $("input[name='row[measure_choose_id][]'][value='" + checkIDss[m] + "']").attr("checked", true);
-                        var node = $('.step' + checkIDss[m]);
-                        if (node.is(':hidden')) {
-                            node.show();
+                    if (Config.measureList) {
+                        var id = Config.problem_type_id;
+                        var work_id = $('#work_id').val();
+                        //row[problem_type_id]
+                        $("input[name='row[problem_type_id]'][value='" + id + "']").attr("checked", true);
+    
+                        //判断是客服创建还是仓库创建
+                        if (Config.work_type == 1) {
+                            var temp_id = 5;
+                        } else if (Config.work_type == 2) {
+                            var temp_id = 4;
+                        }
+                        //id大于5 默认措施4
+                        if (id > temp_id) {
+                            var steparr = Config.workorder['step04'];
+                            for (var j = 0; j < steparr.length; j++) {
+                                $('#step' + steparr[j].step_id).parent().show();
+                                //读取对应措施配置
+                                $('#step' + steparr[j].step_id + '-is_check').val(steparr[j].is_check);
+                                $('#step' + steparr[j].step_id + '-appoint_group').val((steparr[j].appoint_group).join(','));
+                            }
                         } else {
-                            node.hide();
-                        }
-                        var secondNode = $('.step' + id + '-' + checkIDss[m]);
-                        if (secondNode.is(':hidden')) {
-                            secondNode.show();
-                        } else {
-                            secondNode.hide();
-                        }
-                    }
-                    var checkID = [];//定义一个空数组
-                    var appoint_group = '';
-                    var input_content = '';
-                    $("input[name='row[measure_choose_id][]']:checked").each(function (i) {
-                        checkID[i] = $(this).val();
-                        var id = $(this).val();
-                        //获取承接组
-                        appoint_group += $('#step' + id + '-appoint_group').val() + ',';
-                        var group = $('#step' + id + '-appoint_group').val();
-                        var group_arr = group.split(',')
-                        var appoint_users = [];
-                        var appoint_val = [];
-                        for (var i = 0; i < group_arr.length; i++) {
-                            //循环根据承接组Key获取对应承接人id
-                            appoint_users.push(Config.workorder[group_arr[i]]);
-                            appoint_val[Config.workorder[group_arr[i]]] = group_arr[i];
-                        }
-
-                        //循环根据承接人id获取对应人名称
-                        for (var j = 0; j < appoint_users.length; j++) {
-                            input_content += '<input type="hidden" name="row[order_recept][appoint_group][' + id + '][]" value="' + appoint_val[appoint_users[j]] + '"/>';
-                            input_content += '<input type="hidden" name="row[order_recept][appoint_ids][' + id + '][]" value="' + appoint_users[j] + '"/>';
-                            input_content += '<input type="hidden" name="row[order_recept][appoint_users][' + id + '][]" value="' + Config.users[appoint_users[j]] + '"/>';
-                        }
-
-                        //获取是否需要审核
-                        if ($('#step' + id + '-is_check').val() > 0) {
-                            $('#is_check').val(1);
-                        }
-                    });
-                    //追加到元素之后
-                    $("#input-hidden").append(input_content);
-                    var arr = array_filter(appoint_group.split(','));
-                    var username = [];
-                    var appoint_users = [];
-                    //循环根据承接组Key获取对应承接人id
-                    for (var i = 0; i < arr.length - 1; i++) {
-                        //循环根据承接组Key获取对应承接人id
-                        appoint_users.push(Config.workorder[arr[i]]);
-                    }
-
-                    //循环根据承接人id获取对应人名称
-                    for (var j = 0; j < appoint_users.length; j++) {
-                        username.push(Config.users[appoint_users[j]]);
-                    }
-
-                    var users = array_filter(username);
-                    var appoint_users = array_filter(appoint_users);
-                    $('#appoint_group_users').html(users.join(','));
-                    $('#recept_person_id').val(appoint_users.join(','));                    
-                }
-                //判断更换镜框的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 start
-                if (!$('.step1-1').is(':hidden')) {
-                    changeFrame(1, work_id)
-                }
-                //判断更换镜框的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end
-                //判断取消订单的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 start
-                if (!$('.step3').is(':hidden')) {
-                    cancelOrder(1, work_id);
-                }
-                //判断取消订单的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end
-                //判断更换处方的状态，如果显示的话把数据带出来，如果隐藏则不显示镜架数据 start
-                if(!$('.step2-1').is(':hidden')){
-                    changeOrder(work_id,2);
-                }
-                //判断更换处方的状态，如果显示的话把数据带出来，如果隐藏则不显示镜架数据 end
-                //判断补发订单的状态，如果显示的话把数据带出来，如果隐藏则不显示补发数据 start
-                if(!$('.step7').is(':hidden')){
-                    changeOrder(work_id,5);
-                }
-                //判断补发订单的状态，如果显示的话把数据带出来，如果隐藏则不显示补发数据 end
-                //判断赠品信息的状态，如果显示的话把数据带出来，如果隐藏的话则不显示赠品数据  start
-                if(!$('.step6').is(':hidden')){
-                    changeOrder(work_id,4);
-                }
-                //判断赠品信息的状态，如果显示的话把数据带出来，如果隐藏的话则不显示赠品数据 end
-            }
-            function changeOrder(work_id,change_type){
-                var ordertype = $('#work_platform').val();
-                var order_number = $('#c-platform_order').val();
-                if (!order_number) {
-                    return false;
-                }
-                if (ordertype <= 0) {
-                    Layer.alert('请选择正确的平台');
-                    return false;
-                }
-                Backend.api.ajax({
-                    url: 'saleaftermanage/work_order_list/ajax_change_order',
-                    data: { change_type: change_type, order_number: order_number, work_id: work_id,order_type:ordertype}
-                }, function (json, ret) {
-                    //补发订单信息
-                    if(5 == change_type){
-                        //读取的订单地址信息
-                        var data = json.address;
-                        //读取的订单镜片信息
-                        var lens = json.lens;
-                        //读取的存入数据库的地址
-                        var real_address = json.arr;
-                        console.log(json);
-                        prescriptions = data.prescriptions;
-                        $('#supplement-order').html(lens.html);
-                        var order_pay_currency = $('#order_pay_currency').val();
-                        //修改地址
-                        var address = '';
-                        if(real_address){
-                            $('#c-firstname').val(real_address.firstname);
-                            $('#c-lastname').val(real_address.lastname);
-                            $('#c-email').val(real_address.email);
-                            $('#c-telephone').val(real_address.telephone);
-                            $('#c-country').val(real_address.country_id);
-                            $('#c-country').change();
-                            $('#c-region').val(real_address.region_id);
-                            $('#c-city').val(real_address.city);
-                            $('#c-street').val(real_address.street);
-                            $('#c-postcode').val(real_address.postcode);
-                            $('#c-currency_code').val(order_pay_currency);
-                            console.log(real_address.shipping_type);
-                            $('#shipping_type').val(real_address.shipping_type);
-                            for (var i = 0; i < data.address.length; i++) {
-                                if (i == real_address.address_type) {
-                                    address += '<option value="' + i + '" selected>' + data.address[i].address_type + '</option>';
-                                } else {
-                                    address += '<option value="' + i + '">' + data.address[i].address_type + '</option>';
-                                }    
-                          }
-                        }else{
-                            for (var i = 0; i < data.address.length; i++) {
-                                if (i == 0) {
-                                    address += '<option value="' + i + '" selected>' + data.address[i].address_type + '</option>';
-                                    //补发地址自动填充第一个
-                                    $('#c-firstname').val(data.address[i].firstname);
-                                    $('#c-lastname').val(data.address[i].lastname);
-                                    $('#c-email').val(data.address[i].email);
-                                    $('#c-telephone').val(data.address[i].telephone);
-                                    $('#c-country').val(data.address[i].country_id);
-                                    $('#c-country').change();
-                                    $('#c-region').val(data.address[i].region_id);
-                                    $('#c-city').val(data.address[i].city);
-                                    $('#c-street').val(data.address[i].street);
-                                    $('#c-postcode').val(data.address[i].postcode);
-                                    $('#c-currency_code').val(order_pay_currency);
-                                } else {
-                                    address += '<option value="' + i + '">' + data.address[i].address_type + '</option>';
-                                }
-                
+                            //判断是客服创建还是仓库创建
+                            if (Config.work_type == 1) {
+                                var step = Config.workorder.customer_problem_group[id].step;
+                            } else if (Config.work_type == 2) {
+                                var step = Config.workorder.warehouse_problem_group[id].step;
+                            }
+                            var steparr = Config.workorder[step];
+                            for (var j = 0; j < steparr.length; j++) {
+                                $('#step' + steparr[j].step_id).parent().show();
+                                //读取对应措施配置
+                                $('#step' + steparr[j].step_id + '-is_check').val(steparr[j].is_check);
+                                $('#step' + steparr[j].step_id + '-appoint_group').val((steparr[j].appoint_group).join(','));
                             }
                         }
-                        $('#address_select').html(address);
-                        //选择地址切换地址
-                        $('#address_select').change(function () {
-                            var address_id = $(this).val();
-                            var address = data.address[address_id];
-                            $('#c-firstname').val(address.firstname);
-                            $('#c-lastname').val(address.lastname);
-                            $('#c-email').val(address.email);
-                            $('#c-telephone').val(address.telephone);
-                            $('#c-country').val(address.country_id);
-                            $('#c-country').change();
-                            $('#c-region').val(address.region_id);
-                            $('#c-city').val(address.city);
-                            $('#c-street').val(address.street);
-                            $('#c-postcode').val(address.postcode);
-                        })
-            
-                        //追加
-                        lens_click_data = '<div class="margin-top:10px;">' + lens.html + '<div class="form-group-child4_del"><a href="javascript:;" style="width: 50%;" class="btn btn-danger btn-del-lens" title="删除"><i class="fa fa-trash"></i>删除</a></div></div>';
-            
-                        $('.selectpicker ').selectpicker('refresh');
-                        //Controller.api.bindevent();            
-                    }else if(2 == change_type){ //更换镜架信息
-                        $('#lens_contents').html(json.html);
-                        $('.selectpicker').selectpicker('refresh');                       
-                    }else if(4 == change_type){
-                        $('.add_gift').html(json.html);
-                        //追加
-                        gift_click_data = '<div class="margin-top:10px;">' + json.html + '<div class="form-group-child4_del"><a href="javascript:;" style="width: 50%;" class="btn btn-danger btn-del-lens" title="删除"><i class="fa fa-trash"></i>删除</a></div></div>';
-                        $('.selectpicker ').selectpicker('refresh');                        
-                    }
-                }, function (data, ret) {
-                    //失败的回调
-                    alert(ret.msg);
-                    console.log(ret);
-                    return false;
-                });
-            }
-            $(document).on('change', '#c-country', function () {
-                var id = $(this).val();
-                if (!id) {
-                    return false;
-                }
-                $.ajax({
-                    type: "POST",
-                    url: "saleaftermanage/work_order_list/ajaxGetProvince",
-                    dataType: "json",
-                    cache: false,
-                    async: false,
-                    data: {
-                        country_id: id,
-                    },
-                    success: function (json) {
-                        var data = json.province;
-                        var province = '';
-                        for (var i = 0; i < data.length; i++) {
-                            province += '<option value="' + data[i].region_id + '">' + data[i].default_name + '</option>';
+                        if (Config.measureList) {
+                            var checkIDss = Config.measureList;//措施列表赋值给checkID
+                            console.log(checkIDss);
+                            for (var m = 0; m < checkIDss.length; m++) {
+                                $("input[name='row[measure_choose_id][]'][value='" + checkIDss[m] + "']").attr("checked", true);
+                                var node = $('.step' + checkIDss[m]);
+                                if (node.is(':hidden')) {
+                                    node.show();
+                                } else {
+                                    node.hide();
+                                }
+                                var secondNode = $('.step' + id + '-' + checkIDss[m]);
+                                if (secondNode.is(':hidden')) {
+                                    secondNode.show();
+                                } else {
+                                    secondNode.hide();
+                                }
+                            }
+                            var checkID = [];//定义一个空数组
+                            var appoint_group = '';
+                            var input_content = '';
+                            $("input[name='row[measure_choose_id][]']:checked").each(function (i) {
+                                checkID[i] = $(this).val();
+                                var id = $(this).val();
+                                //获取承接组
+                                appoint_group += $('#step' + id + '-appoint_group').val() + ',';
+                                var group = $('#step' + id + '-appoint_group').val();
+                                var group_arr = group.split(',')
+                                var appoint_users = [];
+                                var appoint_val = [];
+                                for (var i = 0; i < group_arr.length; i++) {
+                                    //循环根据承接组Key获取对应承接人id
+                                    appoint_users.push(Config.workorder[group_arr[i]]);
+                                    appoint_val[Config.workorder[group_arr[i]]] = group_arr[i];
+                                }
+        
+                                //循环根据承接人id获取对应人名称
+                                for (var j = 0; j < appoint_users.length; j++) {
+                                    input_content += '<input type="hidden" name="row[order_recept][appoint_group][' + id + '][]" value="' + appoint_val[appoint_users[j]] + '"/>';
+                                    input_content += '<input type="hidden" name="row[order_recept][appoint_ids][' + id + '][]" value="' + appoint_users[j] + '"/>';
+                                    input_content += '<input type="hidden" name="row[order_recept][appoint_users][' + id + '][]" value="' + Config.users[appoint_users[j]] + '"/>';
+                                }
+        
+                                //获取是否需要审核
+                                if ($('#step' + id + '-is_check').val() > 0) {
+                                    $('#is_check').val(1);
+                                }
+                            });
+                            //追加到元素之后
+                            $("#input-hidden").append(input_content);
+                            var arr = array_filter(appoint_group.split(','));
+                            var username = [];
+                            var appoint_users = [];
+                            //循环根据承接组Key获取对应承接人id
+                            for (var i = 0; i < arr.length - 1; i++) {
+                                //循环根据承接组Key获取对应承接人id
+                                appoint_users.push(Config.workorder[arr[i]]);
+                            }
+        
+                            //循环根据承接人id获取对应人名称
+                            for (var j = 0; j < appoint_users.length; j++) {
+                                username.push(Config.users[appoint_users[j]]);
+                            }
+        
+                            var users = array_filter(username);
+                            var appoint_users = array_filter(appoint_users);
+                            $('#appoint_group_users').html(users.join(','));
+                            $('#recept_person_id').val(appoint_users.join(','));
                         }
-                        $('#c-region').html(province);
-                        $('.selectpicker ').selectpicker('refresh');
+    
+                        //判断更换镜框的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 start
+                        if (!$('.step1-1').is(':hidden')) {
+                            changeFrame(1, work_id)
+                        }
+                        //判断更换镜框的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end
+                        //判断取消订单的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 start
+                        if (!$('.step3').is(':hidden')) {
+                            cancelOrder(1, work_id);
+                        }
+                        //判断取消订单的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end
+                        //判断更换处方的状态，如果显示的话把数据带出来，如果隐藏则不显示镜架数据 start
+                        if(!$('.step2-1').is(':hidden')){
+                            changeOrder(work_id,2);
+                        }
+                        //判断更换处方的状态，如果显示的话把数据带出来，如果隐藏则不显示镜架数据 end
+                        //判断补发订单的状态，如果显示的话把数据带出来，如果隐藏则不显示补发数据 start
+                        if(!$('.step7').is(':hidden')){
+                            changeOrder(work_id,5);
+                        }
+                        //判断补发订单的状态，如果显示的话把数据带出来，如果隐藏则不显示补发数据 end
+                        //判断赠品信息的状态，如果显示的话把数据带出来，如果隐藏的话则不显示赠品数据  start
+                        if(!$('.step6').is(':hidden')){
+                            changeOrder(work_id,4);
+                        }
+                        //判断赠品信息的状态，如果显示的话把数据带出来，如果隐藏的话则不显示赠品数据 end
                     }
-                });
-            });                                        
-          },          
-      }
+                    function changeOrder(work_id,change_type){
+                        var ordertype = $('#work_platform').val();
+                        var order_number = $('#c-platform_order').val();
+                        if (!order_number) {
+                            return false;
+                        }
+                        if (ordertype <= 0) {
+                            Layer.alert('请选择正确的平台');
+                            return false;
+                        }
+                        Backend.api.ajax({
+                            url: 'saleaftermanage/work_order_list/ajax_change_order',
+                            data: { change_type: change_type, order_number: order_number, work_id: work_id,order_type:ordertype}
+                        }, function (json, ret) {
+                            //补发订单信息
+                            if(5 == change_type){
+                                //读取的订单地址信息
+                                var data = json.address;
+                                //读取的订单镜片信息
+                                var lens = json.lens;
+                                //读取的存入数据库的地址
+                                var real_address = json.arr;
+                                console.log(json);
+                                prescriptions = data.prescriptions;
+                                $('#supplement-order').html(lens.html);
+                                var order_pay_currency = $('#order_pay_currency').val();
+                                //修改地址
+                                var address = '';
+                                if(real_address){
+                                    $('#c-firstname').val(real_address.firstname);
+                                    $('#c-lastname').val(real_address.lastname);
+                                    $('#c-email').val(real_address.email);
+                                    $('#c-telephone').val(real_address.telephone);
+                                    $('#c-country').val(real_address.country_id);
+                                    $('#c-country').change();
+                                    $('#c-region').val(real_address.region_id);
+                                    $('#c-city').val(real_address.city);
+                                    $('#c-street').val(real_address.street);
+                                    $('#c-postcode').val(real_address.postcode);
+                                    $('#c-currency_code').val(order_pay_currency);
+                                    console.log(real_address.shipping_type);
+                                    $('#shipping_type').val(real_address.shipping_type);
+                                    for (var i = 0; i < data.address.length; i++) {
+                                        if (i == real_address.address_type) {
+                                            address += '<option value="' + i + '" selected>' + data.address[i].address_type + '</option>';
+                                        } else {
+                                            address += '<option value="' + i + '">' + data.address[i].address_type + '</option>';
+                                        }    
+                                  }
+                                }else{
+                                    for (var i = 0; i < data.address.length; i++) {
+                                        if (i == 0) {
+                                            address += '<option value="' + i + '" selected>' + data.address[i].address_type + '</option>';
+                                            //补发地址自动填充第一个
+                                            $('#c-firstname').val(data.address[i].firstname);
+                                            $('#c-lastname').val(data.address[i].lastname);
+                                            $('#c-email').val(data.address[i].email);
+                                            $('#c-telephone').val(data.address[i].telephone);
+                                            $('#c-country').val(data.address[i].country_id);
+                                            $('#c-country').change();
+                                            $('#c-region').val(data.address[i].region_id);
+                                            $('#c-city').val(data.address[i].city);
+                                            $('#c-street').val(data.address[i].street);
+                                            $('#c-postcode').val(data.address[i].postcode);
+                                            $('#c-currency_code').val(order_pay_currency);
+                                        } else {
+                                            address += '<option value="' + i + '">' + data.address[i].address_type + '</option>';
+                                        }
+                        
+                                    }
+                                }
+                                $('#address_select').html(address);
+                                //选择地址切换地址
+                                $('#address_select').change(function () {
+                                    var address_id = $(this).val();
+                                    var address = data.address[address_id];
+                                    $('#c-firstname').val(address.firstname);
+                                    $('#c-lastname').val(address.lastname);
+                                    $('#c-email').val(address.email);
+                                    $('#c-telephone').val(address.telephone);
+                                    $('#c-country').val(address.country_id);
+                                    $('#c-country').change();
+                                    $('#c-region').val(address.region_id);
+                                    $('#c-city').val(address.city);
+                                    $('#c-street').val(address.street);
+                                    $('#c-postcode').val(address.postcode);
+                                })
+                    
+                                //追加
+                                lens_click_data = '<div class="margin-top:10px;">' + lens.html + '<div class="form-group-child4_del"><a href="javascript:;" style="width: 50%;" class="btn btn-danger btn-del-lens" title="删除"><i class="fa fa-trash"></i>删除</a></div></div>';
+                    
+                                $('.selectpicker ').selectpicker('refresh');
+                                //Controller.api.bindevent();            
+                            }else if(2 == change_type){ //更换镜架信息
+                                $('#lens_contents').html(json.html);
+                                $('.selectpicker').selectpicker('refresh');                       
+                            }else if(4 == change_type){
+                                $('.add_gift').html(json.html);
+                                //追加
+                                gift_click_data = '<div class="margin-top:10px;">' + json.html + '<div class="form-group-child4_del"><a href="javascript:;" style="width: 50%;" class="btn btn-danger btn-del-lens" title="删除"><i class="fa fa-trash"></i>删除</a></div></div>';
+                                $('.selectpicker ').selectpicker('refresh');                        
+                            }
+                        }, function (data, ret) {
+                            //失败的回调
+                            alert(ret.msg);
+                            console.log(ret);
+                            return false;
+                        });
+                    }
+                    $(document).on('change', '#c-country', function () {
+                        var id = $(this).val();
+                        if (!id) {
+                            return false;
+                        }
+                        $.ajax({
+                            type: "POST",
+                            url: "saleaftermanage/work_order_list/ajaxGetProvince",
+                            dataType: "json",
+                            cache: false,
+                            async: false,
+                            data: {
+                                country_id: id,
+                            },
+                            success: function (json) {
+                                var data = json.province;
+                                var province = '';
+                                for (var i = 0; i < data.length; i++) {
+                                    province += '<option value="' + data[i].region_id + '">' + data[i].default_name + '</option>';
+                                }
+                                $('#c-region').html(province);
+                                $('.selectpicker ').selectpicker('refresh');
+                            }
+                        });
+                    });                    
+                }
+            },
+        }
     };
     return Controller;
 });
@@ -1593,7 +1533,7 @@ function changeFrame(is_edit = 0, work_id = 0) {
         return false;
     }
     if (ordertype <= 0) {
-        Layer.alert('请选择正确的平台');
+        Toastr.error('请选择正确的平台');
         return false;
     }
     if (1 == is_edit) { //是编辑的话
@@ -1607,6 +1547,9 @@ function changeFrame(is_edit = 0, work_id = 0) {
         url: urls,
         data: datas
     }, function (data, ret) {
+        if (!data) {
+            return false;
+        }
         //删除添加的tr
         $('#change-frame tr:gt(0)').remove();
         var item = ret.data;
@@ -1637,8 +1580,7 @@ function changeFrame(is_edit = 0, work_id = 0) {
         return false;
     }, function (data, ret) {
         //失败的回调
-        alert(ret.msg);
-        console.log(ret);
+        Toastr.error(ret.msg);
         return false;
     });
 }
@@ -1650,7 +1592,7 @@ function cancelOrder(is_edit = 0, work_id = 0) {
         return false;
     }
     if (ordertype <= 0) {
-        Layer.alert('请选择正确的平台');
+        Toastr.error('请选择正确的平台');
         return false;
     }
     if (1 == is_edit) {
@@ -1690,8 +1632,7 @@ function cancelOrder(is_edit = 0, work_id = 0) {
         return false;
     }, function (data, ret) {
         //失败的回调
-        alert(ret.msg);
-        console.log(ret);
+        Toastr.error(ret.msg);
         return false;
     });
 }
