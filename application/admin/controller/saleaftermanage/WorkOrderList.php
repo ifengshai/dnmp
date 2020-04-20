@@ -270,6 +270,7 @@ class WorkOrderList extends Backend
                     if ($params['need_coupon_id'] && in_array(9, array_filter($params['measure_choose_id']))) {
                         $params['coupon_id'] = $params['need_coupon_id'];
                         $params['coupon_describe'] = config('workorder.need_check_coupon')[$params['need_coupon_id']]['desc'];
+                        $params['is_check'] = 1;
                     }
 
                     //选择有优惠券时 值必须为真
@@ -693,6 +694,7 @@ class WorkOrderList extends Backend
                     if ($params['need_coupon_id'] && in_array(9, array_filter($params['measure_choose_id']))) {
                         $params['coupon_id'] = $params['need_coupon_id'];
                         $params['coupon_describe'] = config('workorder.need_check_coupon')[$params['need_coupon_id']]['desc'];
+                        $params['is_check'] = 1;
                     }
 
                     //选择有优惠券时 值必须为真
@@ -1142,7 +1144,7 @@ class WorkOrderList extends Backend
         //$this->model->presentCoupon(235);
         //$this->model->presentIntegral(233);
         //$this->model->createOrder(3, 338);
-        $this->model->createOrder(1, 326);
+        $this->model->createOrder(1, 385);
     }
     /**
      * 工单详情
@@ -1213,6 +1215,9 @@ class WorkOrderList extends Backend
         $this->assignconfig('operate_type',$operateType);
         if($operateType == 2){ //审核
             return $this->view->fetch('saleaftermanage/work_order_list/check');
+        }
+        if($operateType == 3){ //处理
+            return $this->view->fetch('saleaftermanage/work_order_list/process');
         }
 
         //查询工单处理备注

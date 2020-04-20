@@ -230,6 +230,16 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     }
                                 },
                                 {
+                                    name: 'check',
+                                    text: __('处理'),
+                                    title: __('处理'),
+                                    classname: 'btn btn-xs btn-success btn-dialog',
+                                    url: 'saleaftermanage/work_order_list/detail/operate_type/3',
+                                    extend: 'data-area = \'["100%","100%"]\'',
+                                    callback: function (data) {
+                                    }
+                                },
+                                {
                                     name: 'cancel',
                                     text: __('取消'),
                                     title: __('取消'),
@@ -1022,6 +1032,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 //提交审核按钮
                 $('.btn-check-status').click(function () {
                     $('.check-status').val(2);
+                })
+                //提交处理按钮
+                $('.btn-process-status').click(function () {
+                    $('.process-status').val(2);
                 })
 
                 //优惠券下拉切换

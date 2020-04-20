@@ -593,7 +593,7 @@ class WorkOrderList extends Model
             $count = count($orderRecepts);
             foreach($orderRecepts as $orderRecept){
                 //承接人是自己，则措施，承接默认完成
-                if($orderRecept->recept_person_id == $admin_id){
+                if($orderRecept->recept_person_id == $admin_id && ($work->is_check == 0 && $work->work_type == 1) || ($work->is_check == 0 && $work->work_type == 2 && $work->is_after_deal_with == 1)){
                     WorkOrderRecept::where('id',$orderRecept->id)->update(['recept_status' => 2,'finish_time' => $time,'note' => '自动处理完成']);
                     WorkOrderMeasure::where('id',$orderRecept->measure_id)->update(['operation_type' => 1, 'operation_time' => $time]);
                 }else{
