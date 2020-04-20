@@ -146,9 +146,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                             },
                         },
 
-                        /* { field: 'create_time', title: __('Create_time'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime },
-                         { field: 'check_time', title: __('Check_time'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime },
-                         { field: 'complete_time', title: __('Complete_time'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime },*/
+                        { field: 'create_time', title: __('Create_time'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime,visible:false },
+                         { field: 'check_time', title: __('Check_time'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime,visible:false },
+                         { field: 'complete_time', title: __('Complete_time'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime,visible:false},
                         {
                             field: 'buttons',
                             width: "120px",
@@ -196,8 +196,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                 },
                                 {
                                     name: 'process',
-                                    text: __('处理'),
-                                    title: __('处理'),
+                                    text: __('跟单处理'),
+                                    title: __('跟单处理'),
                                     classname: 'btn btn-xs btn-success btn-dialog',
                                     url: 'saleaftermanage/work_order_list/add',
                                     extend: 'data-area = \'["100%","100%"]\'',
@@ -755,7 +755,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                             })
 
                             //追加
-                            lens_click_data = '<div class="margin-top:10px;">' + lens.html + '<div class="form-group-child4_del"><a href="javascript:;" style="width: 50%;" class="btn btn-danger btn-del-lens" title="删除"><i class="fa fa-trash"></i>删除</a></div></div>';
+                            lens_click_data = '<div class="margin-top:10px;">' + lens.html + '<div class="form-group-child4_del" style="width: 99.2%;padding-right: 0px;"><a href="javascript:;" style="width: 50%;" class="btn btn-danger btn-del-lens" title="删除"><i class="fa fa-trash"></i>删除</a></div></div>';
 
                             $('.selectpicker ').selectpicker('refresh');
                             Controller.api.bindevent();
@@ -786,7 +786,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         }, function (data, ret) {
                             $('.add_gift').html(data.html);
                             //追加
-                            gift_click_data = '<div class="margin-top:10px;">' + data.html + '<div class="form-group-child4_del"><a href="javascript:;" style="width: 50%;" class="btn btn-danger btn-del-lens" title="删除"><i class="fa fa-trash"></i>删除</a></div></div>';
+                            gift_click_data = '<div class="margin-top:10px;">' + data.html + '<div class="form-group-child4_del"  style="margin-left: 2%;width: 91%;"><a href="javascript:;" style="width: 50%;" class="btn btn-danger btn-del-lens" title="删除"><i class="fa fa-trash"></i>删除</a></div></div>';
                             $('.selectpicker ').selectpicker('refresh');
                         });
                     }
@@ -1524,7 +1524,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                 })
 
                                 //追加
-                                lens_click_data = '<div class="margin-top:10px;">' + lens.html + '<div class="form-group-child4_del"><a href="javascript:;" style="width: 50%;" class="btn btn-danger btn-del-lens" title="删除"><i class="fa fa-trash"></i>删除</a></div></div>';
+                                lens_click_data = '<div class="margin-top:10px;">' + lens.html + '<div class="form-group-child4_del" style="width: 99.2%;padding-right: 0px;"><a href="javascript:;" style="width: 50%;" class="btn btn-danger btn-del-lens" title="删除"><i class="fa fa-trash"></i>删除</a></div></div>';
 
                                 $('.selectpicker ').selectpicker('refresh');
                                 //Controller.api.bindevent();            
@@ -1534,7 +1534,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                             } else if (4 == change_type) {
                                 $('.add_gift').html(json.html);
                                 //追加
-                                gift_click_data = '<div class="margin-top:10px;">' + json.html + '<div class="form-group-child4_del"><a href="javascript:;" style="width: 50%;" class="btn btn-danger btn-del-lens" title="删除"><i class="fa fa-trash"></i>删除</a></div></div>';
+                                gift_click_data = '<div class="margin-top:10px;">' + json.html + '<div class="form-group-child4_del" style="margin-left: 2%;width: 91%;"><a href="javascript:;" style="width: 50%;" class="btn btn-danger btn-del-lens" title="删除"><i class="fa fa-trash"></i>删除</a></div></div>';
                                 $('.selectpicker ').selectpicker('refresh');
                             }
                         }, function (data, ret) {

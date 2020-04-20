@@ -1,8 +1,13 @@
+<style>
+    .step1_function3_child {
+        width: 33%;
+    }
+</style>
 {if condition="$type eq 1"}
 {notempty name="info"}
 {foreach $info as $vo}
-<div>
-    <div class="step7_function2 prescription_type_step" style="margin-top:10px;">
+<div style="width: 100%;float: left;">
+    <div class="step7_function2 prescription_type_step" style="margin-top:10px;margin-right: 20px;">
         <div class="step7_function2_child">
             <label class="control-label col-xs-12 col-sm-3">SKU:</label>
             <div class="col-xs-12 col-sm-8">
@@ -154,16 +159,14 @@
         </div>
     </div>
 
-    <div class="form-group-child4_del">
-        <!--<a href="javascript:;" style="width: 50%;" class="btn btn-danger btn-del-supplement" title="删除"><i class="fa fa-trash"></i>删除</a>-->
-    </div>
+   
 </div>
 {/foreach}
 {/notempty}
 {elseif condition="$type eq 2" /}
 {foreach name="$showPrescriptions" item="vo" key="keys"}
-<div>
-    <div class="step1_function2 prescription_type_step">
+<div style="width: 100%;float: left;">
+    <div class="step1_function2 prescription_type_step" style="width: 24%;margin-right: 20px;">
         <div class="step1_function2_child">
             <label class="control-label col-xs-12 col-sm-3">SKU:</label>
             <div class="col-xs-12 col-sm-8">
@@ -338,8 +341,8 @@
 {else /}
 {notempty name="info"}
 {foreach $info as $vo}
-<div>
-    <div class="step7_function2 prescription_type_step" style="margin-top:10px;">
+<div style="width: 100%;float: left;margin-left:2%;">
+    <div class="step7_function2 prescription_type_step" style="margin-top:10px;width: 24%;margin-right: 20px;line-height: 55px;">
         <div class="step7_function2_child">
             <label class="control-label col-xs-12 col-sm-3">SKU:</label>
             <div class="col-xs-12 col-sm-8">
@@ -478,9 +481,7 @@
         </div>
     </div>
 
-    <div class="form-group-child4_del">
-        <!--<a href="javascript:;" style="width: 50%;" class="btn btn-danger btn-del-supplement" title="删除"><i class="fa fa-trash"></i>删除</a>-->
-    </div>
+    
 </div>
 {/foreach}
 {/notempty}
