@@ -238,13 +238,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     classname: 'btn btn-xs btn-success btn-ajax',
                                     url: 'saleaftermanage/work_order_list/setStatus/work_status/2',
                                     extend: 'data-area = \'["100%","100%"]\'',
+                                    confirm: '确定要提交吗',
                                     success: function (data, ret) {
                                         table.bootstrapTable('refresh');
                                     },
                                     callback: function (data) {
                                     },
                                     visible: function (row) {
-                                        if (row.work_status == 0) {
+                                        if (row.work_status == 1) {
                                             return true;
                                         } else {
                                             return false;
@@ -258,13 +259,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     classname: 'btn btn-xs btn-danger btn-ajax',
                                     url: 'saleaftermanage/work_order_list/setStatus/work_status/2',
                                     extend: 'data-area = \'["100%","100%"]\'',
+                                    confirm: '确定要取消吗',
                                     success: function (data, ret) {
                                         table.bootstrapTable('refresh');
                                     },
                                     callback: function (data) {
                                     },
                                     visible: function (row) {
-                                        if (row.work_status == 0) {
+                                        if (row.work_status == 1) {
                                             return true;
                                         } else {
                                             return false;
@@ -278,6 +280,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     classname: 'btn btn-xs btn-danger btn-ajax',
                                     url: 'saleaftermanage/work_order_list/setStatus/work_status/8',
                                     extend: 'data-area = \'["100%","100%"]\'',
+                                    confirm: '确定要撤销吗',
                                     success: function (data, ret) {
                                         table.bootstrapTable('refresh');
                                     },
@@ -1114,12 +1117,23 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                             } else {
                                 node.hide();
                             }
-                            var secondNode = $('.step' + id + '-' + checkID[m]);
+                            //判断是客服工单还是仓库工单
+                            if(1 == Config.work_type){ //客服工单
+                                var secondNode = $('.step' + id + '-' + checkID[m]);
+                            }else if(2 == Config.work_type){ //仓库工单
+                                if((1==id) && (1==checkID[m])){
+                                    var secondNode = $('.step2' + '-' + checkID[m]);
+                                }else if((id>=2 || id<=3) && (1 == checkID[m])){
+                                    var secondNode = $('.step1' + '-' + checkID[m]);
+                                }else{
+                                    var secondNode = $('.step' + id + '-' + checkID[m]); 
+                                }                                    
+                            }
                             if (secondNode.is(':hidden')) {
                                 secondNode.show();
                             } else {
                                 secondNode.hide();
-                            }
+                            } 
                         }
                         //判断更换镜框的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 start
                         if (!$('.step1-1').is(':hidden')) {
@@ -1184,13 +1198,23 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                             } else {
                                 node.hide();
                             }
-                            //二级措施
-                            var secondNode = $('.step' + problem_type_id + '-' + checkID[m]);
+                            //判断是客服工单还是仓库工单
+                            if(1 == Config.work_type){ //客服工单
+                                var secondNode = $('.step' + problem_type_id + '-' + checkID[m]);
+                            }else if(2 == Config.work_type){ //仓库工单
+                                if((1==problem_type_id) && (1==checkID[m])){
+                                    var secondNode = $('.step2' + '-' + checkID[m]);
+                                }else if((problem_type_id>=2 || problem_type_id<=3) && (1 == checkID[m])){
+                                    var secondNode = $('.step1' + '-' + checkID[m]);
+                                }else{
+                                    var secondNode = $('.step' + problem_type_id + '-' + checkID[m]); 
+                                }                                   
+                            }
                             if (secondNode.is(':hidden')) {
                                 secondNode.show();
                             } else {
                                 secondNode.hide();
-                            }
+                            }                            
                         }
                         var id = $(this).val();
                         var arr = array_filter(appoint_group.split(','));
@@ -1316,6 +1340,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                         var secondNode = $('.step2' + '-' + checkIDss[m]);
                                     }else if((id>=2 || id<=3) && (1 == checkIDss[m])){
                                         var secondNode = $('.step1' + '-' + checkIDss[m]);
+                                    }else{
+                                        var secondNode = $('.step' + id + '-' + checkIDss[m]); 
                                     }                                   
                                 }
                                 if (secondNode.is(':hidden')) {
@@ -1379,7 +1405,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
     
                         //判断更换镜框的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 start
                         if (!$('.step1-1').is(':hidden')) {
-                            console.log(111111);
                             changeFrame(1, work_id)
                         }
                         //判断更换镜框的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end
