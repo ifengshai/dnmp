@@ -16,7 +16,7 @@ use Util\WeseeopticalPrescriptionDetailHelper;
 use app\admin\model\saleaftermanage\WorkOrderMeasure;
 use app\admin\model\saleaftermanage\WorkOrderChangeSku;
 use app\admin\model\saleaftermanage\WorkOrderRecept;
-
+use app\admin\model\saleAfterManage\WorkOrderRemark;
 /**
  * 售后工单列管理
  *
@@ -1381,29 +1381,22 @@ class WorkOrderList extends Backend
      * @param [type] $ids
      * @return void
      */
-    public function process($ids = null)
-    {
-        $row = $this->model->get($ids);
-        if (!$row) {
-            $this->error(__('No Results were found'));
-        }
-        $recept_person_id = explode(',', $row['recept_person_id']);
-        // if (!in_array(session('admin.id'), $recept_person_id) && $row['after_user_id'] != session('admin.id')) {
-        //     return $this->error(__('对应承接人才能处理任务'));
-        // }
-        $adminIds = $this->getDataLimitAdminIds();
-        if (is_array($adminIds)) {
-            if (!in_array($row[$this->dataLimitField], $adminIds)) {
-                $this->error(__('You have no permission'));
-            }
-        }
-
+    public function process()
+    { 
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
             if ($params) {
-                if ($params['order_sku']) {
-                    $params['order_sku'] = implode(',', $params['order_sku']);
+                $row = $this->model->get($params['id']);
+                if (!$row) {
+                    $this->error(__('No Results were found'));
                 }
+                if(1 == $params['success']){ //本条措施处理成功
+
+                }elseif(2 == $params['']){ //本条措施处理失败
+
+                }
+                dump($params['success']);
+                exit;
                 $params = $this->preExcludeFields($params);
                 $result = false;
                 Db::startTrans();
@@ -1415,6 +1408,17 @@ class WorkOrderList extends Backend
                         $row->validateFailException(true)->validate($validate);
                     }
                     $result = $row->allowField(true)->save($params);
+                    if($result !== false){
+                        $remarkData = [
+                            'work_id' => $row->id,
+                            'remark_type' => 3,
+                            'remark_record' => $params['process_note'],
+                            'create_person_id' => session('admin.id'),
+                            'create_person' => session('admin.nickname'),
+                            'create_time' => date('Y-m-d H:i:s')
+                        ];
+                        WorkOrderRemark::create($remarkData);
+                    }
                     Db::commit();
                 } catch (ValidateException $e) {
                     Db::rollback();
@@ -1434,43 +1438,5 @@ class WorkOrderList extends Backend
             }
             $this->error(__('Parameter %s can not be empty', ''));
         }
-
-        $this->view->assign("row", $row);
-        if (1 == $row->work_type) { //判断工单类型，客服工单
-            $this->view->assign('work_type', 1);
-            $this->assignconfig('work_type', 1);
-            $this->view->assign('problem_type', config('workorder.customer_problem_type')); //客服问题类型          
-        } else { //仓库工单
-            $this->view->assign('work_type', 2);
-            $this->assignconfig('work_type', 2);
-            $this->view->assign('problem_type', config('workorder.warehouse_problem_type')); //仓库问题类型
-        }
-        //求出订单sku列表,传输到页面当中
-        $skus = $this->model->getSkuList($row->work_platform, $row->platform_order);
-        if (is_array($skus['sku'])) {
-            $arrSkus = [];
-            foreach ($skus['sku'] as $val) {
-                $arrSkus[$val] = $val;
-            }
-            //查询用户id对应姓名
-            $admin = new \app\admin\model\Admin();
-            $users = $admin->where('status', 'normal')->column('nickname', 'id');
-            $this->assignconfig('users', $users); //返回用户            
-            $this->view->assign('skus', $arrSkus);
-        }
-
-        //把问题类型传递到js页面
-        if (!empty($row->problem_type_id)) {
-            $this->assignconfig('problem_type_id', $row->problem_type_id);
-        }
-        $this->assignconfig('work_type', $row->work_type);
-        //求出工单选择的措施传递到js页面
-        $measureList = WorkOrderMeasure::workMeasureList($row->id);
-        // dump(!empty($measureList));
-        // exit;
-        if (!empty($measureList)) {
-            $this->assignconfig('measureList', $measureList);
-        }
-        return $this->view->fetch();
     }
 }
