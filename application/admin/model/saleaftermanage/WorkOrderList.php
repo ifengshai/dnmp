@@ -183,7 +183,7 @@ class WorkOrderList extends Model
     {
         switch ($siteType) {
             case 1:
-                $url = 'https://z.zhaokuangyi.com/';
+                $url = 'http://z.zhaokuangyi.com/';
                 break;
             case 2:
                 $url = 'http://pc.zhaokuangyi.com/';
@@ -199,7 +199,7 @@ class WorkOrderList extends Model
                 break;
         }
         $url = $url . $pathinfo;
-        $client = new Client();
+        $client = new Client(['verify' => false]);
         try {
             if ($method == 'GET') {
                 $response = $client->request('GET', $url, array('query'=>$params));
