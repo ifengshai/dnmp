@@ -1156,12 +1156,21 @@ class WorkOrderList extends Backend
     public function detail($ids = null)
     {
         $row = $this->model->get($ids);
+        $operateType = input('operate_type',0);
         if (!$row) {
             $this->error(__('No Results were found'));
         }
-        if ($row['create_user_id'] != session('admin.id')) {
-            return $this->error(__('非本人创建不能编辑'));
+        if($operateType == 2){
+
+           if(!in_array($row->work_status,[1]) || $row->is_check != 1 || !in_array(session('admin.id'),[$row->assign_user_id,config('workorder.customer_manager')])){
+               $this->error('没有审核权限');
+           }
+        }else{
+            if ($row['create_user_id'] != session('admin.id')) {
+                return $this->error(__('非本人创建不能编辑'));
+            }
         }
+
         $adminIds = $this->getDataLimitAdminIds();
         if (is_array($adminIds)) {
             if (!in_array($row[$this->dataLimitField], $adminIds)) {
@@ -1201,7 +1210,6 @@ class WorkOrderList extends Backend
         if (!empty($measureList)) {
             $this->assignconfig('measureList', $measureList);
         }
-        $operateType = input('operate_type',0);
         $this->assignconfig('operate_type',$operateType);
         if($operateType == 2){ //审核
             return $this->view->fetch('saleaftermanage/work_order_list/check');
