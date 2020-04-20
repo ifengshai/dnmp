@@ -41,14 +41,7 @@
                         <a href="javascript:;" data-area='["100%","100%"]'
                             class="btn btn-success btn-edit btn-disabled disabled {:$auth->check('saleaftermanage/workmanage/work_order_list/edit')?'':'hide'}"
                             title="{:__('Edit')}"><i class="fa fa-pencil"></i> {:__('Edit')}</a>
-                        <a href="javascript:;"
-                            class="btn btn-danger btn-del btn-disabled disabled {:$auth->check('saleaftermanage/workmanage/work_order_list/del')?'':'hide'}"
-                            title="{:__('Delete')}"><i class="fa fa-trash"></i> {:__('Delete')}</a>
-                        <a href="javascript:;"
-                            class="btn btn-danger btn-import {:$auth->check('saleaftermanage/workmanage/work_order_list/import')?'':'hide'}"
-                            title="{:__('Import')}" id="btn-import-file" data-url="ajax/upload"
-                            data-mimetype="csv,xls,xlsx" data-multiple="false"><i class="fa fa-upload"></i>
-                            {:__('Import')}</a>
+              
                         <a href="javascript:;"
                             class="btn btn-success btn-open btn-disabled disabled {:$auth->check('purchase/purchase_order/setStatus') ?'':'hide'}"
                             title="审核通过">审核通过</a>

@@ -227,10 +227,10 @@ class WorkOrderList extends Model
      */
     public function changeLens($params, $work_id)
     {
+
         $measure = '';
         //修改镜片
-        if(($params['work_type'] == 1 || $params['work_type'] == 2
-            ) && $params['problem_type_id'] == 2 && in_array(1, array_filter($params['measure_choose_id']))){
+        if(($params['work_type'] == 1 || $params['work_type'] == 2) && $params['problem_type_id'] == 2 && in_array(1, array_filter($params['measure_choose_id']))){
             $measure = 1;
         }elseif(in_array(6, array_filter($params['measure_choose_id']))){ //赠品
             $measure = 2;
@@ -307,7 +307,7 @@ class WorkOrderList extends Model
                         'create_time' => date('Y-m-d H:i:s')
                     ];
                     //补发
-                    if ($change_type == 5) {
+                    //if ($change_type == 5) {
                         $data['email'] = $params['address']['email'];
                         $data['userinfo_option'] = serialize($params['address']);
                         $prescriptionOption = [
@@ -321,7 +321,7 @@ class WorkOrderList extends Model
                             'color_name' => $lensCoatName['colorName'],
                         ];
                         $data['prescription_option'] = serialize($prescriptionOption);
-                    }
+                    //}
                     WorkOrderChangeSku::create($data);
                 }
                 Db::commit();
@@ -331,8 +331,7 @@ class WorkOrderList extends Model
             }
         }
 
-    }
-
+    }   
     /**
      * 根据id获取镜片，镀膜的名称
      * @param $siteType
@@ -533,6 +532,42 @@ class WorkOrderList extends Model
             exception($e->getMessage());
         }
     }
+    /**
+     * 获取修改处方(编辑的时候带出存储的信息)
+     * @param $siteType
+     * @param $showPrescriptions
+     * @return array|bool
+     * @throws \think\Exception
+     */
+    public function getEditReissueLens($siteType, $showPrescriptions, $type = 1,$info = [])
+    {
+        $url = '';
+        $key = $siteType . '_getlens';
+        $data = Cache::get($key);
+        if (!$data) {
+            $data = $this->httpRequest($siteType,'magic/product/lensData');
+            Cache::set($key, $data, 3600 * 24);
+        }
+
+        $prescription = $prescriptions = $coating_type = '';
+
+        $prescription = $data['lens_list'];
+        $colorList = $data['color_list'];
+        $lensColorList = $data['lens_color_list'];
+        $coating_type = $data['coating_list'];
+        if ($type == 1) {
+            foreach ($showPrescriptions as $key => $val) {
+                $prescriptions .= "<option value='{$key}'>{$val}</option>";
+            }
+            //拼接html页面
+            $html = (new \think\View())->fetch('saleaftermanage/work_order_list/ajax_reissue_edit', compact('prescription', 'coating_type', 'prescriptions', 'colorList', 'type','info'));
+        } elseif ($type == 2) {
+            $html = (new \think\View())->fetch('saleaftermanage/work_order_list/ajax_reissue_edit', compact('showPrescriptions', 'prescription', 'coating_type', 'prescriptions', 'colorList', 'lensColorList', 'type','info'));
+        } else {
+            $html = (new \think\View())->fetch('saleaftermanage/work_order_list/ajax_reissue_edit', compact('showPrescriptions', 'prescription', 'coating_type', 'prescriptions', 'colorList', 'type','info'));
+        }
+        return ['data' => $data, 'html' => $html];
+    }    
 
     /**
      * 审核
@@ -554,7 +589,7 @@ class WorkOrderList extends Model
             $time = date('Y-m-d H:i:s');
             $admin_id = session('admin.id');
             //不需要审核的，
-            if($work->is_check == 0){
+            if(($work->is_check == 0 && $work->work_type == 1) || ($work->is_check == 0 && $work->work_type == 2 && $work->is_after_deal_with == 1)){
                 //如果承接人是自己的话表示处理完成，不是自己的不做处理
                 $orderRecepts = WorkOrderRecept::where('work_id',$work_id)->select();
                 $allComplete = 1;

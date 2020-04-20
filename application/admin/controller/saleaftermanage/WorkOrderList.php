@@ -15,7 +15,7 @@ use Util\VooguemePrescriptionDetailHelper;
 use Util\WeseeopticalPrescriptionDetailHelper;
 use app\admin\model\saleaftermanage\WorkOrderMeasure;
 use app\admin\model\saleaftermanage\WorkOrderChangeSku;
-
+use app\admin\model\saleaftermanage\WorkOrderRecept;
 /**
  * 售后工单列管理
  *
@@ -141,9 +141,6 @@ class WorkOrderList extends Backend
                 }
 
                 $list[$k]['step_num'] = $this->sel_order_recept($v['id']); //获取措施相关记录
-
-                //格式化时间
-                $list[$k]['create_time'] = date('Y-m-d H:i', strtotime($v['create_time']));
             }
 
             $result = array("total" => $total, "rows" => $list);
@@ -282,7 +279,7 @@ class WorkOrderList extends Backend
                     if (($params['is_check'] == 0 && $params['work_status'] == 2) || ($params['work_type'] == 2 && $params['work_status'] == 2)) {
                         $params['work_status'] = 3;
                     }
-                    
+
                     //如果为真则为处理任务
                     if (!$params['id']) {
                         $params['recept_person_id'] = $params['recept_person_id'] ?: session('admin.id');
@@ -359,10 +356,10 @@ class WorkOrderList extends Backend
 
                     //循环插入更换镜框数据
                     $orderChangeList = [];
-                    
+
                     //判断是否选中更改镜框问题类型
                     if ($params['change_frame']) {
-                       
+
                         if (($params['problem_type_id'] == 1 && $params['work_type'] == 1) || ($params['problem_type_id'] == 2 && $params['work_type'] == 2) || ($params['problem_type_id'] == 3 && $params['work_type'] == 2)) {
                             $original_sku = $params['change_frame']['original_sku'];
                             $original_number = $params['change_frame']['original_number'];
@@ -425,7 +422,7 @@ class WorkOrderList extends Backend
                         }
                     }
                     //非草稿状态进入审核阶段
-                    if($this->model->work_status != 1){
+                    if ($this->model->work_status != 1) {
                         $this->model->checkWork($this->model->id);
                     }
 
@@ -585,7 +582,220 @@ class WorkOrderList extends Backend
                         $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.edit' : $name) : $this->modelValidate;
                         $row->validateFailException(true)->validate($validate);
                     }
+                    //判断是否选择措施
+                    if (count(array_filter($params['measure_choose_id'])) < 1 && $params['work_type'] == 1) {
+                        throw new Exception("措施不能为空");
+                    }
+
+                    $params['is_check'] = '';
+                    //更换镜框判断是否有库存
+                    if ($params['change_frame'] && $params['problem_type_id'] == 1) {
+                        //判断SKU是否有库存
+                        $skus = $params['change_frame']['change_sku'];
+
+                        $this->skuIsStock($skus, $params['work_type']);
+                    }
+                    //判断赠品是否有库存
+                    //判断补发是否有库存
+                    if(in_array(7, array_filter($params['measure_choose_id'])) || in_array(6, array_filter($params['measure_choose_id']))){
+                        if(in_array(7, array_filter($params['measure_choose_id']))){
+                            $originalSkus = $params['replacement']['original_sku'];
+                            $originalNums = $params['replacement']['original_number'];
+                        }else{
+                            $originalSkus = $params['gift']['original_sku'];
+                            $originalNums = $params['gift']['original_number'];
+                        }
+
+                        foreach($originalSkus as $key => $originalSku){
+                            if(!$originalSku) exception('sku不能为空');
+                            if(!$originalNums[$key]) exception('数量必须大于0');
+                            $this->skuIsStock([$originalSku], $params['work_type'],$originalNums[$key]);
+                        }
+                    }
+
+                    //判断工单类型 1客服 2仓库
+                    if ($params['work_type'] == 1) {
+                        $params['problem_type_content'] = config('workorder.customer_problem_type')[$params['problem_type_id']];
+                    } elseif ($params['work_type'] == 2) {
+                        $params['problem_type_content'] = config('workorder.warehouse_problem_type')[$params['problem_type_id']];
+                        $params['after_user_id'] = implode(',', config('workorder.copy_group')); //经手人
+                    }
+                    //判断是否选择退款措施
+                    if (!in_array(2, array_filter($params['measure_choose_id']))) {
+                        unset($params['refund_money']);
+                        unset($params['refund_way']);
+                    }
+
+                    //判断是否选择补价措施
+                    if (!in_array(8, array_filter($params['measure_choose_id']))) {
+                        unset($params['replenish_increment_id']);
+                        unset($params['replenish_money']);
+                    }
+
+                    //判断是否选择积分措施
+                    if (!in_array(10, array_filter($params['measure_choose_id']))) {
+                        unset($params['integral']);
+                    }
+
+                    //判断是否选择退件措施
+                    if (!in_array(11, array_filter($params['measure_choose_id']))) {
+                        unset($params['refund_logistics_num']);
+                    }
+
+                    //如果积分大于200需要审核
+                    if ($params['integral'] > 200) {
+                        //需要审核
+                        $params['is_check'] = 1;
+                        //创建人对应主管
+                        $params['assign_user_id'] = $this->assign_user_id;
+                    }
+
+                    //判断优惠券 不需要审核的优惠券
+                    if ($params['coupon_id'] && in_array(9, array_filter($params['measure_choose_id']))) {
+                        $params['coupon_describe'] = config('workorder.check_coupon')[$params['coupon_id']]['desc'];
+                    }
+                    //判断优惠券 需要审核的优惠券
+                    if ($params['need_coupon_id'] && in_array(9, array_filter($params['measure_choose_id']))) {
+                        $params['coupon_id'] = $params['need_coupon_id'];
+                        $params['coupon_describe'] = config('workorder.need_check_coupon')[$params['need_coupon_id']]['desc'];
+                    }
+
+                    //判断审核人
+                    if ($params['is_check'] == 1 || $params['need_coupon_id']) {
+                        /**
+                         * 1、退款金额大于30 经理审核
+                         * 2、赠品数量大于1 经理审核
+                         * 3、补发数量大于1 经理审核
+                         * 4、优惠券等于100% 经理审核  50%主管审核 固定额度无需审核
+                         */
+                        $coupon = config('workorder.need_check_coupon')[$params['need_coupon_id']]['sum'];
+                        if ($params['refund_money'] > 30 || array_sum($params['gift']['original_sku']) > 1 || array_sum($params['replacement']['original_number']) > 1 || $coupon == 100) {
+                            //客服经理
+                            $params['assign_user_id'] = config('workorder.customer_manager');
+                        } else {
+                            //创建人对应主管
+                            $params['assign_user_id'] = $this->assign_user_id;
+                        }
+                    }
+                    $params['recept_person_id'] = $params['recept_person_id'] ?: session('admin.id');
                     $result = $row->allowField(true)->save($params);
+                    if (false === $result) {
+                        throw new Exception("添加失败！！");
+                    }
+                    //循环插入措施
+                    if (count(array_filter($params['measure_choose_id'])) > 0) {
+
+                        //措施
+                        WorkOrderMeasure::where(['work_id'=>$row->id])->delete();
+                        WorkOrderRecept::where(['work_id'=>$row->id])->delete();
+                        WorkOrderChangeSku::where(['work_id'=>$row->id])->delete();
+                        foreach ($params['measure_choose_id'] as $k => $v) {
+                            $measureList['work_id'] = $row->id;
+                            $measureList['measure_choose_id'] = $v;
+                            $measureList['measure_content'] = config('workorder.step')[$v];
+                            $measureList['create_time']     = date('Y-m-d H:i:s');
+                            //插入措施表
+                            $res = $this->step->insertGetId($measureList);
+                            if (false === $res) {
+                                throw new Exception("添加失败！！");
+                            }
+
+                            //根据措施读取承接组、承接人 默认是客服问题组配置
+                            $appoint_ids = $params['order_recept']['appoint_ids'][$v];
+                            $appoint_users = $params['order_recept']['appoint_users'][$v];
+                            $appoint_group = $params['order_recept']['appoint_group'][$v];
+                            //循环插入承接人
+                            $appointList = [];
+                            foreach ($appoint_ids as $key => $val) {
+                                $appointList[$key]['work_id'] = $row->id;
+                                $appointList[$key]['measure_id'] = $res;
+                                //如果没有承接人 默认为创建人
+                                if ($val == 'undefined') {
+                                    $appointList[$key]['recept_group_id'] = $this->assign_user_id;
+                                    $appointList[$key]['recept_person_id'] = session('admin.id');
+                                    $appointList[$key]['recept_person'] = session('admin.nickname');
+                                } else {
+
+                                    $appointList[$key]['recept_group_id'] = $appoint_group[$key];
+                                    $appointList[$key]['recept_person_id'] = $val;
+                                    $appointList[$key]['recept_person'] = $appoint_users[$key];
+                                }
+
+                                $appointList[$key]['create_time'] = date('Y-m-d H:i:s');
+                            }
+                            //插入承接人表
+                            $receptRes = $this->recept->saveAll($appointList);
+                            if (false === $receptRes) {
+                                throw new Exception("添加失败！！");
+                            }
+                            //更改镜片，补发，赠品
+                            $this->model->changeLens($params, $row->id);
+                        }
+                    }
+
+                    //循环插入更换镜框数据
+                    $orderChangeList = [];
+                    //判断是否选中更改镜框问题类型
+                    if ($params['change_frame'] && $params['problem_type_id'] == 1) {
+                        $original_sku = $params['change_frame']['original_sku'];
+                        $original_number = $params['change_frame']['original_number'];
+                        $change_sku = $params['change_frame']['change_sku'];
+                        $change_number = $params['change_frame']['change_number'];
+                        foreach ($change_sku as $k => $v) {
+                            if (!$v) {
+                                continue;
+                            }
+                            $orderChangeList[$k]['work_id'] = $row->id;
+                            $orderChangeList[$k]['increment_id'] = $params['platform_order'];
+                            $orderChangeList[$k]['platform_type'] = $params['work_type'];
+                            $orderChangeList[$k]['original_sku'] = $original_sku[$k];
+                            $orderChangeList[$k]['original_number'] = $original_number[$k];
+                            $orderChangeList[$k]['change_sku'] = $v;
+                            $orderChangeList[$k]['change_number'] = $change_number[$k];
+                            $orderChangeList[$k]['change_type'] = 1;
+                            $orderChangeList[$k]['create_person'] = session('admin.nickname');
+                            $orderChangeList[$k]['create_time'] = date('Y-m-d H:i:s');
+                            $orderChangeList[$k]['update_time'] = date('Y-m-d H:i:s');
+                        }
+                        $orderChangeRes = $this->order_change->saveAll($orderChangeList);
+                        if (false === $orderChangeRes) {
+                            throw new Exception("添加失败！！");
+                        }
+                    }
+
+                    //循环插入取消订单数据
+                    $orderChangeList = [];
+                    //判断是否选中取消措施
+                    if ($params['cancel_order'] && in_array(3, array_filter($params['measure_choose_id']))) {
+
+                        foreach ($params['cancel_order']['original_sku'] as $k => $v) {
+
+                            $orderChangeList[$k]['work_id'] = $row->id;
+                            $orderChangeList[$k]['increment_id'] = $params['platform_order'];
+                            $orderChangeList[$k]['platform_type'] = $params['work_type'];
+                            $orderChangeList[$k]['original_sku'] = $v;
+                            $orderChangeList[$k]['original_number'] = $params['cancel_order']['original_number'][$k];
+                            $orderChangeList[$k]['change_type'] = 3;
+                            $orderChangeList[$k]['create_person'] = session('admin.nickname');
+                            $orderChangeList[$k]['create_time'] = date('Y-m-d H:i:s');
+                            $orderChangeList[$k]['update_time'] = date('Y-m-d H:i:s');
+                        }
+                        $cancelOrderRes = $this->order_change->saveAll($orderChangeList);
+                        if (false === $cancelOrderRes) {
+                            throw new Exception("添加失败！！");
+                        }
+                    }
+                    //不需要审核时直接发送积分，赠送优惠券
+                    if(!$params['is_check']){
+                        //赠送积分
+                        if(in_array(10, array_filter($params['measure_choose_id']))){
+                            $this->model->presentIntegral($row->id);
+                        }
+                        //直接发送优惠券
+                        if(in_array(9, array_filter($params['measure_choose_id']))){
+                            $this->model->presentCoupon($row->id);
+                        }
+                    }
                     Db::commit();
                 } catch (ValidateException $e) {
                     Db::rollback();
@@ -635,8 +845,6 @@ class WorkOrderList extends Backend
 
         //求出工单选择的措施传递到js页面
         $measureList = WorkOrderMeasure::workMeasureList($row->id);
-        // dump(!empty($measureList));
-        // exit;
         if (!empty($measureList)) {
             $this->assignconfig('measureList', $measureList);
         }
@@ -823,7 +1031,7 @@ class WorkOrderList extends Backend
      * @since 2020/04/16 10:29:02 
      * @return void
      */
-    public function ajax_edit_order($ordertype = null, $order_number = null, $work_id = null)
+    public function ajax_edit_order($ordertype = null, $order_number = null, $work_id = null,$change_type=null)
     {
         if ($this->request->isAjax()) {
             if ($ordertype < 1 || $ordertype > 5) { //不在平台之内
@@ -835,7 +1043,7 @@ class WorkOrderList extends Backend
             if (!$work_id) {
                 return $this->error('工单不存在，请重新选择', '', 'error', 0);
             }
-            $result = WorkOrderChangeSku::getOrderChangeSku($work_id, $ordertype, $order_number);
+            $result = WorkOrderChangeSku::getOrderChangeSku($work_id, $ordertype, $order_number,$change_type);
             if (!$result) {
                 if ($ordertype == 1) {
                     $result = ZeeloolPrescriptionDetailHelper::get_one_by_increment_id($order_number);
@@ -943,7 +1151,83 @@ class WorkOrderList extends Backend
         }
         return $this->view->fetch();
     }
+    /**
+     * 获取工单的更改镜片、补发、赠品的信息
+     *
+     * @Description
+     * @author lsw
+     * @since 2020/04/16 16:49:21 
+     * @param [type] $work_id
+     * @param [type] $order_number
+     * @param [type] $change_type
+     * @return void
+     */
+    public function ajax_change_order($work_id=null,$order_type=null,$order_number=null,$change_type=null)
+    {
+        if ($this->request->isAjax()) {
+            if ($order_type < 1 || $order_type > 5) { //不在平台之内
+                return $this->error('选择平台错误,请重新选择', '', 'error', 0);
+            }
+            if (!$order_number) {
+                return  $this->error('订单号不存在，请重新选择', '', 'error', 0);
+            }
+            if (!$work_id) {
+                return $this->error('工单不存在，请重新选择', '', 'error', 0);
+            }
+            $result = WorkOrderChangeSku::getOrderChangeSku($work_id, $order_type, $order_number,$change_type);
+            if ($result) {
+                $result = collection($result)->toArray();
+                $userinfo_option = unserialize($result[0]['userinfo_option']);
+                $arr = [];
+                foreach($result as $keys => $val){
+                    $result[$keys]['prescription_options'] = unserialize($val['prescription_option']);
+                }
+                if(!empty($userinfo_option)){
+                    $arr['userinfo_option'] = $userinfo_option;
+                }
+                    $arr['info']            = $result;
 
+            }
+            if(5 == $change_type){ //补发信息
+                //获取地址、处方等信息
+                $res = $this->model->getAddress($order_type, $order_number);
+                //请求接口获取lens_type，coating_type，prescription_type等信息
+                if(isset($arr) && !empty($arr)){
+                    $lens = $this->model->getEditReissueLens($order_type, $res['showPrescriptions'],1,$result);
+                }else{
+                    $lens = $this->model->getEditReissueLens($order_type, $res['showPrescriptions'],1,[]);
+                }
+
+            }elseif(2 == $change_type){ //更改镜片信息
+                $res = $this->model->getAddress($order_type, $order_number);
+                if(isset($arr) && !empty($arr)){
+                    $lens = $this->model->getEditReissueLens($order_type, $res['prescriptions'], 2,$result);
+                }else{
+                    $lens = $this->model->getEditReissueLens($order_type, $res['prescriptions'], 2,[]);
+                }
+
+            }elseif(4 == $change_type){ //赠品信息
+                $res = $this->model->getAddress($order_type, $order_number);
+                if(isset($arr) && !empty($arr)){
+                    $lens = $this->model->getEditReissueLens($order_type, $res['prescriptions'], 3,$result);
+                }else{
+                    $lens = $this->model->getEditReissueLens($order_type, $res['prescriptions'], 3,[]);
+                }
+                
+            }
+            if ($res) {
+                if(5 == $change_type){
+                    $this->success('操作成功！！', '',['address' => $res, 'lens' => $lens,'arr'=>$userinfo_option]);
+                }else{
+                    $this->success('操作成功！！', '',$lens);
+                }     
+            } else {
+                $this->error('未获取到数据！！');
+            }
+        } else {
+            return $this->error('404 Not Found');
+        }
+    }    
     /**
      * 审核
      */
@@ -957,7 +1241,41 @@ class WorkOrderList extends Backend
         }
     }
 
-     /* 处理任务
+    /**
+     * 提交修改工单状态
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/04/17 17:16:55 
+     * @return void
+     */
+    public function setStatus($ids = null)
+    {
+        $row = $this->model->get($ids);
+        if (!$row) {
+            $this->error(__('No Results were found'));
+        }
+
+        if (request()->isAjax()) {
+            $status = input('work_status');
+            $params['work_status'] = $status;
+            if ($params['work_status'] == 2) {
+                $params['submit_time'] = date('Y-m-d H:i:s');
+            } elseif($params['work_status'] == 0 || $params['work_status'] == 8) {
+                $params['cancel_time'] = date('Y-m-d H:i:s');
+                $params['cancel_person'] = session('admin.nickname');
+            } 
+            $result = $row->allowField(true)->save($params);
+            if (false !== $result) {
+                $this->success('操作成功！！');
+            } else {
+                $this->error('操作失败！！');
+            }
+        }
+        $this->error('404 not found');
+    }
+
+    /* 处理任务
      *
      * @Description
      * @author wpl
