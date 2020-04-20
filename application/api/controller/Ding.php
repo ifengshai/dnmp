@@ -215,11 +215,11 @@ class Ding extends Controller
 
     public function test($url = '')
     {
-        $this->setDepartment();
-        exit;
-        $params = send_ding_message(['040740464839840580'], '收到需求2', '钱海信用卡支付后重复发送确认订单的邮件');
-        dump($this->app->conversation->sendCorporationMessage($params));
-        die;
+//        $this->setDepartment();
+//        exit;
+//        $params = send_ding_message(['040740464839840580'], '收到需求2', '钱海信用卡支付后重复发送确认订单的邮件');
+//        dump($this->app->conversation->sendCorporationMessage($params));
+//        die;
         dump($this->app->callback->list());
         die;
         $depart_ids = [144092586, 144052776, 102054298];
