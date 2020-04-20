@@ -183,10 +183,10 @@ class WorkOrderList extends Model
     {
         switch ($siteType) {
             case 1:
-                $url = 'http://z.zhaokuangyi.com/';
+                $url = 'https://z.zhaokuangyi.com/';
                 break;
             case 2:
-                $url = 'http://api.voogueme.com/';
+                $url = 'http://pc.zhaokuangyi.com/';
                 break;
             case 3:
                 $url = 'https://nh.zhaokuangyi.com/';
@@ -593,6 +593,7 @@ class WorkOrderList extends Model
                 //如果承接人是自己的话表示处理完成，不是自己的不做处理
                 $orderRecepts = WorkOrderRecept::where('work_id',$work_id)->select();
                 $allComplete = 1;
+                $count = count($orderRecepts);
                 foreach($orderRecepts as $orderRecept){
                     //承接人是自己，则措施，承接默认完成
                     if($orderRecept->recept_person_id == $admin_id){
@@ -605,11 +606,12 @@ class WorkOrderList extends Model
                 $work->check_note = '系统自动审核通过';
                 $work->check_time = $time;
                 $work->submit_time = $time;
+
                 if($allComplete == 1){
                     //处理完成
                     $work->work_status = 6;
                     $work->complete_time = $time;
-                }else{
+                }elseif($allComplete == 0 && $count >1){
                     //部分处理
                     $work->work_status = 5;
                 }
