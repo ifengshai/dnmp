@@ -270,6 +270,7 @@ class WorkOrderList extends Backend
                     if ($params['need_coupon_id'] && in_array(9, array_filter($params['measure_choose_id']))) {
                         $params['coupon_id'] = $params['need_coupon_id'];
                         $params['coupon_describe'] = config('workorder.need_check_coupon')[$params['need_coupon_id']]['desc'];
+                        $params['is_check'] = 1;
                     }
 
                     //选择有优惠券时 值必须为真
@@ -693,6 +694,7 @@ class WorkOrderList extends Backend
                     if ($params['need_coupon_id'] && in_array(9, array_filter($params['measure_choose_id']))) {
                         $params['coupon_id'] = $params['need_coupon_id'];
                         $params['coupon_describe'] = config('workorder.need_check_coupon')[$params['need_coupon_id']]['desc'];
+                        $params['is_check'] = 1;
                     }
 
                     //选择有优惠券时 值必须为真
