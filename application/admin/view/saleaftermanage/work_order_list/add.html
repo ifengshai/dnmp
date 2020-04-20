@@ -510,7 +510,7 @@
         <div class="form-group-child3 measure step2" style="display:none;">
             <label class="control-label col-xs-12 col-sm-2">{:__('退款方式')}：</label>
             <div class="col-xs-12 col-sm-8">
-                <input id="c-refund_way" class="form-control" name="row[refund_way]" type="text" value="{$row.refund_money}">
+                <input id="c-refund_way" class="form-control" name="row[refund_way]" type="text" readonly value="{$row.refund_money}">
             </div>
         </div>
 
@@ -1244,7 +1244,7 @@
             {if !$row['id']}
             <button type="submit" class="btn btn-warning btn-embossed">{:__('保存草稿')}</button>
             {/if}
-            <button type="submit" class="btn btn-success btn-status btn-embossed">提交审核</button>
+            <button type="submit" class="btn btn-success btn-status btn-embossed">提交</button>
             <button type="reset" class="btn btn-default btn-embossed">{:__('Reset')}</button>
         </div>
     </div>

@@ -227,30 +227,38 @@ class WorkOrderList extends Backend
                     //判断是否选择退款措施
                     if (!in_array(2, array_filter($params['measure_choose_id']))) {
                         unset($params['refund_money']);
+                    } else {
+                        if (!$params['refund_money']) {
+                            throw new Exception("退款金额不能为空");
+                        }
                     }
 
                     //判断是否选择补价措施
                     if (!in_array(8, array_filter($params['measure_choose_id']))) {
                         unset($params['replenish_increment_id']);
                         unset($params['replenish_money']);
+                    } else {
+                        if (!$params['replenish_increment_id'] || !$params['replenish_money']) {
+                            throw new Exception("补差价订单号和金额不能为空");
+                        }
                     }
 
                     //判断是否选择积分措施
                     if (!in_array(10, array_filter($params['measure_choose_id']))) {
                         unset($params['integral']);
+                    } else {
+                        if (!$params['integral'] || !$params['email']) {
+                            throw new Exception("积分和邮箱不能为空");
+                        }
                     }
 
                     //判断是否选择退件措施
                     if (!in_array(11, array_filter($params['measure_choose_id']))) {
                         unset($params['refund_logistics_num']);
-                    }
-
-                    //如果积分大于200需要审核
-                    if ($params['integral'] > 200) {
-                        //需要审核
-                        $params['is_check'] = 1;
-                        //创建人对应主管
-                        $params['assign_user_id'] = $this->assign_user_id;
+                    } else {
+                        if (!$params['refund_logistics_num']) {
+                            throw new Exception("退回物流单号不能为空");
+                        }
                     }
 
                     //判断优惠券 不需要审核的优惠券
@@ -261,6 +269,19 @@ class WorkOrderList extends Backend
                     if ($params['need_coupon_id'] && in_array(9, array_filter($params['measure_choose_id']))) {
                         $params['coupon_id'] = $params['need_coupon_id'];
                         $params['coupon_describe'] = config('workorder.need_check_coupon')[$params['need_coupon_id']]['desc'];
+                    }
+
+                    //选择有优惠券时 值必须为真
+                    if (in_array(9, array_filter($params['measure_choose_id'])) && !$params['coupon_id']) {
+                        throw new Exception("优惠券不能为空");
+                    }
+                    
+                    //如果积分大于200需要审核
+                    if ($params['integral'] > 200) {
+                        //需要审核
+                        $params['is_check'] = 1;
+                        //创建人对应主管
+                        $params['assign_user_id'] = $this->assign_user_id;
                     }
 
                     //判断审核人
@@ -629,31 +650,38 @@ class WorkOrderList extends Backend
                     //判断是否选择退款措施
                     if (!in_array(2, array_filter($params['measure_choose_id']))) {
                         unset($params['refund_money']);
-                        unset($params['refund_way']);
+                    } else {
+                        if (!$params['refund_money']) {
+                            throw new Exception("退款金额不能为空");
+                        }
                     }
 
                     //判断是否选择补价措施
                     if (!in_array(8, array_filter($params['measure_choose_id']))) {
                         unset($params['replenish_increment_id']);
                         unset($params['replenish_money']);
+                    } else {
+                        if (!$params['replenish_increment_id'] || !$params['replenish_money']) {
+                            throw new Exception("补差价订单号和金额不能为空");
+                        }
                     }
 
                     //判断是否选择积分措施
                     if (!in_array(10, array_filter($params['measure_choose_id']))) {
                         unset($params['integral']);
+                    } else {
+                        if (!$params['integral'] || !$params['email']) {
+                            throw new Exception("积分和邮箱不能为空");
+                        }
                     }
 
                     //判断是否选择退件措施
                     if (!in_array(11, array_filter($params['measure_choose_id']))) {
                         unset($params['refund_logistics_num']);
-                    }
-
-                    //如果积分大于200需要审核
-                    if ($params['integral'] > 200) {
-                        //需要审核
-                        $params['is_check'] = 1;
-                        //创建人对应主管
-                        $params['assign_user_id'] = $this->assign_user_id;
+                    } else {
+                        if (!$params['refund_logistics_num']) {
+                            throw new Exception("退回物流单号不能为空");
+                        }
                     }
 
                     //判断优惠券 不需要审核的优惠券
@@ -664,6 +692,19 @@ class WorkOrderList extends Backend
                     if ($params['need_coupon_id'] && in_array(9, array_filter($params['measure_choose_id']))) {
                         $params['coupon_id'] = $params['need_coupon_id'];
                         $params['coupon_describe'] = config('workorder.need_check_coupon')[$params['need_coupon_id']]['desc'];
+                    }
+
+                    //选择有优惠券时 值必须为真
+                    if (in_array(9, array_filter($params['measure_choose_id'])) && !$params['coupon_id']) {
+                        throw new Exception("优惠券不能为空");
+                    }
+                    
+                    //如果积分大于200需要审核
+                    if ($params['integral'] > 200) {
+                        //需要审核
+                        $params['is_check'] = 1;
+                        //创建人对应主管
+                        $params['assign_user_id'] = $this->assign_user_id;
                     }
 
                     //判断审核人
@@ -683,6 +724,12 @@ class WorkOrderList extends Backend
                             $params['assign_user_id'] = $this->assign_user_id;
                         }
                     }
+
+                    //提交时间
+                    if ($params['work_status'] == 2) {
+                        $params['submit_time'] = date('Y-m-d H:i:s');
+                    }
+
                     $params['recept_person_id'] = $params['recept_person_id'] ?: session('admin.id');
                     $result = $row->allowField(true)->save($params);
                     if (false === $result) {
