@@ -1101,7 +1101,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     var secondNode = $('.step2' + '-' + checkID[m]);
                                 }else if((id>=2 || id<=3) && (1 == checkID[m])){
                                     var secondNode = $('.step1' + '-' + checkID[m]);
-                                }                                   
+                                }else{
+                                    var secondNode = $('.step' + id + '-' + checkID[m]); 
+                                }                                    
                             }
                             if (secondNode.is(':hidden')) {
                                 secondNode.show();
@@ -1180,6 +1182,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     var secondNode = $('.step2' + '-' + checkID[m]);
                                 }else if((problem_type_id>=2 || problem_type_id<=3) && (1 == checkID[m])){
                                     var secondNode = $('.step1' + '-' + checkID[m]);
+                                }else{
+                                    var secondNode = $('.step' + problem_type_id + '-' + checkID[m]); 
                                 }                                   
                             }
                             if (secondNode.is(':hidden')) {
@@ -1312,6 +1316,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                         var secondNode = $('.step2' + '-' + checkIDss[m]);
                                     }else if((id>=2 || id<=3) && (1 == checkIDss[m])){
                                         var secondNode = $('.step1' + '-' + checkIDss[m]);
+                                    }else{
+                                        var secondNode = $('.step' + id + '-' + checkIDss[m]); 
                                     }                                   
                                 }
                                 if (secondNode.is(':hidden')) {
