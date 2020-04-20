@@ -183,10 +183,10 @@ class WorkOrderList extends Model
     {
         switch ($siteType) {
             case 1:
-                $url = 'http://z.zhaokuangyi.com/';
+                $url = 'https://z.zhaokuangyi.com/';
                 break;
             case 2:
-                $url = 'http://api.voogueme.com/';
+                $url = 'http://pc.zhaokuangyi.com/';
                 break;
             case 3:
                 $url = 'https://nh.zhaokuangyi.com/';
