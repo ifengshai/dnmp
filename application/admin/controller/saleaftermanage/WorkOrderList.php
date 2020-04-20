@@ -58,8 +58,9 @@ class WorkOrderList extends Backend
         $this->assignconfig('admin_id', session('admin.id'));
         //查询用户id对应姓名
         $admin = new \app\admin\model\Admin();
-        $users = $admin->where('status', 'normal')->column('nickname', 'id');
-        $this->assignconfig('users', $users); //返回用户
+        $this->users = $admin->where('status', 'normal')->column('nickname', 'id');
+        $this->assignconfig('users', $this->users); //返回用户
+        $this->assignconfig('userid', session('admin.id'));
     }
 
     /**
@@ -119,9 +120,8 @@ class WorkOrderList extends Backend
                 ->select();
             $list = collection($list)->toArray();
 
-            $admin = new \app\admin\model\Admin();
-            $user_list = $admin->where('status', 'normal')->column('nickname', 'id');
-
+            //用户
+            $user_list = $this->users;
             foreach ($list as $k => $v) {
                 //排列sku
                 if ($v['order_sku']) {

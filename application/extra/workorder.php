@@ -61,19 +61,19 @@ return [
 
     //客服问题类型组 id大于5 采用step04措施
     'customer_problem_group' => [
-        1 => [//更改镜框
+        1 => [ //更改镜框
             'step' => 'step01'
         ],
-        2 => [//更改镜片
+        2 => [ //更改镜片
             'step' => 'step02'
         ],
-        3 => [//更改地址
+        3 => [ //更改地址
             'step' => 'step01'
         ],
-        4 => [//更改快递
+        4 => [ //更改快递
             'step' => 'step05'
         ],
-        5 => [//关税
+        5 => [ //关税
             'step' => 'step03'
         ],
         6 => [
@@ -82,138 +82,138 @@ return [
     ],
     //仓库问题类型组  id大于4 采用step04措施
     'warehouse_problem_group' => [
-        1 => [//核实处方
-            'step' => 'step02'//措施key
+        1 => [ //核实处方
+            'step' => 'step02' //措施key
         ],
-        2 => [//不可加工
-            'step' => 'step01'//措施key
+        2 => [ //不可加工
+            'step' => 'step01' //措施key
         ],
-        3 => [//镜框缺货
-            'step' => 'step01'//措施key
+        3 => [ //镜框缺货
+            'step' => 'step01' //措施key
         ],
-        4 => [//镜片缺货
-            'step' => ''//为空没有后续
+        4 => [ //镜片缺货
+            'step' => '' //为空没有后续
         ],
         5 => [
-            'step' => 'step04'//措施key
+            'step' => 'step04' //措施key
         ],
-       
+
     ],
 
     //措施组
     'step01' => [
         [
-            'step_id' => 1,//更改
+            'step_id' => 1, //更改
             'is_check' => 0,
             'appoint_group' => [ //承接组
-                'warehouse_group'//仓库跟单
+                'warehouse_group' //仓库跟单
             ],
         ],
     ],
     'step02' => [
         [
-            'step_id' => 1,//更改
+            'step_id' => 1, //更改
             'is_check' => 0,
-            'appoint_group' => [//承接组
-                'warehouse_lens_group'//仓库镜片负责人
+            'appoint_group' => [ //承接组
+                'warehouse_lens_group' //仓库镜片负责人
             ],
         ],
     ],
     'step03' => [
         [
-            'step_id' => 2,//退款
+            'step_id' => 2, //退款
             'is_check' => 1,
-            'appoint_group' => [//承接组
-                'cashier_group'//出纳
+            'appoint_group' => [ //承接组
+                'cashier_group' //出纳
             ],
         ],
     ],
     'step04' => [
 
         [
-            'step_id' => 2,//退款
+            'step_id' => 2, //退款
             'is_check' => 1,
             'appoint_group' => [ //承接组
-                'cashier_group'//出纳
+                'cashier_group' //出纳
             ],
         ],
         [
-            'step_id' => 3,//取消
+            'step_id' => 3, //取消
             'is_check' => 1,
-            'appoint_group' => [//承接组
-                'warehouse_group',//仓库跟单员
-                'cashier_group'//出纳
+            'appoint_group' => [ //承接组
+                'warehouse_group', //仓库跟单员
+                'cashier_group' //出纳
             ],
         ],
 
         [
-            'step_id' => 4,//催单
+            'step_id' => 4, //催单
             'is_check' => 0,
-            'appoint_group' => [//承接组
-                'warehouse_group'//仓库跟单员
+            'appoint_group' => [ //承接组
+                'warehouse_group' //仓库跟单员
             ],
         ],
         [
-            'step_id' => 5,//暂缓
+            'step_id' => 5, //暂缓
             'is_check' => 0,
-            'appoint_group' => [//承接组
-                'warehouse_group'//仓库跟单员
+            'appoint_group' => [ //承接组
+                'warehouse_group' //仓库跟单员
             ],
         ],
         [
-            'step_id' => 6,//赠品
+            'step_id' => 6, //赠品
             'is_check' => 1,
-            'appoint_group' => [//承接组
-                'warehouse_group'//仓库跟单员
+            'appoint_group' => [ //承接组
+                'warehouse_group' //仓库跟单员
             ],
         ],
         [
-            'step_id' => 7,//补发
+            'step_id' => 7, //补发
             'is_check' => 1,
-            'appoint_group' => [//承接组
-                'warehouse_group'//仓库跟单员
+            'appoint_group' => [ //承接组
+                'warehouse_group' //仓库跟单员
             ],
         ],
         [
-            'step_id' => 8,//补价
+            'step_id' => 8, //补价
             'is_check' => 0,
             'appoint_group' => [ //空代表承接给创建人
 
             ],
         ],
         [
-            'step_id' => 9,//优惠券
+            'step_id' => 9, //优惠券
             'is_check' => 0,
             'appoint_group' => [ //空代表承接给创建人
             ],
         ],
 
         [
-            'step_id' => 10,//积分
+            'step_id' => 10, //积分
             'is_check' => 0,
-            'appoint_group' => [//空代表承接给创建人
+            'appoint_group' => [ //空代表承接给创建人
             ],
         ],
-  
+
         [
-            'step_id' => 11,//退件
+            'step_id' => 11, //退件
             'is_check' => 0,
             'appoint_group' => [
-                'warehouse_group'//仓库跟单员
+                'warehouse_group' //仓库跟单员
             ],
         ]
     ],
-    
+
     'step05' => [
         [
-            'step_id' => 1,//更改
+            'step_id' => 1, //更改
             'is_check' => 0,
-            'appoint_group' => [//承接组
-                'warehouse_group'//仓库跟单
+            'appoint_group' => [ //承接组
+                'warehouse_group' //仓库跟单
             ],
         ],
         [
-            'step_id' => 8,//补价
+            'step_id' => 8, //补价
             'is_check' => 0,
             'appoint_group' => [ //空代表承接给创建人
 
@@ -302,7 +302,8 @@ return [
         ]
     ],
     //客服部门角色组ID
-    'customer_department_rule'=>[
+    'customer_department_rule' => [
+        1,
         31,
         32,
         33,
@@ -310,8 +311,7 @@ return [
         36
     ],
     //仓库部门角色组ID
-    'warehouse_department_rule'=>[
-        1,
+    'warehouse_department_rule' => [
         42,
         43,
         44,
