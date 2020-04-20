@@ -172,6 +172,9 @@ class WorkOrderList extends Backend
                         $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.add' : $name) : $this->modelValidate;
                         $this->model->validateFailException(true)->validate($validate);
                     }
+                    if (!$params['platform_order']) {
+                        throw new Exception("订单号不能为空");
+                    }
                     //判断是否选择措施
                     if (!$params['problem_type_id'] && !$params['id']) {
                         throw new Exception("问题类型不能为空");
