@@ -100,7 +100,7 @@ class ZendeskOne extends Controller
     {
         $search = [
             'type' => 'ticket',
-            'via' => ['mail','web'],
+            'via' => ['mail','web','web_widget'],
             'status' => ['new','open'],
             'tags' => [
                 'keytype' => '-',
