@@ -1287,12 +1287,22 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                 } else {
                                     node.hide();
                                 }
-                                var secondNode = $('.step' + id + '-' + checkIDss[m]);
+                                //判断是客服工单还是仓库工单
+                                if(1 == Config.work_type){ //客服工单
+                                    var secondNode = $('.step' + id + '-' + checkIDss[m]);
+                                }else if(2 == Config.work_type){ //仓库工单
+                                    if((1==id) && (1==checkIDss[m])){
+                                        var secondNode = $('.step2' + '-' + checkIDss[m]);
+                                    }else if((id>=2 || id<=3) && (1 == checkIDss[m])){
+                                        var secondNode = $('.step1' + '-' + checkIDss[m]);
+                                    }                                   
+                                }
                                 if (secondNode.is(':hidden')) {
                                     secondNode.show();
                                 } else {
                                     secondNode.hide();
                                 }
+
                             }
                             var checkID = [];//定义一个空数组
                             var appoint_group = '';
@@ -1348,6 +1358,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
     
                         //判断更换镜框的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 start
                         if (!$('.step1-1').is(':hidden')) {
+                            console.log(111111);
                             changeFrame(1, work_id)
                         }
                         //判断更换镜框的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end
