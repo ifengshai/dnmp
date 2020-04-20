@@ -40,7 +40,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                             operate: false,
                             formatter: function (value, rows) {
                                 var all_user_name = '';
-                                if (value) {
+                                if (rows.order_sku_arr) {
                                     for (i = 0, len = rows.order_sku_arr.length; i < len; i++) {
                                         all_user_name += '<div class="step_recept"><b class="recept">' + rows.order_sku_arr[i] + '</b></div>';
                                     }
@@ -748,7 +748,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     }
                     //更加镜架的更改
                     var question = $('input[name="row[problem_type_id]"]:checked').val();
-                    if (value == 1 && question == 2 && check === true) {
+                    if ((Config.work_type == 1 && value == 1 && question == 2 && check === true) || (Config.work_type == 2 && value == 1 && question == 1 && check === true)) {
                         Backend.api.ajax({
                             url: 'saleaftermanage/work_order_list/ajaxGetChangeLens',
                             data: {

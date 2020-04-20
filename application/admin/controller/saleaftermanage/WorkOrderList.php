@@ -172,6 +172,9 @@ class WorkOrderList extends Backend
                         $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.add' : $name) : $this->modelValidate;
                         $this->model->validateFailException(true)->validate($validate);
                     }
+                    if (!$params['platform_order']) {
+                        throw new Exception("订单号不能为空");
+                    }
                     //判断是否选择措施
                     if (!$params['problem_type_id'] && !$params['id']) {
                         throw new Exception("问题类型不能为空");
@@ -350,6 +353,7 @@ class WorkOrderList extends Backend
                             if (false === $receptRes) {
                                 throw new Exception("添加失败！！");
                             }
+
                             //更改镜片，补发，赠品
                             $this->model->changeLens($params, $work_id);
                         }
@@ -1088,8 +1092,8 @@ class WorkOrderList extends Backend
     {
         //$this->model->presentCoupon(235);
         //$this->model->presentIntegral(233);
-        $this->model->createOrder(3, 338);
-        //$this->model->createOrder(1, 326);
+        //$this->model->createOrder(3, 338);
+        $this->model->createOrder(1, 326);
     }
     /**
      * 工单详情

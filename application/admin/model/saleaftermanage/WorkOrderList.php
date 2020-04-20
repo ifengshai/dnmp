@@ -183,7 +183,7 @@ class WorkOrderList extends Model
     {
         switch ($siteType) {
             case 1:
-                $url = 'https://z.zhaokuangyi.com/';
+                $url = 'http://z.zhaokuangyi.com/';
                 break;
             case 2:
                 $url = 'http://pc.zhaokuangyi.com/';
@@ -199,7 +199,7 @@ class WorkOrderList extends Model
                 break;
         }
         $url = $url . $pathinfo;
-        $client = new Client();
+        $client = new Client(['verify' => false]);
         try {
             if ($method == 'GET') {
                 $response = $client->request('GET', $url, array('query'=>$params));
@@ -227,10 +227,9 @@ class WorkOrderList extends Model
      */
     public function changeLens($params, $work_id)
     {
-
         $measure = '';
         //修改镜片
-        if(($params['work_type'] == 1 || $params['work_type'] == 2) && $params['problem_type_id'] == 2 && in_array(1, array_filter($params['measure_choose_id']))){
+        if(($params['work_type'] == 1 && $params['problem_type_id'] == 2 && in_array(1, array_filter($params['measure_choose_id']))) || ($params['work_type'] == 2 && $params['problem_type_id'] == 1 && in_array(1, array_filter($params['measure_choose_id']))) ){
             $measure = 1;
         }elseif(in_array(6, array_filter($params['measure_choose_id']))){ //赠品
             $measure = 2;
