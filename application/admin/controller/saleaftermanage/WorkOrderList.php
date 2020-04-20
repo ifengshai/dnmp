@@ -53,7 +53,7 @@ class WorkOrderList extends Backend
         //选项卡
         $this->view->assign('getTabList', $this->model->getTabList());
 
-        $this->assignconfig('admin_id', session('admin.id')); //JS专用，整个配置文件
+        $this->assignconfig('admin_id', session('admin.id'));
     }
 
     /**

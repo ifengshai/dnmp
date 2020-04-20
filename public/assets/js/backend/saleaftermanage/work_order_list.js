@@ -223,8 +223,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     callback: function (data) {
                                     },
                                     visible: function (row) {
-                                        //草稿，待审核状态+需要审核+审核人，才有审核权限
-                                        if ((row.work_status == 2 || row.work_status == 1) && row.is_check == 1 && Config.admin_id == row.assign_user_id) {
+                                        //草稿，待审核状态+需要审核+审核人(经理)，才有审核权限
+                                        if ((row.work_status == 2 || row.work_status == 1) && row.is_check == 1 && (Config.admin_id == row.assign_user_id || Config.workorder.customer_manager == row.assign_user_id)) {
                                             return true;
                                         } else {
                                             return false;
