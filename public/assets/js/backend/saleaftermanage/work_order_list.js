@@ -146,9 +146,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                             },
                         },
 
-                        /* { field: 'create_time', title: __('Create_time'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime },
-                         { field: 'check_time', title: __('Check_time'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime },
-                         { field: 'complete_time', title: __('Complete_time'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime },*/
+                        { field: 'create_time', title: __('Create_time'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime,visible:false },
+                         { field: 'check_time', title: __('Check_time'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime,visible:false },
+                         { field: 'complete_time', title: __('Complete_time'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime,visible:false},
                         {
                             field: 'buttons',
                             width: "120px",
@@ -227,6 +227,16 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                         } else {
                                             return false;
                                         }
+                                    }
+                                },
+                                {
+                                    name: 'check',
+                                    text: __('处理'),
+                                    title: __('处理'),
+                                    classname: 'btn btn-xs btn-success btn-dialog',
+                                    url: 'saleaftermanage/work_order_list/detail/operate_type/3',
+                                    extend: 'data-area = \'["100%","100%"]\'',
+                                    callback: function (data) {
                                     }
                                 },
                                 {
@@ -1022,6 +1032,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 //提交审核按钮
                 $('.btn-check-status').click(function () {
                     $('.check-status').val(2);
+                })
+                //提交处理按钮
+                $('.btn-process-status').click(function () {
+                    $('.process-status').val(2);
                 })
 
                 //优惠券下拉切换
