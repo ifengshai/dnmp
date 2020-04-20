@@ -40,7 +40,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                             operate: false,
                             formatter: function (value, rows) {
                                 var all_user_name = '';
-                                if (value) {
+                                if (rows.order_sku_arr) {
                                     for (i = 0, len = rows.order_sku_arr.length; i < len; i++) {
                                         all_user_name += '<div class="step_recept"><b class="recept">' + rows.order_sku_arr[i] + '</b></div>';
                                     }
