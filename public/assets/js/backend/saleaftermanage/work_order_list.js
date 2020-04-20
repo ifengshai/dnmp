@@ -1093,12 +1093,21 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                             } else {
                                 node.hide();
                             }
-                            var secondNode = $('.step' + id + '-' + checkID[m]);
+                            //判断是客服工单还是仓库工单
+                            if(1 == Config.work_type){ //客服工单
+                                var secondNode = $('.step' + id + '-' + checkID[m]);
+                            }else if(2 == Config.work_type){ //仓库工单
+                                if((1==id) && (1==checkID[m])){
+                                    var secondNode = $('.step2' + '-' + checkID[m]);
+                                }else if((id>=2 || id<=3) && (1 == checkID[m])){
+                                    var secondNode = $('.step1' + '-' + checkID[m]);
+                                }                                   
+                            }
                             if (secondNode.is(':hidden')) {
                                 secondNode.show();
                             } else {
                                 secondNode.hide();
-                            }
+                            } 
                         }
                         //判断更换镜框的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 start
                         if (!$('.step1-1').is(':hidden')) {
@@ -1163,13 +1172,21 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                             } else {
                                 node.hide();
                             }
-                            //二级措施
-                            var secondNode = $('.step' + problem_type_id + '-' + checkID[m]);
+                            //判断是客服工单还是仓库工单
+                            if(1 == Config.work_type){ //客服工单
+                                var secondNode = $('.step' + problem_type_id + '-' + checkID[m]);
+                            }else if(2 == Config.work_type){ //仓库工单
+                                if((1==problem_type_id) && (1==checkID[m])){
+                                    var secondNode = $('.step2' + '-' + checkID[m]);
+                                }else if((problem_type_id>=2 || problem_type_id<=3) && (1 == checkID[m])){
+                                    var secondNode = $('.step1' + '-' + checkID[m]);
+                                }                                   
+                            }
                             if (secondNode.is(':hidden')) {
                                 secondNode.show();
                             } else {
                                 secondNode.hide();
-                            }
+                            }                            
                         }
                         var id = $(this).val();
                         var arr = array_filter(appoint_group.split(','));
@@ -1358,7 +1375,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
     
                         //判断更换镜框的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 start
                         if (!$('.step1-1').is(':hidden')) {
-                            console.log(111111);
                             changeFrame(1, work_id)
                         }
                         //判断更换镜框的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end
