@@ -1163,7 +1163,6 @@ class WorkOrderList extends Backend
             $this->error(__('No Results were found'));
         }
         if($operateType == 2){
-
            if(!in_array($row->work_status,[1]) || $row->is_check != 1 || !in_array(session('admin.id'),[$row->assign_user_id,config('workorder.customer_manager')])){
                $this->error('没有审核权限');
            }
