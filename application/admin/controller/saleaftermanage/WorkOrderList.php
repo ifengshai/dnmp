@@ -1142,7 +1142,7 @@ class WorkOrderList extends Backend
         //$this->model->presentCoupon(235);
         //$this->model->presentIntegral(233);
         //$this->model->createOrder(3, 338);
-        $this->model->createOrder(1, 326);
+        $this->model->createOrder(1, 385);
     }
     /**
      * 工单详情
@@ -1213,6 +1213,9 @@ class WorkOrderList extends Backend
         $this->assignconfig('operate_type',$operateType);
         if($operateType == 2){ //审核
             return $this->view->fetch('saleaftermanage/work_order_list/check');
+        }
+        if($operateType == 3){ //处理
+            return $this->view->fetch('saleaftermanage/work_order_list/process');
         }
 
         //查询工单处理备注
