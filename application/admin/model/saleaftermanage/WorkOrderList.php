@@ -239,6 +239,7 @@ class WorkOrderList extends Model
         if($measure){
             Db::startTrans();
             try {
+                echo $measure;
                 //如果是更改镜片
                 if ($measure == 1) {
                     $changeLens = $params['change_lens'];
@@ -400,91 +401,95 @@ class WorkOrderList extends Model
     public function createOrder($siteType, $work_id)
     {
         $changeSkus = WorkOrderChangeSku::where(['work_id' => $work_id, 'change_type' => 5])->select();
-        $postData = $postDataCommon = [];
-        foreach ($changeSkus as $key =>  $changeSku) {
-            $address = unserialize($changeSku['userinfo_option']);
-            $prescriptions = unserialize($changeSku['prescription_option']);
-            $postDataCommon = [
-                'currency_code' => $address['currency_code'],
-                'country' => $address['country_id'],
-                'shipping_type' => $address['shipping_type'],
-                'telephone' => $address['telephone'],
-                'email' => $address['email'],
-                'first_name' => $address['firstname'],
-                'last_name' => $address['lastname'],
-                'postcode' => $address['postcode'],
-                'city' => $address['city'],
-                'region_id' => $address['region_id'],
-                'street' => $address['street'],
-            ];
-            $pdCheck = $pd = $prismcheck = '';
-            $pd_r = $pd_l = '';
-            if ($changeSku['pd_r'] && $changeSku['pd_l']) {
-                $pdCheck = 'on';
-                $pd_r = $changeSku['pd_r'];
-                $pd_l = $changeSku['pd_l'];
-            } else {
-                $pd = $changeSku['pd_r'] ?: $changeSku['pd_l'];
+        //如果存在补发单的措施
+        if($changeSkus){
+            $postData = $postDataCommon = [];
+            foreach ($changeSkus as $key =>  $changeSku) {
+                $address = unserialize($changeSku['userinfo_option']);
+                $prescriptions = unserialize($changeSku['prescription_option']);
+                $postDataCommon = [
+                    'currency_code' => $address['currency_code'],
+                    'country' => $address['country_id'],
+                    'shipping_type' => $address['shipping_type'],
+                    'telephone' => $address['telephone'],
+                    'email' => $address['email'],
+                    'first_name' => $address['firstname'],
+                    'last_name' => $address['lastname'],
+                    'postcode' => $address['postcode'],
+                    'city' => $address['city'],
+                    'region_id' => $address['region_id'],
+                    'street' => $address['street'],
+                ];
+                $pdCheck = $pd = $prismcheck = '';
+                $pd_r = $pd_l = '';
+                if ($changeSku['pd_r'] && $changeSku['pd_l']) {
+                    $pdCheck = 'on';
+                    $pd_r = $changeSku['pd_r'];
+                    $pd_l = $changeSku['pd_l'];
+                } else {
+                    $pd = $changeSku['pd_r'] ?: $changeSku['pd_l'];
+                }
+                $od_pv = $changeSku['od_pv'];
+                $os_pv = $changeSku['os_pv'];
+                $od_bd = $changeSku['od_bd'];
+                $os_bd = $changeSku['os_bd'];
+                $od_pv_r = $changeSku['od_pv_r'];
+                $os_pv_r = $changeSku['os_pv_r'];
+                $od_bd_r = $changeSku['od_bd_r'];
+                $os_bd_r = $changeSku['os_bd_r'];
+                if ($od_pv || $os_pv || $od_bd || $os_bd || $od_pv_r || $os_pv_r || $od_bd_r || $os_bd_r) {
+                    $prismcheck = 'on';
+                }
+                $is_frame_only = 0;
+                if($prescriptions['lens_id'] || $prescriptions['coating_id'] || $prescriptions['color_id']){
+                    $is_frame_only = 1;
+                }
+                $postData['product'][$key] = [
+                    'sku' => $changeSku['original_sku'],
+                    'qty' => $changeSku['original_number'],
+                    'prescription_type' => $changeSku['recipe_type'],
+                    'is_frame_only' => $is_frame_only,
+                    'od_sph' => $changeSku['od_sph'],
+                    'os_sph' => $changeSku['os_sph'],
+                    'od_cyl' => $changeSku['od_cyl'],
+                    'os_cyl' => $changeSku['os_cyl'],
+                    'od_axis' => $changeSku['od_axis'],
+                    'os_axis' => $changeSku['os_axis'],
+                    'od_add' => $changeSku['od_add'],
+                    'os_add' => $changeSku['os_add'],
+                    'pd' => $pd,
+                    'pdcheck' => $pdCheck,
+                    'pd_r' => $pd_r,
+                    'pd_l' => $pd_l,
+                    'prismcheck' => $prismcheck,
+                    'od_pv' => $changeSku['od_pv'],
+                    'os_pv' => $changeSku['os_pv'],
+                    'od_bd' => $changeSku['od_bd'],
+                    'os_bd' => $changeSku['os_bd'],
+                    'od_pv_r' => $changeSku['od_pv_r'],
+                    'os_pv_r' => $changeSku['os_pv_r'],
+                    'od_bd_r' => $changeSku['od_bd_r'],
+                    'os_bd_r' => $changeSku['os_bd_r'],
+                    'lens_id' => $prescriptions['lens_id'],
+                    'lens_name' => $prescriptions['lens_name'],
+                    'lens_type' => $prescriptions['lens_type'],
+                    'coating_id' => $prescriptions['coating_id'],
+                    'coating_name' => $prescriptions['coating_name'],
+                    'color_id' => $prescriptions['color_id'],
+                    'color_name' => $prescriptions['color_name'],
+                ];
             }
-            $od_pv = $changeSku['od_pv'];
-            $os_pv = $changeSku['os_pv'];
-            $od_bd = $changeSku['od_bd'];
-            $os_bd = $changeSku['os_bd'];
-            $od_pv_r = $changeSku['od_pv_r'];
-            $os_pv_r = $changeSku['os_pv_r'];
-            $od_bd_r = $changeSku['od_bd_r'];
-            $os_bd_r = $changeSku['os_bd_r'];
-            if ($od_pv || $os_pv || $od_bd || $os_bd || $od_pv_r || $os_pv_r || $od_bd_r || $os_bd_r) {
-                $prismcheck = 'on';
+            $postData = array_merge($postData, $postDataCommon);
+            try {
+                $res = $this->httpRequest($siteType, 'magic/order/createOrder', $postData, 'GET');
+                $increment_id = $res['increment_id'];
+                //replacement_order添加补发的订单号
+                WorkOrderChangeSku::where(['work_id' => $work_id, 'change_type' => 5])->setField('replacement_order', $increment_id);
+            } catch (Exception $e) {
+                exception($e->getMessage());
             }
-            $is_frame_only = 0;
-            if($prescriptions['lens_id'] || $prescriptions['coating_id'] || $prescriptions['color_id']){
-                $is_frame_only = 1;
-            }
-            $postData['product'][$key] = [
-                'sku' => $changeSku['original_sku'],
-                'qty' => $changeSku['original_number'],
-                'prescription_type' => $changeSku['recipe_type'],
-                'is_frame_only' => $is_frame_only,
-                'od_sph' => $changeSku['od_sph'],
-                'os_sph' => $changeSku['os_sph'],
-                'od_cyl' => $changeSku['od_cyl'],
-                'os_cyl' => $changeSku['os_cyl'],
-                'od_axis' => $changeSku['od_axis'],
-                'os_axis' => $changeSku['os_axis'],
-                'od_add' => $changeSku['od_add'],
-                'os_add' => $changeSku['os_add'],
-                'pd' => $pd,
-                'pdcheck' => $pdCheck,
-                'pd_r' => $pd_r,
-                'pd_l' => $pd_l,
-                'prismcheck' => $prismcheck,
-                'od_pv' => $changeSku['od_pv'],
-                'os_pv' => $changeSku['os_pv'],
-                'od_bd' => $changeSku['od_bd'],
-                'os_bd' => $changeSku['os_bd'],
-                'od_pv_r' => $changeSku['od_pv_r'],
-                'os_pv_r' => $changeSku['os_pv_r'],
-                'od_bd_r' => $changeSku['od_bd_r'],
-                'os_bd_r' => $changeSku['os_bd_r'],
-                'lens_id' => $prescriptions['lens_id'],
-                'lens_name' => $prescriptions['lens_name'],
-                'lens_type' => $prescriptions['lens_type'],
-                'coating_id' => $prescriptions['coating_id'],
-                'coating_name' => $prescriptions['coating_name'],
-                'color_id' => $prescriptions['color_id'],
-                'color_name' => $prescriptions['color_name'],
-            ];
         }
-        $postData = array_merge($postData, $postDataCommon);
-        try {
-            $res = $this->httpRequest($siteType, 'magic/order/createOrder', $postData, 'GET');
-            $increment_id = $res['increment_id'];
-            //replacement_order添加补发的订单号
-            WorkOrderChangeSku::where(['work_id' => $work_id, 'change_type' => 5])->setField('replacement_order', $increment_id);
-        } catch (Exception $e) {
-            exception($e->getMessage());
-        }
+
     }
 
     /**
@@ -591,24 +596,6 @@ class WorkOrderList extends Model
             $orderRecepts = WorkOrderRecept::where('work_id',$work_id)->select();
             $allComplete = 1;
             $count = count($orderRecepts);
-            foreach($orderRecepts as $orderRecept){
-                //承接人是自己，则措施，承接默认完成
-                if($orderRecept->recept_person_id == $admin_id && ($work->is_check == 0 && $work->work_type == 1) || ($work->is_check == 0 && $work->work_type == 2 && $work->is_after_deal_with == 1)){
-                    WorkOrderRecept::where('id',$orderRecept->id)->update(['recept_status' => 2,'finish_time' => $time,'note' => '自动处理完成']);
-                    WorkOrderMeasure::where('id',$orderRecept->measure_id)->update(['operation_type' => 1, 'operation_time' => $time]);
-                }else{
-                    $allComplete = 0;
-                }
-            }
-            if($allComplete == 1){
-                //处理完成
-                $work_status = 6;
-            }elseif($allComplete == 0 && $count >1){
-                //部分处理
-                $work_status = 5;
-            }else{
-                $work_status = 3;
-            }
 
             //不需要审核的，
             if(($work->is_check == 0 && $work->work_type == 1) || ($work->is_check == 0 && $work->work_type == 2 && $work->is_after_deal_with == 1)){
@@ -616,6 +603,24 @@ class WorkOrderList extends Model
                 $work->check_note = '系统自动审核通过';
                 $work->check_time = $time;
                 $work->submit_time = $time;
+                foreach($orderRecepts as $orderRecept){
+                    //承接人是自己，则措施，承接默认完成
+                    if($orderRecept->recept_person_id == $admin_id){
+                        WorkOrderRecept::where('id',$orderRecept->id)->update(['recept_status' => 2,'finish_time' => $time,'note' => '自动处理完成']);
+                        WorkOrderMeasure::where('id',$orderRecept->measure_id)->update(['operation_type' => 1, 'operation_time' => $time]);
+                    }else{
+                        $allComplete = 0;
+                    }
+                }
+                if($allComplete == 1){
+                    //处理完成
+                    $work_status = 6;
+                }elseif($allComplete == 0 && $count >1){
+                    //部分处理
+                    $work_status = 5;
+                }else{
+                    $work_status = 3;
+                }
                 $work->work_status = $work_status;
 
                 if($work_status == 6){
@@ -640,6 +645,28 @@ class WorkOrderList extends Model
                     $work->check_note = $params['check_note'];
                     $work->submit_time = $time;
                     $work->check_time = $time;
+                    foreach($orderRecepts as $orderRecept){
+                        //承接人是自己，则措施，承接默认完成
+                        if($orderRecept->recept_person_id == $admin_id){
+                            //审核成功直接进行处理
+                            if($params['success'] == 1){
+                                WorkOrderRecept::where('id',$orderRecept->id)->update(['recept_status' => 2,'finish_time' => $time,'note' => '自动处理完成']);
+                                WorkOrderMeasure::where('id',$orderRecept->measure_id)->update(['operation_type' => 1, 'operation_time' => $time]);
+                            }
+                        }else{
+                            $allComplete = 0;
+                        }
+                    }
+                    if($allComplete == 1){
+                        //处理完成
+                        $work_status = 6;
+                    }elseif($allComplete == 0 && $count >1){
+                        //部分处理
+                        $work_status = 5;
+                    }else{
+                        $work_status = 3;
+                    }
+                    $work->work_status = $work_status;
                     if($params['success'] == 2){
                         $work->work_status = 4;
                         $work->complete_time = $time;
@@ -648,10 +675,13 @@ class WorkOrderList extends Model
                         if($work_status == 6){
                             $work->complete_time = $time;
                         }
+                        //存在补发审核通过后生成补发单
+                        $this->createOrder($work->work_platform,$work_id);
                     }
 
                     $work->save();
 
+                    //
                     //工单备注表
                     $remarkData = [
                         'work_id' => $work_id,

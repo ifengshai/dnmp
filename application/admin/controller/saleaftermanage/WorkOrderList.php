@@ -78,6 +78,12 @@ class WorkOrderList extends Backend
             $recept = $this->recept->where('measure_id', $v['id'])->where('work_id', $id)->select();
             $recept_arr = collection($recept)->toArray();
             $step_arr[$k]['recept_user'] = implode(',', array_column($recept_arr, 'recept_person'));
+            $step_arr[$k]['has_recept']  = 0;
+            //是否有审核的权限
+            if(in_array(session('admin.id'),array_column($recept_arr, 'recept_person_id'))){
+                $step_arr[$k]['has_recept'] = 1;
+            }
+
             $step_arr[$k]['recept'] = $recept_arr;
         }
         return $step_arr;

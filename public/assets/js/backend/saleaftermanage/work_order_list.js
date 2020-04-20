@@ -237,6 +237,18 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     url: 'saleaftermanage/work_order_list/detail/operate_type/3',
                                     extend: 'data-area = \'["100%","100%"]\'',
                                     callback: function (data) {
+                                    },
+                                    visible: function(rows){
+                                        if(!(rows.work_type == 2 && rows.is_after_deal_with == 0)){
+                                            if (rows.step_num) {
+                                                for (i = 0, len = rows.step_num.length; i < len; i++) {
+                                                    if(rows.step_num[i].has_recept == 1){
+                                                        return true;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        return false;
                                     }
                                 },
                                 {
