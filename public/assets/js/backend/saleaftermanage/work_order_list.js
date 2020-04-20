@@ -220,13 +220,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     classname: 'btn btn-xs btn-success btn-ajax',
                                     url: 'saleaftermanage/work_order_list/setStatus/work_status/2',
                                     extend: 'data-area = \'["100%","100%"]\'',
+                                    confirm: '确定要提交吗',
                                     success: function (data, ret) {
                                         table.bootstrapTable('refresh');
                                     },
                                     callback: function (data) {
                                     },
                                     visible: function (row) {
-                                        if (row.work_status == 0) {
+                                        if (row.work_status == 1) {
                                             return true;
                                         } else {
                                             return false;
@@ -240,13 +241,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     classname: 'btn btn-xs btn-danger btn-ajax',
                                     url: 'saleaftermanage/work_order_list/setStatus/work_status/2',
                                     extend: 'data-area = \'["100%","100%"]\'',
+                                    confirm: '确定要取消吗',
                                     success: function (data, ret) {
                                         table.bootstrapTable('refresh');
                                     },
                                     callback: function (data) {
                                     },
                                     visible: function (row) {
-                                        if (row.work_status == 0) {
+                                        if (row.work_status == 1) {
                                             return true;
                                         } else {
                                             return false;
@@ -260,6 +262,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     classname: 'btn btn-xs btn-danger btn-ajax',
                                     url: 'saleaftermanage/work_order_list/setStatus/work_status/8',
                                     extend: 'data-area = \'["100%","100%"]\'',
+                                    confirm: '确定要撤销吗',
                                     success: function (data, ret) {
                                         table.bootstrapTable('refresh');
                                     },
