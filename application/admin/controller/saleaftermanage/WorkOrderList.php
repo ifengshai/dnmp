@@ -54,6 +54,11 @@ class WorkOrderList extends Backend
         $this->assign_user_id = searchForId(session('admin.id'), config('workorder.kefumanage'));
         //选项卡
         $this->view->assign('getTabList', $this->model->getTabList());
+
+        //查询用户id对应姓名
+        $admin = new \app\admin\model\Admin();
+        $users = $admin->where('status', 'normal')->column('nickname', 'id');
+        $this->assignconfig('users', $users); //返回用户
     }
 
     /**
@@ -510,12 +515,6 @@ class WorkOrderList extends Backend
             }
         }
 
-
-
-        //查询用户id对应姓名
-        $admin = new \app\admin\model\Admin();
-        $users = $admin->where('status', 'normal')->column('nickname', 'id');
-        $this->assignconfig('users', $users); //返回用户
         return $this->view->fetch();
     }
 
