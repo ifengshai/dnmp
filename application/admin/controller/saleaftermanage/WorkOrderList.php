@@ -293,6 +293,7 @@ class WorkOrderList extends Backend
                         }
                         $work_id = $this->model->id;
                     } else {
+                       
                         $work_id = $params['id'];
                         unset($params['id']);
                         unset($params['problem_type_content']);
@@ -423,7 +424,7 @@ class WorkOrderList extends Backend
                     }
                     //非草稿状态进入审核阶段
                     if ($this->model->work_status != 1) {
-                        $this->model->checkWork($this->model->id);
+                        $this->model->checkWork($work_id);
                     }
 
                     Db::commit();
