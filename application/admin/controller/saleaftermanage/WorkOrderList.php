@@ -350,6 +350,7 @@ class WorkOrderList extends Backend
                             if (false === $receptRes) {
                                 throw new Exception("添加失败！！");
                             }
+
                             //更改镜片，补发，赠品
                             $this->model->changeLens($params, $work_id);
                         }
