@@ -495,7 +495,7 @@ class WorkOrderList extends Backend
             $userGroupAccess = AuthGroupAccess::where(['uid' => $userId])->column('group_id');
             $warehouseArr = config('workorder.warehouse_department_rule');
             $checkIsWarehouse = array_intersect($userGroupAccess, $warehouseArr);
-            if (1 == 1) {
+            if (!empty($checkIsWarehouse)) {
                 $this->view->assign('work_type', 2);
                 $this->assignconfig('work_type', 2);
                 $this->view->assign('problem_type', config('workorder.warehouse_problem_type')); //仓库问题类型   
@@ -879,8 +879,8 @@ class WorkOrderList extends Backend
     {
         //$this->model->presentCoupon(235);
         //$this->model->presentIntegral(233);
-        $this->model->createOrder(3, 298);
-        //$this->model->createOrder(1, 265);
+        //$this->model->createOrder(3, 298);
+        $this->model->createOrder(1, 326);
     }
     /**
      * 工单详情
