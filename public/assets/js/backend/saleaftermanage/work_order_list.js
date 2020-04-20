@@ -748,7 +748,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     }
                     //更加镜架的更改
                     var question = $('input[name="row[problem_type_id]"]:checked').val();
-                    if (value == 1 && question == 2 && check === true) {
+                    if ((Config.work_type == 1 && value == 1 && question == 2 && check === true) || (Config.work_type == 2 && value == 1 && question == 1 && check === true)) {
                         Backend.api.ajax({
                             url: 'saleaftermanage/work_order_list/ajaxGetChangeLens',
                             data: {
