@@ -391,7 +391,7 @@ class WorkOrderList extends Backend
                             }
 
                             //更改镜片，补发，赠品
-                            $this->model->changeLens($params, $work_id);
+                            $this->model->changeLens($params, $this->model, $v);
                         }
                     }
 
@@ -791,7 +791,7 @@ class WorkOrderList extends Backend
                                 throw new Exception("添加失败！！");
                             }
                             //更改镜片，补发，赠品
-                            $this->model->changeLens($params, $row->id);
+                            $this->model->changeLens($params, $row, $v);
                         }
                     }
 

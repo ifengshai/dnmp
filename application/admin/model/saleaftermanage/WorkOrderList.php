@@ -225,21 +225,21 @@ class WorkOrderList extends Model
      * @param $work_id
      * @throws \Exception
      */
-    public function changeLens($params, $work_id)
+    public function changeLens($params, $work, $measure_choose_id)
     {
+        $work_id = $work->id;
         $measure = '';
         //修改镜片
-        if(($params['work_type'] == 1 && $params['problem_type_id'] == 2 && in_array(1, array_filter($params['measure_choose_id']))) || ($params['work_type'] == 2 && $params['problem_type_id'] == 1 && in_array(1, array_filter($params['measure_choose_id']))) ){
+        if(($work->work_type == 1 && $work->problem_type_id == 2 && $measure_choose_id == 1) || ($work->work_type == 2 && $work->problem_type_id == 1 && $measure_choose_id == 1)){
             $measure = 1;
-        }elseif(in_array(6, array_filter($params['measure_choose_id']))){ //赠品
+        }elseif($measure_choose_id == 6){ //赠品
             $measure = 2;
-        }elseif(in_array(7, array_filter($params['measure_choose_id']))){ //补发
+        }elseif($measure_choose_id == 7){ //补发
             $measure = 3;
         }
         if($measure){
             Db::startTrans();
             try {
-                echo $measure;
                 //如果是更改镜片
                 if ($measure == 1) {
                     $changeLens = $params['change_lens'];
