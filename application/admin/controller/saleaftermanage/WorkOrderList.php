@@ -52,6 +52,8 @@ class WorkOrderList extends Backend
         $this->assign_user_id = searchForId(session('admin.id'), config('workorder.kefumanage'));
         //选项卡
         $this->view->assign('getTabList', $this->model->getTabList());
+
+        $this->assignconfig('admin_id', session('admin.id')); //JS专用，整个配置文件
     }
 
     /**
@@ -1151,7 +1153,40 @@ class WorkOrderList extends Backend
         if (!empty($measureList)) {
             $this->assignconfig('measureList', $measureList);
         }
+        $operateType = input('operate_type',0);
+        $this->assignconfig('operate_type',$operateType);
+        if($operateType == 2){ //审核
+            return $this->view->fetch('saleaftermanage/work_order_list/check');
+        }
         return $this->view->fetch();
+    }
+
+    /**
+     * 审核
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public function check()
+    {
+        $params = input('post.row/a');
+        $workId = $params['id'];
+        $workType = $params['work_type'];
+        $success = $params['success'];
+        if(!$params['check_note']){
+            $this->error('审核意见不能为空');
+        }
+        $work = $this->model->find($workId);
+        if(!$work){
+            $this->error('工单不存在');
+        }
+        //开始审核
+        try{
+            $this->model->checkWork($workId,$params);
+        }catch (Exception $e){
+            $this->error($e->getMessage());
+        }
+        $this->success('已审核');
     }
     /**
      * 获取工单的更改镜片、补发、赠品的信息
@@ -1164,7 +1199,7 @@ class WorkOrderList extends Backend
      * @param [type] $change_type
      * @return void
      */
-    public function ajax_change_order($work_id=null,$order_type=null,$order_number=null,$change_type=null)
+    public function ajax_change_order($work_id=null,$order_type=null,$order_number=null,$change_type=null,$operate_type = '')
     {
         if ($this->request->isAjax()) {
             if ($order_type < 1 || $order_type > 5) { //不在平台之内
@@ -1195,25 +1230,25 @@ class WorkOrderList extends Backend
                 $res = $this->model->getAddress($order_type, $order_number);
                 //请求接口获取lens_type，coating_type，prescription_type等信息
                 if(isset($arr) && !empty($arr)){
-                    $lens = $this->model->getEditReissueLens($order_type, $res['showPrescriptions'],1,$result);
+                    $lens = $this->model->getEditReissueLens($order_type, $res['showPrescriptions'],1,$result,$operate_type);
                 }else{
-                    $lens = $this->model->getEditReissueLens($order_type, $res['showPrescriptions'],1,[]);
+                    $lens = $this->model->getEditReissueLens($order_type, $res['showPrescriptions'],1,[],$operate_type);
                 }
 
             }elseif(2 == $change_type){ //更改镜片信息
                 $res = $this->model->getAddress($order_type, $order_number);
                 if(isset($arr) && !empty($arr)){
-                    $lens = $this->model->getEditReissueLens($order_type, $res['prescriptions'], 2,$result);
+                    $lens = $this->model->getEditReissueLens($order_type, $res['prescriptions'], 2,$result,$operate_type);
                 }else{
-                    $lens = $this->model->getEditReissueLens($order_type, $res['prescriptions'], 2,[]);
+                    $lens = $this->model->getEditReissueLens($order_type, $res['prescriptions'], 2,[],$operate_type);
                 }
 
             }elseif(4 == $change_type){ //赠品信息
                 $res = $this->model->getAddress($order_type, $order_number);
                 if(isset($arr) && !empty($arr)){
-                    $lens = $this->model->getEditReissueLens($order_type, $res['prescriptions'], 3,$result);
+                    $lens = $this->model->getEditReissueLens($order_type, $res['prescriptions'], 3,$result,$operate_type);
                 }else{
-                    $lens = $this->model->getEditReissueLens($order_type, $res['prescriptions'], 3,[]);
+                    $lens = $this->model->getEditReissueLens($order_type, $res['prescriptions'], 3,[],$operate_type);
                 }
                 
             }

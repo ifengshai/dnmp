@@ -538,7 +538,7 @@ class WorkOrderList extends Model
      * @return array|bool
      * @throws \think\Exception
      */
-    public function getEditReissueLens($siteType, $showPrescriptions, $type = 1,$info = [])
+    public function getEditReissueLens($siteType, $showPrescriptions, $type = 1,$info = [],$operate_type = '')
     {
         $url = '';
         $key = $siteType . '_getlens';
@@ -559,11 +559,11 @@ class WorkOrderList extends Model
                 $prescriptions .= "<option value='{$key}'>{$val}</option>";
             }
             //拼接html页面
-            $html = (new \think\View())->fetch('saleaftermanage/work_order_list/ajax_reissue_edit', compact('prescription', 'coating_type', 'prescriptions', 'colorList', 'type','info'));
+            $html = (new \think\View())->fetch('saleaftermanage/work_order_list/ajax_reissue_edit', compact('prescription', 'coating_type', 'prescriptions', 'colorList', 'type','info','operate_type'));
         } elseif ($type == 2) {
-            $html = (new \think\View())->fetch('saleaftermanage/work_order_list/ajax_reissue_edit', compact('showPrescriptions', 'prescription', 'coating_type', 'prescriptions', 'colorList', 'lensColorList', 'type','info'));
+            $html = (new \think\View())->fetch('saleaftermanage/work_order_list/ajax_reissue_edit', compact('showPrescriptions', 'prescription', 'coating_type', 'prescriptions', 'colorList', 'lensColorList', 'type','info','operate_type'));
         } else {
-            $html = (new \think\View())->fetch('saleaftermanage/work_order_list/ajax_reissue_edit', compact('showPrescriptions', 'prescription', 'coating_type', 'prescriptions', 'colorList', 'type','info'));
+            $html = (new \think\View())->fetch('saleaftermanage/work_order_list/ajax_reissue_edit', compact('showPrescriptions', 'prescription', 'coating_type', 'prescriptions', 'colorList', 'type','info','operate_type'));
         }
         return ['data' => $data, 'html' => $html];
     }    
@@ -587,32 +587,39 @@ class WorkOrderList extends Model
         try{
             $time = date('Y-m-d H:i:s');
             $admin_id = session('admin.id');
+            //如果承接人是自己的话表示处理完成，不是自己的不做处理
+            $orderRecepts = WorkOrderRecept::where('work_id',$work_id)->select();
+            $allComplete = 1;
+            $count = count($orderRecepts);
+            foreach($orderRecepts as $orderRecept){
+                //承接人是自己，则措施，承接默认完成
+                if($orderRecept->recept_person_id == $admin_id){
+                    WorkOrderRecept::where('id',$orderRecept->id)->update(['recept_status' => 2,'finish_time' => $time,'note' => '自动处理完成']);
+                    WorkOrderMeasure::where('id',$orderRecept->measure_id)->update(['operation_type' => 1, 'operation_time' => $time]);
+                }else{
+                    $allComplete = 0;
+                }
+            }
+            if($allComplete == 1){
+                //处理完成
+                $work_status = 6;
+            }elseif($allComplete == 0 && $count >1){
+                //部分处理
+                $work_status = 5;
+            }else{
+                $work_status = 3;
+            }
+
             //不需要审核的，
             if(($work->is_check == 0 && $work->work_type == 1) || ($work->is_check == 0 && $work->work_type == 2 && $work->is_after_deal_with == 1)){
-                //如果承接人是自己的话表示处理完成，不是自己的不做处理
-                $orderRecepts = WorkOrderRecept::where('work_id',$work_id)->select();
-                $allComplete = 1;
-                $count = count($orderRecepts);
-                foreach($orderRecepts as $orderRecept){
-                    //承接人是自己，则措施，承接默认完成
-                    if($orderRecept->recept_person_id == $admin_id){
-                        WorkOrderRecept::where('id',$orderRecept->id)->update(['recept_status' => 2,'finish_time' => $time,'note' => '自动处理完成']);
-                        WorkOrderMeasure::where('id',$orderRecept->measure_id)->update(['operation_type' => 1, 'operation_time' => $time]);
-                    }else{
-                        $allComplete = 0;
-                    }
-                }
+
                 $work->check_note = '系统自动审核通过';
                 $work->check_time = $time;
                 $work->submit_time = $time;
+                $work->work_status = $work_status;
 
-                if($allComplete == 1){
-                    //处理完成
-                    $work->work_status = 6;
+                if($work_status == 6){
                     $work->complete_time = $time;
-                }elseif($allComplete == 0 && $count >1){
-                    //部分处理
-                    $work->work_status = 5;
                 }
                 $work->save();
                 //工单备注表
@@ -628,13 +635,21 @@ class WorkOrderList extends Model
             }
             //需要审核的，有参数才进行审核处理，其余跳过
             if(!empty($params)){
-                if($work->is_check == 1){
-                    $work_status = $params['work_status'];
-                    $work->work_status = $work_status;
+                if($work->is_check == 1){;
                     $work->operation_user_id = $admin_id;
                     $work->check_note = $params['check_note'];
                     $work->submit_time = $time;
                     $work->check_time = $time;
+                    if($params['success'] == 2){
+                        $work->work_status = 4;
+                        $work->complete_time = $time;
+                    }elseif($params['success'] == 1){
+                        $work->work_status = $work_status;
+                        if($work_status == 6){
+                            $work->complete_time = $time;
+                        }
+                    }
+
                     $work->save();
 
                     //工单备注表

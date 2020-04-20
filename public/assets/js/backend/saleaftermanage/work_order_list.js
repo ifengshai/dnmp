@@ -214,6 +214,24 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     }
                                 },
                                 {
+                                    name: 'check',
+                                    text: __('审核'),
+                                    title: __('审核'),
+                                    classname: 'btn btn-xs btn-success btn-dialog',
+                                    url: 'saleaftermanage/work_order_list/detail/operate_type/2',
+                                    extend: 'data-area = \'["100%","100%"]\'',
+                                    callback: function (data) {
+                                    },
+                                    visible: function (row) {
+                                        //草稿，待审核状态+需要审核+审核人，才有审核权限
+                                        if ((row.work_status == 2 || row.work_status == 1) && row.is_check == 1 && Config.admin_id == row.assign_user_id) {
+                                            return true;
+                                        } else {
+                                            return false;
+                                        }
+                                    }
+                                },
+                                {
                                     name: 'submit',
                                     text: __('提交'),
                                     title: __('提交'),
@@ -1020,7 +1038,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
         api: {
             bindevent: function () {
                 Form.api.bindevent($("form[role=form]"));
-
+                //提交审核按钮
+                $('.btn-check-status').click(function () {
+                    $('.check-status').val(2);
+                })
                 //优惠券下拉切换
                 $(document).on('change', '#c-check_coupon', function () {
                     if ($('#c-check_coupon').val()) {
@@ -1393,9 +1414,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                             Layer.alert('请选择正确的平台');
                             return false;
                         }
+                        var operate_type = Config.operate_type;
                         Backend.api.ajax({
                             url: 'saleaftermanage/work_order_list/ajax_change_order',
-                            data: { change_type: change_type, order_number: order_number, work_id: work_id,order_type:ordertype}
+                            data: { change_type: change_type, order_number: order_number, work_id: work_id,order_type:ordertype,operate_type:operate_type}
                         }, function (json, ret) {
                             //补发订单信息
                             if(5 == change_type){
