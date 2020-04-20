@@ -239,7 +239,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     callback: function (data) {
                                     },
                                     visible: function(rows){
-                                        if(!(rows.work_type == 2 && rows.is_after_deal_with == 0)){
+                                        if(!(rows.work_type == 2 && rows.is_after_deal_with == 0) && ((rows.is_check == 1 && rows.work_status == 2) || rows.is_check == 0 && (rows.work_status == 2 || rows.work_status == 3))){
                                             if (rows.step_num) {
                                                 for (i = 0, len = rows.step_num.length; i < len; i++) {
                                                     if(rows.step_num[i].has_recept == 1){
