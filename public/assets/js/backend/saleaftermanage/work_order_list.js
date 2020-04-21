@@ -1050,6 +1050,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         { field: 'work_platform', title: __('平台'), custom: { 1: 'blue', 2: 'danger', 3: 'orange' }, searchList: { 1: 'Zeelool', 2: 'Voogueme', 3: 'Nihao' }, formatter: Table.api.formatter.status },
                         { field: 'integral', title: __('积分'), operate: 'between' },
                         { field: 'email', title: __('客户邮箱'), operate: 'like' },
+                        { field: 'integral_describe', title: __('积分描述'), operate: false },
                         { field: 'create_user_name', title: __('创建人'), operate: 'like' },
                         { field: 'create_time', title: __('创建时间'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime },
 
