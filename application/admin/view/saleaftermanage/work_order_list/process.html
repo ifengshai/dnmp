@@ -460,6 +460,47 @@
             </div>
         </div>
     </div>
+    <div class="form-group" style="width: 80%;">
+        <div class="caigou">
+            <label class="control-label col-xs-12 col-sm-2" style="width: 11%;">{:__('处理')}：</label>
+            <div class="col-xs-12 col-sm-8">
+                <table class="caigou-table-sku"  style="background-color: white;">
+                    <tr style="height: 30px;">
+                        <th>序号</th>
+                        <th>措施名称</th>
+                        <th>状态</th>
+                        <th>备注</th>
+                        <th>操作</th>
+                    </tr>
+                    {foreach name="recepts" item="vo" key="key"}
+                    <tr>
+                        <td>{$key+1}</td>
+                        <td>{$vo.measure.measure_content}</td>
+                        <td>{$vo.status_format}</td>
+                        <td>
+                            {if condition="$vo.recept_status != 1"}
+                                {$vo.note}
+                            {else /}
+                            <input type="text" class="form-control process-note" name="row[note]"  value="">
+                            {/if}
+
+                        </td>
+                        <td>
+
+                            <button type="submit" class="btn btn-success btn-process-status-success"  data-id="{$vo.id}">{:__('处理完成')}</button>
+                            <button type="submit" class="btn btn-danger btn-process-status-error"  data-id="{$vo.id}">{:__('处理失败')}</button>
+
+                        </td>
+                    </tr>
+                    {/foreach}
+                    <input type='hidden' name="row[success]" class="process-status" value="1">
+                    <input type='hidden' name="row[recept_id]" class="process-recept-id" value="">
+                    <input type='hidden' name="row[note]" class="process-recept-note" value="">
+                </table>
+            </div>
+        </div>
+    </div>
+
     <hr style="border-top: 1px solid #000;">
 
     <div class="form-group" id="step_function">
@@ -1000,29 +1041,6 @@
             </div>
         </div>
         <!--补发 end-->
-        <hr>
-        <div class="form-group-child4 measure step7">
-            <div class="col-xs-12 col-sm-8" style="width: 100%">
-                <p style="font-size: 16px;"><b>处理</b></p>
-                <div class="form-group-child2" style="margin-left: 1%;width: 47%;">
-                    <label class="control-label col-xs-12 col-sm-2">处理意见：</label>
-                    <div class="col-xs-12 col-sm-8" style="width: 83%;">
-                        <textarea style="resize:none;height: 142px;" class="form-control " rows="5" name="row[process_note]" cols="50"></textarea>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-    </div>
-
-
-    <div class="form-group layer-footer">
-        <input type='hidden' name="row[success]" class="process-status" value="1">
-        <label class="control-label col-xs-12 col-sm-2"></label>
-        <div class="col-xs-12 col-sm-8">
-            <button type="submit" class="btn btn-success btn-embossed disabled" onclick="">{:__('处理完成')}</button>
-            <button type="submit" class="btn btn-danger btn-process-status btn-embossed disabled">{:__('处理失败')}</button>
-        </div>
     </div>
 </form>
 
