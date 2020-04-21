@@ -1430,4 +1430,5 @@ class WorkOrderList extends Backend
             $this->error(__('Parameter %s can not be empty', ''));
         }
     }
+    
 }
