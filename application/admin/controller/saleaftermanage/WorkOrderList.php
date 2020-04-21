@@ -331,6 +331,8 @@ class WorkOrderList extends Backend
                         $params['work_status'] = 3;
                     }
 
+                   
+
                     //如果为真则为处理任务
                     if (!$params['id']) {
                         $params['recept_person_id'] = $params['recept_person_id'] ?: session('admin.id');
@@ -356,6 +358,7 @@ class WorkOrderList extends Backend
                         $result = $this->model->allowField(true)->save($params, ['id' => $work_id]);
                     }
 
+                    
                     $params['problem_type_id'] = $params['problem_type_id'] ?: $params['problem_id'];
 
                     //循环插入措施
@@ -403,13 +406,13 @@ class WorkOrderList extends Backend
                             }
 
                             //更改镜片，补发，赠品
-                            $this->model->changeLens($params, $this->model, $v);
+                            $this->model->changeLens($params, $work_id, $v);
                         }
                     }
 
                     //循环插入更换镜框数据
                     $orderChangeList = [];
-
+                   
                     //判断是否选中更改镜框问题类型
                     if ($params['change_frame']) {
 
@@ -440,7 +443,7 @@ class WorkOrderList extends Backend
                             }
                         }
                     }
-
+                  
                     //循环插入取消订单数据
                     $orderChangeList = [];
                     //判断是否选中取消措施
@@ -813,7 +816,7 @@ class WorkOrderList extends Backend
                                 throw new Exception("添加失败！！");
                             }
                             //更改镜片，补发，赠品
-                            $this->model->changeLens($params, $row, $v);
+                            $this->model->changeLens($params, $row->id, $v);
                         }
                     }
 
