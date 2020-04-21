@@ -271,12 +271,23 @@ class WorkOrderList extends Backend
 
                     //判断优惠券 不需要审核的优惠券
                     if ($params['coupon_id'] && in_array(9, array_filter($params['measure_choose_id']))) {
-                        $params['coupon_describe'] = config('workorder.check_coupon')[$params['coupon_id']]['desc'];
+
+                        foreach (config('workorder.check_coupon') as $v) {
+                            if ($v['id'] == $params['coupon_id']) {
+                                $params['coupon_describe'] = $v['desc'];
+                                break;
+                            }
+                        }
                     }
                     //判断优惠券 需要审核的优惠券
                     if ($params['need_coupon_id'] && in_array(9, array_filter($params['measure_choose_id']))) {
                         $params['coupon_id'] = $params['need_coupon_id'];
-                        $params['coupon_describe'] = config('workorder.need_check_coupon')[$params['need_coupon_id']]['desc'];
+                        foreach (config('workorder.need_check_coupon') as $v) {
+                            if ($v['id'] == $params['coupon_id']) {
+                                $params['coupon_describe'] = $v['desc'];
+                                break;
+                            }
+                        }
                         $params['is_check'] = 1;
                     }
 
@@ -695,12 +706,22 @@ class WorkOrderList extends Backend
 
                     //判断优惠券 不需要审核的优惠券
                     if ($params['coupon_id'] && in_array(9, array_filter($params['measure_choose_id']))) {
-                        $params['coupon_describe'] = config('workorder.check_coupon')[$params['coupon_id']]['desc'];
+                        foreach (config('workorder.check_coupon') as $v) {
+                            if ($v['id'] == $params['coupon_id']) {
+                                $params['coupon_describe'] = $v['desc'];
+                                break;
+                            }
+                        }
                     }
                     //判断优惠券 需要审核的优惠券
                     if ($params['need_coupon_id'] && in_array(9, array_filter($params['measure_choose_id']))) {
                         $params['coupon_id'] = $params['need_coupon_id'];
-                        $params['coupon_describe'] = config('workorder.need_check_coupon')[$params['need_coupon_id']]['desc'];
+                        foreach (config('workorder.need_check_coupon') as $v) {
+                            if ($v['id'] == $params['coupon_id']) {
+                                $params['coupon_describe'] = $v['desc'];
+                                break;
+                            }
+                        }
                         $params['is_check'] = 1;
                     }
 
@@ -1234,10 +1255,10 @@ class WorkOrderList extends Backend
         if ($operateType == 2) { //审核
             return $this->view->fetch('saleaftermanage/work_order_list/check');
         }
-        if($operateType == 3){ //处理
+        if ($operateType == 3) { //处理
             //获取处理的措施
-            $recepts = WorkOrderRecept::where('work_id',$row->id)->with('measure')->group('recept_group_id,measure_id')->select();
-            $this->view->assign('recepts',$recepts);
+            $recepts = WorkOrderRecept::where('work_id', $row->id)->with('measure')->group('recept_group_id,measure_id')->select();
+            $this->view->assign('recepts', $recepts);
             return $this->view->fetch('saleaftermanage/work_order_list/process');
         }
 
