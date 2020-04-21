@@ -1395,6 +1395,22 @@ class WorkOrderList extends Backend
                 if (!$row) {
                     $this->error(__('No Results were found'));
                 }
+                //求出本条工单所有的承接人
+                $receptList = WorkOrderRecept::getWorkOrderReceptPerson($row->id);
+                if($receptList){
+                    //对象转化为数组
+                    $receptListArr = collection($receptList)->toArray();
+                    //定义一个数组，存储承接表中的措施ID
+                    $arr = [];
+                    foreach($receptListArr as $v){
+                        //如果本条工单的承接人是登录用户人,并且没有被处理
+                        if(($v['recept_person_id'] == session('admin.id')) &&( 1 == $v['recept_status'])){
+                                $this->model->handleRecept($v['id'],$v['work_id'],$v['measure_id'],$v['recept_group_id'],$params['success'],$params['process_note']);
+                        }
+                        $arr[] = $v['measure_id'];
+                    }
+                }
+
                 if(1 == $params['success']){ //本条措施处理成功
 
                 }elseif(2 == $params['']){ //本条措施处理失败

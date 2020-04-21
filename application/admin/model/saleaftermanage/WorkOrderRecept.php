@@ -21,6 +21,16 @@ class WorkOrderRecept extends Model
 
     // 追加属性
     protected $append = [];
-
-
+    /**
+     * 根据工单ID获取工单承接人
+     * @param work_id 工单ID
+     * @Description
+     * @author lsw
+     * @since 2020/04/21 09:33:24 
+     * @return void
+     */
+    static function getWorkOrderReceptPerson($work_id)
+    {
+       return WorkOrderRecept::where(['work_id'=>$work_id])->select();
+    }
 }
