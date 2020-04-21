@@ -20,7 +20,23 @@ class WorkOrderRecept extends Model
     protected $deleteTime = false;
 
     // 追加属性
-    protected $append = [];
+    protected $append = [
+        'status_format'
+    ];
+
+    public function getStatusFormatAttr($value, $data)
+    {
+        $status = ['1' => '未处理', '2' => '处理完成', '3' => '处理失败'];
+        return $status[$data['recept_status']];
+    }
+    /**
+     * 措施
+     * @return \think\model\relation\HasOne
+     */
+    public function measure()
+    {
+        return $this->hasOne(WorkOrderMeasure::class,'id','measure_id');
+    }
 
 
 }

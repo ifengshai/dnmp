@@ -1046,8 +1046,28 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     $('.check-status').val(2);
                 })
                 //提交处理按钮
-                $('.btn-process-status').click(function () {
+                $('.btn-process-status-error').click(function () {
+                    var recept_id = $(this).data('id');
+                    var note = $(this).parents('tr').find('.process-note').val();
+                    if(!note){
+                        Toastr.error('处理意见不能为空');
+                        return false;
+                    }
+                    $('.process-recept-id').val(recept_id);
                     $('.process-status').val(2);
+                    $('.process-recept-note').val(note);
+                })
+                $('.btn-process-status-success').click(function () {
+
+                    var recept_id = $(this).data('id');
+                    var note = $(this).parents('tr').find('.process-note').val();
+                    if(!note){
+                        Toastr.error('处理意见不能为空');
+                        return false;
+                    }
+                    $('.process-recept-id').val(recept_id);
+                    $('.process-status').val(1);
+                    $('.process-recept-note').val(note);
                 })
 
                 //优惠券下拉切换

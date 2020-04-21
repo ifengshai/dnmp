@@ -1234,6 +1234,9 @@ class WorkOrderList extends Backend
             return $this->view->fetch('saleaftermanage/work_order_list/check');
         }
         if($operateType == 3){ //处理
+            //获取处理的措施
+            $recepts = WorkOrderRecept::where('work_id',$row->id)->with('measure')->group('recept_group_id,measure_id')->select();
+            $this->view->assign('recepts',$recepts);
             return $this->view->fetch('saleaftermanage/work_order_list/process');
         }
 
