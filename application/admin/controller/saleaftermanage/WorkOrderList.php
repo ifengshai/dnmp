@@ -17,6 +17,7 @@ use app\admin\model\saleaftermanage\WorkOrderMeasure;
 use app\admin\model\saleaftermanage\WorkOrderChangeSku;
 use app\admin\model\saleaftermanage\WorkOrderRecept;
 use app\admin\model\saleAfterManage\WorkOrderRemark;
+
 /**
  * 售后工单列管理
  *
@@ -80,7 +81,7 @@ class WorkOrderList extends Backend
             $step_arr[$k]['recept_user'] = implode(',', array_column($recept_arr, 'recept_person'));
             $step_arr[$k]['has_recept']  = 0;
             //是否有审核的权限
-            if(in_array(session('admin.id'),array_column($recept_arr, 'recept_person_id'))){
+            if (in_array(session('admin.id'), array_column($recept_arr, 'recept_person_id'))) {
                 $step_arr[$k]['has_recept'] = 1;
             }
 
@@ -283,7 +284,7 @@ class WorkOrderList extends Backend
                     if (in_array(9, array_filter($params['measure_choose_id'])) && !$params['coupon_id']) {
                         throw new Exception("优惠券不能为空");
                     }
-                    
+
                     //如果积分大于200需要审核
                     if ($params['integral'] > 200) {
                         //需要审核
@@ -707,7 +708,7 @@ class WorkOrderList extends Backend
                     if (in_array(9, array_filter($params['measure_choose_id'])) && !$params['coupon_id']) {
                         throw new Exception("优惠券不能为空");
                     }
-                    
+
                     //如果积分大于200需要审核
                     if ($params['integral'] > 200) {
                         //需要审核
@@ -848,7 +849,7 @@ class WorkOrderList extends Backend
                         }
                     }
                     //不需要审核时直接发送积分，赠送优惠券
-                    if (!$params['is_check']) {
+                    if (!$params['is_check']  && $params['work_status'] != 1) {
                         //赠送积分
                         if (in_array(10, array_filter($params['measure_choose_id']))) {
                             $this->model->presentIntegral($row->id);
@@ -857,6 +858,10 @@ class WorkOrderList extends Backend
                         if (in_array(9, array_filter($params['measure_choose_id']))) {
                             $this->model->presentCoupon($row->id);
                         }
+                    }
+                    //非草稿状态进入审核阶段
+                    if ($params['work_status'] != 1) {
+                        $this->model->checkWork($row->id);
                     }
                     Db::commit();
                 } catch (ValidateException $e) {
@@ -1164,15 +1169,23 @@ class WorkOrderList extends Backend
     public function detail($ids = null)
     {
         $row = $this->model->get($ids);
-        $operateType = input('operate_type',0);
+        $operateType = input('operate_type', 0);
         if (!$row) {
             $this->error(__('No Results were found'));
         }
-        if($operateType == 2){
-           if(!in_array($row->work_status,[1]) || $row->is_check != 1 || !in_array(session('admin.id'),[$row->assign_user_id,config('workorder.customer_manager')])){
-               $this->error('没有审核权限');
-           }
-        }else{
+        if ($operateType == 2) {
+            if ($row->work_status != 2 || $row->is_check != 1 || !in_array(session('admin.id'), [$row->assign_user_id, config('workorder.customer_manager')])) {
+                $this->error('没有审核权限');
+            }
+        } elseif ($operateType == 3) {
+            //找出工单的所有承接人
+            $receptPersonIds = WorkOrderRecept::where('work_id', $ids)->column('recept_person_id');
+
+            //仓库工单并且经手人未处理
+            if (($row->work_type == 2 && $row->is_after_deal_with == 0) || ($row->work_type == 1 && $row->is_check == 1 && in_array($row->work_status, [0, 1, 2, 4, 6, 7, 8])) || ($row->work_type == 1 && !in_array(session('admin.id'), $receptPersonIds))) {
+                $this->error('没有处理的权限');
+            }
+        } else {
             if ($row['create_user_id'] != session('admin.id')) {
                 return $this->error(__('非本人创建不能编辑'));
             }
@@ -1217,11 +1230,14 @@ class WorkOrderList extends Backend
         if (!empty($measureList)) {
             $this->assignconfig('measureList', $measureList);
         }
-        $this->assignconfig('operate_type',$operateType);
-        if($operateType == 2){ //审核
+        $this->assignconfig('operate_type', $operateType);
+        if ($operateType == 2) { //审核
             return $this->view->fetch('saleaftermanage/work_order_list/check');
         }
         if($operateType == 3){ //处理
+            //获取处理的措施
+            $recepts = WorkOrderRecept::where('work_id',$row->id)->with('measure')->group('recept_group_id,measure_id')->select();
+            $this->view->assign('recepts',$recepts);
             return $this->view->fetch('saleaftermanage/work_order_list/process');
         }
 
@@ -1243,17 +1259,17 @@ class WorkOrderList extends Backend
         $workId = $params['id'];
         $workType = $params['work_type'];
         $success = $params['success'];
-        if(!$params['check_note']){
+        if (!$params['check_note']) {
             $this->error('审核意见不能为空');
         }
         $work = $this->model->find($workId);
-        if(!$work){
+        if (!$work) {
             $this->error('工单不存在');
         }
         //开始审核
-        try{
-            $this->model->checkWork($workId,$params);
-        }catch (Exception $e){
+        try {
+            $this->model->checkWork($workId, $params);
+        } catch (Exception $e) {
             $this->error($e->getMessage());
         }
         $this->success('已审核');
@@ -1269,7 +1285,7 @@ class WorkOrderList extends Backend
      * @param [type] $change_type
      * @return void
      */
-    public function ajax_change_order($work_id=null,$order_type=null,$order_number=null,$change_type=null,$operate_type = '')
+    public function ajax_change_order($work_id = null, $order_type = null, $order_number = null, $change_type = null, $operate_type = '')
     {
         if ($this->request->isAjax()) {
             if ($order_type < 1 || $order_type > 5) { //不在平台之内
@@ -1298,24 +1314,24 @@ class WorkOrderList extends Backend
                 //获取地址、处方等信息
                 $res = $this->model->getAddress($order_type, $order_number);
                 //请求接口获取lens_type，coating_type，prescription_type等信息
-                if(isset($arr) && !empty($arr)){
-                    $lens = $this->model->getEditReissueLens($order_type, $res['showPrescriptions'],1,$result,$operate_type);
-                }else{
-                    $lens = $this->model->getEditReissueLens($order_type, $res['showPrescriptions'],1,[],$operate_type);
+                if (isset($arr) && !empty($arr)) {
+                    $lens = $this->model->getEditReissueLens($order_type, $res['showPrescriptions'], 1, $result, $operate_type);
+                } else {
+                    $lens = $this->model->getEditReissueLens($order_type, $res['showPrescriptions'], 1, [], $operate_type);
                 }
             } elseif (2 == $change_type) { //更改镜片信息
                 $res = $this->model->getAddress($order_type, $order_number);
-                if(isset($arr) && !empty($arr)){
-                    $lens = $this->model->getEditReissueLens($order_type, $res['prescriptions'], 2,$result,$operate_type);
-                }else{
-                    $lens = $this->model->getEditReissueLens($order_type, $res['prescriptions'], 2,[],$operate_type);
+                if (isset($arr) && !empty($arr)) {
+                    $lens = $this->model->getEditReissueLens($order_type, $res['prescriptions'], 2, $result, $operate_type);
+                } else {
+                    $lens = $this->model->getEditReissueLens($order_type, $res['prescriptions'], 2, [], $operate_type);
                 }
             } elseif (4 == $change_type) { //赠品信息
                 $res = $this->model->getAddress($order_type, $order_number);
-                if(isset($arr) && !empty($arr)){
-                    $lens = $this->model->getEditReissueLens($order_type, $res['prescriptions'], 3,$result,$operate_type);
-                }else{
-                    $lens = $this->model->getEditReissueLens($order_type, $res['prescriptions'], 3,[],$operate_type);
+                if (isset($arr) && !empty($arr)) {
+                    $lens = $this->model->getEditReissueLens($order_type, $res['prescriptions'], 3, $result, $operate_type);
+                } else {
+                    $lens = $this->model->getEditReissueLens($order_type, $res['prescriptions'], 3, [], $operate_type);
                 }
             }
             if ($res) {
@@ -1345,7 +1361,7 @@ class WorkOrderList extends Backend
     }
 
     /**
-     * 提交修改工单状态
+     * 修改工单状态
      *
      * @Description
      * @author wpl
@@ -1364,7 +1380,7 @@ class WorkOrderList extends Backend
             $params['work_status'] = $status;
             if ($params['work_status'] == 2) {
                 $params['submit_time'] = date('Y-m-d H:i:s');
-            } elseif ($params['work_status'] == 0 || $params['work_status'] == 8) {
+            } elseif ($params['work_status'] == 0) {
                 $params['cancel_time'] = date('Y-m-d H:i:s');
                 $params['cancel_person'] = session('admin.nickname');
             }
@@ -1387,7 +1403,7 @@ class WorkOrderList extends Backend
      * @return void
      */
     public function process()
-    { 
+    {
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
             if ($params) {
@@ -1395,61 +1411,17 @@ class WorkOrderList extends Backend
                 if (!$row) {
                     $this->error(__('No Results were found'));
                 }
-                //求出本条工单所有的承接人
-                $receptList = WorkOrderRecept::getWorkOrderReceptPerson($row->id);
-                if($receptList){
-                    //对象转化为数组
-                    $receptListArr = collection($receptList)->toArray();
-                    //定义一个数组，存储承接表中的措施ID
-                    $arr = [];
-                    foreach($receptListArr as $v){
-                        //如果本条工单的承接人是登录用户人,并且没有被处理
-                        if(($v['recept_person_id'] == session('admin.id')) &&( 1 == $v['recept_status'])){
-                                $this->model->handleRecept($v['id'],$v['work_id'],$v['measure_id'],$v['recept_group_id'],$params['success'],$params['process_note']);
-                        }
-                        $arr[] = $v['measure_id'];
-                    }
+                if(6 == $row['work_status']){
+                    $this->error(__('工单已经处理完成，请勿重复处理'));
                 }
-
-                if(1 == $params['success']){ //本条措施处理成功
-
-                }elseif(2 == $params['']){ //本条措施处理失败
-
-                }
-                dump($params['success']);
-                exit;
-                $params = $this->preExcludeFields($params);
-                $result = false;
-                Db::startTrans();
-                try {
-                    //是否采用模型验证
-                    if ($this->modelValidate) {
-                        $name = str_replace("\\model\\", "\\validate\\", get_class($this->model));
-                        $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.edit' : $name) : $this->modelValidate;
-                        $row->validateFailException(true)->validate($validate);
+                $recept_id = $params['recept_id'];
+                $receptInfo =  (new WorkOrderRecept())->getOneRecept($recept_id);
+                $result=false;
+                if($receptInfo){
+                    if($receptInfo['recept_person_id'] !=session('admin.id')){
+                        $this->error(__('您不能处理此工单'));
                     }
-                    $result = $row->allowField(true)->save($params);
-                    if($result !== false){
-                        $remarkData = [
-                            'work_id' => $row->id,
-                            'remark_type' => 3,
-                            'remark_record' => $params['process_note'],
-                            'create_person_id' => session('admin.id'),
-                            'create_person' => session('admin.nickname'),
-                            'create_time' => date('Y-m-d H:i:s')
-                        ];
-                        WorkOrderRemark::create($remarkData);
-                    }
-                    Db::commit();
-                } catch (ValidateException $e) {
-                    Db::rollback();
-                    $this->error($e->getMessage());
-                } catch (PDOException $e) {
-                    Db::rollback();
-                    $this->error($e->getMessage());
-                } catch (Exception $e) {
-                    Db::rollback();
-                    $this->error($e->getMessage());
+                    $result = $this->model->handleRecept($receptInfo['id'],$receptInfo['work_id'],$receptInfo['measure_id'],$receptInfo['recept_group_id'],$params['success'],$params['note']);
                 }
                 if ($result !== false) {
                     $this->success();
@@ -1459,5 +1431,85 @@ class WorkOrderList extends Backend
             }
             $this->error(__('Parameter %s can not be empty', ''));
         }
+    }
+
+    /**
+     * 优惠券列表
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/04/21 14:06:32 
+     * @return void
+     */
+    public function couponList()
+    {
+        //设置过滤方法
+        $this->request->filter(['strip_tags']);
+        if ($this->request->isAjax()) {
+            //如果发送的来源是Selectpage，则转发到Selectpage
+            if ($this->request->request('keyField')) {
+                return $this->selectpage();
+            }
+            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            $map['coupon_id'] = ['>', 0];
+            $total = $this->model
+                ->where($where)
+                ->where($map)
+                ->order($sort, $order)
+                ->count();
+
+            $list = $this->model
+                ->where($where)
+                ->where($map)
+                ->order($sort, $order)
+                ->limit($offset, $limit)
+                ->select();
+            $list = collection($list)->toArray();
+
+            $result = array("total" => $total, "rows" => $list);
+
+            return json($result);
+        }
+        return $this->view->fetch();
+    }
+
+    /**
+     * 积分列表
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/04/21 14:06:32 
+     * @return void
+     */
+    public function integralList()
+    {
+        //设置过滤方法
+        $this->request->filter(['strip_tags']);
+        if ($this->request->isAjax()) {
+            //如果发送的来源是Selectpage，则转发到Selectpage
+            if ($this->request->request('keyField')) {
+                return $this->selectpage();
+            }
+            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            $map['integral'] = ['>', 0];
+            $total = $this->model
+                ->where($where)
+                ->where($map)
+                ->order($sort, $order)
+                ->count();
+
+            $list = $this->model
+                ->where($where)
+                ->where($map)
+                ->order($sort, $order)
+                ->limit($offset, $limit)
+                ->select();
+            $list = collection($list)->toArray();
+
+            $result = array("total" => $total, "rows" => $list);
+
+            return json($result);
+        }
+        return $this->view->fetch();
     }
 }

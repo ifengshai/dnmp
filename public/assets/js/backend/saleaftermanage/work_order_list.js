@@ -146,9 +146,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                             },
                         },
 
-                        { field: 'create_time', title: __('Create_time'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime,visible:false },
-                         { field: 'check_time', title: __('Check_time'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime,visible:false },
-                         { field: 'complete_time', title: __('Complete_time'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime,visible:false},
+                        { field: 'create_time', title: __('Create_time'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime, visible: false },
+                        { field: 'check_time', title: __('Check_time'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime, visible: false },
+                        { field: 'complete_time', title: __('Complete_time'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime, visible: false },
                         {
                             field: 'buttons',
                             width: "120px",
@@ -222,7 +222,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     },
                                     visible: function (row) {
                                         //待审核状态+需要审核+审核人(经理)，才有审核权限
-                                        if (row.work_status == 1 && row.is_check == 1 && (Config.admin_id == row.assign_user_id || Config.workorder.customer_manager == Config.admin_id)) {
+                                        if (row.work_status == 2 && row.is_check == 1 && (Config.admin_id == row.assign_user_id || Config.workorder.customer_manager == Config.admin_id)) {
                                             return true;
                                         } else {
                                             return false;
@@ -238,11 +238,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     extend: 'data-area = \'["100%","100%"]\'',
                                     callback: function (data) {
                                     },
-                                    visible: function(rows){
-                                        if(!(rows.work_type == 2 && rows.is_after_deal_with == 0)){
+                                    visible: function (rows) {
+                                        if (!(rows.work_type == 2 && rows.is_after_deal_with == 0) && ((rows.work_type == 1 && rows.is_check == 1 && rows.work_status == 3) || (rows.work_type == 1 && rows.is_check == 0 && (rows.work_status == 2 || rows.work_status == 3)))) {
                                             if (rows.step_num) {
                                                 for (i = 0, len = rows.step_num.length; i < len; i++) {
-                                                    if(rows.step_num[i].has_recept == 1){
+                                                    if (rows.step_num[i].has_recept == 1) {
                                                         return true;
                                                     }
                                                 }
@@ -266,27 +266,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     },
                                     visible: function (row) {
                                         if (row.work_status == 1 && row.create_user_id == Config.userid) {
-                                            return true;
-                                        } else {
-                                            return false;
-                                        }
-                                    }
-                                },
-                                {
-                                    name: 'cancel',
-                                    text: __('撤销'),
-                                    title: __('撤销'),
-                                    classname: 'btn btn-xs btn-danger btn-ajax',
-                                    url: 'saleaftermanage/work_order_list/setStatus/work_status/8',
-                                    extend: 'data-area = \'["100%","100%"]\'',
-                                    confirm: '确定要撤销吗',
-                                    success: function (data, ret) {
-                                        table.bootstrapTable('refresh');
-                                    },
-                                    callback: function (data) {
-                                    },
-                                    visible: function (row) {
-                                        if (row.work_status != 6 && row.work_status != 8 && row.work_status != 1 && row.work_status != 0 && row.create_user_id == Config.userid) {
                                             return true;
                                         } else {
                                             return false;
@@ -330,29 +309,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 table.bootstrapTable('refresh', {});
                 return false;
             });
-
-
-            // //审核通过
-            // $(document).on('click', '.btn-open', function () {
-            //     var ids = Table.api.selectedids(table);
-            //     Backend.api.ajax({
-            //         url: 'saleaftermanage/work_order_list/setStatus//8',
-            //         data: { ids: ids, work_status: 3 }
-            //     }, function (data, ret) {
-            //         table.bootstrapTable('refresh');
-            //     });
-            // })
-
-            // //审核拒绝
-            // $(document).on('click', '.btn-close', function () {
-            //     var ids = Table.api.selectedids(table);
-            //     Backend.api.ajax({
-            //         url: Config.moduleurl + '/purchase/purchase_order/setStatus',
-            //         data: { ids: ids, status: 3 }
-            //     }, function (data, ret) {
-            //         table.bootstrapTable('refresh');
-            //     });
-            // })
 
         },
         add: function () {
@@ -561,24 +517,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 $(this).parent().parent().remove();
             });
 
-            //赠品 start
-            // $(document).on('click', '.btn-add-box', function () {
-            //     var option = $('#add_box_option').html();
-            //     var str = '<div><label style="margin-top: 10px;" class="control-label col-xs-12 col-sm-2">SKU：</label>\n' +
-            //         '                    <div style="margin-top: 10px;" class="col-xs-12 col-sm-8">\n' +
-            //         '                        <div class="dropup">\n' +
-            //         '                            <select class="selectpicker" name="row[order_change][change_sku][]" data-live-search="true" title="请选择">\n' + option +
-            //         '                            </select>\n' +
-            //         '                        </div>\n' +
-            //         '                    </div>\n' +
-            //         '                    <label style="margin-top: 10px;" class="control-label col-xs-12 col-sm-2">数量：</label>\n' +
-            //         '                    <div style="margin-top: 10px;" class="col-xs-12 col-sm-8">\n' +
-            //         '                        <input class="form-control" name="row[order_change][change_number][]" type="text" value="">\n' +
-            //         '                        <a href="javascript:;" class="btn btn-danger btn-del-box" title="删除"><i class="fa fa-trash"></i>删除</a>\n' +
-            //         '                    </div></div>';
-            //     $('#add_box').append(str);
-            //     Controller.api.bindevent();
-            // });
             $(document).on('click', '.btn-del-box', function () {
                 $(this).parent().parent().remove();
             });
@@ -1032,6 +970,96 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 }
             })
         },
+        couponlist: function () {
+            // 初始化表格参数配置
+            Table.api.init({
+                showJumpto: true,
+                searchFormVisible: true,
+                pageList: [10, 25, 50, 100],
+                extend: {
+                    index_url: 'saleaftermanage/work_order_list/couponList' + location.search,
+
+                    table: 'work_order_list',
+                }
+            });
+
+            var table = $("#table");
+
+            // 初始化表格
+            table.bootstrapTable({
+                url: $.fn.bootstrapTable.defaults.extend.index_url,
+                pk: 'id',
+                sortName: 'id',
+                columns: [
+                    [
+                        { checkbox: true },
+                        {
+                            field: '', title: __('序号'), formatter: function (value, row, index) {
+                                var options = table.bootstrapTable('getOptions');
+                                var pageNumber = options.pageNumber;
+                                var pageSize = options.pageSize;
+                                return (pageNumber - 1) * pageSize + 1 + index;
+                            }, operate: false
+                        },
+                        { field: 'id', title: __('Id'), operate: false, visible: false },
+                        { field: 'work_platform', title: __('平台'), custom: { 1: 'blue', 2: 'danger', 3: 'orange' }, searchList: { 1: 'Zeelool', 2: 'Voogueme', 3: 'Nihao' }, formatter: Table.api.formatter.status },
+                        { field: 'coupon_describe', title: __('优惠券名称'), operate: 'like' },
+                        { field: 'coupon_str', title: __('优惠码'), operate: false },
+                        { field: 'create_user_name', title: __('申请人'), operate: 'like' },
+                        { field: 'create_time', title: __('申请时间'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime},
+
+                    ]
+                ]
+            });
+
+            // 为表格绑定事件
+            Table.api.bindevent(table);
+        },
+        integrallist: function () {
+            // 初始化表格参数配置
+            Table.api.init({
+                showJumpto: true,
+                searchFormVisible: true,
+                pageList: [10, 25, 50, 100],
+                extend: {
+                    index_url: 'saleaftermanage/work_order_list/integralList' + location.search,
+
+                    table: 'work_order_list',
+                }
+            });
+
+            var table = $("#table");
+
+            // 初始化表格
+            table.bootstrapTable({
+                url: $.fn.bootstrapTable.defaults.extend.index_url,
+                pk: 'id',
+                sortName: 'id',
+                columns: [
+                    [
+                        { checkbox: true },
+                        {
+                            field: '', title: __('序号'), formatter: function (value, row, index) {
+                                var options = table.bootstrapTable('getOptions');
+                                var pageNumber = options.pageNumber;
+                                var pageSize = options.pageSize;
+                                return (pageNumber - 1) * pageSize + 1 + index;
+                            }, operate: false
+                        },
+                        { field: 'id', title: __('Id'), operate: false, visible: false },
+                        { field: 'work_platform', title: __('平台'), custom: { 1: 'blue', 2: 'danger', 3: 'orange' }, searchList: { 1: 'Zeelool', 2: 'Voogueme', 3: 'Nihao' }, formatter: Table.api.formatter.status },
+                        { field: 'integral', title: __('积分'), operate: 'between' },
+                        { field: 'email', title: __('客户邮箱'), operate: 'like' },
+                        { field: 'create_user_name', title: __('创建人'), operate: 'like' },
+                        { field: 'create_time', title: __('创建时间'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime },
+
+                    ]
+                ]
+            });
+
+            // 为表格绑定事件
+            Table.api.bindevent(table);
+        },
         api: {
             bindevent: function () {
                 Form.api.bindevent($("form[role=form]"));
@@ -1046,8 +1074,28 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     $('.check-status').val(2);
                 })
                 //提交处理按钮
-                $('.btn-process-status').click(function () {
+                $('.btn-process-status-error').click(function () {
+                    var recept_id = $(this).data('id');
+                    var note = $(this).parents('tr').find('.process-note').val();
+                    if(!note){
+                        Toastr.error('处理意见不能为空');
+                        return false;
+                    }
+                    $('.process-recept-id').val(recept_id);
                     $('.process-status').val(2);
+                    $('.process-recept-note').val(note);
+                })
+                $('.btn-process-status-success').click(function () {
+
+                    var recept_id = $(this).data('id');
+                    var note = $(this).parents('tr').find('.process-note').val();
+                    if(!note){
+                        Toastr.error('处理意见不能为空');
+                        return false;
+                    }
+                    $('.process-recept-id').val(recept_id);
+                    $('.process-status').val(1);
+                    $('.process-recept-note').val(note);
                 })
 
                 //优惠券下拉切换
@@ -1447,7 +1495,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         var operate_type = Config.operate_type;
                         Backend.api.ajax({
                             url: 'saleaftermanage/work_order_list/ajax_change_order',
-                            data: { change_type: change_type, order_number: order_number, work_id: work_id,order_type:ordertype,operate_type:operate_type}
+                            data: { change_type: change_type, order_number: order_number, work_id: work_id, order_type: ordertype, operate_type: operate_type }
                         }, function (json, ret) {
                             //补发订单信息
                             if (5 == change_type) {
