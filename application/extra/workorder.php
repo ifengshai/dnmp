@@ -141,8 +141,7 @@ return [
             'step_id' => 3, //取消
             'is_check' => 1,
             'appoint_group' => [ //承接组
-                'warehouse_group', //仓库跟单员
-                'cashier_group' //出纳
+                'warehouse_group' //仓库跟单员
             ],
         ],
 
