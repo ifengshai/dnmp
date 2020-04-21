@@ -265,26 +265,31 @@ return [
     'customer_manager' => 75,
 
     //不需要审核的优惠券
+    //1，zeelool，2:voogueme,3:nihao
     'check_coupon' => [
         '1' => [
             'id' => '354',
             'desc' => '15 off',
             'sum' => '15',
+            'site' => 1
         ],
         '2' => [
             'id' => '355',
             'desc' => '20 off',
             'sum' => '20',
+            'site' => 1
         ],
         '3' => [
             'id' => '356',
             'desc' => '25 off',
             'sum' => '25',
+            'site' => 2
         ],
         '4' => [
             'id' => '357',
             'desc' => '30 off',
             'sum' => '30',
+            'site' => 3
         ],
     ],
     //需要审核的优惠券
@@ -293,11 +298,13 @@ return [
             'id' => '377',
             'desc' => 'half',
             'sum' => '50',
+            'site' => 1
         ],
         '6' => [
             'id' => '378',
             'desc' => 'all',
             'sum' => '100',
+            'site' => 2
         ]
     ],
     //客服部门角色组ID

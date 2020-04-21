@@ -639,7 +639,9 @@
                 <select id="c-check_coupon" class="form-control selectpicker" name="row[coupon_id]">
                     <option value="0">请选择</option>
                     {foreach $check_coupon as $k3 => $v3}
-                    <option value="{$v3.id}">{$v3.desc}</option>
+                    {if condition="$v3.site == $row.work_platform"}
+                    <option value="{$v3.id}" {$row.coupon_id == $v3.id ? 'selected':''}>{$v3.desc}</option>
+                    {/if}
                     {/foreach}
                 </select>
             </div>
@@ -650,7 +652,9 @@
                 <select id="c-need_check_coupon" class="form-control selectpicker" name="row[need_coupon_id]">
                     <option value="0">请选择</option>
                     {foreach $need_check_coupon as $k3 => $v3}
-                    <option value="{$v3.id}">{$v3.desc}</option>
+                    {if condition="$v3.site == $row.work_platform"}
+                    <option value="{$v3.id}" {$row.coupon_id == $v3.id ? 'selected':''}>{$v3.desc}</option>
+                    {/if}
                     {/foreach}
                 </select>
             </div>
