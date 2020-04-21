@@ -1142,15 +1142,23 @@ class WorkOrderList extends Backend
     public function detail($ids = null)
     {
         $row = $this->model->get($ids);
-        $operateType = input('operate_type',0);
+        $operateType = input('operate_type', 0);
         if (!$row) {
             $this->error(__('No Results were found'));
         }
-        if($operateType == 2){
-           if($row->work_status != 2 || $row->is_check != 1 || !in_array(session('admin.id'),[$row->assign_user_id,config('workorder.customer_manager')])){
-               $this->error('没有审核权限');
-           }
-        }else{
+        if ($operateType == 2) {
+            if ($row->work_status != 2 || $row->is_check != 1 || !in_array(session('admin.id'), [$row->assign_user_id, config('workorder.customer_manager')])) {
+                $this->error('没有审核权限');
+            }
+        } elseif($operateType == 3){
+            //找出工单的所有承接人
+            $receptPersonIds = WorkOrderRecept::where('work_id',$ids)->column('recept_person_id');
+
+            //仓库工单并且经手人未处理
+            if(($row->work_type == 2 && $row->is_after_deal_with == 0) || ($row->work_type == 1 && $row->is_check == 1 && in_array($row->work_status,[0,1,2,4,6,7,8])) || ($row->work_type == 1 && !in_array(session('admin.id'),$receptPersonIds))){
+                $this->error('没有处理的权限');
+            }
+        } else{
             if ($row['create_user_id'] != session('admin.id')) {
                 return $this->error(__('非本人创建不能编辑'));
             }
