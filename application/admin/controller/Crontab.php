@@ -1237,7 +1237,7 @@ order by sfoi.item_id asc limit 1000";
         $stime = date("Y-m-d 00:00:00", strtotime("-1 day"));
         $etime = date("Y-m-d 23:59:59", strtotime("-1 day"));
         $map['created_at'] = $date['created_at'] = $update['updated_at'] =  ['between', [$stime, $etime]];
-        $map['status'] = ['in', ['processing', 'complete', 'creditcard_proccessing']];
+        $map['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
         $zeelool_count = $zeelool_model->table('sales_flat_order')->where($map)->count(1);
         $zeelool_total = $zeelool_model->table('sales_flat_order')->where($map)->sum('base_grand_total');
         //zeelool客单价
@@ -3361,7 +3361,7 @@ order by sfoi.item_id asc limit 1000";
     //导入实时库存 第一步
     public function set_product_relstock()
     {
-        $str = 'OP01899-01';
+        $str = 'OT02018-02';
         $skus = explode('
         ', $str);
 
@@ -3395,7 +3395,7 @@ order by sfoi.item_id asc limit 1000";
         $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
         $this->item = new \app\admin\model\itemmanage\Item;
 
-        $str = 'OP01899-01';
+        $str = 'OT02018-02';
         $skus = explode('
         ', $str);
         foreach ($skus as $k => $v) {
@@ -3407,7 +3407,7 @@ order by sfoi.item_id asc limit 1000";
             $map['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal']];
             $map['custom_is_delivery_new'] = 0; //是否提货
             $map['custom_is_match_frame_new'] = 1; //是否配镜架
-            $map['a.created_at'] = ['between', ['2020-01-01 00:00:00', '2020-04-13 23:00:00']]; //时间节点
+            $map['a.created_at'] = ['between', ['2020-01-01 00:00:00', date('Y-m-d H:i:s')]]; //时间节点
             $map['sku'] = $zeelool_sku;
             $zeelool_qty = $this->zeelool->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->sum('qty_ordered');
             $map['sku'] = $voogueme_sku;
@@ -3447,7 +3447,7 @@ order by sfoi.item_id asc limit 1000";
         $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
         $this->item = new \app\admin\model\itemmanage\Item;
 
-        $str = 'OP01899-01';
+        $str = 'OT02018-02';
         $skus = explode('
         ', $str);
         foreach ($skus as $k => $v) {
@@ -3458,7 +3458,7 @@ order by sfoi.item_id asc limit 1000";
 
             $map['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal']];
             $map['custom_is_delivery_new'] = 0; //是否提货
-            $map['a.created_at'] = ['between', ['2020-01-01 00:00:00', '2020-04-13 23:00:00']]; //时间节点
+            $map['a.created_at'] = ['between', ['2020-01-01 00:00:00', date('Y-m-d H:i:s')]]; //时间节点
             $map['sku'] = $zeelool_sku;
             $zeelool_qty = $this->zeelool->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->sum('qty_ordered');
             $map['sku'] = $voogueme_sku;
@@ -3493,7 +3493,7 @@ order by sfoi.item_id asc limit 1000";
         $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
         $this->item = new \app\admin\model\itemmanage\Item;
 
-        $str = 'OP01899-01';
+        $str = 'OT02018-02';
         $skus = explode('
         ', $str);
         $list = $this->item->field('sku,stock,occupy_stock,available_stock,real_time_qty,distribution_occupy_stock')->where(['sku' => ['in', $skus]])->select();

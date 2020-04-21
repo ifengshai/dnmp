@@ -3,7 +3,7 @@
 return [
     'Ticket_id'   => 'ticket id',
     'Type'        => '站点',
-    'Channel'     => '类型',
+    'Channel'     => '来源',
     'Email'       => '发送人邮箱',
     'Username'    => '发送人昵称',
     'User_id'     => '发送人id',
@@ -23,6 +23,6 @@ return [
     'Reason'      => '评分的原因',
     'Answer'      => '回复',
     'pulbic_type' => '邮件类型',
-    'Update_time' => '修改时间',
+    'Update_time' => '更新时间',
     'Create_time' => '添加时间'
 ];

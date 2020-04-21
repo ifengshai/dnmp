@@ -56,9 +56,11 @@ class ZendeskTwo extends Controller
     }
     public function test()
     {
-        $url = "https://translation.googleapis.com/language/translate/v2?key=AIzaSyCqDt6cu0yCLkKkkutNAm9gHJB3pcHIhKU&source=zh&target=en".'&q='.urlencode('我的士大夫丰富阿萨德额');
+        $url = "https://translation.googleapis.com/language/translate/v2?key=AIzaSyCqDt6cu0yCLkKkkutNAm9gHJB3pcHIhKU&source=zh&target=en".'&q='.urlencode('【】this is a ');
         $res = Http::sendRequest($url);
-        dump($res);
+        $data = json_decode($res['msg'],true);
+        //dump($data);
+        echo $data['data']['translations'][0]['translatedText'];
     }
     /**
      * 查询tickets
@@ -75,7 +77,7 @@ class ZendeskTwo extends Controller
             ],
             'created_at' => [
                 'valuetype' => '<=',
-                'value'   => '2020-04-09T06:30:00Z'
+                'value'   => '2020-04-14T16:00:00Z'
             ], //添加创建时间的限制
             'order_by' => 'created_at',
             'sort' => 'asc'
@@ -97,6 +99,7 @@ class ZendeskTwo extends Controller
     {
         $params = $this->parseStr($array);
         $search = $this->client->search()->find($params);
+
         $tickets = $search->results;
         if(!$search->count){
             return true;
@@ -130,9 +133,9 @@ class ZendeskTwo extends Controller
                 continue;
             }
             $params = [];
-           if($key >= 50){
-               break;
-           }
+//           if($key >= 50){
+//               break;
+//           }
             $id = $ticket->id;
             //发送者的id
             $requester_id = $ticket->requester_id;
@@ -164,7 +167,7 @@ class ZendeskTwo extends Controller
                 if(s($body)->contains('return') || s($subjet)->contains('return')){
                     continue;
                 }
-                if (s($body)->containsAny($this->preg_word) === true) {
+                if (s($body)->containsAny($this->preg_word) === true || s($subjet)->containsAny($this->preg_word) === true) {
                     $reply_detail_data = [];
                     $recent_reply_count = 0;
                     //判断最近12小时发送的第几封，超过2封，超过2封直接转客服+tag-》多次发送
@@ -269,7 +272,7 @@ class ZendeskTwo extends Controller
         try{
             $this->client->tickets()->update($ticket_id, $params);
             if($echo) echo $ticket_id . "\r\n";
-            sleep(2);
+            sleep(3);
         }catch (\Exception $e){
             return false;
             //exception($e->getMessage(), 10001);
@@ -468,10 +471,13 @@ class ZendeskTwo extends Controller
         $lastUpdateTime = $data['lastUpdateTime']; //物流最新跟新时间
         $StatusDescription = isset($data['origin_info']['trackinfo'][0]['StatusDescription']) ? $data['origin_info']['trackinfo'][0]['StatusDescription'] : '';
         $lastEvent = $data['lastEvent'] ? $data['lastEvent'] : $StatusDescription;
+        $url = "https://translation.googleapis.com/language/translate/v2?key=AIzaSyCqDt6cu0yCLkKkkutNAm9gHJB3pcHIhKU&source=zh&target=en".'&q='.urlencode($lastEvent);
+        $english = Http::sendRequest($url);
+        $englishData = json_decode($english['msg'],true);
         $res = [
             'status' => $data['status'],
             'lastUpdateTime' => $lastUpdateTime,
-            'lastEvent' => $lastEvent,
+            'lastEvent' => $englishData['data']['translations'][0]['translatedText'],
             'carrier_code' => $data['carrier_code'],
             'updated_at' => $track_result['updated_at'],
             'track_number' => $track_result['track_number']
