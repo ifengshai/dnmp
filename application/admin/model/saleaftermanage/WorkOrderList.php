@@ -680,7 +680,7 @@ class WorkOrderList extends Model
                     }
 
                     $work->save();
-                    
+
                     //工单备注表
                     $remarkData = [
                         'work_id' => $work_id,
