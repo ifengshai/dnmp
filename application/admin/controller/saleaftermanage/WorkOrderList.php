@@ -271,12 +271,23 @@ class WorkOrderList extends Backend
 
                     //判断优惠券 不需要审核的优惠券
                     if ($params['coupon_id'] && in_array(9, array_filter($params['measure_choose_id']))) {
-                        $params['coupon_describe'] = config('workorder.check_coupon')[$params['coupon_id']]['desc'];
+
+                        foreach (config('workorder.check_coupon') as $v) {
+                            if ($v['id'] == $params['coupon_id']) {
+                                $params['coupon_describe'] = $v['desc'];
+                                break;
+                            }
+                        }
                     }
                     //判断优惠券 需要审核的优惠券
                     if ($params['need_coupon_id'] && in_array(9, array_filter($params['measure_choose_id']))) {
                         $params['coupon_id'] = $params['need_coupon_id'];
-                        $params['coupon_describe'] = config('workorder.need_check_coupon')[$params['need_coupon_id']]['desc'];
+                        foreach (config('workorder.need_check_coupon') as $v) {
+                            if ($v['id'] == $params['coupon_id']) {
+                                $params['coupon_describe'] = $v['desc'];
+                                break;
+                            }
+                        }
                         $params['is_check'] = 1;
                     }
 
@@ -333,7 +344,10 @@ class WorkOrderList extends Backend
                         }
                         $work_id = $this->model->id;
                     } else {
-
+                        //如果需要审核 则修改状态为待审核
+                        if ($params['is_check'] == 1) {
+                            $params['work_status'] = 2;
+                        }
                         $work_id = $params['id'];
                         unset($params['id']);
                         unset($params['problem_type_content']);
@@ -344,6 +358,7 @@ class WorkOrderList extends Backend
                         $params['is_after_deal_with'] = 1;
                         $result = $this->model->allowField(true)->save($params, ['id' => $work_id]);
                     }
+
 
                     $params['problem_type_id'] = $params['problem_type_id'] ?: $params['problem_id'];
 
@@ -392,7 +407,7 @@ class WorkOrderList extends Backend
                             }
 
                             //更改镜片，补发，赠品
-                            $this->model->changeLens($params, $this->model, $v);
+                            $this->model->changeLens($params, $work_id, $v);
                         }
                     }
 
@@ -695,12 +710,22 @@ class WorkOrderList extends Backend
 
                     //判断优惠券 不需要审核的优惠券
                     if ($params['coupon_id'] && in_array(9, array_filter($params['measure_choose_id']))) {
-                        $params['coupon_describe'] = config('workorder.check_coupon')[$params['coupon_id']]['desc'];
+                        foreach (config('workorder.check_coupon') as $v) {
+                            if ($v['id'] == $params['coupon_id']) {
+                                $params['coupon_describe'] = $v['desc'];
+                                break;
+                            }
+                        }
                     }
                     //判断优惠券 需要审核的优惠券
                     if ($params['need_coupon_id'] && in_array(9, array_filter($params['measure_choose_id']))) {
                         $params['coupon_id'] = $params['need_coupon_id'];
-                        $params['coupon_describe'] = config('workorder.need_check_coupon')[$params['need_coupon_id']]['desc'];
+                        foreach (config('workorder.need_check_coupon') as $v) {
+                            if ($v['id'] == $params['coupon_id']) {
+                                $params['coupon_describe'] = $v['desc'];
+                                break;
+                            }
+                        }
                         $params['is_check'] = 1;
                     }
 
@@ -792,7 +817,7 @@ class WorkOrderList extends Backend
                                 throw new Exception("添加失败！！");
                             }
                             //更改镜片，补发，赠品
-                            $this->model->changeLens($params, $row, $v);
+                            $this->model->changeLens($params, $row->id, $v);
                         }
                     }
 
@@ -1173,14 +1198,14 @@ class WorkOrderList extends Backend
         if (!$row) {
             $this->error(__('No Results were found'));
         }
+
         if ($operateType == 2) {
             if ($row->work_status != 2 || $row->is_check != 1 || !in_array(session('admin.id'), [$row->assign_user_id, config('workorder.customer_manager')])) {
                 $this->error('没有审核权限');
             }
         } elseif ($operateType == 3) {
             //找出工单的所有承接人
-            $receptPersonIds = WorkOrderRecept::where('work_id', $ids)->column('recept_person_id');
-
+            $receptPersonIds = explode(',', $row->recept_person_id);
             //仓库工单并且经手人未处理
             if (($row->work_type == 2 && $row->is_after_deal_with == 0) || ($row->work_type == 1 && $row->is_check == 1 && in_array($row->work_status, [0, 1, 2, 4, 6, 7, 8])) || ($row->work_type == 1 && !in_array(session('admin.id'), $receptPersonIds))) {
                 $this->error('没有处理的权限');
@@ -1234,10 +1259,10 @@ class WorkOrderList extends Backend
         if ($operateType == 2) { //审核
             return $this->view->fetch('saleaftermanage/work_order_list/check');
         }
-        if($operateType == 3){ //处理
+        if ($operateType == 3) { //处理
             //获取处理的措施
-            $recepts = WorkOrderRecept::where('work_id',$row->id)->with('measure')->group('recept_group_id,measure_id')->select();
-            $this->view->assign('recepts',$recepts);
+            $recepts = WorkOrderRecept::where('work_id', $row->id)->with('measure')->group('recept_group_id,measure_id')->select();
+            $this->view->assign('recepts', $recepts);
             return $this->view->fetch('saleaftermanage/work_order_list/process');
         }
 
@@ -1414,45 +1439,17 @@ class WorkOrderList extends Backend
                 if (!$row) {
                     $this->error(__('No Results were found'));
                 }
-                if (1 == $params['success']) { //本条措施处理成功
-
-                } elseif (2 == $params['']) { //本条措施处理失败
-
+                if (6 == $row['work_status']) {
+                    $this->error(__('工单已经处理完成，请勿重复处理'));
                 }
-                dump($params['success']);
-                exit;
-                $params = $this->preExcludeFields($params);
+                $recept_id = $params['recept_id'];
+                $receptInfo =  (new WorkOrderRecept())->getOneRecept($recept_id);
                 $result = false;
-                Db::startTrans();
-                try {
-                    //是否采用模型验证
-                    if ($this->modelValidate) {
-                        $name = str_replace("\\model\\", "\\validate\\", get_class($this->model));
-                        $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.edit' : $name) : $this->modelValidate;
-                        $row->validateFailException(true)->validate($validate);
+                if ($receptInfo) {
+                    if ($receptInfo['recept_person_id'] != session('admin.id')) {
+                        $this->error(__('您不能处理此工单'));
                     }
-                    $result = $row->allowField(true)->save($params);
-                    if ($result !== false) {
-                        $remarkData = [
-                            'work_id' => $row->id,
-                            'remark_type' => 3,
-                            'remark_record' => $params['process_note'],
-                            'create_person_id' => session('admin.id'),
-                            'create_person' => session('admin.nickname'),
-                            'create_time' => date('Y-m-d H:i:s')
-                        ];
-                        WorkOrderRemark::create($remarkData);
-                    }
-                    Db::commit();
-                } catch (ValidateException $e) {
-                    Db::rollback();
-                    $this->error($e->getMessage());
-                } catch (PDOException $e) {
-                    Db::rollback();
-                    $this->error($e->getMessage());
-                } catch (Exception $e) {
-                    Db::rollback();
-                    $this->error($e->getMessage());
+                    $result = $this->model->handleRecept($receptInfo['id'], $receptInfo['work_id'], $receptInfo['measure_id'], $receptInfo['recept_group_id'], $params['success'], $params['note']);
                 }
                 if ($result !== false) {
                     $this->success();

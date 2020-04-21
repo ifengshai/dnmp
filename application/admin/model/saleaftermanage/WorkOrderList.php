@@ -12,6 +12,8 @@ use Util\VooguemePrescriptionDetailHelper;
 use Util\ZeeloolPrescriptionDetailHelper;
 use Util\WeseeopticalPrescriptionDetailHelper;
 use GuzzleHttp\Client;
+use app\admin\model\saleaftermanage\WorkOrderMeasure;
+use app\admin\model\saleaftermanage\WorkOrderRecept;
 
 
 class WorkOrderList extends Model
@@ -225,9 +227,9 @@ class WorkOrderList extends Model
      * @param $work_id
      * @throws \Exception
      */
-    public function changeLens($params, $work, $measure_choose_id)
+    public function changeLens($params, $work_id, $measure_choose_id)
     {
-        $work_id = $work->id;
+        $work = $this->find($work_id);
         $measure = '';
         //修改镜片
         if(($work->work_type == 1 && $work->problem_type_id == 2 && $measure_choose_id == 1) || ($work->work_type == 2 && $work->problem_type_id == 1 && $measure_choose_id == 1)){
@@ -699,6 +701,69 @@ class WorkOrderList extends Model
             Db::rollback();
             exception($e->getMessage());
         }
+
+    }
+    /**
+     * 工单处理
+     *
+     * @Description
+     * @author lsw
+     * @since 2020/04/21 10:13:28 
+     * @param [type] $id   承接表ID
+     * @param [type] $work_id 工单表ID
+     * @param [type] $measure_id 措施表ID
+     * @param [type] $success 是否成功 1 处理成功 2 处理失败
+     * @param [type] $process_note 处理备注
+     * @return void
+     */
+    public function handleRecept($id,$work_id,$measure_id,$recept_group_id,$success,$process_note)
+    {
+        if(1 == $success){
+            $data['recept_status'] = 2;
+          }else{
+            $data['recept_status'] = 3;
+          }
+            $data['note']          = $process_note;
+            $data['finish_time']   = date('Y-m-d H:i:s');
+            //更新本条工单数据承接人状态
+            WorkOrderRecept::where(['id'=>$id])->update($data);
+            //删除同组数据
+            $where['work_id'] = $work_id;
+            $where['measure_id'] = $measure_id;
+            $where['recept_group_id'] = $recept_group_id;
+            $where['recept_status'] = 1;
+            //删除同样的承接组数据
+            WorkOrderRecept::where($where)->delete();
+            //如果是处理失败的状态
+            if(3 == $data['recept_status']){
+                $dataMeasure['operation_type'] = 2;
+                $dataMeasure['operation_time'] = date('Y-m-d H:i:s');
+                WorkOrderMeasure::where(['id'=>$measure_id])->update($dataMeasure);                  
+            }else{
+                //求出承接措施是否完成
+                $whereMeasure['work_id'] = $work_id;
+                $whereMeasure['measure_id'] = $measure_id;
+                $whereMeasure['recept_status'] = ['neq',2];
+                $resultRecept = WorkOrderRecept::where($whereMeasure)->count();
+                if(0==$resultRecept){ //表明整个措施已经完成
+                    $dataMeasure['operation_type'] = 1;
+                    $dataMeasure['operation_time'] = date('Y-m-d H:i:s');
+                    WorkOrderMeasure::where(['id'=>$measure_id])->update($dataMeasure);
+                    //求出整个工单的措施状态
+                    $whereWork['work_id'] = $work_id;
+                    $whereWork['operation_type'] = ['neq',1];
+                    $resultMeasure = WorkOrderMeasure::where($whereWork)->count();
+                    if(0 == $resultMeasure){
+                        $dataWorkOrder['work_status'] = 6;
+                        
+                    }else{
+                        $dataWorkOrder['work_status'] = 5;                 
+                    }
+                    $dataWorkOrder['complete_time'] = date('Y-m-d H:i:s');
+                    WorkOrderList::where(['id'=>$work_id])->update($dataWorkOrder); 
+                }
+            }
+            return true; 
 
     }
 }
