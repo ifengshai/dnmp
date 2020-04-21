@@ -1319,6 +1319,7 @@ class WorkOrderList extends Backend
                 } else {
                     $lens = $this->model->getEditReissueLens($order_type, $res['showPrescriptions'], 1, [], $operate_type);
                 }
+                $lensForm = $this->model->getReissueLens($order_type, $res['showPrescriptions'], 1);
             } elseif (2 == $change_type) { //更改镜片信息
                 $res = $this->model->getAddress($order_type, $order_number);
                 if (isset($arr) && !empty($arr)) {
@@ -1326,6 +1327,7 @@ class WorkOrderList extends Backend
                 } else {
                     $lens = $this->model->getEditReissueLens($order_type, $res['prescriptions'], 2, [], $operate_type);
                 }
+                $lensForm = $this->model->getReissueLens($order_type, $res['prescriptions'], 2);
             } elseif (4 == $change_type) { //赠品信息
                 $res = $this->model->getAddress($order_type, $order_number);
                 if (isset($arr) && !empty($arr)) {
@@ -1333,12 +1335,13 @@ class WorkOrderList extends Backend
                 } else {
                     $lens = $this->model->getEditReissueLens($order_type, $res['prescriptions'], 3, [], $operate_type);
                 }
+                $lensForm = $this->model->getReissueLens($order_type, $res['prescriptions'], 3);
             }
             if ($res) {
                 if (5 == $change_type) {
-                    $this->success('操作成功！！', '', ['address' => $res, 'lens' => $lens, 'arr' => $userinfo_option]);
+                    $this->success('操作成功！！', '', ['address' => $res, 'lens' => $lens, 'arr' => $userinfo_option,'lensform' => $lensForm]);
                 } else {
-                    $this->success('操作成功！！', '', $lens);
+                    $this->success('操作成功！！', '', ['lens' => $lens,'lensform' => $lensForm]);
                 }
             } else {
                 $this->error('未获取到数据！！');
