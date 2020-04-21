@@ -222,7 +222,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     },
                                     visible: function (row) {
                                         //待审核状态+需要审核+审核人(经理)，才有审核权限
-                                        if (row.work_status == 1 && row.is_check == 1 && (Config.admin_id == row.assign_user_id || Config.workorder.customer_manager == Config.admin_id)) {
+                                        if (row.work_status == 2 && row.is_check == 1 && (Config.admin_id == row.assign_user_id || Config.workorder.customer_manager == Config.admin_id)) {
                                             return true;
                                         } else {
                                             return false;
