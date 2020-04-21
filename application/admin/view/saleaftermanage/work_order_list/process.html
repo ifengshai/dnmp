@@ -472,6 +472,7 @@
                         <th>备注</th>
                         <th>操作</th>
                     </tr>
+
                     {foreach name="recepts" item="vo" key="key"}
                     <tr>
                         <td>{$key+1}</td>
@@ -479,17 +480,17 @@
                         <td>{$vo.status_format}</td>
                         <td>
                             {if condition="$vo.recept_status != 1"}
-                                {$vo.note}
+                            {$vo.note}
                             {else /}
                             <input type="text" class="form-control process-note" name="row[note]"  value="">
                             {/if}
 
                         </td>
                         <td>
-
-                            <button type="submit" class="btn btn-success btn-process-status-success"  data-id="{$vo.id}">{:__('处理完成')}</button>
-                            <button type="submit" class="btn btn-danger btn-process-status-error"  data-id="{$vo.id}">{:__('处理失败')}</button>
-
+                            {if condition="$vo.recept_status == 1 && hasProcessPermission($vo.recept_group_id,$vo.work_id,session('admin.id'))"}
+                                <button type="submit" class="btn btn-success btn-process-status-success"  data-id="{$vo.id}">{:__('处理完成')}</button>
+                                <button type="submit" class="btn btn-danger btn-process-status-error"  data-id="{$vo.id}">{:__('处理失败')}</button>
+                            {/if}
                         </td>
                     </tr>
                     {/foreach}

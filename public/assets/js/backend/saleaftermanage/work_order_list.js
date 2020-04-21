@@ -1050,6 +1050,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         { field: 'work_platform', title: __('平台'), custom: { 1: 'blue', 2: 'danger', 3: 'orange' }, searchList: { 1: 'Zeelool', 2: 'Voogueme', 3: 'Nihao' }, formatter: Table.api.formatter.status },
                         { field: 'integral', title: __('积分'), operate: 'between' },
                         { field: 'email', title: __('客户邮箱'), operate: 'like' },
+                        { field: 'integral_describe', title: __('积分描述'), operate: false },
                         { field: 'create_user_name', title: __('创建人'), operate: 'like' },
                         { field: 'create_time', title: __('创建时间'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime },
 
@@ -1618,6 +1619,34 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         });
                     });
                 }
+                $(document).on('click', 'input[name="row[measure_choose_id][]"]', function () {
+                    var value = $(this).val();
+                    var check = $(this).prop('checked');
+                    var increment_id = $('#c-platform_order').val();
+                    if (increment_id) {
+                        var site_type = $('#work_platform').val();
+                        //补发
+                        if (value == 9 && check === true) {
+                            var check_coupon = Config.workorder.check_coupon;
+                            var need_check_coupon = Config.workorder.need_check_coupon;
+                            check_coupon_option = '<option value="0">请选择</option>';
+                            need_check_coupon_option = '<option value="0">请选择</option>';
+                            for(i in check_coupon){
+                                if(check_coupon[i].site == site_type){
+                                    check_coupon_option += '<option value="'+check_coupon[i].id+'">'+check_coupon[i].desc+'</option>';
+                                }
+                            }
+                            for(i in need_check_coupon){
+                                if(need_check_coupon[i].site == site_type) {
+                                    need_check_coupon_option += '<option value="' + need_check_coupon[i].id + '">' + need_check_coupon[i].desc + '</option>';
+                                }
+                            }
+                            $('#c-check_coupon').html(check_coupon_option);
+                            $('#c-need_check_coupon').html(need_check_coupon_option);
+                            $('.selectpicker ').selectpicker('refresh');
+                        }
+                    }
+                })
             },
         }
     };
