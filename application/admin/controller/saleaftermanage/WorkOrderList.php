@@ -331,8 +331,6 @@ class WorkOrderList extends Backend
                         $params['work_status'] = 3;
                     }
 
-                   
-
                     //如果为真则为处理任务
                     if (!$params['id']) {
                         $params['recept_person_id'] = $params['recept_person_id'] ?: session('admin.id');
@@ -346,7 +344,10 @@ class WorkOrderList extends Backend
                         }
                         $work_id = $this->model->id;
                     } else {
-
+                        //如果需要审核 则修改状态为待审核
+                        if ($params['is_check'] == 1) {
+                            $params['work_status'] = 2;
+                        }
                         $work_id = $params['id'];
                         unset($params['id']);
                         unset($params['problem_type_content']);
@@ -358,7 +359,7 @@ class WorkOrderList extends Backend
                         $result = $this->model->allowField(true)->save($params, ['id' => $work_id]);
                     }
 
-                    
+
                     $params['problem_type_id'] = $params['problem_type_id'] ?: $params['problem_id'];
 
                     //循环插入措施
@@ -412,7 +413,7 @@ class WorkOrderList extends Backend
 
                     //循环插入更换镜框数据
                     $orderChangeList = [];
-                   
+
                     //判断是否选中更改镜框问题类型
                     if ($params['change_frame']) {
 
@@ -443,7 +444,7 @@ class WorkOrderList extends Backend
                             }
                         }
                     }
-                  
+
                     //循环插入取消订单数据
                     $orderChangeList = [];
                     //判断是否选中取消措施
@@ -1197,14 +1198,14 @@ class WorkOrderList extends Backend
         if (!$row) {
             $this->error(__('No Results were found'));
         }
+
         if ($operateType == 2) {
             if ($row->work_status != 2 || $row->is_check != 1 || !in_array(session('admin.id'), [$row->assign_user_id, config('workorder.customer_manager')])) {
                 $this->error('没有审核权限');
             }
         } elseif ($operateType == 3) {
             //找出工单的所有承接人
-            $receptPersonIds = WorkOrderRecept::where('work_id', $ids)->column('recept_person_id');
-
+            $receptPersonIds = explode(',', $row->recept_person_id);
             //仓库工单并且经手人未处理
             if (($row->work_type == 2 && $row->is_after_deal_with == 0) || ($row->work_type == 1 && $row->is_check == 1 && in_array($row->work_status, [0, 1, 2, 4, 6, 7, 8])) || ($row->work_type == 1 && !in_array(session('admin.id'), $receptPersonIds))) {
                 $this->error('没有处理的权限');
@@ -1435,17 +1436,17 @@ class WorkOrderList extends Backend
                 if (!$row) {
                     $this->error(__('No Results were found'));
                 }
-                if(6 == $row['work_status']){
+                if (6 == $row['work_status']) {
                     $this->error(__('工单已经处理完成，请勿重复处理'));
                 }
                 $recept_id = $params['recept_id'];
                 $receptInfo =  (new WorkOrderRecept())->getOneRecept($recept_id);
-                $result=false;
-                if($receptInfo){
-                    if($receptInfo['recept_person_id'] !=session('admin.id')){
+                $result = false;
+                if ($receptInfo) {
+                    if ($receptInfo['recept_person_id'] != session('admin.id')) {
                         $this->error(__('您不能处理此工单'));
                     }
-                    $result = $this->model->handleRecept($receptInfo['id'],$receptInfo['work_id'],$receptInfo['measure_id'],$receptInfo['recept_group_id'],$params['success'],$params['note']);
+                    $result = $this->model->handleRecept($receptInfo['id'], $receptInfo['work_id'], $receptInfo['measure_id'], $receptInfo['recept_group_id'], $params['success'], $params['note']);
                 }
                 if ($result !== false) {
                     $this->success();
