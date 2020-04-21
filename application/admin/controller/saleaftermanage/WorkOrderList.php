@@ -1435,45 +1435,17 @@ class WorkOrderList extends Backend
                 if (!$row) {
                     $this->error(__('No Results were found'));
                 }
-                if (1 == $params['success']) { //本条措施处理成功
-
-                } elseif (2 == $params['']) { //本条措施处理失败
-
+                if(6 == $row['work_status']){
+                    $this->error(__('工单已经处理完成，请勿重复处理'));
                 }
-                dump($params['success']);
-                exit;
-                $params = $this->preExcludeFields($params);
-                $result = false;
-                Db::startTrans();
-                try {
-                    //是否采用模型验证
-                    if ($this->modelValidate) {
-                        $name = str_replace("\\model\\", "\\validate\\", get_class($this->model));
-                        $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.edit' : $name) : $this->modelValidate;
-                        $row->validateFailException(true)->validate($validate);
+                $recept_id = $params['recept_id'];
+                $receptInfo =  (new WorkOrderRecept())->getOneRecept($recept_id);
+                $result=false;
+                if($receptInfo){
+                    if($receptInfo['recept_person_id'] !=session('admin.id')){
+                        $this->error(__('您不能处理此工单'));
                     }
-                    $result = $row->allowField(true)->save($params);
-                    if ($result !== false) {
-                        $remarkData = [
-                            'work_id' => $row->id,
-                            'remark_type' => 3,
-                            'remark_record' => $params['process_note'],
-                            'create_person_id' => session('admin.id'),
-                            'create_person' => session('admin.nickname'),
-                            'create_time' => date('Y-m-d H:i:s')
-                        ];
-                        WorkOrderRemark::create($remarkData);
-                    }
-                    Db::commit();
-                } catch (ValidateException $e) {
-                    Db::rollback();
-                    $this->error($e->getMessage());
-                } catch (PDOException $e) {
-                    Db::rollback();
-                    $this->error($e->getMessage());
-                } catch (Exception $e) {
-                    Db::rollback();
-                    $this->error($e->getMessage());
+                    $result = $this->model->handleRecept($receptInfo['id'],$receptInfo['work_id'],$receptInfo['measure_id'],$receptInfo['recept_group_id'],$params['success'],$params['note']);
                 }
                 if ($result !== false) {
                     $this->success();

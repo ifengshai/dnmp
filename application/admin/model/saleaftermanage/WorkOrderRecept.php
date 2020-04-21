@@ -18,8 +18,18 @@ class WorkOrderRecept extends Model
     protected $createTime = false;
     protected $updateTime = false;
     protected $deleteTime = false;
-
-    // 追加属性
+    /**
+     * 根据工单ID获取工单承接人
+     * @param work_id 工单ID
+     * @Description
+     * @author lsw
+     * @since 2020/04/21 09:33:24 
+     * @return void
+     */
+    static function getWorkOrderReceptPerson($work_id)
+    {
+       return WorkOrderRecept::where(['work_id'=>$work_id])->select();
+    }
     protected $append = [
         'status_format'
     ];
@@ -37,6 +47,18 @@ class WorkOrderRecept extends Model
     {
         return $this->hasOne(WorkOrderMeasure::class,'id','measure_id');
     }
-
+    /**
+     * 获取承接的记录ID
+     *
+     * @Description
+     * @author lsw
+     * @since 2020/04/21 16:01:58 
+     * @param [type] $id
+     * @return void
+     */
+    public function getOneRecept($id)
+    {
+        return $this->where(['id'=>$id])->find()->toArray();
+    }
 
 }
