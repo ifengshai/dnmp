@@ -585,6 +585,8 @@ class ItWebDemand extends Backend
                     $data['entry_user_confirm_time'] =  date('Y-m-d H:i',time());
                     $res = $this->model->allowField(true)->save($data,['id'=> input('ids')]);
                     if ($res) {
+                        $res = $this ->model ->get(input('ids'));
+                        Ding::dingHook('test_group_finish', $res);
                         $this->success('成功');
                     } else {
                         $this->error('失败');
@@ -625,6 +627,7 @@ class ItWebDemand extends Backend
                         $this->error($e->getMessage());
                     }
                     if ($result !== false) {
+                        Ding::dingHook(__FUNCTION__, $this ->model);
                         $this->success();
                     } else {
                         $this->error(__('No rows were inserted'));
@@ -654,6 +657,7 @@ class ItWebDemand extends Backend
                 }
                 $res = $this->model->allowField(true)->save($params,['id'=> input('ids')]);
                 if ($res) {
+                    Ding::dingHook(__FUNCTION__, $this ->model ->get(input('ids')));
                     $this->success('成功');
                 } else {
                     $this->error('失败');
@@ -728,6 +732,7 @@ class ItWebDemand extends Backend
                 }
                 $res = $this->model->allowField(true)->save($update_date,['id'=> $params['id']]);
                 if ($res) {
+                    Ding::dingHook(__FUNCTION__, $this ->model ->get($params['id']));
                     $this->success('成功');
                 } else {
                     $this->error('失败');
@@ -772,6 +777,7 @@ class ItWebDemand extends Backend
             }
             $res = $this->model->allowField(true)->save($data,['id'=> input('ids')]);
             if ($res) {
+                Ding::dingHook(__FUNCTION__, $this ->model ->get(input('ids')));
                 $this->success('成功');
             } else {
                 $this->error('失败');
@@ -837,6 +843,7 @@ class ItWebDemand extends Backend
 
                 $res = $this->model->allowField(true)->save($update_date,['id'=> $params['id']]);
                 if ($res) {
+                    Ding::dingHook(__FUNCTION__, $this ->model ->get($params['id']));
                     $this->success('成功');
                 } else {
                     $this->error('失败');
@@ -956,6 +963,7 @@ class ItWebDemand extends Backend
                         }
                         $res_status = $this->model->allowField(true)->save($update_status,['id'=> $params['id']]);
                         if ($res_status) {
+                            Ding::dingHook(__FUNCTION__, $row);
                             $this->success('成功');
                         } else {
                             $this->error('失败');
@@ -1031,17 +1039,21 @@ class ItWebDemand extends Backend
         if ($this->request->isAjax()) {
             $is_all_test = input('is_all_test');
             if($is_all_test == 1){
+                $ding_type = '_end';
                 $data['status'] =  7;
                 $data['return_test_is_finish'] =  1;
                 $data['return_test_finish_time'] =  date('Y-m-d H:i',time());
                 $data['all_finish_time'] =  date('Y-m-d H:i',time());
             }else{
+                $ding_type = '_wait';
                 $data['status'] =  5;
                 $data['test_is_finish'] =  1;
                 $data['test_finish_time'] =  date('Y-m-d H:i',time());
             }
             $res = $this->model->allowField(true)->save($data,['id'=> input('ids')]);
             if ($res) {
+                // Ding::dingHook(__FUNCTION__ . $ding_type, $this ->model ->get(input('ids')));
+                Ding::dingHook(__FUNCTION__, $this ->model ->get(input('ids')));
                 $this->success('成功');
             } else {
                 $this->error('失败');
@@ -1108,6 +1120,7 @@ class ItWebDemand extends Backend
                 $res_status = $this->testRecordModel->allowField(true)->save($params);
 
                 if ($res_status) {
+                    Ding::dingHook(__FUNCTION__, $this->model->get(['id' => $params['pid']]));
                     $this->success('成功');
                 } else {
                     $this->error('失败');
@@ -1202,6 +1215,7 @@ class ItWebDemand extends Backend
             }
             $res = $this->model->allowField(true)->save($data,['id'=> $ids]);
             if ($res) {
+                Ding::dingHook(__FUNCTION__, $this ->model ->get($ids));
                 $this->success('成功');
             } else {
                 $this->error('失败');
