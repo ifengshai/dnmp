@@ -427,16 +427,35 @@
 
     <div class="form-group">
         <div class="form-group-content">
+            <?php if($work_type == 1){?>
+            <label class="control-label col-xs-12 col-sm-2" style="width:8%;float: left;">{:__('问题类型')}：</label>
+            {foreach $problem_type as $key => $val}
+            <div>
+                <label class="control-label col-xs-12 col-sm-2" style="width:8%;">{:__($val['name'])}：</label>
+            <div class="radio" style="width: 90%;float: left;">
+                {foreach $val['type'] as $k => $v}
+                <label>
+                    <input type="radio" name="row[problem_type_id]" class="problem_type" {:$row['id'] ? 'disabled' : ''} id="optionsRadios{$v['id']}"
+                        value="{$v['id']}">
+                    <span>{$v['name']}</span>
+                </label>
+                {/foreach}
+            </div>
+            </div>
+            <br/>
+            {/foreach}
+            <?php }else{;?>
             <label class="control-label col-xs-12 col-sm-2" style="width:8%;float: left;">{:__('problem_type')}：</label>
             <div class="radio" style="width: 90%;float: left;">
                 {foreach $problem_type as $k1 => $v1}
                 <label>
-                    <input type="radio" name="row[problem_type_id]" class="problem_type" {:$row['id'] ? 'disabled' : ''} id="optionsRadios{$k1}"
-                        value="{$k1}">
+                    <input disabled type="radio" name="row[problem_type_id]" class="problem_type" id="optionsRadios{$k1}"
+                           value="{$k1}">
                     <span>{$v1}</span>
                 </label>
                 {/foreach}
             </div>
+            <?php }?>
         </div>
     </div>
 
