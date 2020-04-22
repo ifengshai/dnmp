@@ -10,6 +10,7 @@ namespace app\api\controller;
 
 use app\admin\model\zendesk\ZendeskReply;
 use app\admin\model\zendesk\ZendeskReplyDetail;
+use fast\Http;
 use fast\Trackingmore;
 use think\Controller;
 use think\Db;
@@ -99,7 +100,7 @@ class ZendeskOne extends Controller
     {
         $search = [
             'type' => 'ticket',
-            'via' => ['mail','web'],
+            'via' => ['mail','web','web_widget'],
             'status' => ['new','open'],
             'tags' => [
                 'keytype' => '-',
@@ -175,6 +176,7 @@ class ZendeskOne extends Controller
             $requester_id = $ticket->requester_id;
             //所有的tag
             $tags = $ticket->tags;
+            $subject = $ticket->subject;
             //email
             $requester_email = $ticket->via->source->from->address;
             try{
@@ -265,7 +267,7 @@ class ZendeskOne extends Controller
 
                     } else {
                         //匹配到相应的关键字，自动回复消息，修改为pending，回复共客户选择的内容
-                        if (s($body)->containsAny($this->preg_word) === true) {
+                        if (s($body)->containsAny($this->preg_word) === true || s($subject)->containsAny($this->preg_word) === true) {
                             $reply_detail_data = [];
                             $recent_reply_count = 0;
                             //判断最近12小时发送的第几封，超过2封，超过2封直接转客服+tag-》多次发送
@@ -569,10 +571,13 @@ class ZendeskOne extends Controller
         $lastUpdateTime = $data['lastUpdateTime']; //物流最新跟新时间
         $StatusDescription = isset($data['origin_info']['trackinfo'][0]['StatusDescription']) ? $data['origin_info']['trackinfo'][0]['StatusDescription'] : '';
         $lastEvent = $data['lastEvent'] ? $data['lastEvent'] : $StatusDescription;
+        $url = "https://translation.googleapis.com/language/translate/v2?key=AIzaSyCqDt6cu0yCLkKkkutNAm9gHJB3pcHIhKU&source=zh&target=en".'&q='.urlencode($lastEvent);
+        $english = Http::sendRequest($url);
+        $englishData = json_decode($english['msg'],true);
         $res = [
             'status' => $data['status'],
             'lastUpdateTime' => $lastUpdateTime,
-            'lastEvent' => $lastEvent,
+            'lastEvent' => $englishData['data']['translations'][0]['translatedText'],
             'carrier_code' => $data['carrier_code'],
             'updated_at' => $track_result['updated_at'],
             'track_number' => $track_result['track_number']

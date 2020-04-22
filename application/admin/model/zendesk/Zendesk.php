@@ -23,7 +23,8 @@ class Zendesk extends Model
     protected $append = [
         'tag_format',
         'status_format',
-        'username_format'
+        'username_format',
+        'status_type'
     ];
 
     protected static function init()
@@ -67,6 +68,15 @@ class Zendesk extends Model
     public function getStatusFormatAttr($value, $data)
     {
         return config('zendesk.status')[$data['status']];
+    }
+    public function getStatusTypeAttr($value, $data)
+    {
+        return [
+            1 => '待处理',
+            2 => '新增',
+            3 => '已处理',
+            4 => '待分配'
+        ];
     }
 
     public function getUsernameFormatAttr($value, $data)
@@ -224,6 +234,108 @@ class Zendesk extends Model
                 }
                 usleep(1000);
             }
+        }
+    }
+
+    /**
+     * 修改后的分单脚本
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public static function shellAssignTicketChange()
+    {
+        //1，判断今天有无task，无，创建
+        $tasks = ZendeskTasks::whereTime('create_time', 'today')->find();
+        //设置所有的隐藏
+        self::where('id','>',1)->setField('is_hide',1);
+        if (!$tasks) {
+            //创建所有的tasks
+            //获取所有的agents
+            $agents = ZendeskAgents::all();
+            foreach ($agents as $agent) {
+                //$target_count = $agent->count - $agent->tickets_count > 0 ? $agent->count - $agent->tickets_count : 0;
+                ZendeskTasks::create([
+                    'type' => $agent->getType(),
+                    'admin_id' => $agent->admin_id,
+                    'assignee_id' => $agent->agent_id,
+                    'leave_count' => 0,
+                    'target_count' => $agent->count,
+                    'surplus_count' => $agent->count,
+                    'complete_count' => 0,
+                    'check_count' => $agent->count,
+                    'apply_count' => 0,
+                    'complete_apply_count' => 0
+                ]);
+            }
+        }
+        //获取所有的open和new的邮件
+        $waitTickets = self::where(['status' => ['in','1,2'],'channel' => ['neq','voice']])->order('id asc')->select();
+        foreach ($waitTickets as $ticket) {
+            //电话不分配
+            if($ticket->channel == 'voice') continue;
+            //找到该邮件是否已分配
+            if($ticket->assign_id){
+                //如果已分配，则直接使得该ticket显示
+                //判断老用户是否在表里面并且目标大于0
+                $task = ZendeskTasks::whereTime('create_time', 'today')
+                    ->where(['admin_id' => $ticket->assign_id, 'type' => $ticket->getType(),'surplus_count' => ['>',0]])
+                    ->find();
+                if($task){
+                    //修改task的字段
+                    $task->surplus_count = $task->surplus_count - 1;
+                    $task->complete_count = $task->complete_count + 1;
+                    $task->complete_apply_count = $task->complete_apply_count + 1;
+                    $task->save();
+                    self::where('id',$ticket->id)->setField('is_hide',0);
+                }
+            }else{
+                //无分配人的，进行分配
+                //判断该邮件是否有老用户
+                $preTicket = Zendesk::where(['user_id' => $ticket->user_id, 'assign_id' => ['>', 0], 'type' => $ticket->getType(),'channel' => ['in',['email','web','chat']]])
+                    ->order('id', 'desc')
+                    ->limit(1)
+                    ->find();
+                if (!$preTicket) {
+                    //无老用户，则分配给最少单的用户
+                    $task = ZendeskTasks::whereTime('create_time', 'today')
+                        ->where(['type' => $ticket->getType()])
+                        ->order('surplus_count', 'desc')
+                        ->limit(1)
+                        ->find();
+                } else {
+                    //判断老用户是否在表里面并且目标大于0
+                    $task = ZendeskTasks::whereTime('create_time', 'today')
+                        ->where(['admin_id' => $preTicket->assign_id, 'type' => $ticket->getType(),'target_count' => ['>',0]])
+                        ->find();
+                }
+                if(!$task){
+                    //则分配给最少单的用户
+                    $task = ZendeskTasks::whereTime('create_time', 'today')
+                        ->where(['type' => $ticket->getType()])
+                        ->order('surplus_count', 'desc')
+                        ->limit(1)
+                        ->find();
+                }
+                if ($task) {
+                    //判断该用户是否已经分配满了，满的话则不分配
+                    if ($task->target_count > $task->complete_count) {
+                        //修改zendesk的assign_id,assign_time
+                        $ticket->assign_id = $task->admin_id;
+                        $ticket->assignee_id = $task->assignee_id;
+                        $ticket->assign_time = date('Y-m-d H:i:s', time());
+                        $ticket->save();
+                        //修改task的字段
+                        $task->surplus_count = $task->surplus_count - 1;
+                        $task->complete_count = $task->complete_count + 1;
+                        $task->complete_apply_count = $task->complete_apply_count + 1;
+                        $task->save();
+                        self::where('id',$ticket->id)->setField('is_hide',0);
+                    }
+                    usleep(1000);
+                }
+            }
+
         }
     }
 

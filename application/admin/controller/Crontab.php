@@ -1237,7 +1237,7 @@ order by sfoi.item_id asc limit 1000";
         $stime = date("Y-m-d 00:00:00", strtotime("-1 day"));
         $etime = date("Y-m-d 23:59:59", strtotime("-1 day"));
         $map['created_at'] = $date['created_at'] = $update['updated_at'] =  ['between', [$stime, $etime]];
-        $map['status'] = ['in', ['processing', 'complete', 'creditcard_proccessing']];
+        $map['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
         $zeelool_count = $zeelool_model->table('sales_flat_order')->where($map)->count(1);
         $zeelool_total = $zeelool_model->table('sales_flat_order')->where($map)->sum('base_grand_total');
         //zeelool客单价
@@ -1453,6 +1453,8 @@ order by sfoi.item_id asc limit 1000";
         $where['b.status'] = 1;
         $supplier_list = $supplier->alias('a')->join(['fa_supplier' => 'b'], 'a.supplier_id=b.id')->column('b.supplier_name,b.purchase_person', 'a.sku');
 
+        //查询产品库正常SKU
+        $skus = $this->item->where(['is_open' => 1, 'is_del' => 1])->column('sku');
 
         //删除无用数组 释放内存
         unset($lists);
@@ -1471,6 +1473,9 @@ order by sfoi.item_id asc limit 1000";
         $F_num = 0;
         $list = [];
         foreach ($data as $k => $val) {
+            if (!in_array($val['true_sku'], $skus)) {
+                continue;
+            }
             $list[$k]['counter'] = $val['counter'] ?? 0;
             $list[$k]['days'] = $val['days'] == 0 ? 1 : $val['days'];
             $list[$k]['created_at'] = $val['created_at'];
@@ -3135,48 +3140,6 @@ order by sfoi.item_id asc limit 1000";
     }
 
 
-    /**
-     * 统计SKU每天的销售数量 
-     * @todo 待定
-     * @Description
-     * @author wpl
-     * @since 2020/03/10 17:16:04 
-     * @return void
-     */
-    public function getSkuSalesNum()
-    {
-        set_time_limit(0);
-        $item = new \app\admin\model\itemmanage\Item();
-        $map['is_open'] = 1;
-        $map['is_del'] = 1;
-        $list = $item->where($map)->limit(1500)->select();
-        $skus = [];
-        foreach ($list as $k => $v) {
-            $itemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku();
-            $zeelool_sku = $itemPlatformSku->getWebSku($v['sku'], 1);
-            $voogueme_sku = $itemPlatformSku->getWebSku($v['sku'], 2);
-            $nihao_sku = $itemPlatformSku->getWebSku($v['sku'], 3);
-            $where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal']];
-            $stime = date("Y-m-d 00:00:00", strtotime("-150 day"));
-            $etime = date("Y-m-d 23:59:59");
-            $where['a.created_at'] = ['between', [$stime, $etime]];
-            //Zeelool
-            $where['sku'] = $zeelool_sku;
-            $zeelool_num = $this->zeelool->alias('a')->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')->where($where)->sum('qty_ordered');
-            //Voogueme
-            $where['sku'] = $voogueme_sku;
-            $voogueme_num = $this->voogueme->alias('a')->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')->where($where)->sum('qty_ordered');
-            //Nihao
-            $where['sku'] = $nihao_sku;
-            $nihao_num = $this->nihao->alias('a')->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')->where($where)->sum('qty_ordered');
-
-            if (($zeelool_num + $voogueme_num + $nihao_num) < 1) {
-                $skus[] = $v['sku'];
-            }
-        }
-        $item->where(['sku' => ['in',$skus]])->save();        
-        dump($skus);die;
-    }
 
     /**
      * 更新order_statistics表字段
@@ -3340,5 +3303,205 @@ order by sfoi.item_id asc limit 1000";
         Db::name('order_item_info')->insert($data);
         echo 'ok';
         die;
+    }
+
+
+
+    /**
+     * 统计150天无销量SKU 移入回收站
+     * @todo 待定
+     * @Description
+     * @author wpl
+     * @since 2020/03/10 17:16:04 
+     * @return void
+     */
+    public function getSkuSalesNum()
+    {
+        set_time_limit(0);
+        $item = new \app\admin\model\itemmanage\Item();
+        $map['is_open'] = 1;
+        $map['is_del'] = 1;
+        $map['item_status'] = 3;
+        $map['is_change'] = 0;
+        $map['is_new'] = 2;
+        $map['available_stock'] = ['<=', 0];
+        $list = $item->where($map)->limit(300)->select();
+        $skus = [];
+        foreach ($list as $k => $v) {
+            $itemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku();
+            $zeelool_sku = $itemPlatformSku->getWebSku($v['sku'], 1);
+            $voogueme_sku = $itemPlatformSku->getWebSku($v['sku'], 2);
+            $nihao_sku = $itemPlatformSku->getWebSku($v['sku'], 3);
+            $where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal']];
+            $stime = date("Y-m-d 00:00:00", strtotime("-150 day"));
+            $etime = date("Y-m-d 23:59:59");
+            $where['a.created_at'] = ['between', [$stime, $etime]];
+            //Zeelool
+            $where['sku'] = $zeelool_sku;
+            $zeelool_num = $this->zeelool->alias('a')->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')->where($where)->sum('qty_ordered');
+            //Voogueme
+            $where['sku'] = $voogueme_sku;
+            $voogueme_num = $this->voogueme->alias('a')->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')->where($where)->sum('qty_ordered');
+            //Nihao
+            $where['sku'] = $nihao_sku;
+            $nihao_num = $this->nihao->alias('a')->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')->where($where)->sum('qty_ordered');
+
+            if (($zeelool_num + $voogueme_num + $nihao_num) < 1) {
+                $skus[] = $v['sku'];
+            }
+        }
+        $data['is_change'] = 1;
+        $data['is_open'] = 3;
+        $res = $item->save($data, ['sku' => ['in', $skus]]);
+        dump($res);
+        die;
+    }
+
+
+    //导入实时库存 第一步
+    public function set_product_relstock()
+    {
+        $str = 'OT02018-02';
+        $skus = explode('
+        ', $str);
+
+        $stock = [
+            0
+        ];
+
+        foreach ($skus as $k => $v) {
+            $p_map['sku'] = $v;
+            $data['real_time_qty'] = $stock[$k];
+            $res = $this->item->where($p_map)->update($data);
+        }
+        echo $res;
+        die;
+    }
+
+    /**
+     * 统计配货占用 第二步
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/04/11 15:54:25 
+     * @return void
+     */
+    public function set_product_process()
+    {
+        $this->zeelool = new \app\admin\model\order\order\Zeelool;
+        $this->voogueme = new \app\admin\model\order\order\Voogueme;
+        $this->nihao = new \app\admin\model\order\order\Nihao;
+        $this->weseeoptical = new \app\admin\model\order\order\Weseeoptical;
+        $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
+        $this->item = new \app\admin\model\itemmanage\Item;
+
+        $str = 'OT02018-02';
+        $skus = explode('
+        ', $str);
+        foreach ($skus as $k => $v) {
+            $zeelool_sku = $this->itemplatformsku->getWebSku($v, 1);
+            $voogueme_sku = $this->itemplatformsku->getWebSku($v, 2);
+            $nihao_sku = $this->itemplatformsku->getWebSku($v, 3);
+            $wesee_sku = $this->itemplatformsku->getWebSku($v, 5);
+
+            $map['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal']];
+            $map['custom_is_delivery_new'] = 0; //是否提货
+            $map['custom_is_match_frame_new'] = 1; //是否配镜架
+            $map['a.created_at'] = ['between', ['2020-01-01 00:00:00', date('Y-m-d H:i:s')]]; //时间节点
+            $map['sku'] = $zeelool_sku;
+            $zeelool_qty = $this->zeelool->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->sum('qty_ordered');
+            $map['sku'] = $voogueme_sku;
+            $voogueme_qty = $this->voogueme->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->sum('qty_ordered');
+            $map['sku'] = $nihao_sku;
+            $nihao_qty = $this->nihao->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->sum('qty_ordered');
+            $map['sku'] = $wesee_sku;
+            $weseeoptical_qty = $this->weseeoptical->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->sum('qty_ordered');
+
+            $p_map['sku'] = $v;
+            $data['distribution_occupy_stock'] = $zeelool_qty + $voogueme_qty + $nihao_qty + $weseeoptical_qty;
+            dump($v);
+            dump($data);
+            $res = $this->item->where($p_map)->update($data);
+        }
+
+        echo $res;
+        die;
+    }
+
+
+
+    /**
+     * 订单占用 第三步
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/04/11 15:54:25 
+     * @return void
+     */
+    public function set_product_process_order()
+    {
+        $this->zeelool = new \app\admin\model\order\order\Zeelool;
+        $this->voogueme = new \app\admin\model\order\order\Voogueme;
+        $this->nihao = new \app\admin\model\order\order\Nihao;
+        $this->weseeoptical = new \app\admin\model\order\order\Weseeoptical;
+        $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
+        $this->item = new \app\admin\model\itemmanage\Item;
+
+        $str = 'OT02018-02';
+        $skus = explode('
+        ', $str);
+        foreach ($skus as $k => $v) {
+            $zeelool_sku = $this->itemplatformsku->getWebSku($v, 1);
+            $voogueme_sku = $this->itemplatformsku->getWebSku($v, 2);
+            $nihao_sku = $this->itemplatformsku->getWebSku($v, 3);
+            $wesee_sku = $this->itemplatformsku->getWebSku($v, 5);
+
+            $map['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal']];
+            $map['custom_is_delivery_new'] = 0; //是否提货
+            $map['a.created_at'] = ['between', ['2020-01-01 00:00:00', date('Y-m-d H:i:s')]]; //时间节点
+            $map['sku'] = $zeelool_sku;
+            $zeelool_qty = $this->zeelool->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->sum('qty_ordered');
+            $map['sku'] = $voogueme_sku;
+            $voogueme_qty = $this->voogueme->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->sum('qty_ordered');
+            $map['sku'] = $nihao_sku;
+            $nihao_qty = $this->nihao->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->sum('qty_ordered');
+            $map['sku'] = $wesee_sku;
+            $weseeoptical_qty = $this->weseeoptical->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->sum('qty_ordered');
+
+            $p_map['sku'] = $v;
+            $data['occupy_stock'] = $zeelool_qty + $voogueme_qty + $nihao_qty + $weseeoptical_qty;
+            $res = $this->item->where($p_map)->update($data);
+        }
+        dump($res);
+        die;
+    }
+
+    /**
+     * 订单占用 第四步
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/04/11 15:54:25 
+     * @return void
+     */
+    public function set_product_sotck()
+    {
+        $this->zeelool = new \app\admin\model\order\order\Zeelool;
+        $this->voogueme = new \app\admin\model\order\order\Voogueme;
+        $this->nihao = new \app\admin\model\order\order\Nihao;
+        $this->weseeoptical = new \app\admin\model\order\order\Weseeoptical;
+        $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
+        $this->item = new \app\admin\model\itemmanage\Item;
+
+        $str = 'OT02018-02';
+        $skus = explode('
+        ', $str);
+        $list = $this->item->field('sku,stock,occupy_stock,available_stock,real_time_qty,distribution_occupy_stock')->where(['sku' => ['in', $skus]])->select();
+        foreach ($list as $k => $v) {
+            $data['stock'] = $v['real_time_qty'] + $v['distribution_occupy_stock'];
+            $data['available_stock'] = ($v['real_time_qty'] + $v['distribution_occupy_stock']) - $v['occupy_stock'];
+            $p_map['sku'] = $v['sku'];
+            $res = $this->item->where($p_map)->update($data);
+        }
     }
 }

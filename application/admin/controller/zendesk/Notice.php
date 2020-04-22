@@ -150,7 +150,8 @@ class Notice extends Controller
                     'is_admin' => $admin_id ? 1 : 0,
                     'attachments' => json($attachments),
                     'is_created' => 1,
-                    'due_id' => $due_id ? $due_id : 0
+                    'due_id' => $due_id ? $due_id : 0,
+                    'attachments' => join(',',$attachments)
                 ]);
             }
             Db::commit();
@@ -178,7 +179,7 @@ class Notice extends Controller
         try{
             //$channel = $postData['channel'];
             //最后一条评论
-            $comment = $this->getLastComments($id);
+            $comments = $this->getComments($id);
             $ticket = $this->getTicket($id);
             //开始插入相关数据
             $tags = $ticket->tags;
@@ -188,7 +189,7 @@ class Notice extends Controller
 
             $zendesk = Zendesk::where(['ticket_id' => $id,'type' => $type])->find();
             if(!$zendesk){
-                return false;
+                return 'success';
             }
         }catch (Exception $e) {
             file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$id."\r\n",FILE_APPEND);
@@ -196,7 +197,6 @@ class Notice extends Controller
             return true;
             //echo $e->getMessage();
         }
-
         //开启事务
         Db::startTrans();
         try {
@@ -284,35 +284,37 @@ class Notice extends Controller
                 }
             }
             //查找comment_id是否存在，不存在则添加
-            if(!ZendeskComments::where('comment_id',$comment->id)->find()) {
-                //获取所有的附件
-                $attachments = [];
-                if ($comment->attachments) {
-                    foreach ($comment->attachments as $attachment) {
-                        $attachments[] = $attachment->content_url;
+            foreach($comments as $comment) {
+                if (!ZendeskComments::where('comment_id', $comment->id)->find()) {
+                    //获取所有的附件
+                    $attachments = [];
+                    if ($comment->attachments) {
+                        foreach ($comment->attachments as $attachment) {
+                            $attachments[] = $attachment->content_url;
+                        }
                     }
+                    $admin_id = $due_id = ZendeskAgents::where('agent_id', $comment->author_id)->value('admin_id');
+                    ZendeskComments::create([
+                        'ticket_id' => $id,
+                        'zid' => $zendesk->id,
+                        'comment_id' => $comment->id,
+                        'author_id' => $comment->author_id,
+                        'body' => $comment->body,
+                        'html_body' => $comment->html_body,
+                        'is_public' => $comment->public ? 1 : 2,
+                        'is_admin' => $admin_id ? 1 : 0,
+                        'attachments' => join(',', $attachments),
+                        'is_created' => 2,
+                        'due_id' => $due_id ? $due_id : 0
+                    ]);
                 }
-                $admin_id = $due_id = ZendeskAgents::where('agent_id',$comment->author_id)->value('admin_id');
-                ZendeskComments::create([
-                    'ticket_id' => $id,
-                    'zid' => $zendesk->id,
-                    'comment_id' => $comment->id,
-                    'author_id' => $comment->author_id,
-                    'body' => $comment->body,
-                    'html_body' => $comment->html_body,
-                    'is_public' => $comment->public ? 1 : 2,
-                    'is_admin' => $admin_id ? 1 : 0,
-                    'attachments' => json($attachments),
-                    'is_created' => 2,
-                    'due_id' => $due_id ? $due_id : 0
-                ]);
             }
             Db::commit();
         } catch (Exception $e) {
             file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$id."\r\n",FILE_APPEND);
             file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$e->getMessage()."\r\n",FILE_APPEND);
             Db::rollback();
-            return true;
+            //return true;
             //写入日志
         }
         return 'success';
@@ -330,7 +332,7 @@ class Notice extends Controller
         }catch (\Exception $e) {
             file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$id."\r\n",FILE_APPEND);
             file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$e->getMessage()."\r\n",FILE_APPEND);
-            return true;
+            return 'success';
             //echo $e->getMessage();
         }
     }
@@ -351,7 +353,7 @@ class Notice extends Controller
         }catch (\Exception $e) {
             file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$id."\r\n",FILE_APPEND);
             file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$e->getMessage()."\r\n",FILE_APPEND);
-            return true;
+            return 'success';
             //echo $e->getMessage();
         }
     }
@@ -371,7 +373,7 @@ class Notice extends Controller
         }catch (\Exception $e) {
             file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$id."\r\n",FILE_APPEND);
             file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$e->getMessage()."\r\n",FILE_APPEND);
-            return true;
+            return 'success';
             //echo $e->getMessage();
         }
     }
@@ -606,24 +608,27 @@ class Notice extends Controller
         $search = [
             'type' => 'ticket',
             'order_by' => 'created_at',
-            'created' => [
-                'valuetype' => '<=',
-                'value' => '2020-04-10T07:20:38Z',
-            ],
-            'created' => [
-                'valuetype' => '>=',
-                'value' => '2020-04-10T01:48:38Z'
+            'status' => ['open'],
+            'assignee' => [
+                'wangyian@nextmar.com',
+                'yuanqianqian@nextmar.com',
+                'mayumeng@nextmar.com',
+                'wufan@nextmar.com',
+                'zhaojinjin@nextmar.com',
+                'lisen@nextmar.com',
+                'liumengnan@nextmar.com'
             ],
             'sort' => 'asc'
         ];
-
-        $type = $this->postData['type'] == 'zeelool' ? 1 : 2;
+        //$type = $this->postData['type'] == 'zeelool' ? 1 : 2;
+        $type = 1;
         $params = $this->parseStr($search);
         $search = $this->client->search()->find($params);
         $tickets = $search->results;
         if (!$search->count) {
             return true;
         }
+        echo $search->count;
         $page = ceil($search->count / 100 );
         //先获取第一页的,一次100条
         $this->findCommentsByTickets($tickets,$type);
@@ -633,7 +638,7 @@ class Notice extends Controller
                 try{
                     $search = $this->client->search()->find($params,['page' => $i]);
                 }catch (\Exception $e){
-                    echo 1;
+                    echo $e->getMessage();
                     $this->setTickets();
                 }
                 $tickets = $search->results;
@@ -650,7 +655,9 @@ class Notice extends Controller
      */
     public function findCommentsByTickets($tickets,$type)
     {
+        $key = 0;
         foreach($tickets as $ticket){
+            ++$key;
             $via = $ticket->via;
             $priority = 0;
             if ($ticket->priority) {
@@ -662,7 +669,10 @@ class Notice extends Controller
             $assign_id = \app\admin\model\zendesk\ZendeskAgents::where('agent_id',$ticket->assignee_id)->value('admin_id');
             $tags = ZendeskTags::where('name','in',$ticket->tags)->column('id');
             sort($tags);
-            if(!Zendesk::where('ticket_id',$ticket->id)->find()) {
+            echo $ticket->id."\r\n";
+//            echo $key."\r\n";
+            if(!Zendesk::where(['ticket_id' => $ticket->id, 'type' => $type])->find()) {
+                echo $ticket->id."\r\n";
                 //根据用户的id获取用户的信息
                 $user = $this->client->crasp()->findUser(['id' => $ticket->requester_id]);
                 $userInfo = $user->user;
@@ -744,6 +754,7 @@ class Notice extends Controller
                     ]);
                 }
                 echo $zendesk->ticket_id."\r\n";
+                usleep(100);
                 // }
                 //sleep(1);
                 //Db::commit();
@@ -796,7 +807,7 @@ class Notice extends Controller
             $type = 2;
         }
         $a = 1;
-        $ticket_ids = Zendesk::where('status','1,2')->where('type',$type)->where('id','<',10845)->column('ticket_id');
+        $ticket_ids = Zendesk::where('ticket_id','in','105010,104326,105024,104644,104913,105119')->where('type',$type)->column('ticket_id');
         foreach($ticket_ids as $ticket_id){
             $ticket = $this->client->tickets()->find($ticket_id)->ticket;
 
@@ -821,13 +832,14 @@ class Notice extends Controller
                 //更新主表,目前应该只会更新status，其他不会更新
                 $updateData = [
                     'tags' => $tags,
-                    'status' => array_search(strtolower($ticket->status), config('zendesk.status'))
+                    'status' => array_search(strtolower($ticket->status), config('zendesk.status')),
+                    'update_time' => date('Y-m-d H:i:s',(strtotime(str_replace(['T','Z'],[' ',''],$ticket->updated_at))+8*3600)),
                 ];
                 //如果分配人修改，则同步修改分配人
                 if($zendesk->assignee_id != $ticket->assignee_id && $ticket->assignee_id){
 
                     $updateData['assignee_id'] = $ticket->assignee_id;
-                    $updateData['assign_id'] = ZendeskAgents::where('agent_id',$ticket->assignee_id)->value('admin_id');
+                    $updateData['assign_id'] = $updateData['due_id'] = ZendeskAgents::where('agent_id',$ticket->assignee_id)->value('admin_id');
                 }
                 //更新rating,如果存在的话
                 if(!$zendesk->rating && $ticket->satisfaction_rating) {
@@ -904,5 +916,15 @@ class Notice extends Controller
     public function shellAssignTicket()
     {
         Zendesk::shellAssignTicket();
+    }
+    /**
+     * 脚本执行分配修改版
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public function shellAssignTicketChange()
+    {
+        Zendesk::shellAssignTicketChange();
     }
 }

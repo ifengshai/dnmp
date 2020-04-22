@@ -11,6 +11,7 @@ namespace app\api\controller;
 use app\admin\model\Admin;
 use app\admin\model\AuthGroup;
 use app\admin\model\AuthGroupAccess;
+use app\admin\model\Department;
 use fast\Random;
 use think\Controller;
 use EasyDingTalk\Application;
@@ -37,7 +38,7 @@ class Ding extends Controller
     {
         $params = [
             'call_back_tag' => ['user_add_org', 'user_modify_org', 'user_leave_org', 'org_dept_create', 'org_dept_modify', 'org_dept_remove'],
-            'url' => 'http://xms.crasphter.cn/api/ding/receive',
+            'url' => 'http://mojing.mruilove.com/api/ding/receive',
         ];
         $this->app->callback->register($params);
     }
@@ -51,7 +52,7 @@ class Ding extends Controller
     {
         $params = [
             'call_back_tag' => ['user_add_org', 'user_modify_org', 'user_leave_org', 'org_dept_create', 'org_dept_modify', 'org_dept_remove'],
-            'url' => 'http://xms.crasphter.cn/api/ding/receive',
+            'url' => 'http://mojing.mruilove.com/api/ding/receive',
         ];
         $this->app->callback->update($params);
     }
@@ -65,7 +66,6 @@ class Ding extends Controller
         // 获取 server 实例
         $server = $this->app->server;
         $server->push(function ($payload) {
-            file_put_contents('/www/wwwroot/mjz/runtime/log/a.txt', json_encode($payload) . "\r\n", FILE_APPEND);
             $type = $payload['EventType'];
             switch ($type) {
                 //添加用户
@@ -103,7 +103,7 @@ class Ding extends Controller
                     foreach ($deptIds as $deptId) {
                         //获取部门详情
                         $department = $this->app->department->get($deptId);
-                        AuthGroup::deptAdd($department);
+                        Department::deptAdd($department);
                     }
                     break;
                 case 'org_dept_modify':
@@ -112,14 +112,14 @@ class Ding extends Controller
                     foreach ($deptIds as $deptId) {
                         //获取部门详情
                         $department = $this->app->department->get($deptId);
-                        AuthGroup::deptUpdate($department);
+                        Department::deptUpdate($department);
                     }
                     break;
                 case 'org_dept_modify':
                     //删除部门
                     $deptIds = $payload['DeptId'];
                     foreach ($deptIds as $deptId) {
-                        AuthGroup::deptDelete($deptId);
+                        Department::deptDelete($deptId);
                     }
                     break;
             }
@@ -140,20 +140,19 @@ class Ding extends Controller
         if ($departments['errcode'] === 0 && !empty($departments['department'])) {
             foreach ($departments['department'] as $department) {
                 //查找是否存在，已存在的不创建
-                $authGroupId = AuthGroup::where('department_id', $department['id'])->value('id');
-                if (!$authGroupId) {
+                $depart = Department::where('department_id',$department['id'])->value('id');
+                if (!$depart) {
                     $data = [
                         'name' => $department['name'],
                         'pid' => $pid,
-                        'status' => 'normal',
                         'department_id' => $department['id'],
-                        'parentid' => $department['parentid'],
+                        'parentid' => $department['parentid']
                     ];
-                    $authGroup = AuthGroup::create($data);
-                    $authGroupId = $authGroup->id;
+                    $depart = Department::create($data);
+                    $departId = $depart->id;
                 }
-                echo $authGroupId;
-                $this->setDepartment($department['id'], $authGroupId);
+                echo $departId;
+                $this->setDepartment($department['id'], $departId);
             }
         }
     }
@@ -180,11 +179,16 @@ class Ding extends Controller
                             'position' => $user['position'],
                             'mobile' => $user['mobile'],
                             'userid' => $user['userid'],
-                            'unionid' => $user['unionid']
+                            'unionid' => $user['unionid'],
+                            'department_id' => $departmentId
                         ];
                         $userAdd = Admin::update($data);
                     } else {
                         $username = str_replace(' ', '', pinyin($user['name']));
+                        $count = Admin::where('username', $username)->count();
+                        if($count == 1){
+                            $username = $username.$count;
+                        }
                         $salt = Random::alnum();
                         $password = md5(md5($username) . $salt);
                         $data = [
@@ -198,18 +202,11 @@ class Ding extends Controller
                             'position' => $user['position'],
                             'mobile' => $user['mobile'],
                             'userid' => $user['userid'],
-                            'unionid' => $user['unionid']
+                            'unionid' => $user['unionid'],
+                            'department_id' => $departmentId
                         ];
                         $userAdd = Admin::create($data);
                     }
-                    //添加或新增
-                    $groupId = AuthGroup::where('department_id', $departmentId)->value('id');
-                    //分配角色
-                    $accessData = [
-                        'uid' => $userAdd->id,
-                        'group_id' => $groupId
-                    ];
-                    AuthGroupAccess::create($accessData);
                     echo $userAdd->id;
                 }
             }
@@ -218,9 +215,11 @@ class Ding extends Controller
 
     public function test($url = '')
     {
-        $params = send_ding_message(['040740464839840580'], '收到需求2', '钱海信用卡支付后重复发送确认订单的邮件');
-        dump($this->app->conversation->sendCorporationMessage($params));
-        die;
+//        $this->setDepartment();
+//        exit;
+//        $params = send_ding_message(['040740464839840580'], '收到需求2', '钱海信用卡支付后重复发送确认订单的邮件');
+//        dump($this->app->conversation->sendCorporationMessage($params));
+//        die;
         dump($this->app->callback->list());
         die;
         $depart_ids = [144092586, 144052776, 102054298];

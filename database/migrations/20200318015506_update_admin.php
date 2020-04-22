@@ -13,6 +13,7 @@ class UpdateAdmin extends Migrator
             ->addColumn('mobile', 'string', array('limit' => 15, 'null' => true, 'comment' => '电话'))
             ->addColumn('userid', 'string', array('limit' => 32, 'null' => true, 'comment' => 'userid'))
             ->addColumn('unionid', 'string', array('limit' => 32, 'null' => true, 'comment' => 'unionid'))
+            ->addColumn('department_id', 'string', array('limit' => 32, 'null' => true, 'comment' => '部门id'))
             ->update();
     }
 }
