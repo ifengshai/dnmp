@@ -347,7 +347,7 @@
     }
 </style>
 
-<form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
+<form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="{:url('saleaftermanage/work_order_list/check')}">
     <input type="hidden" id = "work_id" name="row[id]" value="{$row.id}" />
     <input type="hidden" name="row[work_type]" value="{$work_type}" />
     <!--工单类型，1 客服工单，2 仓库工单-->

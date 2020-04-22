@@ -220,14 +220,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     extend: 'data-area = \'["100%","100%"]\'',
                                     callback: function (data) {
                                     },
-                                    // visible: function (row) {
-                                    //     //待审核状态+需要审核+审核人(经理)，才有审核权限
-                                    //     if (row.work_status == 2 && row.is_check == 1 && (Config.admin_id == row.assign_user_id || Config.workorder.customer_manager == Config.admin_id)) {
-                                    //         return true;
-                                    //     } else {
-                                    //         return false;
-                                    //     }
-                                    // }
+                                    visible: function (row) {
+                                        //待审核状态+需要审核+审核人(经理)，才有审核权限
+                                        if (row.work_status == 2 && row.is_check == 1 && (Config.admin_id == row.assign_user_id || Config.workorder.customer_manager == Config.admin_id)) {
+                                            return true;
+                                        } else {
+                                            return false;
+                                        }
+                                    }
                                 },
                                 {
                                     name: 'check',
@@ -239,17 +239,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     callback: function (data) {
                                     },
                                     visible: function (rows) {
-                                        return true;
-                                        if (!(rows.work_type == 2 && rows.is_after_deal_with == 0) && ((rows.work_type == 1 && rows.is_check == 1 && rows.work_status == 3) || (rows.work_type == 1 && rows.is_check == 0 && (rows.work_status == 2 || rows.work_status == 3)))) {
-                                            if (rows.step_num) {
-                                                for (i = 0, len = rows.step_num.length; i < len; i++) {
-                                                    if (rows.step_num[i].has_recept == 1) {
-                                                        return true;
-                                                    }
-                                                }
-                                            }
+                                        if (!(rows.work_type == 2 && rows.is_after_deal_with == 0) && (rows.work_status == 3 || rows.work_status == 5 ) && rows.has_recept == 1) {
+                                            return true;
                                         }
-                                        return true;
+                                        return false;
                                     }
                                 },
                                 {
@@ -607,7 +600,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     $('#order_pay_method').val(data.method);
                     $('#c-refund_way').val(data.method);
                     $('#customer_email').val(data.customer_email);
-                    var shtml = '<option value="">请选择</option>';
+                    var shtml = '';
                     for (var i in data.sku) {
                         shtml += '<option value="' + data.sku[i] + '">' + data.sku[i] + '</option>'
                     }
