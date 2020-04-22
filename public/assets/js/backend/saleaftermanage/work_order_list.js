@@ -1169,7 +1169,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 }
             });
             $(document).on('click', '.btn-add-supplement-reissue-edit', function () {
-                alert(is_add)
                 if(is_add == 1) {
                     $('#supplement-order').after(lens_click_data_add_edit);
                     $('.selectpicker ').selectpicker('refresh');
