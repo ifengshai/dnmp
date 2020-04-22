@@ -512,10 +512,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 $('#lens_contents').after(contents);
                 Controller.api.bindevent();
             });
-            //删除一行镜片数据
-            $(document).on('click', '.btn-del-lens', function () {
-                $(this).parent().parent().remove();
-            });
+
 
             $(document).on('click', '.btn-del-box', function () {
                 $(this).parent().parent().remove();
@@ -1065,6 +1062,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
             bindevent: function () {
                 Form.api.bindevent($("form[role=form]"));
 
+                //删除一行镜片数据
+                $(document).on('click', '.btn-del-lens', function () {
+                    $(this).parent().parent().remove();
+                });
                 //提交审核按钮
                 $('.btn-status').click(function () {
                     $('.status').val(2);
@@ -1408,6 +1409,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                             var checkID = [];//定义一个空数组
                             var appoint_group = '';
                             var input_content = '';
+                            var lens_click_data_edit;
+                            var gift_click_data_edit;
                             $("input[name='row[measure_choose_id][]']:checked").each(function (i) {
                                 checkID[i] = $(this).val();
                                 var id = $(this).val();
@@ -1506,7 +1509,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                 var lens = json.lens;
                                 //读取的存入数据库的地址
                                 var real_address = json.arr;
-                                console.log(json);
                                 prescriptions = data.prescriptions;
                                 $('#supplement-order').html(lens.html);
                                 var order_pay_currency = $('#order_pay_currency').val();
@@ -1524,7 +1526,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     $('#c-street').val(real_address.street);
                                     $('#c-postcode').val(real_address.postcode);
                                     $('#c-currency_code').val(order_pay_currency);
-                                    console.log(real_address.shipping_type);
                                     $('#shipping_type').val(real_address.shipping_type);
                                     for (var i = 0; i < data.address.length; i++) {
                                         if (i == real_address.address_type) {
@@ -1573,17 +1574,17 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                 })
 
                                 //追加
-                                lens_click_data = '<div class="margin-top:10px;">' + lens.html + '<div class="form-group-child4_del" style="width: 96%;padding-right: 0px;"><a href="javascript:;" style="width: 50%;" class="btn btn-danger btn-del-lens" title="删除"><i class="fa fa-trash"></i>删除</a></div></div>';
+                                lens_click_data_edit = '<div class="margin-top:10px;">' + json.lensform.html + '<div class="form-group-child4_del" style="width: 96%;padding-right: 0px;"><a href="javascript:;" style="width: 50%;" class="btn btn-danger btn-del-lens" title="删除"><i class="fa fa-trash"></i>删除</a></div></div>';
 
                                 $('.selectpicker ').selectpicker('refresh');
                                 //Controller.api.bindevent();            
                             } else if (2 == change_type) { //更换镜架信息
-                                $('#lens_contents').html(json.html);
+                                $('#lens_contents').html(json.lens.html);
                                 $('.selectpicker').selectpicker('refresh');
                             } else if (4 == change_type) {
-                                $('.add_gift').html(json.html);
+                                $('.add_gift').html(json.lens.html);
                                 //追加
-                                gift_click_data = '<div class="margin-top:10px;">' + json.html + '<div class="form-group-child4_del" style="margin-left: 2%;width: 90%;"><a href="javascript:;" style="width: 50%;" class="btn btn-danger btn-del-lens" title="删除"><i class="fa fa-trash"></i>删除</a></div></div>';
+                                gift_click_data_edit = '<div class="margin-top:10px;">' + json.lensform.html + '<div class="form-group-child4_del" style="margin-left: 2%;width: 90%;"><a href="javascript:;" style="width: 50%;" class="btn btn-danger btn-del-lens" title="删除"><i class="fa fa-trash"></i>删除</a></div></div>';
                                 $('.selectpicker ').selectpicker('refresh');
                             }
                         }, function (data, ret) {
@@ -1593,30 +1594,15 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                             return false;
                         });
                     }
-                    $(document).on('change', '#c-country', function () {
-                        var id = $(this).val();
-                        if (!id) {
-                            return false;
-                        }
-                        $.ajax({
-                            type: "POST",
-                            url: "saleaftermanage/work_order_list/ajaxGetProvince",
-                            dataType: "json",
-                            cache: false,
-                            async: false,
-                            data: {
-                                country_id: id,
-                            },
-                            success: function (json) {
-                                var data = json.province;
-                                var province = '';
-                                for (var i = 0; i < data.length; i++) {
-                                    province += '<option value="' + data[i].region_id + '">' + data[i].default_name + '</option>';
-                                }
-                                $('#c-region').html(province);
-                                $('.selectpicker ').selectpicker('refresh');
-                            }
-                        });
+                    $(document).on('click', '.btn-add-box-edit', function () {
+                        $('.add_gift').after(gift_click_data_edit);
+                        $('.selectpicker ').selectpicker('refresh');
+                        Controller.api.bindevent();
+                    });
+                    $(document).on('click', '.btn-add-supplement-reissue-edit', function () {
+                        $('#supplement-order').after(lens_click_data_edit);
+                        $('.selectpicker ').selectpicker('refresh');
+                        Controller.api.bindevent();
                     });
                 }
                 $(document).on('click', 'input[name="row[measure_choose_id][]"]', function () {
@@ -1646,7 +1632,90 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                             $('.selectpicker ').selectpicker('refresh');
                         }
                     }
+                });
+                //根据prescription_type获取lens_type
+                $(document).on('change', 'select[name="row[replacement][recipe_type][]"],select[name="row[change_lens][recipe_type][]"],select[name="row[gift][recipe_type][]"]', function () {
+                    var sitetype = $('#work_platform').val();
+                    var prescription_type = $(this).val();
+                    if (!sitetype || !prescription_type) {
+                        return false;
+                    }
+                    var that = $(this);
+                    Backend.api.ajax({
+                        url: 'saleaftermanage/work_order_list/ajaxGetLensType',
+                        data: {
+                            site_type: sitetype,
+                            prescription_type: prescription_type
+                        }
+                    }, function (data, ret) {
+                        var prescription_div = that.parents('.prescription_type_step').next('div');
+                        var lens_type;
+                        for (var i = 0; i < data.length; i++) {
+                            lens_type += '<option value="' + data[i].lens_id + '">' + data[i].lens_data_name + '</option>';
+                        }
+                        prescription_div.find('#lens_type').html(lens_type);
+                        prescription_div.find('#color_type').val('');
+                        $('.selectpicker ').selectpicker('refresh');
+                    }, function (data, ret) {
+                        var prescription_div = that.parents('.prescription_type_step').next('div');
+                        prescription_div.find('#lens_type').html('');
+                        $('.selectpicker ').selectpicker('refresh');
+                    }
+                    );
+                });
+                //根据color_type获取lens_type
+                $(document).on('change', 'select[name="row[replacement][color_id][]"],select[name="row[change_lens][color_id][]"],select[name="row[gift][color_id][]"]', function () {
+                    var sitetype = $('#work_platform').val();
+                    var color_id = $(this).val();
+                    var that = $(this);
+                    Backend.api.ajax({
+                        url: 'saleaftermanage/work_order_list/ajaxGetLensType',
+                        data: {
+                            site_type: sitetype,
+                            color_id: color_id
+                        }
+                    }, function (data, ret) {
+                        var prescription_div = that.parents('.panel-body');
+                        var color_type;
+                        for (var i = 0; i < data.length; i++) {
+                            color_type += '<option value="' + data[i].lens_id + '">' + data[i].lens_data_name + '</option>';
+                        }
+                        prescription_div.find('#lens_type').html(color_type);
+                        $('.selectpicker ').selectpicker('refresh');
+                    }, function (data, ret) {
+                        var prescription_div = that.parents('.step1_function3');
+                        prescription_div.find('#lens_type').html('');
+                        $('.selectpicker ').selectpicker('refresh');
+                    }
+                    );
                 })
+
+                //省市二级联动
+                $(document).on('change', '#c-country', function () {
+                    var id = $(this).val();
+                    if (!id) {
+                        return false;
+                    }
+                    $.ajax({
+                        type: "POST",
+                        url: "saleaftermanage/work_order_list/ajaxGetProvince",
+                        dataType: "json",
+                        cache: false,
+                        async: false,
+                        data: {
+                            country_id: id,
+                        },
+                        success: function (json) {
+                            var data = json.province;
+                            var province = '';
+                            for (var i = 0; i < data.length; i++) {
+                                province += '<option value="' + data[i].region_id + '">' + data[i].default_name + '</option>';
+                            }
+                            $('#c-region').html(province);
+                            $('.selectpicker ').selectpicker('refresh');
+                        }
+                    });
+                });                
             },
         }
     };

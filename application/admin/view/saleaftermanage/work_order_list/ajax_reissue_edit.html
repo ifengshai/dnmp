@@ -44,6 +44,7 @@
                         {if condition="$vo.recipe_type == $key"}
                         <option value='{$key}' selected >{$key}</option>
                         {/if}
+                        <option value='{$key}'>{$key}</option>
                     {/foreach}
                 </select>
             </div>
@@ -61,6 +62,7 @@
                         {if condition="$vo.prescription_options.color_id eq $val.id"}
                         <option value='{$val["id"]}' selected>{$val["name"]}</option>
                         {/if}
+                        <option value='{$val["id"]}'>{$val["name"]}</option>
                         {/foreach}
                     </select>
                 </div>
@@ -72,6 +74,7 @@
                         {if condition="isset($vo.prescription_options.lens_name)"}
                         <option value="{$vo.prescription_options.lens_id}" selected>{$vo.prescription_options.lens_name}</option>
                         {/if}
+                        <option value="{$vo.prescription_options.lens_id}">{$vo.prescription_options.lens_name}</option>
                     </select>
                 </div>
             </div>
@@ -84,6 +87,7 @@
                         {if condition="$vo.prescription_options.coating_id eq $val.id"}
                         <option value='{$val["id"]}' selected>{$val["name"]}</option>
                         {/if}
+                        <option value='{$val["id"]}'>{$val["name"]}</option>
                         {/foreach}
                     </select>
                 </div>
@@ -365,6 +369,7 @@
                     {if condition="$vo.recipe_type == $key"}
                     <option value='{$key}' selected >{$key}</option>
                     {/if}
+                    <option value='{$key}'>{$key}</option>
                     {/foreach}
                 </select>
             </div>
@@ -382,6 +387,7 @@
                         {if condition="$vo.prescription_options.color_id eq $val.id"}
                         <option value='{$val["id"]}' selected>{$val["name"]}</option>
                         {/if}
+                        <option value='{$val["id"]}'>{$val["name"]}</option>
                         {/foreach}                        
                     </select>
                 </div>
@@ -405,6 +411,7 @@
                         {if condition="$vo.prescription_options.coating_id eq $val.id"}
                         <option value='{$val["id"]}' selected>{$val["name"]}</option>
                         {/if}
+                        <option value='{$val["id"]}'>{$val["name"]}</option>
                         {/foreach}
 
                     </select>

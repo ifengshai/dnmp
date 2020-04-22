@@ -227,9 +227,9 @@ class WorkOrderList extends Model
      * @param $work_id
      * @throws \Exception
      */
-    public function changeLens($params, $work, $measure_choose_id)
+    public function changeLens($params, $work_id, $measure_choose_id)
     {
-        $work_id = $work->id;
+        $work = $this->find($work_id);
         $measure = '';
         //修改镜片
         if(($work->work_type == 1 && $work->problem_type_id == 2 && $measure_choose_id == 1) || ($work->work_type == 2 && $work->problem_type_id == 1 && $measure_choose_id == 1)){
