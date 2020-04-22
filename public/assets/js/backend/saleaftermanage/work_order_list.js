@@ -1240,6 +1240,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         if (Config.work_type == 1) {
                             var step = Config.workorder.customer_problem_group[id].step;
                         } else if (Config.work_type == 2) {
+                            $('#step_id').hide();
+                            $('#recept_person_group').hide();
+                            $('#after_user_group').show();
+                            $('#after_user_id').val(Config.workorder.copy_group);
+                            $('#after_user').html(Config.users[Config.workorder.copy_group]);
                             var step = Config.workorder.warehouse_problem_group[id].step;
                         }
                         var steparr = Config.workorder[step];
@@ -1507,12 +1512,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     $(document).on('click', '.btn-add-box-edit', function () {
                         $('.add_gift').after(gift_click_data_edit);
                         $('.selectpicker ').selectpicker('refresh');
-                        Controller.api.bindevent();
                     });
                     $(document).on('click', '.btn-add-supplement-reissue-edit', function () {
                         $('#supplement-order').after(lens_click_data_edit);
                         $('.selectpicker ').selectpicker('refresh');
-                        Controller.api.bindevent();
                     });
                 }
 

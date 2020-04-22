@@ -235,7 +235,7 @@ return [
 
     //跟单客服
     'copy_group' => [
-        89 //潘静云
+        88 //赵晶晶
     ],
 
     //客服主管组
@@ -318,6 +318,7 @@ return [
     ],
     //仓库部门角色组ID
     'warehouse_department_rule' => [
+        1,
         42,
         43,
         44,
