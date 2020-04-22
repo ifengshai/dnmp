@@ -447,7 +447,7 @@
         </div>
     </div>
 
-
+    {if condition="$work_type eq 1"}
     <div class="form-group" id='step_id' style="height: 50px;">
         <div class="form-group-content">
             <label class="control-label col-xs-12 col-sm-2" style="width:8%;float: left;">{:__('step')}：</label>
@@ -465,7 +465,7 @@
             </div>
         </div>
     </div>
-
+    {/if}
     <!-- 
     <div class="form-group check-div" style="height: 50px;display: none;">
         <div class="form-group-content">
@@ -484,7 +484,7 @@
             <div class="appoint_group" style="width: 90%;float: left;">
 
                 <label class="control-label col-xs-12 col-sm-2" id="after_user" style="text-align: left;"></label>
-                <input type="hidden" name="row[after_user_id]" id="after_user_id" value="">
+                <input type="hidden" name="row[after_user_id]" id="after_user_id" value="{$row.after_user_id}">
             </div>
         </div>
     </div>
