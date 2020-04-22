@@ -239,6 +239,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     callback: function (data) {
                                     },
                                     visible: function (rows) {
+                                        return true;
                                         if (!(rows.work_type == 2 && rows.is_after_deal_with == 0) && ((rows.work_type == 1 && rows.is_check == 1 && rows.work_status == 3) || (rows.work_type == 1 && rows.is_check == 0 && (rows.work_status == 2 || rows.work_status == 3)))) {
                                             if (rows.step_num) {
                                                 for (i = 0, len = rows.step_num.length; i < len; i++) {
