@@ -200,13 +200,14 @@ class WorkOrderList extends Backend
                         throw new Exception("措施不能为空");
                     }
 
-                    //更换镜框判断是否有库存
-                    if ($params['change_frame'] && $params['problem_type_id'] == 1) {
-                        //判断SKU是否有库存
+                    //更换镜框判断是否有库存 
+                    if (($params['change_frame'] && $params['problem_type_id'] == 1  && $params['work_type'] == 1) || ($params['change_frame'] && $params['work_type'] == 2 && in_array($params['problem_id'], [2, 3]))) {
                         $skus = $params['change_frame']['change_sku'];
-
+                        if (count(array_filter($skus)) < 1) throw new Exception("SKU不能为空");
+                        //判断SKU是否有库存
                         $this->skuIsStock($skus, $params['work_type']);
                     }
+
                     //判断赠品是否有库存
                     //判断补发是否有库存
                     if (in_array(7, array_filter($params['measure_choose_id'])) || in_array(6, array_filter($params['measure_choose_id']))) {
@@ -638,12 +639,11 @@ class WorkOrderList extends Backend
                         throw new Exception("措施不能为空");
                     }
 
-                    $params['is_check'] = '';
                     //更换镜框判断是否有库存
                     if ($params['change_frame'] && $params['problem_type_id'] == 1) {
-                        //判断SKU是否有库存
                         $skus = $params['change_frame']['change_sku'];
-
+                        if (count(array_filter($skus)) < 1) throw new Exception("SKU不能为空");
+                        //判断SKU是否有库存
                         $this->skuIsStock($skus, $params['work_type']);
                     }
                     //判断赠品是否有库存
@@ -1344,6 +1344,7 @@ class WorkOrderList extends Backend
                 } else {
                     $lens = $this->model->getEditReissueLens($order_type, $res['showPrescriptions'], 1, [], $operate_type);
                 }
+                $lensForm = $this->model->getReissueLens($order_type, $res['showPrescriptions'], 1);
             } elseif (2 == $change_type) { //更改镜片信息
                 $res = $this->model->getAddress($order_type, $order_number);
                 if (isset($arr) && !empty($arr)) {
@@ -1351,6 +1352,7 @@ class WorkOrderList extends Backend
                 } else {
                     $lens = $this->model->getEditReissueLens($order_type, $res['prescriptions'], 2, [], $operate_type);
                 }
+                $lensForm = $this->model->getReissueLens($order_type, $res['prescriptions'], 2);
             } elseif (4 == $change_type) { //赠品信息
                 $res = $this->model->getAddress($order_type, $order_number);
                 if (isset($arr) && !empty($arr)) {
@@ -1358,12 +1360,13 @@ class WorkOrderList extends Backend
                 } else {
                     $lens = $this->model->getEditReissueLens($order_type, $res['prescriptions'], 3, [], $operate_type);
                 }
+                $lensForm = $this->model->getReissueLens($order_type, $res['prescriptions'], 3);
             }
             if ($res) {
                 if (5 == $change_type) {
-                    $this->success('操作成功！！', '', ['address' => $res, 'lens' => $lens, 'arr' => $userinfo_option]);
+                    $this->success('操作成功！！', '', ['address' => $res, 'lens' => $lens, 'arr' => $userinfo_option, 'lensform' => $lensForm]);
                 } else {
-                    $this->success('操作成功！！', '', $lens);
+                    $this->success('操作成功！！', '', ['lens' => $lens, 'lensform' => $lensForm]);
                 }
             } else {
                 $this->error('未获取到数据！！');

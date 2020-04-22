@@ -512,10 +512,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 $('#lens_contents').after(contents);
                 Controller.api.bindevent();
             });
-            //删除一行镜片数据
-            $(document).on('click', '.btn-del-lens', function () {
-                $(this).parent().parent().remove();
-            });
+
 
             $(document).on('click', '.btn-del-box', function () {
                 $(this).parent().parent().remove();
@@ -693,7 +690,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                             })
 
                             //追加
-                            lens_click_data = '<div class="margin-top:10px;">' + lens.html + '<div class="form-group-child4_del" style="width: 99.2%;padding-right: 0px;"><a href="javascript:;" style="width: 50%;" class="btn btn-danger btn-del-lens" title="删除"><i class="fa fa-trash"></i>删除</a></div></div>';
+                            lens_click_data = '<div class="margin-top:10px;">' + lens.html + '<div class="form-group-child4_del" style="width: 96%;padding-right: 0px;"><a href="javascript:;" style="width: 50%;" class="btn btn-danger btn-del-lens" title="删除"><i class="fa fa-trash"></i>删除</a></div></div>';
 
                             $('.selectpicker ').selectpicker('refresh');
                             Controller.api.bindevent();
@@ -724,7 +721,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         }, function (data, ret) {
                             $('.add_gift').html(data.html);
                             //追加
-                            gift_click_data = '<div class="margin-top:10px;">' + data.html + '<div class="form-group-child4_del"  style="margin-left: 2%;width: 91%;"><a href="javascript:;" style="width: 50%;" class="btn btn-danger btn-del-lens" title="删除"><i class="fa fa-trash"></i>删除</a></div></div>';
+                            gift_click_data = '<div class="margin-top:10px;">' + data.html + '<div class="form-group-child4_del"  style="margin-left: 2%;width: 94%;"><a href="javascript:;" style="width: 50%;" class="btn btn-danger btn-del-lens" title="删除"><i class="fa fa-trash"></i>删除</a></div></div>';
                             $('.selectpicker ').selectpicker('refresh');
                         });
                     }
@@ -1065,6 +1062,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
             bindevent: function () {
                 Form.api.bindevent($("form[role=form]"));
 
+                //删除一行镜片数据
+                $(document).on('click', '.btn-del-lens', function () {
+                    $(this).parent().parent().remove();
+                });
                 //提交审核按钮
                 $('.btn-status').click(function () {
                     $('.status').val(2);
@@ -1408,6 +1409,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                             var checkID = [];//定义一个空数组
                             var appoint_group = '';
                             var input_content = '';
+                            var lens_click_data_edit;
+                            var gift_click_data_edit;
                             $("input[name='row[measure_choose_id][]']:checked").each(function (i) {
                                 checkID[i] = $(this).val();
                                 var id = $(this).val();
@@ -1571,17 +1574,17 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                 })
 
                                 //追加
-                                lens_click_data = '<div class="margin-top:10px;">' + lens.html + '<div class="form-group-child4_del" style="width: 99.2%;padding-right: 0px;"><a href="javascript:;" style="width: 50%;" class="btn btn-danger btn-del-lens" title="删除"><i class="fa fa-trash"></i>删除</a></div></div>';
+                                lens_click_data_edit = '<div class="margin-top:10px;">' + json.lensform.html + '<div class="form-group-child4_del" style="width: 98%;padding-right: 0px;"><a href="javascript:;" style="width: 50%;" class="btn btn-danger btn-del-lens" title="删除"><i class="fa fa-trash"></i>删除</a></div></div>';
 
                                 $('.selectpicker ').selectpicker('refresh');
                                 //Controller.api.bindevent();            
                             } else if (2 == change_type) { //更换镜架信息
-                                $('#lens_contents').html(json.html);
+                                $('#lens_contents').html(json.lens.html);
                                 $('.selectpicker').selectpicker('refresh');
                             } else if (4 == change_type) {
-                                $('.add_gift').html(json.html);
+                                $('.add_gift').html(json.lens.html);
                                 //追加
-                                gift_click_data = '<div class="margin-top:10px;">' + json.html + '<div class="form-group-child4_del" style="margin-left: 2%;width: 91%;"><a href="javascript:;" style="width: 50%;" class="btn btn-danger btn-del-lens" title="删除"><i class="fa fa-trash"></i>删除</a></div></div>';
+                                gift_click_data_edit = '<div class="margin-top:10px;">' + json.lensform.html + '<div class="form-group-child4_del" style="margin-left: 2%;width: 90%;"><a href="javascript:;" style="width: 50%;" class="btn btn-danger btn-del-lens" title="删除"><i class="fa fa-trash"></i>删除</a></div></div>';
                                 $('.selectpicker ').selectpicker('refresh');
                             }
                         }, function (data, ret) {
@@ -1591,30 +1594,15 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                             return false;
                         });
                     }
-                    $(document).on('change', '#c-country', function () {
-                        var id = $(this).val();
-                        if (!id) {
-                            return false;
-                        }
-                        $.ajax({
-                            type: "POST",
-                            url: "saleaftermanage/work_order_list/ajaxGetProvince",
-                            dataType: "json",
-                            cache: false,
-                            async: false,
-                            data: {
-                                country_id: id,
-                            },
-                            success: function (json) {
-                                var data = json.province;
-                                var province = '';
-                                for (var i = 0; i < data.length; i++) {
-                                    province += '<option value="' + data[i].region_id + '">' + data[i].default_name + '</option>';
-                                }
-                                $('#c-region').html(province);
-                                $('.selectpicker ').selectpicker('refresh');
-                            }
-                        });
+                    $(document).on('click', '.btn-add-box-edit', function () {
+                        $('.add_gift').after(gift_click_data_edit);
+                        $('.selectpicker ').selectpicker('refresh');
+                        Controller.api.bindevent();
+                    });
+                    $(document).on('click', '.btn-add-supplement-reissue-edit', function () {
+                        $('#supplement-order').after(lens_click_data_edit);
+                        $('.selectpicker ').selectpicker('refresh');
+                        Controller.api.bindevent();
                     });
                 }
                 $(document).on('click', 'input[name="row[measure_choose_id][]"]', function () {
