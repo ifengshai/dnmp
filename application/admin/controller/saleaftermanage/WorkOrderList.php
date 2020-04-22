@@ -1210,10 +1210,6 @@ class WorkOrderList extends Backend
             if (($row->work_type == 2 && $row->is_after_deal_with == 0) || ($row->work_type == 1 && $row->is_check == 1 && in_array($row->work_status, [0, 1, 2, 4, 6, 7, 8])) || ($row->work_type == 1 && !in_array(session('admin.id'), $receptPersonIds))) {
                 $this->error('没有处理的权限');
             }
-        } else {
-            if ($row['create_user_id'] != session('admin.id')) {
-                return $this->error(__('非本人创建不能编辑'));
-            }
         }
 
         $adminIds = $this->getDataLimitAdminIds();
