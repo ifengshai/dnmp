@@ -539,7 +539,40 @@
         </div>
     </div>
     {/if}
+    {if $recepts}
+    <div class="form-group" style="width: 80%;">
+        <div class="caigou">
+            <label class="control-label col-xs-12 col-sm-2" style="width: 11%;">{:__('处理详情')}：</label>
+            <div class="col-xs-12 col-sm-8">
+                <table class="caigou-table-sku"  style="background-color: white;">
+                    <tr style="height: 30px;">
+                        <th>序号</th>
+                        <th>措施名称</th>
+                        <th>状态</th>
+                        <th>备注</th>
+                        <th>处理人</th>
+                    </tr>
 
+                    {foreach name="recepts" item="vo" key="key"}
+                    <tr>
+                        <td>{$key+1}</td>
+                        <td>{$vo.measure.measure_content}</td>
+                        <td>{$vo.status_format}</td>
+                        <td>
+                            {$vo.note}
+                        </td>
+                        <td>
+                            {if condition="$vo.recept_status != 1"}
+                            {$vo.recept_person}
+                            {/if}
+                        </td>
+                    </tr>
+                    {/foreach}
+                </table>
+            </div>
+        </div>
+    </div>
+    {/if}
     <hr style="border-top: 1px solid #000;">
 
     <div class="form-group" id="step_function">
