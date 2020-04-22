@@ -332,6 +332,19 @@
         float: left;
         margin-top: 2px;
     }
+    .question-type{
+        flex-direction: column;
+        margin-bottom: 10px;
+    }
+    .question-type>div{
+        display: flex;
+        align-items: center;
+        margin-left: 30px;
+    }
+    .question-type>div label{
+        padding: 0 10px;
+        margin: 0;
+    }
 </style>
 
 <form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="{:url('saleaftermanage/work_order_list/process')}">
@@ -411,13 +424,13 @@
     <hr style="border-top: 1px solid #000;">
 
     <div class="form-group">
-        <div class="form-group-content">
+        <div class="form-group-content question-type">
             <?php if($work_type == 1){?>
             <label class="control-label col-xs-12 col-sm-2" style="width:8%;float: left;">{:__('问题类型')}：</label>
             {foreach $problem_type as $key => $val}
             <div>
-                <label class="control-label col-xs-12 col-sm-2" style="width:8%;">{:__($val['name'])}：</label>
                 <div class="radio" style="width: 90%;float: left;">
+                    <label class="control-label col-xs-12 col-sm-2" style="width:8%;">{:__($val['name'])}：</label>
                     {foreach $val['type'] as $k => $v}
                     <label>
                         <input type="radio" name="row[problem_type_id]" class="problem_type" {:$row['id'] ? 'disabled' : ''} id="optionsRadios{$v['id']}"
@@ -430,8 +443,9 @@
             <br/>
             {/foreach}
             <?php }else{;?>
-            <label class="control-label col-xs-12 col-sm-2" style="width:8%;float: left;">{:__('problem_type')}：</label>
             <div class="radio" style="width: 90%;float: left;">
+                <label class="control-label col-xs-12 col-sm-2" style="width:8%;float: left;">{:__('problem_type')}：</label>
+
                 {foreach $problem_type as $k1 => $v1}
                 <label>
                     <input disabled type="radio" name="row[problem_type_id]" class="problem_type" id="optionsRadios{$k1}"
@@ -447,9 +461,9 @@
 
 
     <div class="form-group" id='step_id' style="height: 50px;">
-        <div class="form-group-content">
-            <label class="control-label col-xs-12 col-sm-2" style="width:8%;float: left;">{:__('step')}：</label>
+        <div class="form-group-content question-type">
             <div class="radio" style="width: 90%;float: left;">
+                <label class="control-label col-xs-12 col-sm-2" style="width:8%;float: left;">{:__('step')}：</label>
                 {foreach $step as $k2 => $v2}
                 <label style="display: none;" >
                     <input disabled type="checkbox" name="row[measure_choose_id][]" class="step_type" id="step{$k2}" value="{$k2}">
@@ -477,7 +491,7 @@
 
 
     <div class="form-group" id='after_user_group' style="height: 50px;display: none;">
-        <div class="form-group-content">
+        <div class="form-group-content ">
             <label class="control-label col-xs-12 col-sm-2" style="width:8%;float: left;">{:__('承接人')}：</label>
             <div class="appoint_group" style="width: 90%;float: left;">
 
