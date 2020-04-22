@@ -557,7 +557,21 @@ class WorkOrderList extends Backend
             } else {
                 $this->view->assign('work_type', 1);
                 $this->assignconfig('work_type', 1);
-                $this->view->assign('problem_type', config('workorder.customer_problem_type')); //客服问题类型
+                $customer_problem_classifys = config('workorder.customer_problem_classify');
+                $problem_types = config('workorder.customer_problem_type');
+                $problem_type = [];
+                $i = 0;
+                foreach($customer_problem_classifys as $key => $customer_problem_classify){
+                    $problem_type[$i]['name'] = $key;
+                    foreach($customer_problem_classify as $k => $v){
+                        $problem_type[$i]['type'][$k] = [
+                            'id' => $v,
+                            'name' => $problem_types[$v]
+                        ];
+                    }
+                    $i++;
+                }
+                $this->view->assign('problem_type', $problem_type); //客服问题类型
             }
         }
 
@@ -911,7 +925,21 @@ class WorkOrderList extends Backend
         if (1 == $row->work_type) { //判断工单类型，客服工单
             $this->view->assign('work_type', 1);
             $this->assignconfig('work_type', 1);
-            $this->view->assign('problem_type', config('workorder.customer_problem_type')); //客服问题类型          
+            $customer_problem_classifys = config('workorder.customer_problem_classify');
+            $problem_types = config('workorder.customer_problem_type');
+            $problem_type = [];
+            $i = 0;
+            foreach($customer_problem_classifys as $key => $customer_problem_classify){
+                $problem_type[$i]['name'] = $key;
+                foreach($customer_problem_classify as $k => $v){
+                    $problem_type[$i]['type'][$k] = [
+                        'id' => $v,
+                        'name' => $problem_types[$v]
+                    ];
+                }
+                $i++;
+            }
+            $this->view->assign('problem_type', $problem_type); //客服问题类型
         } else { //仓库工单
             $this->view->assign('work_type', 2);
             $this->assignconfig('work_type', 2);
@@ -1222,7 +1250,21 @@ class WorkOrderList extends Backend
         if (1 == $row->work_type) { //判断工单类型，客服工单
             $this->view->assign('work_type', 1);
             $this->assignconfig('work_type', 1);
-            $this->view->assign('problem_type', config('workorder.customer_problem_type')); //客服问题类型          
+            $customer_problem_classifys = config('workorder.customer_problem_classify');
+            $problem_types = config('workorder.customer_problem_type');
+            $problem_type = [];
+            $i = 0;
+            foreach($customer_problem_classifys as $key => $customer_problem_classify){
+                $problem_type[$i]['name'] = $key;
+                foreach($customer_problem_classify as $k => $v){
+                    $problem_type[$i]['type'][$k] = [
+                        'id' => $v,
+                        'name' => $problem_types[$v]
+                    ];
+                }
+                $i++;
+            }
+            $this->view->assign('problem_type', $problem_type); //客服问题类型
         } else { //仓库工单
             $this->view->assign('work_type', 2);
             $this->assignconfig('work_type', 2);
