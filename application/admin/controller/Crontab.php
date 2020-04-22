@@ -3361,37 +3361,11 @@ order by sfoi.item_id asc limit 1000";
     //导入实时库存 第一步
     public function set_product_relstock()
     {
-        $str = 'OT02018-01
-        OM01454-02
-        VFP0270-01
-        FOP0536-01
-        OT02078-01
-        OA01901-02
-        VFT0269-02
-        OA01854-01
-        OM01935-01
-        FA0802-04
-        FX0872-01
-        OT0239668-02
-        OT0239668-03
-        OT0239668-04';
+        $str = 'OT02018-02';
         $skus = explode('
         ', $str);
 
         $stock = [
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
             0
         ];
 
@@ -3421,20 +3395,7 @@ order by sfoi.item_id asc limit 1000";
         $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
         $this->item = new \app\admin\model\itemmanage\Item;
 
-        $str = 'OT02018-01
-        OM01454-02
-        VFP0270-01
-        FOP0536-01
-        OT02078-01
-        OA01901-02
-        VFT0269-02
-        OA01854-01
-        OM01935-01
-        FA0802-04
-        FX0872-01
-        OT0239668-02
-        OT0239668-03
-        OT0239668-04';
+        $str = 'OT02018-02';
         $skus = explode('
         ', $str);
         foreach ($skus as $k => $v) {
@@ -3446,7 +3407,7 @@ order by sfoi.item_id asc limit 1000";
             $map['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal']];
             $map['custom_is_delivery_new'] = 0; //是否提货
             $map['custom_is_match_frame_new'] = 1; //是否配镜架
-            $map['a.created_at'] = ['between', ['2020-01-01 00:00:00', '2020-04-13 23:00:00']]; //时间节点
+            $map['a.created_at'] = ['between', ['2020-01-01 00:00:00', date('Y-m-d H:i:s')]]; //时间节点
             $map['sku'] = $zeelool_sku;
             $zeelool_qty = $this->zeelool->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->sum('qty_ordered');
             $map['sku'] = $voogueme_sku;
@@ -3486,20 +3447,7 @@ order by sfoi.item_id asc limit 1000";
         $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
         $this->item = new \app\admin\model\itemmanage\Item;
 
-        $str = 'OT02018-01
-        OM01454-02
-        VFP0270-01
-        FOP0536-01
-        OT02078-01
-        OA01901-02
-        VFT0269-02
-        OA01854-01
-        OM01935-01
-        FA0802-04
-        FX0872-01
-        OT0239668-02
-        OT0239668-03
-        OT0239668-04';
+        $str = 'OT02018-02';
         $skus = explode('
         ', $str);
         foreach ($skus as $k => $v) {
@@ -3510,7 +3458,7 @@ order by sfoi.item_id asc limit 1000";
 
             $map['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal']];
             $map['custom_is_delivery_new'] = 0; //是否提货
-            $map['a.created_at'] = ['between', ['2020-01-01 00:00:00', '2020-04-13 23:00:00']]; //时间节点
+            $map['a.created_at'] = ['between', ['2020-01-01 00:00:00', date('Y-m-d H:i:s')]]; //时间节点
             $map['sku'] = $zeelool_sku;
             $zeelool_qty = $this->zeelool->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->sum('qty_ordered');
             $map['sku'] = $voogueme_sku;
@@ -3545,20 +3493,7 @@ order by sfoi.item_id asc limit 1000";
         $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
         $this->item = new \app\admin\model\itemmanage\Item;
 
-        $str = 'OT02018-01
-        OM01454-02
-        VFP0270-01
-        FOP0536-01
-        OT02078-01
-        OA01901-02
-        VFT0269-02
-        OA01854-01
-        OM01935-01
-        FA0802-04
-        FX0872-01
-        OT0239668-02
-        OT0239668-03
-        OT0239668-04';
+        $str = 'OT02018-02';
         $skus = explode('
         ', $str);
         $list = $this->item->field('sku,stock,occupy_stock,available_stock,real_time_qty,distribution_occupy_stock')->where(['sku' => ['in', $skus]])->select();
