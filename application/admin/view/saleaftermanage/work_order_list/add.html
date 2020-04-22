@@ -123,6 +123,9 @@
         opacity: 0;
         float: left;
     }
+    .form-group-content .single{
+        padding: 0;
+    }
 
     .form-group-content span {
         display: inline-block;
@@ -349,6 +352,8 @@
         right: 0;
         left: auto;
     }
+    .question-type .control-label{
+        padding: 0;}
 
 </style>
 
@@ -462,8 +467,8 @@
             </div>
             {/foreach}
             {else/}
-            <label class="control-label col-xs-12 col-sm-2" style="width:8%;float: left;">{:__('problem_type')}：</label>
             <div class="radio" style="width: 90%;float: left;">
+                <label class="control-label col-xs-12 col-sm-2 single" style="width:8%;float: left;">{:__('problem_type')}：</label>
                 {foreach $problem_type as $k1 => $v1}
                 <label>
                     <input type="radio" name="row[problem_type_id]" {:$row['id'] ? 'disabled' : ''} class="problem_type" id="optionsRadios{$k1}"
@@ -478,9 +483,10 @@
 
 
     <div class="form-group" id='step_id' style="height: 50px;">
-        <div class="form-group-content">
-            <label class="control-label col-xs-12 col-sm-2" style="width:8%;float: left;">{:__('step')}：</label>
+        <div class="form-group-content question-type">
+
             <div class="radio" style="width: 90%;float: left;">
+                <label class="control-label col-xs-12 col-sm-2" style="width:8%;float: left;">{:__('step')}：</label>
                 {foreach $step as $k2 => $v2}
                 <label style="display: none;">
                     <input type="checkbox" name="row[measure_choose_id][]" class="step_type" id="step{$k2}"

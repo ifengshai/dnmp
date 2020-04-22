@@ -443,8 +443,9 @@
             </div>
             {/foreach}
             <?php }else{;?>
-            <label class="control-label col-xs-12 col-sm-2" style="width:8%;float: left;">{:__('problem_type')}：</label>
             <div class="radio" style="width: 90%;float: left;">
+                <label class="control-label col-xs-12 col-sm-2" style="width:8%;float: left;">{:__('problem_type')}：</label>
+
                 {foreach $problem_type as $k1 => $v1}
                 <label>
                     <input disabled type="radio" name="row[problem_type_id]" class="problem_type" id="optionsRadios{$k1}"
