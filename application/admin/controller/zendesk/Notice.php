@@ -917,4 +917,14 @@ class Notice extends Controller
     {
         Zendesk::shellAssignTicket();
     }
+    /**
+     * 脚本执行分配修改版
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public function shellAssignTicketChange()
+    {
+        Zendesk::shellAssignTicketChange();
+    }
 }

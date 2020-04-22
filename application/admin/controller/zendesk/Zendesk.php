@@ -54,13 +54,16 @@ class Zendesk extends Backend
             $filter = json_decode($this->request->get('filter'), true);
             $map = [];
             $andWhere = '';
-            if ($filter['me_task'] == 1) { //我的所有任务
+            $me_task = $filter['me_task'];
+            if ($me_task == 1) { //我的所有任务
                 unset($filter['me_task']);
                 $map['zendesk.assign_id'] = session('admin.id');
-            } elseif ($filter['me_task'] == 2) { //我的待处理任务
+            } elseif ($me_task == 2) { //我的待处理任务
                 unset($filter['me_task']);
                 $map['zendesk.assign_id'] = session('admin.id');
                 $map['zendesk.status'] = ['in', [1, 2]];
+                $map['zendesk.is_hide'] = 0;
+                $taskCount = ZendeskTasks::where('admin_id',session('admin.id'))->value('target_count');
             }
             //类型筛选
             if($filter['status_type']){
@@ -101,7 +104,10 @@ class Zendesk extends Backend
             $this->request->get(['filter' => json_encode($filter)]);
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             //默认使用
-            $orderSet = 'status asc,update_time desc,id desc';
+            $orderSet = 'priority desc,status asc,update_time desc,id desc';
+            if($me_task == 2){
+                $orderSet = 'priority desc,status asc,update_time desc,id desc';
+            }
             if($sort != 'zendesk.id' && $sort){
                 $orderSet = "{$sort} {$order}";
             }
@@ -112,6 +118,7 @@ class Zendesk extends Backend
                 ->where($andWhere)
                 ->where('channel','in',['email','web','chat'])
                 ->count();
+
 
             $list = $this->model
                 ->with(['admin'])
@@ -782,6 +789,52 @@ DOC;
             $task->complete_apply_count = $task->complete_apply_count + 1;
             $task->apply_count = $task->apply_count + 1;
             $task->save();
+        }
+    }
+    /**
+     * 申请分配修改
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public function moreTasksChange()
+    {
+        $admin_id = session('admin.id');
+        //判断是否已完成目标且不存在未完成的
+        $now = $this->model->where('assign_id',$admin_id)->where('status', 'in', '1,2')->where('is_hide',0)->where('channel','in',['email','web','chat'])->count();
+        if($now){
+            $this->error("请先处理完成近日已分配的工单");
+        }
+        //判断今天是否完成工作量
+        $tasks = ZendeskTasks::whereTime('create_time', 'today')
+            ->where(['admin_id' => $admin_id])
+            ->select();
+        foreach($tasks as $task){
+            if($task->surplus_count > 0){
+                $this->error("请先完成今天的任务量再进行申请");
+            }
+        }
+        $user_ids = $this->model->where('assign_id','neq',$admin_id)->where('assign_id','>',0)->column('user_id');
+        $tickets = $this->model->where(['status' => ['in',[1,2]]])->order('id desc')->select();
+        $key = 1;
+        foreach($tickets as $ticket){
+            //分配10个并且状态为new或者open的分配人是自己的分配
+            if($key <= 10 && ($ticket->status == 1 || $ticket->assign_id != $admin_id)){
+                $task = ZendeskTasks::whereTime('create_time', 'today')
+                    ->where(['admin_id' => $admin_id, 'type' => $ticket->getType()])
+                    ->find();
+                //修改zendesk的assign_id,assign_time
+                $this->model->where('id',$ticket->id)->update([
+                    'assign_id' => $admin_id,
+                    'assignee_id' => $task->assignee_id,
+                    'assign_time' => date('Y-m-d H:i:s', time()),
+                ]);
+                //分配数目+1
+                $task->complete_apply_count = $task->complete_apply_count + 1;
+                $task->apply_count = $task->apply_count + 1;
+                $task->save();
+                $this->model->where('id',$ticket->id)->setField('is_hide',0);
+            }
         }
     }
 }
