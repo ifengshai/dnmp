@@ -54,13 +54,16 @@ class Zendesk extends Backend
             $filter = json_decode($this->request->get('filter'), true);
             $map = [];
             $andWhere = '';
-            if ($filter['me_task'] == 1) { //我的所有任务
+            $me_task = $filter['me_task'];
+            if ($me_task == 1) { //我的所有任务
                 unset($filter['me_task']);
                 $map['zendesk.assign_id'] = session('admin.id');
-            } elseif ($filter['me_task'] == 2) { //我的待处理任务
+            } elseif ($me_task == 2) { //我的待处理任务
                 unset($filter['me_task']);
                 $map['zendesk.assign_id'] = session('admin.id');
                 $map['zendesk.status'] = ['in', [1, 2]];
+                $map['zendesk.is_hide'] = 0;
+                $taskCount = ZendeskTasks::where('admin_id',session('admin.id'))->value('target_count');
             }
             //类型筛选
             if($filter['status_type']){
@@ -101,7 +104,10 @@ class Zendesk extends Backend
             $this->request->get(['filter' => json_encode($filter)]);
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             //默认使用
-            $orderSet = 'status asc,update_time desc,id desc';
+            $orderSet = 'priority desc,status asc,update_time desc,id desc';
+            if($me_task == 2){
+                $orderSet = 'priority desc,status asc,update_time desc,id desc';
+            }
             if($sort != 'zendesk.id' && $sort){
                 $orderSet = "{$sort} {$order}";
             }
@@ -112,6 +118,7 @@ class Zendesk extends Backend
                 ->where($andWhere)
                 ->where('channel','in',['email','web','chat'])
                 ->count();
+
 
             $list = $this->model
                 ->with(['admin'])
