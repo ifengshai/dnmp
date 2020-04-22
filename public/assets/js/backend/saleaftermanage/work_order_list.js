@@ -220,14 +220,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     extend: 'data-area = \'["100%","100%"]\'',
                                     callback: function (data) {
                                     },
-                                    // visible: function (row) {
-                                    //     //待审核状态+需要审核+审核人(经理)，才有审核权限
-                                    //     if (row.work_status == 2 && row.is_check == 1 && (Config.admin_id == row.assign_user_id || Config.workorder.customer_manager == Config.admin_id)) {
-                                    //         return true;
-                                    //     } else {
-                                    //         return false;
-                                    //     }
-                                    // }
+                                    visible: function (row) {
+                                        //待审核状态+需要审核+审核人(经理)，才有审核权限
+                                        if (row.work_status == 2 && row.is_check == 1 && (Config.admin_id == row.assign_user_id || Config.workorder.customer_manager == Config.admin_id)) {
+                                            return true;
+                                        } else {
+                                            return false;
+                                        }
+                                    }
                                 },
                                 {
                                     name: 'check',
@@ -239,7 +239,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     callback: function (data) {
                                     },
                                     visible: function (rows) {
-                                        return true;
                                         if (!(rows.work_type == 2 && rows.is_after_deal_with == 0) && ((rows.work_type == 1 && rows.is_check == 1 && rows.work_status == 3) || (rows.work_type == 1 && rows.is_check == 0 && (rows.work_status == 2 || rows.work_status == 3)))) {
                                             if (rows.step_num) {
                                                 for (i = 0, len = rows.step_num.length; i < len; i++) {
@@ -249,7 +248,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                                 }
                                             }
                                         }
-                                        return true;
+                                        return false;
                                     }
                                 },
                                 {

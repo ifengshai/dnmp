@@ -267,11 +267,15 @@ class WorkOrderList extends Model
                     if (!$val) {
                         exception('sku不能为空');
                     }
+                    $recipe_type = $changeLens['recipe_type'][$key];
+                    if(!$recipe_type){
+                        exception('处方类型不能为空');
+                    }
                     $type = $params['work_platform'];
                     $lensId = $changeLens['lens_type'][$key];
                     $colorId = $changeLens['color_id'][$key];
                     $coatingId = $changeLens['coating_type'][$key];
-                    $recipe_type = $changeLens['recipe_type'][$key];
+
                     $lensCoatName = $this->getLensCoatingName($type, $lensId, $coatingId, $colorId, $recipe_type);
                     $data = [
                         'work_id' => $work_id,
