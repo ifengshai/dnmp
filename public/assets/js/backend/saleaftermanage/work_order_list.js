@@ -1544,6 +1544,16 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         }
                     }
                 });
+                $(document).on('click', '.btn-edit-supplement-reissue', function () {
+                    $('#supplement-order').after(lens_click_data);
+                    $('.selectpicker ').selectpicker('refresh');
+                    //Controller.api.bindevent();
+                });
+                $(document).on('click', '.btn-edit-box', function () {
+                    $('.add_gift').after(gift_click_data);
+                    $('.selectpicker ').selectpicker('refresh');
+                    //Controller.api.bindevent();
+                });                
                 //根据prescription_type获取lens_type
                 $(document).on('change', 'select[name="row[replacement][recipe_type][]"],select[name="row[change_lens][recipe_type][]"],select[name="row[gift][recipe_type][]"]', function () {
                     var sitetype = $('#work_platform').val();
