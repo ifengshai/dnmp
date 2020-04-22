@@ -9,6 +9,7 @@ use think\Cache;
 use think\Config;
 use think\Db;
 use think\Lang;
+use think\Request;
 
 /**
  * Ajax异步请求接口
@@ -346,5 +347,29 @@ class Ajax extends Backend
         }
         
         $this->success('', null, $list);
+    }
+
+    /***
+     * 异步查询模糊订单
+     * @param Request $request
+     */
+    public function ajaxGetLikeOrder(Request $request)
+    {
+        $saleaftertask = new \app\admin\model\saleaftermanage\SaleAfterTask;
+        if ($this->request->isAjax()) {
+            $order_number = $request->post('order_number');
+            $zeelool_order_number = $saleaftertask->getLikeOrder(1, $order_number);
+            
+            $voogueme_order_number = $saleaftertask->getLikeOrder(2, $order_number);
+            
+            $nihao_order_number = $saleaftertask->getLikeOrder(3, $order_number);
+            $result = array_merge($zeelool_order_number,$voogueme_order_number,$nihao_order_number);
+            if (!$result) {
+                return $this->error('订单不存在，请重新尝试');
+            }
+            return $this->success('', '', $result, 0);
+        } else {
+            $this->error('404 not found');
+        }
     }
 }

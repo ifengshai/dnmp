@@ -253,7 +253,7 @@ class SaleAfterTask extends Model
         }
         $result = Db::connect($db)->table('sales_flat_order')->where('increment_id', 'like', "%{$increment_id}%")->field('increment_id')->limit(10)->select();
         if (!$result) {
-            return false;
+            return [];
         }
         $arr = [];
         foreach($result as $k=>$v){

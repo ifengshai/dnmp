@@ -6,7 +6,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
             Table.api.init({
                 showJumpto: true,
                 searchFormVisible: true,
-                showExport: false,
+                showExport: true,
                 pageList: [10, 25, 50, 100],
                 extend: {
                     index_url: 'order/index/index' + location.search + '&label=' + Config.label,

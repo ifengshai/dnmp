@@ -356,7 +356,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
             })
 
 
-
             //异步获取供应商的数据
             $(document).on('change', '.supplier.selectpicker', function () {
                 var id = $(this).val();

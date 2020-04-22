@@ -142,6 +142,9 @@ class VooguemePrescriptionDetailHelper{
 			$items[$item_key]['options']  = $product_options['options'];
 			$items[$item_key]['cart_currency'] = $product_options['info_buyRequest']['cart_currency'];  
 			$prescription_params = $product_options['info_buyRequest']['tmplens']['prescription'];
+            $items[$item_key]['index_type'] = $final_params['index_type'] = $product_options['info_buyRequest']['tmplens']['index_type'];
+            $items[$item_key]['coating_id'] = $final_params['coating_id'] = $product_options['info_buyRequest']['tmplens']['coating_id'];
+            $items[$item_key]['coatiing_name'] = $final_params['coatiing_name'] = $product_options['info_buyRequest']['tmplens']['coatiing_name'];
             // dump($prescription_params);
 			$prescription_params = explode("&", $prescription_params);
 			$lens_params = array();
