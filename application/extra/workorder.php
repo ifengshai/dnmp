@@ -309,7 +309,7 @@ return [
     ],
     //客服部门角色组ID
     'customer_department_rule' => [
-        
+        1,
         31,
         32,
         33,
@@ -318,7 +318,7 @@ return [
     ],
     //仓库部门角色组ID
     'warehouse_department_rule' => [
-        1,
+
         42,
         43,
         44,
