@@ -205,7 +205,7 @@ class WorkOrderList extends Backend
                         $skus = $params['change_frame']['change_sku'];
                         if (count(array_filter($skus)) < 1) throw new Exception("SKU不能为空");
                         //判断SKU是否有库存
-                        $this->skuIsStock($skus, $params['work_type']);
+                        $this->skuIsStock($skus, $params['work_platform']);
                     }
 
                     //判断赠品是否有库存
@@ -222,7 +222,7 @@ class WorkOrderList extends Backend
                         foreach ($originalSkus as $key => $originalSku) {
                             if (!$originalSku) exception('sku不能为空');
                             if (!$originalNums[$key]) exception('数量必须大于0');
-                            $this->skuIsStock([$originalSku], $params['work_type'], $originalNums[$key]);
+                            $this->skuIsStock([$originalSku], $params['work_platform'], $originalNums[$key]);
                         }
                     }
 
@@ -531,7 +531,7 @@ class WorkOrderList extends Backend
 
             //把问题类型传递到js页面
             if (!empty($row->problem_type_id)) {
-                $this->assignconfig('problem_type_id', $row->problem_type_id);
+                $this->assignconfig('problem_id', $row->problem_type_id);
             }
             $this->assignconfig('work_type', $row->work_type);
 
@@ -654,13 +654,13 @@ class WorkOrderList extends Backend
                     if (count(array_filter($params['measure_choose_id'])) < 1 && $params['work_type'] == 1) {
                         throw new Exception("措施不能为空");
                     }
-                    
+
                     //更换镜框判断是否有库存
                     if ($params['change_frame'] && $params['problem_type_id'] == 1) {
                         $skus = $params['change_frame']['change_sku'];
                         if (count(array_filter($skus)) < 1) throw new Exception("SKU不能为空");
                         //判断SKU是否有库存
-                        $this->skuIsStock($skus, $params['work_type']);
+                        $this->skuIsStock($skus, $params['work_platform']);
                     }
                     //判断赠品是否有库存
                     //判断补发是否有库存
@@ -676,7 +676,7 @@ class WorkOrderList extends Backend
                         foreach ($originalSkus as $key => $originalSku) {
                             if (!$originalSku) exception('sku不能为空');
                             if (!$originalNums[$key]) exception('数量必须大于0');
-                            $this->skuIsStock([$originalSku], $params['work_type'], $originalNums[$key]);
+                            $this->skuIsStock([$originalSku], $params['work_platform'], $originalNums[$key]);
                         }
                     }
 
