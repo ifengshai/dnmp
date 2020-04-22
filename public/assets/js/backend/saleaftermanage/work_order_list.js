@@ -583,7 +583,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
 
             })
 
-            //根据订单号获取数据
+            //载入数据
             $('#platform_order').click(function () {
                 var incrementId = $('#c-platform_order').val();
                 var sitetype = $('#work_platform').val();
@@ -1459,8 +1459,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         $('.selectpicker ').selectpicker('refresh');
                     }
                 })
-
-
 
                 //删除一行镜架数据
                 $(document).on('click', '.btn-del', function () {
