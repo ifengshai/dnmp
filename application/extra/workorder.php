@@ -318,7 +318,6 @@ return [
     ],
     //仓库部门角色组ID
     'warehouse_department_rule' => [
-        1,
         42,
         43,
         44,
