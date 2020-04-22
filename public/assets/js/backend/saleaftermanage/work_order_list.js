@@ -1045,6 +1045,21 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         cancelOrder();
                     }
                     //判断取消订单的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end
+                    //判断更换处方的状态，如果显示的话把数据带出来，如果隐藏则不显示镜架数据 start
+                    if (!$('.step2-1').is(':hidden')) {
+                        changeOrder(work_id, 2);
+                    }
+                    //判断更换处方的状态，如果显示的话把数据带出来，如果隐藏则不显示镜架数据 end
+                    //判断补发订单的状态，如果显示的话把数据带出来，如果隐藏则不显示补发数据 start
+                    if (!$('.step7').is(':hidden')) {
+                        Controller.api.bindevent.changeOrder(work_id, 5);
+                    }
+                    //判断补发订单的状态，如果显示的话把数据带出来，如果隐藏则不显示补发数据 end
+                    //判断赠品信息的状态，如果显示的话把数据带出来，如果隐藏的话则不显示赠品数据  start
+                    if (!$('.step6').is(':hidden')) {
+                        changeOrder(work_id, 4);
+                    }
+                    //判断赠品信息的状态，如果显示的话把数据带出来，如果隐藏的话则不显示赠品数据 end                    
                 }
             });
         },
@@ -1468,7 +1483,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                         } else {
                                             address += '<option value="' + i + '">' + data.address[i].address_type + '</option>';
                                         }
-
+    
                                     }
                                 }
                                 $('#address_select').html(address);
@@ -1487,10 +1502,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     $('#c-street').val(address.street);
                                     $('#c-postcode').val(address.postcode);
                                 })
-
+    
                                 //追加
                                 lens_click_data_edit = '<div class="margin-top:10px;">' + json.lensform.html + '<div class="form-group-child4_del" style="width: 96%;padding-right: 0px;"><a href="javascript:;" style="width: 50%;" class="btn btn-danger btn-del-lens" title="删除"><i class="fa fa-trash"></i>删除</a></div></div>';
-
+    
                                 $('.selectpicker ').selectpicker('refresh');
                                 //Controller.api.bindevent();            
                             } else if (2 == change_type) { //更换镜架信息
@@ -1508,17 +1523,17 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                             console.log(ret);
                             return false;
                         });
-                    }
-                    $(document).on('click', '.btn-add-box-edit', function () {
-                        $('.add_gift').after(gift_click_data_edit);
-                        $('.selectpicker ').selectpicker('refresh');
-                    });
-                    $(document).on('click', '.btn-add-supplement-reissue-edit', function () {
-                        $('#supplement-order').after(lens_click_data_edit);
-                        $('.selectpicker ').selectpicker('refresh');
-                    });
+                    }                    
                 }
 
+                $(document).on('click', '.btn-add-box-edit', function () {
+                    $('.add_gift').after(gift_click_data_edit);
+                    $('.selectpicker ').selectpicker('refresh');
+                });
+                $(document).on('click', '.btn-add-supplement-reissue-edit', function () {
+                    $('#supplement-order').after(lens_click_data_edit);
+                    $('.selectpicker ').selectpicker('refresh');
+                });
                 $(document).on('click', 'input[name="row[measure_choose_id][]"]', function () {
                     var value = $(this).val();
                     var check = $(this).prop('checked');
