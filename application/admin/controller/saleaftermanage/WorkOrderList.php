@@ -79,11 +79,6 @@ class WorkOrderList extends Backend
             $recept = $this->recept->where('measure_id', $v['id'])->where('work_id', $id)->select();
             $recept_arr = collection($recept)->toArray();
             $step_arr[$k]['recept_user'] = implode(',', array_column($recept_arr, 'recept_person'));
-            $step_arr[$k]['has_recept']  = 0;
-            //是否有审核的权限
-            if (in_array(session('admin.id'), array_column($recept_arr, 'recept_person_id'))) {
-                $step_arr[$k]['has_recept'] = 1;
-            }
 
             $step_arr[$k]['recept'] = $recept_arr;
         }
@@ -156,6 +151,15 @@ class WorkOrderList extends Backend
                 }
 
                 $list[$k]['step_num'] = $this->sel_order_recept($v['id']); //获取措施相关记录
+                //是否有处理权限
+                $receptPersonIds = explode(',', $v['recept_person_id']);
+                //仓库工单并且经手人未处理
+                //1、仓库类型：经手人未处理||已处理未审核||
+                if( ($v['work_type'] == 2 && $v['is_after_deal_with'] == 0) || in_array($v['work_status'],[0,1,2,4,6,7]) || !in_array(session('admin.id'), $receptPersonIds)){
+                    $list[$k]['has_recept'] = 0;
+                }else{
+                    $list[$k]['has_recept'] = 1;
+                }
             }
 
             $result = array("total" => $total, "rows" => $list);
@@ -314,7 +318,9 @@ class WorkOrderList extends Backend
                          * 4、优惠券等于100% 经理审核  50%主管审核 固定额度无需审核
                          */
                         $coupon = config('workorder.need_check_coupon')[$params['need_coupon_id']]['sum'];
-                        if ($params['refund_money'] > 30 || array_sum($params['gift']['original_number']) > 1 || array_sum($params['replacement']['original_number']) > 1 || $coupon == 100) {
+                        $giftOriginalNumber = $params['gift']['original_number'] ?: [];
+                        $replacementOriginalNumber = $params['replacement']['original_number'] ?: [];
+                        if ($params['refund_money'] > 30 || array_sum($giftOriginalNumber) > 1 || array_sum($replacementOriginalNumber) > 1 || $coupon == 100) {
                             //客服经理
                             $params['assign_user_id'] = config('workorder.customer_manager');
                         } else {
@@ -767,7 +773,9 @@ class WorkOrderList extends Backend
                          * 4、优惠券等于100% 经理审核  50%主管审核 固定额度无需审核
                          */
                         $coupon = config('workorder.need_check_coupon')[$params['need_coupon_id']]['sum'];
-                        if ($params['refund_money'] > 30 || array_sum($params['gift']['original_number']) > 1 || array_sum($params['replacement']['original_number']) > 1 || $coupon == 100) {
+                        $giftOriginalNumber = $params['gift']['original_number'] ?: [];
+                        $replacementOriginalNumber = $params['replacement']['original_number'] ?: [];
+                        if ($params['refund_money'] > 30 || array_sum($giftOriginalNumber) > 1 || array_sum($replacementOriginalNumber) > 1 || $coupon == 100) {
                             //客服经理
                             $params['assign_user_id'] = config('workorder.customer_manager');
                         } else {
@@ -1237,7 +1245,8 @@ class WorkOrderList extends Backend
             //找出工单的所有承接人
             $receptPersonIds = explode(',', $row->recept_person_id);
             //仓库工单并且经手人未处理
-            if (($row->work_type == 2 && $row->is_after_deal_with == 0) || ($row->work_type == 1 && $row->is_check == 1 && in_array($row->work_status, [0, 1, 2, 4, 6, 7, 8])) || ($row->work_type == 1 && !in_array(session('admin.id'), $receptPersonIds))) {
+            //1、仓库类型：经手人未处理||已处理未审核||
+            if( ($row->work_type == 2 && $row->is_after_deal_with == 0) || in_array($row->work_status,[0,1,2,4,6,7]) || !in_array(session('admin.id'), $receptPersonIds)){
                 $this->error('没有处理的权限');
             }
         }

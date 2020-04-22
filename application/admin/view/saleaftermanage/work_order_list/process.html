@@ -523,6 +523,7 @@
                         <th>措施名称</th>
                         <th>状态</th>
                         <th>备注</th>
+                        <th>处理人</th>
                         <th>操作</th>
                     </tr>
 
@@ -540,11 +541,17 @@
 
                         </td>
                         <td>
+                            {if condition="$vo.recept_status != 1"}
+                            {$vo.recept_person}
+                            {/if}
+                        </td>
+                        <td>
                             {if condition="$vo.recept_status == 1 && hasProcessPermission($vo.recept_group_id,$vo.work_id,session('admin.id'))"}
                                 <button type="submit" class="btn btn-success btn-process-status-success"  data-id="{$vo.id}">{:__('处理完成')}</button>
                                 <button type="submit" class="btn btn-danger btn-process-status-error"  data-id="{$vo.id}">{:__('处理失败')}</button>
                             {/if}
                         </td>
+
                     </tr>
                     {/foreach}
                     <input type='hidden' name="row[success]" class="process-status" value="1">
