@@ -205,7 +205,7 @@ class WorkOrderList extends Backend
                         $skus = $params['change_frame']['change_sku'];
                         if (count(array_filter($skus)) < 1) throw new Exception("SKU不能为空");
                         //判断SKU是否有库存
-                        $this->skuIsStock($skus, $params['work_type']);
+                        $this->skuIsStock($skus, $params['work_platform']);
                     }
 
                     //判断赠品是否有库存
@@ -222,7 +222,7 @@ class WorkOrderList extends Backend
                         foreach ($originalSkus as $key => $originalSku) {
                             if (!$originalSku) exception('sku不能为空');
                             if (!$originalNums[$key]) exception('数量必须大于0');
-                            $this->skuIsStock([$originalSku], $params['work_type'], $originalNums[$key]);
+                            $this->skuIsStock([$originalSku], $params['work_platform'], $originalNums[$key]);
                         }
                     }
 
@@ -314,7 +314,7 @@ class WorkOrderList extends Backend
                          * 4、优惠券等于100% 经理审核  50%主管审核 固定额度无需审核
                          */
                         $coupon = config('workorder.need_check_coupon')[$params['need_coupon_id']]['sum'];
-                        if ($params['refund_money'] > 30 || array_sum($params['gift']['original_sku']) > 1 || array_sum($params['replacement']['original_number']) > 1 || $coupon == 100) {
+                        if ($params['refund_money'] > 30 || array_sum($params['gift']['original_number']) > 1 || array_sum($params['replacement']['original_number']) > 1 || $coupon == 100) {
                             //客服经理
                             $params['assign_user_id'] = config('workorder.customer_manager');
                         } else {
@@ -531,7 +531,7 @@ class WorkOrderList extends Backend
 
             //把问题类型传递到js页面
             if (!empty($row->problem_type_id)) {
-                $this->assignconfig('problem_type_id', $row->problem_type_id);
+                $this->assignconfig('problem_id', $row->problem_type_id);
             }
             $this->assignconfig('work_type', $row->work_type);
 
@@ -654,13 +654,13 @@ class WorkOrderList extends Backend
                     if (count(array_filter($params['measure_choose_id'])) < 1 && $params['work_type'] == 1) {
                         throw new Exception("措施不能为空");
                     }
-                    
+
                     //更换镜框判断是否有库存
                     if ($params['change_frame'] && $params['problem_type_id'] == 1) {
                         $skus = $params['change_frame']['change_sku'];
                         if (count(array_filter($skus)) < 1) throw new Exception("SKU不能为空");
                         //判断SKU是否有库存
-                        $this->skuIsStock($skus, $params['work_type']);
+                        $this->skuIsStock($skus, $params['work_platform']);
                     }
                     //判断赠品是否有库存
                     //判断补发是否有库存
@@ -676,7 +676,7 @@ class WorkOrderList extends Backend
                         foreach ($originalSkus as $key => $originalSku) {
                             if (!$originalSku) exception('sku不能为空');
                             if (!$originalNums[$key]) exception('数量必须大于0');
-                            $this->skuIsStock([$originalSku], $params['work_type'], $originalNums[$key]);
+                            $this->skuIsStock([$originalSku], $params['work_platform'], $originalNums[$key]);
                         }
                     }
 
@@ -767,7 +767,7 @@ class WorkOrderList extends Backend
                          * 4、优惠券等于100% 经理审核  50%主管审核 固定额度无需审核
                          */
                         $coupon = config('workorder.need_check_coupon')[$params['need_coupon_id']]['sum'];
-                        if ($params['refund_money'] > 30 || array_sum($params['gift']['original_sku']) > 1 || array_sum($params['replacement']['original_number']) > 1 || $coupon == 100) {
+                        if ($params['refund_money'] > 30 || array_sum($params['gift']['original_number']) > 1 || array_sum($params['replacement']['original_number']) > 1 || $coupon == 100) {
                             //客服经理
                             $params['assign_user_id'] = config('workorder.customer_manager');
                         } else {
@@ -1229,18 +1229,18 @@ class WorkOrderList extends Backend
             $this->error(__('No Results were found'));
         }
 
-        if ($operateType == 2) {
-            if ($row->work_status != 2 || $row->is_check != 1 || !in_array(session('admin.id'), [$row->assign_user_id, config('workorder.customer_manager')])) {
-                $this->error('没有审核权限');
-            }
-        } elseif ($operateType == 3) {
-            //找出工单的所有承接人
-            $receptPersonIds = explode(',', $row->recept_person_id);
-            //仓库工单并且经手人未处理
-            if (($row->work_type == 2 && $row->is_after_deal_with == 0) || ($row->work_type == 1 && $row->is_check == 1 && in_array($row->work_status, [0, 1, 2, 4, 6, 7, 8])) || ($row->work_type == 1 && !in_array(session('admin.id'), $receptPersonIds))) {
-                $this->error('没有处理的权限');
-            }
-        }
+//        if ($operateType == 2) {
+//            if ($row->work_status != 2 || $row->is_check != 1 || !in_array(session('admin.id'), [$row->assign_user_id, config('workorder.customer_manager')])) {
+//                $this->error('没有审核权限');
+//            }
+//        } elseif ($operateType == 3) {
+//            //找出工单的所有承接人
+//            $receptPersonIds = explode(',', $row->recept_person_id);
+//            //仓库工单并且经手人未处理
+//            if (($row->work_type == 2 && $row->is_after_deal_with == 0) || ($row->work_type == 1 && $row->is_check == 1 && in_array($row->work_status, [0, 1, 2, 4, 6, 7, 8])) || ($row->work_type == 1 && !in_array(session('admin.id'), $receptPersonIds))) {
+//                $this->error('没有处理的权限');
+//            }
+//        }
 
         $adminIds = $this->getDataLimitAdminIds();
         if (is_array($adminIds)) {
