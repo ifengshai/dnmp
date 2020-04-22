@@ -17,6 +17,8 @@ use app\admin\model\saleaftermanage\WorkOrderMeasure;
 use app\admin\model\saleaftermanage\WorkOrderChangeSku;
 use app\admin\model\saleaftermanage\WorkOrderRecept;
 use app\admin\model\saleAfterManage\WorkOrderRemark;
+use think\Loader;
+use Util\SKUHelper;
 
 /**
  * 售后工单列管理
@@ -567,9 +569,9 @@ class WorkOrderList extends Backend
                 $problem_types = config('workorder.customer_problem_type');
                 $problem_type = [];
                 $i = 0;
-                foreach($customer_problem_classifys as $key => $customer_problem_classify){
+                foreach ($customer_problem_classifys as $key => $customer_problem_classify) {
                     $problem_type[$i]['name'] = $key;
-                    foreach($customer_problem_classify as $k => $v){
+                    foreach ($customer_problem_classify as $k => $v) {
                         $problem_type[$i]['type'][$k] = [
                             'id' => $v,
                             'name' => $problem_types[$v]
@@ -654,7 +656,7 @@ class WorkOrderList extends Backend
                         $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.edit' : $name) : $this->modelValidate;
                         $row->validateFailException(true)->validate($validate);
                     }
-                    
+
                     //判断是否选择措施
                     $params['measure_choose_id'] = $params['measure_choose_id'] ?? [];
                     if (count(array_filter($params['measure_choose_id'])) < 1 && $params['work_type'] == 1) {
@@ -939,9 +941,9 @@ class WorkOrderList extends Backend
             $problem_types = config('workorder.customer_problem_type');
             $problem_type = [];
             $i = 0;
-            foreach($customer_problem_classifys as $key => $customer_problem_classify){
+            foreach ($customer_problem_classifys as $key => $customer_problem_classify) {
                 $problem_type[$i]['name'] = $key;
-                foreach($customer_problem_classify as $k => $v){
+                foreach ($customer_problem_classify as $k => $v) {
                     $problem_type[$i]['type'][$k] = [
                         'id' => $v,
                         'name' => $problem_types[$v]
@@ -1265,9 +1267,9 @@ class WorkOrderList extends Backend
             $problem_types = config('workorder.customer_problem_type');
             $problem_type = [];
             $i = 0;
-            foreach($customer_problem_classifys as $key => $customer_problem_classify){
+            foreach ($customer_problem_classifys as $key => $customer_problem_classify) {
                 $problem_type[$i]['name'] = $key;
-                foreach($customer_problem_classify as $k => $v){
+                foreach ($customer_problem_classify as $k => $v) {
                     $problem_type[$i]['type'][$k] = [
                         'id' => $v,
                         'name' => $problem_types[$v]
@@ -1593,5 +1595,268 @@ class WorkOrderList extends Backend
             return json($result);
         }
         return $this->view->fetch();
+    }
+
+    /**
+     * 批量打印标签
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/04/22 17:23:47 
+     * @return void
+     */
+    public function batch_print_label()
+    {
+        ob_start();
+        $ids = input('ids');
+        $where['a.id'] = ['in', $ids];
+        $where['b.change_type'] = 2;
+        $list = $this->model->alias('a')->where($where)
+            ->field('b.*')
+            ->join(['fa_work_order_change_sku' => 'b'], 'a.id=b.work_id')
+            ->select();
+        $list = collection($list)->toArray();
+        if (!$list) {
+            $this->error('未找到更换镜片的数据');
+        }
+        $list = $this->qty_order_check($list);
+
+
+        $file_header = <<<EOF
+                <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<style>
+body{ margin:0; padding:0}
+.single_box{margin:0 auto;width: 400px;padding:1mm;margin-bottom:2mm;}
+table.addpro {clear: both;table-layout: fixed; margin-top:6px; border-top:1px solid #000;border-left:1px solid #000; font-size:12px;}
+table.addpro .title {background: none repeat scroll 0 0 #f5f5f5; }
+table.addpro .title  td {border-collapse: collapse;color: #000;text-align: center; font-weight:normal; }
+table.addpro tbody td {word-break: break-all; text-align: center;border-bottom:1px solid #000;border-right:1px solid #000;}
+table.addpro.re tbody td{ position:relative}
+</style>
+EOF;
+
+        //查询产品货位号
+        $store_sku = new \app\admin\model\warehouse\StockHouse;
+        $cargo_number = $store_sku->alias('a')->where(['status' => 1, 'b.is_del' => 1])->join(['fa_store_sku' => 'b'], 'a.id=b.store_id')->column('coding', 'sku');
+
+        //查询sku映射表
+        $item = new \app\admin\model\itemmanage\ItemPlatformSku;
+        $item_res = $item->cache(3600)->column('sku', 'platform_sku');
+
+        $file_content = '';
+        $temp_increment_id = 0;
+        foreach ($list as $processing_value) {
+            if ($temp_increment_id != $processing_value['increment_id']) {
+                $temp_increment_id = $processing_value['increment_id'];
+
+                $date = substr($processing_value['create_time'], 0, strpos($processing_value['create_time'], " "));
+                $fileName = ROOT_PATH . "public" . DS . "uploads" . DS . "printOrder" . DS . "workorder" . DS . "$date" . DS . "$temp_increment_id.png";
+                // dump($fileName);
+                $dir = ROOT_PATH . "public" . DS . "uploads" . DS . "printOrder" . DS . "workorder" . DS . "$date";
+                if (!file_exists($dir)) {
+                    mkdir($dir, 0777, true);
+                    // echo '创建文件夹$dir成功';
+                } else {
+                    // echo '需创建的文件夹$dir已经存在';
+                }
+                $img_url = "/uploads/printOrder/workorder/$date/$temp_increment_id.png";
+                //生成条形码
+                $this->generate_barcode($temp_increment_id, $fileName);
+                // echo '<br>需要打印'.$temp_increment_id;
+                $file_content .= "<div  class = 'single_box'>
+                <table width='400mm' height='102px' border='0' cellspacing='0' cellpadding='0' class='addpro' style='margin:0px auto;margin-top:0px;padding:0px;'>
+                <tr><td rowspan='5' colspan='2' style='padding:2px;width:20%'>" . str_replace(" ", "<br>", $processing_value['create_time']) . "</td>
+                <td rowspan='5' colspan='3' style='padding:10px;'><img src='" . $img_url . "' height='80%'><br></td></tr>                
+                </table></div>";
+            }
+
+
+            //处理ADD  当ReadingGlasses时 是 双ADD值
+            if ($processing_value['recipe_type'] == 'ReadingGlasses' && strlen($processing_value['os_add']) > 0 && strlen($processing_value['od_add']) > 0) {
+                // echo '双ADD值';
+                $os_add = "<td>" . $processing_value['od_add'] . "</td> ";
+                $od_add = "<td>" . $processing_value['os_add'] . "</td> ";
+            } else {
+                // echo '单ADD值';
+                $od_add = "<td rowspan='2'>" . $processing_value['od_add'] . "</td>";
+                $os_add = "";
+            }
+
+            //处理PD值
+            if (strlen($processing_value['pd_r']) > 0 && strlen($processing_value['pd_l']) > 0) {
+                // echo '双PD值';
+                $od_pd = "<td>" . $processing_value['pd_r'] . "</td> ";
+                $os_pd = "<td>" . $processing_value['pd_l'] . "</td> ";
+            } else {
+                // echo '单PD值';
+                $od_pd = "<td rowspan='2'>" . $processing_value['pd_r'] . "</td>";
+                $os_pd = "";
+            }
+
+            //处理斜视参数
+            if ($processing_value['od_pv'] || $processing_value['os_pv']) {
+                $prismcheck_title = "<td>Prism</td><td colspan=''>Direc</td><td>Prism</td><td colspan=''>Direc</td>";
+                $prismcheck_od_value = "<td>" . $processing_value['od_pv'] . "</td><td colspan=''>" . $processing_value['od_bd'] . "</td>" . "<td>" . $processing_value['od_pv_r'] . "</td><td>" . $processing_value['od_bd_r'] . "</td>";
+                $prismcheck_os_value = "<td>" . $processing_value['os_pv'] . "</td><td colspan=''>" . $processing_value['os_bd'] . "</td>" . "<td>" . $processing_value['os_pv_r'] . "</td><td>" . $processing_value['os_bd_r'] . "</td>";
+                $coatiing_name = '';
+            } else {
+                $prismcheck_title = '';
+                $prismcheck_od_value = '';
+                $prismcheck_os_value = '';
+                $coatiing_name = "<td colspan='4' rowspan='3' style='background-color:#fff;word-break: break-word;line-height: 12px;'>" . $processing_value['coating_type'] . "</td>";
+            }
+
+            //处方字符串截取
+            $final_print['recipe_type'] = substr($processing_value['recipe_type'], 0, 15);
+
+            //判断货号是否存在
+            if ($item_res[$processing_value['original_sku']] && $cargo_number[$item_res[$processing_value['original_sku']]]) {
+                $cargo_number_str = "<b>" . $cargo_number[$item_res[$processing_value['original_sku']]] . "</b><br>";
+            } else {
+                $cargo_number_str = "";
+            }
+
+            $file_content .= "<div  class = 'single_box'>
+            <table width='400mm' height='102px' border='0' cellspacing='0' cellpadding='0' class='addpro' style='margin:0px auto;margin-top:0px;' >
+            <tbody cellpadding='0'>
+            <tr>
+            <td colspan='10' style=' text-align:center;padding:0px 0px 0px 0px;'>                              
+            <span>" . $processing_value['recipe_type'] . "</span>
+            &nbsp;&nbsp;Order:" . $processing_value['increment_id'] . "
+            <span style=' margin-left:5px;'>SKU:" . $processing_value['original_sku'] . "</span>
+            <span style=' margin-left:5px;'>Num:<strong>" . $processing_value['original_number'] . "</strong></span>
+            </td>
+            </tr>  
+            <tr class='title'>      
+            <td></td>  
+            <td>SPH</td>
+            <td>CYL</td>
+            <td>AXI</td>
+            " . $prismcheck_title . "
+            <td>ADD</td>
+            <td>PD</td> 
+            " . $coatiing_name . "
+            </tr>   
+            <tr>  
+            <td>Right</td>      
+            <td>" . $processing_value['od_sph'] . "</td> 
+            <td>" . $processing_value['od_cyl'] . "</td>
+            <td>" . $processing_value['od_axis'] . "</td>    
+            " . $prismcheck_od_value . $od_add . $od_pd .
+                "</tr>
+            <tr>
+            <td>Left</td> 
+            <td>" . $processing_value['os_sph'] . "</td>    
+            <td>" . $processing_value['os_cyl'] . "</td>  
+            <td>" . $processing_value['os_axis'] . "</td> 
+            " . $prismcheck_os_value . $os_add . $os_pd .
+                " </tr>
+            <tr>
+            <td colspan='2'>" . $cargo_number_str . SKUHelper::sku_filter($processing_value['original_sku']) . "</td>
+            <td colspan='8' style=' text-align:center'>Lens：" . $processing_value['lens_type'] . "</td>
+            </tr>  
+            </tbody></table></div>";
+        }
+        echo $file_header . $file_content;
+    }
+
+    /**
+     * 生成条形码
+     */
+    protected function generate_barcode($text, $fileName)
+    {
+        // 引用barcode文件夹对应的类
+        Loader::import('BCode.BCGFontFile', EXTEND_PATH);
+        //Loader::import('BCode.BCGColor',EXTEND_PATH);
+        Loader::import('BCode.BCGDrawing', EXTEND_PATH);
+        // 条形码的编码格式
+        // Loader::import('BCode.BCGcode39',EXTEND_PATH,'.barcode.php');
+        Loader::import('BCode.BCGcode128', EXTEND_PATH, '.barcode.php');
+
+        // $code = '';
+        // 加载字体大小
+        $font = new \BCGFontFile(EXTEND_PATH . '/BCode/font/Arial.ttf', 18);
+        //颜色条形码
+        $color_black = new \BCGColor(0, 0, 0);
+        $color_white = new \BCGColor(255, 255, 255);
+        $drawException = null;
+        try {
+            // $code = new \BCGcode39();
+            $code = new \BCGcode128();
+            $code->setScale(3);
+            $code->setThickness(25); // 条形码的厚度
+            $code->setForegroundColor($color_black); // 条形码颜色
+            $code->setBackgroundColor($color_white); // 空白间隙颜色
+            $code->setFont($font); //设置字体
+            $code->parse($text); // 条形码需要的数据内容
+        } catch (\Exception $exception) {
+            $drawException = $exception;
+        }
+        //根据以上条件绘制条形码
+        $drawing = new \BCGDrawing('', $color_white);
+        if ($drawException) {
+            $drawing->drawException($drawException);
+        } else {
+            $drawing->setBarcode($code);
+            if ($fileName) {
+                // echo 'setFilename<br>';
+                $drawing->setFilename($fileName);
+            }
+            $drawing->draw();
+        }
+        // 生成PNG格式的图片
+        header('Content-Type: image/png');
+        // header('Content-Disposition:attachment; filename="barcode.png"'); //自动下载
+        $drawing->finish(\BCGDrawing::IMG_FORMAT_PNG);
+    }
+
+    /**
+     * 根据SKU数量平铺标签
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/04/22 17:24:01 
+     * @param [type] $origin_order_item
+     * @return void
+     */
+    protected function qty_order_check($origin_order_item = [])
+    {
+        foreach ($origin_order_item as $origin_order_key => $origin_order_value) {
+            if ($origin_order_value['original_number'] > 1 && strpos($origin_order_value['original_sku'], 'Price') === false) {
+                unset($origin_order_item[$origin_order_key]);
+                for ($i = 0; $i < $origin_order_value['original_number']; $i++) {
+                    $tmp_order_value = $origin_order_value;
+                    $tmp_order_value['num'] = 1;
+                    array_push($origin_order_item, $tmp_order_value);
+                }
+                unset($tmp_order_value);
+            }
+        }
+
+        $origin_order_item = $this->arraySequence($origin_order_item, 'original_number');
+        return array_values($origin_order_item);
+    }
+
+    /**
+     * 按个数排序
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/04/22 17:24:23 
+     * @param [type] $array
+     * @param [type] $field
+     * @param string $sort
+     * @return void
+     */
+    protected function arraySequence($array, $field, $sort = 'SORT_ASC')
+    {
+        $arrSort = array();
+        foreach ($array as $uniqid => $row) {
+            foreach ($row as $key => $value) {
+                $arrSort[$key][$uniqid] = $value;
+            }
+        }
+        array_multisort($arrSort[$field], constant($sort), $array);
+        return $array;
     }
 }

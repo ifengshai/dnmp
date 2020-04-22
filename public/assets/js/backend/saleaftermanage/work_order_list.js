@@ -304,6 +304,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 return false;
             });
 
+
+            //批量打印标签    
+            $('.btn-batch-printed').click(function () {
+                var ids = Table.api.selectedids(table);
+                window.open('work_order_list/batch_print_label/ids/' + ids, '_blank');
+            });
+
         },
         add: function () {
             Controller.api.bindevent();
