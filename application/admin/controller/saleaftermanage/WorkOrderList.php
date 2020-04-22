@@ -314,7 +314,7 @@ class WorkOrderList extends Backend
                          * 4、优惠券等于100% 经理审核  50%主管审核 固定额度无需审核
                          */
                         $coupon = config('workorder.need_check_coupon')[$params['need_coupon_id']]['sum'];
-                        if ($params['refund_money'] > 30 || array_sum($params['gift']['original_sku']) > 1 || array_sum($params['replacement']['original_number']) > 1 || $coupon == 100) {
+                        if ($params['refund_money'] > 30 || array_sum($params['gift']['original_number']) > 1 || array_sum($params['replacement']['original_number']) > 1 || $coupon == 100) {
                             //客服经理
                             $params['assign_user_id'] = config('workorder.customer_manager');
                         } else {
@@ -767,7 +767,7 @@ class WorkOrderList extends Backend
                          * 4、优惠券等于100% 经理审核  50%主管审核 固定额度无需审核
                          */
                         $coupon = config('workorder.need_check_coupon')[$params['need_coupon_id']]['sum'];
-                        if ($params['refund_money'] > 30 || array_sum($params['gift']['original_sku']) > 1 || array_sum($params['replacement']['original_number']) > 1 || $coupon == 100) {
+                        if ($params['refund_money'] > 30 || array_sum($params['gift']['original_number']) > 1 || array_sum($params['replacement']['original_number']) > 1 || $coupon == 100) {
                             //客服经理
                             $params['assign_user_id'] = config('workorder.customer_manager');
                         } else {
