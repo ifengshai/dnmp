@@ -593,7 +593,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     $('#order_pay_method').val(data.method);
                     $('#c-refund_way').val(data.method);
                     $('#customer_email').val(data.customer_email);
-                    var shtml = '<option value="">请选择</option>';
+                    var shtml = '';
                     for (var i in data.sku) {
                         shtml += '<option value="' + data.sku[i] + '">' + data.sku[i] + '</option>'
                     }
