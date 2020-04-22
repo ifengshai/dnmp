@@ -1574,7 +1574,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                 })
 
                                 //追加
-                                lens_click_data_edit = '<div class="margin-top:10px;">' + json.lensform.html + '<div class="form-group-child4_del" style="width: 98%;padding-right: 0px;"><a href="javascript:;" style="width: 50%;" class="btn btn-danger btn-del-lens" title="删除"><i class="fa fa-trash"></i>删除</a></div></div>';
+                                lens_click_data_edit = '<div class="margin-top:10px;">' + json.lensform.html + '<div class="form-group-child4_del" style="width: 90%;padding-right: 0px;"><a href="javascript:;" style="width: 50%;" class="btn btn-danger btn-del-lens" title="删除"><i class="fa fa-trash"></i>删除</a></div></div>';
 
                                 $('.selectpicker ').selectpicker('refresh');
                                 //Controller.api.bindevent();            
