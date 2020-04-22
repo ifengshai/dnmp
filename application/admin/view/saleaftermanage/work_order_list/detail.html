@@ -313,6 +313,20 @@
         float: left;
         margin-top: 2px;
     }
+    .question-type{
+        flex-direction: column;
+        margin-bottom: 10px;
+    }
+    .question-type>div{
+        display: flex;
+        align-items: center;
+        margin-left: 30px;
+    }
+    .question-type>div label{
+        padding: 0 10px;
+        margin: 0;
+    }
+
 </style>
 
 <form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
@@ -392,7 +406,7 @@
     <hr style="border-top: 1px solid #000;">
 
     <div class="form-group">
-        <div class="form-group-content">
+        <div class="form-group-content question-type">
             <?php if($work_type == 1){?>
             <label class="control-label col-xs-12 col-sm-2" style="width:8%;float: left;">{:__('问题类型')}：</label>
             {foreach $problem_type as $key => $val}
@@ -408,7 +422,6 @@
                     {/foreach}
                 </div>
             </div>
-            <br/>
             {/foreach}
             <?php }else{;?>
             <label class="control-label col-xs-12 col-sm-2" style="width:8%;float: left;">{:__('problem_type')}：</label>
