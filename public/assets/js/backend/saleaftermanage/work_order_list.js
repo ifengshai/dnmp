@@ -220,14 +220,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     extend: 'data-area = \'["100%","100%"]\'',
                                     callback: function (data) {
                                     },
-                                    visible: function (row) {
-                                        //待审核状态+需要审核+审核人(经理)，才有审核权限
-                                        if (row.work_status == 2 && row.is_check == 1 && (Config.admin_id == row.assign_user_id || Config.workorder.customer_manager == Config.admin_id)) {
-                                            return true;
-                                        } else {
-                                            return false;
-                                        }
-                                    }
+                                    // visible: function (row) {
+                                    //     //待审核状态+需要审核+审核人(经理)，才有审核权限
+                                    //     if (row.work_status == 2 && row.is_check == 1 && (Config.admin_id == row.assign_user_id || Config.workorder.customer_manager == Config.admin_id)) {
+                                    //         return true;
+                                    //     } else {
+                                    //         return false;
+                                    //     }
+                                    // }
                                 },
                                 {
                                     name: 'check',
@@ -1207,72 +1207,74 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
             });
             //处方选择填充
             $(document).on('change', '#prescription_select', function () {
-                var val = $(this).val();
-                var prescription = prescriptions[val];
+                if(is_add == 1) {
+                    var val = $(this).val();
+                    var prescription = prescriptions_add_edit[val];
 
-                var prescription_div = $(this).parents('.step7_function2').next('.step1_function3');
-                prescription_div.find('input').val('');
-                prescription_div.find('input[name="row[replacement][od_sph][]"]').val(prescription.od_sph);
-                prescription_div.find('input[name="row[replacement][os_sph][]"]').val(prescription.os_sph);
-                prescription_div.find('input[name="row[replacement][os_cyl][]"]').val(prescription.os_cyl);
-                prescription_div.find('input[name="row[replacement][od_cyl][]"]').val(prescription.od_cyl);
-                prescription_div.find('input[name="row[replacement][od_axis][]"]').val(prescription.od_axis);
-                prescription_div.find('input[name="row[replacement][os_axis][]"]').val(prescription.os_axis);
+                    var prescription_div = $(this).parents('.step7_function2').next('.step1_function3');
+                    prescription_div.find('input').val('');
+                    prescription_div.find('input[name="row[replacement][od_sph][]"]').val(prescription.od_sph);
+                    prescription_div.find('input[name="row[replacement][os_sph][]"]').val(prescription.os_sph);
+                    prescription_div.find('input[name="row[replacement][os_cyl][]"]').val(prescription.os_cyl);
+                    prescription_div.find('input[name="row[replacement][od_cyl][]"]').val(prescription.od_cyl);
+                    prescription_div.find('input[name="row[replacement][od_axis][]"]').val(prescription.od_axis);
+                    prescription_div.find('input[name="row[replacement][os_axis][]"]').val(prescription.os_axis);
 
-                //$(this).parents('.step7_function2').val('')
-                $(this).parents('.step7_function2').find('select[name="row[replacement][recipe_type][]"]').val(prescription.prescription_type);
-                $(this).parents('.step7_function2').find('select[name="row[replacement][recipe_type][]"]').change();
-                prescription_div.find('select[name="row[replacement][coating_type][]"]').val(prescription.coating_id);
+                    //$(this).parents('.step7_function2').val('')
+                    $(this).parents('.step7_function2').find('select[name="row[replacement][recipe_type][]"]').val(prescription.prescription_type);
+                    $(this).parents('.step7_function2').find('select[name="row[replacement][recipe_type][]"]').change();
+                    prescription_div.find('select[name="row[replacement][coating_type][]"]').val(prescription.coating_id);
 
 
-                //判断是否是彩色镜片
-                if (prescription.color_id > 0) {
-                    prescription_div.find('#color_type').val(prescription.color_id);
-                    prescription_div.find('#color_type').change();
-                }
-                prescription_div.find('#lens_type').val(prescription.index_id);
-                //add，pd添加
-                if (prescription.hasOwnProperty("total_add")) {
-                    prescription_div.find('input[name="row[replacement][od_add][]"]').val(prescription.total_add);
-                    //prescription_div.find('input[name="row[replacement][os_add][]"]').attr('disabled',true);
-                } else {
-                    prescription_div.find('input[name="row[replacement][od_add][]"]').val(prescription.od_add);
-                    prescription_div.find('input[name="row[replacement][os_add][]"]').val(prescription.os_add);
-                }
-                if (prescription.hasOwnProperty("pd")) {
-                    prescription_div.find('input[name="row[replacement][pd_r][]"]').val(prescription.pd);
-                    //prescription_div.find('input[name="row[replacement][pd_l][]"]').attr('disabled',true);
-                } else {
-                    prescription_div.find('input[name="row[replacement][pd_r][]"]').val(prescription.pd_r);
-                    prescription_div.find('input[name="row[replacement][pd_l][]"]').val(prescription.pd_l);
-                }
-                //
-                if (prescription.hasOwnProperty("od_pv")) {
-                    prescription_div.find('input[name="row[replacement][od_pv][]"]').val(prescription.od_pv);
-                }
-                if (prescription.hasOwnProperty("od_bd")) {
-                    prescription_div.find('input[name="row[replacement][od_bd][]"]').val(prescription.od_bd);
-                }
-                if (prescription.hasOwnProperty("od_pv_r")) {
-                    prescription_div.find('input[name="row[replacement][od_pv_r][]"]').val(prescription.od_pv_r);
-                }
-                if (prescription.hasOwnProperty("od_bd_r")) {
-                    prescription_div.find('input[name="row[replacement][od_bd_r][]"]').val(prescription.od_bd_r);
-                }
-                if (prescription.hasOwnProperty("os_pv")) {
-                    prescription_div.find('input[name="row[replacement][os_pv][]"]').val(prescription.os_pv);
-                }
-                if (prescription.hasOwnProperty("os_bd")) {
-                    prescription_div.find('input[name="row[replacement][os_bd][]"]').val(prescription.os_bd);
-                }
-                if (prescription.hasOwnProperty("os_pv_r")) {
-                    prescription_div.find('input[name="row[replacement][os_pv_r][]"]').val(prescription.os_pv_r);
-                }
-                if (prescription.hasOwnProperty("od_pv")) {
-                    prescription_div.find('input[name="row[replacement][os_bd_r][]"]').val(prescription.os_bd_r);
-                }
+                    //判断是否是彩色镜片
+                    if (prescription.color_id > 0) {
+                        prescription_div.find('#color_type').val(prescription.color_id);
+                        prescription_div.find('#color_type').change();
+                    }
+                    prescription_div.find('#lens_type').val(prescription.index_id);
+                    //add，pd添加
+                    if (prescription.hasOwnProperty("total_add")) {
+                        prescription_div.find('input[name="row[replacement][od_add][]"]').val(prescription.total_add);
+                        //prescription_div.find('input[name="row[replacement][os_add][]"]').attr('disabled',true);
+                    } else {
+                        prescription_div.find('input[name="row[replacement][od_add][]"]').val(prescription.od_add);
+                        prescription_div.find('input[name="row[replacement][os_add][]"]').val(prescription.os_add);
+                    }
+                    if (prescription.hasOwnProperty("pd")) {
+                        prescription_div.find('input[name="row[replacement][pd_r][]"]').val(prescription.pd);
+                        //prescription_div.find('input[name="row[replacement][pd_l][]"]').attr('disabled',true);
+                    } else {
+                        prescription_div.find('input[name="row[replacement][pd_r][]"]').val(prescription.pd_r);
+                        prescription_div.find('input[name="row[replacement][pd_l][]"]').val(prescription.pd_l);
+                    }
+                    //
+                    if (prescription.hasOwnProperty("od_pv")) {
+                        prescription_div.find('input[name="row[replacement][od_pv][]"]').val(prescription.od_pv);
+                    }
+                    if (prescription.hasOwnProperty("od_bd")) {
+                        prescription_div.find('input[name="row[replacement][od_bd][]"]').val(prescription.od_bd);
+                    }
+                    if (prescription.hasOwnProperty("od_pv_r")) {
+                        prescription_div.find('input[name="row[replacement][od_pv_r][]"]').val(prescription.od_pv_r);
+                    }
+                    if (prescription.hasOwnProperty("od_bd_r")) {
+                        prescription_div.find('input[name="row[replacement][od_bd_r][]"]').val(prescription.od_bd_r);
+                    }
+                    if (prescription.hasOwnProperty("os_pv")) {
+                        prescription_div.find('input[name="row[replacement][os_pv][]"]').val(prescription.os_pv);
+                    }
+                    if (prescription.hasOwnProperty("os_bd")) {
+                        prescription_div.find('input[name="row[replacement][os_bd][]"]').val(prescription.os_bd);
+                    }
+                    if (prescription.hasOwnProperty("os_pv_r")) {
+                        prescription_div.find('input[name="row[replacement][os_pv_r][]"]').val(prescription.os_pv_r);
+                    }
+                    if (prescription.hasOwnProperty("od_pv")) {
+                        prescription_div.find('input[name="row[replacement][os_bd_r][]"]').val(prescription.os_bd_r);
+                    }
 
-                $('.selectpicker ').selectpicker('refresh');
+                    $('.selectpicker ').selectpicker('refresh');
+                }
             })
             $(document).on('click', '.btn-add-box-edit', function () {
                 if(is_add == 1){
@@ -1564,6 +1566,78 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                             var input_content = '';
                             var lens_click_data_edit;
                             var gift_click_data_edit;
+                            var prescriptions_edit;
+                            //处方选择填充
+                            $(document).on('change', '#prescription_select', function () {
+                                if(prescriptions_edit) {
+                                    var val = $(this).val();
+                                    var prescription = prescriptions_edit[val];
+
+                                    var prescription_div = $(this).parents('.step7_function2').next('.step1_function3');
+                                    prescription_div.find('input').val('');
+                                    prescription_div.find('input[name="row[replacement][od_sph][]"]').val(prescription.od_sph);
+                                    prescription_div.find('input[name="row[replacement][os_sph][]"]').val(prescription.os_sph);
+                                    prescription_div.find('input[name="row[replacement][os_cyl][]"]').val(prescription.os_cyl);
+                                    prescription_div.find('input[name="row[replacement][od_cyl][]"]').val(prescription.od_cyl);
+                                    prescription_div.find('input[name="row[replacement][od_axis][]"]').val(prescription.od_axis);
+                                    prescription_div.find('input[name="row[replacement][os_axis][]"]').val(prescription.os_axis);
+
+                                    //$(this).parents('.step7_function2').val('')
+                                    $(this).parents('.step7_function2').find('select[name="row[replacement][recipe_type][]"]').val(prescription.prescription_type);
+                                    $(this).parents('.step7_function2').find('select[name="row[replacement][recipe_type][]"]').change();
+                                    prescription_div.find('select[name="row[replacement][coating_type][]"]').val(prescription.coating_id);
+
+
+                                    //判断是否是彩色镜片
+                                    if (prescription.color_id > 0) {
+                                        prescription_div.find('#color_type').val(prescription.color_id);
+                                        prescription_div.find('#color_type').change();
+                                    }
+                                    prescription_div.find('#lens_type').val(prescription.index_id);
+                                    //add，pd添加
+                                    if (prescription.hasOwnProperty("total_add")) {
+                                        prescription_div.find('input[name="row[replacement][od_add][]"]').val(prescription.total_add);
+                                        //prescription_div.find('input[name="row[replacement][os_add][]"]').attr('disabled',true);
+                                    } else {
+                                        prescription_div.find('input[name="row[replacement][od_add][]"]').val(prescription.od_add);
+                                        prescription_div.find('input[name="row[replacement][os_add][]"]').val(prescription.os_add);
+                                    }
+                                    if (prescription.hasOwnProperty("pd")) {
+                                        prescription_div.find('input[name="row[replacement][pd_r][]"]').val(prescription.pd);
+                                        //prescription_div.find('input[name="row[replacement][pd_l][]"]').attr('disabled',true);
+                                    } else {
+                                        prescription_div.find('input[name="row[replacement][pd_r][]"]').val(prescription.pd_r);
+                                        prescription_div.find('input[name="row[replacement][pd_l][]"]').val(prescription.pd_l);
+                                    }
+                                    //
+                                    if (prescription.hasOwnProperty("od_pv")) {
+                                        prescription_div.find('input[name="row[replacement][od_pv][]"]').val(prescription.od_pv);
+                                    }
+                                    if (prescription.hasOwnProperty("od_bd")) {
+                                        prescription_div.find('input[name="row[replacement][od_bd][]"]').val(prescription.od_bd);
+                                    }
+                                    if (prescription.hasOwnProperty("od_pv_r")) {
+                                        prescription_div.find('input[name="row[replacement][od_pv_r][]"]').val(prescription.od_pv_r);
+                                    }
+                                    if (prescription.hasOwnProperty("od_bd_r")) {
+                                        prescription_div.find('input[name="row[replacement][od_bd_r][]"]').val(prescription.od_bd_r);
+                                    }
+                                    if (prescription.hasOwnProperty("os_pv")) {
+                                        prescription_div.find('input[name="row[replacement][os_pv][]"]').val(prescription.os_pv);
+                                    }
+                                    if (prescription.hasOwnProperty("os_bd")) {
+                                        prescription_div.find('input[name="row[replacement][os_bd][]"]').val(prescription.os_bd);
+                                    }
+                                    if (prescription.hasOwnProperty("os_pv_r")) {
+                                        prescription_div.find('input[name="row[replacement][os_pv_r][]"]').val(prescription.os_pv_r);
+                                    }
+                                    if (prescription.hasOwnProperty("od_pv")) {
+                                        prescription_div.find('input[name="row[replacement][os_bd_r][]"]').val(prescription.os_bd_r);
+                                    }
+
+                                    $('.selectpicker ').selectpicker('refresh');
+                                }
+                            })
                             $("input[name='row[measure_choose_id][]']:checked").each(function (i) {
                                 checkID[i] = $(this).val();
                                 var id = $(this).val();
@@ -1662,7 +1736,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                 var lens = json.lens;
                                 //读取的存入数据库的地址
                                 var real_address = json.arr;
-                                prescriptions = data.prescriptions;
+                                prescriptions_edit = data.prescriptions;
                                 $('#supplement-order').html(lens.html);
                                 var order_pay_currency = $('#order_pay_currency').val();
                                 //修改地址
