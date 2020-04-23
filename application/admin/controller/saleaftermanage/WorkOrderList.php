@@ -104,7 +104,9 @@ class WorkOrderList extends Backend
             $filter = json_decode($this->request->get('filter'), true);
             if ($filter['recept_person_id']) {
                 //承接 经手 审核 包含用户id
-                $map[] = ['exp', Db::raw("FIND_IN_SET( {$filter['recept_person_id']}, recept_person_id ) or after_user_id = {$filter['recept_person_id']} or assign_user_id = {$filter['recept_person_id']}")];
+                //获取当前用户所有的承接的工单id并且不是取消，新建的
+                $workIds = WorkOrderRecept::where('recept_person_id',$filter['recept_person_id'])->column('work_id');
+                $map = "(id in (".join(',',$workIds).") or after_user_id = {$filter['recept_person_id']} or assign_user_id = {$filter['recept_person_id']}) and work_status not in (0,1,7)";
                 unset($filter['recept_person_id']);
                 $this->request->get(['filter' => json_encode($filter)]);
             }
