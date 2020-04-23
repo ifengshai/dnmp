@@ -287,10 +287,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     var filter = params.filter ? JSON.parse(params.filter) : {};
                     var op = params.op ? JSON.parse(params.op) : {};
                     if (field == 'create_user_name') {
-                        delete filter.create_user_name;
+                        delete filter.recept_person_id;
                         filter[field] = value;
                     } else if (field == 'recept_person_id') {
-                        delete filter.recept_person_id;
+                        delete filter.create_user_name;
                         filter[field] = value;
                     } else {
                         delete filter.recept_person_id;
