@@ -373,7 +373,8 @@
         <div class="form-group-child">
             <label class="control-label col-xs-12 col-sm-2">{:__('order_sku')}：</label>
             <div class="col-xs-12 col-sm-8">
-                {:build_select('row[order_sku][]', $skus, $row.order_sku,['class'=>'form-control selectpicker','multiple'=>'multiple'])}
+                {:build_select('row[order_sku][]', $skus, $row.order_sku,['class'=>'form-control
+                selectpicker','multiple'=>'multiple','disabled' => 'true'])}
             </div>
         </div>
 
@@ -392,7 +393,7 @@
             <label class="control-label col-xs-12 col-sm-2">{:__('problem_description')}：</label>
             <div class="col-xs-12 col-sm-8" style="width: 83%;">
                 <textarea id="c-problem_description" style="resize:none;height: 142px;" class="form-control " rows="5"
-                          name="row[problem_description]" cols="50">{$row.problem_description}</textarea>
+                          name="row[problem_description]" cols="50" disabled>{$row.problem_description}</textarea>
             </div>
         </div>
 
@@ -406,12 +407,13 @@
                         <span><button type="button" id="plupload-work_picture" class="btn btn-danger plupload"
                                       data-input-id="c-work_picture"
                                       data-mimetype="image/gif,image/jpeg,image/png,image/jpg,image/bmp" data-multiple="true"
-                                      data-maxcount="4" data-multipart={"dir":"workorder"} data-preview-id="p-work_picture"><i
-                                class="fa fa-upload"></i>
+                                      data-maxcount="4" data-multipart={"dir":"workorder"}
+                                      data-preview-id="p-work_picture" disabled><i
+                                class="fa fa-upload" disabled></i>
                                 {:__('Upload')}</button></span>
                         <span><button type="button" id="fachoose-work_picture" class="btn btn-primary fachoose"
                                       data-input-id="c-work_picture" data-mimetype="image/*" data-multiple="true"
-                                      data-maxcount="4"><i class="fa fa-list"></i> {:__('Choose')}</button></span>
+                                      data-maxcount="4" disabled><i class="fa fa-list"></i> {:__('Choose')}</button></span>
                     </div>
                     <span class="msg-box n-right" for="c-work_picture"></span>
                 </div>
