@@ -14,7 +14,7 @@ use Util\WeseeopticalPrescriptionDetailHelper;
 use GuzzleHttp\Client;
 use app\admin\model\saleaftermanage\WorkOrderMeasure;
 use app\admin\model\saleaftermanage\WorkOrderRecept;
-
+use app\admin\controller\warehouse\Inventory;
 
 class WorkOrderList extends Model
 {
@@ -740,34 +740,90 @@ class WorkOrderList extends Model
             WorkOrderRecept::where($where)->delete();
             //如果是处理失败的状态
             if(3 == $data['recept_status']){
-                $dataMeasure['operation_type'] = 2;
-                $dataMeasure['operation_time'] = date('Y-m-d H:i:s');
-                WorkOrderMeasure::where(['id'=>$measure_id])->update($dataMeasure);                  
+                $dataMeasure['operation_type'] = 2;                
             }else{
-                //求出承接措施是否完成
-                $whereMeasure['work_id'] = $work_id;
-                $whereMeasure['measure_id'] = $measure_id;
-                $whereMeasure['recept_status'] = ['neq',2];
-                $resultRecept = WorkOrderRecept::where($whereMeasure)->count();
-                if(0==$resultRecept){ //表明整个措施已经完成
-                    $dataMeasure['operation_type'] = 1;
-                    $dataMeasure['operation_time'] = date('Y-m-d H:i:s');
-                    WorkOrderMeasure::where(['id'=>$measure_id])->update($dataMeasure);
-                    //求出整个工单的措施状态
-                    $whereWork['work_id'] = $work_id;
-                    $whereWork['operation_type'] = ['neq',1];
-                    $resultMeasure = WorkOrderMeasure::where($whereWork)->count();
-                    if(0 == $resultMeasure){
-                        $dataWorkOrder['work_status'] = 6;
-                        
-                    }else{
-                        $dataWorkOrder['work_status'] = 5;                 
-                    }
-                    $dataWorkOrder['complete_time'] = date('Y-m-d H:i:s');
-                    WorkOrderList::where(['id'=>$work_id])->update($dataWorkOrder); 
+                $dataMeasure['operation_type'] = 1;
+            }
+                $dataMeasure['operation_time'] = date('Y-m-d H:i:s');
+            WorkOrderMeasure::where(['id'=>$measure_id])->update($dataMeasure);    
+            //求出承接措施是否完成
+            $whereMeasure['work_id'] = $work_id;
+            $whereMeasure['measure_id'] = $measure_id;
+            $whereMeasure['recept_status'] = ['neq',1];
+            $resultRecept = WorkOrderRecept::where($whereMeasure)->count();
+            if(0==$resultRecept){ //表明整个措施已经完成
+                //求出整个工单的措施状态
+                $whereWork['work_id'] = $work_id;
+                $whereWork['operation_type'] = ['neq',0];
+                $resultMeasure = WorkOrderMeasure::where($whereWork)->count();
+                if(0 == $resultMeasure){
+                    $dataWorkOrder['work_status'] = 6;
+                    
+                }else{
+                    $dataWorkOrder['work_status'] = 5;                 
                 }
+                $dataWorkOrder['complete_time'] = date('Y-m-d H:i:s');
+                WorkOrderList::where(['id'=>$work_id])->update($dataWorkOrder);
             }
             return true; 
 
+    }
+    // if (12 == $row['synergy_task_id']) { //执行更改镜架的逻辑
+    //     (new Inventory())->changeFrame($row['id'], $row['order_platform'], $row['synergy_order_number']);
+    // }elseif((14 == $row['synergy_task_id']) || (37 == $row['synergy_task_id']) || (38 == $row['synergy_task_id'])){ //执行取消订单的逻辑
+    //     (new Inventory())->cancelOrder($row['id'], $row['order_platform'], $row['synergy_order_number']);
+    // }
+    //扣减库存逻辑
+    public function deductionStock($work_id)
+    {
+        $result = WorkOrderChangeSku::where(['work_id'=>$work_id])->field('id,increment_id,platform_type,change_type,original_sku,original_number,change_sku,change_number')->select();
+        if(!$result){
+            return false;
+        }
+        $workOrderList = WorkOrderList::where(['id'=>$work_id])->field('id,work_platform,platform_order')->find();
+        $result = collection($result)->toArray();
+        $arr = [];
+        foreach($result as  $val){
+            switch($val['change_type']){
+                //更改镜架
+                case 1:
+                    $arr['change_frame'][] = $val;   
+                break;
+                //更改镜片
+                case 2:
+                    $arr['change_lens'][]  = $val;     
+                break;
+                //取消订单    
+                case 3:
+                    $arr['cancel_order'][] = $val;
+                break;
+                //赠品
+                case 4:
+                    $arr['present'][] = $val;
+                break;
+                //补发
+                case 5:
+                    $arr['reissue'][] = $val;
+                break;
+                default:
+                break;        
+            }
+        }
+        //更改镜架
+        if(!empty($arr['change_frame'])){
+            (new Inventory())->workChangeFrame($work_id, $workOrderList->work_platform, $workOrderList->platform_order,$arr['change_frame']);
+        }
+        //取消订单
+        if(!empty($arr['cancel_order'])){
+            (new Inventory())->workCancelOrder($work_id, $workOrderList->work_platform, $workOrderList->platform_order,$arr['cancel_order']);
+        }
+        //赠品
+        if(!empty($arr['present'])){
+            (new Inventory())->workPresent($work_id, $workOrderList->work_platform, $workOrderList->platform_order,$arr['present']);
+        }
+        //补发
+        if(!empty($arr['reissue'])){
+            (new Inventory())->workPresent($work_id, $workOrderList->work_platform, $workOrderList->platform_order,$arr['reissue']);
+        }
     }
 }
