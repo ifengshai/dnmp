@@ -82,8 +82,8 @@ class WorkOrderList extends Model
         }
         $result['sku'] = array_unique($sku);
         $result['base_currency_code'] = $orderInfo['base_currency_code'];
-        $result['method']             = $orderInfo['method'];
-        $result['customer_email']     = $orderInfo['customer_email'];
+        $result['method'] = $orderInfo['method'];
+        $result['customer_email'] = $orderInfo['customer_email'];
         return $result ? $result : [];
     }
 
@@ -204,18 +204,18 @@ class WorkOrderList extends Model
         $client = new Client(['verify' => false]);
         try {
             if ($method == 'GET') {
-                $response = $client->request('GET', $url, array('query'=>$params));
+                $response = $client->request('GET', $url, array('query' => $params));
             } else {
-                $response = $client->request('POST', $url, array('form_params'=>$params));
+                $response = $client->request('POST', $url, array('form_params' => $params));
             }
             $body = $response->getBody();
 
-            $stringBody = (string) $body;
-            $res = json_decode($stringBody,true);
-            if($res['status'] == 200){
+            $stringBody = (string)$body;
+            $res = json_decode($stringBody, true);
+            if ($res['status'] == 200) {
                 return $res['data'];
             }
-            exception($res['msg'].'   error_code:'.$res['status']);
+            exception($res['msg'] . '   error_code:' . $res['status']);
         } catch (Exception $e) {
             exception($e->getMessage());
         }
@@ -232,14 +232,14 @@ class WorkOrderList extends Model
         $work = $this->find($work_id);
         $measure = '';
         //修改镜片
-        if(($work->work_type == 1 && $work->problem_type_id == 2 && $measure_choose_id == 1) || ($work->work_type == 2 && $work->problem_type_id == 1 && $measure_choose_id == 1)){
+        if (($work->work_type == 1 && $work->problem_type_id == 2 && $measure_choose_id == 1) || ($work->work_type == 2 && $work->problem_type_id == 1 && $measure_choose_id == 1)) {
             $measure = 1;
-        }elseif($measure_choose_id == 6){ //赠品
+        } elseif ($measure_choose_id == 6) { //赠品
             $measure = 2;
-        }elseif($measure_choose_id == 7){ //补发
+        } elseif ($measure_choose_id == 7) { //补发
             $measure = 3;
         }
-        if($measure){
+        if ($measure) {
             Db::startTrans();
             try {
                 //如果是更改镜片
@@ -268,7 +268,7 @@ class WorkOrderList extends Model
                         exception('sku不能为空');
                     }
                     $recipe_type = $changeLens['recipe_type'][$key];
-                    if(!$recipe_type){
+                    if (!$recipe_type) {
                         exception('处方类型不能为空');
                     }
                     $type = $params['work_platform'];
@@ -314,19 +314,19 @@ class WorkOrderList extends Model
                     ];
                     //补发
                     //if ($change_type == 5) {
-                        $data['email'] = $params['address']['email'];
-                        $data['userinfo_option'] = serialize($params['address']);
-                        $prescriptionOption = [
-                            'prescription_type' => $recipe_type,
-                            'lens_id' => $lensId,
-                            'lens_name' => $lensCoatName['lensName'],
-                            'lens_type' => $lensCoatName['lensType'],
-                            'coating_id' => $coatingId,
-                            'coating_name' => $lensCoatName['coatingName'],
-                            'color_id' => $colorId,
-                            'color_name' => $lensCoatName['colorName'],
-                        ];
-                        $data['prescription_option'] = serialize($prescriptionOption);
+                    $data['email'] = $params['address']['email'];
+                    $data['userinfo_option'] = serialize($params['address']);
+                    $prescriptionOption = [
+                        'prescription_type' => $recipe_type,
+                        'lens_id' => $lensId,
+                        'lens_name' => $lensCoatName['lensName'],
+                        'lens_type' => $lensCoatName['lensType'],
+                        'coating_id' => $coatingId,
+                        'coating_name' => $lensCoatName['coatingName'],
+                        'color_id' => $colorId,
+                        'color_name' => $lensCoatName['colorName'],
+                    ];
+                    $data['prescription_option'] = serialize($prescriptionOption);
                     //}
                     WorkOrderChangeSku::create($data);
                 }
@@ -337,7 +337,8 @@ class WorkOrderList extends Model
             }
         }
 
-    }   
+    }
+
     /**
      * 根据id获取镜片，镀膜的名称
      * @param $siteType
@@ -408,9 +409,9 @@ class WorkOrderList extends Model
     {
         $changeSkus = WorkOrderChangeSku::where(['work_id' => $work_id, 'change_type' => 5])->select();
         //如果存在补发单的措施
-        if($changeSkus){
+        if ($changeSkus) {
             $postData = $postDataCommon = [];
-            foreach ($changeSkus as $key =>  $changeSku) {
+            foreach ($changeSkus as $key => $changeSku) {
                 $address = unserialize($changeSku['userinfo_option']);
                 $prescriptions = unserialize($changeSku['prescription_option']);
                 $postDataCommon = [
@@ -447,7 +448,7 @@ class WorkOrderList extends Model
                     $prismcheck = 'on';
                 }
                 $is_frame_only = 0;
-                if($prescriptions['lens_id'] || $prescriptions['coating_id'] || $prescriptions['color_id']){
+                if ($prescriptions['lens_id'] || $prescriptions['coating_id'] || $prescriptions['color_id']) {
                     $is_frame_only = 1;
                 }
                 $postData['product'][$key] = [
@@ -533,15 +534,16 @@ class WorkOrderList extends Model
         $postData = [
             'rule_id' => $work->coupon_id
         ];
-        try{
-            $res = $this->httpRequest($work['work_platform'],'magic/promotion/receive',$postData,'POST');
+        try {
+            $res = $this->httpRequest($work['work_platform'], 'magic/promotion/receive', $postData, 'POST');
             $work->coupon_str = $res['coupon_code'];
             $work->save();
             return true;
-        }catch (Exception $e){
+        } catch (Exception $e) {
             exception($e->getMessage());
         }
     }
+
     /**
      * 获取修改处方(编辑的时候带出存储的信息)
      * @param $siteType
@@ -549,13 +551,13 @@ class WorkOrderList extends Model
      * @return array|bool
      * @throws \think\Exception
      */
-    public function getEditReissueLens($siteType, $showPrescriptions, $type = 1,$info = [],$operate_type = '')
+    public function getEditReissueLens($siteType, $showPrescriptions, $type = 1, $info = [], $operate_type = '')
     {
         $url = '';
         $key = $siteType . '_getlens';
         $data = Cache::get($key);
         if (!$data) {
-            $data = $this->httpRequest($siteType,'magic/product/lensData');
+            $data = $this->httpRequest($siteType, 'magic/product/lensData');
             Cache::set($key, $data, 3600 * 24);
         }
 
@@ -570,14 +572,14 @@ class WorkOrderList extends Model
                 $prescriptions .= "<option value='{$key}'>{$val}</option>";
             }
             //拼接html页面
-            $html = (new \think\View())->fetch('saleaftermanage/work_order_list/ajax_reissue_edit', compact('prescription', 'coating_type', 'prescriptions', 'colorList', 'type','info','operate_type'));
+            $html = (new \think\View())->fetch('saleaftermanage/work_order_list/ajax_reissue_edit', compact('prescription', 'coating_type', 'prescriptions', 'colorList', 'type', 'info', 'operate_type'));
         } elseif ($type == 2) {
-            $html = (new \think\View())->fetch('saleaftermanage/work_order_list/ajax_reissue_edit', compact('showPrescriptions', 'prescription', 'coating_type', 'prescriptions', 'colorList', 'lensColorList', 'type','info','operate_type'));
+            $html = (new \think\View())->fetch('saleaftermanage/work_order_list/ajax_reissue_edit', compact('showPrescriptions', 'prescription', 'coating_type', 'prescriptions', 'colorList', 'lensColorList', 'type', 'info', 'operate_type'));
         } else {
-            $html = (new \think\View())->fetch('saleaftermanage/work_order_list/ajax_reissue_edit', compact('showPrescriptions', 'prescription', 'coating_type', 'prescriptions', 'colorList', 'type','info','operate_type'));
+            $html = (new \think\View())->fetch('saleaftermanage/work_order_list/ajax_reissue_edit', compact('showPrescriptions', 'prescription', 'coating_type', 'prescriptions', 'colorList', 'type', 'info', 'operate_type'));
         }
         return ['data' => $data, 'html' => $html];
-    }    
+    }
 
     /**
      * 审核
@@ -588,48 +590,48 @@ class WorkOrderList extends Model
      * @throws \think\db\exception\ModelNotFoundException
      * @throws \think\exception\DbException
      */
-    public function checkWork($work_id,$params = [])
+    public function checkWork($work_id, $params = [])
     {
         $work = self::find($work_id);
 
         //判断是否已审核
-        if($work->check_time) return true;
+        if ($work->check_time) return true;
         Db::startTrans();
-        try{
+        try {
             $time = date('Y-m-d H:i:s');
             $admin_id = session('admin.id');
             //如果承接人是自己的话表示处理完成，不是自己的不做处理
-            $orderRecepts = WorkOrderRecept::where('work_id',$work_id)->select();
+            $orderRecepts = WorkOrderRecept::where('work_id', $work_id)->select();
             $allComplete = 1;
             $count = count($orderRecepts);
 
             //不需要审核的，
-            if(($work->is_check == 0 && $work->work_type == 1) || ($work->is_check == 0 && $work->work_type == 2 && $work->is_after_deal_with == 1)){
+            if (($work->is_check == 0 && $work->work_type == 1) || ($work->is_check == 0 && $work->work_type == 2 && $work->is_after_deal_with == 1)) {
 
                 $work->check_note = '系统自动审核通过';
                 $work->check_time = $time;
                 $work->submit_time = $time;
-                foreach($orderRecepts as $orderRecept){
+                foreach ($orderRecepts as $orderRecept) {
                     //承接人是自己，则措施，承接默认完成
-                    if($orderRecept->recept_person_id == $work->create_user_id){
-                        WorkOrderRecept::where('id',$orderRecept->id)->update(['recept_status' => 2,'finish_time' => $time,'note' => '自动处理完成']);
-                        WorkOrderMeasure::where('id',$orderRecept->measure_id)->update(['operation_type' => 1, 'operation_time' => $time]);
-                    }else{
+                    if ($orderRecept->recept_person_id == $work->create_user_id) {
+                        WorkOrderRecept::where('id', $orderRecept->id)->update(['recept_status' => 2, 'finish_time' => $time, 'note' => '自动处理完成']);
+                        WorkOrderMeasure::where('id', $orderRecept->measure_id)->update(['operation_type' => 1, 'operation_time' => $time]);
+                    } else {
                         $allComplete = 0;
                     }
                 }
-                if($allComplete == 1){
+                if ($allComplete == 1) {
                     //处理完成
                     $work_status = 6;
-                }elseif($allComplete == 0 && $count >1){
+                } elseif ($allComplete == 0 && $count > 1) {
                     //部分处理
                     $work_status = 5;
-                }else{
+                } else {
                     $work_status = 3;
                 }
                 $work->work_status = $work_status;
 
-                if($work_status == 6){
+                if ($work_status == 6) {
                     $work->complete_time = $time;
                 }
                 $work->save();
@@ -645,44 +647,45 @@ class WorkOrderList extends Model
                 WorkOrderRemark::create($remarkData);
             }
             //需要审核的，有参数才进行审核处理，其余跳过
-            if(!empty($params)){
-                if($work->is_check == 1){;
+            if (!empty($params)) {
+                if ($work->is_check == 1) {
+                    ;
                     $work->operation_user_id = $admin_id;
                     $work->check_note = $params['check_note'];
                     $work->submit_time = $time;
                     $work->check_time = $time;
-                    foreach($orderRecepts as $orderRecept){
+                    foreach ($orderRecepts as $orderRecept) {
                         //承接人是创建人自己，则措施，承接默认完成
-                        if($orderRecept->recept_person_id == $work->create_user_id){
+                        if ($orderRecept->recept_person_id == $work->create_user_id) {
                             //审核成功直接进行处理
-                            if($params['success'] == 1){
-                                WorkOrderRecept::where('id',$orderRecept->id)->update(['recept_status' => 2,'finish_time' => $time,'note' => '自动处理完成']);
-                                WorkOrderMeasure::where('id',$orderRecept->measure_id)->update(['operation_type' => 1, 'operation_time' => $time]);
+                            if ($params['success'] == 1) {
+                                WorkOrderRecept::where('id', $orderRecept->id)->update(['recept_status' => 2, 'finish_time' => $time, 'note' => '自动处理完成']);
+                                WorkOrderMeasure::where('id', $orderRecept->measure_id)->update(['operation_type' => 1, 'operation_time' => $time]);
                             }
-                        }else{
+                        } else {
                             $allComplete = 0;
                         }
                     }
-                    if($allComplete == 1){
+                    if ($allComplete == 1) {
                         //处理完成
                         $work_status = 6;
-                    }elseif($allComplete == 0 && $count >1){
+                    } elseif ($allComplete == 0 && $count > 1) {
                         //部分处理
                         $work_status = 5;
-                    }else{
+                    } else {
                         $work_status = 3;
                     }
                     $work->work_status = $work_status;
-                    if($params['success'] == 2){
+                    if ($params['success'] == 2) {
                         $work->work_status = 4;
                         $work->complete_time = $time;
-                    }elseif($params['success'] == 1){
+                    } elseif ($params['success'] == 1) {
                         $work->work_status = $work_status;
-                        if($work_status == 6){
+                        if ($work_status == 6) {
                             $work->complete_time = $time;
                         }
                         //存在补发审核通过后生成补发单
-                        $this->createOrder($work->work_platform,$work_id);
+                        $this->createOrder($work->work_platform, $work_id);
                     }
 
                     $work->save();
@@ -701,71 +704,72 @@ class WorkOrderList extends Model
             }
 
             Db::commit();
-        }catch(Exception $e){
+        } catch (Exception $e) {
             Db::rollback();
             exception($e->getMessage());
         }
 
     }
+
     /**
      * 工单处理
      *
      * @Description
-     * @author lsw
-     * @since 2020/04/21 10:13:28 
      * @param [type] $id   承接表ID
      * @param [type] $work_id 工单表ID
      * @param [type] $measure_id 措施表ID
      * @param [type] $success 是否成功 1 处理成功 2 处理失败
      * @param [type] $process_note 处理备注
      * @return void
+     * @author lsw
+     * @since 2020/04/21 10:13:28
      */
-    public function handleRecept($id,$work_id,$measure_id,$recept_group_id,$success,$process_note)
+    public function handleRecept($id, $work_id, $measure_id, $recept_group_id, $success, $process_note)
     {
-        if(1 == $success){
+        if (1 == $success) {
             $data['recept_status'] = 2;
-          }else{
+        } else {
             $data['recept_status'] = 3;
-          }
-            $data['note']          = $process_note;
-            $data['finish_time']   = date('Y-m-d H:i:s');
-            //更新本条工单数据承接人状态
-            WorkOrderRecept::where(['id'=>$id])->update($data);
-            //删除同组数据
-            $where['work_id'] = $work_id;
-            $where['measure_id'] = $measure_id;
-            $where['recept_group_id'] = $recept_group_id;
-            $where['recept_status'] = 1;
-            //删除同样的承接组数据
-            WorkOrderRecept::where($where)->delete();
-            //如果是处理失败的状态
-            if(3 == $data['recept_status']){
-                $dataMeasure['operation_type'] = 2;                
-            }else{
-                $dataMeasure['operation_type'] = 1;
+        }
+        $data['note'] = $process_note;
+        $data['finish_time'] = date('Y-m-d H:i:s');
+        //更新本条工单数据承接人状态
+        WorkOrderRecept::where(['id' => $id])->update($data);
+        //删除同组数据
+        $where['work_id'] = $work_id;
+        $where['measure_id'] = $measure_id;
+        $where['recept_group_id'] = $recept_group_id;
+        $where['recept_status'] = 1;
+        //删除同样的承接组数据
+        WorkOrderRecept::where($where)->delete();
+        //如果是处理失败的状态
+        if (3 == $data['recept_status']) {
+            $dataMeasure['operation_type'] = 2;
+        } else {
+            $dataMeasure['operation_type'] = 3;
+        }
+        $dataMeasure['operation_time'] = date('Y-m-d H:i:s');
+        WorkOrderMeasure::where(['id' => $measure_id])->update($dataMeasure);
+        //求出承接措施是否完成
+        $whereMeasure['work_id'] = $work_id;
+        $whereMeasure['measure_id'] = $measure_id;
+        $whereMeasure['recept_status'] = ['eq', 1];
+        $resultRecept = WorkOrderRecept::where($whereMeasure)->count();
+        if (0 == $resultRecept) { //表明整个措施已经完成
+            //求出整个工单的措施状态
+            $whereWork['work_id'] = $work_id;
+            $whereWork['operation_type'] = ['eq', 0];
+            $resultMeasure = WorkOrderMeasure::where($whereWork)->count();
+            if (0 == $resultMeasure) {
+                $dataWorkOrder['work_status'] = 6;
+
+            } else {
+                $dataWorkOrder['work_status'] = 5;
             }
-                $dataMeasure['operation_time'] = date('Y-m-d H:i:s');
-            WorkOrderMeasure::where(['id'=>$measure_id])->update($dataMeasure);    
-            //求出承接措施是否完成
-            $whereMeasure['work_id'] = $work_id;
-            $whereMeasure['measure_id'] = $measure_id;
-            $whereMeasure['recept_status'] = ['neq',1];
-            $resultRecept = WorkOrderRecept::where($whereMeasure)->count();
-            if(0==$resultRecept){ //表明整个措施已经完成
-                //求出整个工单的措施状态
-                $whereWork['work_id'] = $work_id;
-                $whereWork['operation_type'] = ['neq',0];
-                $resultMeasure = WorkOrderMeasure::where($whereWork)->count();
-                if(0 == $resultMeasure){
-                    $dataWorkOrder['work_status'] = 6;
-                    
-                }else{
-                    $dataWorkOrder['work_status'] = 5;                 
-                }
-                $dataWorkOrder['complete_time'] = date('Y-m-d H:i:s');
-                WorkOrderList::where(['id'=>$work_id])->update($dataWorkOrder);
-            }
-            return true; 
+            $dataWorkOrder['complete_time'] = date('Y-m-d H:i:s');
+            WorkOrderList::where(['id' => $work_id])->update($dataWorkOrder);
+        }
+        return true;
 
     }
     // if (12 == $row['synergy_task_id']) { //执行更改镜架的逻辑
@@ -776,54 +780,54 @@ class WorkOrderList extends Model
     //扣减库存逻辑
     public function deductionStock($work_id)
     {
-        $result = WorkOrderChangeSku::where(['work_id'=>$work_id])->field('id,increment_id,platform_type,change_type,original_sku,original_number,change_sku,change_number')->select();
-        if(!$result){
+        $result = WorkOrderChangeSku::where(['work_id' => $work_id])->field('id,increment_id,platform_type,change_type,original_sku,original_number,change_sku,change_number')->select();
+        if (!$result) {
             return false;
         }
-        $workOrderList = WorkOrderList::where(['id'=>$work_id])->field('id,work_platform,platform_order')->find();
+        $workOrderList = WorkOrderList::where(['id' => $work_id])->field('id,work_platform,platform_order')->find();
         $result = collection($result)->toArray();
         $arr = [];
-        foreach($result as  $val){
-            switch($val['change_type']){
+        foreach ($result as $val) {
+            switch ($val['change_type']) {
                 //更改镜架
                 case 1:
-                    $arr['change_frame'][] = $val;   
-                break;
+                    $arr['change_frame'][] = $val;
+                    break;
                 //更改镜片
                 case 2:
-                    $arr['change_lens'][]  = $val;     
-                break;
+                    $arr['change_lens'][] = $val;
+                    break;
                 //取消订单    
                 case 3:
                     $arr['cancel_order'][] = $val;
-                break;
+                    break;
                 //赠品
                 case 4:
                     $arr['present'][] = $val;
-                break;
+                    break;
                 //补发
                 case 5:
                     $arr['reissue'][] = $val;
-                break;
+                    break;
                 default:
-                break;        
+                    break;
             }
         }
         //更改镜架
-        if(!empty($arr['change_frame'])){
-            (new Inventory())->workChangeFrame($work_id, $workOrderList->work_platform, $workOrderList->platform_order,$arr['change_frame']);
+        if (!empty($arr['change_frame'])) {
+            (new Inventory())->workChangeFrame($work_id, $workOrderList->work_platform, $workOrderList->platform_order, $arr['change_frame']);
         }
         //取消订单
-        if(!empty($arr['cancel_order'])){
-            (new Inventory())->workCancelOrder($work_id, $workOrderList->work_platform, $workOrderList->platform_order,$arr['cancel_order']);
+        if (!empty($arr['cancel_order'])) {
+            (new Inventory())->workCancelOrder($work_id, $workOrderList->work_platform, $workOrderList->platform_order, $arr['cancel_order']);
         }
         //赠品
-        if(!empty($arr['present'])){
-            (new Inventory())->workPresent($work_id, $workOrderList->work_platform, $workOrderList->platform_order,$arr['present']);
+        if (!empty($arr['present'])) {
+            (new Inventory())->workPresent($work_id, $workOrderList->work_platform, $workOrderList->platform_order, $arr['present']);
         }
         //补发
-        if(!empty($arr['reissue'])){
-            (new Inventory())->workPresent($work_id, $workOrderList->work_platform, $workOrderList->platform_order,$arr['reissue']);
+        if (!empty($arr['reissue'])) {
+            (new Inventory())->workPresent($work_id, $workOrderList->work_platform, $workOrderList->platform_order, $arr['reissue']);
         }
     }
 }
