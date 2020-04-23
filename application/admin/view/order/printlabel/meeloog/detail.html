@@ -1,0 +1,268 @@
+<style>
+    .list-div {
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+        padding: 10px;
+        width: 100%;
+        height: 400px;
+        margin-bottom: 10px;
+    }
+
+    .caigou {
+        width: 45%;
+        margin-bottom: 10px;
+        float: left;
+    }
+
+    #caigou-table {
+        width: 100%;
+        height: 130px;
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+        text-align: center;
+    }
+
+    #caigou-table tr {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+        line-height: 50px;
+    }
+
+    #caigou-table tr th {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+        text-align: center;
+        font-size: 14px;
+        line-height: 50px;
+    }
+
+    #caigou-table tr td {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+    }
+
+    #caigou-table tr td input {
+
+        width: 150px;
+    }
+
+    .nav-tabs>li {
+        float: left;
+        margin-bottom: -1px;
+    }
+
+    .nav>li {
+        position: relative;
+        display: block;
+    }
+
+    .nav-tabs>li>a {
+        margin-right: 4px;
+        color: #95a5a6;
+        background-color: #d8e0e6;
+        border: 1px solid #e8edf0;
+        border-bottom-color: transparent;
+    }
+
+    .panel-heading {
+        padding: 15px;
+        padding-bottom: 0;
+        background: #e8edf0;
+        border-color: #e8edf0;
+        position: relative;
+    }
+
+    .panel-heading .nav-tabs>li>a {
+        margin-right: 4px;
+        color: #95a5a6;
+        border: 1px solid #e8edf0;
+        border-bottom-color: transparent;
+    }
+
+    .caigou-table-lens tbody tr td input {
+        text-align: center;
+    }
+</style>
+
+
+<form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
+
+    <div id="detailWin" class="easyui-window panel-body panel-body-noborder window-body" title=""
+        data-options="modal:true,closed:true,border:'thin',cls:'c6'" style="padding: 10px; width: 100%; height: 200px;">
+        <style type="text/css">
+            table.altrowstable {
+                margin: 0 auto;
+                width: 95%;
+                font-family: verdana, arial, sans-serif;
+                font-size: 11px;
+                color: #333333;
+                border-width: 1px;
+                border-color: #247692;
+                border-collapse: collapse;
+                margin-bottom: 20px;
+            }
+
+            table.altrowstable th {
+                border-width: 1px;
+                padding: 5px;
+                font-size: 14px;
+                border-style: solid;
+                border-color: #d2d6de;
+            }
+
+            table.altrowstable td {
+                border-width: 1px;
+                padding: 5px;
+                text-align: center;
+                font-size: 14px;
+                border-style: solid;
+                border-color: #d2d6de;
+            }
+            table.altrowstable tr:nth-child(odd){
+                background:#E9F1F4;
+                background: #F5F5F5;
+                background: #F1F1F1;
+            }
+            table.altrowstable tr:nth-child(even){
+                background: #F5FAFA;
+                background: #eee;
+            }            
+        </style>
+        <table class="altrowstable" style="border:#0f0 solid 1px;margin:0px auto;margin-bottom:10px;width:90%;">
+            <tbody>
+                {foreach $result as $sku}
+                <tr>
+                    <td>
+                        <table class="altrowstable" style="margin:0 auto;margin:30px;width:90%;">
+                            <tbody>
+                                <tr></tr>
+                               
+                                <tr>
+                                    <td>产品名称：</td>
+                                    <td>{$sku.name}</td>
+                                </tr>
+                                <tr>
+                                    <td>SKU：</td>
+                                    <td>{$sku.sku}</td>
+                                </tr>
+                                <tr>
+                                    <td>数量：</td>
+                                    <td>{:round($sku['qty_ordered'])}</td>
+                                </tr>
+                                <tr>
+                                    <td>处方类型：</td>
+                                    <td>{$sku.prescription_type}</td>
+                                </tr>
+                                <tr>
+                                    <td>镜片类型：</td>
+                                    <td>{$sku['index_type']}</td>
+                                </tr>
+
+                                <tr>
+                                    <td>镀膜类型：</td>
+                                    <td>{$sku['coatiing_name']}</td>
+                                </tr>
+                                <tr>
+                                    <td>用户留言：</td>
+                                    <td>{:urldecode($sku['information'])}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </td>
+                    <td>
+                        <table class="altrowstable" border="0" cellspacing="0" cellpadding="0"
+                            style="margin:0 auto;margin-top:18px;width:90%;">
+                            <tbody cellpadding="0">
+                                <tr class="title">
+                                    <td colspan="6">处方参数</td>
+                                </tr>
+                                <tr class="title">
+                                    <td></td>
+                                    <td>SPH</td>
+                                    <td>CYL</td>
+                                    <td>AXI</td>
+                                    <td>ADD</td>
+                                    <td>PD</td>
+                                </tr>
+                                <tr>
+                                    <td>Right(OD)</td>
+                                    <td>{:$sku['od_sph'] ?? ''}</td>
+                                    <td>{:$sku['od_cyl'] ?? ''}</td>
+                                    <td>{:$sku['od_axis'] ?? ''}</td>
+                                    {if $sku['total_add']}
+                                    <td rowspan="2">{:$sku['total_add'] ?? ''}</td>
+                                    {else/}
+                                    <td>{:$sku['os_add'] ?? ''}</td>
+                                    {/if}
+                                    {if $sku['pdcheck'] == 'on'}
+                                    <td>{:$sku['pd_r'] ?? ''}</td>
+                                    {else/}
+                                    <td rowspan="2">{:$sku['pd'] ?? ''}</td>
+                                    {/if}
+                                </tr>
+                                <tr>
+                                    <td>Left(OS)</td>
+                                    <td>{:$sku['os_sph'] ?? ''}</td>
+                                    <td>{:$sku['os_cyl'] ?? ''}</td>
+                                    <td>{:$sku['os_axis'] ?? ''}</td>
+                                    {if !$sku['total_add']}
+                                    <td>{:$sku['od_add'] ?? ''}</td>
+                                    {/if}
+                                    {if $sku['pdcheck'] == 'on'}
+                                    <td>{:$sku['pd_l'] ?? ''}</td>
+                                    {/if}                                    
+                                </tr>
+                            </tbody>
+                        </table>
+                        {if $sku['prismcheck']}
+                        <table class="altrowstable" border="0" cellspacing="0" cellpadding="0"
+                            style="margin:0 auto;margin-top:18px;width:90%;">
+                            <tbody cellpadding="0">
+                                <tr class="title">
+                                    <td colspan="6">斜视</td>
+                                </tr>
+                                <tr class="title">
+                                    <td></td>
+                                    <td>Prism(out/in)</td>
+                                    <td>Direction(out/in)</td>
+                                    <td>Prism(up/down)</td>
+                                    <td>Direction(up/down)</td>                                    
+                                </tr>
+                                <tr>
+                                    <td>Right(OD)</td>
+                                    <td>{:$sku['od_pv'] ?? ''}</td>
+                                    <td>{:$sku['od_bd'] ?? ''}</td>
+                                    <td>{:$sku['od_pv_r'] ?? ''}</td>
+                                    <td>{:$sku['od_bd_r'] ?? ''}</td>                                   
+                                </tr>
+                                <tr>
+                                    <td>Left(OS)</td>
+                                    <td>{:$sku['os_pv'] ?? ''}</td>
+                                    <td>{:$sku['os_bd'] ?? ''}</td>
+                                    <td>{:$sku['os_pv_r'] ?? ''}</td>
+                                    <td>{:$sku['os_bd_r'] ?? ''}</td>                                                                  
+                                </tr>
+                            </tbody>
+                        </table>
+                        {/if}      
+                    </td>
+                </tr>
+                {/foreach}
+            </tbody>
+        </table>
+    </div>
+
+</form>
