@@ -1222,7 +1222,8 @@ class WorkOrderList extends Backend
         //$this->model->presentCoupon(235);
         //$this->model->presentIntegral(233);
         //$this->model->createOrder(3, 338);
-        $this->model->createOrder(1, 385);
+        $result=$this->model->deductionStock(445);
+        dump($result);
     }
     /**
      * 工单详情
