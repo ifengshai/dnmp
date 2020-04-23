@@ -17,6 +17,7 @@ use think\Db;
 use think\Exception;
 use Zendesk\API\HttpClient as ZendeskAPI;
 use function Stringy\create as s;
+use SchGroup\SeventeenTrack\Connectors\TrackingConnector;
 
 /**
  * 临时使用的只处理processing的方法
@@ -36,6 +37,7 @@ class ZendeskOne extends Controller
         'change information',
         'others'
     ];
+    protected $apiKey = 'F26A807B685D794C676FA3CC76567035';
     //匹配自动回复的单词
     protected $preg_word = ['deliver','delivery','receive','track','ship','shipping','tracking','status','shipment','where','where is','find','update','eta','expected'];
     public $client = null;
@@ -65,7 +67,7 @@ class ZendeskOne extends Controller
      */
     public function test()
     {
-        try {
+        //try {
             // Query Zendesk API to retrieve the ticket details
              //$id = 86205;
              //$ticket = $this->client->tickets()->find($id);
@@ -84,14 +86,22 @@ class ZendeskOne extends Controller
             // $get_order_id = $this->getOrderId($customr_comment_all);
             // $order = $this->findOrderByEmail($requester_email,$get_order_id);
             // $res = $this->getTrackMsg(41);
-            $track = new Trackingmore();
+            $apiKey = 'F26A807B685D794C676FA3CC76567035 '; // your api key
+
+            $trackNumber = '044141182826'; // Your track number
+
+            $trackingConnector = new TrackingConnector($apiKey);
+            $trackingConnector->register($trackNumber,100012);
+            $trackNumbersHistories =  $trackingConnector->getTrackInfo($trackNumber,100012);
+            echo 1;
+            //$track = new Trackingmore();
             //74890988318622362133
-            $res = $track->getRealtimeTrackingResults('usps', '7489098831862085069');
-            echo json_encode($res);
+//            $res = $track->getRealtimeTrackingResults('usps', '7489098831862085069');
+//            echo json_encode($res);
             die;
-        } catch (\Zendesk\API\Exceptions\ApiResponseException $e) {
-            echo $e->getMessage().'</br>';
-        }
+//        } catch (\Zendesk\API\Exceptions\ApiResponseException $e) {
+//            echo $e->getMessage().'</br>';
+//        }
     }
     /**
      * 查询tickets
@@ -564,16 +574,14 @@ class ZendeskOne extends Controller
         if($title == 'china-post'){
             $title = 'china-ems';
         }
-        $track = new Trackingmore();
-        $result = $track->getRealtimeTrackingResults($title, $track_result['track_number']);
-        //dump($result);die;
-        $data = $result['data']['items'][0];
-        $lastUpdateTime = $data['lastUpdateTime']; //物流最新跟新时间
-        $StatusDescription = isset($data['origin_info']['trackinfo'][0]['StatusDescription']) ? $data['origin_info']['trackinfo'][0]['StatusDescription'] : '';
-        $lastEvent = $data['lastEvent'] ? $data['lastEvent'] : $StatusDescription;
-//        $url = "https://translation.googleapis.com/language/translate/v2?key=AIzaSyCqDt6cu0yCLkKkkutNAm9gHJB3pcHIhKU&source=zh&target=en".'&q='.urlencode($lastEvent);
-//        $english = Http::sendRequest($url);
-//        $englishData = json_decode($english['msg'],true);
+        $trackNumber = $track_result['track_number']; // Your track number
+
+        $trackingConnector = new TrackingConnector($this->apiKey);
+        $carrier = $this->getCarrier($title);
+        $trackingConnector->register($trackNumber,$carrier);
+
+        $trackNumbersHistories =  $trackingConnector->getTrackInfo($trackNumber,$carrier);
+        $data = $this->formatTrack($trackNumbersHistories);
         $res = [
             'status' => $data['status'],
             'lastUpdateTime' => $lastUpdateTime,
@@ -584,6 +592,50 @@ class ZendeskOne extends Controller
         ];
         return $res;
 
+    }
+    public function formatTrack($trackNumbersHistories)
+    {
+
+    }
+    /**
+     * 获取快递号
+     * @param $title
+     * @return mixed|string
+     */
+    public function getCarrier($title)
+    {
+        $carrierId = '';
+        if(stripos($title,'post') !== false){
+            $carrierId = 'chinapost';
+        }elseif(stripos($title,'ems') !== false){
+            $carrierId = 'chinaems';
+        }elseif(stripos($title,'dhl') !== false){
+            $carrierId = 'dhl';
+        }elseif(stripos($title,'fede') !== false){
+            $carrierId = 'fedex';
+        }elseif(stripos($title,'usps') !== false){
+            $carrierId = 'usps';
+        }elseif(stripos($title,'yanwen') !== false){
+            $carrierId = 'yanwen';
+        }elseif(stripos($title,'SFInternational') !== false){
+            $carrierId = 'sf';
+        }elseif(stripos($title,'cpc') !== false){
+            $carrierId = 'cpc';
+        }
+        $carrier = [
+            'dhl' => '100001',
+            'chinapost' => '03011',
+            'chinaems' => '03013',
+            'cpc' =>  '03041',
+            'fedex' => '100003',
+            'usps' => '21051',
+            'yanwen' => '190012',
+            'sf' => '100012',
+        ];
+        if($carrierId){
+            return $carrier[$carrierId];
+        }
+        return $carrierId;
     }
 
     /**
