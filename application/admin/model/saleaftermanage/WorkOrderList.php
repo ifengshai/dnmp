@@ -14,6 +14,7 @@ use Util\WeseeopticalPrescriptionDetailHelper;
 use GuzzleHttp\Client;
 use app\admin\model\saleaftermanage\WorkOrderMeasure;
 use app\admin\model\saleaftermanage\WorkOrderRecept;
+use app\admin\model\saleaftermanage\WorkOrderChangeSku;
 use app\admin\controller\warehouse\Inventory;
 
 class WorkOrderList extends Model
@@ -227,7 +228,7 @@ class WorkOrderList extends Model
      * @param $work_id
      * @throws \Exception
      */
-    public function changeLens($params, $work_id, $measure_choose_id)
+    public function changeLens($params, $work_id, $measure_choose_id,$measure_id)
     {
         $work = $this->find($work_id);
         $measure = '';
@@ -329,6 +330,7 @@ class WorkOrderList extends Model
                         $data['prescription_option'] = serialize($prescriptionOption);
                     //}
                     WorkOrderChangeSku::create($data);
+                    WorkOrderMeasure::where(['id'=>$measure_id])->update(['sku_change_type'=>$change_type]);
                 }
                 Db::commit();
             } catch (\Exception $e) {
@@ -337,7 +339,80 @@ class WorkOrderList extends Model
             }
         }
 
-    }   
+    }
+    /**
+     * 插入更换镜框数据
+     *
+     * @Description
+     * @author lsw
+     * @since 2020/04/23 17:02:32 
+     * @return void
+     */
+    public function changeFrame($params,$work_id, $measure_choose_id,$measure_id){
+        //循环插入更换镜框数据
+        $orderChangeList = [];
+        //判断是否选中更改镜框问题类型
+        if ($params['change_frame']) {
+            if (($params['problem_type_id'] == 1 && $params['work_type'] == 1 && $measure_choose_id == 1) || ($params['problem_type_id'] == 2 && $params['work_type'] == 2 && $measure_choose_id == 1) || ($params['problem_type_id'] == 3 && $params['work_type'] == 2 && $measure_choose_id == 1)) {
+                $original_sku = $params['change_frame']['original_sku'];
+                $original_number = $params['change_frame']['original_number'];
+                $change_sku = $params['change_frame']['change_sku'];
+                $change_number = $params['change_frame']['change_number'];
+                foreach ($change_sku as $k => $v) {
+                    if (!$v) {
+                        continue;
+                    }
+                    $orderChangeList[$k]['work_id'] = $work_id;
+                    $orderChangeList[$k]['increment_id'] = $params['platform_order'];
+                    $orderChangeList[$k]['platform_type'] = $params['work_platform'];
+                    $orderChangeList[$k]['original_sku'] = $original_sku[$k];
+                    $orderChangeList[$k]['original_number'] = $original_number[$k];
+                    $orderChangeList[$k]['change_sku'] = $v;
+                    $orderChangeList[$k]['change_number'] = $change_number[$k];
+                    $orderChangeList[$k]['change_type'] = 1;
+                    $orderChangeList[$k]['create_person'] = session('admin.nickname');
+                    $orderChangeList[$k]['create_time'] = date('Y-m-d H:i:s');
+                    $orderChangeList[$k]['update_time'] = date('Y-m-d H:i:s');
+                }
+                $orderChangeRes = (new WorkOrderChangeSku())->saveAll($orderChangeList);
+                if (false === $orderChangeRes) {
+                    throw new Exception("添加失败！！");
+                }else{
+                    WorkOrderMeasure::where(['id'=>$measure_id])->update(['sku_change_type'=>1]);
+                }
+            }else{
+               return false; 
+            }
+        }
+    }
+    public function cancelOrder($params,$work_id, $measure_choose_id,$measure_id){
+        //循环插入取消订单数据
+        $orderChangeList = [];
+        //判断是否选中取消措施
+        if ($params['cancel_order'] && (3==$measure_choose_id)) {
+
+            foreach ($params['cancel_order']['original_sku'] as $k => $v) {
+
+                $orderChangeList[$k]['work_id'] = $work_id;
+                $orderChangeList[$k]['increment_id'] = $params['platform_order'];
+                $orderChangeList[$k]['platform_type'] = $params['work_platform'];
+                $orderChangeList[$k]['original_sku'] = $v;
+                $orderChangeList[$k]['original_number'] = $params['cancel_order']['original_number'][$k];
+                $orderChangeList[$k]['change_type'] = 3;
+                $orderChangeList[$k]['create_person'] = session('admin.nickname');
+                $orderChangeList[$k]['create_time'] = date('Y-m-d H:i:s');
+                $orderChangeList[$k]['update_time'] = date('Y-m-d H:i:s');
+            }
+            $cancelOrderRes = (new WorkOrderChangeSku())->saveAll($orderChangeList);
+            if (false === $cancelOrderRes) {
+                throw new Exception("添加失败！！");
+            }else{
+                WorkOrderMeasure::where(['id'=>$measure_id])->update(['sku_change_type'=>3]);
+            }
+        }else{
+            return false;
+        }
+    }        
     /**
      * 根据id获取镜片，镀膜的名称
      * @param $siteType
@@ -730,7 +805,7 @@ class WorkOrderList extends Model
             $data['note']          = $process_note;
             $data['finish_time']   = date('Y-m-d H:i:s');
             //更新本条工单数据承接人状态
-            WorkOrderRecept::where(['id'=>$id])->update($data);
+            $resultInfo =WorkOrderRecept::where(['id'=>$id])->update($data);
             //删除同组数据
             $where['work_id'] = $work_id;
             $where['measure_id'] = $measure_id;
@@ -765,65 +840,41 @@ class WorkOrderList extends Model
                 $dataWorkOrder['complete_time'] = date('Y-m-d H:i:s');
                 WorkOrderList::where(['id'=>$work_id])->update($dataWorkOrder);
             }
+            if($resultInfo  && (2 == $data['recept_status'])){
+                $this->deductionStock($work_id,$measure_id);
+            }
             return true; 
 
     }
-    // if (12 == $row['synergy_task_id']) { //执行更改镜架的逻辑
-    //     (new Inventory())->changeFrame($row['id'], $row['order_platform'], $row['synergy_order_number']);
-    // }elseif((14 == $row['synergy_task_id']) || (37 == $row['synergy_task_id']) || (38 == $row['synergy_task_id'])){ //执行取消订单的逻辑
-    //     (new Inventory())->cancelOrder($row['id'], $row['order_platform'], $row['synergy_order_number']);
-    // }
     //扣减库存逻辑
-    public function deductionStock($work_id)
+    public function deductionStock($work_id,$measure_id)
     {
-        $result = WorkOrderChangeSku::where(['work_id'=>$work_id])->field('id,increment_id,platform_type,change_type,original_sku,original_number,change_sku,change_number')->select();
+        $measuerInfo = WorkOrderMeasure::where(['id'=>$measure_id])->column('sku_change_type');
+        if($measuerInfo<1){
+            return false;
+        }
+        $change_type = $measuerInfo[0];
+        $whereMeasure['work_id'] = $work_id;
+        $whereMeasure['change_type'] = $change_type; 
+        $result = WorkOrderChangeSku::where($whereMeasure)->field('id,increment_id,platform_type,change_type,original_sku,original_number,change_sku,change_number')->select();
         if(!$result){
             return false;
         }
         $workOrderList = WorkOrderList::where(['id'=>$work_id])->field('id,work_platform,platform_order')->find();
         $result = collection($result)->toArray();
-        $arr = [];
-        foreach($result as  $val){
-            switch($val['change_type']){
-                //更改镜架
-                case 1:
-                    $arr['change_frame'][] = $val;   
-                break;
-                //更改镜片
-                case 2:
-                    $arr['change_lens'][]  = $val;     
-                break;
-                //取消订单    
-                case 3:
-                    $arr['cancel_order'][] = $val;
-                break;
-                //赠品
-                case 4:
-                    $arr['present'][] = $val;
-                break;
-                //补发
-                case 5:
-                    $arr['reissue'][] = $val;
-                break;
-                default:
-                break;        
-            }
+        
+        if(1 == $change_type){//更改镜片
+            $info = (new Inventory())->workChangeFrame($work_id, $workOrderList->work_platform, $workOrderList->platform_order,$result);
+        }elseif(2 == $change_type){ //取消订单
+            $info = (new Inventory())->workCancelOrder($work_id, $workOrderList->work_platform, $workOrderList->platform_order,$result);
+        }elseif(4 == $change_type){ //赠品
+            $info = (new Inventory())->workPresent($work_id, $workOrderList->work_platform, $workOrderList->platform_order,$result);
+        }elseif(5 == $change_type){
+            $info =(new Inventory())->workPresent($work_id, $workOrderList->work_platform, $workOrderList->platform_order,$result);
+        }else{
+            return false;
         }
-        //更改镜架
-        if(!empty($arr['change_frame'])){
-            (new Inventory())->workChangeFrame($work_id, $workOrderList->work_platform, $workOrderList->platform_order,$arr['change_frame']);
-        }
-        //取消订单
-        if(!empty($arr['cancel_order'])){
-            (new Inventory())->workCancelOrder($work_id, $workOrderList->work_platform, $workOrderList->platform_order,$arr['cancel_order']);
-        }
-        //赠品
-        if(!empty($arr['present'])){
-            (new Inventory())->workPresent($work_id, $workOrderList->work_platform, $workOrderList->platform_order,$arr['present']);
-        }
-        //补发
-        if(!empty($arr['reissue'])){
-            (new Inventory())->workPresent($work_id, $workOrderList->work_platform, $workOrderList->platform_order,$arr['reissue']);
-        }
+        return $info;
+        
     }
 }

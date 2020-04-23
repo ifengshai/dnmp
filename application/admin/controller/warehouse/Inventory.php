@@ -1491,7 +1491,7 @@ class Inventory extends Backend
      */
     public function workCancelOrder($id, $order_platform, $increment_id,$changeRow)
     {
-        if (!$id || !$order_platform || !$increment_id || $changeRow) {
+        if (!$id || !$order_platform || !$increment_id || !$changeRow) {
             return false;
         }
         $item = new \app\admin\model\itemmanage\Item;
@@ -1546,26 +1546,19 @@ class Inventory extends Backend
             }
         }
     }
-        /***lsw
-     * 取消订单的逻辑
+    /***lsw
+     * 赠品和补发的逻辑逻辑
      * @param id 协同任务ID
      * @param order_platform 订单平台
      * @param increment_id 订单号
      */
     public function workPresent($id, $order_platform, $increment_id,$changeRow)
     {
-        if (!$id || !$order_platform || !$increment_id || $changeRow) {
+        if (!$id || !$order_platform || !$increment_id || !$changeRow) {
             return false;
         }
         $item = new \app\admin\model\itemmanage\Item;
         $platformSku   = new \app\admin\model\itemmanage\ItemPlatformSku;
-        if (1 == $order_platform) {
-            $db = 'database.db_zeelool';
-        } elseif (2 == $order_platform) {
-            $db = 'database.db_voogueme';
-        } elseif (3 == $order_platform) {
-            $db = 'database.db_nihao';
-        }
         foreach ($changeRow as $v) {
             //原先sku
             $original_sku    = $v['original_sku'];
@@ -1575,27 +1568,10 @@ class Inventory extends Backend
             $whereOriginSku['platform_sku'] = $original_sku;
             $whereOriginSku['platform_type'] = $order_platform;
             $warehouse_original_sku = $platformSku->where($whereOriginSku)->value('sku');
-            //求出订单对应的order_id
-            $order = Db::connect($db)->table('sales_flat_order')->where(['increment_id' => $increment_id])->field('entity_id,custom_is_match_frame_new')->find();
-            if (!$original_sku || !$original_number) {
-                continue;
-            }
             //回滚
             Db::startTrans();
             try {
-                //更改sales_flat_order_item表中的sku字段
-                $whereChange['order_id'] = $order['entity_id'];
-                $whereChange['sku']      = $original_sku;
-                $changeData['is_change_frame'] = 3;
-                $updateInfo = Db::connect($db)->table('sales_flat_order_item')->where($whereChange)->update($changeData);
-                if (false != $updateInfo) {
-                    if (1 == $order['custom_is_match_frame_new']) { //如果已经配过镜架需要把原先的配货占用库存扣减
-                        //原先sku增加可用库存,减少占用库存
-                        $item->where(['sku' => $warehouse_original_sku])->inc('available_stock', $original_number)->dec('distribution_occupy_stock', $original_number)->dec('occupy_stock', $original_number)->update();
-                    } else {
-                        $item->where(['sku' => $warehouse_original_sku])->inc('available_stock', $original_number)->dec('occupy_stock', $original_number)->update();
-                    }
-                }
+                $item->where(['sku' => $warehouse_original_sku])->dec('available_stock', $original_number)->inc('occupy_stock', $original_number)->update();
                 Db::commit();
             } catch (ValidateException $e) {
                 Db::rollback();
