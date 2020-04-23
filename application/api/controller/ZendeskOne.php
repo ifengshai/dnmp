@@ -111,13 +111,13 @@ class ZendeskOne extends Controller
                 'none'
             ],
             //'requester' => $this->testId,
-//             'updated_at' => [
-//                 'valuetype' => '>=',
-//                 'value'   => '20minutes',
-//             ],//>=意思是3分钟之内，<=是三分钟之外
+             'updated_at' => [
+                 'valuetype' => '>=',
+                 'value'   => '20minutes',
+             ],//>=意思是3分钟之内，<=是三分钟之外
             'created_at' => [
                 'valuetype' => '>=',
-                'value'   => '2020-04-21T010:00:00Z'
+                'value'   => '2020-04-09T01:00:00Z'
             ], //添加创建时间的限制
             'order_by' => 'updated_at',
             'sort' => 'desc'
@@ -138,7 +138,7 @@ class ZendeskOne extends Controller
     protected function getTickets(Array $array)
     {
         $params = $this->parseStr($array);
-        $search = $this->client->search()->find($params,['page' => 1]);
+        $search = $this->client->search()->find($params);
         $tickets = $search->results;
         if(!$search->count){
             return true;
@@ -168,9 +168,9 @@ class ZendeskOne extends Controller
     public function findCommentsByTickets($tickets)
     {
         foreach($tickets as $key => $ticket){
-           if($key >= 100){
-               break;
-           }
+//           if($key >= 10){
+//               break;
+//           }
             $id = $ticket->id;
             //发送者的id
             $requester_id = $ticket->requester_id;
