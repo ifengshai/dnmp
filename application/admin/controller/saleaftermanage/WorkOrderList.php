@@ -255,8 +255,8 @@ class WorkOrderList extends Backend
                         unset($params['replenish_increment_id']);
                         unset($params['replenish_money']);
                     } else {
-                        if (!$params['replenish_increment_id'] || !$params['replenish_money']) {
-                            throw new Exception("补差价订单号和金额不能为空");
+                        if (!$params['replenish_increment_id']) {
+                            throw new Exception("补差价订单号不能为空");
                         }
                     }
 
@@ -711,8 +711,8 @@ class WorkOrderList extends Backend
                         unset($params['replenish_increment_id']);
                         unset($params['replenish_money']);
                     } else {
-                        if (!$params['replenish_increment_id'] || !$params['replenish_money']) {
-                            throw new Exception("补差价订单号和金额不能为空");
+                        if (!$params['replenish_increment_id']) {
+                            throw new Exception("补差价订单号不能为空");
                         }
                     }
 
