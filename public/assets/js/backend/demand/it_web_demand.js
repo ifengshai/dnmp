@@ -577,6 +577,19 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {field: 'all_finish_time', title: __('all_finish_time'), operate:'RANGE', addclass:'datetimerange',operate:false},
                         {field: 'status_str', title: __('Status'),operate:false},
                         {
+                            field: 'is_work_time', title: __('是否非工作时间处理问题'),
+                            searchList: { 1: '是', 0: '否' },
+                            custom: { 1: 'blue', 2: 'yellow' },
+                            visible:false
+                            // formatter: Table.api.formatter.status
+                        },{
+                            field: 'is_test_duty', title: __('是否扣除测试绩效'),
+                            searchList: { 1: '是', 0: '否' },
+                            custom: { 1: 'blue', 2: 'yellow' },
+                            visible:false
+                            // formatter: Table.api.formatter.status
+                        },
+                        {
                             field: 'buttons',
                             width: "120px",
                             operate:false,
@@ -843,6 +856,108 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                             return false;
                                         }
                                     }
+                                },
+                                {
+                                    name: 'opt_test_duty',
+                                    text: '测试责任',
+                                    title: __('将扣除测试绩效'),
+                                    classname: 'btn btn-xs btn-warning btn-ajax',
+                                    url: 'demand/it_web_demand/opt_test_duty/is_test_duty/1',
+                                    confirm: '确认测试责任吗,将扣除测试绩效',
+                                    success: function (data, ret) {
+                                        Layer.alert(ret.msg);
+                                        $(".btn-refresh").trigger("click");
+                                        //如果需要阻止成功提示，则必须使用return false;
+                                        //return false;
+                                    },
+                                    error: function (data, ret) {
+                                        Layer.alert(ret.msg);
+                                        return false;
+                                    },
+                                    visible: function (row) {
+                                        //返回true时按钮显示,返回false隐藏
+                                        if(row.demand_opt_test_duty && row.is_test_duty == 0){//操作权限及显示权限
+                                            return true;
+                                        }else {
+                                            return false;
+                                        }
+                                    },
+                                },{
+                                    name: 'opt_test_duty',
+                                    text: '非测试责任',
+                                    title: __('无需扣除测试绩效'),
+                                    classname: 'btn btn-xs btn-success btn-ajax',
+                                    url: 'demand/it_web_demand/opt_test_duty',
+                                    confirm: '确认非测试责任吗,无需扣除测试绩效',
+                                    success: function (data, ret) {
+                                        Layer.alert(ret.msg);
+                                        $(".btn-refresh").trigger("click");
+                                        //如果需要阻止成功提示，则必须使用return false;
+                                        //return false;
+                                    },
+                                    error: function (data, ret) {
+                                        Layer.alert(ret.msg);
+                                        return false;
+                                    },
+                                    visible: function (row) {
+                                        //返回true时按钮显示,返回false隐藏
+                                        if(row.demand_opt_test_duty && row.is_test_duty == 1){//操作权限及显示权限
+                                            return true;
+                                        }else {
+                                            return false;
+                                        }
+                                    },
+                                },
+                                {
+                                    name: 'opt_work_time',
+                                    text: '工作时间处理问题',
+                                    title: __('改为工作时间处理此问题'),
+                                    classname: 'btn btn-xs btn-warning btn-ajax',
+                                    url: 'demand/it_web_demand/opt_work_time/is_work_time/1',
+                                    confirm: '是否改为工作时间此处理问题',
+                                    success: function (data, ret) {
+                                        Layer.alert(ret.msg);
+                                        $(".btn-refresh").trigger("click");
+                                        //如果需要阻止成功提示，则必须使用return false;
+                                        //return false;
+                                    },
+                                    error: function (data, ret) {
+                                        Layer.alert(ret.msg);
+                                        return false;
+                                    },
+                                    visible: function (row) {
+                                        //返回true时按钮显示,返回false隐藏
+                                        if(row.demand_opt_work_time && row.is_work_time == 0){//操作权限及显示权限
+                                            return true;
+                                        }else {
+                                            return false;
+                                        }
+                                    },
+                                },{//是否非工作时间处理问题  0 否 不是非工作时间处理问题  1 是 是非工作时间处理问题
+                                    name: 'opt_work_time',
+                                    text: '非工作时间处理问题',
+                                    title: __('改为非工作时间处理此问题'),
+                                    classname: 'btn btn-xs btn-success btn-ajax',
+                                    url: 'demand/it_web_demand/opt_work_time',
+                                    confirm: '是否改为非工作时间处理此问题',
+                                    success: function (data, ret) {
+                                        Layer.alert(ret.msg);
+                                        $(".btn-refresh").trigger("click");
+                                        //如果需要阻止成功提示，则必须使用return false;
+                                        //return false;
+                                    },
+                                    error: function (data, ret) {
+                                        Layer.alert(ret.msg);
+                                        return false;
+                                    },
+                                    visible: function (row) {
+                                        //返回true时按钮显示,返回false隐藏
+                                        if(row.demand_opt_work_time && row.is_work_time == 1){//操作权限及显示权限
+                                            return true;
+                                        }else {
+                                            return false;
+                                        }
+                                    },
                                 },
                             ],
                             formatter: Table.api.formatter.buttons
@@ -1536,4 +1651,9 @@ function update_responsibility_user(val){
     var is_val = $(val).val();
     $('.responsibility_user_id').attr('name','');
     $('#responsibility_user_id_'+is_val).attr('name','row[responsibility_user_id]');
+}
+
+
+function onchangeSelect(num) {
+    $("input[name='row[is_small_probability]']").val(num.value);
 }
