@@ -286,15 +286,15 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     var params = queryParams(params);
                     var filter = params.filter ? JSON.parse(params.filter) : {};
                     var op = params.op ? JSON.parse(params.op) : {};
-                    if (field == 'create_person') {
-                        delete filter.recept_person_id;
+                    if (field == 'create_user_name') {
+                        delete filter.create_user_name;
                         filter[field] = value;
                     } else if (field == 'recept_person_id') {
-                        delete filter.create_person;
+                        delete filter.recept_person_id;
                         filter[field] = value;
                     } else {
                         delete filter.recept_person_id;
-                        delete filter.create_person;
+                        delete filter.create_user_name;
                     }
                     params.filter = JSON.stringify(filter);
                     params.op = JSON.stringify(op);
