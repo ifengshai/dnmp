@@ -982,16 +982,16 @@ EOF;
                     $temp_increment_id = $processing_value['increment_id'];
 
                     $date = substr($processing_value['created_at'], 0, strpos($processing_value['created_at'], " "));
-                    $fileName = ROOT_PATH . "public" . DS . "uploads" . DS . "printOrder" . DS . "voogueme" . DS . "$date" . DS . "$temp_increment_id.png";
+                    $fileName = ROOT_PATH . "public" . DS . "uploads" . DS . "printOrder" . DS . "meeloog" . DS . "$date" . DS . "$temp_increment_id.png";
                     // dump($fileName);
-                    $dir = ROOT_PATH . "public" . DS . "uploads" . DS . "printOrder" . DS . "voogueme" . DS . "$date";
+                    $dir = ROOT_PATH . "public" . DS . "uploads" . DS . "printOrder" . DS . "meeloog" . DS . "$date";
                     if (!file_exists($dir)) {
                         mkdir($dir, 0777, true);
                         // echo '创建文件夹$dir成功';
                     } else {
                         // echo '需创建的文件夹$dir已经存在';
                     }
-                    $img_url = "/uploads/printOrder/voogueme/$date/$temp_increment_id.png";
+                    $img_url = "/uploads/printOrder/meeloog/$date/$temp_increment_id.png";
                     //生成条形码
                     $this->generate_barcode($temp_increment_id, $fileName);
                     // echo '<br>需要打印'.$temp_increment_id;
@@ -1144,7 +1144,6 @@ EOF;
         foreach ($origin_order_item as $origin_order_key => $origin_order_value) {
             if ($origin_order_value['qty_ordered'] > 1 && strpos($origin_order_value['sku'], 'Price') === false) {
                 unset($origin_order_item[$origin_order_key]);
-                // array_splice($origin_order_item,$origin_order_key,1);
                 for ($i = 0; $i < $origin_order_value['qty_ordered']; $i++) {
                     $tmp_order_value = $origin_order_value;
                     $tmp_order_value['qty_ordered'] = 1;
