@@ -356,7 +356,7 @@ class Ding extends Controller
             case 'test_distribution':       // 测试分配, 是否需要测试: 不需要 - 通知主管, 需要 - 通知主管和测试负责人
                 if ($demand ->type == 1) { // bug 需要主管确认
                     $send_ids = array_merge(
-                        \think\Db::name('fa_auth_group_access')
+                        \think\Db::name('auth_group_access')
                             ->where('group_id', 68)
                             ->column('uid'), // 主管用户id (fa_auth_group表中name = IT开发组)
                         explode(',', $demand ->test_user_id)
