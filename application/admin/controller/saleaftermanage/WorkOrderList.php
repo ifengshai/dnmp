@@ -1933,5 +1933,13 @@ EOF;
         }
         return $notEnough ? $str : false;
     }
-    
+
+    /**
+     * 问题类型筛选的下拉列表
+     * @return array
+     */
+    public function getProblemTypeContent()
+    {
+        return array_merge(config('workorder.warehouse_problem_type'),config('workorder.customer_problem_type'));
+    }
 }
