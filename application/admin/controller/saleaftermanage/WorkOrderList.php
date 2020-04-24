@@ -418,66 +418,68 @@ class WorkOrderList extends Backend
                             }
 
                             //更改镜片，补发，赠品
-                            $this->model->changeLens($params, $work_id, $v);
+                            $this->model->changeLens($params, $work_id, $v,$res);
+                            $this->model->changeFrame($params, $work_id, $v,$res);
+                            $this->model->cancelOrder($params, $work_id, $v,$res);
                         }
                     }
 
-                    //循环插入更换镜框数据
-                    $orderChangeList = [];
+                    // //循环插入更换镜框数据
+                    // $orderChangeList = [];
 
-                    //判断是否选中更改镜框问题类型
-                    if ($params['change_frame']) {
+                    // //判断是否选中更改镜框问题类型
+                    // if ($params['change_frame']) {
 
-                        if (($params['problem_type_id'] == 1 && $params['work_type'] == 1) || ($params['problem_type_id'] == 2 && $params['work_type'] == 2) || ($params['problem_type_id'] == 3 && $params['work_type'] == 2)) {
-                            $original_sku = $params['change_frame']['original_sku'];
-                            $original_number = $params['change_frame']['original_number'];
-                            $change_sku = $params['change_frame']['change_sku'];
-                            $change_number = $params['change_frame']['change_number'];
-                            foreach ($change_sku as $k => $v) {
-                                if (!$v) {
-                                    continue;
-                                }
-                                $orderChangeList[$k]['work_id'] = $work_id;
-                                $orderChangeList[$k]['increment_id'] = $params['platform_order'];
-                                $orderChangeList[$k]['platform_type'] = $params['work_platform'];
-                                $orderChangeList[$k]['original_sku'] = $original_sku[$k];
-                                $orderChangeList[$k]['original_number'] = $original_number[$k];
-                                $orderChangeList[$k]['change_sku'] = $v;
-                                $orderChangeList[$k]['change_number'] = $change_number[$k];
-                                $orderChangeList[$k]['change_type'] = 1;
-                                $orderChangeList[$k]['create_person'] = session('admin.nickname');
-                                $orderChangeList[$k]['create_time'] = date('Y-m-d H:i:s');
-                                $orderChangeList[$k]['update_time'] = date('Y-m-d H:i:s');
-                            }
-                            $orderChangeRes = $this->order_change->saveAll($orderChangeList);
-                            if (false === $orderChangeRes) {
-                                throw new Exception("添加失败！！");
-                            }
-                        }
-                    }
+                    //     if (($params['problem_type_id'] == 1 && $params['work_type'] == 1) || ($params['problem_type_id'] == 2 && $params['work_type'] == 2) || ($params['problem_type_id'] == 3 && $params['work_type'] == 2)) {
+                    //         $original_sku = $params['change_frame']['original_sku'];
+                    //         $original_number = $params['change_frame']['original_number'];
+                    //         $change_sku = $params['change_frame']['change_sku'];
+                    //         $change_number = $params['change_frame']['change_number'];
+                    //         foreach ($change_sku as $k => $v) {
+                    //             if (!$v) {
+                    //                 continue;
+                    //             }
+                    //             $orderChangeList[$k]['work_id'] = $work_id;
+                    //             $orderChangeList[$k]['increment_id'] = $params['platform_order'];
+                    //             $orderChangeList[$k]['platform_type'] = $params['work_platform'];
+                    //             $orderChangeList[$k]['original_sku'] = $original_sku[$k];
+                    //             $orderChangeList[$k]['original_number'] = $original_number[$k];
+                    //             $orderChangeList[$k]['change_sku'] = $v;
+                    //             $orderChangeList[$k]['change_number'] = $change_number[$k];
+                    //             $orderChangeList[$k]['change_type'] = 1;
+                    //             $orderChangeList[$k]['create_person'] = session('admin.nickname');
+                    //             $orderChangeList[$k]['create_time'] = date('Y-m-d H:i:s');
+                    //             $orderChangeList[$k]['update_time'] = date('Y-m-d H:i:s');
+                    //         }
+                    //         $orderChangeRes = $this->order_change->saveAll($orderChangeList);
+                    //         if (false === $orderChangeRes) {
+                    //             throw new Exception("添加失败！！");
+                    //         }
+                    //     }
+                    // }
 
-                    //循环插入取消订单数据
-                    $orderChangeList = [];
-                    //判断是否选中取消措施
-                    if ($params['cancel_order'] && in_array(3, array_filter($params['measure_choose_id']))) {
+                    // //循环插入取消订单数据
+                    // $orderChangeList = [];
+                    // //判断是否选中取消措施
+                    // if ($params['cancel_order'] && in_array(3, array_filter($params['measure_choose_id']))) {
 
-                        foreach ($params['cancel_order']['original_sku'] as $k => $v) {
+                    //     foreach ($params['cancel_order']['original_sku'] as $k => $v) {
 
-                            $orderChangeList[$k]['work_id'] = $work_id;
-                            $orderChangeList[$k]['increment_id'] = $params['platform_order'];
-                            $orderChangeList[$k]['platform_type'] = $params['work_platform'];
-                            $orderChangeList[$k]['original_sku'] = $v;
-                            $orderChangeList[$k]['original_number'] = $params['cancel_order']['original_number'][$k];
-                            $orderChangeList[$k]['change_type'] = 3;
-                            $orderChangeList[$k]['create_person'] = session('admin.nickname');
-                            $orderChangeList[$k]['create_time'] = date('Y-m-d H:i:s');
-                            $orderChangeList[$k]['update_time'] = date('Y-m-d H:i:s');
-                        }
-                        $cancelOrderRes = $this->order_change->saveAll($orderChangeList);
-                        if (false === $cancelOrderRes) {
-                            throw new Exception("添加失败！！");
-                        }
-                    }
+                    //         $orderChangeList[$k]['work_id'] = $work_id;
+                    //         $orderChangeList[$k]['increment_id'] = $params['platform_order'];
+                    //         $orderChangeList[$k]['platform_type'] = $params['work_platform'];
+                    //         $orderChangeList[$k]['original_sku'] = $v;
+                    //         $orderChangeList[$k]['original_number'] = $params['cancel_order']['original_number'][$k];
+                    //         $orderChangeList[$k]['change_type'] = 3;
+                    //         $orderChangeList[$k]['create_person'] = session('admin.nickname');
+                    //         $orderChangeList[$k]['create_time'] = date('Y-m-d H:i:s');
+                    //         $orderChangeList[$k]['update_time'] = date('Y-m-d H:i:s');
+                    //     }
+                    //     $cancelOrderRes = $this->order_change->saveAll($orderChangeList);
+                    //     if (false === $cancelOrderRes) {
+                    //         throw new Exception("添加失败！！");
+                    //     }
+                    // }
                     //不需要审核且是非草稿状态时直接发送积分，赠送优惠券
                     if ($params['is_check'] != 1 && $this->model->work_status != 1) {
                         //赠送积分
@@ -845,62 +847,64 @@ class WorkOrderList extends Backend
                                 throw new Exception("添加失败！！");
                             }
                             //更改镜片，补发，赠品
-                            $this->model->changeLens($params, $row->id, $v);
+                            $this->model->changeLens($params, $row->id, $v,$res);
+                            $this->model->changeFrame($params, $row->id, $v,$res);
+                            $this->model->cancelOrder($params, $row->id, $v,$res);
                         }
                     }
 
-                    //循环插入更换镜框数据
-                    $orderChangeList = [];
-                    //判断是否选中更改镜框问题类型
-                    if ($params['change_frame'] && $params['problem_type_id'] == 1) {
-                        $original_sku = $params['change_frame']['original_sku'];
-                        $original_number = $params['change_frame']['original_number'];
-                        $change_sku = $params['change_frame']['change_sku'];
-                        $change_number = $params['change_frame']['change_number'];
-                        foreach ($change_sku as $k => $v) {
-                            if (!$v) {
-                                continue;
-                            }
-                            $orderChangeList[$k]['work_id'] = $row->id;
-                            $orderChangeList[$k]['increment_id'] = $params['platform_order'];
-                            $orderChangeList[$k]['platform_type'] = $params['work_type'];
-                            $orderChangeList[$k]['original_sku'] = $original_sku[$k];
-                            $orderChangeList[$k]['original_number'] = $original_number[$k];
-                            $orderChangeList[$k]['change_sku'] = $v;
-                            $orderChangeList[$k]['change_number'] = $change_number[$k];
-                            $orderChangeList[$k]['change_type'] = 1;
-                            $orderChangeList[$k]['create_person'] = session('admin.nickname');
-                            $orderChangeList[$k]['create_time'] = date('Y-m-d H:i:s');
-                            $orderChangeList[$k]['update_time'] = date('Y-m-d H:i:s');
-                        }
-                        $orderChangeRes = $this->order_change->saveAll($orderChangeList);
-                        if (false === $orderChangeRes) {
-                            throw new Exception("添加失败！！");
-                        }
-                    }
+                    // //循环插入更换镜框数据
+                    // $orderChangeList = [];
+                    // //判断是否选中更改镜框问题类型
+                    // if ($params['change_frame'] && $params['problem_type_id'] == 1) {
+                    //     $original_sku = $params['change_frame']['original_sku'];
+                    //     $original_number = $params['change_frame']['original_number'];
+                    //     $change_sku = $params['change_frame']['change_sku'];
+                    //     $change_number = $params['change_frame']['change_number'];
+                    //     foreach ($change_sku as $k => $v) {
+                    //         if (!$v) {
+                    //             continue;
+                    //         }
+                    //         $orderChangeList[$k]['work_id'] = $row->id;
+                    //         $orderChangeList[$k]['increment_id'] = $params['platform_order'];
+                    //         $orderChangeList[$k]['platform_type'] = $params['work_type'];
+                    //         $orderChangeList[$k]['original_sku'] = $original_sku[$k];
+                    //         $orderChangeList[$k]['original_number'] = $original_number[$k];
+                    //         $orderChangeList[$k]['change_sku'] = $v;
+                    //         $orderChangeList[$k]['change_number'] = $change_number[$k];
+                    //         $orderChangeList[$k]['change_type'] = 1;
+                    //         $orderChangeList[$k]['create_person'] = session('admin.nickname');
+                    //         $orderChangeList[$k]['create_time'] = date('Y-m-d H:i:s');
+                    //         $orderChangeList[$k]['update_time'] = date('Y-m-d H:i:s');
+                    //     }
+                    //     $orderChangeRes = $this->order_change->saveAll($orderChangeList);
+                    //     if (false === $orderChangeRes) {
+                    //         throw new Exception("添加失败！！");
+                    //     }
+                    // }
 
-                    //循环插入取消订单数据
-                    $orderChangeList = [];
-                    //判断是否选中取消措施
-                    if ($params['cancel_order'] && in_array(3, array_filter($params['measure_choose_id']))) {
+                    // //循环插入取消订单数据
+                    // $orderChangeList = [];
+                    // //判断是否选中取消措施
+                    // if ($params['cancel_order'] && in_array(3, array_filter($params['measure_choose_id']))) {
 
-                        foreach ($params['cancel_order']['original_sku'] as $k => $v) {
+                    //     foreach ($params['cancel_order']['original_sku'] as $k => $v) {
 
-                            $orderChangeList[$k]['work_id'] = $row->id;
-                            $orderChangeList[$k]['increment_id'] = $params['platform_order'];
-                            $orderChangeList[$k]['platform_type'] = $params['work_type'];
-                            $orderChangeList[$k]['original_sku'] = $v;
-                            $orderChangeList[$k]['original_number'] = $params['cancel_order']['original_number'][$k];
-                            $orderChangeList[$k]['change_type'] = 3;
-                            $orderChangeList[$k]['create_person'] = session('admin.nickname');
-                            $orderChangeList[$k]['create_time'] = date('Y-m-d H:i:s');
-                            $orderChangeList[$k]['update_time'] = date('Y-m-d H:i:s');
-                        }
-                        $cancelOrderRes = $this->order_change->saveAll($orderChangeList);
-                        if (false === $cancelOrderRes) {
-                            throw new Exception("添加失败！！");
-                        }
-                    }
+                    //         $orderChangeList[$k]['work_id'] = $row->id;
+                    //         $orderChangeList[$k]['increment_id'] = $params['platform_order'];
+                    //         $orderChangeList[$k]['platform_type'] = $params['work_type'];
+                    //         $orderChangeList[$k]['original_sku'] = $v;
+                    //         $orderChangeList[$k]['original_number'] = $params['cancel_order']['original_number'][$k];
+                    //         $orderChangeList[$k]['change_type'] = 3;
+                    //         $orderChangeList[$k]['create_person'] = session('admin.nickname');
+                    //         $orderChangeList[$k]['create_time'] = date('Y-m-d H:i:s');
+                    //         $orderChangeList[$k]['update_time'] = date('Y-m-d H:i:s');
+                    //     }
+                    //     $cancelOrderRes = $this->order_change->saveAll($orderChangeList);
+                    //     if (false === $cancelOrderRes) {
+                    //         throw new Exception("添加失败！！");
+                    //     }
+                    // }
                     //不需要审核时直接发送积分，赠送优惠券
                     if (!$params['is_check']  && $params['work_status'] != 1) {
                         //赠送积分
@@ -1222,7 +1226,7 @@ class WorkOrderList extends Backend
         //$this->model->presentCoupon(235);
         //$this->model->presentIntegral(233);
         //$this->model->createOrder(3, 338);
-        $result=$this->model->deductionStock(445);
+        $result=$this->model->deductionStock(462,456);
         dump($result);
     }
     /**
