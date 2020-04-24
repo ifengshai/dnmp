@@ -77,6 +77,7 @@ class WorkOrderList extends Backend
     {
         $step = $this->step->where('work_id', $id)->select();
         $step_arr = collection($step)->toArray();
+
         foreach ($step_arr as $k => $v) {
             $recept = $this->recept->where('measure_id', $v['id'])->where('work_id', $id)->select();
             $recept_arr = collection($recept)->toArray();
@@ -84,7 +85,7 @@ class WorkOrderList extends Backend
 
             $step_arr[$k]['recept'] = $recept_arr;
         }
-        return $step_arr;
+        return $step_arr ?: [];
     }
 
     /**
@@ -165,7 +166,6 @@ class WorkOrderList extends Backend
                     $list[$k]['has_recept'] = 1;
                 }
             }
-
             $result = array("total" => $total, "rows" => $list);
 
             return json($result);
@@ -311,6 +311,11 @@ class WorkOrderList extends Backend
                         $params['is_check'] = 1;
                         //创建人对应主管
                         $params['assign_user_id'] = $this->assign_user_id;
+                    }
+
+                    //如果退款金额大于30 需要审核
+                    if ($params['refund_money'] > 30) {
+                        $params['is_check'] = 1;
                     }
 
                     //判断审核人
@@ -770,6 +775,11 @@ class WorkOrderList extends Backend
                         $params['assign_user_id'] = $this->assign_user_id;
                     }
 
+                    //如果退款金额大于30 需要审核
+                    if ($params['refund_money'] > 30) {
+                        $params['is_check'] = 1;
+                    }
+                    
                     //判断审核人
                     if ($params['is_check'] == 1 || $params['need_coupon_id']) {
                         /**
@@ -1226,7 +1236,7 @@ class WorkOrderList extends Backend
         //$this->model->presentCoupon(235);
         //$this->model->presentIntegral(233);
         //$this->model->createOrder(3, 338);
-        $result=$this->model->deductionStock(462,456);
+        $result=$this->checkMeasure(463);
         dump($result);
     }
     /**
@@ -1511,6 +1521,13 @@ class WorkOrderList extends Backend
                 if ($receptInfo) {
                     if ($receptInfo['recept_person_id'] != session('admin.id')) {
                         $this->error(__('您不能处理此工单'));
+                    }
+                    //当要处理成功时需要判断库存是否存在
+                    if(1 == $params['success']){
+                        $checkSku =$this->checkMeasure($receptInfo['measure_id']);
+                        if($checkSku){
+                            $this->error(__("以下sku库存不足{$checkSku},无法处理成功"));
+                        }
                     }
                     $result = $this->model->handleRecept($receptInfo['id'], $receptInfo['work_id'], $receptInfo['measure_id'], $receptInfo['recept_group_id'], $params['success'], $params['note']);
                 }
@@ -1866,4 +1883,54 @@ EOF;
         array_multisort($arrSort[$field], constant($sort), $array);
         return $array;
     }
+    /**
+     * 判断措施当中的扣减库存是否存在
+     *
+     * @Description
+     * @author lsw
+     * @since 2020/04/24 09:30:03 
+     * @param array $receptInfo
+     * @return void
+     */
+    protected function checkMeasure($measure_id)
+    {
+        //1.求出措施的类型
+        $measuerInfo = WorkOrderMeasure::where(['id'=>$measure_id])->value('sku_change_type');
+        //没有扣减库存的措施
+        if($measuerInfo<1){ 
+            return false;
+        }
+        //求出措施类型
+        if(!in_array($measuerInfo,[1,4,5])){
+            return false;
+        }
+        $whereMeasure['measure_id'] = $measure_id;
+        $whereMeasure['change_type'] = $measuerInfo; 
+        $result = WorkOrderChangeSku::where($whereMeasure)->field('platform_type,original_sku,original_number,change_sku,change_number')->select();
+        $result = collection($result)->toArray();
+        //更改镜片
+        $arr = [];
+        foreach($result as $k=> $v){
+            $arr[$k]['original_sku'] = $v['change_sku'];
+            $arr[$k]['original_number'] = $v['change_number'];
+            $arr[$k]['platform_type']   = $v['platform_type'];
+        }
+        $itemPlatFormSku = new \app\admin\model\itemmanage\ItemPlatformSku();
+        //根据平台sku转sku
+        $notEnough = [];
+        foreach (array_filter($arr) as $v) {
+            //转换sku
+            $sku = $itemPlatFormSku->getTrueSku($v['original_sku'], $v['platform_type']);
+            //查询库存
+            $stock = $this->item->where(['is_open' => 1, 'is_del' => 1, 'sku' => $sku])->value('available_stock');
+            if ($stock <= $v['original_number']) {
+                $notEnough[] = $sku;
+            }
+        }
+        if($notEnough){
+            $str = implode(',',$notEnough);
+        }
+        return $notEnough ? $str : false;
+    }
+    
 }

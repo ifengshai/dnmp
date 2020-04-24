@@ -102,7 +102,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                             operate: false,
                             formatter: function (value, rows) {
                                 var all_user_name = '';
-                                if (value) {
+                                if (value.length > 0) {
                                     for (i = 0, len = value.length; i < len; i++) {
                                         if (value[i].operation_type == 0) {
                                             all_user_name += '<div class="step_recept"><b class="step">' + value[i].measure_content + '：</b><b class="recept text-red">未处理</b></div>';
@@ -239,7 +239,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     callback: function (data) {
                                     },
                                     visible: function (rows) {
-                                        if (!(rows.work_type == 2 && rows.is_after_deal_with == 0) && (rows.work_status == 3 || rows.work_status == 5 ) && rows.has_recept == 1) {
+                                        if (!(rows.work_type == 2 && rows.is_after_deal_with == 0) && (rows.work_status == 3 || rows.work_status == 5) && rows.has_recept == 1) {
                                             return true;
                                         }
                                         return false;
@@ -397,6 +397,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     var checkID = [];//定义一个空数组
                     var appoint_group = '';
                     var input_content = '';
+                    var is_check = [];
                     $("input[name='row[measure_choose_id][]']:checked").each(function (i) {
                         checkID[i] = $(this).val();
                         var id = $(this).val();
@@ -420,12 +421,16 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         }
 
                         //获取是否需要审核
-                        if ($('#step' + id + '-is_check').val() > 0) {
-                            $('#is_check').val(1);
-                        } else {
-                            $('#is_check').val(0);
-                        }
+                        var step_is_check = $('#step' + id + '-is_check').val();
+                        is_check.push(step_is_check);
                     });
+                    //判断如果存在1 则改为需要审核
+                    if ($.inArray("1", is_check) != -1) {
+                        $('#is_check').val(1);
+                    } else {
+                        $('#is_check').val(0);
+                    }
+
                     //追加到元素之后
                     $("#input-hidden").append(input_content);
 
@@ -1012,6 +1017,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     var checkID = [];//定义一个空数组
                     var appoint_group = '';
                     var input_content = '';
+                    var is_check = [];
                     $("input[name='row[measure_choose_id][]']:checked").each(function (i) {
                         checkID[i] = $(this).val();
                         var id = $(this).val();
@@ -1035,10 +1041,15 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         }
 
                         //获取是否需要审核
-                        if ($('#step' + id + '-is_check').val() > 0) {
-                            $('#is_check').val(1);
-                        }
+                        var step_is_check = $('#step' + id + '-is_check').val();
+                        is_check.push(step_is_check);
                     });
+                    //判断如果存在1 则改为需要审核
+                    if ($.inArray("1", is_check) != -1) {
+                        $('#is_check').val(1);
+                    } else {
+                        $('#is_check').val(0);
+                    }
                     //追加到元素之后
                     $("#input-hidden").append(input_content);
                     //一般措施
@@ -1116,7 +1127,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
             var prescriptions_add_edit;
             var is_add = 0;
             $(document).on('click', 'input[name="row[measure_choose_id][]"]', function () {
-                if($("body").find('input[name="row[replacement][original_sku][]"]').length <= 0 || $("body").find('input[name="row[gift][original_sku][]"]').length <= 0) {
+                if ($("body").find('input[name="row[replacement][original_sku][]"]').length <= 0 || $("body").find('input[name="row[gift][original_sku][]"]').length <= 0) {
                     is_add = 1;
                     var value = $(this).val();
                     var check = $(this).prop('checked');
@@ -1222,7 +1233,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
             });
             //处方选择填充
             $(document).on('change', '#prescription_select', function () {
-                if(is_add == 1) {
+                if (is_add == 1) {
                     var val = $(this).val();
                     var prescription = prescriptions_add_edit[val];
 
@@ -1292,13 +1303,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 }
             })
             $(document).on('click', '.btn-add-box-edit', function () {
-                if(is_add == 1){
+                if (is_add == 1) {
                     $('.add_gift').after(gift_click_data_add_edit);
                     $('.selectpicker ').selectpicker('refresh');
                 }
             });
             $(document).on('click', '.btn-add-supplement-reissue-edit', function () {
-                if(is_add == 1) {
+                if (is_add == 1) {
                     $('#supplement-order').after(lens_click_data_add_edit);
                     $('.selectpicker ').selectpicker('refresh');
                 }
@@ -1722,7 +1733,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                         } else {
                                             address += '<option value="' + i + '">' + data.address[i].address_type + '</option>';
                                         }
-    
+
                                     }
                                 }
                                 $('#address_select').html(address);
@@ -1741,10 +1752,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     $('#c-street').val(address.street);
                                     $('#c-postcode').val(address.postcode);
                                 })
-    
+
                                 //追加
                                 lens_click_data_edit = '<div class="margin-top:10px;">' + json.lensform.html + '<div class="form-group-child4_del" style="width: 96%;padding-right: 0px;"><a href="javascript:;" style="width: 50%;" class="btn btn-danger btn-del-lens" title="删除"><i class="fa fa-trash"></i>删除</a></div></div>';
-    
+
                                 $('.selectpicker ').selectpicker('refresh');
                                 //Controller.api.bindevent();            
                             } else if (2 == change_type) { //更换镜架信息
@@ -1762,7 +1773,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                             console.log(ret);
                             return false;
                         });
-                    }                    
+                    }
                 }
 
                 $(document).on('click', '.btn-add-box-edit', function () {
