@@ -313,6 +313,11 @@ class WorkOrderList extends Backend
                         $params['assign_user_id'] = $this->assign_user_id;
                     }
 
+                    //如果退款金额大于30 需要审核
+                    if ($params['refund_money'] > 30) {
+                        $params['is_check'] = 1;
+                    }
+
                     //判断审核人
                     if ($params['is_check'] == 1 || $params['need_coupon_id']) {
                         /**
@@ -770,6 +775,11 @@ class WorkOrderList extends Backend
                         $params['assign_user_id'] = $this->assign_user_id;
                     }
 
+                    //如果退款金额大于30 需要审核
+                    if ($params['refund_money'] > 30) {
+                        $params['is_check'] = 1;
+                    }
+                    
                     //判断审核人
                     if ($params['is_check'] == 1 || $params['need_coupon_id']) {
                         /**
