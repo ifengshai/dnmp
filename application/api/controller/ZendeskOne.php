@@ -88,11 +88,11 @@ class ZendeskOne extends Controller
             // $res = $this->getTrackMsg(41);
             $apiKey = 'F26A807B685D794C676FA3CC76567035 '; // your api key
 
-            $trackNumber = '044141182826'; // Your track number
+            $trackNumber = '392173770724333'; // Your track number
 
             $trackingConnector = new TrackingConnector($apiKey);
-            $trackingConnector->register($trackNumber,100012);
-            $trackNumbersHistories =  $trackingConnector->getTrackInfo($trackNumber,100012);
+            $trackingConnector->register($trackNumber,100003);
+            $trackNumbersHistories =  $trackingConnector->getTrackInfo($trackNumber,100003);
             echo 1;
             //$track = new Trackingmore();
             //74890988318622362133
@@ -120,7 +120,7 @@ class ZendeskOne extends Controller
                 382940274852,
                 'none'
             ],
-            //'requester' => $this->testId,
+            //'requester' => [393708243591],
              'updated_at' => [
                  'valuetype' => '>=',
                  'value'   => '20minutes',
@@ -209,7 +209,7 @@ class ZendeskOne extends Controller
                     //开始匹配邮件内容
                     //查看是否已有自动回复的tag
                     if (in_array('自动回复', $tags)) { //次类是顾客根据要求回复的内容
-                        file_put_contents('/www/wwwroot/mojing/runtime/log/zendesk2.txt',$ticket->id."\r\n",FILE_APPEND);
+                        //file_put_contents('/www/wwwroot/mojing/runtime/log/zendesk2.txt',$ticket->id."\r\n",FILE_APPEND);
                         $answer_key = 0;
                         foreach ($this->auto_answer as $key => $answer) {
                             //回复内容包含自动回复的内容，且相匹配
@@ -302,7 +302,7 @@ class ZendeskOne extends Controller
                                 ];
                             }
 
-                            file_put_contents('/www/wwwroot/mojing/runtime/log/zendesk.txt',$ticket->id."\r\n",FILE_APPEND);
+                            //file_put_contents('/www/wwwroot/mojing/runtime/log/zendesk.txt',$ticket->id."\r\n",FILE_APPEND);
                             //如果是第一条评论，则把对应的客户内容插入主表，回复内容插入附表，其余不做处理
                             if($count == 1){
                                 //主email
@@ -321,9 +321,9 @@ class ZendeskOne extends Controller
                                 ];
                                 //添加主评论
                                 $zendesk_reply = ZendeskReply::create($reply_data);
-                                file_put_contents('/www/wwwroot/mojing/runtime/log/zendeskreply.txt',$zendesk_reply->email_id."\r\n",FILE_APPEND);
+                                //file_put_contents('/www/wwwroot/mojing/runtime/log/zendeskreply.txt',$zendesk_reply->email_id."\r\n",FILE_APPEND);
                                 if(!$zendesk_reply->email_id){
-                                    file_put_contents('/www/wwwroot/mojing/runtime/log/zendeskreply2.txt',$zendesk_reply->email_id."\r\n",FILE_APPEND);
+                                    //file_put_contents('/www/wwwroot/mojing/runtime/log/zendeskreply2.txt',$zendesk_reply->email_id."\r\n",FILE_APPEND);
                                 }
                                 //回复评论
                                 if($zendesk_reply->id){
@@ -436,28 +436,11 @@ class ZendeskOne extends Controller
                 'tags' => ['未发货'],
                 'status' => 'pending'
             ];
-            //判断商品下单时间，2月1日前，8,9.2月1日后，转客服
-//            if($order['created_at'] >= '2020-02-01 00:00:00'){
-//                $params = [
-//                    'tags' => ['转客服'],
-//                    'status' => 'open'
-//                ];
-//            }else{
-//                if(!$order['ship']){
-//                    $params = [
-//                        'comment' => [
-//                            'body' => config('zendesk.t15')
-//                        ],
-//                        'tags' => ['未发货'],
-//                        'status' => 'pending'
-//                    ];
-//                }
-//            }
 
         } elseif ($status == 'complete') {
             $res = $this->getTrackMsg($order['order_id']);
             //判断是否签收
-            if ($res['status'] == 'delivered') { //已签收
+            if ($res['status'] == '40') { //已签收
                 $params = [
                     'comment' => [
                         'body' => sprintf(config('zendesk.templates')['t4'], $res['updated_at'], $res['track_number'], $res['carrier_code'], $res['lastEvent'], $res['lastUpdateTime'])
@@ -465,7 +448,7 @@ class ZendeskOne extends Controller
                     'tags' => ['已签收', '查询物流信息'],
                     'status' => 'solved'
                 ];
-            } elseif ($res['status'] == 'transit' || $res['status'] == 'pickup') { //判断物流时效
+            } elseif (in_array($res['status'],[10,20,30])) { //判断物流时效
                 $params = [
                     'comment' => [
                         'body' => ''
@@ -527,15 +510,6 @@ class ZendeskOne extends Controller
                         'status' => 'pending'
                     ];
                 }
-//                $lastUpdateTime = strtotime($res['lastUpdateTime']);
-//                $now = time();
-//                if ($now - $lastUpdateTime > 7 * 24 * 3600) { //超7天未更新
-//                    $params['comment']['body'] = sprintf(config('zendesk.t6'), $res['updated_at'], $res['track_number'], $res['carrier_code']);
-//                    $params['tags'] = ['超时', '查询物流信息'];
-//                } else {
-//                    $params['comment']['body'] = sprintf(config('zendesk.t5'), $res['updated_at'], $res['track_number'], $res['carrier_code'], '【In Transit】 '.$res['lastEvent'], 'https://www.zeelool.com/ordertrack', 'https://tools.usps.com/go/TrackConfirmAction_input');
-//                    $params['tags'] = ['查询物流信息'];
-//                }
             } else { //转客服，状态open
                 //状态open，tag转客服
                 $params = [
@@ -563,7 +537,14 @@ class ZendeskOne extends Controller
      */
     protected function getTrackMsg($order_id)
     {
-
+        $res = [
+            'status' => '',
+            'lastUpdateTime' => '',
+            'lastEvent' => '',
+            'carrier_code' => '',
+            'updated_at' => '',
+            'track_number' => '',
+        ];
         $track_result = Db::connect('database.db_zeelool')
             ->table('sales_flat_shipment_track')
             ->field('track_number,title,updated_at')
@@ -575,17 +556,20 @@ class ZendeskOne extends Controller
             $title = 'china-ems';
         }
         $trackNumber = $track_result['track_number']; // Your track number
+        try{
+            $trackingConnector = new TrackingConnector($this->apiKey);
+            $carrier = $this->getCarrier($title);
+            $trackingConnector->register($trackNumber,$carrier);
 
-        $trackingConnector = new TrackingConnector($this->apiKey);
-        $carrier = $this->getCarrier($title);
-        $trackingConnector->register($trackNumber,$carrier);
-
-        $trackNumbersHistories =  $trackingConnector->getTrackInfo($trackNumber,$carrier);
-        $data = $this->formatTrack($trackNumbersHistories);
+            $trackNumbersHistories =  $trackingConnector->getTrackInfo($trackNumber,$carrier);
+            $data = $this->formatTrack($trackNumbersHistories);
+        }catch(\Exception $e){
+            return $res;
+        }
         $res = [
             'status' => $data['status'],
-            'lastUpdateTime' => $lastUpdateTime,
-            'lastEvent' => $lastEvent,
+            'lastUpdateTime' => $data['lastUpdateTime'],
+            'lastEvent' => $data['lastEvent'],
             'carrier_code' => $data['carrier_code'],
             'updated_at' => $track_result['updated_at'],
             'track_number' => $track_result['track_number']
@@ -593,9 +577,26 @@ class ZendeskOne extends Controller
         return $res;
 
     }
+
+    /**
+     * 格式化查询信息
+     * @param $trackNumbersHistories
+     * @return array|bool
+     */
     public function formatTrack($trackNumbersHistories)
     {
-
+        $code = isset($trackNumbersHistories['code']) ? $trackNumbersHistories['code'] : 0;
+        if($code !== 0){
+            exception('查询失败');
+            return false;
+        }
+        $track = $trackNumbersHistories['track'];
+        $lastEvent = $track['z0']['z'];
+        $lastUpdateTime = $track['z0']['a'];
+        $carrier_code = $trackNumbersHistories['number'];
+        //0：查询不到，10：运输中，20：运输过久，30：到达待取，35：投递失败，40：成功签收，50：可能异常
+        $status = $track['e'];
+        return compact('lastEvent','lastUpdateTime','carrier_code','status');
     }
     /**
      * 获取快递号
