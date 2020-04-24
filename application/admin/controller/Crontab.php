@@ -2928,7 +2928,6 @@ order by sfoi.item_id asc limit 1000";
         $purchase_num = $purchase->alias('a')->join(['fa_purchase_order_item' => 'b'], 'a.id=b.purchase_id')
             ->where($purchase_map)
             ->whereExp('sku', 'is not null')
-            ->cache(86400)
             ->sum('purchase_num');
 
         $check_map['a.status'] = 2;
@@ -2940,7 +2939,6 @@ order by sfoi.item_id asc limit 1000";
             ->where($check_map)
             ->join(['fa_purchase_order' => 'b'], 'b.id=a.purchase_id')
             ->join(['fa_check_order_item' => 'c'], 'a.id=c.check_id')
-            ->cache(86400)
             ->sum('arrivals_num');
         return $purchase_num - $arrivals_num;
     }
@@ -2962,7 +2960,6 @@ order by sfoi.item_id asc limit 1000";
         $purchase_price = $purchase->alias('a')->join(['fa_purchase_order_item' => 'b'], 'a.id=b.purchase_id')
             ->where($purchase_map)
             ->whereExp('sku', 'is not null')
-            ->cache(86400)
             ->sum('purchase_num*purchase_price');
 
         $check_map['a.status'] = 2;
@@ -2975,7 +2972,6 @@ order by sfoi.item_id asc limit 1000";
             ->join(['fa_purchase_order' => 'b'], 'b.id=a.purchase_id')
             ->join(['fa_check_order_item' => 'c'], 'a.id=c.check_id')
             ->join(['fa_purchase_order_item' => 'd'], 'd.purchase_id=c.purchase_id and c.sku=d.sku', 'left')
-            ->cache(86400)
             ->sum('arrivals_num*purchase_price');
         return $purchase_price - $arrivals_price;
     }
@@ -3001,7 +2997,6 @@ order by sfoi.item_id asc limit 1000";
             $purchase_num = $purchase->alias('a')->join(['fa_purchase_order_item' => 'b'], 'a.id=b.purchase_id')
                 ->where($purchase_map)
                 ->whereExp('sku', 'is not null')
-                ->cache(86400)
                 ->sum('purchase_num');
 
             $check_map['c.sku'] = ['in', $skus];
@@ -3014,7 +3009,6 @@ order by sfoi.item_id asc limit 1000";
                 ->where($check_map)
                 ->join(['fa_purchase_order' => 'b'], 'b.id=a.purchase_id')
                 ->join(['fa_check_order_item' => 'c'], 'a.id=c.check_id')
-                ->cache(86400)
                 ->sum('arrivals_num');
         }
         return $purchase_num - $arrivals_num;
@@ -3041,7 +3035,6 @@ order by sfoi.item_id asc limit 1000";
             $purchase_price = $purchase->alias('a')->join(['fa_purchase_order_item' => 'b'], 'a.id=b.purchase_id')
                 ->where($purchase_map)
                 ->whereExp('sku', 'is not null')
-                ->cache(86400)
                 ->sum('purchase_num*purchase_price');
 
             //计算到货sku总金额
@@ -3056,7 +3049,6 @@ order by sfoi.item_id asc limit 1000";
                 ->join(['fa_purchase_order' => 'b'], 'b.id=a.purchase_id')
                 ->join(['fa_check_order_item' => 'c'], 'a.id=c.check_id')
                 ->join(['fa_purchase_order_item' => 'd'], 'd.purchase_id=c.purchase_id and c.sku=d.sku', 'left')
-                ->cache(86400)
                 ->sum('arrivals_num*purchase_price');
         }
 
@@ -3084,7 +3076,6 @@ order by sfoi.item_id asc limit 1000";
             $purchase_num = $purchase->alias('a')->join(['fa_purchase_order_item' => 'b'], 'a.id=b.purchase_id')
                 ->where($purchase_map)
                 ->whereExp('sku', 'is not null')
-                ->cache(86400)
                 ->sum('purchase_num');
 
             $check_map['c.sku'] = ['in', $skus];
@@ -3097,7 +3088,6 @@ order by sfoi.item_id asc limit 1000";
                 ->where($check_map)
                 ->join(['fa_purchase_order' => 'b'], 'b.id=a.purchase_id')
                 ->join(['fa_check_order_item' => 'c'], 'a.id=c.check_id')
-                ->cache(86400)
                 ->sum('arrivals_num');
         }
         return $purchase_num - $arrivals_num;
@@ -3124,7 +3114,6 @@ order by sfoi.item_id asc limit 1000";
             $purchase_price = $purchase->alias('a')->join(['fa_purchase_order_item' => 'b'], 'a.id=b.purchase_id')
                 ->where($purchase_map)
                 ->whereExp('sku', 'is not null')
-                ->cache(86400)
                 ->sum('purchase_num*purchase_price');
 
             //计算到货sku总金额
@@ -3139,7 +3128,6 @@ order by sfoi.item_id asc limit 1000";
                 ->join(['fa_purchase_order' => 'b'], 'b.id=a.purchase_id')
                 ->join(['fa_check_order_item' => 'c'], 'a.id=c.check_id')
                 ->join(['fa_purchase_order_item' => 'd'], 'd.purchase_id=c.purchase_id and c.sku=d.sku', 'left')
-                ->cache(86400)
                 ->sum('arrivals_num*purchase_price');
         }
 
@@ -3177,7 +3165,7 @@ order by sfoi.item_id asc limit 1000";
             $itemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku();
             $map['is_del'] = 1;
             $map['is_open'] = 1;
-            $data = $this->item->where($map)->field('sku')->cache(3600)->select();
+            $data = $this->item->where($map)->field('sku')->select();
             $data = collection($data)->toArray();
 
             foreach ($data as  &$v) {

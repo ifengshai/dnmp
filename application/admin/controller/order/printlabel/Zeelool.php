@@ -60,7 +60,7 @@ class Zeelool extends Backend
             if ($filter['increment_id']) {
                 $map['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal']];
             } elseif (!$filter['status']) {
-                $map['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed']];
+                $map['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal']];
             }
             //是否有协同任务
             $infoSynergyTask = new \app\admin\model\infosynergytaskmanage\InfoSynergyTask;
@@ -154,7 +154,7 @@ class Zeelool extends Backend
             $increment_id = $this->request->post('increment_id');
             if ($increment_id) {
                 $map['increment_id'] = $increment_id;
-                $map['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed']];
+                $map['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal']];
                 $field = 'order_type,custom_order_prescription_type,entity_id,status,base_shipping_amount,increment_id,coupon_code,shipping_description,store_id,customer_id,base_discount_amount,base_grand_total,
                      total_qty_ordered,quote_id,base_currency_code,customer_email,customer_firstname,customer_lastname,custom_is_match_frame_new,custom_is_match_lens_new,
                      custom_is_send_factory_new,custom_is_delivery_new,custom_print_label_new,custom_order_prescription,custom_service_name,created_at';
@@ -335,7 +335,7 @@ class Zeelool extends Backend
                             $v['qty_ordered'] = $infoTaskRes['change_number'];
                         }
 
-                        $trueSku = $ItemPlatformSku->getTrueSku($v['sku'], 1);
+                        $trueSku = $ItemPlatformSku->getTrueSku(trim($v['sku']), 1);
                         //总库存
                         $item_map['sku'] = $trueSku;
                         $item_map['is_del'] = 1;
@@ -345,13 +345,13 @@ class Zeelool extends Backend
                         }
 
                         if (!$res_three) {
-                            $error[] = $k;
+                            $error[] = $k . $trueSku . '_' . $v['sku'];
                         }
                     }
                     unset($v);
 
                     if (count($error)) {
-                        throw new Exception("增加配货占用库存失败！！请检查SKU");
+                        throw new Exception("增加配货占用库存失败！！请检查SKU:" . implode(',', $error));
                     };
                     $item->commit();
                 }
@@ -378,7 +378,7 @@ class Zeelool extends Backend
                             $v['qty_ordered'] = $infoTaskRes['change_number'];
                         }
 
-                        $trueSku = $ItemPlatformSku->getTrueSku($v['sku'], 1);
+                        $trueSku = $ItemPlatformSku->getTrueSku(trim($v['sku']), 1);
 
                         //总库存
                         $item_map['sku'] = $trueSku;
@@ -595,7 +595,7 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
         if ($filter['increment_id']) {
             $map['sfo.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal']];
         } elseif (!$filter['status']) {
-            $map['sfo.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed']];
+            $map['status'] = ['in', ['free_processing', 'processing',  'paypal_reversed', 'paypal_canceled_reversal']];
         }
 
         //是否有协同任务
@@ -670,6 +670,10 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
             // dump($product_options);
             $finalResult[$key]['coatiing_name'] = $tmp_product_options['info_buyRequest']['tmplens']['coatiing_name'];
             $finalResult[$key]['index_type'] = $tmp_product_options['info_buyRequest']['tmplens']['index_type'];
+            //镜片类型拼接颜色字段
+            if ($tmp_product_options['info_buyRequest']['tmplens']['color_name']) {
+                $finalResult[$key]['index_type'] .= '-' . $tmp_product_options['info_buyRequest']['tmplens']['color_name'];
+            }
 
             $tmp_prescription_params = $tmp_product_options['info_buyRequest']['tmplens']['prescription'];
             if (isset($tmp_prescription_params)) {
@@ -815,7 +819,7 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
             $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 2 + 2), $value['od_axis']);
             $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 2 + 3), $value['os_axis']);
 
-            if ($value['prescription_type'] == 'Reading Glasses' && strlen($value['os_add']) > 0 && strlen($value['od_add']) > 0) {
+            if ($value['prescription_type'] == 'ReadingGlasses' && strlen($value['os_add']) > 0 && strlen($value['od_add']) > 0) {
                 // 双ADD值时，左右眼互换
                 $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 2), $value['os_add']);
                 $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 3), $value['od_add']);
@@ -958,7 +962,74 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
         set_time_limit(0);
         ini_set('memory_limit', '512M');
 
-        $str = '';
+        $str = '400102225
+        100057807
+        100058826
+        100057700
+        400105710
+        400105084
+        400109193
+        400106881
+        100062383
+        400112463
+        100059575
+        400112180
+        400111769
+        100063399
+        400120032
+        400122171
+        400119330
+        100065695
+        100066455
+        400121044
+        400123047
+        100065261
+        400130195
+        400130530
+        400132409
+        100072008
+        100071647
+        100071904
+        100068502
+        100073956
+        400134837
+        400137818
+        400138672
+        400146946
+        400142784
+        400138402
+        100072943
+        400139333
+        400148614
+        400142540
+        100078361
+        100077918
+        400140106
+        400144847
+        100077156
+        100080044
+        100076717
+        400142945
+        100076524
+        400155388
+        400163697
+        400163697
+        400159688
+        400155263
+        400164507
+        400064188
+        100058490
+        100084315
+        100080074
+        400154844
+        400170789
+        100085157
+        100084357
+        400170599
+        400175120
+        400127662
+        400171294
+        ';
         $str = explode('
         ', $str);
 
@@ -1119,7 +1190,7 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
             $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 2 + 2), $value['od_axis']);
             $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 2 + 3), $value['os_axis']);
 
-            if ($value['prescription_type'] == 'Reading Glasses' && strlen($value['os_add']) > 0 && strlen($value['od_add']) > 0) {
+            if ($value['prescription_type'] == 'ReadingGlasses' && strlen($value['os_add']) > 0 && strlen($value['od_add']) > 0) {
                 // 双ADD值时，左右眼互换
                 $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 2), $value['os_add']);
                 $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 3), $value['od_add']);
@@ -1326,11 +1397,12 @@ EOF;
 
                 $final_print = array();
                 $product_options = unserialize($processing_value['product_options']);
-                // dump($product_options);
                 $final_print['coatiing_name'] = substr($product_options['info_buyRequest']['tmplens']['coatiing_name'], 0, 60);
-                // $final_print['index_type'] = substr($product_options['info_buyRequest']['tmplens']['index_type'],0,60);
                 $final_print['index_type'] = $product_options['info_buyRequest']['tmplens']['index_type'];
-
+                //镜片类型拼接颜色字段
+                if ($product_options['info_buyRequest']['tmplens']['color_name']) {
+                    $final_print['index_type'] .= '-' . $product_options['info_buyRequest']['tmplens']['color_name'];
+                }
                 $prescription_params = $product_options['info_buyRequest']['tmplens']['prescription'];
                 if ($prescription_params) {
                     $prescription_params = explode("&", $prescription_params);
@@ -1367,7 +1439,7 @@ EOF;
 
 
                 //处理ADD  当ReadingGlasses时 是 双ADD值
-                if ($final_print['prescription_type'] == 'Reading Glasses' && strlen($final_print['os_add']) > 0 && strlen($final_print['od_add']) > 0) {
+                if ($final_print['prescription_type'] == 'ReadingGlasses' && strlen($final_print['os_add']) > 0 && strlen($final_print['od_add']) > 0) {
                     // echo '双ADD值';
                     $os_add = "<td>" . $final_print['od_add'] . "</td> ";
                     $od_add = "<td>" . $final_print['os_add'] . "</td> ";
