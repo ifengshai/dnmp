@@ -378,11 +378,6 @@ class Nihao extends Backend
                             $error[] = $k;
                         }
 
-                        //先入先出逻辑
-                        $rows['sku'] = $trueSku;
-                        $rows['out_stock_num'] = $v['qty_ordered'];
-                        $rows['increment_id'] = $v['increment_id'];
-                        $outStockItem->setOrderOutStock($rows);
                     }
                     unset($v);
 

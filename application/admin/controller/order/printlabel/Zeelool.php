@@ -374,6 +374,9 @@ class Zeelool extends Backend
                             //根据订单号 SKU查询更换镜架记录表 处理更换之后SKU库存
                             $infotask = new \app\admin\model\infosynergytaskmanage\InfoSynergyTaskChangeSku;
                             $infoTaskRes = $infotask->getChangeSkuData($v['increment_id'], 1, $v['sku']);
+                            foreach($infoTaskRes as $val) {
+                                
+                            }
                             $v['sku'] = $infoTaskRes['change_sku'];
                             $v['qty_ordered'] = $infoTaskRes['change_number'];
                         }
@@ -397,11 +400,6 @@ class Zeelool extends Backend
                             $error[] = $k;
                         }
 
-                        //先入先出逻辑
-                        $rows['sku'] = $trueSku;
-                        $rows['out_stock_num'] = $v['qty_ordered'];
-                        $rows['increment_id'] = $v['increment_id'];
-                        $outStockItem->setOrderOutStock($rows);
                     }
                     unset($v);
                     if (count($error)) {

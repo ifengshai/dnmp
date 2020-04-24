@@ -1,0 +1,61 @@
+<style>
+    #accordion div{
+        text-align: center;
+    }
+</style>
+<form role="form" data-toggle="validator" method="POST" action="{:url('test_record_bug')}">
+    <input type="hidden" name="row[type]" value="{$row.type}"/>
+    <input type="hidden" name="row[pid]" value="{$row.id}"/>
+    <input type="hidden" name="row[site_type]" value="{$row.site_type}"/>
+    <input type="hidden" name="row[environment_type]" value="{if $row['status'] == 4}1{else}2{/if}"/>
+    <div class="box box-danger">
+        <div class="box-body">
+            <div class="">
+                <div class="col-xs-5" style="width: 48%;">
+                    <span>{:__('describe')}:</span>
+                    <textarea id="c-describe" class="form-control" data-rule="required" style="resize:none" rows="5" name="row[describe]" cols="50"></textarea>
+                </div>
+            </div>
+        </div>
+        <div style="width: 100%;text-align: center;padding-bottom: 1%;">
+            <button type="submit" name="web_finish" value="1" class="btn btn-success btn-embossed" style="width: 50%;align-content: center;">{:__('OK')}</button>
+        </div>
+    </div>
+</form>
+
+
+<ul class="timeline">
+    <li class="time-label">
+        <span class="bg-red">
+            {:__('5555555555')}
+        </span>
+    </li>
+    {volist name="row" id="ltl"}
+        <li>
+            <i class="fa fa-user bg-aqua"></i>
+            <div class="timeline-item">
+                <span class="time"><i class="fa fa-clock-o"></i>{:__('时间')}：shijian</span>
+                <h3 class="timeline-header"><a href="#" style="color: darkseagreen;font-weight: 900">11111111</a></h3>
+
+                <div class="timeline-body">
+                    <p style="float: left;width: 62%">{:__('111')}：<span><b>2222222222222</b></span></p>
+                    <p>{:__('222')}：<span><b>sdasdasdasdasdasdas1111111</b></span></p>
+                </div>
+
+                <div class="timeline-body" >
+                    {:__('3333')}：<span style="word-break: break-all;"><b>dasdasdadas</b></span>
+                </div>
+
+            </div>
+        </li>
+    {/volist}
+</ul>
+
+
+
+<div class="hide layer-footer">
+    <label class="control-label col-xs-12 col-sm-2"></label>
+    <div class="col-xs-12 col-sm-8">
+        <button type="reset" class="btn btn-primary btn-embossed btn-close" onclick="Layer.closeAll();">{:__('Close')}</button>
+    </div>
+</div>
