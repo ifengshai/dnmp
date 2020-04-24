@@ -41,6 +41,7 @@ class WorkOrderList extends Backend
         $this->step = new \app\admin\model\saleaftermanage\WorkOrderMeasure;
         $this->order_change = new \app\admin\model\saleaftermanage\WorkOrderChangeSku;
         $this->order_remark = new \app\admin\model\saleaftermanage\WorkOrderRemark;
+        $this->work_order_note = new \app\admin\model\saleaftermanage\WorkOrderNote;
         $this->view->assign('step', config('workorder.step')); //措施
         $this->assignconfig('workorder', config('workorder')); //JS专用，整个配置文件
 
@@ -1942,4 +1943,38 @@ EOF;
     {
         return array_merge(config('workorder.warehouse_problem_type'),config('workorder.customer_problem_type'));
     }
+
+
+
+    /**
+     * 工单备注
+     */
+    public function work_order_note(){
+        if($this->request->isPost()) {
+            $params = $this->request->post("row/a");
+            if ($params) {
+                $params['create_time'] =  date('Y-m-d H:i',time());
+                $params['create_user_id'] =  $this->auth->id;
+                $res_status = $this->testRecordModel->allowField(true)->save($params);
+
+                if ($res_status) {
+                    $this->success('成功');
+                } else {
+                    $this->error('失败');
+                }
+            }
+            $this->error(__('Parameter %s can not be empty', ''));
+        }
+
+        $ids = $ids ?? input('ids');
+
+        $row = $this->work_order_note->get(['work_id' => $ids]);
+
+        $row_arr = $row->toArray();
+        dump($row_arr);
+
+        $this->view->assign("row", $row_arr);
+        return $this->view->fetch();
+    }
+
 }

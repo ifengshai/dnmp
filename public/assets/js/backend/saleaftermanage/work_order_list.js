@@ -157,6 +157,38 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         {
                             field: 'buttons',
                             width: "120px",
+                            operate:false,
+                            title: __('备注'),
+                            table: table,
+                            events: Table.api.events.operate,
+                            buttons: [
+                                {
+                                    name: 'work_order_note',
+                                    text: __('查看备注'),
+                                    title: __('查看备注'),
+                                    classname: 'btn btn-xs btn-primary btn-dialog',
+                                    url: 'saleaftermanage/work_order_list/work_order_note',
+                                    callback: function (data) {
+                                    },
+                                    visible: function(row){
+                                        return true;
+                                        if(row.status == 4){
+                                            if(row.demand_test_record_bug && row.is_test_record_hidden == 1){//操作权限及显示权限
+                                                if(row.test_is_finish == 0){
+                                                    return true;
+                                                }else{
+                                                    return false;
+                                                }
+                                            }
+                                        }
+                                    }
+                                },
+                            ],
+                            formatter: Table.api.formatter.buttons
+                        },
+                        {
+                            field: 'buttons',
+                            width: "120px",
                             operate: false,
                             title: __('操作'),
                             table: table,
