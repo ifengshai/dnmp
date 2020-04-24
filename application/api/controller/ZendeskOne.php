@@ -618,8 +618,6 @@ class ZendeskOne extends Controller
             $carrierId = 'usps';
         }elseif(stripos($title,'yanwen') !== false){
             $carrierId = 'yanwen';
-        }elseif(stripos($title,'SFInternational') !== false){
-            $carrierId = 'sf';
         }elseif(stripos($title,'cpc') !== false){
             $carrierId = 'cpc';
         }
@@ -630,8 +628,7 @@ class ZendeskOne extends Controller
             'cpc' =>  '03041',
             'fedex' => '100003',
             'usps' => '21051',
-            'yanwen' => '190012',
-            'sf' => '100012',
+            'yanwen' => '190012'
         ];
         if($carrierId){
             return $carrier[$carrierId];
