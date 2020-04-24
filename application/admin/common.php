@@ -233,7 +233,6 @@ if (!function_exists('searchForId')) {
 if (!function_exists('hasProcessPermission')) {
     /**
      * 判断用户是否有处理的权限
-     * @param $recept_group_id
      * @param $work_id
      * @param $admin_id
      * @return bool
@@ -241,9 +240,10 @@ if (!function_exists('hasProcessPermission')) {
      * @throws \think\db\exception\ModelNotFoundException
      * @throws \think\exception\DbException
      */
-    function hasProcessPermission($recept_group_id, $work_id, $admin_id)
+    function hasProcessPermission($work_id, $admin_id)
     {
-        $recept = \app\admin\model\saleaftermanage\WorkOrderRecept::where(['recept_group_id' => $recept_group_id, 'work_id' => $work_id, 'recept_person_id' => $admin_id])->find();
-        return $recept ? true : false;
+        $recept_person_id = \app\admin\model\saleaftermanage\WorkOrderList::where('id',$work_id)->value('recept_person_id');
+        $recept_person_ids = explode(',',$recept_person_id);
+        return in_array($admin_id,$recept_person_ids) ? true : false;
     }
 }
