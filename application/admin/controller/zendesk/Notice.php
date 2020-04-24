@@ -240,35 +240,35 @@ class Notice extends Controller
             }
             Zendesk::update($updateData, ['id' => $zendesk->id]);
             //写入附表
-            //如果该ticket的分配时间不是今天，且修改后的状态是open或者new的话，则今天任务数-1
-            if (in_array(strtolower($ticket->status), ['open', 'new']) && strtotime($zendesk->assign_time) < strtotime(date('Y-m-d', time()))) {
-                //找出今天的task
-                $task = ZendeskTasks::whereTime('create_time', 'today')
-                    ->where(['admin_id' => $zendesk->assign_id, 'type' => $zendesk->type])
-                    ->find();
-                //存在，则更新
-                if ($task) {
-                    $task->leave_count = $task->leave_count + 1;
-                    $task->target_count = $task->target_count - 1;
-                    $task->surplus_count = $task->surplus_count - 1;
-                    $task->complete_count = $task->complete_count - 1;
-                    $task->complete_apply_count = $task->complete_apply_count - 1;
-                    $task->save();
-                }
-            }
+            //如果该ticket的分配时间不是今天，且修改后的状态是open或者new的话，则今天任务数-1（分担逻辑修改，改方法暂时不用）
+//            if (in_array(strtolower($ticket->status), ['open', 'new']) && strtotime($zendesk->assign_time) < strtotime(date('Y-m-d', time()))) {
+//                //找出今天的task
+//                $task = ZendeskTasks::whereTime('create_time', 'today')
+//                    ->where(['admin_id' => $zendesk->assign_id, 'type' => $zendesk->type])
+//                    ->find();
+//                //存在，则更新
+//                if ($task) {
+//                    $task->leave_count = $task->leave_count + 1;
+//                    $task->target_count = $task->target_count - 1;
+//                    $task->surplus_count = $task->surplus_count - 1;
+//                    $task->complete_count = $task->complete_count - 1;
+//                    $task->complete_apply_count = $task->complete_apply_count - 1;
+//                    $task->save();
+//                }
+//            }
             //从stefen修改为其他用户，用户apply_count+1，complete_apply_count+1
-            if($ticket->assignee_id != '382940274852' && $zendesk->assignee_id == '382940274852'){
-                //找出今天的task
-                $task = ZendeskTasks::whereTime('create_time', 'today')
-                    ->where(['assignee_id' => $ticket->assignee_id, 'type' => $zendesk->type])
-                    ->find();
-                //存在，则更新
-                if ($task) {
-                    $task->complete_apply_count = $task->complete_apply_count + 1;
-                    $task->apply_count = $task->apply_count + 1;
-                    $task->save();
-                }
-            }
+//            if($ticket->assignee_id != '382940274852' && $zendesk->assignee_id == '382940274852'){
+//                //找出今天的task
+//                $task = ZendeskTasks::whereTime('create_time', 'today')
+//                    ->where(['assignee_id' => $ticket->assignee_id, 'type' => $zendesk->type])
+//                    ->find();
+//                //存在，则更新
+//                if ($task) {
+//                    $task->complete_apply_count = $task->complete_apply_count + 1;
+//                    $task->apply_count = $task->apply_count + 1;
+//                    $task->save();
+//                }
+//            }
             //其他用户修改为stefen,今天分配的量-1
             if($ticket->assignee_id == '382940274852' && $zendesk->assignee_id != '382940274852'){
                 //找出今天的task
@@ -281,6 +281,8 @@ class Notice extends Controller
                     $task->complete_count = $task->complete_count - 1;
                     $task->complete_apply_count = $task->complete_apply_count - 1;
                     $task->save();
+                    $zendesk->is_hide = 0;
+                    $zendesk->save();
                 }
             }
             //查找comment_id是否存在，不存在则添加
