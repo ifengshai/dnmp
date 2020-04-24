@@ -334,7 +334,7 @@ class WorkOrderList extends Backend
                             $params['assign_user_id'] = config('workorder.customer_manager');
                         } else {
                             //创建人对应主管
-                            $params['assign_user_id'] = $this->assign_user_id;
+                            $params['assign_user_id'] = $this->assign_user_id ?: session('admin.id');
                         }
                     }
                     //提交时间
@@ -354,6 +354,7 @@ class WorkOrderList extends Backend
                         $params['create_user_id'] = session('admin.id');
                         $params['create_time'] = date('Y-m-d H:i:s');
                         $params['order_sku'] = implode(',', $params['order_sku']);
+                        $params['assign_user_id'] = $params['assign_user_id'] ?: 0;
                         $result = $this->model->allowField(true)->save($params);
                         if (false === $result) {
                             throw new Exception("添加失败！！");
@@ -796,7 +797,7 @@ class WorkOrderList extends Backend
                             $params['assign_user_id'] = config('workorder.customer_manager');
                         } else {
                             //创建人对应主管
-                            $params['assign_user_id'] = $this->assign_user_id;
+                            $params['assign_user_id'] = $this->assign_user_id ?: session('admin.id');
                         }
                     }
 
