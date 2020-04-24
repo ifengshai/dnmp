@@ -584,7 +584,7 @@ class WorkOrderList extends Model
         $work = self::find($work_id);
         $postData = [
             'email' => $work->email,
-            //'ordernum' => $work->platform_order,
+            'ordernum' => $work->platform_order,
             'point' => $work->integral,
             'content' => $work->integral_describe
         ];
