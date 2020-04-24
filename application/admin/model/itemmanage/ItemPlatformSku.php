@@ -163,7 +163,7 @@ class ItemPlatformSku extends Model
     /**
      * 根据平台SKU查出仓库SKU
      * @param $sku 平台SKU
-     * @param $platform_type 对应平台 1 Zeelool 2 Voogueme 3 Nihao
+     * @param $platform_type 对应平台 1 Zeelool 2 Voogueme 3 Nihao 4 Meeloog
      * @return string
      */
     public function getTrueSku($sku = '', $platform_type = '')
