@@ -36,7 +36,7 @@ class WorkOrderRecept extends Model
 
     public function getStatusFormatAttr($value, $data)
     {
-        $status = ['1' => '未处理', '2' => '处理完成', '3' => '处理失败'];
+        $status = ['0' => '未处理', '1' => '处理完成', '2' => '处理失败'];
         return $status[$data['recept_status']];
     }
     /**

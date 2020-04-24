@@ -691,7 +691,7 @@ class WorkOrderList extends Model
                 foreach ($orderRecepts as $orderRecept) {
                     //承接人是自己，则措施，承接默认完成
                     if ($orderRecept->recept_person_id == $work->create_user_id) {
-                        WorkOrderRecept::where('id', $orderRecept->id)->update(['recept_status' => 2, 'finish_time' => $time, 'note' => '自动处理完成']);
+                        WorkOrderRecept::where('id', $orderRecept->id)->update(['recept_status' => 1, 'finish_time' => $time, 'note' => '自动处理完成']);
                         WorkOrderMeasure::where('id', $orderRecept->measure_id)->update(['operation_type' => 1, 'operation_time' => $time]);
                     } else {
                         $allComplete = 0;
@@ -736,7 +736,7 @@ class WorkOrderList extends Model
                         if ($orderRecept->recept_person_id == $work->create_user_id) {
                             //审核成功直接进行处理
                             if ($params['success'] == 1) {
-                                WorkOrderRecept::where('id', $orderRecept->id)->update(['recept_status' => 2, 'finish_time' => $time, 'note' => '自动处理完成']);
+                                WorkOrderRecept::where('id', $orderRecept->id)->update(['recept_status' => 1, 'finish_time' => $time, 'note' => '自动处理完成']);
                                 WorkOrderMeasure::where('id', $orderRecept->measure_id)->update(['operation_type' => 1, 'operation_time' => $time]);
                             }
                         } else {
