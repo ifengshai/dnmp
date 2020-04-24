@@ -436,8 +436,8 @@ table.altrowstable tr:nth-child(even){
                                  <td style="text-align: center; vertical-align: middle;">{$orderInfoList.customer_email}</td>
                                  <td style="text-align: center; vertical-align: middle;">{$orderInfoList.order_currency_code}</td>
                                  <td style="text-align: center; vertical-align: middle;">{$orderInfoList.status}</td>
-                                 <td style="text-align: center; vertical-align: middle;">{:round($orderInfoList.real_papid,3)}</td>
-								 <td style="text-align: center; vertical-align: middle;">{:round($orderInfoList.base_grand_total,2)}</td>
+                                 <td style="text-align: center; vertical-align: middle;">{:round($orderInfoList.base_grand_total,3)}</td>
+								 <td style="text-align: center; vertical-align: middle;">{:round($orderInfoList.base_subtotal,2)}</td>
                                  <td style="text-align: center; vertical-align: middle;">{$orderInfoList.coupon_code}</td>
                                  <td style="text-align: center; vertical-align: middle;">{$orderInfoList.coupon_rule_name}</td>
                                  <td style="text-align: center; vertical-align: middle;">{:round($orderInfoList.mw_rewardpoint,2)}</td>
@@ -549,7 +549,7 @@ table.altrowstable tr:nth-child(even){
                         {foreach name="orderInfoResult" item="orderInfoList"}
                         <tr>
                             <td style="text-align: center; vertical-align: middle;">{$orderInfoList.increment_id}</td>
-                            <td style="text-align: center; vertical-align: middle;">{:round($orderInfoList.real_papid,3)}</td>
+                            <td style="text-align: center; vertical-align: middle;">{:round($orderInfoList.base_subtotal,3)}</td>
                             <td style="text-align: center; vertical-align: middle;">{:round($orderInfoList.base_grand_total,2)}</td>
                             <td style="text-align: center; vertical-align: middle;">{$orderInfoList.method}</td>
                             <td style="text-align: center; vertical-align: middle;">{$orderInfoList.last_trans_id}</td>
