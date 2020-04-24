@@ -1236,7 +1236,7 @@ class WorkOrderList extends Backend
         //$this->model->presentCoupon(235);
         //$this->model->presentIntegral(233);
         //$this->model->createOrder(3, 338);
-        $result=$this->checkMeasure(463);
+        $result=$this->model->deductionStock(496,521);
         dump($result);
     }
     /**

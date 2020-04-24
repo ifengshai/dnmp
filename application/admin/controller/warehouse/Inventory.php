@@ -1427,7 +1427,7 @@ class Inventory extends Backend
             Db::startTrans();
             try {
                 //更改sales_flat_order_item表中的sku字段
-                if ($original_sku && $original_number) { //如果存在原始sku和原始的数量
+                if ($original_sku && $original_number) {     //如果存在原始sku和原始的数量
                     $whereChange['order_id'] = $order['entity_id'];
                     $whereChange['sku']      = $original_sku;
                     $changeData['is_change_frame'] = 2;

@@ -364,8 +364,12 @@
     <input type="hidden" name="row[order_pay_method]" id='order_pay_method' value="{$row.order_pay_method}" />
     <!--订单支付的支付方式 根据订单号读出来-->
     <input type="hidden" id='work_platform' name="row[work_platform]" value="{$row.work_platform}" />
+    <!-- 承接人id -->
+    <input type="hidden" name="row[recept_person_id]" id="recept_person_id" value="{$row.recept_person_id}">
     <!--是否需要审核-->
-    <input type="hidden" id='is_check' name="row[is_check]" value="" />
+    <input type="hidden" id='is_check' name="row[is_check]" value="{$row.is_check}"/>
+    <!-- 问题类型id传递 -->
+    <input type="hidden" name="row[problem_id]" id="problem_id" value="{$row.problem_type_id}">
     <!--站点类型-->
     <div id="input-hidden"></div>
     <div class="form-group">
