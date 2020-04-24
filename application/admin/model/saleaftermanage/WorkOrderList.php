@@ -309,6 +309,7 @@ class WorkOrderList extends Model
                         'os_bd' => $changeLens['os_bd'][$key],
                         'os_pv_r' => $changeLens['os_pv_r'][$key],
                         'os_bd_r' => $changeLens['os_bd_r'][$key],
+                        'measure_id'  => $measure_id,
                         'create_person' => session('admin.nickname'),
                         'update_time' => date('Y-m-d H:i:s'),
                         'create_time' => date('Y-m-d H:i:s')
@@ -370,6 +371,7 @@ class WorkOrderList extends Model
                     $orderChangeList[$k]['change_sku'] = $v;
                     $orderChangeList[$k]['change_number'] = $change_number[$k];
                     $orderChangeList[$k]['change_type'] = 1;
+                    $orderChangeList[$k]['measure_id']  = $measure_id;
                     $orderChangeList[$k]['create_person'] = session('admin.nickname');
                     $orderChangeList[$k]['create_time'] = date('Y-m-d H:i:s');
                     $orderChangeList[$k]['update_time'] = date('Y-m-d H:i:s');
@@ -399,6 +401,7 @@ class WorkOrderList extends Model
                 $orderChangeList[$k]['original_sku'] = $v;
                 $orderChangeList[$k]['original_number'] = $params['cancel_order']['original_number'][$k];
                 $orderChangeList[$k]['change_type'] = 3;
+                $orderChangeList[$k]['measure_id']  = $measure_id;
                 $orderChangeList[$k]['create_person'] = session('admin.nickname');
                 $orderChangeList[$k]['create_time'] = date('Y-m-d H:i:s');
                 $orderChangeList[$k]['update_time'] = date('Y-m-d H:i:s');
@@ -584,7 +587,7 @@ class WorkOrderList extends Model
         $work = self::find($work_id);
         $postData = [
             'email' => $work->email,
-            //'ordernum' => $work->platform_order,
+            'ordernum' => $work->platform_order,
             'point' => $work->integral,
             'content' => $work->integral_describe
         ];
@@ -688,7 +691,7 @@ class WorkOrderList extends Model
                 foreach ($orderRecepts as $orderRecept) {
                     //承接人是自己，则措施，承接默认完成
                     if ($orderRecept->recept_person_id == $work->create_user_id) {
-                        WorkOrderRecept::where('id', $orderRecept->id)->update(['recept_status' => 2, 'finish_time' => $time, 'note' => '自动处理完成']);
+                        WorkOrderRecept::where('id', $orderRecept->id)->update(['recept_status' => 1, 'finish_time' => $time, 'note' => '自动处理完成']);
                         WorkOrderMeasure::where('id', $orderRecept->measure_id)->update(['operation_type' => 1, 'operation_time' => $time]);
                     } else {
                         $allComplete = 0;
@@ -733,7 +736,7 @@ class WorkOrderList extends Model
                         if ($orderRecept->recept_person_id == $work->create_user_id) {
                             //审核成功直接进行处理
                             if ($params['success'] == 1) {
-                                WorkOrderRecept::where('id', $orderRecept->id)->update(['recept_status' => 2, 'finish_time' => $time, 'note' => '自动处理完成']);
+                                WorkOrderRecept::where('id', $orderRecept->id)->update(['recept_status' => 1, 'finish_time' => $time, 'note' => '自动处理完成']);
                                 WorkOrderMeasure::where('id', $orderRecept->measure_id)->update(['operation_type' => 1, 'operation_time' => $time]);
                             }
                         } else {
@@ -801,9 +804,9 @@ class WorkOrderList extends Model
     public function handleRecept($id, $work_id, $measure_id, $recept_group_id, $success, $process_note)
     {
         if (1 == $success) {
-            $data['recept_status'] = 2;
+            $data['recept_status'] = 1;
         } else {
-            $data['recept_status'] = 3;
+            $data['recept_status'] = 2;
         }
         $data['note'] = $process_note;
         $data['finish_time'] = date('Y-m-d H:i:s');
@@ -813,11 +816,11 @@ class WorkOrderList extends Model
         $where['work_id'] = $work_id;
         $where['measure_id'] = $measure_id;
         $where['recept_group_id'] = $recept_group_id;
-        $where['recept_status'] = 1;
+        $where['recept_status'] = 0;
         //删除同样的承接组数据
         WorkOrderRecept::where($where)->delete();
         //如果是处理失败的状态
-        if (3 == $data['recept_status']) {
+        if (2 == $data['recept_status']) {
             $dataMeasure['operation_type'] = 2;
         } else {
             $dataMeasure['operation_type'] = 3;
@@ -827,7 +830,7 @@ class WorkOrderList extends Model
         //求出承接措施是否完成
         $whereMeasure['work_id'] = $work_id;
         $whereMeasure['measure_id'] = $measure_id;
-        $whereMeasure['recept_status'] = ['eq', 1];
+        $whereMeasure['recept_status'] = ['eq', 0];
         $resultRecept = WorkOrderRecept::where($whereMeasure)->count();
         if (0 == $resultRecept) { //表明整个措施已经完成
             //求出整个工单的措施状态
@@ -843,7 +846,7 @@ class WorkOrderList extends Model
             $dataWorkOrder['complete_time'] = date('Y-m-d H:i:s');
             WorkOrderList::where(['id' => $work_id])->update($dataWorkOrder);
         }
-        if($resultInfo  && (2 == $data['recept_status'])){
+        if($resultInfo  && (1 == $data['recept_status'])){
             $this->deductionStock($work_id,$measure_id);
         }
         return true;
@@ -852,13 +855,12 @@ class WorkOrderList extends Model
     //扣减库存逻辑
     public function deductionStock($work_id,$measure_id)
     {
-        $measuerInfo = WorkOrderMeasure::where(['id'=>$measure_id])->column('sku_change_type');
+        $measuerInfo = WorkOrderMeasure::where(['id'=>$measure_id])->value('sku_change_type');
         if($measuerInfo<1){
             return false;
         }
-        $change_type = $measuerInfo[0];
         $whereMeasure['work_id'] = $work_id;
-        $whereMeasure['change_type'] = $change_type; 
+        $whereMeasure['change_type'] = $measuerInfo; 
         $result = WorkOrderChangeSku::where($whereMeasure)->field('id,increment_id,platform_type,change_type,original_sku,original_number,change_sku,change_number')->select();
         if(!$result){
             return false;
@@ -866,13 +868,13 @@ class WorkOrderList extends Model
         $workOrderList = WorkOrderList::where(['id' => $work_id])->field('id,work_platform,platform_order')->find();
         $result = collection($result)->toArray();
         
-        if(1 == $change_type){//更改镜片
+        if(1 == $measuerInfo){//更改镜片
             $info = (new Inventory())->workChangeFrame($work_id, $workOrderList->work_platform, $workOrderList->platform_order,$result);
-        }elseif(3 == $change_type){ //取消订单
+        }elseif(3 == $measuerInfo){ //取消订单
             $info = (new Inventory())->workCancelOrder($work_id, $workOrderList->work_platform, $workOrderList->platform_order,$result);
-        }elseif(4 == $change_type){ //赠品
+        }elseif(4 == $measuerInfo){ //赠品
             $info = (new Inventory())->workPresent($work_id, $workOrderList->work_platform, $workOrderList->platform_order,$result);
-        }elseif(5 == $change_type){
+        }elseif(5 == $measuerInfo){
             $info =(new Inventory())->workPresent($work_id, $workOrderList->work_platform, $workOrderList->platform_order,$result);
         }else{
             return false;
