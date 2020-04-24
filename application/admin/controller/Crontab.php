@@ -1380,6 +1380,7 @@ order by sfoi.item_id asc limit 1000";
         $zeelool_model = new \app\admin\model\order\order\Zeelool;
         $voogueme_model = new \app\admin\model\order\order\Voogueme;
         $nihao_model = new \app\admin\model\order\order\Nihao;
+        $meeloog_model = new \app\admin\model\order\order\Meeloog;
         $intelligent_purchase_query_sql = "SELECT a.sku, if(counter,counter,0) as counter, 
         IF ( datediff( now( ), a.created_at ) > 90, 90, datediff( now( ), a.created_at ) ) days, a.created_at 
         FROM catalog_product_entity a 
