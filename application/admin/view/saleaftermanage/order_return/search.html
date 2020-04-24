@@ -236,32 +236,7 @@ table.altrowstable tr:nth-child(even){
                         </table>
                     </div>
                     </div>
-                    <!-- <table id="info-customer-task" class="altrowstable"
-                           data-operate-edit="{:$auth->check('saleaftermanage/order_return/edit')}"
-                           data-operate-del="{:$auth->check('saleaftermanage/order_return/del')}"
-                           width="100%">
-                    <thead>
-                            <tr><th colspan="16" style="font-size:16px;text-align: center; vertical-align: middle;">用户个人信息</th></tr>                           
-                        <tr>
-                            <th style="text-align: center; vertical-align: middle;">姓名</th>
-                            <th style="text-align: center; vertical-align: middle;">邮箱</th>
-                            <th style="text-align: center; vertical-align: middle;">支付成功次数</th>
-                            <th style="text-align: center; vertical-align: middle;">支付成功金额</th>
-                            <th style="text-align: center; vertical-align: middle;">支付失败次数</th>
-                            <th style="text-align: center; vertical-align: middle;">支付失败金额</th>
-                        </tr>
-                    </thead>
-                        {notempty name="customerInfo"}
-                        <tr>
-                            <td style="text-align: center; vertical-align: middle;">{$customerInfo.customer_name}</td>
-                            <td style="text-align: center; vertical-align: middle;">{$customerInfo.customer_email}</td>
-                            <td style="text-align: center; vertical-align: middle;">{$customerInfo.success_counter}</td>
-                            <td style="text-align: center; vertical-align: middle;">{$customerInfo.success_total}</td>
-                            <td style="text-align: center; vertical-align: middle;">{$customerInfo.failed_counter}</td>
-                            <td style="text-align: center; vertical-align: middle;">{$customerInfo.failed_total}</td>
-                        </tr>
-                        {/notempty}
-                    </table> -->
+                 
                         {notempty name="infoSynergyTaskResult"}
                         <table id="info-synergy-task" class="altrowstable"
                                data-operate-edit="{:$auth->check('saleaftermanage/order_return/edit')}"
@@ -411,7 +386,7 @@ table.altrowstable tr:nth-child(even){
                             <th style="text-align: center; vertical-align: middle;">支付货币</th>
                             <th style="text-align: center; vertical-align: middle;">订单状态</th>
 							<th style="text-align: center; vertical-align: middle;">原币种支付金额</th>
-                            <th style="text-align: center; vertical-align: middle;">美金支付金额($)</th>s
+                            <th style="text-align: center; vertical-align: middle;">美金支付金额($)</th>
                             <th style="text-align: center; vertical-align: middle;">优惠券</th>
                             <th style="text-align: center; vertical-align: middle;">优惠码</th>
                             <th style="text-align: center; vertical-align: middle;">积分(参考)</th>
