@@ -51,6 +51,8 @@ class InfoSynergyTaskChangeSku extends Model
         $map['platform_type'] = $platform_type;
         $map['original_sku'] = $original_sku;
         $map['change_type'] = 1;
-        return $this->where($map)->field('change_sku,change_number')->find();
+        $list = $this->where($map)->field('change_sku,change_number')->select();
+        $list = collection($list)->toArray();
+        return $list ?: [];
     }
 }
