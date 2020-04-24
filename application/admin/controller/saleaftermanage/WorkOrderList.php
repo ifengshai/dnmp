@@ -77,6 +77,7 @@ class WorkOrderList extends Backend
     {
         $step = $this->step->where('work_id', $id)->select();
         $step_arr = collection($step)->toArray();
+
         foreach ($step_arr as $k => $v) {
             $recept = $this->recept->where('measure_id', $v['id'])->where('work_id', $id)->select();
             $recept_arr = collection($recept)->toArray();
@@ -84,7 +85,7 @@ class WorkOrderList extends Backend
 
             $step_arr[$k]['recept'] = $recept_arr;
         }
-        return $step_arr;
+        return $step_arr ?: [];
     }
 
     /**
@@ -165,7 +166,6 @@ class WorkOrderList extends Backend
                     $list[$k]['has_recept'] = 1;
                 }
             }
-
             $result = array("total" => $total, "rows" => $list);
 
             return json($result);
