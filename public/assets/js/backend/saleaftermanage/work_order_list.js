@@ -102,7 +102,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                             operate: false,
                             formatter: function (value, rows) {
                                 var all_user_name = '';
-                                if (value) {
+                                if (value.length > 0) {
                                     for (i = 0, len = value.length; i < len; i++) {
                                         if (value[i].operation_type == 0) {
                                             all_user_name += '<div class="step_recept"><b class="step">' + value[i].measure_content + '：</b><b class="recept text-red">未处理</b></div>';
