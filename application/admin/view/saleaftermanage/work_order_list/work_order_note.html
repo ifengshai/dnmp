@@ -3,17 +3,14 @@
         text-align: center;
     }
 </style>
-<form role="form" data-toggle="validator" method="POST" action="{:url('test_record_bug')}">
-    <input type="hidden" name="row[type]" value="{$row.type}"/>
-    <input type="hidden" name="row[pid]" value="{$row.id}"/>
-    <input type="hidden" name="row[site_type]" value="{$row.site_type}"/>
-    <input type="hidden" name="row[environment_type]" value="{if $row['status'] == 4}1{else}2{/if}"/>
+<form role="form" data-toggle="validator" method="POST" action="{:url('saleaftermanage/work_order_list/workOrderNote')}">
     <div class="box box-danger">
+        <input type="hidden" name="row[work_id]" value="{$work_id}">
         <div class="box-body">
             <div class="">
                 <div class="col-xs-5" style="width: 48%;">
                     <span>{:__('describe')}:</span>
-                    <textarea id="c-describe" class="form-control" data-rule="required" style="resize:none" rows="5" name="row[describe]" cols="50"></textarea>
+                    <textarea id="c-describe" class="form-control" data-rule="required" style="resize:none" rows="5" name="row[content]" cols="50"></textarea>
                 </div>
             </div>
         </div>
@@ -27,26 +24,23 @@
 <ul class="timeline">
     <li class="time-label">
         <span class="bg-red">
-            {:__('5555555555')}
+            {:__('备注记录')}
         </span>
     </li>
-    {volist name="row" id="ltl"}
+    {volist name="row" id="vo"}
         <li>
             <i class="fa fa-user bg-aqua"></i>
-            <div class="timeline-item">
-                <span class="time"><i class="fa fa-clock-o"></i>{:__('时间')}：shijian</span>
-                <h3 class="timeline-header"><a href="#" style="color: darkseagreen;font-weight: 900">11111111</a></h3>
+            <div class="timeline-item" style="background-color: #f5f5f5;">
+                <span class="time"><i class="fa fa-clock-o"></i> {:__('备注时间')}：{$vo.note_time}</span>
+
+                <h3 class="timeline-header"><a href="#">{$vo.note_user_name}</a></h3>
 
                 <div class="timeline-body">
-                    <p style="float: left;width: 62%">{:__('111')}：<span><b>2222222222222</b></span></p>
-                    <p>{:__('222')}：<span><b>sdasdasdasdasdasdas1111111</b></span></p>
-                </div>
-
-                <div class="timeline-body" >
-                    {:__('3333')}：<span style="word-break: break-all;"><b>dasdasdadas</b></span>
+                    {$vo.content}
                 </div>
 
             </div>
+
         </li>
     {/volist}
 </ul>

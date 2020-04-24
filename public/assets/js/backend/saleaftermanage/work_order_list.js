@@ -167,7 +167,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     text: __('查看备注'),
                                     title: __('查看备注'),
                                     classname: 'btn btn-xs btn-primary btn-dialog',
-                                    url: 'saleaftermanage/work_order_list/work_order_note',
+                                    url: 'saleaftermanage/work_order_list/workOrderNote',
                                     callback: function (data) {
                                     },
                                     visible: function(row){
