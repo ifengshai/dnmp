@@ -366,6 +366,27 @@ class Zeelool extends Backend
                     };
 
                     $ItemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku;
+
+                    $infotask = new \app\admin\model\infosynergytaskmanage\InfoSynergyTaskChangeSku;
+                    $arr = array_column($res, 'increment_id');
+                    $infoRes = $infotask->where(['increment_id' => ['in', $arr]])->select();
+                    $sku = [];
+
+                    foreach ($infoRes as $k => $v) {
+                        $trueSku = $ItemPlatformSku->getTrueSku(trim($v['new_sku']), 1);
+                        if ($trueSku) {
+                            //扣减总库存 扣减占用库存
+                            $res_one = $item->where($item_map)->setDec('stock', $v['qty_ordered']);
+                            //占用库存
+                            $res_two = $item->where($item_map)->setDec('occupy_stock', $v['qty_ordered']);
+
+                            //扣减配货占用
+                            $res_three = $item->where($item_map)->setDec('distribution_occupy_stock', $v['qty_ordered']);
+                        }
+                        $sku[$v['increment_id']][$v['yuan_sku']] += $v['qty'];
+                    }
+
+
                     //查出订单SKU映射表对应的仓库SKU
                     $error = [];
                     foreach ($res as $k => &$v) {
@@ -374,19 +395,19 @@ class Zeelool extends Backend
                             //根据订单号 SKU查询更换镜架记录表 处理更换之后SKU库存
                             $infotask = new \app\admin\model\infosynergytaskmanage\InfoSynergyTaskChangeSku;
                             $infoTaskRes = $infotask->getChangeSkuData($v['increment_id'], 1, $v['sku']);
-                            foreach($infoTaskRes as $val) {
-                                
+                            foreach ($infoTaskRes as $val) {
                             }
                             $v['sku'] = $infoTaskRes['change_sku'];
                             $v['qty_ordered'] = $infoTaskRes['change_number'];
                         }
 
                         $trueSku = $ItemPlatformSku->getTrueSku(trim($v['sku']), 1);
-
+                        $qty = $v['qty_ordered'] - $sku[$v['increment_id']][$v['sku']];
                         //总库存
                         $item_map['sku'] = $trueSku;
                         $item_map['is_del'] = 1;
                         if ($trueSku) {
+
                             //扣减总库存 扣减占用库存
                             $res_one = $item->where($item_map)->setDec('stock', $v['qty_ordered']);
                             //占用库存
@@ -399,7 +420,6 @@ class Zeelool extends Backend
                         if (!$res_one || !$res_two || !$res_three) {
                             $error[] = $k;
                         }
-
                     }
                     unset($v);
                     if (count($error)) {
