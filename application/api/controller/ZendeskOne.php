@@ -568,11 +568,12 @@ class ZendeskOne extends Controller
         try{
             $trackingConnector = new TrackingConnector($this->apiKey);
             $carrier = $this->getCarrier($title);
-            $trackingConnector->register($trackNumber,$carrier['carrierId']);
             //无物流商，直接返回
             if(!$carrier['carrierId']){
                 return $res;
             }
+            $trackingConnector->register($trackNumber,$carrier['carrierId']);
+
 
             $trackNumbersHistories =  $trackingConnector->getTrackInfo($trackNumber,$carrier['carrierId']);
             $data = $this->formatTrack($trackNumbersHistories);
