@@ -2,7 +2,6 @@
 
 namespace app\admin\model\saleaftermanage;
 
-use app\admin\model\saleaftermanage\WorkOrderMeasure;
 use fast\Http;
 use think\Cache;
 use think\Db;
