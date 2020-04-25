@@ -349,7 +349,7 @@ class WorkOrderList extends Model
      *
      * @Description
      * @author lsw
-     * @since 2020/04/23 17:02:32 
+     * @since 2020/04/23 17:02:32
      * @return void
      */
     public function changeFrame($params,$work_id, $measure_choose_id,$measure_id){
@@ -386,7 +386,7 @@ class WorkOrderList extends Model
                     WorkOrderMeasure::where(['id'=>$measure_id])->update(['sku_change_type'=>1]);
                 }
             }else{
-               return false; 
+                return false;
             }
         }
     }
@@ -418,7 +418,7 @@ class WorkOrderList extends Model
         }else{
             return false;
         }
-    }        
+    }
     /**
      * 根据id获取镜片，镀膜的名称
      * @param $siteType
@@ -745,6 +745,11 @@ class WorkOrderList extends Model
                             if ($params['success'] == 1) {
                                 WorkOrderRecept::where('id', $orderRecept->id)->update(['recept_status' => 1, 'finish_time' => $time, 'note' => '自动处理完成']);
                                 WorkOrderMeasure::where('id', $orderRecept->measure_id)->update(['operation_type' => 1, 'operation_time' => $time]);
+                                if($measure_choose_id == 9){
+                                    $this->presentCoupon($work->id);
+                                }elseif($measure_choose_id == 10){
+                                    $this->presentIntegral($work->id);
+                                }
                             }
                         } else {
                             $allComplete = 0;
@@ -867,13 +872,13 @@ class WorkOrderList extends Model
             return false;
         }
         $whereMeasure['work_id'] = $work_id;
-        $whereMeasure['change_type'] = $measuerInfo; 
+        $whereMeasure['change_type'] = $measuerInfo;
         $result = WorkOrderChangeSku::where($whereMeasure)->field('id,increment_id,platform_type,change_type,original_sku,original_number,change_sku,change_number')->select();
         if(!$result){
             return false;
         }
         $workOrderList = WorkOrderList::where(['id' => $work_id])->field('id,work_platform,platform_order')->find();
-        $result = collection($result)->toArray();  
+        $result = collection($result)->toArray();
         if(1 == $measuerInfo){//更改镜片
             $info = (new Inventory())->workChangeFrame($work_id, $workOrderList->work_platform, $workOrderList->platform_order,$result);
         }elseif(3 == $measuerInfo){ //取消订单
@@ -886,6 +891,6 @@ class WorkOrderList extends Model
             return false;
         }
         return $info;
-        
+
     }
 }
