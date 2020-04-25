@@ -3,21 +3,24 @@
         text-align: center;
     }
 </style>
-<form role="form" data-toggle="validator" method="POST" action="{:url('saleaftermanage/work_order_list/workOrderNote')}">
-    <div class="box box-danger">
-        <input type="hidden" name="row[work_id]" value="{$work_id}">
-        <div class="box-body">
-            <div class="">
-                <div class="col-xs-5" style="width: 48%;">
-                    <span>{:__('describe')}:</span>
-                    <textarea id="c-describe" class="form-control" data-rule="required" style="resize:none" rows="5" name="row[content]" cols="50"></textarea>
+    <form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="{:url('saleaftermanage/work_order_list/workOrderNote')}">
+        <div class="form-group">
+            <div class="box box-danger">
+            <input type="hidden" name="row[work_id]" value="{$work_id}">
+            <div class="box-body">
+                <div class="">
+                    <div class="col-xs-5" style="width: 48%;">
+                        <span>{:__('describe')}:</span>
+                        <textarea id="c-describe" class="form-control" data-rule="required" style="resize:none" rows="5" name="row[content]" cols="50"></textarea>
+                    </div>
                 </div>
             </div>
+            <div style="width: 100%;text-align: center;padding-bottom: 1%;">
+                <button type="submit" class="btn btn-success btn-embossed">{:__('OK')}</button>
+            </div>
         </div>
-        <div style="width: 100%;text-align: center;padding-bottom: 1%;">
-            <button type="submit" name="web_finish" value="1" class="btn btn-success btn-embossed" style="width: 50%;align-content: center;">{:__('OK')}</button>
         </div>
-    </div>
+
 </form>
 
 

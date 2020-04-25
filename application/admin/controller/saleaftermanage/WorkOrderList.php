@@ -1950,7 +1950,7 @@ EOF;
     /**
      * 工单备注
      */
-    public function workOrderNote($ids = null){
+    public function workordernote($ids = null){
         if($this->request->isPost()) {
             $params = $this->request->post("row/a");
             if ($params) {
@@ -1999,7 +1999,7 @@ EOF;
         $row = WorkOrderNote::where(['work_id' => $ids])->select();
         $this->view->assign("row", $row);
         $this->view->assign('work_id',$ids);
-        return $this->view->fetch();
+        return $this->view->fetch('work_order_note');
     }
 
 }

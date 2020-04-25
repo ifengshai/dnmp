@@ -163,11 +163,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                             events: Table.api.events.operate,
                             buttons: [
                                 {
-                                    name: 'work_order_note',
+                                    name: 'workOrderNote',
                                     text: __('查看备注'),
                                     title: __('查看备注'),
                                     classname: 'btn btn-xs btn-primary btn-dialog',
-                                    url: 'saleaftermanage/work_order_list/workOrderNote',
+                                    url: 'saleaftermanage/work_order_list/workordernote',
                                     callback: function (data) {
                                     },
                                     visible: function(row){
@@ -1359,6 +1359,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
         //处理任务
         process: function () {
             Controller.api.bindevent();
+        },
+        workordernote: function () {
+            Form.api.bindevent($("form[role=form]"), function(data, ret) {
+                Fast.api.close();
+            }, function(data, ret) {
+                Toastr.success("失败");
+            });
         },
         couponlist: function () {
             // 初始化表格参数配置
