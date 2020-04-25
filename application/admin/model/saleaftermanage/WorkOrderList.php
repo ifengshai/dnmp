@@ -317,6 +317,9 @@ class WorkOrderList extends Model
                     //补发
                     //if ($change_type == 5) {
                     $data['email'] = $params['address']['email'];
+                    if(!$params['region_id'] || !$params['country_id'] ){
+                        exception('国家、地区不能为空');
+                    }
                     $data['userinfo_option'] = serialize($params['address']);
                     $prescriptionOption = [
                         'prescription_type' => $recipe_type,
