@@ -652,7 +652,7 @@ class ZendeskOne extends Controller
         if($carrierId){
             return ['title' => $title,'carrierId' => $carrier[$carrierId]];
         }
-        return $carrierId;
+        return ['title' => $title,'carrierId' => $carrierId];
     }
 
     /**
