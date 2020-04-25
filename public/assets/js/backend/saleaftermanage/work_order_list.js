@@ -8,7 +8,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 searchFormVisible: true,
                 pageList: [10, 25, 50, 100],
                 extend: {
-                    index_url: 'saleaftermanage/work_order_list/index' + location.search,
+                    index_url: 'saleaftermanage/work_order_list/index' + location.search + '&platform_order=' + Config.platform_order,
                     add_url: 'saleaftermanage/work_order_list/add',
                     edit_url: 'saleaftermanage/work_order_list/edit',
                     del_url: 'saleaftermanage/work_order_list/del',

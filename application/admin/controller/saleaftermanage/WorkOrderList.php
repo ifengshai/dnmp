@@ -94,6 +94,7 @@ class WorkOrderList extends Backend
      */
     public function index()
     {
+        $platform_order = input('platform_order');
         //设置过滤方法
         $this->request->filter(['strip_tags']);
         if ($this->request->isAjax()) {
@@ -101,14 +102,17 @@ class WorkOrderList extends Backend
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
-
+            $platform_order = input('platform_order');
+            if ($platform_order) {
+                $map['platform_order'] = $platform_order;
+            }
             //选项卡我的任务切换
             $filter = json_decode($this->request->get('filter'), true);
             if ($filter['recept_person_id']) {
                 //承接 经手 审核 包含用户id
                 //获取当前用户所有的承接的工单id并且不是取消，新建的
-                $workIds = WorkOrderRecept::where('recept_person_id',$filter['recept_person_id'])->column('work_id');
-                $map = "(id in (".join(',',$workIds).") or after_user_id = {$filter['recept_person_id']} or assign_user_id = {$filter['recept_person_id']}) and work_status not in (0,1,7)";
+                $workIds = WorkOrderRecept::where('recept_person_id', $filter['recept_person_id'])->column('work_id');
+                $map = "(id in (" . join(',', $workIds) . ") or after_user_id = {$filter['recept_person_id']} or assign_user_id = {$filter['recept_person_id']}) and work_status not in (0,1,7)";
                 unset($filter['recept_person_id']);
                 $this->request->get(['filter' => json_encode($filter)]);
             }
@@ -161,9 +165,9 @@ class WorkOrderList extends Backend
                 $receptPersonIds = explode(',', $v['recept_person_id']);
                 //仓库工单并且经手人未处理
                 //1、仓库类型：经手人未处理||已处理未审核||
-                if( ($v['work_type'] == 2 && $v['is_after_deal_with'] == 0) || in_array($v['work_status'],[0,1,2,4,6,7]) || !in_array(session('admin.id'), $receptPersonIds)){
+                if (($v['work_type'] == 2 && $v['is_after_deal_with'] == 0) || in_array($v['work_status'], [0, 1, 2, 4, 6, 7]) || !in_array(session('admin.id'), $receptPersonIds)) {
                     $list[$k]['has_recept'] = 0;
-                }else{
+                } else {
                     $list[$k]['has_recept'] = 1;
                 }
             }
@@ -171,6 +175,7 @@ class WorkOrderList extends Backend
 
             return json($result);
         }
+        $this->assignconfig('platform_order', $platform_order ?: '');
         return $this->view->fetch();
     }
 
@@ -425,9 +430,9 @@ class WorkOrderList extends Backend
                             }
 
                             //更改镜片，补发，赠品
-                            $this->model->changeLens($params, $work_id, $v,$res);
-                            $this->model->changeFrame($params, $work_id, $v,$res);
-                            $this->model->cancelOrder($params, $work_id, $v,$res);
+                            $this->model->changeLens($params, $work_id, $v, $res);
+                            $this->model->changeFrame($params, $work_id, $v, $res);
+                            $this->model->cancelOrder($params, $work_id, $v, $res);
                         }
                     }
 
@@ -781,7 +786,7 @@ class WorkOrderList extends Backend
                     if ($params['refund_money'] > 30) {
                         $params['is_check'] = 1;
                     }
-                    
+
                     //判断审核人
                     if ($params['is_check'] == 1 || $params['need_coupon_id']) {
                         /**
@@ -859,9 +864,9 @@ class WorkOrderList extends Backend
                                 throw new Exception("添加失败！！");
                             }
                             //更改镜片，补发，赠品
-                            $this->model->changeLens($params, $row->id, $v,$res);
-                            $this->model->changeFrame($params, $row->id, $v,$res);
-                            $this->model->cancelOrder($params, $row->id, $v,$res);
+                            $this->model->changeLens($params, $row->id, $v, $res);
+                            $this->model->changeFrame($params, $row->id, $v, $res);
+                            $this->model->cancelOrder($params, $row->id, $v, $res);
                         }
                     }
 
@@ -1238,7 +1243,7 @@ class WorkOrderList extends Backend
         //$this->model->presentCoupon(235);
         //$this->model->presentIntegral(233);
         //$this->model->createOrder(3, 338);
-        $result=$this->model->deductionStock(496,521);
+        $result = $this->model->deductionStock(496, 521);
         dump($result);
     }
     /**
@@ -1267,7 +1272,7 @@ class WorkOrderList extends Backend
             $receptPersonIds = explode(',', $row->recept_person_id);
             //仓库工单并且经手人未处理
             //1、仓库类型：经手人未处理||已处理未审核||
-            if( ($row->work_type == 2 && $row->is_after_deal_with == 0) || in_array($row->work_status,[0,1,2,4,6,7]) || !in_array(session('admin.id'), $receptPersonIds)){
+            if (($row->work_type == 2 && $row->is_after_deal_with == 0) || in_array($row->work_status, [0, 1, 2, 4, 6, 7]) || !in_array(session('admin.id'), $receptPersonIds)) {
                 $this->error('没有处理的权限');
             }
         }
@@ -1525,9 +1530,9 @@ class WorkOrderList extends Backend
                         $this->error(__('您不能处理此工单'));
                     }
                     //当要处理成功时需要判断库存是否存在
-                    if(1 == $params['success']){
-                        $checkSku =$this->checkMeasure($receptInfo['measure_id']);
-                        if($checkSku){
+                    if (1 == $params['success']) {
+                        $checkSku = $this->checkMeasure($receptInfo['measure_id']);
+                        if ($checkSku) {
                             $this->error(__("以下sku库存不足{$checkSku},无法处理成功"));
                         }
                     }
@@ -1897,22 +1902,22 @@ EOF;
     protected function checkMeasure($measure_id)
     {
         //1.求出措施的类型
-        $measuerInfo = WorkOrderMeasure::where(['id'=>$measure_id])->value('sku_change_type');
+        $measuerInfo = WorkOrderMeasure::where(['id' => $measure_id])->value('sku_change_type');
         //没有扣减库存的措施
-        if($measuerInfo<1){ 
+        if ($measuerInfo < 1) {
             return false;
         }
         //求出措施类型
-        if(!in_array($measuerInfo,[1,4,5])){
+        if (!in_array($measuerInfo, [1, 4, 5])) {
             return false;
         }
         $whereMeasure['measure_id'] = $measure_id;
-        $whereMeasure['change_type'] = $measuerInfo; 
+        $whereMeasure['change_type'] = $measuerInfo;
         $result = WorkOrderChangeSku::where($whereMeasure)->field('platform_type,original_sku,original_number,change_sku,change_number')->select();
         $result = collection($result)->toArray();
         //更改镜片
         $arr = [];
-        foreach($result as $k=> $v){
+        foreach ($result as $k => $v) {
             $arr[$k]['original_sku'] = $v['change_sku'];
             $arr[$k]['original_number'] = $v['change_number'];
             $arr[$k]['platform_type']   = $v['platform_type'];
@@ -1929,8 +1934,8 @@ EOF;
                 $notEnough[] = $sku;
             }
         }
-        if($notEnough){
-            $str = implode(',',$notEnough);
+        if ($notEnough) {
+            $str = implode(',', $notEnough);
         }
         return $notEnough ? $str : false;
     }
@@ -1941,7 +1946,7 @@ EOF;
      */
     public function getProblemTypeContent()
     {
-        return array_merge(config('workorder.warehouse_problem_type'),config('workorder.customer_problem_type'));
+        return array_merge(config('workorder.warehouse_problem_type'), config('workorder.customer_problem_type'));
     }
 
 
@@ -1949,11 +1954,12 @@ EOF;
     /**
      * 工单备注
      */
-    public function work_order_note(){
-        if($this->request->isPost()) {
+    public function work_order_note()
+    {
+        if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
             if ($params) {
-                $params['create_time'] =  date('Y-m-d H:i',time());
+                $params['create_time'] =  date('Y-m-d H:i', time());
                 $params['create_user_id'] =  $this->auth->id;
                 $res_status = $this->testRecordModel->allowField(true)->save($params);
 
@@ -1976,5 +1982,4 @@ EOF;
         $this->view->assign("row", $row_arr);
         return $this->view->fetch();
     }
-
 }
