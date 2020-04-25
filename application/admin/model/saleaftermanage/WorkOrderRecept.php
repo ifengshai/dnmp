@@ -58,7 +58,7 @@ class WorkOrderRecept extends Model
      */
     public function getOneRecept($id)
     {
-        return $this->where(['id'=>$id])->find()->toArray();
+        return $this->where(['id'=>$id])->find();
     }
 
 }
