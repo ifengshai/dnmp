@@ -2,6 +2,7 @@
 
 namespace app\admin\controller\saleaftermanage;
 
+use app\admin\model\saleaftermanage\WorkOrderNote;
 use app\common\controller\Backend;
 use think\Cache;
 use think\Db;
@@ -1955,14 +1956,44 @@ EOF;
     /**
      * 工单备注
      */
-    public function work_order_note(){
+    public function workordernote($ids = null){
         if($this->request->isPost()) {
             $params = $this->request->post("row/a");
             if ($params) {
-                $params['create_time'] =  date('Y-m-d H:i',time());
-                $params['create_user_id'] =  $this->auth->id;
-                $res_status = $this->testRecordModel->allowField(true)->save($params);
+                $data['note_time'] =  date('Y-m-d H:i',time());
+                $data['note_user_id'] =  session('admin.id');
+                $data['note_user_name'] =  session('admin.nickname');
+                $data['work_id'] =  $params['work_id'];
+                $data['user_group_id'] =  0;
+                $data['content'] =  $params['content'];
+                Db::startTrans();
+                try{
+                    $res_status = WorkOrderNote::create($data);
+                    //查询用户的角色组id
+                    $authGroupIds = AuthGroupAccess::where('uid',session('admin.id'))->column('group_id');
+                    $work = $this->model->find($params['work_id']);
+                    $work_order_note_status = $work->work_order_note_status;
 
+                    if(array_intersect($authGroupIds,config('workorder.customer_department_rule'))){
+                        //客服组
+                        $work_order_note_status = 1;
+                    }
+                    if(array_intersect($authGroupIds,config('workorder.warehouse_department_rule'))){
+                        //仓库部
+                        $work_order_note_status = 2;
+                    }
+                    if(array_intersect($authGroupIds,config('workorder.finance_department_rule'))){
+                        //财务组
+                        $work_order_note_status = 3;
+                    }
+                    $work->work_order_note_status = $work_order_note_status;
+                    $work->save();
+                    Db::commit();
+                }catch (\Exception $e){
+                    echo 2;
+                    echo $e->getMessage();
+                    Db::rollback();
+                }
                 if ($res_status) {
                     $this->success('成功');
                 } else {
@@ -1971,16 +2002,10 @@ EOF;
             }
             $this->error(__('Parameter %s can not be empty', ''));
         }
-
-        $ids = $ids ?? input('ids');
-
-        $row = $this->work_order_note->get(['work_id' => $ids]);
-
-        $row_arr = $row->toArray();
-        dump($row_arr);
-
-        $this->view->assign("row", $row_arr);
-        return $this->view->fetch();
+        $row = WorkOrderNote::where(['work_id' => $ids])->select();
+        $this->view->assign("row", $row);
+        $this->view->assign('work_id',$ids);
+        return $this->view->fetch('work_order_note');
     }
 
 }

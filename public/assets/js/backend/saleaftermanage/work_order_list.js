@@ -125,6 +125,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         },
 
                         { field: 'work_status', title: __('work_status'), custom: { 0: 'black', 1: 'danger', 2: 'success', 4: 'success', 3: 'success', 5: 'success', 6: 'success', 7: 'success', 8: 'success' }, searchList: { 0: '已取消', 1: '新建', 2: '待审核', 4: '审核拒绝', 3: '待处理', 5: '部分处理', 6: '处理完成', 7: '处理失败', 8: '已撤销' }, formatter: Table.api.formatter.status },
+                        { field: 'work_order_note_status', title: __('备注组别'), custom: { 0: 'gray',1: 'success', 2: 'danger', 3: 'blank' }, searchList: { 0: '无备注', 1: '客服备注', 2: '仓库备注', 3: '财务备注' }, formatter: Table.api.formatter.status },
                         {
                             field: 'create_time',
                             title: __('time_str'),
@@ -163,24 +164,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                             events: Table.api.events.operate,
                             buttons: [
                                 {
-                                    name: 'work_order_note',
+                                    name: 'workOrderNote',
                                     text: __('查看备注'),
                                     title: __('查看备注'),
                                     classname: 'btn btn-xs btn-primary btn-dialog',
-                                    url: 'saleaftermanage/work_order_list/work_order_note',
+                                    url: 'saleaftermanage/work_order_list/workordernote',
                                     callback: function (data) {
-                                    },
-                                    visible: function(row){
-                                        return true;
-                                        if(row.status == 4){
-                                            if(row.demand_test_record_bug && row.is_test_record_hidden == 1){//操作权限及显示权限
-                                                if(row.test_is_finish == 0){
-                                                    return true;
-                                                }else{
-                                                    return false;
-                                                }
-                                            }
-                                        }
                                     }
                                 },
                             ],
@@ -1359,6 +1348,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
         //处理任务
         process: function () {
             Controller.api.bindevent();
+        },
+        workordernote: function () {
+            Form.api.bindevent($("form[role=form]"), function(data, ret) {
+                Fast.api.close();
+            }, function(data, ret) {
+                Toastr.success("失败");
+            });
         },
         couponlist: function () {
             // 初始化表格参数配置
