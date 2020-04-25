@@ -312,16 +312,18 @@ class WorkOrderList extends Model
                         'os_bd' => $changeLens['os_bd'][$key],
                         'os_pv_r' => $changeLens['os_pv_r'][$key],
                         'os_bd_r' => $changeLens['os_bd_r'][$key],
-                        'measure_id'  => $measure_id,
+                        'measure_id' => $measure_id,
                         'create_person' => session('admin.nickname'),
                         'update_time' => date('Y-m-d H:i:s'),
                         'create_time' => date('Y-m-d H:i:s')
                     ];
                     //补发
-                    //if ($change_type == 5) {
+
                     $data['email'] = $params['address']['email'];
-                    if(!$params['address']['region_id'] || !$params['address']['country_id'] ){
-                        exception('国家、地区不能为空');
+                    if ($change_type == 5) {
+                        if (!$params['address']['region_id'] || !$params['address']['country_id']) {
+                            exception('国家、地区不能为空');
+                        }
                     }
                     $data['userinfo_option'] = serialize($params['address']);
                     $prescriptionOption = [
