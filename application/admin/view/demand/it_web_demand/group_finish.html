@@ -8,12 +8,14 @@
             <span class="bg-red">
                 {:__('Hope_time')}：{$year_time}
             </span>
+
         </li>
         <li>
             <div class="timeline-item">
-                <label class="control-label col-xs-12 col-sm-2">{:__('is_small_probability')}:</label>
-                <div class="col-xs-12 col-sm-8">
-                    <select  id="is_small_probability" class="form-control settlement_method" onchange="onchangeSelect(this)">
+                                <span style="float: left;">小概率:</span>
+                <!--                <label class="control-label col-xs-12 col-sm-2">{:__('is_small_probability')}:</label>-->
+                <div class="col-xs-12 col-sm-9">
+                    <select  id="is_small_probability" class="form-control " onchange="onchangeSelect(this)">
                         <option value="0" {:$row['is_small_probability'] == 0 ? 'selected' : ''}>否</option>
                         <option value="1" {:$row['is_small_probability'] == 1 ? 'selected' : ''}>是</option>
                     </select>

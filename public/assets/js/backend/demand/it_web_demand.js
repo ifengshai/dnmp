@@ -577,17 +577,19 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {field: 'all_finish_time', title: __('all_finish_time'), operate:'RANGE', addclass:'datetimerange',operate:false},
                         {field: 'status_str', title: __('Status'),operate:false},
                         {
-                            field: 'is_work_time', title: __('是否非工作时间处理问题'),
+                            field: 'is_work_time', title: __('是否为加班处理'),
                             searchList: { 1: '是', 0: '否' },
                             custom: { 1: 'blue', 2: 'yellow' },
-                            visible:false
-                            // formatter: Table.api.formatter.status
+                            visible:false,
+                            operate:false,
+                            formatter: Table.api.formatter.status
                         },{
                             field: 'is_test_duty', title: __('是否扣除测试绩效'),
                             searchList: { 1: '是', 0: '否' },
                             custom: { 1: 'blue', 2: 'yellow' },
-                            visible:false
-                            // formatter: Table.api.formatter.status
+                            visible:false,
+                            operate:false,
+                            formatter: Table.api.formatter.status
                         },
                         {
                             field: 'buttons',
@@ -861,7 +863,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     name: 'opt_test_duty',
                                     text: '测试责任',
                                     title: __('将扣除测试绩效'),
-                                    classname: 'btn btn-xs btn-warning btn-ajax',
+                                    classname: 'btn btn-xs btn-danger btn-ajax',
                                     url: 'demand/it_web_demand/opt_test_duty/is_test_duty/1',
                                     confirm: '确认测试责任吗,将扣除测试绩效',
                                     success: function (data, ret) {
@@ -908,13 +910,15 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                         }
                                     },
                                 },
+
+
                                 {
                                     name: 'opt_work_time',
-                                    text: '工作时间处理问题',
-                                    title: __('改为工作时间处理此问题'),
+                                    text: '改为加班处理',
+                                    title: __('改为加班处理'),
                                     classname: 'btn btn-xs btn-warning btn-ajax',
                                     url: 'demand/it_web_demand/opt_work_time/is_work_time/1',
-                                    confirm: '是否改为工作时间此处理问题',
+                                    confirm: '是否改为加班时间此处理问题',
                                     success: function (data, ret) {
                                         Layer.alert(ret.msg);
                                         $(".btn-refresh").trigger("click");
@@ -935,11 +939,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     },
                                 },{//是否非工作时间处理问题  0 否 不是非工作时间处理问题  1 是 是非工作时间处理问题
                                     name: 'opt_work_time',
-                                    text: '非工作时间处理问题',
-                                    title: __('改为非工作时间处理此问题'),
+                                    text: '改为工作时间处理',
+                                    title: __('改为工作时间处理'),
                                     classname: 'btn btn-xs btn-success btn-ajax',
                                     url: 'demand/it_web_demand/opt_work_time',
-                                    confirm: '是否改为非工作时间处理此问题',
+                                    confirm: '是否改为工作时间处理此问题',
                                     success: function (data, ret) {
                                         Layer.alert(ret.msg);
                                         $(".btn-refresh").trigger("click");
