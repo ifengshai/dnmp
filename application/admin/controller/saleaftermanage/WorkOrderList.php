@@ -1538,7 +1538,7 @@ class WorkOrderList extends Backend
                 $receptInfo =  (new WorkOrderRecept())->getOneRecept($recept_id);
                 $result = false;
                 if ($receptInfo) {
-                    if ($receptInfo['recept_person_id'] != session('admin.id')) {
+                    if ($receptInfo->recept_person_id != session('admin.id')) {
                         $this->error(__('您不能处理此工单'));
                     }
                     //当要处理成功时需要判断库存是否存在
