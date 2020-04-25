@@ -17,6 +17,7 @@ use app\admin\model\saleaftermanage\WorkOrderMeasure;
 use app\admin\model\saleaftermanage\WorkOrderChangeSku;
 use app\admin\model\saleaftermanage\WorkOrderRecept;
 use app\admin\model\saleAfterManage\WorkOrderRemark;
+use app\admin\model\Admin;
 use think\Loader;
 use Util\SKUHelper;
 
@@ -1334,6 +1335,11 @@ class WorkOrderList extends Backend
             $recepts = WorkOrderRecept::where('work_id', $row->id)->with('measure')->group('recept_group_id,measure_id')->select();
             $this->view->assign('recepts', $recepts);
             return $this->view->fetch('saleaftermanage/work_order_list/process');
+        }
+        if(2 <= $row->work_status){
+            $row->assign_user = Admin::where(['id'=>$row->assign_user_id])->value('nickname');
+        }else{
+            $row->assign_uer  = Admin::where(['id'=>$row->operation_user_id])->value('nickname');
         }
 
         //查询工单处理备注
