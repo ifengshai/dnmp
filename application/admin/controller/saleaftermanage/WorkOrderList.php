@@ -110,7 +110,11 @@ class WorkOrderList extends Backend
                 //承接 经手 审核 包含用户id
                 //获取当前用户所有的承接的工单id并且不是取消，新建的
                 $workIds = WorkOrderRecept::where('recept_person_id',$filter['recept_person_id'])->column('work_id');
-                $map = "(id in (".join(',',$workIds).") or after_user_id = {$filter['recept_person_id']} or assign_user_id = {$filter['recept_person_id']}) and work_status not in (0,1,7)";
+                if($workIds){
+                    $map = "(id in (".join(',',$workIds).") or after_user_id = {$filter['recept_person_id']} or assign_user_id = {$filter['recept_person_id']}) and work_status not in (0,1,7)";
+                }else{
+                    $map = "(after_user_id = {$filter['recept_person_id']} or assign_user_id = {$filter['recept_person_id']}) and work_status not in (0,1,7)";
+                }
                 unset($filter['recept_person_id']);
                 $this->request->get(['filter' => json_encode($filter)]);
             }
@@ -121,7 +125,6 @@ class WorkOrderList extends Backend
                 ->where($map)
                 ->order($sort, $order)
                 ->count();
-
             $list = $this->model
                 ->where($where)
                 ->where($map)
