@@ -186,7 +186,7 @@ class WorkOrderList extends Model
     {
         switch ($siteType) {
             case 1:
-                $url = 'http://z.zhaokuangyi.com/';
+                $url = 'https://z.zhaokuangyi.com/';
                 break;
             case 2:
                 $url = 'http://pc.zhaokuangyi.com/';
@@ -213,6 +213,9 @@ class WorkOrderList extends Model
 
             $stringBody = (string)$body;
             $res = json_decode($stringBody, true);
+            if($res === null){
+                exception('网络异常');
+            }
             if ($res['status'] == 200) {
                 return $res['data'];
             }
