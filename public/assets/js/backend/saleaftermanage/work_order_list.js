@@ -780,10 +780,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
 
                 //判断是否是彩色镜片
                 if (prescription.color_id > 0) {
-                    prescription_div.find('#color_type').val(prescription.color_id);
                     prescription_div.find('#color_type').change();
+                    prescription_div.find('#color_type').val(prescription.color_id);
+                }else{
+                    prescription_div.find('#lens_type').change();
+                    prescription_div.find('#lens_type').val(prescription.index_id);
                 }
-                prescription_div.find('#lens_type').val(prescription.index_id);
+
                 //add，pd添加
                 if (prescription.hasOwnProperty("total_add")) {
                     prescription_div.find('input[name="row[replacement][od_add][]"]').val(prescription.total_add);
