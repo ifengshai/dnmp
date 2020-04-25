@@ -1960,8 +1960,34 @@ EOF;
                 $data['work_id'] =  $params['work_id'];
                 $data['user_group_id'] =  0;
                 $data['content'] =  $params['content'];
-                $res_status = WorkOrderNote::create($data);
+                Db::startTrans();
+                try{
+                    $res_status = WorkOrderNote::create($data);
+                    //查询用户的角色组id
+                    $authGroupIds = AuthGroupAccess::where('uid',session('admin.id'))->column('group_id');
+                    $work = $this->model->find($params['work_id']);
+                    $work_order_note_status = $work->work_order_note_status;
 
+                    if(array_intersect($authGroupIds,config('workorder.customer_department_rule'))){
+                        //客服组
+                        $work_order_note_status = 1;
+                    }
+                    if(array_intersect($authGroupIds,config('workorder.warehouse_department_rule'))){
+                        //仓库部
+                        $work_order_note_status = 2;
+                    }
+                    if(array_intersect($authGroupIds,config('workorder.finance_department_rule'))){
+                        //财务组
+                        $work_order_note_status = 3;
+                    }
+                    $work->work_order_note_status = $work_order_note_status;
+                    $work->save();
+                    Db::commit();
+                }catch (\Exception $e){
+                    echo 2;
+                    echo $e->getMessage();
+                    Db::rollback();
+                }
                 if ($res_status) {
                     $this->success('成功');
                 } else {
