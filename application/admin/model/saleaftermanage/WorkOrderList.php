@@ -317,6 +317,9 @@ class WorkOrderList extends Model
                     //补发
                     //if ($change_type == 5) {
                     $data['email'] = $params['address']['email'];
+                    if(!$params['region_id'] || !$params['country_id'] ){
+                        exception('国家、地区不能为空');
+                    }
                     $data['userinfo_option'] = serialize($params['address']);
                     $prescriptionOption = [
                         'prescription_type' => $recipe_type,
@@ -868,13 +871,13 @@ class WorkOrderList extends Model
         $workOrderList = WorkOrderList::where(['id' => $work_id])->field('id,work_platform,platform_order')->find();
         $result = collection($result)->toArray();  
         if(1 == $measuerInfo){//更改镜片
-            $info = (new Inventory())->workChangeFrame($work_id, $workOrderList->work_platform, $workOrderList->platform_order,$result);
+            $info = (new Inventory())->workChangeFrame($work_id, $workOrderList->work_platform, $workOrderList->platform_order,$result,1);
         }elseif(3 == $measuerInfo){ //取消订单
-            $info = (new Inventory())->workCancelOrder($work_id, $workOrderList->work_platform, $workOrderList->platform_order,$result);
+            $info = (new Inventory())->workCancelOrder($work_id, $workOrderList->work_platform, $workOrderList->platform_order,$result,2);
         }elseif(4 == $measuerInfo){ //赠品
-            $info = (new Inventory())->workPresent($work_id, $workOrderList->work_platform, $workOrderList->platform_order,$result);
+            $info = (new Inventory())->workPresent($work_id, $workOrderList->work_platform, $workOrderList->platform_order,$result,3);
         }elseif(5 == $measuerInfo){
-            $info =(new Inventory())->workPresent($work_id, $workOrderList->work_platform, $workOrderList->platform_order,$result);
+            $info =(new Inventory())->workPresent($work_id, $workOrderList->work_platform, $workOrderList->platform_order,$result,4);
         }else{
             return false;
         }

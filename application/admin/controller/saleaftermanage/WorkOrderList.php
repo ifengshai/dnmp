@@ -2,6 +2,7 @@
 
 namespace app\admin\controller\saleaftermanage;
 
+use app\admin\model\saleaftermanage\WorkOrderNote;
 use app\common\controller\Backend;
 use think\Cache;
 use think\Db;
@@ -17,6 +18,7 @@ use app\admin\model\saleaftermanage\WorkOrderMeasure;
 use app\admin\model\saleaftermanage\WorkOrderChangeSku;
 use app\admin\model\saleaftermanage\WorkOrderRecept;
 use app\admin\model\saleAfterManage\WorkOrderRemark;
+use app\admin\model\Admin;
 use think\Loader;
 use Util\SKUHelper;
 
@@ -111,8 +113,12 @@ class WorkOrderList extends Backend
             if ($filter['recept_person_id']) {
                 //承接 经手 审核 包含用户id
                 //获取当前用户所有的承接的工单id并且不是取消，新建的
-                $workIds = WorkOrderRecept::where('recept_person_id', $filter['recept_person_id'])->column('work_id');
-                $map = "(id in (" . join(',', $workIds) . ") or after_user_id = {$filter['recept_person_id']} or assign_user_id = {$filter['recept_person_id']}) and work_status not in (0,1,7)";
+                $workIds = WorkOrderRecept::where('recept_person_id',$filter['recept_person_id'])->column('work_id');
+                if($workIds){
+                    $map = "(id in (".join(',',$workIds).") or after_user_id = {$filter['recept_person_id']} or assign_user_id = {$filter['recept_person_id']}) and work_status not in (0,1,7)";
+                }else{
+                    $map = "(after_user_id = {$filter['recept_person_id']} or assign_user_id = {$filter['recept_person_id']}) and work_status not in (0,1,7)";
+                }
                 unset($filter['recept_person_id']);
                 $this->request->get(['filter' => json_encode($filter)]);
             }
@@ -123,7 +129,6 @@ class WorkOrderList extends Backend
                 ->where($map)
                 ->order($sort, $order)
                 ->count();
-
             $list = $this->model
                 ->where($where)
                 ->where($map)
@@ -1331,6 +1336,11 @@ class WorkOrderList extends Backend
             $this->assignconfig('measureList', $measureList);
         }
         $this->assignconfig('operate_type', $operateType);
+        if(2 <= $row->work_status){
+            $row->assign_user = Admin::where(['id'=>$row->assign_user_id])->value('nickname');
+        }else{
+            $row->assign_uer  = Admin::where(['id'=>$row->operation_user_id])->value('nickname');
+        }
         if ($operateType == 2) { //审核
             return $this->view->fetch('saleaftermanage/work_order_list/check');
         }
@@ -1340,7 +1350,6 @@ class WorkOrderList extends Backend
             $this->view->assign('recepts', $recepts);
             return $this->view->fetch('saleaftermanage/work_order_list/process');
         }
-
         //查询工单处理备注
         $remarkList = $this->order_remark->where('work_id', $ids)->select();
 
@@ -1349,6 +1358,9 @@ class WorkOrderList extends Backend
         $this->view->assign('recepts', $recepts);
 
         $this->view->assign('remarkList', $remarkList);
+//        $workOrderNote = WorkOrderNote::where('work_id',$ids)->select();
+//        $html = (new \think\View())->fetch('work_order_note',['row' => $workOrderNote]);
+//        $this->view->assign('html', $html);
         return $this->view->fetch();
     }
 
@@ -1954,6 +1966,7 @@ EOF;
     /**
      * 工单备注
      */
+<<<<<<< HEAD
     public function work_order_note()
     {
         if ($this->request->isPost()) {
@@ -1963,6 +1976,46 @@ EOF;
                 $params['create_user_id'] =  $this->auth->id;
                 $res_status = $this->testRecordModel->allowField(true)->save($params);
 
+=======
+    public function workordernote($ids = null){
+        if($this->request->isPost()) {
+            $params = $this->request->post("row/a");
+            if ($params) {
+                $data['note_time'] =  date('Y-m-d H:i',time());
+                $data['note_user_id'] =  session('admin.id');
+                $data['note_user_name'] =  session('admin.nickname');
+                $data['work_id'] =  $params['work_id'];
+                $data['user_group_id'] =  0;
+                $data['content'] =  $params['content'];
+                Db::startTrans();
+                try{
+                    $res_status = WorkOrderNote::create($data);
+                    //查询用户的角色组id
+                    $authGroupIds = AuthGroupAccess::where('uid',session('admin.id'))->column('group_id');
+                    $work = $this->model->find($params['work_id']);
+                    $work_order_note_status = $work->work_order_note_status;
+
+                    if(array_intersect($authGroupIds,config('workorder.customer_department_rule'))){
+                        //客服组
+                        $work_order_note_status = 1;
+                    }
+                    if(array_intersect($authGroupIds,config('workorder.warehouse_department_rule'))){
+                        //仓库部
+                        $work_order_note_status = 2;
+                    }
+                    if(array_intersect($authGroupIds,config('workorder.finance_department_rule'))){
+                        //财务组
+                        $work_order_note_status = 3;
+                    }
+                    $work->work_order_note_status = $work_order_note_status;
+                    $work->save();
+                    Db::commit();
+                }catch (\Exception $e){
+                    echo 2;
+                    echo $e->getMessage();
+                    Db::rollback();
+                }
+>>>>>>> 0d260438d3669b53f5af99b7c58b6c962df11f0f
                 if ($res_status) {
                     $this->success('成功');
                 } else {
@@ -1971,15 +2024,9 @@ EOF;
             }
             $this->error(__('Parameter %s can not be empty', ''));
         }
-
-        $ids = $ids ?? input('ids');
-
-        $row = $this->work_order_note->get(['work_id' => $ids]);
-
-        $row_arr = $row->toArray();
-        dump($row_arr);
-
-        $this->view->assign("row", $row_arr);
-        return $this->view->fetch();
+        $row = WorkOrderNote::where(['work_id' => $ids])->select();
+        $this->view->assign("row", $row);
+        $this->view->assign('work_id',$ids);
+        return $this->view->fetch('work_order_note');
     }
 }
