@@ -186,7 +186,7 @@ class WorkOrderList extends Model
     {
         switch ($siteType) {
             case 1:
-                $url = 'http://z.zhaokuangyi.com/';
+                $url = 'https://z.zhaokuangyi.com/';
                 break;
             case 2:
                 $url = 'http://pc.zhaokuangyi.com/';
@@ -202,6 +202,7 @@ class WorkOrderList extends Model
                 break;
         }
         $url = $url . $pathinfo;
+
         $client = new Client(['verify' => false]);
         try {
             if ($method == 'GET') {
@@ -213,6 +214,9 @@ class WorkOrderList extends Model
 
             $stringBody = (string)$body;
             $res = json_decode($stringBody, true);
+            if($res === null){
+                exception('网络异常');
+            }
             if ($res['status'] == 200) {
                 return $res['data'];
             }
@@ -309,16 +313,18 @@ class WorkOrderList extends Model
                         'os_bd' => $changeLens['os_bd'][$key],
                         'os_pv_r' => $changeLens['os_pv_r'][$key],
                         'os_bd_r' => $changeLens['os_bd_r'][$key],
-                        'measure_id'  => $measure_id,
+                        'measure_id' => $measure_id,
                         'create_person' => session('admin.nickname'),
                         'update_time' => date('Y-m-d H:i:s'),
                         'create_time' => date('Y-m-d H:i:s')
                     ];
                     //补发
-                    //if ($change_type == 5) {
+
                     $data['email'] = $params['address']['email'];
-                    if(!$params['address']['region_id'] || !$params['address']['country_id'] ){
-                        exception('国家、地区不能为空');
+                    if ($change_type == 5) {
+                        if (!$params['address']['region_id'] || !$params['address']['country_id']) {
+                            exception('国家、地区不能为空');
+                        }
                     }
                     $data['userinfo_option'] = serialize($params['address']);
                     $prescriptionOption = [
@@ -568,7 +574,7 @@ class WorkOrderList extends Model
             }
             $postData = array_merge($postData, $postDataCommon);
             try {
-                $res = $this->httpRequest($siteType, 'magic/order/createOrder', $postData, 'GET');
+                $res = $this->httpRequest($siteType, 'magic/order/createOrder', $postData, 'POST');
                 $increment_id = $res['increment_id'];
                 //replacement_order添加补发的订单号
                 WorkOrderChangeSku::where(['work_id' => $work_id, 'change_type' => 5])->setField('replacement_order', $increment_id);
