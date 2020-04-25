@@ -1345,6 +1345,9 @@ class WorkOrderList extends Backend
         $this->view->assign('recepts', $recepts);
 
         $this->view->assign('remarkList', $remarkList);
+//        $workOrderNote = WorkOrderNote::where('work_id',$ids)->select();
+//        $html = (new \think\View())->fetch('work_order_note',['row' => $workOrderNote]);
+//        $this->view->assign('html', $html);
         return $this->view->fetch();
     }
 
