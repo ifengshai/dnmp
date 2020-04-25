@@ -39,7 +39,7 @@ class ZendeskOne extends Controller
     ];
     protected $apiKey = 'F26A807B685D794C676FA3CC76567035';
     //匹配自动回复的单词
-    protected $preg_word = ['deliver','delivery','receive','track','ship','shipping','tracking','status','shipment','where','where is','find','update','eta','expected'];
+    protected $preg_word = ['when', 'delivery', 'deliver', 'receive', 'receiving', 'track', 'tracking', 'ship', 'shipped', 'shipment', 'shipping', 'status', 'eta', 'expected', 'expect', 'update', 'where is', 'wait', 'waiting', 'send', 'arrive', 'arriving', 'check', 'get', 'mail', 'find'];
     public $client = null;
     //public $testId = [383401621551,383402124271,383347471012,393708243591,383347496492,394745643811,394627403612,394627403852,394745654451,394627408052,383402007531,394627410752,394745679291];
 
@@ -120,7 +120,7 @@ class ZendeskOne extends Controller
                 382940274852,
                 'none'
             ],
-            //'requester' => [393708243591],
+//            'requester' => [393708243591],
              'updated_at' => [
                  'valuetype' => '>=',
                  'value'   => '20minutes',
@@ -276,8 +276,8 @@ class ZendeskOne extends Controller
                         }
 
                     } else {
-                        //匹配到相应的关键字，自动回复消息，修改为pending，回复共客户选择的内容
-                        if (s($body)->containsAny($this->preg_word) === true || s($subject)->containsAny($this->preg_word) === true) {
+                        //匹配到相应的关键字，自动回复消息，修改为pending，回复共客户选择的内容，并且不包含return，refund
+                        if ((s($body)->containsAny($this->preg_word) === true || s($subject)->containsAny($this->preg_word) === true) && s($body)->containsAny(['return','refund']) === false && s($subject)->containsAny(['return','refund']) === false) {
                             $reply_detail_data = [];
                             $recent_reply_count = 0;
                             //判断最近12小时发送的第几封，超过2封，超过2封直接转客服+tag-》多次发送
@@ -568,9 +568,9 @@ class ZendeskOne extends Controller
         try{
             $trackingConnector = new TrackingConnector($this->apiKey);
             $carrier = $this->getCarrier($title);
-            $trackingConnector->register($trackNumber,$carrier);
+            $trackingConnector->register($trackNumber,$carrier['carrierId']);
             //无物流商，直接返回
-            if(!$carrier){
+            if(!$carrier['carrierId']){
                 return $res;
             }
 
