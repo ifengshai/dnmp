@@ -4,6 +4,7 @@ namespace app\admin\controller\zendesk;
 use think\Db;
 use app\common\controller\Backend;
 use think\Exception;
+use app\admin\model\zendesk\ZendeskTags;
 use think\exception\PDOException;
 use think\exception\ValidateException;
 use app\admin\model\platformmanage\MagentoPlatform;
@@ -47,16 +48,7 @@ class ZendeskMailTemplate extends Backend
      */
     private function template_category()
     {
-        $arr = [
-            1=> '售前',
-            2=> '售中',
-            3=> '售后',
-            4=> '物流',
-            5=> '超时',
-            6=> '疫情',
-            7=> '电话',
-            8=> '其他'
-        ];
+        $arr = config('zendesk.template_category');
         return $arr;
     }
     public function _initialize()
@@ -65,9 +57,12 @@ class ZendeskMailTemplate extends Backend
         $this->model = new \app\admin\model\zendesk\ZendeskMailTemplate;
         $this->view->assign(
             [
-                "orderPlatformList"     => (new MagentoPlatform())->getOrderPlatformList(),
+                "orderPlatformList"     => config('zendesk.platform'),
                 "templatePermission"    => $this->template_permission(),
-                "templateCategory"      => $this->template_category()
+                "templateCategory"      => $this->template_category(),
+                "mailStatus"            => config('zendesk.status'),
+                "mailLevel"             => config('zendesk.priority'),
+                "tagsList"              => (new ZendeskTags())->tags_list()
             ]);
     }
     
@@ -136,12 +131,13 @@ class ZendeskMailTemplate extends Backend
      */
     public function add()
     {
-        $platform =  (new MagentoPlatform())->getOrderPlatformList();
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
             if ($params) {
                 $params = $this->preExcludeFields($params);
-
+                if(is_array($params['mail_tag'])){
+                    $params['mail_tag'] = implode(',',$params['mail_tag']);
+                }
                 if ($this->dataLimit && $this->dataLimitFieldAutoFill) {
                     $params[$this->dataLimitField] = $this->auth->id;
                 }
@@ -198,6 +194,9 @@ class ZendeskMailTemplate extends Backend
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
             if ($params) {
+                if(is_array($params['mail_tag'])){
+                    $params['mail_tag'] = implode(',',$params['mail_tag']);
+                }  
                 $params = $this->preExcludeFields($params);
                 $result = false;
                 Db::startTrans();
@@ -312,6 +311,53 @@ class ZendeskMailTemplate extends Backend
         } else {
             $this->error('404 Not found');
         }          
-    }    
+    }
+
+    /**
+     * 获取模板替换的内容
+     * @return \think\response\Json
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public function getTemplate()
+    {
+        if($this->request->isAjax()) {
+            $id = $this->request->post('id');
+            $ticket_id = $this->request->post('ticket_id');
+            //获取模板内容
+            $template = $this->model
+                ->where('id',$id)
+                ->find();
+            //获取邮件的信息
+            $ticket = \app\admin\model\zendesk\Zendesk::where('ticket_id',$ticket_id)->find();
+            //替换模板内容
+            $template['template_content'] = str_replace(['{{username}}','{{email}}','{{ticket_id}}'],[$ticket->username,$ticket->email,$ticket->ticket_id],$template['template_content']);
+            //tags合并
+            $template['mail_tag'] = array_filter(array_merge(explode(',',$template['mail_tag']),explode(',',$ticket->tags)));
+            return json($template);
+        }
+        $this->error('404 Not found');
+    }
+    public function getTemplateAdd()
+    {
+        if($this->request->isAjax()) {
+            $id = $this->request->post('id');
+            $email = $this->request->post('email');
+            $type = $this->request->post('type');
+            //获取模板内容
+            $template = $this->model
+                ->where(['id' => $id, 'template_platform' => $type])
+                ->find();
+            //获取用户的信息
+            $ticket = \app\admin\model\zendesk\Zendesk::where('ticket_id',$ticket_id)->find();
+            //替换模板内容
+            $template['template_content'] = str_replace(['{{username}}','{{email}}','{{ticket_id}}'],[$ticket->username,$ticket->email,$ticket->ticket_id],$template['template_content']);
+            //tags合并
+            $template['mail_tag'] = array_filter(explode(',',$template['mail_tag']));
+            return json($template);
+        }
+        $this->error('404 Not found');
+    }
 
 }

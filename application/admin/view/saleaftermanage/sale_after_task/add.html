@@ -32,8 +32,13 @@
         <label class="control-label col-xs-12 col-sm-2">{:__('Order_platform')}:</label>
         <div class="col-xs-12 col-sm-3">
             <select  id="c-order_platform" data-rule="required" class="form-control selectpicker" name="row[order_platform]">
-                {foreach name="orderPlatformList" item="vo"}
-                <option value="{$key}" {in name="key" value="0"}selected{/in}>{$vo}</option>
+                {foreach name="orderPlatformList" item="vo" key='k'}
+                <option value="{$k}" >{$vo}</option>
+                {present name="default"}
+                {if condition="$default == $k"}
+                <option value="{$k}" selected="selected">{$vo}</option>
+                {/if}
+                {/present}
                 {/foreach}
             </select>
         </div>

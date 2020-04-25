@@ -93,7 +93,7 @@ class Item extends Model
                     }
                 }
                 $result['itemArr'] = $arr;
-            } elseif (3 == $type) { //配饰类型
+            } elseif (3 <= $type) { //配饰类型
                 $arr = $this->alias('m')->where('origin_sku', '=', $result['origin_sku'])->join('item_attribute a', 'm.id=a.item_id')->field('m.name,m.price,a.accessory_color')->select();
                 $result['itemArr'] = $arr;
             }
@@ -712,7 +712,7 @@ class Item extends Model
         $ids = $category->where($map)->column('id');
 
         $where['category_id']  = ['in', $ids];
-        return $this->where($where)->where(['is_new'=>1])->column('sku');
+        return $this->where($where)->where(['is_new' => 1])->column('sku');
     }
     /**
      * 获取不同分类的sku中新品sku的数量
@@ -730,7 +730,7 @@ class Item extends Model
         $ids = $category->where($map)->column('id');
 
         $where['category_id']  = ['in', $ids];
-        return $this->where($where)->where(['is_new'=>1])->count('sku');
+        return $this->where($where)->where(['is_new' => 1])->count('sku');
     }
 
     /**
@@ -746,6 +746,22 @@ class Item extends Model
     {
         $where['a.is_del']  = 1;
         $where['a.is_open']  = 1;
-        return $this->alias('a')->where($where)->join(['fa_item_category' => 'b'],'a.category_id=b.id')->column('b.name','sku');
+        return $this->alias('a')->where($where)->join(['fa_item_category' => 'b'], 'a.category_id=b.id')->column('b.name', 'sku');
+    }
+
+    /**
+     * 获取实时库存
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/04/25 10:26:15 
+     * @param [type] $sku
+     * @return void
+     */
+    public function getRealStock($sku)
+    {
+        $where['is_del']  = 1;
+        $where['sku']  = $sku;
+        return $this->where($where)->sum('stock-distribution_occupy_stock');
     }
 }

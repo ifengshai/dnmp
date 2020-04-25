@@ -611,6 +611,9 @@ class Check extends Backend
                 ->join(['fa_purchase_order_item' => 'c'], 'a.purchase_id=c.purchase_id and b.sku=c.sku')
                 ->select();
             $res = collection($res)->toArray();
+            if (!$res) {
+                $this->error('暂无需要推销的数据');
+            }
 
             $list = [];
             foreach ($res as $k => $v) {
@@ -660,13 +663,12 @@ class Check extends Backend
             }
 
             if ($result !== false) {
-
                 //标记为已退
                 $map['id'] = ['in', array_unique($check_id)];
                 $this->model->allowField(true)->isUpdate(true, $map)->save(['is_return' => 1]);
                 $this->success('操作成功');
             } else {
-                $this->success('操作失败');
+                $this->error('操作失败');
             }
         }
 

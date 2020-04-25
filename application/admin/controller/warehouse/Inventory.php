@@ -1386,7 +1386,7 @@ class Inventory extends Backend
      * @param change_sku   改变之后的sKu
      * @param change_number 改变之后的sku数量
      */
-    public function workChangeFrame($id, $order_platform, $increment_id,$changeRow)
+    public function workChangeFrame($id, $order_platform, $increment_id,$changeRow,$type)
     {
         if (!$id || !$order_platform || !$increment_id || !$changeRow) {
             return false;
@@ -1461,6 +1461,8 @@ class Inventory extends Backend
                         $original_sku_log['occupy_change_num'] = -$original_number;
                         $original_sku_log['operation_person'] = session('admin.nickname');
                         $original_sku_log['create_time'] = date('Y-m-d H:i:s');
+                        $original_sku_log['site'] = $order_platform;
+                        $original_sku_log['type'] = $type;
 
                         $change_sku_log['change_id'] = $v['id'];
                         $change_sku_log['increment_id'] = $increment_id;
@@ -1469,6 +1471,8 @@ class Inventory extends Backend
                         $change_sku_log['occupy_change_num'] = $change_number;
                         $change_sku_log['operation_person'] = session('admin.nickname');
                         $change_sku_log['create_time'] = date('Y-m-d H:i:s');
+                        $change_sku_log['site'] = $order_platform;
+                        $change_sku_log['type'] = $type;
                         Db::name('work_change_sku_log')->insert($original_sku_log);
                         Db::name('work_change_sku_log')->insert($change_sku_log);
                     }
@@ -1508,7 +1512,7 @@ class Inventory extends Backend
      * @param order_platform 订单平台
      * @param increment_id 订单号
      */
-    public function workCancelOrder($id, $order_platform, $increment_id,$changeRow)
+    public function workCancelOrder($id, $order_platform, $increment_id,$changeRow,$type)
     {
         if (!$id || !$order_platform || !$increment_id || !$changeRow) {
             return false;
@@ -1559,6 +1563,8 @@ class Inventory extends Backend
                     $original_sku_log['occupy_change_num'] = -$original_number;
                     $original_sku_log['operation_person'] = session('admin.nickname');
                     $original_sku_log['create_time'] = date('Y-m-d H:i:s');
+                    $original_sku_log['site'] = $order_platform;
+                    $original_sku_log['type'] = $type;
                     Db::name('work_change_sku_log')->insert($original_sku_log);
                 }
                 Db::commit();
@@ -1580,7 +1586,7 @@ class Inventory extends Backend
      * @param order_platform 订单平台
      * @param increment_id 订单号
      */
-    public function workPresent($id, $order_platform, $increment_id,$changeRow)
+    public function workPresent($id, $order_platform, $increment_id,$changeRow,$type)
     {
         if (!$id || !$order_platform || !$increment_id || !$changeRow) {
             return false;
@@ -1607,6 +1613,8 @@ class Inventory extends Backend
                 $original_sku_log['occupy_change_num'] = $original_number;
                 $original_sku_log['operation_person'] = session('admin.nickname');
                 $original_sku_log['create_time'] = date('Y-m-d H:i:s');
+                $original_sku_log['site'] = $order_platform;
+                $original_sku_log['type'] = $type;
                 Db::name('work_change_sku_log')->insert($original_sku_log);
                 Db::commit();
             } catch (ValidateException $e) {

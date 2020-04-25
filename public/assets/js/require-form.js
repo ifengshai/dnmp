@@ -513,6 +513,8 @@ define(['jquery', 'bootstrap', 'upload', 'validator'], function ($, undefined, U
                 events.citypicker(form);
 
                 events.datetimepicker(form);
+                
+                events.datetimepickernew(form);
 
                 events.datetimepickernew(form);
 

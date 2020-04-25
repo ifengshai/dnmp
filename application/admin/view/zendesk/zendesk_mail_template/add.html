@@ -1,3 +1,9 @@
+<div class="callout">
+    <h4>模板变量对应关系!</h4>
+    <h5 class="text-red">{{username}} ----- 用户名</h5>
+    <h5 class="text-red">{{email}} ------ 用户email</h5>
+    <h5 class="text-red">{{ticket_id}} ----- ticket_id</h5>
+</div>
 <form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
 
     <div class="form-group">
@@ -49,45 +55,34 @@
             <input id="c-template_content" data-rule="required" class="form-control editor" name="row[template_content]" type="text" value="">
         </div>
     </div>
-
-    <!-- <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Is_active')}:</label>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Mail_subject')}:</label>
         <div class="col-xs-12 col-sm-8">
-            <input id="c-is_active" data-rule="required" class="form-control" name="row[is_active]" type="number" value="1">
+            <input id="c-mail_subject"  class="form-control" name="row[mail_subject]" type="text" value="">
         </div>
     </div>
     <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Used_time')}:</label>
+        <label class="control-label col-xs-12 col-sm-2">{:__('Mail_status')}:</label>
         <div class="col-xs-12 col-sm-8">
-            <input id="c-used_time" data-rule="required" class="form-control datetimepicker" data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[used_time]" type="text" value="{:date('Y-m-d H:i:s')}">
-        </div>
-    </div> -->
-    <!-- <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Extra_param')}:</label>
-        <div class="col-xs-12 col-sm-3">
-            <input id="c-extra_param" data-rule="required" class="form-control" name="row[extra_param]" type="text" value="">
-        </div>
-        <label class="control-label col-xs-12 col-sm-2">{:__('Param_value')}:</label>
-        <div class="col-xs-12 col-sm-3">
-            <input id="c-extra_param" data-rule="required" class="form-control" name="row[extra_param]" type="text" value="">
-        </div>
-    </div> -->
-    <!-- <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Create_person')}:</label>
-        <div class="col-xs-12 col-sm-8">
-            <input id="c-create_person" data-rule="required" class="form-control" name="row[create_person]" type="text" value="">
-        </div>
-    </div> -->
-    <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Update_time')}:</label>
-        <div class="col-xs-12 col-sm-8">
-            <input id="c-update_time" data-rule="required" class="form-control datetimepicker" data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[update_time]" type="text" value="{:date('Y-m-d H:i:s')}">
+            <select  id="c-mail_status" class="form-control selectpicker" name="row[mail_status]">
+                {foreach name="mailStatus" item="vo"}
+                <option value="{$key}" {in name="key" value="0"}selected{/in}>{$vo}</option>
+                {/foreach}
+            </select>
         </div>
     </div>
     <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Create_time')}:</label>
-        <div class="col-xs-12 col-sm-8">
-            <input id="c-create_time" data-rule="required" class="form-control datetimepicker" data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[create_time]" type="text" value="{:date('Y-m-d H:i:s')}">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Mail_level')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <select  id="c-mail_level" class="form-control selectpicker" name="row[mail_level]">
+                {foreach name="mailLevel" item="vo"}
+                <option value="{$key}" {in name="key" value="0"}selected{/in}>{$vo}</option>
+                {/foreach}
+            </select>
+        </div>
+        <label class="control-label col-xs-12 col-sm-2">{:__('Mail_tag')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            {:build_select('row[mail_tag][]', $tagsList, null, ['class'=>'form-control selectpicker','data-live-search' => true,'multiple'=>'multiple'])} 
         </div>
     </div>
     <div class="form-group layer-footer">

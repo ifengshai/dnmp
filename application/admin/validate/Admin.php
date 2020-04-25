@@ -34,7 +34,7 @@ class Admin extends Validate
      */
     protected $scene = [
         'add'  => ['username', 'email', 'nickname'],
-        'edit' => ['username', 'email', 'nickname','password'],
+        'edit' => ['username', 'email', 'nickname'],
     ];
 
     public function __construct(array $rules = [], $message = [], $field = [])
