@@ -820,10 +820,10 @@ class WorkOrderList extends Model
         //删除同样的承接组数据
         WorkOrderRecept::where($where)->delete();
         //如果是处理失败的状态
-        if (2 == $data['recept_status']) {
-            $dataMeasure['operation_type'] = 2;
+        if (1 == $data['recept_status']) {
+            $dataMeasure['operation_type'] = 1;
         } else {
-            $dataMeasure['operation_type'] = 3;
+            $dataMeasure['operation_type'] = 2;
         }
         $dataMeasure['operation_time'] = date('Y-m-d H:i:s');
         WorkOrderMeasure::where(['id' => $measure_id])->update($dataMeasure);
@@ -866,8 +866,7 @@ class WorkOrderList extends Model
             return false;
         }
         $workOrderList = WorkOrderList::where(['id' => $work_id])->field('id,work_platform,platform_order')->find();
-        $result = collection($result)->toArray();
-        
+        $result = collection($result)->toArray();  
         if(1 == $measuerInfo){//更改镜片
             $info = (new Inventory())->workChangeFrame($work_id, $workOrderList->work_platform, $workOrderList->platform_order,$result);
         }elseif(3 == $measuerInfo){ //取消订单

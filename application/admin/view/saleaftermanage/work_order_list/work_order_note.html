@@ -1,0 +1,58 @@
+<style>
+    #accordion div{
+        text-align: center;
+    }
+</style>
+    <form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="{:url('saleaftermanage/work_order_list/workOrderNote')}">
+        <div class="form-group">
+            <div class="box box-danger">
+            <input type="hidden" name="row[work_id]" value="{$work_id}">
+            <div class="box-body">
+                <div class="">
+                    <div class="col-xs-5" style="width: 48%;">
+                        <span>{:__('describe')}:</span>
+                        <textarea id="c-describe" class="form-control" data-rule="required" style="resize:none" rows="5" name="row[content]" cols="50"></textarea>
+                    </div>
+                </div>
+            </div>
+            <div style="width: 100%;text-align: center;padding-bottom: 1%;">
+                <button type="submit" class="btn btn-success btn-embossed">{:__('OK')}</button>
+            </div>
+        </div>
+        </div>
+
+</form>
+
+
+<ul class="timeline">
+    <li class="time-label">
+        <span class="bg-red">
+            {:__('备注记录')}
+        </span>
+    </li>
+    {volist name="row" id="vo"}
+        <li>
+            <i class="fa fa-user bg-aqua"></i>
+            <div class="timeline-item" style="background-color: #f5f5f5;">
+                <span class="time"><i class="fa fa-clock-o"></i> {:__('备注时间')}：{$vo.note_time}</span>
+
+                <h3 class="timeline-header"><a href="#">{$vo.note_user_name}</a></h3>
+
+                <div class="timeline-body">
+                    {$vo.content}
+                </div>
+
+            </div>
+
+        </li>
+    {/volist}
+</ul>
+
+
+
+<div class="hide layer-footer">
+    <label class="control-label col-xs-12 col-sm-2"></label>
+    <div class="col-xs-12 col-sm-8">
+        <button type="reset" class="btn btn-primary btn-embossed btn-close" onclick="Layer.closeAll();">{:__('Close')}</button>
+    </div>
+</div>
