@@ -98,6 +98,10 @@ class Admin extends Model
         if (!empty($user['department'])) {
             $departmentIds = $user['department'];
         }
+        $depatmentId = '';
+        if($departmentIds){
+            $depatmentId = $departmentIds[0];
+        }
         $username = str_replace(' ', '', pinyin($user['name']));
         //排除用户名拼音一样的问题
         $count = self::where('username', $username)->count();
@@ -115,21 +119,22 @@ class Admin extends Model
             'position' => $user['position'],
             'mobile' => $user['mobile'],
             'userid' => $user['userid'],
-            'unionid' => $user['unionid']
+            'unionid' => $user['unionid'],
+            'department_id' => $depatmentId
         ];
         $userAdd = self::create($data);
-        //存在部门id则绑定角色
-        if ($departmentIds) {
-            foreach ($departmentIds as $departmentId) {
-                $groupId = AuthGroup::where('department_id', $departmentId)->value('id');
-                AuthGroupAccess::create([
-                    'uid' => $userAdd->id,
-                    'group_id' => $groupId
-                ]);
-
-            }
-
-        }
+//        //存在部门id则绑定角色
+//        if ($departmentIds) {
+//            foreach ($departmentIds as $departmentId) {
+//                $groupId = AuthGroup::where('department_id', $departmentId)->value('id');
+//                AuthGroupAccess::create([
+//                    'uid' => $userAdd->id,
+//                    'group_id' => $groupId
+//                ]);
+//
+//            }
+//
+//        }
         return $userAdd->id;
     }
 
@@ -141,10 +146,14 @@ class Admin extends Model
      */
     public static function userUpdate($user, $id = '')
     {
-        $departmentIds = '';
+        $departmentIds = [];
         //判断有无部门，有则去第一个
         if (!empty($user['department'])) {
             $departmentIds = $user['department'];
+        }
+        $depatmentId = '';
+        if($departmentIds){
+            $depatmentId = $departmentIds[0];
         }
         $data = [
             'avatar' => $user['avatar'] ?: '/assets/img/avatar.png',
@@ -152,29 +161,30 @@ class Admin extends Model
             'position' => $user['position'],
             'mobile' => $user['mobile'],
             'userid' => $user['userid'],
-            'unionid' => $user['unionid']
+            'unionid' => $user['unionid'],
+            'department_id' => $depatmentId
         ];
         self::update($data, ['id' => $id]);
-        //获取用户原始的departmentId
-        $preGroupIds = AuthGroupAccess::where('uid', $id)->column('group_id');
-        //现在新分配的权限
-        $groupIds = AuthGroup::where('department_id', 'in', $departmentIds)->column('id');
-        //求差集，如果无差则不操作，否则删除之前，新增之后
-        if (array_diff($preGroupIds, $groupIds) || array_diff($groupIds, $preGroupIds)) {
-            Db::startTrans();
-            try {
-                AuthGroupAccess::where('uid', $id)->delete();
-                foreach ($groupIds as $groupId) {
-                    AuthGroupAccess::create([
-                        'uid' => $id,
-                        'group_id' => $groupId
-                    ]);
-                }
-                Db::commit();
-            } catch (Exception $e) {
-                Db::rollback();
-            }
-        }
+//        //获取用户原始的departmentId
+//        $preGroupIds = AuthGroupAccess::where('uid', $id)->column('group_id');
+//        //现在新分配的权限
+//        $groupIds = AuthGroup::where('department_id', 'in', $departmentIds)->column('id');
+//        //求差集，如果无差则不操作，否则删除之前，新增之后
+//        if (array_diff($preGroupIds, $groupIds) || array_diff($groupIds, $preGroupIds)) {
+//            Db::startTrans();
+//            try {
+//                AuthGroupAccess::where('uid', $id)->delete();
+//                foreach ($groupIds as $groupId) {
+//                    AuthGroupAccess::create([
+//                        'uid' => $id,
+//                        'group_id' => $groupId
+//                    ]);
+//                }
+//                Db::commit();
+//            } catch (Exception $e) {
+//                Db::rollback();
+//            }
+//        }
         return $id;
     }
 }

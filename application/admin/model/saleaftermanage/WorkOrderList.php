@@ -317,6 +317,9 @@ class WorkOrderList extends Model
                     //补发
                     //if ($change_type == 5) {
                     $data['email'] = $params['address']['email'];
+                    if(!$params['address']['region_id'] || !$params['address']['country_id'] ){
+                        exception('国家、地区不能为空');
+                    }
                     $data['userinfo_option'] = serialize($params['address']);
                     $prescriptionOption = [
                         'prescription_type' => $recipe_type,
@@ -678,9 +681,9 @@ class WorkOrderList extends Model
             $time = date('Y-m-d H:i:s');
             $admin_id = session('admin.id');
             //如果承接人是自己的话表示处理完成，不是自己的不做处理
-            $orderRecepts = WorkOrderRecept::where('work_id', $work_id)->select();
-            $allComplete = 1;
-            $count = count($orderRecepts);
+//            $orderRecepts = WorkOrderRecept::where('work_id', $work_id)->select();
+//            $allComplete = 1;
+//            $count = count($orderRecepts);
 
             //不需要审核的，
             if (($work->is_check == 0 && $work->work_type == 1) || ($work->is_check == 0 && $work->work_type == 2 && $work->is_after_deal_with == 1)) {
@@ -688,29 +691,29 @@ class WorkOrderList extends Model
                 $work->check_note = '系统自动审核通过';
                 $work->check_time = $time;
                 $work->submit_time = $time;
-                foreach ($orderRecepts as $orderRecept) {
-                    //承接人是自己，则措施，承接默认完成
-                    if ($orderRecept->recept_person_id == $work->create_user_id) {
-                        WorkOrderRecept::where('id', $orderRecept->id)->update(['recept_status' => 1, 'finish_time' => $time, 'note' => '自动处理完成']);
-                        WorkOrderMeasure::where('id', $orderRecept->measure_id)->update(['operation_type' => 1, 'operation_time' => $time]);
-                    } else {
-                        $allComplete = 0;
-                    }
-                }
-                if ($allComplete == 1) {
-                    //处理完成
-                    $work_status = 6;
-                } elseif ($allComplete == 0 && $count > 1) {
-                    //部分处理
-                    $work_status = 5;
-                } else {
-                    $work_status = 3;
-                }
-                $work->work_status = $work_status;
+//                foreach ($orderRecepts as $orderRecept) {
+//                    //承接人是自己，则措施，承接默认完成
+//                    if ($orderRecept->recept_person_id == $work->create_user_id) {
+//                        WorkOrderRecept::where('id', $orderRecept->id)->update(['recept_status' => 1, 'finish_time' => $time, 'note' => '自动处理完成']);
+//                        WorkOrderMeasure::where('id', $orderRecept->measure_id)->update(['operation_type' => 1, 'operation_time' => $time]);
+//                    } else {
+//                        $allComplete = 0;
+//                    }
+//                }
+//                if ($allComplete == 1) {
+//                    //处理完成
+//                    $work_status = 6;
+//                } elseif ($allComplete == 0 && $count > 1) {
+//                    //部分处理
+//                    $work_status = 5;
+//                } else {
+//                    $work_status = 3;
+//                }
+                $work->work_status = 3;
 
-                if ($work_status == 6) {
-                    $work->complete_time = $time;
-                }
+//                if ($work_status == 6) {
+//                    $work->complete_time = $time;
+//                }
                 $work->save();
                 //工单备注表
                 $remarkData = [
@@ -731,36 +734,33 @@ class WorkOrderList extends Model
                     $work->check_note = $params['check_note'];
                     $work->submit_time = $time;
                     $work->check_time = $time;
-                    foreach ($orderRecepts as $orderRecept) {
-                        //承接人是创建人自己，则措施，承接默认完成
-                        if ($orderRecept->recept_person_id == $work->create_user_id) {
-                            //审核成功直接进行处理
-                            if ($params['success'] == 1) {
-                                WorkOrderRecept::where('id', $orderRecept->id)->update(['recept_status' => 1, 'finish_time' => $time, 'note' => '自动处理完成']);
-                                WorkOrderMeasure::where('id', $orderRecept->measure_id)->update(['operation_type' => 1, 'operation_time' => $time]);
-                            }
-                        } else {
-                            $allComplete = 0;
-                        }
-                    }
-                    if ($allComplete == 1) {
-                        //处理完成
-                        $work_status = 6;
-                    } elseif ($allComplete == 0 && $count > 1) {
-                        //部分处理
-                        $work_status = 5;
-                    } else {
-                        $work_status = 3;
-                    }
-                    $work->work_status = $work_status;
+//                    foreach ($orderRecepts as $orderRecept) {
+//                        //承接人是创建人自己，则措施，承接默认完成
+//                        if ($orderRecept->recept_person_id == $work->create_user_id) {
+//                            //审核成功直接进行处理
+//                            if ($params['success'] == 1) {
+//                                WorkOrderRecept::where('id', $orderRecept->id)->update(['recept_status' => 1, 'finish_time' => $time, 'note' => '自动处理完成']);
+//                                WorkOrderMeasure::where('id', $orderRecept->measure_id)->update(['operation_type' => 1, 'operation_time' => $time]);
+//                            }
+//                        } else {
+//                            $allComplete = 0;
+//                        }
+//                    }
+//                    if ($allComplete == 1) {
+//                        //处理完成
+//                        $work_status = 6;
+//                    } elseif ($allComplete == 0 && $count > 1) {
+//                        //部分处理
+//                        $work_status = 5;
+//                    } else {
+//                        $work_status = 3;
+//                    }
+                    //$work->work_status = $work_status;
                     if ($params['success'] == 2) {
                         $work->work_status = 4;
                         $work->complete_time = $time;
                     } elseif ($params['success'] == 1) {
-                        $work->work_status = $work_status;
-                        if ($work_status == 6) {
-                            $work->complete_time = $time;
-                        }
+                        $work->work_status = 3;
                         //存在补发审核通过后生成补发单
                         $this->createOrder($work->work_platform, $work_id);
                     }
@@ -868,13 +868,13 @@ class WorkOrderList extends Model
         $workOrderList = WorkOrderList::where(['id' => $work_id])->field('id,work_platform,platform_order')->find();
         $result = collection($result)->toArray();  
         if(1 == $measuerInfo){//更改镜片
-            $info = (new Inventory())->workChangeFrame($work_id, $workOrderList->work_platform, $workOrderList->platform_order,$result);
+            $info = (new Inventory())->workChangeFrame($work_id, $workOrderList->work_platform, $workOrderList->platform_order,$result,1);
         }elseif(3 == $measuerInfo){ //取消订单
-            $info = (new Inventory())->workCancelOrder($work_id, $workOrderList->work_platform, $workOrderList->platform_order,$result);
+            $info = (new Inventory())->workCancelOrder($work_id, $workOrderList->work_platform, $workOrderList->platform_order,$result,2);
         }elseif(4 == $measuerInfo){ //赠品
-            $info = (new Inventory())->workPresent($work_id, $workOrderList->work_platform, $workOrderList->platform_order,$result);
+            $info = (new Inventory())->workPresent($work_id, $workOrderList->work_platform, $workOrderList->platform_order,$result,3);
         }elseif(5 == $measuerInfo){
-            $info =(new Inventory())->workPresent($work_id, $workOrderList->work_platform, $workOrderList->platform_order,$result);
+            $info =(new Inventory())->workPresent($work_id, $workOrderList->work_platform, $workOrderList->platform_order,$result,4);
         }else{
             return false;
         }

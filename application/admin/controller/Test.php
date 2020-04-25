@@ -3,6 +3,7 @@
 namespace app\admin\controller;
 
 use app\common\controller\Backend;
+use app\Common\model\Auth;
 
 class Test extends Backend
 {
@@ -15,5 +16,4 @@ class Test extends Backend
         $this->item = new \app\admin\model\itemmanage\Item();
     }
 
-   
 }
