@@ -9,6 +9,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'template'], function
                     add_url: '',
                     edit_url: '',
                     del_url: 'example/bootstraptable/del',
+                    import_url: 'example/bootstraptable/import',
                     multi_url: '',
                 }
             });

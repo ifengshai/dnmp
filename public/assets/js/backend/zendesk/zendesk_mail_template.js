@@ -15,6 +15,17 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             });
 
             var table = $("#table");
+            $(document).on('click',".problem_desc_info",function(){
+                var problem_desc = $(this).attr('name');
+                //Layer.alert(problem_desc);
+                Layer.open({
+                    closeBtn: 1,
+                    title: '内容',
+                    area: ['900px', '500px'],
+                    content:problem_desc
+                });
+                return false;
+            });
 
             // 初始化表格
             table.bootstrapTable({
@@ -41,7 +52,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             custom: { 1: 'yellow', 2: 'blue'},
                             formatter: Table.api.formatter.status
                         },
-                        {field: 'template_content', title: __('Template_content')},
+                        {field: 'template_content', title: __('Template_content'),formatter:Controller.api.formatter.getClear,operate:false},
                         {field: 'template_category', title: __('Template_category')},
                         {
                             field: 'is_active', 
@@ -51,7 +62,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             formatter: Table.api.formatter.status                            
                         },
                         {field: 'used_time', title: __('Used_time')},
-                        {field: 'extra_param', title: __('Extra_param')},
                         {field: 'create_person', title: __('Create_person')},
                         {field: 'update_time', title: __('Update_time'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime},
                         {field: 'create_time', title: __('Create_time'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime},
@@ -199,7 +209,31 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
         api: {
             bindevent: function () {
                 Form.api.bindevent($("form[role=form]"));
+            },
+            formatter:{
+                getClear:function(value){
+                    if (value == null || value == undefined) {
+                        return '';
+                    } else {
+                         var tem = value;
+                            // .replace(/&lt;/g, "<")
+                            // .replace(/&gt;/g, ">")
+                            // .replace(/&quot;/g, "\"")
+                            // .replace(/&apos;/g, "'")
+                            // .replace(/&amp;/g, "&")
+                            // .replace(/&nbsp;/g, '').replace(/<\/?.+?\/?>/g, '').replace(/<[^>]+>/g, "")
+                           //.replace(/<\/?.+?\/?>/g, '').replace(/<[^>]+>/g, "")
+                        if(tem.length<=10){
+                            //console.log(row.id);
+                            return tem;
+                        }else{
+                            return tem.substr(0, 10)+'<span class="problem_desc_info" name = "'+tem+'" style="color:red;">...</span>';
+
+                        }
+                    }
+                }                
             }
+
         }
     };
     return Controller;
