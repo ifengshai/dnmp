@@ -1966,17 +1966,6 @@ EOF;
     /**
      * 工单备注
      */
-<<<<<<< HEAD
-    public function work_order_note()
-    {
-        if ($this->request->isPost()) {
-            $params = $this->request->post("row/a");
-            if ($params) {
-                $params['create_time'] =  date('Y-m-d H:i', time());
-                $params['create_user_id'] =  $this->auth->id;
-                $res_status = $this->testRecordModel->allowField(true)->save($params);
-
-=======
     public function workordernote($ids = null){
         if($this->request->isPost()) {
             $params = $this->request->post("row/a");
@@ -2015,7 +2004,6 @@ EOF;
                     echo $e->getMessage();
                     Db::rollback();
                 }
->>>>>>> 0d260438d3669b53f5af99b7c58b6c962df11f0f
                 if ($res_status) {
                     $this->success('成功');
                 } else {
