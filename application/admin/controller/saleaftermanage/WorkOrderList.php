@@ -1331,6 +1331,11 @@ class WorkOrderList extends Backend
             $this->assignconfig('measureList', $measureList);
         }
         $this->assignconfig('operate_type', $operateType);
+        if(2 <= $row->work_status){
+            $row->assign_user = Admin::where(['id'=>$row->assign_user_id])->value('nickname');
+        }else{
+            $row->assign_uer  = Admin::where(['id'=>$row->operation_user_id])->value('nickname');
+        }
         if ($operateType == 2) { //审核
             return $this->view->fetch('saleaftermanage/work_order_list/check');
         }
@@ -1340,12 +1345,6 @@ class WorkOrderList extends Backend
             $this->view->assign('recepts', $recepts);
             return $this->view->fetch('saleaftermanage/work_order_list/process');
         }
-        if(2 <= $row->work_status){
-            $row->assign_user = Admin::where(['id'=>$row->assign_user_id])->value('nickname');
-        }else{
-            $row->assign_uer  = Admin::where(['id'=>$row->operation_user_id])->value('nickname');
-        }
-
         //查询工单处理备注
         $remarkList = $this->order_remark->where('work_id', $ids)->select();
 
