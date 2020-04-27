@@ -1386,7 +1386,7 @@ class Inventory extends Backend
      * @param change_sku   改变之后的sKu
      * @param change_number 改变之后的sku数量
      */
-    public function workChangeFrame($id, $order_platform, $increment_id,$changeRow)
+    public function workChangeFrame($id, $order_platform, $increment_id,$changeRow,$type)
     {
         if (!$id || !$order_platform || !$increment_id || !$changeRow) {
             return false;
@@ -1427,19 +1427,21 @@ class Inventory extends Backend
             Db::startTrans();
             try {
                 //更改sales_flat_order_item表中的sku字段
-                if ($original_sku && $original_number) { //如果存在原始sku和原始的数量
+                if ($original_sku && $original_number) {     //如果存在原始sku和原始的数量
                     $whereChange['order_id'] = $order['entity_id'];
                     $whereChange['sku']      = $original_sku;
                     $changeData['is_change_frame'] = 2;
                     $updateInfo = Db::connect($db)->table('sales_flat_order_item')->where($whereChange)->update($changeData);
-                    if (false != $updateInfo) {
+                    if (false !== $updateInfo) {
                         if (1 == $order['custom_is_match_frame_new']) { //如果已经配过镜架需要把原先的配货占用库存扣减，更新的配货占用库存增加
                             //原先sku增加可用库存,减少占用库存
                             if ($warehouse_original_sku && $original_number) {
+                                $original_sku_log['distribution_change_num'] = -$original_number;
                                 $item->where(['sku' => $warehouse_original_sku])->inc('available_stock', $original_number)->dec('distribution_occupy_stock', $original_number)->dec('occupy_stock', $original_number)->update();
                             }
                             //更新之后的sku减少可用库存,增加占用库存
                             if ($warehouse_change_sku && $change_number) {
+                                $change_sku_log['distribution_change_num'] = $change_number;
                                 $item->where(['sku' => $warehouse_change_sku])->dec('available_stock', $change_number)->inc('distribution_occupy_stock', $change_number)->inc('occupy_stock', $change_number)->update();
                             }
                         } else { //否则走原先的流程
@@ -1452,6 +1454,27 @@ class Inventory extends Backend
                                 $item->where(['sku' => $warehouse_change_sku])->dec('available_stock', $change_number)->inc('occupy_stock', $change_number)->update();
                             }
                         }
+                        $original_sku_log['change_id'] = $v['id'];
+                        $original_sku_log['increment_id'] = $increment_id;
+                        $original_sku_log['sku']       = $warehouse_original_sku;
+                        $original_sku_log['available_change_num'] = $original_number;
+                        $original_sku_log['occupy_change_num'] = -$original_number;
+                        $original_sku_log['operation_person'] = session('admin.nickname');
+                        $original_sku_log['create_time'] = date('Y-m-d H:i:s');
+                        $original_sku_log['site'] = $order_platform;
+                        $original_sku_log['type'] = $type;
+
+                        $change_sku_log['change_id'] = $v['id'];
+                        $change_sku_log['increment_id'] = $increment_id;
+                        $change_sku_log['sku']       = $warehouse_change_sku;
+                        $change_sku_log['available_change_num'] = -$change_number;
+                        $change_sku_log['occupy_change_num'] = $change_number;
+                        $change_sku_log['operation_person'] = session('admin.nickname');
+                        $change_sku_log['create_time'] = date('Y-m-d H:i:s');
+                        $change_sku_log['site'] = $order_platform;
+                        $change_sku_log['type'] = $type;
+                        Db::name('work_change_sku_log')->insert($original_sku_log);
+                        Db::name('work_change_sku_log')->insert($change_sku_log);
                     }
                 } else { //如果不存在原始sku和原始的数量
                     if (1 == $order['custom_is_match_frame_new']) { //如果已经配过镜架需要把原先的配货占用库存扣减，更新的配货占用库存增加
@@ -1489,7 +1512,7 @@ class Inventory extends Backend
      * @param order_platform 订单平台
      * @param increment_id 订单号
      */
-    public function workCancelOrder($id, $order_platform, $increment_id,$changeRow)
+    public function workCancelOrder($id, $order_platform, $increment_id,$changeRow,$type)
     {
         if (!$id || !$order_platform || !$increment_id || !$changeRow) {
             return false;
@@ -1525,13 +1548,24 @@ class Inventory extends Backend
                 $whereChange['sku']      = $original_sku;
                 $changeData['is_change_frame'] = 3;
                 $updateInfo = Db::connect($db)->table('sales_flat_order_item')->where($whereChange)->update($changeData);
-                if (false != $updateInfo) {
+                if (false !== $updateInfo) {
                     if (1 == $order['custom_is_match_frame_new']) { //如果已经配过镜架需要把原先的配货占用库存扣减
                         //原先sku增加可用库存,减少占用库存
+                        $original_sku_log['distribution_change_num'] = -$original_number;
                         $item->where(['sku' => $warehouse_original_sku])->inc('available_stock', $original_number)->dec('distribution_occupy_stock', $original_number)->dec('occupy_stock', $original_number)->update();
                     } else {
                         $item->where(['sku' => $warehouse_original_sku])->inc('available_stock', $original_number)->dec('occupy_stock', $original_number)->update();
                     }
+                    $original_sku_log['change_id'] = $v['id'];
+                    $original_sku_log['increment_id'] = $increment_id;
+                    $original_sku_log['sku']       = $warehouse_original_sku;
+                    $original_sku_log['available_change_num'] = $original_number;
+                    $original_sku_log['occupy_change_num'] = -$original_number;
+                    $original_sku_log['operation_person'] = session('admin.nickname');
+                    $original_sku_log['create_time'] = date('Y-m-d H:i:s');
+                    $original_sku_log['site'] = $order_platform;
+                    $original_sku_log['type'] = $type;
+                    Db::name('work_change_sku_log')->insert($original_sku_log);
                 }
                 Db::commit();
             } catch (ValidateException $e) {
@@ -1552,7 +1586,7 @@ class Inventory extends Backend
      * @param order_platform 订单平台
      * @param increment_id 订单号
      */
-    public function workPresent($id, $order_platform, $increment_id,$changeRow)
+    public function workPresent($id, $order_platform, $increment_id,$changeRow,$type)
     {
         if (!$id || !$order_platform || !$increment_id || !$changeRow) {
             return false;
@@ -1572,6 +1606,16 @@ class Inventory extends Backend
             Db::startTrans();
             try {
                 $item->where(['sku' => $warehouse_original_sku])->dec('available_stock', $original_number)->inc('occupy_stock', $original_number)->update();
+                $original_sku_log['change_id'] = $v['id'];
+                $original_sku_log['increment_id'] = $increment_id;
+                $original_sku_log['sku']       = $warehouse_original_sku;
+                $original_sku_log['available_change_num'] = -$original_number;
+                $original_sku_log['occupy_change_num'] = $original_number;
+                $original_sku_log['operation_person'] = session('admin.nickname');
+                $original_sku_log['create_time'] = date('Y-m-d H:i:s');
+                $original_sku_log['site'] = $order_platform;
+                $original_sku_log['type'] = $type;
+                Db::name('work_change_sku_log')->insert($original_sku_log);
                 Db::commit();
             } catch (ValidateException $e) {
                 Db::rollback();

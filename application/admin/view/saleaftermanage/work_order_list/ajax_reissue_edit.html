@@ -10,13 +10,6 @@
 
             </div>
         </div>
-
-        <div class="step7_function2_child">
-            <label class="control-label col-xs-12 col-sm-3">Name:</label>
-            <div class="col-xs-12 col-sm-8">
-                <input {$operate_type ? 'disabled': '' } class="form-control" name="row[replacement][original_name][]" type="text" value="{$vo.original_name}">
-            </div>
-        </div>
         <div class="step7_function2_child">
             <label class="control-label col-xs-12 col-sm-3">QTY:</label>
             <div class="col-xs-12 col-sm-8">
@@ -24,7 +17,7 @@
             </div>
         </div>
         <div class="step7_function2_child">
-            <label class="control-label col-xs-12 col-sm-3">选择已有处方:</label>
+            <label class="control-label col-xs-12 col-sm-3">Original RX:</label>
             <div class="col-xs-12 col-sm-8">
                 <select {$operate_type ? 'disabled': '' } id="prescription_select" class="form-control selectpicker" title="请选择">
                     {$prescriptions}
@@ -50,7 +43,7 @@
     <div class="step1_function3"  style="margin-top:10px;">
         <div class="panel-body">
             <div class="step1_function3_child">
-                <label class="control-label col-xs-12 col-sm-3">color_type:</label>
+                <label class="control-label col-xs-12 col-sm-3">Color:</label>
                 <div class="col-xs-12 col-sm-8">
                     <select {$operate_type ? 'disabled': '' } id="color_type" class="form-control selectpicker" name="row[replacement][color_id][]"  title="请选择">
                         {foreach name="colorList" item="val"}
@@ -63,7 +56,7 @@
                 </div>
             </div>
             <div class="step1_function3_child">
-                <label class="control-label col-xs-12 col-sm-3">lens_type:</label>
+                <label class="control-label col-xs-12 col-sm-3">Lens:</label>
                 <div class="col-xs-12 col-sm-8">
                     <select {$operate_type ? 'disabled': '' } id="lens_type" class="form-control selectpicker" name="row[replacement][lens_type][]"  title="请选择">
                         {if condition="isset($vo.prescription_options.lens_name)"}
@@ -74,7 +67,7 @@
                 </div>
             </div>
             <div class="step1_function3_child">
-                <label class="control-label col-xs-12 col-sm-3">coating_type:</label>
+                <label class="control-label col-xs-12 col-sm-3">Coating:</label>
                 <div class="col-xs-12 col-sm-8">
                     <select {$operate_type ? 'disabled': '' } id="c-coating_type" class="form-control selectpicker"
                             name="row[replacement][coating_type][]"  title="请选择">
@@ -202,7 +195,7 @@
     <div class="step7_function3">
         <div class="panel-body">
             <div class="step7_function3_child">
-                <label class="control-label col-xs-12 col-sm-3">color_type:</label>
+                <label class="control-label col-xs-12 col-sm-3">Color:</label>
                 <div class="col-xs-12 col-sm-8">
                     <select {$operate_type ? 'disabled': '' } id="color_type" class="form-control selectpicker" name="row[change_lens][color_id][]"  title="请选择">
                         {foreach name="colorList" item="val"}
@@ -212,7 +205,7 @@
                 </div>
             </div>
             <div class="step7_function3_child">
-                <label class="control-label col-xs-12 col-sm-3">lens_type:</label>
+                <label class="control-label col-xs-12 col-sm-3">Lens:</label>
                 <div class="col-xs-12 col-sm-8">
                     <select {$operate_type ? 'disabled': '' }  id="lens_type" class="form-control selectpicker" name="row[change_lens][lens_type][]"  title="请选择">
                         {if condition="$vo['color_id']"}
@@ -234,7 +227,7 @@
                 </div>
             </div>
             <div class="step7_function3_child">
-                <label class="control-label col-xs-12 col-sm-3">coating_type:</label>
+                <label class="control-label col-xs-12 col-sm-3">Coating:</label>
                 <div class="col-xs-12 col-sm-8">
                     <select {$operate_type ? 'disabled': '' } id="c-coating_type" class="form-control selectpicker"
                             name="row[change_lens][coating_type][]" title="请选择">
@@ -375,7 +368,7 @@
     <div class="step1_function3"  style="margin-top:10px;">
         <div class="panel-body">
             <div class="step1_function3_child">
-                <label class="control-label col-xs-12 col-sm-3">color_type:</label>
+                <label class="control-label col-xs-12 col-sm-3">Color:</label>
                 <div class="col-xs-12 col-sm-8">
                     <select {$operate_type ? 'disabled': '' } id="color_type" class="form-control selectpicker" name="row[gift][color_id][]"  title="请选择">
                         {foreach name="colorList" item="val"}
@@ -388,7 +381,7 @@
                 </div>
             </div>
             <div class="step1_function3_child">
-                <label class="control-label col-xs-12 col-sm-3">lens_type:</label>
+                <label class="control-label col-xs-12 col-sm-3">Lens:</label>
                 <div class="col-xs-12 col-sm-8">
                     <select {$operate_type ? 'disabled': '' } id="lens_type" class="form-control selectpicker" name="row[gift][lens_type][]"  title="请选择">
                         {if condition="isset($vo.prescription_options.lens_name)"}
@@ -398,7 +391,7 @@
                 </div>
             </div>
             <div class="step1_function3_child">
-                <label class="control-label col-xs-12 col-sm-3">coating_type:</label>
+                <label class="control-label col-xs-12 col-sm-3">Coating:</label>
                 <div class="col-xs-12 col-sm-8">
                     <select {$operate_type ? 'disabled': '' } id="c-coating_type" class="form-control selectpicker"
                             name="row[gift][coating_type][]"  title="请选择">

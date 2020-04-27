@@ -330,6 +330,7 @@ class NewProduct extends Backend
         }
         return $this->view->fetch();
     }
+    
 
     /**
      * 编辑

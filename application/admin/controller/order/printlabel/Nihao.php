@@ -12,6 +12,7 @@ use think\exception\PDOException;
 use Util\NihaoPrescriptionDetailHelper;
 use Util\SKUHelper;
 use app\admin\model\OrderLog;
+use app\admin\model\WorkChangeSkuLog;
 
 /**
  * Sales Flat Order
@@ -63,12 +64,11 @@ class Nihao extends Backend
                 $map['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal']];
             }
             //是否有协同任务
-            $infoSynergyTask = new \app\admin\model\infosynergytaskmanage\InfoSynergyTask;
+            $workorder = new \app\admin\model\saleaftermanage\WorkOrderList();
             if ($filter['task_label'] == 1 || $filter['task_label'] == '0') {
-                $swhere['is_del'] = 1;
-                $swhere['order_platform'] = 3;
-                $swhere['synergy_order_id'] = 2;
-                $order_arr = $infoSynergyTask->where($swhere)->order('create_time desc')->column('synergy_order_number');
+                $swhere['work_platform'] = 3;
+                $swhere['work_status'] = ['<>', 0];
+                $order_arr = $workorder->where($swhere)->column('platform_order');
                 if ($filter['task_label'] == 1) {
                     $map['increment_id'] = ['in', $order_arr];
                 } elseif ($filter['task_label'] == '0') {
@@ -78,18 +78,6 @@ class Nihao extends Backend
                 $this->request->get(['filter' => json_encode($filter)]);
             }
 
-            //协同任务分类id搜索
-            if ($filter['category_id'] || $filter['c_id']) {
-                $swhere['is_del'] = 1;
-                $swhere['order_platform'] = 3;
-                $swhere['synergy_order_id'] = 2;
-                $swhere['synergy_task_id'] = $filter['category_id'] ?? $filter['c_id'];
-                $order_arr = $infoSynergyTask->where($swhere)->order('create_time desc')->column('synergy_order_number');
-                $map['increment_id'] = ['in', $order_arr];
-                unset($filter['category_id']);
-                unset($filter['c_id']);
-                $this->request->get(['filter' => json_encode($filter)]);
-            }
 
             //SKU搜索
             if ($filter['sku']) {
@@ -108,9 +96,9 @@ class Nihao extends Backend
                 ->where($where)
                 ->order($sort, $order)
                 ->count();
-            $field = 'order_type,custom_order_prescription_type,entity_id,status,base_shipping_amount,increment_id,coupon_code,shipping_description,store_id,customer_id,base_discount_amount,base_grand_total,
-                     total_qty_ordered,quote_id,customer_email,customer_firstname,customer_lastname,custom_is_match_frame_new,custom_is_match_lens_new,
-                     custom_is_send_factory_new,custom_is_delivery_new,custom_print_label_new,custom_order_prescription,created_at';
+            $field = 'order_type,custom_order_prescription_type,entity_id,status,base_shipping_amount,increment_id,base_grand_total,
+                total_qty_ordered,custom_is_match_frame_new,custom_is_match_lens_new,
+                custom_is_send_factory_new,custom_is_delivery_new,custom_print_label_new,custom_order_prescription,created_at';
             $list = $this->model
                 ->field($field)
                 ->where($map)
@@ -122,13 +110,12 @@ class Nihao extends Backend
             $list = collection($list)->toArray();
 
             //查询订单是否存在协同任务
+            $swhere = [];
             $increment_ids = array_column($list, 'increment_id');
-            $infoSynergyTask = new \app\admin\model\infosynergytaskmanage\InfoSynergyTask;
-            $swhere['synergy_order_number'] = ['in', $increment_ids];
-            $swhere['is_del'] = 1;
-            $swhere['order_platform'] = 3;
-            $swhere['synergy_order_id'] = 2;
-            $order_arr = $infoSynergyTask->where($swhere)->column('synergy_order_number');
+            $swhere['platform_order'] = ['in', $increment_ids];
+            $swhere['work_platform'] = 3;
+            $swhere['work_status'] = ['<>', 0];
+            $order_arr = $workorder->where($swhere)->column('platform_order');
             //查询是否存在协同任务
             foreach ($list as $k => $v) {
                 if (in_array($v['increment_id'], $order_arr)) {
@@ -155,18 +142,20 @@ class Nihao extends Backend
             if ($increment_id) {
                 $map['increment_id'] = $increment_id;
                 $map['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal']];
+                $field = 'order_type,custom_order_prescription_type,entity_id,status,base_shipping_amount,increment_id,base_grand_total,
+                total_qty_ordered,custom_is_match_frame_new,custom_is_match_lens_new,
+                custom_is_send_factory_new,custom_is_delivery_new,custom_print_label_new,custom_order_prescription,created_at';
                 $list = $this->model
-                    // ->field($field)
+                    ->field($field)
                     ->where($map)
                     ->find();
                 if ($list) {
                     //查询订单是否存在协同任务
-                    $infoSynergyTask = new \app\admin\model\infosynergytaskmanage\InfoSynergyTask;
-                    $swhere['synergy_order_number'] = $increment_id;
-                    $swhere['is_del'] = 1;
-                    $swhere['order_platform'] = 3;
-                    $swhere['synergy_order_id'] = 2;
-                    $count = $infoSynergyTask->where($swhere)->count();
+                    $workorder = new \app\admin\model\saleaftermanage\WorkOrderList();
+                    $swhere['platform_order'] = $increment_id;
+                    $swhere['work_platform'] = 3;
+                    $swhere['work_status'] = ['<>', 0];
+                    $count = $workorder->where($swhere)->count();
                     //查询是否存在协同任务
                     if ($count > 0) {
                         $list['task_info'] = 1;
@@ -185,7 +174,6 @@ class Nihao extends Backend
     //标记为已打印标签
     public function tag_printed()
     {
-        // echo 'tag_printed';
         $entity_ids = input('id_params/a');
         $label = input('label');
         if ($entity_ids) {
@@ -232,19 +220,26 @@ class Nihao extends Backend
         }
     }
 
-    //配镜架 配镜片 加工 质检通过
+    /**
+     * 配镜架 配镜片 加工 质检通过
+     */
     public function setOrderStatus()
     {
         $entity_ids = input('id_params/a');
+        if (!$entity_ids) {
+            $this->error('参数错误！！');
+        }
         $status = input('status');
         $label = input('label');
         $map['entity_id'] = ['in', $entity_ids];
-        $res = $this->model->where($map)->select();
+        $res = $this->model->field('increment_id,custom_is_match_frame_new,custom_is_delivery_new,custom_is_match_frame_new')->where($map)->select();
+        if (!$res) {
+            $this->error('未查询到订单数据！！');
+        }
         foreach ($res as $v) {
             if ($status == 1 && $v['custom_is_match_frame_new'] == 1) {
                 $this->error('存在已配过镜架的订单！！');
             }
-
             if ($v['custom_is_delivery_new'] == 1) {
                 $this->error('存在已质检通过的订单！！');
             }
@@ -254,176 +249,301 @@ class Nihao extends Backend
             }
         }
 
-        if ($entity_ids) {
+        //判断订单是否存在未处理完成的工单
+        $arr = array_column($res, 'increment_id');
+        $workorder = new \app\admin\model\saleaftermanage\WorkOrderList();
+        $count = $workorder->where([
+            'platform_order' => ['in', $arr],
+            'work_status' => ['in', [1, 2, 3, 5]],
+            'work_platform' => 3 //平台
+        ])->count();
+        if ($count > 0) {
+            $this->error('存在未处理的工单');
+        }
 
-            switch ($status) {
-                case 1:
-                    //配镜架
-                    $data['custom_is_match_frame_new'] = 1;
-                    $data['custom_match_frame_created_at_new'] = date('Y-m-d H:i:s', time());
-                    $data['custom_match_frame_person_new'] = session('admin.nickname');
-                    $params['type'] = 2;
-                    break;
-                case 2:
-                    //配镜片
-                    $data['custom_is_match_lens_new'] = 1;
-                    $data['custom_match_lens_created_at_new'] = date('Y-m-d H:i:s', time());
-                    $data['custom_match_lens_person_new'] = session('admin.nickname');
-                    $params['type'] = 3;
-                    break;
-                case 3:
-                    //移送加工时间
-                    $data['custom_is_send_factory_new'] = 1;
-                    $data['custom_match_factory_created_at_new'] = date('Y-m-d H:i:s', time());
-                    $data['custom_match_factory_person_new'] = session('admin.nickname');
-                    $params['type'] = 4;
-                    break;
-                case 4:
-                    //提货
-                    $data['custom_is_delivery_new'] = 1;
-                    $data['custom_match_delivery_created_at_new'] = date('Y-m-d H:i:s', time());
-                    $data['custom_match_delivery_person_new'] = session('admin.nickname');
-                    $params['type'] = 5;
-                    break;
-                default:
+        switch ($status) {
+            case 1:
+                //配镜架
+                $data['custom_is_match_frame_new'] = 1;
+                $data['custom_match_frame_created_at_new'] = date('Y-m-d H:i:s', time());
+                $data['custom_match_frame_person_new'] = session('admin.nickname');
+                $params['type'] = 2;
+                break;
+            case 2:
+                //配镜片
+                $data['custom_is_match_lens_new'] = 1;
+                $data['custom_match_lens_created_at_new'] = date('Y-m-d H:i:s', time());
+                $data['custom_match_lens_person_new'] = session('admin.nickname');
+                $params['type'] = 3;
+                break;
+            case 3:
+                //移送加工
+                $data['custom_is_send_factory_new'] = 1;
+                $data['custom_match_factory_created_at_new'] = date('Y-m-d H:i:s', time());
+                $data['custom_match_factory_person_new'] = session('admin.nickname');
+                $params['type'] = 4;
+                break;
+            case 4:
+                //质检通过
+                $data['custom_is_delivery_new'] = 1;
+                $data['custom_match_delivery_created_at_new'] = date('Y-m-d H:i:s', time());
+                $data['custom_match_delivery_person_new'] = session('admin.nickname');
+                $params['type'] = 5;
+                break;
+            default:
+                $this->error('参数错误');
+        }
+        $item = new \app\admin\model\itemmanage\Item;
+        $this->model->startTrans();
+        $item->startTrans();
+        try {
+            $result = $this->model->where($map)->update($data);
+            if (false === $result) {
+                throw new Exception("操作失败！！");
             }
-            $item = new \app\admin\model\itemmanage\Item;
-            $outStockItem = new \app\admin\model\warehouse\OutStockItem;
-            $this->model->startTrans();
-            $item->startTrans();
-            try {
-                $result = $this->model->where($map)->update($data);
+            //配镜架
+            if ($status == 1) {
+                //查询出订单数据
+                $list = $this->model->alias('a')->where($map)->field('a.increment_id,b.sku,b.qty_ordered')->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->select();
+                if (!$list) {
+                    throw new Exception("未查询到订单数据！！");
+                };
+                //sku映射表
+                $ItemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku;
+                $infotask = new \app\admin\model\saleaftermanage\WorkOrderChangeSku();
 
-                if ($status == 1) {
-                    //查询出质检通过的订单
-                    $res = $this->model->alias('a')->where($map)->field('a.increment_id,b.sku,b.qty_ordered,b.is_change_frame')->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->select();
-                    if (!$res) {
-                        throw new Exception("未查询到订单数据！！");
-                    };
-
-                    $ItemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku;
-                    //查出订单SKU映射表对应的仓库SKU
-                    $error = [];
-                    foreach ($res as $k => &$v) {
-
-                        //是否为更换镜架 如果为更换镜架 需处理更换之后SKU的库存
-                        if ($v['is_change_frame'] == 2) {
-                            //根据订单号 SKU查询更换镜架记录表 处理更换之后SKU库存
-                            $infotask = new \app\admin\model\infosynergytaskmanage\InfoSynergyTaskChangeSku;
-                            $infoTaskRes = $infotask->getChangeSkuData($v['increment_id'], 3, $v['sku']);
-
-                            $v['sku'] = $infoTaskRes['change_sku'];
-                            $v['qty_ordered'] = $infoTaskRes['change_number'];
+                //查询是否存在更换镜架的订单
+                $infoRes = $infotask->field('sum(change_number) as qty,change_sku,original_sku,increment_id')
+                    ->where([
+                        'increment_id' => ['in', $arr],
+                        'change_type' => 1,    //更改类型 1更改镜架
+                        'platform_type' => 3, //平台类型
+                    ])
+                    ->group('change_sku')
+                    ->select();
+                $sku = [];
+                if ($infoRes) {
+                    foreach ($infoRes as $k => $v) {
+                        //sku转换
+                        $trueSku = $ItemPlatformSku->getTrueSku(trim($v['change_sku']), 3);
+                        if (!$trueSku) {
+                            throw new Exception("增加配货占用库存失败！！请检查更换镜框SKU:" . $v['change_sku']);
                         }
-
-                        $trueSku = $ItemPlatformSku->getTrueSku(trim($v['sku']), 3);
-                        //总库存
-                        $item_map['sku'] = $trueSku;
-                        $item_map['is_del'] = 1;
-                        if ($trueSku) {
-                            //增加配货占用
-                            $res_three = $item->where($item_map)->setInc('distribution_occupy_stock', $v['qty_ordered']);
+                        //判断是否有实时库存
+                        $realStock = $item->getRealStock($trueSku);
+                        if ($v['qty'] > $realStock) {
+                            throw new Exception("SKU:" . $v['change_sku'] . "实时库存不足");
                         }
-
-                        if (!$res_three) {
-                            $error[] = $k;
+                        //增加配货占用
+                        $map = [];
+                        $map['sku'] = $trueSku;
+                        $map['is_del'] = 1;
+                        $res = $item->where($map)->setInc('distribution_occupy_stock', $v['qty']);
+                        if (false === $res) {
+                            throw new Exception("增加配货占用库存失败！！请检查更换镜框SKU:" . $v['change_sku']);
                         }
+                        $sku[$v['increment_id']][$v['original_sku']] += $v['qty'];
+
+                        //插入日志表
+                        (new WorkChangeSkuLog())->setData([
+                            'increment_id'            => $v['increment_id'],
+                            'site'                     => 3,
+                            'type'                     => 5, //配镜架
+                            'sku'                     => $trueSku,
+                            'distribution_change_num' => $v['qty'],
+                            'operation_person'        => session('admin.nickname'),
+                            'create_time'             => date('Y-m-d H:i:s')
+                        ]);
                     }
-                    unset($v);
-
-                    if (count($error)) {
-                        throw new Exception("增加配货占用库存失败！！请检查SKU");
-                    };
-                    $item->commit();
                 }
-
-                //质检通过扣减库存
-                if ($status == 4) {
-                    //查询出质检通过的订单
-                    $res = $this->model->alias('a')->where($map)->field('a.increment_id,b.sku,b.qty_ordered,b.is_change_frame')->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->select();
-                    if (!$res) {
-                        throw new Exception("未查询到订单数据！！");
-                    };
-
-                    $ItemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku;
-                    //查出订单SKU映射表对应的仓库SKU
-                    $error = [];
-                    foreach ($res as $k => &$v) {
-
-                        //是否为更换镜架 如果为更换镜架 需处理更换之后SKU的库存
-                        if ($v['is_change_frame'] == 2) {
-                            //根据订单号 SKU查询更换镜架记录表 处理更换之后SKU库存
-                            $infotask = new \app\admin\model\infosynergytaskmanage\InfoSynergyTaskChangeSku;
-                            $infoTaskRes = $infotask->getChangeSkuData($v['increment_id'], 3, $v['sku']);
-
-                            $v['sku'] = $infoTaskRes['change_sku'];
-                            $v['qty_ordered'] = $infoTaskRes['change_number'];
-                        }
-
-                        $trueSku = $ItemPlatformSku->getTrueSku(trim($v['sku']), 3);
-                        //总库存
-                        $item_map['sku'] = $trueSku;
-                        $item_map['is_del'] = 1;
-                        if ($trueSku) {
-                            //扣减总库存 扣减占用库存
-                            $res_one = $item->where($item_map)->setDec('stock', $v['qty_ordered']);
-                            //占用库存
-                            $res_two = $item->where($item_map)->setDec('occupy_stock', $v['qty_ordered']);
-
-                            //扣减配货占用
-                            $res_three = $item->where($item_map)->setDec('distribution_occupy_stock', $v['qty_ordered']);
-                        }
-
-                        if (!$res_one || !$res_two || !$res_three) {
-                            $error[] = $k;
-                        }
-
-                        //先入先出逻辑
-                        $rows['sku'] = $trueSku;
-                        $rows['out_stock_num'] = $v['qty_ordered'];
-                        $rows['increment_id'] = $v['increment_id'];
-                        $outStockItem->setOrderOutStock($rows);
+                //查出订单SKU映射表对应的仓库SKU
+                $number = 0;
+                foreach ($list as $k => &$v) {
+                    //转仓库SKU
+                    $trueSku = $ItemPlatformSku->getTrueSku(trim($v['sku']), 3);
+                    if (!$trueSku) {
+                        throw new Exception("增加配货占用库存失败！！请检查更换镜框SKU:" . $v['sku']);
                     }
-                    unset($v);
 
-                    if (count($error)) {
-                        throw new Exception("扣减库存失败！！请检查SKU");
-                    };
-                    $item->commit();
+                    //如果为真 则存在更换镜架的数量 则订单需要扣减的数量为原数量-更换镜架的数量
+                    if ($sku[$v['increment_id']][$v['sku']]) {
+                        $qty = $v['qty_ordered'] - $sku[$v['increment_id']][$v['sku']];
+                    } else {
+                        $qty = $v['qty_ordered'];
+                    }
+
+                    if ($qty == 0) {
+                        continue;
+                    }
+
+                    //判断是否有实时库存
+                    $realStock = $item->getRealStock($trueSku);
+                    if ($qty > $realStock) {
+                        throw new Exception("SKU:" . $v['sku'] . "实时库存不足");
+                    }
+
+                    $map = [];
+                    $map['sku'] = $trueSku;
+                    $map['is_del'] = 1;
+                    //增加配货占用
+                    $res = $item->where($map)->setInc('distribution_occupy_stock', $qty);
+                    if (false === $res) {
+                        throw new Exception("增加配货占用库存失败！！请检查更换镜框SKU:" . $v['sku']);
+                    }
+
+                    $number++;
+                    //100条提交一次
+                    if ($number == 100) {
+                        $item->commit();
+                        $number = 0;
+                    }
+
+                    //插入日志表
+                    (new WorkChangeSkuLog())->setData([
+                        'increment_id'            => $v['increment_id'],
+                        'site'                     => 3,
+                        'type'                     => 5, //配镜架
+                        'sku'                     => $trueSku,
+                        'distribution_change_num' => $qty,
+                        'operation_person'        => session('admin.nickname'),
+                        'create_time'             => date('Y-m-d H:i:s')
+                    ]);
                 }
-
-                $this->model->commit();
-            } catch (PDOException $e) {
-                $this->model->rollback();
-                $this->error($e->getMessage());
-            } catch (Exception $e) {
-                $this->model->rollback();
-                $this->error($e->getMessage());
+                unset($v);
+                $item->commit();
             }
-            if ($result) {
-                $params['site'] = 3;
-                $params['num'] = count($entity_ids);
-                $params['order_ids'] = implode(',', $entity_ids);
-                (new OrderLog())->setOrderLog($params);
 
+            //质检通过扣减库存
+            if ($status == 4) {
+                //查询出质检通过的订单
+                $list = $this->model->alias('a')->where($map)->field('a.increment_id,b.sku,b.qty_ordered')->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->select();
+                if (!$list) {
+                    throw new Exception("未查询到订单数据！！");
+                };
+                //sku映射表
+                $ItemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku;
+                $infotask = new \app\admin\model\saleaftermanage\WorkOrderChangeSku();
+                //查询是否存在更换镜架的订单
+                $infoRes = $infotask->field('sum(change_number) as qty,change_sku,original_sku,increment_id')
+                    ->where([
+                        'increment_id' => ['in', $arr],
+                        'change_type' => 1,    //更改类型 1更改镜架
+                        'platform_type' => 3, //平台类型
+                    ])
+                    ->group('change_sku')
+                    ->select();
+                $sku = [];
+                if ($infoRes) {
+                    foreach ($infoRes as $k => $v) {
+                        $trueSku = $ItemPlatformSku->getTrueSku(trim($v['change_sku']), 3);
+                        if (!$trueSku) {
+                            throw new Exception("扣减库存失败！！请检查更换镜框SKU:" . $v['sku']);
+                        }
+                        //扣减总库存 扣减占用库存 扣减配货占用
+                        $map = [];
+                        $map['sku'] = $trueSku;
+                        $map['is_del'] = 1;
+                        $res = $item->where($map)->dec('stock', $v['qty'])->dec('occupy_stock', $v['qty'])->dec('distribution_occupy_stock', $v['qty'])->update();
+                        if (false === $res) {
+                            throw new Exception("扣减库存失败！！请检查更换镜框SKU:" . $v['sku']);
+                        }
+                        $sku[$v['increment_id']][$v['original_sku']] += $v['qty'];
 
-                //用来判断是否从_list列表页进来
-                if ($label == 'list') {
-                    //订单号
-                    $map['entity_id'] = ['in', $entity_ids];
-                    $list = $this->model
-                        ->where($map)
-                        ->select();
-                    $list = collection($list)->toArray();
-                } else {
-                    $list = 'success';
+                        //插入日志表
+                        (new WorkChangeSkuLog())->setData([
+                            'increment_id'            => $v['increment_id'],
+                            'site'                    => 3,
+                            'type'                    => 6, //质检通过
+                            'sku'                     => $trueSku,
+                            'stock_change_num'        => $v['qty'],
+                            'occupy_change_num'       => $v['qty'],
+                            'distribution_change_num' => $v['qty'],
+                            'operation_person'        => session('admin.nickname'),
+                            'create_time'             => date('Y-m-d H:i:s')
+                        ]);
+                    }
                 }
-                return $this->success('操作成功!', '', $list, 200);
+                $number = 0; //记录更新次数
+                foreach ($list as &$v) {
+                    //查出订单SKU映射表对应的仓库SKU
+                    $trueSku = $ItemPlatformSku->getTrueSku(trim($v['sku']), 3);
+                    if (!$trueSku) {
+                        throw new Exception("扣减库存失败！！请检查SKU:" . $v['sku']);
+                    }
+                    //如果为真 则存在更换镜架的数量 则订单需要扣减的数量为原数量-更换镜架的数量
+                    if ($sku[$v['increment_id']][$v['sku']]) {
+                        $qty = $v['qty_ordered'] - $sku[$v['increment_id']][$v['sku']];
+                    } else {
+                        $qty = $v['qty_ordered'];
+                    }
+                    if ($qty == 0) {
+                        continue;
+                    }
+
+                    //总库存
+                    $item_map['sku'] = $trueSku;
+                    $item_map['is_del'] = 1;
+                    //扣减总库存 扣减占用库存 扣减配货占用
+                    $res = $item->where($item_map)->dec('stock', $qty)->dec('occupy_stock', $qty)->dec('distribution_occupy_stock', $qty)->update();
+                    if (false === $res) {
+                        throw new Exception("扣减库存失败！！请检查SKU:" . $v['sku']);
+                    }
+                    $number++;
+                    //100条提交一次
+                    if ($number == 100) {
+                        $item->commit();
+                        $number = 0;
+                    }
+                    //插入日志表
+                    (new WorkChangeSkuLog())->setData([
+                        'increment_id'            => $v['increment_id'],
+                        'site'                    => 3,
+                        'type'                    => 6, //质检通过
+                        'sku'                     => $trueSku,
+                        'stock_change_num'        => $qty,
+                        'occupy_change_num'       => $qty,
+                        'distribution_change_num' => $qty,
+                        'operation_person'        => session('admin.nickname'),
+                        'create_time'             => date('Y-m-d H:i:s')
+                    ]);
+                }
+                unset($v);
+                $item->commit();
+            }
+
+            $this->model->commit();
+        } catch (PDOException $e) {
+            $item->rollback();
+            $this->model->rollback();
+            $this->error($e->getMessage());
+        } catch (Exception $e) {
+            $item->rollback();
+            $this->model->rollback();
+            $this->error($e->getMessage());
+        }
+        if (false !== $result) {
+            $params['num'] = count($entity_ids);
+            $params['order_ids'] = implode(',', $entity_ids);
+            $params['site'] = 2;
+            (new OrderLog())->setOrderLog($params);
+
+            //用来判断是否从_list列表页进来
+            if ($label == 'list') {
+                //订单号
+                $map['entity_id'] = ['in', $entity_ids];
+                $list = $this->model
+                    ->where($map)
+                    ->select();
+                $list = collection($list)->toArray();
             } else {
-                return $this->error('操作失败', '', 'error', 0);
+                $list = 'success';
             }
+            return $this->success('操作成功!', '', $list, 200);
+        } else {
+            return $this->error('操作失败', '', 'error', 0);
         }
     }
+
 
     public function detail($ids = null)
     {
@@ -1002,7 +1122,7 @@ where cped.attribute_id in(146,147) and cped.store_id=0 and cped.entity_id=$prod
 
         $map['sfo.increment_id'] = ['in', $str];
         $map['sfo.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal']];
-       
+
         if ($filter['created_at']) {
             $created_at = explode(' - ', $filter['created_at']);
             $map['sfo.created_at'] = ['between', [$created_at[0], $created_at[1]]];

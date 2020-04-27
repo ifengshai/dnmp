@@ -324,7 +324,6 @@ return [
     ],
     //仓库部门角色组ID
     'warehouse_department_rule' => [
-
         42,
         43,
         44,
@@ -333,5 +332,12 @@ return [
         47,
         48,
         49
-    ]
+    ],
+    //财务角色组
+    'finance_department_rule' => [
+        29,
+        51,
+        64,
+        65
+    ],
 ];

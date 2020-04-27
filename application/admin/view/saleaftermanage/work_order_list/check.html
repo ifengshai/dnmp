@@ -236,7 +236,7 @@
         width: 100%;
     }
     .step7_function2_child {
-        padding: 8px;
+        padding: 14px;
         float: left;
         width: 100%;
     }
@@ -513,7 +513,35 @@
             </div>
         </div>
     </div>
+    {if condition="$row->work_status elt 2"}
+    <div class="form-group">
+        <div class="form-group-content">
+            <label class="control-label col-xs-12 col-sm-2" style="width:8%;float: left;">{:__('审核人')}：</label>
+            <div class="appoint_group" style="width: 90%;float: left;">
+                <label class="control-label col-xs-12 col-sm-2" id="appoint_group_users" style="text-align: left;">{$row->assign_user}1111</label>
 
+               
+            </div>
+        </div>
+    </div>
+    {elseif condition="$row->work_status egt 3"/}
+    <div class="form-group">
+        <div class="form-group-content">
+            <label class="control-label col-xs-12 col-sm-2" style="width:8%;float: left;">{:__('审核人')}：</label>
+            <div class="appoint_group" style="width: 90%;float: left;">
+                <label class="control-label col-xs-12 col-sm-2" id="appoint_group_users" style="text-align: left;">{$row->assign_user}</label>
+            </div>
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="form-group-content">
+            <label class="control-label col-xs-12 col-sm-2" style="width:8%;float: left;">{:__('审核人备注')}：</label>
+            <div class="col-xs-8 col-sm-6" style="width: 90%;float: left;">
+                <textarea  disabled class="col-xs-8 col-sm-6" rows="5" cols="10">{$row.check_note}</textarea>
+            </div>
+        </div>
+    </div>     
+    {/if}
     {if $remarkList}
     <div class="form-group" style="width: 80%;">
         <div class="caigou">
@@ -852,12 +880,30 @@
                 <p style="font-size: 16px;"><b>补发</b></p>
                 
                 <div class="step7_function1">
-                    <div class="step7_function1_child " style="width: 100%">
-                        <label class="control-label col-xs-12 col-sm-3" style="width: 12.3%;">{:__('收货地址')}：</label>
-                        <div class="col-xs-12 col-sm-8" style="width: 83%">
+                    <div class="step7_function1_child ">
+                        <label class="control-label col-xs-12 col-sm-3">{:__('Address')}：</label>
+                        <div class="col-xs-12 col-sm-8">
                             <select id="address_select" class="form-control selectpicker" disabled name="row[address][address_id]">
                                 <option value="">请选择</option>
                             </select>
+                        </div>
+                    </div>
+                    <div class="step7_function1_child">
+                        <label class="control-label col-xs-12 col-sm-3">Shipping Method：</label>
+                        <div class="col-xs-12 col-sm-8">
+                            <select id="shipping_type" class="form-control selectpicker" disabled name="row[address][shipping_type]"
+                                    data-title="请选择">
+                                <option value="flatrate_flatrate">Standard Shipping</option>
+                                <option value="tablerate_bestway">Business Express</option>
+                                <option value="freeshipping_freeshipping">Free shipping</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="step7_function1_child">
+                        <label class="control-label col-xs-12 col-sm-3">Currency：</label>
+                        <div class="col-xs-12 col-sm-8">
+                            <input id="c-currency_code" class="form-control" disabled name="row[address][currency_code]" type="text"
+                                   value="">
                         </div>
                     </div>
                     <div class="step7_function1_child">
@@ -879,13 +925,13 @@
                         </div>
                     </div>
                     <div class="step7_function1_child">
-                        <label class="control-label col-xs-12 col-sm-3">{:__('Tel')}：</label>
+                        <label class="control-label col-xs-12 col-sm-3">{:__('Telephone')}：</label>
                         <div class="col-xs-12 col-sm-8">
                             <input id="c-telephone" class="form-control" disabled name="row[address][telephone]" type="text" value="">
                         </div>
                     </div>
                     <div class="step7_function1_child">
-                        <label class="control-label col-xs-12 col-sm-3">{:__('国家')}：</label>
+                        <label class="control-label col-xs-12 col-sm-3">{:__('Country')}：</label>
                         <div class="col-xs-12 col-sm-8">
                             <select id="c-country" class="form-control selectpicker" disabled name="row[address][country_id]">
                                 <option value="">请选择</option>
@@ -896,7 +942,7 @@
                         </div>
                     </div>
                     <div class="step7_function1_child">
-                        <label class="control-label col-xs-12 col-sm-3">{:__('地区(省/州)')}：</label>
+                        <label class="control-label col-xs-12 col-sm-3">{:__('State/Province')}：</label>
                         <div class="col-xs-12 col-sm-8">
                             <select id="c-region" class="form-control selectpicker" disabled name="row[address][region_id]">
                                 <option value="">请选择</option>
@@ -904,19 +950,19 @@
                         </div>
                     </div>
                     <div class="step7_function1_child">
-                        <label class="control-label col-xs-12 col-sm-3">{:__('城市')}：</label>
+                        <label class="control-label col-xs-12 col-sm-3">{:__('City')}：</label>
                         <div class="col-xs-12 col-sm-8">
                             <input id="c-city" class="form-control" disabled name="row[address][city]" type="text" value="">
                         </div>
                     </div>
                     <div class="step7_function1_child">
-                        <label class="control-label col-xs-12 col-sm-3">{:__('街道')}：</label>
+                        <label class="control-label col-xs-12 col-sm-3">{:__('Street Address')}：</label>
                         <div class="col-xs-12 col-sm-8">
                             <input id="c-street" class="form-control" disabled name="row[address][street]" type="text" value="">
                         </div>
                     </div>
                     <div class="step7_function1_child">
-                        <label class="control-label col-xs-12 col-sm-3">{:__('邮编')}：</label>
+                        <label class="control-label col-xs-12 col-sm-3">{:__('Zip/Postal Code')}：</label>
                         <div class="col-xs-12 col-sm-8">
                             <input id="c-postcode" class="form-control" disabled name="row[address][postcode]" type="text" value="">
                         </div>

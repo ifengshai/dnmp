@@ -109,6 +109,8 @@ class ItWebDemand extends Backend
             $permissions['demand_test_finish'] = $this->auth->check('demand/it_web_demand/test_group_finish');//测试完成
             $permissions['demand_test_record_bug'] = $this->auth->check('demand/it_web_demand/test_record_bug');//测试完成
             $permissions['demand_add_online'] = $this->auth->check('demand/it_web_demand/add_online');//上线需求
+            $permissions['demand_opt_test_duty'] = $this->auth->check('demand/it_web_demand/opt_test_duty');//是否扣测试绩效
+            $permissions['demand_opt_work_time'] = $this->auth->check('demand/it_web_demand/opt_work_time');//是否扣非加班处理问题
 
             foreach ($list as $k => $v){
                 $user_detail = $this->auth->getUserInfo($list[$k]['entry_user_id']);
@@ -202,6 +204,8 @@ class ItWebDemand extends Backend
                 $list[$k]['demand_test_finish'] = $permissions['demand_test_finish'];
                 $list[$k]['demand_test_record_bug'] = $permissions['demand_test_record_bug'];
                 $list[$k]['demand_add_online'] = $permissions['demand_add_online'];
+                $list[$k]['demand_opt_test_duty'] = $permissions['demand_opt_test_duty'];
+                $list[$k]['demand_opt_work_time'] = $permissions['demand_opt_work_time'];
 
                 //判断当前登录人是否显示应该操作的按钮
                 if($v['test_group'] == 1 && $v['test_user_id'] != ''){
@@ -280,6 +284,8 @@ class ItWebDemand extends Backend
             $permissions['demand_test_finish'] = $this->auth->check('demand/it_web_demand/test_group_finish');//测试完成
             $permissions['demand_test_record_bug'] = $this->auth->check('demand/it_web_demand/test_record_bug');//测试完成
             $permissions['demand_add_online'] = $this->auth->check('demand/it_web_demand/add_online');//上线需求
+            $permissions['demand_opt_test_duty'] = $this->auth->check('demand/it_web_demand/opt_test_duty');//上线需求
+            $permissions['demand_opt_work_time'] = $this->auth->check('demand/it_web_demand/opt_work_time');//上线需求
 
             foreach ($list as $k => $v){
                 $user_detail = $this->auth->getUserInfo($list[$k]['entry_user_id']);
@@ -373,9 +379,13 @@ class ItWebDemand extends Backend
                 $list[$k]['demand_test_finish'] = $permissions['demand_test_finish'];
                 $list[$k]['demand_test_record_bug'] = $permissions['demand_test_record_bug'];
                 $list[$k]['demand_add_online'] = $permissions['demand_add_online'];
+                $list[$k]['demand_opt_test_duty'] = $permissions['demand_opt_test_duty'];
+                $list[$k]['demand_opt_work_time'] = $permissions['demand_opt_work_time'];
 
+                $list[$k]['is_test_record_hidden'] = 1;
+                $list[$k]['is_test_finish_hidden'] = 1;
                 //判断当前登录人是否显示应该操作的按钮
-                if($v['test_group'] == 1 && $v['test_user_id'] != ''){
+               /* if($v['test_group'] == 1 && $v['test_user_id'] != ''){
                     if(in_array($this->auth->id, explode(',', $v['test_user_id']))){
                         $list[$k]['is_test_record_hidden'] = 1;
                         $list[$k]['is_test_finish_hidden'] = 1;
@@ -383,7 +393,7 @@ class ItWebDemand extends Backend
                 }
                 if($this->auth->id == $v['entry_user_id']){
                     $list[$k]['is_entry_user_hidden'] = 1;
-                }
+                }*/
             }
             $result = array("total" => $total, "rows" => $list);
             return json($result);
@@ -568,11 +578,11 @@ class ItWebDemand extends Backend
      */
     public function add()
     {
-        $url = 'http://mj.com/admin_1biSSnWyfW.php/demand/it_web_demand/index?ref=addtabs';
+       /* $url = 'http://mj.com/admin_1biSSnWyfW.php/demand/it_web_demand/index?ref=addtabs';
         $user_id[] =  '0550643549844645';//李想
         $user_id[] =  '0333543233781107';//张晓
         $res = (new Ding())->ding_notice($user_id,$url,'新需求来了1111111111','测试内容222222222222');
-        dump($res);exit;
+        dump($res);exit;*/
 
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
@@ -585,6 +595,8 @@ class ItWebDemand extends Backend
                     $data['entry_user_confirm_time'] =  date('Y-m-d H:i',time());
                     $res = $this->model->allowField(true)->save($data,['id'=> input('ids')]);
                     if ($res) {
+                        $res = $this ->model ->get(input('ids'));
+                        Ding::dingHook('test_group_finish', $res);
                         $this->success('成功');
                     } else {
                         $this->error('失败');
@@ -625,6 +637,7 @@ class ItWebDemand extends Backend
                         $this->error($e->getMessage());
                     }
                     if ($result !== false) {
+                        Ding::dingHook(__FUNCTION__, $this ->model);
                         $this->success();
                     } else {
                         $this->error(__('No rows were inserted'));
@@ -654,6 +667,7 @@ class ItWebDemand extends Backend
                 }
                 $res = $this->model->allowField(true)->save($params,['id'=> input('ids')]);
                 if ($res) {
+                    Ding::dingHook(__FUNCTION__, $this ->model ->get(input('ids')));
                     $this->success('成功');
                 } else {
                     $this->error('失败');
@@ -728,6 +742,7 @@ class ItWebDemand extends Backend
                 }
                 $res = $this->model->allowField(true)->save($update_date,['id'=> $params['id']]);
                 if ($res) {
+                    Ding::dingHook(__FUNCTION__, $this ->model ->get($params['id']));
                     $this->success('成功');
                 } else {
                     $this->error('失败');
@@ -772,6 +787,7 @@ class ItWebDemand extends Backend
             }
             $res = $this->model->allowField(true)->save($data,['id'=> input('ids')]);
             if ($res) {
+                Ding::dingHook(__FUNCTION__, $this ->model ->get(input('ids')));
                 $this->success('成功');
             } else {
                 $this->error('失败');
@@ -837,6 +853,7 @@ class ItWebDemand extends Backend
 
                 $res = $this->model->allowField(true)->save($update_date,['id'=> $params['id']]);
                 if ($res) {
+                    Ding::dingHook(__FUNCTION__, $this ->model ->get($params['id']));
                     $this->success('成功');
                 } else {
                     $this->error('失败');
@@ -909,6 +926,7 @@ class ItWebDemand extends Backend
                         $update_date['web_designer_is_finish'] = 1;
                         $update_date['web_designer_finish_time'] =  date('Y-m-d H:i',time());
                         $update_date['web_designer_note'] =  $params['web_designer_note'];
+                        $update_date['is_small_probability'] =  $params['is_small_probability'];
                         $res = $this->model->allowField(true)->save($update_date,['id'=> $params['id']]);
                     }
 
@@ -917,6 +935,7 @@ class ItWebDemand extends Backend
                         $update_date['phper_is_finish'] = 1;
                         $update_date['phper_finish_time'] =  date('Y-m-d H:i',time());
                         $update_date['phper_note'] =  $params['phper_note'];
+                        $update_date['is_small_probability'] =  $params['is_small_probability'];
                         $res = $this->model->allowField(true)->save($update_date,['id'=> $params['id']]);
                     }
 
@@ -925,6 +944,7 @@ class ItWebDemand extends Backend
                         $update_date['app_is_finish'] = 1;
                         $update_date['app_finish_time'] =  date('Y-m-d H:i',time());
                         $update_date['app_note'] =  $params['app_note'];
+                        $update_date['is_small_probability'] =  $params['is_small_probability'];
                         $res = $this->model->allowField(true)->save($update_date,['id'=> $params['id']]);
                     }
 
@@ -956,6 +976,7 @@ class ItWebDemand extends Backend
                         }
                         $res_status = $this->model->allowField(true)->save($update_status,['id'=> $params['id']]);
                         if ($res_status) {
+                            Ding::dingHook(__FUNCTION__, $row);
                             $this->success('成功');
                         } else {
                             $this->error('失败');
@@ -1031,17 +1052,21 @@ class ItWebDemand extends Backend
         if ($this->request->isAjax()) {
             $is_all_test = input('is_all_test');
             if($is_all_test == 1){
+                $ding_type = '_end';
                 $data['status'] =  7;
                 $data['return_test_is_finish'] =  1;
                 $data['return_test_finish_time'] =  date('Y-m-d H:i',time());
                 $data['all_finish_time'] =  date('Y-m-d H:i',time());
             }else{
+                $ding_type = '_wait';
                 $data['status'] =  5;
                 $data['test_is_finish'] =  1;
                 $data['test_finish_time'] =  date('Y-m-d H:i',time());
             }
             $res = $this->model->allowField(true)->save($data,['id'=> input('ids')]);
             if ($res) {
+                // Ding::dingHook(__FUNCTION__ . $ding_type, $this ->model ->get(input('ids')));
+                Ding::dingHook(__FUNCTION__, $this ->model ->get(input('ids')));
                 $this->success('成功');
             } else {
                 $this->error('失败');
@@ -1108,6 +1133,7 @@ class ItWebDemand extends Backend
                 $res_status = $this->testRecordModel->allowField(true)->save($params);
 
                 if ($res_status) {
+                    Ding::dingHook(__FUNCTION__, $this->model->get(['id' => $params['pid']]));
                     $this->success('成功');
                 } else {
                     $this->error('失败');
@@ -1202,6 +1228,7 @@ class ItWebDemand extends Backend
             }
             $res = $this->model->allowField(true)->save($data,['id'=> $ids]);
             if ($res) {
+                Ding::dingHook(__FUNCTION__, $this ->model ->get($ids));
                 $this->success('成功');
             } else {
                 $this->error('失败');
@@ -1280,4 +1307,151 @@ class ItWebDemand extends Backend
         $this->view->assign("row", $row_arr);
         return $this->view->fetch();
     }
+
+
+    /**
+    *  bug列表页面
+     * 是否扣除测试绩效
+     */
+
+    public function opt_test_duty($ids = null)
+    {
+        if ($this->request->isAjax()) {
+            $is_test_duty = input('is_test_duty');
+            if($is_test_duty == 1){
+                $data['is_test_duty'] =  1;
+            }else{
+                $data['is_test_duty'] =  0;
+            }
+            $res = $this->model->allowField(true)->save($data,['id'=> input('ids')]);
+            if ($res) {
+                // Ding::dingHook(__FUNCTION__ . $ding_type, $this ->model ->get(input('ids')));
+//                Ding::dingHook(__FUNCTION__, $this ->model ->get(input('ids')));
+                $this->success('操作成功');
+            } else {
+                $this->error('操作失败');
+            }
+        }
+
+        $ids = $ids ?? input('id');
+        $row = $this->model->get(['id' => $ids]);
+        $row_arr = $row->toArray();
+        $year_time = date('Y-m-d H:i',time());
+
+        //如果已分配前端人员
+        $web_userid_arr = array();
+        if($row_arr['web_designer_user_id']){
+            $web_userid_arr['group'] = $row_arr['web_designer_group'];
+            $web_userid_arr['complexity'] = config('demand.allComplexity')[$row_arr['web_designer_complexity']];
+            $web_userid_arr['user_name'] = $this->extract_username($row_arr['web_designer_user_id'],'web_designer_user');
+            $web_userid_arr['expect_time'] = date('Y-m-d H:i',strtotime($row_arr['web_designer_expect_time']));
+            $web_userid_arr['is_finish'] = $row_arr['web_designer_is_finish'];
+            $web_userid_arr['finish_time'] = $row_arr['web_designer_finish_time'];
+        }
+        //如果已分配后端人员
+        $phper_userid_arr = array();
+        if($row_arr['phper_user_id']){
+            $phper_userid_arr['group'] = $row_arr['phper_group'];
+            $phper_userid_arr['complexity'] = config('demand.allComplexity')[$row_arr['phper_complexity']];
+            $phper_userid_arr['user_name'] = $this->extract_username($row_arr['phper_user_id'],'phper_user');
+            $phper_userid_arr['expect_time'] = date('Y-m-d H:i',strtotime($row_arr['phper_expect_time']));
+            $phper_userid_arr['is_finish'] = $row_arr['phper_is_finish'];
+            $phper_userid_arr['finish_time'] = $row_arr['phper_finish_time'];
+        }
+
+        //如果已分配app人员
+        $app_userid_arr = array();
+        if($row_arr['app_user_id']){
+            $app_userid_arr['group'] = $row_arr['app_group'];
+            $app_userid_arr['complexity'] = config('demand.allComplexity')[$row_arr['app_complexity']];
+            $app_userid_arr['user_name'] = $this->extract_username($row_arr['app_user_id'],'app_user');
+            $app_userid_arr['expect_time'] = date('Y-m-d H:i',strtotime($row_arr['app_expect_time']));
+            $app_userid_arr['is_finish'] = $row_arr['app_is_finish'];
+            $app_userid_arr['finish_time'] = $row_arr['app_finish_time'];
+        }
+
+
+        $this->view->assign("web_userid_arr", $web_userid_arr);
+        $this->view->assign("phper_userid_arr", $phper_userid_arr);
+        $this->view->assign("app_userid_arr", $app_userid_arr);
+        $this->view->assign("year_time", $year_time);
+
+        $this->view->assign("row", $row_arr);
+        return $this->view->fetch();
+    }
+
+
+    /**
+    *  bug列表页面
+     * 是否工作时间处理问题
+     */
+
+    public function opt_work_time($ids = null)
+    {
+        if ($this->request->isAjax()) {
+            $is_test_duty = input('is_work_time');
+            if($is_test_duty == 1){
+                $data['is_work_time'] =  1;
+            }else{
+                $data['is_work_time'] =  0;
+            }
+            $res = $this->model->allowField(true)->save($data,['id'=> input('ids')]);
+            if ($res) {
+                // Ding::dingHook(__FUNCTION__ . $ding_type, $this ->model ->get(input('ids')));
+//                Ding::dingHook(__FUNCTION__, $this ->model ->get(input('ids')));
+                $this->success('操作成功');
+            } else {
+                $this->error('操作失败');
+            }
+        }
+
+        $ids = $ids ?? input('id');
+        $row = $this->model->get(['id' => $ids]);
+        $row_arr = $row->toArray();
+        $year_time = date('Y-m-d H:i',time());
+
+        //如果已分配前端人员
+        $web_userid_arr = array();
+        if($row_arr['web_designer_user_id']){
+            $web_userid_arr['group'] = $row_arr['web_designer_group'];
+            $web_userid_arr['complexity'] = config('demand.allComplexity')[$row_arr['web_designer_complexity']];
+            $web_userid_arr['user_name'] = $this->extract_username($row_arr['web_designer_user_id'],'web_designer_user');
+            $web_userid_arr['expect_time'] = date('Y-m-d H:i',strtotime($row_arr['web_designer_expect_time']));
+            $web_userid_arr['is_finish'] = $row_arr['web_designer_is_finish'];
+            $web_userid_arr['finish_time'] = $row_arr['web_designer_finish_time'];
+        }
+        //如果已分配后端人员
+        $phper_userid_arr = array();
+        if($row_arr['phper_user_id']){
+            $phper_userid_arr['group'] = $row_arr['phper_group'];
+            $phper_userid_arr['complexity'] = config('demand.allComplexity')[$row_arr['phper_complexity']];
+            $phper_userid_arr['user_name'] = $this->extract_username($row_arr['phper_user_id'],'phper_user');
+            $phper_userid_arr['expect_time'] = date('Y-m-d H:i',strtotime($row_arr['phper_expect_time']));
+            $phper_userid_arr['is_finish'] = $row_arr['phper_is_finish'];
+            $phper_userid_arr['finish_time'] = $row_arr['phper_finish_time'];
+        }
+
+        //如果已分配app人员
+        $app_userid_arr = array();
+        if($row_arr['app_user_id']){
+            $app_userid_arr['group'] = $row_arr['app_group'];
+            $app_userid_arr['complexity'] = config('demand.allComplexity')[$row_arr['app_complexity']];
+            $app_userid_arr['user_name'] = $this->extract_username($row_arr['app_user_id'],'app_user');
+            $app_userid_arr['expect_time'] = date('Y-m-d H:i',strtotime($row_arr['app_expect_time']));
+            $app_userid_arr['is_finish'] = $row_arr['app_is_finish'];
+            $app_userid_arr['finish_time'] = $row_arr['app_finish_time'];
+        }
+
+
+        $this->view->assign("web_userid_arr", $web_userid_arr);
+        $this->view->assign("phper_userid_arr", $phper_userid_arr);
+        $this->view->assign("app_userid_arr", $app_userid_arr);
+        $this->view->assign("year_time", $year_time);
+
+        $this->view->assign("row", $row_arr);
+        return $this->view->fetch();
+    }
+
+
+
 }

@@ -39,6 +39,6 @@ class ItWebTask extends Model
 
     public function itwebtaskitem()
     {
-        return $this->belongsTo('app\admin\model\ItWebTaskItem', 'id', 'task_id', [], 'LEFT')->setEagerlyType(0);
+        return $this->belongsTo('ItWebTaskItem', 'id', 'task_id', [], 'LEFT')->setEagerlyType(0);
     }
 }

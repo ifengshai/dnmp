@@ -55,7 +55,7 @@ class Item extends Backend
     {
         //设置过滤方法
         $this->request->filter(['strip_tags']);
-        if ($this->request->isAjax()) {
+        if ($this->request->isAjax()) {// 判断是否为Ajax调用
             //如果发送的来源是Selectpage，则转发到Selectpage
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
@@ -1082,13 +1082,17 @@ class Item extends Backend
                 return $this->selectpage();
             }
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            $map['is_open'] = 1;
+            $map['is_del'] = 1;
             $total = $this->model
                 ->where($where)
+                ->where($map)
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->model
                 ->where($where)
+                ->where($map)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();

@@ -236,7 +236,7 @@
         width: 100%;
     }
     .step7_function2_child {
-        padding: 8px;
+        padding: 14px;
         float: left;
         width: 100%;
     }
@@ -515,6 +515,35 @@
             </div>
         </div>
     </div>
+    {if condition="$row->work_status elt 2"}
+    <div class="form-group">
+        <div class="form-group-content">
+            <label class="control-label col-xs-12 col-sm-2" style="width:8%;float: left;">{:__('审核人')}：</label>
+            <div class="appoint_group" style="width: 90%;float: left;">
+                <label class="control-label col-xs-12 col-sm-2" id="appoint_group_users" style="text-align: left;">{$row->assign_user}1111</label>
+
+               
+            </div>
+        </div>
+    </div>
+    {elseif condition="$row->work_status egt 3"/}
+    <div class="form-group">
+        <div class="form-group-content">
+            <label class="control-label col-xs-12 col-sm-2" style="width:8%;float: left;">{:__('审核人')}：</label>
+            <div class="appoint_group" style="width: 90%;float: left;">
+                <label class="control-label col-xs-12 col-sm-2" id="appoint_group_users" style="text-align: left;">{$row->assign_user}</label>
+            </div>
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="form-group-content">
+            <label class="control-label col-xs-12 col-sm-2" style="width:8%;float: left;">{:__('审核人备注')}：</label>
+            <div class="col-xs-8 col-sm-6" style="width: 90%;float: left;">
+                <textarea  disabled class="col-xs-8 col-sm-6" rows="5" cols="10">{$row.check_note}</textarea>
+            </div>
+        </div>
+    </div>     
+    {/if}    
     <div class="form-group" style="width: 80%;">
         <div class="caigou">
             <label class="control-label col-xs-12 col-sm-2" style="width: 9%;">{:__('处理')}：</label>
@@ -535,7 +564,7 @@
                         <td>{$vo.measure.measure_content}</td>
                         <td>{$vo.status_format}</td>
                         <td>
-                            {if condition="$vo.recept_status != 1"}
+                            {if condition="$vo.recept_status != 0"}
                             {$vo.note}
                             {else /}
                             <input type="text" class="form-control process-note" name="row[note]"  value="">
@@ -543,12 +572,12 @@
 
                         </td>
                         <td>
-                            {if condition="$vo.recept_status != 1"}
+                            {if condition="$vo.recept_status != 0"}
                             {$vo.recept_person}
                             {/if}
                         </td>
                         <td>
-                            {if condition="$vo.recept_status == 1 && hasProcessPermission($vo.recept_group_id,$vo.work_id,session('admin.id'))"}
+                            {if condition="$vo.recept_status == 0 && hasProcessPermission($vo.recept_group_id,$vo.work_id,session('admin.id'))"}
                                 <button type="submit" class="btn btn-success btn-process-status-success"  data-id="{$vo.id}">{:__('处理完成')}</button>
                                 <button type="submit" class="btn btn-danger btn-process-status-error"  data-id="{$vo.id}">{:__('处理失败')}</button>
                             {/if}
@@ -863,42 +892,60 @@
                 <p style="font-size: 16px;"><b>补发</b></p>
 
                 <div class="step7_function1">
-                    <div class="step7_function1_child " style="width: 100%">
-                        <label class="control-label col-xs-12 col-sm-3" style="width: 12.3%;">{:__('收货地址')}：</label>
-                        <div class="col-xs-12 col-sm-8" style="width: 83%">
-                            <select disabled id="address_select" class="form-control selectpicker" name="row[address][address_id]">
+                    <div class="step7_function1_child ">
+                        <label class="control-label col-xs-12 col-sm-3">{:__('Address')}：</label>
+                        <div class="col-xs-12 col-sm-8">
+                            <select id="address_select" class="form-control selectpicker" disabled name="row[address][address_id]">
                                 <option value="">请选择</option>
                             </select>
                         </div>
                     </div>
                     <div class="step7_function1_child">
+                        <label class="control-label col-xs-12 col-sm-3">Shipping Method：</label>
+                        <div class="col-xs-12 col-sm-8">
+                            <select id="shipping_type" class="form-control selectpicker" disabled name="row[address][shipping_type]"
+                                    data-title="请选择">
+                                <option value="flatrate_flatrate">Standard Shipping</option>
+                                <option value="tablerate_bestway">Business Express</option>
+                                <option value="freeshipping_freeshipping">Free shipping</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="step7_function1_child">
+                        <label class="control-label col-xs-12 col-sm-3">Currency：</label>
+                        <div class="col-xs-12 col-sm-8">
+                            <input id="c-currency_code" class="form-control" disabled name="row[address][currency_code]" type="text"
+                                   value="">
+                        </div>
+                    </div>
+                    <div class="step7_function1_child">
                         <label class="control-label col-xs-12 col-sm-3">{:__('Fast name')}：</label>
                         <div class="col-xs-12 col-sm-8">
-                            <input disabled id="c-firstname" class="form-control" name="row[address][firstname]" type="text" value="">
+                            <input id="c-firstname" class="form-control" disabled name="row[address][firstname]" type="text" value="">
                         </div>
                     </div>
                     <div class="step7_function1_child">
                         <label class="control-label col-xs-12 col-sm-3">{:__('Last name')}：</label>
                         <div class="col-xs-12 col-sm-8">
-                            <input disabled id="c-lastname" class="form-control" name="row[address][lastname]" type="text" value="">
+                            <input id="c-lastname" class="form-control" disabled name="row[address][lastname]" type="text" value="">
                         </div>
                     </div>
                     <div class="step7_function1_child">
                         <label class="control-label col-xs-12 col-sm-3">{:__('Email')}：</label>
                         <div class="col-xs-12 col-sm-8">
-                            <input disabled id="c-email" class="form-control" name="row[address][email]" type="text" value="">
+                            <input id="c-email" class="form-control" disabled name="row[address][email]" type="text" value="">
                         </div>
                     </div>
                     <div class="step7_function1_child">
-                        <label class="control-label col-xs-12 col-sm-3">{:__('Tel')}：</label>
+                        <label class="control-label col-xs-12 col-sm-3">{:__('Telephone')}：</label>
                         <div class="col-xs-12 col-sm-8">
-                            <input disabled id="c-telephone" class="form-control" name="row[address][telephone]" type="text" value="">
+                            <input id="c-telephone" class="form-control" disabled name="row[address][telephone]" type="text" value="">
                         </div>
                     </div>
                     <div class="step7_function1_child">
-                        <label class="control-label col-xs-12 col-sm-3">{:__('国家')}：</label>
+                        <label class="control-label col-xs-12 col-sm-3">{:__('Country')}：</label>
                         <div class="col-xs-12 col-sm-8">
-                            <select disabled id="c-country" class="form-control selectpicker" name="row[address][country_id]">
+                            <select id="c-country" class="form-control selectpicker" disabled name="row[address][country_id]">
                                 <option value="">请选择</option>
                                 {foreach name="country" item="vo" key="key"}
                                 <option value="{$key}">{$vo['country']}</option>
@@ -907,29 +954,29 @@
                         </div>
                     </div>
                     <div class="step7_function1_child">
-                        <label class="control-label col-xs-12 col-sm-3">{:__('地区(省/州)')}：</label>
+                        <label class="control-label col-xs-12 col-sm-3">{:__('State/Province')}：</label>
                         <div class="col-xs-12 col-sm-8">
-                            <select disabled id="c-region" class="form-control selectpicker" name="row[address][region_id]">
+                            <select id="c-region" class="form-control selectpicker" disabled name="row[address][region_id]">
                                 <option value="">请选择</option>
                             </select>
                         </div>
                     </div>
                     <div class="step7_function1_child">
-                        <label class="control-label col-xs-12 col-sm-3">{:__('城市')}：</label>
+                        <label class="control-label col-xs-12 col-sm-3">{:__('City')}：</label>
                         <div class="col-xs-12 col-sm-8">
-                            <input disabled id="c-city" class="form-control" name="row[address][city]" type="text" value="">
+                            <input id="c-city" class="form-control" disabled name="row[address][city]" type="text" value="">
                         </div>
                     </div>
                     <div class="step7_function1_child">
-                        <label class="control-label col-xs-12 col-sm-3">{:__('街道')}：</label>
+                        <label class="control-label col-xs-12 col-sm-3">{:__('Street Address')}：</label>
                         <div class="col-xs-12 col-sm-8">
-                            <input disabled id="c-street" class="form-control" name="row[address][street]" type="text" value="">
+                            <input id="c-street" class="form-control" disabled name="row[address][street]" type="text" value="">
                         </div>
                     </div>
                     <div class="step7_function1_child">
-                        <label class="control-label col-xs-12 col-sm-3">{:__('邮编')}：</label>
+                        <label class="control-label col-xs-12 col-sm-3">{:__('Zip/Postal Code')}：</label>
                         <div class="col-xs-12 col-sm-8">
-                            <input disabled id="c-postcode" class="form-control" name="row[address][postcode]" type="text" value="">
+                            <input id="c-postcode" class="form-control" disabled name="row[address][postcode]" type="text" value="">
                         </div>
                     </div>
                 </div>
@@ -937,14 +984,17 @@
                 <div class="form-group-child4_add">
 
                 </div>
-           
+                <!-- <div id="toolbar" class="toolbar">
+                    <a href="javascript:;" class="btn btn-success btn-add-supplement-reissue" title="增加"><i class="fa fa-plus"></i>
+                        增加</a>
+                </div> -->
                 <div id="supplement-order">
                     <div>
                         <div class="step7_function2">
                             <div class="step7_function2_child">
                                 <label class="control-label col-xs-12 col-sm-3">SKU:</label>
                                 <div class="col-xs-12 col-sm-8">
-                                    <select disabled class="form-control selectpicker" name="row[replacement][original_sku][]">
+                                    <select class="form-control selectpicker" disabled name="row[replacement][original_sku][]">
                                         <option value="0">请选择</option>
                                     </select>
                                 </div>
@@ -953,19 +1003,19 @@
                             <div class="step7_function2_child">
                                 <label class="control-label col-xs-12 col-sm-3">Name:</label>
                                 <div class="col-xs-12 col-sm-8">
-                                    <input disabled class="form-control" name="row[replacement][original_name][]" type="text" value="">
+                                    <input class="form-control" disabled name="row[replacement][original_name][]" type="text" value="">
                                 </div>
                             </div>
                             <div class="step7_function2_child">
                                 <label class="control-label col-xs-12 col-sm-3">QTY:</label>
                                 <div class="col-xs-12 col-sm-8">
-                                    <input disabled class="form-control" name="row[replacement][original_number][]" type="text" value="">
+                                    <input class="form-control" disabled name="row[replacement][original_number][]" type="text" value="">
                                 </div>
                             </div>
                             <div class="step7_function2_child">
                                 <label class="control-label col-xs-12 col-sm-3">选择已有处方:</label>
                                 <div class="col-xs-12 col-sm-8">
-                                    <select disabled id="prescription_select" class="form-control selectpicker">
+                                    <select id="prescription_select" disabled class="form-control selectpicker">
                                         <option value="0">请选择</option>
                                     </select>
                                 </div>
@@ -973,7 +1023,7 @@
                             <div class="step7_function2_child">
                                 <label class="control-label col-xs-12 col-sm-3">prescription_type:</label>
                                 <div class="col-xs-12 col-sm-8">
-                                    <select disabled class="form-control selectpicker" name="row[replacement][recipe_type][]">
+                                    <select class="form-control selectpicker" disabled name="row[replacement][recipe_type][]">
                                         <option value="">请选择</option>
                                     </select>
                                 </div>
@@ -986,7 +1036,7 @@
                                 <div class="step1_function3_child">
                                     <label class="control-label col-xs-12 col-sm-3">lens_type:</label>
                                     <div class="col-xs-12 col-sm-8">
-                                        <select disabled class="form-control selectpicker" name="row[replacement][lens_type][]">
+                                        <select class="form-control selectpicker" disabled name="row[replacement][lens_type][]">
                                             <option value="0">请选择</option>
                                         </select>
                                     </div>
@@ -994,7 +1044,7 @@
                                 <div class="step1_function3_child">
                                     <label class="control-label col-xs-12 col-sm-3">coating_type:</label>
                                     <div class="col-xs-12 col-sm-8">
-                                        <select disabled id="c-coating_type" class="form-control selectpicker"
+                                        <select id="c-coating_type" disabled class="form-control selectpicker"
                                                 name="row[replacement][coating_type][]">
                                             <option value="0">请选择</option>
                                         </select>
@@ -1012,28 +1062,28 @@
                                     </tr>
                                     <tr>
                                         <td style="text-align: center">Right(OD)</td>
-                                        <td><input disabled class="form-control" name="row[replacement][od_sph][]" type="text" value="">
+                                        <td><input class="form-control" disabled name="row[replacement][od_sph][]" type="text" value="">
                                         </td>
-                                        <td><input disabled class="form-control" name="row[replacement][od_cyl][]" type="text" value="">
+                                        <td><input class="form-control" disabled name="row[replacement][od_cyl][]" type="text" value="">
                                         </td>
-                                        <td><input disabled class="form-control" name="row[replacement][od_axis][]" type="text"
+                                        <td><input class="form-control" disabled name="row[replacement][od_axis][]" type="text"
                                                    value=""></td>
-                                        <td><input disabled class="form-control" name="row[replacement][od_add][]" type="text" value="">
+                                        <td><input class="form-control" disabled name="row[replacement][od_add][]" type="text" value="">
                                         </td>
-                                        <td><input disabled class="form-control" name="row[replacement][pd_r][]" type="text" value="">
+                                        <td><input class="form-control" disabled name="row[replacement][pd_r][]" type="text" value="">
                                         </td>
                                     </tr>
                                     <tr>
                                         <td style="text-align: center">Left(OS)</td>
-                                        <td><input disabled class="form-control" name="row[replacement][os_sph][]" type="text" value="">
+                                        <td><input class="form-control" disabled name="row[replacement][os_sph][]" type="text" value="">
                                         </td>
-                                        <td><input disabled class="form-control" name="row[replacement][os_cyl][]" type="text" value="">
+                                        <td><input class="form-control" disabled name="row[replacement][os_cyl][]" type="text" value="">
                                         </td>
-                                        <td><input disabled class="form-control" name="row[replacement][os_axis][]" type="text"
+                                        <td><input class="form-control" disabled name="row[replacement][os_axis][]" type="text"
                                                    value=""></td>
-                                        <td><input disabled class="form-control" name="row[replacement][os_add][]" type="text" value="">
+                                        <td><input class="form-control" disabled name="row[replacement][os_add][]" type="text" value="">
                                         </td>
-                                        <td><input disabled class="form-control" name="row[replacement][pd_l][]" type="text" value="">
+                                        <td><input class="form-control" disabled name="row[replacement][pd_l][]" type="text" value="">
                                         </td>
                                     </tr>
 
@@ -1046,24 +1096,24 @@
                                     </tr>
                                     <tr>
                                         <td style="text-align: center">Right(OD)</td>
-                                        <td><input disabled class="form-control" type="text" name="row[replacement][od_pv][]" value="">
+                                        <td><input class="form-control" disabled type="text" name="row[replacement][od_pv][]" value="">
                                         </td>
-                                        <td><input disabled class="form-control" type="text" name="row[replacement][od_bd][]" value="">
+                                        <td><input class="form-control" disabled type="text" name="row[replacement][od_bd][]" value="">
                                         </td>
-                                        <td><input disabled class="form-control" type="text" name="row[replacement][od_pv_r][]"
+                                        <td><input class="form-control" disabled type="text" name="row[replacement][od_pv_r][]"
                                                    value=""></td>
-                                        <td><input disabled class="form-control" type="text" name="row[replacement][od_bd_r][]"
+                                        <td><input class="form-control" disabled type="text" name="row[replacement][od_bd_r][]"
                                                    value=""></td>
                                     </tr>
                                     <tr>
                                         <td style="text-align: center">Left(OS)</td>
-                                        <td><input disabled class="form-control" name="row[replacement][os_pv][]" type="text" value="">
+                                        <td><input class="form-control" disabled name="row[replacement][os_pv][]" type="text" value="">
                                         </td>
-                                        <td><input disabled class="form-control" name="row[replacement][os_bd][]" type="text" value="">
+                                        <td><input class="form-control" disabled name="row[replacement][os_bd][]" type="text" value="">
                                         </td>
-                                        <td><input disabled class="form-control" name="row[replacement][os_pv_r][]" type="text"
+                                        <td><input class="form-control" disabled name="row[replacement][os_pv_r][]" type="text"
                                                    value=""></td>
-                                        <td><input disabled class="form-control" name="row[replacement][os_bd_r][]" type="text"
+                                        <td><input class="form-control" disabled name="row[replacement][os_bd_r][]" type="text"
                                                    value=""></td>
                                     </tr>
                                     </tbody>
