@@ -1,6 +1,6 @@
 <?php
 
-namespace app\admin\controller\demand\testManage;
+namespace app\admin\controller\demand\testmanage;
 
 use think\Db;
 use think\Exception;
