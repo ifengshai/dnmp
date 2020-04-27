@@ -34,6 +34,8 @@ class SaleAfterTask extends Backend
      * @var \app\admin\model\saleAfterManage\SaleAfterTask
      */
     protected $model = null;
+    protected $worklist = null;
+    protected $workremark = null;
     protected $relationSearch = true;
     protected $groupdata = [];
     // protected $noNeedLogin = [
@@ -49,6 +51,8 @@ class SaleAfterTask extends Backend
     {
         parent::_initialize();
         $this->model = new \app\admin\model\saleaftermanage\SaleAfterTask;
+        $this->worklist = new \app\admin\model\saleaftermanage\WorkOrderList;
+        $this->workremark = new \app\admin\model\saleaftermanage\WorkOrderRemark;
         //新加内容
         $this->childrenGroupIds = $this->auth->getChildrenGroupIds(true);
 
@@ -1377,13 +1381,103 @@ class SaleAfterTask extends Backend
             $arr[$k]['refund_money']  = $v['refund_money'];
             $arr[$k]['refund_way']    = $v['refund_way'];
             $arr[$k]['recept_person_id'] = $v['rep_id'];
+            $arr[$k]['original_id']   = $v['id'];
+
         }
-            $info = $this->model->saveAll($arr);
+            $info = $this->worklist->saveAll($arr);
             if($info){
                 echo 'ok';
             }else{
                 echo 'error';
             }
-    }	
+    }
+    /**
+     * 处理售后处理备注
+     */
+    public function getSaleAfterRemark()
+    {
+        $page = input("page") ?:1;
+        $start = ($page - 1)*1000;
+        $result = Db::name('sale_after_task_remark')->alias('m')->join('work_order_list w','m.tid=w.original_id','left')->field('m.*,w.id as wid')->limit($start,1000)->select();
+        if(!$result){
+            return false;
+        }
+        $arr = [];
+        foreach($result as $k => $v){
+            $arr[$k]['work_id'] = $v['wid'];
+            $arr[$k]['remark_type'] = 3;
+            $arr[$k]['remark_record'] = $v['remark_record'];
+            $arr[$k]['create_person'] = $v['create_person'];
+            $arr[$k]['create_time'] = $v['create_time'];
+        }
+        $info = $this->workremark->saveAll($arr);
+        if($info){
+            echo 'ok';
+        }else{
+            echo 'error';
+        }
+    }
+    /**
+     * 协同任务导入到工单列表
+     *
+     * @Description
+     * @author lsw
+     * @since 2020/04/27 16:57:56 
+     * @return void
+     */
+    public function infoSynergyToWorkOrder()
+    {
+        $page = input("page") ?:1;
+        $start = ($page - 1)*1000;
+        $result = Db::name('info_synergy_task')->limit($start,1000)->select();
+        if(!$result){
+            return false;
+        }
+        foreach($result as $k => $v){
+            $arr[$k]['work_platform'] = $v['order_platform'];
+            if(('马奇' == $v['create_person']) || ('陈爱利' == $v['create_person'])){
+                $arr[$k]['work_type'] = 2;
+            }else{
+                $arr[$k]['work_type'] = 1;
+            }
+            $arr[$k]['platform_order'] = $v['synergy_order_number'];
+            $arr[$k]['order_pay_method'] = $v['refund_way'];
+            $arr[$k]['order_sku']      = $v['order_skus'];
+            switch($v['synergy_status']){
+                case 1:
+                $arr[$k]['work_status'] = 5;
+                break;
+                case 2:
+                $arr[$k]['work_status'] = 6;
+                break;
+                case 3:
+                $arr[$k]['work_status'] = 0;
+                break;
+                default:
+                $arr[$k]['work_status'] = 1;
+                break;
+            }
+            $arr[$k]['work_level'] = $v['prty_id'];
+            $arr[$k]['problem_description'] = $v['problem_desc'];
+            $arr[$k]['work_picture']  = $v['upload_photos'];
+            $arr[$k]['create_user_name'] = $v['create_person'];
+            $arr[$k]['create_time']   = $v['create_time'];
+            $arr[$k]['complete_time'] = $v['complete_time'];
+            $arr[$k]['replenish_increment_id'] = $v['make_up_price_order'];
+            $arr[$k]['refund_money']  = $v['refund_money'];
+            $arr[$k]['refund_way']    = $v['refund_way'];
+            if($v['rep_id']){
+            $arr[$k]['recept_person_id']  = str_replace("+",",",$v['rep_id']);
+            }
+            $arr[$k]['original_id']   = $v['id'];
+
+        }
+            $info = $this->worklist->saveAll($arr);
+            if($info){
+                echo 'ok';
+            }else{
+                echo 'error';
+            }
+    }
 
 }
