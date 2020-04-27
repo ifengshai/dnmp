@@ -740,7 +740,6 @@ class WorkOrderList extends Model
             //需要审核的，有参数才进行审核处理，其余跳过
             if (!empty($params)) {
                 if ($work->is_check == 1) {
-                    ;
                     $work->operation_user_id = $admin_id;
                     $work->check_note = $params['check_note'];
                     $work->submit_time = $time;
