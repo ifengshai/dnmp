@@ -233,7 +233,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     callback: function (data) {
                                     },
                                     visible: function (row) {
-                                        if (row.work_type == 2 && row.is_after_deal_with == 0 && row.work_type != 6 && row.after_user_id == Config.userid) {
+                                        if (row.work_type == 2 && row.is_after_deal_with == 0 && row.work_type != 6 && row.after_user_id == Config.userid && row.work_status != 1) {
                                             return true;
                                         } else {
                                             return false;
