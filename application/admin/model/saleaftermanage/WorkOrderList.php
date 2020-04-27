@@ -716,7 +716,7 @@ class WorkOrderList extends Model
                 if ($allComplete == 1 && $count == $key) {
                     //处理完成
                     $work_status = 6;
-                } elseif ($allComplete == 1 && $count > $key) {
+                } elseif ($key > 0 && $count > $key) {
                     //部分处理
                     $work_status = 5;
                 } else {
@@ -770,7 +770,7 @@ class WorkOrderList extends Model
                     if ($allComplete == 1  && $count == $key) {
                         //处理完成
                         $work_status = 6;
-                    } elseif ($allComplete == 1  && $count > $key) {
+                    } elseif ($key > 0  && $count > $key) {
                         //部分处理
                         $work_status = 5;
                     } else {
