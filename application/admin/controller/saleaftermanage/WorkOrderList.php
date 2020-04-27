@@ -1593,12 +1593,14 @@ class WorkOrderList extends Backend
             $total = $this->model
                 ->where($where)
                 ->where($map)
+                ->where('work_status','in','5,6')
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->model
                 ->where($where)
                 ->where($map)
+                ->where('work_status','in','5,6')
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
@@ -1633,12 +1635,14 @@ class WorkOrderList extends Backend
             $total = $this->model
                 ->where($where)
                 ->where($map)
+                ->where('work_status','in','5,6')
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->model
                 ->where($where)
                 ->where($map)
+                ->where('work_status','in','5,6')
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
