@@ -700,21 +700,23 @@ class WorkOrderList extends Model
                 $work->check_note = '系统自动审核通过';
                 $work->check_time = $time;
                 $work->submit_time = $time;
+                $key = 0;
                 foreach ($orderRecepts as $orderRecept) {
                     //查找措施的id
                     $measure_choose_id = WorkOrderMeasure::where('id',$orderRecept->measure_id)->value('measure_choose_id');
                     //承接人是自己并且是赠品和补发的，则措施，承接默认完成
-                    if ($orderRecept->recept_person_id == $work->create_user_id && in_array($measure_choose_id,[9,10])) {
+                    if (($orderRecept->recept_person_id == $work->create_user_id || $orderRecept->recept_person_id == $work->after_user_id) && in_array($measure_choose_id,[9,10])) {
                         WorkOrderRecept::where('id', $orderRecept->id)->update(['recept_status' => 1, 'finish_time' => $time, 'note' => '自动处理完成']);
                         WorkOrderMeasure::where('id', $orderRecept->measure_id)->update(['operation_type' => 1, 'operation_time' => $time]);
+                        $key++;
                     } else {
                         $allComplete = 0;
                     }
                 }
-                if ($allComplete == 1) {
+                if ($allComplete == 1 && $count == $key) {
                     //处理完成
                     $work_status = 6;
-                } elseif ($allComplete == 0 && $count > 1) {
+                } elseif ($key > 0 && $count > $key) {
                     //部分处理
                     $work_status = 5;
                 } else {
@@ -744,11 +746,12 @@ class WorkOrderList extends Model
                     $work->check_note = $params['check_note'];
                     $work->submit_time = $time;
                     $work->check_time = $time;
+                    $key = 0;
                     foreach ($orderRecepts as $orderRecept) {
                         //查找措施的id
                         $measure_choose_id = WorkOrderMeasure::where('id',$orderRecept->measure_id)->value('measure_choose_id');
                         //承接人是自己并且是赠品和补发的，则措施，承接默认完成
-                        if ($orderRecept->recept_person_id == $work->create_user_id && in_array($measure_choose_id,[9,10])) {
+                        if (($orderRecept->recept_person_id == $work->create_user_id || $orderRecept->recept_person_id == $work->after_user_id) && in_array($measure_choose_id,[9,10])) {
                             //审核成功直接进行处理
                             if ($params['success'] == 1) {
                                 WorkOrderRecept::where('id', $orderRecept->id)->update(['recept_status' => 1, 'finish_time' => $time, 'note' => '自动处理完成']);
@@ -758,15 +761,16 @@ class WorkOrderList extends Model
                                 }elseif($measure_choose_id == 10){
                                     $this->presentIntegral($work->id);
                                 }
+                                $key++;
                             }
                         } else {
                             $allComplete = 0;
                         }
                     }
-                    if ($allComplete == 1) {
+                    if ($allComplete == 1  && $count == $key) {
                         //处理完成
                         $work_status = 6;
-                    } elseif ($allComplete == 0 && $count > 1) {
+                    } elseif ($key > 0  && $count > $key) {
                         //部分处理
                         $work_status = 5;
                     } else {
