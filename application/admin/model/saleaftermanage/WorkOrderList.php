@@ -743,7 +743,7 @@ class WorkOrderList extends Model
             if (!empty($params)) {
                 if ($work->is_check == 1) {
                     $work->operation_user_id = $admin_id;
-                    $work->check_note = $params[' check_note'];
+                    $work->check_note = $params['check_note'];
                     $work->submit_time = $time;
                     $work->check_time = $time;
                     $key = 0;
