@@ -124,8 +124,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                             },
                         },
 
-                        { field: 'work_status', title: __('work_status'), custom: { 0: 'black', 1: 'danger', 2: 'success', 4: 'success', 3: 'success', 5: 'success', 6: 'success'}, searchList: { 0: '已取消', 1: '新建', 2: '待审核', 4: '审核拒绝', 3: '待处理', 5: '部分处理', 6: '已处理'}, formatter: Table.api.formatter.status },
-                        { field: 'work_order_note_status', title: __('备注组别'), custom: { 0: 'gray',1: 'success', 2: 'danger', 3: 'blank' }, searchList: { 0: '无备注', 1: '客服备注', 2: '仓库备注', 3: '财务备注' }, formatter: Table.api.formatter.status },
+                        { field: 'work_status', title: __('work_status'), custom: { 0: 'black', 1: 'danger', 2: 'success', 4: 'success', 3: 'success', 5: 'success', 6: 'success' }, searchList: { 0: '已取消', 1: '新建', 2: '待审核', 4: '审核拒绝', 3: '待处理', 5: '部分处理', 6: '已处理' }, formatter: Table.api.formatter.status },
+                        { field: 'work_order_note_status', title: __('备注组别'), custom: { 0: 'gray', 1: 'success', 2: 'danger', 3: 'blank' }, searchList: { 0: '无备注', 1: '客服备注', 2: '仓库备注', 3: '财务备注' }, formatter: Table.api.formatter.status },
                         {
                             field: 'create_time',
                             title: __('time_str'),
@@ -158,7 +158,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         {
                             field: 'buttons',
                             width: "120px",
-                            operate:false,
+                            operate: false,
                             title: __('备注'),
                             table: table,
                             events: Table.api.events.operate,
@@ -196,7 +196,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     },
                                     visible: function (row) {
                                         //返回true时按钮显示,返回false隐藏
-                                        if(row.work_status == 1){
+                                        if (row.work_status == 1) {
                                             return false;
                                         }
                                         return true;
@@ -494,8 +494,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                             $('.step1-1').show();
                         }
                     }
-
-                    var id = $(this).val();
                     var arr = array_filter(appoint_group.split(','));
                     var username = [];
                     var appoint_users = [];
@@ -515,16 +513,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     $('#appoint_group_users').html(users.join(','));
                     $('#recept_person_id').val(appoint_users.join(','));
 
-                    //判断更换镜框的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 start
-                    if (!$('.step1-1').is(':hidden')) {
-                        changeFrame();
-                    }
-                    //判断更换镜框的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end
-                    //判断取消订单的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 start
-                    if (!$('.step3').is(':hidden')) {
-                        cancelOrder();
-                    }
-                    //判断取消订单的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end
                 }
             });
 
@@ -649,7 +637,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     if (!$('.step3').is(':hidden')) {
                         cancelOrder();
                     }
-                    //判断取消订单的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end                                        
+                    // //判断取消订单的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end                                        
                 });
             })
 
@@ -756,6 +744,16 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                             gift_click_data = '<div class="margin-top:10px;">' + data.html + '<div class="form-group-child4_del"  style="width: 96%;padding-right: 0px;"><a href="javascript:;" style="width: 50%;" class="btn btn-danger btn-del-lens" title="删除"><i class="fa fa-trash"></i>删除</a></div></div>';
                             $('.selectpicker ').selectpicker('refresh');
                         });
+                    }
+
+                    //判断更换镜框的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 start
+                    if (!$('.step1-1').is(':hidden')) {
+                        changeFrame();
+                    }
+                    //判断更换镜框的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end
+                    //判断取消订单的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 start
+                    if (!$('.step3').is(':hidden') && value == 3) {
+                        cancelOrder();
                     }
                 }
 
@@ -1124,16 +1122,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     var users = array_filter(username);
                     $('#appoint_group_users').html(users.join(','));
 
-                    //判断更换镜框的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 start
-                    if (!$('.step1-1').is(':hidden')) {
-                        changeFrame();
-                    }
-                    //判断更换镜框的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end
-                    //判断取消订单的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 start
-                    if (!$('.step3').is(':hidden')) {
-                        cancelOrder();
-                    }
-                    //判断取消订单的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end
+
                     //判断更换处方的状态，如果显示的话把数据带出来，如果隐藏则不显示镜架数据 start
                     // if (!$('.step2-1').is(':hidden')) {
                     //     changeOrder(work_id, 2);
@@ -1256,6 +1245,17 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                 $('.selectpicker ').selectpicker('refresh');
                             });
                         }
+
+                        //判断更换镜框的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 start
+                        if (!$('.step1-1').is(':hidden')) {
+                            changeFrame();
+                        }
+                        //判断更换镜框的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end
+                        //判断取消订单的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 start
+                        if (!$('.step3').is(':hidden') && value == 3) {
+                            cancelOrder();
+                        }
+                        //判断取消订单的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end
                     }
                 }
 
@@ -1353,9 +1353,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
             Controller.api.bindevent();
         },
         workordernote: function () {
-            Form.api.bindevent($("form[role=form]"), function(data, ret) {
+            Form.api.bindevent($("form[role=form]"), function (data, ret) {
                 Fast.api.close();
-            }, function(data, ret) {
+            }, function (data, ret) {
                 Toastr.success("失败");
             });
         },
