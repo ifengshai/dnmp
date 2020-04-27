@@ -1512,14 +1512,9 @@ class WorkOrderList extends Backend
         }
 
         if (request()->isAjax()) {
-            $status = input('work_status');
-            $params['work_status'] = $status;
-            if ($params['work_status'] == 2) {
-                $params['submit_time'] = date('Y-m-d H:i:s');
-            } elseif ($params['work_status'] == 0) {
-                $params['cancel_time'] = date('Y-m-d H:i:s');
-                $params['cancel_person'] = session('admin.nickname');
-            }
+            $params['work_status'] = 0;
+            $params['cancel_time'] = date('Y-m-d H:i:s');
+            $params['cancel_person'] = session('admin.nickname');
             $result = $row->allowField(true)->save($params);
             if (false !== $result) {
                 $this->success('操作成功！！');
