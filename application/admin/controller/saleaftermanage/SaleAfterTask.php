@@ -1325,6 +1325,65 @@ class SaleAfterTask extends Backend
         }else{
             return $this->error('404 Not Found');    
         }
+    }
+    /**
+     * 售后任务导入到工单列表
+     *
+     * @Description
+     * @author lsw
+     * @since 2020/04/27 10:13:42 
+     * @return void
+     */
+    public function saleAfterToWorkOrder()
+    {
+        $page = input("page") ?:1;
+        $start = ($page - 1)*1000;
+        $result = Db::name('sale_after_task')->limit($start,1000)->select();
+        if(!$result){
+            return false;
+        }
+        $arr = [];
+        foreach($result as $k => $v){
+            $arr[$k]['work_platform'] = $v['order_platform'];
+            $arr[$k]['work_type'] = 1;
+            $arr[$k]['platform_order'] = $v['order_number'];
+            $arr[$k]['order_pay_method'] = $v['refund_way'];
+            $arr[$k]['order_sku']      = $v['order_skus'];
+            switch($v['task_status']){
+                case 1:
+                $arr[$k]['work_status'] = 5;
+                break;
+                case 2:
+                $arr[$k]['work_status'] = 6;
+                break;
+                case 3:
+                $arr[$k]['work_status'] = 0;
+                break;
+                default:
+                $arr[$k]['work_status'] = 1;
+                break;
+            }
+            $arr[$k]['work_level'] = $v['prty_id'];
+            $arr[$k]['problem_description'] = $v['problem_desc'];
+            $arr[$k]['work_picture']  = $v['upload_photos'];
+            $arr[$k]['create_user_name'] = $v['create_person'];
+            $arr[$k]['create_time']   = $v['create_time'];
+            $arr[$k]['submit_time']   = $v['handle_time'];
+            $arr[$k]['complete_time'] = $v['complete_time'];
+            $arr[$k]['replenish_increment_id'] = $v['make_up_price_order'];
+            $arr[$k]['coupon_str']    = $v['give_coupon'];
+            $arr[$k]['integral']      = $v['integral'];  
+            $arr[$k]['email']         = $v['customer_email'];
+            $arr[$k]['refund_money']  = $v['refund_money'];
+            $arr[$k]['refund_way']    = $v['refund_way'];
+            $arr[$k]['recept_person_id'] = $v['rep_id'];
+        }
+            $info = $this->model->saveAll($arr);
+            if($info){
+                echo 'ok';
+            }else{
+                echo 'error';
+            }
     }	
 
 }
