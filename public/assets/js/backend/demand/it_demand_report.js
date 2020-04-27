@@ -194,7 +194,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                 }
                             },
                             { field: 'create_person', title: __('Create_person'), operate: false },
-                            { field: 'nickname', title: __('负责人'), visible: false, operate: 'like' },
                         ]
                     ]
                 });
