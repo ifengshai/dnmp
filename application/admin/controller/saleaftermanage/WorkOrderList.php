@@ -1045,10 +1045,16 @@ class WorkOrderList extends Backend
         if (request()->isAjax()) {
             $incrementId = input('increment_id');
             $siteType = input('site_type');
-            //获取地址、处方等信息
-            $res = $this->model->getAddress($siteType, $incrementId);
-            //请求接口获取lens_type，coating_type，prescription_type等信息
-            $lens = $this->model->getReissueLens($siteType, $res['showPrescriptions']);
+
+            try{
+                //获取地址、处方等信息
+                $res = $this->model->getAddress($siteType, $incrementId);
+                //请求接口获取lens_type，coating_type，prescription_type等信息
+                $lens = $this->model->getReissueLens($siteType, $res['showPrescriptions']);
+            }catch (\Exception $e){
+                $this->error($e->getMessage());
+            }
+
             if ($res) {
                 $this->success('操作成功！！', '', ['address' => $res, 'lens' => $lens]);
             } else {
@@ -1079,9 +1085,13 @@ class WorkOrderList extends Backend
         if (request()->isAjax()) {
             $incrementId = input('increment_id');
             $siteType = input('site_type');
-            //获取地址、处方等信息
-            $res = $this->model->getAddress($siteType, $incrementId);
-            $lens = $this->model->getReissueLens($siteType, $res['prescriptions'], 2);
+            try{
+                //获取地址、处方等信息
+                $res = $this->model->getAddress($siteType, $incrementId);
+                $lens = $this->model->getReissueLens($siteType, $res['prescriptions'], 2);
+            }catch (\Exception $e){
+                $this->error($e->getMessage());
+            }
             if ($res) {
                 $this->success('操作成功！！', '', $lens);
             } else {
@@ -1103,9 +1113,15 @@ class WorkOrderList extends Backend
         if (request()->isAjax()) {
             $incrementId = input('increment_id');
             $siteType = input('site_type');
-            //获取地址、处方等信息
-            $res = $this->model->getAddress($siteType, $incrementId);
-            $lens = $this->model->getReissueLens($siteType, $res['prescriptions'], 3);
+
+            try{
+                //获取地址、处方等信息
+                $res = $this->model->getAddress($siteType, $incrementId);
+                $lens = $this->model->getReissueLens($siteType, $res['prescriptions'], 3);
+            }catch (\Exception $e){
+                $this->error($e->getMessage());
+            }
+
             if ($res) {
                 $this->success('操作成功！！', '', $lens);
             } else {

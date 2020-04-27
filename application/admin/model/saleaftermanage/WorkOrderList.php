@@ -130,6 +130,9 @@ class WorkOrderList extends Model
             ->order('b.entity_id desc')
             ->select();
         $showPrescriptions = [];
+        if($prescriptions === false){
+            exception('无此订单号，请查询后重试');
+        }
         foreach ($prescriptions as $prescription) {
             $showPrescriptions[] = $prescription['prescription_type'] . '--' . $prescription['index_type'];
         }
