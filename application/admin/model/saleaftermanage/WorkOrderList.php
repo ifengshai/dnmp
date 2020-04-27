@@ -130,6 +130,9 @@ class WorkOrderList extends Model
             ->order('b.entity_id desc')
             ->select();
         $showPrescriptions = [];
+        if($prescriptions === false){
+            exception('无此订单号，请查询后重试');
+        }
         foreach ($prescriptions as $prescription) {
             $showPrescriptions[] = $prescription['prescription_type'] . '--' . $prescription['index_type'];
         }
@@ -202,6 +205,7 @@ class WorkOrderList extends Model
                 break;
         }
         $url = $url . $pathinfo;
+
         $client = new Client(['verify' => false]);
         try {
             if ($method == 'GET') {
@@ -573,7 +577,7 @@ class WorkOrderList extends Model
             }
             $postData = array_merge($postData, $postDataCommon);
             try {
-                $res = $this->httpRequest($siteType, 'magic/order/createOrder', $postData, 'GET');
+                $res = $this->httpRequest($siteType, 'magic/order/createOrder', $postData, 'POST');
                 $increment_id = $res['increment_id'];
                 //replacement_order添加补发的订单号
                 WorkOrderChangeSku::where(['work_id' => $work_id, 'change_type' => 5])->setField('replacement_order', $increment_id);
@@ -736,7 +740,6 @@ class WorkOrderList extends Model
             //需要审核的，有参数才进行审核处理，其余跳过
             if (!empty($params)) {
                 if ($work->is_check == 1) {
-                    ;
                     $work->operation_user_id = $admin_id;
                     $work->check_note = $params['check_note'];
                     $work->submit_time = $time;
