@@ -692,6 +692,7 @@ class WorkOrderList extends Model
             //如果承接人是自己的话表示处理完成，不是自己的不做处理
             $orderRecepts = WorkOrderRecept::where('work_id', $work_id)->select();
             $allComplete = 1;
+            $count = count($orderRecepts);
 
             //不需要审核的，
             if (($work->is_check == 0 && $work->work_type == 1) || ($work->is_check == 0 && $work->work_type == 2 && $work->is_after_deal_with == 1)) {
@@ -699,6 +700,7 @@ class WorkOrderList extends Model
                 $work->check_note = '系统自动审核通过';
                 $work->check_time = $time;
                 $work->submit_time = $time;
+                $key = 0;
                 foreach ($orderRecepts as $orderRecept) {
                     //查找措施的id
                     $measure_choose_id = WorkOrderMeasure::where('id',$orderRecept->measure_id)->value('measure_choose_id');
@@ -706,15 +708,15 @@ class WorkOrderList extends Model
                     if (($orderRecept->recept_person_id == $work->create_user_id || $orderRecept->recept_person_id == $work->after_user_id) && in_array($measure_choose_id,[9,10])) {
                         WorkOrderRecept::where('id', $orderRecept->id)->update(['recept_status' => 1, 'finish_time' => $time, 'note' => '自动处理完成']);
                         WorkOrderMeasure::where('id', $orderRecept->measure_id)->update(['operation_type' => 1, 'operation_time' => $time]);
-                        $allComplete = 2;
+                        $key++;
                     } else {
                         $allComplete = 0;
                     }
                 }
-                if ($allComplete == 1) {
+                if ($allComplete == 1 && $count == $key) {
                     //处理完成
                     $work_status = 6;
-                } elseif ($allComplete == 2) {
+                } elseif ($allComplete == 1 && $count > $key) {
                     //部分处理
                     $work_status = 5;
                 } else {
@@ -744,6 +746,7 @@ class WorkOrderList extends Model
                     $work->check_note = $params[' check_note'];
                     $work->submit_time = $time;
                     $work->check_time = $time;
+                    $key = 0;
                     foreach ($orderRecepts as $orderRecept) {
                         //查找措施的id
                         $measure_choose_id = WorkOrderMeasure::where('id',$orderRecept->measure_id)->value('measure_choose_id');
@@ -753,21 +756,21 @@ class WorkOrderList extends Model
                             if ($params['success'] == 1) {
                                 WorkOrderRecept::where('id', $orderRecept->id)->update(['recept_status' => 1, 'finish_time' => $time, 'note' => '自动处理完成']);
                                 WorkOrderMeasure::where('id', $orderRecept->measure_id)->update(['operation_type' => 1, 'operation_time' => $time]);
-                                $allComplete = 2;
                                 if($measure_choose_id == 9){
                                     $this->presentCoupon($work->id);
                                 }elseif($measure_choose_id == 10){
                                     $this->presentIntegral($work->id);
                                 }
+                                $key++;
                             }
                         } else {
                             $allComplete = 0;
                         }
                     }
-                    if ($allComplete == 1) {
+                    if ($allComplete == 1  && $count == $key) {
                         //处理完成
                         $work_status = 6;
-                    } elseif ($allComplete == 2) {
+                    } elseif ($allComplete == 1  && $count > $key) {
                         //部分处理
                         $work_status = 5;
                     } else {
