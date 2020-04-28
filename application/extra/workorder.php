@@ -68,7 +68,7 @@ return [
     //客服问题类型组 id大于5 采用step04措施
     'customer_problem_group' => [
         1 => [ //更改镜框
-            'step' => 'step01'
+            'step' => 'step06',
         ],
         2 => [ //更改镜片
             'step' => 'step02'
@@ -215,6 +215,37 @@ return [
             'is_check' => 0,
             'appoint_group' => [ //承接组
                 'warehouse_group' //仓库跟单
+            ],
+        ],
+        [
+            'step_id' => 2, //退款
+            'is_check' => 1,
+            'appoint_group' => [ //承接组
+                'cashier_group' //出纳
+            ],
+        ],
+        [
+            'step_id' => 8, //补价
+            'is_check' => 0,
+            'appoint_group' => [ //空代表承接给创建人
+
+            ],
+        ],
+    ],
+
+    'step06' => [
+        [
+            'step_id' => 1, //更改
+            'is_check' => 0,
+            'appoint_group' => [ //承接组
+                'warehouse_group' //仓库跟单
+            ],
+        ],
+        [
+            'step_id' => 2, //退款
+            'is_check' => 1,
+            'appoint_group' => [ //承接组
+                'cashier_group' //出纳
             ],
         ],
         [
