@@ -980,14 +980,19 @@ class WorkOrderList extends Model
                 ])
             ->select();
         $workOrderLists = collection($workOrderLists)->toArray();
+        dump($workOrderLists);die;
         foreach($workOrderLists as &$workOrderList){
             $receptPersonIds = $workOrderList['recept_person_id'];
             $receptPerson = Admin::where('id','in',$receptPersonIds)->column('nickname');
             //承接人
             $workOrderList['recept_persons'] = join(',',$receptPerson);
-            foreach($workOrderList['measures'] as $key => $measure){
-                $workOrderList['measure'] = $measure['measure_content'] . ',';
+            $workOrderList['measure'] = '';
+            if(!empty($workOrderList['measures'])){
+                foreach($workOrderList['measures'] as $key => $measure){
+                    $workOrderList['measure'] = $measure['measure_content'] . ',';
+                }
             }
+
         }
         return $workOrderLists;
 
