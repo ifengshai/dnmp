@@ -926,7 +926,9 @@ class ItWebDemand extends Backend
                         $update_date['web_designer_is_finish'] = 1;
                         $update_date['web_designer_finish_time'] =  date('Y-m-d H:i',time());
                         $update_date['web_designer_note'] =  $params['web_designer_note'];
-                        $update_date['is_small_probability'] =  $params['is_small_probability'];
+                        if ($params['type']==1){
+                            $update_date['is_small_probability'] =  $params['is_small_probability'];
+                        }
                         $res = $this->model->allowField(true)->save($update_date,['id'=> $params['id']]);
                     }
 
@@ -935,7 +937,9 @@ class ItWebDemand extends Backend
                         $update_date['phper_is_finish'] = 1;
                         $update_date['phper_finish_time'] =  date('Y-m-d H:i',time());
                         $update_date['phper_note'] =  $params['phper_note'];
-                        $update_date['is_small_probability'] =  $params['is_small_probability'];
+                        if ($params['type']==1){
+                            $update_date['is_small_probability'] =  $params['is_small_probability'];
+                        }
                         $res = $this->model->allowField(true)->save($update_date,['id'=> $params['id']]);
                     }
 
@@ -944,7 +948,9 @@ class ItWebDemand extends Backend
                         $update_date['app_is_finish'] = 1;
                         $update_date['app_finish_time'] =  date('Y-m-d H:i',time());
                         $update_date['app_note'] =  $params['app_note'];
-                        $update_date['is_small_probability'] =  $params['is_small_probability'];
+                        if ($params['type']==1){
+                            $update_date['is_small_probability'] =  $params['is_small_probability'];
+                        }
                         $res = $this->model->allowField(true)->save($update_date,['id'=> $params['id']]);
                     }
 
