@@ -977,7 +977,7 @@ class WorkOrderList extends Model
         $workOrderLists = self::where('platform_order','in',$allIncrementOrder)
             ->with([
                 'measures'=>function($query){$query->field('measure_content');}
-                ])
+            ])
             ->select();
         foreach($workOrderLists as &$workOrderList){
             $receptPersonIds = $workOrderList->recept_person_id;
@@ -993,6 +993,5 @@ class WorkOrderList extends Model
 
         }
         return $workOrderLists;
-
     }
 }
