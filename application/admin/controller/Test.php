@@ -16,11 +16,4 @@ class Test extends Backend
         $this->item = new \app\admin\model\itemmanage\Item();
     }
 
-    
-    public function test()
-    {
-        $uid = Auth::getUsersId('purchase/purchase_order/index');
-        dump($uid);die;
-    }
-
 }

@@ -8,6 +8,7 @@ use Util\NihaoPrescriptionDetailHelper;
 use Util\ZeeloolPrescriptionDetailHelper;
 use Util\VooguemePrescriptionDetailHelper;
 use Util\WeseeopticalPrescriptionDetailHelper;
+use Util\MeeloogPrescriptionDetailHelper;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 use PhpOffice\PhpSpreadsheet\Reader\Xls;
 use PhpOffice\PhpSpreadsheet\Reader\Csv;
@@ -29,6 +30,7 @@ class Index extends Backend
         $this->zeelool = new \app\admin\model\order\order\Zeelool;
         $this->voogueme = new \app\admin\model\order\order\Voogueme;
         $this->weseeoptical = new \app\admin\model\order\order\Weseeoptical;
+        $this->meeloog = new \app\admin\model\order\order\Meeloog;
     }
 
     /**
@@ -61,6 +63,8 @@ class Index extends Backend
                 $model = $this->nihao;
             } elseif ($label == 4) {
                 $model = $this->weseeoptical;
+            } elseif ($label == 5) {
+                $model = $this->meeloog;
             }
 
             $filter = json_decode($this->request->get('filter'), true);
@@ -119,6 +123,8 @@ class Index extends Backend
             $model = $this->nihao;
         } elseif ($label == 4) {
             $model = $this->weseeoptical;
+        } elseif ($label == 5) {
+            $model = $this->meeloog;
         }
 
         //查询订单详情
@@ -145,6 +151,8 @@ class Index extends Backend
             $goods = NihaoPrescriptionDetailHelper::get_list_by_entity_ids($ids);
         } elseif ($label == 4) {
             $goods = WeseeopticalPrescriptionDetailHelper::get_list_by_entity_ids($ids);
+        } elseif ($label == 5) {
+            $goods = MeeloogPrescriptionDetailHelper::get_list_by_entity_ids($ids);
         }
 
         //获取支付信息
@@ -174,6 +182,8 @@ class Index extends Backend
             $model = $this->nihao;
         } elseif ($label == 4) {
             $model = $this->weseeoptical;
+        } elseif ($label == 5) {
+            $model = $this->meeloog;
         }
 
         //查询订单详情

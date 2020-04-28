@@ -115,6 +115,21 @@ return [
         'charset'     => Env::get('db_weseeoptical.charset'),
         'prefix'      => Env::get('db_weseeoptical.prefix'),
     ],
+    'db_meeloog' => [
+        // 数据库类型
+        'type'        => Env::get('db_meeloog.type'),
+        // 服务器地址
+        'hostname'    => Env::get('db_meeloog.hostname'),
+        // 数据库名
+        'database'    => Env::get('db_meeloog.database'),
+        // 数据库用户名
+        'username'    => Env::get('db_meeloog.username'),
+        // 密码
+        'password'    => Env::get('db_meeloog.password'),
+        // 数据库编码默认采用utf8
+        'charset'     => Env::get('db_meeloog.charset'),
+        'prefix'      => Env::get('db_meeloog.prefix'),
+    ],
 
     'db_zeelool_online' => [
         // 数据库类型
