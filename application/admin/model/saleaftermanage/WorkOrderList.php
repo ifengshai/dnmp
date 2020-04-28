@@ -976,7 +976,7 @@ class WorkOrderList extends Model
     {
         $workOrderLists = self::where('platform_order','in',$allIncrementOrder)
             ->with([
-                'measure'=>function($query){$query->field('measure_content');}
+                'measures'=>function($query){$query->field('measure_content');}
                 ])
             ->select();
         $workOrderLists = collection($workOrderLists)->toArray();
