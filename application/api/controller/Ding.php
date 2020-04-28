@@ -12,6 +12,7 @@ use app\admin\model\Admin;
 use app\admin\model\AuthGroup;
 use app\admin\model\AuthGroupAccess;
 use app\admin\model\demand\ItTestRecord;
+use app\admin\model\demand\ItWebDemand;
 use app\admin\model\Department;
 use app\common\model\Auth;
 use fast\Random;
@@ -297,7 +298,7 @@ class Ding extends Controller
         if (!is_array($users)) $users = [$users];
         foreach ($users as $k =>&$user) {
             // 使用id获取userid
-            if (($get = Admin::get(['id' =>$user])) || $get = Admin::get(['username' =>$user])) {
+            if (($get = Admin::get(['id' =>$user])) || ($get = Admin::get(['username' =>$user]))) {
                 $user = $get['userid'];
             }
             if (!$user) unset($users[$k]);
@@ -338,14 +339,19 @@ class Ding extends Controller
      */
     public static function dingHook(string $name, \app\admin\model\demand\ItWebDemand $demand) {
         if ($demand ->type == 3) return false; // 疑难不作处理
+        $demand = ItWebDemand::get($demand->id);
         $send_ids = []; // 被发送者id, userid或nickname
         $msg = ''; // 消息内容
         switch($name){
             case 'add':                     // 添加内容通知, 发送给所有测试人员
-                $send_ids = array_merge(
-                    Auth::getUsersId('demand/it_web_demand/test_distribution'), // 所有有权限点击测试确认的用户
-                    explode(',', $demand ->copy_to_user_id??'')   // 需求抄送
-                );
+                $authUserIds = Auth::getUsersId('demand/it_web_demand/test_distribution') ?: [];
+                $copy_to_user_id = $demand->copy_to_user_id;
+                $copyToUserId = explode(',',$copy_to_user_id ?: '');
+
+                $send_ids = array_filter(array_merge(
+                    $authUserIds, // 所有有权限点击测试确认的用户
+                    $copyToUserId   // 需求抄送
+                ));
                 $entry_user = Admin::get($demand ->entry_user_id) ->nickname;
                 $msg = $entry_user . '刚刚录入了一个新的' . self::demandType($demand ->type) . ', 请关注';
                 break;

@@ -3,8 +3,6 @@
 namespace app\admin\controller\demand;
 
 use app\common\controller\Backend;
-use fast\Arr;
-use function fast\array_except;
 
 class ItDemandReport extends Backend
 {
@@ -193,7 +191,6 @@ class ItDemandReport extends Backend
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
-
             $filter = json_decode($this->request->get('filter'), true);
             $smap = array();
             if ($filter['Allgroup_sel'] == 1) {
@@ -328,6 +325,7 @@ class ItDemandReport extends Backend
     /**
      * 七日未完成开发任务列表
      */
+
     public function undone_task()
     { //dump(input());exit;
         //设置过滤方法
@@ -377,6 +375,67 @@ class ItDemandReport extends Backend
         }
         return $this->view->fetch();
     }
+
+
+    /*
+    public function undone_task()
+    {
+        //设置过滤方法
+        $stime = date("Y-m-d 00:00:00", strtotime("-7 day"));
+        $etime = date('Y-m-d 00:00:00', strtotime("+1 day"));
+        $this->request->filter(['strip_tags']);
+        if ($this->request->isAjax()) {
+            $this->model = new \app\admin\model\demand\ItWebTask;
+            if ($this->request->request('keyField')) {
+                return $this->selectpage();
+            }
+            //自定义姓名搜索
+            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            $between_map['it_web_task.createtime'] = ['between', [$stime, $etime]];
+            $addWhere="it_web_task.is_complete= '0' OR  itwebtaskitem.is_complete = '0' ";
+
+            $rep    = $this->request->get('filter');
+            $where.='1=1 ';
+            if($rep != '{}'){
+                $whereArr = json_decode($rep,true);
+                if(!empty($whereArr)){
+                    foreach($whereArr as $key => $whereval){
+                        $where .=" AND  it_web_task.".$key." = '".$whereval."' ";
+                    }
+                }
+            }
+
+            $total = $this->model->alias('it_web_task')->join('fa_it_web_task_item itwebtaskitem','it_web_task.id=itwebtaskitem.task_id','left')
+                ->where($where)
+                ->where($addWhere)
+                ->where($between_map)
+                ->distinct('it_web_task.id')
+                ->order('it_web_task.id', $order)
+                ->limit($offset, $limit)
+                ->field('it_web_task.id,it_web_task.type,it_web_task.title,it_web_task.desc,it_web_task.closing_date,it_web_task.is_test_adopt,it_web_task.complete_date,it_web_task.is_complete,it_web_task.test_adopt_time,it_web_task.create_person,it_web_task.createtime,it_web_task.site_type,it_web_task.test_regression_adopt,it_web_task.test_regression_adopt_time,it_web_task.test_regression_person')
+                ->count();
+
+
+            $list = $this->model->alias('it_web_task')->join('fa_it_web_task_item itwebtaskitem','it_web_task.id=itwebtaskitem.task_id','left')
+                ->where($where)
+                ->where($addWhere)
+                ->where($between_map)
+                ->distinct('it_web_task.id')
+                ->order('it_web_task.id', $order)
+                ->limit($offset, $limit)
+                ->field('it_web_task.id,it_web_task.type,it_web_task.title,it_web_task.desc,it_web_task.closing_date,it_web_task.is_test_adopt,it_web_task.complete_date,it_web_task.is_complete,it_web_task.test_adopt_time,it_web_task.create_person,it_web_task.createtime,it_web_task.site_type,it_web_task.test_regression_adopt,it_web_task.test_regression_adopt_time,it_web_task.test_regression_person')
+                ->select();
+
+            $list = collection($list)->toArray();
+            $result = array("total" => $total, "rows" => $list);
+
+            return json($result);
+
+        }
+        return $this->view->fetch();
+    }
+
+    */
 
 
 }

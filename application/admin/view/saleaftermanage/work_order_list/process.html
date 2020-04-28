@@ -526,7 +526,7 @@
             </div>
         </div>
     </div>
-    {elseif condition="$row->work_status egt 3"/}
+    {elseif condition="$row->work_status egt 3  && $row->is_check == 1"/}
     <div class="form-group">
         <div class="form-group-content">
             <label class="control-label col-xs-12 col-sm-2" style="width:8%;float: left;">{:__('审核人')}：</label>

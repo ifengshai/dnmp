@@ -2,6 +2,7 @@
 
 namespace app\admin\model\saleaftermanage;
 
+use app\admin\model\Admin;
 use fast\Http;
 use think\Cache;
 use think\Db;
@@ -33,6 +34,54 @@ class WorkOrderList extends Model
     // 追加属性
     protected $append = [];
 
+    /**
+     * 平台类型
+     * @param $value
+     * @param $data
+     * @return mixed
+     */
+    public function getWorkPlatFormFormatAttr($value, $data)
+    {
+        $status = ['1' => 'zeelool', '2' => 'voogueme', '3' => 'nihao'];
+        return $status[$data['work_platform']];
+    }
+
+    /**
+     * 工单类型
+     * @param $value
+     * @param $data
+     * @return mixed
+     */
+    public function getWorkTypeFormatAttr($value, $data)
+    {
+        $status = ['1' => '客服工单', '2' => '仓库工单'];
+        return $status[$data['work_type']];
+    }
+
+    /**
+     * 工单状态
+     * @param $value
+     * @param $data
+     * @return mixed
+     */
+    public function getWorkStatusFormatAttr($value, $data)
+    {
+        $status = ['0' => '取消', '1' => '新建', '2' => '待审核','3' => '待处理', '4' => '审核拒绝', '5' => '部分处理', '6' => '已处理'];
+        return $status[$data['work_status']];
+    }
+
+    /**
+     * 工单级别
+     * @param $value
+     * @param $data
+     * @return mixed
+     */
+    public function getWorkLevelFormatAttr($value, $data)
+    {
+        $status = ['1' => '低', '2' => '中', '3' => '高'];
+        return $status[$data['work_type']];
+    }
+
     //获取选项卡列表
     public function getTabList()
     {
@@ -40,6 +89,15 @@ class WorkOrderList extends Model
             ['name' => '我创建的任务', 'field' => 'create_user_name', 'value' => session('admin.nickname')],
             ['name' => '我的任务', 'field' => 'recept_person_id', 'value' => session('admin.id')],
         ];
+    }
+
+    /**
+     * 措施
+     * @return \think\model\relation\HasMany
+     */
+    public function measures()
+    {
+        return $this->hasMany(WorkOrderMeasure::class,'id','work_id');
     }
 
     /**
@@ -192,7 +250,7 @@ class WorkOrderList extends Model
                 $url = 'https://z.zhaokuangyi.com/';
                 break;
             case 2:
-                $url = 'http://pc.zhaokuangyi.com/';
+                $url = 'http://v.zhaokuangyi.com/';
                 break;
             case 3:
                 $url = 'https://nh.zhaokuangyi.com/';
@@ -692,6 +750,7 @@ class WorkOrderList extends Model
             //如果承接人是自己的话表示处理完成，不是自己的不做处理
             $orderRecepts = WorkOrderRecept::where('work_id', $work_id)->select();
             $allComplete = 1;
+            $count = count($orderRecepts);
 
             //不需要审核的，
             if (($work->is_check == 0 && $work->work_type == 1) || ($work->is_check == 0 && $work->work_type == 2 && $work->is_after_deal_with == 1)) {
@@ -699,6 +758,7 @@ class WorkOrderList extends Model
                 $work->check_note = '系统自动审核通过';
                 $work->check_time = $time;
                 $work->submit_time = $time;
+                $key = 0;
                 foreach ($orderRecepts as $orderRecept) {
                     //查找措施的id
                     $measure_choose_id = WorkOrderMeasure::where('id',$orderRecept->measure_id)->value('measure_choose_id');
@@ -706,15 +766,15 @@ class WorkOrderList extends Model
                     if (($orderRecept->recept_person_id == $work->create_user_id || $orderRecept->recept_person_id == $work->after_user_id) && in_array($measure_choose_id,[9,10])) {
                         WorkOrderRecept::where('id', $orderRecept->id)->update(['recept_status' => 1, 'finish_time' => $time, 'note' => '自动处理完成']);
                         WorkOrderMeasure::where('id', $orderRecept->measure_id)->update(['operation_type' => 1, 'operation_time' => $time]);
-                        $allComplete = 2;
+                        $key++;
                     } else {
                         $allComplete = 0;
                     }
                 }
-                if ($allComplete == 1) {
+                if ($allComplete == 1 && $count == $key) {
                     //处理完成
                     $work_status = 6;
-                } elseif ($allComplete == 2) {
+                } elseif ($key > 0 && $count > $key) {
                     //部分处理
                     $work_status = 5;
                 } else {
@@ -741,9 +801,10 @@ class WorkOrderList extends Model
             if (!empty($params)) {
                 if ($work->is_check == 1) {
                     $work->operation_user_id = $admin_id;
-                    $work->check_note = $params[' check_note'];
+                    $work->check_note = $params['check_note'];
                     $work->submit_time = $time;
                     $work->check_time = $time;
+                    $key = 0;
                     foreach ($orderRecepts as $orderRecept) {
                         //查找措施的id
                         $measure_choose_id = WorkOrderMeasure::where('id',$orderRecept->measure_id)->value('measure_choose_id');
@@ -753,21 +814,21 @@ class WorkOrderList extends Model
                             if ($params['success'] == 1) {
                                 WorkOrderRecept::where('id', $orderRecept->id)->update(['recept_status' => 1, 'finish_time' => $time, 'note' => '自动处理完成']);
                                 WorkOrderMeasure::where('id', $orderRecept->measure_id)->update(['operation_type' => 1, 'operation_time' => $time]);
-                                $allComplete = 2;
                                 if($measure_choose_id == 9){
                                     $this->presentCoupon($work->id);
                                 }elseif($measure_choose_id == 10){
                                     $this->presentIntegral($work->id);
                                 }
+                                $key++;
                             }
                         } else {
                             $allComplete = 0;
                         }
                     }
-                    if ($allComplete == 1) {
+                    if ($allComplete == 1  && $count == $key) {
                         //处理完成
                         $work_status = 6;
-                    } elseif ($allComplete == 2) {
+                    } elseif ($key > 0  && $count > $key) {
                         //部分处理
                         $work_status = 5;
                     } else {
@@ -901,5 +962,36 @@ class WorkOrderList extends Model
         }
         return $info;
 
+    }
+
+    /**
+     * 客户订单检索工单
+     * @param $allIncrementOrder
+     * @return array|false|\PDOStatement|string|\think\Collection
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public static function workOrderListResult($allIncrementOrder)
+    {
+        $workOrderLists = self::where('platform_order','in',$allIncrementOrder)
+            ->with([
+                'measures'=>function($query){$query->field('measure_content');}
+            ])
+            ->select();
+        foreach($workOrderLists as &$workOrderList){
+            $receptPersonIds = $workOrderList->recept_person_id;
+            $receptPerson = Admin::where('id','in',$receptPersonIds)->column('nickname');
+            //承接人
+            $workOrderList->recept_persons = join(',',$receptPerson);
+            $workOrderList->measure = '';
+            if(!empty($workOrderList->measures)){
+                foreach($workOrderList->measures as $key => $measure){
+                    $workOrderList->measure = $measure->measure_content . ',';
+                }
+            }
+
+        }
+        return $workOrderLists;
     }
 }
