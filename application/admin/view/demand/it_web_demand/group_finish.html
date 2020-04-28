@@ -11,6 +11,7 @@
 
         </li>
         <li>
+            {if $row['type'] == 1}
             <div class="timeline-item">
                                 <span style="float: left;">小概率:</span>
                 <!--                <label class="control-label col-xs-12 col-sm-2">{:__('is_small_probability')}:</label>-->
@@ -22,6 +23,7 @@
                 </div>
             </div>
         </li>
+    {/if}
         {if $web_userid_arr['group'] == 1}
             <li>
                 <i class="fa fa-user bg-aqua"></i>
@@ -47,6 +49,7 @@
                             <input type="hidden" name="row[web_finish]" value="1"/>
                             <input type="hidden" name="row[id]" value="{$row.id}"/>
                             <input type="hidden" name="row[status]" value="{$row.status}"/>
+                            <input type="hidden" name="row[type]" value="{$row.type}"/>
                             <input type="hidden" name="row[is_small_probability]" value="{$row.is_small_probability}"/>
 
                             {if $demand_type == 1}
@@ -93,6 +96,7 @@
                     <input type="hidden" name="row[group_finish]" value="1"/>
                     <input type="hidden" name="row[php_finish]" value="1"/>
                     <input type="hidden" name="row[id]" value="{$row.id}"/>
+                    <input type="hidden" name="row[type]" value="{$row.type}"/>
                     <input type="hidden" name="row[status]" value="{$row.status}"/>
                     <input type="hidden" name="row[is_small_probability]" value="{$row.is_small_probability}"/>
                     {if $demand_type == 1}
@@ -139,6 +143,7 @@
                     <input type="hidden" name="row[group_finish]" value="1"/>
                     <input type="hidden" name="row[app_finish]" value="1"/>
                     <input type="hidden" name="row[id]" value="{$row.id}"/>
+                    <input type="hidden" name="row[type]" value="{$row.type}"/>
                     <input type="hidden" name="row[status]" value="{$row.status}"/>
                     <input type="hidden" name="row[is_small_probability]" value="{$row.is_small_probability}"/>
                     {if $demand_type == 1}

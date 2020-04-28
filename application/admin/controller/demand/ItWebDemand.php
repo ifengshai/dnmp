@@ -4,6 +4,7 @@ namespace app\admin\controller\demand;
 
 use app\api\controller\Ding;
 use app\common\controller\Backend;
+use app\common\model\Auth;
 use think\Db;
 use think\Request;
 
@@ -25,6 +26,7 @@ class ItWebDemand extends Backend
     {
         parent::_initialize();
         $this->model = new \app\admin\model\demand\ItWebDemand;
+        $this->view->assign('getTabList', $this->model->getTabList());
         $this->testRecordModel = new \app\admin\model\demand\ItTestRecord;
     }
 
@@ -76,15 +78,44 @@ class ItWebDemand extends Backend
             if ($filter['Allgroup_sel'] == 4) {
                 $smap['test_group'] = 1;
             }
-            if($smap){
-                unset($filter['Allgroup_sel']);
-                $this->request->get(['filter' => json_encode($filter)]);
-            }
+            $meWhere = '';
+            //我的
+            if(isset($filter['me_task'])){
 
+                $adminId = session('admin.id');
+                //是否是主管
+                $authUserIds = Auth::getUsersId('demand/it_web_demand/test_distribution') ?: [];
+                //判断是否是测试
+                if(in_array($adminId,$authUserIds)){
+                    $meWhere = "(status = 1 or test_group = 1)";
+                }
+                //判断是否是普通的测试
+                $testAuthUserIds = Auth::getUsersId('demand/it_web_demand/test_group_finish') ?: [];
+                if(!in_array($adminId,$authUserIds) && in_array($adminId,$testAuthUserIds)){
+                    $meWhere = "(test_group = 1 and FIND_IN_SET({$adminId},test_user_id))";
+                }
+                //显示有分配权限的人，此类人跟点上线的是一类人，此类人应该可以查看所有的权限
+                $assignAuthUserIds = Auth::getUsersId('demand/it_web_demand/distribution') ?: [];
+                if(in_array($adminId,$assignAuthUserIds)){
+                    $meWhere = "1 = 1";
+                }
+                //拼接我创建的所有和负责人是我的,抄送人是我的
+                if($meWhere){
+                    $meWhere .= "  or entry_user_id = {$adminId} or FIND_IN_SET({$adminId},web_designer_user_id) or FIND_IN_SET({$adminId},phper_user_id) or FIND_IN_SET({$adminId},test_user_id) or FIND_IN_SET({$adminId},copy_to_user_id)";
+                }else{
+                    $meWhere .= "entry_user_id = {$adminId} or FIND_IN_SET({$adminId},web_designer_user_id) or FIND_IN_SET({$adminId},phper_user_id) or FIND_IN_SET({$adminId},test_user_id) or FIND_IN_SET({$adminId},copy_to_user_id)";
+                }
+                unset($filter['me_task']);
+            }
+            if(isset($filter['Allgroup_sel'])){
+                unset($filter['Allgroup_sel']);
+            }
+            $this->request->get(['filter' => json_encode($filter)]);
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
                 ->where($where)
                 ->where($smap)
+                ->where($meWhere)
                 ->where('type', 2)
                 ->where('is_del', 1)
                 ->order($sort, $order)
@@ -93,6 +124,7 @@ class ItWebDemand extends Backend
             $list = $this->model
                 ->where($where)
                 ->where($smap)
+                ->where($meWhere)
                 ->where('type', 2)
                 ->where('is_del', 1)
                 ->order($sort, $order)
@@ -926,7 +958,9 @@ class ItWebDemand extends Backend
                         $update_date['web_designer_is_finish'] = 1;
                         $update_date['web_designer_finish_time'] =  date('Y-m-d H:i',time());
                         $update_date['web_designer_note'] =  $params['web_designer_note'];
-                        $update_date['is_small_probability'] =  $params['is_small_probability'];
+                        if ($params['type']==1){
+                            $update_date['is_small_probability'] =  $params['is_small_probability'];
+                        }
                         $res = $this->model->allowField(true)->save($update_date,['id'=> $params['id']]);
                     }
 
@@ -935,7 +969,9 @@ class ItWebDemand extends Backend
                         $update_date['phper_is_finish'] = 1;
                         $update_date['phper_finish_time'] =  date('Y-m-d H:i',time());
                         $update_date['phper_note'] =  $params['phper_note'];
-                        $update_date['is_small_probability'] =  $params['is_small_probability'];
+                        if ($params['type']==1){
+                            $update_date['is_small_probability'] =  $params['is_small_probability'];
+                        }
                         $res = $this->model->allowField(true)->save($update_date,['id'=> $params['id']]);
                     }
 
@@ -944,7 +980,9 @@ class ItWebDemand extends Backend
                         $update_date['app_is_finish'] = 1;
                         $update_date['app_finish_time'] =  date('Y-m-d H:i',time());
                         $update_date['app_note'] =  $params['app_note'];
-                        $update_date['is_small_probability'] =  $params['is_small_probability'];
+                        if ($params['type']==1){
+                            $update_date['is_small_probability'] =  $params['is_small_probability'];
+                        }
                         $res = $this->model->allowField(true)->save($update_date,['id'=> $params['id']]);
                     }
 
