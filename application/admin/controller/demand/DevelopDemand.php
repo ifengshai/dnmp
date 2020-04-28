@@ -82,14 +82,22 @@ class DevelopDemand extends Backend
 
             return json($result);
         }
-         //判断是否有完成按钮权限
-         $this->assignconfig('review_status_btn', $this->auth->check('demand/develop_demand/review_status_develop'));
-         $this->assignconfig('test_btn', $this->auth->check('demand/develop_demand/test_distribution'));
-         $this->assignconfig('is_set_status', $this->auth->check('demand/develop_demand/set_complete_status'));
-         $this->assignconfig('test_record_bug', $this->auth->check('demand/develop_demand/test_record_bug'));
-         $this->assignconfig('test_is_passed', $this->auth->check('demand/develop_demand/test_is_passed'));
-         $this->assignconfig('is_finish_task', $this->auth->check('demand/develop_demand/is_finish_task'));
-         $this->assignconfig('regression_test_info', $this->auth->check('demand/develop_demand/regression_test_info'));
+        //判断编辑按钮权限
+        $this->assignconfig('is_edit', $this->auth->check('demand/develop_demand/edit'));
+        //判断是否有开发主管审核权限
+        $this->assignconfig('review_status_btn', $this->auth->check('demand/develop_demand/review_status_develop'));
+        //判断测试确认按钮
+        $this->assignconfig('test_btn', $this->auth->check('demand/develop_demand/test_distribution'));
+        //判断开发完成按钮
+        $this->assignconfig('is_set_status', $this->auth->check('demand/develop_demand/set_complete_status'));
+        //判断测试记录问题按钮
+        $this->assignconfig('test_record_bug', $this->auth->check('demand/develop_demand/test_record_bug'));
+        //判断通过测试按钮
+        $this->assignconfig('test_is_passed', $this->auth->check('demand/develop_demand/test_is_passed'));
+        //判断产品经理确认按钮
+        $this->assignconfig('is_finish_task', $this->auth->check('demand/develop_demand/is_finish_task'));
+        //判断回归测试按钮
+        $this->assignconfig('regression_test_info', $this->auth->check('demand/develop_demand/regression_test_info'));
         return $this->view->fetch();
     }
 
@@ -209,7 +217,7 @@ class DevelopDemand extends Backend
                 $this->error(__('You have no permission'));
             }
         }
-       
+
         $this->view->assign("row", $row);
         return $this->view->fetch();
     }
@@ -495,7 +503,7 @@ class DevelopDemand extends Backend
             ->order('id', 'desc')
             ->select();
         $list = collection($list)->toArray();
-        
+
         //查询用户表id
         $admin = new \app\admin\model\Admin();
         $userInfo = $admin->where('status', 'normal')->column('nickname', 'id');
@@ -623,5 +631,4 @@ class DevelopDemand extends Backend
         $this->assign('row', $row);
         return $this->view->fetch();
     }
-
 }
