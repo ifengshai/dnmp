@@ -520,7 +520,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'editable', 'bootstra
                             },
                             { field: 'id', title: __('Id'), operate: false, visible: false },
                             { field: 'sku', title: __('Sku'), operate: 'like' },
-                            { field: 'real_time_qty', title: __('实时库存'), operate: false },
+                            { field: 'real_time_qty', title: __('总库存'), operate: false },
                             { field: 'available_stock', title: __('可用库存'), operate: false },
                             { field: 'distribution_occupy_stock', title: __('配货占用库存'), operate: false }
                         ]
@@ -565,6 +565,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'editable', 'bootstra
                         },
                         { field: 'id', title: __('Id'), visible: false, operate: false },
                         { field: 'sku', title: __('Sku'), operate: 'like' },
+                        {
+                            field: 'allstock', title: __('总库存'), operate: false, formatter: function (value, row) {
+                                return row.real_time_qty + row.distribution_occupy_stock;
+                            }
+                        },
                         { field: 'real_time_qty', title: __('实时库存'), operate: false },
                         { field: 'available_stock', title: __('可用库存'), operate: false },
                         { field: 'distribution_occupy_stock', title: __('配货占用库存'), operate: false },
@@ -636,6 +641,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'editable', 'bootstra
                         },
                         { field: 'id', title: __('Id'), visible: false, operate: false },
                         { field: 'sku', title: __('Sku'), operate: 'like' },
+                        {
+                            field: 'allstock', title: __('总库存'), operate: false, formatter: function (value, row) {
+                                return row.real_time_qty + row.distribution_occupy_stock;
+                            }
+                        },
                         { field: 'real_time_qty', title: __('实时库存'), operate: false },
                         { field: 'available_stock', title: __('可用库存'), operate: false },
                         { field: 'distribution_occupy_stock', title: __('配货占用库存'), operate: false },

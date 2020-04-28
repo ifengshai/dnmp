@@ -656,6 +656,7 @@ class PurchaseOrder extends Backend
         $data = [];
         //判断采购单类型是否为线上采购单 1线下采购单=> 快递100api 2线上采购单 1688api
         if ($row['purchase_type'] == 2) {
+           
             $cacheIndex = 'logisticsDetail_' . $row['purchase_number'];
             $data = Cache::get($cacheIndex);
             if (!$data) {
@@ -684,13 +685,18 @@ class PurchaseOrder extends Backend
         //采购单退销物流信息
         $purchaseReturn = new \app\admin\model\purchase\PurchaseReturn;
         $res = $purchaseReturn->where('purchase_id', $id)->column('logistics_number');
+        $logistics_company_no = $purchaseReturn->where('purchase_id', $id)->column('logistics_company_no');
         $return_data = [];
         if ($res) {
             $number = implode(',', $res);
             $arr = array_filter(explode(',', $number));
+
+            $com_number = implode(',', $logistics_company_no);
+            $com_arr = array_filter(explode(',', $com_number));
             foreach ($arr as $k => $v) {
                 try {
-                    $param = ['express_id' => trim($v)];
+                    $param['express_id'] = trim($v);
+                    $param['code'] = trim($com_arr[$k]);
                     $return_data[$k] = Hook::listen('express_query', $param)[0];
                 } catch (\Exception $e) {
                     $this->error($e->getMessage());

@@ -63,7 +63,7 @@ class Voogueme extends Backend
             if ($filter['increment_id']) {
                 $map['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal']];
             } elseif (!$filter['status']) {
-                $map['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed']];
+                $map['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal']];
             }
             //是否有协同任务
             $infoSynergyTask = new \app\admin\model\infosynergytaskmanage\InfoSynergyTask;
@@ -158,7 +158,7 @@ class Voogueme extends Backend
             $increment_id = $this->request->post('increment_id');
             if ($increment_id) {
                 $map['increment_id'] = $increment_id;
-                $map['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed']];
+                $map['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal']];
                 $field = 'order_type,custom_order_prescription_type,entity_id,status,base_shipping_amount,increment_id,coupon_code,shipping_description,store_id,customer_id,base_discount_amount,base_grand_total,
                 total_qty_ordered,quote_id,base_currency_code,customer_email,customer_firstname,customer_lastname,custom_is_match_frame_new,custom_is_match_lens_new,
                 custom_is_send_factory_new,custom_is_delivery_new,custom_print_label_new,custom_order_prescription,custom_service_name,created_at';
@@ -390,7 +390,7 @@ class Voogueme extends Backend
                             $v['qty_ordered'] = $infoTaskRes['change_number'];
                         }
 
-                        $trueSku = $ItemPlatformSku->getTrueSku($v['sku'], 2);
+                        $trueSku = $ItemPlatformSku->getTrueSku(trim($v['sku']), 2);
                         //总库存
                         $item_map['sku'] = $trueSku;
                         $item_map['is_del'] = 1;
@@ -435,7 +435,7 @@ class Voogueme extends Backend
                         }
 
 
-                        $trueSku = $ItemPlatformSku->getTrueSku($v['sku'], 2);
+                        $trueSku = $ItemPlatformSku->getTrueSku(trim($v['sku']), 2);
                         //总库存
                         $item_map['sku'] = $trueSku;
                         $item_map['is_del'] = 1;
@@ -597,7 +597,7 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
         if ($filter['increment_id']) {
             $map['sfo.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal']];
         } elseif (!$filter['status']) {
-            $map['sfo.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed']];
+            $map['sfo.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal']];
         }
 
         $infoSynergyTask = new \app\admin\model\infosynergytaskmanage\InfoSynergyTask;
@@ -818,7 +818,7 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
             $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 2 + 2), $value['od_axis']);
             $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 2 + 3), $value['os_axis']);
 
-            if ($value['prescription_type'] == 'Reading Glasses' && strlen($value['os_add']) > 0 && strlen($value['od_add']) > 0) {
+            if ($value['prescription_type'] == 'ReadingGlasses' && strlen($value['os_add']) > 0 && strlen($value['od_add']) > 0) {
                 // 双ADD值时，左右眼互换
                 $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 2), $value['os_add']);
                 $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 3), $value['od_add']);
@@ -965,7 +965,51 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
         set_time_limit(0);
         ini_set('memory_limit', '512M');
 
-        $str = '       
+        $str = '430050187
+        430054559
+        430042709
+        130020645
+        430049302
+        430058396
+        130022070
+        430029133
+        430058830
+        430063653
+        130023205
+        430062274
+        430064288
+        430064305
+        130022195
+        430064770
+        430065547
+        130023570
+        430064475
+        430067101
+        430069063
+        430070293
+        130024360
+        430069777
+        130022957
+        130026770
+        130027982
+        430073987
+        430073890
+        430073890
+        430072536
+        430081858
+        430082181
+        430081858
+        430075424
+        430085632
+        430069740
+        130031779
+        430084939
+        430079366
+        430078704
+        130031588
+        130032197
+        430070683
+        430087633
         ';
         $str = explode('
         ', $str);
@@ -1128,7 +1172,7 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
             $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 2 + 2), $value['od_axis']);
             $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 2 + 3), $value['os_axis']);
 
-            if ($value['prescription_type'] == 'Reading Glasses' && strlen($value['os_add']) > 0 && strlen($value['od_add']) > 0) {
+            if ($value['prescription_type'] == 'ReadingGlasses' && strlen($value['os_add']) > 0 && strlen($value['od_add']) > 0) {
                 // 双ADD值时，左右眼互换
                 $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 2), $value['os_add']);
                 $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 3), $value['od_add']);
@@ -1374,7 +1418,7 @@ EOF;
 
 
                 //处理ADD  当ReadingGlasses时 是 双ADD值
-                if ($final_print['prescription_type'] == 'Reading Glasses' && strlen($final_print['os_add']) > 0 && strlen($final_print['od_add']) > 0) {
+                if ($final_print['prescription_type'] == 'ReadingGlasses' && strlen($final_print['os_add']) > 0 && strlen($final_print['od_add']) > 0) {
                     // echo '双ADD值';
                     $os_add = "<td>" . $final_print['od_add'] . "</td> ";
                     $od_add = "<td>" . $final_print['os_add'] . "</td> ";

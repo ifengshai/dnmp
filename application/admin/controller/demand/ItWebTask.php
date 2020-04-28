@@ -121,12 +121,13 @@ class ItWebTask extends Backend
                     $title = $this->request->post("title/a");
                     $desc = $this->request->post("desc/a");
                     $plan_date = $this->request->post("plan_date/a");
+                    $type = $this->request->post("type/a");
 
                     //执行过滤空值
                     array_walk($group_type, 'trim_value');
                     array_walk($person_in_charge, 'trim_value');
                     array_walk($title, 'trim_value');
-                   
+             
                     if (count(array_filter($group_type)) < 1 || count(array_filter($person_in_charge)) < 1 || count(array_filter($title)) < 1) {
                         $this->error('请先分配任务');
                     }
@@ -141,6 +142,7 @@ class ItWebTask extends Backend
                             $data[$k]['person_in_charge'] = $person_in_charge[$k];
                             $data[$k]['group_type'] = $v;
                             $data[$k]['title'] = $title[$k];
+                            $data[$k]['type'] = $type[$k];
                             $data[$k]['desc'] = $desc[$k];
                             $data[$k]['plan_date'] = $plan_date[$k];
                             $data[$k]['task_id'] = $this->model->id;
@@ -218,12 +220,14 @@ class ItWebTask extends Backend
                         $desc = $this->request->post("desc/a");
                         $plan_date = $this->request->post("plan_date/a");
                         $item_id = $this->request->post("item_id/a");
+                        $type = $this->request->post("type/a");
                         $data = [];
                         foreach ($group_type as $k => $v) {
                             $data[$k]['person_in_charge'] = $person_in_charge[$k];
                             $data[$k]['group_type'] = $v;
                             $data[$k]['title'] = $title[$k];
                             $data[$k]['desc'] = $desc[$k];
+                            $data[$k]['type'] = $type[$k];
                             $data[$k]['plan_date'] = $plan_date[$k];
                             if (@$item_id[$k]) {
                                 $data[$k]['id'] = $item_id[$k];
@@ -504,7 +508,7 @@ class ItWebTask extends Backend
                 Db::startTrans();
                 try {
                     $params['site_type'] = $testInfo['site_type'];
-                    $params['type'] = 3;
+                    $params['type'] = 4;
                     $params['pid'] = $row->task_id;
                     $params['responsibility_group'] = $row->group_type;
                     $params['environment_type'] = 1;
@@ -549,7 +553,7 @@ class ItWebTask extends Backend
     public function problem_detail($ids = null)
     {
         $map['pid'] = $ids;
-        $map['type'] = 3;
+        $map['type'] = 4;
         /*测试日志--测试环境*/
         $left_test_list = $this->testRecord
             ->where($map)
@@ -622,7 +626,7 @@ class ItWebTask extends Backend
                 $result = false;
                 Db::startTrans();
                 try {
-                    $params['type'] = 3;
+                    $params['type'] = 4;
                     $params['environment_type'] = 2;
                     $params['pid'] = $row->id;
                     $params['site_type'] = $row->site_type;

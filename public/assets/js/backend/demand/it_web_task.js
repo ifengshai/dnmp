@@ -261,7 +261,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         { field: 'id', title: __('Id') },
                         { field: 'person_in_charge_text', title: __('负责人') },
                         {
-                            field: 'group_type', title: __('任务类型'),
+                            field: 'type', title: __('任务类型'),
                             custom: { 1: 'success', 2: 'success', 3: 'success' },
                             searchList: { 1: '短期任务', 2: '中期任务', 3: '长期任务' },
                             formatter: Table.api.formatter.status

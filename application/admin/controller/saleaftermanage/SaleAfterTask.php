@@ -86,7 +86,7 @@ class SaleAfterTask extends Backend
      */
     public function index()
     {
-        //设置过滤方法
+        //设置过滤方法 
         $task_number = input('task_number');
         $this->request->filter(['strip_tags']);
         if ($this->request->isAjax()) {
@@ -111,7 +111,8 @@ class SaleAfterTask extends Backend
             $list = collection($list)->toArray();
             $deptArr = (new AuthGroup())->getAllGroup();
             $repArr  = (new Admin())->getAllStaff();
-			$issueArr = (new SaleAfterIssue())->getAjaxIssueList();
+            $issueArr = (new SaleAfterIssue())->getAjaxIssueList();
+            $solveScheme = $this->model->getSolveScheme();
             foreach ($list as $key => $val){
 				if ($val['problem_id']) {
                     $deptNumArr = explode(',', $val['problem_id']);
@@ -126,6 +127,13 @@ class SaleAfterTask extends Backend
                 }
                 if($val['rep_id']){
                     $list[$key]['rep_id'] = $repArr[$val['rep_id']];
+                }
+                if($val['handle_scheme']){
+                    $schemeArr = explode(',',$val['handle_scheme']);
+                    $list[$key]['handle_scheme'] = '';
+                    foreach($schemeArr as $sval){
+                        $list[$key]['handle_scheme'] .= $solveScheme[$sval] . ' ';
+                    }
                 }
             }
             $result = array("total" => $total, "rows" => $list);
@@ -275,6 +283,17 @@ class SaleAfterTask extends Backend
                 }
             }
             $this->error(__('Parameter %s can not be empty', ''));
+        }
+        $serviceArr = config('search.platform');
+        $sessionId  = session('admin.id');
+        foreach($serviceArr as $key => $kv){
+             if(in_array($sessionId,$kv)){
+                    $default= $key; 
+             }   
+        }
+        //默认的客服分组值
+        if($default){
+            $this->view->assign("default",$default);
         }
         $this->view->assign('userId',session('admin.id'));
         $this->view->assign('SolveScheme',$this->model->getSolveScheme());
@@ -649,8 +668,8 @@ class SaleAfterTask extends Backend
             }
             if(2 == $params['task_status']){
                 $params['complete_time'] = date("Y-m-d H:i:s",time());
-                if((1 == count($params['handle_scheme'])) &&(in_array(0,$params['handle_scheme']))){
-                    $this->error('没有选择解决方案，无法处理完成');    
+                if(in_array(0,$params['handle_scheme'])){
+                    $this->error('请选择正确的解决方案');    
                 }
             }
             $handle_scheme = $params['handle_scheme'];
@@ -1288,6 +1307,24 @@ class SaleAfterTask extends Backend
         $writer = new $class($spreadsheet);
 
         $writer->save('php://output');
+    }
+    /**
+     * 异步获取解决方案
+     *
+     * @Description
+     * @author lsw
+     * @since 2020/04/01 11:29:25 
+     * @return void
+     */
+    public function getAjaxHandleScheme()
+    {
+        if($this->request->isAjax()){
+            $json = $this->model->getSolveScheme();
+            $arrToObject = (object)($json);
+            return json($arrToObject);
+        }else{
+            return $this->error('404 Not Found');    
+        }
     }	
 
 }

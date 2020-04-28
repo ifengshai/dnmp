@@ -1,0 +1,83 @@
+<style>
+    .form-group {
+        float: left;
+        width: 100%;
+    }
+
+    #add_web_designer_user,
+    #add_phper_user,
+    #add_app_group,
+    #add_test_user {
+        float: left;
+        width: 6%;
+        height: 31px;
+        line-height: 31px;
+        border: 1px solid #000;
+        text-align: center;
+        border-radius: 30px;
+        cursor: pointer;
+    }
+
+    .user_list {
+        margin-right: 8px;
+        margin-top: 6px;
+        float: left;
+        height: 20px;
+        line-height: 20px;
+        border: 1px solid #000;
+        text-align: center;
+        border-radius: 30px;
+        padding-left: 6px;
+        padding-right: 4px;
+    }
+
+    .user_list span {
+        float: left;
+    }
+
+    .user_list a {
+        width: 20px;
+        text-align: center;
+        margin-left: 6px;
+        float: left;
+        height: 19px;
+        border-left: 1px solid #000;
+
+    }
+</style>
+<form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST"
+    action="{:url('test_distribution')}">
+
+    <!--后端分配 start-->
+    <input type="hidden" name="id" value="{$row.id}" />
+    <div class="form-group phper_class">
+        <label class="control-label col-xs-12 col-sm-2">{:__('测试复杂程度')}</label>
+        <div class="col-xs-12 col-sm-8">
+            {:Form::select('row[test_complexity]', config('demand.allComplexity'), null, ['class'=>'form-control',
+            null,'data-live-search' => true,'id'=>'phper_complexity'])}
+        </div>
+    </div>
+
+    <div class="form-group phper_class">
+        <label class="control-label col-xs-12 col-sm-2">{:__('负责人')}</label>
+        <div class="col-xs-12 col-sm-8">
+            {:Form::select('test_person[]', config('demand.test_user'), null, ['class'=>'form-control
+            selectpicker', null,'data-live-search' => true, 'multiple' => true,'id'=>'test_person'])}
+        </div>
+    </div>
+    <!--后端分配 end-->
+    <div class="form-group layer-footer">
+        <label class="control-label col-xs-12 col-sm-2"></label>
+        <div class="col-xs-12 col-sm-8">
+            <button type="submit" class="btn btn-success btn-embossed">{:__('OK')}</button>
+        </div>
+    </div>
+</form>
+
+<div class="hide layer-footer">
+    <label class="control-label col-xs-12 col-sm-2"></label>
+    <div class="col-xs-12 col-sm-8">
+        <button type="reset" class="btn btn-primary btn-embossed btn-close"
+            onclick="Layer.closeAll();">{:__('Close')}</button>
+    </div>
+</div>

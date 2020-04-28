@@ -4,6 +4,7 @@ namespace app\admin\controller\zendesk;
 
 use app\admin\model\Admin;
 use app\admin\model\zendesk\ZendeskPosts;
+use app\admin\model\zendesk\ZendeskTasks;
 use app\common\controller\Backend;
 use app\admin\model\zendesk\ZendeskTags;
 use app\admin\model\zendesk\ZendeskAgents;
@@ -13,6 +14,7 @@ use think\Db;
 use think\Exception;
 use think\exception\PDOException;
 use think\exception\ValidateException;
+use League\HTMLToMarkdown\HtmlConverter;
 
 
 /**
@@ -42,6 +44,8 @@ class Zendesk extends Backend
     {
         //设置过滤方法
         $this->request->filter(['strip_tags']);
+        $tags = ZendeskTags::column('name','id');
+        $this->view->assign('tags',$tags);
         if ($this->request->isAjax()) {
             //如果发送的来源是Selectpage，则转发到Selectpage
             if ($this->request->request('keyField')) {
@@ -49,28 +53,80 @@ class Zendesk extends Backend
             }
             $filter = json_decode($this->request->get('filter'), true);
             $map = [];
-            if ($filter['me_task'] == 1) { //我的所有任务
+            $andWhere = '';
+            $me_task = $filter['me_task'];
+            if ($me_task == 1) { //我的所有任务
                 unset($filter['me_task']);
                 $map['zendesk.assign_id'] = session('admin.id');
-            } elseif ($filter['me_task'] == 2) { //我的待处理任务
+            } elseif ($me_task == 2) { //我的待处理任务
                 unset($filter['me_task']);
                 $map['zendesk.assign_id'] = session('admin.id');
                 $map['zendesk.status'] = ['in', [1, 2]];
+                $map['zendesk.is_hide'] = 0;
+                $taskCount = ZendeskTasks::where('admin_id',session('admin.id'))->value('target_count');
+            }
+            //类型筛选
+            if($filter['status_type']){
+//                待处理：new;open状态下的工单
+//                新增：update时间为选择时间，new、open状态的工单
+//                已处理：public comment
+//                待分配：没有承接人的工单
+                $status_type = $filter['status_type'];
+                unset($filter['status_type']);
+                switch($status_type){
+                    case 1:
+                        $map['zendesk.status'] = ['in', [1, 2]];
+                        break;
+                    case 2:
+                        $update_time = $filter['update_time'] ?? '';
+                        if(!$update_time){
+                            $this->error('请选择更新时间');
+                        }
+                        $map['zendesk.status'] = ['in', [1, 2]];
+                        break;
+                    case 3:
+                        //获取public =1 is_admin=1的zid列表
+                        $zids = ZendeskComments::where(['is_public' => 1,'is_admin' => 1])->column('zid');
+                        $map['zendesk.id'] = ['in',$zids];
+                        break;
+                    case 4:
+                        //获取所有的账号admin_id
+                        $admin_ids = ZendeskAgents::column('admin_id');
+                        $map['zendesk.assign_id'] = ['not in',$admin_ids];
+                        $map['zendesk.status'] = ['in', [1, 2]];
+                        break;
+                }
+            }
+            if($filter['tags']) {
+                $andWhere = "FIND_IN_SET({$filter['tags']},tags)";
+                unset($filter['tags']);
             }
             $this->request->get(['filter' => json_encode($filter)]);
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             //默认使用
+            $orderSet = 'priority desc,status asc,update_time desc,id desc';
+            if($me_task == 2){
+                $orderSet = 'priority desc,status asc,update_time desc,id desc';
+            }
+            if($sort != 'zendesk.id' && $sort){
+                $orderSet = "{$sort} {$order}";
+            }
             $total = $this->model
                 ->with(['admin'])
                 ->where($where)
                 ->where($map)
+                ->where($andWhere)
+                ->where('channel','in',['email','web','chat'])
                 ->count();
+
 
             $list = $this->model
                 ->with(['admin'])
                 ->where($where)
                 ->where($map)
-                ->order('status asc,update_time desc,id desc')
+                ->where($andWhere)
+                ->where('channel','in',['email','web','chat'])
+                ->order($orderSet)
                 ->limit($offset, $limit)
                 ->select();
             $list = collection($list)->toArray();
@@ -81,6 +137,188 @@ class Zendesk extends Backend
         return $this->view->fetch();
     }
 
+    /**
+     * 新增
+     * @return string
+     * @throws Exception
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public function add()
+    {
+        if ($this->request->isPost()) {
+            $params = $this->request->post("row/a");
+            if ($params) {
+                $params = $this->preExcludeFields($params);
+                if ($this->dataLimit && $this->dataLimitFieldAutoFill) {
+                    $params[$this->dataLimitField] = $this->auth->id;
+                }
+                $result = false;
+                Db::startTrans();
+                try {
+                    //是否采用模型验证
+                    if ($this->modelValidate) {
+                        $name = str_replace("\\model\\", "\\validate\\", get_class($this->model));
+                        $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.add' : $name) : $this->modelValidate;
+                        $this->model->validateFailException(true)->validate($validate);
+                    }
+                    $type = input('type');
+                    $siteName = 'zeelool';
+                    if($type == 2) {
+                        $siteName = 'voogueme';
+                    }
+                    $tags = ZendeskTags::where('id', 'in', $params['tags'])->column('name');
+                    $status = config('zendesk.status')[$params['status']];
+                    $author_id = $assignee_id = ZendeskAgents::where(['admin_id' => session('admin.id'), 'type' => $type])->value('agent_id');
+                    if (!$author_id) {
+                        throw new Exception('请将用户先绑定zendesk的账号', 10001);
+                    }
+                    //发送邮件的参数
+                    $createData = [
+                        'comment' => [
+                            'author_id' => $author_id,
+                        ],
+                        'tags' => $tags,
+                        'status' => $status,
+                        'assignee_id' => $assignee_id,
+                        'submitter_id' => $assignee_id
+                    ];
+                    if(!$params['subject']) {
+                        throw new Exception('邮件标题不能为空', 10001);
+                    }
+                    if(!strip_tags($params['content'])) {
+                        throw new Exception('内容不能为空', 10001);
+                    }
+                    if(!$params['email']) {
+                        throw new Exception('发送人不能为空', 10001);
+                    }
+                    $createData['requester'] = [
+                        'email' => $params['email']
+                    ];
+                    //有抄送，添加抄送
+                    if ($params['email_cc']) {
+                        $email_ccs = $this->emailCcs($params['email_cc'], []);
+                        $createData['email_ccs'] = $email_ccs;
+                    }
+                    $priority = config('zendesk.priority')[$params['priority']];
+                    $body = $params['content'];
+                    if ($priority) {
+                        $createData['priority'] = $priority;
+                    }
+                    //由于编辑器或默认带个<br>,所以去除标签判断有无值
+                    if (strip_tags($body)) {
+                        $createData['comment']['html_body'] = $body;
+                    }
+                    if ($params['image']) {
+                        //附件上传
+                        $attachments = explode(',', $params['image']);
+                        $token = [];
+                        foreach ($attachments as $attachment) {
+                            $res = (new Notice(request(), ['type' => $siteName]))->attachment($attachment);
+                            if (isset($res['code'])) {
+                                throw new Exception($res['message'], 10001);
+                            }
+                            $token[] = $res;
+                        }
+                        if ($token) {
+                            $createData['comment']['uploads'] = $token;
+                        }
+                    }
+                    //私有的
+                    if ($params['public_type'] == 1) {
+                        $createData['comment']['public'] = false;
+                    }
+                    //开始发送
+                    $res = (new Notice(request(), ['type' => $siteName]))->createTicket($createData);
+                    if (isset($res['code'])) {
+                        throw new Exception($res['message'], 10001);
+                    }
+                    //开始写入数据库
+                    $agent_id = ZendeskAgents::where(['admin_id' => session('admin.id'), 'type' => $type])->value('agent_id');
+                    //对tag进行排序
+                    $zendeskTags = $params['tags'];
+                    sort($zendeskTags);
+                    //更新主表的状态和priority，tags,due_id，assignee_id等
+                    //根据用户的id获取用户的信息
+                    $userInfo = (new Notice(request(), ['type' => $siteName]))->findUserById($res['requester_id']);
+                    $rawSubject = $subject = $params['subject'];
+                    //写入主表
+                    $zendesk = \app\admin\model\zendesk\Zendesk::create([
+                        'ticket_id' => $res['ticket_id'],
+                        'type' => $type,
+                        'channel' => 'web',
+                        'email' => $userInfo->email,
+                        'username' => $userInfo->name,
+                        'user_id' => $res['requester_id'],
+                        'to_email' => '',
+                        'priority' => $params['priority'],
+                        'status' => $params['status'],
+                        'tags' => join(',',$zendeskTags),
+                        'subject' => $subject,
+                        'raw_subject' => $rawSubject,
+                        'assignee_id' => $assignee_id,
+                        'assign_id' => $agent_id,
+                        'email_cc' => $params['email_cc']
+                    ]);
+                    $zid = $zendesk->id;
+                    //评论表添加内容,有body时添加评论，修改状态等不添加
+                    if (strip_tags($params['content'])) {
+                        $result = ZendeskComments::create([
+                            'ticket_id' => $res['ticket_id'],
+                            'comment_id' => $res['comment_id'],
+                            'zid' => $zid,
+                            'author_id' => $agent_id,
+                            'body' => strip_tags($params['content']),
+                            'html_body' => $params['content'],
+                            'is_public' => $params['public_type'],
+                            'is_admin' => 1,
+                            'due_id' => session('admin.id'),
+                            'attachments' => $params['image']
+                        ]);
+                    }
+                    Db::commit();
+                } catch (ValidateException $e) {
+                    Db::rollback();
+                    $this->error($e->getMessage());
+                } catch (PDOException $e) {
+                    Db::rollback();
+                    $this->error($e->getMessage());
+                } catch (Exception $e) {
+                    Db::rollback();
+                    $this->error($e->getMessage());
+                }
+                if ($result !== false) {
+                    $this->success();
+                } else {
+                    $this->error(__('No rows were inserted'));
+                }
+            }
+            $this->error(__('Parameter %s can not be empty', ''));
+        }
+        //获取所有的tags
+        $tags = ZendeskTags::order('count desc')->column('name', 'id');
+        //站点类型，默认zeelool，1：zeelool，2：voogueme
+        $type = input('type',1);
+        //获取所有的消息模板
+        $templateAll = ZendeskMailTemplate::where([
+            'template_platform' => $type,
+            'template_permission' => 1,
+            'is_active' => 1])
+            ->order('template_category desc,id desc')
+            ->select();
+        $templates = ['Apply Macro'];
+        foreach ($templateAll as $key => $template) {
+            $category = '';
+            if ($template['template_category']) {
+                $category = '【' . config('zendesk.template_category')[$template['template_category']] . '】';
+            }
+            $templates[$template['id']] = $category . $template['template_name'];
+        }
+
+        $this->view->assign(compact('tags',  'templates','type'));
+        return $this->view->fetch();
+    }
     /**
      * 发送邮件
      * @param null $ids
@@ -118,9 +356,13 @@ class Zendesk extends Backend
                     //status
                     $tags = ZendeskTags::where('id', 'in', $params['tags'])->column('name');
                     $status = config('zendesk.status')[$params['status']];
-                    $author_id = $assignee_id = ZendeskAgents::where(['admin_id' => session('admin.id'), 'agent_type' => $ticket->type])->value('agent_id');
+                    $author_id = $assignee_id = ZendeskAgents::where(['admin_id' => session('admin.id'), 'type' => $ticket->type])->value('agent_id');
                     if (!$author_id) {
                         throw new Exception('请将用户先绑定zendesk的账号', 10001);
+                    }
+                    $siteName = 'zeelool';
+                    if($ticket->type == 2){
+                        $siteName = 'voogueme';
                     }
                     //发送邮件的参数
                     $updateData = [
@@ -154,7 +396,7 @@ class Zendesk extends Backend
                         $attachments = explode(',', $params['image']);
                         $token = [];
                         foreach ($attachments as $attachment) {
-                            $res = (new Notice(request(), ['type' => 'zeelool']))->attachment($attachment);
+                            $res = (new Notice(request(), ['type' => $siteName]))->attachment($attachment);
                             if (isset($res['code'])) {
                                 throw new Exception($res['message'], 10001);
                             }
@@ -169,18 +411,21 @@ class Zendesk extends Backend
                         $updateData['comment']['public'] = false;
                     }
                     //开始发送
-                    $res = (new Notice(request(), ['type' => 'zeelool']))->autoUpdate($ticket->ticket_id, $updateData);
+                    $res = (new Notice(request(), ['type' => $siteName]))->autoUpdate($ticket->ticket_id, $updateData);
                     if (isset($res['code'])) {
                         throw new Exception($res['message'], 10001);
                     }
                     //开始写入数据库
-                    $agent_id = ZendeskAgents::where('admin_id', session('admin.id'))->value('agent_id');
+                    $agent_id = ZendeskAgents::where(['admin_id' => session('admin.id'), 'type' => $ticket->type])->value('agent_id');
+                    //对tag进行排序
+                    $zendeskTags = $params['tags'];
+                    sort($zendeskTags);
                     //更新主表的状态和priority，tags,due_id，assignee_id等
                     $result = $this->model->where('id', $ids)->update([
                         'subject' => $params['subject'],
                         'priority' => $params['priority'],
                         'status' => $params['status'],
-                        'tags' => join(',', $params['tags']),
+                        'tags' => join(',', $zendeskTags),
                         'assignee_id' => $agent_id,
                         'due_id' => session('admin.id'),
                         'email_cc' => $params['email_cc']
@@ -311,8 +556,8 @@ Please close this window and try again.");
 Please close this window and try again.");
         }
         //合并的最后一条评论
-        $comment = $this->model->where('ticket_id', $ticket_id)->with('lastComment')->find();
-        if ($comment->status == 5) {
+        $comment = $this->model->where('ticket_id', $pid)->with('lastComment')->find();
+        if (in_array($comment->status,[4,5])) {
             $this->error("You are unable to merge into #{$ticket_id}. Tickets that are Closed, tickets that are shared with other accounts, and tickets you don\'t have access to cannot be merged into.
 Please close this window and try again.");
         }
@@ -335,21 +580,31 @@ Please close this window and try again.");
             $source_comment = $params['merge_to'];
             $target_comment_is_public = isset($params['merge_in_check']) ? true : false;
             $source_comment_is_public = isset($params['merge_to_check']) ? true : false;
+            //获取邮件的type类型，是v还是z站
+            $type = $this->model->where('ticket_id', $ticket)->value('type');
+            $siteName = '';
+            if($type == 1){
+                $siteName = 'zeelool';
+            }elseif($type == 2){
+                $siteName = 'voogueme';
+            }
+
             $data = [
                 'ids' => [$ids],
                 'target_comment_is_public' => $target_comment_is_public,
                 'source_comment_is_public' => $source_comment_is_public,
             ];
+            $converter = new HtmlConverter();
             if ($target_comment) {
-                $data['target_comment'] = $target_comment;
+                $data['target_comment'] = $converter->convert($target_comment);
             }
             if ($source_comment) {
-                $data['source_comment'] = $source_comment;
+                $data['source_comment'] = $converter->convert($source_comment);
             }
             $result = false;
             try {
                 //合并工单
-                $result = (new Notice(request(), ['type' => 'zeelool']))->merge($ticket, $data);
+                $result = (new Notice(request(), ['type' => $siteName]))->merge($ticket, $data);
                 if (isset($result['code'])) {
                     throw new Exception($result['message'], 10001);
                 }
@@ -366,13 +621,14 @@ Please close this window and try again.");
                     $tagIds = $tagId;
                 }
 
-                $agent_id = ZendeskAgents::where('admin_id', session('admin.id'))->value('agent_id');
+                $agent_id = ZendeskAgents::where(['admin_id' => session('admin.id'),'type' => $type])->value('agent_id');
                 $zid = $this->model->where('ticket_id', $ids)->value('id');
                 //被合并的状态closed，添加content，tag：closed_by_merge
                 $this->model->where('ticket_id', $ids)->update([
                     'status' => '5',
                     'tags' => $tagIds,
                     'assignee_id' => $agent_id,
+                    'assign_id' => $agent_id,
                     'due_id' => session('admin.id'),
                 ]);
 
@@ -388,6 +644,7 @@ Please close this window and try again.");
                 //合并的添加评论content
                 $this->model->where('ticket_id', $ticket)->update([
                     'assignee_id' => $agent_id,
+                    'assign_id' => $agent_id,
                     'due_id' => session('admin.id'),
                 ]);
                 $zid = $this->model->where('ticket_id', $ticket)->value('id');
@@ -472,7 +729,10 @@ DOC;
      */
     public function emailCcs($emailCcs, $preEmailCcs)
     {
-        $preEmailCcs = explode(',', $preEmailCcs);
+        if($preEmailCcs){
+            $preEmailCcs = explode(',', $preEmailCcs);
+        }
+
         $emailCcs = explode(',', $emailCcs);
         //pre并em，删除，
         //$del = array_diff($preEmailCcs,$emailCcs);
@@ -487,5 +747,94 @@ DOC;
         }
         return $emails;
 
+    }
+
+    /**
+     * 申请分配
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public function moreTasks()
+    {
+
+        $admin_id = session('admin.id');
+        //判断是否已完成目标且不存在未完成的
+        $now = $this->model->where('assign_id',$admin_id)->where('status', 'in', '1,2')->where('channel','in',['email','web','chat'])->count();
+        if($now){
+            $this->error("请先处理完成已分配的工单");
+        }
+        //判断今天是否完成工作量
+        $tasks = ZendeskTasks::whereTime('create_time', 'today')
+            ->where(['admin_id' => $admin_id])
+            ->select();
+        foreach($tasks as $task){
+            if($task->surplus_count > 0){
+                $this->error("请先完成今天的任务量再进行申请");
+            }
+        }
+        $user_ids = $this->model->where('assign_id','neq',$admin_id)->where('assign_id','>',0)->column('user_id');
+        $tickets = $this->model->where(['user_id' => ['not in', $user_ids],'assign_id' => 0,'status' => 1])->order('id desc')->limit(10)->select();
+        foreach($tickets as $ticket){
+            $task = ZendeskTasks::whereTime('create_time', 'today')
+                ->where(['admin_id' => $admin_id, 'type' => $ticket->getType()])
+                ->find();
+            //修改zendesk的assign_id,assign_time
+            $this->model->where('id',$ticket->id)->update([
+                'assign_id' => $admin_id,
+                'assignee_id' => $task->assignee_id,
+                'assign_time' => date('Y-m-d H:i:s', time()),
+            ]);
+            //分配数目+1
+            $task->complete_apply_count = $task->complete_apply_count + 1;
+            $task->apply_count = $task->apply_count + 1;
+            $task->save();
+        }
+    }
+    /**
+     * 申请分配修改
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public function moreTasksChange()
+    {
+        $admin_id = session('admin.id');
+        //判断是否已完成目标且不存在未完成的
+        $now = $this->model->where('assign_id',$admin_id)->where('status', 'in', '1,2')->where('is_hide',0)->where('channel','in',['email','web','chat'])->count();
+        if($now){
+            $this->error("请先处理完成近日已分配的工单");
+        }
+        //判断今天是否完成工作量
+        $tasks = ZendeskTasks::whereTime('create_time', 'today')
+            ->where(['admin_id' => $admin_id])
+            ->select();
+        foreach($tasks as $task){
+            if($task->surplus_count > 0){
+                $this->error("请先完成今天的任务量再进行申请");
+            }
+        }
+        $user_ids = $this->model->where('assign_id','neq',$admin_id)->where('assign_id','>',0)->column('user_id');
+        $tickets = $this->model->where(['status' => ['in',[1,2]]])->order('id desc')->select();
+        $key = 1;
+        foreach($tickets as $ticket){
+            //分配10个并且状态为new或者open的分配人是自己的分配
+            if($key <= 10 && ($ticket->status == 1 || $ticket->assign_id != $admin_id)){
+                $task = ZendeskTasks::whereTime('create_time', 'today')
+                    ->where(['admin_id' => $admin_id, 'type' => $ticket->getType()])
+                    ->find();
+                //修改zendesk的assign_id,assign_time
+                $this->model->where('id',$ticket->id)->update([
+                    'assign_id' => $admin_id,
+                    'assignee_id' => $task->assignee_id,
+                    'assign_time' => date('Y-m-d H:i:s', time()),
+                ]);
+                //分配数目+1
+                $task->complete_apply_count = $task->complete_apply_count + 1;
+                $task->apply_count = $task->apply_count + 1;
+                $task->save();
+                $this->model->where('id',$ticket->id)->setField('is_hide',0);
+            }
+        }
     }
 }

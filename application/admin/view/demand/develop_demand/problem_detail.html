@@ -1,0 +1,80 @@
+<style>
+    #accordion div {
+        text-align: center;
+    }
+    .timeline-body {
+        padding-top: 0px;
+    }
+</style>
+
+
+
+<ul class="timeline" style="width: 48%;float: left;">
+    <li class="time-label">
+        <span class="bg-red">
+            {:__('测试环境')}
+        </span>
+    </li>
+    {volist name="list" id="ltl"}
+    <li>
+        <i class="fa fa-user bg-aqua"></i>
+        <div class="timeline-item">
+            <span class="time"><i class="fa fa-clock-o"></i>{:__('创建时间')}：{$ltl['create_time']}</span>
+            <h3 class="timeline-header"><a href="#" {if $ltl['bug_type']==1}style="color: darkseagreen;font-weight: 900"
+                    {elseif $ltl['bug_type']==2}style="color: green;font-weight: 900" {elseif
+                    $ltl['bug_type']==3}style="color: darkorange;font-weight: 900" {elseif
+                    $ltl['bug_type']==4}style="color: red;font-weight: 900" {/if}>{$bug_type[$ltl['bug_type']]}</a></h3>
+
+            <div class="timeline-body" style="padding-bottom: 0px;">
+                <p style="float: left;width: 62%">
+                    {:__('责任人')}：<span><b>{$ltl['responsibility_user_name']}</b></span></p>
+                <p>{:__('测试记录人')}：<span><b>{$ltl['create_user_name']}</b></span></p>
+            </div>
+
+            <div class="timeline-body" style="padding-top: 0px;">
+                {:__('描述')}：<span style="word-break: break-all;"><b>{$ltl['describe']}</b></span>
+            </div>
+
+        </div>
+    </li>
+    {/volist}
+</ul>
+
+<ul class="timeline" style="width: 48%;float: right;">
+    <li class="time-label">
+        <span class="bg-red">
+            {:__('线上环境')}
+        </span>
+    </li>
+    {volist name="right_list" id="rtl"}
+    <li>
+        <i class="fa fa-user bg-aqua"></i>
+        <div class="timeline-item">
+            <span class="time"><i class="fa fa-clock-o"></i>{:__('创建时间')}：{$rtl['create_time']}</span>
+            <h3 class="timeline-header"><a href="#" {if $rtl['bug_type']==1}style="color: darkseagreen;font-weight: 900"
+                    {elseif $rtl['bug_type']==2}style="color: green;font-weight: 900" {elseif
+                    $rtl['bug_type']==3}style="color: darkorange;font-weight: 900" {elseif
+                    $rtl['bug_type']==4}style="color: red;font-weight: 900" {/if}>{$bug_type[$rtl['bug_type']]}</a></h3>
+
+            <div class="timeline-body" style="padding-bottom: 0px;">
+                <p style="float: left;width: 62%">
+                    {:__('责任人')}：<span><b>{$rtl['responsibility_user_name']}</b></span></p>
+                <p>{:__('测试记录人')}：<span><b>{$rtl['create_user_name']}</b></span></p>
+            </div>
+
+            <div class="timeline-body" style="padding-top: 0px;">
+                {:__('描述')}：<span style="word-break: break-all;"><b>{$rtl['describe']}</b></span>
+            </div>
+
+        </div>
+    </li>
+    {/volist}
+</ul>
+
+<!-- <div class="hide layer-footer">
+    <label class="control-label col-xs-12 col-sm-2"></label>
+    <div class="col-xs-12 col-sm-8">
+        <button type="reset" class="btn btn-primary btn-embossed btn-close"
+            onclick="Layer.closeAll();">{:__('Close')}</button>
+    </div>
+</div> -->

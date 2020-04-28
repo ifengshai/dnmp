@@ -8,13 +8,13 @@ use think\Model;
 class MagentoPlatform extends Model
 {
 
-    
+
 
     //数据库
     protected $connection = 'database';
     // 表名
     protected $name = 'magento_platform';
-    
+
     // 自动写入时间戳字段
     protected $autoWriteTimestamp = false;
 
@@ -24,35 +24,33 @@ class MagentoPlatform extends Model
     protected $deleteTime = false;
 
     // 追加属性
-    protected $append = [
-
-    ];
+    protected $append = [];
 
     /**
      * 禁用还是启用的状态
      */
     public function getPlatformStatus()
     {
-        return [1=>'启用',2=>'禁用'];
+        return [1 => '启用', 2 => '禁用'];
     }
     /***
      * 是否需要上传商品信息到平台
      */
     public function getPlatformIsUpload()
     {
-        return [1=>'上传',2=>'不上传'];
+        return [1 => '上传', 2 => '不上传'];
     }
     /***
      * @return array
      */
     public function getOrderPlatformList()
     {
-        $result = $this->where('status','=',1)->field('id,name')->select();
-        if(!$result){
-            return [0=>'请先添加平台'];
+        $result = $this->where('status', '=', 1)->field('id,name')->select();
+        if (!$result) {
+            return [0 => '请先添加平台'];
         }
         $arr = [];
-        foreach($result as $key=>$val){
+        foreach ($result as $key => $val) {
             $arr[$val['id']] = $val['name'];
         }
         return $arr;
@@ -63,11 +61,11 @@ class MagentoPlatform extends Model
      */
     public function magentoPlatformList()
     {
-      $where['status'] = 1;
-      $where['is_del'] = 1;
-      $where['is_upload_item'] = 1;
-      $result = $this->where($where)->field('id,magento_account,magento_key,name')->select();
-      return $result ? $result : false;
+        $where['status'] = 1;
+        $where['is_del'] = 1;
+        $where['is_upload_item'] = 1;
+        $result = $this->where($where)->field('id,magento_account,magento_key,name')->select();
+        return $result ? $result : false;
     }
 
 
@@ -76,19 +74,10 @@ class MagentoPlatform extends Model
      */
     public function getMagentoPlatform($name = '')
     {
-      $where['status'] = 1;
-      $where['is_del'] = 1;
-      $where['name'] = $name;
-      $id = $this->where($where)->value('id');
-      return $id ? $id : false;
+        $where['status'] = 1;
+        $where['is_del'] = 1;
+        $where['name'] = $name;
+        $id = $this->where($where)->value('id');
+        return $id ? $id : false;
     }
-
-
-
-
-
-
-
-
-
 }

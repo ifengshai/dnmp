@@ -107,6 +107,8 @@ class ZendeskAgents extends Backend
                     $this->error($e->getMessage());
                 }
                 if ($result !== false) {
+                    //is_used变为2
+                    ZendeskAccount::where('account_id',$params['agent_id'])->setField('is_used',2);
                     $this->success();
                 } else {
                     $this->error(__('No rows were inserted'));
@@ -133,6 +135,7 @@ class ZendeskAgents extends Backend
             }
         }
         if ($this->request->isPost()) {
+            $agent_id = $row->agent_id;
             $params = $this->request->post("row/a");
             if ($params) {
                 $params = $this->preExcludeFields($params);
@@ -158,6 +161,9 @@ class ZendeskAgents extends Backend
                     $this->error($e->getMessage());
                 }
                 if ($result !== false) {
+                    //is_used变为2
+                    ZendeskAccount::where('account_id',$params['agent_id'])->setField('is_used',2);
+                    ZendeskAccount::where('account_id',$agent_id)->setField('is_used',1);
                     $this->success();
                 } else {
                     $this->error(__('No rows were updated'));
@@ -170,21 +176,9 @@ class ZendeskAgents extends Backend
         $this->view->assign("agents", $agents);
         return $this->view->fetch();
     }
-    /**
-     * 获取平台Agents用户
-     *
-     * @Description
-     * @author lsw
-     * @since 2020/03/28 14:58:26 
-     * @return void
-     */
-    public function getPlatformUser()
-    {
-        $res = (new Notice(request(),['type' => 'zeelool']))->fetchUser();
-    }
 
     /**
-     * ajax获取所有的管理员
+     * ajax获取zendesk管理员列表
      * @return string
      * @throws \think\db\exception\DataNotFoundException
      * @throws \think\db\exception\ModelNotFoundException
@@ -194,7 +188,7 @@ class ZendeskAgents extends Backend
     {
         if($this->request->isPost()) {
             $type = input('type');
-            $agents = ZendeskAccount::where('account_type',$type)->field('account_id,account_user')->select();
+            $agents = ZendeskAccount::where(['account_type' => $type, 'is_used' => 1])->field('account_id,account_user')->select();
             $html = '<option value="">请选择</option>';
             foreach($agents as $agent){
                 $html .= "<option value='{$agent->account_id}'>{$agent->account_user}</option>";
@@ -202,5 +196,22 @@ class ZendeskAgents extends Backend
             return $html;
         }
         $this->error('not found');
+    }
+
+    /**
+     * zendesk列表筛选获取列表
+     * @return array
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public function getAgentsList()
+    {
+        $agents = $this->model->with('admin')->select();
+        $res = [];
+        foreach($agents as $agent){
+            $res[] = $agent->admin->nickname;
+        }
+        return $res;
     }
 }

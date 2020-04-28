@@ -7,6 +7,7 @@ use app\common\controller\Backend;
 use think\Db;
 use think\Exception;
 use app\admin\model\platformmanage\MagentoPlatform;
+use think\Cache;
 
 class Dashboard extends Backend
 {
@@ -126,13 +127,16 @@ class Dashboard extends Backend
 	 * @param [type] $id
 	 * @return void
 	 */
-	public function async_bottom_data($id=null)
+	public function async_bottom_data($create_time=null)
 	{
 		if($this->request->isAjax()){
-			if(!$id){
-				return $this->error('参数不存在，请重新尝试');
+            if ($create_time) {
+                $time = explode(' ', $create_time);
+                $map['created_at'] = ['between', [$time[0] . ' ' . $time[1], $time[3] . ' ' . $time[4]]];
+            } else {
+                $map['created_at'] = ['between', [date('Y-m-d 00:00:00', strtotime('-7 day')), date('Y-m-d H:i:s', time())]];
 			}
-			$data = $this->get_platform_data($id);
+			$data = $this->get_platform_data($map);
 			if(false == $data){
 				return $this->error('没有对应的时间数据，请重新尝试');
 			}
@@ -140,32 +144,115 @@ class Dashboard extends Backend
 		}
 	}	
 	/**
-	 * 获取平台数据来源
+	 * 获取平台数据来源(原先)
 	 * @param $id  date 中的ID
 	 * @Description created by lsw
 	 * @author lsw
 	 * @since 2020/03/12 14:04:02 
 	 * @return void
 	 */
-	public function get_platform_data($id)
+	// public function get_platform_data($map)
+	// {
+	// 	switch($id){
+	// 		case 1:
+	// 			$where = 'DATE_SUB(CURDATE(),INTERVAL 30 DAY) <= date(created_at) and created_at< curdate()';
+	// 		break;
+	// 		case 2:
+	// 			$where = 'DATE_SUB(CURDATE(),INTERVAL 14 DAY) <= date(created_at) and created_at< curdate()';
+	// 		break;
+	// 		case 3:
+	// 			$where = 'DATE_SUB(CURDATE(),INTERVAL 7 DAY) <= date(created_at) and created_at< curdate()';
+	// 		break;
+	// 		case 4:
+	// 			$where = 'DATEDIFF(created_at,NOW())=-1';
+	// 		break;
+	// 		default:
+	// 			$where = 'TO_DAYS(created_at) = TO_DAYS(NOW())';
+	// 		break;
+	// 	}
+	// 	$zeelool_model 	= Db::connect('database.db_zeelool');
+	// 	$voogueme_model = Db::connect('database.db_voogueme');
+	// 	$nihao_model	= Db::connect('database.db_nihao');
+	// 	$zeelool_model->table('sales_flat_order')->query("set time_zone='+8:00'");
+	// 	$voogueme_model->table('sales_flat_order')->query("set time_zone='+8:00'");
+	// 	$nihao_model->table('sales_flat_order')->query("set time_zone='+8:00'");
+	// 	$status['status']  = ['in', ['processing', 'complete', 'creditcard_proccessing']];
+	// 	$pc['store_id']    = 1;
+	// 	$wap['store_id']   = ['in',[2,4]];
+	// 	$app['store_id']   = 5;
+	// 	//zeelool中pc销售额
+	// 	$zeelool_pc_sales_money  	= $zeelool_model->table('sales_flat_order')->where($pc)->where($status)->where($where)->sum('base_grand_total');
+	// 	//zeelool中wap销售额
+	// 	$zeelool_wap_sales_money 	= $zeelool_model->table('sales_flat_order')->where($wap)->where($status)->where($where)->sum('base_grand_total');
+	// 	//zeelool中app销售额
+	// 	$zeelool_app_sales_money 	= $zeelool_model->table('sales_flat_order')->where($app)->where($status)->where($where)->sum('base_grand_total');
+	// 	//zeelool中pc支付成功数
+	// 	$zeelool_pc_sales_num	 	= $zeelool_model->table('sales_flat_order')->where($pc)->where($status)->where($where)->count('*');
+	// 	//zeelool中wap支付成功数
+	// 	$zeelool_wap_sales_num	 	= $zeelool_model->table('sales_flat_order')->where($wap)->where($status)->where($where)->count('*');
+	// 	//zeelool中pc支付成功数
+	// 	$zeelool_app_sales_num	 	= $zeelool_model->table('sales_flat_order')->where($app)->where($status)->where($where)->count('*');
+	// 	//zeelool pc端客单价
+	// 	$zeelool_pc_unit_price   	= @round(($zeelool_pc_sales_money/$zeelool_pc_sales_num),2);
+	// 	//zeelool wap客单价
+	// 	$zeelool_wap_unit_price  	= @round(($zeelool_wap_sales_money/$zeelool_wap_sales_num),2);
+	// 	//zeelool app端客单价
+	// 	$zeelool_app_unit_price 	= @round(($zeelool_app_sales_money/$zeelool_app_sales_num),2);
+	// 	//voogueme中pc销售额
+	// 	$voogueme_pc_sales_money 	= $voogueme_model->table('sales_flat_order')->where($pc)->where($status)->where($where)->sum('base_grand_total');
+	// 	//voogueme中wap销售额
+	// 	$voogueme_wap_sales_money	= $voogueme_model->table('sales_flat_order')->where($wap)->where($status)->where($where)->sum('base_grand_total');
+	// 	//voogueme中pc支付成功数
+	// 	$voogueme_pc_sales_num		= $voogueme_model->table('sales_flat_order')->where($pc)->where($status)->where($where)->count('*');
+	// 	//voogueme中wap支付成功数
+	// 	$voogueme_wap_sales_num	 	= $voogueme_model->table('sales_flat_order')->where($wap)->where($status)->where($where)->count('*');
+	// 	//voogueme pc端客单价
+	// 	$voogueme_pc_unit_price   	= @round(($voogueme_pc_sales_money/$voogueme_pc_sales_num),2);
+	// 	//voogueme wap客单价
+	// 	$voogueme_wap_unit_price  	= @round(($voogueme_wap_sales_money/$voogueme_wap_sales_num),2);
+	// 	//nihao中pc销售额
+	// 	$nihao_pc_sales_money 		= $nihao_model->table('sales_flat_order')->where($pc)->where($status)->where($where)->sum('base_grand_total');
+	// 	//nihao中wap销售额
+	// 	$nihao_wap_sales_money		= $nihao_model->table('sales_flat_order')->where($wap)->where($status)->where($where)->sum('base_grand_total');
+	// 	//nihao中pc支付成功数
+	// 	$nihao_pc_sales_num			= $nihao_model->table('sales_flat_order')->where($pc)->where($status)->where($where)->count('*');
+	// 	//nihao中wap支付成功数
+	// 	$nihao_wap_sales_num	 	= $nihao_model->table('sales_flat_order')->where($wap)->where($status)->where($where)->count('*');
+	// 	//nihao pc端客单价
+	// 	$nihao_pc_unit_price   		= @round(($nihao_pc_sales_money/$nihao_pc_sales_num),2);
+	// 	//nihao wap客单价
+	// 	$nihao_wap_unit_price  		= @round(($nihao_wap_sales_money/$nihao_wap_sales_num),2);
+	// 	return [
+	// 		'zeelool_pc_sales_money' 	=> $zeelool_pc_sales_money,
+	// 		'zeelool_wap_sales_money' 	=> $zeelool_wap_sales_money,
+	// 		'zeelool_app_sales_money' 	=> $zeelool_app_sales_money,
+	// 		'zeelool_pc_sales_num' 		=> $zeelool_pc_sales_num,
+	// 		'zeelool_wap_sales_num'		=> $zeelool_wap_sales_num,
+	// 		'zeelool_app_sales_num' 	=> $zeelool_app_sales_num,
+	// 		'zeelool_pc_unit_price' 	=> $zeelool_pc_unit_price,
+	// 		'zeelool_wap_unit_price' 	=> $zeelool_wap_unit_price,
+	// 		'zeelool_app_unit_price' 	=> $zeelool_app_unit_price,
+	// 		'voogueme_pc_sales_money' 	=> $voogueme_pc_sales_money,
+	// 		'voogueme_wap_sales_money' 	=> $voogueme_wap_sales_money,
+	// 		'voogueme_pc_sales_num' 	=> $voogueme_pc_sales_num,
+	// 		'voogueme_wap_sales_num' 	=> $voogueme_wap_sales_num,
+	// 		'voogueme_pc_unit_price' 	=> $voogueme_pc_unit_price,
+	// 		'voogueme_wap_unit_price' 	=> $voogueme_wap_unit_price,
+	// 		'nihao_pc_sales_money' 		=> $nihao_pc_sales_money,
+	// 		'nihao_wap_sales_money' 	=> $nihao_wap_sales_money,
+	// 		'nihao_pc_sales_num' 		=> $nihao_pc_sales_num,
+	// 		'nihao_wap_sales_num' 		=> $nihao_wap_sales_num,
+	// 		'nihao_pc_unit_price' 		=> $nihao_pc_unit_price,
+	// 		'nihao_wap_unit_price' 		=> $nihao_wap_unit_price
+	// 	];		
+
+	// }
+	public function get_platform_data($map)
 	{
-		switch($id){
-			case 1:
-				$where = 'DATE_SUB(CURDATE(),INTERVAL 30 DAY) <= date(created_at) and created_at< curdate()';
-			break;
-			case 2:
-				$where = 'DATE_SUB(CURDATE(),INTERVAL 14 DAY) <= date(created_at) and created_at< curdate()';
-			break;
-			case 3:
-				$where = 'DATE_SUB(CURDATE(),INTERVAL 7 DAY) <= date(created_at) and created_at< curdate()';
-			break;
-			case 4:
-				$where = 'DATEDIFF(created_at,NOW())=-1';
-			break;
-			default:
-				$where = 'TO_DAYS(created_at) = TO_DAYS(NOW())';
-			break;
-		}
+		$arr = Cache::get('Dashboard_get_platform_data_'.md5(serialize($map)));
+		if($arr){
+			return $arr;
+		}				
 		$zeelool_model 	= Db::connect('database.db_zeelool');
 		$voogueme_model = Db::connect('database.db_voogueme');
 		$nihao_model	= Db::connect('database.db_nihao');
@@ -177,17 +264,17 @@ class Dashboard extends Backend
 		$wap['store_id']   = ['in',[2,4]];
 		$app['store_id']   = 5;
 		//zeelool中pc销售额
-		$zeelool_pc_sales_money  	= $zeelool_model->table('sales_flat_order')->where($pc)->where($status)->where($where)->sum('base_grand_total');
+		$zeelool_pc_sales_money  	= $zeelool_model->table('sales_flat_order')->where($pc)->where($status)->where($map)->sum('base_grand_total');
 		//zeelool中wap销售额
-		$zeelool_wap_sales_money 	= $zeelool_model->table('sales_flat_order')->where($wap)->where($status)->where($where)->sum('base_grand_total');
+		$zeelool_wap_sales_money 	= $zeelool_model->table('sales_flat_order')->where($wap)->where($status)->where($map)->sum('base_grand_total');
 		//zeelool中app销售额
-		$zeelool_app_sales_money 	= $zeelool_model->table('sales_flat_order')->where($app)->where($status)->where($where)->sum('base_grand_total');
+		$zeelool_app_sales_money 	= $zeelool_model->table('sales_flat_order')->where($app)->where($status)->where($map)->sum('base_grand_total');
 		//zeelool中pc支付成功数
-		$zeelool_pc_sales_num	 	= $zeelool_model->table('sales_flat_order')->where($pc)->where($status)->where($where)->count('*');
+		$zeelool_pc_sales_num	 	= $zeelool_model->table('sales_flat_order')->where($pc)->where($status)->where($map)->count('*');
 		//zeelool中wap支付成功数
-		$zeelool_wap_sales_num	 	= $zeelool_model->table('sales_flat_order')->where($wap)->where($status)->where($where)->count('*');
+		$zeelool_wap_sales_num	 	= $zeelool_model->table('sales_flat_order')->where($wap)->where($status)->where($map)->count('*');
 		//zeelool中pc支付成功数
-		$zeelool_app_sales_num	 	= $zeelool_model->table('sales_flat_order')->where($app)->where($status)->where($where)->count('*');
+		$zeelool_app_sales_num	 	= $zeelool_model->table('sales_flat_order')->where($app)->where($status)->where($map)->count('*');
 		//zeelool pc端客单价
 		$zeelool_pc_unit_price   	= @round(($zeelool_pc_sales_money/$zeelool_pc_sales_num),2);
 		//zeelool wap客单价
@@ -195,30 +282,30 @@ class Dashboard extends Backend
 		//zeelool app端客单价
 		$zeelool_app_unit_price 	= @round(($zeelool_app_sales_money/$zeelool_app_sales_num),2);
 		//voogueme中pc销售额
-		$voogueme_pc_sales_money 	= $voogueme_model->table('sales_flat_order')->where($pc)->where($status)->where($where)->sum('base_grand_total');
+		$voogueme_pc_sales_money 	= $voogueme_model->table('sales_flat_order')->where($pc)->where($status)->where($map)->sum('base_grand_total');
 		//voogueme中wap销售额
-		$voogueme_wap_sales_money	= $voogueme_model->table('sales_flat_order')->where($wap)->where($status)->where($where)->sum('base_grand_total');
+		$voogueme_wap_sales_money	= $voogueme_model->table('sales_flat_order')->where($wap)->where($status)->where($map)->sum('base_grand_total');
 		//voogueme中pc支付成功数
-		$voogueme_pc_sales_num		= $voogueme_model->table('sales_flat_order')->where($pc)->where($status)->where($where)->count('*');
+		$voogueme_pc_sales_num		= $voogueme_model->table('sales_flat_order')->where($pc)->where($status)->where($map)->count('*');
 		//voogueme中wap支付成功数
-		$voogueme_wap_sales_num	 	= $voogueme_model->table('sales_flat_order')->where($wap)->where($status)->where($where)->count('*');
+		$voogueme_wap_sales_num	 	= $voogueme_model->table('sales_flat_order')->where($wap)->where($status)->where($map)->count('*');
 		//voogueme pc端客单价
 		$voogueme_pc_unit_price   	= @round(($voogueme_pc_sales_money/$voogueme_pc_sales_num),2);
 		//voogueme wap客单价
 		$voogueme_wap_unit_price  	= @round(($voogueme_wap_sales_money/$voogueme_wap_sales_num),2);
 		//nihao中pc销售额
-		$nihao_pc_sales_money 		= $nihao_model->table('sales_flat_order')->where($pc)->where($status)->where($where)->sum('base_grand_total');
+		$nihao_pc_sales_money 		= $nihao_model->table('sales_flat_order')->where($pc)->where($status)->where($map)->sum('base_grand_total');
 		//nihao中wap销售额
-		$nihao_wap_sales_money		= $nihao_model->table('sales_flat_order')->where($wap)->where($status)->where($where)->sum('base_grand_total');
+		$nihao_wap_sales_money		= $nihao_model->table('sales_flat_order')->where($wap)->where($status)->where($map)->sum('base_grand_total');
 		//nihao中pc支付成功数
-		$nihao_pc_sales_num			= $nihao_model->table('sales_flat_order')->where($pc)->where($status)->where($where)->count('*');
+		$nihao_pc_sales_num			= $nihao_model->table('sales_flat_order')->where($pc)->where($status)->where($map)->count('*');
 		//nihao中wap支付成功数
-		$nihao_wap_sales_num	 	= $nihao_model->table('sales_flat_order')->where($wap)->where($status)->where($where)->count('*');
+		$nihao_wap_sales_num	 	= $nihao_model->table('sales_flat_order')->where($wap)->where($status)->where($map)->count('*');
 		//nihao pc端客单价
 		$nihao_pc_unit_price   		= @round(($nihao_pc_sales_money/$nihao_pc_sales_num),2);
 		//nihao wap客单价
-		$nihao_wap_unit_price  		= @round(($nihao_wap_sales_money/$nihao_wap_sales_num),2);
-		return [
+		$nihao_wap_unit_price  		= @round(($nihao_wap_sales_money/$nihao_wap_sales_num),2);				
+		$arr = [
 			'zeelool_pc_sales_money' 	=> $zeelool_pc_sales_money,
 			'zeelool_wap_sales_money' 	=> $zeelool_wap_sales_money,
 			'zeelool_app_sales_money' 	=> $zeelool_app_sales_money,
@@ -240,7 +327,9 @@ class Dashboard extends Backend
 			'nihao_wap_sales_num' 		=> $nihao_wap_sales_num,
 			'nihao_pc_unit_price' 		=> $nihao_pc_unit_price,
 			'nihao_wap_unit_price' 		=> $nihao_wap_unit_price
-		];		
+		];
+		Cache::set('Dashboard_get_platform_data_'.md5(serialize($map)),$arr,7200);
+		return $arr;		
 
 	}
 }
