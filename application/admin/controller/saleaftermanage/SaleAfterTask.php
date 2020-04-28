@@ -36,6 +36,7 @@ class SaleAfterTask extends Backend
     protected $model = null;
     protected $worklist = null;
     protected $workremark = null;
+    protected $changesku = null;
     protected $relationSearch = true;
     protected $groupdata = [];
     // protected $noNeedLogin = [
@@ -53,6 +54,7 @@ class SaleAfterTask extends Backend
         $this->model = new \app\admin\model\saleaftermanage\SaleAfterTask;
         $this->worklist = new \app\admin\model\saleaftermanage\WorkOrderList;
         $this->workremark = new \app\admin\model\saleaftermanage\WorkOrderRemark;
+        $this->changesku  = new \app\admin\model\saleaftermanage\WorkOrderChangeSku;
         //新加内容
         $this->childrenGroupIds = $this->auth->getChildrenGroupIds(true);
 
@@ -1469,7 +1471,7 @@ class SaleAfterTask extends Backend
             if($v['rep_id']){
             $arr[$k]['recept_person_id']  = str_replace("+",",",$v['rep_id']);
             }
-            $arr[$k]['original_id']   = $v['id'];
+            $arr[$k]['synergy_id']   = $v['id'];
 
         }
             $info = $this->worklist->saveAll($arr);
@@ -1479,5 +1481,96 @@ class SaleAfterTask extends Backend
                 echo 'error';
             }
     }
-
+    /**
+     * 协同任务的备注导入到工单的备注
+     *
+     * @Description
+     * @author lsw
+     * @since 2020/04/28 09:36:41 
+     * @return void
+     */
+    public function getinfoSynergyRemark()
+    {
+        $page = input("page") ?:1;
+        $start = ($page - 1)*1000;
+        $result = Db::name('info_synergy_task_remark')->alias('m')->join('work_order_list w','m.tid=w.synergy_id','left')->field('m.*,w.id as wid')->limit($start,1000)->select();
+        if(!$result){
+            return false;
+        }
+        $arr = [];
+        foreach($result as $k => $v){
+            $arr[$k]['work_id'] = $v['wid'];
+            $arr[$k]['remark_type'] = 3;
+            $arr[$k]['remark_record'] = $v['remark_record'];
+            $arr[$k]['create_person'] = $v['create_person'];
+            $arr[$k]['create_time'] = $v['create_time'];
+        }
+        $info = $this->workremark->saveAll($arr);
+        if($info){
+            echo 'ok';
+        }else{
+            echo 'error';
+        }
+    }
+    /**
+     * 协同任务更改sku信息到新的库
+     *
+     * @Description
+     * @author lsw
+     * @since 2020/04/28 09:47:46 
+     * @return void
+     */    
+    public function infoSynergyChangeSku()
+    {
+        $page = input("page") ?:1;
+        $start = ($page - 1)*1000;
+        $result = Db::name('info_synergy_task_change_sku')->alias('m')->join('work_order_list w','m.tid=w.synergy_id','left')->field('m.*,w.id as wid')->limit($start,1000)->select();
+        if(!$result){
+            return false;
+        }
+        $arr = [];
+        foreach($result as $k =>$v){
+            $arr[$k]['work_id']         = $v['wid'];
+            $arr[$k]['increment_id']    = $v['increment_id'];
+            $arr[$k]['platform_type']   = $v['platform_type'];
+            $arr[$k]['original_name']   = $v['original_name'];
+            $arr[$k]['original_sku']    = $v['original_sku'];
+            $arr[$k]['original_number'] = $v['original_number'];
+            $arr[$k]['change_type']     = $v['change_type'];    
+            $arr[$k]['change_sku']      = $v['change_sku'];
+            $arr[$k]['change_number']   = $v['change_number'];
+            $arr[$k]['recipe_type']     = $v['recipe_type'];
+            $arr[$k]['lens_type']       = $v['lens_type'];
+            $arr[$k]['coating_type']    = $v['coating_type'];
+            $arr[$k]['second_name']     = $v['second_name'];
+            $arr[$k]['zsl']             = $v['zsl'];
+            $arr[$k]['od_sph']          = $v['od_sph'];
+            $arr[$k]['od_cyl']          = $v['od_cyl'];
+            $arr[$k]['od_axis']         = $v['od_axis'];
+            $arr[$k]['od_add']          = $v['od_add'];
+            $arr[$k]['pd_r']            = $v['pd_r'];
+            $arr[$k]['od_pv']           = $v['od_pv'];
+            $arr[$k]['od_bd']           = $v['od_bd'];
+            $arr[$k]['od_pv_r']         = $v['od_pv_r'];
+            $arr[$k]['od_bd_r']         = $v['od_bd_r'];
+            $arr[$k]['os_sph']          = $v['os_sph'];
+            $arr[$k]['os_cyl']          = $v['os_cyl'];
+            $arr[$k]['os_axis']         = $v['os_axis'];
+            $arr[$k]['os_add']          = $v['os_add'];
+            $arr[$k]['pd_l']            = $v['pd_l'];
+            $arr[$k]['os_pv']           = $v['os_pv'];
+            $arr[$k]['os_bd']           = $v['os_bd'];
+            $arr[$k]['os_pv_r']         = $v['os_pv_r'];
+            $arr[$k]['os_bd_r']         = $v['os_bd_r'];
+            $arr[$k]['create_person']   = $v['create_person'];
+            $arr[$k]['update_time']     = $v['update_time'];
+            $arr[$k]['create_time']     = $v['create_time'];
+        }
+        $info = $this->changesku->saveAll($arr);
+        if($info){
+            echo 'ok';
+        }else{
+            echo 'error';
+        }        
+    }
 }

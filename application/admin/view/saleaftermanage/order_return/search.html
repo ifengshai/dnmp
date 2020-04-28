@@ -236,7 +236,73 @@ table.altrowstable tr:nth-child(even){
                         </table>
                     </div>
                     </div>
-                 
+                    <!-- <table id="info-customer-task" class="altrowstable"
+                           data-operate-edit="{:$auth->check('saleaftermanage/order_return/edit')}"
+                           data-operate-del="{:$auth->check('saleaftermanage/order_return/del')}"
+                           width="100%">
+                    <thead>
+                            <tr><th colspan="16" style="font-size:16px;text-align: center; vertical-align: middle;">用户个人信息</th></tr>                           
+                        <tr>
+                            <th style="text-align: center; vertical-align: middle;">姓名</th>
+                            <th style="text-align: center; vertical-align: middle;">邮箱</th>
+                            <th style="text-align: center; vertical-align: middle;">支付成功次数</th>
+                            <th style="text-align: center; vertical-align: middle;">支付成功金额</th>
+                            <th style="text-align: center; vertical-align: middle;">支付失败次数</th>
+                            <th style="text-align: center; vertical-align: middle;">支付失败金额</th>
+                        </tr>
+                    </thead>
+                        {notempty name="customerInfo"}
+                        <tr>
+                            <td style="text-align: center; vertical-align: middle;">{$customerInfo.customer_name}</td>
+                            <td style="text-align: center; vertical-align: middle;">{$customerInfo.customer_email}</td>
+                            <td style="text-align: center; vertical-align: middle;">{$customerInfo.success_counter}</td>
+                            <td style="text-align: center; vertical-align: middle;">{$customerInfo.success_total}</td>
+                            <td style="text-align: center; vertical-align: middle;">{$customerInfo.failed_counter}</td>
+                            <td style="text-align: center; vertical-align: middle;">{$customerInfo.failed_total}</td>
+                        </tr>
+                        {/notempty}
+                    </table> -->
+                    {notempty name="workOrderListResult"}
+                    <table id="info-synergy-task" class="altrowstable"
+                           data-operate-edit="{:$auth->check('saleaftermanage/order_return/edit')}"
+                           data-operate-del="{:$auth->check('saleaftermanage/order_return/del')}"
+                           width="100%">
+                        <thead>
+                        <tr><th colspan="16" style="font-size:16px;text-align: center; vertical-align: middle;background-color: #cccccc;">协同任务列表</th></tr>
+                        <tr>
+                            <th style="text-align: center; vertical-align: middle;">工单状态</th>
+                            <th style="text-align: center; vertical-align: middle;">工单类型</th>
+                            <th style="text-align: center; vertical-align: middle;">关联单号</th>
+                            <th style="text-align: center; vertical-align: middle;">订单SKUS</th>
+                            <th style="text-align: center; vertical-align: middle;">平台类型</th>
+                            <th style="text-align: center; vertical-align: middle;">工单级别</th>
+                            <th style="text-align: center; vertical-align: middle;">问题类型</th>
+                            <th style="text-align: center; vertical-align: middle;">问题描述</th>
+                            <th style="text-align: center; vertical-align: middle;">承接人</th>
+                            <th style="text-align: center; vertical-align: middle;">工单措施</th>
+                            <th style="text-align: center; vertical-align: middle;">创建人</th>
+                            <th style="text-align: center; vertical-align: middle;">创建时间</th>
+                            <th style="text-align: center; vertical-align: middle;">操作</th>
+                        </tr>
+                        </thead>
+                        {foreach name="workOrderListResult" item="workOrderList" }
+                        <tr>
+                            <td style="text-align: center; vertical-align: middle;">{workOrderList.work_status_format}</td>
+                            <td style="text-align: center; vertical-align: middle;">{workOrderList.work_type_format}</td>
+                            <td style="text-align: center; vertical-align: middle;">{workOrderList.platform_order}</td>
+                            <td style="text-align: center; vertical-align: middle;">{workOrderList.order_sku}</td>
+                            <td style="text-align: center; vertical-align: middle;">{workOrderList.work_platform_format}</td>
+                            <td style="text-align: center; vertical-align: middle;">{workOrderList.work_level_format}</td>
+                            <td style="text-align: center; vertical-align: middle;">{workOrderList.problem_type_content}</td>
+                            <td style="text-align: center; vertical-align: middle;">{workOrderList.problem_description}</td>
+                            <td style="text-align: center; vertical-align: middle;">{workOrderList.measure}</td>
+                            <td style="text-align: center; vertical-align: middle;">{workOrderList.recept_persons}</td>
+                            <td style="text-align: center; vertical-align: middle;">{workOrderList.create_time}</td>
+                            <td style="text-align: center; vertical-align: middle;"><a href="{:url('infosynergytaskmanage/info_synergy_task/index')}?synergy_order_number={$synergyTaskList.synergy_order_number}" class="btn btn-primary btn-xs btn-click btn-addtabs" data-table-id="table" data-field-index="11" data-row-index="0" data-button-index="3" title="协同任务"><i class="fa fa-list"></i>查看</a></td>
+                        </tr>
+                        {/foreach}
+                    </table>
+                    {/notempty}
                         {notempty name="infoSynergyTaskResult"}
                         <table id="info-synergy-task" class="altrowstable"
                                data-operate-edit="{:$auth->check('saleaftermanage/order_return/edit')}"
