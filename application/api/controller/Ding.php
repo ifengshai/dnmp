@@ -297,7 +297,7 @@ class Ding extends Controller
         if (!is_array($users)) $users = [$users];
         foreach ($users as $k =>&$user) {
             // 使用id获取userid
-            if (($get = Admin::get(['id' =>$user])) || $get = Admin::get(['username' =>$user])) {
+            if (($get = Admin::get(['id' =>$user])) || ($get = Admin::get(['username' =>$user]))) {
                 $user = $get['userid'];
             }
             if (!$user) unset($users[$k]);
