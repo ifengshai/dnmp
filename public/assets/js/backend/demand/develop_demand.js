@@ -151,15 +151,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     url: 'demand/develop_demand/set_complete_status',
                                     success: function (data, ret) {
                                         table.bootstrapTable('refresh', {});
-                                        //如果需要阻止成功提示，则必须使用return false;
-                                        //return false;
                                     },
                                     error: function (data, ret) {
                                         Layer.alert(ret.msg);
                                         return false;
                                     },
                                     visible: function (row) {
-                                        if (row.is_finish == 0 && Config.is_set_status == 1) {
+                                        if (row.is_finish == 0 && Config.is_set_status == 1 && row.review_status_develop == 1) {
                                             return true;
                                         } else {
                                             return false;
