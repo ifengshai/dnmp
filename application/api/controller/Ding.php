@@ -342,15 +342,15 @@ class Ding extends Controller
         $msg = ''; // 消息内容
         switch($name){
             case 'add':                     // 添加内容通知, 发送给所有测试人员
-                $authUserIds = Auth::getUsersId('demand/it_web_demand/test_distribution') ?: [];
-                $copyToUserId = explode(',',$demand ->copy_to_user_id);
-
-                $send_ids = array_merge(
-                    $authUserIds, // 所有有权限点击测试确认的用户
-                    $copyToUserId   // 需求抄送
-                );
-                $entry_user = Admin::get($demand ->entry_user_id) ->nickname;
-                $msg = $entry_user . '刚刚录入了一个新的' . self::demandType($demand ->type) . ', 请关注';
+//                $authUserIds = Auth::getUsersId('demand/it_web_demand/test_distribution') ?: [];
+//                $copyToUserId = explode(',',$demand ->copy_to_user_id);
+//
+//                $send_ids = array_merge(
+//                    $authUserIds, // 所有有权限点击测试确认的用户
+//                    $copyToUserId   // 需求抄送
+//                );
+//                $entry_user = Admin::get($demand ->entry_user_id) ->nickname;
+//                $msg = $entry_user . '刚刚录入了一个新的' . self::demandType($demand ->type) . ', 请关注';
                 break;
             case 'add_confirm':             // 提出人确认完成
                 break;
