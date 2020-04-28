@@ -330,7 +330,6 @@ class ItDemandReport extends Backend
         //设置过滤方法
         $stime = date("Y-m-d 00:00:00", strtotime("-7 day"));
         $etime = date('Y-m-d 00:00:00', strtotime("+1 day"));
-//        $this->relationSearch=true;
         $this->request->filter(['strip_tags']);
         if ($this->request->isAjax()) {
             $this->model = new \app\admin\model\demand\ItWebTask;
@@ -354,19 +353,20 @@ class ItDemandReport extends Backend
             }
 
             $total = $this->model->alias('it_web_task')->join('fa_it_web_task_item itwebtaskitem','it_web_task.id=itwebtaskitem.task_id','left')
-                ->where($between_map)
-                ->where($addWhere)
                 ->where($where)
+                ->where($addWhere)
+                ->where($between_map)
                 ->distinct('it_web_task.id')
-                ->field('it_web_task.id,it_web_task.type,it_web_task.title,it_web_task.desc,it_web_task.closing_date,it_web_task.is_test_adopt,it_web_task.complete_date,it_web_task.is_complete,it_web_task.test_adopt_time,it_web_task.create_person,it_web_task.createtime,it_web_task.site_type,it_web_task.test_regression_adopt,it_web_task.test_regression_adopt_time,it_web_task.test_regression_person')
                 ->order('it_web_task.id', $order)
+                ->limit($offset, $limit)
+                ->field('it_web_task.id,it_web_task.type,it_web_task.title,it_web_task.desc,it_web_task.closing_date,it_web_task.is_test_adopt,it_web_task.complete_date,it_web_task.is_complete,it_web_task.test_adopt_time,it_web_task.create_person,it_web_task.createtime,it_web_task.site_type,it_web_task.test_regression_adopt,it_web_task.test_regression_adopt_time,it_web_task.test_regression_person')
                 ->count();
 
 
             $list = $this->model->alias('it_web_task')->join('fa_it_web_task_item itwebtaskitem','it_web_task.id=itwebtaskitem.task_id','left')
-                ->where($between_map)
-                ->where($addWhere)
                 ->where($where)
+                ->where($addWhere)
+                ->where($between_map)
                 ->distinct('it_web_task.id')
                 ->order('it_web_task.id', $order)
                 ->limit($offset, $limit)
