@@ -469,7 +469,7 @@ class OrderReturn extends Backend
             // exit;
             $orderReturnResult = Db::name('order_return')->where('order_platform', $order_platform)->where('increment_id', 'in', $allIncrementOrder)->order('id desc')->select();
             //工单列表
-            \app\admin\model\saleaftermanage\WorkOrderList::workOrderListResult($allIncrementOrder);
+            $workOrderListResult = \app\admin\model\saleaftermanage\WorkOrderList::workOrderListResult($allIncrementOrder);
             //求出承接部门和承接人
             $deptArr = (new AuthGroup())->getAllGroup();
             $repArr  = (new Admin())->getAllStaff();
@@ -595,6 +595,7 @@ class OrderReturn extends Backend
                 }
             }
             $this->view->assign('infoSynergyTaskResult', $infoSynergyTaskResult);
+            $this->view->assign('workOrderListResult', $workOrderListResult);
             $this->view->assign('saleAfterTaskResult', $saleAfterTaskResult);
             $this->view->assign('orderReturnResult', $orderReturnResult);
             $this->view->assign('orderInfoResult', $customer);
