@@ -42,7 +42,9 @@ class Crontab extends Backend
         'get_sales_order_update',
         'get_sales_order_update_two',
         'warehouse_data_everyday',
-        'calculate_order_item_num'
+        'calculate_order_item_num',
+        'get_stock_data',
+        'set_stock_change'
 
     ];
 
@@ -3727,7 +3729,7 @@ order by sfoi.item_id asc limit 1000";
         die;
     }
 
-
+    /************************跑库存数据用START**********************************/
     //导入实时库存 第一步
     public function set_product_relstock()
     {
@@ -3941,5 +3943,98 @@ order by sfoi.item_id asc limit 1000";
             $p_map['sku'] = $v['sku'];
             $res = $this->item->where($p_map)->update($data);
         }
+    }
+
+    /************************跑库存数据用END**********************************/
+
+    /**
+     * 每天定时获取库存数据
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/04/27 09:48:05 
+     * @return void
+     */
+    public function get_stock_data()
+    {
+        //清空表
+        Db::execute("truncate table fa_temp_stock;");
+
+        //查询当天所有有库存的数据
+        $map['item_status'] = 3;
+        $map['is_open'] = 1;
+        $map['is_del'] = 1;
+        $map['available_stock'] = ['>', 0];
+        $list = $this->item->field('sku,available_stock as stock')->where($map)->select();
+        $list = collection($list)->toArray();
+        foreach ($list as &$v) {
+            $v['type'] = 1;
+            $v['createtime'] = date('Y-m-d H:i:s');
+        }
+        unset($v);
+        Db::table('fa_temp_stock')->insertAll($list);
+
+
+        //查询当天所有无库存数据
+        $map['available_stock'] = ['<=', 0];
+        $info = $this->item->field('sku,available_stock as stock')->where($map)->select();
+        $info = collection($info)->toArray();
+        foreach ($info as &$v) {
+            $v['type'] = 2;
+            $v['createtime'] = date('Y-m-d H:i:s');
+        }
+        unset($v);
+        Db::table('fa_temp_stock')->insertAll($info);
+        echo 'ok';
+    }
+
+    /**
+     * 定时统计SKU变化情况
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/04/27 10:34:10 
+     * @return void
+     */
+    public function set_stock_change()
+    {
+        //查询
+        $list = Db::table('fa_temp_stock')->select();
+
+        //查询当天所有有库存的数据
+        $map['item_status'] = 3;
+        $map['is_open'] = 1;
+        $map['is_del'] = 1;
+        $res = $this->item->where($map)->column('available_stock as stock', 'sku');
+        $info = [];
+        foreach ($list as $k => $v) {
+            //从有库存到无库存
+            if ($v['type'] == 1 && $res[$v['sku']] <= 0) {
+                $info[$k]['sku'] = $v['sku'];
+                $info[$k]['type'] = 1;
+                $info[$k]['change_num'] = $v['stock'] - $res[$v['sku']];
+                $info[$k]['createtime'] = date('Y-m-d H:i:s', time());
+
+                Db::table('fa_temp_stock')->where(['sku' => $v['sku']])->update([
+                    'stock' => $res[$v['sku']],
+                    'type'  => 2
+                    ]);
+            }
+            //从无到有
+            if ($v['type'] == 2 && $res[$v['sku']] > 0) {
+                $info[$k]['sku'] = $v['sku'];
+                $info[$k]['type'] = 2;
+                $info[$k]['change_num'] = $res[$v['sku']] - $v['stock'];
+                $info[$k]['createtime'] = date('Y-m-d H:i:s', time());
+
+                Db::table('fa_temp_stock')->where(['sku' => $v['sku']])->update([
+                    'stock' => $res[$v['sku']],
+                    'type'  => 1
+                ]);
+            }
+           
+        }
+    
+        Db::table('fa_goods_stock_change')->insertAll(array_values($info));
     }
 }

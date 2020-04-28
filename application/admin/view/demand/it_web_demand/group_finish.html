@@ -8,6 +8,19 @@
             <span class="bg-red">
                 {:__('Hope_time')}：{$year_time}
             </span>
+
+        </li>
+        <li>
+            <div class="timeline-item">
+                                <span style="float: left;">小概率:</span>
+                <!--                <label class="control-label col-xs-12 col-sm-2">{:__('is_small_probability')}:</label>-->
+                <div class="col-xs-12 col-sm-9">
+                    <select  id="is_small_probability" class="form-control " onchange="onchangeSelect(this)">
+                        <option value="0" {:$row['is_small_probability'] == 0 ? 'selected' : ''}>否</option>
+                        <option value="1" {:$row['is_small_probability'] == 1 ? 'selected' : ''}>是</option>
+                    </select>
+                </div>
+            </div>
         </li>
         {if $web_userid_arr['group'] == 1}
             <li>
@@ -34,6 +47,7 @@
                             <input type="hidden" name="row[web_finish]" value="1"/>
                             <input type="hidden" name="row[id]" value="{$row.id}"/>
                             <input type="hidden" name="row[status]" value="{$row.status}"/>
+                            <input type="hidden" name="row[is_small_probability]" value="{$row.is_small_probability}"/>
 
                             {if $demand_type == 1}
                             <input type="hidden" name="row[demand_type]" value="{$demand_type}"/>
@@ -80,6 +94,7 @@
                     <input type="hidden" name="row[php_finish]" value="1"/>
                     <input type="hidden" name="row[id]" value="{$row.id}"/>
                     <input type="hidden" name="row[status]" value="{$row.status}"/>
+                    <input type="hidden" name="row[is_small_probability]" value="{$row.is_small_probability}"/>
                     {if $demand_type == 1}
                     <input type="hidden" name="row[demand_type]" value="{$demand_type}"/>
                     <div style="overflow: hidden">
@@ -125,6 +140,7 @@
                     <input type="hidden" name="row[app_finish]" value="1"/>
                     <input type="hidden" name="row[id]" value="{$row.id}"/>
                     <input type="hidden" name="row[status]" value="{$row.status}"/>
+                    <input type="hidden" name="row[is_small_probability]" value="{$row.is_small_probability}"/>
                     {if $demand_type == 1}
                     <input type="hidden" name="row[demand_type]" value="{$demand_type}"/>
                     <div style="overflow: hidden">
