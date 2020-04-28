@@ -37,7 +37,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                         { field: 'custom_is_match_lens_new', title: __('配镜片'), custom: { 0: 'danger', 1: 'green' }, searchList: { 1: '是', 0: '否' }, formatter: Table.api.formatter.status },
                         { field: 'custom_is_send_factory_new', title: __('加工'), custom: { 0: 'danger', 1: 'green' }, searchList: { 1: '是', 0: '否' }, formatter: Table.api.formatter.status },
                         { field: 'custom_is_delivery_new', title: __('质检'), custom: { 0: 'danger', 1: 'green' }, searchList: { 1: '是', 0: '否' }, formatter: Table.api.formatter.status },
-                        { field: 'task_label', title: __('是否有工单'), visible: false, searchList: { 1: '是', 0: '否' }, formatter: Table.api.formatter.status },
+                        { field: 'task_label', title: __('是否有协同任务'), visible: false, searchList: { 1: '是', 0: '否' }, formatter: Table.api.formatter.status },
+                        { field: 'is_task', title: __('是否有工单'), visible: false, searchList: { 1: '是', 0: '否' }, formatter: Table.api.formatter.status },
                         {
                             field: 'task_info', title: __('工单'), operate: false, formatter: function (value, row) {
                                 if (value) {
@@ -45,17 +46,24 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                                 }
                             }
                         },
+                        {
+                            field: 'is_task_info', title: __('协同任务'), operate: false, formatter: function (value, row) {
+                                if (value) {
+                                    return '<a href="' + Config.moduleurl + '/infosynergytaskmanage/info_synergy_task/index?synergy_order_number=' + row.increment_id + '" class="btn btn-primary btn-xs btn-click btn-addtabs" data-table-id="table" data-field-index="11" data-row-index="0" data-button-index="3" title="协同任务"><i class="fa fa-list"></i> 问</a>'
+                                }
+                            }
+                        },
                         { field: 'custom_order_prescription_type', title: __('处方类型'), addClass: 'selectpicker', data: 'multiple', operate: 'IN', custom: { 1: 'green', 2: 'green', 3: 'green', 4: 'green', 5: 'green', 6: 'green' }, searchList: { 1: '仅镜架', 2: '现货处方镜', 3: '定制处方镜', 4: '镜架+现货', 5: '镜架+定制', 6: '现片+定制片', '': '获取中' }, formatter: Table.api.formatter.status },
                         { field: 'order_type', title: __('订单类型'), custom: { 1: 'blue', 2: 'blue', 3: 'blue', 4: 'blue', 5: 'blue' }, searchList: { 1: '普通订单', 2: '批发单', 3: '网红单', 4: '补发单', 5: '补差价' }, formatter: Table.api.formatter.status },
                         { field: 'created_at', title: __('创建时间'), operate: 'RANGE', sortable: true, addclass: 'datetimerange' },
                         { field: 'sku', title: __('SKU'), operate: 'like', visible: false },
-                        // {
-                        //     field: 'category_id', title: __('任务分类'), searchList: function (column) {
-                        //         return Template('categorytpl', {});
-                        //     }, formatter: function (value, row, index) {
-                        //         return '无';
-                        //     }, visible: false
-                        // },
+                        {
+                            field: 'category_id', title: __('任务分类'), searchList: function (column) {
+                                return Template('categorytpl', {});
+                            }, formatter: function (value, row, index) {
+                                return '无';
+                            }, visible: false
+                        },
                         {
                             field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [
                                 {
@@ -250,6 +258,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                             field: 'task_info', title: __('工单'), operate: false, formatter: function (value, row) {
                                 if (value) {
                                     return '<a href="' + Config.moduleurl + '/saleaftermanage/work_order_list/index?platform_order=' + row.increment_id + '" class="btn btn-primary btn-xs btn-click btn-dialog" data-table-id="table" target="_blank" data-field-index="11" data-row-index="0" data-button-index="3" title="工单"><i class="fa fa-list"></i> 工单</a>'
+                                }
+                            }
+                        },
+                        {
+                            field: 'is_task_info', title: __('协同任务'), operate: false, formatter: function (value, row) {
+                                if (value) {
+                                    return '<a href="' + Config.moduleurl + '/infosynergytaskmanage/info_synergy_task/index?synergy_order_number=' + row.increment_id + '" class="btn btn-primary btn-xs btn-click btn-addtabs" data-table-id="table" data-field-index="11" data-row-index="0" data-button-index="3" title="协同任务"><i class="fa fa-list"></i> 问</a>'
                                 }
                             }
                         },

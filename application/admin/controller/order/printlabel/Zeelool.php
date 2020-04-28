@@ -63,18 +63,51 @@ class Zeelool extends Backend
             } elseif (!$filter['status']) {
                 $map['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal']];
             }
-            //是否有协同任务
+
+            //是否有工单
             $workorder = new \app\admin\model\saleaftermanage\WorkOrderList();
-            if ($filter['task_label'] == 1 || $filter['task_label'] == '0') {
+            if ($filter['is_task'] == 1 || $filter['is_task'] == '0') {
+                $swhere = [];
                 $swhere['work_platform'] = 1;
                 $swhere['work_status'] = ['<>', 0];
                 $order_arr = $workorder->where($swhere)->column('platform_order');
+                if ($filter['is_task'] == 1) {
+                    $map['increment_id'] = ['in', $order_arr];
+                } elseif ($filter['is_task'] == '0') {
+                    $map['increment_id'] = ['not in', $order_arr];
+                }
+                unset($filter['is_task']);
+                $this->request->get(['filter' => json_encode($filter)]);
+            }
+
+            //是否有协同任务
+            $infoSynergyTask = new \app\admin\model\infosynergytaskmanage\InfoSynergyTask;
+            if ($filter['task_label'] == 1 || $filter['task_label'] == '0') {
+                $swhere = [];
+                $swhere['is_del'] = 1;
+                $swhere['order_platform'] = 1;
+                $swhere['synergy_order_id'] = 2;
+                $order_arr = $infoSynergyTask->where($swhere)->order('create_time desc')->column('synergy_order_number');
                 if ($filter['task_label'] == 1) {
                     $map['increment_id'] = ['in', $order_arr];
                 } elseif ($filter['task_label'] == '0') {
                     $map['increment_id'] = ['not in', $order_arr];
                 }
                 unset($filter['task_label']);
+                $this->request->get(['filter' => json_encode($filter)]);
+            }
+
+            //协同任务分类id搜索
+            if ($filter['category_id'] || $filter['c_id']) {
+                $swhere = [];
+                $swhere['is_del'] = 1;
+                $swhere['order_platform'] = 1;
+                $swhere['synergy_order_id'] = 2;
+                $swhere['synergy_task_id'] = $filter['category_id'] ?? $filter['c_id'];
+                $order_arr = $infoSynergyTask->where($swhere)->order('create_time desc')->column('synergy_order_number');
+                $map['increment_id'] = ['in', $order_arr];
+                unset($filter['category_id']);
+                unset($filter['c_id']);
                 $this->request->get(['filter' => json_encode($filter)]);
             }
 
@@ -107,17 +140,30 @@ class Zeelool extends Backend
                 ->select();
 
             $list = collection($list)->toArray();
-            //查询订单是否存在协同任务
+            //查询订单是否存在工单
             $swhere = [];
             $increment_ids = array_column($list, 'increment_id');
             $swhere['platform_order'] = ['in', $increment_ids];
             $swhere['work_platform'] = 1;
             $swhere['work_status'] = ['<>', 0];
             $order_arr = $workorder->where($swhere)->column('platform_order');
+
+
             //查询是否存在协同任务
+            $swhere = [];
+            $swhere['synergy_order_number'] = ['in', $increment_ids];
+            $swhere['is_del'] = 1;
+            $swhere['order_platform'] = 1;
+            $swhere['synergy_order_id'] = 2;
+            $synergy_order_arr = $infoSynergyTask->where($swhere)->column('synergy_order_number');
+
             foreach ($list as $k => $v) {
                 if (in_array($v['increment_id'], $order_arr)) {
                     $list[$k]['task_info'] = 1;
+                }
+
+                if (in_array($v['increment_id'], $synergy_order_arr)) {
+                    $list[$k]['is_task_info'] = 1;
                 }
             }
 
@@ -155,8 +201,19 @@ class Zeelool extends Backend
                     $swhere['work_status'] = ['<>', 0];
                     $count = $workorder->where($swhere)->count();
                     //查询是否存在协同任务
+                    $infoSynergyTask = new \app\admin\model\infosynergytaskmanage\InfoSynergyTask;
+                    $swhere = [];
+                    $swhere['synergy_order_number'] = $increment_id;
+                    $swhere['is_del'] = 1;
+                    $swhere['order_platform'] = 1;
+                    $swhere['synergy_order_id'] = 2;
+                    $info_count = $infoSynergyTask->where($swhere)->count();
                     if ($count > 0) {
                         $list['task_info'] = 1;
+                    }
+
+                    if ($info_count > 0) {
+                        $list['is_task_info'] = 1;
                     }
                 }
                 $result = ['code' => 1, 'data' => $list ?? []];
@@ -708,7 +765,21 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
         } elseif (!$filter['status']) {
             $map['status'] = ['in', ['free_processing', 'processing',  'paypal_reversed', 'paypal_canceled_reversal']];
         }
-
+        //是否有工单
+        $workorder = new \app\admin\model\saleaftermanage\WorkOrderList();
+        if ($filter['is_task'] == 1 || $filter['is_task'] == '0') {
+            $swhere = [];
+            $swhere['work_platform'] = 1;
+            $swhere['work_status'] = ['<>', 0];
+            $order_arr = $workorder->where($swhere)->column('platform_order');
+            if ($filter['is_task'] == 1) {
+                $map['increment_id'] = ['in', $order_arr];
+            } elseif ($filter['is_task'] == '0') {
+                $map['increment_id'] = ['not in', $order_arr];
+            }
+            unset($filter['is_task']);
+            $this->request->get(['filter' => json_encode($filter)]);
+        }
         //是否有协同任务
         $infoSynergyTask = new \app\admin\model\infosynergytaskmanage\InfoSynergyTask;
         if ($filter['task_label'] == 1 || $filter['task_label'] == '0') {
@@ -1073,44 +1144,7 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
         set_time_limit(0);
         ini_set('memory_limit', '512M');
 
-        $str = '400223640
-        100107402
-        400223862
-        400223700
-        400223723
-        400223549
-        100107455
-        400223951
-        400221633
-        400223505
-        400223713
-        400223660
-        400223359
-        400223343
-        400223454
-        400223542
-        400223506
-        400223649
-        100107425
-        400223419
-        100107436
-        100107460
-        100107450
-        400223407
-        100107476
-        100107473
-        400223395
-        400223496
-        100107429
-        400223435
-        100107399
-        400223301
-        400223452
-        100107424
-        400191521
-        400223998
-        400223529
-        100107292';
+        $str = '';
         $str = explode('
         ', $str);
 
