@@ -82,6 +82,9 @@ class Db
             // 解析连接参数 支持数组和字符串
             $options = self::parseConfig($config);
             if (empty($options['type'])) {
+                echo '<pre>';
+                var_dump($options['type']);
+                var_dump($options);
                 throw new \InvalidArgumentException('Undefined db type');
             }
 

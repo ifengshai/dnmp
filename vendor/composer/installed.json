@@ -2162,57 +2162,6 @@
         "description": "A polyfill for getallheaders."
     },
     {
-        "name": "sch-group/17track",
-        "version": "v1.7",
-        "version_normalized": "1.7.0.0",
-        "source": {
-            "type": "git",
-            "url": "https://github.com/sch-group/17track.git",
-            "reference": "2acb2826217b5e9bff1e40ba2d4d521f3dfa7efc"
-        },
-        "dist": {
-            "type": "zip",
-            "url": "https://api.github.com/repos/sch-group/17track/zipball/2acb2826217b5e9bff1e40ba2d4d521f3dfa7efc",
-            "reference": "2acb2826217b5e9bff1e40ba2d4d521f3dfa7efc",
-            "shasum": "",
-            "mirrors": [
-                {
-                    "url": "https://mirrors.aliyun.com/composer/dists/%package%/%reference%.%type%",
-                    "preferred": true
-                }
-            ]
-        },
-        "require": {
-            "ext-json": "*",
-            "guzzlehttp/guzzle": "^6.2",
-            "php": "^7.1"
-        },
-        "require-dev": {
-            "guzzlehttp/guzzle": "^6.2",
-            "phpunit/phpunit": "~6.5.5",
-            "piwik/ini": "^2.0"
-        },
-        "time": "2020-02-28T10:50:44+00:00",
-        "type": "library",
-        "installation-source": "dist",
-        "autoload": {
-            "psr-4": {
-                "SchGroup\\SeventeenTrack\\": "src/"
-            }
-        },
-        "notification-url": "https://packagist.org/downloads/",
-        "license": [
-            "MIT"
-        ],
-        "authors": [
-            {
-                "name": "aahmetgaliev",
-                "email": "ainur_ahmetgalie@mail.ru"
-            }
-        ],
-        "description": "17Track (SeventeenTrack) api connector"
-    },
-    {
         "name": "setasign/fpdi",
         "version": "v2.3.0",
         "version_normalized": "2.3.0.0",

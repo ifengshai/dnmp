@@ -215,18 +215,6 @@ Our order tracker indicates that your glasses are being processed in our facilit
 
 We really appreciate your patience and understanding. Please feel free to contact us if there is any other question.
 
-Have a nice day!',
-        //投递失败/可能异常
-        't16' => 'Hi there,
-
-Thank you for shopping with us at Zeelool.
-
-We want to inform you that your order was shipped out on %s, with tracking number %s by %s.
-
-Here is the latest update on the shipping status: %s
-
-It shows that there is something wrong with your tracking information. Would you please kindly contact %s to ask them why they’re not able to deliver your parcel for you and arrange the delivery date?
-
-We appreciate your kind understanding and patience. Please feel free to contact us with any questions. Thank you. Have a wonderful day.'
+Have a nice day!'
     ]
 ];
