@@ -979,17 +979,15 @@ class WorkOrderList extends Model
                 'measures'=>function($query){$query->field('measure_content');}
                 ])
             ->select();
-        $workOrderLists = collection($workOrderLists)->toArray();
-        dump($workOrderLists);die;
         foreach($workOrderLists as &$workOrderList){
-            $receptPersonIds = $workOrderList['recept_person_id'];
+            $receptPersonIds = $workOrderList->recept_person_id;
             $receptPerson = Admin::where('id','in',$receptPersonIds)->column('nickname');
             //承接人
-            $workOrderList['recept_persons'] = join(',',$receptPerson);
-            $workOrderList['measure'] = '';
-            if(!empty($workOrderList['measures'])){
-                foreach($workOrderList['measures'] as $key => $measure){
-                    $workOrderList['measure'] = $measure['measure_content'] . ',';
+            $workOrderList->recept_persons = join(',',$receptPerson);
+            $workOrderList->measure = '';
+            if(!empty($workOrderList->measures)){
+                foreach($workOrderList->measures as $key => $measure){
+                    $workOrderList->measure = $measure->measure_content . ',';
                 }
             }
 
