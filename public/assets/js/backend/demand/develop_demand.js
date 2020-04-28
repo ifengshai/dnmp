@@ -51,11 +51,30 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         { field: 'is_finish', title: __('是否开发完成'), custom: { 0: 'danger', 1: 'success' }, searchList: { 0: '否', 1: '是' }, formatter: Table.api.formatter.status },
                         { field: 'test_is_passed', title: __('Test_is_passed'), custom: { 0: 'danger', 1: 'success' }, searchList: { 0: '否', 1: '是' }, formatter: Table.api.formatter.status },
                         { field: 'is_finish_task', title: __('产品经理是否确认'), custom: { 0: 'danger', 1: 'success' }, searchList: { 0: '否', 1: '是' }, formatter: Table.api.formatter.status },
-                        { field: 'createtime', title: __('Createtime'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime },
-                        { field: 'expected_time', title: __('Expected_time'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime },
-                        { field: 'estimated_time', title: __('Estimated_time'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime },
-                        { field: 'finish_time', title: __('Finish_time'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime },
+                        { field: 'createtime', title: __('Createtime'), operate: 'RANGE', addclass: 'datetimerange', visible: false, formatter: Table.api.formatter.datetime },
+                        { field: 'expected_time', title: __('Expected_time'), operate: 'RANGE', addclass: 'datetimerange', visible: false, formatter: Table.api.formatter.datetime },
+                        { field: 'estimated_time', title: __('Estimated_time'), operate: 'RANGE', addclass: 'datetimerange', visible: false, formatter: Table.api.formatter.datetime },
+                        { field: 'finish_time', title: __('Finish_time'), operate: 'RANGE', addclass: 'datetimerange', visible: false, formatter: Table.api.formatter.datetime },
+                        {
+                            field: 'createtime',
+                            title: __('时间'),
+                            operate: false,
+                            formatter: function (value, rows) {
+                                var str = '';
+                                str += '<div class="step_recept"><b class="step">创建时间：</b><b class="recept">' + value + '</b></div>';
+                                if (rows.expected_time) {
+                                    str += '<br><div class="step_recept"><b class="step">期望时间：</b><b class="recept">' + rows.expected_time + '</b></div>';
+                                }
+                                if (rows.estimated_time) {
+                                    str += '<br><div class="step_recept"><b class="step">预计时间：</b><b class="recept">' + rows.estimated_time + '</b></div>';
+                                }
 
+                                if (rows.finish_time) {
+                                    str += '<br><div class="step_recept"><b class="step">完成时间：</b><b class="recept">' + rows.finish_time + '</b></div>';
+                                }
+                                return str;
+                            },
+                        },
                         {
                             field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [
                                 {
