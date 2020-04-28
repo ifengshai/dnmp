@@ -325,6 +325,59 @@ class ItDemandReport extends Backend
     /**
      * 七日未完成开发任务列表
      */
+
+    public function undone_task()
+    { //dump(input());exit;
+        //设置过滤方法
+        $stime = date("Y-m-d 00:00:00", strtotime("-7 day"));
+        $etime = date('Y-m-d H:i:s', time());
+        $this->request->filter(['strip_tags']);
+        if ($this->request->isAjax()) {
+            $this->model = new \app\admin\model\demand\ItWebTask();
+            if ($this->request->request('keyField')) {
+                return $this->selectpage();
+            }
+            //自定义姓名搜索
+            $filter = json_decode($this->request->get('filter'), true);
+            if ($filter['nickname']) {
+                $admin = new \app\admin\model\Admin();
+                $smap['nickname'] = ['like', '%' . $filter['nickname'] . '%'];
+                $id = $admin->where($smap)->value('id');
+                $task_ids = $this->itWebTaskItem->where('person_in_charge', $id)->column('task_id');
+                $map['id'] = ['in', $task_ids];
+                unset($filter['nickname']);
+                $this->request->get(['filter' => json_encode($filter)]);
+            }
+
+            list($where, $sort, $order, $offset, $limit) = $this->buildparams(null);
+            $between_map['createtime'] = ['between', [$stime, $etime]];
+
+            $total = $this->model
+                ->where($where)
+                ->where($between_map)
+                ->where('is_complete', '=', 0)//未完成的任务
+                ->order($sort, $order)
+                ->count();
+
+            $list = $this->model
+                ->where($where)
+                ->where($between_map)
+                ->where('is_complete', '=', 0)//未完成的任务
+                ->order($sort, $order)
+                ->limit($offset, $limit)
+                ->select();
+
+            $list = collection($list)->toArray();
+            $result = array("total" => $total, "rows" => $list);
+
+            return json($result);
+
+        }
+        return $this->view->fetch();
+    }
+
+
+    /*
     public function undone_task()
     {
         //设置过滤方法
@@ -381,6 +434,8 @@ class ItDemandReport extends Backend
         }
         return $this->view->fetch();
     }
+
+    */
 
 
 }
