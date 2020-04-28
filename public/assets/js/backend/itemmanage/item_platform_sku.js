@@ -61,13 +61,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui','bootstrap-tabl
                             custom:{1:'blue',2:'red'},
                             formatter:Table.api.formatter.status,
                         },
-                        // {
-                        //     field: 'platform_sku_status',
-                        //     title: __('Platform_sku_status'),
-                        //     searchList: { 1:'上架', 2:'下架' },
-                        //     custom: { 1: 'blue', 2: 'red' },
-                        //     formatter: Table.api.formatter.status,
-                        // },
+                    
                         {
                             field:'is_upload',
                             title:__('Is_upload_item'),
@@ -91,60 +85,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui','bootstrap-tabl
                             events: Table.api.events.operate,
                             formatter: Table.api.formatter.operate,
                             buttons:[
-                                // {
-                                //     name: 'putaway',
-                                //     text: '上架',
-                                //     title: __('上架'),
-                                //     classname: 'btn btn-xs btn-success btn-ajax',
-                                //     url: Config.moduleurl + '/itemmanage/item_platform_sku/putaway',
-                                //     confirm: '确定要上架吗',
-                                //     success: function (data, ret) {
-                                //         Layer.alert(ret.msg);
-                                //         $(".btn-refresh").trigger("click");
-                                //         //如果需要阻止成功提示，则必须使用return false;
-                                //         //return false;
-                                //     },
-                                //     error: function (data, ret) {
-                                //         Layer.alert(ret.msg);
-                                //         return false;
-                                //     },
-                                //     visible: function (row) {
-                                //         //返回true时按钮显示,返回false隐藏
-                                //         return true;
-                                //         // if (row.outer_sku_status == 2) {
-                                //         //     return true;
-                                //         // } else {
-                                //         //     return false;
-                                //         // }
-                                //     },
-                                // },
-                                // {
-                                //     name: 'soldOut',
-                                //     text: '下架',
-                                //     title: __('下架'),
-                                //     classname: 'btn btn-xs btn-danger btn-ajax',
-                                //     url: Config.moduleurl + '/itemmanage/item_platform_sku/soldOut',
-                                //     confirm: '确定要下架吗',
-                                //     success: function (data, ret) {
-                                //         Layer.alert(ret.msg);
-                                //         $(".btn-refresh").trigger("click");
-                                //         //如果需要阻止成功提示，则必须使用return false;
-                                //         //return false;
-                                //     },
-                                //     error: function (data, ret) {
-                                //         Layer.alert(ret.msg);
-                                //         return false;
-                                //     },
-                                //     visible: function (row) {
-                                //         //返回true时按钮显示,返回false隐藏
-                                //         return true;
-                                //         // if (row.outer_sku_status == 2) {
-                                //         //     return true;
-                                //         // } else {
-                                //         //     return false;
-                                //         // }
-                                //     },
-                                // },
+                               
                                 {
                                     name: 'uploadToPlatform',
                                     text: '上传至对应平台',
