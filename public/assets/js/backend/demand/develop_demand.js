@@ -62,6 +62,55 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     name: 'ajax',
                                     text: '审核通过',
                                     title: __('审核通过'),
+                                    classname: 'btn btn-xs btn-success btn-magic btn-dialog',
+                                    icon: 'fa fa-magic',
+                                    url: 'demand/develop_demand/review',
+                                    success: function (data, ret) {
+                                        table.bootstrapTable('refresh', {});
+                                        //如果需要阻止成功提示，则必须使用return false;
+                                        //return false;
+                                    },
+                                    error: function (data, ret) {
+                                        Layer.alert(ret.msg);
+                                        return false;
+                                    },
+                                    visible: function (row) {
+                                        if (row.review_status_manager == 0 && Config.review_status_manager_btn == 1) {
+                                            return true;
+                                        } else {
+                                            return false;
+                                        }
+                                    }
+                                },
+                                {
+                                    name: 'ajax',
+                                    text: '审核拒绝',
+                                    title: __('审核拒绝'),
+                                    classname: 'btn btn-xs btn-danger  btn-magic btn-dialog',
+                                    icon: 'fa fa-magic',
+                                    url: 'demand/develop_demand/review?label=refuse',
+                                    success: function (data, ret) {
+                                        table.bootstrapTable('refresh', {});
+                                        //如果需要阻止成功提示，则必须使用return false;
+                                        //return false;
+                                    },
+                                    error: function (data, ret) {
+                                        Layer.alert(ret.msg);
+                                        return false;
+                                    },
+                                    visible: function (row) {
+                                        if (row.review_status_manager == 0 && Config.review_status_manager_btn == 1) {
+                                            return true;
+                                        } else {
+                                            return false;
+                                        }
+                                    }
+                                },
+                                
+                                {
+                                    name: 'ajax',
+                                    text: '审核通过',
+                                    title: __('审核通过'),
                                     classname: 'btn btn-xs btn-success btn-magic btn-ajax',
                                     icon: 'fa fa-magic',
                                     url: 'demand/develop_demand/review_status_develop?review_status_develop=1',
@@ -106,6 +155,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                         }
                                     }
                                 },
+
                                 {
                                     name: 'test_distribution',
                                     text: __('测试确认'),
