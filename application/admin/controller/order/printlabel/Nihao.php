@@ -63,12 +63,31 @@ class Nihao extends Backend
             } elseif (!$filter['status']) {
                 $map['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal']];
             }
-            //是否有协同任务
+
+            //是否有工单
             $workorder = new \app\admin\model\saleaftermanage\WorkOrderList();
-            if ($filter['task_label'] == 1 || $filter['task_label'] == '0') {
+            if ($filter['is_task'] == 1 || $filter['is_task'] == '0') {
+                $swhere = [];
                 $swhere['work_platform'] = 3;
                 $swhere['work_status'] = ['<>', 0];
                 $order_arr = $workorder->where($swhere)->column('platform_order');
+                if ($filter['is_task'] == 1) {
+                    $map['increment_id'] = ['in', $order_arr];
+                } elseif ($filter['is_task'] == '0') {
+                    $map['increment_id'] = ['not in', $order_arr];
+                }
+                unset($filter['is_task']);
+                $this->request->get(['filter' => json_encode($filter)]);
+            }
+
+            //是否有协同任务
+            $infoSynergyTask = new \app\admin\model\infosynergytaskmanage\InfoSynergyTask;
+            if ($filter['task_label'] == 1 || $filter['task_label'] == '0') {
+                $swhere = [];
+                $swhere['is_del'] = 1;
+                $swhere['order_platform'] = 3;
+                $swhere['synergy_order_id'] = 2;
+                $order_arr = $infoSynergyTask->where($swhere)->order('create_time desc')->column('synergy_order_number');
                 if ($filter['task_label'] == 1) {
                     $map['increment_id'] = ['in', $order_arr];
                 } elseif ($filter['task_label'] == '0') {
@@ -109,20 +128,32 @@ class Nihao extends Backend
 
             $list = collection($list)->toArray();
 
-            //查询订单是否存在协同任务
+            //查询订单是否存在工单
             $swhere = [];
             $increment_ids = array_column($list, 'increment_id');
             $swhere['platform_order'] = ['in', $increment_ids];
             $swhere['work_platform'] = 3;
             $swhere['work_status'] = ['<>', 0];
             $order_arr = $workorder->where($swhere)->column('platform_order');
+
+
             //查询是否存在协同任务
+            $swhere = [];
+            $swhere['synergy_order_number'] = ['in', $increment_ids];
+            $swhere['is_del'] = 1;
+            $swhere['order_platform'] = 3;
+            $swhere['synergy_order_id'] = 2;
+            $synergy_order_arr = $infoSynergyTask->where($swhere)->column('synergy_order_number');
+
             foreach ($list as $k => $v) {
                 if (in_array($v['increment_id'], $order_arr)) {
                     $list[$k]['task_info'] = 1;
                 }
-            }
 
+                if (in_array($v['increment_id'], $synergy_order_arr)) {
+                    $list[$k]['is_task_info'] = 1;
+                }
+            }
             $result = array("total" => $total, "rows" => $list);
             return json($result);
         }
@@ -157,8 +188,19 @@ class Nihao extends Backend
                     $swhere['work_status'] = ['<>', 0];
                     $count = $workorder->where($swhere)->count();
                     //查询是否存在协同任务
+                    $infoSynergyTask = new \app\admin\model\infosynergytaskmanage\InfoSynergyTask;
+                    $swhere = [];
+                    $swhere['synergy_order_number'] = $increment_id;
+                    $swhere['is_del'] = 1;
+                    $swhere['order_platform'] = 3;
+                    $swhere['synergy_order_id'] = 2;
+                    $info_count = $infoSynergyTask->where($swhere)->count();
                     if ($count > 0) {
                         $list['task_info'] = 1;
+                    }
+
+                    if ($info_count > 0) {
+                        $list['is_task_info'] = 1;
                     }
                 }
 
@@ -718,6 +760,22 @@ where cped.attribute_id in(146,147) and cped.store_id=0 and cped.entity_id=$prod
             $map['sfo.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal']];
         } elseif (!$filter['status']) {
             $map['sfo.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal']];
+        }
+
+        //是否有工单
+        $workorder = new \app\admin\model\saleaftermanage\WorkOrderList();
+        if ($filter['is_task'] == 1 || $filter['is_task'] == '0') {
+            $swhere = [];
+            $swhere['work_platform'] = 3;
+            $swhere['work_status'] = ['<>', 0];
+            $order_arr = $workorder->where($swhere)->column('platform_order');
+            if ($filter['is_task'] == 1) {
+                $map['increment_id'] = ['in', $order_arr];
+            } elseif ($filter['is_task'] == '0') {
+                $map['increment_id'] = ['not in', $order_arr];
+            }
+            unset($filter['is_task']);
+            $this->request->get(['filter' => json_encode($filter)]);
         }
 
         $infoSynergyTask = new \app\admin\model\infosynergytaskmanage\InfoSynergyTask;

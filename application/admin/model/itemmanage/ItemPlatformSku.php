@@ -52,8 +52,8 @@ class ItemPlatformSku extends Model
                     case 'nihao':
                         $prefix = 'N';
                         break;
-                    case 'amazon':
-                        $prefix = 'A';
+                    case 'meeloog':
+                        $prefix = 'M';
                         break;
                     case 'wesee':
                         $prefix = 'W';

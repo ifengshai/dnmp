@@ -108,6 +108,10 @@ class WorkOrderList extends Backend
             if ($platform_order) {
                 $map['platform_order'] = $platform_order;
             }
+            $work_id = input('work_id');
+            if ($work_id) {
+                $map['id'] = $work_id;
+            }
             //选项卡我的任务切换
             $filter = json_decode($this->request->get('filter'), true);
             if ($filter['recept_person_id']) {
