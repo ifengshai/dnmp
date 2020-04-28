@@ -86,6 +86,8 @@ class DevelopDemand extends Backend
         }
         //判断编辑按钮权限
         $this->assignconfig('is_edit', $this->auth->check('demand/develop_demand/edit'));
+        //判断产品经理审核权限
+        $this->assignconfig('review_status_manager_btn', $this->auth->check('demand/develop_demand/review'));
         //判断是否有开发主管审核权限
         $this->assignconfig('review_status_btn', $this->auth->check('demand/develop_demand/review_status_develop'));
         //判断测试确认按钮
@@ -232,9 +234,9 @@ class DevelopDemand extends Backend
      * @since 2020/03/31 10:02:24 
      * @return void
      */
-    public function review()
+    public function review($ids = null)
     {
-        $id = input('id');
+        $id = $ids ?: input('id');
         $label = input('label');
         $row = $this->model->get($id);
         if ($this->request->isPost()) {
