@@ -287,17 +287,17 @@ table.altrowstable tr:nth-child(even){
                         </thead>
                         {foreach name="workOrderListResult" item="workOrderList" }
                         <tr>
-                            <td style="text-align: center; vertical-align: middle;">{workOrderList.work_status_format}</td>
-                            <td style="text-align: center; vertical-align: middle;">{workOrderList.work_type_format}</td>
-                            <td style="text-align: center; vertical-align: middle;">{workOrderList.platform_order}</td>
-                            <td style="text-align: center; vertical-align: middle;">{workOrderList.order_sku}</td>
-                            <td style="text-align: center; vertical-align: middle;">{workOrderList.work_platform_format}</td>
-                            <td style="text-align: center; vertical-align: middle;">{workOrderList.work_level_format}</td>
-                            <td style="text-align: center; vertical-align: middle;">{workOrderList.problem_type_content}</td>
-                            <td style="text-align: center; vertical-align: middle;">{workOrderList.problem_description}</td>
-                            <td style="text-align: center; vertical-align: middle;">{workOrderList.measure}</td>
-                            <td style="text-align: center; vertical-align: middle;">{workOrderList.recept_persons}</td>
-                            <td style="text-align: center; vertical-align: middle;">{workOrderList.create_time}</td>
+                            <td style="text-align: center; vertical-align: middle;">{$workOrderList.work_status_format}</td>
+                            <td style="text-align: center; vertical-align: middle;">{$workOrderList.work_type_format}</td>
+                            <td style="text-align: center; vertical-align: middle;">{$workOrderList.platform_order}</td>
+                            <td style="text-align: center; vertical-align: middle;">{$workOrderList.order_sku}</td>
+                            <td style="text-align: center; vertical-align: middle;">{$workOrderList.work_platform_format}</td>
+                            <td style="text-align: center; vertical-align: middle;">{$workOrderList.work_level_format}</td>
+                            <td style="text-align: center; vertical-align: middle;">{$workOrderList.problem_type_content}</td>
+                            <td style="text-align: center; vertical-align: middle;">{$workOrderList.problem_description}</td>
+                            <td style="text-align: center; vertical-align: middle;">{$workOrderList.measure}</td>
+                            <td style="text-align: center; vertical-align: middle;">{$workOrderList.recept_persons}</td>
+                            <td style="text-align: center; vertical-align: middle;">{$workOrderList.create_time}</td>
                             <td style="text-align: center; vertical-align: middle;"><a href="{:url('infosynergytaskmanage/info_synergy_task/index')}?synergy_order_number={$synergyTaskList.synergy_order_number}" class="btn btn-primary btn-xs btn-click btn-addtabs" data-table-id="table" data-field-index="11" data-row-index="0" data-button-index="3" title="协同任务"><i class="fa fa-list"></i>查看</a></td>
                         </tr>
                         {/foreach}
