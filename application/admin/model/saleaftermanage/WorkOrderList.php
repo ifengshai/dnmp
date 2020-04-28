@@ -192,7 +192,7 @@ class WorkOrderList extends Model
                 $url = 'https://z.zhaokuangyi.com/';
                 break;
             case 2:
-                $url = 'http://pc.zhaokuangyi.com/';
+                $url = 'http://v.zhaokuangyi.com/';
                 break;
             case 3:
                 $url = 'https://nh.zhaokuangyi.com/';
