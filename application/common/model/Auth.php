@@ -18,6 +18,7 @@ class Auth extends Model
      */
     public static function getUsersId($url)
     {
+        //如果是超级管理员
         //获取规则id
         $authRule = new \app\admin\model\AuthRule();
         $ruleId = $authRule->where('name', $url)->value('id');
@@ -34,6 +35,7 @@ class Auth extends Model
         //根据角色组获取用户id
         $authGroupAccess = new \app\admin\model\AuthGroupAccess();
         $uids = $authGroupAccess->where(['group_id' => ['in', $authGroupId]])->column('uid');
+        $uids = array_merge($uids,[1]);
         return $uids ?: [];
     }
 }

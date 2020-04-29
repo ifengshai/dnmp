@@ -8,6 +8,9 @@ use think\Model;
 class ItTestRecord extends Model
 {
 
+    
+
+    
 
     // 表名
     protected $name = 'it_test_record';
@@ -24,6 +27,14 @@ class ItTestRecord extends Model
     protected $append = [
 
     ];
+    
+
+    
+
+
+
+
+
 
 
 }
