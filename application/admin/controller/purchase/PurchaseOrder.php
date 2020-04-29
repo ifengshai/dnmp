@@ -1243,6 +1243,8 @@ class PurchaseOrder extends Backend
 
         $list = collection($list)->toArray();
 
+        //查询生产周期
+        $supplier = new \app\admin\model\Purchase\SupplierSku();
 
         //从数据库查询需要的数据
         $spreadsheet = new Spreadsheet();
