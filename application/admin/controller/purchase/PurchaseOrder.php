@@ -1244,7 +1244,7 @@ class PurchaseOrder extends Backend
         $list = collection($list)->toArray();
 
         //查询生产周期
-        $supplier = new \app\admin\model\Purchase\SupplierSku();
+        $supplier = new \app\admin\model\purchase\SupplierSku();
         $info = $supplier->where([
             'status' => 1,
             'label' => 1
