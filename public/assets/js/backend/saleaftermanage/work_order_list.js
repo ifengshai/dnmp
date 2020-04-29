@@ -125,7 +125,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         },
 
                         { field: 'work_status', title: __('work_status'), custom: { 0: 'black', 1: 'danger', 2: 'success', 4: 'success', 3: 'success', 5: 'success', 6: 'success' }, searchList: { 0: '已取消', 1: '新建', 2: '待审核', 4: '审核拒绝', 3: '待处理', 5: '部分处理', 6: '已处理' }, formatter: Table.api.formatter.status },
-                        { field: 'work_order_note_status', title: __('备注组别'), custom: { 0: 'gray', 1: 'success', 2: 'danger', 3: 'blank' }, searchList: { 0: '无备注', 1: '客服备注', 2: '仓库备注', 3: '财务备注' }, formatter: Table.api.formatter.status },
+                        { field: 'work_order_note_status', title: __('回复状态'), custom: { 0: 'gray', 1: 'success', 2: 'danger', 3: 'blank' }, searchList: { 0: '无', 1: '客服已回复', 2: '仓库已回复', 3: '财务已回复' }, formatter: Table.api.formatter.status },
                         {
                             field: 'create_time',
                             title: __('time_str'),
@@ -159,14 +159,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                             field: 'buttons',
                             width: "120px",
                             operate: false,
-                            title: __('备注'),
+                            title: __('回复'),
                             table: table,
                             events: Table.api.events.operate,
                             buttons: [
                                 {
                                     name: 'workOrderNote',
-                                    text: __('查看备注'),
-                                    title: __('查看备注'),
+                                    text: __('查看回复'),
+                                    title: __('查看回复'),
                                     classname: 'btn btn-xs btn-primary btn-dialog',
                                     url: 'saleaftermanage/work_order_list/workordernote',
                                     callback: function (data) {

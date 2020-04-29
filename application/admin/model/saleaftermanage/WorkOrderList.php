@@ -2,6 +2,7 @@
 
 namespace app\admin\model\saleaftermanage;
 
+use app\admin\model\Admin;
 use fast\Http;
 use think\Cache;
 use think\Db;
@@ -33,6 +34,54 @@ class WorkOrderList extends Model
     // 追加属性
     protected $append = [];
 
+    /**
+     * 平台类型
+     * @param $value
+     * @param $data
+     * @return mixed
+     */
+    public function getWorkPlatFormFormatAttr($value, $data)
+    {
+        $status = ['1' => 'zeelool', '2' => 'voogueme', '3' => 'nihao'];
+        return $status[$data['work_platform']];
+    }
+
+    /**
+     * 工单类型
+     * @param $value
+     * @param $data
+     * @return mixed
+     */
+    public function getWorkTypeFormatAttr($value, $data)
+    {
+        $status = ['1' => '客服工单', '2' => '仓库工单'];
+        return $status[$data['work_type']];
+    }
+
+    /**
+     * 工单状态
+     * @param $value
+     * @param $data
+     * @return mixed
+     */
+    public function getWorkStatusFormatAttr($value, $data)
+    {
+        $status = ['0' => '取消', '1' => '新建', '2' => '待审核','3' => '待处理', '4' => '审核拒绝', '5' => '部分处理', '6' => '已处理'];
+        return $status[$data['work_status']];
+    }
+
+    /**
+     * 工单级别
+     * @param $value
+     * @param $data
+     * @return mixed
+     */
+    public function getWorkLevelFormatAttr($value, $data)
+    {
+        $status = ['1' => '低', '2' => '中', '3' => '高'];
+        return $status[$data['work_type']];
+    }
+
     //获取选项卡列表
     public function getTabList()
     {
@@ -40,6 +89,15 @@ class WorkOrderList extends Model
             ['name' => '我创建的任务', 'field' => 'create_user_name', 'value' => session('admin.nickname')],
             ['name' => '我的任务', 'field' => 'recept_person_id', 'value' => session('admin.id')],
         ];
+    }
+
+    /**
+     * 措施
+     * @return \think\model\relation\HasMany
+     */
+    public function measures()
+    {
+        return $this->hasMany(WorkOrderMeasure::class,'id','work_id');
     }
 
     /**
@@ -189,16 +247,16 @@ class WorkOrderList extends Model
     {
         switch ($siteType) {
             case 1:
-                $url = 'https://z.zhaokuangyi.com/';
+                $url = 'https://www.zeelool.com/';
                 break;
             case 2:
-                $url = 'http://v.zhaokuangyi.com/';
+                $url = 'https://pc.voogueme.com/';
                 break;
             case 3:
-                $url = 'https://nh.zhaokuangyi.com/';
+                $url = 'https://www.nihaooptical.com/';
                 break;
             case 5:
-                $url = 'http://www.eseeoptical.com/';
+                $url = 'https://www.weseeoptical.com/';
                 break;
             default:
                 return false;
@@ -892,17 +950,48 @@ class WorkOrderList extends Model
         $workOrderList = WorkOrderList::where(['id' => $work_id])->field('id,work_platform,platform_order')->find();
         $result = collection($result)->toArray();
         if(1 == $measuerInfo){//更改镜片
-            $info = (new Inventory())->workChangeFrame($work_id, $workOrderList->work_platform, $workOrderList->platform_order,$result);
+            $info = (new Inventory())->workChangeFrame($work_id, $workOrderList->work_platform, $workOrderList->platform_order,$result,1);
         }elseif(3 == $measuerInfo){ //取消订单
-            $info = (new Inventory())->workCancelOrder($work_id, $workOrderList->work_platform, $workOrderList->platform_order,$result);
+            $info = (new Inventory())->workCancelOrder($work_id, $workOrderList->work_platform, $workOrderList->platform_order,$result,2);
         }elseif(4 == $measuerInfo){ //赠品
-            $info = (new Inventory())->workPresent($work_id, $workOrderList->work_platform, $workOrderList->platform_order,$result);
+            $info = (new Inventory())->workPresent($work_id, $workOrderList->work_platform, $workOrderList->platform_order,$result,3);
         }elseif(5 == $measuerInfo){
-            $info =(new Inventory())->workPresent($work_id, $workOrderList->work_platform, $workOrderList->platform_order,$result);
+            $info =(new Inventory())->workPresent($work_id, $workOrderList->work_platform, $workOrderList->platform_order,$result,4);
         }else{
             return false;
         }
         return $info;
 
+    }
+
+    /**
+     * 客户订单检索工单
+     * @param $allIncrementOrder
+     * @return array|false|\PDOStatement|string|\think\Collection
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public static function workOrderListResult($allIncrementOrder)
+    {
+        $workOrderLists = self::where('platform_order','in',$allIncrementOrder)
+            ->with([
+                'measures'=>function($query){$query->field('measure_content');}
+            ])
+            ->select();
+        foreach($workOrderLists as &$workOrderList){
+            $receptPersonIds = $workOrderList->recept_person_id;
+            $receptPerson = Admin::where('id','in',$receptPersonIds)->column('nickname');
+            //承接人
+            $workOrderList->recept_persons = join(',',$receptPerson);
+            $workOrderList->measure = '';
+            if(!empty($workOrderList->measures)){
+                foreach($workOrderList->measures as $key => $measure){
+                    $workOrderList->measure = $measure->measure_content . ',';
+                }
+            }
+
+        }
+        return $workOrderLists;
     }
 }
