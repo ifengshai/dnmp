@@ -396,12 +396,12 @@ class Zeelool extends Backend
                         //sku转换
                         $trueSku = $ItemPlatformSku->getTrueSku(trim($v['change_sku']), 1);
                         if (!$trueSku) {
-                            throw new Exception("增加配货占用库存失败！！请检查更换镜框SKU:" . $v['change_sku']);
+                            throw new Exception("增加配货占用库存失败！！请检查更换镜框SKU:" . $v['change_sku'] . ',订单号：' . $v['increment_id']);
                         }
                         //判断是否有实时库存
                         $realStock = $item->getRealStock($trueSku);
                         if ($v['qty'] > $realStock) {
-                            throw new Exception("SKU:" . $v['change_sku'] . "实时库存不足");
+                            throw new Exception("SKU:" . $v['change_sku'] . "实时库存不足,订单号：" . $v['increment_id']);
                         }
                         //增加配货占用
                         $map = [];
@@ -409,7 +409,7 @@ class Zeelool extends Backend
                         $map['is_del'] = 1;
                         $res = $item->where($map)->setInc('distribution_occupy_stock', $v['qty']);
                         if (false === $res) {
-                            throw new Exception("增加配货占用库存失败！！请检查更换镜框SKU:" . $v['change_sku']);
+                            throw new Exception("增加配货占用库存失败！！请检查更换镜框SKU:" . $v['change_sku']. ',订单号：' . $v['increment_id']);
                         }
                         $sku[$v['increment_id']][$v['original_sku']] += $v['qty'];
 
@@ -431,7 +431,7 @@ class Zeelool extends Backend
                     //转仓库SKU
                     $trueSku = $ItemPlatformSku->getTrueSku(trim($v['sku']), 1);
                     if (!$trueSku) {
-                        throw new Exception("增加配货占用库存失败！！请检查更换镜框SKU:" . $v['sku']);
+                        throw new Exception("增加配货占用库存失败！！请检查更换镜框SKU:" . $v['sku']. ',订单号：' . $v['increment_id']);
                     }
 
                     //如果为真 则存在更换镜架的数量 则订单需要扣减的数量为原数量-更换镜架的数量
@@ -448,7 +448,7 @@ class Zeelool extends Backend
                     //判断是否有实时库存
                     $realStock = $item->getRealStock($trueSku);
                     if ($qty > $realStock) {
-                        throw new Exception("SKU:" . $v['sku'] . "实时库存不足");
+                        throw new Exception("SKU:" . $v['sku'] . "实时库存不足". ',订单号：' . $v['increment_id']);
                     }
 
                     $map = [];
@@ -457,7 +457,7 @@ class Zeelool extends Backend
                     //增加配货占用
                     $res = $item->where($map)->setInc('distribution_occupy_stock', $qty);
                     if (false === $res) {
-                        throw new Exception("增加配货占用库存失败！！请检查更换镜框SKU:" . $v['sku']);
+                        throw new Exception("增加配货占用库存失败！！请检查更换镜框SKU:" . $v['sku']. ',订单号：' . $v['increment_id']);
                     }
 
                     $number++;
@@ -506,7 +506,7 @@ class Zeelool extends Backend
                     foreach ($infoRes as $k => $v) {
                         $trueSku = $ItemPlatformSku->getTrueSku(trim($v['change_sku']), 1);
                         if (!$trueSku) {
-                            throw new Exception("扣减库存失败！！请检查更换镜框SKU:" . $v['sku']);
+                            throw new Exception("扣减库存失败！！请检查更换镜框SKU:" . $v['sku']. ',订单号：' . $v['increment_id']);
                         }
                         //扣减总库存 扣减占用库存 扣减配货占用
                         $map = [];
@@ -514,7 +514,7 @@ class Zeelool extends Backend
                         $map['is_del'] = 1;
                         $res = $item->where($map)->dec('stock', $v['qty'])->dec('occupy_stock', $v['qty'])->dec('distribution_occupy_stock', $v['qty'])->update();
                         if (false === $res) {
-                            throw new Exception("扣减库存失败！！请检查更换镜框SKU:" . $v['sku']);
+                            throw new Exception("扣减库存失败！！请检查更换镜框SKU:" . $v['sku']. ',订单号：' . $v['increment_id']);
                         }
                         $sku[$v['increment_id']][$v['original_sku']] += $v['qty'];
 
@@ -537,7 +537,7 @@ class Zeelool extends Backend
                     //查出订单SKU映射表对应的仓库SKU
                     $trueSku = $ItemPlatformSku->getTrueSku(trim($v['sku']), 1);
                     if (!$trueSku) {
-                        throw new Exception("扣减库存失败！！请检查SKU:" . $v['sku']);
+                        throw new Exception("扣减库存失败！！请检查SKU:" . $v['sku']. ',订单号：' . $v['increment_id']);
                     }
                     //如果为真 则存在更换镜架的数量 则订单需要扣减的数量为原数量-更换镜架的数量
                     if ($sku[$v['increment_id']][$v['sku']]) {
@@ -555,7 +555,7 @@ class Zeelool extends Backend
                     //扣减总库存 扣减占用库存 扣减配货占用
                     $res = $item->where($item_map)->dec('stock', $qty)->dec('occupy_stock', $qty)->dec('distribution_occupy_stock', $qty)->update();
                     if (false === $res) {
-                        throw new Exception("扣减库存失败！！请检查SKU:" . $v['sku']);
+                        throw new Exception("扣减库存失败！！请检查SKU:" . $v['sku']. ',订单号：' . $v['increment_id']);
                     }
                     $number++;
                     //100条提交一次
@@ -1144,67 +1144,81 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
         set_time_limit(0);
         ini_set('memory_limit', '512M');
 
-        $str = '400227173
-        400226783
-        100108681
-        400226708
-        400226849
-        400226701
-        400226835
-        400227389
-        400226907
-        400226885
-        400227118
-        400227413
-        400226954
-        500001998
-        100108717
-        400227043
-        400227093
-        400226798
-        100108787
-        100108655
-        400226840
-        400226843
-        400226702
-        400226958
-        400226895
-        400226756
-        100108633
-        100108802
-        400226952
-        400226752
-        400226834
-        400227155
-        100108592
-        400226829
-        400227314
-        400227358
-        400227295
-        400227054
-        400227366
-        400227172
-        400227316
-        500001984
-        400227341
-        400226816
-        400227393
-        400227189
-        400227010
-        400227290
-        400226998
-        400227207
-        400226996
-        400227319
-        400227228
-        400227468
-        400226976
-        400227158
-        400227541
-        400226713
-        400227223
-        400227454
-        400226920';
+        $str = '400227559
+        400227661
+        400228165
+        100108909
+        400228089
+        400227606
+        400227645
+        400227786
+        400227918
+        400228107
+        400227934
+        100108930
+        400226547
+        400227796
+        500002045
+        400228106
+        400228124
+        400227751
+        500002053
+        400227687
+        400228143
+        100108891
+        400227778
+        400228063
+        400168616
+        400228128
+        400227855
+        100109003
+        100108905
+        100108666
+        400227729
+        100108954
+        400227681
+        400227732
+        400227701
+        400227820
+        400228179
+        400227659
+        400227886
+        400227704
+        130041422
+        400227943
+        400227823
+        400228180
+        400228171
+        100108942
+        100108951
+        100109048
+        400228175
+        400227851
+        500002040
+        400228067
+        400227883
+        100108852
+        100108945
+        400227958
+        400228038
+        100108947
+        400227873
+        400227913
+        400227577
+        400228183
+        400227595
+        400228104
+        400228114
+        100108974
+        400228145
+        400227647
+        400228262
+        400227604
+        400162293
+        100108835
+        400227612
+        100138208
+        400227563';
         $str = explode('
         ', $str);
 
