@@ -856,7 +856,7 @@ class PurchaseOrder extends Backend
         if ($success_data) {
             $success_data = collection($success_data)->toArray();
         }
-        dump($success_data);
+        dump($success_data);die;
         $data = [];
         for ($i = 1; $i <= round($success_data['totalRecord'] / 50); $i++) {
 
