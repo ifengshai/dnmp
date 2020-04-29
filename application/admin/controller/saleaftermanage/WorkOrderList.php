@@ -108,6 +108,10 @@ class WorkOrderList extends Backend
             if ($platform_order) {
                 $map['platform_order'] = $platform_order;
             }
+            $work_id = input('work_id');
+            if ($work_id) {
+                $map['id'] = $work_id;
+            }
             //选项卡我的任务切换
             $filter = json_decode($this->request->get('filter'), true);
             if ($filter['recept_person_id']) {
@@ -2028,7 +2032,7 @@ EOF;
             }
             $this->error(__('Parameter %s can not be empty', ''));
         }
-        $row = WorkOrderNote::where(['work_id' => $ids])->select();
+        $row = WorkOrderNote::where(['work_id' => $ids])->order('id desc')->select();
         $this->view->assign("row", $row);
         $this->view->assign('work_id',$ids);
         return $this->view->fetch('work_order_note');

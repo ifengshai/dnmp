@@ -27,14 +27,14 @@
 <ul class="timeline">
     <li class="time-label">
         <span class="bg-red">
-            {:__('备注记录')}
+            {:__('回复记录')}
         </span>
     </li>
     {volist name="row" id="vo"}
         <li>
             <i class="fa fa-user bg-aqua"></i>
             <div class="timeline-item" style="background-color: #f5f5f5;">
-                <span class="time"><i class="fa fa-clock-o"></i> {:__('备注时间')}：{$vo.note_time}</span>
+                <span class="time"><i class="fa fa-clock-o"></i> {:__('回复时间')}：{$vo.note_time}</span>
 
                 <h3 class="timeline-header"><a href="#">{$vo.note_user_name}</a></h3>
 

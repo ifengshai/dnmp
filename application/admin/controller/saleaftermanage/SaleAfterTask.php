@@ -1342,9 +1342,11 @@ class SaleAfterTask extends Backend
      */
     public function saleAfterToWorkOrder()
     {
+        
+        set_time_limit(0);
         $page = input("page") ?:1;
-        $start = ($page - 1)*1000;
-        $result = Db::name('sale_after_task')->limit($start,1000)->select();
+        $start = ($page - 1)*10000;
+        $result = Db::name('sale_after_task')->limit($start,10000)->select();
         if(!$result){
             return false;
         }
@@ -1398,9 +1400,10 @@ class SaleAfterTask extends Backend
      */
     public function getSaleAfterRemark()
     {
+        set_time_limit(0);
         $page = input("page") ?:1;
-        $start = ($page - 1)*1000;
-        $result = Db::name('sale_after_task_remark')->alias('m')->join('work_order_list w','m.tid=w.original_id','left')->field('m.*,w.id as wid')->limit($start,1000)->select();
+        $start = ($page - 1)*10000;
+        $result = Db::name('sale_after_task_remark')->alias('m')->join('work_order_list w','m.tid=w.original_id','left')->field('m.*,w.id as wid')->limit($start,10000)->order('m.id')->select();
         if(!$result){
             return false;
         }
@@ -1429,15 +1432,16 @@ class SaleAfterTask extends Backend
      */
     public function infoSynergyToWorkOrder()
     {
+        set_time_limit(0);
         $page = input("page") ?:1;
-        $start = ($page - 1)*1000;
-        $result = Db::name('info_synergy_task')->limit($start,1000)->select();
+        $start = ($page - 1)*10000;
+        $result = Db::name('info_synergy_task')->limit($start,10000)->select();
         if(!$result){
             return false;
         }
         foreach($result as $k => $v){
             $arr[$k]['work_platform'] = $v['order_platform'];
-            if(('马奇' == $v['create_person']) || ('陈爱利' == $v['create_person'])){
+            if(('马奇' == $v['create_person']) || ('陈爱利' == $v['create_person']) ||('陈爱丽' == $v['create_person'])){
                 $arr[$k]['work_type'] = 2;
             }else{
                 $arr[$k]['work_type'] = 1;
@@ -1491,12 +1495,15 @@ class SaleAfterTask extends Backend
      */
     public function getinfoSynergyRemark()
     {
+        set_time_limit(0);
         $page = input("page") ?:1;
         $start = ($page - 1)*1000;
-        $result = Db::name('info_synergy_task_remark')->alias('m')->join('work_order_list w','m.tid=w.synergy_id','left')->field('m.*,w.id as wid')->limit($start,1000)->select();
+        $result = Db::name('info_synergy_task_remark')->alias('m')->join('work_order_list w','m.tid=w.synergy_id','left')->field('m.*,w.id as wid')->limit($start,1000)->order('m.id')->select();
         if(!$result){
             return false;
         }
+        dump($result);
+        exit;
         $arr = [];
         foreach($result as $k => $v){
             $arr[$k]['work_id'] = $v['wid'];
@@ -1522,6 +1529,7 @@ class SaleAfterTask extends Backend
      */    
     public function infoSynergyChangeSku()
     {
+        set_time_limit(0);
         $page = input("page") ?:1;
         $start = ($page - 1)*1000;
         $result = Db::name('info_synergy_task_change_sku')->alias('m')->join('work_order_list w','m.tid=w.synergy_id','left')->field('m.*,w.id as wid')->limit($start,1000)->select();
@@ -1572,5 +1580,18 @@ class SaleAfterTask extends Backend
         }else{
             echo 'error';
         }        
+    }
+    /**
+     * 更新完成时间
+     *
+     * @Description
+     * @author lsw
+     * @since 2020/04/28 14:16:49 
+     * @return void
+     */
+    public function updateTime()
+    {
+        // $result = Db::name('order_complate')->select();
+        // $sql 
     }
 }
