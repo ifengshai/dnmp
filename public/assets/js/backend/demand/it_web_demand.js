@@ -418,7 +418,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     callback: function (data) {
                                     },
                                     visible: function(row){
-                                        if(row.test_group == 1 && row.test_user_id != ''){
+                                        if(row.test_group == 1 && row.test_user_id != '' && row.is_test_record_hidden != 1){
                                             return true;
                                         }else{
                                             return false;
@@ -875,7 +875,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     callback: function (data) {
                                     },
                                     visible: function(row){
-                                        if(row.test_group == 1 && row.test_user_id != ''){
+                                        if(row.test_group == 1 && row.test_user_id != '' && row.is_test_record_hidden != 1){
                                             return true;
                                         }else{
                                             return false;
@@ -1390,7 +1390,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     callback: function (data) {
                                     },
                                     visible: function(row){
-                                        if(row.test_group == 1 && row.test_user_id != ''){
+                                        if(row.test_group == 1 && row.test_user_id != '' && row.is_test_record_hidden != 1){
                                             return true;
                                         }else{
                                             return false;
