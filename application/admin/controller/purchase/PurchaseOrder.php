@@ -856,7 +856,8 @@ class PurchaseOrder extends Backend
             //根据不同的状态取订单数据
             $data[$i] = Alibaba::getOrderList($i, $params)->result;
         }
-
+        dump($data);
+        dump(array_values($data));
         foreach (array_values($data) as $key => $val) {
             if (!$val) {
                 continue;
