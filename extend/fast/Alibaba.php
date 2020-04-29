@@ -58,6 +58,7 @@ class Alibaba
 
         $client = new Client(['verify' => false]);
         $response = $client->request('POST', $url, array('form_params' => $params));
+        dump($response);die;
         //请求URL
         $body = $response->getBody();
         $stringBody = (string) $body;
