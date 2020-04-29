@@ -63,7 +63,6 @@ class Alibaba
         $body = $response->getBody();
         $stringBody = (string) $body;
         $res = json_decode($stringBody, true);
-        dump($res);die;
         if ($res === null) {
             exception('网络异常');
         }
