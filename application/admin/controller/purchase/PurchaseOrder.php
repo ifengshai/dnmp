@@ -656,7 +656,7 @@ class PurchaseOrder extends Backend
         $data = [];
         //判断采购单类型是否为线上采购单 1线下采购单=> 快递100api 2线上采购单 1688api
         if ($row['purchase_type'] == 2) {
-           
+
             $cacheIndex = 'logisticsDetail_' . $row['purchase_number'];
             $data = Cache::get($cacheIndex);
             if (!$data) {
@@ -805,7 +805,7 @@ class PurchaseOrder extends Backend
                 $params['supplier_sku'] = (new SupplierSku())->getSupplierData($v['skuid']);
             }
             if ($params['sku']) {
-               $this->purchase_order_item->allowField(true)->isUpdate(true, ['id' => $v['id']])->data($params)->save();
+                $this->purchase_order_item->allowField(true)->isUpdate(true, ['id' => $v['id']])->data($params)->save();
             }
         }
 
@@ -849,21 +849,17 @@ class PurchaseOrder extends Backend
         ];
 
         set_time_limit(0);
-        $data = cache('Crontab_getAlibabaPurchaseOrder_' . date('YmdH') . md5(serialize($params)));
-        
-        if (!$data) {
+        //根据不同的状态取订单数据
+        $success_data = Alibaba::getOrderList(1, $params);
+        dump($success_data);
+        $data = [];
+        for ($i = 1; $i <= round($success_data->totalRecord / 50); $i++) {
             //根据不同的状态取订单数据
-            $success_data = Alibaba::getOrderList(1, $params);
-            $data = [];
-            for ($i = 1; $i <= round($success_data->totalRecord / 50); $i++) {
-
-                //根据不同的状态取订单数据
-                $data[$i] = Alibaba::getOrderList($i, $params)->result;
-            }
-            //设置缓存
-            cache('Crontab_getAlibabaPurchaseOrder_' . date('YmdH') . md5(serialize($params)), $data, 3600);
+            $data[$i] = Alibaba::getOrderList($i, $params)->result;
         }
-        dump($data);die;
+
+        dump($data);
+        die;
         foreach (array_values($data) as $key => $val) {
             if (!$val) {
                 continue;
