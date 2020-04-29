@@ -1497,13 +1497,11 @@ class SaleAfterTask extends Backend
     {
         set_time_limit(0);
         $page = input("page") ?:1;
-        $start = ($page - 1)*1000;
-        $result = Db::name('info_synergy_task_remark')->alias('m')->join('work_order_list w','m.tid=w.synergy_id','left')->field('m.*,w.id as wid')->limit($start,1000)->order('m.id')->select();
+        $start = ($page - 1)*10000;
+        $result = Db::name('info_synergy_task_remark')->alias('m')->join('work_order_list w','m.tid=w.synergy_id','left')->field('m.*,w.id as wid')->limit($start,10000)->order('m.id')->select();
         if(!$result){
             return false;
         }
-        dump($result);
-        exit;
         $arr = [];
         foreach($result as $k => $v){
             $arr[$k]['work_id'] = $v['wid'];
