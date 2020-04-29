@@ -2032,7 +2032,7 @@ EOF;
             }
             $this->error(__('Parameter %s can not be empty', ''));
         }
-        $row = WorkOrderNote::where(['work_id' => $ids])->select();
+        $row = WorkOrderNote::where(['work_id' => $ids])->order('id desc')->select();
         $this->view->assign("row", $row);
         $this->view->assign('work_id',$ids);
         return $this->view->fetch('work_order_note');
