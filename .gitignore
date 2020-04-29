@@ -11,3 +11,5 @@ composer.lock
 .svn
 .vscode
 tryon/*
+nginx.htaccess
+public/nginx.htaccess

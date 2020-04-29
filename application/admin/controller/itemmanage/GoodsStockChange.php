@@ -31,6 +31,7 @@ class GoodsStockChange extends Backend
      */
     /**
      * 查看
+     * 
      */
     public function index()
     {
