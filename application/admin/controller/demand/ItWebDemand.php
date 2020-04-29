@@ -244,7 +244,6 @@ class ItWebDemand extends Backend
                     if(in_array($this->auth->id, explode(',', $v['test_user_id']))){
                         $list[$k]['is_test_record_hidden'] = 1;//显示
                         $list[$k]['is_test_finish_hidden'] = 1;//显示
-                        $list[$k]['is_detail_log'] = 0;//不显示
                     }
                 }
                 if($this->auth->id == $v['entry_user_id']){
@@ -427,14 +426,6 @@ class ItWebDemand extends Backend
                 if($this->auth->id == $v['entry_user_id']){
                     $list[$k]['is_entry_user_hidden'] = 1;
                 }*/
-
-                if($v['test_group'] == 1 && $v['test_user_id'] != ''){
-                    if(in_array($this->auth->id, explode(',', $v['test_user_id']))){
-                        $list[$k]['is_test_record_hidden'] = 1;
-                        $list[$k]['is_test_finish_hidden'] = 1;
-                        $list[$k]['is_detail_log'] = 0;//不显示
-                    }
-                }
 
 
             }
