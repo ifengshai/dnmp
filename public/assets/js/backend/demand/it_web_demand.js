@@ -418,10 +418,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     callback: function (data) {
                                     },
                                     visible: function(row){
-                                        if(row.test_group == 1 && row.test_user_id != '' && row.is_test_record_hidden != 1){
+                                        if(row.status == 7 && row.test_group == 1 && row.test_user_id != ''){
                                             return true;
                                         }else{
-                                            return false;
+                                            if(row.is_detail_log == 0){
+                                                return false;
+                                            }else{
+                                                return true;
+                                            }
                                         }
                                     }
                                 },
@@ -875,10 +879,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     callback: function (data) {
                                     },
                                     visible: function(row){
-                                        if(row.test_group == 1 && row.test_user_id != '' && row.is_test_record_hidden != 1){
+                                        if(row.status == 7 && row.test_group == 1 && row.test_user_id != ''){
                                             return true;
                                         }else{
-                                            return false;
+                                            if(row.is_detail_log == 0){
+                                                return false;
+                                            }else{
+                                                return true;
+                                            }
                                         }
                                     }
                                 },
@@ -1390,10 +1398,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     callback: function (data) {
                                     },
                                     visible: function(row){
-                                        if(row.test_group == 1 && row.test_user_id != '' && row.is_test_record_hidden != 1){
+                                        if(row.status == 7 && row.test_group == 1 && row.test_user_id != ''){
                                             return true;
                                         }else{
-                                            return false;
+                                            if(row.is_detail_log == 0){
+                                                return false;
+                                            }else{
+                                                return true;
+                                            }
                                         }
                                     }
                                 },
