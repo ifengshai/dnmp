@@ -247,22 +247,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                 },
                                 {
                                     name: 'test_record_bug',
-                                    text: __('问题记录'),
-                                    title: __('问题记录'),
-                                    classname: 'btn btn-xs btn-primary btn-dialog',
-                                    url: 'demand/it_web_demand/test_record_bug',
-                                    callback: function (data) {
-                                    },
-                                    visible: function(row){
-                                        if(row.test_group == 1 && row.test_user_id != ''){//操作权限及显示权限
-                                            return true;
-                                        }else{
-                                            return false;
-                                        }
-                                    }
-                                },
-                                {
-                                    name: 'test_record_bug',
                                     text: __('记录问题'),
                                     title: __('记录问题'),
                                     classname: 'btn btn-xs btn-primary btn-dialog',
@@ -434,7 +418,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     callback: function (data) {
                                     },
                                     visible: function(row){
-                                        if(row.status == 7){
+                                        if(row.test_group == 1 && row.test_user_id != ''){
                                             return true;
                                         }else{
                                             return false;
@@ -720,22 +704,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                 },
                                 {
                                     name: 'test_record_bug',
-                                    text: __('问题记录'),
-                                    title: __('问题记录'),
-                                    classname: 'btn btn-xs btn-primary btn-dialog',
-                                    url: 'demand/it_web_demand/test_record_bug',
-                                    callback: function (data) {
-                                    },
-                                    visible: function(row){
-                                        if(row.test_group == 1 && row.test_user_id != ''){//操作权限及显示权限
-                                            return true;
-                                        }else{
-                                            return false;
-                                        }
-                                    }
-                                },
-                                {
-                                    name: 'test_record_bug',
                                     text: __('记录问题'),
                                     title: __('记录问题'),
                                     classname: 'btn btn-xs btn-primary btn-dialog',
@@ -907,7 +875,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     callback: function (data) {
                                     },
                                     visible: function(row){
-                                        if(row.status == 7){
+                                        if(row.test_group == 1 && row.test_user_id != ''){
                                             return true;
                                         }else{
                                             return false;
@@ -1422,7 +1390,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     callback: function (data) {
                                     },
                                     visible: function(row){
-                                        if(row.status == 7){
+                                        if(row.test_group == 1 && row.test_user_id != ''){
                                             return true;
                                         }else{
                                             return false;
