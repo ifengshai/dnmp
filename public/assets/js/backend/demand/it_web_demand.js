@@ -421,7 +421,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                         if(row.status == 7 && row.test_group == 1 && row.test_user_id != ''){
                                             return true;
                                         }else{
-                                            if(row.is_detail_log == 0){
+                                            if(row.is_detail_log == 0 && row.test_group == 1){
                                                 return false;
                                             }else{
                                                 return true;
@@ -882,7 +882,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                         if(row.status == 7 && row.test_group == 1 && row.test_user_id != ''){
                                             return true;
                                         }else{
-                                            if(row.is_detail_log == 0){
+                                            if(row.is_detail_log == 0 && row.test_group == 1){
                                                 return false;
                                             }else{
                                                 return true;
@@ -1401,7 +1401,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                         if(row.status == 7 && row.test_group == 1 && row.test_user_id != ''){
                                             return true;
                                         }else{
-                                            if(row.is_detail_log == 0){
+                                            if(row.is_detail_log == 0 && row.test_group == 1){
                                                 return false;
                                             }else{
                                                 return true;
