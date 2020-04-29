@@ -71,7 +71,7 @@ return [
             'step' => 'step06',
         ],
         2 => [ //更改镜片
-            'step' => 'step02'
+            'step' => 'step07'
         ],
         3 => [ //更改地址
             'step' => 'step01'
@@ -238,7 +238,30 @@ return [
             'step_id' => 1, //更改
             'is_check' => 0,
             'appoint_group' => [ //承接组
-                'warehouse_group' //仓库跟单
+                'warehouse_lens_group' //仓库跟单
+            ],
+        ],
+        [
+            'step_id' => 2, //退款
+            'is_check' => 1,
+            'appoint_group' => [ //承接组
+                'cashier_group' //出纳
+            ],
+        ],
+        [
+            'step_id' => 8, //补价
+            'is_check' => 0,
+            'appoint_group' => [ //空代表承接给创建人
+
+            ],
+        ],
+    ],
+    'step07' => [
+        [
+            'step_id' => 1, //更改
+            'is_check' => 0,
+            'appoint_group' => [ //承接组
+                'warehouse_group' //仓库镜片负责人
             ],
         ],
         [
