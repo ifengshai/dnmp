@@ -421,10 +421,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                         if(row.test_group == 0 || row.test_group == 2){
                                             return false;
                                         }else{
-                                            if(row.status >= 4 && row.is_test_detail_log != 0){
+                                            if(row.status == 7){
                                                 return true;
                                             }else{
-                                                return false;
+                                                if(row.status >= 4 && row.is_test_detail_log != 0){
+                                                    return true;
+                                                }else{
+                                                    return false;
+                                                }
                                             }
                                         }
                                     }
@@ -882,10 +886,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                         if(row.test_group == 0 || row.test_group == 2){
                                             return false;
                                         }else{
-                                            if(row.status >= 4 && row.is_test_detail_log != 0){
+                                            if(row.status == 7){
                                                 return true;
                                             }else{
-                                                return false;
+                                                if(row.status >= 4 && row.is_test_detail_log != 0){
+                                                    return true;
+                                                }else{
+                                                    return false;
+                                                }
                                             }
                                         }
                                     }
@@ -1424,10 +1432,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                         if(row.test_group == 0 || row.test_group == 2){
                                             return false;
                                         }else{
-                                            if(row.status >= 4 && row.is_test_detail_log != 0){
+                                            if(row.status == 7){
                                                 return true;
                                             }else{
-                                                return false;
+                                                if(row.status >= 4 && row.is_test_detail_log != 0){
+                                                    return true;
+                                                }else{
+                                                    return false;
+                                                }
                                             }
                                         }
                                     }
