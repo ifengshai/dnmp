@@ -2,6 +2,7 @@
 
 namespace app\admin\controller\demand\testManage;
 
+use app\common\model\Auth;
 use think\Db;
 use think\Exception;
 use think\exception\PDOException;
@@ -27,6 +28,17 @@ class ItTestOptimize extends Backend
         parent::_initialize();
         $this->model = new \app\admin\model\demand\testmanage\ItTestOptimize;
         $this->view->assign('orderPlatformList',config('demand.siteType'));
+        $adminId = session('admin.id');
+        $isTest = 0;
+//        //判断是否是测试
+//        $authUserIds = Auth::getUsersId('demand/it_web_demand/test_distribution') ?: [];
+
+        //判断是否是普通的测试
+        $testAuthUserIds = Auth::getUsersId('demand/it_web_demand/test_group_finish') ?: [];
+        if(in_array($adminId,$testAuthUserIds)){
+            $isTest = 1;
+        }
+        $this->assignconfig('isTest',$isTest);
 
     }
     
