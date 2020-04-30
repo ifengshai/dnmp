@@ -177,7 +177,7 @@ class Index extends Api
                 $demandData['return_test_finish_time'] = $completeTime;
             }
             //前端数据
-            if(($demand['process_type'] == 1 || $demand['process_type'] == 3) && $demand['']){
+            if(($demand['process_type'] == 1 || $demand['process_type'] == 3) && $demand['qd_name']){
                 $webDesignerUerId = Admin::where('nickname','in',$demand['qd_name'])->column('id');
                 $demandData['web_designer_group'] = 1;
                 $demandData['web_designer_complexity'] = $all_complexity;
@@ -188,7 +188,7 @@ class Index extends Api
                 $demandData['web_designer_note'] = $demand['replay'];
             }
             //后端数据
-            if($demand['process_type'] == 2 || $demand['process_type'] == 3){
+            if(($demand['process_type'] == 2 || $demand['process_type'] == 3) && $demand['hd_name']){
                 $phpUerId = Admin::where('nickname','in',$demand['hd_name'])->column('id');
                 $demandData['phper_group'] = 1;
                 $demandData['phper_complexity'] = $all_complexity;
