@@ -29,11 +29,6 @@ class ItWebDemand extends Backend
         $this->view->assign('getTabList', $this->model->getTabList());
         $this->testRecordModel = new \app\admin\model\demand\ItTestRecord;
         $this->assignconfig('admin_id', session('admin.id'));
-        $testAuthUserIds = Auth::getUsersId('demand/it_web_demand/test_group_finish') ?: [];
-        if(in_array(session('admin.id'),$testAuthUserIds)){
-            $isTest = 1;
-        }
-        $this->assignconfig('isTest',$isTest);
     }
 
     /**
