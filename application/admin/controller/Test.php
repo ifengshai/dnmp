@@ -14,7 +14,7 @@ class Test extends Backend
         $this->newproduct = new \app\admin\model\NewProduct();
         $this->item = new \app\admin\model\itemmanage\Item();
     }
-    public function test()
+    public function test123()
     {
         echo 1111;
     }
