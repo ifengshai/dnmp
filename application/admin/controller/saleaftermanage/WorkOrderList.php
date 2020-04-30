@@ -2068,9 +2068,12 @@ EOF;
         ->where($addWhere)
         ->select();
         $list = collection($list)->toArray();
+        //查询用户id对应姓名
+        $admin = new \app\admin\model\Admin();
+        $users = $admin->where('status', 'normal')->column('nickname', 'id');
         $arr = [];
 		foreach($list as $vals){
-			$arr[] = $vals['id'];
+            $arr[] = $vals['id'];
         }
         //求出所有的措施
 		$info = $this->step->fetchMeasureRecord($arr);
@@ -2138,6 +2141,15 @@ EOF;
             ->setCellValue("AM1","工单回复备注");
         $spreadsheet->setActiveSheetIndex(0)->setTitle('工单数据');
         foreach ($list as $key => $value) {
+            if($value['after_user_id']){
+                $value['after_user_id'] = $users[$value['after_user_id']];
+            }
+            if($value['assign_user_id']){
+                $value['assign_user_id'] = $users[$value['assign_user_id']];
+            }
+            if($value['operation_user_id']){
+                $value['operation_user_id'] = $users[$value['operation_user_id']];
+            }            
             switch($value['work_platform']){
                 case 2:
                 $value['work_platform'] = 'voogueme';

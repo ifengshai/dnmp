@@ -635,6 +635,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     }
                 }, function (data, ret) {
                     $('#order_pay_currency').val(data.base_currency_code);
+                    $('#step2_pay_currency').val(data.base_currency_code);
                     $('#order_pay_method').val(data.method);
                     $('#c-refund_way').val(data.method);
                     $('#customer_email').val(data.customer_email);
