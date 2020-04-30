@@ -319,6 +319,7 @@ class ItWebDemand extends Backend
             $total = $this->model
                 ->where($where)
                 ->where($smap)
+                ->where($meWhere)
                 ->where('type', 1)
                 ->where('is_del', 1)
                 ->order($sort, $order)
@@ -327,6 +328,7 @@ class ItWebDemand extends Backend
             $list = $this->model
                 ->where($where)
                 ->where($smap)
+                ->where($meWhere)
                 ->where('type', 1)
                 ->where('is_del', 1)
                 ->order($sort, $order)
