@@ -84,6 +84,7 @@ class DevelopDemand extends Backend
 
             return json($result);
         }
+        $this->assignconfig('username', session('admin.nickname'));
         //判断编辑按钮权限
         $this->assignconfig('is_edit', $this->auth->check('demand/develop_demand/edit'));
         //判断分配权限

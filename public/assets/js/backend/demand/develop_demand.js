@@ -352,7 +352,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
                                     },
                                     visible: function (row) {
-                                        if (row.review_status_manager == 0 && Config.is_edit == 1) {
+                                        if (row.review_status_manager == 0 && Config.is_edit == 1 && Config.username == row.create_person) {
                                             return true;
                                         } else {
                                             return false;
