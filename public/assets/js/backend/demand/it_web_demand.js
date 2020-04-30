@@ -690,7 +690,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     },
                                     visible: function(row){
                                         if(row.status == 1){
-                                            if(row.demand_test_distribution){//操作权限
+                                            if(row.demand_test_distribution && Config.isTest == 1){//操作权限
                                                 return true;
                                             }
                                         }else{
@@ -758,7 +758,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     visible: function(row){
                                         if(row.status == 4){
                                             if(row.demand_test_finish && row.is_test_finish_hidden == 1){//操作权限及显示权限
-                                                if(row.test_group == 1 && row.test_is_finish == 0){
+                                                if(row.test_group == 1 && row.test_is_finish == 0 && Config.isTest == 1){
                                                     return true;
                                                 }else{
                                                     return false;

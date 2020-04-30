@@ -30,9 +30,6 @@ class ItTestOptimize extends Backend
         $this->view->assign('orderPlatformList',config('demand.siteType'));
         $adminId = session('admin.id');
         $isTest = 0;
-//        //判断是否是测试
-//        $authUserIds = Auth::getUsersId('demand/it_web_demand/test_distribution') ?: [];
-
         //判断是否是普通的测试
         $testAuthUserIds = Auth::getUsersId('demand/it_web_demand/test_group_finish') ?: [];
         if(in_array($adminId,$testAuthUserIds)){
