@@ -79,7 +79,7 @@ class Index extends Api
             foreach($deadlines as $deadline){
                 //用户id
                 $userId = Admin::where('nickname',$deadline['fz_name'])->value('id');
-                $php = ['黄彬彬','李想','卢志恒','苗晶晶'];
+                $php = ['黄彬彬','李想','卢志恒','苗晶晶','钱会博'];
                 $data = [
                     'task_id' => $itWebTask->id,
                     'person_in_charge' => $userId,
@@ -99,10 +99,17 @@ class Index extends Api
         }
     }
 
+    /**
+     * 需求，bug导入，只导入成功的
+     * @throws \think\Exception
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
     public function demandImport()
     {
         $db = Db::connect($this->connect);
-        $demands = $db->name('task')->where('status',5)->where('type','in','1,2,3,4')->select();
+        $demands = $db->name('task')->where('status',5)->where('type','in','1,2,3,4')->order('id asc')->select();
         foreach($demands as $demand){
             $website = $demand['website'];
             switch($website){
@@ -126,7 +133,7 @@ class Index extends Api
             }else{
                 $type = 2;
             }
-            $entry_user_id = Admin::where('nickname',$demand['ask_name'])->value('id');
+            $entry_user_id = Admin::where('nickname','in',$demand['ask_name'])->value('id');
             $all_complexity = $demand['level'];
             if($all_complexity == 1){
                 $all_complexity = 3;
@@ -146,10 +153,10 @@ class Index extends Api
                 'web_designer_group' => 0,
                 'test_group' => 2,
                 'entry_user_confirm' => 1,
-                'entry_user_confirm_time' => $demand['completed_time'],
+                'entry_user_confirm_time' => strtotime($demand['completed_time']) ? $demand['completed_time'] : null,
                 'create_time' => $demand['add_time'],
-                'hope_time' => $demand['wish_time'],
-                'all_finish_time' => $demand['completed_time'],
+                'hope_time' => strtotime($demand['wish_time']) ? $demand['wish_time'] : null,
+                'all_finish_time' => strtotime($demand['completed_time']) ? $demand['completed_time'] : null,
                 'is_small_probability' => $demand['is_small_pro'],
                 'is_work_time' => $demand['bug_is_not_work'] ?: 0,
             ];
@@ -158,19 +165,19 @@ class Index extends Api
                 $demandData['test_group'] = 1;
                 $demandData['test_complexity'] = $all_complexity;
                 $demandData['test_is_finish'] = 1;
-                $demandData['test_finish_time'] = $demand['completed_time'];
+                $demandData['test_finish_time'] = strtotime($demand['test_time']) ? $demand['test_time'] : $demand['completed_time'];
                 $demandData['return_test_is_finish'] = 1;
-                $demandData['return_test_finish_time'] = $demand['completed_time'];
+                $demandData['return_test_finish_time'] = strtotime($demand['completed_time']) ? $demand['completed_time'] : null;
             }
             //前端数据
-            if($demand['process_type'] == 1 || $demand['process_type'] == 3){
+            if(($demand['process_type'] == 1 || $demand['process_type'] == 3) && $demand['']){
                 $webDesignerUerId = Admin::where('nickname','in',$demand['qd_name'])->column('id');
                 $demandData['web_designer_group'] = 1;
                 $demandData['web_designer_complexity'] = $all_complexity;
                 $demandData['web_designer_user_id'] = join(',',$webDesignerUerId);
-                $demandData['web_designer_expect_time'] = $demand['qd_yqtime'];
+                $demandData['web_designer_expect_time'] = strtotime($demand['qd_yq_time']) ? $demand['qd_yq_time'] : null;
                 $demandData['web_designer_is_finish'] = 1;
-                $demandData['web_designer_finish_time'] = $demand['qd_complete_time'];
+                $demandData['web_designer_finish_time'] = strtotime($demand['qd_complete_time']) ? $demand['qd_complete_time'] : $demand['completed_time'];
                 $demandData['web_designer_note'] = $demand['replay'];
             }
             //后端数据
@@ -179,9 +186,9 @@ class Index extends Api
                 $demandData['phper_group'] = 1;
                 $demandData['phper_complexity'] = $all_complexity;
                 $demandData['phper_user_id'] = join(',',$phpUerId);
-                $demandData['phper_expect_time'] = $demand['hd_yqtime'];
+                $demandData['phper_expect_time'] = strtotime($demand['hd_yq_time']) ? $demand['hd_yq_time'] : null;
                 $demandData['phper_is_finish'] = 1;
-                $demandData['phper_finish_time'] = $demand['hd_complete_time'];
+                $demandData['phper_finish_time'] = strtotime($demand['hd_complete_time']) ? $demand['hd_complete_time'] : $demand['completed_time'];
                 $demandData['phper_note'] = $demand['replay'];
             }
             $res = ItWebDemand::create($demandData);
