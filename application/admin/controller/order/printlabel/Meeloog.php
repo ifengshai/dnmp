@@ -390,11 +390,11 @@ class Meeloog extends Backend
                         if (!$trueSku) {
                             throw new Exception("增加配货占用库存失败！！请检查更换镜框SKU:" . $v['change_sku']);
                         }
-                        //判断是否有实时库存
-                        $realStock = $item->getRealStock($trueSku);
-                        if ($v['qty'] > $realStock) {
-                            throw new Exception("SKU:" . $v['change_sku'] . "实时库存不足");
-                        }
+                        // //判断是否有实时库存
+                        // $realStock = $item->getRealStock($trueSku);
+                        // if ($v['qty'] > $realStock) {
+                        //     throw new Exception("SKU:" . $v['change_sku'] . "实时库存不足");
+                        // }
                         //增加配货占用
                         $map = [];
                         $map['sku'] = $trueSku;
@@ -437,11 +437,11 @@ class Meeloog extends Backend
                         continue;
                     }
 
-                    //判断是否有实时库存
-                    $realStock = $item->getRealStock($trueSku);
-                    if ($qty > $realStock) {
-                        throw new Exception("SKU:" . $v['sku'] . "实时库存不足");
-                    }
+                    // //判断是否有实时库存
+                    // $realStock = $item->getRealStock($trueSku);
+                    // if ($qty > $realStock) {
+                    //     throw new Exception("SKU:" . $v['sku'] . "实时库存不足");
+                    // }
 
                     $map = [];
                     $map['sku'] = $trueSku;
@@ -591,6 +591,7 @@ class Meeloog extends Backend
             //用来判断是否从_list列表页进来
             if ($label == 'list') {
                 //订单号
+                $map = [];
                 $map['entity_id'] = ['in', $entity_ids];
                 $list = $this->model
                     ->where($map)

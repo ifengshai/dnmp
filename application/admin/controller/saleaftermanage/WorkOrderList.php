@@ -222,7 +222,7 @@ class WorkOrderList extends Backend
                     }
 
                     //判断是否选择措施
-                    if (count(array_filter($params['measure_choose_id'])) < 1 && $params['work_type'] == 1) {
+                    if (count(array_filter($params['measure_choose_id'])) < 1 && $params['work_type'] == 1 && $params['status'] == 2) {
                         throw new Exception("措施不能为空");
                     }
 
@@ -687,7 +687,7 @@ class WorkOrderList extends Backend
 
                     //判断是否选择措施
                     $params['measure_choose_id'] = $params['measure_choose_id'] ?? [];
-                    if (count(array_filter($params['measure_choose_id'])) < 1 && $params['work_type'] == 1) {
+                    if (count(array_filter($params['measure_choose_id'])) < 1 && $params['work_type'] == 1  && $params['status'] == 2) {
                         throw new Exception("措施不能为空");
                     }
 

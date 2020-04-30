@@ -19,4 +19,23 @@ class Test extends Backend
         echo 1111;
     }
 
+    /**
+     * 更新采购负责人
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/04/29 15:43:38 
+     * @return void
+     */
+    public function test()
+    {
+        $ids = [];
+        $person = '';
+        $str = explode('
+        ', $person);
+        $supplier = new \app\admin\model\purchase\Supplier();
+        foreach ($ids as $k => $v) {
+            $supplier->where('id', $v)->update(['purchase_person' => $str[$k]]);
+        }
+    }
 }

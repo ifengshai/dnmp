@@ -21,7 +21,15 @@
     }
 </style>
 <div class="panel panel-default panel-intro">
-    {:build_heading()}
+    <div class="panel-heading">
+        {:build_heading()}
+        <ul class="nav nav-tabs" >
+            <li class="active"><a href="#t-all" data-value="" data-field="" data-toggle="tab">{:__('All')}</a></li>
+            {foreach name="getTabList" item="vo"}
+            <li><a href="#t-{$key}" data-value="{$vo.value}" data-field="{$vo.field}" data-toggle="tab">{$vo.name}</a></li>
+            {/foreach}
+        </ul>
+    </div>
 
     <div class="panel-body">
         <div id="myTabContent" class="tab-content">

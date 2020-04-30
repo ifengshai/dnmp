@@ -435,20 +435,20 @@ class Voogueme extends Backend
                         //sku转换
                         $trueSku = $ItemPlatformSku->getTrueSku(trim($v['change_sku']), 2);
                         if (!$trueSku) {
-                            throw new Exception("增加配货占用库存失败！！请检查更换镜框SKU:" . $v['change_sku']);
+                            throw new Exception("增加配货占用库存失败！！请检查更换镜框SKU:" . $v['change_sku']. ',订单号：' . $v['increment_id']);
                         }
-                        //判断是否有实时库存
-                        $realStock = $item->getRealStock($trueSku);
-                        if ($v['qty'] > $realStock) {
-                            throw new Exception("SKU:" . $v['change_sku'] . "实时库存不足");
-                        }
+                        // //判断是否有实时库存
+                        // $realStock = $item->getRealStock($trueSku);
+                        // if ($v['qty'] > $realStock) {
+                        //     throw new Exception("SKU:" . $v['change_sku'] . "实时库存不足". ',订单号：' . $v['increment_id']);
+                        // }
                         //增加配货占用
                         $map = [];
                         $map['sku'] = $trueSku;
                         $map['is_del'] = 1;
                         $res = $item->where($map)->setInc('distribution_occupy_stock', $v['qty']);
                         if (false === $res) {
-                            throw new Exception("增加配货占用库存失败！！请检查更换镜框SKU:" . $v['change_sku']);
+                            throw new Exception("增加配货占用库存失败！！请检查更换镜框SKU:" . $v['change_sku']. ',订单号：' . $v['increment_id']);
                         }
                         $sku[$v['increment_id']][$v['original_sku']] += $v['qty'];
 
@@ -470,7 +470,7 @@ class Voogueme extends Backend
                     //转仓库SKU
                     $trueSku = $ItemPlatformSku->getTrueSku(trim($v['sku']), 2);
                     if (!$trueSku) {
-                        throw new Exception("增加配货占用库存失败！！请检查更换镜框SKU:" . $v['sku']);
+                        throw new Exception("增加配货占用库存失败！！请检查更换镜框SKU:" . $v['sku']. ',订单号：' . $v['increment_id']);
                     }
 
                     //如果为真 则存在更换镜架的数量 则订单需要扣减的数量为原数量-更换镜架的数量
@@ -484,11 +484,11 @@ class Voogueme extends Backend
                         continue;
                     }
 
-                    //判断是否有实时库存
-                    $realStock = $item->getRealStock($trueSku);
-                    if ($qty > $realStock) {
-                        throw new Exception("SKU:" . $v['sku'] . "实时库存不足");
-                    }
+                    // //判断是否有实时库存
+                    // $realStock = $item->getRealStock($trueSku);
+                    // if ($qty > $realStock) {
+                    //     throw new Exception("SKU:" . $v['sku'] . "实时库存不足");
+                    // }
 
                     $map = [];
                     $map['sku'] = $trueSku;
@@ -496,7 +496,7 @@ class Voogueme extends Backend
                     //增加配货占用
                     $res = $item->where($map)->setInc('distribution_occupy_stock', $qty);
                     if (false === $res) {
-                        throw new Exception("增加配货占用库存失败！！请检查更换镜框SKU:" . $v['sku']);
+                        throw new Exception("增加配货占用库存失败！！请检查更换镜框SKU:" . $v['sku']. ',订单号：' . $v['increment_id']);
                     }
 
                     $number++;
@@ -545,7 +545,7 @@ class Voogueme extends Backend
                     foreach ($infoRes as $k => $v) {
                         $trueSku = $ItemPlatformSku->getTrueSku(trim($v['change_sku']), 2);
                         if (!$trueSku) {
-                            throw new Exception("扣减库存失败！！请检查更换镜框SKU:" . $v['sku']);
+                            throw new Exception("扣减库存失败！！请检查更换镜框SKU:" . $v['sku']. ',订单号：' . $v['increment_id']);
                         }
                         //扣减总库存 扣减占用库存 扣减配货占用
                         $map = [];
@@ -553,7 +553,7 @@ class Voogueme extends Backend
                         $map['is_del'] = 1;
                         $res = $item->where($map)->dec('stock', $v['qty'])->dec('occupy_stock', $v['qty'])->dec('distribution_occupy_stock', $v['qty'])->update();
                         if (false === $res) {
-                            throw new Exception("扣减库存失败！！请检查更换镜框SKU:" . $v['sku']);
+                            throw new Exception("扣减库存失败！！请检查更换镜框SKU:" . $v['sku']. ',订单号：' . $v['increment_id']);
                         }
                         $sku[$v['increment_id']][$v['original_sku']] += $v['qty'];
 
@@ -576,7 +576,7 @@ class Voogueme extends Backend
                     //查出订单SKU映射表对应的仓库SKU
                     $trueSku = $ItemPlatformSku->getTrueSku(trim($v['sku']), 2);
                     if (!$trueSku) {
-                        throw new Exception("扣减库存失败！！请检查SKU:" . $v['sku']);
+                        throw new Exception("扣减库存失败！！请检查SKU:" . $v['sku']. ',订单号：' . $v['increment_id']);
                     }
                     //如果为真 则存在更换镜架的数量 则订单需要扣减的数量为原数量-更换镜架的数量
                     if ($sku[$v['increment_id']][$v['sku']]) {
@@ -594,7 +594,7 @@ class Voogueme extends Backend
                     //扣减总库存 扣减占用库存 扣减配货占用
                     $res = $item->where($item_map)->dec('stock', $qty)->dec('occupy_stock', $qty)->dec('distribution_occupy_stock', $qty)->update();
                     if (false === $res) {
-                        throw new Exception("扣减库存失败！！请检查SKU:" . $v['sku']);
+                        throw new Exception("扣减库存失败！！请检查SKU:" . $v['sku']. ',订单号：' . $v['increment_id']);
                     }
                     $number++;
                     //100条提交一次
@@ -638,6 +638,7 @@ class Voogueme extends Backend
             //用来判断是否从_list列表页进来
             if ($label == 'list') {
                 //订单号
+                $map = [];
                 $map['entity_id'] = ['in', $entity_ids];
                 $list = $this->model
                     ->where($map)
@@ -1119,8 +1120,93 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
         set_time_limit(0);
         ini_set('memory_limit', '512M');
 
-        $str = '
-        ';
+        $str = '430115832
+        430115827
+        430115866
+        130041398
+        430115989
+        130041429
+        430116120
+        430116129
+        430116104
+        430116122
+        430116065
+        430116090
+        430116070
+        130041434
+        430115906
+        430115993
+        130041384
+        430115976
+        430115736
+        130041451
+        430115996
+        430116113
+        130041488
+        130041477
+        430116134
+        130041450
+        130041490
+        430115973
+        130041460
+        430115880
+        430116002
+        130041380
+        430116138
+        430115995
+        130041406
+        430115966
+        430115770
+        430115753
+        430115855
+        130041476
+        430116058
+        430115820
+        430116007
+        430116092
+        430116005
+        430115757
+        430116048
+        430116006
+        130041389
+        430116059
+        430115893
+        130041473
+        430116055
+        430115850
+        430115978
+        430115934
+        430115908
+        130041383
+        430115810
+        430116080
+        130041413
+        430115777
+        430115771
+        430116062
+        430115956
+        130041416
+        430115950
+        430115431
+        430115826
+        430115933
+        130041459
+        430116029
+        130041412
+        430115924
+        430115783
+        430116137
+        430115895
+        430115824
+        430115814
+        130041444
+        430115833
+        430115946
+        430115779
+        130041425
+        430115994
+        430115748
+        130041404';
         $str = explode('
         ', $str);
 
