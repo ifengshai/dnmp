@@ -137,6 +137,10 @@ class Index extends Api
             if(strpos('王小花',$demand['ask_name']) !== false){
                 $askName = str_replace('王小花','王桂华',$demand['ask_name']);
             }
+            $qd_name = $demand['qd_name'];
+            if(strpos('李杨',$qd_name) !== false){
+                $qd_name = str_replace('李杨','李扬',$qd_name);
+            }
             $entry_user_id = Admin::where('nickname','in',$askName)->value('id');
             $copy_to_user_id = Admin::where('nickname','in',$askName)->column('id');
             $all_complexity = $demand['level'];
@@ -178,7 +182,7 @@ class Index extends Api
             }
             //前端数据
             if(($demand['process_type'] == 1 || $demand['process_type'] == 3) && $demand['qd_name']){
-                $webDesignerUerId = Admin::where('nickname','in',$demand['qd_name'])->column('id');
+                $webDesignerUerId = Admin::where('nickname','in',$qd_name)->column('id');
                 $demandData['web_designer_group'] = 1;
                 $demandData['web_designer_complexity'] = $all_complexity;
                 $demandData['web_designer_user_id'] = join(',',$webDesignerUerId);
