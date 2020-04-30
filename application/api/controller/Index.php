@@ -133,7 +133,12 @@ class Index extends Api
             }else{
                 $type = 2;
             }
-            $entry_user_id = Admin::where('nickname','in',$demand['ask_name'])->value('id');
+            $askName = $demand['ask_name'];
+            if(strpos('王小花',$demand['ask_name']) !== false){
+                $askName = str_replace('王小花','王桂华',$demand['ask_name']);
+            }
+            $entry_user_id = Admin::where('nickname','in',$askName)->value('id');
+            $copy_to_user_id = Admin::where('nickname','in',$askName)->column('id');
             $all_complexity = $demand['level'];
             if($all_complexity == 1){
                 $all_complexity = 3;
@@ -144,7 +149,7 @@ class Index extends Api
                 'type' => $type,
                 'site_type' => $siteType,
                 'entry_user_id' => $entry_user_id,
-                'copy_to_user_id' => $entry_user_id,
+                'copy_to_user_id' => join(',',$copy_to_user_id),
                 'title' => $demand['title'],
                 'content' => $demand['description'],
                 'all_complexity' => $all_complexity,
@@ -161,13 +166,15 @@ class Index extends Api
                 'is_work_time' => $demand['bug_is_not_work'] ?: 0,
             ];
             //测试数据
+            $completeTime = strtotime($demand['completed_time']) ? $demand['completed_time'] : null;
             if($demand['is_need_test']){
                 $demandData['test_group'] = 1;
                 $demandData['test_complexity'] = $all_complexity;
                 $demandData['test_is_finish'] = 1;
-                $demandData['test_finish_time'] = strtotime($demand['test_time']) ? $demand['test_time'] : $demand['completed_time'];
+                $demandData['test_user_id'] = 195;
+                $demandData['test_finish_time'] = strtotime($demand['test_time']) ? $demand['test_time'] : $completeTime;
                 $demandData['return_test_is_finish'] = 1;
-                $demandData['return_test_finish_time'] = strtotime($demand['completed_time']) ? $demand['completed_time'] : null;
+                $demandData['return_test_finish_time'] = $completeTime;
             }
             //前端数据
             if(($demand['process_type'] == 1 || $demand['process_type'] == 3) && $demand['']){
@@ -177,7 +184,7 @@ class Index extends Api
                 $demandData['web_designer_user_id'] = join(',',$webDesignerUerId);
                 $demandData['web_designer_expect_time'] = strtotime($demand['qd_yq_time']) ? $demand['qd_yq_time'] : null;
                 $demandData['web_designer_is_finish'] = 1;
-                $demandData['web_designer_finish_time'] = strtotime($demand['qd_complete_time']) ? $demand['qd_complete_time'] : $demand['completed_time'];
+                $demandData['web_designer_finish_time'] = strtotime($demand['qd_complete_time']) ? $demand['qd_complete_time'] : $completeTime;
                 $demandData['web_designer_note'] = $demand['replay'];
             }
             //后端数据
@@ -188,7 +195,7 @@ class Index extends Api
                 $demandData['phper_user_id'] = join(',',$phpUerId);
                 $demandData['phper_expect_time'] = strtotime($demand['hd_yq_time']) ? $demand['hd_yq_time'] : null;
                 $demandData['phper_is_finish'] = 1;
-                $demandData['phper_finish_time'] = strtotime($demand['hd_complete_time']) ? $demand['hd_complete_time'] : $demand['completed_time'];
+                $demandData['phper_finish_time'] = strtotime($demand['hd_complete_time']) ? $demand['hd_complete_time'] : $completeTime;
                 $demandData['phper_note'] = $demand['replay'];
             }
             $res = ItWebDemand::create($demandData);

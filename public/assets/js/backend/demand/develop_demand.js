@@ -184,8 +184,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
 
                                 {
                                     name: 'test_distribution',
-                                    text: __('测试确认'),
-                                    title: __('测试确认'),
+                                    text: __('测试分配'),
+                                    title: __('测试分配'),
                                     extend: 'data-area = \'["50%","50%"]\'',
                                     classname: 'btn btn-xs btn-primary btn-dialog',
                                     url: 'demand/develop_demand/test_distribution',
@@ -214,11 +214,20 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                         return false;
                                     },
                                     visible: function (row) {
-                                        if (row.is_finish == 0 && Config.is_set_status == 1 && row.review_status_develop == 1) {
-                                            return true;
+                                        if (row.is_test == 1) {
+                                            if (row.is_finish == 0 && Config.is_set_status == 1 && row.review_status_develop == 1 && row.assign_developer_ids && row.test_person) {
+                                                return true;
+                                            } else {
+                                                return false;
+                                            }
                                         } else {
-                                            return false;
+                                            if (row.is_finish == 0 && Config.is_set_status == 1 && row.review_status_develop == 1 && row.assign_developer_ids) {
+                                                return true;
+                                            } else {
+                                                return false;
+                                            }
                                         }
+                                        
                                     }
                                 },
                                 {
@@ -230,7 +239,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     callback: function (data) {
                                     },
                                     visible: function (row) {
-                                        if (row.is_finish == 1 && Config.test_record_bug == 1 && row.is_test == 1 && row.test_person) {
+                                        if (row.is_finish == 1 && Config.test_record_bug == 1 && row.is_test == 1 && row.test_person && row.test_is_passed == 0) {
                                             return true;
                                         } else {
                                             return false;
@@ -239,8 +248,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                 },
                                 {
                                     name: 'problem',
-                                    text: '问题记录',
-                                    title: __('问题记录'),
+                                    text: '问题详情',
+                                    title: __('问题详情'),
                                     extend: 'data-area = \'["70%","70%"]\'',
                                     classname: 'btn btn-xs btn-warning btn-dialog',
                                     icon: 'fa fa-list',
@@ -275,7 +284,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     },
                                     visible: function (row) {
 
-                                        if (row.test_is_passed == 0 && Config.test_is_passed == 1 && row.is_test == 1 && row.test_person) {
+                                        if (row.test_is_passed == 0 && Config.test_is_passed == 1 && row.is_test == 1 && row.test_person && row.is_finish == 1) {
                                             return true;
                                         } else {
                                             return false;
@@ -352,22 +361,46 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                 },
                                 {
                                     name: 'test',
-                                    text: '回归测试',
-                                    title: __('回归测试'),
-                                    classname: 'btn btn-xs btn-warning btn-dialog',
+                                    text: '记录问题',
+                                    title: __('记录问题'),
+                                    classname: 'btn btn-xs btn-primary btn-dialog',
                                     url: 'demand/develop_demand/regression_test_info',
                                     extend: 'data-area = \'["70%","70%"]\'',
                                     callback: function (data) {
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
                                     },
                                     visible: function (row) {
-                                        if (row.is_finish_task == 1 && row.is_test == 1 && Config.regression_test_info == 1) {
+                                        if (row.is_finish_task == 1 && row.is_test == 1 && Config.regression_test_info == 1 && row.is_test_complete == 0) {
                                             return true;
                                         } else {
                                             return false;
                                         }
                                     }
-                                }
+                                },
+                                {
+                                    name: 'ajax',
+                                    text: '通过测试',
+                                    title: __('通过测试'),
+                                    classname: 'btn btn-xs btn-success btn-magic btn-ajax',
+                                    icon: 'fa fa-magic',
+                                    url: 'demand/develop_demand/test_complete',
+                                    success: function (data, ret) {
+                                        table.bootstrapTable('refresh', {});
+                                        //如果需要阻止成功提示，则必须使用return false;
+                                        //return false;
+                                    },
+                                    error: function (data, ret) {
+                                        Layer.alert(ret.msg);
+                                        return false;
+                                    },
+                                    visible: function (row) {
+                                        if (row.is_finish_task == 1 && row.is_test == 1 && Config.test_complete == 1 && row.is_test_complete == 0) {
+                                            return true;
+                                        } else {
+                                            return false;
+                                        }
+                                    }
+                                },
                             ], formatter: Table.api.formatter.operate
                         }
                     ]
@@ -538,14 +571,6 @@ function formatTableUnit(value, row, index) {
     }
 }
 
-function update_responsibility_detail(val, classstr) {
-    var is_val = $(val).val();
-    if (is_val == 1) {
-        $('.' + classstr).show();
-    } else {
-        $('.' + classstr).hide();
-    }
-}
 
 function update_responsibility_user(val) {
     var is_val = $(val).val();

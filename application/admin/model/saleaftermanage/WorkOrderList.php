@@ -975,22 +975,15 @@ class WorkOrderList extends Model
      */
     public static function workOrderListResult($allIncrementOrder)
     {
-        $workOrderLists = self::where('platform_order','in',$allIncrementOrder)
-            ->with([
-                'measures'=>function($query){$query->field('measure_content');}
-            ])
-            ->select();
+        $workOrderLists = self::where('platform_order','in',$allIncrementOrder)->select();
         foreach($workOrderLists as &$workOrderList){
             $receptPersonIds = $workOrderList->recept_person_id;
             $receptPerson = Admin::where('id','in',$receptPersonIds)->column('nickname');
             //承接人
             $workOrderList->recept_persons = join(',',$receptPerson);
-            $workOrderList->measure = '';
-            if(!empty($workOrderList->measures)){
-                foreach($workOrderList->measures as $key => $measure){
-                    $workOrderList->measure = $measure->measure_content . ',';
-                }
-            }
+            $measures = \app\admin\model\saleaftermanage\WorkOrderMeasure::where('work_id',$workOrderList->id)->column('measure_content');
+            $measures = join(',',$measures);
+            $workOrderList->measure = $measures;
 
         }
         return $workOrderLists;
