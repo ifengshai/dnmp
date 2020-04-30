@@ -127,7 +127,6 @@
                             <option value="1" {:$v['group_type']==1 ? 'selected' : '' }>前端</option>
                             <option value="2" {:$v['group_type']==2 ? 'selected' : '' }>后端</option>
                             <option value="3" {:$v['group_type']==3 ? 'selected' : '' }>app</option>
-                            <option value="4" {:$v['group_type']==4 ? 'selected' : '' }>测试</option>
                         </select>
                     </td>
                     {php}
@@ -138,9 +137,7 @@
                     $person_in_charge = config('demand.phper_user');
                     } elseif($v['group_type'] == 3) {
                     $person_in_charge = config('demand.app_user');
-                    } elseif($v['group_type'] == 4) {
-                    $person_in_charge = config('demand.test_user');
-                    }
+                    } 
                     {/php}
                     <td>
                         <select name="person_in_charge[]" class="form-control person_in_charge" disabled style="width:120px;">

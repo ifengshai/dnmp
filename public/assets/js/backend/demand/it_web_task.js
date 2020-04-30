@@ -177,7 +177,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                         return false;
                                     },
                                     visible: function (row) {
-                                        if (row.test_regression_adopt == 0 && Config.is_set_task_test_status == 1) {
+                                        var test_person = Config.test_user;
+                                        if (row.test_regression_adopt == 0 && Config.is_set_task_test_status == 1 && row.is_complete == 1 && $.inArray(Config.user_id, test_person) !== -1) {
                                             return true;
                                         } else {
                                             return false;

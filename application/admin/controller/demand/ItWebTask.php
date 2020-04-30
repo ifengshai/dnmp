@@ -84,6 +84,8 @@ class ItWebTask extends Backend
 
             return json($result);
         }
+        $this->assignconfig('user_id', session('admin.id'));
+        $this->assignconfig('test_user', array_keys(config('demand.test_user')));
         //判断是否有完成按钮权限
         $this->assignconfig('is_set_status', $this->auth->check('demand/it_web_task/set_task_complete_status'));
         $this->assignconfig('is_problem_detail', $this->auth->check('demand/it_web_task/problem_detail'));
