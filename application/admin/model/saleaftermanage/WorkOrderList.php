@@ -383,8 +383,8 @@ class WorkOrderList extends Model
 
                     $data['email'] = $params['address']['email'];
                     if ($change_type == 5) {
-                        if (!$params['address']['region_id'] || !$params['address']['country_id']) {
-                            exception('国家、地区不能为空');
+                        if (!$params['address']['country_id']) {
+                            exception('国家不能为空');
                         }
                     }
                     $data['userinfo_option'] = serialize($params['address']);
@@ -639,6 +639,7 @@ class WorkOrderList extends Model
                 $increment_id = $res['increment_id'];
                 //replacement_order添加补发的订单号
                 WorkOrderChangeSku::where(['work_id' => $work_id, 'change_type' => 5])->setField('replacement_order', $increment_id);
+                self::where(['id' => $work_id])->setField('replacement_order', $increment_id);
             } catch (Exception $e) {
                 exception($e->getMessage());
             }
