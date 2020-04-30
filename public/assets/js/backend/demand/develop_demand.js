@@ -184,8 +184,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
 
                                 {
                                     name: 'test_distribution',
-                                    text: __('测试确认'),
-                                    title: __('测试确认'),
+                                    text: __('测试分配'),
+                                    title: __('测试分配'),
                                     extend: 'data-area = \'["50%","50%"]\'',
                                     classname: 'btn btn-xs btn-primary btn-dialog',
                                     url: 'demand/develop_demand/test_distribution',
@@ -214,11 +214,20 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                         return false;
                                     },
                                     visible: function (row) {
-                                        if (row.is_finish == 0 && Config.is_set_status == 1 && row.review_status_develop == 1 && row.assign_developer_ids) {
-                                            return true;
+                                        if (row.is_test == 1) {
+                                            if (row.is_finish == 0 && Config.is_set_status == 1 && row.review_status_develop == 1 && row.assign_developer_ids && row.test_person) {
+                                                return true;
+                                            } else {
+                                                return false;
+                                            }
                                         } else {
-                                            return false;
+                                            if (row.is_finish == 0 && Config.is_set_status == 1 && row.review_status_develop == 1 && row.assign_developer_ids) {
+                                                return true;
+                                            } else {
+                                                return false;
+                                            }
                                         }
+                                        
                                     }
                                 },
                                 {
@@ -275,7 +284,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     },
                                     visible: function (row) {
 
-                                        if (row.test_is_passed == 0 && Config.test_is_passed == 1 && row.is_test == 1 && row.test_person) {
+                                        if (row.test_is_passed == 0 && Config.test_is_passed == 1 && row.is_test == 1 && row.test_person && row.is_finish == 1) {
                                             return true;
                                         } else {
                                             return false;
