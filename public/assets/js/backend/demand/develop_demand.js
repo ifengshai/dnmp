@@ -39,7 +39,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             field: 'nickname', title: __('开发负责人'), operate: false, formatter: function (value, rows) {
                                 var group = '<span>' + value + '</span>';
                                 var web_distribution = '';
-                                if (rows.review_status_develop == 1 && !rows.assign_developer_ids) {
+                                if (rows.review_status_develop == 1 && !rows.assign_developer_ids && Config.is_distribution == 1) {
                                     web_distribution = '<span><a href="#" class="btn btn-xs btn-primary web_distribution" data="' + rows.id + '"><i class="fa fa-list"></i>分配</a></span><br>';
                                 }
                                 return web_distribution + group;
