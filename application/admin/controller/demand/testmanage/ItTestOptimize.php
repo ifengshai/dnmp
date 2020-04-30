@@ -81,11 +81,11 @@ class ItTestOptimize extends Backend
             return json($result);
         }
         if(148 == session('admin.id')){
-            $isTest = 1;
+            $isTests = 1;
         }else{
-            $isTest = 0;
+            $isTests = 0;
         }
-        $this->assignconfig('isCheck',$isTest);
+        $this->assignconfig('isCheck',$isTests);
         return $this->view->fetch();
     }
     /**
