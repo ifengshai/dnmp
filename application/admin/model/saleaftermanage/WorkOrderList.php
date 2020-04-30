@@ -97,7 +97,7 @@ class WorkOrderList extends Model
      */
     public function measures()
     {
-        return $this->hasMany(WorkOrderMeasure::class,'id','work_id');
+        return $this->hasMany(WorkOrderMeasure::class,'work_id','id');
     }
 
     /**
