@@ -373,9 +373,9 @@ class ItWebDemand extends Backend
                 }elseif ($v['status'] == 4){
                     if($v['test_group'] == 1){
                         if($v['entry_user_confirm'] == 0){
-                            $list[$k]['status_str'] = '待测试,待确认';
+                            $list[$k]['status_str'] = '待测试';
                         }else{
-                            $list[$k]['status_str'] = '待测试,已确认';
+                            $list[$k]['status_str'] = '待测试';
                         }
                     }else{
                         $list[$k]['status_str'] = '待上线';

@@ -337,7 +337,7 @@ class DevelopWebTask extends Backend
     }
 
     /**
-     * 更改完成状态
+     * 更改任务完成状态
      *
      * @Description
      * @author wpl
@@ -381,7 +381,7 @@ class DevelopWebTask extends Backend
 
 
     /**
-     * 更改完成状态
+     * 更改明细完成状态
      *
      * @Description
      * @author wpl

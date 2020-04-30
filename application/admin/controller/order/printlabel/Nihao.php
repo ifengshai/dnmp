@@ -371,11 +371,11 @@ class Nihao extends Backend
                         if (!$trueSku) {
                             throw new Exception("增加配货占用库存失败！！请检查更换镜框SKU:" . $v['change_sku']. ',订单号：' . $v['increment_id']);
                         }
-                        //判断是否有实时库存
-                        $realStock = $item->getRealStock($trueSku);
-                        if ($v['qty'] > $realStock) {
-                            throw new Exception("SKU:" . $v['change_sku'] . "实时库存不足". ',订单号：' . $v['increment_id']);
-                        }
+                        // //判断是否有实时库存
+                        // $realStock = $item->getRealStock($trueSku);
+                        // if ($v['qty'] > $realStock) {
+                        //     throw new Exception("SKU:" . $v['change_sku'] . "实时库存不足". ',订单号：' . $v['increment_id']);
+                        // }
                         //增加配货占用
                         $map = [];
                         $map['sku'] = $trueSku;
@@ -418,11 +418,11 @@ class Nihao extends Backend
                         continue;
                     }
 
-                    //判断是否有实时库存
-                    $realStock = $item->getRealStock($trueSku);
-                    if ($qty > $realStock) {
-                        throw new Exception("SKU:" . $v['sku'] . "实时库存不足". ',订单号：' . $v['increment_id']);
-                    }
+                    // //判断是否有实时库存
+                    // $realStock = $item->getRealStock($trueSku);
+                    // if ($qty > $realStock) {
+                    //     throw new Exception("SKU:" . $v['sku'] . "实时库存不足". ',订单号：' . $v['increment_id']);
+                    // }
 
                     $map = [];
                     $map['sku'] = $trueSku;
