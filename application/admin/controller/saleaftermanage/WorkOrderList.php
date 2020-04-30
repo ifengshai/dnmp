@@ -2229,6 +2229,7 @@ EOF;
             }
             //承接
 			if(array_key_exists($value['id'],$receptInfo)){
+                
 				$value['result'] = $receptInfo[$value['id']];
 				$spreadsheet->getActiveSheet()->setCellValue("AL" . ($key * 1 + 2), $value['result']);
 			}else{
