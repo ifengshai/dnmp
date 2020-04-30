@@ -383,8 +383,8 @@ class WorkOrderList extends Model
 
                     $data['email'] = $params['address']['email'];
                     if ($change_type == 5) {
-                        if (!$params['address']['region_id'] || !$params['address']['country_id']) {
-                            exception('国家、地区不能为空');
+                        if (!$params['address']['country_id']) {
+                            exception('国家不能为空');
                         }
                     }
                     $data['userinfo_option'] = serialize($params['address']);
