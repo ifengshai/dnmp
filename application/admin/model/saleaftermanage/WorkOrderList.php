@@ -250,13 +250,13 @@ class WorkOrderList extends Model
                 $url = 'https://z.zhaokuangyi.com/';
                 break;
             case 2:
-                $url = 'http://v.zhaokuangyi.com/';
+                $url = 'https://pc.zhaokuangyi.com/';
                 break;
             case 3:
-                $url = 'https://nh.zhaokuangyi.com/';
+                $url = 'https://nh.nihaooptical.com/';
                 break;
             case 5:
-                $url = 'http://www.eseeoptical.com/';
+                $url = 'https://www.weseeoptical.com/';
                 break;
             default:
                 return false;
