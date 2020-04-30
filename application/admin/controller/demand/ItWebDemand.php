@@ -28,6 +28,7 @@ class ItWebDemand extends Backend
         $this->model = new \app\admin\model\demand\ItWebDemand;
         $this->view->assign('getTabList', $this->model->getTabList());
         $this->testRecordModel = new \app\admin\model\demand\ItTestRecord;
+        $this->assignconfig('admin_id', session('admin.id'));
     }
 
     /**
