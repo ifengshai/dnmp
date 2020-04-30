@@ -18,10 +18,6 @@ class Test extends Backend
     {
         echo 1111;
     }
-    public function haha()
-    {
-        echo 111;
-    }
 
     /**
      * 更新采购负责人
