@@ -239,8 +239,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                 },
                                 {
                                     name: 'problem',
-                                    text: '问题记录',
-                                    title: __('问题记录'),
+                                    text: '问题详情',
+                                    title: __('问题详情'),
                                     extend: 'data-area = \'["70%","70%"]\'',
                                     classname: 'btn btn-xs btn-warning btn-dialog',
                                     icon: 'fa fa-list',
