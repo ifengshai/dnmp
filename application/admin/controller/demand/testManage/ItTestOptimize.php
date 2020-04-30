@@ -25,7 +25,7 @@ class ItTestOptimize extends Backend
     public function _initialize()
     {
         parent::_initialize();
-        $this->model = new \app\admin\model\demand\testManage\ItTestOptimize;
+        $this->model = new \app\admin\model\demand\testmanage\ItTestOptimize;
         $this->view->assign('orderPlatformList',config('demand.siteType'));
 
     }

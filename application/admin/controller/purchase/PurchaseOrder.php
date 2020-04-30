@@ -656,7 +656,7 @@ class PurchaseOrder extends Backend
         $data = [];
         //判断采购单类型是否为线上采购单 1线下采购单=> 快递100api 2线上采购单 1688api
         if ($row['purchase_type'] == 2) {
-           
+
             $cacheIndex = 'logisticsDetail_' . $row['purchase_number'];
             $data = Cache::get($cacheIndex);
             if (!$data) {
@@ -805,7 +805,7 @@ class PurchaseOrder extends Backend
                 $params['supplier_sku'] = (new SupplierSku())->getSupplierData($v['skuid']);
             }
             if ($params['sku']) {
-               $this->purchase_order_item->allowField(true)->isUpdate(true, ['id' => $v['id']])->data($params)->save();
+                $this->purchase_order_item->allowField(true)->isUpdate(true, ['id' => $v['id']])->data($params)->save();
             }
         }
 
@@ -844,27 +844,22 @@ class PurchaseOrder extends Backend
          * @todo 后面添加采集时间段
          */
         $params = [
-            'createStartTime' => date('YmdHis', strtotime("-60 day")) . '000+0800',
+            'createStartTime' => date('YmdHis', strtotime("-2 day")) . '000+0800',
             'createEndTime' => date('YmdHis') . '000+0800',
         ];
 
         set_time_limit(0);
-        $data = cache('Crontab_getAlibabaPurchaseOrder_' . date('YmdH') . md5(serialize($params)));
-        
-        if (!$data) {
+        //根据不同的状态取订单数据
+        $success_data = Alibaba::getOrderList(1, $params);
+        $data = [];
+        for ($i = 1; $i <= ceil($success_data['totalRecord'] / 50); $i++) {
             //根据不同的状态取订单数据
-            $success_data = Alibaba::getOrderList(1, $params);
-            $data = [];
-            for ($i = 1; $i <= round($success_data->totalRecord / 50); $i++) {
-
-                //根据不同的状态取订单数据
-                $data[$i] = Alibaba::getOrderList($i, $params)->result;
-            }
-            //设置缓存
-            cache('Crontab_getAlibabaPurchaseOrder_' . date('YmdH') . md5(serialize($params)), $data, 3600);
+            $data[$i] = Alibaba::getOrderList($i, $params)->result;
         }
-       
-        foreach (array_values($data) as $key => $val) {
+        dump($data);
+
+
+        foreach ($data as $key => $val) {
             if (!$val) {
                 continue;
             }
@@ -1240,7 +1235,7 @@ class PurchaseOrder extends Backend
 
         list($where) = $this->buildparams();
         $list = $this->model->alias('purchase_order')
-            ->field('purchase_number,purchase_name,supplier_name,sku,supplier_sku,purchase_num,purchase_price,purchase_remark,b.purchase_total,purchase_order.create_person,purchase_order.createtime')
+            ->field('receiving_time,purchase_number,purchase_name,supplier_name,sku,supplier_sku,purchase_num,purchase_price,purchase_remark,b.purchase_total,purchase_order.create_person,purchase_order.createtime')
             ->join(['fa_purchase_order_item' => 'b'], 'b.purchase_id=purchase_order.id')
             ->join(['fa_supplier' => 'c'], 'c.id=purchase_order.supplier_id')
             ->where($where)
@@ -1250,6 +1245,12 @@ class PurchaseOrder extends Backend
 
         $list = collection($list)->toArray();
 
+        //查询生产周期
+        $supplier = new \app\admin\model\purchase\SupplierSku();
+        $info = $supplier->where([
+            'status' => 1,
+            'label' => 1
+        ])->column('product_cycle', 'sku');
 
         //从数据库查询需要的数据
         $spreadsheet = new Spreadsheet();
@@ -1266,6 +1267,9 @@ class PurchaseOrder extends Backend
             ->setCellValue("I1", "采购总价")
             ->setCellValue("J1", "创建人");
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("K1", "创建时间");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("L1", "生产周期");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("M1", "预计到货时间");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("N1", "实际到货时间");
 
         foreach ($list as $key => $value) {
 
@@ -1280,6 +1284,10 @@ class PurchaseOrder extends Backend
             $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 1 + 2), $value['purchase_total']);
             $spreadsheet->getActiveSheet()->setCellValue("J" . ($key * 1 + 2), $value['create_person']);
             $spreadsheet->getActiveSheet()->setCellValue("K" . ($key * 1 + 2), $value['createtime']);
+            $spreadsheet->getActiveSheet()->setCellValue("L" . ($key * 1 + 2), $info[$value['sku']] ?: 7);
+            $product_cycle = $info[$value['sku']] ?: 7;
+            $spreadsheet->getActiveSheet()->setCellValue("M" . ($key * 1 + 2), date('Y-m-d H:i:s', strtotime('+' . $product_cycle . ' day', strtotime($value['createtime']))));
+            $spreadsheet->getActiveSheet()->setCellValue("N" . ($key * 1 + 2), $value['receiving_time']);
         }
 
         //设置宽度
@@ -1296,6 +1304,9 @@ class PurchaseOrder extends Backend
 
         $spreadsheet->getActiveSheet()->getColumnDimension('J')->setWidth(20);
         $spreadsheet->getActiveSheet()->getColumnDimension('K')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('L')->setWidth(30);
+        $spreadsheet->getActiveSheet()->getColumnDimension('M')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('N')->setWidth(30);
 
         //设置边框
         $border = [
@@ -1313,7 +1324,7 @@ class PurchaseOrder extends Backend
         $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
         $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
 
-        $spreadsheet->getActiveSheet()->getStyle('A1:K' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $spreadsheet->getActiveSheet()->getStyle('A1:N' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
         $spreadsheet->setActiveSheetIndex(0);
 
         $format = 'xlsx';

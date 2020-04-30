@@ -11,7 +11,10 @@ namespace app\api\controller;
 use app\admin\model\Admin;
 use app\admin\model\AuthGroup;
 use app\admin\model\AuthGroupAccess;
+use app\admin\model\demand\ItTestRecord;
+use app\admin\model\demand\ItWebDemand;
 use app\admin\model\Department;
+use app\common\model\Auth;
 use fast\Random;
 use think\Controller;
 use EasyDingTalk\Application;
@@ -258,14 +261,14 @@ class Ding extends Controller
         // 邮件id%5求余数分配
     }
 
-    public function ding_notice(array $userIds,$url = null,$title=null,$text=null){
+    public function ding_notice(array $userIds,$url = null,$title=null,$text=null, $picUrl = 'https://static.dingtalk.com/media/lALPDeC2v2wwMcPMpcyk_164_165.png'){
         $url = config('ding.message_url');
         $agentId = config('ding.agent_id');
         $link = [
             'msgtype' => 'link',
             'link' => [
                 'messageUrl' => $url,
-                'picUrl' => 'https://static.dingtalk.com/media/lALPDeC2v2wwMcPMpcyk_164_165.png',
+                'picUrl' => $picUrl,
                 'title' => $title,
                 'text' => $text
             ]
@@ -279,5 +282,161 @@ class Ding extends Controller
         //$params = send_ding_message(['0550643549844645'], '收到需求2', '钱海信用卡支付后重复发送确认订单的邮件');
         $return_date = $this->app->conversation->sendCorporationMessage($params);
         return $return_date;
+    }
+
+    private static $instance;
+
+    /**
+     * 发送钉钉通知
+     * @param string|int|array $users 接收人userid, 也可以是用户id或用户名, 可使用数组方式发送给多人
+     * @param string $title 通知标题
+     * @param string $content 通知内容
+     */
+    public static function cc_ding($users, $title, $content, $picUrl = 'https://static.dingtalk.com/media/lALPDeC2v2wwMcPMpcyk_164_165.png') {
+        if (!self::$instance) self::$instance = new self();
+        $instance = self::$instance;
+        if (!is_array($users)) $users = [$users];
+        foreach ($users as $k =>&$user) {
+            // 使用id获取userid
+            if (($get = Admin::get(['id' =>$user])) || ($get = Admin::get(['username' =>$user]))) {
+                $user = $get['userid'];
+            }
+            if (!$user) unset($users[$k]);
+        }
+        // var_dump($users);
+        // die();
+        if (!$title) $title = '您有一条新消息';
+        if (!$content) $content = '请前往魔晶查看详情';
+        return $instance ->ding_notice($users, $url, $title, strip_tags($content), $picUrl);
+    }
+
+    /**
+     * 根据it_web_demand表返回任务类型
+     * @param $type
+     * @return string
+     */
+    public static function demandType($type) {
+        return ['bug', '需求', '疑难'][$type - 1]?? '消息';
+    }
+
+    /**
+     * 根据it_web_demand表返回站点名称
+     */
+    public static function siteType($type_id) {
+        return [
+            'zeelool',
+            'voogueme',
+            'nihao',
+            'wesee',
+            'orther'
+        ][$type_id - 1]?? '';
+    }
+
+    /**
+     * 回调发起钉钉通知
+     * @param string $name 事件名称
+     * @param \app\admin\model\demand\ItWebDemand $demand 需求管理模型
+     */
+    public static function dingHook(string $name, \app\admin\model\demand\ItWebDemand $demand) {
+        if ($demand ->type == 3) return false; // 疑难不作处理
+        $demand = ItWebDemand::get($demand->id);
+        $send_ids = []; // 被发送者id, userid或nickname
+        $msg = ''; // 消息内容
+        switch($name){
+            case 'add':                     // 添加内容通知, 发送给所有测试人员
+                $authUserIds = Auth::getUsersId('demand/it_web_demand/test_distribution') ?: [];
+                $copy_to_user_id = $demand->copy_to_user_id;
+                $copyToUserId = explode(',',$copy_to_user_id ?: '');
+
+                $send_ids = array_filter(array_merge(
+                    $authUserIds, // 所有有权限点击测试确认的用户
+                    $copyToUserId   // 需求抄送
+                ));
+                $entry_user = Admin::get($demand ->entry_user_id) ->nickname;
+                $msg = $entry_user . '刚刚录入了一个新的' . self::demandType($demand ->type) . ', 请关注';
+                break;
+            case 'add_confirm':             // 提出人确认完成
+                break;
+            case 'edit':                    // 内容被编辑
+                break;
+            case 'test_distribution':       // 测试分配, 是否需要测试: 不需要 - 通知主管, 需要 - 通知主管和测试负责人
+                if ($demand ->type == 1) { // bug 需要主管确认
+                    $send_ids = array_merge(
+                        \think\Db::name('auth_group_access')
+                            ->where('group_id', 68)
+                            ->column('uid'), // 主管用户id (fa_auth_group表中name = IT开发组)
+                        explode(',', $demand ->test_user_id)
+                    );
+                    $msg = '测试已确认, 等待分配中';
+                }else if($demand ->type == 2){ // 需求, 需要前后端审核
+                    $send_ids = Auth::getUsersId('demand/it_web_demand/through_demand'); // 所有有权限点击[通过]按钮的人
+                    $msg = '有个新需求需要您审核';
+                }
+                break;
+            case 'distribution':            // 任务被分配, 通知相关负责人
+                $send_ids = array_merge(
+                    explode(',', $demand ->web_designer_user_id),   // 前端负责人
+                    explode(',', $demand ->phper_user_id),          // 后端负责人
+                    explode(',', $demand ->app_user_id)             // APP负责人
+                );
+                $msg = '有个' . (['简单的', '中等的', '复杂的'][$demand ->all_complexity - 1]) . '任务已被分配给您';
+                break;
+            /*case 'add_confirm':             // 提出人确认任务完成
+                $send_ids = array_merge(
+                    explode(',', $demand ->test_user_id)    // 通知测试负责人
+                );
+                $msg = '任务已完成, 待测试';
+                break;*/
+            case 'group_finish':            // 任务全部完成通知, 向提出人及测试发出通知
+                $send_ids = explode(',', $demand ->test_user_id); // 测试负责人
+                $msg = '任务已完成, 等待测试';
+                break;
+            case 'test_record_bug':         // 测试组记录问题 - 通知相关负责人(关联fa_it_test_record表)
+                // $record = ItTestRecord::get(['pid' =>$demand ->id]);
+                $record = \think\Db::name('it_test_record') // 刚刚填的测试问题
+                    ->where('pid', $demand ->id)
+                    ->order('id', 'desc')
+                    ->find();
+                $send_ids = array_merge(
+                    explode(',', $record ->responsibility_user_id) // 相关负责人
+                ); // 相关负责人
+                $msg = '有个任务在 [' . (['测试', '正式'][$record['environment_type'] - 1]) . '环境] 被记录了一个 [' . (['次要', '一般', '严重', '崩溃'][$record['bug_type'] - 1]) . '问题] , 所属 [' . (['前端', '后端', 'APP'][$record['responsibility_group'] - 1]) . '组] , 需要您查看';
+                break;
+            case 'test_group_finish': // 测试完成并且提出人点击确认
+                if ($demand ->test_is_finish == 1 && $demand ->entry_user_confirm == 1) {
+                    $send_ids = Auth::getUsersId('demand/it_web_demand/through_demand'); // 所有有权限点击[通过]按钮的人
+                    $msg = '任务已验收';
+                }
+                break;
+            /*case 'test_group_finish_wait':  // 测试完成, 等待上线
+
+                $send_ids = Auth::getUsersId('demand/it_web_demand/through_demand'); // 能点通过按钮的
+                $msg = '测试完成，等待上线';
+                break;*/
+            case 'add_online':              // 上线完成
+                $send_ids = array_merge(
+                    [$demand ->entry_user_id],  // 发起人
+                    explode(',', $demand ->copy_to_user_id??''), // 需求抄送
+                    explode(',', $demand ->test_user_id)    // 测试负责人
+                );
+                $msg = '任务已完成上线, 待回归测试';
+                break;
+            /*case 'test_group_finish_end':   // bug上线测试完成 - 全部完成
+                // $send_ids = array_merge(
+                //     [$demand ->entry_user_id] // 通知发起人
+                // );
+                // $msg = '上线测试已完成';
+                break;*/
+            case 'through_demand':          // 发布的需求被前后APP端们通过
+                $send_ids = $demand ->entry_user_id;
+                $msg = '需求已通过, 等待分配';
+                break;
+        }
+        if ($send_ids && $msg) return self::cc_ding(
+            $send_ids /*'changyucheng'*/
+            ,'【' . self::siteType($demand ->site_type) . '】【' . self::demandType($demand ->type) . '】' . $msg
+            , '摘要: ' . $demand ->title
+        );
+        return false;
     }
 }

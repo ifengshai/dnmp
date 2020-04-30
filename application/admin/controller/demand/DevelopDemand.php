@@ -67,9 +67,11 @@ class DevelopDemand extends Backend
                 $userids = explode(',', $val['assign_developer_ids']);
                 $nickname = [];
                 foreach ($userids as $v) {
+                    if (!$v) {
+                        continue;
+                    }
                     $nickname[] = $userInfo[$v];
                 }
-
                 $test_userids = explode(',', $val['test_person']);
                 $test_nickname = [];
                 foreach ($test_userids as $v) {
