@@ -86,6 +86,8 @@ class DevelopDemand extends Backend
         }
         //判断编辑按钮权限
         $this->assignconfig('is_edit', $this->auth->check('demand/develop_demand/edit'));
+        //判断分配权限
+        $this->assignconfig('is_distribution', $this->auth->check('demand/develop_demand/distribution'));
         //判断产品经理审核权限
         $this->assignconfig('review_status_manager_btn', $this->auth->check('demand/develop_demand/review'));
         //判断是否有开发主管审核权限
