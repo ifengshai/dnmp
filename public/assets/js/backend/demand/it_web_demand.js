@@ -420,8 +420,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     visible: function(row){
                                         if(row.test_group == 0 || row.test_group == 2){
                                             return false;
+                                        }else{
+                                            if(row.status >= 4 && row.is_test_detail_log != 0){
+                                                return true;
+                                            }else{
+                                                return false;
+                                            }
                                         }
-                                        //return true;
                                     }
                                 },
                             ],
@@ -874,7 +879,15 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     callback: function (data) {
                                     },
                                     visible: function(row){
-                                        return true;
+                                        if(row.test_group == 0 || row.test_group == 2){
+                                            return false;
+                                        }else{
+                                            if(row.status >= 4 && row.is_test_detail_log != 0){
+                                                return true;
+                                            }else{
+                                                return false;
+                                            }
+                                        }
                                     }
                                 },
                                 {
@@ -1408,7 +1421,15 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     callback: function (data) {
                                     },
                                     visible: function(row){
-                                        return true;
+                                        if(row.test_group == 0 || row.test_group == 2){
+                                            return false;
+                                        }else{
+                                            if(row.status >= 4 && row.is_test_detail_log != 0){
+                                                return true;
+                                            }else{
+                                                return false;
+                                            }
+                                        }
                                     }
                                 },
                             ],
