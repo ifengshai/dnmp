@@ -238,7 +238,7 @@ return [
             'step_id' => 1, //更改
             'is_check' => 0,
             'appoint_group' => [ //承接组
-                'warehouse_lens_group' //仓库跟单
+                'warehouse_group' //仓库跟单
             ],
         ],
         [
@@ -261,7 +261,7 @@ return [
             'step_id' => 1, //更改
             'is_check' => 0,
             'appoint_group' => [ //承接组
-                'warehouse_group' //仓库镜片负责人
+                'warehouse_lens_group' //仓库镜片负责人
             ],
         ],
         [
