@@ -7,7 +7,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 extend: {
                     index_url: 'demand/testmanage/it_test_optimize/index' + location.search,
                     add_url: 'demand/testmanage/it_test_optimize/add',
-                    //edit_url: 'demand/testmanage/it_test_optimize/edit',
+                    edit_url: 'demand/testmanage/it_test_optimize/edit',
                     //del_url: 'demand/testmanage/it_test_optimize/del',
                     multi_url: 'demand/testmanage/it_test_optimize/multi',
                     table: 'it_test_optimize',

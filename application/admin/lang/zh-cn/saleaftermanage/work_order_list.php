@@ -16,7 +16,7 @@ return [
     'Create_id'            => '创建人ID',
 
     'Handle_person'        => '工单经手人',
-    'Is_check'             => '是否审核',
+    'Is_check'             => '是否需要审核',
     'Check_person_id'      => '指派审核人',
     'Operation_person'     => '实际审核人',
     'Shenhe_beizhu'        => '审核人备注',
