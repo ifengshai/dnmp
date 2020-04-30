@@ -230,7 +230,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     callback: function (data) {
                                     },
                                     visible: function (row) {
-                                        if (row.is_finish == 1 && Config.test_record_bug == 1 && row.is_test == 1) {
+                                        if (row.is_finish == 1 && Config.test_record_bug == 1 && row.is_test == 1 && row.test_person) {
                                             return true;
                                         } else {
                                             return false;
@@ -275,7 +275,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     },
                                     visible: function (row) {
 
-                                        if (row.test_is_passed == 0 && Config.test_is_passed == 1 && row.is_test == 1) {
+                                        if (row.test_is_passed == 0 && Config.test_is_passed == 1 && row.is_test == 1 && row.test_person) {
                                             return true;
                                         } else {
                                             return false;
