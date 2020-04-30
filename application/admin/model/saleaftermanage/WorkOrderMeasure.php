@@ -34,4 +34,39 @@ class WorkOrderMeasure extends Model
     {
         return WorkOrderMeasure::where(['work_id'=>$id])->column('measure_choose_id');
     }
+    /**
+     * 
+     *导出措施
+     * @Description
+     * @author lsw
+     * @since 2020/04/30 14:04:52 
+     * @param [type] $arr
+     * @return void
+     */
+    public function fetchMeasureRecord($arr=[])
+    {
+		$where['work_id'] = ['in',$arr];
+		$result = $this->where($where)->select();
+		if(!$result){
+			return false;
+		}
+		$arrInfo = [];
+		foreach($result as $v){
+			if(in_array($v['work_id'],$arr)){
+                switch($v['operation_type']){
+                    case 1:
+                    $v['operation_type'] = '处理完成';
+                    break;
+                    case 2:
+                    $v['operation_type'] = '处理失败';
+                    break;
+                    default:
+                    $v['operation_type'] = '未处理';
+                    break;        
+                }
+				$arrInfo[$v['work_id']].= $v['measure_content'].' '.$v['operation_type'].' '.$v['operation_time'].' | ';
+			}
+		}
+		return $arrInfo;
+    }
 }
