@@ -988,7 +988,7 @@ class WorkOrderList extends Model
             $workOrderList->measure = '';
             if(!empty($workOrderList->measures)){
                 foreach($workOrderList->measures as $key => $measure){
-                    $workOrderList->measure = $measure->measure_content . ',';
+                    $workOrderList->measure .= $measure->measure_content . ',';
                 }
             }
 
