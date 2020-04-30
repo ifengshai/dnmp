@@ -646,6 +646,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                             if(row.demand_del && row.is_entry_user_hidden == 1){//操作权限
                                                 return true;
                                             }
+                                            //创建人显示
+                                            if(row.entry_user_id == Config.admin_id){
+                                                return true;
+                                            }
                                         }else{
                                             return false;
                                         }
@@ -665,6 +669,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     visible: function(row){
                                         if(row.status == 1 || row.status == 2){
                                             if(row.demand_del && row.is_entry_user_hidden == 1){//操作权限
+                                                return true;
+                                            }
+                                            //创建人显示
+                                            if(row.entry_user_id == Config.admin_id){
                                                 return true;
                                             }
                                         }else{
