@@ -32,9 +32,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         { field: 'work_type_str', title: __('Work_type'), operate: false },
                         { field: 'work_type', title: __('Work_type'), searchList: { 1: '客服工单', 2: '仓库工单' }, visible: false, formatter: Table.api.formatter.status },
                         { field: 'platform_order', title: __('Platform_order') },
-                        /*{ field: 'order_sku', title: __('Order_sku') },*/
+                        { field: 'order_sku', title: __('Order_sku'),operate: 'like',visible: true },
 
-                        {
+                        /*{
                             field: 'order_sku',
                             title: __('Order_sku'),
                             operate: 'like',
@@ -50,7 +50,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                 }
                                 return all_user_name;
                             },
-                        },
+                        },*/
                         { field: 'coupon_str', title: __('优惠券') },
                         { field: 'replacement_order', title: __('补发订单号') },
                         { field: 'work_level', title: __('Work_level'), custom: { 1: 'success', 2: 'orange', 3: 'danger' }, searchList: { 1: '低', 2: '中', 3: '高' }, formatter: Table.api.formatter.status },
