@@ -17,5 +17,9 @@ class Test extends Backend{
     {
         echo 111;
     }
+    public function nihao()
+    {
+        echo 11111;
+    }
 
 }
