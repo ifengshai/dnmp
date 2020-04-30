@@ -138,9 +138,12 @@ class Index extends Api
                 $askName = str_replace('王小花','王桂华',$demand['ask_name']);
             }
             $qd_name = $demand['qd_name'];
-            if(strpos('李杨',$qd_name) !== false){
-                $qd_name = str_replace('李杨','李扬',$qd_name);
+            if($qd_name){
+                if(strpos('李杨',$qd_name) !== false){
+                    $qd_name = str_replace('李杨','李扬',$qd_name);
+                }
             }
+
             $entry_user_id = Admin::where('nickname','in',$askName)->value('id');
             $copy_to_user_id = Admin::where('nickname','in',$askName)->column('id');
             $all_complexity = $demand['level'];
