@@ -60,5 +60,39 @@ class WorkOrderRecept extends Model
     {
         return $this->where(['id'=>$id])->find();
     }
-
+    /**
+     * 导出措施
+     *
+     * @Description
+     * @author lsw
+     * @since 2020/04/30 14:16:08 
+     * @param array $arr
+     * @return void
+     */
+    public function fetchReceptRecord($arr=[])
+    {
+		$where['r.work_id'] = ['in',$arr];
+		$result = $this->where($where)->alias('r')->join('work_order_measure m','r.measure_id=m.id')->field('r.work_id,r.recept_status,r.recept_person,r.finish_time,r.note,m.measure_content')->select();
+		if(!$result){
+			return false;
+		}
+		$arrInfo = [];
+		foreach($result as $v){
+			if(in_array($v['work_id'],$arr)){
+                switch($v['recept_status']){
+                    case 1:
+                    $v['recept_status'] = '处理完成';
+                    break;
+                    case 2:
+                    $v['recept_status'] = '处理失败';
+                    break;
+                    default:
+                    $v['recept_status'] = '未处理';
+                    break;        
+                }
+				$arrInfo[$v['work_id']].= $v['measure_content'].' '.$v['recept_status'].' '.$v['recept_person'].' '.$v['note'].' '.$v['finish_time'].' | ';
+			}
+		}
+		return $arrInfo;        
+    }
 }
