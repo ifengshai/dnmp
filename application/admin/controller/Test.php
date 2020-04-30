@@ -38,4 +38,8 @@ class Test extends Backend
             $supplier->where('id', $v)->update(['purchase_person' => $str[$k]]);
         }
     }
+    public function haha()
+    {
+        
+    }
 }
