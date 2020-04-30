@@ -38,9 +38,5 @@ class Test extends Backend
             $supplier->where('id', $v)->update(['purchase_person' => $str[$k]]);
         }
     }
-    public function nihao()
-    {
-        echo 11111;
-    }
 
 }
