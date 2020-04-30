@@ -66,8 +66,6 @@ class Alibaba
         if ($res === null) {
             exception('网络异常');
         }
-        dump($body);
-        dump($res);
         return $res;
     }
 
