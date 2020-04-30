@@ -104,6 +104,8 @@ class DevelopDemand extends Backend
         $this->assignconfig('is_finish_task', $this->auth->check('demand/develop_demand/is_finish_task'));
         //判断回归测试按钮
         $this->assignconfig('regression_test_info', $this->auth->check('demand/develop_demand/regression_test_info'));
+        //判断回归测试完成按钮
+        $this->assignconfig('test_complete', $this->auth->check('demand/develop_demand/test_complete'));
         return $this->view->fetch();
     }
 
@@ -636,5 +638,26 @@ class DevelopDemand extends Backend
         }
         $this->assign('row', $row);
         return $this->view->fetch();
+    }
+
+    /**
+     * 回归测试完成
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/04/30 17:24:26 
+     * @return void
+     */
+    public function test_complete($ids = null)
+    {
+        $data['is_test_complete'] = 1;
+        $data['test_complete_time'] = date('Y-m-d H:i:s', time());
+        $data['test_complete_person'] = session('admin.nickname');
+        $res = $this->model->save($data, ['id' => $ids]);
+        if ($res !== false) {
+            $this->success('操作成功！！');
+        } else {
+            $this->error('操作失败！！');
+        }
     }
 }
