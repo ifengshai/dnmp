@@ -40,7 +40,7 @@ class Test extends Backend
     }
     public function haha()
     {
-        
+       echo 111; 
     }
     public function nihao()
     {
