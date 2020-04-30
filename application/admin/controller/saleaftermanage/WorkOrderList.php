@@ -634,7 +634,7 @@ class WorkOrderList extends Backend
         //根据平台sku转sku
         foreach (array_filter($skus) as $v) {
             //转换sku
-            $sku = $itemPlatFormSku->getTrueSku($v, $siteType);
+            $sku = $itemPlatFormSku->getTrueSku(trim($v), $siteType);
             //查询库存
             $stock = $this->item->where(['is_open' => 1, 'is_del' => 1, 'sku' => $sku])->value('available_stock');
             if ($stock <= $num) {
@@ -1964,7 +1964,7 @@ EOF;
         $notEnough = [];
         foreach (array_filter($arr) as $v) {
             //转换sku
-            $sku = $itemPlatFormSku->getTrueSku($v['original_sku'], $v['platform_type']);
+            $sku = $itemPlatFormSku->getTrueSku(trim($v['original_sku']), $v['platform_type']);
             //查询库存
             $stock = $this->item->where(['is_open' => 1, 'is_del' => 1, 'sku' => $sku])->value('available_stock');
             if ($stock <= $v['original_number']) {
