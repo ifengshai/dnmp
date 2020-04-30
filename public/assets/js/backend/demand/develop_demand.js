@@ -27,8 +27,15 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     [
                         { checkbox: true },
                         { field: 'id', title: __('Id') },
-                        { field: 'title', title: __('Titel'), cellStyle: formatTableUnit, formatter: Controller.api.formatter.getClear, operate: false },
-                        { field: 'desc', title: __('Desc'), cellStyle: formatTableUnit, formatter: Controller.api.formatter.getClear, operate: false },
+                        // { field: 'title', title: __('Titel'), cellStyle: formatTableUnit, formatter: Controller.api.formatter.getClear, operate: false },
+                        {
+                            field: 'desc',
+                            operate: false,
+                            title: __('需求内容'),
+                            events: Controller.api.events.getcontent,
+                            formatter: Controller.api.formatter.getcontent,
+                        },
+                        // { field: 'desc', title: __('Desc'), cellStyle: formatTableUnit, formatter: Controller.api.formatter.getClear, operate: false },
                         { field: 'create_person', title: __('提出人'), operate: false },
                         { field: 'review_status_manager', title: __('Review_status_manager'), custom: { 0: 'yellow', 1: 'success', 2: 'danger' }, searchList: { 0: '待审核', 1: '审核通过', 2: '审核拒绝' }, formatter: Table.api.formatter.status },
                         { field: 'solution', title: __('解决方案'), cellStyle: formatTableUnit, formatter: Controller.api.formatter.getClear, operate: false },
@@ -125,7 +132,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                         }
                                     }
                                 },
-                                
+
                                 {
                                     name: 'ajax',
                                     text: '审核通过',
@@ -475,7 +482,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
         },
         api: {
             formatter: {
-
+                getcontent: function (value) {
+                    if (value == null || value == undefined) {
+                        value = '';
+                    }
+                    return '<div style="float: left;width: 100%;"><span class="btn-getcontent check_demand_content" data = "' + value + '" style="">查 看</span></div>';
+                },
                 getClear: function (value) {
 
                     if (value == null || value == undefined) {
@@ -495,6 +507,19 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             },
             bindevent: function () {
                 Form.api.bindevent($("form[role=form]"));
+            },
+            events: {//绑定事件的方法
+                getcontent: {
+                    //格式为：方法名+空格+DOM元素
+                    'click .btn-getcontent': function (e, value, row, index) {
+                        var str = '标题：' + row.title + '<br><hr>内容：' + value;
+                        Layer.open({
+                            closeBtn: 1,
+                            title: "详情",
+                            content: str
+                        });
+                    }
+                }
             }
         }
     };
