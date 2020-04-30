@@ -244,6 +244,7 @@ class ItWebDemand extends Backend
                     if(in_array($this->auth->id, explode(',', $v['test_user_id']))){
                         $list[$k]['is_test_record_hidden'] = 1;//显示
                         $list[$k]['is_test_finish_hidden'] = 1;//显示
+                        $list[$k]['is_test_detail_log'] = 0;//不显示
                     }
                 }
                 if($this->auth->id == $v['entry_user_id']){
@@ -319,6 +320,7 @@ class ItWebDemand extends Backend
             $total = $this->model
                 ->where($where)
                 ->where($smap)
+                ->where($meWhere)
                 ->where('type', 1)
                 ->where('is_del', 1)
                 ->order($sort, $order)
@@ -327,6 +329,7 @@ class ItWebDemand extends Backend
             $list = $this->model
                 ->where($where)
                 ->where($smap)
+                ->where($meWhere)
                 ->where('type', 1)
                 ->where('is_del', 1)
                 ->order($sort, $order)
@@ -346,7 +349,6 @@ class ItWebDemand extends Backend
             $permissions['demand_add_online'] = $this->auth->check('demand/it_web_demand/add_online');//上线需求
             $permissions['demand_opt_test_duty'] = $this->auth->check('demand/it_web_demand/opt_test_duty');//上线需求
             $permissions['demand_opt_work_time'] = $this->auth->check('demand/it_web_demand/opt_work_time');//上线需求
-
             foreach ($list as $k => $v){
                 $user_detail = $this->auth->getUserInfo($list[$k]['entry_user_id']);
                 $list[$k]['entry_user_name'] = $user_detail['nickname'];//取提出人
@@ -442,8 +444,6 @@ class ItWebDemand extends Backend
                 $list[$k]['demand_opt_test_duty'] = $permissions['demand_opt_test_duty'];
                 $list[$k]['demand_opt_work_time'] = $permissions['demand_opt_work_time'];
 
-                $list[$k]['is_test_record_hidden'] = 1;
-                $list[$k]['is_test_finish_hidden'] = 1;
                 //判断当前登录人是否显示应该操作的按钮
                /* if($v['test_group'] == 1 && $v['test_user_id'] != ''){
                     if(in_array($this->auth->id, explode(',', $v['test_user_id']))){
@@ -451,11 +451,19 @@ class ItWebDemand extends Backend
                         $list[$k]['is_test_finish_hidden'] = 1;
                     }
                 }
+                */
+
                 if($this->auth->id == $v['entry_user_id']){
                     $list[$k]['is_entry_user_hidden'] = 1;
-                }*/
+                }
 
-
+                if($v['test_group'] == 1 && $v['test_user_id'] != ''){
+                    if(in_array($this->auth->id, explode(',', $v['test_user_id']))){
+                        $list[$k]['is_test_record_hidden'] = 1;
+                        $list[$k]['is_test_finish_hidden'] = 1;
+                        $list[$k]['is_test_detail_log'] = 0;//不显示
+                    }
+                }
             }
             $result = array("total" => $total, "rows" => $list);
             return json($result);
@@ -622,6 +630,7 @@ class ItWebDemand extends Backend
                     if(in_array($this->auth->id, explode(',', $v['test_user_id']))){
                         $list[$k]['is_test_record_hidden'] = 1;
                         $list[$k]['is_test_finish_hidden'] = 1;
+                        $list[$k]['is_test_detail_log'] = 0;//不显示
                     }
                 }
                 if($this->auth->id == $v['entry_user_id']){
