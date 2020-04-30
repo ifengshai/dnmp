@@ -13,9 +13,5 @@ class Test extends Backend{
 
        $this->es = new Elaticsearch();
     }
-    public function haha()
-    {
-        echo 111;
-    }
 
 }
