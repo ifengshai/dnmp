@@ -61,8 +61,8 @@
     <div class="form-group phper_class">
         <label class="control-label col-xs-12 col-sm-2">{:__('负责人')}</label>
         <div class="col-xs-12 col-sm-8">
-            {:Form::select('test_person[]', config('demand.test_user'), null, ['class'=>'form-control
-            selectpicker', null,'data-live-search' => true, 'multiple' => true,'id'=>'test_person'])}
+            {:Form::select('test_person[]', config('develop_demand.test_user'), null, ['class'=>'form-control
+            selectpicker', null, 'multiple' => true,'id'=>'test_person'])}
         </div>
     </div>
     <!--后端分配 end-->
