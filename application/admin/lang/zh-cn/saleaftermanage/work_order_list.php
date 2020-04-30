@@ -2,7 +2,7 @@
 
 return [
     'Id'                   => 'ID',
-    'Work_platform'        => '工单平台',
+    'Work_platform'        => '平台',
     'Work_type'            => '工单类型',
     'platform_order'       => '订单号',
     'Order_pay_currency'   => '订单支付的货币类型',

@@ -28,7 +28,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     [
                         { checkbox: true },
                         { field: 'id', title: __('Id') },
-                        { field: 'work_platform', title: __('work_platform'), custom: { 1: 'blue', 2: 'danger', 3: 'orange' }, searchList: { 1: 'Zeelool', 2: 'Voogueme', 3: 'Nihao' }, formatter: Table.api.formatter.status },
+                        { field: 'work_platform', title: __('work_platform'), custom: { 1: 'blue', 2: 'danger', 3: 'orange' }, searchList: { 1: 'Z', 2: 'V', 3: 'Nh' }, formatter: Table.api.formatter.status },
                         { field: 'work_type_str', title: __('Work_type'), operate: false },
                         { field: 'work_type', title: __('Work_type'), searchList: { 1: '客服工单', 2: '仓库工单' }, visible: false, formatter: Table.api.formatter.status },
                         { field: 'platform_order', title: __('Platform_order') },
@@ -37,7 +37,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         {
                             field: 'order_sku',
                             title: __('Order_sku'),
-                            operate: false,
+                            operate: 'like',
+                            visible: true,
                             formatter: function (value, rows) {
                                 var all_user_name = '';
                                 if (rows.order_sku_arr) {
