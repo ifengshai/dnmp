@@ -851,15 +851,11 @@ class PurchaseOrder extends Backend
         set_time_limit(0);
         //根据不同的状态取订单数据
         $success_data = Alibaba::getOrderList(1, $params);
-        
         $data = [];
         for ($i = 1; $i <= ceil($success_data['totalRecord'] / 50); $i++) {
-            $result = Alibaba::getOrderList($i, $params)->result;
             //根据不同的状态取订单数据
-            $data[$i]['baseInfo'] = $result->baseInfo;
-            $data[$i]['productItems'] = $result->productItems;
+            $data[$i] = Alibaba::getOrderList($i, $params)->result;
         }
-        dump($data);die;
        
         foreach ($data as $key => $val) {
             if (!$val) {
