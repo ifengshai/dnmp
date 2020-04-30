@@ -844,7 +844,7 @@ class PurchaseOrder extends Backend
          * @todo 后面添加采集时间段
          */
         $params = [
-            'createStartTime' => date('YmdHis', strtotime("-90 day")) . '000+0800',
+            'createStartTime' => date('YmdHis', strtotime("-60 day")) . '000+0800',
             'createEndTime' => date('YmdHis') . '000+0800',
         ];
 
@@ -854,81 +854,78 @@ class PurchaseOrder extends Backend
         $data = [];
         for ($i = 1; $i <= ceil($success_data['totalRecord'] / 50); $i++) {
             //根据不同的状态取订单数据
-            $data[$i] = Alibaba::getOrderList($i, $params)->result;
+            $data[$i] = Alibaba::getOrderList($i, $params)['result'];
         }
-        dump($data);die;
-
-
         foreach ($data as $key => $val) {
             if (!$val) {
                 continue;
             }
             foreach ($val as $k => $v) {
                 $list = [];
-                $map['purchase_number'] = $v->baseInfo->idOfStr;
+                $map['purchase_number'] = $v['baseInfo']['idOfStr'];
                 $map['is_del'] = 1;
                 //根据采购单号查询采购单是否已存在
                 $res = $this->model->where($map)->find();
                 //如果采购单已存在 则更新采购单状态
                 if ($res) {
                     //待发货
-                    if (in_array($v->baseInfo->status, ['waitsellersend', 'waitsellerconfirm', 'waitbuyerconfirm', 'waitselleract', 'waitsellerpush', 'waitbuyerconfirmaction'])) {
+                    if (in_array($v['baseInfo']['status'], ['waitsellersend', 'waitsellerconfirm', 'waitbuyerconfirm', 'waitselleract', 'waitsellerpush', 'waitbuyerconfirmaction'])) {
                         $list['purchase_status'] = 5;
-                    } elseif (in_array($v->baseInfo->status, ['waitbuyerreceive', 'send_goods_but_not_fund', 'waitlogisticstakein', 'waitbuyersign', 'signinfailed'])) {
+                    } elseif (in_array($v['baseInfo']['status'], ['waitbuyerreceive', 'send_goods_but_not_fund', 'waitlogisticstakein', 'waitbuyersign', 'signinfailed'])) {
                         $list['purchase_status'] = 6; //待收货
                     } else {
                         $list['purchase_status'] = 7; //已收货
-                        $jsonDate = $v->baseInfo->createTime;
+                        $jsonDate = $v['baseInfo']['createTime'];
                         preg_match('/\d{14}/', $jsonDate, $matches);
                         $list['receiving_time'] = date('Y-m-d H:i:s', strtotime($matches[0]));
                     }
 
                     //售中退款
-                    if (@$v->baseInfo->refundStatus == 'refundsuccess') {
+                    if (@$v['baseInfo']['refundStatus'] == 'refundsuccess') {
                         $list['purchase_status'] = 8; //已退款
                     }
 
-                    $list['online_status'] = $v->baseInfo->status;
+                    $list['online_status'] = $v['baseInfo']['status'];
 
                     //匹配供应商
                     if (!$res['supplier_id']) {
                         $supplier = new Supplier;
-                        $list['supplier_id'] = $supplier->getSupplierId($v->baseInfo->sellerContact->companyName);
+                        $list['supplier_id'] = $supplier->getSupplierId($v['baseInfo']['sellerContact']['companyName']);
                     }
 
                     //更新采购单状态
                     $result = $res->save($list);
                 } else {
                     //过滤待付款 和取消状态的订单
-                    if (in_array($v->baseInfo->status, ['waitbuyerpay', 'cancel'])) {
+                    if (in_array($v['baseInfo']['status'], ['waitbuyerpay', 'cancel'])) {
                         continue;
                     }
 
-                    $list['purchase_number'] = $v->baseInfo->idOfStr;
+                    $list['purchase_number'] = $v['baseInfo']['idOfStr'];
                     //1688用户配置id
                     $userIDs = config('1688user');
-                    $list['create_person'] = $userIDs[$v->baseInfo->buyerSubID] ?? '任萍';
+                    $list['create_person'] = $userIDs[$v['baseInfo']['buyerSubID']] ?? '任萍';
                     //采购02账号 默认都为新品
-                    if ($v->baseInfo->buyerSubID == 2201224483475) {
+                    if ($v['baseInfo']['buyerSubID'] == 2201224483475) {
                         $list['is_new_product'] = 1;
                     }
-                    $jsonDate = $v->baseInfo->createTime;
+                    $jsonDate = $v['baseInfo']['createTime'];
                     preg_match('/\d{14}/', $jsonDate, $matches);
                     $list['createtime'] = date('Y-m-d H:i:s', strtotime($matches[0]));
 
-                    $list['product_total'] = ($v->baseInfo->totalAmount) * 1 - ($v->baseInfo->shippingFee) * 1;
-                    $list['purchase_freight'] = $v->baseInfo->shippingFee;
-                    $list['purchase_total'] = $v->baseInfo->totalAmount;
-                    $list['payment_money'] = $v->baseInfo->totalAmount;
+                    $list['product_total'] = ($v['baseInfo']['totalAmount']) * 1 - ($v['baseInfo']['shippingFee']) * 1;
+                    $list['purchase_freight'] = $v['baseInfo']['shippingFee'];
+                    $list['purchase_total'] = $v['baseInfo']['totalAmount'];
+                    $list['payment_money'] = $v['baseInfo']['totalAmount'];
                     $list['payment_status'] = 3;
-                    $payTime = @$v->baseInfo->payTime;
+                    $payTime = @$v['baseInfo']['payTime'];
                     if ($payTime) {
                         $matches = [];
                         preg_match('/\d{14}/', $payTime, $matches);
                         $list['payment_time'] = date('Y-m-d H:i:s', strtotime($matches[0]));
                     }
 
-                    $allDeliveredTime = @$v->baseInfo->allDeliveredTime;
+                    $allDeliveredTime = @$v['baseInfo']['allDeliveredTime'];
                     if ($allDeliveredTime) {
                         $matches = [];
                         preg_match('/\d{14}/', $allDeliveredTime, $matches);
@@ -937,17 +934,17 @@ class PurchaseOrder extends Backend
                     }
 
                     //待发货
-                    if (in_array($v->baseInfo->status, ['waitsellersend', 'waitsellerconfirm', 'waitbuyerconfirm', 'waitselleract', 'waitsellerpush', 'waitbuyerconfirmaction'])) {
+                    if (in_array($v['baseInfo']['status'], ['waitsellersend', 'waitsellerconfirm', 'waitbuyerconfirm', 'waitselleract', 'waitsellerpush', 'waitbuyerconfirmaction'])) {
                         $list['purchase_status'] = 5;
-                    } elseif (in_array($v->baseInfo->status, ['waitbuyerreceive', 'send_goods_but_not_fund', 'waitlogisticstakein', 'waitbuyersign', 'signinfailed'])) {
+                    } elseif (in_array($v['baseInfo']['status'], ['waitbuyerreceive', 'send_goods_but_not_fund', 'waitlogisticstakein', 'waitbuyersign', 'signinfailed'])) {
                         $list['purchase_status'] = 6; //待收货
                     } else {
                         $list['purchase_status'] = 7; //已收货
                     }
                     //收货地址
-                    $list['delivery_address'] = $v->baseInfo->receiverInfo->toArea;
-                    $list['online_status'] = $v->baseInfo->status;
-                    $receivingTime = @$v->baseInfo->receivingTime;
+                    $list['delivery_address'] = $v['baseInfo']['receiverInfo']['toArea'];
+                    $list['online_status'] = $v['baseInfo']['status'];
+                    $receivingTime = @$v['baseInfo']['receivingTime'];
                     if ($receivingTime) {
                         $matches = [];
                         preg_match('/\d{14}/', $receivingTime, $matches);
@@ -957,34 +954,35 @@ class PurchaseOrder extends Backend
 
                     //匹配供应商
                     $supplier = new Supplier;
-                    $list['supplier_id'] = $supplier->getSupplierId($v->baseInfo->sellerContact->companyName);
+                    $list['supplier_id'] = $supplier->getSupplierId($v['baseInfo']['sellerContact']['companyName']);
 
                     //添加采购单
                     $result = $this->model->allowField(true)->create($list);
 
                     $params = [];
-                    foreach ($v->productItems as  $key => $val) {
+                    foreach ($v['productItems'] as  $key => $val) {
                         //添加商品数据
                         $params[$key]['purchase_id'] = $result->id;
-                        $params[$key]['purchase_order_number'] = $v->baseInfo->idOfStr;
-                        $params[$key]['product_name'] = $val->name;
-                        $params[$key]['purchase_num'] = $val->quantity;
-                        $params[$key]['purchase_price'] = $val->itemAmount / $val->quantity;
-                        $params[$key]['purchase_total'] = $val->itemAmount;
-                        $params[$key]['price'] = $val->price;
-                        $params[$key]['discount_money'] = $val->entryDiscount / 100;
-                        $params[$key]['skuid'] = $val->skuID;
+                        $params[$key]['purchase_order_number'] = $v['baseInfo']['idOfStr'];
+                        $params[$key]['product_name'] = $val['name'];
+                        $params[$key]['purchase_num'] = $val['quantity'];
+                        $params[$key]['purchase_price'] = $val['itemAmount'] / $val['quantity'];
+                        $params[$key]['purchase_total'] = $val['itemAmount'];
+                        $params[$key]['price'] = $val['price'];
+                        $params[$key]['discount_money'] = $val['entryDiscount'] / 100;
+                        $params[$key]['skuid'] = $val['skuID'];
 
                         //匹配SKU 供应商SKU
-                        if ($val->skuID) {
-                            $params[$key]['sku'] = (new SupplierSku())->getSkuData($val->skuID);
-                            $params[$key]['supplier_sku'] = (new SupplierSku())->getSupplierData($val->skuID);
+                        if ($val['skuID']) {
+                            $params[$key]['sku'] = (new SupplierSku())->getSkuData($val['skuID']);
+                            $params[$key]['supplier_sku'] = (new SupplierSku())->getSupplierData($val['skuID']);
                         }
                     }
                     $this->purchase_order_item->allowField(true)->saveAll($params);
                 }
             }
         }
+        unset($data);
         echo 'ok';
     }
 
