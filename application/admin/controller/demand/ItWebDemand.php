@@ -242,8 +242,8 @@ class ItWebDemand extends Backend
                 //判断当前登录人是否显示应该操作的按钮
                 if($v['test_group'] == 1 && $v['test_user_id'] != ''){
                     if(in_array($this->auth->id, explode(',', $v['test_user_id']))){
-                        $list[$k]['is_test_record_hidden'] = 1;
-                        $list[$k]['is_test_finish_hidden'] = 1;
+                        $list[$k]['is_test_record_hidden'] = 1;//显示
+                        $list[$k]['is_test_finish_hidden'] = 1;//显示
                     }
                 }
                 if($this->auth->id == $v['entry_user_id']){
@@ -373,9 +373,9 @@ class ItWebDemand extends Backend
                 }elseif ($v['status'] == 4){
                     if($v['test_group'] == 1){
                         if($v['entry_user_confirm'] == 0){
-                            $list[$k]['status_str'] = '待测试,待确认';
+                            $list[$k]['status_str'] = '待测试';
                         }else{
-                            $list[$k]['status_str'] = '待测试,已确认';
+                            $list[$k]['status_str'] = '待测试';
                         }
                     }else{
                         $list[$k]['status_str'] = '待上线';
@@ -426,6 +426,8 @@ class ItWebDemand extends Backend
                 if($this->auth->id == $v['entry_user_id']){
                     $list[$k]['is_entry_user_hidden'] = 1;
                 }*/
+
+
             }
             $result = array("total" => $total, "rows" => $list);
             return json($result);

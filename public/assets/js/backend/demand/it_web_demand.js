@@ -418,11 +418,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     callback: function (data) {
                                     },
                                     visible: function(row){
-                                        if(row.status == 7){
-                                            return true;
-                                        }else{
-                                            return false;
-                                        }
+                                        return true;
                                     }
                                 },
                             ],
@@ -875,11 +871,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     callback: function (data) {
                                     },
                                     visible: function(row){
-                                        if(row.status == 7){
-                                            return true;
-                                        }else{
-                                            return false;
-                                        }
+                                        return true;
                                     }
                                 },
                                 {
@@ -1390,11 +1382,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     callback: function (data) {
                                     },
                                     visible: function(row){
-                                        if(row.status == 7){
-                                            return true;
-                                        }else{
-                                            return false;
-                                        }
+                                        return true;
                                     }
                                 },
                             ],
