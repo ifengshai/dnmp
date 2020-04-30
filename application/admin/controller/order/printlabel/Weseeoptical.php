@@ -265,11 +265,11 @@ class Weseeoptical extends Backend
 
                     $qty = $v['qty_ordered'];
 
-                    //判断是否有实时库存
-                    $realStock = $item->getRealStock($trueSku);
-                    if ($qty > $realStock) {
-                        throw new Exception("SKU:" . $v['sku'] . "实时库存不足");
-                    }
+                    // //判断是否有实时库存
+                    // $realStock = $item->getRealStock($trueSku);
+                    // if ($qty > $realStock) {
+                    //     throw new Exception("SKU:" . $v['sku'] . "实时库存不足");
+                    // }
 
                     $map = [];
                     $map['sku'] = $trueSku;

@@ -639,6 +639,7 @@ class WorkOrderList extends Model
                 $increment_id = $res['increment_id'];
                 //replacement_order添加补发的订单号
                 WorkOrderChangeSku::where(['work_id' => $work_id, 'change_type' => 5])->setField('replacement_order', $increment_id);
+                self::where(['id' => $work_id])->setField('replacement_order', $increment_id);
             } catch (Exception $e) {
                 exception($e->getMessage());
             }

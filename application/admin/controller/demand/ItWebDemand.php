@@ -282,11 +282,39 @@ class ItWebDemand extends Backend
             if ($filter['Allgroup_sel'] == 4) {
                 $smap['test_group'] = 1;
             }
-            if($smap){
-                unset($filter['Allgroup_sel']);
-                $this->request->get(['filter' => json_encode($filter)]);
-            }
+            $meWhere = '';
+            //我的
+            if(isset($filter['me_task'])){
 
+                $adminId = session('admin.id');
+                //是否是主管
+                $authUserIds = Auth::getUsersId('demand/it_web_demand/test_distribution') ?: [];
+                //判断是否是测试
+                if(in_array($adminId,$authUserIds)){
+                    $meWhere = "(status = 1 or test_group = 1)";
+                }
+                //判断是否是普通的测试
+                $testAuthUserIds = Auth::getUsersId('demand/it_web_demand/test_group_finish') ?: [];
+                if(!in_array($adminId,$authUserIds) && in_array($adminId,$testAuthUserIds)){
+                    $meWhere = "(test_group = 1 and FIND_IN_SET({$adminId},test_user_id))";
+                }
+                //显示有分配权限的人，此类人跟点上线的是一类人，此类人应该可以查看所有的权限
+                $assignAuthUserIds = Auth::getUsersId('demand/it_web_demand/distribution') ?: [];
+                if(in_array($adminId,$assignAuthUserIds)){
+                    $meWhere = "1 = 1";
+                }
+                //拼接我创建的所有和负责人是我的,抄送人是我的
+                if($meWhere){
+                    $meWhere .= "  or entry_user_id = {$adminId} or FIND_IN_SET({$adminId},web_designer_user_id) or FIND_IN_SET({$adminId},phper_user_id) or FIND_IN_SET({$adminId},test_user_id) or FIND_IN_SET({$adminId},copy_to_user_id)";
+                }else{
+                    $meWhere .= "entry_user_id = {$adminId} or FIND_IN_SET({$adminId},web_designer_user_id) or FIND_IN_SET({$adminId},phper_user_id) or FIND_IN_SET({$adminId},test_user_id) or FIND_IN_SET({$adminId},copy_to_user_id)";
+                }
+                unset($filter['me_task']);
+            }
+            if(isset($filter['Allgroup_sel'])){
+                unset($filter['Allgroup_sel']);
+            }
+            $this->request->get(['filter' => json_encode($filter)]);
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
                 ->where($where)

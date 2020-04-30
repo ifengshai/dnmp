@@ -844,7 +844,7 @@ class PurchaseOrder extends Backend
          * @todo 后面添加采集时间段
          */
         $params = [
-            'createStartTime' => date('YmdHis', strtotime("-60 day")) . '000+0800',
+            'createStartTime' => date('YmdHis', strtotime("-90 day")) . '000+0800',
             'createEndTime' => date('YmdHis') . '000+0800',
         ];
 
@@ -852,12 +852,14 @@ class PurchaseOrder extends Backend
         //根据不同的状态取订单数据
         $success_data = Alibaba::getOrderList(1, $params);
         $data = [];
-        for ($i = 1; $i <= round($success_data['totalRecord'] / 50); $i++) {
+        for ($i = 1; $i <= ceil($success_data['totalRecord'] / 50); $i++) {
             //根据不同的状态取订单数据
             $data[$i] = Alibaba::getOrderList($i, $params)->result;
         }
+        dump($data);die;
 
-        foreach (array_values($data) as $key => $val) {
+
+        foreach ($data as $key => $val) {
             if (!$val) {
                 continue;
             }
