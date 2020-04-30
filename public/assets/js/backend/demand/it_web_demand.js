@@ -418,7 +418,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     callback: function (data) {
                                     },
                                     visible: function(row){
-                                        return true;
+                                        if(row.test_group == 0 || row.test_group == 2){
+                                            return false;
+                                        }
+                                        //return true;
                                     }
                                 },
                             ],
