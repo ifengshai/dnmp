@@ -320,7 +320,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                 }else{
                     parent.$(".layui-layer-footer").show();
                 }
-            });
+            });           
         },
         api: {
             bindevent: function () {
