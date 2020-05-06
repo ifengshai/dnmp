@@ -217,6 +217,7 @@ class WorkOrderList extends Backend
                     if (!$params['platform_order']) {
                         throw new Exception("订单号不能为空");
                     }
+                    $params['platform_order'] = trim($params['platform_order']);
                     if (!$params['problem_description']) {
                         throw new Exception("问题描述不能为空");
                     }
