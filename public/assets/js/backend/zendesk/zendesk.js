@@ -60,7 +60,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                                     title: function (row) {
                                         return __('Answer') + '【' + row.ticket_id + '】' + row.subject;
                                     },
-                                    classname: 'btn btn-xs btn-success btn-dialog',
+                                    classname: 'btn btn-xs btn-success btn-addtabs',
                                     icon: '',
                                     url: 'zendesk/zendesk/edit',
                                     extend: 'data-area = \'["100%","100%"]\'',
@@ -197,6 +197,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
         },
         edit: function () {
             Controller.api.bindevent();
+            Form.api.bindevent($("form[role=form]"), function (data, ret) {
+                top.window.$("ul.nav-addtabs li.active").find(".fa-remove").trigger("click");
+            }, function (data, ret) {
+                Toastr.success("失败");
+            });            
             //删除商品数据
             $(document).on('click', '.merge', function () {
                 var nid = $(this).data('nid');
