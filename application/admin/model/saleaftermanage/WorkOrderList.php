@@ -841,7 +841,6 @@ class WorkOrderList extends Model
                     $work->work_status = $work_status;
                     if ($params['success'] == 2) {
                         $work->work_status = 4;
-                        $work->complete_time = $time;
                     } elseif ($params['success'] == 1) {
                         $work->work_status = $work_status;
                         if ($work_status == 6) {
