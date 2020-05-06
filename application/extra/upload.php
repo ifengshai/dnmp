@@ -9,7 +9,7 @@ return [
     /**
      * CDN地址
      */
-    'cdnurl'    => '',
+    'cdnurl'    => 'http://test.mruilove.com',
     /**
      * 文件保存格式
      */

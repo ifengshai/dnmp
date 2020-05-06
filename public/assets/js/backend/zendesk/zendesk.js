@@ -1,5 +1,6 @@
 define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','template'], function ($, undefined, Backend, Table, Form , JqTags , Jqui , Template) {
 
+
     var Controller = {
         index: function () {
             // 初始化表格参数配置

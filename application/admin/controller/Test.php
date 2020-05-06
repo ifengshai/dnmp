@@ -11,9 +11,12 @@ class Test extends Backend
     public function _initialize()
     {
         parent::_initialize();
-
         $this->newproduct = new \app\admin\model\NewProduct();
         $this->item = new \app\admin\model\itemmanage\Item();
+    }
+    public function test123()
+    {
+        echo 1111;
     }
 
     /**
@@ -35,4 +38,5 @@ class Test extends Backend
             $supplier->where('id', $v)->update(['purchase_person' => $str[$k]]);
         }
     }
+
 }

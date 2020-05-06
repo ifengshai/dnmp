@@ -1,6 +1,6 @@
 <?php
 
-namespace app\admin\model\demand\testManage;
+namespace app\admin\model\demand\testmanage;
 
 use think\Model;
 
