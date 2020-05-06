@@ -914,7 +914,7 @@ class WorkOrderList extends Model
         WorkOrderMeasure::where(['id' => $measure_id])->update($dataMeasure);
         //求出承接措施是否完成
         $whereMeasure['work_id'] = $work_id;
-        $whereMeasure['measure_id'] = $measure_id;
+        //$whereMeasure['measure_id'] = $measure_id;
         $whereMeasure['recept_status'] = ['eq', 0];
         $resultRecept = WorkOrderRecept::where($whereMeasure)->count();
         if (0 == $resultRecept) { //表明整个措施已经完成
