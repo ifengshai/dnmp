@@ -1592,7 +1592,7 @@ EOF;
 
                 $final_print = array();
                 $product_options = unserialize($processing_value['product_options']);
-                $final_print['coatiing_name'] = substr($product_options['info_buyRequest']['tmplens']['coatiing_name'], 0, 60);
+                $final_print['coatiing_name'] = substr($product_options['info_buyRequest']['tmplens']['coating_name'], 0, 60);
                 $final_print['index_type'] = $product_options['info_buyRequest']['tmplens']['index_type'];
                 //镜片类型拼接颜色字段
                 if ($product_options['info_buyRequest']['tmplens']['color_name']) {
