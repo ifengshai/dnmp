@@ -157,6 +157,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                             type: type
                         },
                         success: function (json) {
+                            if(json.code != undefined){
+                                Toastr.error(json.msg);
+                                return false;
+                            }
                             //修改回复内容，状态，priority，tags
                             if(json.template_content){
                                 var code = $('.ticket-content').summernote('code');
