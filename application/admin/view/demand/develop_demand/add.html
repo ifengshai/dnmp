@@ -1,4 +1,5 @@
 <form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
+    <input name="row[type]" type="hidden" value="{$demand_type}">
 
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">{:__('Titel')}:</label>
@@ -6,6 +7,19 @@
             <input id="c-titel" data-rule="required" class="form-control" name="row[title]" type="text" value="">
         </div>
     </div>
+    {if $demand_type == 1}
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('优先级')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <select name="row[priority]" class="form-control"  data-rule="required">
+                <option value="">请选择</option>
+                <option value="1">低</option>
+                <option value="2">中</option>
+                <option value="3">高</option>
+            </select>
+        </div>
+    </div>
+    {/if}
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">{:__('Desc')}:</label>
         <div class="col-xs-12 col-sm-8">
