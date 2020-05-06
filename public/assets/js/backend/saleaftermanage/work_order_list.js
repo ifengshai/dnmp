@@ -604,7 +604,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
 
             //失去焦点
             $('#c-platform_order').blur(function () {
-                var incrementId = $(this).val();
+                var incrementId = $(this).val().replace(/^\s+|\s+$/g,"");
+                //var incrementId = replace(/^\s+|\s+$/g,"");
                 if (!incrementId) {
                     Toastr.error('订单号不能为空');
                     return false;
@@ -624,7 +625,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
 
             //载入数据
             $('#platform_order').click(function () {
-                var incrementId = $('#c-platform_order').val();
+                var incrementId = $('#c-platform_order').val().replace(/^\s+|\s+$/g,"");
                 var sitetype = $('#work_platform').val();
                 $('#c-order_sku').html('');
                 Backend.api.ajax({
