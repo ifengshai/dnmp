@@ -409,7 +409,7 @@ class Zeelool extends Backend
                         $map['is_del'] = 1;
                         $res = $item->where($map)->setInc('distribution_occupy_stock', $v['qty']);
                         if (false === $res) {
-                            throw new Exception("增加配货占用库存失败！！请检查更换镜框SKU:" . $v['change_sku']. ',订单号：' . $v['increment_id']);
+                            throw new Exception("增加配货占用库存失败！！请检查更换镜框SKU:" . $v['change_sku'] . ',订单号：' . $v['increment_id']);
                         }
                         $sku[$v['increment_id']][$v['original_sku']] += $v['qty'];
 
@@ -431,7 +431,7 @@ class Zeelool extends Backend
                     //转仓库SKU
                     $trueSku = $ItemPlatformSku->getTrueSku(trim($v['sku']), 1);
                     if (!$trueSku) {
-                        throw new Exception("增加配货占用库存失败！！请检查更换镜框SKU:" . $v['sku']. ',订单号：' . $v['increment_id']);
+                        throw new Exception("增加配货占用库存失败！！请检查更换镜框SKU:" . $v['sku'] . ',订单号：' . $v['increment_id']);
                     }
 
                     //如果为真 则存在更换镜架的数量 则订单需要扣减的数量为原数量-更换镜架的数量
@@ -457,7 +457,7 @@ class Zeelool extends Backend
                     //增加配货占用
                     $res = $item->where($map)->setInc('distribution_occupy_stock', $qty);
                     if (false === $res) {
-                        throw new Exception("增加配货占用库存失败！！请检查更换镜框SKU:" . $v['sku']. ',订单号：' . $v['increment_id']);
+                        throw new Exception("增加配货占用库存失败！！请检查更换镜框SKU:" . $v['sku'] . ',订单号：' . $v['increment_id']);
                     }
 
                     $number++;
@@ -506,7 +506,7 @@ class Zeelool extends Backend
                     foreach ($infoRes as $k => $v) {
                         $trueSku = $ItemPlatformSku->getTrueSku(trim($v['change_sku']), 1);
                         if (!$trueSku) {
-                            throw new Exception("扣减库存失败！！请检查更换镜框SKU:" . $v['sku']. ',订单号：' . $v['increment_id']);
+                            throw new Exception("扣减库存失败！！请检查更换镜框SKU:" . $v['sku'] . ',订单号：' . $v['increment_id']);
                         }
                         //扣减总库存 扣减占用库存 扣减配货占用
                         $map = [];
@@ -514,7 +514,7 @@ class Zeelool extends Backend
                         $map['is_del'] = 1;
                         $res = $item->where($map)->dec('stock', $v['qty'])->dec('occupy_stock', $v['qty'])->dec('distribution_occupy_stock', $v['qty'])->update();
                         if (false === $res) {
-                            throw new Exception("扣减库存失败！！请检查更换镜框SKU:" . $v['sku']. ',订单号：' . $v['increment_id']);
+                            throw new Exception("扣减库存失败！！请检查更换镜框SKU:" . $v['sku'] . ',订单号：' . $v['increment_id']);
                         }
                         $sku[$v['increment_id']][$v['original_sku']] += $v['qty'];
 
@@ -537,7 +537,7 @@ class Zeelool extends Backend
                     //查出订单SKU映射表对应的仓库SKU
                     $trueSku = $ItemPlatformSku->getTrueSku(trim($v['sku']), 1);
                     if (!$trueSku) {
-                        throw new Exception("扣减库存失败！！请检查SKU:" . $v['sku']. ',订单号：' . $v['increment_id']);
+                        throw new Exception("扣减库存失败！！请检查SKU:" . $v['sku'] . ',订单号：' . $v['increment_id']);
                     }
                     //如果为真 则存在更换镜架的数量 则订单需要扣减的数量为原数量-更换镜架的数量
                     if ($sku[$v['increment_id']][$v['sku']]) {
@@ -555,7 +555,7 @@ class Zeelool extends Backend
                     //扣减总库存 扣减占用库存 扣减配货占用
                     $res = $item->where($item_map)->dec('stock', $qty)->dec('occupy_stock', $qty)->dec('distribution_occupy_stock', $qty)->update();
                     if (false === $res) {
-                        throw new Exception("扣减库存失败！！请检查SKU:" . $v['sku']. ',订单号：' . $v['increment_id']);
+                        throw new Exception("扣减库存失败！！请检查SKU:" . $v['sku'] . ',订单号：' . $v['increment_id']);
                     }
                     $number++;
                     //100条提交一次
@@ -1532,7 +1532,7 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
         $entity_ids = rtrim(input('id_params'), ',');
         // dump($entity_ids);
         if ($entity_ids) {
-            $processing_order_querySql = "select sfo.increment_id,round(sfo.total_qty_ordered,0) NUM,sfoi.product_options,sfoi.order_id,sfo.`status`,sfoi.sku,sfoi.qty_ordered,sfo.created_at
+            $processing_order_querySql = "select sfo.is_new_version,sfo.increment_id,round(sfo.total_qty_ordered,0) NUM,sfoi.product_options,sfoi.order_id,sfo.`status`,sfoi.sku,sfoi.qty_ordered,sfo.created_at
 from sales_flat_order_item sfoi
 left join sales_flat_order sfo on  sfoi.order_id=sfo.entity_id 
 where sfo.`status` in ('processing','creditcard_proccessing','free_processing','complete','paypal_reversed','paypal_canceled_reversal') and sfo.entity_id in($entity_ids)
@@ -1562,7 +1562,6 @@ EOF;
             //查询sku映射表
             $item = new \app\admin\model\itemmanage\ItemPlatformSku;
             $item_res = $item->cache(3600)->column('sku', 'platform_sku');
-
             $file_content = '';
             $temp_increment_id = 0;
             foreach ($processing_order_list as $processing_key => $processing_value) {
@@ -1592,71 +1591,115 @@ EOF;
 
                 $final_print = array();
                 $product_options = unserialize($processing_value['product_options']);
-                $final_print['coatiing_name'] = substr($product_options['info_buyRequest']['tmplens']['coating_name'], 0, 60);
-                $final_print['index_type'] = $product_options['info_buyRequest']['tmplens']['index_type'];
-                //镜片类型拼接颜色字段
-                if ($product_options['info_buyRequest']['tmplens']['color_name']) {
-                    $final_print['index_type'] .= '-' . $product_options['info_buyRequest']['tmplens']['color_name'];
-                }
-                $prescription_params = $product_options['info_buyRequest']['tmplens']['prescription'];
-                if ($prescription_params) {
-                    $prescription_params = explode("&", $prescription_params);
-                    $lens_params = array();
-                    foreach ($prescription_params as $key => $value) {
-                        // dump($value);
-                        $arr_value = explode("=", $value);
-                        $lens_params[$arr_value[0]] = $arr_value[1];
+
+                //新处方字段
+                if ($processing_value['is_new_version'] == 1) {
+                    //镀膜名称
+                    $final_print['coatiing_name'] = substr($product_options['info_buyRequest']['tmplens']['coating_name'], 0, 60);
+                    //镜片类型名称
+                    $final_print['index_type'] = $product_options['info_buyRequest']['tmplens']['index_type'];
+                    //处方参数
+                    $prescription_params = $product_options['info_buyRequest']['tmplens']['prescription'];
+                    if ($prescription_params) {
+                        $prescription_params = explode("&", $prescription_params);
+                        $lens_params = array();
+                        foreach ($prescription_params as $key => $value) {
+                            $arr_value = explode("=", $value);
+                            $lens_params[$arr_value[0]] = $arr_value[1];
+                        }
+                        $final_print = array_merge($lens_params, $final_print);
                     }
-                    // dump($lens_params);
-                    $final_print = array_merge($lens_params, $final_print);
-                }
+                    //处方类型
+                    $final_print['prescription_type'] = $final_print['prescription_type'] ?: 'Frame Only';
 
-                // dump($final_print);
+                    //处理ADD
+                    if ($final_print['os_add'] && $final_print['od_add'] && $final_print['os_add']*1 != 0 && $final_print['od_add']*1 != 0) {
+                        $os_add = "<td>" . $final_print['od_add'] . "</td> ";
+                        $od_add = "<td>" . $final_print['os_add'] . "</td> ";
+                    } else {
+                        if ($final_print['os_add'] && $final_print['os_add']*1 != 0) {
+                            $os_add = "<td rowspan='2'>" . $final_print['os_add'] . "</td>";
+                            $od_add = "";
+                        } else {
+                            $od_add = "<td rowspan='2'>" . $final_print['od_add'] . "</td>";
+                            $os_add = "";
+                        }
+                    }
 
-                $final_print['prescription_type'] = isset($final_print['prescription_type']) ? $final_print['prescription_type'] : '';
-
-                $final_print['od_sph'] = isset($final_print['od_sph']) ? $final_print['od_sph'] : '';
-                $final_print['os_sph'] = isset($final_print['os_sph']) ? $final_print['os_sph'] : '';
-                $final_print['od_cyl'] = isset($final_print['od_cyl']) ? $final_print['od_cyl'] : '';
-                $final_print['os_cyl'] = isset($final_print['os_cyl']) ? $final_print['os_cyl'] : '';
-                $final_print['od_axis'] = isset($final_print['od_axis']) ? $final_print['od_axis'] : '';
-                $final_print['os_axis'] = isset($final_print['os_axis']) ? $final_print['os_axis'] : '';
-
-                $final_print['od_add'] = isset($final_print['od_add']) ? $final_print['od_add'] : '';
-                $final_print['os_add'] = isset($final_print['os_add']) ? $final_print['os_add'] : '';
-
-                $final_print['pdcheck'] = isset($final_print['pdcheck']) ? $final_print['pdcheck'] : '';
-                $final_print['pd_r'] = isset($final_print['pd_r']) ? $final_print['pd_r'] : '';
-                $final_print['pd_l'] = isset($final_print['pd_l']) ? $final_print['pd_l'] : '';
-                $final_print['pd'] = isset($final_print['pd']) ? $final_print['pd'] : '';
-
-                $final_print['prismcheck'] = isset($final_print['prismcheck']) ? $final_print['prismcheck'] : '';
-
-
-                //处理ADD  当ReadingGlasses时 是 双ADD值
-                if ($final_print['prescription_type'] == 'ReadingGlasses' && strlen($final_print['os_add']) > 0 && strlen($final_print['od_add']) > 0) {
-                    // echo '双ADD值';
-                    $os_add = "<td>" . $final_print['od_add'] . "</td> ";
-                    $od_add = "<td>" . $final_print['os_add'] . "</td> ";
+                    //处理PD值
+                    if ($final_print['pdcheck'] == 'on' && strlen($final_print['pd_r']) > 0 && strlen($final_print['pd_l']) > 0) {
+                        // echo '双PD值';
+                        $od_pd = "<td>" . $final_print['pd_r'] . "</td> ";
+                        $os_pd = "<td>" . $final_print['pd_l'] . "</td> ";
+                    } else {
+                        // echo '单PD值';
+                        $od_pd = "<td rowspan='2'>" . $final_print['pd'] . "</td>";
+                        $os_pd = "";
+                    }
                 } else {
-                    // echo '单ADD值';
-                    $od_add = "<td rowspan='2'>" . $final_print['os_add'] . "</td>";
-                    $os_add = "";
-                }
+                    $final_print['coatiing_name'] = substr($product_options['info_buyRequest']['tmplens']['coatiing_name'], 0, 60);
+                    $final_print['index_type'] = $product_options['info_buyRequest']['tmplens']['index_type'];
+                    //镜片类型拼接颜色字段
+                    if ($product_options['info_buyRequest']['tmplens']['color_name']) {
+                        $final_print['index_type'] .= '-' . $product_options['info_buyRequest']['tmplens']['color_name'];
+                    }
+                    $prescription_params = $product_options['info_buyRequest']['tmplens']['prescription'];
+                    if ($prescription_params) {
+                        $prescription_params = explode("&", $prescription_params);
+                        $lens_params = array();
+                        foreach ($prescription_params as $key => $value) {
+                            // dump($value);
+                            $arr_value = explode("=", $value);
+                            $lens_params[$arr_value[0]] = $arr_value[1];
+                        }
+                        // dump($lens_params);
+                        $final_print = array_merge($lens_params, $final_print);
+                    }
 
-                //处理PD值
-                if ($final_print['pdcheck'] && strlen($final_print['pd_r']) > 0 && strlen($final_print['pd_l']) > 0) {
-                    // echo '双PD值';
-                    $od_pd = "<td>" . $final_print['pd_r'] . "</td> ";
-                    $os_pd = "<td>" . $final_print['pd_l'] . "</td> ";
-                } else {
-                    // echo '单PD值';
-                    $od_pd = "<td rowspan='2'>" . $final_print['pd'] . "</td>";
-                    $os_pd = "";
-                }
+                    // dump($final_print);
 
-                // dump($os_add);
-                // dump($od_add);
+                    $final_print['prescription_type'] = isset($final_print['prescription_type']) ? $final_print['prescription_type'] : '';
+
+                    $final_print['od_sph'] = isset($final_print['od_sph']) ? $final_print['od_sph'] : '';
+                    $final_print['os_sph'] = isset($final_print['os_sph']) ? $final_print['os_sph'] : '';
+                    $final_print['od_cyl'] = isset($final_print['od_cyl']) ? $final_print['od_cyl'] : '';
+                    $final_print['os_cyl'] = isset($final_print['os_cyl']) ? $final_print['os_cyl'] : '';
+                    $final_print['od_axis'] = isset($final_print['od_axis']) ? $final_print['od_axis'] : '';
+                    $final_print['os_axis'] = isset($final_print['os_axis']) ? $final_print['os_axis'] : '';
+
+                    $final_print['od_add'] = isset($final_print['od_add']) ? $final_print['od_add'] : '';
+                    $final_print['os_add'] = isset($final_print['os_add']) ? $final_print['os_add'] : '';
+
+                    $final_print['pdcheck'] = isset($final_print['pdcheck']) ? $final_print['pdcheck'] : '';
+                    $final_print['pd_r'] = isset($final_print['pd_r']) ? $final_print['pd_r'] : '';
+                    $final_print['pd_l'] = isset($final_print['pd_l']) ? $final_print['pd_l'] : '';
+                    $final_print['pd'] = isset($final_print['pd']) ? $final_print['pd'] : '';
+
+                    $final_print['prismcheck'] = isset($final_print['prismcheck']) ? $final_print['prismcheck'] : '';
+
+
+                    //处理ADD  当ReadingGlasses时 是 双ADD值
+                    if ($final_print['prescription_type'] == 'ReadingGlasses' && strlen($final_print['os_add']) > 0 && strlen($final_print['od_add']) > 0) {
+                        // echo '双ADD值';
+                        $os_add = "<td>" . $final_print['od_add'] . "</td> ";
+                        $od_add = "<td>" . $final_print['os_add'] . "</td> ";
+                    } else {
+                        // echo '单ADD值';
+                        $od_add = "<td rowspan='2'>" . $final_print['os_add'] . "</td>";
+                        $os_add = "";
+                    }
+
+                    //处理PD值
+                    if ($final_print['pdcheck'] && strlen($final_print['pd_r']) > 0 && strlen($final_print['pd_l']) > 0) {
+                        // echo '双PD值';
+                        $od_pd = "<td>" . $final_print['pd_r'] . "</td> ";
+                        $os_pd = "<td>" . $final_print['pd_l'] . "</td> ";
+                    } else {
+                        // echo '单PD值';
+                        $od_pd = "<td rowspan='2'>" . $final_print['pd'] . "</td>";
+                        $os_pd = "";
+                    }
+                }
 
                 //处理斜视参数
                 if ($final_print['prismcheck'] == 'on') {
