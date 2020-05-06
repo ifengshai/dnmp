@@ -218,9 +218,15 @@ class WorkOrderList extends Backend
                         throw new Exception("订单号不能为空");
                     }
                     $params['platform_order'] = trim($params['platform_order']);
+                    if (!$params['problem_description']) {
+                        throw new Exception("问题描述不能为空");
+                    }
                     //判断是否选择措施
                     if (!$params['problem_type_id'] && !$params['id']) {
                         throw new Exception("问题类型不能为空");
+                    }
+                    if (in_array($params['problem_type_id'],[11,13,14,16]) && empty(array_filter($params['order_sku']))) {
+                        throw new Exception("Sku不能为空");
                     }
 
                     //判断是否选择措施
@@ -686,7 +692,12 @@ class WorkOrderList extends Backend
                         $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.edit' : $name) : $this->modelValidate;
                         $row->validateFailException(true)->validate($validate);
                     }
-
+                    if (!$params['problem_description']) {
+                        throw new Exception("问题描述不能为空");
+                    }
+                    if (in_array($params['problem_type_id'],[11,13,14,16]) && empty(array_filter($params['order_sku']))) {
+                        throw new Exception("Sku不能为空");
+                    }
                     //判断是否选择措施
                     $params['measure_choose_id'] = $params['measure_choose_id'] ?? [];
                     if (count(array_filter($params['measure_choose_id'])) < 1 && $params['work_type'] == 1  && $params['status'] == 2) {
@@ -2137,9 +2148,10 @@ EOF;
             ->setCellValue("AH1","退款金额")
             ->setCellValue("AI1","退款方式")
             ->setCellValue("AJ1","积分描述")
-            ->setCellValue("AK1","措施详情")
-            ->setCellValue("AL1","承接详情")
-            ->setCellValue("AM1","工单回复备注");
+            ->setCellValue("AK1","补发订单号")
+            ->setCellValue("AL1","措施详情")
+            ->setCellValue("AM1","承接详情")
+            ->setCellValue("AN1","工单回复备注");
         $spreadsheet->setActiveSheetIndex(0)->setTitle('工单数据');
         foreach ($list as $key => $value) {
             if($value['after_user_id']){
@@ -2233,27 +2245,28 @@ EOF;
             $spreadsheet->getActiveSheet()->setCellValue("AH". ($key * 1 + 2), $value['refund_money']);
             $spreadsheet->getActiveSheet()->setCellValue("AI". ($key * 1 + 2), $value['refund_way']);
             $spreadsheet->getActiveSheet()->setCellValue("AJ". ($key * 1 + 2), $value['integral_describe']);
+            $spreadsheet->getActiveSheet()->setCellValue("AK". ($key * 1 + 2), $value['replacement_order']);
             //措施
             if(array_key_exists($value['id'],$info)){
 				$value['handle_result'] = $info[$value['id']];
-				$spreadsheet->getActiveSheet()->setCellValue("AK" . ($key * 1 + 2), $value['handle_result']);
+				$spreadsheet->getActiveSheet()->setCellValue("AL" . ($key * 1 + 2), $value['handle_result']);
 			}else{
-				$spreadsheet->getActiveSheet()->setCellValue("AK" . ($key * 1 + 2), '');
+				$spreadsheet->getActiveSheet()->setCellValue("AL" . ($key * 1 + 2), '');
             }
             //承接
 			if(array_key_exists($value['id'],$receptInfo)){
                 
 				$value['result'] = $receptInfo[$value['id']];
-				$spreadsheet->getActiveSheet()->setCellValue("AL" . ($key * 1 + 2), $value['result']);
+				$spreadsheet->getActiveSheet()->setCellValue("AM" . ($key * 1 + 2), $value['result']);
 			}else{
-				$spreadsheet->getActiveSheet()->setCellValue("AL" . ($key * 1 + 2), '');
+				$spreadsheet->getActiveSheet()->setCellValue("AM" . ($key * 1 + 2), '');
             }
             //回复
             if(array_key_exists($value['id'],$noteInfo)){
 				$value['note'] = $noteInfo[$value['id']];
-				$spreadsheet->getActiveSheet()->setCellValue("AM" . ($key * 1 + 2), $value['note']);
+				$spreadsheet->getActiveSheet()->setCellValue("AN" . ($key * 1 + 2), $value['note']);
 			}else{
-				$spreadsheet->getActiveSheet()->setCellValue("AM" . ($key * 1 + 2), '');
+				$spreadsheet->getActiveSheet()->setCellValue("AN" . ($key * 1 + 2), '');
             }           			
 			
         }
@@ -2296,9 +2309,10 @@ EOF;
         $spreadsheet->getActiveSheet()->getColumnDimension('AH')->setWidth(20);
         $spreadsheet->getActiveSheet()->getColumnDimension('AI')->setWidth(20);
         $spreadsheet->getActiveSheet()->getColumnDimension('AJ')->setWidth(20);
-        $spreadsheet->getActiveSheet()->getColumnDimension('AK')->setWidth(100);
+        $spreadsheet->getActiveSheet()->getColumnDimension('AK')->setWidth(20);
         $spreadsheet->getActiveSheet()->getColumnDimension('AL')->setWidth(100);
         $spreadsheet->getActiveSheet()->getColumnDimension('AM')->setWidth(100);
+        $spreadsheet->getActiveSheet()->getColumnDimension('AN')->setWidth(100);
         //设置边框
         $border = [
             'borders' => [

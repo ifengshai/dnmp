@@ -32,7 +32,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         { field: 'work_type_str', title: __('Work_type'), operate: false },
                         { field: 'work_type', title: __('Work_type'), searchList: { 1: '客服工单', 2: '仓库工单' }, visible: false, formatter: Table.api.formatter.status },
                         { field: 'platform_order', title: __('Platform_order') },
-                        { field: 'order_sku', title: __('Order_sku'),operate: 'like',visible: true },
+                        { field: 'order_sku', title: __('Order_sku'), operate: 'like', visible: false },
 
                         /*{
                             field: 'order_sku',
@@ -353,8 +353,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     var op = search.op;
                     window.open(Config.moduleurl + '/saleaftermanage/work_order_list/batch_export_xls?filter=' + filter + '&op=' + op, '_blank');
                 }
-                
-            });            
+
+            });
 
         },
         add: function () {
@@ -1410,7 +1410,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         },
                         { field: 'id', title: __('Id'), operate: false, visible: false },
                         { field: 'work_platform', title: __('平台'), custom: { 1: 'blue', 2: 'danger', 3: 'orange' }, searchList: { 1: 'Zeelool', 2: 'Voogueme', 3: 'Nihao' }, formatter: Table.api.formatter.status },
-                        { field: 'platform_order', title: __('订单号')},
+                        { field: 'platform_order', title: __('订单号') },
                         { field: 'coupon_describe', title: __('优惠券名称'), operate: 'like' },
                         { field: 'coupon_str', title: __('优惠码'), operate: false },
                         { field: 'create_user_name', title: __('申请人'), operate: 'like' },
@@ -1456,7 +1456,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         },
                         { field: 'id', title: __('Id'), operate: false, visible: false },
                         { field: 'work_platform', title: __('平台'), custom: { 1: 'blue', 2: 'danger', 3: 'orange' }, searchList: { 1: 'Zeelool', 2: 'Voogueme', 3: 'Nihao' }, formatter: Table.api.formatter.status },
-                        { field: 'platform_order', title: __('订单号')},
+                        { field: 'platform_order', title: __('订单号') },
                         { field: 'integral', title: __('积分'), operate: 'between' },
                         { field: 'email', title: __('客户邮箱'), operate: 'like' },
                         { field: 'integral_describe', title: __('积分描述'), operate: false },
