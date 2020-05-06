@@ -135,12 +135,12 @@ class WorkOrderList extends Model
             ->column('sku');
         $orderInfo = $this->model->alias('a')->where('increment_id', $increment_id)
             ->join(['sales_flat_order_payment' => 'c'], 'a.entity_id=c.parent_id')
-            ->field('a.base_currency_code,c.method,a.customer_email')->find();
+            ->field('a.order_currency_code,c.method,a.customer_email')->find();
         if (!$sku && !$orderInfo) {
             return [];
         }
         $result['sku'] = array_unique($sku);
-        $result['base_currency_code'] = $orderInfo['base_currency_code'];
+        $result['base_currency_code'] = $orderInfo['order_currency_code'];
         $result['method'] = $orderInfo['method'];
         $result['customer_email'] = $orderInfo['customer_email'];
         return $result ? $result : [];
