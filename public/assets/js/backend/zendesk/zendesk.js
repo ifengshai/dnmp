@@ -159,7 +159,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                         success: function (json) {
                             //修改回复内容，状态，priority，tags
                             if(json.template_content){
-                                $('.ticket-content').summernote("pasteHTML",json.template_content);
+                                var code = $('.ticket-content').summernote('code');
+                                var template_content = json.template_content;
+                                if(code != '<p><br></p>'){
+                                    template_content = code + template_content;
+                                }
+                                $('.ticket-content').summernote("code",template_content);
                             }
                             if(json.mail_status) {
                                 $('.ticket-status').val(json.mail_status);
@@ -271,7 +276,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                         success: function (json) {
                             //修改回复内容，状态，priority，tags
                             if(json.template_content){
-                                $('.ticket-content').summernote("pasteHTML",json.template_content);
+                                var code = $('.ticket-content').summernote('code');
+                                var template_content = json.template_content;
+                                if(code != '<p><br></p>'){
+                                    template_content = code + template_content;
+                                }
+                                $('.ticket-content').summernote("code",template_content);
                             }
                             if(json.mail_status) {
                                 $('.ticket-status').val(json.mail_status);
