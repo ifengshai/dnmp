@@ -49,7 +49,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             searchList: { 1: '是', 0: '否' },
                             formatter: Table.api.formatter.status
                         },
-                        { field: 'complete_date', title: __('complete_date'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime },
+                        { field: 'complete_date', title: __('complete_date'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime,visible:false },
                        
                         {
                             field: 'test_regression_adopt', title: __('回归测试状态'), custom: { 1: 'success', 0: 'danger' },
@@ -76,6 +76,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                 }
                                 if(rows.closing_date){
                                     all_user_name += '<span class="all_user_name">截止：<b>'+ rows.closing_date + '</b></span><br>';
+                                }
+                                if(rows.complete_date){
+                                    all_user_name += '<span class="all_user_name">完成：<b>'+ rows.complete_date + '</b></span><br>';
                                 }
                                 return all_user_name;
                             },
