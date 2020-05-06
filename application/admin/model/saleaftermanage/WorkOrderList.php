@@ -601,7 +601,7 @@ class WorkOrderList extends Model
                     $is_frame_only = 1;
                 }
                 $postData['product'][$key] = [
-                    'sku' => str_replace('\t','',$changeSku['original_sku']),
+                    'sku' => $changeSku['original_sku'],
                     'qty' => $changeSku['original_number'],
                     'prescription_type' => $changeSku['recipe_type'],
                     'is_frame_only' => $is_frame_only,
