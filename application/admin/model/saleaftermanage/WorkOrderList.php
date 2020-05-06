@@ -600,6 +600,7 @@ class WorkOrderList extends Model
                 if ($prescriptions['lens_id'] || $prescriptions['coating_id'] || $prescriptions['color_id']) {
                     $is_frame_only = 1;
                 }
+                
                 $postData['product'][$key] = [
                     'sku' => $changeSku['original_sku'],
                     'qty' => $changeSku['original_number'],
