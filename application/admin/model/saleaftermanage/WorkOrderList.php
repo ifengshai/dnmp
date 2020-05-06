@@ -602,7 +602,7 @@ class WorkOrderList extends Model
                 }
 
                 $postData['product'][$key] = [
-                    'sku' => $changeSku['original_sku'],
+                    'sku' => strtoupper($changeSku['original_sku']),
                     'qty' => $changeSku['original_number'],
                     'prescription_type' => $changeSku['recipe_type'],
                     'is_frame_only' => $is_frame_only,
