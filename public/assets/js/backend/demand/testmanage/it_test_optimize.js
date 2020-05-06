@@ -82,6 +82,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                 },
                                 visible: function (row) {
                                     if((1 == row.optimize_status) && (Config.isCheck == 1)){
+                                        console.log(Config.isCheck);
                                         return true;
                                     }
                                         return false;
@@ -107,6 +108,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                 },
                                 visible: function (row) {
                                     if((1 == row.optimize_status)  && (Config.isCheck == 1)){
+                                        console.log(Config.isCheck);
                                         return true;
                                     }
                                         return false;
