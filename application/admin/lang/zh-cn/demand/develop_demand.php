@@ -14,6 +14,7 @@ return [
     'Complexity'            => '复杂程度',
     'Estimated_time'        => '预计时间',
     'Test_person'           => '测试负责人id',
+    'Test_person_name'      => '测试负责人',
     'Test_complexity'       => '测试复杂度',
     'Test_is_passed'        => '测试是否通过',
     'Test_problem'          => '测试记录问题',
