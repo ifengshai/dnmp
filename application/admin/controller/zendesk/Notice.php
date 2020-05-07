@@ -929,4 +929,16 @@ class Notice extends Controller
     {
         Zendesk::shellAssignTicketChange();
     }
+
+    /**
+     * 获取邮件模板
+     * @return mixed
+     * @throws \Exception
+     */
+    public function getTemplate()
+    {
+        $res = $this->client->macros()->findAllActive();
+        $macros = $res->macros;
+        return $macros;
+    }
 }
