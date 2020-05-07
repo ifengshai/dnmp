@@ -363,4 +363,70 @@ class ZendeskMailTemplate extends Backend
         $this->error('404 Not found');
     }
 
+    /**
+     * 邮件模板同步
+     * @throws \Exception
+     */
+    public function refreshTemplate()
+    {
+        if($this->request->isAjax()){
+            $zeeloolMacros = (new Notice(request(),['type' => 'zeelool']))->getTemplate();
+            $vooguemeMacros = (new Notice(request(),['type' => 'voogueme']))->getTemplate();
+            $macrosTypes = [
+                1 => $zeeloolMacros,
+                2 => $vooguemeMacros
+            ];
+            foreach($macrosTypes as $type =>  $macrosType){
+                foreach($zeeloolMacros as $macro) {
+                    if($this->model->where(['template_platform' => $type,'template_id' => $macro->id])->find()){
+                        continue;
+                    }
+                    $data = [];
+                    $title = $macro->title;
+                    $template_name = mb_substr(strstr($title, '】'), 1);
+                    $template_category = mb_substr(strstr($title, '】', true), 1);
+                    $template_category = array_search($template_category, config('zendesk.template_category'));
+                    if (!$template_name && !$template_category) {
+                        $template_category = 14;
+                        $template_name = $title;
+                    }
+                    $data = [
+                        'template_id' => $macro->id,
+                        'template_platform' => $type,
+                        'template_name' => $template_name,
+                        'template_description' => $macro->description ? $macro->description : $title,
+                        'template_permission' => 1,
+                        'template_category' => $template_category,
+                        'is_active' => 1,
+                        'create_person' => 1,
+                        'create_time' => date('Y-m-d H:i:s', time()),
+                        'update_time' => date('Y-m-d H:i:s', time()),
+                    ];
+                    $actions = $macro->actions;
+                    foreach ($actions as $key => $action) {
+                        if ($action->field == 'comment_value_html') {
+                            $data['template_content'] = str_replace(['{{ticket.requester.first_name}}', '{{ticket.id}}'], ['{{username}}', '{{ticket_id}}'], $action->value);
+                        }
+                        if ($action->field == 'subject') {
+                            $data['mail_subject'] = $action->value;
+                        }
+                        if ($action->field == 'current_tags') {
+                            $tags = explode(' ', $action->value);
+                            $tags = ZendeskTags::where('name', 'in', $tags)->column('id');
+                            sort($tags);
+                            $data['mail_tag'] = join(',', $tags);
+                        }
+                        if ($action->field == 'status') {
+                            $data['mail_status'] = array_search($action->value, config('zendesk.status'));
+                        }
+                        if ($action->field == 'priority') {
+                            $data['mail_level'] = array_search($action->value, config('zendesk.priority'));
+                        }
+                    }
+                    $this->model->create($data);
+                }
+            }
+            $this->success('更新模板成功');
+        }
+    }
 }

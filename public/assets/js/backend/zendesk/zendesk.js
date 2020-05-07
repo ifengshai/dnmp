@@ -26,6 +26,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                         {field: 'ticket_id', title: __('Ticket_id'),sortable: true},
                         {field: 'subject', title: __('Subject'),operate:false,formatter: function(value){return value.toString().substr(0, 100)}},
                         {field: 'email', title: __('Email'),operate:'LIKE %...%'},
+                        {field: 'content', title: __('关键字'),visible:false},
                         //{field: 'assign_id', title: __('Assgin_id'),operate: false,visible:false},
                         {
                             field: 'admin.nickname',

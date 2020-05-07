@@ -273,7 +273,7 @@ class WorkOrderList extends Model
         $url = $url . $pathinfo;
 
         $client = new Client(['verify' => false]);
-        file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',json_encode($params),FILE_APPEND);
+        //file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',json_encode($params),FILE_APPEND);
         try {
             if ($method == 'GET') {
                 $response = $client->request('GET', $url, array('query' => $params));
@@ -281,10 +281,10 @@ class WorkOrderList extends Model
                 $response = $client->request('POST', $url, array('form_params' => $params));
             }
             $body = $response->getBody();
-            file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$body,FILE_APPEND);
+            //file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$body,FILE_APPEND);
             $stringBody = (string)$body;
             $res = json_decode($stringBody, true);
-            file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$stringBody,FILE_APPEND);
+            //file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$stringBody,FILE_APPEND);
             if($res === null){
                 exception('网络异常');
             }

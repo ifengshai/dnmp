@@ -26,6 +26,7 @@ class Zeelool extends Backend
      * Sales_flat_order模型对象
      * @var \app\admin\model\order\Sales_flat_order
      */
+
     protected $model = null;
 
     protected $searchFields = 'entity_id';
@@ -120,7 +121,7 @@ class Zeelool extends Backend
                 unset($filter['sku']);
                 $this->request->get(['filter' => json_encode($filter)]);
             }
-
+          
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
 
             $total = $this->model
@@ -409,7 +410,7 @@ class Zeelool extends Backend
                         $map['is_del'] = 1;
                         $res = $item->where($map)->setInc('distribution_occupy_stock', $v['qty']);
                         if (false === $res) {
-                            throw new Exception("增加配货占用库存失败！！请检查更换镜框SKU:" . $v['change_sku']. ',订单号：' . $v['increment_id']);
+                            throw new Exception("增加配货占用库存失败！！请检查更换镜框SKU:" . $v['change_sku'] . ',订单号：' . $v['increment_id']);
                         }
                         $sku[$v['increment_id']][$v['original_sku']] += $v['qty'];
 
@@ -431,7 +432,7 @@ class Zeelool extends Backend
                     //转仓库SKU
                     $trueSku = $ItemPlatformSku->getTrueSku(trim($v['sku']), 1);
                     if (!$trueSku) {
-                        throw new Exception("增加配货占用库存失败！！请检查更换镜框SKU:" . $v['sku']. ',订单号：' . $v['increment_id']);
+                        throw new Exception("增加配货占用库存失败！！请检查更换镜框SKU:" . $v['sku'] . ',订单号：' . $v['increment_id']);
                     }
 
                     //如果为真 则存在更换镜架的数量 则订单需要扣减的数量为原数量-更换镜架的数量
@@ -457,7 +458,7 @@ class Zeelool extends Backend
                     //增加配货占用
                     $res = $item->where($map)->setInc('distribution_occupy_stock', $qty);
                     if (false === $res) {
-                        throw new Exception("增加配货占用库存失败！！请检查更换镜框SKU:" . $v['sku']. ',订单号：' . $v['increment_id']);
+                        throw new Exception("增加配货占用库存失败！！请检查更换镜框SKU:" . $v['sku'] . ',订单号：' . $v['increment_id']);
                     }
 
                     $number++;
@@ -506,7 +507,7 @@ class Zeelool extends Backend
                     foreach ($infoRes as $k => $v) {
                         $trueSku = $ItemPlatformSku->getTrueSku(trim($v['change_sku']), 1);
                         if (!$trueSku) {
-                            throw new Exception("扣减库存失败！！请检查更换镜框SKU:" . $v['sku']. ',订单号：' . $v['increment_id']);
+                            throw new Exception("扣减库存失败！！请检查更换镜框SKU:" . $v['sku'] . ',订单号：' . $v['increment_id']);
                         }
                         //扣减总库存 扣减占用库存 扣减配货占用
                         $map = [];
@@ -514,7 +515,7 @@ class Zeelool extends Backend
                         $map['is_del'] = 1;
                         $res = $item->where($map)->dec('stock', $v['qty'])->dec('occupy_stock', $v['qty'])->dec('distribution_occupy_stock', $v['qty'])->update();
                         if (false === $res) {
-                            throw new Exception("扣减库存失败！！请检查更换镜框SKU:" . $v['sku']. ',订单号：' . $v['increment_id']);
+                            throw new Exception("扣减库存失败！！请检查更换镜框SKU:" . $v['sku'] . ',订单号：' . $v['increment_id']);
                         }
                         $sku[$v['increment_id']][$v['original_sku']] += $v['qty'];
 
@@ -537,7 +538,7 @@ class Zeelool extends Backend
                     //查出订单SKU映射表对应的仓库SKU
                     $trueSku = $ItemPlatformSku->getTrueSku(trim($v['sku']), 1);
                     if (!$trueSku) {
-                        throw new Exception("扣减库存失败！！请检查SKU:" . $v['sku']. ',订单号：' . $v['increment_id']);
+                        throw new Exception("扣减库存失败！！请检查SKU:" . $v['sku'] . ',订单号：' . $v['increment_id']);
                     }
                     //如果为真 则存在更换镜架的数量 则订单需要扣减的数量为原数量-更换镜架的数量
                     if ($sku[$v['increment_id']][$v['sku']]) {
@@ -555,7 +556,7 @@ class Zeelool extends Backend
                     //扣减总库存 扣减占用库存 扣减配货占用
                     $res = $item->where($item_map)->dec('stock', $qty)->dec('occupy_stock', $qty)->dec('distribution_occupy_stock', $qty)->update();
                     if (false === $res) {
-                        throw new Exception("扣减库存失败！！请检查SKU:" . $v['sku']. ',订单号：' . $v['increment_id']);
+                        throw new Exception("扣减库存失败！！请检查SKU:" . $v['sku'] . ',订单号：' . $v['increment_id']);
                     }
                     $number++;
                     //100条提交一次
@@ -1757,4 +1758,6 @@ EOF;
         array_multisort($arrSort[$field], constant($sort), $array);
         return $array;
     }
+
+    
 }
