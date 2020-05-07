@@ -180,6 +180,14 @@ class WorkOrderList extends Model
                 return false;
                 break;
         }
+        if($siteType < 3){
+            foreach($prescriptions as $key => $val){
+                if(!isset($val['total_add'])){
+                    $prescription[$key]['os_add'] = $val['od_add'];
+                    $prescription[$key]['od_add'] = $val['os_add'];
+                }
+            }
+        }
         //获取地址信息
         $address = $this->model->alias('a')
             ->field('b.entity_id,b.firstname,b.lastname,b.telephone,b.email,b.region,b.region_id,b.postcode,b.street,b.city,b.country_id,b.address_type')
