@@ -419,7 +419,15 @@
                     name="row[problem_description]" cols="50">{$row.problem_description}</textarea>
             </div>
         </div>
-
+        {if $row['id']}
+        <div class="form-group-child2" style="margin-left: 1%;width: 47%;">
+            <label class="control-label col-xs-12 col-sm-2">{:__('处理备注')}：</label>
+            <div class="col-xs-12 col-sm-8" style="width: 83%;">
+                <textarea id="c-problem_description" style="resize:none;height: 142px;"  class="form-control" rows="5"
+                    name="row[content]" cols="50"></textarea>
+            </div>
+        </div>
+        {/if}
         <div class="form-group-child2">
             <label class="control-label col-xs-12 col-sm-2">{:__('work_picture')}：</label>
             <div class="col-xs-12 col-sm-8">

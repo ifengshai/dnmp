@@ -374,6 +374,11 @@ class WorkOrderList extends Backend
                     if (($params['is_check'] == 0 && $params['work_status'] == 2) || ($params['work_type'] == 2 && $params['work_status'] == 2)) {
                         $params['work_status'] = 3;
                     }
+                    if($params['content']){
+                        //取出备注记录并且销毁
+                        $content = $params['content'];
+                        unset($params['content']);
+                    }
 
                     //如果为真则为处理任务
                     if (!$params['id']) {
@@ -402,6 +407,18 @@ class WorkOrderList extends Backend
                         unset($params['problem_description']);
                         $params['is_after_deal_with'] = 1;
                         $result = $this->model->allowField(true)->save($params, ['id' => $work_id]);
+                    }
+                    if($content){
+                        $noteData['note_time'] =  date('Y-m-d H:i',time());
+                        $noteData['note_user_id'] =  session('admin.id');
+                        $noteData['note_user_name'] =  session('admin.nickname');
+                        $noteData['work_id'] =  $work_id;
+                        $noteData['user_group_id'] =  0;
+                        $noteData['content'] =  $content;
+                        $contentResult = $this->work_order_note->allowField(true)->save($noteData);
+                        if(false === $contentResult){
+                            throw new Exception("备注添加失败！！");
+                        }
                     }
 
 
