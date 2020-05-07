@@ -305,13 +305,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     },
                                     visible: function (row) {
                                         if (row.is_test == 1) {
-                                            if (row.is_finish == 0 && Config.is_set_status == 1 && row.review_status_develop == 1 && row.assign_developer_ids && row.test_person) {
+                                            if (row.is_finish == 0 && Config.is_set_status == 1 && row.review_status_develop == 1 && row.is_developer_opt == 1 && row.test_person) {
                                                 return true;
                                             } else {
                                                 return false;
                                             }
                                         } else {
-                                            if (row.is_finish == 0 && Config.is_set_status == 1 && row.review_status_develop == 1 && row.assign_developer_ids) {
+                                            if (row.is_finish == 0 && Config.is_set_status == 1 && row.review_status_develop == 1 && row.is_developer_opt == 1 ) {
                                                 return true;
                                             } else {
                                                 return false;
@@ -329,7 +329,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     callback: function (data) {
                                     },
                                     visible: function (row) {
-                                        if (row.is_finish == 1 && Config.test_record_bug == 1 && row.is_test == 1 && row.test_person && row.test_is_passed == 0) {
+                                        if (row.is_finish == 1 && Config.test_record_bug == 1 && row.is_test == 1  && row.test_is_passed == 0 && row.is_test_record_hidden==1) {
                                             return true;
                                         } else {
                                             return false;
@@ -374,7 +374,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     },
                                     visible: function (row) {
 
-                                        if (row.test_is_passed == 0 && Config.test_is_passed == 1 && row.is_test == 1 && row.test_person && row.is_finish == 1) {
+                                        if (row.test_is_passed == 0 && Config.test_is_passed == 1 && row.is_test == 1  && row.is_finish == 1 && row.is_test_record_hidden==1 ) {
                                             return true;
                                         } else {
                                             return false;
@@ -442,7 +442,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), {title: "回传数据"});
                                     },
                                     visible: function (row) {
-                                        if (row.is_finish_task == 1 && row.is_test == 1 && Config.regression_test_info == 1 && row.is_test_complete == 0) {
+                                        if (row.is_finish_task == 1 && row.is_test == 1 && Config.regression_test_info == 1 && row.is_test_complete == 0 && row.is_test_record_hidden==1) {
                                             return true;
                                         } else {
                                             return false;
@@ -466,7 +466,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                         return false;
                                     },
                                     visible: function (row) {
-                                        if (row.is_finish_task == 1 && row.is_test == 1 && Config.test_complete == 1 && row.is_test_complete == 0) {
+                                        if (row.is_finish_task == 1 && row.is_test == 1 && Config.test_complete == 1 && row.is_test_complete == 0 && row.is_test_record_hidden==1) {
                                             return true;
                                         } else {
                                             return false;
@@ -784,13 +784,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     },
                                     visible: function (row) {
                                         if (row.is_test == 1) {
-                                            if (row.is_finish == 0 && Config.is_set_status == 1 && row.review_status_develop == 1 && row.assign_developer_ids && row.test_person) {
+                                            if (row.is_finish == 0 && Config.is_set_status == 1 && row.review_status_develop == 1 && row.is_developer_opt == 1  && row.test_person) {
                                                 return true;
                                             } else {
                                                 return false;
                                             }
                                         } else {
-                                            if (row.is_finish == 0 && Config.is_set_status == 1 && row.review_status_develop == 1 && row.assign_developer_ids) {
+                                            if (row.is_finish == 0 && Config.is_set_status == 1 && row.review_status_develop == 1 && row.is_developer_opt == 1 ) {//  当前开发人可点击开发完成//
                                                 return true;
                                             } else {
                                                 return false;
@@ -808,7 +808,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     callback: function (data) {
                                     },
                                     visible: function (row) {
-                                        if (row.is_finish == 1 && Config.test_record_bug == 1 && row.is_test == 1 && row.test_person && row.test_is_passed == 0) {
+                                        if (row.is_finish == 1 && Config.test_record_bug == 1 && row.is_test == 1 &&  row.test_is_passed == 0 && row.is_test_record_hidden==1) {
                                             return true;
                                         } else {
                                             return false;
@@ -922,7 +922,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), {title: "回传数据"});
                                     },
                                     visible: function (row) {
-                                        if (row.is_finish_task == 1 && row.is_test == 1 && Config.regression_test_info == 1 && row.is_test_complete == 0) {
+                                        if (row.is_finish_task == 1 && row.is_test == 1 && Config.regression_test_info == 1 && row.is_test_complete == 0 && row.is_test_record_hidden==1) {
                                             return true;
                                         } else {
                                             return false;

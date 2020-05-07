@@ -99,7 +99,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     },
                                     visible: function (row) {
                                         //返回true时按钮显示,返回false隐藏
-                                        if (row.is_problem_detail == 1) {
+                                        if (Config.is_problem_detail == 1) {
                                             return true;
                                         } else {
                                             return false;
@@ -205,6 +205,28 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                             return true;
                                         } else {
                                             return false;
+                                        }
+                                    }
+                                },
+                                {
+                                    name: 'ajax',
+                                    title: __('删除'),
+                                    icon:'fa fa-trash',
+                                    classname: 'btn btn-xs btn-danger btn-magic btn-ajax',
+                                    url: 'demand/it_web_task/del',
+                                    confirm: '是否删除?',
+                                    success: function (data, ret) {
+                                        table.bootstrapTable('refresh', {});
+                                    },
+                                    error: function (data, ret) {
+                                        Layer.alert(ret.msg);
+                                        return false;
+                                    },
+                                    visible: function (row) {
+                                        if (Config.is_del_btu == 1) {//有权限 或者创建人为当前人
+                                            return true;
+                                        }else {
+                                            return  false;
                                         }
                                     }
                                 },
