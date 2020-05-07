@@ -258,7 +258,7 @@
                             <td>{$vo->status}</td>
                         </tr>
                         {/foreach}
-                        <tr><td  style="width: 100px;text-align: center;"><a href="{:config('zendesk.check_order_info_url')}" target="_blank">查看用户信息</a></td></tr>
+                        <tr><td  style="width: 100px;text-align: center;"><a class="btn-addtabs" href="{:url('saleaftermanage/order_return/search',['type' => $rows.type,'email' => $ticket->email])}" target="_blank">查看用户信息</a></td></tr>
                     </table>
                 </div>
                 <!-- /.box-body -->

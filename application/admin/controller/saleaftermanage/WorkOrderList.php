@@ -125,9 +125,13 @@ class WorkOrderList extends Backend
                     $map = "(after_user_id = {$filter['recept_person_id']} or assign_user_id = {$filter['recept_person_id']}) and work_status not in (0,1,7)";
                 }
                 unset($filter['recept_person_id']);
-                $this->request->get(['filter' => json_encode($filter)]);
             }
-
+            if ($filter['recept_person']) {
+                $workIds = WorkOrderRecept::where('recept_person_id','in',$filter['recept_person'])->column('work_id');
+                $map['id'] = ['in',$workIds];
+                unset($filter['recept_person']);
+            }
+            $this->request->get(['filter' => json_encode($filter)]);
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
                 ->where($where)
@@ -190,6 +194,8 @@ class WorkOrderList extends Backend
 
             return json($result);
         }
+        $admins = Admin::all();
+        $this->assign('admins',$admins);
         $this->assignconfig('platform_order', $platform_order ?: '');
         return $this->view->fetch();
     }

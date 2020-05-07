@@ -32,6 +32,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         { field: 'work_type_str', title: __('Work_type'), operate: false },
                         { field: 'work_type', title: __('Work_type'), searchList: { 1: '客服工单', 2: '仓库工单' }, visible: false, formatter: Table.api.formatter.status },
                         { field: 'platform_order', title: __('Platform_order') },
+                        {
+                            field: 'recept_person', title: __('承接人'), searchList: function (column) {
+                                return Template('receptpersontpl', {});
+                            },visible: false
+                        },
                         { field: 'order_sku', title: __('Order_sku'), operate: 'like', visible: false },
 
                         /*{
