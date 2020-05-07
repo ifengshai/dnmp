@@ -550,7 +550,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             closeBtn: 1,
                             title: "详情",
                             content: str,
-                            area:['80%']
+                            area:['80%','80%']
                         });
                     }
                 }
