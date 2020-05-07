@@ -1393,15 +1393,13 @@ class WorkOrderList extends Backend
         }
         //查询工单处理备注
         $remarkList = $this->order_remark->where('work_id', $ids)->select();
-
         //获取处理的措施
         $recepts = WorkOrderRecept::where('work_id', $row->id)->with('measure')->group('recept_group_id,measure_id')->select();
         $this->view->assign('recepts', $recepts);
 
         $this->view->assign('remarkList', $remarkList);
-//        $workOrderNote = WorkOrderNote::where('work_id',$ids)->select();
-//        $html = (new \think\View())->fetch('work_order_note',['row' => $workOrderNote]);
-//        $this->view->assign('html', $html);
+       $workOrderNote = WorkOrderNote::where('work_id',$ids)->select();
+       $this->view->assign('workOrderNote', $workOrderNote);
         return $this->view->fetch();
     }
 
