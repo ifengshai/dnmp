@@ -23,6 +23,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 url: $.fn.bootstrapTable.defaults.extend.index_url,
                 pk: 'id',
                 sortName: 'id',
+                clickToSelect: false,
                 columns: [
                     [
                         // { checkbox: true },
@@ -38,8 +39,29 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         // { field: 'desc', title: __('Desc'), cellStyle: formatTableUnit, formatter: Controller.api.formatter.getClear, operate: false },
                         {field: 'create_person', title: __('提出人'), operate: false},
                         {
+                            field: 'priority',
+                            title: __('Priority'),
+                            custom: {1: 'success', 2: 'blue', 3: 'danger'},
+                            searchList: {1: '低', 2: '中', 3: '高'},
+                            formatter: Table.api.formatter.status
+                        },
+                        {
+                            field: 'complexity',
+                            title: __('Complexity'),
+                            custom: {1: 'success', 2: 'blue', 3: 'danger'},
+                            searchList: {1: '简单', 2: '中等', 3: '复杂'},
+                            formatter: Table.api.formatter.status
+                        },
+                        {
                             field: 'review_status_manager',
                             title: __('Review_status_manager'),
+                            custom: {0: 'yellow', 1: 'success', 2: 'danger'},
+                            searchList: {0: '待审核', 1: '审核通过', 2: '审核拒绝'},
+                            formatter: Table.api.formatter.status
+                        },
+                        {
+                            field: 'review_status_develop',
+                            title: __('Review_status_develop'),
                             custom: {0: 'yellow', 1: 'success', 2: 'danger'},
                             searchList: {0: '待审核', 1: '审核通过', 2: '审核拒绝'},
                             formatter: Table.api.formatter.status
@@ -59,20 +81,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             operate: false
                         },
                         {
-                            field: 'priority',
-                            title: __('Priority'),
-                            custom: {1: 'success', 2: 'blue', 3: 'danger'},
-                            searchList: {1: '低', 2: '中', 3: '高'},
-                            formatter: Table.api.formatter.status
-                        },
-                        {
-                            field: 'review_status_develop',
-                            title: __('Review_status_develop'),
-                            custom: {0: 'yellow', 1: 'success', 2: 'danger'},
-                            searchList: {0: '待审核', 1: '审核通过', 2: '审核拒绝'},
-                            formatter: Table.api.formatter.status
-                        },
-                        {
                             field: 'nickname', title: __('开发负责人'), operate: false, formatter: function (value, rows) {
                                 var group = '<span>' + value + '</span>';
                                 var web_distribution = '';
@@ -81,13 +89,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                 }
                                 return web_distribution + group;
                             },
-                        },
-                        {
-                            field: 'complexity',
-                            title: __('Complexity'),
-                            custom: {1: 'success', 2: 'blue', 3: 'danger'},
-                            searchList: {1: '简单', 2: '中等', 3: '复杂'},
-                            formatter: Table.api.formatter.status
                         },
                         {
                             field: 'is_test',
@@ -99,7 +100,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {field: 'test_person', title: __('Test_person_name'), operate: false},
                         {
                             field: 'is_finish',
-                            title: __('是否开发完成'),
+                            title: __('开发完成'),
                             custom: {0: 'danger', 1: 'success'},
                             searchList: {0: '否', 1: '是'},
                             formatter: Table.api.formatter.status
@@ -113,7 +114,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         },
                         {
                             field: 'is_finish_task',
-                            title: __('产品经理是否确认'),
+                            title: __('产品确认'),
                             custom: {0: 'danger', 1: 'success'},
                             searchList: {0: '否', 1: '是'},
                             formatter: Table.api.formatter.status
@@ -171,15 +172,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             },
                         },
                         {
-                            field: 'operate',
-                            title: __('Operate'),
-                            table: table,
-                            events: Table.api.events.operate,
+                            field: 'operate', title: __('Operate'),operate:false, table: table, events: Table.api.events.operate,
                             buttons: [
                                 {
                                     name: 'ajax',
                                     text: '审核通过',
-                                    title: __('审核通过'),
+                                    title: __('产品审核通过'),
                                     classname: 'btn btn-xs btn-success btn-magic btn-dialog',
                                     icon: 'fa fa-magic',
                                     url: 'demand/develop_demand/review',
@@ -203,7 +201,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                 {
                                     name: 'ajax',
                                     text: '审核拒绝',
-                                    title: __('审核拒绝'),
+                                    title: __('产品审核拒绝'),
                                     classname: 'btn btn-xs btn-danger  btn-magic btn-dialog',
                                     icon: 'fa fa-magic',
                                     url: 'demand/develop_demand/review?label=refuse',
@@ -228,7 +226,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                 {
                                     name: 'ajax',
                                     text: '审核通过',
-                                    title: __('审核通过'),
+                                    title: __('开发主管审核通过'),
                                     classname: 'btn btn-xs btn-success btn-magic btn-ajax',
                                     icon: 'fa fa-magic',
                                     url: 'demand/develop_demand/review_status_develop?review_status_develop=1',
@@ -252,7 +250,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                 {
                                     name: 'ajax',
                                     text: '审核拒绝',
-                                    title: __('审核拒绝'),
+                                    title: __('开发主管审核拒绝'),
                                     classname: 'btn btn-xs btn-danger  btn-magic btn-ajax',
                                     icon: 'fa fa-magic',
                                     url: 'demand/develop_demand/review_status_develop?review_status_develop=2',
@@ -416,7 +414,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
 
                                     }
                                 },
-                                {
+                                /*{
                                     name: 'detail',
                                     text: '详情',
                                     title: __('查看详情'),
@@ -431,26 +429,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                         //返回true时按钮显示,返回false隐藏
                                         return true;
                                     }
-                                },
-                                {
-                                    name: 'edit',
-                                    text: '编辑',
-                                    title: __('Edit'),
-                                    classname: 'btn btn-xs btn-success btn-dialog',
-                                    icon: 'fa fa-pencil',
-                                    url: 'demand/develop_demand/edit/demand_type/2',
-                                    extend: 'data-area = \'["80%","70%"]\'',
-                                    callback: function (data) {
-                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), {title: "回传数据"});
-                                    },
-                                    visible: function (row) {
-                                        if (row.review_status_manager == 0 && Config.is_edit == 1 && Config.username == row.create_person) {
-                                            return true;
-                                        } else {
-                                            return false;
-                                        }
-                                    }
-                                },
+                                },*/
+
                                 {
                                     name: 'test',
                                     text: '记录问题',
@@ -494,10 +474,30 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     }
                                 },
                                 {
+                                    name: 'edit',
+                                    text: '',
+                                    title: __('Edit'),
+                                    classname: 'btn btn-xs btn-success btn-dialog',
+                                    icon: 'fa fa-pencil',
+                                    url: 'demand/develop_demand/edit/demand_type/2',
+                                    extend: 'data-area = \'["80%","70%"]\'',
+                                    callback: function (data) {
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), {title: "回传数据"});
+                                    },
+                                    visible: function (row) {
+                                        if (row.review_status_manager == 0 && Config.is_edit == 1 && Config.username == row.create_person) {
+                                            return true;
+                                        } else {
+                                            return false;
+                                        }
+                                    }
+                                },
+                                {
                                     name: 'ajax',
-                                    text: __('删除'),
+                                    text: __(''),
                                     title: __('删除'),
-                                    classname: 'btn btn-xs btn-success btn-magic btn-ajax',
+                                    icon:'fa fa-trash',
+                                    classname: 'btn btn-xs btn-danger btn-magic btn-ajax',
                                     url: 'demand/develop_demand/del',
                                     confirm: '是否删除?',
                                     success: function (data, ret) {
@@ -562,7 +562,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     }
                 };
                 Fast.api.open('demand/develop_demand/review?id=' + id, '审核通过', options);
-            })
+            });
 
             //审核通过 弹窗
             $(document).on('click', '.btn-close', function () {
@@ -586,7 +586,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     }
                 };
                 Fast.api.open('demand/develop_demand/review?label=refuse&id=' + id, '审核拒绝', options);
-            })
+            });
 
             //分配负责人
             $(document).on('click', ".web_distribution", function () {
@@ -624,6 +624,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 url: $.fn.bootstrapTable.defaults.extend.index_url,
                 pk: 'id',
                 sortName: 'id',
+                clickToSelect: false,
                 columns: [
                     [
                         // { checkbox: true },
@@ -632,7 +633,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {
                             field: 'desc',
                             operate: false,
-                            title: __('需求内容'),
+                            title: __('详情'),
                             events: Controller.api.events.getcontent,
                             formatter: Controller.api.formatter.getcontent,
                         },
@@ -645,6 +646,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             formatter: Table.api.formatter.status
                         },
                         {
+                            field: 'complexity',
+                            title: __('Complexity'),
+                            custom: {1: 'success', 2: 'blue', 3: 'danger'},
+                            searchList: {1: '简单', 2: '中等', 3: '复杂'},
+                            formatter: Table.api.formatter.status
+                        },
+                        {
                             field: 'nickname', title: __('开发负责人'), operate: false, formatter: function (value, rows) {
                                 var group = '<span>' + value + '</span>';
                                 var web_distribution = '';
@@ -654,13 +662,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                 return web_distribution + group;
                             },
                         },
-                        {
-                            field: 'complexity',
-                            title: __('Complexity'),
-                            custom: {1: 'success', 2: 'blue', 3: 'danger'},
-                            searchList: {1: '简单', 2: '中等', 3: '复杂'},
-                            formatter: Table.api.formatter.status
-                        },
+
                         {
                             field: 'is_test',
                             title: __('Is_test'),
@@ -671,7 +673,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {field: 'test_person', title: __('Test_person_name'), operate: false},
                         {
                             field: 'is_finish',
-                            title: __('是否开发完成'),
+                            title: __('开发完成'),
                             custom: {0: 'danger', 1: 'success'},
                             searchList: {0: '否', 1: '是'},
                             formatter: Table.api.formatter.status
@@ -745,6 +747,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {
                             field: 'operate',
                             title: __('Operate'),
+                            operate:false,
                             table: table,
                             events: Table.api.events.operate,
                             buttons: [
@@ -891,7 +894,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
 
                                     }
                                 },
-                                {
+                               /* {
                                     name: 'detail',
                                     text: '详情',
                                     title: __('查看详情'),
@@ -906,26 +909,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                         //返回true时按钮显示,返回false隐藏
                                         return true;
                                     }
-                                },
-                                {
-                                    name: 'edit',
-                                    text: '编辑',
-                                    title: __('Edit'),
-                                    classname: 'btn btn-xs btn-success btn-dialog',
-                                    icon: 'fa fa-pencil',
-                                    url: 'demand/develop_demand/edit/demand_type/1',
-                                    extend: 'data-area = \'["80%","70%"]\'',
-                                    callback: function (data) {
-                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), {title: "回传数据"});
-                                    },
-                                    visible: function (row) {
-                                        if (!row.assign_developer_ids && Config.is_edit == 1 && Config.username == row.create_person) {//未分配的BUG可以进行操作编辑
-                                            return true;
-                                        } else {
-                                            return false;
-                                        }
-                                    }
-                                },
+                                },*/
+
                                 {
                                     name: 'test',
                                     text: '记录问题',
@@ -969,10 +954,30 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     }
                                 },
                                 {
+                                    name: 'edit',
+                                    text: '',
+                                    title: __('Edit'),
+                                    classname: 'btn btn-xs btn-success btn-dialog',
+                                    icon: 'fa fa-pencil',
+                                    url: 'demand/develop_demand/edit/demand_type/1',
+                                    extend: 'data-area = \'["80%","70%"]\'',
+                                    callback: function (data) {
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), {title: "回传数据"});
+                                    },
+                                    visible: function (row) {
+                                        if (!row.assign_developer_ids && Config.is_edit == 1 && Config.username == row.create_person) {//未分配的BUG可以进行操作编辑
+                                            return true;
+                                        } else {
+                                            return false;
+                                        }
+                                    }
+                                },
+                                {
                                     name: 'ajax',
-                                    text: __('删除'),
+                                    text: __(''),
                                     title: __('删除'),
-                                    classname: 'btn btn-xs btn-success btn-magic btn-ajax',
+                                    icon:'fa fa-trash',
+                                    classname: 'btn btn-xs btn-danger btn-magic btn-ajax',
                                     url: 'demand/develop_demand/del',
                                     confirm: '是否删除?',
                                     success: function (data, ret) {
@@ -1111,6 +1116,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             Controller.api.bindevent();
         },
         api: {
+            bindevent: function () {
+                Form.api.bindevent($("form[role=form]"));
+            },
             formatter: {
                 getcontent: function (value) {
                     if (value == null || value == undefined) {
@@ -1135,9 +1143,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 },
 
             },
-            bindevent: function () {
-                Form.api.bindevent($("form[role=form]"));
-            },
+
             events: {//绑定事件的方法
                 getcontent: {
                     //格式为：方法名+空格+DOM元素
