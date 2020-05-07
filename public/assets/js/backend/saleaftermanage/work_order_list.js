@@ -495,6 +495,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         } else {
                             node.hide();
                         }
+
                         //二级措施
                         var secondNode = $('.step' + problem_type_id + '-' + checkID[m]);
                         if (secondNode.is(':hidden')) {
@@ -502,10 +503,25 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         } else {
                             secondNode.hide();
                         }
+                        //判断如果为处理任务时
+                        if (Config.ids) {
+                            if(problem_type_id == 1 && checkID[m] == 1){
+                                $('.step1-1').hide();
+                                $('.step2-1').show();
+                            }
+                            if(problem_type_id == 2 && checkID[m] == 1){
+                                $('.step2-1').hide();
+                                $('.step1-1').show();
+                            }
+                            if(problem_type_id == 3 && checkID[m] == 1){
+                                $('.step2-1').hide();
+                                $('.step1-1').show();
+                            }
+                        }
                     }
 
                     //判断如果为处理任务时
-                    if (Config.ids) {
+                    /*if (Config.ids) {
                         if (problem_type_id == 1) {
                             $('.step1-1').hide();
                             $('.step2-1').show();
@@ -516,7 +532,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                             $('.step2-1').hide();
                             $('.step1-1').show();
                         }
-                    }
+                    }*/
                     var arr = array_filter(appoint_group.split(','));
                    
                     var username = [];
