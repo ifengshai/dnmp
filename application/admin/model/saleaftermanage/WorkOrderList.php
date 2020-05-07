@@ -183,8 +183,8 @@ class WorkOrderList extends Model
         if($siteType < 3){
             foreach($prescriptions as $key => $val){
                 if(!isset($val['total_add'])){
-                    $prescription[$key]['os_add'] = $val['od_add'];
-                    $prescription[$key]['od_add'] = $val['os_add'];
+                    $prescriptions[$key]['os_add'] = $val['od_add'];
+                    $prescriptions[$key]['od_add'] = $val['os_add'];
                 }
             }
         }
