@@ -437,6 +437,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     Toastr.error('订单号不能为空');
                     return false;
                 } else {
+                   
                     $('.measure').hide();
                     var problem_type_id = $("input[name='row[problem_type_id]']:checked").val();
                     var checkID = [];//定义一个空数组
@@ -448,6 +449,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         var id = $(this).val();
                         //获取承接组
                         appoint_group += $('#step' + id + '-appoint_group').val() + ',';
+                        
                         var group = $('#step' + id + '-appoint_group').val();
                         var group_arr = group.split(',')
                         var appoint_users = [];
@@ -511,6 +513,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         }
                     }
                     var arr = array_filter(appoint_group.split(','));
+                   
                     var username = [];
                     var appoint_users = [];
                     //循环根据承接组Key获取对应承接人id
@@ -518,12 +521,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         //循环根据承接组Key获取对应承接人id
                         appoint_users.push(Config.workorder[arr[i]]);
                     }
-
+                   
                     //循环根据承接人id获取对应人名称
                     for (var j = 0; j < appoint_users.length; j++) {
                         username.push(Config.users[appoint_users[j]]);
                     }
-
                     var users = array_filter(username);
                     var appoint_users = array_filter(appoint_users);
                     $('#appoint_group_users').html(users.join(','));
@@ -604,7 +606,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
 
             //失去焦点
             $('#c-platform_order').blur(function () {
-                var incrementId = $(this).val().replace(/^\s+|\s+$/g,"");
+                var incrementId = $(this).val().replace(/^\s+|\s+$/g, "");
                 //var incrementId = replace(/^\s+|\s+$/g,"");
                 if (!incrementId) {
                     Toastr.error('订单号不能为空');
@@ -625,7 +627,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
 
             //载入数据
             $('#platform_order').click(function () {
-                var incrementId = $('#c-platform_order').val().replace(/^\s+|\s+$/g,"");
+                var incrementId = $('#c-platform_order').val().replace(/^\s+|\s+$/g, "");
                 var sitetype = $('#work_platform').val();
                 $('#c-order_sku').html('');
                 Backend.api.ajax({
@@ -878,13 +880,17 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     $('#after_user_id').val(Config.workorder.copy_group);
                     $('#after_user').html(Config.users[Config.workorder.copy_group]);
                     var step = Config.workorder.warehouse_problem_group[id].step;
-                    var steparr = Config.workorder[step];
-                    for (var j = 0; j < steparr.length; j++) {
-                        $('#step' + steparr[j].step_id).parent().show();
-                        //读取对应措施配置
-                        $('#step' + steparr[j].step_id + '-is_check').val(steparr[j].is_check);
-                        $('#step' + steparr[j].step_id + '-appoint_group').val((steparr[j].appoint_group).join(','));
+                    if (step) {
+                        var steparr = Config.workorder[step];
+
+                        for (var j = 0; j < steparr.length; j++) {
+                            $('#step' + steparr[j].step_id).parent().show();
+                            //读取对应措施配置
+                            $('#step' + steparr[j].step_id + '-is_check').val(steparr[j].is_check);
+                            $('#step' + steparr[j].step_id + '-appoint_group').val((steparr[j].appoint_group).join(','));
+                        }
                     }
+
                 }
                 var checkID = [];//定义一个空数组
                 var appoint_group = '';
@@ -938,6 +944,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 var appoint_users = array_filter(appoint_users);
                 $('#appoint_group_users').html(users.join(','));
                 $('#recept_person_id').val(appoint_users.join(','));
+                $('#recept_person_group').show();
+                $('#after_user_group').hide();
 
 
                 //判断更换镜框的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 start

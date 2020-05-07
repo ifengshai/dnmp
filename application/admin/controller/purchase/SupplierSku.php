@@ -437,7 +437,7 @@ class SupplierSku extends Backend
             $actionname = strtolower($this->request->action());
             $path = str_replace('.', '1', $controllername) . '_' . $actionname . '_' . md5($row['link']);
             //是否存在缓存
-            $result = session($path);
+            $result = cache($path);
             if ($row['link'] && !$result) {
                 //截取出商品id
                 $name = parse_url($row['link']);
@@ -447,9 +447,9 @@ class SupplierSku extends Backend
                 //获取商品详情
                 $result = Alibaba::getGoodsDetail($goodsId[0]);
 
-                session($path, $result);
+                cache($path, $result, 3600);
             }
-           
+
             $list = [];
             if (!$result->productInfo->skuInfos) {
                 $result = array("total" => 0, "rows" => $list);
@@ -460,11 +460,11 @@ class SupplierSku extends Backend
                 $list[$k]['id'] = $k + 1;
                 $list[$k]['title'] = $result->productInfo->subject;
                 if (count($v->attributes) > 1) {
-                    $list[$k]['color'] = $v->attributes[0]->attributeValue . ':' .$v->attributes[1]->attributeValue;
+                    $list[$k]['color'] = $v->attributes[0]->attributeValue . ':' . $v->attributes[1]->attributeValue;
                 } else {
                     $list[$k]['color'] = $v->attributes[0]->attributeValue;
                 }
-                
+
                 $list[$k]['cargoNumber'] = $v->cargoNumber;
                 $list[$k]['price'] = @$v->price ? @$v->price : @$v->consignPrice;
                 $list[$k]['skuId'] = $v->skuId;

@@ -7,7 +7,7 @@ return [
         '2' => 'Voogueme',
         '3' => 'Nihao',
         '4' => 'Wesee',
-        '5' => 'Orther',
+        '5' => 'Other',
     ],
     //抄送人
     'copyToUserId' => [

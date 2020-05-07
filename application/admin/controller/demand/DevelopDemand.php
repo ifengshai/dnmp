@@ -112,6 +112,8 @@ class DevelopDemand extends Backend
         $this->assignconfig('test_complete', $this->auth->check('demand/develop_demand/test_complete'));
         //判断删除按钮
         $this->assignconfig('is_del_btu', $this->auth->check('demand/develop_demand/del'));
+        //bug列表页 是否有上线按钮权限
+        $this->assignconfig('is_finish_bug', $this->auth->check('demand/develop_demand/is_finish_bug'));
         return $this->view->fetch();
     }
 
@@ -193,6 +195,8 @@ class DevelopDemand extends Backend
         $this->assignconfig('test_complete', $this->auth->check('demand/develop_demand/test_complete'));
         //判断删除按钮
         $this->assignconfig('is_del_btu', $this->auth->check('demand/develop_demand/del'));
+        //bug列表页 是否有上线按钮权限
+        $this->assignconfig('is_finish_bug', $this->auth->check('demand/develop_demand/is_finish_bug'));
         return $this->view->fetch();
     }
 
@@ -705,6 +709,30 @@ class DevelopDemand extends Backend
             $this->error('操作失败！！');
         }
     }
+
+
+    /**
+     * bug上线操作 更改is_finish_task字段
+     *
+     * @Description
+     * @author fzg
+     * @since 2020/05/07 16:52:22 
+     * @param [type] $ids
+     * @return void
+     */
+    public function is_finish_bug($ids = null)
+    {
+        $data['is_finish_task'] = 1;
+        $data['finish_task_time'] = date('Y-m-d H:i:s', time());
+        $res = $this->model->save($data, ['id' => $ids]);
+        if ($res !== false) {
+            $this->success('操作成功！！');
+        } else {
+            $this->error('操作失败！！');
+        }
+    }
+
+
 
     /**
      * 回归测试记录测试问题

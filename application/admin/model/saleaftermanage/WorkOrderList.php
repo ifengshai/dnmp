@@ -602,9 +602,9 @@ class WorkOrderList extends Model
                 }
 
                 $postData['product'][$key] = [
-                    'sku' => $changeSku['original_sku'],
+                    'sku' => strtoupper($changeSku['original_sku']),
                     'qty' => $changeSku['original_number'],
-                    'prescriptiontype' => $changeSku['recipe_type'],
+                    'prescription_type' => $changeSku['recipe_type'],
                     'is_frame_only' => $is_frame_only,
                     'od_sph' => $changeSku['od_sph'],
                     'os_sph' => $changeSku['os_sph'],
@@ -841,7 +841,6 @@ class WorkOrderList extends Model
                     $work->work_status = $work_status;
                     if ($params['success'] == 2) {
                         $work->work_status = 4;
-                        $work->complete_time = $time;
                     } elseif ($params['success'] == 1) {
                         $work->work_status = $work_status;
                         if ($work_status == 6) {
@@ -915,7 +914,7 @@ class WorkOrderList extends Model
         WorkOrderMeasure::where(['id' => $measure_id])->update($dataMeasure);
         //求出承接措施是否完成
         $whereMeasure['work_id'] = $work_id;
-        $whereMeasure['measure_id'] = $measure_id;
+        //$whereMeasure['measure_id'] = $measure_id;
         $whereMeasure['recept_status'] = ['eq', 0];
         $resultRecept = WorkOrderRecept::where($whereMeasure)->count();
         if (0 == $resultRecept) { //表明整个措施已经完成

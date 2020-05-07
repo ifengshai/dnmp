@@ -27,13 +27,17 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 sortName: 'id',
                 columns: [
                     [
-                        { checkbox: true },
+                        /*{ checkbox: true },*/
                         { field: 'id', title: __('Id') },
                         { field: 'sitetype', title: __('站点') },
                         { field: 'type', title: __('Type'), custom: { 1: 'success', 2: 'success', 3: 'success' }, searchList: { 1: '短期任务', 2: '中期任务', 3: '长期任务' }, formatter: Table.api.formatter.status },
                         { field: 'title', title: __('Title') },
                         { field: 'desc', title: __('Desc'), cellStyle: formatTableUnit, formatter: Controller.api.formatter.getClear, operate: false },
-                        { field: 'closing_date', title: __('Closing_date') , operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime },
+
+
+
+                        { field: 'closing_date', title: __('Closing_date') , operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime,visible:false },
+
                         {
                             field: 'is_test_adopt', title: __('Is_test_adopt'), custom: { 1: 'success', 0: 'danger' },
                             searchList: { 1: '是', 0: '否' },
@@ -45,7 +49,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             searchList: { 1: '是', 0: '否' },
                             formatter: Table.api.formatter.status
                         },
-                        { field: 'complete_date', title: __('complete_date'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime },
+                        { field: 'complete_date', title: __('complete_date'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime,visible:false },
                        
                         {
                             field: 'test_regression_adopt', title: __('回归测试状态'), custom: { 1: 'success', 0: 'danger' },
@@ -59,7 +63,26 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         },
                         { field: 'create_person', title: __('Create_person'), operate: false },
                         { field: 'nickname', title: __('负责人'), visible: false, operate: 'like' },
-                        { field: 'createtime', title: __('Create_time'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime },
+                        { field: 'createtime', title: __('Create_time'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime,visible:false, },
+
+                        {
+                            field: '时间节点',
+                            title: __('时间节点'),
+                            operate: false,
+                            formatter: function (value, rows) {
+                                var all_user_name = '';
+                                if(rows.test_regression_adopt_time){
+                                    all_user_name += '<span class="all_user_name">创建：<b>'+ rows.test_regression_adopt_time + '</b></span><br>';
+                                }
+                                if(rows.closing_date){
+                                    all_user_name += '<span class="all_user_name">截止：<b>'+ rows.closing_date + '</b></span><br>';
+                                }
+                                if(rows.complete_date){
+                                    all_user_name += '<span class="all_user_name">完成：<b>'+ rows.complete_date + '</b></span><br>';
+                                }
+                                return all_user_name;
+                            },
+                        },
 
                         {
                             field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [
