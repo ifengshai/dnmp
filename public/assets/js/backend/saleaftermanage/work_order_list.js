@@ -502,13 +502,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     //判断如果为处理任务时
                     if (Config.ids) {
                         if (problem_type_id == 1) {
-                            $('.measure').hide();
+                            $('.step1-1').hide();
                             $('.step2-1').show();
                         } else if (problem_type_id == 2) {
-                            $('.measure').hide();
+                            $('.step2-1').hide();
                             $('.step1-1').show();
                         } else if (problem_type_id == 3) {
-                            $('.measure').hide();
+                            $('.step2-1').hide();
                             $('.step1-1').show();
                         }
                     }
