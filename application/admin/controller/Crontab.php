@@ -205,7 +205,6 @@ order by sfoi.item_id asc limit 1000";
         foreach ($order_item_list as $order_item_key => $order_item_value) {
 
             $product_options = unserialize($order_item_value['product_options']);
-            // dump($product_options);
             $final_params['coatiing_name'] = substr($product_options['info_buyRequest']['tmplens']['coatiing_name'], 0, 100);
             $final_params['index_type'] = substr($product_options['info_buyRequest']['tmplens']['index_type'], 0, 100);
 
@@ -298,6 +297,7 @@ order by sfoi.item_id asc limit 1000";
              * 1、渐进镜 Progressive
              * 2、偏光镜 镜片类型包含Polarized
              * 3、染色镜 镜片类型包含Lens with Color Tint
+             * 4、染色镜 Color Tint
              * 4、当cyl<=-4或cyl>=4
              */
 
@@ -419,17 +419,9 @@ order by sfoi.item_id asc limit 1000";
             if ($frameArr) {
                 $whereMap['platform_sku'] = ['in', $frameArr];
                 $whereMap['platform_type'] = 1;
-                $skuType = Db::connect('database.db_stock')->table('fa_item_platform_sku')->where($whereMap)->field('platform_sku,platform_frame_is_rimless')->select();
-                if ($skuType) {
-                    $skuType = collection($skuType)->toArray();
-                    $frameRimless = [];
-                    foreach ($skuType as $k => $v) {
-                        if (2 == $v['platform_frame_is_rimless']) {
-                            $frameRimless[] = $v['platform_sku'];
-                        }
-                    }
-                }
-                $wherePrescription['sku'] = ['in', $frameRimless];
+                $whereMap['platform_frame_is_rimless'] = 2;
+                $skus =  $this->itemplatformsku->where($whereMap)->column('platform_sku');
+                $wherePrescription['sku'] = ['in', $skus];
                 $wherePrescription['order_id'] = ['in', $orderArr];
                 Db::connect('database.db_zeelool')->table('sales_flat_order_item_prescription')->where($wherePrescription)->update(['frame_type_is_rimless' => 2]);
             }
