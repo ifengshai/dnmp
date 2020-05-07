@@ -135,7 +135,7 @@
                                 {:Form::select('', $templates, null, ['class'=>'form-control selectpicker macro-apply', null,'data-live-search' => true,'id'=>'Entry_status_select'])}
                             </div>
                         </div>
-                        {if condition="$ticket->status != 5 && !$btn"}
+                        {if condition="$ticket->status != 5"}
                         <div class="form-group layer-footer">
                             <div class="col-xs-12 col-sm-8">
                                 <button type="submit" class="btn btn-success btn-embossed disabled">发送邮件</button>
@@ -221,7 +221,7 @@
                         {foreach name="recentTickets" item="vo"}
                         <li class="list-group-item">
                             <!-- <b><a class="change-ticket" data-status="{$vo->status}" data-title="回复【{$vo->ticket_id}】{$vo->subject}" href="{:url('zendesk/zendesk/edit',['ids' => $vo->id,'btn' => 1])}">#{$vo->ticket_id}  {$vo->subject}</a> </b><a class="pull-right">{$vo->status_format}</a> -->
-                            <b><a class="btn-addtabs"  title="回复【{$vo->ticket_id}】{$vo->subject}" href="{:url('zendesk/zendesk/edit',['ids' => $vo->id,'btn' => 1])}">#{$vo->ticket_id}  {$vo->subject}</a> </b><a class="pull-right">{$vo->status_format}</a>
+                            <b><a class="" target="_blank"  title="回复【{$vo->ticket_id}】{$vo->subject}" href="{:url('zendesk/zendesk/edit',['ids' => $vo->id,'btn' => 1])}">#{$vo->ticket_id}  {$vo->subject}</a> </b><a class="pull-right">{$vo->status_format}</a>
                         </li>
                         {/foreach}
                     </ul>
