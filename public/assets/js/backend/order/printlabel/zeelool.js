@@ -132,6 +132,17 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                 window.open(Config.moduleurl + '/order/printlabel/zeelool/batch_print_label/id_params/' + id_params, '_blank');
             });
 
+            //批量打印标签    
+            $('.btn-batch-printed_test').click(function () {
+                var ids = Table.api.selectedids(table);
+                var id_params = '';
+                $.each(table.bootstrapTable('getSelections'), function (index, row) {
+                    id_params += row['entity_id'] + ',';
+                });
+
+                window.open(Config.moduleurl + '/order/printlabel/zeelool/batch_print_label_new/id_params/' + id_params, '_blank');
+            });
+
             //批量导出xls 
             $('.btn-batch-export-xls').click(function () {
                 var ids = Table.api.selectedids(table);
