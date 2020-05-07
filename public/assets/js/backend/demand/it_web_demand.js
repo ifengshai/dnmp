@@ -1720,8 +1720,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         var str = '标题：'+row.title+'<br><hr>内容：'+value;
                         Layer.open({
                             closeBtn: 1,
-                            title: "详情",
-                            content: str
+                            title: row.title,
+                            area: ['60%'],
+                            shadeClose:true,
+                            anim: 6,
+                            content: value
                         });
                     }
                 }

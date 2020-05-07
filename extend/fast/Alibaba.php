@@ -112,7 +112,7 @@ class Alibaba
         //请求URL
         $body = $response->getBody();
         $stringBody = (string) $body;
-        $res = json_decode($stringBody, true);
+        $res = json_decode($stringBody);
         if ($res === null) {
             exception('网络异常');
         }
