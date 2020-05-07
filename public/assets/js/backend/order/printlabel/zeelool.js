@@ -30,7 +30,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                         { field: 'status', title: __('状态'), addClass: 'selectpicker', data: 'multiple', operate: 'IN', searchList: { "processing": __('processing'), "free_processing": __('free_processing'), "paypal_reversed": "paypal_reversed","creditcard_proccessing": "creditcard_proccessing", "paypal_canceled_reversal": "paypal_canceled_reversal",'complete': 'complete' } },
                         { field: 'base_grand_total', title: __('订单金额'), operate: false, formatter: Controller.api.formatter.float_format },
                         { field: 'base_shipping_amount', title: __('运费'), operate: false, formatter: Controller.api.formatter.float_format },
-
+                        { field: 'country_id', title: __('国家') },
                         { field: 'total_qty_ordered', title: __('SKU数量'), sortable: true, operate: 'between', formatter: Controller.api.formatter.int_format },
                         { field: 'custom_print_label_new', title: __('打印标签'), custom: { 0: 'danger', 1: 'green' }, searchList: { 1: '是', 0: '否' }, formatter: Table.api.formatter.status },
                         { field: 'custom_is_match_frame_new', title: __('配镜架'), custom: { 0: 'danger', 1: 'green' }, searchList: { 1: '是', 0: '否' }, formatter: Table.api.formatter.status },

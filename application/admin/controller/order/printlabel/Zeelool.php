@@ -116,25 +116,28 @@ class Zeelool extends Backend
                 $smap['sku'] = ['like', '%' . $filter['sku'] . '%'];
                 $smap['status'] = $filter['status'] ? ['in', $filter['status']] : $map['status'];
                 $ids = $this->model->getOrderId($smap);
-                $map['entity_id'] = ['in', $ids];
+                $map['a.entity_id'] = ['in', $ids];
                 unset($filter['sku']);
                 $this->request->get(['filter' => json_encode($filter)]);
             }
-
+            $map['address_type'] = 'shipping';
+            
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
 
-            $total = $this->model
+            $total = $this->model->alias('a')
                 ->where($map)
                 ->where($where)
+                ->join(['sales_flat_order_address' => 'b'],'a.entity_id=b.parent_id')
                 ->order($sort, $order)
                 ->count();
-            $field = 'order_type,custom_order_prescription_type,entity_id,status,base_shipping_amount,increment_id,base_grand_total,
+            $field = 'country_id,order_type,custom_order_prescription_type,a.entity_id,status,base_shipping_amount,increment_id,base_grand_total,
                      total_qty_ordered,custom_is_match_frame_new,custom_is_match_lens_new,
                      custom_is_send_factory_new,custom_is_delivery_new,custom_print_label_new,custom_order_prescription,created_at';
-            $list = $this->model
+            $list = $this->model->alias('a')
                 ->field($field)
                 ->where($map)
                 ->where($where)
+                ->join(['sales_flat_order_address' => 'b'],'a.entity_id=b.parent_id')
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
