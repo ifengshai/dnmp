@@ -92,6 +92,7 @@ class ItWebTask extends Backend
         $this->assignconfig('is_edit', $this->auth->check('demand/it_web_task/edit'));
         $this->assignconfig('is_set_task_test_status', $this->auth->check('demand/it_web_task/set_task_test_status'));
         $this->assignconfig('is_regression_test_info', $this->auth->check('demand/it_web_task/regression_test_info'));
+        $this->assignconfig('is_del_btu', $this->auth->check('demand/it_web_task/del'));
         return $this->view->fetch();
     }
 
@@ -277,6 +278,23 @@ class ItWebTask extends Backend
 
 
     /**
+     * 逻辑删除
+     * */
+    public function del($ids = "")
+    {
+        if ($this->request->isAjax()) {
+            $data['is_del'] =  2;
+            $res = $this->model->allowField(true)->save($data,['id'=> input('ids')]);
+            if ($res) {
+                $this->success('成功');
+            } else {
+                $this->error('失败');
+            }
+        }
+    }
+
+
+    /**
      * 详情
      */
     public function detail($ids = null)
@@ -328,13 +346,13 @@ class ItWebTask extends Backend
             $id = input('id');
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->itWebTaskItem
-                ->where($where)
+//                ->where($where)
                 ->where('task_id', $id)
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->itWebTaskItem
-                ->where($where)
+//                ->where($where)
                 ->where('task_id', $id)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
@@ -554,6 +572,21 @@ class ItWebTask extends Backend
      */
     public function problem_detail($ids = null)
     {
+
+        if($this->request->isPost()) {
+            $params = $this->request->post("row/a");
+            if ($params) {
+                $data['is_complete']=1;
+                $res = $this->testRecord->allowField(true)->save($data,$params);
+                if ($res) {
+                    $this->success('成功');
+                } else {
+                    $this->error('失败');
+                }
+            }
+            $this->error(__('Parameter %s can not be empty', ''));
+        }
+
         $map['pid'] = $ids;
         $map['type'] = 4;
         /*测试日志--测试环境*/

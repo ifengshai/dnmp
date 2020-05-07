@@ -1318,7 +1318,22 @@ class ItWebDemand extends Backend
      * 本条目详情，包含测试日志，以及bug回复日志
      * 测试组权限
      */
-    public function detail_log(){
+    public function detail_log($ids=null){
+
+        if($this->request->isPost()) {
+            $params = $this->request->post("row/a");
+            if ($params) {
+                $data['is_complete']=1;
+                $res = $this->testRecordModel->allowField(true)->save($data,$params);
+                if ($res) {
+                    $this->success('成功');
+                } else {
+                    $this->error('失败');
+                }
+            }
+            $this->error(__('Parameter %s can not be empty', ''));
+        }
+
         $ids = $ids ?? input('ids');
         $row = $this->model->get(['id' => $ids]);
         $row_arr = $row->toArray();

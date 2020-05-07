@@ -1665,6 +1665,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
         group_finish: function () {
             Controller.api.bindevent();
         },
+        detail_log: function () {
+            Controller.api.bindevent();
+        },
+        test_finish_opt: function () {
+            Controller.api.bindevent();
+        },
         test_record_bug: function () {
             Controller.api.bindevent();
         },

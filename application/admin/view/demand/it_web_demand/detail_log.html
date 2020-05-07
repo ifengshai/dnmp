@@ -65,7 +65,17 @@
                 <div class="timeline-body" >
                     {:__('describe')}：<span style="word-break: break-all;"><b>{$ltl['describe']}</b></span>
                 </div>
-
+                <div class="timeline-body" >
+                    {:__('是否完成')}：<span style="word-break: break-all;"><b>{$ltl['is_complete']==1?'是':'否'}</b></span>
+                </div>
+                {if $ltl['is_complete'] == 0 && in_array(session('admin.id'), explode(',', $ltl['responsibility_user_id']))}
+                <form role="form" data-toggle="validator" method="POST" action="{:url('detail_log')}">
+                    <input type="hidden" name="row[id]" value="{$ltl['id']}"/>
+                    <div style="padding-left: 58px;padding-bottom: 1%;padding-top: 1%">
+                        <button type="submit" name="web_finish" value="1" class="btn btn-success btn-embossed">{:__('All_finish')}</button>
+                    </div>
+                </form>
+                {/if}
             </div>
         </li>
     {/volist}
@@ -93,6 +103,17 @@
                 {:__('describe')}：<span style="word-break: break-all;"><b>{$rtl['describe']}</b></span>
             </div>
 
+            <div class="timeline-body" >
+                {:__('是否完成')}：<span style="word-break: break-all;"><b>{$rtl['is_complete']==1?'是':'否'}</b></span>
+            </div>
+            {if $rtl['is_complete'] == 0 && in_array(session('admin.id'), explode(',', $rtl['responsibility_user_id']))}
+            <form role="form" data-toggle="validator" method="POST" action="{:url('detail_log')}">
+                <input type="hidden" name="row[id]" value="{$rtl['id']}"/>
+                <div style="padding-left: 58px;padding-bottom: 1%;padding-top: 1%">
+                    <button type="submit" name="web_finish" value="1" class="btn btn-success btn-embossed">{:__('All_finish')}</button>
+                </div>
+            </form>
+            {/if}
         </div>
     </li>
     {/volist}
