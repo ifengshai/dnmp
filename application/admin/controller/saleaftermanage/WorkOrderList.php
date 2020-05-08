@@ -704,9 +704,6 @@ class WorkOrderList extends Backend
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
             if ($params) {
-                if ($params['order_sku']) {
-                    $params['order_sku'] = implode(',', $params['order_sku']);
-                }
                 $params = $this->preExcludeFields($params);
                 $result = false;
                 Db::startTrans();
@@ -725,6 +722,7 @@ class WorkOrderList extends Backend
                     }
                     //判断是否选择措施
                     $params['measure_choose_id'] = $params['measure_choose_id'] ?? [];
+
                     if (count(array_filter($params['measure_choose_id'])) < 1 && $params['work_type'] == 1  && $params['status'] == 2) {
                         throw new Exception("措施不能为空");
                     }
@@ -1403,7 +1401,7 @@ class WorkOrderList extends Backend
         if(2 <= $row->work_status){
             $row->assign_user = Admin::where(['id'=>$row->assign_user_id])->value('nickname');
         }else{
-            $row->assign_uer  = Admin::where(['id'=>$row->operation_user_id])->value('nickname');
+            $row->assign_user = Admin::where(['id'=>$row->operation_user_id])->value('nickname');
         }
         if ($operateType == 2) { //审核
             return $this->view->fetch('saleaftermanage/work_order_list/check');
