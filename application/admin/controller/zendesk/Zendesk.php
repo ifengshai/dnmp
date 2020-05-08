@@ -858,7 +858,7 @@ DOC;
     public function asycTicketsVoogueme()
     {
         set_time_limit(0);
-        for($i=62993;$i<63153;$i++){
+        for($i=63021;$i<63153;$i++){
             (new Notice(request(), ['type' => 'voogueme','id' => $i]))->create();
         }
     }
