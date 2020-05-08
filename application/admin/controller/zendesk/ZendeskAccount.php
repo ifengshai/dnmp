@@ -116,7 +116,7 @@ class ZendeskAccount extends Backend
                         'account_user' => $v['name'],
                         'account_email' => $v['email'],
                     ];
-                    $this->model->where('account_id',$v['id'])->save($updateData);
+                    $this->model->where('account_id',$v['id'])->update($updateData);
                     continue;
                 }
                 $data[$k]['user_type']      = 2;
@@ -133,7 +133,7 @@ class ZendeskAccount extends Backend
                         'account_user' => $v['name'],
                         'account_email' => $v['email'],
                     ];
-                    $this->model->where('account_id',$v['id'])->save($updateData);
+                    $this->model->where('account_id',$v['id'])->update($updateData);
                     continue;
                 }
                 $data[$vk]['user_type']      = 2;
