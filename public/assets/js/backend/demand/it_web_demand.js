@@ -140,12 +140,16 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                 var all_user_name = '';
                                 all_user_name += '<span class="all_user_name">创&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;建：<b>'+ rows.create_time + '</b></span><br>';
 
-                                if(rows.test_group != 0){
+                                if(rows.test_group == 1){
                                     all_user_name += '<span class="all_user_name">测试确认：<b>'+ rows.test_confirm_time + '</b></span><br>';
+                                    if(rows.test_is_finish == 1){
+                                        all_user_name += '<span class="all_user_name">测试完成：<b>'+ rows.test_finish_time + '</b></span><br>';
+                                    }
                                 }
                                 if(rows.all_finish_time){
                                     all_user_name += '<span class="all_user_name">完&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;成：<b>'+ rows.all_finish_time + '</b></span><br>';
                                 }
+
                                 return all_user_name;
                             },
                         },
@@ -632,8 +636,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             formatter: function (value, rows) {
                                 var all_user_name = '';
                                 all_user_name += '<span class="all_user_name">创&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;建：<b>'+ rows.create_time + '</b></span><br>';
-                                if(rows.test_group != 0){
+                                if(rows.test_group == 1){
                                     all_user_name += '<span class="all_user_name">测试确认：<b>'+ rows.test_confirm_time + '</b></span><br>';
+                                    if(rows.test_is_finish == 1){
+                                        all_user_name += '<span class="all_user_name">测试完成：<b>'+ rows.test_finish_time + '</b></span><br>';
+                                    }
                                 }
                                 if(rows.all_finish_time){
                                     all_user_name += '<span class="all_user_name">完&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;成：<b>'+ rows.all_finish_time + '</b></span><br>';
