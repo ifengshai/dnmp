@@ -107,29 +107,31 @@ class DevelopDemand extends Backend
                 } else {
                     $list[$k]['status_str'] = '审核拒绝';
                 }
-
-                if ($val['is_test'] == 1) {
-                    if ($val['is_finish'] == 1 && $val['test_is_passed'] == 0) {
-                        $list[$k]['develop_status_str'] = '待测试';
-                    } elseif ($val['is_finish'] == 1 && $val['test_is_passed'] == 1 && $val['is_finish_task'] == 0) {
-                        $list[$k]['develop_status_str'] = '待上线';
-                    } elseif ($val['is_finish'] == 1 && $val['test_is_passed'] == 1 && $val['is_finish_task'] == 1) {
-                        $list[$k]['develop_status_str'] = '待回测';
-                    } elseif ($val['is_test_complete'] == 1) {
-                        $list[$k]['develop_status_str'] = '已完成';
+                //判断审核通过
+                if ($val['review_status_manager'] == 1 && $val['review_status_develop'] == 1) {
+                    if ($val['is_test'] == 1) {
+                        if ($val['is_finish'] == 1 && $val['test_is_passed'] == 0) {
+                            $list[$k]['develop_status_str'] = '待测试';
+                        } elseif ($val['is_finish'] == 1 && $val['test_is_passed'] == 1 && $val['is_finish_task'] == 0) {
+                            $list[$k]['develop_status_str'] = '待上线';
+                        } elseif ($val['is_finish'] == 1 && $val['test_is_passed'] == 1 && $val['is_finish_task'] == 1) {
+                            $list[$k]['develop_status_str'] = '待回测';
+                        } elseif ($val['is_test_complete'] == 1) {
+                            $list[$k]['develop_status_str'] = '已完成';
+                        } else {
+                            $list[$k]['develop_status_str'] = '开发ing';
+                        }
                     } else {
-                        $list[$k]['develop_status_str'] = '开发ing';
+                        if ($val['is_finish'] == 1 && $val['is_finish_task'] == 0) {
+                            $list[$k]['develop_status_str'] = '待上线';
+                        } elseif ($val['is_finish'] == 1  && $val['is_finish_task'] == 1) {
+                            $list[$k]['develop_status_str'] = '已完成';
+                        } else {
+                            $list[$k]['develop_status_str'] = '开发ing';
+                        }
                     }
-                } else {
-                    if ($val['is_finish'] == 1 && $val['is_finish_task'] == 0) {
-                        $list[$k]['develop_status_str'] = '待上线';
-                    } elseif ($val['is_finish'] == 1  && $val['is_finish_task'] == 1) {
-                        $list[$k]['develop_status_str'] = '已完成';
-                    } else {
-                        $list[$k]['develop_status_str'] = '开发ing';
-                    }
-                }
-
+                } 
+                
                 $list[$k]['expected_time'] = date('Y-m-d', strtotime($val['expected_time']));
                 $list[$k]['estimated_time'] = date('Y-m-d', strtotime($val['estimated_time']));
             }
