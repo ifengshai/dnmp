@@ -576,12 +576,26 @@ class ItWebTask extends Backend
         if($this->request->isPost()) {
             $params = $this->request->post("row/a");
             if ($params) {
-                $data['is_complete']=1;
-                $res = $this->testRecord->allowField(true)->save($data,$params);
-                if ($res) {
-                    $this->success('成功');
-                } else {
-                    $this->error('失败');
+                if ($params['opt_type']==1){
+                    $data['is_complete']=1;
+                    $res = $this->testRecord->allowField(true)->save($data,$params);
+                    if ($res) {
+                        $this->success('成功');
+
+                    } else {
+                        $this->error('失败');
+                    }
+                }elseif ($params['opt_type']==2){
+
+                    $data['is_del']=2;
+                    $where['id']=$params['id'];
+                    $res = $this->testRecord->allowField(true)->save($data,$where);
+                    if ($res) {
+                        $this->success('成功');
+                    } else {
+                        $this->error('失败');
+                    }
+
                 }
             }
             $this->error(__('Parameter %s can not be empty', ''));
@@ -589,6 +603,7 @@ class ItWebTask extends Backend
 
         $map['pid'] = $ids;
         $map['type'] = 4;
+        $map['is_del'] = 1;
         /*测试日志--测试环境*/
         $left_test_list = $this->testRecord
             ->where($map)
