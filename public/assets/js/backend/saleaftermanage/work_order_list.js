@@ -720,7 +720,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     //补发地址自动填充第一个
                                     $('#c-firstname').val(data.address[i].firstname);
                                     $('#c-lastname').val(data.address[i].lastname);
-                                    $('#c-email').val(data.address[i].email);
+                                    var email = data.address[i].email;
+                                    if(email == null){
+                                        email = $('#customer_email').val();
+                                    }
+                                    $('#c-email').val(email);
                                     $('#c-telephone').val(data.address[i].telephone);
                                     $('#c-country').val(data.address[i].country_id);
                                     $('#c-country').change();
@@ -1226,7 +1230,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                         //补发地址自动填充第一个
                                         $('#c-firstname').val(data.address[i].firstname);
                                         $('#c-lastname').val(data.address[i].lastname);
-                                        $('#c-email').val(data.address[i].email);
+                                        var email = data.address[i].email;
+                                        if(email == null){
+                                            email = $('#customer_email').val();
+                                        }
+                                        $('#c-email').val(email);
                                         $('#c-telephone').val(data.address[i].telephone);
                                         $('#c-country').val(data.address[i].country_id);
                                         $('#c-country').change();
@@ -1247,7 +1255,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     var address = data.address[address_id];
                                     $('#c-firstname').val(address.firstname);
                                     $('#c-lastname').val(address.lastname);
-                                    $('#c-email').val(address.email);
+                                    var email = address.email;
+                                    if(email == null){
+                                        email = $('#customer_email').val();
+                                    }
+                                    $('#c-email').val(email);
                                     $('#c-telephone').val(address.telephone);
                                     $('#c-country').val(address.country_id);
                                     $('#c-country').change();
@@ -1782,7 +1794,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                 if (real_address) {
                                     $('#c-firstname').val(real_address.firstname);
                                     $('#c-lastname').val(real_address.lastname);
-                                    $('#c-email').val(real_address.email);
+                                    var email = real_address.email;
+                                    if(email == null){
+                                        email = $('#customer_email').val();
+                                    }
+                                    $('#c-email').val(email);
                                     $('#c-telephone').val(real_address.telephone);
                                     $('#c-country').val(real_address.country_id);
                                     $('#c-country').change();
