@@ -27,8 +27,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 columns: [
                     [
                         // { checkbox: true },
-                        {field: 'id', title: __('Id')},
-                        // { field: 'title', title: __('Titel'), cellStyle: formatTableUnit, formatter: Controller.api.formatter.getClear, operate: false },
+                        { field: 'id', title: __('Id') },
+                        { field: 'title', title: __('Titel'), cellStyle: formatTableUnit, formatter: Controller.api.formatter.getClear, operate: false },
                         {
                             field: 'desc',
                             operate: false,
@@ -36,49 +36,47 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             events: Controller.api.events.getcontent,
                             formatter: Controller.api.formatter.getcontent,
                         },
-                        // { field: 'desc', title: __('Desc'), cellStyle: formatTableUnit, formatter: Controller.api.formatter.getClear, operate: false },
-                        {field: 'create_person', title: __('提出人'), operate: false},
+
+                        { field: 'create_person', title: __('提出人'), operate: false },
                         {
                             field: 'priority',
                             title: __('Priority'),
-                            custom: {1: 'success', 2: 'blue', 3: 'danger'},
-                            searchList: {1: '低', 2: '中', 3: '高'},
+                            custom: { 1: 'success', 2: 'blue', 3: 'danger' },
+                            searchList: { 1: '低', 2: '中', 3: '高' },
                             formatter: Table.api.formatter.status
                         },
                         {
                             field: 'complexity',
                             title: __('Complexity'),
-                            custom: {1: 'success', 2: 'blue', 3: 'danger'},
-                            searchList: {1: '简单', 2: '中等', 3: '复杂'},
+                            custom: { 1: 'success', 2: 'blue', 3: 'danger' },
+                            searchList: { 1: '简单', 2: '中等', 3: '复杂' },
                             formatter: Table.api.formatter.status
                         },
+                        { field: 'status_str', title: __('状态'), operate: false },
                         {
                             field: 'review_status_manager',
                             title: __('Review_status_manager'),
-                            custom: {0: 'yellow', 1: 'success', 2: 'danger'},
-                            searchList: {0: '待审核', 1: '审核通过', 2: '审核拒绝'},
+                            custom: { 0: 'yellow', 1: 'success', 2: 'danger' },
+                            searchList: { 0: '待审核', 1: '审核通过', 2: '审核拒绝' },
+                            visible: false,
                             formatter: Table.api.formatter.status
                         },
                         {
                             field: 'review_status_develop',
                             title: __('Review_status_develop'),
-                            custom: {0: 'yellow', 1: 'success', 2: 'danger'},
-                            searchList: {0: '待审核', 1: '审核通过', 2: '审核拒绝'},
+                            custom: { 0: 'yellow', 1: 'success', 2: 'danger' },
+                            searchList: { 0: '待审核', 1: '审核通过', 2: '审核拒绝' },
+                            visible: false,
                             formatter: Table.api.formatter.status
                         },
                         {
-                            field: 'solution',
-                            title: __('解决方案'),
-                            cellStyle: formatTableUnit,
-                            formatter: Controller.api.formatter.getClear,
-                            operate: false
-                        },
-                        {
-                            field: 'refuse_reason',
-                            title: __('拒绝原因'),
-                            cellStyle: formatTableUnit,
-                            formatter: Controller.api.formatter.getClear,
-                            operate: false
+                            field: 'solution', title: __('备注'), cellStyle: formatTableUnit, operate: false, formatter: function (value, rows) {
+                                if (rows.review_status_manager == 1) {
+                                    return Controller.api.formatter.getClear(rows.solution);
+                                } else if (rows.review_status_manager == 2) {
+                                    return Controller.api.formatter.getClear(rows.refuse_reason);
+                                }
+                            }
                         },
                         {
                             field: 'nickname', title: __('开发负责人'), operate: false, formatter: function (value, rows) {
@@ -93,30 +91,34 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {
                             field: 'is_test',
                             title: __('Is_test'),
-                            custom: {0: 'danger', 1: 'success'},
-                            searchList: {0: '否', 1: '是'},
+                            custom: { 0: 'danger', 1: 'success' },
+                            searchList: { 0: '否', 1: '是' },
                             formatter: Table.api.formatter.status
                         },
-                        {field: 'test_person', title: __('Test_person_name'), operate: false},
+                        { field: 'test_person', title: __('Test_person_name'), operate: false },
+                        { field: 'develop_status_str', title: __('开发节点'), operate: false },
                         {
                             field: 'is_finish',
                             title: __('开发完成'),
-                            custom: {0: 'danger', 1: 'success'},
-                            searchList: {0: '否', 1: '是'},
+                            custom: { 0: 'danger', 1: 'success' },
+                            searchList: { 0: '否', 1: '是' },
+                            visible: false,
                             formatter: Table.api.formatter.status
                         },
                         {
                             field: 'test_is_passed',
                             title: __('Test_is_passed'),
-                            custom: {0: 'danger', 1: 'success'},
-                            searchList: {0: '否', 1: '是'},
+                            custom: { 0: 'danger', 1: 'success' },
+                            searchList: { 0: '否', 1: '是' },
+                            visible: false,
                             formatter: Table.api.formatter.status
                         },
                         {
                             field: 'is_finish_task',
                             title: __('产品确认'),
-                            custom: {0: 'danger', 1: 'success'},
-                            searchList: {0: '否', 1: '是'},
+                            custom: { 0: 'danger', 1: 'success' },
+                            searchList: { 0: '否', 1: '是' },
+                            visible: false,
                             formatter: Table.api.formatter.status
                         },
                         {
@@ -132,47 +134,45 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             title: __('Expected_time'),
                             operate: 'RANGE',
                             addclass: 'datetimerange',
-                            visible: false,
-                            formatter: Table.api.formatter.datetime
+                           
                         },
                         {
                             field: 'estimated_time',
                             title: __('Estimated_time'),
                             operate: 'RANGE',
                             addclass: 'datetimerange',
-                            visible: false,
-                            formatter: Table.api.formatter.datetime
+                            
                         },
                         {
                             field: 'finish_time',
                             title: __('Finish_time'),
                             operate: 'RANGE',
                             addclass: 'datetimerange',
-                            visible: false,
+                 
                             formatter: Table.api.formatter.datetime
                         },
-                        {
-                            field: 'createtime',
-                            title: __('时间'),
-                            operate: false,
-                            formatter: function (value, rows) {
-                                var str = '';
-                                str += '<div class="step_recept"><b class="step">创建时间：</b><b class="recept">' + value + '</b></div>';
-                                if (rows.expected_time) {
-                                    str += '<br><div class="step_recept"><b class="step">期望时间：</b><b class="recept">' + rows.expected_time + '</b></div>';
-                                }
-                                if (rows.estimated_time) {
-                                    str += '<br><div class="step_recept"><b class="step">预计时间：</b><b class="recept">' + rows.estimated_time + '</b></div>';
-                                }
+                        // {
+                        //     field: 'createtime',
+                        //     title: __('时间'),
+                        //     operate: false,
+                        //     formatter: function (value, rows) {
+                        //         var str = '';
+                        //         str += '<div class="step_recept"><b class="step">创建时间：</b><b class="recept">' + value + '</b></div>';
+                        //         if (rows.expected_time) {
+                        //             str += '<br><div class="step_recept"><b class="step">期望时间：</b><b class="recept">' + rows.expected_time + '</b></div>';
+                        //         }
+                        //         if (rows.estimated_time) {
+                        //             str += '<br><div class="step_recept"><b class="step">预计时间：</b><b class="recept">' + rows.estimated_time + '</b></div>';
+                        //         }
 
-                                if (rows.finish_time) {
-                                    str += '<br><div class="step_recept"><b class="step">完成时间：</b><b class="recept">' + rows.finish_time + '</b></div>';
-                                }
-                                return str;
-                            },
-                        },
+                        //         if (rows.finish_time) {
+                        //             str += '<br><div class="step_recept"><b class="step">完成时间：</b><b class="recept">' + rows.finish_time + '</b></div>';
+                        //         }
+                        //         return str;
+                        //     },
+                        // },
                         {
-                            field: 'operate', title: __('Operate'),operate:false, table: table, events: Table.api.events.operate,
+                            field: 'operate', title: __('Operate'), operate: false, table: table, events: Table.api.events.operate,
                             buttons: [
                                 {
                                     name: 'ajax',
@@ -311,7 +311,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                                 return false;
                                             }
                                         } else {
-                                            if (row.is_finish == 0 && Config.is_set_status == 1 && row.review_status_develop == 1 && row.is_developer_opt == 1 ) {
+                                            if (row.is_finish == 0 && Config.is_set_status == 1 && row.review_status_develop == 1 && row.is_developer_opt == 1) {
                                                 return true;
                                             } else {
                                                 return false;
@@ -329,7 +329,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     callback: function (data) {
                                     },
                                     visible: function (row) {
-                                        if (row.is_finish == 1 && Config.test_record_bug == 1 && row.is_test == 1  && row.test_is_passed == 0 && row.is_test_record_hidden==1) {
+                                        if (row.is_finish == 1 && Config.test_record_bug == 1 && row.is_test == 1 && row.test_is_passed == 0 && row.is_test_record_hidden == 1) {
                                             return true;
                                         } else {
                                             return false;
@@ -345,7 +345,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     icon: 'fa fa-list',
                                     url: 'demand/develop_demand/problem_detail',
                                     callback: function (data) {
-                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), {title: "回传数据"});
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
                                     },
                                     visible: function (row) {
                                         //返回true时按钮显示,返回false隐藏
@@ -374,7 +374,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     },
                                     visible: function (row) {
 
-                                        if (row.test_is_passed == 0 && Config.test_is_passed == 1 && row.is_test == 1  && row.is_finish == 1 && row.is_test_record_hidden==1 ) {
+                                        if (row.test_is_passed == 0 && Config.test_is_passed == 1 && row.is_test == 1 && row.is_finish == 1 && row.is_test_record_hidden == 1) {
                                             return true;
                                         } else {
                                             return false;
@@ -439,10 +439,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     url: 'demand/develop_demand/regression_test_info',
                                     extend: 'data-area = \'["70%","70%"]\'',
                                     callback: function (data) {
-                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), {title: "回传数据"});
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
                                     },
                                     visible: function (row) {
-                                        if (row.is_finish_task == 1 && row.is_test == 1 && Config.regression_test_info == 1 && row.is_test_complete == 0 && row.is_test_record_hidden==1) {
+                                        if (row.is_finish_task == 1 && row.is_test == 1 && Config.regression_test_info == 1 && row.is_test_complete == 0 && row.is_test_record_hidden == 1) {
                                             return true;
                                         } else {
                                             return false;
@@ -466,7 +466,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                         return false;
                                     },
                                     visible: function (row) {
-                                        if (row.is_finish_task == 1 && row.is_test == 1 && Config.test_complete == 1 && row.is_test_complete == 0 && row.is_test_record_hidden==1) {
+                                        if (row.is_finish_task == 1 && row.is_test == 1 && Config.test_complete == 1 && row.is_test_complete == 0 && row.is_test_record_hidden == 1) {
                                             return true;
                                         } else {
                                             return false;
@@ -482,7 +482,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     url: 'demand/develop_demand/edit/demand_type/2',
                                     extend: 'data-area = \'["80%","70%"]\'',
                                     callback: function (data) {
-                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), {title: "回传数据"});
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
                                     },
                                     visible: function (row) {
                                         if (row.review_status_manager == 0 && Config.is_edit == 1 && Config.username == row.create_person) {
@@ -496,7 +496,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     name: 'ajax',
                                     text: __(''),
                                     title: __('删除'),
-                                    icon:'fa fa-trash',
+                                    icon: 'fa fa-trash',
                                     classname: 'btn btn-xs btn-danger btn-magic btn-ajax',
                                     url: 'demand/develop_demand/del',
                                     confirm: '是否删除?',
@@ -508,11 +508,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                         return false;
                                     },
                                     visible: function (row) {
-                                        if (row.is_finish_task == 0){
-                                            if (Config.is_del_btu == 1||row.create_person_id == Config.admin_id) {//有权限 或者创建人为当前人
+                                        if (row.is_finish_task == 0) {
+                                            if (Config.is_del_btu == 1 || row.create_person_id == Config.admin_id) {//有权限 或者创建人为当前人
                                                 return true;
-                                            }else {
-                                                return  false;
+                                            } else {
+                                                return false;
                                             }
                                         } else {
                                             return false;
@@ -628,7 +628,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 columns: [
                     [
                         // { checkbox: true },
-                        {field: 'id', title: __('Id')},
+                        { field: 'id', title: __('Id') },
                         // { field: 'title', title: __('Titel'), cellStyle: formatTableUnit, formatter: Controller.api.formatter.getClear, operate: false },
                         {
                             field: 'desc',
@@ -637,19 +637,19 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             events: Controller.api.events.getcontent,
                             formatter: Controller.api.formatter.getcontent,
                         },
-                        {field: 'create_person', title: __('提出人'), operate: false},
+                        { field: 'create_person', title: __('提出人'), operate: false },
                         {
                             field: 'priority',
                             title: __('Priority'),
-                            custom: {1: 'success', 2: 'blue', 3: 'danger'},
-                            searchList: {1: '低', 2: '中', 3: '高'},
+                            custom: { 1: 'success', 2: 'blue', 3: 'danger' },
+                            searchList: { 1: '低', 2: '中', 3: '高' },
                             formatter: Table.api.formatter.status
                         },
                         {
                             field: 'complexity',
                             title: __('Complexity'),
-                            custom: {1: 'success', 2: 'blue', 3: 'danger'},
-                            searchList: {1: '简单', 2: '中等', 3: '复杂'},
+                            custom: { 1: 'success', 2: 'blue', 3: 'danger' },
+                            searchList: { 1: '简单', 2: '中等', 3: '复杂' },
                             formatter: Table.api.formatter.status
                         },
                         {
@@ -666,30 +666,30 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {
                             field: 'is_test',
                             title: __('Is_test'),
-                            custom: {0: 'danger', 1: 'success'},
-                            searchList: {0: '否', 1: '是'},
+                            custom: { 0: 'danger', 1: 'success' },
+                            searchList: { 0: '否', 1: '是' },
                             formatter: Table.api.formatter.status
                         },
-                        {field: 'test_person', title: __('Test_person_name'), operate: false},
+                        { field: 'test_person', title: __('Test_person_name'), operate: false },
                         {
                             field: 'is_finish',
                             title: __('开发完成'),
-                            custom: {0: 'danger', 1: 'success'},
-                            searchList: {0: '否', 1: '是'},
+                            custom: { 0: 'danger', 1: 'success' },
+                            searchList: { 0: '否', 1: '是' },
                             formatter: Table.api.formatter.status
                         },
                         {
                             field: 'test_is_passed',
                             title: __('Test_is_passed'),
-                            custom: {0: 'danger', 1: 'success'},
-                            searchList: {0: '否', 1: '是'},
+                            custom: { 0: 'danger', 1: 'success' },
+                            searchList: { 0: '否', 1: '是' },
                             formatter: Table.api.formatter.status
                         },
                         {
                             field: 'is_finish_task',
                             title: __('是否上线'),
-                            custom: {0: 'danger', 1: 'success'},
-                            searchList: {0: '否', 1: '是'},
+                            custom: { 0: 'danger', 1: 'success' },
+                            searchList: { 0: '否', 1: '是' },
                             formatter: Table.api.formatter.status
                         },
                         {
@@ -747,7 +747,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {
                             field: 'operate',
                             title: __('Operate'),
-                            operate:false,
+                            operate: false,
                             table: table,
                             events: Table.api.events.operate,
                             buttons: [
@@ -784,13 +784,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     },
                                     visible: function (row) {
                                         if (row.is_test == 1) {
-                                            if (row.is_finish == 0 && Config.is_set_status == 1 && row.review_status_develop == 1 && row.is_developer_opt == 1  && row.test_person) {
+                                            if (row.is_finish == 0 && Config.is_set_status == 1 && row.review_status_develop == 1 && row.is_developer_opt == 1 && row.test_person) {
                                                 return true;
                                             } else {
                                                 return false;
                                             }
                                         } else {
-                                            if (row.is_finish == 0 && Config.is_set_status == 1 && row.review_status_develop == 1 && row.is_developer_opt == 1 ) {//  当前开发人可点击开发完成//
+                                            if (row.is_finish == 0 && Config.is_set_status == 1 && row.review_status_develop == 1 && row.is_developer_opt == 1) {//  当前开发人可点击开发完成//
                                                 return true;
                                             } else {
                                                 return false;
@@ -808,7 +808,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     callback: function (data) {
                                     },
                                     visible: function (row) {
-                                        if (row.is_finish == 1 && Config.test_record_bug == 1 && row.is_test == 1 &&  row.test_is_passed == 0 && row.is_test_record_hidden==1) {
+                                        if (row.is_finish == 1 && Config.test_record_bug == 1 && row.is_test == 1 && row.test_is_passed == 0 && row.is_test_record_hidden == 1) {
                                             return true;
                                         } else {
                                             return false;
@@ -824,7 +824,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     icon: 'fa fa-list',
                                     url: 'demand/develop_demand/problem_detail',
                                     callback: function (data) {
-                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), {title: "回传数据"});
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
                                     },
                                     visible: function (row) {
                                         //返回true时按钮显示,返回false隐藏
@@ -894,22 +894,22 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
 
                                     }
                                 },
-                               /* {
-                                    name: 'detail',
-                                    text: '详情',
-                                    title: __('查看详情'),
-                                    extend: 'data-area = \'["80%","70%"]\'',
-                                    classname: 'btn btn-xs btn-primary btn-dialog',
-                                    icon: 'fa fa-list',
-                                    url: 'demand/develop_demand/detail',
-                                    callback: function (data) {
-                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), {title: "回传数据"});
-                                    },
-                                    visible: function (row) {
-                                        //返回true时按钮显示,返回false隐藏
-                                        return true;
-                                    }
-                                },*/
+                                /* {
+                                     name: 'detail',
+                                     text: '详情',
+                                     title: __('查看详情'),
+                                     extend: 'data-area = \'["80%","70%"]\'',
+                                     classname: 'btn btn-xs btn-primary btn-dialog',
+                                     icon: 'fa fa-list',
+                                     url: 'demand/develop_demand/detail',
+                                     callback: function (data) {
+                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), {title: "回传数据"});
+                                     },
+                                     visible: function (row) {
+                                         //返回true时按钮显示,返回false隐藏
+                                         return true;
+                                     }
+                                 },*/
 
                                 {
                                     name: 'test',
@@ -919,10 +919,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     url: 'demand/develop_demand/regression_test_info',
                                     extend: 'data-area = \'["70%","70%"]\'',
                                     callback: function (data) {
-                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), {title: "回传数据"});
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
                                     },
                                     visible: function (row) {
-                                        if (row.is_finish_task == 1 && row.is_test == 1 && Config.regression_test_info == 1 && row.is_test_complete == 0 && row.is_test_record_hidden==1) {
+                                        if (row.is_finish_task == 1 && row.is_test == 1 && Config.regression_test_info == 1 && row.is_test_complete == 0 && row.is_test_record_hidden == 1) {
                                             return true;
                                         } else {
                                             return false;
@@ -962,7 +962,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     url: 'demand/develop_demand/edit/demand_type/1',
                                     extend: 'data-area = \'["80%","70%"]\'',
                                     callback: function (data) {
-                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), {title: "回传数据"});
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
                                     },
                                     visible: function (row) {
                                         if (!row.assign_developer_ids && Config.is_edit == 1 && Config.username == row.create_person) {//未分配的BUG可以进行操作编辑
@@ -976,7 +976,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     name: 'ajax',
                                     text: __(''),
                                     title: __('删除'),
-                                    icon:'fa fa-trash',
+                                    icon: 'fa fa-trash',
                                     classname: 'btn btn-xs btn-danger btn-magic btn-ajax',
                                     url: 'demand/develop_demand/del',
                                     confirm: '是否删除?',
@@ -988,11 +988,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                         return false;
                                     },
                                     visible: function (row) {
-                                        if (row.is_finish_task == 0){
-                                            if (Config.is_del_btu == 1||row.create_person_id == Config.admin_id) {//有权限 或者创建人为当前人
+                                        if (row.is_finish_task == 0) {
+                                            if (Config.is_del_btu == 1 || row.create_person_id == Config.admin_id) {//有权限 或者创建人为当前人
                                                 return true;
-                                            }else {
-                                                return  false;
+                                            } else {
+                                                return false;
                                             }
                                         } else {
                                             return false;
@@ -1152,7 +1152,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         Layer.open({
                             closeBtn: 1,
                             title: "详情",
-                            content: str
+                            content: str,
+                            area: ['80%', '80%'],
+                            anim: 0
                         });
                     }
                 }

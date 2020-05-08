@@ -51,13 +51,13 @@ class DevelopDemand extends Backend
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
                 ->where($where)
-                ->where('type','2')
+                ->where('type', '2')
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->model
                 ->where($where)
-                ->where('type','2')
+                ->where('type', '2')
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
@@ -83,21 +83,57 @@ class DevelopDemand extends Backend
                 $list[$k]['nickname'] = implode(',', $nickname);
                 $list[$k]['test_person'] = implode(',', $test_nickname);
 
-                if($val['is_test'] == 1 && $val['test_person'] != ''){
-                    if(in_array(session('admin.id'), explode(',', $val['test_person']))){
-                        $list[$k]['is_test_record_hidden'] = 1;//显示 记录问题
-                        $list[$k]['is_test_finish_hidden'] = 1;//显示  测试通过
-                        $list[$k]['is_test_detail_log'] = 0;//不显示  问题详情
+                if ($val['is_test'] == 1 && $val['test_person'] != '') {
+                    if (in_array(session('admin.id'), explode(',', $val['test_person']))) {
+                        $list[$k]['is_test_record_hidden'] = 1; //显示 记录问题
+                        $list[$k]['is_test_finish_hidden'] = 1; //显示  测试通过
+                        $list[$k]['is_test_detail_log'] = 0; //不显示  问题详情
                     }
                 }
 
-                if($val['assign_developer_ids'] != ''){
-                    if(in_array(session('admin.id'), explode(',', $val['assign_developer_ids']))){
-                        $list[$k]['is_developer_opt'] = 1;//开发完成
+                if ($val['assign_developer_ids'] != '') {
+                    if (in_array(session('admin.id'), explode(',', $val['assign_developer_ids']))) {
+                        $list[$k]['is_developer_opt'] = 1; //开发完成
                     }
                 }
 
 
+                if ($val['review_status_manager'] == 0) {
+                    $list[$k]['status_str'] = '经理待审核';
+                } elseif ($val['review_status_manager'] == 1 && $val['review_status_develop'] == 0) {
+                    $list[$k]['status_str'] = '主管待审核';
+                } elseif ($val['review_status_manager'] == 1 && $val['review_status_develop'] == 1) {
+                    $list[$k]['status_str'] = '审核通过';
+                } else {
+                    $list[$k]['status_str'] = '审核拒绝';
+                }
+                //判断审核通过
+                if ($val['review_status_manager'] == 1 && $val['review_status_develop'] == 1) {
+                    if ($val['is_test'] == 1) {
+                        if ($val['is_finish'] == 1 && $val['test_is_passed'] == 0) {
+                            $list[$k]['develop_status_str'] = '待测试';
+                        } elseif ($val['is_finish'] == 1 && $val['test_is_passed'] == 1 && $val['is_finish_task'] == 0) {
+                            $list[$k]['develop_status_str'] = '待上线';
+                        } elseif ($val['is_finish'] == 1 && $val['test_is_passed'] == 1 && $val['is_finish_task'] == 1) {
+                            $list[$k]['develop_status_str'] = '待回测';
+                        } elseif ($val['is_test_complete'] == 1) {
+                            $list[$k]['develop_status_str'] = '已完成';
+                        } else {
+                            $list[$k]['develop_status_str'] = '开发ing';
+                        }
+                    } else {
+                        if ($val['is_finish'] == 1 && $val['is_finish_task'] == 0) {
+                            $list[$k]['develop_status_str'] = '待上线';
+                        } elseif ($val['is_finish'] == 1  && $val['is_finish_task'] == 1) {
+                            $list[$k]['develop_status_str'] = '已完成';
+                        } else {
+                            $list[$k]['develop_status_str'] = '开发ing';
+                        }
+                    }
+                } 
+                
+                $list[$k]['expected_time'] = date('Y-m-d', strtotime($val['expected_time']));
+                $list[$k]['estimated_time'] = date('Y-m-d', strtotime($val['estimated_time']));
             }
             $result = array("total" => $total, "rows" => $list);
 
@@ -150,13 +186,13 @@ class DevelopDemand extends Backend
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
                 ->where($where)
-                ->where('type','1')
+                ->where('type', '1')
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->model
                 ->where($where)
-                ->where('type','1')
+                ->where('type', '1')
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
@@ -181,20 +217,19 @@ class DevelopDemand extends Backend
                 }
                 $list[$k]['nickname'] = implode(',', $nickname);
                 $list[$k]['test_person'] = implode(',', $test_nickname);
-                if($val['is_test'] == 1 && $val['test_person'] != ''){
-                    if(in_array(session('admin.id'), explode(',', $val['test_person']))){
-                        $list[$k]['is_test_record_hidden'] = 1;//显示 记录问题
-                        $list[$k]['is_test_finish_hidden'] = 1;//显示  测试通过
-                        $list[$k]['is_test_detail_log'] = 0;//不显示  问题详情
+                if ($val['is_test'] == 1 && $val['test_person'] != '') {
+                    if (in_array(session('admin.id'), explode(',', $val['test_person']))) {
+                        $list[$k]['is_test_record_hidden'] = 1; //显示 记录问题
+                        $list[$k]['is_test_finish_hidden'] = 1; //显示  测试通过
+                        $list[$k]['is_test_detail_log'] = 0; //不显示  问题详情
                     }
                 }
 
-                if($val['assign_developer_ids'] != ''){
-                    if(in_array(session('admin.id'), explode(',', $val['assign_developer_ids']))){
-                        $list[$k]['is_developer_opt'] = 1;//开发完成
+                if ($val['assign_developer_ids'] != '') {
+                    if (in_array(session('admin.id'), explode(',', $val['assign_developer_ids']))) {
+                        $list[$k]['is_developer_opt'] = 1; //开发完成
                     }
                 }
-
             }
             $result = array("total" => $total, "rows" => $list);
 
@@ -260,7 +295,7 @@ class DevelopDemand extends Backend
                     $params['create_person_id'] = session('admin.id');
                     $params['createtime'] = date('Y-m-d H:i:s');
 
-                    if ($params['type']==1){//如果为BUG类型,更新
+                    if ($params['type'] == 1) { //如果为BUG类型,更新
                         $params['review_status_develop'] = 1;
                         $params['review_status_manager'] = 1;
                     }
@@ -285,7 +320,7 @@ class DevelopDemand extends Backend
             }
             $this->error(__('Parameter %s can not be empty', ''));
         }
-        $this->view->assign('demand_type',input('demand_type'));
+        $this->view->assign('demand_type', input('demand_type'));
         return $this->view->fetch();
     }
 
@@ -337,7 +372,7 @@ class DevelopDemand extends Backend
             }
             $this->error(__('Parameter %s can not be empty', ''));
         }
-        $this->view->assign('demand_type',input('demand_type'));
+        $this->view->assign('demand_type', input('demand_type'));
         $this->view->assign("row", $row);
         return $this->view->fetch();
     }
@@ -350,7 +385,7 @@ class DevelopDemand extends Backend
     {
         if ($this->request->isAjax()) {
             $data['is_del'] =  2;
-            $res = $this->model->allowField(true)->save($data,['id'=> input('ids')]);
+            $res = $this->model->allowField(true)->save($data, ['id' => input('ids')]);
             if ($res) {
                 $this->success('成功');
             } else {
@@ -653,29 +688,27 @@ class DevelopDemand extends Backend
     public function problem_detail($ids = null)
     {
 
-        if($this->request->isPost()) {
+        if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
             if ($params) {
-                if ($params['opt_type']==1){
-                $data['is_complete']=1;
-                $res = $this->testRecord->allowField(true)->save($data,$params);
-                if ($res) {
-                    $this->success('成功');
-
-                } else {
-                    $this->error('失败');
-                }
-                }elseif ($params['opt_type']==2){
-
-                    $data['is_del']=2;
-                    $where['id']=$params['id'];
-                    $res = $this->testRecord->allowField(true)->save($data,$where);
+                if ($params['opt_type'] == 1) {
+                    $data['is_complete'] = 1;
+                    $res = $this->testRecord->allowField(true)->save($data, $params);
                     if ($res) {
                         $this->success('成功');
                     } else {
                         $this->error('失败');
                     }
+                } elseif ($params['opt_type'] == 2) {
 
+                    $data['is_del'] = 2;
+                    $where['id'] = $params['id'];
+                    $res = $this->testRecord->allowField(true)->save($data, $where);
+                    if ($res) {
+                        $this->success('成功');
+                    } else {
+                        $this->error('失败');
+                    }
                 }
             }
             $this->error(__('Parameter %s can not be empty', ''));
