@@ -76,6 +76,17 @@
                     </div>
                 </form>
                 {/if}
+
+                {if $ltl['is_complete'] == 0 && session('admin.id')== $ltl['create_user_id'] }
+                <form role="form" data-toggle="validator" method="POST" action="{:url('problem_detail')}">
+                    <input type="hidden" name="row[id]" value="{$ltl['id']}"/>
+                    <input type="hidden" name="row[opt_type]" value="2"/>
+                    <div style="padding-left: 58px;padding-bottom: 1%;padding-top: 1%">
+                        <button type="submit" name="web_finish" value="1" class="btn btn-success btn-embossed">删除</button>
+                    </div>
+                </form>
+                {/if}
+
             </div>
         </li>
     {/volist}
@@ -111,6 +122,16 @@
                 <input type="hidden" name="row[id]" value="{$rtl['id']}"/>
                 <div style="padding-left: 58px;padding-bottom: 1%;padding-top: 1%">
                     <button type="submit" name="web_finish" value="1" class="btn btn-success btn-embossed">{:__('All_finish')}</button>
+                </div>
+            </form>
+            {/if}
+
+            {if $rtl['is_complete'] == 0 && session('admin.id')== $rtl['create_user_id'] }
+            <form role="form" data-toggle="validator" method="POST" action="{:url('problem_detail')}">
+                <input type="hidden" name="row[id]" value="{$rtl['id']}"/>
+                <input type="hidden" name="row[opt_type]" value="2"/>
+                <div style="padding-left: 58px;padding-bottom: 1%;padding-top: 1%">
+                    <button type="submit" name="web_finish" value="1" class="btn btn-success btn-embossed">删除</button>
                 </div>
             </form>
             {/if}
