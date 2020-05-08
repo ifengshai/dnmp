@@ -41,6 +41,7 @@
             {if $ltl['is_complete'] == 0 && in_array(session('admin.id'), explode(',', $ltl['responsibility_user_id']))}
             <form role="form" data-toggle="validator" method="POST" action="{:url('problem_detail')}">
                 <input type="hidden" name="row[id]" value="{$ltl['id']}"/>
+                <input type="hidden" name="row[opt_type]" value="1"/>
                 <div style="padding-left: 58px;padding-bottom: 1%;padding-top: 1%">
                     <button type="submit" name="web_finish" value="1" class="btn btn-success btn-embossed">点击完成</button>
                 </div>
@@ -94,6 +95,7 @@
             {if $rtl['is_complete'] == 0 && in_array(session('admin.id'), explode(',', $rtl['responsibility_user_id']))}
             <form role="form" data-toggle="validator" method="POST" action="{:url('problem_detail')}">
                 <input type="hidden" name="row[id]" value="{$rtl['id']}"/>
+                <input type="hidden" name="row[opt_type]" value="1"/>
                 <div style="padding-left: 58px;padding-bottom: 1%;padding-top: 1%">
                     <button type="submit" name="web_finish" value="1" class="btn btn-success btn-embossed">点击完成</button>
                 </div>

@@ -1206,6 +1206,31 @@ class ItWebDemand extends Backend
         if($this->request->isPost()) {
             $params = $this->request->post("row/a");
             if ($params) {
+                if ($params['opt_type']){
+                    if ($params['opt_type']==1){
+                        $data['is_complete']=1;
+                        $where['id'] = $params['id'];
+                        $res = $this->testRecordModel->allowField(true)->save($data, $where);
+                        if ($res) {
+                            $this->success('成功');
+
+                        } else {
+                            $this->error('失败');
+                        }
+                    }elseif ($params['opt_type']==2){
+
+                        $data['is_del']=2;
+                        $where['id']=$params['id'];
+                        $res = $this->testRecordModel->allowField(true)->save($data,$where);
+                        if ($res) {
+                            $this->success('成功');
+                        } else {
+                            $this->error('失败');
+                        }
+
+                    }
+
+                }else{
                 $params['create_time'] =  date('Y-m-d H:i',time());
                 $params['create_user_id'] =  $this->auth->id;
                 $res_status = $this->testRecordModel->allowField(true)->save($params);
@@ -1215,6 +1240,7 @@ class ItWebDemand extends Backend
                     $this->success('成功');
                 } else {
                     $this->error('失败');
+                }
                 }
             }
             $this->error(__('Parameter %s can not be empty', ''));
@@ -1327,7 +1353,8 @@ class ItWebDemand extends Backend
             if ($params) {
                 if ($params['opt_type']==1){
                     $data['is_complete']=1;
-                    $res = $this->testRecordModel->allowField(true)->save($data,$params);
+                    $where['id'] = $params['id'];
+                    $res = $this->testRecordModel->allowField(true)->save($data, $where);
                     if ($res) {
                         $this->success('成功');
 

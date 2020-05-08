@@ -545,7 +545,8 @@ class DevelopWebTask extends Backend
             if ($params) {
                 if ($params['opt_type']==1){
                     $data['is_complete']=1;
-                    $res = $this->testRecord->allowField(true)->save($data,$params);
+                    $where['id'] = $params['id'];
+                    $res = $this->testRecord->allowField(true)->save($data, $where);
                     if ($res) {
                         $this->success('成功');
 
