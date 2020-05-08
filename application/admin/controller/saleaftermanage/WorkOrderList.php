@@ -194,7 +194,18 @@ class WorkOrderList extends Backend
 
             return json($result);
         }
-        $admins = Admin::all();
+        //所有承接人的id
+        //客服的所有承接人
+        $kefumanages = config('workorder.kefumanage');
+        foreach($kefumanages as $key => $kefumanage){
+            $kefumanageIds[] = $key;
+            foreach($kefumanage as $k => $v){
+                $kefumanageIds[] = $v;
+            }
+        }
+        array_unshift($kefumanageIds,config('workorder.customer_manager'));
+        $receptPersonAllIds = array_merge(config('workorder.warehouse_group'),config('workorder.warehouse_lens_group'),config('workorder.cashier_group'),config('workorder.copy_group'),$kefumanageIds);
+        $admins = Admin::where('id','in',$receptPersonAllIds)->select();
         $this->assign('admins',$admins);
         $this->assignconfig('platform_order', $platform_order ?: '');
         return $this->view->fetch();
