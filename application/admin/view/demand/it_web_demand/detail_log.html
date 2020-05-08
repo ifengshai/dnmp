@@ -79,7 +79,7 @@
                 {/if}
 
                 {if $ltl['is_complete'] == 0 && session('admin.id')== $ltl['create_user_id'] }
-                <form role="form" data-toggle="validator" method="POST" action="{:url('problem_detail')}">
+                <form role="form" data-toggle="validator" method="POST" action="{:url('detail_log')}">
                     <input type="hidden" name="row[id]" value="{$ltl['id']}"/>
                     <input type="hidden" name="row[opt_type]" value="2"/>
                     <div style="padding-left: 58px;padding-bottom: 1%;padding-top: 1%">
@@ -129,7 +129,7 @@
             {/if}
 
             {if $rtl['is_complete'] == 0 && session('admin.id')== $rtl['create_user_id'] }
-            <form role="form" data-toggle="validator" method="POST" action="{:url('problem_detail')}">
+            <form role="form" data-toggle="validator" method="POST" action="{:url('detail_log')}">
                 <input type="hidden" name="row[id]" value="{$rtl['id']}"/>
                 <input type="hidden" name="row[opt_type]" value="2"/>
                 <div style="padding-left: 58px;padding-bottom: 1%;padding-top: 1%">
