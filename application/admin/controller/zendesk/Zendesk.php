@@ -844,4 +844,14 @@ DOC;
             }
         }
     }
+
+    /**
+     * 同步未常见的工单，由于通知失败导致的
+     */
+    public function asycTickets()
+    {
+        for($i=121918;$i<121920;$i++){
+            (new Notice(request(), ['type' => 'zeelool','id' => $i]))->create();
+        }
+    }
 }
