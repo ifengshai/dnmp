@@ -114,7 +114,7 @@ class DevelopDemand extends Backend
                             $list[$k]['develop_status_str'] = '待测试';
                         } elseif ($val['is_finish'] == 1 && $val['test_is_passed'] == 1 && $val['is_finish_task'] == 0) {
                             $list[$k]['develop_status_str'] = '待上线';
-                        } elseif ($val['is_finish'] == 1 && $val['test_is_passed'] == 1 && $val['is_finish_task'] == 1) {
+                        } elseif ($val['is_finish'] == 1 && $val['test_is_passed'] == 1 && $val['is_finish_task'] == 1 && $val['is_test_complete'] == 0) {
                             $list[$k]['develop_status_str'] = '待回测';
                         } elseif ($val['is_test_complete'] == 1) {
                             $list[$k]['develop_status_str'] = '已完成';
@@ -228,6 +228,30 @@ class DevelopDemand extends Backend
                 if ($val['assign_developer_ids'] != '') {
                     if (in_array(session('admin.id'), explode(',', $val['assign_developer_ids']))) {
                         $list[$k]['is_developer_opt'] = 1; //开发完成
+                    }
+                }
+
+                if ($val['review_status_manager'] == 1 && $val['review_status_develop'] == 1) {
+                    if ($val['is_test'] == 1) {
+                        if ($val['is_finish'] == 1 && $val['test_is_passed'] == 0) {
+                            $list[$k]['develop_status_str'] = '待测试';
+                        } elseif ($val['is_finish'] == 1 && $val['test_is_passed'] == 1 && $val['is_finish_task'] == 0) {
+                            $list[$k]['develop_status_str'] = '待上线';
+                        } elseif ($val['is_finish'] == 1 && $val['test_is_passed'] == 1 && $val['is_finish_task'] == 1 && $val['is_test_complete'] == 0) {
+                            $list[$k]['develop_status_str'] = '待回测';
+                        } elseif ($val['is_test_complete'] == 1) {
+                            $list[$k]['develop_status_str'] = '已完成';
+                        } else {
+                            $list[$k]['develop_status_str'] = '开发ing';
+                        }
+                    } else {
+                        if ($val['is_finish'] == 1 && $val['is_finish_task'] == 0) {
+                            $list[$k]['develop_status_str'] = '待上线';
+                        } elseif ($val['is_finish'] == 1  && $val['is_finish_task'] == 1) {
+                            $list[$k]['develop_status_str'] = '已完成';
+                        } else {
+                            $list[$k]['develop_status_str'] = '开发ing';
+                        }
                     }
                 }
             }
