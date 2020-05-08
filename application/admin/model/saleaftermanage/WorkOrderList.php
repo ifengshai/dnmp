@@ -565,6 +565,7 @@ class WorkOrderList extends Model
     public function createOrder($siteType, $work_id)
     {
         $changeSkus = WorkOrderChangeSku::where(['work_id' => $work_id, 'change_type' => 5])->select();
+        file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',json_encode(collection($changeSkus)->toArray()),FILE_APPEND);
         //如果存在补发单的措施
         if ($changeSkus) {
             $postData = $postDataCommon = [];
