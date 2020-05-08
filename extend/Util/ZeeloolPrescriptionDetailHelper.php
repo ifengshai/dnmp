@@ -190,7 +190,7 @@ class ZeeloolPrescriptionDetailHelper
 					$items[$item_key]['od_add'] = $items[$item_key]['od_add'];
 				}
 			} else {
-				if ($items[$item_key]['od_add'] && $items[$item_key]['od_add'] != '0.00') {
+				if ($items[$item_key]['od_add'] && $items[$item_key]['od_add']*1 != 0) {
 					$items[$item_key]['total_add'] = $items[$item_key]['od_add'];
 				} else {
 					$items[$item_key]['total_add'] = $items[$item_key]['os_add'];

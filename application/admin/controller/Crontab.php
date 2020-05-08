@@ -73,8 +73,10 @@ class Crontab extends Backend
      */
     public function  zeelool_order_custom_order_prescription()
     {
-        $order_entity_id_querySql = "select sfo.entity_id from sales_flat_order sfo where sfo.custom_order_prescription_type is null order by entity_id asc limit 1000";
+        $order_entity_id_querySql = "select sfo.entity_id from sales_flat_order sfo where sfo.custom_order_prescription_type > 0 order by entity_id asc limit 1000";
         $order_entity_id_list = Db::connect('database.db_zeelool')->query($order_entity_id_querySql);
+
+        dump($order_entity_id_list);die;
         if (empty($order_entity_id_list)) {
             echo '处理完毕！';
             exit;
@@ -104,11 +106,11 @@ class Crontab extends Backend
             $label = [];
             foreach ($items as $k => $v) {
                 //如果镜片参数为真 或 不等于 Plastic Lenses 并且不等于 FRAME ONLY则此订单为含处方
-                if ($v['index_type'] == '' || $v['index_type'] == 'Plastic Lenses' || $v['index_type'] == 'FRAME ONLY') {
+                if ($v['index_type'] == '' || $v['index_type'] == 'Plastic Lenses' || $v['index_type'] == 'FRAME ONLY' || $v['index_type'] == 'Frame Only') {
                     $label[] = 1; //仅镜架
-                } else if (($v['index_type'] && $v['index_type'] != 'Plastic Lenses' && $v['index_type'] != 'FRAME ONLY') && $v['is_custom_lens'] == 0) {
+                } else if (($v['index_type'] && $v['index_type'] != 'Plastic Lenses' && $v['index_type'] != 'FRAME ONLY' && $v['index_type'] != 'Frame Only') && $v['is_custom_lens'] == 0) {
                     $label[] = 2; //现片含处方
-                } else if (($v['index_type'] && $v['index_type'] != 'Plastic Lenses' && $v['index_type'] != 'FRAME ONLY') && $v['is_custom_lens'] == 1) {
+                } else if (($v['index_type'] && $v['index_type'] != 'Plastic Lenses' && $v['index_type'] != 'FRAME ONLY' && $v['index_type'] != 'Frame Only') && $v['is_custom_lens'] == 1) {
                     $label[] = 3; //定制含处方
                 }
             }
@@ -205,36 +207,32 @@ order by sfoi.item_id asc limit 1000";
         foreach ($order_item_list as $order_item_key => $order_item_value) {
 
             $product_options = unserialize($order_item_value['product_options']);
-            $final_params['coatiing_name'] = substr($product_options['info_buyRequest']['tmplens']['coatiing_name'], 0, 100);
-            $final_params['index_type'] = substr($product_options['info_buyRequest']['tmplens']['index_type'], 0, 100);
+            $final_params['coatiing_name'] = substr($product_options['info_buyRequest']['tmplens']['coating_name'], 0, 100);
+            $final_params['index_type'] = substr($product_options['info_buyRequest']['tmplens']['lens_data_name'], 0, 100);
 
             $final_params['frame_price'] = $product_options['info_buyRequest']['tmplens']['frame_price'];
-            $final_params['index_price'] = $product_options['info_buyRequest']['tmplens']['index_price'];
-            $final_params['coatiing_price'] = $product_options['info_buyRequest']['tmplens']['coatiing_price'];
+            $final_params['index_price'] = $product_options['info_buyRequest']['tmplens']['lens_base_price'];
+            $final_params['coatiing_price'] = $product_options['info_buyRequest']['tmplens']['coating_base_price'];
 
             $items[$order_item_key]['frame_regural_price'] = $final_params['frame_regural_price'] = $product_options['info_buyRequest']['tmplens']['frame_regural_price'];
             $items[$order_item_key]['is_special_price'] = $final_params['is_special_price'] = $product_options['info_buyRequest']['tmplens']['is_special_price'];
             $items[$order_item_key]['index_price_old'] = $final_params['index_price_old'] = $product_options['info_buyRequest']['tmplens']['index_price_old'];
-            $items[$order_item_key]['index_name'] = $final_params['index_name'] = $product_options['info_buyRequest']['tmplens']['index_name'];
-            $items[$order_item_key]['index_id'] = $final_params['index_id'] = $product_options['info_buyRequest']['tmplens']['index_id'];
+            $items[$order_item_key]['index_name'] = $final_params['index_name'] = $product_options['info_buyRequest']['tmplens']['lens_data_name'];
+            $items[$order_item_key]['index_id'] = $final_params['index_id'] = $product_options['info_buyRequest']['tmplens']['lens_id'];
             $items[$order_item_key]['lens'] = $final_params['lens'] = $product_options['info_buyRequest']['tmplens']['lens'];
-            $items[$order_item_key]['lens_old'] = $final_params['lens_old'] = $product_options['info_buyRequest']['tmplens']['lens_old'];
+            $items[$order_item_key]['lens_old'] = $final_params['lens_old'] = $product_options['info_buyRequest']['tmplens']['lens'];
             $items[$order_item_key]['total'] = $final_params['total'] = $product_options['info_buyRequest']['tmplens']['total'];
-            $items[$order_item_key]['total_old'] = $final_params['total_old'] = $product_options['info_buyRequest']['tmplens']['total_old'];
+            $items[$order_item_key]['total_old'] = $final_params['total_old'] = $product_options['info_buyRequest']['tmplens']['total'];
 
             $prescription_params = $product_options['info_buyRequest']['tmplens']['prescription'];
-            // dump($final_params);
             $prescription_params = explode("&", $prescription_params);
             $lens_params = array();
             foreach ($prescription_params as $key => $value) {
-                // dump($value);
                 $arr_value = explode("=", $value);
                 $lens_params[$arr_value[0]] = $arr_value[1];
             }
-            // dump($lens_params);
             $final_params = array_merge($lens_params, $final_params);
-            // dump($final_params);            
-
+      
             $items[$order_item_key]['order_id'] = $order_item_value['order_id'];
             $items[$order_item_key]['item_id'] = $order_item_value['item_id'];
             $items[$order_item_key]['product_id'] = $order_item_value['product_id'];
@@ -266,11 +264,15 @@ order by sfoi.item_id asc limit 1000";
             $items[$order_item_key]['od_axis'] = $final_params['od_axis'];
             $items[$order_item_key]['os_axis'] = $final_params['os_axis'];
 
-            if ($final_params['os_add'] && $final_params['od_add']) {
+            if ($final_params['os_add'] && $final_params['od_add'] && $final_params['os_add'] * 1 != 0 && $final_params['od_add'] * 1 != 0) {
                 $items[$order_item_key]['os_add'] = $final_params['os_add'];
                 $items[$order_item_key]['od_add'] = $final_params['od_add'];
             } else {
-                $items[$order_item_key]['total_add'] = $final_params['os_add'];
+                if ($items[$order_item_key]['od_add'] && $final_params['od_add']*1 != 0) {
+					$items[$order_item_key]['total_add'] = $final_params['od_add'];
+				} else {
+					$items[$order_item_key]['total_add'] = $final_params['os_add'];
+				}
             }
 
             if ($final_params['pdcheck'] == 'on') {
@@ -310,6 +312,10 @@ order by sfoi.item_id asc limit 1000";
             }
 
             if (strpos($final_params['index_type'], 'Lens with Color Tint') !== false) {
+                $items[$order_item_key]['is_custom_lens'] = 1;
+            }
+
+            if (strpos($final_params['index_type'], 'Color Tint') !== false) {
                 $items[$order_item_key]['is_custom_lens'] = 1;
             }
 
