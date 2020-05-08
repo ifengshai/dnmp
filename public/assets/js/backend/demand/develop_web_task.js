@@ -127,7 +127,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                         return false;
                                     },
                                     visible: function (row) {
-                                        return true;
+                                        // return true;
                                         if (row.is_test_adopt == 1 && row.is_complete == 0 && Config.is_set_status == 1) {
                                             return true;
                                         } else {
