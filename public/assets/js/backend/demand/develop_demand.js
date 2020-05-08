@@ -853,7 +853,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     },
                                     visible: function (row) {
 
-                                        if (row.test_is_passed == 0 && Config.test_is_passed == 1 && row.is_test == 1 && row.test_person && row.is_finish == 1) {
+                                        if (row.test_is_passed == 0 && Config.test_is_passed == 1 && row.is_test == 1 && row.is_test_record_hidden ==1 && row.is_finish == 1) {
                                             return true;
                                         } else {
                                             return false;
@@ -946,7 +946,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                         return false;
                                     },
                                     visible: function (row) {
-                                        if (row.is_finish_task == 1 && row.is_test == 1 && Config.test_complete == 1 && row.is_test_complete == 0) {
+                                        if (row.is_finish_task == 1 && row.is_test == 1 && Config.test_complete == 1 && row.is_test_complete == 0 && row.is_test_record_hidden ==1) {
                                             return true;
                                         } else {
                                             return false;
