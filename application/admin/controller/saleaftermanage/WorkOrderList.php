@@ -1405,6 +1405,7 @@ class WorkOrderList extends Backend
         }else{
             $row->assign_user  = Admin::where(['id'=>$row->operation_user_id])->value('nickname');
         }
+        $this->view->assign("row", $row);
         if ($operateType == 2) { //审核
             return $this->view->fetch('saleaftermanage/work_order_list/check');
         }
@@ -1419,7 +1420,7 @@ class WorkOrderList extends Backend
         //获取处理的措施
         $recepts = WorkOrderRecept::where('work_id', $row->id)->with('measure')->group('recept_group_id,measure_id')->select();
         $this->view->assign('recepts', $recepts);
-        $this->view->assign("row", $row);
+
         $this->view->assign('remarkList', $remarkList);
        $workOrderNote = WorkOrderNote::where('work_id',$ids)->select();
        $this->view->assign('workOrderNote', $workOrderNote);
