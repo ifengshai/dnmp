@@ -39,7 +39,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         },
                         {field: 'entry_user_id', title: __('Entry_user_id'),visible:false,operate:false},
                         {field: 'entry_user_name', title: __('Entry_user_id'),operate:false},
-                        {field: 'title', title: __('Title'),visible:false,operate:'LIKE'},
+                        {field: 'title', title: __('Title'),cellStyle: formatTableUnit,operate:'LIKE'},
                         {
                             field: 'content',
                             operate:false,
@@ -518,7 +518,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         },
                         {field: 'entry_user_id', title: __('Entry_user_id'),visible:false,operate:false},
                         {field: 'entry_user_name', title: __('Entry_user_id'),operate:false},
-                        {field: 'title', title: __('Title'),visible:false,operate:'LIKE'},
+                        {field: 'title', title: __('Title'),cellStyle: formatTableUnit,operate:'LIKE',},
                         {
                             field: 'content',
                             operate:false,
@@ -1031,6 +1031,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     ]
                 ]
             });
+
             $('.panel-heading a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
                 var field = $(this).data("field");
                 var value = $(this).data("value");
@@ -1717,13 +1718,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 getcontent: {
                     //格式为：方法名+空格+DOM元素
                     'click .btn-getcontent': function (e, value, row, index) {
-                        var str = '标题：'+row.title+'<br><hr>内容：'+value;
+                        //var str = '标题：'+row.title+'<br><hr>内容：'+value;
                         Layer.open({
                             closeBtn: 1,
                             title: row.title,
                             area: ['60%'],
                             shadeClose:true,
-                            anim: 6,
+                            anim: 0,
                             content: value
                         });
                     }
@@ -1756,4 +1757,16 @@ function update_responsibility_user(val){
 
 function onchangeSelect(num) {
     $("input[name='row[is_small_probability]']").val(num.value);
+}
+
+
+function formatTableUnit(value, row, index) {
+    return {
+        css: {
+            "white-space": "nowrap",
+            "text-overflow": "ellipsis",
+            "overflow": "hidden",
+            "max-width": "200px"
+        }
+    }
 }
