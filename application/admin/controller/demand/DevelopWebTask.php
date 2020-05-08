@@ -82,7 +82,6 @@ class DevelopWebTask extends Backend
             return json($result);
         }
         //判断是否有完成按钮权限
-        $this->assignconfig('is_set_status', $this->auth->check('demand/develop_web_task/set_task_complete_status'));
         $this->assignconfig('is_problem_detail', $this->auth->check('demand/develop_web_task/problem_detail'));
         $this->assignconfig('is_edit', $this->auth->check('demand/develop_web_task/edit'));
         $this->assignconfig('is_set_status', $this->auth->check('demand/develop_web_task/set_task_complete_status'));

@@ -84,7 +84,7 @@ class DevelopDemand extends Backend
                 $list[$k]['test_person'] = implode(',', $test_nickname);
 
                 if($val['is_test'] == 1 && $val['test_person'] != ''){
-                    if(in_array($this->auth->id, explode(',', $val['test_person']))){
+                    if(in_array(session('admin.id'), explode(',', $val['test_person']))){
                         $list[$k]['is_test_record_hidden'] = 1;//显示 记录问题
                         $list[$k]['is_test_finish_hidden'] = 1;//显示  测试通过
                         $list[$k]['is_test_detail_log'] = 0;//不显示  问题详情
@@ -92,7 +92,7 @@ class DevelopDemand extends Backend
                 }
 
                 if($val['assign_developer_ids'] != ''){
-                    if(in_array($this->auth->id, explode(',', $val['assign_developer_ids']))){
+                    if(in_array(session('admin.id'), explode(',', $val['assign_developer_ids']))){
                         $list[$k]['is_developer_opt'] = 1;//开发完成
                     }
                 }
@@ -181,6 +181,20 @@ class DevelopDemand extends Backend
                 }
                 $list[$k]['nickname'] = implode(',', $nickname);
                 $list[$k]['test_person'] = implode(',', $test_nickname);
+                if($val['is_test'] == 1 && $val['test_person'] != ''){
+                    if(in_array(session('admin.id'), explode(',', $val['test_person']))){
+                        $list[$k]['is_test_record_hidden'] = 1;//显示 记录问题
+                        $list[$k]['is_test_finish_hidden'] = 1;//显示  测试通过
+                        $list[$k]['is_test_detail_log'] = 0;//不显示  问题详情
+                    }
+                }
+
+                if($val['assign_developer_ids'] != ''){
+                    if(in_array(session('admin.id'), explode(',', $val['assign_developer_ids']))){
+                        $list[$k]['is_developer_opt'] = 1;//开发完成
+                    }
+                }
+
             }
             $result = array("total" => $total, "rows" => $list);
 
@@ -642,12 +656,26 @@ class DevelopDemand extends Backend
         if($this->request->isPost()) {
             $params = $this->request->post("row/a");
             if ($params) {
+                if ($params['opt_type']==1){
                 $data['is_complete']=1;
                 $res = $this->testRecord->allowField(true)->save($data,$params);
                 if ($res) {
                     $this->success('成功');
+
                 } else {
                     $this->error('失败');
+                }
+                }elseif ($params['opt_type']==2){
+
+                    $data['is_del']=2;
+                    $where['id']=$params['id'];
+                    $res = $this->testRecord->allowField(true)->save($data,$where);
+                    if ($res) {
+                        $this->success('成功');
+                    } else {
+                        $this->error('失败');
+                    }
+
                 }
             }
             $this->error(__('Parameter %s can not be empty', ''));
@@ -655,6 +683,7 @@ class DevelopDemand extends Backend
 
         $map['pid'] = $ids;
         $map['type'] = 2;
+        $map['is_del'] = 1;
         /*测试日志--测试环境*/
         $list = $this->testRecord
             ->where($map)
