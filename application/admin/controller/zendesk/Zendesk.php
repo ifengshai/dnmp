@@ -851,7 +851,7 @@ DOC;
     public function asycTickets()
     {
         set_time_limit(0);
-        for($i=122331;$i<122543;$i++){
+        for($i=122455;$i<122543;$i++){
             (new Notice(request(), ['type' => 'zeelool','id' => $i]))->create();
         }
     }
