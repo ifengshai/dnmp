@@ -764,7 +764,7 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
 
         if ($filter['increment_id']) {
             $map['sfo.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal']];
-        } elseif (!$filter['status']) {
+        } elseif (!$filter['status'] && !$ids) {
             $map['status'] = ['in', ['free_processing', 'processing',  'paypal_reversed', 'paypal_canceled_reversal']];
         }
         //是否有工单
@@ -838,9 +838,12 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
             ->where($map)
             ->where($where)
             ->order('sfoi.order_id desc')
-            ->select();
+            ->select(false);
+        echo $resultList;die;
 
         $resultList = collection($resultList)->toArray();
+
+       
 
         $resultList = $this->qty_order_check($resultList);
 
