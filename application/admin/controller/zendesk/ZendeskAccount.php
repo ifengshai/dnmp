@@ -109,7 +109,14 @@ class ZendeskAccount extends Backend
             }
             $data = [];
             foreach($zeelool_info['users'] as $k=> $v){
+                //已经存在的进行更新
                 if(in_array($v['id'],$accountIdArr)){
+                    $updateData = [
+                        'user_type' => 2,
+                        'account_user' => $v['name'],
+                        'account_email' => $v['email'],
+                    ];
+                    $this->model->where('account_id',$v['id'])->save($updateData);
                     continue;
                 }
                 $data[$k]['user_type']      = 2;
@@ -121,6 +128,12 @@ class ZendeskAccount extends Backend
             }
             foreach($voogueme_info['users'] as $vk=> $vv){
                 if(in_array($vv['id'],$accountIdArr)){
+                    $updateData = [
+                        'user_type' => 2,
+                        'account_user' => $v['name'],
+                        'account_email' => $v['email'],
+                    ];
+                    $this->model->where('account_id',$v['id'])->save($updateData);
                     continue;
                 }
                 $data[$vk]['user_type']      = 2;
