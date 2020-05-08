@@ -1172,7 +1172,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
 
                     var users = array_filter(username);
                     $('#appoint_group_users').html(users.join(','));
-
+                    $('#recept_person_id').val(appoint_users.join(','));
 
                     //判断更换处方的状态，如果显示的话把数据带出来，如果隐藏则不显示镜架数据 start
                     // if (!$('.step2-1').is(':hidden')) {
