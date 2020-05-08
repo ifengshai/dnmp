@@ -677,11 +677,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             formatter: Table.api.formatter.status
                         },
                         { field: 'test_person', title: __('Test_person_name'), operate: false },
+                        { field: 'develop_status_str', title: __('开发节点'), operate: false },
                         {
                             field: 'is_finish',
                             title: __('开发完成'),
                             custom: { 0: 'danger', 1: 'success' },
                             searchList: { 0: '否', 1: '是' },
+                            visible: false,
                             formatter: Table.api.formatter.status
                         },
                         {
@@ -689,6 +691,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             title: __('Test_is_passed'),
                             custom: { 0: 'danger', 1: 'success' },
                             searchList: { 0: '否', 1: '是' },
+                            visible: false,
                             formatter: Table.api.formatter.status
                         },
                         {
@@ -696,6 +699,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             title: __('是否上线'),
                             custom: { 0: 'danger', 1: 'success' },
                             searchList: { 0: '否', 1: '是' },
+                            visible: false,
                             formatter: Table.api.formatter.status
                         },
                         {
@@ -706,49 +710,21 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             visible: false,
                             formatter: Table.api.formatter.datetime
                         },
-                        {
-                            field: 'expected_time',
-                            title: __('Expected_time'),
-                            operate: 'RANGE',
-                            addclass: 'datetimerange',
-                            visible: false,
-                            formatter: Table.api.formatter.datetime
-                        },
+
                         {
                             field: 'estimated_time',
                             title: __('Estimated_time'),
                             operate: 'RANGE',
                             addclass: 'datetimerange',
-                            visible: false,
-                            formatter: Table.api.formatter.datetime
+
                         },
                         {
                             field: 'finish_time',
                             title: __('Finish_time'),
                             operate: 'RANGE',
                             addclass: 'datetimerange',
-                            visible: false,
-                            formatter: Table.api.formatter.datetime
-                        },
-                        {
-                            field: 'createtime',
-                            title: __('时间'),
-                            operate: false,
-                            formatter: function (value, rows) {
-                                var str = '';
-                                str += '<div class="step_recept"><b class="step">创建时间：</b><b class="recept">' + value + '</b></div>';
-                                if (rows.expected_time) {
-                                    str += '<br><div class="step_recept"><b class="step">期望时间：</b><b class="recept">' + rows.expected_time + '</b></div>';
-                                }
-                                if (rows.estimated_time) {
-                                    str += '<br><div class="step_recept"><b class="step">预计时间：</b><b class="recept">' + rows.estimated_time + '</b></div>';
-                                }
 
-                                if (rows.finish_time) {
-                                    str += '<br><div class="step_recept"><b class="step">完成时间：</b><b class="recept">' + rows.finish_time + '</b></div>';
-                                }
-                                return str;
-                            },
+                            formatter: Table.api.formatter.datetime
                         },
                         {
                             field: 'operate',
