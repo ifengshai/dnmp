@@ -1350,7 +1350,7 @@ class WorkOrderList extends Backend
                 $this->error(__('You have no permission'));
             }
         }
-        $this->view->assign("row", $row);
+
         if (1 == $row->work_type) { //判断工单类型，客服工单
             $this->view->assign('work_type', 1);
             $this->assignconfig('work_type', 1);
@@ -1401,8 +1401,9 @@ class WorkOrderList extends Backend
         if(2 <= $row->work_status){
             $row->assign_user = Admin::where(['id'=>$row->assign_user_id])->value('nickname');
         }else{
-            $row->assign_user = Admin::where(['id'=>$row->operation_user_id])->value('nickname');
+            $row->assign_user  = Admin::where(['id'=>$row->operation_user_id])->value('nickname');
         }
+        $this->view->assign("row", $row);
         if ($operateType == 2) { //审核
             return $this->view->fetch('saleaftermanage/work_order_list/check');
         }

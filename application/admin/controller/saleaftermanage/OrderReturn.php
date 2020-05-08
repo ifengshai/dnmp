@@ -421,7 +421,7 @@ class OrderReturn extends Backend
     public function search(Request $request)
     {
         $order_platform = intval(input('type',0));
-        $customer_email = input('email',0);
+        $customer_email = input('email','');
         if ($request->isPost() || ( $order_platform && $customer_email)) {
             //获取输入的订单号
             $increment_id = trim($request->post('increment_id'));
