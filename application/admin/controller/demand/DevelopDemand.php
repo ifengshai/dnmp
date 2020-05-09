@@ -91,13 +91,7 @@ class DevelopDemand extends Backend
                     }
                 }
 
-                if ($val['assign_developer_ids'] != '') {
-                    if (in_array(session('admin.id'), explode(',', $val['assign_developer_ids']))) {
-                        $list[$k]['is_developer_opt'] = 1; //开发完成
-                    }
-                }
-
-
+            
                 if ($val['review_status_manager'] == 0) {
                     $list[$k]['status_str'] = '经理待审核';
                 } elseif ($val['review_status_manager'] == 1 && $val['review_status_develop'] == 0) {
