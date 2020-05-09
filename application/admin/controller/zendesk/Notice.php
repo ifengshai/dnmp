@@ -959,7 +959,7 @@ class Notice extends Controller
     }
     public function asyncUpdate()
     {
-        $params = 'type:ticket created_at>=2020-05-07T15:49:10Z created_at<=2020-05-08T10:57:10Z order_by:created_at sort:asc';
+        $params = 'type:ticket created_at>=2020-05-08T22:40:10Z created_at<=2020-05-09T02:20:10Z order_by:created_at sort:asc';
          //Get all tickets
         $tickets = $this->client->search()->find($params);
 
