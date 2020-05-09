@@ -871,6 +871,7 @@ DOC;
         $ticketIds = (new Notice(request(), ['type' => 'zeelool']))->asyncUpdate();
         foreach($ticketIds as $ticketId){
             (new Notice(request(), ['type' => 'zeelool','id' => $ticketId]))->update();
+            echo $ticketId."\r\n";
         }
     }
     public function asycTicketsVooguemeUpdate()
@@ -878,6 +879,7 @@ DOC;
         $ticketIds = (new Notice(request(), ['type' => 'voogueme']))->asyncUpdate();
         foreach($ticketIds as $ticketId){
             (new Notice(request(), ['type' => 'voogueme','id' => $ticketId]))->update();
+            echo $ticketId."\r\n";
         }
     }
 }
