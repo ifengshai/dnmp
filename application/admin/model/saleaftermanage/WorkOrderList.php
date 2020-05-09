@@ -756,7 +756,7 @@ class WorkOrderList extends Model
         $work = self::find($work_id);
 
         //判断是否已审核
-        //if (strtotime($work->check_time)) return true;
+        if ($work->check_time) return true;
         Db::startTrans();
         try {
             $time = date('Y-m-d H:i:s');
