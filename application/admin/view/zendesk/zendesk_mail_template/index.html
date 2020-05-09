@@ -8,6 +8,7 @@
                     <div id="toolbar" class="toolbar">
                         <a href="javascript:;" class="btn btn-primary btn-refresh" title="{:__('Refresh')}" ><i class="fa fa-refresh"></i> </a>
                         <a href="javascript:;" data-area='["100%","100%"]' class="btn btn-success btn-add {:$auth->check('zendesk/zendesk_mail_template/add')?'':'hide'}" title="{:__('Add')}" ><i class="fa fa-plus"></i> {:__('Add')}</a>
+                        <a href="javascript:;" class="btn btn-success btn-refresh-template {:$auth->check('zendesk/zendesk_mail_template/refreshTemplate')?'':'hide'}" title="{:__('刷新邮件模板')}" ><i class="fa fa-refresh"></i> {:__('刷新邮件模板')}</a>
                         <!-- <a href="javascript:;" data-area='["100%","100%"]' class="btn btn-success btn-edit btn-disabled disabled {:$auth->check('zendesk/zendesk_mail_template/edit')?'':'hide'}" title="{:__('Edit')}" ><i class="fa fa-pencil"></i> {:__('Edit')}</a>
                         <a href="javascript:;"  class="btn btn-success btn-start btn-disabled disabled {:$auth->check('zendesk/zendesk_mail_template/start')?'':'hide'}" title="{:__('Start')}" ><i class="fa fa-cog fa-spin"></i> {:__('Start')}</a>
                         <a href="javascript:;"  class="btn btn-danger btn-forbidden btn-disabled disabled {:$auth->check('zendesk/zendesk_mail_template/forbidden')?'':'hide'}" title="{:__('Forbidden')}" ><i class="fa fa-ban"></i> {:__('Forbidden')}</a>

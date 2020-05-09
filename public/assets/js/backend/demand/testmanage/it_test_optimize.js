@@ -166,7 +166,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         Layer.open({
                             closeBtn: 1,
                             title: "详情",
-                            content: str
+                            content: str,
+                            area:['80%','80%'],
+                            anim: 0
                         });
                     }
                 }

@@ -178,6 +178,23 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     }
                 );
             });
+            //刷新邮件模板
+            $(document).on('click', '.btn-refresh-template', function () {
+                Layer.confirm(
+                    __('确定要刷新邮件模板吗'),
+                    function (index) {
+                        Backend.api.ajax({
+                            url: "zendesk/zendesk_mail_template/refreshTemplate",
+                        }, function (data, ret) {
+                            table.bootstrapTable('refresh');
+                            Layer.close(index);
+                        },function(data,ret){
+                            Layer.alert(ret.msg);
+                            return false;
+                        });
+                    }
+                );
+            });
             //商品禁用
             $(document).on('click', '.btn-forbidden', function () {
                 var ids = Table.api.selectedids(table);

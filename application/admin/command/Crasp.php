@@ -29,6 +29,5 @@ class Crasp extends Command
         $type = $input->getOption('type');
         $method = $input->getOption('method');
         (new Notice(request(), ['type' => $type]))->$method();
-
     }
 }

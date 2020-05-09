@@ -56,3 +56,14 @@
         </div>
     </div>
 </div>
+<script id="receptpersontpl" type="text/html">
+    <!--form表单必须添加form-commsearch这个类-->
+    <form action="" class="form-commonsearch">
+        <!--给select一个固定的高度-->
+        <select id="c-receptperson" class="form-control selectpicker" multiple data-live-search="true" name="recept_person" data-title="请选择">
+            {foreach name="admins" item="vo"}
+                <option value="{$vo.id}">{$vo.nickname}</option>
+            {/foreach}
+        </select>
+    </form>
+</script>

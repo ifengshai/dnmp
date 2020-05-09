@@ -180,6 +180,14 @@ class WorkOrderList extends Model
                 return false;
                 break;
         }
+        if($siteType < 3){
+            foreach($prescriptions as $key => $val){
+                if(!isset($val['total_add'])){
+                    $prescriptions[$key]['os_add'] = $val['od_add'];
+                    $prescriptions[$key]['od_add'] = $val['os_add'];
+                }
+            }
+        }
         //获取地址信息
         $address = $this->model->alias('a')
             ->field('b.entity_id,b.firstname,b.lastname,b.telephone,b.email,b.region,b.region_id,b.postcode,b.street,b.city,b.country_id,b.address_type')
@@ -265,7 +273,7 @@ class WorkOrderList extends Model
         $url = $url . $pathinfo;
 
         $client = new Client(['verify' => false]);
-        file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',json_encode($params),FILE_APPEND);
+        //file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',json_encode($params),FILE_APPEND);
         try {
             if ($method == 'GET') {
                 $response = $client->request('GET', $url, array('query' => $params));
@@ -273,10 +281,10 @@ class WorkOrderList extends Model
                 $response = $client->request('POST', $url, array('form_params' => $params));
             }
             $body = $response->getBody();
-            file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$body,FILE_APPEND);
+            //file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$body,FILE_APPEND);
             $stringBody = (string)$body;
             $res = json_decode($stringBody, true);
-            file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$stringBody,FILE_APPEND);
+            //file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$stringBody,FILE_APPEND);
             if($res === null){
                 exception('网络异常');
             }
@@ -557,6 +565,7 @@ class WorkOrderList extends Model
     public function createOrder($siteType, $work_id)
     {
         $changeSkus = WorkOrderChangeSku::where(['work_id' => $work_id, 'change_type' => 5])->select();
+        //file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',json_encode(collection($changeSkus)->toArray()),FILE_APPEND);
         //如果存在补发单的措施
         if ($changeSkus) {
             $postData = $postDataCommon = [];
@@ -638,6 +647,7 @@ class WorkOrderList extends Model
             }
             $postData = array_merge($postData, $postDataCommon);
             try {
+                file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',json_encode($postData),FILE_APPEND);
                 $res = $this->httpRequest($siteType, 'magic/order/createOrder', $postData, 'POST');
                 $increment_id = $res['increment_id'];
                 //replacement_order添加补发的订单号

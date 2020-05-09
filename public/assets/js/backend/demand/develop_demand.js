@@ -28,7 +28,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     [
                         // { checkbox: true },
                         { field: 'id', title: __('Id') },
-                        { field: 'title', title: __('Titel'), cellStyle: formatTableUnit, formatter: Controller.api.formatter.getClear, operate: false },
+                        // { field: 'title', title: __('Titel'), cellStyle: formatTableUnit, formatter: Controller.api.formatter.getClear, operate: false },
                         {
                             field: 'desc',
                             operate: false,
@@ -134,21 +134,21 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             title: __('Expected_time'),
                             operate: 'RANGE',
                             addclass: 'datetimerange',
-                           
+
                         },
                         {
                             field: 'estimated_time',
                             title: __('Estimated_time'),
                             operate: 'RANGE',
                             addclass: 'datetimerange',
-                            
+
                         },
                         {
                             field: 'finish_time',
                             title: __('Finish_time'),
                             operate: 'RANGE',
                             addclass: 'datetimerange',
-                 
+
                             formatter: Table.api.formatter.datetime
                         },
                         // {
@@ -172,8 +172,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         //     },
                         // },
                         {
-                            field: 'operate', title: __('Operate'), operate: false, table: table, events: Table.api.events.operate,
-                            buttons: [
+                            field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [
                                 {
                                     name: 'ajax',
                                     text: '审核通过',
@@ -1141,7 +1140,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             closeBtn: 1,
                             title: "详情",
                             content: str,
-                            area: ['80%', '80%'],
+                            area:['80%','80%'],
                             anim: 0
                         });
                     }

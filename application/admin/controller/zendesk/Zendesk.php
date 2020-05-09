@@ -101,6 +101,13 @@ class Zendesk extends Backend
                 $andWhere = "FIND_IN_SET({$filter['tags']},tags)";
                 unset($filter['tags']);
             }
+            if($filter['content']) {
+                $comments = ZendeskComments::where('body','like','%'.$filter['content'].'%')->column('ticket_id');
+                $tickets = $this->model->where('subject','like','%'.$filter['content'].'%')->column('ticket_id');
+                $ticket_ids = array_merge($comments,$tickets);
+                $map['zendesk.ticket_id'] = ['in',$ticket_ids];
+                unset($filter['content']);
+            }
             $this->request->get(['filter' => json_encode($filter)]);
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             //默认使用
@@ -835,6 +842,24 @@ DOC;
                 $task->save();
                 $this->model->where('id',$ticket->id)->setField('is_hide',0);
             }
+        }
+    }
+
+    /**
+     * 同步未常见的工单，由于通知失败导致的
+     */
+    public function asycTickets()
+    {
+        set_time_limit(0);
+        for($i=123018;$i<123019;$i++){
+            (new Notice(request(), ['type' => 'zeelool','id' => $i]))->create();
+        }
+    }
+    public function asycTicketsVoogueme()
+    {
+        set_time_limit(0);
+        for($i=63382;$i<63384;$i++){
+            (new Notice(request(), ['type' => 'voogueme','id' => $i]))->create();
         }
     }
 }

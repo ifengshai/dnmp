@@ -66,7 +66,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         { field: 'createtime', title: __('Create_time'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime,visible:false, },
 
                         {
-                            field: '时间节点',
+                            field: 'createtime',
                             title: __('时间节点'),
                             operate: false,
                             formatter: function (value, rows) {
