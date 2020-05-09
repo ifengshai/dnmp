@@ -70,7 +70,15 @@ class Notice extends Controller
         //file_put_contents('/www/wwwroot/mjz/runtime/b.txt',json_encode($postData)."\r\n",FILE_APPEND);
         //评论s
         $comments = $this->getComments($id);
+        //有错误的防止执行下一步
+        if($comments == 'success'){
+            return 'success';
+        }
         $ticket = $this->getTicket($id);
+        //有错误的防止执行下一步
+        if($ticket == 'success'){
+            return 'success';
+        }
         //存在已创建的则跳过流程
         if(Zendesk::where(['ticket_id' => $id,'type' => $type])->find()){
             return false;
@@ -180,7 +188,15 @@ class Notice extends Controller
             //$channel = $postData['channel'];
             //最后一条评论
             $comments = $this->getComments($id);
+            //有错误的防止执行下一步
+            if($comments == 'success'){
+                return 'success';
+            }
             $ticket = $this->getTicket($id);
+            //有错误的防止执行下一步
+            if($ticket == 'success'){
+                return 'success';
+            }
             //开始插入相关数据
             $tags = $ticket->tags;
             $tags = \app\admin\model\zendesk\ZendeskTags::where('name', 'in', $tags)->distinct(true)->column('id');

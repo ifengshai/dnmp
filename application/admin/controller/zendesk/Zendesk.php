@@ -851,14 +851,14 @@ DOC;
     public function asycTickets()
     {
         set_time_limit(0);
-        for($i=122455;$i<122543;$i++){
+        for($i=122716;$i<123019;$i++){
             (new Notice(request(), ['type' => 'zeelool','id' => $i]))->create();
         }
     }
     public function asycTicketsVoogueme()
     {
         set_time_limit(0);
-        for($i=63146;$i<63153;$i++){
+        for($i=63230;$i<63384;$i++){
             (new Notice(request(), ['type' => 'voogueme','id' => $i]))->create();
         }
     }
