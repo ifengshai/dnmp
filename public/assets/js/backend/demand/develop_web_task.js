@@ -31,7 +31,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         { field: 'type', title: __('Type'), custom: { 1: 'success', 2: 'success', 3: 'success' }, searchList: { 1: '短期任务', 2: '中期任务', 3: '长期任务' }, formatter: Table.api.formatter.status },
                         { field: 'title', title: __('Title') },
                         { field: 'desc', title: __('Desc'), cellStyle: formatTableUnit, formatter: Controller.api.formatter.getClear, operate: false },
-                        { field: 'closing_date', title: __('Closing_date') , operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime },
+                        { field: 'closing_date', title: __('Closing_date') , operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime , visible:false },
                         {
                             field: 'is_test_adopt', title: __('Is_test_adopt'), custom: { 1: 'success', 0: 'danger' },
                             searchList: { 1: '是', 0: '否' },
@@ -43,7 +43,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             searchList: { 1: '是', 0: '否' },
                             formatter: Table.api.formatter.status
                         },
-                        { field: 'complete_date', title: __('complete_date'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime },
+                        { field: 'complete_date', title: __('complete_date'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime  , visible:false},
                        
                         {
                             field: 'test_regression_adopt', title: __('回归测试状态'), custom: { 1: 'success', 0: 'danger' },
@@ -57,14 +57,36 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         },
                         { field: 'create_person', title: __('Create_person'), operate: false },
                         { field: 'nickname', title: __('负责人'), visible: false, operate: 'like' },
-                        { field: 'createtime', title: __('创建时间'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime },
+                        { field: 'createtime', title: __('创建时间'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime , visible:false},
                         {
                             field: 'is_finish', title: __('产品经理确认'), custom: { 1: 'success', 0: 'danger' },
                             searchList: { 1: '已确认', 0: '未确认' },
                             formatter: Table.api.formatter.status
                         },
-                        { field: 'finish_time', title: __('确认时间'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime },
-                    
+                        { field: 'finish_time', title: __('确认时间'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime, visible:false },
+
+                        {
+                            field: '时间节点',
+                            title: __('时间节点'),
+                            operate: false,
+                            formatter: function (value, rows) {
+                                var all_user_name = '';
+                                if(rows.createtime){
+                                    all_user_name += '<span class="all_user_name">创建时间：<b>'+ rows.createtime + '</b></span><br>';
+                                }
+                                if(rows.closing_date){
+                                    all_user_name += '<span class="all_user_name">截止时间：<b>'+ rows.closing_date + '</b></span><br>';
+                                }
+                                if(rows.finish_time){
+                                    all_user_name += '<span class="all_user_name">确认时间：<b>'+ rows.finish_time + '</b></span><br>';
+                                }
+                                if(rows.complete_date){
+                                    all_user_name += '<span class="all_user_name">完成时间：<b>'+ rows.complete_date + '</b></span><br>';
+                                }
+                                return all_user_name;
+                            },
+                        },
+
                         {
                             field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [
                                 {
@@ -75,8 +97,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     classname: 'btn btn-xs btn-warning btn-dialog',
                                     icon: 'fa fa-list',
                                     url: 'demand/develop_web_task/problem_detail',
-                                    callback: function (data) {
-                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                    success: function (data, ret) {
+                                        table.bootstrapTable('refresh', {});
+                                        //如果需要阻止成功提示，则必须使用return false;
+                                        //return false;
+                                    },
+                                    error: function (data, ret) {
+                                        Layer.alert(ret.msg);
+                                        return false;
                                     },
                                     visible: function (row) {
                                         return true;
@@ -105,7 +133,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                         return false;
                                     },
                                     visible: function (row) {
-                                        return true;
+                                        // return true;
                                         if (row.is_test_adopt == 1 && row.is_complete == 0 && Config.is_set_status == 1) {
                                             return true;
                                         } else {
@@ -213,6 +241,28 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                             return false;
                                         }
                                         
+                                    }
+                                },
+                                {
+                                    name: 'ajax',
+                                    title: __('删除'),
+                                    icon:'fa fa-trash',
+                                    classname: 'btn btn-xs btn-danger btn-magic btn-ajax',
+                                    url: 'demand/develop_web_task/del',
+                                    confirm: '是否删除?',
+                                    success: function (data, ret) {
+                                        table.bootstrapTable('refresh', {});
+                                    },
+                                    error: function (data, ret) {
+                                        Layer.alert(ret.msg);
+                                        return false;
+                                    },
+                                    visible: function (row) {
+                                        if (Config.is_del_btu == 1) {//有权限 或者创建人为当前人
+                                            return true;
+                                        }else {
+                                            return  false;
+                                        }
                                     }
                                 },
                             ], formatter: Table.api.formatter.operate
