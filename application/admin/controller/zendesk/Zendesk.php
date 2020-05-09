@@ -846,6 +846,7 @@ DOC;
     }
 
     /**
+     * 同步丢失数据使用
      * 同步未常见的工单，由于通知失败导致的
      */
     public function asycTickets()
@@ -864,6 +865,7 @@ DOC;
     }
 
     /**
+     * 同步丢失数据使用
      * 更新同步未常见的工单，由于通知失败导致的
      */
     public function asycTicketsUpdate()
