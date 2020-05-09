@@ -957,4 +957,27 @@ class Notice extends Controller
         $macros = $res->macros;
         return $macros;
     }
+    public function asyncUpdate()
+    {
+        $params = 'type:ticket created_at>=2020-05-07T15:49:10Z created_at<=2020-05-08T10:57:10Z order_by:created_at sort:asc';
+         //Get all tickets
+        $tickets = $this->client->search()->find($params);
+
+        $ticketIds = [];
+        if(!$tickets->count){
+            return true;
+        }
+        $page = ceil($tickets->count / 100 );
+        if($page >= 1){
+            //获取后续的
+            for($i=1;$i<= $page;$i++){
+                $search = $this->client->search()->find($params,['page' => $i]);
+                foreach($search->results as $ticket){
+                    $ticketIds[] = $ticket->id;
+                }
+
+            }
+        }
+         return array_filter($ticketIds);
+    }
 }
