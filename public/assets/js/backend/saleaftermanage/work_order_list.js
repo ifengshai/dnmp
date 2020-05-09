@@ -32,6 +32,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         { field: 'work_type_str', title: __('Work_type'), operate: false },
                         { field: 'work_type', title: __('Work_type'), searchList: { 1: '客服工单', 2: '仓库工单' }, visible: false, formatter: Table.api.formatter.status },
                         { field: 'platform_order', title: __('Platform_order') },
+                        {
+                            field: 'recept_person', title: __('承接人'), searchList: function (column) {
+                                return Template('receptpersontpl', {});
+                            },visible: false
+                        },
                         { field: 'order_sku', title: __('Order_sku'), operate: 'like', visible: false },
 
                         /*{
@@ -126,7 +131,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                             },
                         },
 
-                        { field: 'work_status', title: __('work_status'), custom: { 0: 'black', 1: 'danger', 2: 'success', 4: 'success', 3: 'success', 5: 'success', 6: 'success' }, searchList: { 0: '已取消', 1: '新建', 2: '待审核', 4: '审核拒绝', 3: '待处理', 5: '部分处理', 6: '已处理' }, formatter: Table.api.formatter.status },
+                        { field: 'work_status', title: __('work_status'), custom: { 0: 'black', 1: 'danger', 2: 'orange', 4: 'warning', 3: 'purple', 5: 'primary', 6: 'success' }, searchList: { 0: '已取消', 1: '新建', 2: '待审核', 4: '审核拒绝', 3: '待处理', 5: '部分处理', 6: '已处理' }, formatter: Table.api.formatter.status },
                         { field: 'work_order_note_status', title: __('回复状态'), custom: { 0: 'gray', 1: 'success', 2: 'danger', 3: 'blank' }, searchList: { 0: '无', 1: '客服已回复', 2: '仓库已回复', 3: '财务已回复' }, formatter: Table.api.formatter.status },
                         {
                             field: 'create_time',
@@ -490,6 +495,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         } else {
                             node.hide();
                         }
+
                         //二级措施
                         var secondNode = $('.step' + problem_type_id + '-' + checkID[m]);
                         if (secondNode.is(':hidden')) {
@@ -497,21 +503,36 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         } else {
                             secondNode.hide();
                         }
+                        //判断如果为处理任务时
+                        if (Config.ids) {
+                            if(problem_type_id == 1 && checkID[m] == 1){
+                                $('.step1-1').hide();
+                                $('.step2-1').show();
+                            }
+                            if(problem_type_id == 2 && checkID[m] == 1){
+                                $('.step2-1').hide();
+                                $('.step1-1').show();
+                            }
+                            if(problem_type_id == 3 && checkID[m] == 1){
+                                $('.step2-1').hide();
+                                $('.step1-1').show();
+                            }
+                        }
                     }
 
                     //判断如果为处理任务时
-                    if (Config.ids) {
+                    /*if (Config.ids) {
                         if (problem_type_id == 1) {
-                            $('.measure').hide();
+                            $('.step1-1').hide();
                             $('.step2-1').show();
                         } else if (problem_type_id == 2) {
-                            $('.measure').hide();
+                            $('.step2-1').hide();
                             $('.step1-1').show();
                         } else if (problem_type_id == 3) {
-                            $('.measure').hide();
+                            $('.step2-1').hide();
                             $('.step1-1').show();
                         }
-                    }
+                    }*/
                     var arr = array_filter(appoint_group.split(','));
                    
                     var username = [];
@@ -699,7 +720,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     //补发地址自动填充第一个
                                     $('#c-firstname').val(data.address[i].firstname);
                                     $('#c-lastname').val(data.address[i].lastname);
-                                    $('#c-email').val(data.address[i].email);
+                                    var email = data.address[i].email;
+                                    if(email == null){
+                                        email = $('#customer_email').val();
+                                    }
+                                    $('#c-email').val(email);
                                     $('#c-telephone').val(data.address[i].telephone);
                                     $('#c-country').val(data.address[i].country_id);
                                     $('#c-country').change();
@@ -1147,7 +1172,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
 
                     var users = array_filter(username);
                     $('#appoint_group_users').html(users.join(','));
-
+                    $('#recept_person_id').val(appoint_users.join(','));
 
                     //判断更换处方的状态，如果显示的话把数据带出来，如果隐藏则不显示镜架数据 start
                     // if (!$('.step2-1').is(':hidden')) {
@@ -1205,7 +1230,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                         //补发地址自动填充第一个
                                         $('#c-firstname').val(data.address[i].firstname);
                                         $('#c-lastname').val(data.address[i].lastname);
-                                        $('#c-email').val(data.address[i].email);
+                                        var email = data.address[i].email;
+                                        if(email == null){
+                                            email = $('#customer_email').val();
+                                        }
+                                        $('#c-email').val(email);
                                         $('#c-telephone').val(data.address[i].telephone);
                                         $('#c-country').val(data.address[i].country_id);
                                         $('#c-country').change();
@@ -1226,7 +1255,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     var address = data.address[address_id];
                                     $('#c-firstname').val(address.firstname);
                                     $('#c-lastname').val(address.lastname);
-                                    $('#c-email').val(address.email);
+                                    var email = address.email;
+                                    if(email == null){
+                                        email = $('#customer_email').val();
+                                    }
+                                    $('#c-email').val(email);
                                     $('#c-telephone').val(address.telephone);
                                     $('#c-country').val(address.country_id);
                                     $('#c-country').change();
@@ -1761,7 +1794,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                 if (real_address) {
                                     $('#c-firstname').val(real_address.firstname);
                                     $('#c-lastname').val(real_address.lastname);
-                                    $('#c-email').val(real_address.email);
+                                    var email = real_address.email;
+                                    if(email == null){
+                                        email = $('#customer_email').val();
+                                    }
+                                    $('#c-email').val(email);
                                     $('#c-telephone').val(real_address.telephone);
                                     $('#c-country').val(real_address.country_id);
                                     $('#c-country').change();

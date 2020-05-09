@@ -812,6 +812,7 @@ class ItWebDemand extends Backend
                     }
 
                 }
+                $update_date['test_confirm_time'] =  date('Y-m-d H:i',time());
                 $res = $this->model->allowField(true)->save($update_date,['id'=> $params['id']]);
                 if ($res) {
                     Ding::dingHook(__FUNCTION__, $this ->model ->get($params['id']));

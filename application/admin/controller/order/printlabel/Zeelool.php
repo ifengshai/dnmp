@@ -26,6 +26,7 @@ class Zeelool extends Backend
      * Sales_flat_order模型对象
      * @var \app\admin\model\order\Sales_flat_order
      */
+
     protected $model = null;
 
     protected $searchFields = 'entity_id';
@@ -120,7 +121,7 @@ class Zeelool extends Backend
                 unset($filter['sku']);
                 $this->request->get(['filter' => json_encode($filter)]);
             }
-
+          
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
 
             $total = $this->model
@@ -763,7 +764,7 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
 
         if ($filter['increment_id']) {
             $map['sfo.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal']];
-        } elseif (!$filter['status']) {
+        } elseif (!$filter['status'] && !$ids) {
             $map['status'] = ['in', ['free_processing', 'processing',  'paypal_reversed', 'paypal_canceled_reversal']];
         }
         //是否有工单
@@ -838,7 +839,6 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
             ->where($where)
             ->order('sfoi.order_id desc')
             ->select();
-
         $resultList = collection($resultList)->toArray();
 
         $resultList = $this->qty_order_check($resultList);
@@ -1146,86 +1146,7 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
         set_time_limit(0);
         ini_set('memory_limit', '512M');
 
-        $str = '400228125
-        400227939
-        400227961
-        400228094
-        400226068
-        400227974
-        100109028
-        400227562
-        100108896
-        400227745
-        100108859
-        400227733
-        400227607
-        400228014
-        400227812
-        100108926
-        400227903
-        400227844
-        100108866
-        400227657
-        400228199
-        400228233
-        400227725
-        100109034
-        400227787
-        400227990
-        100109001
-        400228044
-        400227802
-        400227797
-        100108963
-        400228266
-        400228138
-        400227784
-        400227912
-        400227927
-        400227794
-        400227834
-        400228024
-        400227592
-        400227617
-        400228113
-        100109015
-        400227724
-        400227915
-        500002047
-        400228181
-        400227653
-        400228035
-        400227716
-        500002038
-        100109000
-        400227785
-        100108931
-        400227861
-        400227632
-        400228265
-        400227723
-        100109002
-        100108979
-        400228116
-        100108860
-        400227697
-        400227575
-        400227916
-        100109014
-        400227769
-        400227623
-        400227880
-        100109046
-        400227894
-        400227997
-        400228142
-        400227949
-        100108955
-        500002022
-        100108837
-        100108939
-        100109006
-        ';
+        $str = '100099417';
         $str = explode('
         ', $str);
 
@@ -1240,7 +1161,7 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
             ->where($where)
             ->order('sfoi.order_id desc')
             ->select();
-
+       
         $resultList = collection($resultList)->toArray();
 
         $resultList = $this->qty_order_check($resultList);
@@ -1262,7 +1183,6 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
                 $tmp_prescription_params = explode("&", $tmp_prescription_params);
                 $tmp_lens_params = array();
                 foreach ($tmp_prescription_params as $tmp_key => $tmp_value) {
-                    // dump($value);
                     $arr_value = explode("=", $tmp_value);
                     if (isset($arr_value[1])) {
                         $tmp_lens_params[$arr_value[0]] = $arr_value[1];
@@ -1778,4 +1698,6 @@ EOF;
         array_multisort($arrSort[$field], constant($sort), $array);
         return $array;
     }
+
+    
 }

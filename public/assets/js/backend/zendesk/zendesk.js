@@ -27,6 +27,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                         {field: 'ticket_id', title: __('Ticket_id'),sortable: true},
                         {field: 'subject', title: __('Subject'),operate:false,formatter: function(value){return value.toString().substr(0, 100)}},
                         {field: 'email', title: __('Email'),operate:'LIKE %...%'},
+                        {field: 'content', title: __('关键字'),visible:false},
                         //{field: 'assign_id', title: __('Assgin_id'),operate: false,visible:false},
                         {
                             field: 'admin.nickname',
@@ -61,10 +62,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                                     title: function (row) {
                                         return __('Answer') + '【' + row.ticket_id + '】' + row.subject;
                                     },
-                                    classname: 'btn btn-xs btn-success btn-addtabs',
+                                    classname: 'btn btn-xs btn-success',
                                     icon: '',
                                     url: 'zendesk/zendesk/edit',
-                                    extend: 'data-area = \'["100%","100%"]\'',
+                                    extend: 'data-area = \'["100%","100%"]\' target=\'_blank\'',
                                     callback: function (data) {
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
                                     },
@@ -141,6 +142,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
         },
         add: function () {
             Controller.api.bindevent();
+            Form.api.bindevent($("form[role=form]"), function (data, ret) {
+                top.window.$("ul.nav-addtabs li.active").find(".fa-remove").trigger("click");
+                Fast.api.close();
+                window.open("about:blank","_self").close();
+            }, function (data, ret) {
+                Toastr.success("失败");
+            });
             $(document).on('change','.macro-apply',function(){
                 var id = $(this).val();
                 var email = $('.email').val();
@@ -200,6 +208,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
             Controller.api.bindevent();
             Form.api.bindevent($("form[role=form]"), function (data, ret) {
                 top.window.$("ul.nav-addtabs li.active").find(".fa-remove").trigger("click");
+                Fast.api.close();
+                window.open("about:blank","_self").close();
             }, function (data, ret) {
                 Toastr.success("失败");
             });            

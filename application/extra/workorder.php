@@ -86,42 +86,13 @@ return [
             'step' => 'step04'
         ]
     ],
-    //仓库问题类型组  id大于4 采用step04措施
-    'warehouse_problem_group' => [
-        1 => [ //核实处方
-            'step' => 'step02' //措施key
-        ],
-        2 => [ //不可加工
-            'step' => 'step01' //措施key
-        ],
-        3 => [ //镜框缺货
-            'step' => 'step01' //措施key
-        ],
-        4 => [ //镜片缺货
-            'step' => '' //为空没有后续
-        ],
-        5 => [
-            'step' => 'step04' //措施key
-        ],
-
-    ],
-
-    //措施组
+    /*客服-措施组专用 start*/
     'step01' => [
         [
             'step_id' => 1, //更改
             'is_check' => 0,
             'appoint_group' => [ //承接组
                 'warehouse_group' //仓库跟单
-            ],
-        ],
-    ],
-    'step02' => [
-        [
-            'step_id' => 1, //更改
-            'is_check' => 0,
-            'appoint_group' => [ //承接组
-                'warehouse_lens_group' //仓库镜片负责人
             ],
         ],
     ],
@@ -134,6 +105,260 @@ return [
             ],
         ],
     ],
+    'step05' => [
+        [
+            'step_id' => 1, //更改
+            'is_check' => 0,
+            'appoint_group' => [ //承接组
+                'warehouse_group' //仓库跟单
+            ],
+        ],
+        [
+            'step_id' => 2, //退款
+            'is_check' => 1,
+            'appoint_group' => [ //承接组
+                'cashier_group' //出纳
+            ],
+        ],
+        [
+            'step_id' => 8, //补价
+            'is_check' => 0,
+            'appoint_group' => [ //空代表承接给创建人
+
+            ],
+        ],
+    ],
+    'step06' => [
+        [
+            'step_id' => 1, //更改
+            'is_check' => 0,
+            'appoint_group' => [ //承接组
+                'warehouse_group' //仓库跟单
+            ],
+        ],
+        [
+            'step_id' => 2, //退款
+            'is_check' => 1,
+            'appoint_group' => [ //承接组
+                'cashier_group' //出纳
+            ],
+        ],
+        [
+            'step_id' => 8, //补价
+            'is_check' => 0,
+            'appoint_group' => [ //空代表承接给创建人
+
+            ],
+        ],
+    ],
+    'step07' => [
+        [
+            'step_id' => 1, //更改
+            'is_check' => 0,
+            'appoint_group' => [ //承接组
+                'warehouse_lens_group' //仓库镜片负责人
+            ],
+        ],
+        [
+            'step_id' => 2, //退款
+            'is_check' => 1,
+            'appoint_group' => [ //承接组
+                'cashier_group' //出纳
+            ],
+        ],
+        [
+            'step_id' => 8, //补价
+            'is_check' => 0,
+            'appoint_group' => [ //空代表承接给创建人
+
+            ],
+        ],
+    ],
+    /*客服-措施组专用 end*/
+
+    //仓库问题类型组  id大于4 采用step04措施
+    'warehouse_problem_group' => [
+        1 => [ //核实处方
+            'step' => 'step02' //措施key
+        ],
+        2 => [ //不可加工
+            'step' => 'step08' //措施key
+        ],
+        3 => [ //镜框缺货
+            'step' => 'step08' //措施key
+        ],
+        4 => [ //镜片缺货
+            'step' => '' //为空没有后续
+        ],
+        5 => [
+            'step' => 'step04' //措施key
+        ],
+
+    ],
+    /*仓库-措施组专用 start*/
+    'step02' => [
+        [
+            'step_id' => 1, //更改
+            'is_check' => 0,
+            'appoint_group' => [ //承接组
+                'warehouse_lens_group' //仓库镜片负责人
+            ],
+        ],
+        [
+            'step_id' => 2, //退款
+            'is_check' => 1,
+            'appoint_group' => [ //承接组
+                'cashier_group' //出纳
+            ],
+        ],
+        [
+            'step_id' => 3, //取消
+            'is_check' => 1,
+            'appoint_group' => [ //承接组
+                'warehouse_group' //仓库跟单员
+            ],
+        ],
+
+        [
+            'step_id' => 4, //催单
+            'is_check' => 0,
+            'appoint_group' => [ //承接组
+                'warehouse_group' //仓库跟单员
+            ],
+        ],
+        [
+            'step_id' => 5, //暂缓
+            'is_check' => 0,
+            'appoint_group' => [ //承接组
+                'warehouse_group' //仓库跟单员
+            ],
+        ],
+        [
+            'step_id' => 6, //赠品
+            'is_check' => 1,
+            'appoint_group' => [ //承接组
+                'warehouse_group' //仓库跟单员
+            ],
+        ],
+        [
+            'step_id' => 7, //补发
+            'is_check' => 1,
+            'appoint_group' => [ //承接组
+                'warehouse_group' //仓库跟单员
+            ],
+        ],
+        [
+            'step_id' => 8, //补价
+            'is_check' => 0,
+            'appoint_group' => [ //空代表承接给创建人
+
+            ],
+        ],
+        [
+            'step_id' => 9, //优惠券
+            'is_check' => 0,
+            'appoint_group' => [ //空代表承接给创建人
+            ],
+        ],
+
+        [
+            'step_id' => 10, //积分
+            'is_check' => 0,
+            'appoint_group' => [ //空代表承接给创建人
+            ],
+        ],
+
+        [
+            'step_id' => 11, //退件
+            'is_check' => 0,
+            'appoint_group' => [
+                'warehouse_group' //仓库跟单员
+            ],
+        ]
+    ],
+    'step08' => [
+        [
+            'step_id' => 1, //更改
+            'is_check' => 0,
+            'appoint_group' => [ //承接组
+                'warehouse_group' //仓库跟单
+            ],
+        ],
+        [
+            'step_id' => 2, //退款
+            'is_check' => 1,
+            'appoint_group' => [ //承接组
+                'cashier_group' //出纳
+            ],
+        ],
+        [
+            'step_id' => 3, //取消
+            'is_check' => 1,
+            'appoint_group' => [ //承接组
+                'warehouse_group' //仓库跟单员
+            ],
+        ],
+
+        [
+            'step_id' => 4, //催单
+            'is_check' => 0,
+            'appoint_group' => [ //承接组
+                'warehouse_group' //仓库跟单员
+            ],
+        ],
+        [
+            'step_id' => 5, //暂缓
+            'is_check' => 0,
+            'appoint_group' => [ //承接组
+                'warehouse_group' //仓库跟单员
+            ],
+        ],
+        [
+            'step_id' => 6, //赠品
+            'is_check' => 1,
+            'appoint_group' => [ //承接组
+                'warehouse_group' //仓库跟单员
+            ],
+        ],
+        [
+            'step_id' => 7, //补发
+            'is_check' => 1,
+            'appoint_group' => [ //承接组
+                'warehouse_group' //仓库跟单员
+            ],
+        ],
+        [
+            'step_id' => 8, //补价
+            'is_check' => 0,
+            'appoint_group' => [ //空代表承接给创建人
+
+            ],
+        ],
+        [
+            'step_id' => 9, //优惠券
+            'is_check' => 0,
+            'appoint_group' => [ //空代表承接给创建人
+            ],
+        ],
+
+        [
+            'step_id' => 10, //积分
+            'is_check' => 0,
+            'appoint_group' => [ //空代表承接给创建人
+            ],
+        ],
+
+        [
+            'step_id' => 11, //退件
+            'is_check' => 0,
+            'appoint_group' => [
+                'warehouse_group' //仓库跟单员
+            ],
+        ]
+    ],
+    /*仓库-措施组专用 end*/
+
+    /*公共-措施组专用 start*/
     'step04' => [
 
         [
@@ -208,77 +433,7 @@ return [
             ],
         ]
     ],
-
-    'step05' => [
-        [
-            'step_id' => 1, //更改
-            'is_check' => 0,
-            'appoint_group' => [ //承接组
-                'warehouse_group' //仓库跟单
-            ],
-        ],
-        [
-            'step_id' => 2, //退款
-            'is_check' => 1,
-            'appoint_group' => [ //承接组
-                'cashier_group' //出纳
-            ],
-        ],
-        [
-            'step_id' => 8, //补价
-            'is_check' => 0,
-            'appoint_group' => [ //空代表承接给创建人
-
-            ],
-        ],
-    ],
-
-    'step06' => [
-        [
-            'step_id' => 1, //更改
-            'is_check' => 0,
-            'appoint_group' => [ //承接组
-                'warehouse_group' //仓库跟单
-            ],
-        ],
-        [
-            'step_id' => 2, //退款
-            'is_check' => 1,
-            'appoint_group' => [ //承接组
-                'cashier_group' //出纳
-            ],
-        ],
-        [
-            'step_id' => 8, //补价
-            'is_check' => 0,
-            'appoint_group' => [ //空代表承接给创建人
-
-            ],
-        ],
-    ],
-    'step07' => [
-        [
-            'step_id' => 1, //更改
-            'is_check' => 0,
-            'appoint_group' => [ //承接组
-                'warehouse_lens_group' //仓库镜片负责人
-            ],
-        ],
-        [
-            'step_id' => 2, //退款
-            'is_check' => 1,
-            'appoint_group' => [ //承接组
-                'cashier_group' //出纳
-            ],
-        ],
-        [
-            'step_id' => 8, //补价
-            'is_check' => 0,
-            'appoint_group' => [ //空代表承接给创建人
-
-            ],
-        ],
-    ],
+    /*公共-措施组专用 end*/
 
     //仓库跟单员
     'warehouse_group' => [
