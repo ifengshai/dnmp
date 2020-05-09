@@ -862,4 +862,22 @@ DOC;
             (new Notice(request(), ['type' => 'voogueme','id' => $i]))->create();
         }
     }
+
+    /**
+     * 更新同步未常见的工单，由于通知失败导致的
+     */
+    public function asycTicketsUpdate()
+    {
+        $ticketIds = (new Notice(request(), ['type' => 'zeelool']))->asyncUpdate();
+        foreach($ticketIds as $ticketId){
+            (new Notice(request(), ['type' => 'zeelool','id' => $ticketId]))->update();
+        }
+    }
+    public function asycTicketsVooguemeUpdate()
+    {
+        $ticketIds = (new Notice(request(), ['type' => 'voogueme']))->asyncUpdate();
+        foreach($ticketIds as $ticketId){
+            (new Notice(request(), ['type' => 'voogueme','id' => $ticketId]))->update();
+        }
+    }
 }
