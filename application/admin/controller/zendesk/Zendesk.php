@@ -2,7 +2,6 @@
 
 namespace app\admin\controller\zendesk;
 
-use app\admin\model\Admin;
 use app\admin\model\zendesk\ZendeskPosts;
 use app\admin\model\zendesk\ZendeskTasks;
 use app\common\controller\Backend;
@@ -15,6 +14,7 @@ use think\Exception;
 use think\exception\PDOException;
 use think\exception\ValidateException;
 use League\HTMLToMarkdown\HtmlConverter;
+use app\admin\controller\Admin;
 
 
 /**

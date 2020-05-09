@@ -18,6 +18,7 @@ use Zendesk\API\HttpClient as ZendeskAPI;
 use app\admin\model\zendesk\Zendesk;
 use app\admin\model\zendesk\ZendeskComments;
 use app\admin\model\zendesk\ZendeskTags;
+use app\admin\controller\Admin;
 
 /**
  * 通知方法
