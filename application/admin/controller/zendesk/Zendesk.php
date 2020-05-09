@@ -14,7 +14,7 @@ use think\Exception;
 use think\exception\PDOException;
 use think\exception\ValidateException;
 use League\HTMLToMarkdown\HtmlConverter;
-use app\admin\controller\Admin;
+use app\admin\controller\auth\Admin;
 
 
 /**
