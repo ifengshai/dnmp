@@ -656,8 +656,7 @@ class PurchaseOrder extends Backend
         $data = [];
         //判断采购单类型是否为线上采购单 1线下采购单=> 快递100api 2线上采购单 1688api
         if ($row['purchase_type'] == 2) {
-
-            $cacheIndex = 'logisticsDetail_' . $row['purchase_number'];
+            $cacheIndex = 'logisticsDetail_purchase_number' . $row['purchase_number'];
             $data = Cache::get($cacheIndex);
             if (!$data) {
                 $data = Alibaba::getLogisticsMsg($row['purchase_number']);
