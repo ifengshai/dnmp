@@ -37,25 +37,25 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
 
 
                         { field: 'closing_date', title: __('Closing_date') , operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime,visible:false },
-
+                        {
+                            field: 'is_complete', title: __('开发完成'),
+                            custom: { 1: 'success', 0: 'danger' },
+                            searchList: { 1: '是', 0: '否' },
+                            formatter: Table.api.formatter.status
+                        },
                         {
                             field: 'is_test_adopt', title: __('Is_test_adopt'), custom: { 1: 'success', 0: 'danger' },
                             searchList: { 1: '是', 0: '否' },
                             formatter: Table.api.formatter.status
                         },
                         {
-                            field: 'is_complete', title: __('Is_complete'),
-                            custom: { 1: 'success', 0: 'danger' },
-                            searchList: { 1: '是', 0: '否' },
-                            formatter: Table.api.formatter.status
-                        },
-                        { field: 'complete_date', title: __('complete_date'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime,visible:false },
-                        { field: 'test_regression_adopt_time', title: __('回归测试通过时间'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime  , visible:false},
-                        {
                             field: 'is_finish', title: __('开发经理确认'), custom: { 1: 'success', 0: 'danger' },
                             searchList: { 1: '已确认', 0: '未确认' },
                             formatter: Table.api.formatter.status
                         },
+                        { field: 'complete_date', title: __('complete_date'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime,visible:false },
+                        { field: 'test_regression_adopt_time', title: __('回归测试通过时间'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime  , visible:false},
+
                         {
                             field: 'test_regression_adopt', title: __('回归测试状态'), custom: { 1: 'success', 0: 'danger' },
                             searchList: { 1: '已通过', 0: '待处理' },
