@@ -1207,6 +1207,31 @@ class ItWebDemand extends Backend
         if($this->request->isPost()) {
             $params = $this->request->post("row/a");
             if ($params) {
+                if ($params['opt_type']){
+                    if ($params['opt_type']==1){
+                        $data['is_complete']=1;
+                        $where['id'] = $params['id'];
+                        $res = $this->testRecordModel->allowField(true)->save($data, $where);
+                        if ($res) {
+                            $this->success('成功');
+
+                        } else {
+                            $this->error('失败');
+                        }
+                    }elseif ($params['opt_type']==2){
+
+                        $data['is_del']=2;
+                        $where['id']=$params['id'];
+                        $res = $this->testRecordModel->allowField(true)->save($data,$where);
+                        if ($res) {
+                            $this->success('成功');
+                        } else {
+                            $this->error('失败');
+                        }
+
+                    }
+
+                }else{
                 $params['create_time'] =  date('Y-m-d H:i',time());
                 $params['create_user_id'] =  $this->auth->id;
                 $res_status = $this->testRecordModel->allowField(true)->save($params);
@@ -1216,6 +1241,7 @@ class ItWebDemand extends Backend
                     $this->success('成功');
                 } else {
                     $this->error('失败');
+                }
                 }
             }
             $this->error(__('Parameter %s can not be empty', ''));
@@ -1238,6 +1264,7 @@ class ItWebDemand extends Backend
         /*测试日志--测试环境*/
         $left_test_list = $this->testRecordModel
             ->where('pid',$ids)
+            ->where('is_del',1)
             ->where('type', $row_arr['type'])
             ->where('environment_type', 1)
             ->order('id', 'desc')
@@ -1260,6 +1287,7 @@ class ItWebDemand extends Backend
         /*测试日志--正式环境*/
         $right_test_list = $this->testRecordModel
             ->where('pid',$ids)
+            ->where('is_del',1)
             ->where('type', $row_arr['type'])
             ->where('environment_type', 2)
             ->order('id', 'desc')
@@ -1319,7 +1347,37 @@ class ItWebDemand extends Backend
      * 本条目详情，包含测试日志，以及bug回复日志
      * 测试组权限
      */
-    public function detail_log(){
+    public function detail_log($ids=null){
+
+        if($this->request->isPost()) {
+            $params = $this->request->post("row/a");
+            if ($params) {
+                if ($params['opt_type']==1){
+                    $data['is_complete']=1;
+                    $where['id'] = $params['id'];
+                    $res = $this->testRecordModel->allowField(true)->save($data, $where);
+                    if ($res) {
+                        $this->success('成功');
+
+                    } else {
+                        $this->error('失败');
+                    }
+                }elseif ($params['opt_type']==2){
+
+                    $data['is_del']=2;
+                    $where['id']=$params['id'];
+                    $res = $this->testRecordModel->allowField(true)->save($data,$where);
+                    if ($res) {
+                        $this->success('成功');
+                    } else {
+                        $this->error('失败');
+                    }
+
+                }
+            }
+            $this->error(__('Parameter %s can not be empty', ''));
+        }
+
         $ids = $ids ?? input('ids');
         $row = $this->model->get(['id' => $ids]);
         $row_arr = $row->toArray();
@@ -1337,6 +1395,7 @@ class ItWebDemand extends Backend
         /*测试日志--测试环境*/
         $left_test_list = $this->testRecordModel
             ->where('pid',$ids)
+            ->where('is_del',1)
             ->where('type', $row_arr['type'])
             ->where('environment_type', 1)
             ->order('id', 'desc')
@@ -1359,6 +1418,7 @@ class ItWebDemand extends Backend
         /*测试日志--正式环境*/
         $right_test_list = $this->testRecordModel
             ->where('pid',$ids)
+            ->where('is_del',1)
             ->where('type', $row_arr['type'])
             ->where('environment_type', 2)
             ->order('id', 'desc')

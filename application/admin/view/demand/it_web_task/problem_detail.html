@@ -35,6 +35,31 @@
                 {:__('describe')}：<span style="word-break: break-all;"><b>{$ltl['describe']}</b></span>
             </div>
 
+            <div class="timeline-body" >
+                {:__('是否完成')}：<span style="word-break: break-all;"><b>{$ltl['is_complete']==1?'是':'否'}</b></span>
+            </div>
+
+            {if $ltl['is_complete'] == 0 && in_array(session('admin.id'), explode(',', $ltl['responsibility_user_id']))}
+            <form role="form" data-toggle="validator" method="POST" action="{:url('problem_detail')}">
+                <input type="hidden" name="row[id]" value="{$ltl['id']}"/>
+                <input type="hidden" name="row[opt_type]" value="1"/>
+                <div style="padding-left: 58px;padding-bottom: 1%;padding-top: 1%">
+                    <button type="submit" name="web_finish" value="1" class="btn btn-success btn-embossed">点击完成</button>
+                </div>
+            </form>
+            {/if}
+
+            {if $ltl['is_complete'] == 0 && session('admin.id')== $ltl['create_user_id'] }
+            <form role="form" data-toggle="validator" method="POST" action="{:url('problem_detail')}">
+                <input type="hidden" name="row[id]" value="{$ltl['id']}"/>
+                <input type="hidden" name="row[opt_type]" value="2"/>
+                <div style="padding-left: 58px;padding-bottom: 1%;padding-top: 1%">
+                    <button type="submit" name="web_finish" value="1" class="btn btn-success btn-embossed">删除</button>
+                </div>
+            </form>
+            {/if}
+
+
         </div>
     </li>
     {/volist}
@@ -65,6 +90,30 @@
             <div class="timeline-body" style="padding-top: 0px;">
                 {:__('describe')}：<span style="word-break: break-all;"><b>{$rtl['describe']}</b></span>
             </div>
+
+            <div class="timeline-body" >
+                {:__('是否完成')}：<span style="word-break: break-all;"><b>{$rtl['is_complete']==1?'是':'否'}</b></span>
+            </div>
+            {if $rtl['is_complete'] == 0 && in_array(session('admin.id'), explode(',', $rtl['responsibility_user_id']))}
+            <form role="form" data-toggle="validator" method="POST" action="{:url('problem_detail')}">
+                <input type="hidden" name="row[id]" value="{$rtl['id']}"/>
+                <input type="hidden" name="row[opt_type]" value="1"/>
+                <div style="padding-left: 58px;padding-bottom: 1%;padding-top: 1%">
+                    <button type="submit" name="web_finish" value="1" class="btn btn-success btn-embossed">点击完成</button>
+                </div>
+            </form>
+            {/if}
+
+            {if $rtl['is_complete'] == 0 && session('admin.id')== $rtl['create_user_id'] }
+            <form role="form" data-toggle="validator" method="POST" action="{:url('problem_detail')}">
+                <input type="hidden" name="row[id]" value="{$rtl['id']}"/>
+                <input type="hidden" name="row[opt_type]" value="2"/>
+                <div style="padding-left: 58px;padding-bottom: 1%;padding-top: 1%">
+                    <button type="submit" name="web_finish" value="1" class="btn btn-success btn-embossed">删除</button>
+                </div>
+            </form>
+            {/if}
+
 
         </div>
     </li>

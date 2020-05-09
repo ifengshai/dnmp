@@ -27,6 +27,7 @@ class DevelopDemand extends Backend
         parent::_initialize();
         $this->model = new \app\admin\model\demand\DevelopDemand;
         $this->testRecord = new \app\admin\model\demand\DevelopTestRecord();
+        $this->assignconfig('admin_id', session('admin.id'));
     }
 
     /**
@@ -36,7 +37,7 @@ class DevelopDemand extends Backend
      */
 
     /**
-     * 查看
+     * 查看 开发组日常需求
      */
     public function index()
     {
@@ -50,11 +51,13 @@ class DevelopDemand extends Backend
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
                 ->where($where)
+                ->where('type', '2')
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->model
                 ->where($where)
+                ->where('type', '2')
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
@@ -79,6 +82,58 @@ class DevelopDemand extends Backend
                 }
                 $list[$k]['nickname'] = implode(',', $nickname);
                 $list[$k]['test_person'] = implode(',', $test_nickname);
+
+                if ($val['is_test'] == 1 && $val['test_person'] != '') {
+                    if (in_array(session('admin.id'), explode(',', $val['test_person']))) {
+                        $list[$k]['is_test_record_hidden'] = 1; //显示 记录问题
+                        $list[$k]['is_test_finish_hidden'] = 1; //显示  测试通过
+                        $list[$k]['is_test_detail_log'] = 0; //不显示  问题详情
+                    }
+                }
+
+                if ($val['assign_developer_ids'] != '') {
+                    if (in_array(session('admin.id'), explode(',', $val['assign_developer_ids']))) {
+                        $list[$k]['is_developer_opt'] = 1; //开发完成
+                    }
+                }
+
+
+                if ($val['review_status_manager'] == 0) {
+                    $list[$k]['status_str'] = '经理待审核';
+                } elseif ($val['review_status_manager'] == 1 && $val['review_status_develop'] == 0) {
+                    $list[$k]['status_str'] = '主管待审核';
+                } elseif ($val['review_status_manager'] == 1 && $val['review_status_develop'] == 1) {
+                    $list[$k]['status_str'] = '审核通过';
+                } else {
+                    $list[$k]['status_str'] = '审核拒绝';
+                }
+                //判断审核通过
+                if ($val['review_status_manager'] == 1 && $val['review_status_develop'] == 1) {
+                    if ($val['is_test'] == 1) {
+                        if ($val['is_finish'] == 1 && $val['test_is_passed'] == 0) {
+                            $list[$k]['develop_status_str'] = '待测试';
+                        } elseif ($val['is_finish'] == 1 && $val['test_is_passed'] == 1 && $val['is_finish_task'] == 0) {
+                            $list[$k]['develop_status_str'] = '待上线';
+                        } elseif ($val['is_finish'] == 1 && $val['test_is_passed'] == 1 && $val['is_finish_task'] == 1 && $val['is_test_complete'] == 0) {
+                            $list[$k]['develop_status_str'] = '待回测';
+                        } elseif ($val['is_test_complete'] == 1) {
+                            $list[$k]['develop_status_str'] = '已完成';
+                        } else {
+                            $list[$k]['develop_status_str'] = '开发ing';
+                        }
+                    } else {
+                        if ($val['is_finish'] == 1 && $val['is_finish_task'] == 0) {
+                            $list[$k]['develop_status_str'] = '待上线';
+                        } elseif ($val['is_finish'] == 1  && $val['is_finish_task'] == 1) {
+                            $list[$k]['develop_status_str'] = '已完成';
+                        } else {
+                            $list[$k]['develop_status_str'] = '开发ing';
+                        }
+                    }
+                } 
+                
+                $list[$k]['expected_time'] = date('Y-m-d', strtotime($val['expected_time']));
+                $list[$k]['estimated_time'] = date('Y-m-d', strtotime($val['estimated_time']));
             }
             $result = array("total" => $total, "rows" => $list);
 
@@ -107,8 +162,134 @@ class DevelopDemand extends Backend
         $this->assignconfig('regression_test_info', $this->auth->check('demand/develop_demand/regression_test_info'));
         //判断回归测试完成按钮
         $this->assignconfig('test_complete', $this->auth->check('demand/develop_demand/test_complete'));
+        //判断删除按钮
+        $this->assignconfig('is_del_btu', $this->auth->check('demand/develop_demand/del'));
+        //bug列表页 是否有上线按钮权限
+        $this->assignconfig('is_finish_bug', $this->auth->check('demand/develop_demand/is_finish_bug'));
         return $this->view->fetch();
     }
+
+
+
+    /**
+     * 查看 开发组BUG列表
+     */
+    public function develop_bug_list()
+    {
+        //设置过滤方法
+        $this->request->filter(['strip_tags']);
+        if ($this->request->isAjax()) {
+            //如果发送的来源是Selectpage，则转发到Selectpage
+            if ($this->request->request('keyField')) {
+                return $this->selectpage();
+            }
+            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            $total = $this->model
+                ->where($where)
+                ->where('type', '1')
+                ->order($sort, $order)
+                ->count();
+
+            $list = $this->model
+                ->where($where)
+                ->where('type', '1')
+                ->order($sort, $order)
+                ->limit($offset, $limit)
+                ->select();
+
+            $list = collection($list)->toArray();
+            //查询用户表id
+            $admin = new \app\admin\model\Admin();
+            $userInfo = $admin->where('status', 'normal')->column('nickname', 'id');
+            foreach ($list as $k => $val) {
+                $userids = explode(',', $val['assign_developer_ids']);
+                $nickname = [];
+                foreach ($userids as $v) {
+                    if (!$v) {
+                        continue;
+                    }
+                    $nickname[] = $userInfo[$v];
+                }
+                $test_userids = explode(',', $val['test_person']);
+                $test_nickname = [];
+                foreach ($test_userids as $v) {
+                    $test_nickname[] = $userInfo[$v];
+                }
+                $list[$k]['nickname'] = implode(',', $nickname);
+                $list[$k]['test_person'] = implode(',', $test_nickname);
+                if ($val['is_test'] == 1 && $val['test_person'] != '') {
+                    if (in_array(session('admin.id'), explode(',', $val['test_person']))) {
+                        $list[$k]['is_test_record_hidden'] = 1; //显示 记录问题
+                        $list[$k]['is_test_finish_hidden'] = 1; //显示  测试通过
+                        $list[$k]['is_test_detail_log'] = 0; //不显示  问题详情
+                    }
+                }
+
+                if ($val['assign_developer_ids'] != '') {
+                    if (in_array(session('admin.id'), explode(',', $val['assign_developer_ids']))) {
+                        $list[$k]['is_developer_opt'] = 1; //开发完成
+                    }
+                }
+
+                if ($val['review_status_manager'] == 1 && $val['review_status_develop'] == 1) {
+                    if ($val['is_test'] == 1) {
+                        if ($val['is_finish'] == 1 && $val['test_is_passed'] == 0) {
+                            $list[$k]['develop_status_str'] = '待测试';
+                        } elseif ($val['is_finish'] == 1 && $val['test_is_passed'] == 1 && $val['is_finish_task'] == 0) {
+                            $list[$k]['develop_status_str'] = '待上线';
+                        } elseif ($val['is_finish'] == 1 && $val['test_is_passed'] == 1 && $val['is_finish_task'] == 1 && $val['is_test_complete'] == 0) {
+                            $list[$k]['develop_status_str'] = '待回测';
+                        } elseif ($val['is_test_complete'] == 1) {
+                            $list[$k]['develop_status_str'] = '已完成';
+                        } else {
+                            $list[$k]['develop_status_str'] = '开发ing';
+                        }
+                    } else {
+                        if ($val['is_finish'] == 1 && $val['is_finish_task'] == 0) {
+                            $list[$k]['develop_status_str'] = '待上线';
+                        } elseif ($val['is_finish'] == 1  && $val['is_finish_task'] == 1) {
+                            $list[$k]['develop_status_str'] = '已完成';
+                        } else {
+                            $list[$k]['develop_status_str'] = '开发ing';
+                        }
+                    }
+                }
+            }
+            $result = array("total" => $total, "rows" => $list);
+
+            return json($result);
+        }
+        $this->assignconfig('username', session('admin.nickname'));
+        //判断编辑按钮权限
+        $this->assignconfig('is_edit', $this->auth->check('demand/develop_demand/edit'));
+        //判断分配权限
+        $this->assignconfig('is_distribution', $this->auth->check('demand/develop_demand/distribution'));
+        //判断产品经理审核权限
+        $this->assignconfig('review_status_manager_btn', $this->auth->check('demand/develop_demand/review'));
+        //判断是否有开发主管审核权限
+        $this->assignconfig('review_status_btn', $this->auth->check('demand/develop_demand/review_status_develop'));
+        //判断测试确认按钮
+        $this->assignconfig('test_btn', $this->auth->check('demand/develop_demand/test_distribution'));
+        //判断开发完成按钮
+        $this->assignconfig('is_set_status', $this->auth->check('demand/develop_demand/set_complete_status'));
+        //判断测试记录问题按钮
+        $this->assignconfig('test_record_bug', $this->auth->check('demand/develop_demand/test_record_bug'));
+        //判断通过测试按钮
+        $this->assignconfig('test_is_passed', $this->auth->check('demand/develop_demand/test_is_passed'));
+        //判断产品经理确认按钮
+        $this->assignconfig('is_finish_task', $this->auth->check('demand/develop_demand/is_finish_task'));
+        //判断回归测试按钮
+        $this->assignconfig('regression_test_info', $this->auth->check('demand/develop_demand/regression_test_info'));
+        //判断回归测试完成按钮
+        $this->assignconfig('test_complete', $this->auth->check('demand/develop_demand/test_complete'));
+        //判断删除按钮
+        $this->assignconfig('is_del_btu', $this->auth->check('demand/develop_demand/del'));
+        //bug列表页 是否有上线按钮权限
+        $this->assignconfig('is_finish_bug', $this->auth->check('demand/develop_demand/is_finish_bug'));
+        return $this->view->fetch();
+    }
+
+
 
 
 
@@ -135,7 +316,14 @@ class DevelopDemand extends Backend
                         $this->model->validateFailException(true)->validate($validate);
                     }
                     $params['create_person'] = session('admin.nickname');
+                    $params['create_person_id'] = session('admin.id');
                     $params['createtime'] = date('Y-m-d H:i:s');
+
+                    if ($params['type'] == 1) { //如果为BUG类型,更新
+                        $params['review_status_develop'] = 1;
+                        $params['review_status_manager'] = 1;
+                    }
+
                     $result = $this->model->allowField(true)->save($params);
                     Db::commit();
                 } catch (ValidateException $e) {
@@ -156,6 +344,7 @@ class DevelopDemand extends Backend
             }
             $this->error(__('Parameter %s can not be empty', ''));
         }
+        $this->view->assign('demand_type', input('demand_type'));
         return $this->view->fetch();
     }
 
@@ -207,8 +396,26 @@ class DevelopDemand extends Backend
             }
             $this->error(__('Parameter %s can not be empty', ''));
         }
+        $this->view->assign('demand_type', input('demand_type'));
         $this->view->assign("row", $row);
         return $this->view->fetch();
+    }
+
+
+    /**
+     * 逻辑删除
+     * */
+    public function del($ids = "")
+    {
+        if ($this->request->isAjax()) {
+            $data['is_del'] =  2;
+            $res = $this->model->allowField(true)->save($data, ['id' => input('ids')]);
+            if ($res) {
+                $this->success('成功');
+            } else {
+                $this->error('失败');
+            }
+        }
     }
 
     /**
@@ -434,6 +641,7 @@ class DevelopDemand extends Backend
         $data['is_finish'] = 1;
         $data['finish_time'] = date('Y-m-d H:i:s', time());
         $data['finish_person'] = session('admin.nickname');
+        $data['finish_person_id'] = session('admin.id');
         $res = $this->model->save($data, ['id' => $ids]);
         if ($res !== false) {
             $this->success('操作成功！！');
@@ -503,8 +711,37 @@ class DevelopDemand extends Backend
      */
     public function problem_detail($ids = null)
     {
+
+        if ($this->request->isPost()) {
+            $params = $this->request->post("row/a");
+            if ($params) {
+                if ($params['opt_type'] == 1) {
+                    $data['is_complete'] = 1;
+                    $where['id'] = $params['id'];
+                    $res = $this->testRecord->allowField(true)->save($data, $where);
+                    if ($res) {
+                        $this->success('成功');
+                    } else {
+                        $this->error('失败');
+                    }
+                } elseif ($params['opt_type'] == 2) {
+
+                    $data['is_del'] = 2;
+                    $where['id'] = $params['id'];
+                    $res = $this->testRecord->allowField(true)->save($data, $where);
+                    if ($res) {
+                        $this->success('成功');
+                    } else {
+                        $this->error('失败');
+                    }
+                }
+            }
+            $this->error(__('Parameter %s can not be empty', ''));
+        }
+
         $map['pid'] = $ids;
         $map['type'] = 2;
+        $map['is_del'] = 1;
         /*测试日志--测试环境*/
         $list = $this->testRecord
             ->where($map)
@@ -590,6 +827,30 @@ class DevelopDemand extends Backend
             $this->error('操作失败！！');
         }
     }
+
+
+    /**
+     * bug上线操作 更改is_finish_task字段
+     *
+     * @Description
+     * @author fzg
+     * @since 2020/05/07 16:52:22 
+     * @param [type] $ids
+     * @return void
+     */
+    public function is_finish_bug($ids = null)
+    {
+        $data['is_finish_task'] = 1;
+        $data['finish_task_time'] = date('Y-m-d H:i:s', time());
+        $res = $this->model->save($data, ['id' => $ids]);
+        if ($res !== false) {
+            $this->success('操作成功！！');
+        } else {
+            $this->error('操作失败！！');
+        }
+    }
+
+
 
     /**
      * 回归测试记录测试问题

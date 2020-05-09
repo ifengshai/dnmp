@@ -439,7 +439,15 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     title: __('详情记录'),
                                     classname: 'btn btn-xs btn-primary btn-dialog',
                                     url: 'demand/it_web_demand/detail_log/demand_type/2',
-                                    callback: function (data) {
+                                    success: function (data, ret) {
+                                        table.bootstrapTable('refresh');
+                                        //如果需要阻止成功提示，则必须使用return false;
+                                        //return false;
+                                    },
+                                    error: function (data, ret) {
+                                        console.log(data, ret);
+                                        Layer.alert(ret.msg);
+                                        return false;
                                     },
                                     visible: function(row){
                                         if(row.test_group == 0 || row.test_group == 2){
@@ -934,7 +942,15 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     title: __('详情记录'),
                                     classname: 'btn btn-xs btn-primary btn-dialog',
                                     url: 'demand/it_web_demand/detail_log/demand_type/1',
-                                    callback: function (data) {
+                                    success: function (data, ret) {
+                                        table.bootstrapTable('refresh');
+                                        //如果需要阻止成功提示，则必须使用return false;
+                                        //return false;
+                                    },
+                                    error: function (data, ret) {
+                                        console.log(data, ret);
+                                        Layer.alert(ret.msg);
+                                        return false;
                                     },
                                     visible: function(row){
                                         if(row.test_group == 0 || row.test_group == 2){
@@ -1481,7 +1497,15 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     title: __('详情记录'),
                                     classname: 'btn btn-xs btn-primary btn-dialog',
                                     url: 'demand/it_web_demand/detail_log/demand_type/2',
-                                    callback: function (data) {
+                                    success: function (data, ret) {
+                                        table.bootstrapTable('refresh');
+                                        //如果需要阻止成功提示，则必须使用return false;
+                                        //return false;
+                                    },
+                                    error: function (data, ret) {
+                                        console.log(data, ret);
+                                        Layer.alert(ret.msg);
+                                        return false;
                                     },
                                     visible: function(row){
                                         if(row.test_group == 0 || row.test_group == 2){
@@ -1710,6 +1734,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             /*测试确认、分配 end*/
         },
         group_finish: function () {
+            Controller.api.bindevent();
+        },
+        detail_log: function () {
+            Controller.api.bindevent();
+        },
+        test_finish_opt: function () {
             Controller.api.bindevent();
         },
         test_record_bug: function () {
