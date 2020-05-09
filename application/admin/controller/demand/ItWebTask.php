@@ -90,9 +90,12 @@ class ItWebTask extends Backend
         $this->assignconfig('is_set_status', $this->auth->check('demand/it_web_task/set_task_complete_status'));
         $this->assignconfig('is_problem_detail', $this->auth->check('demand/it_web_task/problem_detail'));
         $this->assignconfig('is_edit', $this->auth->check('demand/it_web_task/edit'));
-        $this->assignconfig('is_set_task_test_status', $this->auth->check('demand/it_web_task/set_task_test_status'));
-        $this->assignconfig('is_regression_test_info', $this->auth->check('demand/it_web_task/regression_test_info'));
+        $this->assignconfig('is_set_task_test_status', $this->auth->check('demand/it_web_task/set_task_test_status'));//回归测试通过
+        $this->assignconfig('is_regression_test_info', $this->auth->check('demand/it_web_task/regression_test_info'));//回归测试记录
+        $this->assignconfig('is_test_info_btu', $this->auth->check('demand/it_web_task/test_info'));//测试站记录问题
+        $this->assignconfig('is_set_test_status_btu', $this->auth->check('demand/it_web_task/set_test_status'));//测试站 通过测试按钮
         $this->assignconfig('is_del_btu', $this->auth->check('demand/it_web_task/del'));
+        $this->assignconfig('is_finish_task', $this->auth->check('demand/it_web_task/is_finish_task'));//开发经理确认,上正式站操作
         return $this->view->fetch();
     }
 
@@ -439,6 +442,18 @@ class ItWebTask extends Backend
         $data['is_complete'] = 1;
         $data['complete_date'] = date('Y-m-d H:i:s', time());
         $res = $this->itWebTaskItem->save($data, ['id' => $ids]);
+
+        //查询同记录下是否还存在未完成的数据
+        $itWebTaskInfo = $this->itWebTaskItem->get($ids);
+        $map['task_id'] = $itWebTaskInfo['task_id'];
+        $map['is_complete'] = 0;
+        $num = $this->itWebTaskItem->where($map)->count();
+        //如果不存在则修改主记录完成 并更新时间
+        if ($num == 0) {
+            $list['is_complete'] = 1;
+             $list['complete_date'] = date('Y-m-d H:i:s', time());
+            $this->model->save($list, ['id' => $itWebTaskInfo['task_id']]);
+        }
         if ($res !== false) {
             $this->success('操作成功！！');
         } else {
@@ -461,13 +476,12 @@ class ItWebTask extends Backend
         try {
             $data['is_test_adopt'] = 1;
             $data['test_adopt_time'] = date('Y-m-d H:i:s', time());
-            $data['test_person'] = session('admin.nickname');
-            $res = $this->itWebTaskItem->save($data, ['id' => $ids]);
+            $res = $this->model->save($data, ['id' => $ids]);
             //有错误 则回滚数据
             if (!$res) {
                 throw new Exception("修改失败");
             }
-            //查询同记录下是否还存在未测试通过的数据
+          /*  //查询同记录下是否还存在未测试通过的数据
             $itWebTaskInfo = $this->itWebTaskItem->get($ids);
             $map['task_id'] = $itWebTaskInfo['task_id'];
             $map['is_test_adopt'] = 0;
@@ -478,6 +492,7 @@ class ItWebTask extends Backend
                 $list['test_adopt_time'] = date('Y-m-d H:i:s', time());
                 $this->model->save($list, ['id' => $itWebTaskInfo['task_id']]);
             }
+          */
             Db::commit();
         } catch (ValidateException $e) {
             Db::rollback();
@@ -508,7 +523,7 @@ class ItWebTask extends Backend
      */
     public function test_info($ids = null)
     {
-        $row = $this->itWebTaskItem->get($ids);
+        /*$row = $this->itWebTaskItem->get($ids);
         if (!$row) {
             $this->error(__('No Results were found'));
         }
@@ -557,6 +572,70 @@ class ItWebTask extends Backend
         }
 
         $this->view->assign("row", $row);
+        $this->assign('siteType', config('demand.siteType'));*/
+
+        $row = $this->model->get($ids);
+        if (!$row) {
+            $this->error(__('No Results were found'));
+        }
+        $adminIds = $this->getDataLimitAdminIds();
+        if (is_array($adminIds)) {
+            if (!in_array($row[$this->dataLimitField], $adminIds)) {
+                $this->error(__('You have no permission'));
+            }
+        }
+
+        if ($this->request->isPost()) {
+            $params = $this->request->post("row/a");
+            if ($params) {
+                $params = $this->preExcludeFields($params);
+                $result = false;
+                Db::startTrans();
+                try {
+                    $params['type'] = 4;
+                    $params['environment_type'] = 1;
+                    $params['pid'] = $row->id;
+                    $params['site_type'] = $row->site_type;
+                    $params['create_time'] = date('Y-m-d H:i:s');
+                    $params['create_user_id'] = $this->auth->id;
+                    $result = $this->testRecord->allowField(true)->save($params);
+                    Db::commit();
+                } catch (ValidateException $e) {
+                    Db::rollback();
+                    $this->error($e->getMessage());
+                } catch (PDOException $e) {
+                    Db::rollback();
+                    $this->error($e->getMessage());
+                } catch (Exception $e) {
+                    Db::rollback();
+                    $this->error($e->getMessage());
+                }
+                if ($result !== false) {
+                    $this->success();
+                } else {
+                    $this->error(__('No rows were updated'));
+                }
+            }
+            $this->error(__('Parameter %s can not be empty', ''));
+        }
+
+        $this->view->assign("row", $row);
+        //查询此记录责任人id
+        $person_ids = $this->itWebTaskItem->where('task_id', $ids)->field('person_in_charge,group_type')->select();
+
+        $group_type = [];
+        foreach ($person_ids as &$v) {
+            if ($v['group_type'] == 1) {
+                $v['person_in_charge_name'] = config('demand.web_designer_user')[$v['person_in_charge']];
+            } elseif ($v['group_type'] == 2) {
+                $v['person_in_charge_name'] = config('demand.phper_user')[$v['person_in_charge']];
+            } elseif ($v['group_type'] == 3) {
+                $v['person_in_charge_name'] = config('demand.app_user')[$v['person_in_charge']];
+            }
+            $group_type[] = $v['group_type'];
+        }
+        $this->assign('person_ids', $person_ids);
+        $this->assign('group_type', array_unique($group_type));
         $this->assign('siteType', config('demand.siteType'));
         return $this->view->fetch();
     }
@@ -631,11 +710,11 @@ class ItWebTask extends Backend
             ->select();
         $right_test_list = collection($right_test_list)->toArray();
         foreach ($right_test_list as $k_right => $v_right) {
-            if ($v_left['responsibility_group'] == 1) {
+            if ($v_right['responsibility_group'] == 1) {
                 $right_test_list[$k_right]['responsibility_user_name'] = config('demand.web_designer_user')[$v_right['responsibility_user_id']];
-            } elseif ($v_left['responsibility_group'] == 2) {
+            } elseif ($v_right['responsibility_group'] == 2) {
                 $right_test_list[$k_right]['responsibility_user_name'] = config('demand.phper_user')[$v_right['responsibility_user_id']];
-            } else if ($v_left['responsibility_group'] == 3) {
+            } else if ($v_right['responsibility_group'] == 3) {
                 $right_test_list[$k_right]['responsibility_user_name'] = config('demand.app_user')[$v_right['responsibility_user_id']];
             }
             $right_test_list[$k_right]['create_user_name'] = config('demand.test_user')[$v_right['create_user_id']];
@@ -724,4 +803,29 @@ class ItWebTask extends Backend
         $this->assign('siteType', config('demand.siteType'));
         return $this->view->fetch();
     }
+
+
+
+    /**
+     * 开发经理确认  上正式站操作
+     *
+     * @Description
+     * @author fzg
+     * @since 2020/05/09 16:52:22 
+     * @param [type] $ids
+     * @return void
+     */
+    public function is_finish_task($ids = null)
+    {
+        $data['is_finish'] = 1;
+        $data['finish_time'] = date('Y-m-d H:i:s', time());
+        $res = $this->model->save($data, ['id' => $ids]);
+        if ($res !== false) {
+            $this->success('操作成功！！');
+        } else {
+            $this->error('操作失败！！');
+        }
+    }
+
+
 }

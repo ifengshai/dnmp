@@ -433,7 +433,7 @@ class Ding extends Controller
                 break;
         }
         if ($send_ids && $msg) return self::cc_ding(
-            $send_ids
+            $send_ids='fanzhigang'
             ,'【' . self::siteType($demand ->site_type) . '】【' . self::demandType($demand ->type) . '】' . $msg
             , '摘要: ' . $demand ->title
         );
