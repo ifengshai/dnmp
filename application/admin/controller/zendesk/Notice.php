@@ -957,4 +957,34 @@ class Notice extends Controller
         $macros = $res->macros;
         return $macros;
     }
+
+    /**
+     * 同步丢失数据使用
+     * @return array|bool
+     * @throws \Zendesk\API\Exceptions\MissingParametersException
+     * @throws \Zendesk\API\Exceptions\RouteException
+     */
+    public function asyncUpdate()
+    {
+        $params = 'type:ticket updated_at>=2020-05-09T00:10:00Z updated_at<=2020-05-09T03:20:00Z order_by:updated_at sort:asc';
+         //Get all tickets
+        $tickets = $this->client->search()->find($params);
+
+        $ticketIds = [];
+        if(!$tickets->count){
+            return true;
+        }
+        $page = ceil($tickets->count / 100 );
+        if($page >= 1){
+            //获取后续的
+            for($i=1;$i<= $page;$i++){
+                $search = $this->client->search()->find($params,['page' => $i]);
+                foreach($search->results as $ticket){
+                    $ticketIds[] = $ticket->id;
+                }
+
+            }
+        }
+         return array_filter($ticketIds);
+    }
 }

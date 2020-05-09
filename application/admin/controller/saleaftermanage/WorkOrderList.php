@@ -22,6 +22,10 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use app\admin\model\Admin;
 use think\Loader;
 use Util\SKUHelper;
+use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
+use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
+use PhpOffice\PhpSpreadsheet\Reader\Xls;
+use PhpOffice\PhpSpreadsheet\Reader\Csv;
 
 /**
  * 售后工单列管理
@@ -236,6 +240,11 @@ class WorkOrderList extends Backend
                     if (!$params['platform_order']) {
                         throw new Exception("订单号不能为空");
                     }
+
+                    if (!$params['order_pay_currency']) {
+                        throw new Exception("请先点击载入数据");
+                    }
+
                     $params['platform_order'] = trim($params['platform_order']);
                     if (!$params['problem_description']) {
                         throw new Exception("问题描述不能为空");
@@ -244,12 +253,13 @@ class WorkOrderList extends Backend
                     if (!$params['problem_type_id'] && !$params['id']) {
                         throw new Exception("问题类型不能为空");
                     }
+
                     if (in_array($params['problem_type_id'],[11,13,14,16]) && empty(array_filter($params['order_sku']))) {
                         throw new Exception("Sku不能为空");
                     }
-
+          
                     //判断是否选择措施
-                    if (count(array_filter($params['measure_choose_id'])) < 1 && $params['work_type'] == 1 && $params['status'] == 2) {
+                    if (count(array_filter($params['measure_choose_id'])) < 1 && $params['work_type'] == 1 && $params['work_status'] == 2) {
                         throw new Exception("措施不能为空");
                     }
 
@@ -2389,5 +2399,132 @@ EOF;
         $writer = new $class($spreadsheet);
 
         $writer->save('php://output');
+    }
+
+     /**
+     * 批量导入
+     */
+    public function import()
+    {
+        $file = $this->request->request('file');
+        if (!$file) {
+            $this->error(__('Parameter %s can not be empty', 'file'));
+        }
+        $filePath = ROOT_PATH . DS . 'public' . DS . $file;
+        if (!is_file($filePath)) {
+            $this->error(__('No results were found'));
+        }
+        //实例化reader
+        $ext = pathinfo($filePath, PATHINFO_EXTENSION);
+        if (!in_array($ext, ['csv', 'xls', 'xlsx'])) {
+            $this->error(__('Unknown data format'));
+        }
+        if ($ext === 'csv') {
+            $file = fopen($filePath, 'r');
+            $filePath = tempnam(sys_get_temp_dir(), 'import_csv');
+            $fp = fopen($filePath, "w");
+            $n = 0;
+            while ($line = fgets($file)) {
+                $line = rtrim($line, "\n\r\0");
+                $encoding = mb_detect_encoding($line, ['utf-8', 'gbk', 'latin1', 'big5']);
+                if ($encoding != 'utf-8') {
+                    $line = mb_convert_encoding($line, 'utf-8', $encoding);
+                }
+                if ($n == 0 || preg_match('/^".*"$/', $line)) {
+                    fwrite($fp, $line . "\n");
+                } else {
+                    fwrite($fp, '"' . str_replace(['"', ','], ['""', '","'], $line) . "\"\n");
+                }
+                $n++;
+            }
+            fclose($file) || fclose($fp);
+
+            $reader = new Csv();
+        } elseif ($ext === 'xls') {
+            $reader = new Xls();
+        } else {
+            $reader = new Xlsx();
+        }
+
+        //导入文件首行类型,默认是注释,如果需要使用字段名称请使用name
+        //$importHeadType = isset($this->importHeadType) ? $this->importHeadType : 'comment';
+        //模板文件列名
+        $listName = ['订单号', '差额',  'SKU', '货币'];
+        try {
+            if (!$PHPExcel = $reader->load($filePath)) {
+                $this->error(__('Unknown data format'));
+            }
+            $currentSheet = $PHPExcel->getSheet(0);  //读取文件中的第一个工作表
+            $allColumn = $currentSheet->getHighestDataColumn(); //取得最大的列号
+            $allRow = $currentSheet->getHighestRow(); //取得一共有多少行
+            $maxColumnNumber = Coordinate::columnIndexFromString($allColumn);
+
+            $fields = [];
+            for ($currentRow = 1; $currentRow <= 1; $currentRow++) {
+                for ($currentColumn = 1; $currentColumn <= $maxColumnNumber; $currentColumn++) {
+                    $val = $currentSheet->getCellByColumnAndRow($currentColumn, $currentRow)->getValue();
+                    $fields[] = $val;
+                }
+            }
+
+            //模板文件不正确
+            if ($listName !== $fields) {
+                throw new Exception("模板文件不正确！！");
+            }
+
+            $data = [];
+            for ($currentRow = 2; $currentRow <= $allRow; $currentRow++) {
+                for ($currentColumn = 1; $currentColumn <= $maxColumnNumber; $currentColumn++) {
+                    $val = $currentSheet->getCellByColumnAndRow($currentColumn, $currentRow)->getValue();
+                    $data[$currentRow - 2][$currentColumn - 1] = is_null($val) ? '' : $val;
+                }
+            }
+        } catch (Exception $exception) {
+            $this->error($exception->getMessage());
+        }
+
+        $work_measure = new \app\admin\model\saleaftermanage\WorkOrderMeasure();
+        $order_recept = new \app\admin\model\saleaftermanage\WorkOrderRecept();
+        foreach ($data as $k => $v) {
+            $params['work_platform'] = 3;
+            $params['work_type'] = 1;
+            $params['platform_order'] = $v[0];
+            $params['order_pay_currency'] = $v[3];
+            $params['order_pay_method'] = 'paypal_express';
+            $params['order_sku'] = $v[2];
+            $params['work_status'] = 3;
+            $params['problem_type_id'] = 23;
+            $params['problem_type_content'] = '其他';
+            $params['problem_description'] = '网站bug 镜片折扣未生效 退款';
+            $params['create_user_id'] = 75;
+            $params['create_user_name'] = '王伟';
+            $params['is_check'] = 1;
+            $params['assign_user_id'] = 75;
+            $params['operation_user_id'] = 75;
+            $params['check_note'] = '网站bug 镜片折扣未生效 退款';
+            $params['create_time'] = date('Y-m-d H:i:s');
+            $params['submit_time'] = date('Y-m-d H:i:s');
+            $params['check_time'] = date('Y-m-d H:i:s');
+            $params['refund_money'] = $v[1];
+            $params['refund_way'] = 'paypal_express';
+            $params['recept_person_id'] = 169;
+            $result = $this->model->isUpdate(false)->data($params)->save($params);
+            if ($result) {
+                $list['work_id'] = $this->model->id;
+                $list['measure_choose_id'] = 2;
+                $list['measure_content'] = '退款';
+                $list['create_time'] = date('Y-m-d H:i:s');
+                $work_measure->isUpdate(false)->data($list)->save($list);
+
+                $rlist['work_id'] = $this->model->id;
+                $rlist['measure_id'] = $work_measure->id;
+                $rlist['recept_group_id'] = 'cashier_group';
+                $rlist['recept_person_id'] = 169;
+                $rlist['recept_person'] = '李亚芳';
+                $rlist['create_time'] = date('Y-m-d H:i:s');
+                $order_recept->insert($rlist);
+            }
+        }
+        echo 'ok';
     }
 }

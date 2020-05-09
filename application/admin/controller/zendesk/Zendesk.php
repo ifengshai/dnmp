@@ -2,7 +2,6 @@
 
 namespace app\admin\controller\zendesk;
 
-use app\admin\model\Admin;
 use app\admin\model\zendesk\ZendeskPosts;
 use app\admin\model\zendesk\ZendeskTasks;
 use app\common\controller\Backend;
@@ -26,6 +25,7 @@ class Zendesk extends Backend
 {
     protected $model = null;
     protected $relationSearch = true;
+    protected $noNeedLogin = ['asycTicketsUpdate','asycTicketsVooguemeUpdate'];
 
     public function _initialize()
     {
@@ -846,6 +846,7 @@ DOC;
     }
 
     /**
+     * 同步丢失数据使用
      * 同步未常见的工单，由于通知失败导致的
      */
     public function asycTickets()
@@ -860,6 +861,27 @@ DOC;
         set_time_limit(0);
         for($i=63382;$i<63384;$i++){
             (new Notice(request(), ['type' => 'voogueme','id' => $i]))->create();
+        }
+    }
+
+    /**
+     * 同步丢失数据使用
+     * 更新同步未常见的工单，由于通知失败导致的
+     */
+    public function asycTicketsUpdate()
+    {
+        $ticketIds = (new Notice(request(), ['type' => 'zeelool']))->asyncUpdate();
+        foreach($ticketIds as $ticketId){
+            (new Notice(request(), ['type' => 'zeelool','id' => $ticketId]))->update();
+            echo $ticketId."\r\n";
+        }
+    }
+    public function asycTicketsVooguemeUpdate()
+    {
+        $ticketIds = (new Notice(request(), ['type' => 'voogueme']))->asyncUpdate();
+        foreach($ticketIds as $ticketId){
+            (new Notice(request(), ['type' => 'voogueme','id' => $ticketId]))->update();
+            echo $ticketId."\r\n";
         }
     }
 }
