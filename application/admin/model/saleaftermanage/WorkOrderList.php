@@ -647,6 +647,7 @@ class WorkOrderList extends Model
             }
             $postData = array_merge($postData, $postDataCommon);
             try {
+                file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',json_encode($postData),FILE_APPEND);
                 $res = $this->httpRequest($siteType, 'magic/order/createOrder', $postData, 'POST');
                 $increment_id = $res['increment_id'];
                 //replacement_order添加补发的订单号
