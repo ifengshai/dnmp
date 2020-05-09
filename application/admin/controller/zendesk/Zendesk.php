@@ -14,7 +14,6 @@ use think\Exception;
 use think\exception\PDOException;
 use think\exception\ValidateException;
 use League\HTMLToMarkdown\HtmlConverter;
-use app\admin\controller\auth\Admin;
 
 
 /**
@@ -26,6 +25,7 @@ class Zendesk extends Backend
 {
     protected $model = null;
     protected $relationSearch = true;
+    protected $noNeedLogin = ['asycTicketsUpdate','asycTicketsVooguemeUpdate'];
 
     public function _initialize()
     {
