@@ -2,7 +2,6 @@
 
 namespace app\admin\controller\zendesk;
 
-use app\admin\model\Admin;
 use app\admin\model\zendesk\ZendeskPosts;
 use app\admin\model\zendesk\ZendeskTasks;
 use app\common\controller\Backend;
@@ -26,6 +25,7 @@ class Zendesk extends Backend
 {
     protected $model = null;
     protected $relationSearch = true;
+    protected $noNeedLogin = ['asycTicketsUpdate','asycTicketsVooguemeUpdate'];
 
     public function _initialize()
     {
