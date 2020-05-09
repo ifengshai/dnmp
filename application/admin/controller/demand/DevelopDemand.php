@@ -132,8 +132,8 @@ class DevelopDemand extends Backend
                     }
                 } 
                 
-                $list[$k]['expected_time'] = date('Y-m-d', strtotime($val['expected_time']));
-                $list[$k]['estimated_time'] = date('Y-m-d', strtotime($val['estimated_time']));
+                $list[$k]['expected_time'] = $val['expected_time'] ? date('Y-m-d', strtotime($val['expected_time'])) : '';
+                $list[$k]['estimated_time'] = $val['estimated_time'] ? date('Y-m-d', strtotime($val['estimated_time'])) : '';
             }
             $result = array("total" => $total, "rows" => $list);
 
