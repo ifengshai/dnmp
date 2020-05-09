@@ -13,6 +13,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     edit_url: 'saleaftermanage/work_order_list/edit',
                     del_url: 'saleaftermanage/work_order_list/del',
                     multi_url: 'saleaftermanage/work_order_list/multi',
+                    import_url: 'saleaftermanage/work_order_list/import',
                     table: 'work_order_list',
                 }
             });
