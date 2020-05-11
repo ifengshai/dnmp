@@ -303,8 +303,7 @@ class Ding extends Controller
             }
             if (!$user) unset($users[$k]);
         }
-        // var_dump($users);
-        // die();
+        
         if (!$title) $title = '您有一条新消息';
         if (!$content) $content = '请前往魔晶查看详情';
         return $instance ->ding_notice($users, $url, $title, strip_tags($content), $picUrl);
