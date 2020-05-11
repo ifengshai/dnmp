@@ -41,12 +41,23 @@ class Notice extends Controller
         }
         $this->postData = $postData;
         try {
+
+            $username = '';
+            if(isset($this->postData['username'])){
+                $username = $this->postData['username'];
+            }
             if ($this->postData['type'] == 'voogueme') {
+                if(!$username){
+                    $username = config('zendesk.voogueme')['username'];
+                }
                 $this->client = new ZendeskAPI(config('zendesk.voogueme')['subdomain']);
-                $this->client->setAuth('basic', ['username' => config('zendesk.voogueme')['username'], 'token' => config('zendesk.voogueme')['token']]);
+                $this->client->setAuth('basic', ['username' => $username, 'token' => config('zendesk.voogueme')['token']]);
             } else {
+                if(!$username){
+                    $username = config('zendesk.zeelool')['username'];
+                }
                 $this->client = new ZendeskAPI(config('zendesk.zeelool')['subdomain']);
-                $this->client->setAuth('basic', ['username' => config('zendesk.zeelool')['username'], 'token' => config('zendesk.zeelool')['token']]);
+                $this->client->setAuth('basic', ['username' => $username, 'token' => config('zendesk.zeelool')['token']]);
             }
 
         } catch (\Exception $e) {

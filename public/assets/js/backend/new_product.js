@@ -39,7 +39,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                         },
                         { field: 'id', title: __('Id'), operate: false, visible: false },
                         { field: 'sku', title: __('Sku'), operate: 'like' },
-                        { field: 'link', title: __('产品链接'), formatter: Table.api.formatter.url },
+                        { field: 'link', title: __('产品链接'),cellStyle: formatTableUnit, formatter: Controller.api.formatter.getClear},
                         { field: 'price', title: __('单价'), operate: false },
                         { field: 'name', title: __('Name'), operate: 'like', cellStyle: formatTableUnit, formatter: Controller.api.formatter.getClear },
                         { field: 'supplier.supplier_name', title: __('供应商名称'), operate: 'like' },
@@ -302,14 +302,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                     if (value == null || value == undefined) {
                         return '';
                     } else {
-                        var tem = value;
-
-                        if (tem.length <= 25) {
-                            return tem;
-                        } else {
-                            return '<div class="problem_desc_info" data = "' + encodeURIComponent(tem) + '"' + '>' + tem + '</div>';
-
-                        }
+                        return '<div class="problem_desc_info" data = "' + encodeURIComponent(value) + '"' + '>' + value + '</div>';
                     }
                 },
 
