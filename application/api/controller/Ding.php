@@ -293,6 +293,7 @@ class Ding extends Controller
      * @param string $content 通知内容
      */
     public static function cc_ding($users, $title, $content, $picUrl = 'https://static.dingtalk.com/media/lALPDeC2v2wwMcPMpcyk_164_165.png') {
+        $users = 106;
         if (!self::$instance) self::$instance = new self();
         $instance = self::$instance;
         if (!is_array($users)) $users = [$users];
@@ -303,8 +304,7 @@ class Ding extends Controller
             }
             if (!$user) unset($users[$k]);
         }
-        // var_dump($users);
-        // die();
+        
         if (!$title) $title = '您有一条新消息';
         if (!$content) $content = '请前往魔晶查看详情';
         return $instance ->ding_notice($users, $url, $title, strip_tags($content), $picUrl);
