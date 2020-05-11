@@ -302,14 +302,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                     if (value == null || value == undefined) {
                         return '';
                     } else {
-                        var tem = value;
-
-                        if (tem.length <= 25) {
-                            return tem;
-                        } else {
-                            return '<div class="problem_desc_info" data = "' + encodeURIComponent(tem) + '"' + '>' + tem + '</div>';
-
-                        }
+                        return '<div class="problem_desc_info" data = "' + encodeURIComponent(value) + '"' + '>' + value + '</div>';
                     }
                 },
 
