@@ -183,8 +183,8 @@ class WorkOrderList extends Backend
                 $list[$k]['step_num'] = $this->sel_order_recept($v['id']); //获取措施相关记录
                 //是否有处理权限
                 $receptPersonIds = explode(',', $v['recept_person_id']);
-                if($v['after_user_id']){
-                    array_unshift($receptPersonIds,$v['after_user_id']);
+                if ($v['after_user_id']) {
+                    array_unshift($receptPersonIds, $v['after_user_id']);
                 }
                 //仓库工单并且经手人未处理
                 //1、仓库类型：经手人未处理||已处理未审核||
@@ -523,12 +523,20 @@ class WorkOrderList extends Backend
                 }
                 if ($result !== false) {
                     //通知
-                    if ($this->model->work_status == 2) {
-                        $this->model->assign_user_id;
-                        //查询
-                        $user_id[] =  '071829462027950349'; //李想
-                        Ding::cc_ding($user_id, '', '有新工单需要处理', '有新工单需要处理');
+                    if ($this->model->work_type == 1) {
+                        if ($this->model->work_status == 2) {
+                            Ding::cc_ding($this->model->assign_user_id, '', '有新工单需要你审核', '有新工单需要你审核');
+                        } elseif ($this->model->work_status == 3) {
+                            $usersId = explode(',', $this->model->recept_person_id);
+                            Ding::cc_ding($usersId, '', '有新工单需要你处理', '有新工单需要你处理');
+                        }
                     }
+                    //经手人
+                    if ($this->model->work_type == 2 && $this->model->work_status == 3) {
+                        
+                        Ding::cc_ding($this->model->after_user_id, '', '有新工单需要你处理', '有新工单需要你处理');
+                    }
+                   
                     $this->success();
                 } else {
                     $this->error(__('No rows were inserted'));
@@ -884,58 +892,7 @@ class WorkOrderList extends Backend
                         }
                     }
 
-                    // //循环插入更换镜框数据
-                    // $orderChangeList = [];
-                    // //判断是否选中更改镜框问题类型
-                    // if ($params['change_frame'] && $params['problem_type_id'] == 1) {
-                    //     $original_sku = $params['change_frame']['original_sku'];
-                    //     $original_number = $params['change_frame']['original_number'];
-                    //     $change_sku = $params['change_frame']['change_sku'];
-                    //     $change_number = $params['change_frame']['change_number'];
-                    //     foreach ($change_sku as $k => $v) {
-                    //         if (!$v) {
-                    //             continue;
-                    //         }
-                    //         $orderChangeList[$k]['work_id'] = $row->id;
-                    //         $orderChangeList[$k]['increment_id'] = $params['platform_order'];
-                    //         $orderChangeList[$k]['platform_type'] = $params['work_type'];
-                    //         $orderChangeList[$k]['original_sku'] = $original_sku[$k];
-                    //         $orderChangeList[$k]['original_number'] = $original_number[$k];
-                    //         $orderChangeList[$k]['change_sku'] = $v;
-                    //         $orderChangeList[$k]['change_number'] = $change_number[$k];
-                    //         $orderChangeList[$k]['change_type'] = 1;
-                    //         $orderChangeList[$k]['create_person'] = session('admin.nickname');
-                    //         $orderChangeList[$k]['create_time'] = date('Y-m-d H:i:s');
-                    //         $orderChangeList[$k]['update_time'] = date('Y-m-d H:i:s');
-                    //     }
-                    //     $orderChangeRes = $this->order_change->saveAll($orderChangeList);
-                    //     if (false === $orderChangeRes) {
-                    //         throw new Exception("添加失败！！");
-                    //     }
-                    // }
-
-                    // //循环插入取消订单数据
-                    // $orderChangeList = [];
-                    // //判断是否选中取消措施
-                    // if ($params['cancel_order'] && in_array(3, array_filter($params['measure_choose_id']))) {
-
-                    //     foreach ($params['cancel_order']['original_sku'] as $k => $v) {
-
-                    //         $orderChangeList[$k]['work_id'] = $row->id;
-                    //         $orderChangeList[$k]['increment_id'] = $params['platform_order'];
-                    //         $orderChangeList[$k]['platform_type'] = $params['work_type'];
-                    //         $orderChangeList[$k]['original_sku'] = $v;
-                    //         $orderChangeList[$k]['original_number'] = $params['cancel_order']['original_number'][$k];
-                    //         $orderChangeList[$k]['change_type'] = 3;
-                    //         $orderChangeList[$k]['create_person'] = session('admin.nickname');
-                    //         $orderChangeList[$k]['create_time'] = date('Y-m-d H:i:s');
-                    //         $orderChangeList[$k]['update_time'] = date('Y-m-d H:i:s');
-                    //     }
-                    //     $cancelOrderRes = $this->order_change->saveAll($orderChangeList);
-                    //     if (false === $cancelOrderRes) {
-                    //         throw new Exception("添加失败！！");
-                    //     }
-                    // }
+                    
                     //不需要审核时直接发送积分，赠送优惠券
                     if (!$params['is_check']  && $params['work_status'] != 1) {
                         //赠送积分
@@ -963,6 +920,22 @@ class WorkOrderList extends Backend
                     $this->error($e->getMessage());
                 }
                 if ($result !== false) {
+
+                    //通知
+                    if ($row->work_type == 1) {
+                        if ($row->work_status == 2) {
+                            Ding::cc_ding($row->assign_user_id, '', '有新工单需要你审核', '有新工单需要你审核');
+                        } elseif ($row->work_status == 3) {
+                            $usersId = explode(',', $row->recept_person_id);
+                            Ding::cc_ding($usersId, '', '有新工单需要你处理', '有新工单需要你处理');
+                        }
+                    }
+                    //经手人
+                    if ($row->work_type == 2 && $row->work_status == 3) {
+                        
+                        Ding::cc_ding($row->after_user_id, '', '有新工单需要你处理', '有新工单需要你处理');
+                    }
+
                     $this->success();
                 } else {
                     $this->error(__('No rows were updated'));
