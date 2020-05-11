@@ -600,7 +600,7 @@ Please close this window and try again.");
             $data = [
                 'ids' => [$ids],
                 'target_comment_is_public' => $target_comment_is_public,
-                'source_comment_is_public' => $source_comment_is_public,
+                'source_comment_is_public' => $source_comment_is_public
             ];
             $converter = new HtmlConverter();
             if ($target_comment) {
@@ -610,9 +610,13 @@ Please close this window and try again.");
                 $data['source_comment'] = $converter->convert($source_comment);
             }
             $result = false;
+
             try {
+                //获取当前用户绑定的账户邮箱
+                $agentId = ZendeskAgents::where('admin_id',session('admin.id'))->value('agent_id');
+                $username = \app\admin\model\zendesk\ZendeskAccount::where('account_id',$agentId)->value('account_email');
                 //合并工单
-                $result = (new Notice(request(), ['type' => $siteName]))->merge($ticket, $data);
+                $result = (new Notice(request(), ['type' => $siteName,'username' => $username]))->merge($ticket, $data);
                 if (isset($result['code'])) {
                     throw new Exception($result['message'], 10001);
                 }
