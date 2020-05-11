@@ -86,6 +86,11 @@ class ItTestOptimize extends Backend
             $isTests = 0;
         }
         $this->assignconfig('isCheck',$isTests);
+        $this->assignconfig('is_test_opt_del', $this->auth->check('demand/testmanage/it_test_optimize/del'));//删除按钮
+        $this->assignconfig('is_test_opt_edit', $this->auth->check('demand/testmanage/it_test_optimize/edit'));//编辑按钮
+        $this->assignconfig('is_test_opt_plan', $this->auth->check('demand/testmanage/it_test_optimize/plan'));//安排按钮
+        $this->assignconfig('is_test_opt_handle', $this->auth->check('demand/testmanage/it_test_optimize/not_handle'));//处理按钮
+
         return $this->view->fetch();
     }
     /**
@@ -287,6 +292,23 @@ class ItTestOptimize extends Backend
         }else{
             return $this->error('404 Not found');
         }
-    }    
+    }
+
+
+    /**
+     * 逻辑删除
+     * */
+    public function del($ids = "")
+    {
+        if ($this->request->isAjax()) {
+            $data['is_del'] =  2;
+            $res = $this->model->allowField(true)->save($data, ['id' => input('ids')]);
+            if ($res) {
+                $this->success('成功');
+            } else {
+                $this->error('失败');
+            }
+        }
+    }
 
 }

@@ -23,7 +23,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 sortName: 'id',
                 columns: [
                     [
-                        {checkbox: true},
+                        // {checkbox: true},
                         {field: 'id', title: __('Id')},
                         {field: 'optimize_type', 
                          title: __('Optimize_type'),
@@ -69,6 +69,46 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             //         return true;
                             //     }
                             // },
+
+                             {
+                                 name: 'delete',
+                                 text: __(''),
+                                 title: __('删除'),
+                                 icon: 'fa fa-trash',
+                                 classname: 'btn btn-xs btn-danger btn-magic btn-ajax',
+                                 url: 'demand/testmanage/it_test_optimize/del',
+                                 confirm: '确认删除？',
+                                 success: function (data, ret) {
+                                     table.bootstrapTable('refresh');
+                                 },
+                                 callback: function (data) {
+                                 },
+                                 visible: function(row){
+                                     if(Config.is_test_opt_del == 1){
+                                         return true;
+                                     }
+                                     return true;
+                                 }
+                             },
+                             {
+                                 name: 'edit',
+                                 text: __(''),
+                                 title: __('编辑'),
+                                 icon: 'fa fa-pencil',
+                                 classname: 'btn btn-xs btn-success btn-editone',
+                                 url: 'demand/testmanage/it_test_optimize/edit',
+                                 success: function (data, ret) {
+                                     table.bootstrapTable('refresh');
+                                 },
+                                 callback: function (data) {
+                                 },
+                                 visible: function(row){
+                                     if(Config.is_test_opt_edit == 1){
+                                         return true;
+                                     }
+                                     return true;
+                                 }
+                             },
                             {
                                 name: 'plan',
                                 text: '安排',
