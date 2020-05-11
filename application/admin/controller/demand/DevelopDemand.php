@@ -2,6 +2,7 @@
 
 namespace app\admin\controller\demand;
 
+use app\api\controller\Ding;
 use app\common\controller\Backend;
 use think\Db;
 use think\Exception;
@@ -409,6 +410,7 @@ class DevelopDemand extends Backend
                     $this->error($e->getMessage());
                 }
                 if ($result !== false) {
+                    Ding::dingHookByDevelop(__FUNCTION__, $this ->model);
                     $this->success();
                 } else {
                     $this->error(__('No rows were inserted'));

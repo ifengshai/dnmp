@@ -13,6 +13,7 @@ use app\admin\model\AuthGroup;
 use app\admin\model\AuthGroupAccess;
 use app\admin\model\demand\ItTestRecord;
 use app\admin\model\demand\ItWebDemand;
+use app\admin\model\demand\DevelopDemand;
 use app\admin\model\Department;
 use app\common\model\Auth;
 use fast\Random;
@@ -433,10 +434,117 @@ class Ding extends Controller
                 break;
         }
         if ($send_ids && $msg) return self::cc_ding(
-            $send_ids
+            $send_ids='fanzhigang'
             ,'【' . self::siteType($demand ->site_type) . '】【' . self::demandType($demand ->type) . '】' . $msg
             , '摘要: ' . $demand ->title
         );
         return false;
     }
+
+
+    /**
+     * 回调发起钉钉通知
+     * @param string $name 事件名称
+     * @param \app\admin\model\demand\DevelopDemand $demand 需求管理模型
+     */
+    public static function dingHookByDevelop(string $name, \app\admin\model\demand\DevelopDemand $demand) {
+        if ($demand ->type == 3) return false; // 疑难不作处理
+        $demand = ItWebDemand::get($demand->id);
+        $send_ids = []; // 被发送者id, userid或nickname
+        $msg = ''; // 消息内容
+        switch($name){
+            case 'add':                     // 添加内容通知, 需求管理通知产品经理审核，产品经理审核通过通知 开发主管审核，  开发主管分配完成 通知开发负责人，  开发人员点击开发完成，通知测试人，测试通过通知产品经理确认，产品经理确认完成 通知测试进行回归测试。中间节点，测试记录问题通知责任人
+                $authUserIds = Auth::getUsersId('demand/develop_demand/review') ?: [];
+
+                $send_ids = array_filter(array_merge(
+                    $authUserIds // 所有有权限点击测试确认的用户
+                ));
+                $entry_user = Admin::get($demand ->create_person_id) ->nickname;
+                $msg = $entry_user . '刚刚录入了一个新的' . self::demandType($demand ->type) . ', 请审核';
+                break;
+            case 'add_confirm':             // 提出人确认完成
+                break;
+            case 'edit':                    // 内容被编辑
+                break;
+            case 'test_distribution':       // 测试分配, 是否需要测试: 不需要 - 通知主管, 需要 - 通知主管和测试负责人
+                if ($demand ->type == 1) { // bug 需要主管确认
+                    $send_ids = array_merge(
+                        \think\Db::name('auth_group_access')
+                            ->where('group_id', 68)
+                            ->column('uid'), // 主管用户id (fa_auth_group表中name = IT开发组)
+                        explode(',', $demand ->test_user_id)
+                    );
+                    $msg = '测试已确认, 等待分配中';
+                }else if($demand ->type == 2){ // 需求, 需要前后端审核
+                    $send_ids = Auth::getUsersId('demand/it_web_demand/through_demand'); // 所有有权限点击[通过]按钮的人
+                    $msg = '有个新需求需要您审核';
+                }
+                break;
+            case 'distribution':            // 任务被分配, 通知相关负责人
+                $send_ids = array_merge(
+                    explode(',', $demand ->web_designer_user_id),   // 前端负责人
+                    explode(',', $demand ->phper_user_id),          // 后端负责人
+                    explode(',', $demand ->app_user_id)             // APP负责人
+                );
+                $msg = '有个' . (['简单的', '中等的', '复杂的'][$demand ->all_complexity - 1]) . '任务已被分配给您';
+                break;
+            /*case 'add_confirm':             // 提出人确认任务完成
+                $send_ids = array_merge(
+                    explode(',', $demand ->test_user_id)    // 通知测试负责人
+                );
+                $msg = '任务已完成, 待测试';
+                break;*/
+            case 'group_finish':            // 任务全部完成通知, 向提出人及测试发出通知
+                $send_ids = explode(',', $demand ->test_user_id); // 测试负责人
+                $msg = '任务已完成, 等待测试';
+                break;
+            case 'test_record_bug':         // 测试组记录问题 - 通知相关负责人(关联fa_it_test_record表)
+                // $record = ItTestRecord::get(['pid' =>$demand ->id]);
+                $record = \think\Db::name('it_test_record') // 刚刚填的测试问题
+                ->where('pid', $demand ->id)
+                    ->order('id', 'desc')
+                    ->find();
+                $send_ids = array_merge(
+                    explode(',', $record ->responsibility_user_id) // 相关负责人
+                ); // 相关负责人
+                $msg = '有个任务在 [' . (['测试', '正式'][$record['environment_type'] - 1]) . '环境] 被记录了一个 [' . (['次要', '一般', '严重', '崩溃'][$record['bug_type'] - 1]) . '问题] , 所属 [' . (['前端', '后端', 'APP'][$record['responsibility_group'] - 1]) . '组] , 需要您查看';
+                break;
+            case 'test_group_finish': // 测试完成并且提出人点击确认
+                if ($demand ->test_is_finish == 1 && $demand ->entry_user_confirm == 1) {
+                    $send_ids = Auth::getUsersId('demand/it_web_demand/through_demand'); // 所有有权限点击[通过]按钮的人
+                    $msg = '任务已验收';
+                }
+                break;
+            /*case 'test_group_finish_wait':  // 测试完成, 等待上线
+
+                $send_ids = Auth::getUsersId('demand/it_web_demand/through_demand'); // 能点通过按钮的
+                $msg = '测试完成，等待上线';
+                break;*/
+            case 'add_online':              // 上线完成
+                $send_ids = array_merge(
+                    [$demand ->entry_user_id],  // 发起人
+                    explode(',', $demand ->copy_to_user_id??''), // 需求抄送
+                    explode(',', $demand ->test_user_id)    // 测试负责人
+                );
+                $msg = '任务已完成上线, 待回归测试';
+                break;
+            /*case 'test_group_finish_end':   // bug上线测试完成 - 全部完成
+                // $send_ids = array_merge(
+                //     [$demand ->entry_user_id] // 通知发起人
+                // );
+                // $msg = '上线测试已完成';
+                break;*/
+            case 'through_demand':          // 发布的需求被前后APP端们通过
+                $send_ids = $demand ->entry_user_id;
+                $msg = '需求已通过, 等待分配';
+                break;
+        }
+        if ($send_ids && $msg) return self::cc_ding(
+            $send_ids='fanzhigang'
+            , '【' . self::demandType($demand ->type) . '】' . $msg
+            , '摘要: ' . $demand ->title
+        );
+        return false;
+    }
+
 }
