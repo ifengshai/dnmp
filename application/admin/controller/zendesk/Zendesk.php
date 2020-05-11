@@ -500,6 +500,7 @@ class Zendesk extends Backend
             'is_active' => 1])
             ->order('template_category desc,id desc')
             ->select();
+
         $templates = ['Apply Macro'];
         foreach ($templateAll as $key => $template) {
             $category = '';

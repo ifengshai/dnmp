@@ -377,7 +377,7 @@ class ZendeskMailTemplate extends Backend
                 2 => $vooguemeMacros
             ];
             foreach($macrosTypes as $type =>  $macrosType){
-                foreach($zeeloolMacros as $macro) {
+                foreach($macrosType as $macro) {
                     if($this->model->where(['template_platform' => $type,'template_id' => $macro->id])->find()){
                         continue;
                     }
