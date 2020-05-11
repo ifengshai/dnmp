@@ -7,6 +7,7 @@ use think\Db;
 use think\Exception;
 use think\exception\PDOException;
 use think\exception\ValidateException;
+use app\common\model\Auth;
 
 /**
  * 需求平台-开发组-日常需求管理
@@ -28,6 +29,7 @@ class DevelopDemand extends Backend
         $this->model = new \app\admin\model\demand\DevelopDemand;
         $this->testRecord = new \app\admin\model\demand\DevelopTestRecord();
         $this->assignconfig('admin_id', session('admin.id'));
+        $this->view->assign('getTabList', $this->model->getTabList());
     }
 
     /**
@@ -48,15 +50,54 @@ class DevelopDemand extends Backend
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
+
+            $filter = json_decode($this->request->get('filter'), true);
+            $meWhere = '';
+            //我的
+            if(isset($filter['me_task'])){
+
+                $adminId = session('admin.id');
+                //经理
+                $authUserIds = Auth::getUsersId('demand/develop_demand/review') ?: [];
+                //经理
+                if(in_array($adminId,$authUserIds)){
+                    $meWhere = "(review_status_manager = 0 or ( (is_test =1 and test_is_passed=1 and is_finish_task =0) or (is_test =0 and is_finish=1 and is_finish_task=0)  ) )";
+                }
+                //开发主管
+                $authDevelopUserIds = Auth::getUsersId('demand/develop_demand/review_status_develop') ?: [];
+                if(!in_array($adminId,$authUserIds) && in_array($adminId,$authDevelopUserIds)){
+                    $meWhere = "(review_status_develop = 0 or FIND_IN_SET({$adminId},assign_developer_ids) or is_finish_task =0)";//主管 需要主管审核的 主管本人的任务  未完成，需主管确认完成的
+                }
+
+                //判断是否是普通的测试
+                $testAuthUserIds = Auth::getUsersId('demand/develop_web_task/set_test_status') ?: [];
+                if(!in_array($adminId,$authUserIds) && in_array($adminId,$testAuthUserIds)){
+                    $meWhere = "(is_test = 1 and FIND_IN_SET({$adminId},test_person) and is_test_complete =0)"; //测试用户
+                }
+                //显示有分配权限的人，此类人跟点上线的是一类人，此类人应该可以查看所有的权限
+                $assignAuthUserIds = Auth::getUsersId('demand/it_web_demand/distribution') ?: [];
+                if(in_array($adminId,$assignAuthUserIds)){
+                    $meWhere = "1 = 1";
+                }
+                // 不是主管和经理的, 是否为开发人或测试认，或创建人
+                if(!$meWhere){
+                    $meWhere .= "FIND_IN_SET({$adminId},assign_developer_ids)  or FIND_IN_SET({$adminId},test_person)  or FIND_IN_SET({$adminId}, create_person_id)";
+                }
+                unset($filter['me_task']);
+            }
+            $this->request->get(['filter' => json_encode($filter)]);
+
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
                 ->where($where)
+                ->where($meWhere)
                 ->where('type', '2')
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->model
                 ->where($where)
+                ->where($meWhere)
                 ->where('type', '2')
                 ->order($sort, $order)
                 ->limit($offset, $limit)
@@ -177,15 +218,52 @@ class DevelopDemand extends Backend
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
+            $filter = json_decode($this->request->get('filter'), true);
+            $meWhere = '';
+            if(isset($filter['me_task'])){
+
+                $adminId = session('admin.id');
+                //经理
+                $authUserIds = Auth::getUsersId('demand/develop_demand/review') ?: [];
+                //经理
+                if(in_array($adminId,$authUserIds)){
+                    $meWhere = "(review_status_manager = 0 or ( (is_test =1 and test_is_passed=1 and is_finish_task =0) or (is_test =0 and is_finish=1 and is_finish_task=0)  ) )";
+                }
+                //开发主管
+                $authDevelopUserIds = Auth::getUsersId('demand/develop_demand/review_status_develop') ?: [];
+                if(!in_array($adminId,$authUserIds) && in_array($adminId,$authDevelopUserIds)){
+                    $meWhere = "(review_status_develop = 0 or FIND_IN_SET({$adminId},assign_developer_ids) or is_finish_task =0)";//主管 需要主管审核的 主管本人的任务  未完成，需主管确认完成的
+                }
+
+                //判断是否是普通的测试
+                $testAuthUserIds = Auth::getUsersId('demand/develop_web_task/set_test_status') ?: [];
+                if(!in_array($adminId,$authUserIds) && in_array($adminId,$testAuthUserIds)){
+                    $meWhere = "(is_test = 1 and FIND_IN_SET({$adminId},test_person) and is_test_complete =0)"; //测试用户
+                }
+                //显示有分配权限的人，此类人跟点上线的是一类人，此类人应该可以查看所有的权限
+                $assignAuthUserIds = Auth::getUsersId('demand/it_web_demand/distribution') ?: [];
+                if(in_array($adminId,$assignAuthUserIds)){
+                    $meWhere = "1 = 1";
+                }
+                // 不是主管和经理的, 是否为开发人或测试认，或创建人
+                if(!$meWhere){
+                    $meWhere .= "FIND_IN_SET({$adminId},assign_developer_ids)  or FIND_IN_SET({$adminId},test_person)  or FIND_IN_SET({$adminId}, create_person_id)";
+                }
+                unset($filter['me_task']);
+            }
+            $this->request->get(['filter' => json_encode($filter)]);
+
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
                 ->where($where)
+                ->where($meWhere)
                 ->where('type', '1')
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->model
                 ->where($where)
+                ->where($meWhere)
                 ->where('type', '1')
                 ->order($sort, $order)
                 ->limit($offset, $limit)
