@@ -299,7 +299,7 @@
                             <td style="text-align: center; vertical-align: middle;">{$workOrderList.measure}</td>
                             <th style="text-align: center; vertical-align: middle;">{$workOrderList.create_user_name}</th>
                             <td style="text-align: center; vertical-align: middle;">{$workOrderList.create_time}</td>
-                            <td style="text-align: center; vertical-align: middle;"><a href="{:url('saleaftermanage/work_order_list/index')}?ref=addtabs&work_id={$workOrderList.id}" class="btn btn-primary btn-xs btn-click btn-addtabs" data-table-id="table" data-field-index="11" data-row-index="0" data-button-index="3" title="售后工单列表"><i class="fa fa-list"></i>查看</a></td>
+                            <td style="text-align: center; vertical-align: middle;"><a href="{:url('saleaftermanage/work_order_list/index')}?work_id={$workOrderList.id}" class="btn btn-primary btn-xs btn-click btn-addtabs" data-table-id="table" data-field-index="11" data-row-index="0" data-button-index="3" title="售后工单列表"><i class="fa fa-list"></i>查看</a></td>
                         </tr>
                         {/foreach}
                     </table>
@@ -345,7 +345,7 @@
                             <td style="text-align: center; vertical-align: middle;">{$synergyTaskList.problem_desc}</td>
                             <td style="text-align: center; vertical-align: middle;">{$synergyTaskList.create_person}</td>
                             <td style="text-align: center; vertical-align: middle;">{$synergyTaskList.create_time}</td>
-                            <td style="text-align: center; vertical-align: middle;"><a href="{:url('infosynergytaskmanage/info_synergy_task/index')}?ref=addtabs&synergy_order_number={$synergyTaskList.synergy_order_number}" class="btn btn-primary btn-xs btn-click btn-addtabs" data-table-id="table" data-field-index="11" data-row-index="0" data-button-index="3" title="协同任务"><i class="fa fa-list"></i>查看</a></td>
+                            <td style="text-align: center; vertical-align: middle;"><a href="{:url('infosynergytaskmanage/info_synergy_task/index')}?synergy_order_number={$synergyTaskList.synergy_order_number}" class="btn btn-primary btn-xs btn-click btn-addtabs" data-table-id="table" data-field-index="11" data-row-index="0" data-button-index="3" title="协同任务"><i class="fa fa-list"></i>查看</a></td>
                         </tr>
                         {/foreach}
                     </table>
@@ -397,7 +397,7 @@
                             <td style="text-align: center; vertical-align: middle;">{$saleTaskList.handle_scheme}</td>
                             <td style="text-align: center; vertical-align: middle;">{$saleTaskList.create_person}</td>
                             <td style="text-align: center; vertical-align: middle;">{$saleTaskList.create_time}</td>
-                            <td style="text-align: center; vertical-align: middle;"><a href="{:url('saleaftermanage/sale_after_task/index')}?ref=addtabs&task_number={$saleTaskList.task_number}" class="btn btn-primary btn-xs btn-click btn-addtabs" data-table-id="table" data-field-index="11" data-row-index="0" data-button-index="3" title="售后任务"><i class="fa fa-list"></i>查看</a></td>
+                            <td style="text-align: center; vertical-align: middle;"><a href="{:url('saleaftermanage/sale_after_task/index')}?task_number={$saleTaskList.task_number}" class="btn btn-primary btn-xs btn-click btn-addtabs" data-table-id="table" data-field-index="11" data-row-index="0" data-button-index="3" title="售后任务"><i class="fa fa-list"></i>查看</a></td>
                         </tr>
                         {/foreach}
                     </table>
