@@ -176,7 +176,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     callback: function (data) {
                                     },
                                     visible: function(row){
-                                        if(row.demand_del && row.is_entry_user_hidden == 1){//操作权限
+                                        if(row.demand_del || row.is_entry_user_hidden == 1){//操作权限
                                             return true;
                                         }
                                     }
@@ -692,13 +692,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     callback: function (data) {
                                     },
                                     visible: function(row){
-                                        if(row.demand_del && row.is_entry_user_hidden == 1){//操作权限
+                                        if(row.demand_del || row.is_entry_user_hidden == 1){//操作权限
                                             return true;
                                         }
-                                        //创建人显示
-                                        if(row.entry_user_id == Config.admin_id){
-                                            return true;
-                                        }
+
                                     }
                                 },
                                 {
