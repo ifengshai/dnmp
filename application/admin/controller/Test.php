@@ -50,11 +50,9 @@ class Test extends Backend
 
         $trackingConnector = new TrackingConnector($this->apiKey);
         foreach ($order_group as $key => $val){
-            if($key>= 609){
-                $aa = $trackingConnector->registerMulti($val);
-                sleep(1);
-                echo $key."\n";
-            }
+            $aa = $trackingConnector->registerMulti($val);
+            sleep(1);
+            echo $key."\n";
         }
         dump($order_group[$key]);
         echo 'all is ok'."\n";
