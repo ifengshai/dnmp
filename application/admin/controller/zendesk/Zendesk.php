@@ -25,7 +25,7 @@ class Zendesk extends Backend
 {
     protected $model = null;
     protected $relationSearch = true;
-    protected $noNeedLogin = ['asycTicketsUpdate','asycTicketsVooguemeUpdate'];
+    protected $noNeedLogin = ['asycTicketsUpdate','asycTicketsVooguemeUpdate','asycTicketsAll'];
 
     public function _initialize()
     {
@@ -890,6 +890,24 @@ DOC;
         $ticketIds = (new Notice(request(), ['type' => 'voogueme']))->asyncUpdate();
         foreach($ticketIds as $ticketId){
             (new Notice(request(), ['type' => 'voogueme','id' => $ticketId]))->update();
+            echo $ticketId."\r\n";
+        }
+    }
+
+    /**
+     * 同步所有数据
+     * @throws \Exception
+     */
+    public function asycTicketsAll()
+    {
+        $tickets = $this->model->where('id','>=',1)->order('id asc')->limit(10)->select();
+        foreach($tickets as $ticket){
+            $ticketId = $ticket->ticket_id;
+            if($ticket->type == 1){
+                (new Notice(request(), ['type' => 'zeelool','id' => $ticketId]))->update();
+            }elseif($ticket->type == 2){
+                (new Notice(request(), ['type' => 'voogueme','id' => $ticketId]))->update();
+            }
             echo $ticketId."\r\n";
         }
     }
