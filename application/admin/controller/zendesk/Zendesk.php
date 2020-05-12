@@ -900,7 +900,7 @@ DOC;
      */
     public function asycTicketsAll()
     {
-        $tickets = $this->model->where('id','>=',1)->order('id asc')->limit(10)->select();
+        $tickets = $this->model->where('id','>=',1)->order('id asc')->select();
         foreach($tickets as $ticket){
             $ticketId = $ticket->ticket_id;
             if($ticket->type == 1){
