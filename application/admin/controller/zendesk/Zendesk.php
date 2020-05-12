@@ -900,7 +900,7 @@ DOC;
      */
     public function asycTicketsAll()
     {
-        $tickets = $this->model->where('zendesk_update_time','<','2011-12-12 00:00:00')->order('id asc')->select();
+        $tickets = $this->model->where('is_hide',0)->order('id asc')->select();
         foreach($tickets as $ticket){
             $ticketId = $ticket->ticket_id;
             if($ticket->type == 1){
