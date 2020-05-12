@@ -926,7 +926,7 @@ DOC;
     }
     public function asycTicketsAll3()
     {
-        $tickets = $this->model->where('id','between',[6000,10660])->order('id asc')->select();
+        $tickets = $this->model->where('id','between',[7613,10660])->order('id asc')->select();
         foreach($tickets as $ticket){
             $ticketId = $ticket->ticket_id;
             if($ticket->type == 1){
