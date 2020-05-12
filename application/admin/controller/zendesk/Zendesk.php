@@ -2,7 +2,6 @@
 
 namespace app\admin\controller\zendesk;
 
-use app\admin\model\Admin;
 use app\admin\model\zendesk\ZendeskPosts;
 use app\admin\model\zendesk\ZendeskTasks;
 use app\common\controller\Backend;
@@ -26,6 +25,7 @@ class Zendesk extends Backend
 {
     protected $model = null;
     protected $relationSearch = true;
+    protected $noNeedLogin = ['asycTicketsUpdate','asycTicketsVooguemeUpdate'];
 
     public function _initialize()
     {
@@ -101,12 +101,19 @@ class Zendesk extends Backend
                 $andWhere = "FIND_IN_SET({$filter['tags']},tags)";
                 unset($filter['tags']);
             }
+            if($filter['content']) {
+                $comments = ZendeskComments::where('body','like','%'.$filter['content'].'%')->column('ticket_id');
+                $tickets = $this->model->where('subject','like','%'.$filter['content'].'%')->column('ticket_id');
+                $ticket_ids = array_merge($comments,$tickets);
+                $map['zendesk.ticket_id'] = ['in',$ticket_ids];
+                unset($filter['content']);
+            }
             $this->request->get(['filter' => json_encode($filter)]);
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             //默认使用
-            $orderSet = 'priority desc,status asc,update_time desc,id desc';
+            $orderSet = 'priority desc,update_time asc,id asc';
             if($me_task == 2){
-                $orderSet = 'priority desc,status asc,update_time desc,id desc';
+                $orderSet = 'priority desc,update_time asc,id asc';
             }
             if($sort != 'zendesk.id' && $sort){
                 $orderSet = "{$sort} {$order}";
@@ -493,6 +500,7 @@ class Zendesk extends Backend
             'is_active' => 1])
             ->order('template_category desc,id desc')
             ->select();
+
         $templates = ['Apply Macro'];
         foreach ($templateAll as $key => $template) {
             $category = '';
@@ -592,7 +600,7 @@ Please close this window and try again.");
             $data = [
                 'ids' => [$ids],
                 'target_comment_is_public' => $target_comment_is_public,
-                'source_comment_is_public' => $source_comment_is_public,
+                'source_comment_is_public' => $source_comment_is_public
             ];
             $converter = new HtmlConverter();
             if ($target_comment) {
@@ -602,9 +610,13 @@ Please close this window and try again.");
                 $data['source_comment'] = $converter->convert($source_comment);
             }
             $result = false;
+
             try {
+                //获取当前用户绑定的账户邮箱
+                $agentId = ZendeskAgents::where('admin_id',session('admin.id'))->value('agent_id');
+                $username = \app\admin\model\zendesk\ZendeskAccount::where('account_id',$agentId)->value('account_email');
                 //合并工单
-                $result = (new Notice(request(), ['type' => $siteName]))->merge($ticket, $data);
+                $result = (new Notice(request(), ['type' => $siteName,'username' => $username]))->merge($ticket, $data);
                 if (isset($result['code'])) {
                     throw new Exception($result['message'], 10001);
                 }
@@ -835,6 +847,46 @@ DOC;
                 $task->save();
                 $this->model->where('id',$ticket->id)->setField('is_hide',0);
             }
+        }
+    }
+
+    /**
+     * 同步丢失数据使用
+     * 同步未常见的工单，由于通知失败导致的
+     */
+    public function asycTickets()
+    {
+        set_time_limit(0);
+        for($i=123018;$i<123019;$i++){
+            (new Notice(request(), ['type' => 'zeelool','id' => $i]))->create();
+        }
+    }
+    public function asycTicketsVoogueme()
+    {
+        set_time_limit(0);
+        for($i=63382;$i<63384;$i++){
+            (new Notice(request(), ['type' => 'voogueme','id' => $i]))->create();
+        }
+    }
+
+    /**
+     * 同步丢失数据使用
+     * 更新同步未常见的工单，由于通知失败导致的
+     */
+    public function asycTicketsUpdate()
+    {
+        $ticketIds = (new Notice(request(), ['type' => 'zeelool']))->asyncUpdate();
+        foreach($ticketIds as $ticketId){
+            (new Notice(request(), ['type' => 'zeelool','id' => $ticketId]))->update();
+            echo $ticketId."\r\n";
+        }
+    }
+    public function asycTicketsVooguemeUpdate()
+    {
+        $ticketIds = (new Notice(request(), ['type' => 'voogueme']))->asyncUpdate();
+        foreach($ticketIds as $ticketId){
+            (new Notice(request(), ['type' => 'voogueme','id' => $ticketId]))->update();
+            echo $ticketId."\r\n";
         }
     }
 }

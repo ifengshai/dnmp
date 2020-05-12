@@ -63,6 +63,17 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
             // 为表格绑定事件
             Table.api.bindevent(table);
 
+            //批量打印标签    
+            $('.btn-batch-printed_test').click(function () {
+                var ids = Table.api.selectedids(table);
+                var id_params = '';
+                $.each(table.bootstrapTable('getSelections'), function (index, row) {
+                    id_params += row['entity_id'] + ',';
+                });
+
+                window.open(Config.moduleurl + '/order/index/batch_print_label_new?id_params=' + id_params + '&label=' + Config.label, '_blank');
+            });
+
         },
         add: function () {
             Controller.api.bindevent();

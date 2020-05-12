@@ -26,6 +26,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                         {field: 'ticket_id', title: __('Ticket_id'),sortable: true},
                         {field: 'subject', title: __('Subject'),operate:false,formatter: function(value){return value.toString().substr(0, 100)}},
                         {field: 'email', title: __('Email'),operate:'LIKE %...%'},
+                        {field: 'content', title: __('关键字'),visible:false},
                         //{field: 'assign_id', title: __('Assgin_id'),operate: false,visible:false},
                         {
                             field: 'admin.nickname',
@@ -60,10 +61,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                                     title: function (row) {
                                         return __('Answer') + '【' + row.ticket_id + '】' + row.subject;
                                     },
-                                    classname: 'btn btn-xs btn-success btn-dialog',
+                                    classname: 'btn btn-xs btn-success',
                                     icon: '',
                                     url: 'zendesk/zendesk/edit',
-                                    extend: 'data-area = \'["100%","100%"]\'',
+                                    extend: 'data-area = \'["100%","100%"]\' target=\'_blank\'',
                                     callback: function (data) {
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
                                     },
@@ -140,6 +141,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
         },
         add: function () {
             Controller.api.bindevent();
+            Form.api.bindevent($("form[role=form]"), function (data, ret) {
+                top.window.$("ul.nav-addtabs li.active").find(".fa-remove").trigger("click");
+                Fast.api.close();
+                window.open("about:blank","_self").close();
+            }, function (data, ret) {
+                Toastr.success("失败");
+            });
             $(document).on('change','.macro-apply',function(){
                 var id = $(this).val();
                 var email = $('.email').val();
@@ -157,9 +165,18 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                             type: type
                         },
                         success: function (json) {
+                            if(json.code != undefined){
+                                Toastr.error(json.msg);
+                                return false;
+                            }
                             //修改回复内容，状态，priority，tags
                             if(json.template_content){
-                                $('.ticket-content').summernote("pasteHTML",json.template_content);
+                                var code = $('.ticket-content').summernote('code');
+                                var template_content = json.template_content;
+                                if(code != '<p><br></p>'){
+                                    template_content = code + template_content;
+                                }
+                                $('.ticket-content').summernote("code",template_content);
                             }
                             if(json.mail_status) {
                                 $('.ticket-status').val(json.mail_status);
@@ -188,6 +205,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
         },
         edit: function () {
             Controller.api.bindevent();
+            Form.api.bindevent($("form[role=form]"), function (data, ret) {
+                top.window.$("ul.nav-addtabs li.active").find(".fa-remove").trigger("click");
+                Fast.api.close();
+                window.open("about:blank","_self").close();
+            }, function (data, ret) {
+                Toastr.success("失败");
+            });            
             //删除商品数据
             $(document).on('click', '.merge', function () {
                 var nid = $(this).data('nid');
@@ -271,7 +295,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                         success: function (json) {
                             //修改回复内容，状态，priority，tags
                             if(json.template_content){
-                                $('.ticket-content').summernote("pasteHTML",json.template_content);
+                                var code = $('.ticket-content').summernote('code');
+                                var template_content = json.template_content;
+                                if(code != '<p><br></p>'){
+                                    template_content = code + template_content;
+                                }
+                                $('.ticket-content').summernote("code",template_content);
                             }
                             if(json.mail_status) {
                                 $('.ticket-status').val(json.mail_status);
@@ -306,7 +335,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                 }else{
                     parent.$(".layui-layer-footer").show();
                 }
-            });
+            });           
         },
         api: {
             bindevent: function () {

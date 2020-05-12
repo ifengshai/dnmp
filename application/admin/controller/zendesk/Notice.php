@@ -41,12 +41,23 @@ class Notice extends Controller
         }
         $this->postData = $postData;
         try {
+
+            $username = '';
+            if(isset($this->postData['username'])){
+                $username = $this->postData['username'];
+            }
             if ($this->postData['type'] == 'voogueme') {
+                if(!$username){
+                    $username = config('zendesk.voogueme')['username'];
+                }
                 $this->client = new ZendeskAPI(config('zendesk.voogueme')['subdomain']);
-                $this->client->setAuth('basic', ['username' => config('zendesk.voogueme')['username'], 'token' => config('zendesk.voogueme')['token']]);
+                $this->client->setAuth('basic', ['username' => $username, 'token' => config('zendesk.voogueme')['token']]);
             } else {
+                if(!$username){
+                    $username = config('zendesk.zeelool')['username'];
+                }
                 $this->client = new ZendeskAPI(config('zendesk.zeelool')['subdomain']);
-                $this->client->setAuth('basic', ['username' => config('zendesk.zeelool')['username'], 'token' => config('zendesk.zeelool')['token']]);
+                $this->client->setAuth('basic', ['username' => $username, 'token' => config('zendesk.zeelool')['token']]);
             }
 
         } catch (\Exception $e) {
@@ -70,7 +81,15 @@ class Notice extends Controller
         //file_put_contents('/www/wwwroot/mjz/runtime/b.txt',json_encode($postData)."\r\n",FILE_APPEND);
         //评论s
         $comments = $this->getComments($id);
+        //有错误的防止执行下一步
+        if($comments == 'success'){
+            return 'success';
+        }
         $ticket = $this->getTicket($id);
+        //有错误的防止执行下一步
+        if($ticket == 'success'){
+            return 'success';
+        }
         //存在已创建的则跳过流程
         if(Zendesk::where(['ticket_id' => $id,'type' => $type])->find()){
             return false;
@@ -180,7 +199,15 @@ class Notice extends Controller
             //$channel = $postData['channel'];
             //最后一条评论
             $comments = $this->getComments($id);
+            //有错误的防止执行下一步
+            if($comments == 'success'){
+                return 'success';
+            }
             $ticket = $this->getTicket($id);
+            //有错误的防止执行下一步
+            if($ticket == 'success'){
+                return 'success';
+            }
             //开始插入相关数据
             $tags = $ticket->tags;
             $tags = \app\admin\model\zendesk\ZendeskTags::where('name', 'in', $tags)->distinct(true)->column('id');
@@ -928,5 +955,47 @@ class Notice extends Controller
     public function shellAssignTicketChange()
     {
         Zendesk::shellAssignTicketChange();
+    }
+
+    /**
+     * 获取邮件模板
+     * @return mixed
+     * @throws \Exception
+     */
+    public function getTemplate()
+    {
+        $res = $this->client->macros()->findAllActive();
+        $macros = $res->macros;
+        return $macros;
+    }
+
+    /**
+     * 同步丢失数据使用
+     * @return array|bool
+     * @throws \Zendesk\API\Exceptions\MissingParametersException
+     * @throws \Zendesk\API\Exceptions\RouteException
+     */
+    public function asyncUpdate()
+    {
+        $params = 'type:ticket updated_at>=2020-05-09T00:10:00Z updated_at<=2020-05-09T03:20:00Z order_by:updated_at sort:asc';
+         //Get all tickets
+        $tickets = $this->client->search()->find($params);
+
+        $ticketIds = [];
+        if(!$tickets->count){
+            return true;
+        }
+        $page = ceil($tickets->count / 100 );
+        if($page >= 1){
+            //获取后续的
+            for($i=1;$i<= $page;$i++){
+                $search = $this->client->search()->find($params,['page' => $i]);
+                foreach($search->results as $ticket){
+                    $ticketIds[] = $ticket->id;
+                }
+
+            }
+        }
+         return array_filter($ticketIds);
     }
 }

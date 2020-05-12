@@ -13,6 +13,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     edit_url: 'saleaftermanage/work_order_list/edit',
                     del_url: 'saleaftermanage/work_order_list/del',
                     multi_url: 'saleaftermanage/work_order_list/multi',
+                    import_url: 'saleaftermanage/work_order_list/import',
                     table: 'work_order_list',
                 }
             });
@@ -32,7 +33,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         { field: 'work_type_str', title: __('Work_type'), operate: false },
                         { field: 'work_type', title: __('Work_type'), searchList: { 1: '客服工单', 2: '仓库工单' }, visible: false, formatter: Table.api.formatter.status },
                         { field: 'platform_order', title: __('Platform_order') },
-                        { field: 'order_sku', title: __('Order_sku'),operate: 'like',visible: true },
+                        {
+                            field: 'recept_person', title: __('承接人'), searchList: function (column) {
+                                return Template('receptpersontpl', {});
+                            },visible: false
+                        },
+                        { field: 'order_sku', title: __('Order_sku'), operate: 'like', visible: false },
 
                         /*{
                             field: 'order_sku',
@@ -126,7 +132,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                             },
                         },
 
-                        { field: 'work_status', title: __('work_status'), custom: { 0: 'black', 1: 'danger', 2: 'success', 4: 'success', 3: 'success', 5: 'success', 6: 'success' }, searchList: { 0: '已取消', 1: '新建', 2: '待审核', 4: '审核拒绝', 3: '待处理', 5: '部分处理', 6: '已处理' }, formatter: Table.api.formatter.status },
+                        { field: 'work_status', title: __('work_status'), custom: { 0: 'black', 1: 'danger', 2: 'orange', 4: 'warning', 3: 'purple', 5: 'primary', 6: 'success' }, searchList: { 0: '已取消', 1: '新建', 2: '待审核', 4: '审核拒绝', 3: '待处理', 5: '部分处理', 6: '已处理' }, formatter: Table.api.formatter.status },
                         { field: 'work_order_note_status', title: __('回复状态'), custom: { 0: 'gray', 1: 'success', 2: 'danger', 3: 'blank' }, searchList: { 0: '无', 1: '客服已回复', 2: '仓库已回复', 3: '财务已回复' }, formatter: Table.api.formatter.status },
                         {
                             field: 'create_time',
@@ -353,8 +359,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     var op = search.op;
                     window.open(Config.moduleurl + '/saleaftermanage/work_order_list/batch_export_xls?filter=' + filter + '&op=' + op, '_blank');
                 }
-                
-            });            
+
+            });
 
         },
         add: function () {
@@ -362,6 +368,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
 
             //点击事件 #todo::需判断仓库或者客服
             $(document).on('click', '.problem_type', function () {
+                $order_pay_currency = $('#order_pay_currency').val();
+                if (!$order_pay_currency) {
+                    Toastr.error('请先点击载入数据');
+                    return false;
+                }
                 //读取是谁添加的配置console.log(Config.work_type);
                 $('.step_type').attr('checked', false);
                 $('.step_type').parent().hide();
@@ -429,6 +440,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 }
             })
 
+            //更改单号清空
+            $('#c-platform_order').change(function(){
+                $('#order_pay_currency').val('');
+            })
+
+
             //根据措施类型显示隐藏
             $(document).on('click', '.step_type', function () {
                 $("#input-hidden").html('');
@@ -437,6 +454,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     Toastr.error('订单号不能为空');
                     return false;
                 } else {
+                   
                     $('.measure').hide();
                     var problem_type_id = $("input[name='row[problem_type_id]']:checked").val();
                     var checkID = [];//定义一个空数组
@@ -448,6 +466,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         var id = $(this).val();
                         //获取承接组
                         appoint_group += $('#step' + id + '-appoint_group').val() + ',';
+                        
                         var group = $('#step' + id + '-appoint_group').val();
                         var group_arr = group.split(',')
                         var appoint_users = [];
@@ -488,6 +507,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         } else {
                             node.hide();
                         }
+
                         //二级措施
                         var secondNode = $('.step' + problem_type_id + '-' + checkID[m]);
                         if (secondNode.is(':hidden')) {
@@ -495,22 +515,38 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         } else {
                             secondNode.hide();
                         }
+                        //判断如果为处理任务时
+                        if (Config.ids) {
+                            if(problem_type_id == 1 && checkID[m] == 1){
+                                $('.step1-1').hide();
+                                $('.step2-1').show();
+                            }
+                            if(problem_type_id == 2 && checkID[m] == 1){
+                                $('.step2-1').hide();
+                                $('.step1-1').show();
+                            }
+                            if(problem_type_id == 3 && checkID[m] == 1){
+                                $('.step2-1').hide();
+                                $('.step1-1').show();
+                            }
+                        }
                     }
 
                     //判断如果为处理任务时
-                    if (Config.ids) {
+                    /*if (Config.ids) {
                         if (problem_type_id == 1) {
-                            $('.measure').hide();
+                            $('.step1-1').hide();
                             $('.step2-1').show();
                         } else if (problem_type_id == 2) {
-                            $('.measure').hide();
+                            $('.step2-1').hide();
                             $('.step1-1').show();
                         } else if (problem_type_id == 3) {
-                            $('.measure').hide();
+                            $('.step2-1').hide();
                             $('.step1-1').show();
                         }
-                    }
+                    }*/
                     var arr = array_filter(appoint_group.split(','));
+                   
                     var username = [];
                     var appoint_users = [];
                     //循环根据承接组Key获取对应承接人id
@@ -518,12 +554,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         //循环根据承接组Key获取对应承接人id
                         appoint_users.push(Config.workorder[arr[i]]);
                     }
-
+                   
                     //循环根据承接人id获取对应人名称
                     for (var j = 0; j < appoint_users.length; j++) {
                         username.push(Config.users[appoint_users[j]]);
                     }
-
                     var users = array_filter(username);
                     var appoint_users = array_filter(appoint_users);
                     $('#appoint_group_users').html(users.join(','));
@@ -604,7 +639,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
 
             //失去焦点
             $('#c-platform_order').blur(function () {
-                var incrementId = $(this).val();
+                var incrementId = $(this).val().replace(/^\s+|\s+$/g, "");
+                //var incrementId = replace(/^\s+|\s+$/g,"");
                 if (!incrementId) {
                     Toastr.error('订单号不能为空');
                     return false;
@@ -624,9 +660,24 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
 
             //载入数据
             $('#platform_order').click(function () {
-                var incrementId = $('#c-platform_order').val();
+                var incrementId = $('#c-platform_order').val().replace(/^\s+|\s+$/g, "");
+                if (!incrementId) {
+                    Toastr.error('订单号不能为空');
+                    return false;
+                }
+                var str = incrementId.substring(0, 3);
+                //判断站点
+                if (str == '100' || str == '400' || str == '500') {
+                    $("#work_platform").val(1);
+                } else if (str == '130' || str == '430') {
+                    $('#work_platform').val(2);
+                } else if (str == '300' || str == '600') {
+                    $('#work_platform').val(3);
+                }
+                
                 var sitetype = $('#work_platform').val();
                 $('#c-order_sku').html('');
+                Layer.load();
                 Backend.api.ajax({
                     url: 'saleaftermanage/work_order_list/get_sku_list',
                     data: {
@@ -634,7 +685,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         order_number: incrementId
                     }
                 }, function (data, ret) {
+                    Layer.closeAll();
                     $('#order_pay_currency').val(data.base_currency_code);
+                    $('#step2_pay_currency').val(data.base_currency_code);
                     $('#order_pay_method').val(data.method);
                     $('#c-refund_way').val(data.method);
                     $('#customer_email').val(data.customer_email);
@@ -695,7 +748,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     //补发地址自动填充第一个
                                     $('#c-firstname').val(data.address[i].firstname);
                                     $('#c-lastname').val(data.address[i].lastname);
-                                    $('#c-email').val(data.address[i].email);
+                                    var email = data.address[i].email;
+                                    if(email == null){
+                                        email = $('#customer_email').val();
+                                    }
+                                    $('#c-email').val(email);
                                     $('#c-telephone').val(data.address[i].telephone);
                                     $('#c-country').val(data.address[i].country_id);
                                     $('#c-country').change();
@@ -876,13 +933,17 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     $('#after_user_id').val(Config.workorder.copy_group);
                     $('#after_user').html(Config.users[Config.workorder.copy_group]);
                     var step = Config.workorder.warehouse_problem_group[id].step;
-                    var steparr = Config.workorder[step];
-                    for (var j = 0; j < steparr.length; j++) {
-                        $('#step' + steparr[j].step_id).parent().show();
-                        //读取对应措施配置
-                        $('#step' + steparr[j].step_id + '-is_check').val(steparr[j].is_check);
-                        $('#step' + steparr[j].step_id + '-appoint_group').val((steparr[j].appoint_group).join(','));
+                    if (step) {
+                        var steparr = Config.workorder[step];
+
+                        for (var j = 0; j < steparr.length; j++) {
+                            $('#step' + steparr[j].step_id).parent().show();
+                            //读取对应措施配置
+                            $('#step' + steparr[j].step_id + '-is_check').val(steparr[j].is_check);
+                            $('#step' + steparr[j].step_id + '-appoint_group').val((steparr[j].appoint_group).join(','));
+                        }
                     }
+
                 }
                 var checkID = [];//定义一个空数组
                 var appoint_group = '';
@@ -936,6 +997,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 var appoint_users = array_filter(appoint_users);
                 $('#appoint_group_users').html(users.join(','));
                 $('#recept_person_id').val(appoint_users.join(','));
+                $('#recept_person_group').show();
+                $('#after_user_group').hide();
 
 
                 //判断更换镜框的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 start
@@ -1137,7 +1200,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
 
                     var users = array_filter(username);
                     $('#appoint_group_users').html(users.join(','));
-
+                    $('#recept_person_id').val(appoint_users.join(','));
 
                     //判断更换处方的状态，如果显示的话把数据带出来，如果隐藏则不显示镜架数据 start
                     // if (!$('.step2-1').is(':hidden')) {
@@ -1195,7 +1258,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                         //补发地址自动填充第一个
                                         $('#c-firstname').val(data.address[i].firstname);
                                         $('#c-lastname').val(data.address[i].lastname);
-                                        $('#c-email').val(data.address[i].email);
+                                        var email = data.address[i].email;
+                                        if(email == null){
+                                            email = $('#customer_email').val();
+                                        }
+                                        $('#c-email').val(email);
                                         $('#c-telephone').val(data.address[i].telephone);
                                         $('#c-country').val(data.address[i].country_id);
                                         $('#c-country').change();
@@ -1216,7 +1283,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     var address = data.address[address_id];
                                     $('#c-firstname').val(address.firstname);
                                     $('#c-lastname').val(address.lastname);
-                                    $('#c-email').val(address.email);
+                                    var email = address.email;
+                                    if(email == null){
+                                        email = $('#customer_email').val();
+                                    }
+                                    $('#c-email').val(email);
                                     $('#c-telephone').val(address.telephone);
                                     $('#c-country').val(address.country_id);
                                     $('#c-country').change();
@@ -1408,7 +1479,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         },
                         { field: 'id', title: __('Id'), operate: false, visible: false },
                         { field: 'work_platform', title: __('平台'), custom: { 1: 'blue', 2: 'danger', 3: 'orange' }, searchList: { 1: 'Zeelool', 2: 'Voogueme', 3: 'Nihao' }, formatter: Table.api.formatter.status },
-                        { field: 'platform_order', title: __('订单号')},
+                        { field: 'platform_order', title: __('订单号') },
                         { field: 'coupon_describe', title: __('优惠券名称'), operate: 'like' },
                         { field: 'coupon_str', title: __('优惠码'), operate: false },
                         { field: 'create_user_name', title: __('申请人'), operate: 'like' },
@@ -1454,7 +1525,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         },
                         { field: 'id', title: __('Id'), operate: false, visible: false },
                         { field: 'work_platform', title: __('平台'), custom: { 1: 'blue', 2: 'danger', 3: 'orange' }, searchList: { 1: 'Zeelool', 2: 'Voogueme', 3: 'Nihao' }, formatter: Table.api.formatter.status },
-                        { field: 'platform_order', title: __('订单号')},
+                        { field: 'platform_order', title: __('订单号') },
                         { field: 'integral', title: __('积分'), operate: 'between' },
                         { field: 'email', title: __('客户邮箱'), operate: 'like' },
                         { field: 'integral_describe', title: __('积分描述'), operate: false },
@@ -1476,6 +1547,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 $(document).on('click', '.btn-del-lens', function () {
                     $(this).parent().parent().remove();
                 });
+                //保存草稿
+                $('.btn-warning').click(function () {
+                    $('.status').val(1);
+                })
+
                 //提交审核按钮
                 $('.btn-status').click(function () {
                     $('.status').val(2);
@@ -1751,7 +1827,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                 if (real_address) {
                                     $('#c-firstname').val(real_address.firstname);
                                     $('#c-lastname').val(real_address.lastname);
-                                    $('#c-email').val(real_address.email);
+                                    var email = real_address.email;
+                                    if(email == null){
+                                        email = $('#customer_email').val();
+                                    }
+                                    $('#c-email').val(email);
                                     $('#c-telephone').val(real_address.telephone);
                                     $('#c-country').val(real_address.country_id);
                                     $('#c-country').change();

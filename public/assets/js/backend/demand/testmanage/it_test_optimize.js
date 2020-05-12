@@ -81,7 +81,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
                                 },
                                 visible: function (row) {
-                                    if(1 == row.optimize_status && Config.isTest == 0){
+                                    if((1 == row.optimize_status) && (Config.isCheck == 1)){
+                                        console.log(Config.isCheck);
                                         return true;
                                     }
                                         return false;
@@ -106,7 +107,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     return false;
                                 },
                                 visible: function (row) {
-                                    if(1 == row.optimize_status  && Config.isTest == 0){
+                                    if((1 == row.optimize_status)  && (Config.isCheck == 1)){
+                                        console.log(Config.isCheck);
                                         return true;
                                     }
                                         return false;
@@ -164,7 +166,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         Layer.open({
                             closeBtn: 1,
                             title: "详情",
-                            content: str
+                            content: str,
+                            area:['80%','80%'],
+                            anim: 0
                         });
                     }
                 }

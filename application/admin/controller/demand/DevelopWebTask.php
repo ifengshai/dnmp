@@ -82,13 +82,15 @@ class DevelopWebTask extends Backend
             return json($result);
         }
         //判断是否有完成按钮权限
-        $this->assignconfig('is_set_status', $this->auth->check('demand/develop_web_task/set_task_complete_status'));
         $this->assignconfig('is_problem_detail', $this->auth->check('demand/develop_web_task/problem_detail'));
         $this->assignconfig('is_edit', $this->auth->check('demand/develop_web_task/edit'));
         $this->assignconfig('is_set_status', $this->auth->check('demand/develop_web_task/set_task_complete_status'));
         $this->assignconfig('is_set_task_test_status', $this->auth->check('demand/develop_web_task/set_task_test_status'));
         $this->assignconfig('is_regression_test_info', $this->auth->check('demand/develop_web_task/regression_test_info'));
         $this->assignconfig('is_finish_task', $this->auth->check('demand/develop_web_task/is_finish_task'));
+        $this->assignconfig('is_del_btu', $this->auth->check('demand/develop_web_task/del'));
+        $this->assignconfig('is_test_info_btu', $this->auth->check('demand/develop_web_task/test_info'));//开发管理 记录测试问题
+        $this->assignconfig('is_set_test_status_btu', $this->auth->check('demand/develop_web_task/set_test_status'));//开发管理 记录测试问题
         return $this->view->fetch();
     }
 
@@ -261,6 +263,25 @@ class DevelopWebTask extends Backend
     }
 
 
+
+    /**
+     * 逻辑删除
+     * */
+    public function del($ids = "")
+    {
+        if ($this->request->isAjax()) {
+            $data['is_del'] =  2;
+            $res = $this->model->allowField(true)->save($data,['id'=> input('ids')]);
+            if ($res) {
+                $this->success('成功');
+            } else {
+                $this->error('失败');
+            }
+        }
+    }
+
+
+
     /**
      * 详情
      */
@@ -309,13 +330,11 @@ class DevelopWebTask extends Backend
             $id = input('ids');
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->itWebTaskItem
-                ->where($where)
                 ->where('task_id', $id)
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->itWebTaskItem
-                ->where($where)
                 ->where('task_id', $id)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
@@ -394,6 +413,19 @@ class DevelopWebTask extends Backend
         $data['is_complete'] = 1;
         $data['complete_date'] = date('Y-m-d H:i:s', time());
         $res = $this->itWebTaskItem->save($data, ['id' => $ids]);
+        //判断同主任务下是否都完成，如果都完成，则更改主任务为完成
+
+        //查询同记录下是否还存在未测试通过的数据
+        $itWebTaskInfo = $this->itWebTaskItem->get($ids);
+        $map['task_id'] = $itWebTaskInfo['task_id'];
+        $map['is_complete'] = 0;
+        $num = $this->itWebTaskItem->where($map)->count();
+        //如果不存在则修改主记录测试完成 并更新时间
+        if ($num == 0) {
+            $list['is_complete'] = 1;
+            $list['complete_date'] = date('Y-m-d H:i:s', time());
+            $this->model->save($list, ['id' => $itWebTaskInfo['task_id']]);
+        }
         if ($res !== false) {
             $this->success('操作成功！！');
         } else {
@@ -416,13 +448,12 @@ class DevelopWebTask extends Backend
         try {
             $data['is_test_adopt'] = 1;
             $data['test_adopt_time'] = date('Y-m-d H:i:s', time());
-            $data['test_person'] = session('admin.nickname');
-            $res = $this->itWebTaskItem->save($data, ['id' => $ids]);
+            $res = $this->model->save($data, ['id' => $ids]);
             //有错误 则回滚数据
             if (!$res) {
                 throw new Exception("修改失败");
             }
-            //查询同记录下是否还存在未测试通过的数据
+/*            //查询同记录下是否还存在未测试通过的数据
             $itWebTaskInfo = $this->itWebTaskItem->get($ids);
             $map['task_id'] = $itWebTaskInfo['task_id'];
             $map['is_test_adopt'] = 0;
@@ -432,7 +463,7 @@ class DevelopWebTask extends Backend
                 $list['is_test_adopt'] = 1;
                 $list['test_adopt_time'] = date('Y-m-d H:i:s', time());
                 $this->model->save($list, ['id' => $itWebTaskInfo['task_id']]);
-            }
+            }*/
             Db::commit();
         } catch (ValidateException $e) {
             Db::rollback();
@@ -463,7 +494,7 @@ class DevelopWebTask extends Backend
      */
     public function test_info($ids = null)
     {
-        $row = $this->itWebTaskItem->get($ids);
+       /* $row = $this->itWebTaskItem->get($ids);
         if (!$row) {
             $this->error(__('No Results were found'));
         }
@@ -508,6 +539,59 @@ class DevelopWebTask extends Backend
         }
 
         $this->view->assign("row", $row);
+        return $this->view->fetch();*/
+
+        $row = $this->model->get($ids);
+        if (!$row) {
+            $this->error(__('No Results were found'));
+        }
+        $adminIds = $this->getDataLimitAdminIds();
+        if (is_array($adminIds)) {
+            if (!in_array($row[$this->dataLimitField], $adminIds)) {
+                $this->error(__('You have no permission'));
+            }
+        }
+
+        if ($this->request->isPost()) {
+            $params = $this->request->post("row/a");
+            if ($params) {
+                $params = $this->preExcludeFields($params);
+                $result = false;
+                Db::startTrans();
+                try {
+                    $params['type'] = 4;
+                    $params['environment_type'] = 1;
+                    $params['pid'] = $row->id;
+                    $params['create_time'] = date('Y-m-d H:i:s');
+                    $params['create_user_id'] = $this->auth->id;
+                    $result = $this->testRecord->allowField(true)->save($params);
+                    Db::commit();
+                } catch (ValidateException $e) {
+                    Db::rollback();
+                    $this->error($e->getMessage());
+                } catch (PDOException $e) {
+                    Db::rollback();
+                    $this->error($e->getMessage());
+                } catch (Exception $e) {
+                    Db::rollback();
+                    $this->error($e->getMessage());
+                }
+                if ($result !== false) {
+                    $this->success();
+                } else {
+                    $this->error(__('No rows were updated'));
+                }
+            }
+            $this->error(__('Parameter %s can not be empty', ''));
+        }
+
+        $this->view->assign("row", $row);
+        //查询此记录责任人id
+        $person_ids = $this->itWebTaskItem->where('task_id', $ids)->field('person_in_charge')->select();
+        foreach ($person_ids as &$v) {
+            $v['person_in_charge_name'] = config('develop_demand.phper_user')[$v['person_in_charge']];
+        }
+        $this->assign('person_ids', $person_ids);
         return $this->view->fetch();
     }
 
@@ -522,8 +606,39 @@ class DevelopWebTask extends Backend
      */
     public function problem_detail($ids = null)
     {
+
+        if($this->request->isPost()) {
+            $params = $this->request->post("row/a");
+            if ($params) {
+                if ($params['opt_type']==1){
+                    $data['is_complete']=1;
+                    $where['id'] = $params['id'];
+                    $res = $this->testRecord->allowField(true)->save($data, $where);
+                    if ($res) {
+                        $this->success('成功');
+
+                    } else {
+                        $this->error('失败');
+                    }
+                }elseif ($params['opt_type']==2){
+
+                    $data['is_del']=2;
+                    $where['id']=$params['id'];
+                    $res = $this->testRecord->allowField(true)->save($data,$where);
+                    if ($res) {
+                        $this->success('成功');
+                    } else {
+                        $this->error('失败');
+                    }
+
+                }
+            }
+            $this->error(__('Parameter %s can not be empty', ''));
+        }
+
         $map['pid'] = $ids;
         $map['type'] = 4;
+        $map['is_del'] = 1;
         /*测试日志--测试环境*/
         $left_test_list = $this->testRecord
             ->where($map)

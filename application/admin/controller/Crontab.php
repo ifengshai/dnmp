@@ -1705,7 +1705,7 @@ order by sfoi.item_id asc limit 1000";
         $list = collection($list)->toArray();
 
         foreach ($list as $k => $v) {
-            $res = Alibaba::getOrderDetail($v['purchase_number']);
+            $res = Alibaba::getOrderDetail(trim($v['purchase_number']));
             if (!$res) {
                 continue;
             }

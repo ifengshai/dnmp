@@ -80,6 +80,12 @@ class ItTestOptimize extends Backend
 
             return json($result);
         }
+        if(148 == session('admin.id')){
+            $isTests = 1;
+        }else{
+            $isTests = 0;
+        }
+        $this->assignconfig('isCheck',$isTests);
         return $this->view->fetch();
     }
     /**

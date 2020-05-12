@@ -136,12 +136,12 @@ class WorkOrderList extends Model
             ->column('sku');
         $orderInfo = $this->model->alias('a')->where('increment_id', $increment_id)
             ->join(['sales_flat_order_payment' => 'c'], 'a.entity_id=c.parent_id')
-            ->field('a.base_currency_code,c.method,a.customer_email')->find();
+            ->field('a.order_currency_code,c.method,a.customer_email')->find();
         if (!$sku && !$orderInfo) {
             return [];
         }
         $result['sku'] = array_unique($sku);
-        $result['base_currency_code'] = $orderInfo['base_currency_code'];
+        $result['base_currency_code'] = $orderInfo['order_currency_code'];
         $result['method'] = $orderInfo['method'];
         $result['customer_email'] = $orderInfo['customer_email'];
         return $result ? $result : [];
@@ -180,6 +180,14 @@ class WorkOrderList extends Model
             default:
                 return false;
                 break;
+        }
+        if($siteType < 3){
+            foreach($prescriptions as $key => $val){
+                if(!isset($val['total_add'])){
+                    $prescriptions[$key]['os_add'] = $val['od_add'];
+                    $prescriptions[$key]['od_add'] = $val['os_add'];
+                }
+            }
         }
         //获取地址信息
         $address = $this->model->alias('a')
@@ -266,6 +274,7 @@ class WorkOrderList extends Model
         $url = $url . $pathinfo;
 
         $client = new Client(['verify' => false]);
+        //file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',json_encode($params),FILE_APPEND);
         try {
             if ($method == 'GET') {
                 $response = $client->request('GET', $url, array('query' => $params));
@@ -273,10 +282,11 @@ class WorkOrderList extends Model
                 $response = $client->request('POST', $url, array('form_params' => $params));
             }
             $body = $response->getBody();
-
-            $stringBody = (string) $body;
+            //file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$body,FILE_APPEND);
+            $stringBody = (string)$body;
             $res = json_decode($stringBody, true);
-            if ($res === null) {
+            //file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$stringBody,FILE_APPEND);
+            if($res === null){
                 exception('网络异常');
             }
             if ($res['status'] == 200) {
@@ -557,6 +567,7 @@ class WorkOrderList extends Model
     public function createOrder($siteType, $work_id)
     {
         $changeSkus = WorkOrderChangeSku::where(['work_id' => $work_id, 'change_type' => 5])->select();
+        //file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',json_encode(collection($changeSkus)->toArray()),FILE_APPEND);
         //如果存在补发单的措施
         if ($changeSkus) {
             $postData = $postDataCommon = [];
@@ -600,8 +611,9 @@ class WorkOrderList extends Model
                 if ($prescriptions['lens_id'] || $prescriptions['coating_id'] || $prescriptions['color_id']) {
                     $is_frame_only = 1;
                 }
+
                 $postData['product'][$key] = [
-                    'sku' => $changeSku['original_sku'],
+                    'sku' => strtoupper($changeSku['original_sku']),
                     'qty' => $changeSku['original_number'],
                     'prescription_type' => $changeSku['recipe_type'],
                     'is_frame_only' => $is_frame_only,
@@ -637,6 +649,7 @@ class WorkOrderList extends Model
             }
             $postData = array_merge($postData, $postDataCommon);
             try {
+                file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',json_encode($postData),FILE_APPEND);
                 $res = $this->httpRequest($siteType, 'magic/order/createOrder', $postData, 'POST');
                 $increment_id = $res['increment_id'];
                 //replacement_order添加补发的订单号
@@ -839,7 +852,6 @@ class WorkOrderList extends Model
                     $work->work_status = $work_status;
                     if ($params['success'] == 2) {
                         $work->work_status = 4;
-                        $work->complete_time = $time;
                     } elseif ($params['success'] == 1) {
                         $work->work_status = $work_status;
                         if ($work_status == 6) {
@@ -862,7 +874,7 @@ class WorkOrderList extends Model
                     ];
                     WorkOrderRemark::create($remarkData);
                     //通知
-                    Ding::cc_ding(explode(',', $work->recept_person_id), '', '有新工单需要你处理', '有新工单需要你处理');
+                    Ding::cc_ding(explode(',', $work->recept_person_id), '', '😎😎😎😎有新工单需要你处理😎😎😎😎', '有新工单需要你处理');
                 }
             }
 
@@ -914,7 +926,7 @@ class WorkOrderList extends Model
         WorkOrderMeasure::where(['id' => $measure_id])->update($dataMeasure);
         //求出承接措施是否完成
         $whereMeasure['work_id'] = $work_id;
-        $whereMeasure['measure_id'] = $measure_id;
+        //$whereMeasure['measure_id'] = $measure_id;
         $whereMeasure['recept_status'] = ['eq', 0];
         $resultRecept = WorkOrderRecept::where($whereMeasure)->count();
         if (0 == $resultRecept) { //表明整个措施已经完成
@@ -974,24 +986,16 @@ class WorkOrderList extends Model
      */
     public static function workOrderListResult($allIncrementOrder)
     {
-        $workOrderLists = self::where('platform_order', 'in', $allIncrementOrder)
-            ->with([
-                'measures' => function ($query) {
-                    $query->field('measure_content');
-                }
-            ])
-            ->select();
-        foreach ($workOrderLists as &$workOrderList) {
+        $workOrderLists = self::where('platform_order','in',$allIncrementOrder)->select();
+        foreach($workOrderLists as &$workOrderList){
             $receptPersonIds = $workOrderList->recept_person_id;
             $receptPerson = Admin::where('id', 'in', $receptPersonIds)->column('nickname');
             //承接人
-            $workOrderList->recept_persons = join(',', $receptPerson);
-            $workOrderList->measure = '';
-            if (!empty($workOrderList->measures)) {
-                foreach ($workOrderList->measures as $key => $measure) {
-                    $workOrderList->measure = $measure->measure_content . ',';
-                }
-            }
+            $workOrderList->recept_persons = join(',',$receptPerson);
+            $measures = \app\admin\model\saleaftermanage\WorkOrderMeasure::where('work_id',$workOrderList->id)->column('measure_content');
+            $measures = join(',',$measures);
+            $workOrderList->measure = $measures;
+
         }
         return $workOrderLists;
     }
