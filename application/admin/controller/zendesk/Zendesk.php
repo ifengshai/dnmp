@@ -25,7 +25,7 @@ class Zendesk extends Backend
 {
     protected $model = null;
     protected $relationSearch = true;
-    protected $noNeedLogin = ['asycTicketsUpdate','asycTicketsVooguemeUpdate','asycTicketsAll'];
+    protected $noNeedLogin = ['asycTicketsUpdate','asycTicketsVooguemeUpdate','asycTicketsAll','asycTicketsAll2','asycTicketsAll3'];
 
     public function _initialize()
     {
