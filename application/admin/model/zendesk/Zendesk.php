@@ -248,7 +248,7 @@ class Zendesk extends Model
         //1，判断今天有无task，无，创建
         $tasks = ZendeskTasks::whereTime('create_time', 'today')->find();
         //设置所有的隐藏
-        self::where('id','>',1)->setField('is_hide',1);
+        self::where('id','>=',1)->setField('is_hide',1);
         if (!$tasks) {
             //创建所有的tasks
             //获取所有的agents
@@ -332,10 +332,9 @@ class Zendesk extends Model
                         $task->save();
                         self::where('id',$ticket->id)->setField('is_hide',0);
                     }
-                    usleep(1000);
                 }
             }
-
+            usleep(1000);
         }
     }
 
