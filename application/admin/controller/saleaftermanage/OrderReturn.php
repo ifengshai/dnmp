@@ -450,8 +450,6 @@ class OrderReturn extends Backend
             }
             //求出用户的所有订单信息
             $customer = (new SaleAfterTask())->getCustomerEmail($order_platform, $increment_id, $customer_name, $customer_phone, $track_number, $customer_email);
-            // dump($customer);
-            // exit;
             if (!$customer) {
                 $this->error('找不到订单信息，请重新尝试', 'saleaftermanage/order_return/search?ref=addtabs');
             }
@@ -472,11 +470,9 @@ class OrderReturn extends Backend
             }
             
             $saleAfterTaskResult = Db::name('sale_after_task')->where('order_platform', $order_platform)->where('order_number', 'in', $allIncrementOrder)->order('id desc')->select();
-            // dump($saleAfterTaskResult);
-            // exit;
+         
             $orderReturnResult = Db::name('order_return')->where('order_platform', $order_platform)->where('increment_id', 'in', $allIncrementOrder)->order('id desc')->select();
-            //工单列表
-            $workOrderListResult = \app\admin\model\saleaftermanage\WorkOrderList::workOrderListResult($allIncrementOrder);
+            
             //求出承接部门和承接人
             $deptArr = (new AuthGroup())->getAllGroup();
             $repArr  = (new Admin())->getAllStaff();
@@ -602,7 +598,7 @@ class OrderReturn extends Backend
                 }
             }
             $this->view->assign('infoSynergyTaskResult', $infoSynergyTaskResult);
-            $this->view->assign('workOrderListResult', $workOrderListResult);
+            // $this->view->assign('workOrderListResult', $workOrderListResult);
             $this->view->assign('saleAfterTaskResult', $saleAfterTaskResult);
             $this->view->assign('orderReturnResult', $orderReturnResult);
             $this->view->assign('orderInfoResult', $customer);

@@ -139,13 +139,13 @@ body {
         justify-content: center;
         align-items: center;
         padding: 8px;
-        width: 5%;
+        width: 6%;
         vertical-align: middle;
         border-bottom: 1px solid #DDDDDD; }
         body .order-list-wrap ul.order-list > li.normal {
           color: #0073B7; }
         body .order-list-wrap ul.order-list > li.num {
-          width: 200px;
+          /* width: 100px; */
           flex: auto; }
         body .order-list-wrap ul.order-list > li.detail-wrap {
           display: block;

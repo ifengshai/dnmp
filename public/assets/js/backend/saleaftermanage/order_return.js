@@ -501,8 +501,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'custom-css',
             $(document).on('click', '.site', function () {
                 var site = $(this).html();
                 if (!$(this).hasClass('active')) {
-                    $('.site').removeClass('active');
-                    $(this).addClass('active');
+                    $(this).addClass("active").siblings().removeClass("active")
                     if (site == 'Zeelool') {
                         $('#order_platform').val(1);
                     } else if(site == 'Voogueme') {
@@ -513,7 +512,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'custom-css',
                 }
             })
 
-
+            $(".type li").click(function() {
+                $(this).addClass("active").siblings().removeClass("active");
+            })
+            $(".option .detail-btn").click(function() {
+                $(this).parent().parent().find(".detail-wrap").stop(true, true).slideToggle();
+            })
 
 
             //$('tr:not(:has(td[rowspan])):even');
@@ -529,7 +533,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'custom-css',
             $('#increment_id').autocomplete({
                 source: function (request, response) {
                     var incrementId = $('#increment_id').val();
-                    var orderType = $('#c-order_platform').val();
+                    var orderType = $('#order_platform').val();
                     if (incrementId.length > 2) {
                         $.ajax({
                             type: "POST",
@@ -707,12 +711,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'custom-css',
             });
             //点击查看物流信息
             $(document).on('click', '.track-number', function () {
-                var entity_id = $(this).parent().prev().prev().val();
-                var order_platform = $('#c-order_platform').val();
+                var entity_id = $(this).data('id');
+                var order_platform = $('#order_platform').val();
                 var track_number = $(this).html();
-                // console.log(entity_id);
-                // console.log(order_platform);
-                // console.log(track_number);
+                if (!entity_id || !order_platform || !track_number) {
+                    Toastr.error('缺少参数');
+                    return false;
+                }
                 Backend.api.open('saleaftermanage/order_return/get_logistics_info/?track_number=' + track_number + '&entity_id=' + entity_id + '&order_platform=' + order_platform, '查询物流信息', { area: ["60%", "60%"] });
             });
             // $(document).on('change','#increment_id',function(){
