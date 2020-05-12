@@ -224,7 +224,7 @@ class ZendeskAgents extends Backend
         if ($this->request->isAjax()) {
             $agentIds = $this->model->where('id','in',$ids)->column('agent_id');
             $this->model->where('id','in',$ids)->delete();
-            $res = ZendeskAccount::where('account_id','in',$agentIds)->setField('is_userd',1);
+            $res = ZendeskAccount::where('account_id','in',$agentIds)->setField('is_used',1);
             if ($res) {
                 $this->success('成功');
             } else {
