@@ -405,8 +405,8 @@ class ZendeskMailTemplate extends Backend
                     $actions = $macro->actions;
                     foreach ($actions as $key => $action) {
                         if ($action->field == 'comment_value_html') {
-                            $template_content = str_replace(['<p></br></p>','{{ticket.requester.first_name}}', '{{ticket.id}}'], ['</br>','{{username}}', '{{ticket_id}}'], $action->value);
-                            $data['template_content'] = str_replace(['<p>','</p>','<br>'], ['','</br>',''], $template_content);
+                            $template_content = str_replace(['{{ticket.requester.first_name}}', '{{ticket.id}}'], ['{{username}}', '{{ticket_id}}'], $action->value);
+                            $data['template_content'] = $template_content;
                         }
                         if ($action->field == 'subject') {
                             $data['mail_subject'] = $action->value;
