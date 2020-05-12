@@ -25,7 +25,7 @@ class Zendesk extends Backend
 {
     protected $model = null;
     protected $relationSearch = true;
-    protected $noNeedLogin = ['asycTicketsUpdate','asycTicketsVooguemeUpdate','asycTicketsAll'];
+    protected $noNeedLogin = ['asycTicketsUpdate','asycTicketsVooguemeUpdate','asycTicketsAll','asycTicketsAll2','asycTicketsAll3'];
 
     public function _initialize()
     {
@@ -900,7 +900,33 @@ DOC;
      */
     public function asycTicketsAll()
     {
-        $tickets = $this->model->where('id','>',1161)->order('id asc')->select();
+        $tickets = $this->model->where('id','between',[4660,5660])->order('id asc')->select();
+        foreach($tickets as $ticket){
+            $ticketId = $ticket->ticket_id;
+            if($ticket->type == 1){
+                (new Notice(request(), ['type' => 'zeelool','id' => $ticketId]))->update();
+            }elseif($ticket->type == 2){
+                (new Notice(request(), ['type' => 'voogueme','id' => $ticketId]))->update();
+            }
+            echo $ticketId."\r\n";
+        }
+    }
+    public function asycTicketsAll2()
+    {
+        $tickets = $this->model->where('id','between',[5660,6660])->order('id asc')->select();
+        foreach($tickets as $ticket){
+            $ticketId = $ticket->ticket_id;
+            if($ticket->type == 1){
+                (new Notice(request(), ['type' => 'zeelool','id' => $ticketId]))->update();
+            }elseif($ticket->type == 2){
+                (new Notice(request(), ['type' => 'voogueme','id' => $ticketId]))->update();
+            }
+            echo $ticketId."\r\n";
+        }
+    }
+    public function asycTicketsAll3()
+    {
+        $tickets = $this->model->where('id','between',[3660,4660])->order('id asc')->select();
         foreach($tickets as $ticket){
             $ticketId = $ticket->ticket_id;
             if($ticket->type == 1){
