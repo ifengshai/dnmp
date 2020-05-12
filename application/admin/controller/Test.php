@@ -30,7 +30,7 @@ class Test extends Backend
      */
     public function test()
     {
-        $order_shipment = Db::connect('database.db_zeelool')
+        $order_shipment = Db::connect('database.db_voogueme')
             ->table('sales_flat_shipment_track')
             ->field('entity_id,track_number,title,updated_at')
             ->where('created_at','>=','2020-04-10 00:00:00')
