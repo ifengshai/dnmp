@@ -21,14 +21,10 @@ class Test extends Backend
     }
 
     /**
-     * 更新采购负责人
-     *
-     * @Description
-     * @author wpl
-     * @since 2020/04/29 15:43:38 
-     * @return void
+     * 批量 注册物流
+     * 莫删除
      */
-    public function test()
+    public function reg_shipment()
     {
         $order_shipment = Db::connect('database.db_nihao')
             ->table('sales_flat_shipment_track')

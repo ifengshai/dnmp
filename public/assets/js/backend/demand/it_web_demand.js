@@ -165,44 +165,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             events: Table.api.events.operate,
                             buttons: [
                                 {
-                                    name: 'del',
-                                    text: __('删除'),
-                                    title: __('删除'),
-                                    classname: 'btn btn-xs btn-success btn-magic btn-ajax',
-                                    url: 'demand/it_web_demand/del',
-                                    success: function (data, ret) {
-                                        table.bootstrapTable('refresh');
-                                    },
-                                    callback: function (data) {
-                                    },
-                                    visible: function(row){
-                                        if(row.demand_del || row.is_entry_user_hidden == 1){//操作权限
-                                            return true;
-                                        }
-                                    }
-                                },
-                                {
-                                    name: 'edit',
-                                    text: __('编辑'),
-                                    title: __('编辑'),
-                                    classname: 'btn btn-xs btn-primary btn-dialog',
-                                    url: 'demand/it_web_demand/edit/demand_type/2',
-                                    success: function (data, ret) {
-                                        table.bootstrapTable('refresh');
-                                    },
-                                    callback: function (data) {
-                                    },
-                                    visible: function(row){
-                                        if(row.status == 1 || row.status == 2){
-                                            if(row.demand_del && row.is_entry_user_hidden == 1){//操作权限
-                                                return true;
-                                            }
-                                        }else{
-                                            return false;
-                                        }
-                                    }
-                                },
-                                {
                                     name: 'test_distribution',
                                     text: __('测试确认'),
                                     title: __('测试确认'),
@@ -461,6 +423,48 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                         }
                                     }
                                 },
+
+                                {
+                                    name: 'edit',
+                                    text: __(''),
+                                    title: __('编辑'),
+                                    icon: 'fa fa-pencil',
+                                    classname: 'btn btn-xs btn-success btn-dialog',
+                                    url: 'demand/it_web_demand/edit/demand_type/2',
+                                    success: function (data, ret) {
+                                        table.bootstrapTable('refresh');
+                                    },
+                                    callback: function (data) {
+                                    },
+                                    visible: function(row){
+                                        if(row.status == 1 || row.status == 2){
+                                            if(row.demand_del && row.is_entry_user_hidden == 1){//操作权限
+                                                return true;
+                                            }
+                                        }else{
+                                            return false;
+                                        }
+                                    }
+                                },
+                                {
+                                    name: 'del',
+                                    text: __(''),
+                                    title: __('删除'),
+                                    icon: 'fa fa-trash',
+                                    classname: 'btn btn-xs btn-danger btn-magic btn-ajax',
+                                    url: 'demand/it_web_demand/del',
+                                    confirm: '是否删除?',
+                                    success: function (data, ret) {
+                                        table.bootstrapTable('refresh');
+                                    },
+                                    callback: function (data) {
+                                    },
+                                    visible: function(row){
+                                        if(row.demand_del || row.is_entry_user_hidden == 1){//操作权限
+                                            return true;
+                                        }
+                                    }
+                                },
                             ],
                             formatter: Table.api.formatter.buttons
                         },
@@ -680,49 +684,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             table: table,
                             events: Table.api.events.operate,
                             buttons: [
-                                {
-                                    name: 'del',
-                                    text: __('删除'),
-                                    title: __('删除'),
-                                    classname: 'btn btn-xs btn-success btn-magic btn-ajax',
-                                    url: 'demand/it_web_demand/del',
-                                    success: function (data, ret) {
-                                        table.bootstrapTable('refresh');
-                                    },
-                                    callback: function (data) {
-                                    },
-                                    visible: function(row){
-                                        if(row.demand_del || row.is_entry_user_hidden == 1){//操作权限
-                                            return true;
-                                        }
-
-                                    }
-                                },
-                                {
-                                    name: 'edit',
-                                    text: __('编辑'),
-                                    title: __('编辑'),
-                                    classname: 'btn btn-xs btn-primary btn-dialog',
-                                    url: 'demand/it_web_demand/edit/demand_type/1',
-                                    success: function (data, ret) {
-                                        table.bootstrapTable('refresh');
-                                    },
-                                    callback: function (data) {
-                                    },
-                                    visible: function(row){
-                                        if(row.status == 1 || row.status == 2){
-                                            if(row.demand_del && row.is_entry_user_hidden == 1){//操作权限
-                                                return true;
-                                            }
-                                            //创建人显示
-                                            if(row.entry_user_id == Config.admin_id){
-                                                return true;
-                                            }
-                                        }else{
-                                            return false;
-                                        }
-                                    }
-                                },
                                 {
                                     name: 'test_distribution',
                                     text: __('测试确认'),
@@ -1061,6 +1022,52 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                         }
                                     },
                                 },
+                                {
+                                    name: 'edit',
+                                    text: __(''),
+                                    title: __('编辑'),
+                                    icon: 'fa fa-pencil',
+                                    classname: 'btn btn-xs btn-success btn-dialog',
+                                    url: 'demand/it_web_demand/edit/demand_type/1',
+                                    success: function (data, ret) {
+                                        table.bootstrapTable('refresh');
+                                    },
+                                    callback: function (data) {
+                                    },
+                                    visible: function(row){
+                                        if(row.status == 1 || row.status == 2){
+                                            if(row.demand_del && row.is_entry_user_hidden == 1){//操作权限
+                                                return true;
+                                            }
+                                            //创建人显示
+                                            if(row.entry_user_id == Config.admin_id){
+                                                return true;
+                                            }
+                                        }else{
+                                            return false;
+                                        }
+                                    }
+                                },
+                                {
+                                    name: 'del',
+                                    text: __(''),
+                                    title: __('删除'),
+                                    icon: 'fa fa-trash',
+                                    classname: 'btn btn-xs btn-danger btn-magic btn-ajax',
+                                    url: 'demand/it_web_demand/del',
+                                    confirm: '是否删除?',
+                                    success: function (data, ret) {
+                                        table.bootstrapTable('refresh');
+                                    },
+                                    callback: function (data) {
+                                    },
+                                    visible: function(row){
+                                        if(row.demand_del || row.is_entry_user_hidden == 1){//操作权限
+                                            return true;
+                                        }
+
+                                    }
+                                },
                             ],
                             formatter: Table.api.formatter.buttons
                         },
@@ -1265,50 +1272,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             events: Table.api.events.operate,
                             buttons: [
                                 {
-                                    name: 'del',
-                                    text: __('删除'),
-                                    title: __('删除'),
-                                    classname: 'btn btn-xs btn-success btn-magic btn-ajax',
-                                    url: 'demand/it_web_demand/del',
-                                    success: function (data, ret) {
-                                        table.bootstrapTable('refresh');
-                                    },
-                                    callback: function (data) {
-                                    },
-                                    visible: function(row){
-                                        return true;
-                                        if(row.status == 1 || row.status == 2){
-                                            if(row.demand_del && row.is_entry_user_hidden == 1){//操作权限
-                                                return true;
-                                            }
-                                        }else{
-                                            return false;
-                                        }
-                                    }
-                                },
-                                {
-                                    name: 'edit',
-                                    text: __('编辑'),
-                                    title: __('编辑'),
-                                    classname: 'btn btn-xs btn-primary btn-dialog',
-                                    url: 'demand/it_web_demand/edit/demand_type/3',
-                                    success: function (data, ret) {
-                                        table.bootstrapTable('refresh');
-                                    },
-                                    callback: function (data) {
-                                    },
-                                    visible: function(row){
-                                        return true;
-                                        if(row.status == 1 || row.status == 2){
-                                            if(row.demand_del && row.is_entry_user_hidden == 1){//操作权限
-                                                return true;
-                                            }
-                                        }else{
-                                            return false;
-                                        }
-                                    }
-                                },
-                                {
                                     name: 'test_distribution',
                                     text: __('分配测试'),
                                     title: __('分配测试'),
@@ -1509,6 +1472,52 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                                     return false;
                                                 }
                                             }
+                                        }
+                                    }
+                                },
+                                {
+                                    name: 'edit',
+                                    text: __(''),
+                                    title: __('编辑'),
+                                    icon: 'fa fa-pencil',
+                                    classname: 'btn btn-xs btn-success btn-dialog',
+                                    url: 'demand/it_web_demand/edit/demand_type/3',
+                                    success: function (data, ret) {
+                                        table.bootstrapTable('refresh');
+                                    },
+                                    callback: function (data) {
+                                    },
+                                    visible: function(row){
+                                        return true;
+                                        if(row.status == 1 || row.status == 2){
+                                            if(row.demand_del && row.is_entry_user_hidden == 1){//操作权限
+                                                return true;
+                                            }
+                                        }else{
+                                            return false;
+                                        }
+                                    }
+                                },
+                                {
+                                    name: 'del',
+                                    text: __(''),
+                                    title: __('删除'),
+                                    icon: 'fa fa-trash',
+                                    classname: 'btn btn-xs btn-danger btn-magic btn-ajax',
+                                    url: 'demand/it_web_demand/del',
+                                    success: function (data, ret) {
+                                        table.bootstrapTable('refresh');
+                                    },
+                                    callback: function (data) {
+                                    },
+                                    visible: function(row){
+                                        return true;
+                                        if(row.status == 1 || row.status == 2){
+                                            if(row.demand_del && row.is_entry_user_hidden == 1){//操作权限
+                                                return true;
+                                            }
+                                        }else{
+                                            return false;
                                         }
                                     }
                                 },
