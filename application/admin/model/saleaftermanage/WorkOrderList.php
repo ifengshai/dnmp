@@ -256,13 +256,13 @@ class WorkOrderList extends Model
     {
         switch ($siteType) {
             case 1:
-                $url = 'https://z.zhaokuangyi.com/';
+                $url = 'https://www.zeelool.com/';
                 break;
             case 2:
-                $url = 'https://pc.zhaokuangyi.com/';
+                $url = 'https://pc.voogueme.com/';
                 break;
             case 3:
-                $url = 'https://nh.nihaooptical.com/';
+                $url = 'https://www.nihaooptical.com/';
                 break;
             case 5:
                 $url = 'https://www.weseeoptical.com/';
@@ -282,10 +282,11 @@ class WorkOrderList extends Model
                 $response = $client->request('POST', $url, array('form_params' => $params));
             }
             $body = $response->getBody();
-
-            $stringBody = (string) $body;
+            //file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$body,FILE_APPEND);
+            $stringBody = (string)$body;
             $res = json_decode($stringBody, true);
-            if ($res === null) {
+            //file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$stringBody,FILE_APPEND);
+            if($res === null){
                 exception('网络异常');
             }
             if ($res['status'] == 200) {
@@ -873,7 +874,7 @@ class WorkOrderList extends Model
                     ];
                     WorkOrderRemark::create($remarkData);
                     //通知
-                    Ding::cc_ding(explode(',', $work->recept_person_id), '', '有新工单需要你处理', '有新工单需要你处理');
+                    Ding::cc_ding(explode(',', $work->recept_person_id), '', '😎😎😎😎有新工单需要你处理😎😎😎😎', '有新工单需要你处理');
                 }
             }
 
@@ -985,24 +986,16 @@ class WorkOrderList extends Model
      */
     public static function workOrderListResult($allIncrementOrder)
     {
-        $workOrderLists = self::where('platform_order', 'in', $allIncrementOrder)
-            ->with([
-                'measures' => function ($query) {
-                    $query->field('measure_content');
-                }
-            ])
-            ->select();
-        foreach ($workOrderLists as &$workOrderList) {
+        $workOrderLists = self::where('platform_order','in',$allIncrementOrder)->select();
+        foreach($workOrderLists as &$workOrderList){
             $receptPersonIds = $workOrderList->recept_person_id;
             $receptPerson = Admin::where('id', 'in', $receptPersonIds)->column('nickname');
             //承接人
-            $workOrderList->recept_persons = join(',', $receptPerson);
-            $workOrderList->measure = '';
-            if (!empty($workOrderList->measures)) {
-                foreach ($workOrderList->measures as $key => $measure) {
-                    $workOrderList->measure = $measure->measure_content . ',';
-                }
-            }
+            $workOrderList->recept_persons = join(',',$receptPerson);
+            $measures = \app\admin\model\saleaftermanage\WorkOrderMeasure::where('work_id',$workOrderList->id)->column('measure_content');
+            $measures = join(',',$measures);
+            $workOrderList->measure = $measures;
+
         }
         return $workOrderLists;
     }

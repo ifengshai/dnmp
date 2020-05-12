@@ -13,6 +13,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     edit_url: 'saleaftermanage/work_order_list/edit',
                     del_url: 'saleaftermanage/work_order_list/del',
                     multi_url: 'saleaftermanage/work_order_list/multi',
+                    import_url: 'saleaftermanage/work_order_list/import',
                     table: 'work_order_list',
                 }
             });
@@ -367,6 +368,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
 
             //点击事件 #todo::需判断仓库或者客服
             $(document).on('click', '.problem_type', function () {
+                $order_pay_currency = $('#order_pay_currency').val();
+                if (!$order_pay_currency) {
+                    Toastr.error('请先点击载入数据');
+                    return false;
+                }
                 //读取是谁添加的配置console.log(Config.work_type);
                 $('.step_type').attr('checked', false);
                 $('.step_type').parent().hide();
@@ -433,6 +439,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     //判断取消订单的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end                   
                 }
             })
+
+            //更改单号清空
+            $('#c-platform_order').change(function(){
+                $('#order_pay_currency').val('');
+            })
+
 
             //根据措施类型显示隐藏
             $(document).on('click', '.step_type', function () {
@@ -649,8 +661,23 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
             //载入数据
             $('#platform_order').click(function () {
                 var incrementId = $('#c-platform_order').val().replace(/^\s+|\s+$/g, "");
+                if (!incrementId) {
+                    Toastr.error('订单号不能为空');
+                    return false;
+                }
+                var str = incrementId.substring(0, 3);
+                //判断站点
+                if (str == '100' || str == '400' || str == '500') {
+                    $("#work_platform").val(1);
+                } else if (str == '130' || str == '430') {
+                    $('#work_platform').val(2);
+                } else if (str == '300' || str == '600') {
+                    $('#work_platform').val(3);
+                }
+                
                 var sitetype = $('#work_platform').val();
                 $('#c-order_sku').html('');
+                Layer.load();
                 Backend.api.ajax({
                     url: 'saleaftermanage/work_order_list/get_sku_list',
                     data: {
@@ -658,6 +685,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         order_number: incrementId
                     }
                 }, function (data, ret) {
+                    Layer.closeAll();
                     $('#order_pay_currency').val(data.base_currency_code);
                     $('#step2_pay_currency').val(data.base_currency_code);
                     $('#order_pay_method').val(data.method);
@@ -1519,6 +1547,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 $(document).on('click', '.btn-del-lens', function () {
                     $(this).parent().parent().remove();
                 });
+                //保存草稿
+                $('.btn-warning').click(function () {
+                    $('.status').val(1);
+                })
+
                 //提交审核按钮
                 $('.btn-status').click(function () {
                     $('.status').val(2);

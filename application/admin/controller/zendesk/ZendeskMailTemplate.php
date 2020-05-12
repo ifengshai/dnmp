@@ -377,7 +377,7 @@ class ZendeskMailTemplate extends Backend
                 2 => $vooguemeMacros
             ];
             foreach($macrosTypes as $type =>  $macrosType){
-                foreach($zeeloolMacros as $macro) {
+                foreach($macrosType as $macro) {
                     if($this->model->where(['template_platform' => $type,'template_id' => $macro->id])->find()){
                         continue;
                     }
@@ -405,7 +405,8 @@ class ZendeskMailTemplate extends Backend
                     $actions = $macro->actions;
                     foreach ($actions as $key => $action) {
                         if ($action->field == 'comment_value_html') {
-                            $data['template_content'] = str_replace(['{{ticket.requester.first_name}}', '{{ticket.id}}'], ['{{username}}', '{{ticket_id}}'], $action->value);
+                            $template_content = str_replace(['<p></br></p>','{{ticket.requester.first_name}}', '{{ticket.id}}'], ['</br>','{{username}}', '{{ticket_id}}'], $action->value);
+                            $data['template_content'] = str_replace(['<p>','</p>','<br>'], ['','</br>',''], $template_content);
                         }
                         if ($action->field == 'subject') {
                             $data['mail_subject'] = $action->value;

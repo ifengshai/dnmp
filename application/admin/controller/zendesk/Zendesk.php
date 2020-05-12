@@ -2,7 +2,6 @@
 
 namespace app\admin\controller\zendesk;
 
-use app\admin\model\Admin;
 use app\admin\model\zendesk\ZendeskPosts;
 use app\admin\model\zendesk\ZendeskTasks;
 use app\common\controller\Backend;
@@ -26,6 +25,7 @@ class Zendesk extends Backend
 {
     protected $model = null;
     protected $relationSearch = true;
+    protected $noNeedLogin = ['asycTicketsUpdate','asycTicketsVooguemeUpdate','asycTicketsAll','asycTicketsAll2','asycTicketsAll3'];
 
     public function _initialize()
     {
@@ -111,9 +111,9 @@ class Zendesk extends Backend
             $this->request->get(['filter' => json_encode($filter)]);
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             //默认使用
-            $orderSet = 'priority desc,update_time asc,id asc';
+            $orderSet = 'priority desc,zendesk_update_time asc,id asc';
             if($me_task == 2){
-                $orderSet = 'priority desc,update_time asc,id asc';
+                $orderSet = 'priority desc,zendesk_update_time asc,id asc';
             }
             if($sort != 'zendesk.id' && $sort){
                 $orderSet = "{$sort} {$order}";
@@ -266,7 +266,8 @@ class Zendesk extends Backend
                         'raw_subject' => $rawSubject,
                         'assignee_id' => $assignee_id,
                         'assign_id' => $agent_id,
-                        'email_cc' => $params['email_cc']
+                        'email_cc' => $params['email_cc'],
+                        'zendesk_update_time' => date('Y-m-d H:i:s',time()+8*3600)
                     ]);
                     $zid = $zendesk->id;
                     //评论表添加内容,有body时添加评论，修改状态等不添加
@@ -427,6 +428,7 @@ class Zendesk extends Backend
                     //对tag进行排序
                     $zendeskTags = $params['tags'];
                     sort($zendeskTags);
+
                     //更新主表的状态和priority，tags,due_id，assignee_id等
                     $result = $this->model->where('id', $ids)->update([
                         'subject' => $params['subject'],
@@ -435,7 +437,8 @@ class Zendesk extends Backend
                         'tags' => join(',', $zendeskTags),
                         'assignee_id' => $agent_id,
                         'due_id' => session('admin.id'),
-                        'email_cc' => $params['email_cc']
+                        'email_cc' => $params['email_cc'],
+                        'zendesk_update_time' => date('Y-m-d H:i:s',time() + 8*3600)
                     ]);
                     //评论表添加内容,有body时添加评论，修改状态等不添加
                     if (strip_tags($params['content'])) {
@@ -500,6 +503,7 @@ class Zendesk extends Backend
             'is_active' => 1])
             ->order('template_category desc,id desc')
             ->select();
+
         $templates = ['Apply Macro'];
         foreach ($templateAll as $key => $template) {
             $category = '';
@@ -599,7 +603,7 @@ Please close this window and try again.");
             $data = [
                 'ids' => [$ids],
                 'target_comment_is_public' => $target_comment_is_public,
-                'source_comment_is_public' => $source_comment_is_public,
+                'source_comment_is_public' => $source_comment_is_public
             ];
             $converter = new HtmlConverter();
             if ($target_comment) {
@@ -609,9 +613,13 @@ Please close this window and try again.");
                 $data['source_comment'] = $converter->convert($source_comment);
             }
             $result = false;
+
             try {
+                //获取当前用户绑定的账户邮箱
+                $agentId = ZendeskAgents::where('admin_id',session('admin.id'))->value('agent_id');
+                $username = \app\admin\model\zendesk\ZendeskAccount::where('account_id',$agentId)->value('account_email');
                 //合并工单
-                $result = (new Notice(request(), ['type' => $siteName]))->merge($ticket, $data);
+                $result = (new Notice(request(), ['type' => $siteName,'username' => $username]))->merge($ticket, $data);
                 if (isset($result['code'])) {
                     throw new Exception($result['message'], 10001);
                 }
@@ -637,6 +645,7 @@ Please close this window and try again.");
                     'assignee_id' => $agent_id,
                     'assign_id' => $agent_id,
                     'due_id' => session('admin.id'),
+                    'zendesk_update_time' => date('Y-m-d H:i:s',time() + 8*3600)
                 ]);
 
                 ZendeskComments::create([
@@ -846,6 +855,7 @@ DOC;
     }
 
     /**
+     * 同步丢失数据使用
      * 同步未常见的工单，由于通知失败导致的
      */
     public function asycTickets()
@@ -860,6 +870,71 @@ DOC;
         set_time_limit(0);
         for($i=63382;$i<63384;$i++){
             (new Notice(request(), ['type' => 'voogueme','id' => $i]))->create();
+        }
+    }
+
+    /**
+     * 同步丢失数据使用
+     * 更新同步未常见的工单，由于通知失败导致的
+     */
+    public function asycTicketsUpdate()
+    {
+        $ticketIds = (new Notice(request(), ['type' => 'zeelool']))->asyncUpdate();
+        foreach($ticketIds as $ticketId){
+            (new Notice(request(), ['type' => 'zeelool','id' => $ticketId]))->update();
+            echo $ticketId."\r\n";
+        }
+    }
+    public function asycTicketsVooguemeUpdate()
+    {
+        $ticketIds = (new Notice(request(), ['type' => 'voogueme']))->asyncUpdate();
+        foreach($ticketIds as $ticketId){
+            (new Notice(request(), ['type' => 'voogueme','id' => $ticketId]))->update();
+            echo $ticketId."\r\n";
+        }
+    }
+
+    /**
+     * 同步所有数据
+     * @throws \Exception
+     */
+    public function asycTicketsAll()
+    {
+        $tickets = $this->model->where('id','between',[24660,26660])->order('id asc')->select();
+        foreach($tickets as $ticket){
+            $ticketId = $ticket->ticket_id;
+            if($ticket->type == 1){
+                (new Notice(request(), ['type' => 'zeelool','id' => $ticketId]))->update();
+            }elseif($ticket->type == 2){
+                (new Notice(request(), ['type' => 'voogueme','id' => $ticketId]))->update();
+            }
+            echo $ticketId."\r\n";
+        }
+    }
+    public function asycTicketsAll2()
+    {
+        $tickets = $this->model->where('id','between',[26660,28660])->order('id asc')->select();
+        foreach($tickets as $ticket){
+            $ticketId = $ticket->ticket_id;
+            if($ticket->type == 1){
+                (new Notice(request(), ['type' => 'zeelool','id' => $ticketId]))->update();
+            }elseif($ticket->type == 2){
+                (new Notice(request(), ['type' => 'voogueme','id' => $ticketId]))->update();
+            }
+            echo $ticketId."\r\n";
+        }
+    }
+    public function asycTicketsAll3()
+    {
+        $tickets = $this->model->where('id','between',[28660,30660])->order('id asc')->select();
+        foreach($tickets as $ticket){
+            $ticketId = $ticket->ticket_id;
+            if($ticket->type == 1){
+                (new Notice(request(), ['type' => 'zeelool','id' => $ticketId]))->update();
+            }elseif($ticket->type == 2){
+                (new Notice(request(), ['type' => 'voogueme','id' => $ticketId]))->update();
+            }
+            echo $ticketId."\r\n";
         }
     }
 }

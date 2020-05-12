@@ -98,6 +98,29 @@ class Index extends Backend
 
             $list = collection($list)->toArray();
 
+            $arr = [
+                'Business express(4-7 business days)',
+                'Expedited',
+                'Business express(7-14 Days)',
+                'Business express(7-12 Days)',
+                'Business express',
+                'Business express (7-12 days)',
+                'Business express(7-12 days)',
+                'Express Shipping (3-5 Days)',
+                'Express Shipping (5-8Days)',
+                'Express Shipping (3-5 Business Days)',
+                'Express Shipping (5-8 Business Days)',
+                'Business Express(7-12 Days)'
+            ];
+            foreach ($list as &$v) {
+                if (in_array($v['shipping_description'],$arr)) {
+                    $v['label'] = 1;
+                } else {
+                    $v['label'] = 0;
+                }
+            }
+            unset($v);
+
             $result = array("total" => $total, "rows" => $list);
 
             return json($result);

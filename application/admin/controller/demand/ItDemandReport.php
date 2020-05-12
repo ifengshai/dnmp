@@ -113,6 +113,7 @@ class ItDemandReport extends Backend
 
         $task_item_list = $this->itWebTaskItem
             ->with("itWebTask")
+            ->where('is_del', 1)
             ->where($task_item_smap)
             ->select();
 
@@ -130,6 +131,7 @@ class ItDemandReport extends Backend
 
        $it_task_list= $task_web
             ->where($task_smap)
+            ->where('is_del', 1)
             ->select();
         //站点数据获取
         $site_type_total=array();

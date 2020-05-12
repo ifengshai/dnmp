@@ -13,6 +13,7 @@ use app\admin\model\AuthGroup;
 use app\admin\model\AuthGroupAccess;
 use app\admin\model\demand\ItTestRecord;
 use app\admin\model\demand\ItWebDemand;
+use app\admin\model\demand\DevelopDemand;
 use app\admin\model\Department;
 use app\common\model\Auth;
 use fast\Random;
@@ -293,7 +294,6 @@ class Ding extends Controller
      * @param string $content 通知内容
      */
     public static function cc_ding($users, $title, $content, $picUrl = 'https://static.dingtalk.com/media/lALPDeC2v2wwMcPMpcyk_164_165.png') {
-        $users = 106;
         if (!self::$instance) self::$instance = new self();
         $instance = self::$instance;
         if (!is_array($users)) $users = [$users];
@@ -317,6 +317,15 @@ class Ding extends Controller
      */
     public static function demandType($type) {
         return ['bug', '需求', '疑难'][$type - 1]?? '消息';
+    }
+
+    /**
+     * 优先级 priority
+     * @param $type
+     * @return string
+     */
+    public static function demandPriority($type) {
+        return ['低', '中', '高'][$type - 1]?? '低';
     }
 
     /**
@@ -435,8 +444,113 @@ class Ding extends Controller
         if ($send_ids && $msg) return self::cc_ding(
             $send_ids
             ,'【' . self::siteType($demand ->site_type) . '】【' . self::demandType($demand ->type) . '】' . $msg
-            , '摘要: ' . $demand ->title
+            , '摘要: ' .'[id:'.$demand->id.'],title:'. $demand ->title
         );
         return false;
     }
+
+
+    /**
+     * 回调发起钉钉通知
+     * @param string $name 事件名称
+     * @param \app\admin\model\demand\DevelopDemand $demand 需求管理模型
+     */
+    public static function dingHookByDevelop(string $name, \app\admin\model\demand\DevelopDemand $demand) {
+        if ($demand ->type == 3) return false; // 疑难不作处理
+        $demand = DevelopDemand::get($demand->id);
+        $send_ids = []; // 被发送者id, userid或nickname
+        $msg = ''; // 消息内容
+        switch($name){ //type =1 BUG    type =2 需求
+            case 'add':                     // 添加内容通知, 需求管理通知产品经理审核，产品经理审核通过通知 开发主管审核，  开发主管分配完成 通知开发负责人，  开发人员点击开发完成，通知测试人，测试通过通知产品经理确认，产品经理确认完成 通知测试进行回归测试。中间节点，测试记录问题通知责任人
+               if ($demand->type==1){
+                   $authUserIds = Auth::getUsersId('demand/develop_demand/review_status_develop') ?: [];
+                   $send_ids = array_filter(array_merge(
+                       $authUserIds // 有开发主管权限的人，可分配用户
+                   ));
+                   $entry_user = Admin::get($demand ->create_person_id) ->nickname;
+                   $msg =$entry_user .'刚刚录入了一个新的['. self::demandType($demand ->type). '], 请关注';
+                   break;
+               }elseif ($demand->type==2){
+                $authUserIds = Auth::getUsersId('demand/develop_demand/review') ?: [];
+                $send_ids = array_filter(array_merge(
+                    $authUserIds // 所有有权限点击测试确认的用户
+                ));
+                $entry_user = Admin::get($demand ->create_person_id) ->nickname;
+                $msg = $entry_user . '刚刚录入了一个新的' . self::demandType($demand ->type) . ', 等待您的审核';
+                break;
+               }
+            case 'review':             // 产品经理审核通过
+                $authUserIds = Auth::getUsersId('demand/develop_demand/review_status_develop') ?: [];
+                $send_ids = array_filter(array_merge(
+                    $authUserIds // 所有有权限点击测试确认的用户
+                ));
+                $msg ='一个优先级['. self::demandPriority($demand ->type). ']的任务产品经理已审核通过, 等待您的审核';
+
+                break;
+            case 'distribution':                    // 分配开发人员
+                $send_ids = $demand->assign_developer_ids;//获取开发人员
+                $msg = '有个[' . (['简单的', '中等的', '复杂的'][$demand ->complexity - 1]) . ']任务已被分配给您';
+                break;
+            case 'set_complete_status':       // 开发完成-- 通知测试人员
+                if ($demand ->is_test == 1) { // 是否需要测试
+                    $send_ids = $authUserIds = $demand->test_person;
+                    $msg = '有个测试复杂度为[' . (['简单的', '中等的', '复杂的'][$demand ->test_complexity - 1]) .']任务已开发完成,等待您的测试';
+                }else if($demand ->is_test == 0){ // 不需要测试,开发完成直接上线,根据不同类型通知不同人
+                    if ($demand->type==2){//需求类型,产品经理确认
+                        $send_ids = Auth::getUsersId('demand/develop_demand/is_finish_task'); // 所有有权限点击[通过]按钮的人
+                        $msg ='一个任务已开发完成,等待您的确认';
+                    }elseif ($demand->type==1){//BUG 类型`
+                        $send_ids = Auth::getUsersId('demand/develop_demand/is_finish_bug'); // 所有有权限点击[通过]按钮的人
+                        $msg ='一个任务已开发完成,请您关注';
+                    }
+                }
+                break;
+            case 'test_is_passed': // 测试站通过测试,通知相关人员进行确认
+                if ($demand->type==2){//需求类型,产品经理确认
+                    $send_ids = Auth::getUsersId('demand/develop_demand/is_finish_task'); // 所有有权限点击[通过]按钮的人
+                    $msg ='一个任务已完成测试,等待您的确认';
+                }elseif ($demand->type==1){//BUG 类型
+                    $send_ids = Auth::getUsersId('demand/develop_demand/is_finish_bug'); // 所有有权限点击[上线]按钮的人
+                    $msg ='一个任务已完成测试,请您关注';
+                }
+                break;
+            case 'is_finish_task':          // 需求列表  产品经理确认
+                if ($demand ->is_test == 1) { // 是否需要测试
+                    $send_ids =  $authUserIds = $demand->test_person;
+                    $msg = '有个测试复杂度为[' . (['简单的', '中等的', '复杂的'][$demand ->test_complexity - 1]) . ']任务已产品经理已确认,等待回归测试';
+                }
+                break;
+            case 'is_finish_bug':          // BUG 列表 已上线
+                if ($demand ->is_test == 1) { // 是否需要测试
+                    $send_ids = $authUserIds = $demand->test_person;
+                    $msg = '有个测试复杂度为[' . (['简单的', '中等的', '复杂的'][$demand ->test_complexity - 1]) . ']任务已上线,等待回归测试';
+                }
+                break;
+            case 'test_record_bug':          // 测试站记录问题
+                $send_ids =$authUserIds = $demand->assign_developer_ids;
+                $record = \think\Db::name('develop_test_record') // 刚刚填的测试问题
+                ->where('pid', $demand ->id)
+                    ->order('id', 'desc')
+                    ->find();
+
+                $msg = '有个任务在 [测试环境] 被记录了一个[' . (['次要', '一般', '严重', '崩溃'][$record['bug_type'] - 1]) . '问题] , 需要您查看';
+                break;
+            case 'regression_test_info':          // 正式站记录问题
+                $send_ids =   $authUserIds = $demand->assign_developer_ids;
+                $record = \think\Db::name('develop_test_record') // 刚刚填的测试问题
+                ->where('pid', $demand ->id)
+                    ->order('id', 'desc')
+                    ->find();
+
+                $msg = '有个任务在 [正式环境] 被记录了一个 [' . (['次要', '一般', '严重', '崩溃'][$record['bug_type'] - 1]) . '问题] , 需要您查看';
+                break;
+        }
+        if ($send_ids && $msg) return self::cc_ding(
+            $send_ids
+            , '【开发组' . self::demandType($demand ->type) . '】' . $msg
+            , '摘要: ' .'[id:'.$demand->id.'],title:'. $demand ->title
+        );
+        return false;
+    }
+
 }

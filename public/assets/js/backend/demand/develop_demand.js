@@ -28,7 +28,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     [
                         // { checkbox: true },
                         { field: 'id', title: __('Id') },
-                        // { field: 'title', title: __('Titel'), cellStyle: formatTableUnit, formatter: Controller.api.formatter.getClear, operate: false },
+                        { field: 'title', title: __('Titel'), cellStyle: formatTableUnit, formatter: Controller.api.formatter.getClear, operate: false },
                         {
                             field: 'desc',
                             operate: false,
@@ -304,13 +304,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     },
                                     visible: function (row) {
                                         if (row.is_test == 1) {
-                                            if (row.is_finish == 0 && Config.is_set_status == 1 && row.review_status_develop == 1 && row.is_developer_opt == 1 && row.test_person) {
+                                            if (row.is_finish == 0 && Config.is_set_status == 1 && row.review_status_develop == 1 && row.test_person) {
                                                 return true;
                                             } else {
                                                 return false;
                                             }
                                         } else {
-                                            if (row.is_finish == 0 && Config.is_set_status == 1 && row.review_status_develop == 1 && row.is_developer_opt == 1) {
+                                            if (row.is_finish == 0 && Config.is_set_status == 1 && row.review_status_develop == 1 ) {
                                                 return true;
                                             } else {
                                                 return false;
@@ -530,7 +530,30 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     ]
                 ]
             });
-
+            $('.panel-heading a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+                var field = $(this).data("field");
+                var value = $(this).data("value");
+                // console.log(field);
+                // console.log(value);
+                var options = table.bootstrapTable('getOptions');
+                options.pageNumber = 1;
+                var queryParams = options.queryParams;
+                options.queryParams = function (params) {
+                    var params = queryParams(params);
+                    var filter = params.filter ? JSON.parse(params.filter) : {};
+                    var op     = params.op ? JSON.parse(params.op) : {};
+                    if(field == 'me_task'){
+                        filter[field] = value;
+                    }else{
+                        delete filter.me_task;
+                    }
+                    params.filter = JSON.stringify(filter);
+                    params.op     = JSON.stringify(op);
+                    return params;
+                };
+                table.bootstrapTable('refresh', {});
+                return false;
+            });
             // 为表格绑定事件
             Table.api.bindevent(table);
 
@@ -993,6 +1016,30 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 ]
             });
 
+            $('.panel-heading a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+                var field = $(this).data("field");
+                var value = $(this).data("value");
+                // console.log(field);
+                // console.log(value);
+                var options = table.bootstrapTable('getOptions');
+                options.pageNumber = 1;
+                var queryParams = options.queryParams;
+                options.queryParams = function (params) {
+                    var params = queryParams(params);
+                    var filter = params.filter ? JSON.parse(params.filter) : {};
+                    var op     = params.op ? JSON.parse(params.op) : {};
+                    if(field == 'me_task'){
+                        filter[field] = value;
+                    }else{
+                        delete filter.me_task;
+                    }
+                    params.filter = JSON.stringify(filter);
+                    params.op     = JSON.stringify(op);
+                    return params;
+                };
+                table.bootstrapTable('refresh', {});
+                return false;
+            });
             // 为表格绑定事件
             Table.api.bindevent(table);
 
