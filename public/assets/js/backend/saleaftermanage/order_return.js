@@ -1,4 +1,4 @@
-define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','custom-css','bootstrap-table-jump-to'], function ($, undefined, Backend, Table, Form) {
+define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'custom-css', 'bootstrap-table-jump-to'], function ($, undefined, Backend, Table, Form) {
 
     var Controller = {
         index: function () {
@@ -35,13 +35,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','custom-css','
                 columns: [
                     [
                         { checkbox: true },
-                        {field: '', title: __('序号'), formatter: function (value, row, index) {
-                            var options = table.bootstrapTable('getOptions');
-                            var pageNumber = options.pageNumber;
-                            var pageSize = options.pageSize;
+                        {
+                            field: '', title: __('序号'), formatter: function (value, row, index) {
+                                var options = table.bootstrapTable('getOptions');
+                                var pageNumber = options.pageNumber;
+                                var pageSize = options.pageSize;
 
-                            //return (pageNumber - 1) * pageSize + 1 + index;
-                            return 1+index;
+                                //return (pageNumber - 1) * pageSize + 1 + index;
+                                return 1 + index;
                             }, operate: false
                         },
                         { field: 'id', title: __('Id'), operate: false },
@@ -54,23 +55,23 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','custom-css','
                         {
                             field: 'order_status',
                             title: __('Order_status'),
-                            searchList: { 1: '新建', 2: '待审核', 3: '已审核', 4: '已拒绝',5:'已取消'},
-                            custom: { 1: 'yellow', 2: 'blue', 3: 'success', 4: 'red',5:'gray'},
+                            searchList: { 1: '新建', 2: '待审核', 3: '已审核', 4: '已拒绝', 5: '已取消' },
+                            custom: { 1: 'yellow', 2: 'blue', 3: 'success', 4: 'red', 5: 'gray' },
                             formatter: Table.api.formatter.status
                         },
                         {
-                            field:'quality_status',
-                            title:__('Quality_status'),
-                            searchList:{0:'未质检',1:'已质检'},
-                            custom:{0:'yellow',1:'blue'},
-                            formatter:Table.api.formatter.status
+                            field: 'quality_status',
+                            title: __('Quality_status'),
+                            searchList: { 0: '未质检', 1: '已质检' },
+                            custom: { 0: 'yellow', 1: 'blue' },
+                            formatter: Table.api.formatter.status
                         },
                         {
-                            field:'in_stock_status',
-                            title:__('In_stock_status'),
-                            searchList:{0:'未入库',1:'已入库'},
-                            custom:{0:'yellow',1:'blue'},
-                            formatter:Table.api.formatter.status
+                            field: 'in_stock_status',
+                            title: __('In_stock_status'),
+                            searchList: { 0: '未入库', 1: '已入库' },
+                            custom: { 0: 'yellow', 1: 'blue' },
+                            formatter: Table.api.formatter.status
                         },
                         { field: 'create_person', title: __('Create_person') },
                         { field: 'create_time', title: __('Create_time'), operate: 'RANGE', addclass: 'datetimerange' },
@@ -194,16 +195,16 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','custom-css','
                                     title: __('编辑'),
                                     classname: 'btn btn-xs btn-success btn-dialog',
                                     icon: 'fa fa-pencil',
-                                    url:  'saleaftermanage/order_return/edit',
+                                    url: 'saleaftermanage/order_return/edit',
                                     extend: 'data-area = \'["100%","100%"]\'',
                                     callback: function (data) {
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
                                     },
                                     visible: function (row) {
-                                        if(row.order_status == 1){
+                                        if (row.order_status == 1) {
                                             return true;
                                         }
-                                            return false;
+                                        return false;
                                     }
                                 },
                                 {
@@ -226,11 +227,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','custom-css','
                                     },
                                     visible: function (row) {
                                         //返回true时按钮显示,返回false隐藏
-                                        if(row.order_status == 1){
+                                        if (row.order_status == 1) {
                                             return true;
                                         }
-                                            return false;
-                                            
+                                        return false;
+
                                     }
 
                                 }
@@ -264,13 +265,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','custom-css','
                 options.queryParams = function (params) {
                     var params = queryParams(params);
                     var filter = params.filter ? JSON.parse(params.filter) : {};
-                    if(field == 'create_person'){
+                    if (field == 'create_person') {
                         delete filter.rep_id;
                         filter[field] = value;
-                    }else if(field == 'rep_id'){
+                    } else if (field == 'rep_id') {
                         delete filter.create_person;
                         filter[field] = value;
-                    }else{
+                    } else {
                         delete filter.rep_id;
                         delete filter.create_person;
                     }
@@ -429,8 +430,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','custom-css','
                         //alert(ret);
                         //清除html商品数据
                         var email = ret.data[0].customer_email != undefined ? ret.data[0].customer_email : '';
-                        var firstname =  ret.data[0].customer_firstname != undefined ? ret.data[0].customer_firstname : '';
-                        var lastname  =  ret.data[0].customer_lastname != undefined ? ret.data[0].customer_lastname : '';
+                        var firstname = ret.data[0].customer_firstname != undefined ? ret.data[0].customer_firstname : '';
+                        var lastname = ret.data[0].customer_lastname != undefined ? ret.data[0].customer_lastname : '';
                         $(".item_info").empty();
                         $('#c-order_status').val(ret.data.status);
                         $('#c-customer_name').val(firstname + " " + lastname);
@@ -495,14 +496,34 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','custom-css','
             Form.api.bindevent($("form[role=form]"), function (data) {
                 window.top.location.href = Config.moduleurl + '/saleaftermanage/order_return/search';
             });
+
+            //站点切换
+            $(document).on('click', '.site', function () {
+                var site = $(this).html();
+                if (!$(this).hasClass('active')) {
+                    $('.site').removeClass('active');
+                    $(this).addClass('active');
+                    if (site == 'Zeelool') {
+                        $('#order_platform').val(1);
+                    } else if(site == 'Voogueme') {
+                        $('#order_platform').val(2);
+                    } else if(site == 'Nihao') {
+                        $('#order_platform').val(3);
+                    }
+                }
+            })
+
+
+
+
             //$('tr:not(:has(td[rowspan])):even');
             //点击重置按钮
-            $(document).on('click','.btn-default',function(){
-                $('#increment_id').attr({"value": ""});
-                $('#customer_email').attr({"value": ""});
-                $('#customer_name').attr({"value": ""});
-                $('#customer_phone').attr({"value": ""});
-                $('#track_number').attr({"value": ""});
+            $(document).on('click', '.btn-default', function () {
+                $('#increment_id').attr({ "value": "" });
+                $('#customer_email').attr({ "value": "" });
+                $('#customer_name').attr({ "value": "" });
+                $('#customer_phone').attr({ "value": "" });
+                $('#track_number').attr({ "value": "" });
             });
             //模糊匹配订单
             $('#increment_id').autocomplete({
@@ -685,14 +706,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','custom-css','
                 max: 5000
             });
             //点击查看物流信息
-            $(document).on('click','.track-number',function(){
+            $(document).on('click', '.track-number', function () {
                 var entity_id = $(this).parent().prev().prev().val();
                 var order_platform = $('#c-order_platform').val();
                 var track_number = $(this).html();
                 // console.log(entity_id);
                 // console.log(order_platform);
                 // console.log(track_number);
-                Backend.api.open('saleaftermanage/order_return/get_logistics_info/?track_number='+track_number+'&entity_id='+entity_id+'&order_platform='+order_platform,'查询物流信息',{area:["60%", "60%"]});
+                Backend.api.open('saleaftermanage/order_return/get_logistics_info/?track_number=' + track_number + '&entity_id=' + entity_id + '&order_platform=' + order_platform, '查询物流信息', { area: ["60%", "60%"] });
             });
             // $(document).on('change','#increment_id',function(){
             //     var incrementId = $('#increment_id').val();

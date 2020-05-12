@@ -87,35 +87,36 @@
                     <div class="part-wrap control-wrap">
                         <ul class="type">
                             <li>订单平台</li>
-                            <li class="active">zeelool</li>
-                            <li>Voogueme</li>
-                            <li>Nihao</li>
-                            <li>Wesee</li>
+                            <li class="active site">Zeelool</li>
+                            <li class="site">Voogueme</li>
+                            <li class="site">Nihao</li>
+                            <!-- <li class="site">Wesee</li> -->
                         </ul>
-                        <form action="">
+                        <form id="form1" action="{:url('/admin/saleaftermanage/order_return/search')}" class="form-commonsearch form-horizontal" method="post">
+                            <input type="hidden" name="order_platform" id="order_platform" value="1" />
                             <div class="input-list">
                                 <ul class="order-list">
                                     <li>
                                         <span>订单号</span>
-                                        <input id="orderNum" type="text" name="">
+                                        <input id="increment_id" type="text" class="form-control" autocomplete="off" name="increment_id" value="{$increment_id}" />
                                     </li>
                                     <li>
                                         <span for="orderNum">快递单号</span>
-                                        <input type="text" name="">
+                                        <input type="text" id="track_number" class="form-control" name="track_number" value="{$track_number}"/>
                                     </li>
                                 </ul>
                                 <ul class="order-list">
                                     <li>
                                         <span>客户邮箱</span>
-                                        <input type="text" name="">
+                                        <input type="text" id="customer_email" class="form-control" name="customer_email" value="{$customer_email}"/>
                                     </li>
                                     <li>
                                         <span>客户电话</span>
-                                        <input type="text" name="">
+                                        <input type="text" id="customer_phone" class="form-control" name="customer_phone" value="{$customer_phone}"/>
                                     </li>
                                     <li>
                                         <span>客户姓名</span>
-                                        <input type="text" name="">
+                                        <input type="text" id="customer_name" class="form-control" name="customer_name" value="{$customer_name}"/>
                                     </li>
                                 </ul>
                             </div>
@@ -131,25 +132,25 @@
                             <ul class="user-list ">
                                 <li>
                                     <span class="name">Email</span>
-                                    <span>temikanoble@gmail.com</span>
+                                    <span>{$customerInfo.customer_email}</span>
                                 </li>
                                 <li>
                                     <span class="name">Name</span>
-                                    <span>Temika Noble</span>
+                                    <span>{$customerInfo.customer_name}</span>
                                 </li>
                                 <li>
                                     <span class="name">Customer Group</span>
-                                    <span>VIP</span>
+                                    <span>{$customerInfo.customer_group_code}</span>
                                 </li>
                             </ul>
                             <ul class="pay-infos">
                                 <li>
-                                    <strong>2</strong>
+                                    <strong>{$customerInfo.success_counter}</strong>
                                     <span>支付成功数量</span>
                                 </li>
                                 <li>
-                                    <strong>120.36</strong>
-                                    <span>支付成功数量</span>
+                                    <strong>{$customerInfo.success_total}</strong>
+                                    <span>支付成功金额($)</span>
                                 </li>
                                 <li class="failed">
                                     <strong>2</strong>
