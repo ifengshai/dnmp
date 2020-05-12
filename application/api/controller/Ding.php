@@ -294,7 +294,6 @@ class Ding extends Controller
      * @param string $content 通知内容
      */
     public static function cc_ding($users, $title, $content, $picUrl = 'https://static.dingtalk.com/media/lALPDeC2v2wwMcPMpcyk_164_165.png') {
-        $users = 106;
         if (!self::$instance) self::$instance = new self();
         $instance = self::$instance;
         if (!is_array($users)) $users = [$users];
