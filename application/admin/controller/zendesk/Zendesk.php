@@ -900,7 +900,7 @@ DOC;
      */
     public function asycTicketsAll()
     {
-        $tickets = $this->model->where('id','between',[24660,26660])->order('id asc')->select();
+        $tickets = $this->model->where('is_hide',0)->order('id asc')->select();
         foreach($tickets as $ticket){
             $ticketId = $ticket->ticket_id;
             if($ticket->type == 1){
@@ -913,7 +913,7 @@ DOC;
     }
     public function asycTicketsAll2()
     {
-        $tickets = $this->model->where('id','between',[26660,28660])->order('id asc')->select();
+        $tickets = $this->model->where('id','between',[33500,34660])->order('id asc')->select();
         foreach($tickets as $ticket){
             $ticketId = $ticket->ticket_id;
             if($ticket->type == 1){
@@ -926,7 +926,7 @@ DOC;
     }
     public function asycTicketsAll3()
     {
-        $tickets = $this->model->where('id','between',[28660,30660])->order('id asc')->select();
+        $tickets = $this->model->where('id','between',[35507,37937])->order('id asc')->select();
         foreach($tickets as $ticket){
             $ticketId = $ticket->ticket_id;
             if($ticket->type == 1){
