@@ -51,6 +51,7 @@ class Test extends Backend
         $trackingConnector = new TrackingConnector($this->apiKey);
         foreach ($order_group as $key => $val){
             $aa = $trackingConnector->registerMulti($val);
+            sleep(1);
             echo $key."\n";
         }
 
