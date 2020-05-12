@@ -46,7 +46,7 @@ class Test extends Backend
             $shipment_reg[$k]['carrier'] =  $carrier['carrierId'];
         }
 
-        $order_group = array_chunk($shipment_reg, 5);
+        $order_group = array_chunk($shipment_reg, 40);
 
         $trackingConnector = new TrackingConnector($this->apiKey);
         foreach ($order_group as $key => $val){
