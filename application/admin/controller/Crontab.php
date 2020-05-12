@@ -3733,34 +3733,19 @@ order by sfoi.item_id asc limit 1000";
     //导入实时库存 第一步
     public function set_product_relstock()
     {
-        $str = 'OP2097-03
-        OA01901-03
-        VFP0164-01
-        FT0139-01
-        OM01949-01
-        FX0419-01
-        FA0249-01
-        VFP0270-04
-        OA02117-03
-        FX0199-01
-        OA02135-02
-        ZX0926-02
-        OA208120-01
-        OX01987-02
-        OA766129-01
-        OT157359-01
-        OX715881-01
-        VFP0270-04';
+        $str = 'OT02018-02
+        VFP0236-01';
         $skus = explode('
         ', $str);
 
         $stock = [
+            30,
             0
         ];
 
         foreach ($skus as $k => $v) {
             $p_map['sku'] = $v;
-            $data['real_time_qty'] = 0;
+            $data['real_time_qty'] = $stock[$k];
             $res = $this->item->where($p_map)->update($data);
         }
         echo $res;
@@ -3784,24 +3769,8 @@ order by sfoi.item_id asc limit 1000";
         $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
         $this->item = new \app\admin\model\itemmanage\Item;
 
-        $str = 'OP2097-03
-        OA01901-03
-        VFP0164-01
-        FT0139-01
-        OM01949-01
-        FX0419-01
-        FA0249-01
-        VFP0270-04
-        OA02117-03
-        FX0199-01
-        OA02135-02
-        ZX0926-02
-        OA208120-01
-        OX01987-02
-        OA766129-01
-        OT157359-01
-        OX715881-01
-        VFP0270-04';
+        $str = 'OT02018-02
+        VFP0236-01';
         $skus = explode('
         ', $str);
         foreach ($skus as $k => $v) {
@@ -3853,24 +3822,8 @@ order by sfoi.item_id asc limit 1000";
         $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
         $this->item = new \app\admin\model\itemmanage\Item;
 
-        $str = 'OP2097-03
-        OA01901-03
-        VFP0164-01
-        FT0139-01
-        OM01949-01
-        FX0419-01
-        FA0249-01
-        VFP0270-04
-        OA02117-03
-        FX0199-01
-        OA02135-02
-        ZX0926-02
-        OA208120-01
-        OX01987-02
-        OA766129-01
-        OT157359-01
-        OX715881-01
-        VFP0270-04';
+        $str = 'OT02018-02
+        VFP0236-01';
         $skus = explode('
         ', $str);
         foreach ($skus as $k => $v) {
@@ -3916,24 +3869,8 @@ order by sfoi.item_id asc limit 1000";
         $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
         $this->item = new \app\admin\model\itemmanage\Item;
 
-        $str = 'OP2097-03
-        OA01901-03
-        VFP0164-01
-        FT0139-01
-        OM01949-01
-        FX0419-01
-        FA0249-01
-        VFP0270-04
-        OA02117-03
-        FX0199-01
-        OA02135-02
-        ZX0926-02
-        OA208120-01
-        OX01987-02
-        OA766129-01
-        OT157359-01
-        OX715881-01
-        VFP0270-04';
+        $str = 'OT02018-02
+        VFP0236-01';
         $skus = explode('
         ', $str);
         $list = $this->item->field('sku,stock,occupy_stock,available_stock,real_time_qty,distribution_occupy_stock')->where(['sku' => ['in', $skus]])->select();
