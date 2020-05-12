@@ -67,7 +67,7 @@ class DevelopDemand extends Backend
                 //开发主管
                 $authDevelopUserIds = Auth::getUsersId('demand/develop_demand/review_status_develop') ?: [];
                 if(!in_array($adminId,$authUserIds) && in_array($adminId,$authDevelopUserIds)){
-                    $meWhere = "(review_status_develop = 0 or FIND_IN_SET({$adminId},assign_developer_ids) or is_finish_task =0)";//主管 需要主管审核的 主管本人的任务  未完成，需主管确认完成的
+                    $meWhere = "((review_status_manager =1 and is_finish_task =0 and review_status_develop = 0) or FIND_IN_SET({$adminId},assign_developer_ids))";//主管 需要主管审核的 主管本人的任务  未完成，需主管确认完成的
                 }
 
                 //判断是否是普通的测试
@@ -230,10 +230,11 @@ class DevelopDemand extends Backend
                 if(in_array($adminId,$authUserIds)){
                     $meWhere = "(review_status_manager = 0 or ( (is_test =1 and test_is_passed=1 and is_finish_task =0) or (is_test =0 and is_finish=1 and is_finish_task=0)  ) )";
                 }
+
                 //开发主管
                 $authDevelopUserIds = Auth::getUsersId('demand/develop_demand/review_status_develop') ?: [];
                 if(!in_array($adminId,$authUserIds) && in_array($adminId,$authDevelopUserIds)){
-                    $meWhere = "(review_status_develop = 0 or FIND_IN_SET({$adminId},assign_developer_ids) or is_finish_task =0)";//主管 需要主管审核的 主管本人的任务  未完成，需主管确认完成的
+                    $meWhere = "(is_finish_task =0 or FIND_IN_SET({$adminId},assign_developer_ids))";//
                 }
 
                 //判断是否是普通的测试
@@ -552,6 +553,8 @@ class DevelopDemand extends Backend
                     $this->error($e->getMessage());
                 }
                 if ($result !== false) {
+                    $res = $this ->model ->get(input('ids'));
+                    Ding::dingHookByDevelop('review', $res);
                     $this->success();
                 } else {
                     $this->error(__('No rows were updated'));
@@ -645,6 +648,8 @@ class DevelopDemand extends Backend
                     $this->error($e->getMessage());
                 }
                 if ($result !== false) {
+                    $res = $this ->model ->get(input('id'));
+                    Ding::dingHookByDevelop('distribution', $res);
                     $this->success();
                 } else {
                     $this->error(__('No rows were updated'));
@@ -716,11 +721,13 @@ class DevelopDemand extends Backend
         $data['finish_time'] = date('Y-m-d H:i:s', time());
         $data['finish_person'] = session('admin.nickname');
         $data['finish_person_id'] = session('admin.id');
-        $res = $this->model->save($data, ['id' => $ids]);
-        if ($res !== false) {
-            $this->success('操作成功！！');
+        $result = $this->model->save($data, ['id' => $ids]);
+        if ($result) {
+            $res = $this ->model ->get(input('ids'));
+            Ding::dingHookByDevelop('set_complete_status', $res);
+            $this->success('操作成功');
         } else {
-            $this->error('操作失败！！');
+            $this->error('操作失败');
         }
     }
 
@@ -763,6 +770,8 @@ class DevelopDemand extends Backend
                     $this->error($e->getMessage());
                 }
                 if ($result !== false) {
+                    $res = $this ->model ->get(input('ids'));
+                    Ding::dingHookByDevelop('test_record_bug', $res);
                     $this->success();
                 } else {
                     $this->error(__('No rows were updated'));
@@ -875,6 +884,8 @@ class DevelopDemand extends Backend
         $data['test_finish_time'] = date('Y-m-d H:i:s', time());
         $res = $this->model->save($data, ['id' => $ids]);
         if ($res !== false) {
+            $res = $this ->model ->get(input('ids'));
+            Ding::dingHookByDevelop('test_is_passed', $res);
             $this->success('操作成功！！');
         } else {
             $this->error('操作失败！！');
@@ -896,6 +907,8 @@ class DevelopDemand extends Backend
         $data['finish_task_time'] = date('Y-m-d H:i:s', time());
         $res = $this->model->save($data, ['id' => $ids]);
         if ($res !== false) {
+            $res = $this ->model ->get(input('ids'));
+            Ding::dingHookByDevelop('is_finish_task', $res);
             $this->success('操作成功！！');
         } else {
             $this->error('操作失败！！');
@@ -918,6 +931,8 @@ class DevelopDemand extends Backend
         $data['finish_task_time'] = date('Y-m-d H:i:s', time());
         $res = $this->model->save($data, ['id' => $ids]);
         if ($res !== false) {
+            $res = $this ->model ->get(input('ids'));
+            Ding::dingHookByDevelop('is_finish_bug', $res);
             $this->success('操作成功！！');
         } else {
             $this->error('操作失败！！');
@@ -965,6 +980,8 @@ class DevelopDemand extends Backend
                     $this->error($e->getMessage());
                 }
                 if ($result !== false) {
+                    $res = $this ->model ->get(input('ids'));
+                    Ding::dingHookByDevelop('regression_test_info', $res);
                     $this->success();
                 } else {
                     $this->error(__('No rows were updated'));
