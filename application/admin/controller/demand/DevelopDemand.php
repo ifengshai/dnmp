@@ -21,7 +21,7 @@ class DevelopDemand extends Backend
      * @var \app\admin\model\demand\DevelopDemand
      */
     protected $model = null;
-
+    protected $noNeedRight=['del'];  //解决创建人无删除权限问题 暂定
     public function _initialize()
     {
         parent::_initialize();
