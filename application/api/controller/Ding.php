@@ -279,11 +279,8 @@ class Ding extends Controller
             'userid_list' => join(',', $userIds),
             'msg' => json_encode($link)
         ];
-        dump($params);
-
         //$params = send_ding_message(['0550643549844645'], '收到需求2', '钱海信用卡支付后重复发送确认订单的邮件');
         $return_date = $this->app->conversation->sendCorporationMessage($params);
-        dump($return_date);die;
         return $return_date;
     }
 
