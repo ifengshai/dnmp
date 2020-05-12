@@ -164,8 +164,10 @@ class ZeeloolPrescriptionDetailHelper
 
 			$prescription_params = $product_options['info_buyRequest']['tmplens']['prescription'];
 			$prescription_params = explode("&", $prescription_params);
-			foreach ($prescription_params as $value) {
+			$lens_params = array();
+			foreach ($prescription_params as $key => $value) {
 				$arr_value = explode("=", $value);
+				$lens_params[$arr_value[0]] = $arr_value[1];
 				$items[$item_key][$arr_value[0]] = $arr_value[1];
 			}
 			
@@ -182,18 +184,19 @@ class ZeeloolPrescriptionDetailHelper
 
 			//判断双ADD还是单ADD
 			if ($items[$item_key]['os_add'] && $items[$item_key]['od_add'] && $items[$item_key]['os_add'] * 1 != 0 && $items[$item_key]['od_add'] * 1 != 0) {
+				//如果新处方add 对调 因为旧处方add左右眼颠倒
 				if ($item_value['is_new_version'] == 1) {
-					$items[$item_key]['os_add'] = $items[$item_key]['od_add'];
-					$items[$item_key]['od_add'] = $items[$item_key]['os_add'];
+					$items[$item_key]['os_add'] = $lens_params['od_add'];
+					$items[$item_key]['od_add'] = $lens_params['os_add'];
 				} else {
-					$items[$item_key]['os_add'] = $items[$item_key]['os_add'];
-					$items[$item_key]['od_add'] = $items[$item_key]['od_add'];
+					$items[$item_key]['os_add'] = $lens_params['os_add'];
+					$items[$item_key]['od_add'] = $lens_params['od_add'];
 				}
 			} else {
-				if ($items[$item_key]['od_add'] && $items[$item_key]['od_add']*1 != 0) {
-					$items[$item_key]['total_add'] = $items[$item_key]['od_add'];
+				if ($items[$item_key]['od_add'] && $lens_params['od_add']*1 != 0) {
+					$items[$item_key]['total_add'] = $lens_params['od_add'];
 				} else {
-					$items[$item_key]['total_add'] = $items[$item_key]['os_add'];
+					$items[$item_key]['total_add'] = $lens_params['os_add'];
 				}
 			}
 
