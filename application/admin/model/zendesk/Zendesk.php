@@ -270,7 +270,7 @@ class Zendesk extends Model
             }
         }
         //获取所有的open和new的邮件
-        $waitTickets = self::where(['status' => ['in','1,2'],'channel' => ['neq','voice']])->order('id asc')->select();
+        $waitTickets = self::where(['status' => ['in','1,2'],'channel' => ['neq','voice']])->order('priority desc,update_time asc')->select();
         foreach ($waitTickets as $ticket) {
             //电话不分配
             if($ticket->channel == 'voice') continue;
