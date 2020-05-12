@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>AdminLTE 2 | Invoice</title>
+    <!-- Tell the browser to be responsive to screen width -->
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <!-- Bootstrap 3.3.6 -->
+    <link rel="stylesheet" href="../../bootstrap/css/bootstrap.min.css">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.5.0/css/font-awesome.min.css">
+    <!-- Ionicons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ionicons/2.0.1/css/ionicons.min.css">
+    <!-- Theme style -->
+    <link rel="stylesheet" href="../../dist/css/AdminLTE.min.css">
+    <!-- AdminLTE Skins. Choose a skin from the css/skins
+       folder instead of downloading all of them to reduce the load. -->
+    <link rel="stylesheet" href="../../dist/css/skins/_all-skins.min.css">
+    <link rel="stylesheet" href="../control.css">
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+  <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+  <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+  <![endif]-->
+</head>
+
+<body class="hold-transition skin-blue sidebar-mini">
+    <div class="wrapper">
+
+        <header class="main-header">
+            <!-- Logo -->
+            <a href="../../index2.html" class="logo">
+                <!-- mini logo for sidebar mini 50x50 pixels -->
+                <span class="logo-mini"><b>A</b>LT</span>
+                <!-- logo for regular state and mobile devices -->
+                <span class="logo-lg"><b>Admin</b>LTE</span>
+            </a>
+            <!-- Header Navbar: style can be found in header.less -->
+            <nav class="navbar navbar-static-top">
+                <!-- Sidebar toggle button-->
+                <a href="#" class="sidebar-toggle" data-toggle="offcanvas" role="button">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </a>
+
+                <div class="navbar-custom-menu">
+                    <ul class="nav navbar-nav">
+                        <!-- Messages: style can be found in dropdown.less-->
+                        <li class="dropdown messages-menu">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                                <i class="fa fa-envelope-o"></i>
+                                <span class="label label-success">4</span>
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li class="header">You have 4 messages</li>
+                                <li>
+                                    <!-- inner menu: contains the actual data -->
+                                    <ul class="menu">
+                                        <li>
+                                            <!-- start message -->
+                                            <a href="#">
+                                                <div class="pull-left">
+                                                    <img src="../../dist/img/user2-160x160.jpg" class="img-circle" alt="User Image">
+                                                </div>
+                                                <h4>
+                                                    Support Team
+                                                    <small><i class="fa fa-clock-o"></i> 5 mins</small>
+                                                </h4>
+                                                <p>Why not buy a new awesome theme?</p>
+                                            </a>
+                                        </li>
+                                        <!-- end message -->
+                                        <li>
+                                            <a href="#">
+                                                <div class="pull-left">
+                                                    <img src="../../dist/img/user3-128x128.jpg" class="img-circle" alt="User Image">
+                                                </div>
+                                                <h4>
+                                                    AdminLTE Design Team
+                                                    <small><i class="fa fa-clock-o"></i> 2 hours</small>
+                                                </h4>
+                                                <p>Why not buy a new awesome theme?</p>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="#">
+                                                <div class="pull-left">
+                                                    <img src="../../dist/img/user4-128x128.jpg" class="img-circle" alt="User Image">
+                                                </div>
+                                                <h4>
+                                                    Developers
+                                                    <small><i class="fa fa-clock-o"></i> Today</small>
+                                                </h4>
+                                                <p>Why not buy a new awesome theme?</p>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="#">
+                                                <div class="pull-left">
+                                                    <img src="../../dist/img/user3-128x128.jpg" class="img-circle" alt="User Image">
+                                                </div>
+                                                <h4>
+                                                    Sales Department
+                                                    <small><i class="fa fa-clock-o"></i> Yesterday</small>
+                                                </h4>
+                                                <p>Why not buy a new awesome theme?</p>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="#">
+                                                <div class="pull-left">
+                                                    <img src="../../dist/img/user4-128x128.jpg" class="img-circle" alt="User Image">
+                                                </div>
+                                                <h4>
+                                                    Reviewers
+                                                    <small><i class="fa fa-clock-o"></i> 2 days</small>
+                                                </h4>
+                                                <p>Why not buy a new awesome theme?</p>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </li>
+                                <li class="footer"><a href="#">See All Messages</a></li>
+                            </ul>
+                        </li>
+                        <!-- Notifications: style can be found in dropdown.less -->
+                        <li class="dropdown notifications-menu">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                                <i class="fa fa-bell-o"></i>
+                                <span class="label label-warning">10</span>
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li class="header">You have 10 notifications</li>
+                                <li>
+                                    <!-- inner menu: contains the actual data -->
+                                    <ul class="menu">
+                                        <li>
+                                            <a href="#">
+                                                <i class="fa fa-users text-aqua"></i> 5 new members joined today
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="#">
+                                                <i class="fa fa-warning text-yellow"></i> Very long description here that may not fit into the page and may cause design problems
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="#">
+                                                <i class="fa fa-users text-red"></i> 5 new members joined
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="#">
+                                                <i class="fa fa-shopping-cart text-green"></i> 25 sales made
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="#">
+                                                <i class="fa fa-user text-red"></i> You changed your username
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </li>
+                                <li class="footer"><a href="#">View all</a></li>
+                            </ul>
+                        </li>
+                        <!-- Tasks: style can be found in dropdown.less -->
+                        <li class="dropdown tasks-menu">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                                <i class="fa fa-flag-o"></i>
+                                <span class="label label-danger">9</span>
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li class="header">You have 9 tasks</li>
+                                <li>
+                                    <!-- inner menu: contains the actual data -->
+                                    <ul class="menu">
+                                        <li>
+                                            <!-- Task item -->
+                                            <a href="#">
+                                                <h3>
+                                                    Design some buttons
+                                                    <small class="pull-right">20%</small>
+                                                </h3>
+                                                <div class="progress xs">
+                                                    <div class="progress-bar progress-bar-aqua" style="width: 20%" role="progressbar" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100">
+                                                        <span class="sr-only">20% Complete</span>
+                                                    </div>
+                                                </div>
+                                            </a>
+                                        </li>
+                                        <!-- end task item -->
+                                        <li>
+                                            <!-- Task item -->
+                                            <a href="#">
+                                                <h3>
+                                                    Create a nice theme
+                                                    <small class="pull-right">40%</small>
+                                                </h3>
+                                                <div class="progress xs">
+                                                    <div class="progress-bar progress-bar-green" style="width: 40%" role="progressbar" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100">
+                                                        <span class="sr-only">40% Complete</span>
+                                                    </div>
+                                                </div>
+                                            </a>
+                                        </li>
+                                        <!-- end task item -->
+                                        <li>
+                                            <!-- Task item -->
+                                            <a href="#">
+                                                <h3>
+                                                    Some task I need to do
+                                                    <small class="pull-right">60%</small>
+                                                </h3>
+                                                <div class="progress xs">
+                                                    <div class="progress-bar progress-bar-red" style="width: 60%" role="progressbar" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100">
+                                                        <span class="sr-only">60% Complete</span>
+                                                    </div>
+                                                </div>
+                                            </a>
+                                        </li>
+                                        <!-- end task item -->
+                                        <li>
+                                            <!-- Task item -->
+                                            <a href="#">
+                                                <h3>
+                                                    Make beautiful transitions
+                                                    <small class="pull-right">80%</small>
+                                                </h3>
+                                                <div class="progress xs">
+                                                    <div class="progress-bar progress-bar-yellow" style="width: 80%" role="progressbar" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100">
+                                                        <span class="sr-only">80% Complete</span>
+                                                    </div>
+                                                </div>
+                                            </a>
+                                        </li>
+                                        <!-- end task item -->
+                                    </ul>
+                                </li>
+                                <li class="footer">
+                                    <a href="#">View all tasks</a>
+                                </li>
+                            </ul>
+                        </li>
+                        <!-- User Account: style can be found in dropdown.less -->
+                        <li class="dropdown user user-menu">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                                <img src="../../dist/img/user2-160x160.jpg" class="user-image" alt="User Image">
+                                <span class="hidden-xs">Alexander Pierce</span>
+                            </a>
+                            <ul class="dropdown-menu">
+                                <!-- User image -->
+                                <li class="user-header">
+                                    <img src="../../dist/img/user2-160x160.jpg" class="img-circle" alt="User Image">
+
+                                    <p>
+                                        Alexander Pierce - Web Developer
+                                        <small>Member since Nov. 2012</small>
+                                    </p>
+                                </li>
+                                <!-- Menu Body -->
+                                <li class="user-body">
+                                    <div class="row">
+                                        <div class="col-xs-4 text-center">
+                                            <a href="#">Followers</a>
+                                        </div>
+                                        <div class="col-xs-4 text-center">
+                                            <a href="#">Sales</a>
+                                        </div>
+                                        <div class="col-xs-4 text-center">
+                                            <a href="#">Friends</a>
+                                        </div>
+                                    </div>
+                                    <!-- /.row -->
+                                </li>
+                                <!-- Menu Footer-->
+                                <li class="user-footer">
+                                    <div class="pull-left">
+                                        <a href="#" class="btn btn-default btn-flat">Profile</a>
+                                    </div>
+                                    <div class="pull-right">
+                                        <a href="#" class="btn btn-default btn-flat">Sign out</a>
+                                    </div>
+                                </li>
+                            </ul>
+                        </li>
+                        <!-- Control Sidebar Toggle Button -->
+                        <li>
+                            <a href="#" data-toggle="control-sidebar"><i class="fa fa-gears"></i></a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+        </header>
+        <!-- Left side column. contains the logo and sidebar -->
+        <aside class="main-sidebar">
+            <!-- sidebar: style can be found in sidebar.less -->
+            <section class="sidebar">
+                <!-- Sidebar user panel -->
+                <div class="user-panel">
+                    <div class="pull-left image">
+                        <img src="../../dist/img/user2-160x160.jpg" class="img-circle" alt="User Image">
+                    </div>
+                    <div class="pull-left info">
+                        <p>Alexander Pierce</p>
+                        <a href="#"><i class="fa fa-circle text-success"></i> Online</a>
+                    </div>
+                </div>
+                <!-- search form -->
+                <form action="#" method="get" class="sidebar-form">
+                    <div class="input-group">
+                        <input type="text" name="q" class="form-control" placeholder="Search...">
+                        <span class="input-group-btn">
+                <button type="submit" name="search" id="search-btn" class="btn btn-flat"><i class="fa fa-search"></i>
+                </button>
+              </span>
+                    </div>
+                </form>
+                <!-- /.search form -->
+                <!-- sidebar menu: : style can be found in sidebar.less -->
+                <ul class="sidebar-menu">
+                    <li class="header">MAIN NAVIGATION</li>
+                    <li class="treeview">
+                        <a href="#">
+                            <i class="fa fa-dashboard"></i> <span>Dashboard</span>
+                            <span class="pull-right-container">
+              <i class="fa fa-angle-left pull-right"></i>
+            </span>
+                        </a>
+                        <ul class="treeview-menu">
+                            <li><a href="../../index.html"><i class="fa fa-circle-o"></i> Dashboard v1</a></li>
+                            <li><a href="../../index2.html"><i class="fa fa-circle-o"></i> Dashboard v2</a></li>
+                        </ul>
+                    </li>
+                    <li class="treeview">
+                        <a href="#">
+                            <i class="fa fa-files-o"></i>
+                            <span>Layout Options</span>
+                            <span class="pull-right-container">
+              <span class="label label-primary pull-right">4</span>
+                            </span>
+                        </a>
+                        <ul class="treeview-menu">
+                            <li><a href="../layout/top-nav.html"><i class="fa fa-circle-o"></i> Top Navigation</a></li>
+                            <li><a href="../layout/boxed.html"><i class="fa fa-circle-o"></i> Boxed</a></li>
+                            <li><a href="../layout/fixed.html"><i class="fa fa-circle-o"></i> Fixed</a></li>
+                            <li><a href="../layout/collapsed-sidebar.html"><i class="fa fa-circle-o"></i> Collapsed Sidebar</a></li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="../widgets.html">
+                            <i class="fa fa-th"></i> <span>Widgets</span>
+                            <span class="pull-right-container">
+              <small class="label pull-right bg-green">new</small>
+            </span>
+                        </a>
+                    </li>
+                    <li class="treeview">
+                        <a href="#">
+                            <i class="fa fa-pie-chart"></i>
+                            <span>Charts</span>
+                            <span class="pull-right-container">
+              <i class="fa fa-angle-left pull-right"></i>
+            </span>
+                        </a>
+                        <ul class="treeview-menu">
+                            <li><a href="../charts/chartjs.html"><i class="fa fa-circle-o"></i> ChartJS</a></li>
+                            <li><a href="../charts/morris.html"><i class="fa fa-circle-o"></i> Morris</a></li>
+                            <li><a href="../charts/flot.html"><i class="fa fa-circle-o"></i> Flot</a></li>
+                            <li><a href="../charts/inline.html"><i class="fa fa-circle-o"></i> Inline charts</a></li>
+                        </ul>
+                    </li>
+                    <li class="treeview">
+                        <a href="#">
+                            <i class="fa fa-laptop"></i>
+                            <span>UI Elements</span>
+                            <span class="pull-right-container">
+              <i class="fa fa-angle-left pull-right"></i>
+            </span>
+                        </a>
+                        <ul class="treeview-menu">
+                            <li><a href="../UI/general.html"><i class="fa fa-circle-o"></i> General</a></li>
+                            <li><a href="../UI/icons.html"><i class="fa fa-circle-o"></i> Icons</a></li>
+                            <li><a href="../UI/buttons.html"><i class="fa fa-circle-o"></i> Buttons</a></li>
+                            <li><a href="../UI/sliders.html"><i class="fa fa-circle-o"></i> Sliders</a></li>
+                            <li><a href="../UI/modals.html"><i class="fa fa-circle-o"></i> Modals</a></li>
+                        </ul>
+                    </li>
+                    <li class="treeview">
+                        <a href="#">
+                            <i class="fa fa-edit"></i> <span>Forms</span>
+                            <span class="pull-right-container">
+              <i class="fa fa-angle-left pull-right"></i>
+            </span>
+                        </a>
+                        <ul class="treeview-menu">
+                            <li><a href="../forms/general.html"><i class="fa fa-circle-o"></i> General Elements</a></li>
+                            <li><a href="../forms/advanced.html"><i class="fa fa-circle-o"></i> Advanced Elements</a></li>
+                            <li><a href="../forms/editors.html"><i class="fa fa-circle-o"></i> Editors</a></li>
+                        </ul>
+                    </li>
+                    <li class="treeview">
+                        <a href="#">
+                            <i class="fa fa-table"></i> <span>Tables</span>
+                            <span class="pull-right-container">
+              <i class="fa fa-angle-left pull-right"></i>
+            </span>
+                        </a>
+                        <ul class="treeview-menu">
+                            <li><a href="../tables/simple.html"><i class="fa fa-circle-o"></i> Simple tables</a></li>
+                            <li><a href="../tables/data.html"><i class="fa fa-circle-o"></i> Data tables</a></li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="../calendar.html">
+                            <i class="fa fa-calendar"></i> <span>Calendar</span>
+                            <span class="pull-right-container">
+              <small class="label pull-right bg-red">3</small>
+              <small class="label pull-right bg-blue">17</small>
+            </span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="../mailbox/mailbox.html">
+                            <i class="fa fa-envelope"></i> <span>Mailbox</span>
+                            <span class="pull-right-container">
+              <small class="label pull-right bg-yellow">12</small>
+              <small class="label pull-right bg-green">16</small>
+              <small class="label pull-right bg-red">5</small>
+            </span>
+                        </a>
+                    </li>
+                    <li class="treeview active">
+                        <a href="#">
+                            <i class="fa fa-folder"></i> <span>Examples</span>
+                            <span class="pull-right-container">
+              <i class="fa fa-angle-left pull-right"></i>
+            </span>
+                        </a>
+                        <ul class="treeview-menu">
+                            <li class="active"><a href="invoice.html"><i class="fa fa-circle-o"></i> Invoice</a></li>
+                            <li><a href="profile.html"><i class="fa fa-circle-o"></i> Profile</a></li>
+                            <li><a href="login.html"><i class="fa fa-circle-o"></i> Login</a></li>
+                            <li><a href="register.html"><i class="fa fa-circle-o"></i> Register</a></li>
+                            <li><a href="lockscreen.html"><i class="fa fa-circle-o"></i> Lockscreen</a></li>
+                            <li><a href="404.html"><i class="fa fa-circle-o"></i> 404 Error</a></li>
+                            <li><a href="500.html"><i class="fa fa-circle-o"></i> 500 Error</a></li>
+                            <li><a href="blank.html"><i class="fa fa-circle-o"></i> Blank Page</a></li>
+                            <li><a href="pace.html"><i class="fa fa-circle-o"></i> Pace Page</a></li>
+                        </ul>
+                    </li>
+                    <li class="treeview">
+                        <a href="#">
+                            <i class="fa fa-share"></i> <span>Multilevel</span>
+                            <span class="pull-right-container">
+              <i class="fa fa-angle-left pull-right"></i>
+            </span>
+                        </a>
+                        <ul class="treeview-menu">
+                            <li><a href="#"><i class="fa fa-circle-o"></i> Level One</a></li>
+                            <li>
+                                <a href="#"><i class="fa fa-circle-o"></i> Level One
+                <span class="pull-right-container">
+                  <i class="fa fa-angle-left pull-right"></i>
+                </span>
+              </a>
+                                <ul class="treeview-menu">
+                                    <li><a href="#"><i class="fa fa-circle-o"></i> Level Two</a></li>
+                                    <li>
+                                        <a href="#"><i class="fa fa-circle-o"></i> Level Two
+                    <span class="pull-right-container">
+                      <i class="fa fa-angle-left pull-right"></i>
+                    </span>
+                  </a>
+                                        <ul class="treeview-menu">
+                                            <li><a href="#"><i class="fa fa-circle-o"></i> Level Three</a></li>
+                                            <li><a href="#"><i class="fa fa-circle-o"></i> Level Three</a></li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li><a href="#"><i class="fa fa-circle-o"></i> Level One</a></li>
+                        </ul>
+                    </li>
+                    <li><a href="../../documentation/index.html"><i class="fa fa-book"></i> <span>Documentation</span></a></li>
+                    <li class="header">LABELS</li>
+                    <li><a href="#"><i class="fa fa-circle-o text-red"></i> <span>Important</span></a></li>
+                    <li><a href="#"><i class="fa fa-circle-o text-yellow"></i> <span>Warning</span></a></li>
+                    <li><a href="#"><i class="fa fa-circle-o text-aqua"></i> <span>Information</span></a></li>
+                </ul>
+            </section>
+            <!-- /.sidebar -->
+        </aside>
+        <!-- Content Wrapper. Contains page content -->
+        <div class="content-wrapper">
+            <section class="content-header">
+                <h1>
+                    User Profile
+                </h1>
+                <ol class="breadcrumb">
+                    <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
+                    <li><a href="#">Examples</a></li>
+                    <li class="active">User profile</li>
+                </ol>
+            </section>
+            <section class="content">
+                <div class="part-wrap control-wrap">
+                    <ul class="type">
+                        <li>订单平台</li>
+                        <li class="active">zeelool</li>
+                        <li>Voogueme</li>
+                        <li>Nihao</li>
+                        <li>Wesee</li>
+                    </ul>
+                    <form action="">
+                        <div class="input-list">
+                            <ul class="order-list">
+                                <li>
+                                    <span>订单号</span>
+                                    <input id="orderNum" type="text" name="">
+                                </li>
+                                <li>
+                                    <span for="orderNum">快递单号</span>
+                                    <input type="text" name="">
+                                </li>
+                            </ul>
+                            <ul class="order-list">
+                                <li>
+                                    <span>客户邮箱</span>
+                                    <input type="text" name="">
+                                </li>
+                                <li>
+                                    <span>客户电话</span>
+                                    <input type="text" name="">
+                                </li>
+                                <li>
+                                    <span>客户姓名</span>
+                                    <input type="text" name="">
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="btn-wrap">
+                            <button type="submit" class="btn btn-submit">提交</button>
+                            <button type="submit" class="btn btn-flat">重置</button>
+                        </div>
+                    </form>
+                </div>
+                <div class="infos-wrap">
+                    <h2>用户个人信息</h2>
+                    <div class="user-info-wrap ">
+                        <ul class="user-list ">
+                            <li>
+                                <span class="name">Email</span>
+                                <span>temikanoble@gmail.com</span>
+                            </li>
+                            <li>
+                                <span class="name">Name</span>
+                                <span>Temika Noble</span>
+                            </li>
+                            <li>
+                                <span class="name">Customer Group</span>
+                                <span>VIP</span>
+                            </li>
+                        </ul>
+                        <ul class="pay-infos">
+                            <li>
+                                <strong>2</strong>
+                                <span>支付成功数量</span>
+                            </li>
+                            <li>
+                                <strong>120.36</strong>
+                                <span>支付成功数量</span>
+                            </li>
+                            <li class="failed">
+                                <strong>2</strong>
+                                <span>支付成功数量</span>
+                            </li>
+                            <li class="failed">
+                                <strong>2</strong>
+                                <span>支付成功数量</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="order-list-wrap">
+                    <h2>订单信息列表</h2>
+                    <div class="table-responsive">
+                        <ul class="order-list">
+                            <li>订单类型</li>
+                            <li>订单号</li>
+                            <li class="num">快递单号</li>
+                            <li>快递名称</li>
+                            <li>订单状态</li>
+                            <li>支付货币</li>
+                            <li>原币种<br>支付金额</li>
+                            <li>美金($)<br>支付金额</li>
+                            <li>优惠券</li>
+                            <li>优惠码</li>
+                            <li>积分</li>
+                            <li>抵扣</li>
+                            <li>运费</li>
+                            <li>快递方式</li>
+                            <li>创建时间</li>
+                            <li>操作</li>
+                        </ul>
+                        <ul class="order-list">
+                            <li class="normal">普通</li>
+                            <li>100090650</li>
+                            <li class="normal num">92748902348247002004750540</li>
+                            <li>USPS</li>
+                            <li>Processing</li>
+                            <li>USD</li>
+                            <li>6.95</li>
+                            <li>6.95</li>
+                            <li>0</li>
+                            <li>0</li>
+                            <li></li>
+                            <li>0</li>
+                            <li>1</li>
+                            <li>Standard Shipping (15-28 Days)</li>
+                            <li>2020-04-26 02:49:07</li>
+                            <li class="option">
+                                <button type="button">增加工单</button>
+                                <button type="button">配货记录</button>
+                                <button class="detail-btn" type="button">收起详情</button>
+                            </li>
+                            <li class="detail-wrap">
+                                <div class="product-list">
+                                    <h3>商品列表</h3>
+                                    <table>
+                                        <tr>
+                                            <th>Product</th>
+                                            <th>Lens</th>
+                                            <th>Prescription Type</th>
+                                            <th>Frame Price</th>
+                                            <th>Lens Price</th>
+                                            <th>Original price</th>
+                                            <th>Discount</th>
+                                            <th>Row Total</th>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <ul class="product-info">
+                                                    <li>Riley Rectangle Brown Glasses</li>
+                                                    <li>SKU：FA0761-02 </li>
+                                                    <li>Color：Black</li>
+                                                    <li>Qty：1</li>
+                                                </ul>
+                                            </td>
+                                            <td class="lens-wrap-td">
+                                                <ul class="lens-wrap">
+                                                    <li>
+                                                        <span class="name">1.57 Mid-Index-</span> <span class="price">25.00</span> </li>
+                                                    <li>
+                                                        <span class="name">Super Hydrophobic (water resistant, easy to clean) Anti-Reflective Coating</span>
+                                                        <span>35.00</span>
+                                                    </li>
+                                                </ul>
+                                            </td>
+                                            <td class="pres-type">
+                                                <table>
+                                                    <tr>
+                                                        <th class="type" colspan="5">Single Vision</th>
+                                                    </tr>
+                                                    <tr>
+                                                        <th></th>
+                                                        <th>SPH</th>
+                                                        <th>CYL</th>
+                                                        <th>Axis</th>
+                                                        <th>ADD</th>
+                                                    </tr>
+                                                    <tr>
+                                                        <th>OD</th>
+                                                        <td>-0.25</td>
+                                                        <td>--</td>
+                                                        <td>--</td>
+                                                        <td>--</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th>OS</th>
+                                                        <td>-0.25</td>
+                                                        <td>-0.25</td>
+                                                        <td>-0.25</td>
+                                                        <td>-0.25</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th>PD</th>
+                                                        <td class="pd">32 <span>(OD)</span></td>
+                                                        <td class="pd">32 <span>(OS)</span></td>
+                                                        <td></td>
+                                                        <td></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th></th>
+                                                        <th> Prism Horizontal</th>
+                                                        <th>Base Direction</th>
+                                                        <th>Prism Vertical</th>
+                                                        <th>Base Direction</th>
+                                                    </tr>
+                                                    <tr>
+                                                        <th>OD</th>
+                                                        <td>0</td>
+                                                        <td>0</td>
+                                                        <td>0</td>
+                                                        <td>0</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>OS</td>
+                                                        <td>0</td>
+                                                        <td>0</td>
+                                                        <td>0</td>
+                                                        <td>0</td>
+                                                    </tr>
+                                                </table>
+                                            </td>
+                                            <td>CA $52.01 (US $45.00)</td>
+                                            <td>CA $52.01 (US $45.00)</td>
+                                            <td>CA $52.01 (US $45.00)</td>
+                                            <td>CA $52.01 (US $45.00)</td>
+                                            <td>CA $52.01 (US $45.00)</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                                <div class="address-pay-info">
+                                    <div>
+                                        <h3>支付信息</h3>
+                                        <ul>
+                                            <li>
+                                                <span>支付方式:</span>
+                                                <em> paypal_express</em>
+                                            </li>
+                                            <li>
+                                                <span>last trans id:</span>
+                                                <em> paypal_express</em>
+                                            </li>
+                                            <li>
+                                                <span>paypal payer email:</span>
+                                                <em> paypal_express</em>
+                                            </li>
+                                            <li>
+                                                <span>paypal payment status:</span>
+                                                <em> paypal_express</em>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <div>
+                                        <h3>地址信息</h3>
+                                        <img class="edit" src="../../web/edit.png" alt="">
+                                        <dl>
+                                            <dt>
+                                                <strong>Billing Address</strong>
+											</dt>
+                                            <dd>
+                                                <div><span>Name</span><em>	Dylan Howard</em></div>
+                                                <div><span>Adress</span><em>43 Hog Creek Ln, East Hampton, New York, 11937-3052,United States</em></div>
+                                                <div><span>Tel</span> <em>917-890-0974</em></div>
+                                            </dd>
+                                            <dt>
+                                                <strong>Billing Address</strong>
+											</dt>
+                                            <dd>
+                                                <div><span>Name</span><em>	Dylan Howard</em></div>
+                                                <div><span>Adress</span><em>43 Hog Creek Ln, East Hampton, New York, 11937-3052,United States</em></div>
+                                                <div><span>Tel</span> <em>917-890-0974</em></div>
+                                            </dd>
+                                        </dl>
+                                    </div>
+                                </div>
+                                <div class="list-wrap">
+                                    <div>
+                                        <h3>工单列表</h3>
+                                        <table>
+                                            <tr>
+                                                <th>序号</th>
+                                                <th>ID</th>
+                                                <th>工单类型</th>
+                                                <th>优惠券</th>
+                                                <th>补发订单号</th>
+                                                <th>工单级别</th>
+                                                <th>问题类型</th>
+                                                <th>相关人员</th>
+                                                <th>承接人</th>
+                                                <th>措施状态</th>
+                                                <th>工单状态</th>
+                                                <th>时间</th>
+                                                <th>承接人</th>
+                                                <th>创建时间</th>
+                                            </tr>
+                                            <tr>
+                                                <td>1</td>
+                                                <td>9274890</td>
+                                                <td>客服工单</td>
+                                                <td>1</td>
+                                                <td>100090650</td>
+                                                <td class="leave">低</td>
+                                                <td>问题不明</td>
+                                                <td>
+                                                    <ul>
+                                                        <li><span class="name">工单创建人:</span><span>白青青</span></li>
+                                                        <li><span class="name">实际审核人:</span><span>王伟</span></li>
+                                                    </ul>
+                                                </td>
+                                                <td>
+                                                    <ul>
+                                                        <li>
+                                                            <span class="name">退款:</span><span>李亚方</span>
+                                                        </li>
+                                                        <li>
+                                                            <span class="name">取消:</span><span>马奇</span>
+                                                        </li>
+                                                    </ul>
+                                                </td>
+                                                <td>
+                                                    <ul>
+                                                        <li>
+                                                            <span class="name">退款:</span> <span>处理成功</span>
+                                                        </li>
+                                                        <li>
+                                                            <span class="name">取消:</span><span class="status ">未处理</span>
+                                                        </li>
+                                                    </ul>
+                                                </td>
+                                                <td class="status ">部分处理</td>
+                                                <td>无</td>
+                                                <td>
+                                                    <ul>
+                                                        <li>
+                                                            创建时间：2020-05-06 09:40:28
+                                                        </li>
+                                                        <li>
+                                                            提交时间：2020-05-06 09:40:28
+                                                        </li>
+                                                        <li>
+                                                            审核时间：2020-05-06 09:40:28
+                                                        </li>
+                                                        <li>
+                                                            完成时间：2020-05-06 09:40:28
+                                                        </li>
+                                                    </ul>
+                                                </td>
+                                                <td>
+                                                    <button>查看回复</button>
+                                                </td>
+                                                <td>
+                                                    <button>查看回复</button>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div class="list-wrap ">
+                                    <div class="is-dif-wrap ">
+                                        <h3>补差价列表</h3>
+                                        <table>
+                                            <tr>
+                                                <th>序号</th>
+                                                <th>订单号</th>
+                                                <th>订单状态</th>
+                                                <th>付款金额</th>
+                                                <th>币种</th>
+                                                <th>创建时间</th>
+                                            </tr>
+                                            <tr>
+                                                <td>1</td>
+                                                <td>100090650</td>
+                                                <td>Processing</td>
+                                                <td>6.95</td>
+                                                <td>USD</td>
+                                                <td>2020-05-06 09:40:28</td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                    <img class="slide-down" src="../../web/shouqi.png" alt="">
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="order-list-wrap vip-wrap ">
+                    <h2>VIP会员订单列表</h2>
+                    <div class="table-responsive ">
+                        <table class="table ">
+                            <tr>
+                                <th>序号</th>
+                                <th>订单号</th>
+                                <th>订单状态</th>
+                                <th>开始时间</th>
+                                <th>结束时间</th>
+                                <th>账户状态</th>
+                            </tr>
+                            <tr>
+                                <td>1</td>
+                                <td>100090650</td>
+                                <td>complete</td>
+                                <td>2020-04-26 02:49:07</td>
+                                <td>2020-04-26 02:49:07</td>
+                                <td>正常</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+    <div class="record-dialog">
+        <ul>
+            <li class="active">
+                <i><span class="fa-check fa fa-fw fa-check"></span></i>
+                <span>打标签</span>
+            </li>
+            <li class="active">
+                <i><span class="fa-check fa fa-fw fa-check"></span></i>
+                <span>配镜架</span>
+            </li>
+            <li>
+                <i><span class="fa-check fa fa-fw fa-check"></span></i>
+                <span>配镜片</span>
+            </li>
+            <li>
+                <i><span class="fa-check fa fa-fw fa-check"></span></i>
+                <span>加工</span>
+            </li>
+            <li>
+                <i><span class="fa-check fa fa-fw fa-check"></span></i>
+                <span>提货</span>
+            </li>
+        </ul>
+        <div class="table-wrap">
+            <table>
+                <tr>
+                    <th>序号</th>
+                    <th>操作内容</th>
+                    <th>操作人</th>
+                    <th>操作时间</th>
+                </tr>
+                <tr>
+                    <td>1</td>
+                    <td>打标签</td>
+                    <td>马奇</td>
+                    <td>2020-01-09 13:39:03</td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td>打标签</td>
+                    <td>马奇</td>
+                    <td>2020-01-09 13:39:03</td>
+                </tr>
+                <tr>
+                    <td>3</td>
+                    <td>打标签</td>
+                    <td>马奇</td>
+                    <td>2020-01-09 13:39:03</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <!-- ./wrapper -->
+
+    <!-- jQuery 2.2.3 -->
+    <script src="../../plugins/jQuery/jquery-2.2.3.min.js "></script>
+    <!-- Bootstrap 3.3.6 -->
+    <script src="../../bootstrap/js/bootstrap.min.js "></script>
+    <!-- FastClick -->
+    <script src="../../plugins/fastclick/fastclick.js "></script>
+    <!-- AdminLTE App -->
+    <script src="../../dist/js/app.min.js "></script>
+    <!-- AdminLTE for demo purposes -->
+    <script src="../../dist/js/demo.js "></script>
+    <script>
+        $(function() {
+            $(".type li").click(function() {
+                $(this).addClass("active").siblings().removeClass("active")
+            })
+            $(".option .detail-btn").click(function() {
+                $(".detail-wrap").stop(true, true).slideToggle()
+            })
+        })
+    </script>
+</body>
+
+</html>

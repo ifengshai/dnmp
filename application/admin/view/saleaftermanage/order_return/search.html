@@ -74,12 +74,413 @@
         background-color: #eeeeee;
     }
 </style>
+
+<link rel="stylesheet" href="/assets/css/control.css">
 <div class="panel panel-default panel-intro">
     {:build_heading()}
 
     <div class="panel-body">
         <div id="myTabContent" class="tab-content">
             <div class="tab-pane fade active in" id="one">
+
+                <section class="content">
+                    <div class="part-wrap control-wrap">
+                        <ul class="type">
+                            <li>订单平台</li>
+                            <li class="active">zeelool</li>
+                            <li>Voogueme</li>
+                            <li>Nihao</li>
+                            <li>Wesee</li>
+                        </ul>
+                        <form action="">
+                            <div class="input-list">
+                                <ul class="order-list">
+                                    <li>
+                                        <span>订单号</span>
+                                        <input id="orderNum" type="text" name="">
+                                    </li>
+                                    <li>
+                                        <span for="orderNum">快递单号</span>
+                                        <input type="text" name="">
+                                    </li>
+                                </ul>
+                                <ul class="order-list">
+                                    <li>
+                                        <span>客户邮箱</span>
+                                        <input type="text" name="">
+                                    </li>
+                                    <li>
+                                        <span>客户电话</span>
+                                        <input type="text" name="">
+                                    </li>
+                                    <li>
+                                        <span>客户姓名</span>
+                                        <input type="text" name="">
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="btn-wrap">
+                                <button type="submit" class="btn btn-submit">提交</button>
+                                <button type="submit" class="btn btn-flat">重置</button>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="infos-wrap">
+                        <h2>用户个人信息</h2>
+                        <div class="user-info-wrap ">
+                            <ul class="user-list ">
+                                <li>
+                                    <span class="name">Email</span>
+                                    <span>temikanoble@gmail.com</span>
+                                </li>
+                                <li>
+                                    <span class="name">Name</span>
+                                    <span>Temika Noble</span>
+                                </li>
+                                <li>
+                                    <span class="name">Customer Group</span>
+                                    <span>VIP</span>
+                                </li>
+                            </ul>
+                            <ul class="pay-infos">
+                                <li>
+                                    <strong>2</strong>
+                                    <span>支付成功数量</span>
+                                </li>
+                                <li>
+                                    <strong>120.36</strong>
+                                    <span>支付成功数量</span>
+                                </li>
+                                <li class="failed">
+                                    <strong>2</strong>
+                                    <span>支付成功数量</span>
+                                </li>
+                                <li class="failed">
+                                    <strong>2</strong>
+                                    <span>支付成功数量</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="order-list-wrap">
+                        <h2>订单信息列表</h2>
+                        <div class="table-responsive">
+                            <ul class="order-list">
+                                <li>订单类型</li>
+                                <li>订单号</li>
+                                <li class="num">快递单号</li>
+                                <li>快递名称</li>
+                                <li>订单状态</li>
+                                <li>支付货币</li>
+                                <li>原币种<br>支付金额</li>
+                                <li>美金($)<br>支付金额</li>
+                                <li>优惠券</li>
+                                <li>优惠码</li>
+                                <li>积分</li>
+                                <li>抵扣</li>
+                                <li>运费</li>
+                                <li>快递方式</li>
+                                <li>创建时间</li>
+                                <li>操作</li>
+                            </ul>
+                            <ul class="order-list">
+                                <li class="normal">普通</li>
+                                <li>100090650</li>
+                                <li class="normal num">92748902348247002004750540</li>
+                                <li>USPS</li>
+                                <li>Processing</li>
+                                <li>USD</li>
+                                <li>6.95</li>
+                                <li>6.95</li>
+                                <li>0</li>
+                                <li>0</li>
+                                <li></li>
+                                <li>0</li>
+                                <li>1</li>
+                                <li>Standard Shipping (15-28 Days)</li>
+                                <li>2020-04-26 02:49:07</li>
+                                <li class="option">
+                                    <button type="button">增加工单</button>
+                                    <button type="button">配货记录</button>
+                                    <button class="detail-btn" type="button">收起详情</button>
+                                </li>
+                                <li class="detail-wrap">
+                                    <div class="product-list">
+                                        <h3>商品列表</h3>
+                                        <table>
+                                            <tr>
+                                                <th>Product</th>
+                                                <th>Lens</th>
+                                                <th>Prescription Type</th>
+                                                <th>Frame Price</th>
+                                                <th>Lens Price</th>
+                                                <th>Original price</th>
+                                                <th>Discount</th>
+                                                <th>Row Total</th>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <ul class="product-info">
+                                                        <li>Riley Rectangle Brown Glasses</li>
+                                                        <li>SKU：FA0761-02 </li>
+                                                        <li>Color：Black</li>
+                                                        <li>Qty：1</li>
+                                                    </ul>
+                                                </td>
+                                                <td class="lens-wrap-td">
+                                                    <ul class="lens-wrap">
+                                                        <li>
+                                                            <span class="name">1.57 Mid-Index-</span> <span class="price">25.00</span> </li>
+                                                        <li>
+                                                            <span class="name">Super Hydrophobic (water resistant, easy to clean) Anti-Reflective Coating</span>
+                                                            <span>35.00</span>
+                                                        </li>
+                                                    </ul>
+                                                </td>
+                                                <td class="pres-type">
+                                                    <table>
+                                                        <tr>
+                                                            <th class="type" colspan="5">Single Vision</th>
+                                                        </tr>
+                                                        <tr>
+                                                            <th></th>
+                                                            <th>SPH</th>
+                                                            <th>CYL</th>
+                                                            <th>Axis</th>
+                                                            <th>ADD</th>
+                                                        </tr>
+                                                        <tr>
+                                                            <th>OD</th>
+                                                            <td>-0.25</td>
+                                                            <td>--</td>
+                                                            <td>--</td>
+                                                            <td>--</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th>OS</th>
+                                                            <td>-0.25</td>
+                                                            <td>-0.25</td>
+                                                            <td>-0.25</td>
+                                                            <td>-0.25</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th>PD</th>
+                                                            <td class="pd">32 <span>(OD)</span></td>
+                                                            <td class="pd">32 <span>(OS)</span></td>
+                                                            <td></td>
+                                                            <td></td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th></th>
+                                                            <th> Prism Horizontal</th>
+                                                            <th>Base Direction</th>
+                                                            <th>Prism Vertical</th>
+                                                            <th>Base Direction</th>
+                                                        </tr>
+                                                        <tr>
+                                                            <th>OD</th>
+                                                            <td>0</td>
+                                                            <td>0</td>
+                                                            <td>0</td>
+                                                            <td>0</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>OS</td>
+                                                            <td>0</td>
+                                                            <td>0</td>
+                                                            <td>0</td>
+                                                            <td>0</td>
+                                                        </tr>
+                                                    </table>
+                                                </td>
+                                                <td>CA $52.01 (US $45.00)</td>
+                                                <td>CA $52.01 (US $45.00)</td>
+                                                <td>CA $52.01 (US $45.00)</td>
+                                                <td>CA $52.01 (US $45.00)</td>
+                                                <td>CA $52.01 (US $45.00)</td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                    <div class="address-pay-info">
+                                        <div>
+                                            <h3>支付信息</h3>
+                                            <ul>
+                                                <li>
+                                                    <span>支付方式:</span>
+                                                    <em> paypal_express</em>
+                                                </li>
+                                                <li>
+                                                    <span>last trans id:</span>
+                                                    <em> paypal_express</em>
+                                                </li>
+                                                <li>
+                                                    <span>paypal payer email:</span>
+                                                    <em> paypal_express</em>
+                                                </li>
+                                                <li>
+                                                    <span>paypal payment status:</span>
+                                                    <em> paypal_express</em>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                        <div>
+                                            <h3>地址信息</h3>
+                                            <img class="edit" src="../../web/edit.png" alt="">
+                                            <dl>
+                                                <dt>
+                                                    <strong>Billing Address</strong>
+                                                </dt>
+                                                <dd>
+                                                    <div><span>Name</span><em>	Dylan Howard</em></div>
+                                                    <div><span>Adress</span><em>43 Hog Creek Ln, East Hampton, New York, 11937-3052,United States</em></div>
+                                                    <div><span>Tel</span> <em>917-890-0974</em></div>
+                                                </dd>
+                                                <dt>
+                                                    <strong>Billing Address</strong>
+                                                </dt>
+                                                <dd>
+                                                    <div><span>Name</span><em>	Dylan Howard</em></div>
+                                                    <div><span>Adress</span><em>43 Hog Creek Ln, East Hampton, New York, 11937-3052,United States</em></div>
+                                                    <div><span>Tel</span> <em>917-890-0974</em></div>
+                                                </dd>
+                                            </dl>
+                                        </div>
+                                    </div>
+                                    <div class="list-wrap">
+                                        <div>
+                                            <h3>工单列表</h3>
+                                            <table>
+                                                <tr>
+                                                    <th>序号</th>
+                                                    <th>ID</th>
+                                                    <th>工单类型</th>
+                                                    <th>优惠券</th>
+                                                    <th>补发订单号</th>
+                                                    <th>工单级别</th>
+                                                    <th>问题类型</th>
+                                                    <th>相关人员</th>
+                                                    <th>承接人</th>
+                                                    <th>措施状态</th>
+                                                    <th>工单状态</th>
+                                                    <th>时间</th>
+                                                    <th>承接人</th>
+                                                    <th>创建时间</th>
+                                                </tr>
+                                                <tr>
+                                                    <td>1</td>
+                                                    <td>9274890</td>
+                                                    <td>客服工单</td>
+                                                    <td>1</td>
+                                                    <td>100090650</td>
+                                                    <td class="leave">低</td>
+                                                    <td>问题不明</td>
+                                                    <td>
+                                                        <ul>
+                                                            <li><span class="name">工单创建人:</span><span>白青青</span></li>
+                                                            <li><span class="name">实际审核人:</span><span>王伟</span></li>
+                                                        </ul>
+                                                    </td>
+                                                    <td>
+                                                        <ul>
+                                                            <li>
+                                                                <span class="name">退款:</span><span>李亚方</span>
+                                                            </li>
+                                                            <li>
+                                                                <span class="name">取消:</span><span>马奇</span>
+                                                            </li>
+                                                        </ul>
+                                                    </td>
+                                                    <td>
+                                                        <ul>
+                                                            <li>
+                                                                <span class="name">退款:</span> <span>处理成功</span>
+                                                            </li>
+                                                            <li>
+                                                                <span class="name">取消:</span><span class="status ">未处理</span>
+                                                            </li>
+                                                        </ul>
+                                                    </td>
+                                                    <td class="status ">部分处理</td>
+                                                    <td>无</td>
+                                                    <td>
+                                                        <ul>
+                                                            <li>
+                                                                创建时间：2020-05-06 09:40:28
+                                                            </li>
+                                                            <li>
+                                                                提交时间：2020-05-06 09:40:28
+                                                            </li>
+                                                            <li>
+                                                                审核时间：2020-05-06 09:40:28
+                                                            </li>
+                                                            <li>
+                                                                完成时间：2020-05-06 09:40:28
+                                                            </li>
+                                                        </ul>
+                                                    </td>
+                                                    <td>
+                                                        <button>查看回复</button>
+                                                    </td>
+                                                    <td>
+                                                        <button>查看回复</button>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    <div class="list-wrap ">
+                                        <div class="is-dif-wrap ">
+                                            <h3>补差价列表</h3>
+                                            <table>
+                                                <tr>
+                                                    <th>序号</th>
+                                                    <th>订单号</th>
+                                                    <th>订单状态</th>
+                                                    <th>付款金额</th>
+                                                    <th>币种</th>
+                                                    <th>创建时间</th>
+                                                </tr>
+                                                <tr>
+                                                    <td>1</td>
+                                                    <td>100090650</td>
+                                                    <td>Processing</td>
+                                                    <td>6.95</td>
+                                                    <td>USD</td>
+                                                    <td>2020-05-06 09:40:28</td>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                        <img class="slide-down" src="../../web/shouqi.png" alt="">
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="order-list-wrap vip-wrap ">
+                        <h2>VIP会员订单列表</h2>
+                        <div class="table-responsive ">
+                            <table class="table ">
+                                <tr>
+                                    <th>序号</th>
+                                    <th>订单号</th>
+                                    <th>订单状态</th>
+                                    <th>开始时间</th>
+                                    <th>结束时间</th>
+                                    <th>账户状态</th>
+                                </tr>
+                                <tr>
+                                    <td>1</td>
+                                    <td>100090650</td>
+                                    <td>complete</td>
+                                    <td>2020-04-26 02:49:07</td>
+                                    <td>2020-04-26 02:49:07</td>
+                                    <td>正常</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
                 <div class="widget-body no-padding" style="overflow:scroll">
                     <form id = "form1" action="{:url('/admin/saleaftermanage/order_return/search')}" class="form-commonsearch form-horizontal" method="post">
                         <div style="border-radius:2px;margin-bottom:10px;background:#f5f5f5;padding:20px;">
@@ -169,6 +570,9 @@
                             </div>
                         </div>
                     </form>
+
+
+
                     <table id="info-customer-task" class="altrowstable" style="margin-bottom: 0px;"
                            data-operate-edit="{:$auth->check('saleaftermanage/order_return/edit')}"
                            data-operate-del="{:$auth->check('saleaftermanage/order_return/del')}"
