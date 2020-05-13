@@ -311,19 +311,25 @@ class Zendesk extends Backend
         //站点类型，默认zeelool，1：zeelool，2：voogueme
         $type = input('type',1);
         //获取所有的消息模板
+        //获取所有的消息模板
         $templateAll = ZendeskMailTemplate::where([
             'template_platform' => $type,
             'template_permission' => 1,
             'is_active' => 1])
-            ->order('template_category desc,id desc')
+            ->whereOr(['template_permission' => 2,'is_active' => 1, 'create_person' => session('admin.id')])
+            ->order('used_time desc,template_category desc,id desc')
             ->select();
-        $templates = ['Apply Macro'];
+
         foreach ($templateAll as $key => $template) {
             $category = '';
             if ($template['template_category']) {
                 $category = '【' . config('zendesk.template_category')[$template['template_category']] . '】';
             }
-            $templates[$template['id']] = $category . $template['template_name'];
+            $templates[] = [
+                'id' => $template['id'],
+                'title' => $category . $template['template_name']
+            ];
+
         }
 
         $this->view->assign(compact('tags',  'templates','type'));
@@ -504,16 +510,20 @@ class Zendesk extends Backend
             'template_platform' => $ticket->type,
             'template_permission' => 1,
             'is_active' => 1])
-            ->order('template_category desc,id desc')
+            ->whereOr(['template_permission' => 2,'is_active' => 1, 'create_person' => session('admin.id')])
+            ->order('used_time desc,template_category desc,id desc')
             ->select();
 
-        $templates = ['Apply Macro'];
         foreach ($templateAll as $key => $template) {
             $category = '';
             if ($template['template_category']) {
                 $category = '【' . config('zendesk.template_category')[$template['template_category']] . '】';
             }
-            $templates[$template['id']] = $category . $template['template_name'];
+            $templates[] = [
+                'id' => $template['id'],
+                'title' => $category . $template['template_name']
+            ];
+
         }
         //array_unshift($templates, 'Apply Macro');
         //获取当前用户的最新5个的订单
