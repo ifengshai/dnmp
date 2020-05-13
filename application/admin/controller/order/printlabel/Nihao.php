@@ -999,7 +999,7 @@ where cped.attribute_id in(146,147) and cped.store_id=0 and cped.entity_id=$prod
             $spreadsheet->getActiveSheet()->setCellValue("W" . ($key * 2 + 2), $value['second_name']);
             $spreadsheet->getActiveSheet()->setCellValue("X" . ($key * 2 + 2), $value['four_name']);
 
-            if ($value['prescription_type'] == 'Reading Glasses' && $value['od_add'] > 0 && $value['os_add'] > 0) {
+            if ($value['od_add']*1 != 0 && $value['os_add']*1 != 0) {
                 $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 2), $value['od_add']);
                 $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 3), $value['os_add']);
             } else {
@@ -1370,7 +1370,7 @@ where cped.attribute_id in(146,147) and cped.store_id=0 and cped.entity_id=$prod
             $spreadsheet->getActiveSheet()->setCellValue("W" . ($key * 2 + 2), $value['second_name']);
             $spreadsheet->getActiveSheet()->setCellValue("X" . ($key * 2 + 2), $value['four_name']);
 
-            if ($value['prescription_type'] == 'Reading Glasses' && $value['od_add'] > 0 && $value['os_add'] > 0) {
+            if ($value['od_add']*1 != 0 && $value['os_add']*1 != 0) {
                 $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 2), $value['od_add']);
                 $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 3), $value['os_add']);
             } else {
@@ -1604,7 +1604,7 @@ EOF;
                 // exit;
 
                 //处理ADD  当ReadingGlasses时 是 双PD值
-                if ($final_print['prescription_type'] == 'Reading Glasses' &&  strlen($final_print['os_add']) > 0 && strlen($final_print['od_add']) > 0) {
+                if (strlen($final_print['os_add']) > 0 && strlen($final_print['od_add']) > 0 && $final_print['os_add']*1 != 0 && $final_print['od_add']*1 != 0) {
                     // echo '双PD值';
                     $od_add = "<td>" . $final_print['od_add'] . "</td> ";
                     $os_add = "<td>" . $final_print['os_add'] . "</td> ";

@@ -985,7 +985,7 @@ EOF;
 
 
                 //处理ADD  当ReadingGlasses时 是 双ADD值
-                if ($final_print['prescription_type'] == 'Reading Glasses' && strlen($final_print['os_add']) > 0 && strlen($final_print['od_add']) > 0) {
+                if (strlen($final_print['os_add']) > 0 && strlen($final_print['od_add']) > 0 && $final_print['od_add']*1 != 0 && $final_print['os_add']*1 != 0) {
                     // echo '双ADD值';
                     $os_add = "<td>" . $final_print['od_add'] . "</td> ";
                     $od_add = "<td>" . $final_print['os_add'] . "</td> ";
