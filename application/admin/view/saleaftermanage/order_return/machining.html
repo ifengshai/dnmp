@@ -1,0 +1,44 @@
+<link rel="stylesheet" href="/assets/css/control.css">
+<div class="record-dialog">
+    <ul>
+        <li class="{:$row['custom_print_label_new'] == 1 ? 'active' : ''}">
+            <i><span class="fa-check fa fa-fw fa-check"></span></i>
+            <span>打标签</span>
+        </li>
+        <li class="{:$row['custom_is_match_frame_new'] == 1 ? 'active' : ''}">
+            <i><span class="fa-check fa fa-fw fa-check"></span></i>
+            <span>配镜架</span>
+        </li>
+        <li class="{:$row['custom_is_match_lens_new'] == 1 ? 'active' : ''}">
+            <i><span class="fa-check fa fa-fw fa-check"></span></i>
+            <span>配镜片</span>
+        </li>
+        <li class="{:$row['custom_is_send_factory_new'] == 1 ? 'active' : ''}">
+            <i><span class="fa-check fa fa-fw fa-check"></span></i>
+            <span>加工</span>
+        </li>
+        <li class="{:$row['custom_is_delivery_new'] == 1 ? 'active' : ''}">
+            <i><span class="fa-check fa fa-fw fa-check"></span></i>
+            <span>提货</span>
+        </li>
+    </ul>
+    <div class="table-wrap" style="width: 400px;">
+        <table>
+            <tr>
+                <th>序号</th>
+                <th>操作内容</th>
+                <th>操作人</th>
+                <th>操作时间</th>
+            </tr>
+            {foreach $list as $v}
+            <tr>
+                <td>{$v.id}</td>
+                <td>{$v.content}</td>
+                <td>{$v.person}</td>
+                <td>{$v.createtime}</td>
+            </tr>
+            {/foreach}
+           
+        </table>
+    </div>
+</div>
