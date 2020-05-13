@@ -1,4 +1,22 @@
 <link rel="stylesheet" href="/assets/css/control.css">
+<style>
+      .record-dialog .table-wrap{
+       width: 100% !important;
+    }
+    body .record-dialog .table-wrap table tr th,body .record-dialog .table-wrap table td{
+        border: 1px solid #ddd;
+        padding: 0;
+    }
+    .record-dialog .table-wrap tr:nth-of-type(2n){
+        background-color: #f9f9f9;
+    }
+    .table-striped > tbody > tr:nth-of-type(even){
+        background-color: #f9f9f9 !important;
+    }
+    .table-striped > tbody > tr:nth-of-type(odd){
+        background-color: #fff !important;
+    }
+</style>
 <div class="record-dialog">
     <ul>
         <li class="{:$row['custom_print_label_new'] == 1 ? 'active' : ''}">
@@ -22,8 +40,8 @@
             <span>提货</span>
         </li>
     </ul>
-    <div class="table-wrap" style="width: 400px;">
-        <table>
+    <div class="table-wrap">
+        <table class="table table-striped table-bordered table-hover table-nowrap">
             <tr>
                 <th>序号</th>
                 <th>操作内容</th>

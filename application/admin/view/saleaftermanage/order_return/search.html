@@ -84,6 +84,40 @@
     .detail-wrap {
         display: none;
     }
+    .panel-body {
+    padding: 0;
+}
+    .content {
+        background-color: #f1f4f6;
+        padding: 0;
+    }
+    .panel-intro{
+        background-color: #f1f4f6;
+    }
+    #ribbon{
+        padding: 15px;
+    }
+    body .control-wrap,.infos-wrap,.order-list-wrap {
+        margin: 10px 22px;
+        padding: 33px 22px !important;
+    }
+    body .order-list-wrap{
+        padding-top:0  !important;
+    }
+    body .order-list-wrap h2{
+        border-bottom: 1px solid #ddd;
+    }
+    body .order-list-wrap ul.order-list .detail-wrap table tr td .pres-type td,body .order-list-wrap ul.order-list .detail-wrap table .pres-type th{
+        padding: 4px !important;
+        font-size: 12px;
+    }
+    body .order-list-wrap ul.order-list .detail-wrap table tr td{
+        font-size: 12px;
+    }
+    body .order-list-wrap ul.order-list .detail-wrap table tr td.pd span{
+        font-size: 12px;
+    }
+  
 </style>
 
 <link rel="stylesheet" href="/assets/css/control.css">
@@ -91,7 +125,7 @@
     {:build_heading()}
 
     <div class="panel-body">
-        <div id="myTabContent" class="tab-content">
+       
             <div class="tab-pane fade active in" id="one">
 
                 <section class="content">
@@ -161,7 +195,7 @@
                                     <span>{$customerInfo.customer_group_code}</span>
                                 </li>
                             </ul>
-                            <ul class="pay-infos">
+                            <ul class="pay-infos" style="font-size: 16px;">
                                 <li>
                                     <strong>{$customerInfo.success_counter}</strong>
                                     <span>支付成功数量</span>
@@ -218,7 +252,9 @@
                                 <li>{$orderInfoList.order_currency_code}</li>
                                 <li>{:round($orderInfoList.grand_total,3)}</li>
                                 <li>{:round($orderInfoList.base_grand_total,2)}</li>
-                                <li>{$orderInfoList.coupon_code}</li>
+                                <li>{$orderInfoList.coupon_code}ggdfffffffffg 
+                                    ggdfffffffffg
+                                    </li>
                                 <li>{$orderInfoList.coupon_rule_name}</li>
                                 <li>{:round($orderInfoList.mw_rewardpoint,2)}</li>
                                 <li>{:round($orderInfoList.mw_rewardpoint_discount_show,2)}</li>
@@ -228,11 +264,11 @@
                                 <li class="option">
                                     <button type="button" class="addOrder" data-id="{$orderInfoList.increment_id}">增加工单</button>
                                     <button type="button" class='machiningBtn' data-id="{$orderInfoList.increment_id}">配货记录</button>
-                                    <button class="detail-btn" type="button">收起详情</button>
+                                    <button class="detail-btn" type="button">展开详情</button>
                                 </li>
                                 
                                 <li class="detail-wrap" style="display: none;">
-                                    {foreach $orderInfoList.item as $itemInfoList}
+                                    
                                     <div class="product-list">
                                         <h3>商品列表</h3>
                                         <table>
@@ -246,13 +282,14 @@
                                                 <th>Discount</th>
                                                 <th>Row Total</th>
                                             </tr>
+                                            {foreach $orderInfoList.item as $itemInfoList}
                                             <tr>
                                                 <td>
                                                     <ul class="product-info">
                                                         <li>{$itemInfoList.name}</li>
                                                         <li>SKU：{$itemInfoList.sku} </li>
                                                         <li>Color：{$itemInfoList.color_name}</li>
-                                                        <li>Qty：{$itemInfoList.qty_ordered}</li>
+                                                        <li>Qty：{:round($itemInfoList.qty_ordered)}</li>
                                                     </ul>
                                                 </td>
                                                 <td class="lens-wrap-td">
@@ -317,7 +354,7 @@
                                                             <td>{$itemInfoList.od_bd_r}</td>
                                                         </tr>
                                                         <tr>
-                                                            <td>OS</td>
+                                                            <th>OS</th>
                                                             <td>{$itemInfoList.os_pv}</td>
                                                             <td>{$itemInfoList.os_bd}</td>
                                                             <td>{$itemInfoList.os_pv_r}</td>
@@ -331,9 +368,10 @@
                                                 <td>{:round($itemInfoList.discount_amount,2)}</td>
                                                 <td>{:round($itemInfoList.total,2)}</td>
                                             </tr>
+                                            {/foreach}
                                         </table>
                                     </div>
-                                    {/foreach}
+                                 
                                     <div class="address-pay-info">
                                         <div>
                                             <h3>支付信息</h3>
@@ -703,7 +741,8 @@
             </div>
 
         </div>
-    </div>
+    
+    
 </div>
 
 
