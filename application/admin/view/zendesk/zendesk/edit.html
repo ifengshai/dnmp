@@ -68,7 +68,7 @@
                                 <span class="username">
                                   <span href="#"><input id="c-subject" data-rule="required" value="{$ticket->subject}" class="form-control ticket-subject" name="row[subject]" type="text"></span>
                                 </span>
-                                <span class="description">{$ticket->update_time} · {$ticket->username} {$ticket->email} · {$ticket->channel}</span>
+                                <span class="description">{$ticket->zendesk_update_time} · {$ticket->username} {$ticket->email} · {$ticket->channel}</span>
                             </div>
                             <div class="user-block pull-right">
                                 <button type="button" class="btn btn-default" data-toggle="modal" data-target="#modal-default">
@@ -178,7 +178,7 @@
                                         <a href="#">{$ticket->username}</a>
                                         {/if}
                                     </span>
-                                    <span class="description">{$vo->update_time}</span>
+                                    <span class="description">{$vo->zendesk_update_time}</span>
                                 </div>
                                 <!-- /.user-block -->
                                 <div style="margin:0px 0px 0px 70px;">
@@ -313,7 +313,7 @@
                         <div class="col-sm-4 col-md-6">
                             <div class="color-palette-set">
                                 <div class=""><span class="label label-primary">#{$vo->ticket_id}</span></div>
-                                <div class=""><span class="label text-green">{$vo->update_time} {$vo->username}</span></div>
+                                <div class=""><span class="label text-green">{$vo->zendesk_update_time} {$vo->username}</span></div>
                                 <div class="merge" data-subject="{$ticket->subject}" data-pid="{$ticket->ticket_id}" data-nid="{$vo->ticket_id}"><a href=""><b>{$vo->subject}</b></a></div>
                             </div>
                         </div>
