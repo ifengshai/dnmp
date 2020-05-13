@@ -563,7 +563,7 @@ class Zeelool extends Model
             $map['custom_is_delivery_new'] = 0;
             $map['status'] = ['in', ['processing', 'free_processing']];
             $map['custom_order_prescription_type'] = ['in', [2, 3, 4, 5, 6]];
-            $map[] = ['exp', Db::raw("index_type NOT IN ( 'Plastic Lenses', 'FRAME ONLY' ) 
+            $map[] = ['exp', Db::raw("index_type NOT IN ( 'Plastic Lenses', 'FRAME ONLY','Frame Only') 
             AND index_type IS NOT NULL 
             AND index_type != ''")];
 
@@ -588,7 +588,7 @@ class Zeelool extends Model
             $map['custom_is_delivery_new'] = 0;
             $map['status'] = ['in', ['processing', 'free_processing']];
             $map['custom_order_prescription_type'] = ['in', [2, 4, 6]];
-            $map[] = ['exp', Db::raw("index_type NOT IN ( 'Plastic Lenses', 'FRAME ONLY' ) 
+            $map[] = ['exp', Db::raw("index_type NOT IN ( 'Plastic Lenses', 'FRAME ONLY','Frame Only' ) 
             AND index_type IS NOT NULL 
             AND index_type != ''")];
             $map['is_custom_lens'] = 0;
@@ -614,7 +614,7 @@ class Zeelool extends Model
             $map['custom_is_delivery_new'] = 0;
             $map['status'] = ['in', ['processing', 'free_processing']];
             $map['custom_order_prescription_type'] = ['in', [3, 5, 6]];
-            $map[] = ['exp', Db::raw("index_type NOT IN ( 'Plastic Lenses', 'FRAME ONLY' ) 
+            $map[] = ['exp', Db::raw("index_type NOT IN ( 'Plastic Lenses', 'FRAME ONLY','Frame Only' ) 
             AND index_type IS NOT NULL 
             AND index_type != ''")];
             $map['is_custom_lens'] = 1;
