@@ -113,9 +113,12 @@ class WorkOrderList extends Model
      */
     public function getSkuList($order_platform, $increment_id)
     {
+        $is_new_version = 0;
         switch ($order_platform) {
             case 1:
                 $this->model = new \app\admin\model\order\order\Zeelool();
+                $is_new_version = $this->model->where('increment_id', $increment_id)
+                    ->value('is_new_version');
                 break;
             case 2:
                 $this->model = new \app\admin\model\order\order\Voogueme();
@@ -143,6 +146,7 @@ class WorkOrderList extends Model
         $result['sku'] = array_unique($sku);
         $result['base_currency_code'] = $orderInfo['order_currency_code'];
         $result['method'] = $orderInfo['method'];
+        $result['is_new_version'] = $is_new_version;
         $result['customer_email'] = $orderInfo['customer_email'];
         return $result ? $result : [];
     }
@@ -181,9 +185,9 @@ class WorkOrderList extends Model
                 return false;
                 break;
         }
-        if ($siteType < 3) {
-            foreach ($prescriptions as $key => $val) {
-                if (!isset($val['total_add'])) {
+        if($siteType < 3){
+            foreach($prescriptions as $key => $val){
+                if(!isset($val['total_add'])){
                     $prescriptions[$key]['os_add'] = $val['od_add'];
                     $prescriptions[$key]['od_add'] = $val['os_add'];
                 }
@@ -213,20 +217,25 @@ class WorkOrderList extends Model
      * @return array|bool
      * @throws \think\Exception
      */
-    public function getReissueLens($siteType, $showPrescriptions, $type = 1)
+    public function getReissueLens($siteType, $showPrescriptions, $type = 1, $isNewVersion = 0)
     {
         $url = '';
-        $key = $siteType . '_getlens';
+        $key = $siteType . '_getlens_' . $isNewVersion;
         $data = Cache::get($key);
         if (!$data) {
-            $data = $this->httpRequest($siteType, 'magic/product/lensData');
+            if($isNewVersion == 1){
+                $url = 'magic/product/newLensData';
+            }else{
+                $url = 'magic/product/lensData';
+            }
+            $data = $this->httpRequest($siteType, $url);
             Cache::set($key, $data, 3600 * 24);
         }
 
         $prescription = $prescriptions = $coating_type = '';
 
         $prescription = $data['lens_list'];
-        $colorList = $data['color_list'];
+        $colorList = $data['color_list'] ?? [];
         $lensColorList = $data['lens_color_list'];
         $coating_type = $data['coating_list'];
         if ($type == 1) {
@@ -234,11 +243,11 @@ class WorkOrderList extends Model
                 $prescriptions .= "<option value='{$key}'>{$val}</option>";
             }
             //拼接html页面
-            $html = (new \think\View())->fetch('saleaftermanage/work_order_list/ajax_reissue_add', compact('prescription', 'coating_type', 'prescriptions', 'colorList', 'type'));
+            $html = (new \think\View())->fetch('saleaftermanage/work_order_list/ajax_reissue_add', compact('prescription', 'coating_type', 'prescriptions', 'colorList', 'type','lensColorList','isNewVersion'));
         } elseif ($type == 2) {
-            $html = (new \think\View())->fetch('saleaftermanage/work_order_list/ajax_reissue_add', compact('showPrescriptions', 'prescription', 'coating_type', 'prescriptions', 'colorList', 'lensColorList', 'type'));
+            $html = (new \think\View())->fetch('saleaftermanage/work_order_list/ajax_reissue_add', compact('showPrescriptions', 'prescription', 'coating_type', 'prescriptions', 'colorList', 'lensColorList', 'type','isNewVersion'));
         } else {
-            $html = (new \think\View())->fetch('saleaftermanage/work_order_list/ajax_reissue_add', compact('showPrescriptions', 'prescription', 'coating_type', 'prescriptions', 'colorList', 'type'));
+            $html = (new \think\View())->fetch('saleaftermanage/work_order_list/ajax_reissue_add', compact('showPrescriptions', 'prescription', 'coating_type', 'prescriptions', 'colorList', 'type','lensColorList','isNewVersion'));
         }
         return ['data' => $data, 'html' => $html];
     }
@@ -256,7 +265,7 @@ class WorkOrderList extends Model
     {
         switch ($siteType) {
             case 1:
-                $url = 'https://www.zeelool.com/';
+                $url = 'https://z.zhaokuangyi.com/';
                 break;
             case 2:
                 $url = 'https://pc.voogueme.com/';
@@ -283,10 +292,10 @@ class WorkOrderList extends Model
             }
             $body = $response->getBody();
             //file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$body,FILE_APPEND);
-            $stringBody = (string) $body;
+            $stringBody = (string)$body;
             $res = json_decode($stringBody, true);
             //file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$stringBody,FILE_APPEND);
-            if ($res === null) {
+            if($res === null){
                 exception('网络异常');
             }
             if ($res['status'] == 200) {
@@ -353,7 +362,7 @@ class WorkOrderList extends Model
                     $colorId = $changeLens['color_id'][$key];
                     $coatingId = $changeLens['coating_type'][$key];
 
-                    $lensCoatName = $this->getLensCoatingName($type, $lensId, $coatingId, $colorId, $recipe_type);
+                    $lensCoatName = $this->getLensCoatingName($type, $lensId, $coatingId, $colorId, $recipe_type,$work->is_new_version);
                     $data = [
                         'work_id' => $work_id,
                         'increment_id' => $params['platform_order'],
@@ -506,17 +515,22 @@ class WorkOrderList extends Model
      * @param $prescription_type
      * @return array
      */
-    public function getLensCoatingName($siteType, $lens_id, $coating_id, $colorId, $prescription_type)
+    public function getLensCoatingName($siteType, $lens_id, $coating_id, $colorId, $prescription_type,$isNewVersion)
     {
-        $key = $siteType . '_getlens';
+        $key = $siteType . '_getlens_' . $isNewVersion;
         $data = Cache::get($key);
         if (!$data) {
-            $data = $this->httpRequest($siteType, 'magic/product/lensData');
+            if($isNewVersion == 0){
+                $url = 'magic/product/lensData';
+            }elseif($isNewVersion == 1){
+                $url = 'magic/product/newLensData';
+            }
+            $data = $this->httpRequest($siteType, $url);
             Cache::set($key, $data, 3600 * 24);
         }
         $prescription = $data['lens_list'];
         $coatingLists = $data['coating_list'];
-        $colorList = $data['color_list'];
+        $colorList = $data['color_list'] ?? [];
         $lensColorList = $data['lens_color_list'];
         //返回lensName
         $lens = $prescription[$prescription_type] ?? [];
@@ -531,12 +545,22 @@ class WorkOrderList extends Model
             }
         } else {
             //colorname
-            foreach ($colorList as $key => $val) {
-                if ($val['id'] == $colorId) {
-                    $colorName = $val['name'];
-                    break;
+            if($isNewVersion == 1){
+                foreach ($lensColorList as $key => $val) {
+                    if ($val['lens_id'] == $colorId) {
+                        $colorName = $val['lens_data_name'];
+                        break;
+                    }
+                }
+            }else{
+                foreach ($colorList as $key => $val) {
+                    if ($val['id'] == $colorId) {
+                        $colorName = $val['name'];
+                        break;
+                    }
                 }
             }
+
             //lensName
             foreach ($lensColorList as $val) {
                 if ($val['lens_id'] == $lens_id) {
@@ -548,11 +572,20 @@ class WorkOrderList extends Model
         }
 
         foreach ($coatingLists as $coatingList) {
-            if ($coatingList['id'] == $coating_id) {
-                $coatingName = $coatingList['name'];
-                break;
+            if($isNewVersion == 1){
+                if ($coatingList['coating_id'] == $coating_id) {
+                    $coatingName = $coatingList['coating_name'];
+                    break;
+                }
+            }else{
+                if ($coatingList['id'] == $coating_id) {
+                    $coatingName = $coatingList['name'];
+                    break;
+                }
             }
+
         }
+
         return ['lensName' => $lensName, 'lensType' => $lensType, 'colorName' => $colorName, 'coatingName' => $coatingName];
     }
 
@@ -564,7 +597,7 @@ class WorkOrderList extends Model
      * @throws \think\db\exception\ModelNotFoundException
      * @throws \think\exception\DbException
      */
-    public function createOrder($siteType, $work_id)
+    public function createOrder($siteType, $work_id, $isNewVersion = 0)
     {
         $changeSkus = WorkOrderChangeSku::where(['work_id' => $work_id, 'change_type' => 5])->select();
         //file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',json_encode(collection($changeSkus)->toArray()),FILE_APPEND);
@@ -649,8 +682,13 @@ class WorkOrderList extends Model
             }
             $postData = array_merge($postData, $postDataCommon);
             try {
-                file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt', json_encode($postData), FILE_APPEND);
-                $res = $this->httpRequest($siteType, 'magic/order/createOrder', $postData, 'POST');
+                //file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',json_encode($postData),FILE_APPEND);
+                if($isNewVersion == 0){
+                    $url = 'magic/order/createOrder';
+                }elseif($isNewVersion == 1){
+                    $url = 'magic/order/newCreateOrder';
+                }
+                $res = $this->httpRequest($siteType, $url, $postData, 'POST');
                 $increment_id = $res['increment_id'];
                 //replacement_order添加补发的订单号
                 WorkOrderChangeSku::where(['work_id' => $work_id, 'change_type' => 5])->setField('replacement_order', $increment_id);
@@ -713,20 +751,25 @@ class WorkOrderList extends Model
      * @return array|bool
      * @throws \think\Exception
      */
-    public function getEditReissueLens($siteType, $showPrescriptions, $type = 1, $info = [], $operate_type = '')
+    public function getEditReissueLens($siteType, $showPrescriptions, $type = 1, $info = [], $operate_type = '',$is_new_version = 0)
     {
         $url = '';
-        $key = $siteType . '_getlens';
+        $key = $siteType . '_getlens_' . $is_new_version;
         $data = Cache::get($key);
         if (!$data) {
-            $data = $this->httpRequest($siteType, 'magic/product/lensData');
+            if($is_new_version == 1){
+                $url = 'magic/product/newLensData';
+            }else{
+                $url = 'magic/product/lensData';
+            }
+            $data = $this->httpRequest($siteType, $url);
             Cache::set($key, $data, 3600 * 24);
         }
 
         $prescription = $prescriptions = $coating_type = '';
 
         $prescription = $data['lens_list'];
-        $colorList = $data['color_list'];
+        $colorList = $data['color_list'] ?? [];
         $lensColorList = $data['lens_color_list'];
         $coating_type = $data['coating_list'];
         if ($type == 1) {
@@ -734,11 +777,11 @@ class WorkOrderList extends Model
                 $prescriptions .= "<option value='{$key}'>{$val}</option>";
             }
             //拼接html页面
-            $html = (new \think\View())->fetch('saleaftermanage/work_order_list/ajax_reissue_edit', compact('prescription', 'coating_type', 'prescriptions', 'colorList', 'type', 'info', 'operate_type'));
+            $html = (new \think\View())->fetch('saleaftermanage/work_order_list/ajax_reissue_edit', compact('prescription', 'coating_type', 'prescriptions', 'colorList', 'type', 'info', 'operate_type','lensColorList','is_new_version'));
         } elseif ($type == 2) {
-            $html = (new \think\View())->fetch('saleaftermanage/work_order_list/ajax_reissue_edit', compact('showPrescriptions', 'prescription', 'coating_type', 'prescriptions', 'colorList', 'lensColorList', 'type', 'info', 'operate_type'));
+            $html = (new \think\View())->fetch('saleaftermanage/work_order_list/ajax_reissue_edit', compact('showPrescriptions', 'prescription', 'coating_type', 'prescriptions', 'colorList', 'lensColorList', 'type', 'info', 'operate_type','is_new_version'));
         } else {
-            $html = (new \think\View())->fetch('saleaftermanage/work_order_list/ajax_reissue_edit', compact('showPrescriptions', 'prescription', 'coating_type', 'prescriptions', 'colorList', 'type', 'info', 'operate_type'));
+            $html = (new \think\View())->fetch('saleaftermanage/work_order_list/ajax_reissue_edit', compact('showPrescriptions', 'prescription', 'coating_type', 'prescriptions', 'colorList', 'type', 'info', 'operate_type','lensColorList','is_new_version'));
         }
         return ['data' => $data, 'html' => $html];
     }
@@ -858,7 +901,7 @@ class WorkOrderList extends Model
                             $work->complete_time = $time;
                         }
                         //存在补发审核通过后生成补发单
-                        $this->createOrder($work->work_platform, $work_id);
+                        $this->createOrder($work->work_platform, $work_id, $work->is_new_version);
                     }
 
                     $work->save();
@@ -986,147 +1029,17 @@ class WorkOrderList extends Model
      */
     public static function workOrderListResult($allIncrementOrder)
     {
-        $workOrderLists = self::where('platform_order', 'in', $allIncrementOrder)->select();
-        foreach ($workOrderLists as &$workOrderList) {
+        $workOrderLists = self::where('platform_order','in',$allIncrementOrder)->select();
+        foreach($workOrderLists as &$workOrderList){
             $receptPersonIds = $workOrderList->recept_person_id;
             $receptPerson = Admin::where('id', 'in', $receptPersonIds)->column('nickname');
             //承接人
-            $workOrderList->recept_persons = join(',', $receptPerson);
-            $measures = \app\admin\model\saleaftermanage\WorkOrderMeasure::where('work_id', $workOrderList->id)->column('measure_content');
-            $measures = join(',', $measures);
+            $workOrderList->recept_persons = join(',',$receptPerson);
+            $measures = \app\admin\model\saleaftermanage\WorkOrderMeasure::where('work_id',$workOrderList->id)->column('measure_content');
+            $measures = join(',',$measures);
             $workOrderList->measure = $measures;
+
         }
         return $workOrderLists;
-    }
-
-
-    /**
-     * 客户订单检索工单 新
-     * @param $allIncrementOrder
-     * @return array|false|\PDOStatement|string|\think\Collection
-     * @throws \think\db\exception\DataNotFoundException
-     * @throws \think\db\exception\ModelNotFoundException
-     * @throws \think\exception\DbException
-     */
-    public static function workOrderListInfo($incrementOrder)
-    {
-        //查询用户id对应姓名
-        $admin = new \app\admin\model\Admin();
-        $users = $admin->where('status', 'normal')->column('nickname', 'id');
-
-        $workOrderLists = self::where('platform_order', '=', $incrementOrder)->select();
-        $replenish_list = [];
-        $i = 0;
-        foreach ($workOrderLists as &$v) {
-
-            switch ($v['work_platform']) {
-                case 1:
-                    $db = 'database.db_zeelool';
-                    break;
-                case 2:
-                    $db = 'database.db_voogueme';
-                    break;
-                case 3:
-                    $db = 'database.db_nihao';
-                    break;
-                default:
-                    return false;
-                    break;
-            }
-
-            //补差价列表
-            if ($v['replenish_increment_id']) {
-                $status = Db::connect($db)->table('sales_flat_order')->where(['increment_id' => $v['platform_order']])->value('status');
-                $replenish_list[$i]['replenish_increment_id'] = $v['replenish_increment_id'];
-                $replenish_list[$i]['status'] = $status;
-                $replenish_list[$i]['replenish_money'] = $v['replenish_money'];
-                $replenish_list[$i]['order_pay_currency'] = $v['order_pay_currency'];
-                $replenish_list[$i]['create_time'] = $v['create_time'];
-                $i++;
-            }
-
-            //排列sku
-            if ($v['order_sku']) {
-                $v['order_sku_arr'] = explode(',', $v['order_sku']);
-            }
-
-            //取经手人
-            if ($v['after_user_id'] != 0) {
-                $v['after_user_name'] = $users[$v['after_user_id']];
-            }
-
-            //工单类型
-            if ($v['work_type'] == 1) {
-                $v['work_type_str'] = '客服工单';
-            } else {
-                $v['work_type_str'] = '仓库工单';
-            }
-
-            //工单等级
-            if ($v['work_level'] == 1) {
-                $v['work_level_str'] = '低';
-            } elseif ($v['work_level'] == 2) {
-                $v['work_level_str'] = '中';
-            } elseif ($v['work_level'] == 3) {
-                $v['work_level_str'] = '高';
-            }
-
-
-            $v['assign_user_name'] = $users[$v['assign_user_id']];
-            $v['operation_user_name'] = $users[$v['operation_user_id']];
-
-            switch ($v['work_status']) {
-                case 0:
-                    $v['work_status'] = '取消';
-                    break;
-                case 1:
-                    $v['work_status'] = '新建';
-                    break;
-                case 2:
-                    $v['work_status'] = '待审核';
-                    break;
-                case 3:
-                    $v['work_status'] = '待处理';
-                    break;
-                case 4:
-                    $v['work_status'] = '审核拒绝';
-                    break;
-                case 5:
-                    $v['work_status'] = '部分处理';
-                    break;
-                case 6:
-                    $v['work_status'] = '已处理';
-                    break;
-                default:
-                    break;
-            }
-
-            $receptPersonIds = $v->recept_person_id;
-            $receptPerson = Admin::where('id', 'in', $receptPersonIds)->column('nickname');
-            //承接人
-            $v['recept_persons'] = join(',', $receptPerson);
-            $step_arr = \app\admin\model\saleaftermanage\WorkOrderMeasure::where('work_id', $v['id'])->select();
-            $step_arr = collection($step_arr)->toArray();
-            foreach ($step_arr as $key => $values) {
-                $recept = \app\admin\model\saleaftermanage\WorkOrderRecept::where('measure_id', $values['id'])->where('work_id',  $v['id'])->select();
-                $recept_arr = collection($recept)->toArray();
-                $step_arr[$key]['recept_user'] = implode(',', array_column($recept_arr, 'recept_person'));
-
-                $step_arr[$key]['recept'] = $recept_arr;
-                if ($values['operation_type'] == 0) {
-                    $step_arr[$key]['operation_type'] = '未处理';
-                } elseif ($values['operation_type'] == 1) {
-                    $step_arr[$key]['operation_type'] = '处理完成';
-                } elseif ($values['operation_type'] == 2) {
-                    $step_arr[$key]['operation_type'] = '处理失败';
-                }
-            }
-
-            $v['step'] = $step_arr;
-        }
-        unset($v);
-        $data['list'] = $workOrderLists;
-        $data['replenish_list'] = $replenish_list;
-        return $data;
     }
 }

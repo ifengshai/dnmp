@@ -166,7 +166,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                 },
                                 {
                                     name: 'edit',
-                                    text: '编辑',
+                                    text: '',
                                     title: __('Edit'),
                                     classname: 'btn btn-xs btn-success btn-dialog',
                                     icon: 'fa fa-pencil',
@@ -319,7 +319,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                         return false;
                                     },
                                     visible: function (row) {
-                                        if (Config.is_del_btu == 1  && row.is_finish_task ==0) {//有权限 或者创建人为当前人
+                                        if (Config.is_del_btu == 1 || row.is_finish_task ==0) {//有权限 或者创建人为当前人
                                             return true;
                                         }else {
                                             return  false;
