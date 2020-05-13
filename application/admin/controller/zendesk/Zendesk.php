@@ -494,7 +494,7 @@ class Zendesk extends Backend
         $tickets = $this->model
             ->where(['user_id' => $ticket->user_id, 'status' => ['in', [1, 2, 3]], 'type' => $ticket->type])
             ->where('id', 'neq', $ids)
-            ->field('ticket_id,id,username,subject,update_time')
+            ->field('ticket_id,id,username,subject,update_time,zendesk_update_time')
             ->order('id desc')
             ->select();
         //获取该用户最新的5条ticket
