@@ -1003,4 +1003,135 @@ class WorkOrderList extends Model
         }
         return $workOrderLists;
     }
+
+
+    /**
+     * 客户订单检索工单 新
+     * @param $allIncrementOrder
+     * @return array|false|\PDOStatement|string|\think\Collection
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public static function workOrderListInfo($incrementOrder)
+    {
+        //查询用户id对应姓名
+        $admin = new \app\admin\model\Admin();
+        $users = $admin->where('status', 'normal')->column('nickname', 'id');
+
+        $workOrderLists = self::where('platform_order', '=', $incrementOrder)->select();
+        $replenish_list = [];
+        $i = 0;
+        foreach ($workOrderLists as &$v) {
+
+            switch ($v['work_platform']) {
+                case 1:
+                    $db = 'database.db_zeelool';
+                    break;
+                case 2:
+                    $db = 'database.db_voogueme';
+                    break;
+                case 3:
+                    $db = 'database.db_nihao';
+                    break;
+                default:
+                    return false;
+                    break;
+            }
+
+            //补差价列表
+            if ($v['replenish_increment_id']) {
+                $status = Db::connect($db)->table('sales_flat_order')->where(['increment_id' => $v['platform_order']])->value('status');
+                $replenish_list[$i]['replenish_increment_id'] = $v['replenish_increment_id'];
+                $replenish_list[$i]['status'] = $status;
+                $replenish_list[$i]['replenish_money'] = $v['replenish_money'];
+                $replenish_list[$i]['order_pay_currency'] = $v['order_pay_currency'];
+                $replenish_list[$i]['create_time'] = $v['create_time'];
+                $i++;
+            }
+
+            //排列sku
+            if ($v['order_sku']) {
+                $v['order_sku_arr'] = explode(',', $v['order_sku']);
+            }
+
+            //取经手人
+            if ($v['after_user_id'] != 0) {
+                $v['after_user_name'] = $users[$v['after_user_id']];
+            }
+
+            //工单类型
+            if ($v['work_type'] == 1) {
+                $v['work_type_str'] = '客服工单';
+            } else {
+                $v['work_type_str'] = '仓库工单';
+            }
+
+            //工单等级
+            if ($v['work_level'] == 1) {
+                $v['work_level_str'] = '低';
+            } elseif ($v['work_level'] == 2) {
+                $v['work_level_str'] = '中';
+            } elseif ($v['work_level'] == 3) {
+                $v['work_level_str'] = '高';
+            }
+
+
+            $v['assign_user_name'] = $users[$v['assign_user_id']];
+            $v['operation_user_name'] = $users[$v['operation_user_id']];
+
+            switch ($v['work_status']) {
+                case 0:
+                    $v['work_status'] = '取消';
+                    break;
+                case 1:
+                    $v['work_status'] = '新建';
+                    break;
+                case 2:
+                    $v['work_status'] = '待审核';
+                    break;
+                case 3:
+                    $v['work_status'] = '待处理';
+                    break;
+                case 4:
+                    $v['work_status'] = '审核拒绝';
+                    break;
+                case 5:
+                    $v['work_status'] = '部分处理';
+                    break;
+                case 6:
+                    $v['work_status'] = '已处理';
+                    break;
+                default:
+                    break;
+            }
+
+            $receptPersonIds = $v->recept_person_id;
+            $receptPerson = Admin::where('id', 'in', $receptPersonIds)->column('nickname');
+            //承接人
+            $v['recept_persons'] = join(',', $receptPerson);
+            $step_arr = \app\admin\model\saleaftermanage\WorkOrderMeasure::where('work_id', $v['id'])->select();
+            $step_arr = collection($step_arr)->toArray();
+            foreach ($step_arr as $key => $values) {
+                $recept = \app\admin\model\saleaftermanage\WorkOrderRecept::where('measure_id', $values['id'])->where('work_id',  $v['id'])->select();
+                $recept_arr = collection($recept)->toArray();
+                $step_arr[$key]['recept_user'] = implode(',', array_column($recept_arr, 'recept_person'));
+
+                $step_arr[$key]['recept'] = $recept_arr;
+                if ($values['operation_type'] == 0) {
+                    $step_arr[$key]['operation_type'] = '未处理';
+                } elseif ($values['operation_type'] == 1) {
+                    $step_arr[$key]['operation_type'] = '处理完成';
+                } elseif ($values['operation_type'] == 2) {
+                    $step_arr[$key]['operation_type'] = '处理失败';
+                }
+            }
+
+            $v['step'] = $step_arr;
+        }
+        unset($v);
+        $data['list'] = $workOrderLists;
+        $data['replenish_list'] = $replenish_list;
+        return $data;
+    }
 }

@@ -34,10 +34,6 @@ class ZeeloolPrescriptionDetailHelper{
 	*/
 	public static function get_one_by_increment_id($increment_id){
 		
-		// if($increment_id){
-					
-		// }
-
 		if($increment_id){
 			$querySql = "select sfoi.original_price,sfoi.discount_amount,sfo.increment_id,sfo.customer_email,sfo.customer_firstname,sfo.customer_lastname,sfo.store_id,sfoi.product_options,sfoi.order_id,sfo.`status`,sfoi.sku,sfoi.qty_ordered,sfoi.name,sfo.created_at
 			from sales_flat_order_item sfoi
@@ -152,6 +148,7 @@ class ZeeloolPrescriptionDetailHelper{
             $items[$item_key]['coating_id'] = $final_params['coating_id'] = $product_options['info_buyRequest']['tmplens']['coating_id'];
             $items[$item_key]['coatiing_name'] = $final_params['coatiing_name'] = $product_options['info_buyRequest']['tmplens']['coatiing_name'];
             $items[$item_key]['color_id'] = $final_params['color_id'] ?: '';
+            $items[$item_key]['color_name'] = $final_params['color_name'] ?: '';
 
 			$prescription_params = $product_options['info_buyRequest']['tmplens']['prescription'];
             // dump($prescription_params);
