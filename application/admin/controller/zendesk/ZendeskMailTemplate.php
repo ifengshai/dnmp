@@ -336,7 +336,7 @@ class ZendeskMailTemplate extends Backend
             //tags合并
             $template['mail_tag'] = array_filter(array_merge(explode(',',$template['mail_tag']),explode(',',$ticket->tags)));
             //使用次数+1
-            $this->model->where('id',$id)->setInc('used_time');
+            $this->model->where('id',$id)->setInc('used_time',1);
             return json($template);
         }
         $this->error('404 Not found');
@@ -368,7 +368,7 @@ class ZendeskMailTemplate extends Backend
             $template['template_content'] = str_replace(['{{username}}','{{email}}','{{ticket_id}}'],[$ticket->username,$ticket->email,$ticket->ticket_id],$template['template_content']);
             //tags合并
             //使用次数+1
-            $this->model->where('id',$id)->setInc('used_time');
+            $this->model->where('id',$id)->setInc('used_time',1);
             $template['mail_tag'] = array_filter(explode(',',$template['mail_tag']));
             return json($template);
         }
