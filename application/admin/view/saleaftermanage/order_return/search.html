@@ -98,14 +98,14 @@
                     <div class="part-wrap control-wrap">
                         <ul class="type">
                             <li>订单平台</li>
-                            <li class="active site">Zeelool</li>
-                            <li class="site">Voogueme</li>
-                            <li class="site">Nihao</li>
+                            <li class="{:$order_platform == 1 ? 'active' : ''} site">Zeelool</li>
+                            <li class="site {:$order_platform == 2 ? 'active' : ''}">Voogueme</li>
+                            <li class="site {:$order_platform == 3 ? 'active' : ''}">Nihao</li>
                             <!-- <li class="site">Wesee</li> -->
                         </ul>
                         <form id="form1" action="{:url('/admin/saleaftermanage/order_return/search')}"
                             class="form-commonsearch form-horizontal" method="post">
-                            <input type="hidden" name="order_platform" id="order_platform" value="1" />
+                            <input type="hidden" name="order_platform" id="order_platform" value="{$order_platform}" />
                             <div class="input-list">
                                 <ul class="order-list">
                                     <li>
@@ -226,8 +226,8 @@
                                 <li>{$orderInfoList.shipping_description}</li>
                                 <li>{$orderInfoList.created_at}</li>
                                 <li class="option">
-                                    <button type="button">增加工单</button>
-                                    <button type="button">配货记录</button>
+                                    <button type="button" class="addOrder" data-id="{$orderInfoList.increment_id}">增加工单</button>
+                                    <button type="button" class='machiningBtn' data-id="{$orderInfoList.increment_id}">配货记录</button>
                                     <button class="detail-btn" type="button">收起详情</button>
                                 </li>
                                 
@@ -256,6 +256,7 @@
                                                     </ul>
                                                 </td>
                                                 <td class="lens-wrap-td">
+                                                    {if $itemInfoList.index_type || $itemInfoList.coatiing_name}
                                                     <ul class="lens-wrap">
                                                         <li>
                                                             <span class="name">{$itemInfoList.index_type}</span> <span
@@ -265,6 +266,7 @@
                                                             <span>{$itemInfoList.coatiing_price}</span>
                                                         </li>
                                                     </ul>
+                                                    {/if}
                                                 </td>
                                                 <td class="pres-type">
                                                     <table>
@@ -703,3 +705,6 @@
         </div>
     </div>
 </div>
+
+
+

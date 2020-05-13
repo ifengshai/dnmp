@@ -501,21 +501,19 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'custom-css',
             $(document).on('click', '.site', function () {
                 var site = $(this).html();
                 if (!$(this).hasClass('active')) {
-                    $(this).addClass("active").siblings().removeClass("active")
+                    $(this).addClass("active").siblings().removeClass("active");
                     if (site == 'Zeelool') {
                         $('#order_platform').val(1);
-                    } else if(site == 'Voogueme') {
+                    } else if (site == 'Voogueme') {
                         $('#order_platform').val(2);
-                    } else if(site == 'Nihao') {
+                    } else if (site == 'Nihao') {
                         $('#order_platform').val(3);
                     }
                 }
             })
 
-            $(".type li").click(function() {
-                $(this).addClass("active").siblings().removeClass("active");
-            })
-            $(".option .detail-btn").click(function() {
+         
+            $(".option .detail-btn").click(function () {
                 $(this).parent().parent().find(".detail-wrap").stop(true, true).slideToggle();
             })
 
@@ -720,31 +718,32 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'custom-css',
                 }
                 Backend.api.open('saleaftermanage/order_return/get_logistics_info/?track_number=' + track_number + '&entity_id=' + entity_id + '&order_platform=' + order_platform, '查询物流信息', { area: ["60%", "60%"] });
             });
-            // $(document).on('change','#increment_id',function(){
-            //     var incrementId = $('#increment_id').val();
-            //     var orderType = $('#c-order_platform').val();
-            //     console.log(orderType);
-            //     if(orderType<=0){
-            //         Layer.alert('请选择正确的平台');
-            //         return false;
-            //     }
-            //     if(incrementId.length>=3){
-            //         Backend.api.ajax({
-            //             url:'saleaftermanage/order_return/ajaxGetLikeOrder',
-            //             data:{orderType:orderType,order_number:incrementId}
-            //         }, function(data, ret){
-            //             $('#increment_id').autocomplete({
-            //                 source: ret.data
-            //             });
-            //             console.log(ret.data);
-            //         }, function(data, ret){
-            //             //失败的回调
-            //             alert(ret.msg);
-            //             console.log(ret);
-            //             return false;
-            //         });
-            //     }
-            // });
+
+
+            //增加工单
+            $(document).on('click', '.addOrder', function () {
+                var incrementId = $(this).data('id');
+                if (!incrementId) {
+                    Toastr.error('缺少订单号');
+                    return false;
+                }
+                Backend.api.open('saleaftermanage/work_order_list/add/?order_number=' + incrementId, '添加工单', { area: ["100%", "100%"] });
+
+            })
+
+            //增加工单
+            $(document).on('click', '.machiningBtn', function () {
+                var incrementId = $(this).data('id');
+                var order_platform = $('#order_platform').val();
+                if (!incrementId || !order_platform) {
+                    Toastr.error('缺少参数');
+                    return false;
+                }
+                Backend.api.open('saleaftermanage/order_return/machining/?order_number=' + incrementId + '&order_platform=' + order_platform, '配货记录', { area: ["40%", "60%"] });
+
+            })
+
+           
         }
     };
     return Controller;
