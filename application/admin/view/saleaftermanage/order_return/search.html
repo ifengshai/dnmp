@@ -286,7 +286,7 @@
                                                     <ul class="product-info">
                                                         <li>{$itemInfoList.name}</li>
                                                         <li>SKU：{$itemInfoList.sku} </li>
-                                                        <li>Color：{$itemInfoList.color_name}</li>
+                                                        <li>Color：{$itemInfoList.options[0]['value']}</li>
                                                         <li>Qty：{:round($itemInfoList.qty_ordered)}</li>
                                                     </ul>
                                                 </td>
@@ -332,9 +332,14 @@
                                                         </tr>
                                                         <tr>
                                                             <th>PD</th>
-                                                            <td class="pd">{$itemInfoList.pd_r} <span>(OD)</span></td>
-                                                            <td class="pd">{$itemInfoList.pd_l} <span>(OS)</span></td>
-                                                            <td></td>
+                                                            {if $itemInfoList.pd}
+                                                                <td>{$itemInfoList.pd}</td>
+                                                                <td></td>
+                                                                {else/}
+                                                                <td class="pd">{$itemInfoList.pd_r} <span>(OD)</span></td>
+                                                                <td class="pd">{$itemInfoList.pd_l} <span>(OS)</span></td>
+                                                            {/if}
+                                                            
                                                             <td></td>
                                                         </tr>
                                                         <tr>

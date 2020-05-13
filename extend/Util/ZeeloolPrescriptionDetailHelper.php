@@ -232,7 +232,6 @@ class ZeeloolPrescriptionDetailHelper{
 			}
 
 		}
-
 		return $items;
 	}
 }
