@@ -3733,14 +3733,12 @@ order by sfoi.item_id asc limit 1000";
     //导入实时库存 第一步
     public function set_product_relstock()
     {
-        $str = 'OT02018-02
-        VFP0236-01';
+        $str = 'FX0052-01';
         $skus = explode('
         ', $str);
 
         $stock = [
-            30,
-            0
+            185
         ];
 
         foreach ($skus as $k => $v) {
@@ -3768,9 +3766,7 @@ order by sfoi.item_id asc limit 1000";
         $this->weseeoptical = new \app\admin\model\order\order\Weseeoptical;
         $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
         $this->item = new \app\admin\model\itemmanage\Item;
-
-        $str = 'OT02018-02
-        VFP0236-01';
+        $str = 'FX0052-01';
         $skus = explode('
         ', $str);
         foreach ($skus as $k => $v) {
@@ -3821,9 +3817,7 @@ order by sfoi.item_id asc limit 1000";
         $this->weseeoptical = new \app\admin\model\order\order\Weseeoptical;
         $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
         $this->item = new \app\admin\model\itemmanage\Item;
-
-        $str = 'OT02018-02
-        VFP0236-01';
+        $str = 'FX0052-01';
         $skus = explode('
         ', $str);
         foreach ($skus as $k => $v) {
@@ -3869,8 +3863,7 @@ order by sfoi.item_id asc limit 1000";
         $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
         $this->item = new \app\admin\model\itemmanage\Item;
 
-        $str = 'OT02018-02
-        VFP0236-01';
+        $str = 'FX0052-01';
         $skus = explode('
         ', $str);
         $list = $this->item->field('sku,stock,occupy_stock,available_stock,real_time_qty,distribution_occupy_stock')->where(['sku' => ['in', $skus]])->select();
