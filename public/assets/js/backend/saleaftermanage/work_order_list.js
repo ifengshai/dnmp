@@ -67,7 +67,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                             searchList: $.getJSON('saleaftermanage/work_order_list/getProblemTypeContent')
                         },
                         { field: 'is_check', title: __('Is_check'), custom: { 0: 'black', 1: 'success' }, searchList: { 0: '否', 1: '是' }, formatter: Table.api.formatter.status },
-
+                        { field: 'is_refund', title: __('是否有退款'), custom: { 0: 'black', 1: 'success' }, searchList: { 0: '否', 1: '是' }, formatter: Table.api.formatter.status },
                         /*{ field: 'create_user_name', title: __('create_user_name') },*/
                         {
                             field: 'create_user_name',

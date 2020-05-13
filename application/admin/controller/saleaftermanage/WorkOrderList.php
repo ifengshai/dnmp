@@ -373,7 +373,10 @@ class WorkOrderList extends Backend
                     if ($params['refund_money'] > 30) {
                         $params['is_check'] = 1;
                     }
-
+                    //增加是否退款值
+                    if($params['refund_money']>0){
+                        $params['is_refund'] = 1;
+                    }
                     //判断审核人
                     if ($params['is_check'] == 1 || $params['need_coupon_id']) {
                         /**
@@ -763,6 +766,7 @@ class WorkOrderList extends Backend
                     //判断是否选择积分措施
                     if (!in_array(10, array_filter($params['measure_choose_id']))) {
                         unset($params['integral']);
+                        unset($params['integral_describe']);
                     } else {
                         if (!$params['integral'] || !$params['email']) {
                             throw new Exception("积分和邮箱不能为空");
@@ -816,7 +820,9 @@ class WorkOrderList extends Backend
                     if ($params['refund_money'] > 30) {
                         $params['is_check'] = 1;
                     }
-
+                    if($params['refund_money']>0){
+                        $params['is_refund'] = 1;
+                    }
                     //判断审核人
                     if ($params['is_check'] == 1 || $params['need_coupon_id']) {
                         /**
@@ -843,9 +849,25 @@ class WorkOrderList extends Backend
                     }
 
                     $params['recept_person_id'] = $params['recept_person_id'] ?: session('admin.id');
+                    //更新之前的措施全部去掉
+                    $updateData['replenish_money'] = '';
+                    $updateData['replenish_increment_id'] = '';
+                    $updateData['coupon_id'] = 0;
+                    $updateData['coupon_describe'] = '';
+                    $updateData['coupon_str'] = '';
+                    $updateData['integral'] = '';
+                    $updateData['refund_logistics_num'] = '';
+                    $updateData['refund_money'] = '';
+                    $updateData['is_refund'] = 0;
+                    $updateData['replacement_order'] = '';
+                    $updateData['integral_describe'] = '';
+                    $updateInfo = $row->allowField(true)->save($updateData);
+                    if(false === $updateInfo){
+                        throw new Exception('更新失败!!');
+                    }
                     $result = $row->allowField(true)->save($params);
                     if (false === $result) {
-                        throw new Exception("添加失败！！");
+                        throw new Exception("编辑失败！！");
                     }
                     //循环插入措施
                     if (count(array_filter($params['measure_choose_id'])) > 0) {
@@ -2119,9 +2141,10 @@ EOF;
             ->setCellValue("AI1","退款方式")
             ->setCellValue("AJ1","积分描述")
             ->setCellValue("AK1","补发订单号")
-            ->setCellValue("AL1","措施详情")
-            ->setCellValue("AM1","承接详情")
-            ->setCellValue("AN1","工单回复备注");
+            ->setCellValue("AL1","措施")
+            ->setCellValue("AM1","措施详情")
+            ->setCellValue("AN1","承接详情")
+            ->setCellValue("AO1","工单回复备注");
         $spreadsheet->setActiveSheetIndex(0)->setTitle('工单数据');
         foreach ($list as $key => $value) {
             if ($value['after_user_id']) {
@@ -2159,6 +2182,7 @@ EOF;
             switch ($value['work_status']) {
                 case 1:
                     $value['work_status'] = '新建';
+                    break;
                 case 2:
                     $value['work_status'] = '待审核';
                     break;
@@ -2217,26 +2241,31 @@ EOF;
             $spreadsheet->getActiveSheet()->setCellValue("AJ". ($key * 1 + 2), $value['integral_describe']);
             $spreadsheet->getActiveSheet()->setCellValue("AK". ($key * 1 + 2), $value['replacement_order']);
             //措施
-            if(array_key_exists($value['id'],$info)){
-				$value['handle_result'] = $info[$value['id']];
-				$spreadsheet->getActiveSheet()->setCellValue("AL" . ($key * 1 + 2), $value['handle_result']);
+            if(array_key_exists($value['id'],$info['step'])){
+				$spreadsheet->getActiveSheet()->setCellValue("AL" . ($key * 1 + 2), $info['step'][$value['id']]);
 			}else{
 				$spreadsheet->getActiveSheet()->setCellValue("AL" . ($key * 1 + 2), '');
+            }
+            //措施详情
+            if(array_key_exists($value['id'],$info['detail'])){
+				$spreadsheet->getActiveSheet()->setCellValue("AM" . ($key * 1 + 2), $info['detail'][$value['id']]);
+			}else{
+				$spreadsheet->getActiveSheet()->setCellValue("AM" . ($key * 1 + 2), '');
             }
             //承接
 			if(array_key_exists($value['id'],$receptInfo)){
                 
 				$value['result'] = $receptInfo[$value['id']];
-				$spreadsheet->getActiveSheet()->setCellValue("AM" . ($key * 1 + 2), $value['result']);
+				$spreadsheet->getActiveSheet()->setCellValue("AN" . ($key * 1 + 2), $value['result']);
 			}else{
-				$spreadsheet->getActiveSheet()->setCellValue("AM" . ($key * 1 + 2), '');
+				$spreadsheet->getActiveSheet()->setCellValue("AN" . ($key * 1 + 2), '');
             }
             //回复
             if(array_key_exists($value['id'],$noteInfo)){
 				$value['note'] = $noteInfo[$value['id']];
-				$spreadsheet->getActiveSheet()->setCellValue("AN" . ($key * 1 + 2), $value['note']);
+				$spreadsheet->getActiveSheet()->setCellValue("AO" . ($key * 1 + 2), $value['note']);
 			}else{
-				$spreadsheet->getActiveSheet()->setCellValue("AN" . ($key * 1 + 2), '');
+				$spreadsheet->getActiveSheet()->setCellValue("AO" . ($key * 1 + 2), '');
             }           			
 			
         }
@@ -2283,6 +2312,7 @@ EOF;
         $spreadsheet->getActiveSheet()->getColumnDimension('AL')->setWidth(100);
         $spreadsheet->getActiveSheet()->getColumnDimension('AM')->setWidth(100);
         $spreadsheet->getActiveSheet()->getColumnDimension('AN')->setWidth(100);
+        $spreadsheet->getActiveSheet()->getColumnDimension('AO')->setWidth(100);
         //设置边框
         $border = [
             'borders' => [
