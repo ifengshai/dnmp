@@ -524,6 +524,16 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'custom-css',
             })
 
 
+            $(".slide-down").click(function () {
+                var str = $(this).parent().parent().parent().find('.detail-btn').html();
+                if (str == '展开详情') {
+                    $(this).parent().parent().parent().find('.detail-btn').html('收起详情');
+                } else {
+                    $(this).parent().parent().parent().find('.detail-btn').html('展开详情');
+                }
+                $(this).parent().parent().stop(true, true).slideToggle();
+            })
+
             //$('tr:not(:has(td[rowspan])):even');
             //点击重置按钮
             $(document).on('click', '.btn-default', function () {
