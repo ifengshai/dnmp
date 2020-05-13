@@ -485,8 +485,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     var op     = params.op ? JSON.parse(params.op) : {};
                     if(field == 'me_task'){
                         filter[field] = value;
+                        delete filter.none_complete;
+                    }else if(field == 'none_complete'){
+                        filter[field] = value;
+                        delete filter.me_task;
                     }else{
                         delete filter.me_task;
+                        delete filter.none_complete;
                     }
                     params.filter = JSON.stringify(filter);
                     params.op     = JSON.stringify(op);
@@ -1089,8 +1094,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     var op     = params.op ? JSON.parse(params.op) : {};
                     if(field == 'me_task'){
                         filter[field] = value;
+                        delete filter.none_complete;
+                    }else if(field == 'none_complete'){
+                        filter[field] = value;
+                        delete filter.me_task;
                     }else{
                         delete filter.me_task;
+                        delete filter.none_complete;
                     }
                     params.filter = JSON.stringify(filter);
                     params.op     = JSON.stringify(op);
