@@ -855,6 +855,10 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
                 $finalResult[$key]['coatiing_name'] = $tmp_product_options['info_buyRequest']['tmplens']['coating_name'];
                 //镜片类型
                 $finalResult[$key]['index_type'] = $tmp_product_options['info_buyRequest']['tmplens']['lens_data_name'];
+                //镜片类型拼接颜色字段
+                if ($tmp_product_options['info_buyRequest']['tmplens']['color_id']) {
+                    $finalResult[$key]['index_type'] .= '-' . $tmp_product_options['info_buyRequest']['tmplens']['color_data_name'];
+                }
             } else {
                 $finalResult[$key]['coatiing_name'] = $tmp_product_options['info_buyRequest']['tmplens']['coatiing_name'];
                 $finalResult[$key]['index_type'] = $tmp_product_options['info_buyRequest']['tmplens']['index_type'];
@@ -863,6 +867,8 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
                     $finalResult[$key]['index_type'] .= '-' . $tmp_product_options['info_buyRequest']['tmplens']['color_name'];
                 }
             }
+
+
 
             $tmp_prescription_params = $tmp_product_options['info_buyRequest']['tmplens']['prescription'];
             if (isset($tmp_prescription_params)) {
@@ -1600,6 +1606,10 @@ EOF;
                     $final_print['coatiing_name'] = substr($product_options['info_buyRequest']['tmplens']['coating_name'], 0, 60);
                     //镜片类型名称
                     $final_print['index_type'] = $product_options['info_buyRequest']['tmplens']['lens_data_name'];
+                    //镜片类型拼接颜色字段
+                    if ($product_options['info_buyRequest']['tmplens']['color_id']) {
+                        $final_print['index_type'] .= '-' . $product_options['info_buyRequest']['tmplens']['color_data_name'];
+                    }
 
                     //处方参数
                     $prescription_params = $product_options['info_buyRequest']['tmplens']['prescription'];
