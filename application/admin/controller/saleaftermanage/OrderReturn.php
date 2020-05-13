@@ -36,14 +36,9 @@ class OrderReturn extends Backend
     protected $zeelool = null;
     protected $modelItem = null;
     protected $relationSearch = true;
-    // protected $noNeedLogin = [
-    //     'zeelool_order_return',
-    //     'voogueme_order_return',
-    //     'nihao_order_return',
-    //     'zeelool_order_return_item',
-    //     'voogueme_order_return_item',
-    //     'nihao_order_return_item'
-    // ];
+    protected $noNeedRight = [
+        'machining'
+    ];
     public function _initialize()
     {
         parent::_initialize();
@@ -520,7 +515,7 @@ class OrderReturn extends Backend
     }
 
     /***
-     * 异步查询模糊订单
+     * 配货记录
      * @param Request $request
      */
     public function machining(Request $request)
