@@ -373,7 +373,10 @@ class WorkOrderList extends Backend
                     if ($params['refund_money'] > 30) {
                         $params['is_check'] = 1;
                     }
-
+                    //增加是否退款值
+                    if($params['refund_money']>0){
+                        $params['is_refund'] = 1;
+                    }
                     //判断审核人
                     if ($params['is_check'] == 1 || $params['need_coupon_id']) {
                         /**
@@ -763,6 +766,7 @@ class WorkOrderList extends Backend
                     //判断是否选择积分措施
                     if (!in_array(10, array_filter($params['measure_choose_id']))) {
                         unset($params['integral']);
+                        unset($params['integral_describe']);
                     } else {
                         if (!$params['integral'] || !$params['email']) {
                             throw new Exception("积分和邮箱不能为空");
@@ -816,7 +820,9 @@ class WorkOrderList extends Backend
                     if ($params['refund_money'] > 30) {
                         $params['is_check'] = 1;
                     }
-
+                    if($params['refund_money']>0){
+                        $params['is_refund'] = 1;
+                    }
                     //判断审核人
                     if ($params['is_check'] == 1 || $params['need_coupon_id']) {
                         /**
@@ -843,9 +849,25 @@ class WorkOrderList extends Backend
                     }
 
                     $params['recept_person_id'] = $params['recept_person_id'] ?: session('admin.id');
+                    //更新之前的措施全部去掉
+                    $updateData['replenish_money'] = '';
+                    $updateData['replenish_increment_id'] = '';
+                    $updateData['coupon_id'] = 0;
+                    $updateData['coupon_describe'] = '';
+                    $updateData['coupon_str'] = '';
+                    $updateData['integral'] = '';
+                    $updateData['refund_logistics_num'] = '';
+                    $updateData['refund_money'] = '';
+                    $updateData['is_refund'] = 0;
+                    $updateData['replacement_order'] = '';
+                    $updateData['integral_describe'] = '';
+                    $updateInfo = $row->allowField(true)->save($updateData);
+                    if(false === $updateInfo){
+                        throw new Exception('更新失败!!');
+                    }
                     $result = $row->allowField(true)->save($params);
                     if (false === $result) {
-                        throw new Exception("添加失败！！");
+                        throw new Exception("编辑失败！！");
                     }
                     //循环插入措施
                     if (count(array_filter($params['measure_choose_id'])) > 0) {
