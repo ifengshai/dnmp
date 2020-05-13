@@ -215,9 +215,8 @@ class Zendesk extends Backend
                     }
                     //由于编辑器或默认带个<br>,所以去除标签判断有无值
                     if (strip_tags($body)) {
-                        $createData['comment']['html_body'] = '<div class="editor zendesk-editor--rich-text-comment" dir="auto" data-rendered-apps="0" contenteditable="true">'.$body.'</div>';
-                        $createData['comment']['html_body'] = str_replace('<p></br></p>','</br></br>',$createData['comment']['html_body']);
-                        $createData['comment']['html_body'] = str_replace(['<p>','</p>'],['',''],$createData['comment']['html_body']);
+                        $converter = new HtmlConverter();
+                        $createData['comment']['body'] = $converter->convert($body);
 
                     }
                     if ($params['image']) {
@@ -400,9 +399,8 @@ class Zendesk extends Backend
                     }
                     //由于编辑器或默认带个<br>,所以去除标签判断有无值
                     if (strip_tags($body)) {
-                        $updateData['comment']['html_body'] = '<div class="editor zendesk-editor--rich-text-comment" dir="auto" data-rendered-apps="0" contenteditable="true">'.$body.'</div>';
-                        $updateData['comment']['html_body'] = str_replace('<p></br></p>','</br></br>',$updateData['comment']['html_body']);
-                        $updateData['comment']['html_body'] = str_replace(['<p>','</p>'],['',''],$updateData['comment']['html_body']);
+                        $converter = new HtmlConverter();
+                        $updateData['comment']['body'] = $converter->convert($body);
                     }
                     if ($params['image']) {
                         //附件上传
