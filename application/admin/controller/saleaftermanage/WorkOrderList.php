@@ -2141,9 +2141,10 @@ EOF;
             ->setCellValue("AI1","退款方式")
             ->setCellValue("AJ1","积分描述")
             ->setCellValue("AK1","补发订单号")
-            ->setCellValue("AL1","措施详情")
-            ->setCellValue("AM1","承接详情")
-            ->setCellValue("AN1","工单回复备注");
+            ->setCellValue("AL1","措施")
+            ->setCellValue("AM1","措施详情")
+            ->setCellValue("AN1","承接详情")
+            ->setCellValue("AO1","工单回复备注");
         $spreadsheet->setActiveSheetIndex(0)->setTitle('工单数据');
         foreach ($list as $key => $value) {
             if ($value['after_user_id']) {
@@ -2240,26 +2241,31 @@ EOF;
             $spreadsheet->getActiveSheet()->setCellValue("AJ". ($key * 1 + 2), $value['integral_describe']);
             $spreadsheet->getActiveSheet()->setCellValue("AK". ($key * 1 + 2), $value['replacement_order']);
             //措施
-            if(array_key_exists($value['id'],$info)){
-				$value['handle_result'] = $info[$value['id']];
-				$spreadsheet->getActiveSheet()->setCellValue("AL" . ($key * 1 + 2), $value['handle_result']);
+            if(array_key_exists($value['id'],$info['step'])){
+				$spreadsheet->getActiveSheet()->setCellValue("AL" . ($key * 1 + 2), $info['step'][$value['id']]);
 			}else{
 				$spreadsheet->getActiveSheet()->setCellValue("AL" . ($key * 1 + 2), '');
+            }
+            //措施详情
+            if(array_key_exists($value['id'],$info['detail'])){
+				$spreadsheet->getActiveSheet()->setCellValue("AM" . ($key * 1 + 2), $info['detail'][$value['id']]);
+			}else{
+				$spreadsheet->getActiveSheet()->setCellValue("AM" . ($key * 1 + 2), '');
             }
             //承接
 			if(array_key_exists($value['id'],$receptInfo)){
                 
 				$value['result'] = $receptInfo[$value['id']];
-				$spreadsheet->getActiveSheet()->setCellValue("AM" . ($key * 1 + 2), $value['result']);
+				$spreadsheet->getActiveSheet()->setCellValue("AN" . ($key * 1 + 2), $value['result']);
 			}else{
-				$spreadsheet->getActiveSheet()->setCellValue("AM" . ($key * 1 + 2), '');
+				$spreadsheet->getActiveSheet()->setCellValue("AN" . ($key * 1 + 2), '');
             }
             //回复
             if(array_key_exists($value['id'],$noteInfo)){
 				$value['note'] = $noteInfo[$value['id']];
-				$spreadsheet->getActiveSheet()->setCellValue("AN" . ($key * 1 + 2), $value['note']);
+				$spreadsheet->getActiveSheet()->setCellValue("AO" . ($key * 1 + 2), $value['note']);
 			}else{
-				$spreadsheet->getActiveSheet()->setCellValue("AN" . ($key * 1 + 2), '');
+				$spreadsheet->getActiveSheet()->setCellValue("AO" . ($key * 1 + 2), '');
             }           			
 			
         }
@@ -2306,6 +2312,7 @@ EOF;
         $spreadsheet->getActiveSheet()->getColumnDimension('AL')->setWidth(100);
         $spreadsheet->getActiveSheet()->getColumnDimension('AM')->setWidth(100);
         $spreadsheet->getActiveSheet()->getColumnDimension('AN')->setWidth(100);
+        $spreadsheet->getActiveSheet()->getColumnDimension('AO')->setWidth(100);
         //设置边框
         $border = [
             'borders' => [
