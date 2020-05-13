@@ -691,6 +691,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     $('#order_pay_method').val(data.method);
                     $('#c-refund_way').val(data.method);
                     $('#customer_email').val(data.customer_email);
+                    $('#is_new_version').val(data.is_new_version);
                     var shtml = '';
                     for (var i in data.sku) {
                         shtml += '<option value="' + data.sku[i] + '">' + data.sku[i] + '</option>'
@@ -721,6 +722,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 var increment_id = $('#c-platform_order').val();
                 if (increment_id) {
                     var site_type = $('#work_platform').val();
+                    var is_new_version = $('#is_new_version').val();
                     //补发
                     if (value == 7 && check === true) {
                         //获取补发的信息
@@ -729,6 +731,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                             data: {
                                 increment_id: increment_id,
                                 site_type: site_type,
+                                is_new_version: is_new_version
                             }
                         }, function (json, ret) {
                             if (json.code == 0) {
@@ -835,6 +838,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
             //处方选择填充
             $(document).on('change', '#prescription_select', function () {
                 var val = $(this).val();
+                var is_new_version = $('#is_new_version').val();
                 var prescription = prescriptions[val];
 
                 var prescription_div = $(this).parents('.step7_function2').next('.step1_function3');
@@ -853,11 +857,18 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
 
 
                 //判断是否是彩色镜片
-                if (prescription.color_id > 0) {
+                if (prescription.color_id) {
                     prescription_div.find('#color_type').val(prescription.color_id);
-                    prescription_div.find('#color_type').change();
+                    if(is_new_version == 0){
+                        prescription_div.find('#color_type').change();
+                    }
                 }
-                prescription_div.find('#lens_type').val(prescription.index_id);
+                if(is_new_version == 0){
+                    prescription_div.find('#lens_type').val(prescription.index_id);
+                }else if(is_new_version == 1){
+                    prescription_div.find('#lens_type').val(prescription.lens_id);
+                }
+
                 //add，pd添加
                 if (prescription.hasOwnProperty("total_add")) {
                     prescription_div.find('input[name="row[replacement][od_add][]"]').val(prescription.total_add);
@@ -1958,6 +1969,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 $(document).on('change', 'select[name="row[replacement][recipe_type][]"],select[name="row[change_lens][recipe_type][]"],select[name="row[gift][recipe_type][]"]', function () {
                     var sitetype = $('#work_platform').val();
                     var prescription_type = $(this).val();
+                    var is_new_version = $('#is_new_version').val();
                     if (!sitetype || !prescription_type) {
                         return false;
                     }
@@ -1966,7 +1978,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         url: 'saleaftermanage/work_order_list/ajaxGetLensType',
                         data: {
                             site_type: sitetype,
-                            prescription_type: prescription_type
+                            prescription_type: prescription_type,
+                            is_new_version: is_new_version
                         }
                     }, function (data, ret) {
                         var prescription_div = that.parents('.prescription_type_step').next('div');
@@ -1975,7 +1988,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                             lens_type += '<option value="' + data[i].lens_id + '">' + data[i].lens_data_name + '</option>';
                         }
                         prescription_div.find('#lens_type').html(lens_type);
-                        prescription_div.find('#color_type').val('');
+                        if(is_new_version == 0){
+                            prescription_div.find('#color_type').val('');
+                        }
+
                         $('.selectpicker ').selectpicker('refresh');
                     }, function (data, ret) {
                         var prescription_div = that.parents('.prescription_type_step').next('div');
@@ -1988,12 +2004,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 $(document).on('change', 'select[name="row[replacement][color_id][]"],select[name="row[change_lens][color_id][]"],select[name="row[gift][color_id][]"]', function () {
                     var sitetype = $('#work_platform').val();
                     var color_id = $(this).val();
+                    var is_new_version = $('#is_new_version').val();
                     var that = $(this);
                     Backend.api.ajax({
                         url: 'saleaftermanage/work_order_list/ajaxGetLensType',
                         data: {
                             site_type: sitetype,
-                            color_id: color_id
+                            color_id: color_id,
+                            is_new_version: is_new_version
                         }
                     }, function (data, ret) {
                         var prescription_div = that.parents('.panel-body');

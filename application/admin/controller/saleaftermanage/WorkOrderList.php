@@ -1035,12 +1035,13 @@ class WorkOrderList extends Backend
         if (request()->isAjax()) {
             $incrementId = input('increment_id');
             $siteType = input('site_type');
+            $isNewVersion = input('is_new_version');
 
             try {
                 //获取地址、处方等信息
                 $res = $this->model->getAddress($siteType, $incrementId);
                 //请求接口获取lens_type，coating_type，prescription_type等信息
-                $lens = $this->model->getReissueLens($siteType, $res['showPrescriptions']);
+                $lens = $this->model->getReissueLens($siteType, $res['showPrescriptions'],1,$isNewVersion);
             } catch (\Exception $e) {
                 $this->error($e->getMessage());
             }
@@ -1129,11 +1130,17 @@ class WorkOrderList extends Backend
         if (request()->isAjax()) {
             $siteType = input('site_type');
             $prescriptionType = input('prescription_type', '');
+            $isNewVersion = input('is_new_version', 0);
             $color_id = input('color_id', '');
-            $key = $siteType . '_getlens';
+            $key = $siteType . '_getlens_' . $isNewVersion;
             $data = Cache::get($key);
             if (!$data) {
-                $data = $this->model->httpRequest($siteType, 'magic/product/lensData');
+                if($isNewVersion == 1){
+                    $url = 'magic/product/newLensData';
+                }else{
+                    $url = 'magic/product/lensData';
+                }
+                $data = $this->model->httpRequest($siteType, $url);
                 Cache::set($key, $data, 3600 * 24);
             }
             if ($color_id) {

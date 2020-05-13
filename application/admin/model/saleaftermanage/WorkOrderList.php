@@ -113,9 +113,12 @@ class WorkOrderList extends Model
      */
     public function getSkuList($order_platform, $increment_id)
     {
+        $is_new_version = 0;
         switch ($order_platform) {
             case 1:
                 $this->model = new \app\admin\model\order\order\Zeelool();
+                $is_new_version = $this->model->where('increment_id', $increment_id)
+                    ->value('is_new_version');
                 break;
             case 2:
                 $this->model = new \app\admin\model\order\order\Voogueme();
@@ -143,6 +146,7 @@ class WorkOrderList extends Model
         $result['sku'] = array_unique($sku);
         $result['base_currency_code'] = $orderInfo['order_currency_code'];
         $result['method'] = $orderInfo['method'];
+        $result['is_new_version'] = $is_new_version;
         $result['customer_email'] = $orderInfo['customer_email'];
         return $result ? $result : [];
     }
@@ -213,20 +217,25 @@ class WorkOrderList extends Model
      * @return array|bool
      * @throws \think\Exception
      */
-    public function getReissueLens($siteType, $showPrescriptions, $type = 1)
+    public function getReissueLens($siteType, $showPrescriptions, $type = 1, $isNewVersion = 0)
     {
         $url = '';
-        $key = $siteType . '_getlens';
+        $key = $siteType . '_getlens_' . $isNewVersion;
         $data = Cache::get($key);
         if (!$data) {
-            $data = $this->httpRequest($siteType, 'magic/product/lensData');
+            if($isNewVersion == 1){
+                $url = 'magic/product/newLensData';
+            }else{
+                $url = 'magic/product/lensData';
+            }
+            $data = $this->httpRequest($siteType, $url);
             Cache::set($key, $data, 3600 * 24);
         }
 
         $prescription = $prescriptions = $coating_type = '';
 
         $prescription = $data['lens_list'];
-        $colorList = $data['color_list'];
+        $colorList = $data['color_list'] ?? [];
         $lensColorList = $data['lens_color_list'];
         $coating_type = $data['coating_list'];
         if ($type == 1) {
@@ -234,11 +243,11 @@ class WorkOrderList extends Model
                 $prescriptions .= "<option value='{$key}'>{$val}</option>";
             }
             //拼接html页面
-            $html = (new \think\View())->fetch('saleaftermanage/work_order_list/ajax_reissue_add', compact('prescription', 'coating_type', 'prescriptions', 'colorList', 'type'));
+            $html = (new \think\View())->fetch('saleaftermanage/work_order_list/ajax_reissue_add', compact('prescription', 'coating_type', 'prescriptions', 'colorList', 'type','lensColorList','isNewVersion'));
         } elseif ($type == 2) {
             $html = (new \think\View())->fetch('saleaftermanage/work_order_list/ajax_reissue_add', compact('showPrescriptions', 'prescription', 'coating_type', 'prescriptions', 'colorList', 'lensColorList', 'type'));
         } else {
-            $html = (new \think\View())->fetch('saleaftermanage/work_order_list/ajax_reissue_add', compact('showPrescriptions', 'prescription', 'coating_type', 'prescriptions', 'colorList', 'type'));
+            $html = (new \think\View())->fetch('saleaftermanage/work_order_list/ajax_reissue_add', compact('showPrescriptions', 'prescription', 'coating_type', 'prescriptions', 'colorList', 'type','lensColorList','isNewVersion'));
         }
         return ['data' => $data, 'html' => $html];
     }
@@ -256,7 +265,7 @@ class WorkOrderList extends Model
     {
         switch ($siteType) {
             case 1:
-                $url = 'https://www.zeelool.com/';
+                $url = 'https://z.zhaokuangyi.com/';
                 break;
             case 2:
                 $url = 'https://pc.voogueme.com/';
