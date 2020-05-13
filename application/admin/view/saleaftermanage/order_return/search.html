@@ -252,9 +252,7 @@
                                 <li>{$orderInfoList.order_currency_code}</li>
                                 <li>{:round($orderInfoList.grand_total,3)}</li>
                                 <li>{:round($orderInfoList.base_grand_total,2)}</li>
-                                <li>{$orderInfoList.coupon_code}ggdfffffffffg 
-                                    ggdfffffffffg
-                                    </li>
+                                <li>{$orderInfoList.coupon_code}</li>
                                 <li>{$orderInfoList.coupon_rule_name}</li>
                                 <li>{:round($orderInfoList.mw_rewardpoint,2)}</li>
                                 <li>{:round($orderInfoList.mw_rewardpoint_discount_show,2)}</li>
@@ -501,7 +499,7 @@
                                     </div>
                                    
                                     {/notempty}
-                                    {notempty name="orderInfoList.replenish_list"}
+                                    <!-- notempty name="orderInfoList.replenish_list" -->
                                   
                                     <div class="list-wrap ">
                                         <div class="is-dif-wrap ">
@@ -530,7 +528,7 @@
                                         <img class="slide-down" src="/assets/img/shouqi.png" alt="">
                                     </div>
                                     
-                                    {/notempty}
+                                    <!-- /notempty -->
                                 </li>
                                 
                             </ul>
