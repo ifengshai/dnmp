@@ -55,7 +55,7 @@ class CustomerService extends Backend
             $order_platform = $params['platform'];
             //问题措施比统计
             $problem_step_data = $this->get_problem_step_data($order_platform,$map,1);
-           // $data = $this->get_workorder_data($order_platform, $map);
+            //$data = $this->get_workorder_data($order_platform, $map);
             if('echart1' == $params['key']){
                 //问题大分类统计、措施统计
                 $data = $this->get_workorder_data($order_platform, $map);
@@ -72,29 +72,33 @@ class CustomerService extends Backend
             }elseif('echart2' == $params['key']){
             //问题类型统计
             $problem_data = $this->get_problem_type_data($order_platform, $map,1);
+            //问题类型数组
+            $customer_problem_arr   = config('workorder.customer_problem_classify_arr')[1];
+            $customer_problem_list  = config('workorder.customer_problem_type'); 
+             //循环数组根据id获取客服问题类型
+            $column = $columnData = []; 
+            foreach($customer_problem_arr as $k => $v){
+                $column[] = $customer_problem_list[$v];
+            }
+            foreach($column as $ck => $cv){
+                $columnData[$ck]['name'] = $cv;
+                $columnData[$ck]['value'] = $problem_data[$ck];
+            }
+            $json['column'] = $column;
+            $json['columnData'] = $columnData;
+            return json(['code' => 1, 'data' => $json]);
             }elseif('echart3' == $params['key']){
                 //问题大分类统计、措施统计
                 $data = $this->get_workorder_data($order_platform, $map);
-                $step = config('workorder.customer_problem_classify');
-                $json['column'] = ['订单修改', '物流仓储', '产品质量', '客户问题'];
-                $json['columnData'] = [
-                    [
-                        'name' => '订单修改',
-                        'value' => $data['problem_type'][1],
-                    ],
-                    [
-                        'name' => '物流仓储',
-                        'value' => $data['problem_type'][2],
-                    ],
-                    [
-                        'name' => '产品质量',
-                        'value' => $data['problem_type'][3],
-                    ],
-                    [
-                        'name' => '客户问题',
-                        'value' => $data['problem_type'][4],
-                    ]
-                ];
+                $step = config('workorder.step');
+                $column = array_merge($step);
+                $columnData = [];
+                foreach($column as $k =>$v){
+                    $columnData[$k]['name'] = $v;
+                    $columnData[$k]['value'] = $data['step'][$k];
+                }
+                $json['column'] = $column;
+                $json['columnData'] = $columnData;
                 return json(['code' => 1, 'data' => $json]);
             }elseif('echart4' == $params['key']){
 
@@ -104,9 +108,50 @@ class CustomerService extends Backend
             }
             return $this->success('', '', $data, 0);
         }
+        $customer_problem_classify = config('workorder.customer_problem_classify');
+        $problem_type = array_keys($customer_problem_classify);
         $orderPlatformList = config('workorder.platform');
-        $this->view->assign(compact('orderPlatformList','create_time','platform'));
+        $this->view->assign(compact('orderPlatformList','create_time','platform','problem_type'));
         return $this->view->fetch();
+    }
+    /**
+     * 切换问题类型
+     *
+     * @Description
+     * @author lsw
+     * @since 2020/05/13 18:47:18 
+     * @return void
+     */
+    public function problem()
+    {
+        if ($this->request->isAjax()) {
+            $params = $this->request->param();
+            if ($params['time']) {
+                $time = explode(' ', $params['time']);
+                $map['complete_time'] = ['between', [$time[0] . ' ' . $time[1], $time[3] . ' ' . $time[4]]];
+            } else {
+                $map['complete_time'] = ['between', [date('Y-m-d 00:00:00',strtotime('-30 day')), date('Y-m-d H:i:s', time())]];
+            }
+            $value = $params['value'];
+            $order_platform = $params['platform'];
+            //问题类型统计
+            $problem_data = $this->get_problem_type_data($order_platform, $map,$value);
+            //问题类型数组
+            $customer_problem_arr   = config('workorder.customer_problem_classify_arr')[$value];
+            $customer_problem_list  = config('workorder.customer_problem_type'); 
+             //循环数组根据id获取客服问题类型
+            $column = $columnData = []; 
+            foreach($customer_problem_arr as $k => $v){
+                $column[] = $customer_problem_list[$v];
+            }
+            foreach($column as $ck => $cv){
+                $columnData[$ck]['name'] = $cv;
+                $columnData[$ck]['value'] = $problem_data[$ck];
+            }
+            $json['column'] = $column;
+            $json['columnData'] = $columnData;
+            return json(['code' => 1, 'data' => $json]);            
+        }
     }
     /**
      *获取workorder的统计数据
@@ -139,7 +184,7 @@ class CustomerService extends Backend
         $step_arr = config('workorder.step');
         $where_step['operation_type'] = 1;
         foreach($step_arr as $sk=>$sv){
-            $result['step'][$sk] = $this->step->where($where_step)->where('measure_choose_id',$sk)->where('work_id','in',$all_work_id)->count('id');
+            $result['step'][] = $this->step->where($where_step)->where('measure_choose_id',$sk)->where('work_id','in',$all_work_id)->count('id');
         }
         return $result;
     }
@@ -163,7 +208,7 @@ class CustomerService extends Backend
         $current_problem_arr = $problem_arr[$problem_type];
         $result = [];
         foreach($current_problem_arr as $k =>$v){
-            $result['problem_type'][$k] = $this->model->where($where)->where($map)->where('problem_type_id',$v)->count('id');
+            $result[$k] = $this->model->where($where)->where($map)->where('problem_type_id',$v)->count('id');
         }
         return $result;
     }

@@ -87,14 +87,29 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form','echartsobj'
         detail:function(){
             Controller.api.formatter.daterangepicker($("form[role=form1]"));
             Form.api.bindevent($("form[role=form]"));
-            var chartOptions = {
+            var chartOptions1 = {
                 targetId: 'echart1',
                 downLoadTitle: '图表',
                 type: 'pie',
-            };           
+            };
+            var chartOptions2 = {
+                targetId: 'echart2',
+                downLoadTitle: '图表',
+                type: 'pie',               
+            };
+            var chartOptions3 = {
+                targetId: 'echart3',
+                downLoadTitle: '图表',
+                type: 'pie',               
+            };
+            var chartOptions4 = {
+                targetId: 'echart4',
+                downLoadTitle: '图表',
+                type: 'pie',               
+            };                                   
             var time = $('#create_time').val();
             var platform = $('#c-order_platform').val();           
-            var options = {
+            var options1 = {
                 type: 'post',
                 url: 'datacenter/customer_service/detail',
                 data: {
@@ -103,8 +118,59 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form','echartsobj'
                     'key':'echart1' 
                 }
            } 
-
-            EchartObj.api.ajax(options, chartOptions)             
+           var options2 = {
+                type: 'post',
+                url: 'datacenter/customer_service/detail',
+                data: {
+                    'time': time,
+                    'platform': platform,
+                    'key':'echart2' 
+                }
+            }
+            var options3 = {
+                type: 'post',
+                url: 'datacenter/customer_service/detail',
+                data: {
+                    'time': time,
+                    'platform': platform,
+                    'key':'echart3' 
+                }
+            }
+            var options4 = {
+                type: 'post',
+                url: 'datacenter/customer_service/detail',
+                data: {
+                    'time': time,
+                    'platform': platform,
+                    'key':'echart4' 
+                }
+            }                            
+            EchartObj.api.ajax(options1, chartOptions1);
+            EchartObj.api.ajax(options2, chartOptions2);
+            EchartObj.api.ajax(options3, chartOptions3);
+            EchartObj.api.ajax(options4, chartOptions4);
+            $(".statistics").on('click',function(){
+                var value = $(this).data("value");
+                if(value>0){
+                    var time = $('#create_time').val();
+                    var platform = $('#c-order_platform').val();  
+                    var chartOptions = {
+                        targetId: 'echart2',
+                        downLoadTitle: '图表',
+                        type: 'pie',
+                    };
+                    var options = {
+                        type: 'post',
+                        url: 'datacenter/customer_service/problem',
+                        data: {
+                            'time': time,
+                            'platform': platform,
+                            'value':value
+                        }
+                   };
+                   EchartObj.api.ajax(options, chartOptions);                                         
+                }
+            });
         },
     };
     return Controller;
