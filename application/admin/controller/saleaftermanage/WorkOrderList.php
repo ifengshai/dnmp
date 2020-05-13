@@ -2181,6 +2181,7 @@ EOF;
             switch ($value['work_status']) {
                 case 1:
                     $value['work_status'] = '新建';
+                    break;
                 case 2:
                     $value['work_status'] = '待审核';
                     break;
