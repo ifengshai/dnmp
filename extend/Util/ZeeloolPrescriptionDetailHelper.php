@@ -139,6 +139,9 @@ class ZeeloolPrescriptionDetailHelper
 				$items[$item_key]['index_price_old'] = $product_options['info_buyRequest']['tmplens']['lens_base_price'];
 				$items[$item_key]['index_name'] = $product_options['info_buyRequest']['tmplens']['lens_data_name'];
 				$items[$item_key]['index_id'] = $product_options['info_buyRequest']['tmplens']['lens_id'];
+				if ($product_options['info_buyRequest']['tmplens']['color_id']) {
+					$items[$item_key]['index_type'] = $items[$item_key]['index_type'] . '-' . $product_options['info_buyRequest']['tmplens']['color_data_name'];
+				} 
 			} else {
 				$items[$item_key]['coatiing_name'] = substr($product_options['info_buyRequest']['tmplens']['coatiing_name'], 0, 100);
 				$items[$item_key]['index_type'] = substr($product_options['info_buyRequest']['tmplens']['index_type'], 0, 100);
@@ -147,6 +150,9 @@ class ZeeloolPrescriptionDetailHelper
 				$items[$item_key]['index_price_old'] = $product_options['info_buyRequest']['tmplens']['index_price_old'];
 				$items[$item_key]['index_name'] = $product_options['info_buyRequest']['tmplens']['index_name'];
 				$items[$item_key]['index_id'] =  $product_options['info_buyRequest']['tmplens']['index_id'];
+				if ($product_options['info_buyRequest']['tmplens']['color_name']) {
+					$items[$item_key]['index_type'] = $items[$item_key]['index_type'] . '-' . $product_options['info_buyRequest']['tmplens']['color_name'];
+				} 
 			}
 			$items[$item_key]['frame_price'] = $product_options['info_buyRequest']['tmplens']['frame_price'];
 			//添加color-name 参数	
@@ -171,11 +177,7 @@ class ZeeloolPrescriptionDetailHelper
 				$items[$item_key][$arr_value[0]] = $arr_value[1];
 			}
 			
-			if ($items[$item_key]['color_id']) {
-				$items[$item_key]['index_type'] = $items[$item_key]['index_type'] . '-' . $items[$item_key]['color_name'];
-			} else {
-				$items[$item_key]['index_type'] = $items[$item_key]['index_type'];
-			}
+			
 
 			$items[$item_key]['year'] = $product_options['info_buyRequest']['tmplens']['year'] ? $product_options['info_buyRequest']['tmplens']['year'] : '';
 			$items[$item_key]['month'] = $product_options['info_buyRequest']['tmplens']['month'] ? $product_options['info_buyRequest']['tmplens']['month'] : '';
@@ -215,6 +217,7 @@ class ZeeloolPrescriptionDetailHelper
 				$items[$item_key]['store_id'] = $item_value['store_id'];
 			}
 		}
+	
 		return $items;
 	}
 }
