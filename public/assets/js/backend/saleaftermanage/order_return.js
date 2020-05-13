@@ -514,6 +514,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'custom-css',
 
          
             $(".option .detail-btn").click(function () {
+                var str = $(this).html();
+                if (str == '展开详情') {
+                    $(this).html('收起详情');
+                } else {
+                    $(this).html('展开详情');
+                }
                 $(this).parent().parent().find(".detail-wrap").stop(true, true).slideToggle();
             })
 
@@ -739,7 +745,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'custom-css',
                     Toastr.error('缺少参数');
                     return false;
                 }
-                Backend.api.open('saleaftermanage/order_return/machining/?order_number=' + incrementId + '&order_platform=' + order_platform, '配货记录', { area: ["40%", "60%"] });
+                Backend.api.open('saleaftermanage/order_return/machining/?order_number=' + incrementId + '&order_platform=' + order_platform, '配货记录', { area: ["60%","600px"] });
 
             })
 
