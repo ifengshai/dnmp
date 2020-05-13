@@ -321,14 +321,20 @@
                                                             <td>{$itemInfoList.od_sph}</td>
                                                             <td>{$itemInfoList.od_cyl}</td>
                                                             <td>{$itemInfoList.od_axis}</td>
+                                                            {if $itemInfoList.total_add}
+                                                            <td rowspan="2">{$itemInfoList.total_add}</td>
+                                                            {else/}
                                                             <td>{$itemInfoList.od_add}</td>
+                                                            {/if}
                                                         </tr>
                                                         <tr>
                                                             <th>OS</th>
                                                             <td>{$itemInfoList.os_sph}</td>
                                                             <td>{$itemInfoList.os_cyl}</td>
                                                             <td>{$itemInfoList.os_axis}</td>
+                                                            {if !$itemInfoList.total_add}
                                                             <td>{$itemInfoList.os_add}</td>
+                                                            {/if}
                                                         </tr>
                                                         <tr>
                                                             <th>PD</th>
