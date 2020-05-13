@@ -485,6 +485,8 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                     url:'datacenter/operationanalysis/operationkanban/dashboard/async_data',
                     data:{order_platform:order_platform}
                 }, function(data, ret){
+                    console.log(1111);
+                    console.log(ret);
                     $('#today_sales_money').text(ret.data.today_sales_money);
                     $('#yesterday_sales_money').text(ret.data.yesterday_sales_money);
                     $('#pastsevenday_sales_money').text(ret.data.pastsevenday_sales_money);
@@ -578,6 +580,8 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                     //console.log(ret.data);
                     return false;
                 }, function(data, ret){
+                    console.log(2222);
+                    console.log(ret);
                     //失败的回调
                     $('#today_sales_money').text(0);
                     $('#yesterday_sales_money').text(0);
