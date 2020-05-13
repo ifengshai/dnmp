@@ -611,6 +611,9 @@ class Check extends Backend
                 ->join(['fa_purchase_order_item' => 'c'], 'a.purchase_id=c.purchase_id and b.sku=c.sku')
                 ->select();
             $res = collection($res)->toArray();
+            if (!$res) {
+                $this->error('暂无需要推销的数据');
+            }
 
             $list = [];
             foreach ($res as $k => $v) {
@@ -660,13 +663,12 @@ class Check extends Backend
             }
 
             if ($result !== false) {
-
                 //标记为已退
                 $map['id'] = ['in', array_unique($check_id)];
                 $this->model->allowField(true)->isUpdate(true, $map)->save(['is_return' => 1]);
                 $this->success('操作成功');
             } else {
-                $this->success('操作失败');
+                $this->error('操作失败');
             }
         }
 
@@ -708,19 +710,21 @@ class Check extends Backend
         }
 
         list($where) = $this->buildparams();
-        $list = $this->model
-            ->with(['purchaseorder' , 'supplier'])
+        $list = $this->model->alias('check')
+            ->join(['fa_purchase_order' => 'd'], 'check.purchase_id=d.id')
             ->join(['fa_check_order_item' => 'b'], 'b.check_id=check.id')
             ->join(['fa_purchase_order_item' => 'c'], 'b.purchase_id=c.purchase_id and c.sku=b.sku')
-            ->field('check.*,b.*,c.purchase_price')
+            ->field('check.*,b.*,c.purchase_price,d.purchase_number,d.create_person as person,d.purchase_remark')
             ->where($where)
             ->where($map)
             ->order('check.id desc')
             ->select();
-        
         $list = collection($list)->toArray();
        
-
+        //查询供应商
+        $supplier = new \app\admin\model\purchase\Supplier();
+        $supplier_data = $supplier->getSupplierData();
+        
         //从数据库查询需要的数据
         $spreadsheet = new Spreadsheet();
 
@@ -749,11 +753,11 @@ class Check extends Backend
 
             $spreadsheet->getActiveSheet()->setCellValue("A" . ($key * 1 + 2), $value['check_order_number']);
             $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $value['type'] == 1 ? '采购质检' : '退货质检');
-            $spreadsheet->getActiveSheet()->setCellValueExplicit("C" . ($key * 1 + 2), $value['purchaseorder']['purchase_number'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
-            $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 1 + 2), $value['purchaseorder']['create_person']);
-            $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), $value['orderreturn']['return_order_number']);
-            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 1 + 2), $value['supplier']['supplier_name']);
-            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 1 + 2), $value['purchaseorder']['purchase_remark']);
+            $spreadsheet->getActiveSheet()->setCellValueExplicit("C" . ($key * 1 + 2), $value['purchase_number'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+            $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 1 + 2), $value['person']);
+            $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), '');
+            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 1 + 2), $supplier_data[$value['supplier_id']]);
+            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 1 + 2), $value['purchase_remark']);
             $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 1 + 2), $value['remark']);
             $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 1 + 2), $value['sku']);
             $spreadsheet->getActiveSheet()->setCellValue("J" . ($key * 1 + 2), $value['supplier_sku']);

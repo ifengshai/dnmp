@@ -39,9 +39,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                             addClass: 'selectpicker', data: 'multiple', operate: 'IN',
                             formatter: Table.api.formatter.status
                         },
-                        { field: 'supplier_linkname', title: __('Supplier_linkname'), operate: 'like' },
-                        { field: 'supplier_linkphone', title: __('Supplier_linkphone'), operate: 'like' },
-                        { field: 'supplier_address', title: __('Supplier_address'), operate: 'like' },
+                        { field: 'logistics_number', title: __('退回运单号'), operate: 'like' },
+                        { field: 'logistics_company_no', title: __('物流名称编码'), operate: 'like' },
                         { field: 'createtime', title: __('Createtime'), operate: 'RANGE', addclass: 'datetimerange' },
                         { field: 'create_person', title: __('Create_person'), operate: 'like' },
 

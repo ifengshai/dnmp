@@ -2,8 +2,8 @@
 
 namespace fast;
 
-use fast\Http;
 use function GuzzleHttp\json_encode;
+use GuzzleHttp\Client;
 
 /**
  * alibaba类
@@ -55,9 +55,18 @@ class Alibaba
             '_aop_signature' => $code_sign
         ];
         $params = array_merge($params, $addparams);
+
+        $client = new Client(['verify' => false]);
+        $response = $client->request('POST', $url, array('form_params' => $params));
+        
         //请求URL
-        $res = Http::post($url, $params);
-        return json_decode($res);
+        $body = $response->getBody();
+        $stringBody = (string) $body;
+        $res = json_decode($stringBody, true);
+        if ($res === null) {
+            exception('网络异常');
+        }
+        return $res;
     }
 
 
@@ -97,9 +106,17 @@ class Alibaba
             'access_token' => self::$access_token,
             '_aop_signature' => $code_sign
         ];
+
+        $client = new Client(['verify' => false]);
+        $response = $client->request('POST', $url, array('form_params' => $params));
         //请求URL
-        $res = Http::post($url, $params);
-        return json_decode($res);
+        $body = $response->getBody();
+        $stringBody = (string) $body;
+        $res = json_decode($stringBody);
+        if ($res === null) {
+            exception('网络异常');
+        }
+        return $res;
     }
 
 
@@ -139,9 +156,16 @@ class Alibaba
             'access_token' => self::$access_token,
             '_aop_signature' => $code_sign
         ];
+        $client = new Client(['verify' => false]);
+        $response = $client->request('POST', $url, array('form_params' => $params));
         //请求URL
-        $res = Http::post($url, $params);
-        return json_decode($res);
+        $body = $response->getBody();
+        $stringBody = (string) $body;
+        $res = json_decode($stringBody);
+        if ($res === null) {
+            exception('网络异常');
+        }
+        return $res;
     }
 
 
@@ -183,9 +207,16 @@ class Alibaba
             'access_token' => self::$access_token,
             '_aop_signature' => $code_sign
         ];
+        $client = new Client(['verify' => false]);
+        $response = $client->request('POST', $url, array('form_params' => $params));
         //请求URL
-        $res = Http::post($url, $params);
-        return json_decode($res);
+        $body = $response->getBody();
+        $stringBody = (string) $body;
+        $res = json_decode($stringBody, true);
+        if ($res === null) {
+            exception('网络异常');
+        }
+        return $res;
     }
 
     /**
@@ -224,8 +255,15 @@ class Alibaba
             'access_token' => self::$access_token,
             '_aop_signature' => $code_sign
         ];
+        $client = new Client(['verify' => false]);
+        $response = $client->request('POST', $url, array('form_params' => $params));
         //请求URL
-        $res = Http::post($url, $params);
-        return json_decode($res);
+        $body = $response->getBody();
+        $stringBody = (string) $body;
+        $res = json_decode($stringBody);
+        if ($res === null) {
+            exception('网络异常');
+        }
+        return $res;
     }
 }

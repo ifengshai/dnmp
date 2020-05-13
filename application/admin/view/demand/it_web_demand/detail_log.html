@@ -1,0 +1,151 @@
+<style>
+    #accordion div{
+        text-align: center;
+    }
+</style>
+{if $demand_type == 1}
+    {if $row['web_designer_group'] == 1 && $row['web_designer_user_id'] != '' && $row['web_designer_note'] != ''}
+        <div class="col-md-3" style="width: 33%;float: left;">
+            <div class="box box-success box-solid">
+                <div class="box-header with-border">
+                    {:__('Web_designer_user_id')}：<h5 class="box-title">{$row['web_designer_username']}</h5>
+                </div>
+                <div class="box-body" style="word-wrap:break-word">
+                    {$row['web_designer_note']}
+                </div>
+            </div>
+        </div>
+    {/if}
+    {if $row['phper_group'] == 1 && $row['phper_user_id'] != '' && $row['phper_note'] != ''}
+        <div class="col-md-3" style="width: 33%;float: left;">
+            <div class="box box-success box-solid">
+                <div class="box-header with-border">
+                    {:__('Phper_user_id')}：<h5 class="box-title">{$row['phper_username']}</h5>
+                </div>
+                <div class="box-body" style="word-wrap:break-word">
+                    {$row['phper_note']}
+                </div>
+            </div>
+        </div>
+    {/if}
+    {if $row['app_group'] == 1 && $row['app_user_id'] != '' && $row['app_note'] != ''}
+        <div class="col-md-3" style="width: 33%;float: left;">
+            <div class="box box-success box-solid">
+                <div class="box-header with-border">
+                    {:__('App_user_id')}：<h5 class="box-title">{$row['app_username']}</h5>
+                </div>
+                <div class="box-body" style="word-wrap:break-word">
+                    {$row['app_note']}
+                </div>
+            </div>
+        </div>
+    {/if}
+    <div style="float: left;width: 100%"></div>
+{/if}
+
+{if $row['test_group'] == 1}
+<ul class="timeline" style="width: 50%;float: left;">
+    <li class="time-label">
+        <span class="bg-red">
+            {:__('test_environment')}
+        </span>
+    </li>
+    {volist name="left_test_list" id="ltl"}
+        <li>
+            <i class="fa fa-user bg-aqua"></i>
+            <div class="timeline-item">
+                <span class="time"><i class="fa fa-clock-o"></i>{:__('test_add_time')}：{$ltl['create_time']}</span>
+                <h3 class="timeline-header"><a href="#" {if $ltl['bug_type'] == 1}style="color: darkseagreen;font-weight: 900"{elseif $ltl['bug_type'] == 2}style="color: green;font-weight: 900"{elseif $ltl['bug_type'] == 3}style="color: darkorange;font-weight: 900"{elseif $ltl['bug_type'] == 4}style="color: red;font-weight: 900"{/if}>{$bug_type[$ltl['bug_type']]}</a></h3>
+
+                <div class="timeline-body">
+                    <p style="float: left;width: 62%">{:__('All_user_id')}：<span><b>{$ltl['responsibility_user_name']}</b></span></p>
+                    <p>{:__('Entry_user_id')}：<span><b>{$ltl['create_user_name']}</b></span></p>
+                </div>
+
+                <div class="timeline-body" >
+                    {:__('describe')}：<span style="word-break: break-all;"><b>{$ltl['describe']}</b></span>
+                </div>
+                <div class="timeline-body" >
+                    {:__('是否完成')}：<span style="word-break: break-all;"><b>{$ltl['is_complete']==1?'是':'否'}</b></span>
+                </div>
+                {if $ltl['is_complete'] == 0 && in_array(session('admin.id'), explode(',', $ltl['responsibility_user_id']))}
+                <form role="form" data-toggle="validator" method="POST" action="{:url('detail_log')}">
+                    <input type="hidden" name="row[id]" value="{$ltl['id']}"/>
+                    <input type="hidden" name="row[opt_type]" value="1"/>
+                    <div style="padding-left: 58px;padding-bottom: 1%;padding-top: 1%">
+                        <button type="submit" name="web_finish" value="1" class="btn btn-success btn-embossed">{:__('All_finish')}</button>
+                    </div>
+                </form>
+                {/if}
+
+                {if $ltl['is_complete'] == 0 && session('admin.id')== $ltl['create_user_id'] }
+                <form role="form" data-toggle="validator" method="POST" action="{:url('detail_log')}">
+                    <input type="hidden" name="row[id]" value="{$ltl['id']}"/>
+                    <input type="hidden" name="row[opt_type]" value="2"/>
+                    <div style="padding-left: 58px;padding-bottom: 1%;padding-top: 1%">
+                        <button type="submit" name="web_finish" value="1" class="btn btn-success btn-embossed">删除</button>
+                    </div>
+                </form>
+                {/if}
+
+            </div>
+        </li>
+    {/volist}
+</ul>
+
+<ul class="timeline" style="width: 50%;float: right;">
+    <li class="time-label">
+            <span class="bg-red">
+                {:__('formal_environment')}
+            </span>
+    </li>
+    {volist name="right_test_list" id="rtl"}
+    <li>
+        <i class="fa fa-user bg-aqua"></i>
+        <div class="timeline-item">
+            <span class="time"><i class="fa fa-clock-o"></i>{:__('test_add_time')}：{$rtl['create_time']}</span>
+            <h3 class="timeline-header"><a href="#"{if $rtl['bug_type'] == 1}style="color: darkseagreen;font-weight: 900"{elseif $rtl['bug_type'] == 2}style="color: green;font-weight: 900"{elseif $rtl['bug_type'] == 3}style="color: darkorange;font-weight: 900"{elseif $rtl['bug_type'] == 4}style="color: red;font-weight: 900"{/if}>{$bug_type[$rtl['bug_type']]}</a></h3>
+
+            <div class="timeline-body">
+                <p style="float: left;width: 62%">{:__('All_user_id')}：<span><b>{$rtl['responsibility_user_name']}</b></span></p>
+                <p>{:__('Entry_user_id')}：<span><b>{$rtl['create_user_name']}</b></span></p>
+            </div>
+
+            <div class="timeline-body" >
+                {:__('describe')}：<span style="word-break: break-all;"><b>{$rtl['describe']}</b></span>
+            </div>
+
+            <div class="timeline-body" >
+                {:__('是否完成')}：<span style="word-break: break-all;"><b>{$rtl['is_complete']==1?'是':'否'}</b></span>
+            </div>
+            {if $rtl['is_complete'] == 0 && in_array(session('admin.id'), explode(',', $rtl['responsibility_user_id']))}
+            <form role="form" data-toggle="validator" method="POST" action="{:url('detail_log')}">
+                <input type="hidden" name="row[id]" value="{$rtl['id']}"/>
+                <input type="hidden" name="row[opt_type]" value="1"/>
+                <div style="padding-left: 58px;padding-bottom: 1%;padding-top: 1%">
+                    <button type="submit" name="web_finish" value="1" class="btn btn-success btn-embossed">{:__('All_finish')}</button>
+                </div>
+            </form>
+            {/if}
+
+            {if $rtl['is_complete'] == 0 && session('admin.id')== $rtl['create_user_id'] }
+            <form role="form" data-toggle="validator" method="POST" action="{:url('detail_log')}">
+                <input type="hidden" name="row[id]" value="{$rtl['id']}"/>
+                <input type="hidden" name="row[opt_type]" value="2"/>
+                <div style="padding-left: 58px;padding-bottom: 1%;padding-top: 1%">
+                    <button type="submit" name="web_finish" value="1" class="btn btn-success btn-embossed">删除</button>
+                </div>
+            </form>
+            {/if}
+        </div>
+    </li>
+    {/volist}
+</ul>
+{/if}
+
+<div class="hide layer-footer">
+    <label class="control-label col-xs-12 col-sm-2"></label>
+    <div class="col-xs-12 col-sm-8">
+        <button type="reset" class="btn btn-primary btn-embossed btn-close" onclick="Layer.closeAll();">{:__('Close')}</button>
+    </div>
+</div>

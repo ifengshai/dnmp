@@ -63,7 +63,7 @@ class Instock extends Model
     {
         $where['createtime'] = ['between', [date('Y-m-d 00:00:00', time()), date('Y-m-d H:i:s', time())]];
         $where['status'] = 2;
-        return $this->where($where)->alias('a')->join(['fa_in_stock_item' => 'b'], 'a.id=b.in_stock_id')->cache(3600)->sum('in_stock_num');
+        return $this->where($where)->alias('a')->join(['fa_in_stock_item' => 'b'], 'a.id=b.in_stock_id')->sum('in_stock_num');
     }
 
 }

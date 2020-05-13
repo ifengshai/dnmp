@@ -1,4 +1,4 @@
-define(['jquery', 'bootstrap', 'backend', 'table', 'form','bootstrap-table-jump-to'], function ($, undefined, Backend, Table, Form) {
+define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump-to'], function ($, undefined, Backend, Table, Form) {
 
     var Controller = {
         index: function () {
@@ -6,7 +6,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','bootstrap-table-jump-
             Table.api.init({
                 showJumpto: true,
                 searchFormVisible: true,
-                showExport: false,
+                showExport: true,
                 pageList: [10, 25, 50, 100],
                 extend: {
                     index_url: 'order/index/index' + location.search + '&label=' + Config.label,
@@ -26,13 +26,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','bootstrap-table-jump-
                         { checkbox: true },
                         { field: 'entity_id', title: __('记录标识'), operate: false },
                         { field: 'increment_id', title: __('订单号'), operate: 'like' },
+                        { field: 'label', title: __('是否为商业快递'), custom: { 1: 'danger', 0: 'gray' }, searchList: { 1: '是', 0: '否' }, operate: false, formatter: Table.api.formatter.status },
                         { field: 'customer_firstname', title: __('客户名称'), operate: 'like' },
                         { field: 'customer_email', title: __('邮箱'), operate: 'like' },
                         { field: 'status', title: __('状态'), searchList: { "processing": __('processing'), 'complete': 'complete', 'creditcard_failed': 'creditcard_failed', 'creditcard_pending': 'creditcard_pending', 'holded': 'holded', 'payment_review': 'payment_review', 'paypal_canceled_reversal': 'paypal_canceled_reversal', 'paypal_reversed': 'paypal_reversed', 'pending': 'pending', 'canceled': 'canceled', 'closed': 'closed', "free_processing": __('free_processing') } },
                         { field: 'base_grand_total', title: __('订单金额'), operate: false, formatter: Controller.api.formatter.float_format },
                         { field: 'base_shipping_amount', title: __('邮费'), operate: false, formatter: Controller.api.formatter.float_format },
-                        { field: 'custom_order_prescription_type', title: __('处方类型'), custom: { 1: 'green', 2: 'green', 3: 'green', 4: 'green', 5: 'green', 6: 'green', }, searchList: { 1: '仅镜架', 2: '现货处方镜', 3: '定制处方镜', 4: '镜架+现货', 5: '镜架+定制', 6: '现片+定制片','':'获取中' }, formatter: Table.api.formatter.status },
-                        { field: 'order_type', title: __('订单类型'), custom: { 1: 'blue', 2: 'blue', 3: 'blue', 4: 'blue' }, searchList: { 1: '普通订单', 2: '批发单', 3: '网红单', 4: '补发单' }, formatter: Table.api.formatter.status },
+                        { field: 'custom_order_prescription_type', title: __('处方类型'), custom: { 1: 'green', 2: 'green', 3: 'green', 4: 'green', 5: 'green', 6: 'green', }, searchList: { 1: '仅镜架', 2: '现货处方镜', 3: '定制处方镜', 4: '镜架+现货', 5: '镜架+定制', 6: '现片+定制片', '': '获取中' }, formatter: Table.api.formatter.status },
+                        { field: 'order_type', title: __('订单类型'), custom: { 1: 'blue', 2: 'blue', 3: 'blue', 4: 'blue', 5: 'blue' }, searchList: { 1: '普通订单', 2: '批发单', 3: '网红单', 4: '补发单', 5: '补差价' }, formatter: Table.api.formatter.status },
                         { field: 'sku', title: __('SKU'), operate: 'like', visible: false },
                         { field: 'created_at', title: __('创建时间'), operate: 'RANGE', addclass: 'datetimerange' },
                         {
@@ -62,6 +63,17 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','bootstrap-table-jump-
 
             // 为表格绑定事件
             Table.api.bindevent(table);
+
+            //批量打印标签    
+            $('.btn-batch-printed_test').click(function () {
+                var ids = Table.api.selectedids(table);
+                var id_params = '';
+                $.each(table.bootstrapTable('getSelections'), function (index, row) {
+                    id_params += row['entity_id'] + ',';
+                });
+
+                window.open(Config.moduleurl + '/order/index/batch_print_label_new?id_params=' + id_params + '&label=' + Config.label, '_blank');
+            });
 
         },
         add: function () {
@@ -172,13 +184,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','bootstrap-table-jump-
                         { field: 'increment_id', title: __('订单号') },
                         { field: 'customer_email', title: __('邮箱'), operate: 'like' },
                         { field: 'status', title: __('状态'), searchList: { "processing": __('processing'), 'complete': 'complete', 'creditcard_failed': 'creditcard_failed', 'creditcard_pending': 'creditcard_pending', 'holded': 'holded', 'payment_review': 'payment_review', 'paypal_canceled_reversal': 'paypal_canceled_reversal', 'paypal_reversed': 'paypal_reversed', 'pending': 'pending', 'canceled': 'canceled', 'closed': 'closed', "free_processing": __('free_processing') } },
-                        { field: 'total_money', title: __('支付金额（$）'), operate: false},
-                        { field: 'frame_cost',title:__('镜架成本金额（￥）'),operate:false,formatter:Controller.api.formatter.float_format},
-                        { field: 'lens_cost',title:__('镜片成本金额（￥）'),operate:false,formatter:Controller.api.formatter.float_format},
-                        { field: 'postage_money',title:__('邮费成本金额（￥）'),operate:false,formatter:Controller.api.formatter.float_format},
-                        { field: 'process_cost',title:__('加工费成本金额（￥）'),operate:false,formatter:Controller.api.formatter.float_format},
-                        { field: 'refund_money',title:__('退款金额'),operate:false,formatter:Controller.api.formatter.float_format},
-                        { field: 'fill_post',title:__('补差价金额'),operate:false,formatter:Controller.api.formatter.float_format},
+                        { field: 'total_money', title: __('支付金额（$）'), operate: false },
+                        { field: 'frame_cost', title: __('镜架成本金额（￥）'), operate: false, formatter: Controller.api.formatter.float_format },
+                        { field: 'lens_cost', title: __('镜片成本金额（￥）'), operate: false, formatter: Controller.api.formatter.float_format },
+                        { field: 'postage_money', title: __('邮费成本金额（￥）'), operate: false, formatter: Controller.api.formatter.float_format },
+                        { field: 'process_cost', title: __('加工费成本金额（￥）'), operate: false, formatter: Controller.api.formatter.float_format },
+                        { field: 'refund_money', title: __('退款金额'), operate: false, formatter: Controller.api.formatter.float_format },
+                        { field: 'fill_post', title: __('补差价金额'), operate: false, formatter: Controller.api.formatter.float_format },
                         { field: 'created_at', title: __('创建时间'), operate: 'RANGE', addclass: 'datetimerange' },
                     ],
                 ],
@@ -259,7 +271,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','bootstrap-table-jump-
                         { field: 'entity_id', title: __('记录标识'), operate: false },
                         //默认隐藏该列
                         { field: 'increment_id', title: __('订单号') },
-                        { field: 'postage_money', title: __('邮费'), operate: false},
+                        { field: 'postage_money', title: __('邮费'), operate: false },
                         { field: 'postage_create_time', title: __('创建时间'), operate: 'RANGE', addclass: 'datetimerange' },
                         //操作栏,默认有编辑、删除或排序按钮,可自定义配置buttons来扩展按钮
                         // {
@@ -310,7 +322,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','bootstrap-table-jump-
 
             // 为表格绑定事件
             Table.api.bindevent(table);
-        }        
+        }
     };
     return Controller;
 });

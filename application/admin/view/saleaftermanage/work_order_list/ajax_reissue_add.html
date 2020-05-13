@@ -1,0 +1,446 @@
+{if condition="$type eq 1"}
+<div style="width: 100%;float: left;" >
+    <div class="step7_function2 prescription_type_step" style="margin-top:10px;">
+        <div class="step7_function2_child">
+            <label class="control-label col-xs-12 col-sm-3">SKU:</label>
+            <div class="col-xs-12 col-sm-8">
+                <input class="form-control" name="row[replacement][original_sku][]" type="text" value="">
+
+            </div>
+        </div>
+        <div class="step7_function2_child">
+            <label class="control-label col-xs-12 col-sm-3">QTY:</label>
+            <div class="col-xs-12 col-sm-8">
+                <input class="form-control" name="row[replacement][original_number][]" type="text" value="">
+            </div>
+        </div>
+        <div class="step7_function2_child">
+            <label class="control-label col-xs-12 col-sm-3">Original RX:</label>
+            <div class="col-xs-12 col-sm-8">
+                <select id="prescription_select" class="form-control selectpicker" title="请选择">
+                    {$prescriptions}
+                </select>
+            </div>
+        </div>
+        <div class="step7_function2_child">
+            <label class="control-label col-xs-12 col-sm-3">prescription_type:</label>
+            <div class="col-xs-12 col-sm-8">
+                <select class="form-control selectpicker prescription_type" name="row[replacement][recipe_type][]"  title="请选择">
+                    {foreach name="prescription" item="val" key="key"}
+                        <option value='{$key}'>{$key}</option>
+                    {/foreach}
+                </select>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="step1_function3"  style="margin-top:10px;">
+        <div class="panel-body">
+            <div class="step1_function3_child">
+                <label class="control-label col-xs-12 col-sm-3">Color:</label>
+                <div class="col-xs-12 col-sm-8">
+                    <select id="color_type" class="form-control selectpicker" name="row[replacement][color_id][]"  title="请选择">
+                        {foreach name="colorList" item="val"}
+                        <option value='{$val["id"]}'>{$val["name"]}</option>
+                        {/foreach}
+                    </select>
+                </div>
+            </div>
+            <div class="step1_function3_child">
+                <label class="control-label col-xs-12 col-sm-3">Lens:</label>
+                <div class="col-xs-12 col-sm-8">
+                    <select id="lens_type" class="form-control selectpicker" name="row[replacement][lens_type][]"  title="请选择">
+
+                    </select>
+                </div>
+            </div>
+            <div class="step1_function3_child">
+                <label class="control-label col-xs-12 col-sm-3">Coating:</label>
+                <div class="col-xs-12 col-sm-8">
+                    <select id="c-coating_type" class="form-control selectpicker"
+                            name="row[replacement][coating_type][]"  title="请选择">
+                        {foreach name="coating_type" item="val"}
+                        <option value='{$val["id"]}'>{$val["name"]}</option>
+                        {/foreach}
+                    </select>
+                </div>
+            </div>
+
+            <table>
+                <tbody>
+                <tr>
+                    <td style="text-align: center">value</td>
+                    <td style="text-align: center">SPH</td>
+                    <td style="text-align: center">CYL</td>
+                    <td style="text-align: center">AXI</td>
+                    <td style="text-align: center">ADD</td>
+                    <td style="text-align: center">PD</td>
+                </tr>
+                <tr>
+                    <td style="text-align: center">Right(OD)</td>
+                    <td><input class="form-control" name="row[replacement][od_sph][]" type="text" value="">
+                    </td>
+                    <td><input class="form-control" name="row[replacement][od_cyl][]" type="text" value="">
+                    </td>
+                    <td><input class="form-control" name="row[replacement][od_axis][]" type="text"
+                               value=""></td>
+                    <td><input class="form-control" name="row[replacement][od_add][]" type="text" value="">
+                    </td>
+                    <td><input class="form-control" name="row[replacement][pd_r][]" type="text" value="">
+                    </td>
+                </tr>
+                <tr>
+                    <td style="text-align: center">Left(OS)</td>
+                    <td><input class="form-control" name="row[replacement][os_sph][]" type="text" value="">
+                    </td>
+                    <td><input class="form-control" name="row[replacement][os_cyl][]" type="text" value="">
+                    </td>
+                    <td><input class="form-control" name="row[replacement][os_axis][]" type="text"
+                               value=""></td>
+                    <td><input class="form-control" name="row[replacement][os_add][]" placeholder="单add填写到上边即可" type="text" value="">
+                    </td>
+                    <td><input class="form-control" name="row[replacement][pd_l][]" placeholder="单pd填写到上边即可" type="text" value="">
+                    </td>
+                </tr>
+
+                <tr>
+                    <td style="text-align: center"></td>
+                    <td style="text-align: center">Prism Horizontal</td>
+                    <td style="text-align: center">Base Direction</td>
+                    <td style="text-align: center">Prism Vertical</td>
+                    <td style="text-align: center">Base Direction</td>
+                </tr>
+                <tr>
+                    <td style="text-align: center">Right(OD)</td>
+                    <td><input class="form-control" type="text" name="row[replacement][od_pv][]" value="">
+                    </td>
+                    <td><input class="form-control" type="text" name="row[replacement][od_bd][]" value="">
+                    </td>
+                    <td><input class="form-control" type="text" name="row[replacement][od_pv_r][]"
+                               value=""></td>
+                    <td><input class="form-control" type="text" name="row[replacement][od_bd_r][]"
+                               value=""></td>
+                </tr>
+                <tr>
+                    <td style="text-align: center">Left(OS)</td>
+                    <td><input class="form-control" name="row[replacement][os_pv][]" type="text" value="">
+                    </td>
+                    <td><input class="form-control" name="row[replacement][os_bd][]" type="text" value="">
+                    </td>
+                    <td><input class="form-control" name="row[replacement][os_pv_r][]" type="text"
+                               value=""></td>
+                    <td><input class="form-control" name="row[replacement][os_bd_r][]" type="text"
+                               value=""></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    
+</div>
+{elseif condition="$type eq 2" /}
+{foreach name="$showPrescriptions" item="vo" key="key"}
+<div style="width: 100%;float: left;" >
+    <div class="step1_function2 prescription_type_step" style="width: 28%;">
+        <div class="step1_function2_child">
+            <label class="control-label col-xs-12 col-sm-3">SKU:</label>
+            <div class="col-xs-12 col-sm-8">
+                <input class="form-control" name="row[change_lens][original_sku][]" readonly="true" type="text" value="{$vo['sku']}">
+            </div>
+        </div>
+
+        <div class="step1_function2_child">
+            <label class="control-label col-xs-12 col-sm-3">Name:</label>
+            <div class="col-xs-12 col-sm-8">
+                <input class="form-control" name="row[change_lens][original_name][]" readonly="true" type="text" value="{$vo['name']}">
+            </div>
+        </div>
+        <div class="step1_function2_child">
+            <label class="control-label col-xs-12 col-sm-3">QTY:</label>
+            <div class="col-xs-12 col-sm-8">
+                <input class="form-control" name="row[change_lens][original_number][]" readonly="true" type="text" value="{$vo['qty_ordered']}">
+            </div>
+        </div>
+
+        <div class="step1_function2_child">
+            <label class="control-label col-xs-12 col-sm-3">prescription_type:</label>
+            <div class="col-xs-12 col-sm-8">
+                <select class="form-control selectpicker prescription_type" name="row[change_lens][recipe_type][]"  title="请选择">
+                    {foreach name="prescription" item="val" key="key"}
+                    <option value='{$key}' {$key == $vo['prescription_type'] ? 'selected' : ''}>{$key}</option>
+                    {/foreach}
+                </select>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="step7_function3">
+        <div class="panel-body">
+            <div class="step7_function3_child">
+                <label class="control-label col-xs-12 col-sm-3">Color:</label>
+                <div class="col-xs-12 col-sm-8">
+                    <select id="color_type" class="form-control selectpicker" name="row[change_lens][color_id][]"  title="请选择">
+                        {foreach name="colorList" item="val"}
+                        <option value='{$val["id"]}' {$val["id"] == $vo['color_id'] ? 'selected' : ''}>{$val["name"]}</option>
+                        {/foreach}
+                    </select>
+                </div>
+            </div>
+            <div class="step7_function3_child">
+                <label class="control-label col-xs-12 col-sm-3">Lens:</label>
+                <div class="col-xs-12 col-sm-8">
+                    <select  id="lens_type" class="form-control selectpicker" name="row[change_lens][lens_type][]"  title="请选择">
+                        {if condition="$vo['color_id']"}
+                            {foreach name="lensColorList" item="val"}
+                            <option value='{$val["lens_id"]}' {$val["lens_id"] == $vo['index_id'] ? 'selected' : ''}>{$val['lens_data_name']}</option>
+                            {/foreach}
+                        {else /}
+                            {foreach name="prescription[$vo['prescription_type']]" item="val"}
+                            <option value='{$val["lens_id"]}' {$val["lens_id"] == $vo['index_id'] ? 'selected' : ''}>{$val['lens_data_name']}</option>
+                            {/foreach}
+                        {/if}
+                    </select>
+                </div>
+            </div>
+            <div class="step7_function3_child">
+                <label class="control-label col-xs-12 col-sm-3">Coating:</label>
+                <div class="col-xs-12 col-sm-8">
+                    <select id="c-coating_type" class="form-control selectpicker"
+                            name="row[change_lens][coating_type][]" title="请选择">
+                        {foreach name="coating_type" item="val"}
+                        <option value='{$val["id"]}' {$val["id"] == $vo['coating_id'] ? 'selected' : ''}>{$val["name"]}</option>
+                        {/foreach}
+                    </select>
+                </div>
+            </div>
+            <table>
+                <tbody>
+                <tr>
+                    <td style="text-align: center">value</td>
+                    <td style="text-align: center">SPH</td>
+                    <td style="text-align: center">CYL</td>
+                    <td style="text-align: center">AXI</td>
+                    <td style="text-align: center">ADD</td>
+                    <td style="text-align: center">PD</td>
+                </tr>
+                <tr>
+                    <td style="text-align: center">Right(OD)</td>
+                    <td><input class="form-control" name="row[change_lens][od_sph][]" type="text" value="{$vo['od_sph']}">
+                    </td>
+                    <td><input class="form-control" name="row[change_lens][od_cyl][]" type="text" value="{$vo['od_cyl']}">
+                    </td>
+                    <td><input class="form-control" name="row[change_lens][od_axis][]" type="text"
+                               value="{$vo['od_axis']}"></td>
+                    <td>
+                        {if condition="isset($vo['od_add'])"}
+                        <input class="form-control" name="row[change_lens][od_add][]" type="text" value="{$vo['od_add']}">
+                        {else /}
+                        <input class="form-control" name="row[change_lens][od_add][]" type="text" value="{$vo['total_add']}">
+                        {/if}
+                    </td>
+                    <td>
+                        {if condition="isset($vo['pd'])"}
+                        <input class="form-control" name="row[change_lens][pd_r][]" type="text" value="{$vo['pd']}">
+                        {else /}
+                        <input class="form-control" name="row[change_lens][pd_r][]" type="text" value="{$vo['pd_r']}">
+                        {/if}
+                    </td>
+                </tr>
+                <tr>
+                    <td style="text-align: center">Left(OS)</td>
+                    <td><input class="form-control" name="row[change_lens][os_sph][]" type="text" value="{$vo['os_sph']}">
+                    </td>
+                    <td><input class="form-control" name="row[change_lens][os_cyl][]" type="text" value="{$vo['os_cyl']}">
+                    </td>
+                    <td><input class="form-control" name="row[change_lens][os_axis][]" type="text"
+                               value="{$vo['os_axis']}"></td>
+                    <td>
+                        {if condition="isset($vo['os_add'])"}
+                        <input class="form-control" name="row[change_lens][os_add][]" type="text" value="{$vo['os_add']}">
+                        {else /}
+                        <input class="form-control" name="row[change_lens][os_add][]" type="text" value="{$vo['os_add']}">
+                        {/if}
+
+                    </td>
+                    <td>
+                        {if condition="isset($vo['pd'])"}
+                        <input class="form-control" name="row[change_lens][pd_l][]" type="text" value="">
+                        {else /}
+                        <input class="form-control" name="row[change_lens][pd_l][]" type="text" value="{$vo['pd_l']}">
+                        {/if}
+                    </td>
+                </tr>
+
+                <tr>
+                    <td style="text-align: center"></td>
+                    <td style="text-align: center">Prism Horizontal</td>
+                    <td style="text-align: center">Base Direction</td>
+                    <td style="text-align: center">Prism Vertical</td>
+                    <td style="text-align: center">Base Direction</td>
+                </tr>
+                <tr>
+                    <td style="text-align: center">Right(OD)</td>
+                    <td><input class="form-control" type="text" name="row[change_lens][od_pv][]" value="{$vo['od_pv']}">
+                    </td>
+                    <td><input class="form-control" type="text" name="row[change_lens][od_bd][]" value="{$vo['od_bd']}">
+                    </td>
+                    <td><input class="form-control" type="text" name="row[change_lens][od_pv_r][]"
+                               value="{$vo['od_pv_r']}"></td>
+                    <td><input class="form-control" type="text" name="row[change_lens][od_bd_r][]"
+                               value="{$vo['od_bd_r']}"></td>
+                </tr>
+                <tr>
+                    <td style="text-align: center">Left(OS)</td>
+                    <td><input class="form-control" name="row[change_lens][os_pv][]" type="text" value="{$vo['os_pv']}">
+                    </td>
+                    <td><input class="form-control" name="row[change_lens][os_bd][]" type="text" value="{$vo['os_bd']}">
+                    </td>
+                    <td><input class="form-control" name="row[change_lens][os_pv_r][]" type="text"
+                               value="{$vo['os_pv_r']}"></td>
+                    <td><input class="form-control" name="row[change_lens][os_bd_r][]" type="text"
+                               value="{$vo['os_bd_r']}"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{/foreach}
+{else /}
+<div style="width: 100%;float: left;" >
+    <div class="step7_function2 prescription_type_step">
+        <div class="step6_function2_child">
+            <label class="control-label col-xs-12 col-sm-3">SKU:</label>
+            <div class="col-xs-12 col-sm-8">
+                <input class="form-control" name="row[gift][original_sku][]" type="text" value="">
+
+            </div>
+        </div>
+
+        <div class="step6_function2_child">
+            <label class="control-label col-xs-12 col-sm-3">QTY:</label>
+            <div class="col-xs-12 col-sm-8">
+                <input class="form-control" name="row[gift][original_number][]" type="text" value="">
+            </div>
+        </div>
+        <div class="step6_function2_child">
+            <label class="control-label col-xs-12 col-sm-3">prescription_type:</label>
+            <div class="col-xs-12 col-sm-8">
+                <select class="form-control selectpicker prescription_type" name="row[gift][recipe_type][]"  title="请选择">
+                    {foreach name="prescription" item="val" key="key"}
+                    <option value='{$key}'>{$key}</option>
+                    {/foreach}
+                </select>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="step1_function3"  style="margin-top:10px;">
+        <div class="panel-body">
+            <div class="step1_function3_child">
+                <label class="control-label col-xs-12 col-sm-3">Color:</label>
+                <div class="col-xs-12 col-sm-8">
+                    <select id="color_type" class="form-control selectpicker" name="row[gift][color_id][]"  title="请选择">
+                        {foreach name="colorList" item="val"}
+                        <option value='{$val["id"]}'>{$val["name"]}</option>
+                        {/foreach}
+                    </select>
+                </div>
+            </div>
+            <div class="step1_function3_child">
+                <label class="control-label col-xs-12 col-sm-3">Lens:</label>
+                <div class="col-xs-12 col-sm-8">
+                    <select id="lens_type" class="form-control selectpicker" name="row[gift][lens_type][]"  title="请选择">
+
+                    </select>
+                </div>
+            </div>
+            <div class="step1_function3_child">
+                <label class="control-label col-xs-12 col-sm-3">Coating:</label>
+                <div class="col-xs-12 col-sm-8">
+                    <select id="c-coating_type" class="form-control selectpicker"
+                            name="row[gift][coating_type][]"  title="请选择">
+                        {foreach name="coating_type" item="val"}
+                        <option value='{$val["id"]}'>{$val["name"]}</option>
+                        {/foreach}
+                    </select>
+                </div>
+            </div>
+            <table>
+                <tbody>
+                <tr>
+                    <td style="text-align: center">value</td>
+                    <td style="text-align: center">SPH</td>
+                    <td style="text-align: center">CYL</td>
+                    <td style="text-align: center">AXI</td>
+                    <td style="text-align: center">ADD</td>
+                    <td style="text-align: center">PD</td>
+                </tr>
+                <tr>
+                    <td style="text-align: center">Right(OD)</td>
+                    <td><input class="form-control" name="row[gift][od_sph][]" type="text" value="">
+                    </td>
+                    <td><input class="form-control" name="row[gift][od_cyl][]" type="text" value="">
+                    </td>
+                    <td><input class="form-control" name="row[gift][od_axis][]" type="text"
+                               value=""></td>
+                    <td><input class="form-control" name="row[gift][od_add][]" type="text" value="">
+                    </td>
+                    <td><input class="form-control" name="row[gift][pd_r][]" type="text" value="">
+                    </td>
+                </tr>
+                <tr>
+                    <td style="text-align: center">Left(OS)</td>
+                    <td><input class="form-control" name="row[gift][os_sph][]" type="text" value="">
+                    </td>
+                    <td><input class="form-control" name="row[gift][os_cyl][]" type="text" value="">
+                    </td>
+                    <td><input class="form-control" name="row[gift][os_axis][]" type="text"
+                               value=""></td>
+                    <td><input class="form-control" name="row[gift][os_add][]" type="text" placeholder="单add填写到上边即可" value="">
+                    </td>
+                    <td><input class="form-control" name="row[gift][pd_l][]" placeholder="单pd填写到上边即可" type="text" value="">
+                    </td>
+                </tr>
+
+                <tr>
+                    <td style="text-align: center"></td>
+                    <td style="text-align: center">Prism Horizontal</td>
+                    <td style="text-align: center">Base Direction</td>
+                    <td style="text-align: center">Prism Vertical</td>
+                    <td style="text-align: center">Base Direction</td>
+                </tr>
+                <tr>
+                    <td style="text-align: center">Right(OD)</td>
+                    <td><input class="form-control" type="text" name="row[gift][od_pv][]" value="">
+                    </td>
+                    <td><input class="form-control" type="text" name="row[gift][od_bd][]" value="">
+                    </td>
+                    <td><input class="form-control" type="text" name="row[gift][od_pv_r][]"
+                               value=""></td>
+                    <td><input class="form-control" type="text" name="row[gift][od_bd_r][]"
+                               value=""></td>
+                </tr>
+                <tr>
+                    <td style="text-align: center">Left(OS)</td>
+                    <td><input class="form-control" name="row[gift][os_pv][]" type="text" value="">
+                    </td>
+                    <td><input class="form-control" name="row[gift][os_bd][]" type="text" value="">
+                    </td>
+                    <td><input class="form-control" name="row[gift][os_pv_r][]" type="text"
+                               value=""></td>
+                    <td><input class="form-control" name="row[gift][os_bd_r][]" type="text"
+                               value=""></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+   
+</div>
+{/if}

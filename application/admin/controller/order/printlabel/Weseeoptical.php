@@ -12,7 +12,7 @@ use think\exception\PDOException;
 use Util\WeseeopticalPrescriptionDetailHelper;
 use Util\SKUHelper;
 use app\admin\model\OrderLog;
-
+use app\admin\model\WorkChangeSkuLog;
 /**
  * Sales Flat Order
  *
@@ -63,14 +63,13 @@ class Weseeoptical extends Backend
                 $map['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed']];
             }
 
-            $infoSynergyTask = new \app\admin\model\infosynergytaskmanage\InfoSynergyTask;
-            if ($filter['task_label'] == 1 || $filter['task_label'] == '0') {
-                $swhere['is_del'] = 1;
-                $swhere['order_platform'] = 3;
-                $swhere['synergy_order_id'] = 2;
-                $order_arr = $infoSynergyTask->where($swhere)->order('create_time desc')->column('synergy_order_number');
-                $map['increment_id'] = ['in', $order_arr];
-                unset($filter['task_label']);
+            //SKU搜索
+            if ($filter['sku']) {
+                $smap['sku'] = ['like', '%' . $filter['sku'] . '%'];
+                $smap['status'] = $filter['status'] ? ['in', $filter['status']] : $map['status'];
+                $ids = $this->model->getOrderId($smap);
+                $map['entity_id'] = ['in', $ids];
+                unset($filter['sku']);
                 $this->request->get(['filter' => json_encode($filter)]);
             }
 
@@ -82,8 +81,8 @@ class Weseeoptical extends Backend
                 ->order($sort, $order)
                 ->count();
             $field = 'order_type,custom_order_prescription_type,entity_id,status,base_shipping_amount,increment_id,coupon_code,shipping_description,store_id,customer_id,base_discount_amount,base_grand_total,
-                     total_qty_ordered,quote_id,customer_email,customer_firstname,customer_lastname,custom_is_match_frame_new,custom_is_match_lens_new,
-                     custom_is_send_factory_new,custom_is_delivery_new,custom_print_label_new,custom_order_prescription,created_at';
+                total_qty_ordered,quote_id,customer_email,customer_firstname,customer_lastname,custom_is_match_frame_new,custom_is_match_lens_new,
+                custom_is_send_factory_new,custom_is_delivery_new,custom_print_label_new,custom_order_prescription,created_at';
             $list = $this->model
                 ->field($field)
                 ->where($map)
@@ -93,22 +92,6 @@ class Weseeoptical extends Backend
                 ->select();
 
             $list = collection($list)->toArray();
-
-            //查询订单是否存在协同任务
-            $increment_ids = array_column($list, 'increment_id');
-            $infoSynergyTask = new \app\admin\model\infosynergytaskmanage\InfoSynergyTask;
-            $swhere['synergy_order_number'] = ['in', $increment_ids];
-            $swhere['is_del'] = 1;
-            $swhere['order_platform'] = 3;
-            $swhere['synergy_order_id'] = 2;
-            $order_arr = $infoSynergyTask->where($swhere)->column('synergy_order_number');
-            //查询是否存在协同任务
-            foreach ($list as $k => $v) {
-                if (in_array($v['increment_id'], $order_arr)) {
-                    $list[$k]['task_info'] = 1;
-                }
-            }
-
             $result = array("total" => $total, "rows" => $list);
             return json($result);
         }
@@ -128,23 +111,13 @@ class Weseeoptical extends Backend
             if ($increment_id) {
                 $map['increment_id'] = $increment_id;
                 $map['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed']];
+                $field = 'order_type,custom_order_prescription_type,entity_id,status,base_shipping_amount,increment_id,base_grand_total,
+                total_qty_ordered,custom_is_match_frame_new,custom_is_match_lens_new,
+                custom_is_send_factory_new,custom_is_delivery_new,custom_print_label_new,custom_order_prescription,created_at';
                 $list = $this->model
+                    ->field($field)
                     ->where($map)
                     ->find();
-                if ($list) {
-                    //查询订单是否存在协同任务
-                    $infoSynergyTask = new \app\admin\model\infosynergytaskmanage\InfoSynergyTask;
-                    $swhere['synergy_order_number'] = $increment_id;
-                    $swhere['is_del'] = 1;
-                    $swhere['order_platform'] = 5;
-                    $swhere['synergy_order_id'] = 2;
-                    $count = $infoSynergyTask->where($swhere)->count();
-                    //查询是否存在协同任务
-                    if ($count > 0) {
-                        $list['task_info'] = 1;
-                    }
-                }
-
                 $result = ['code' => 1, 'data' => $list ?? []];
             } else {
                 $result = array("total" => 0, "rows" => []);
@@ -202,20 +175,26 @@ class Weseeoptical extends Backend
         }
     }
 
-    //配镜架 配镜片 加工 质检通过
+    /**
+     * 配镜架 配镜片 加工 质检通过
+     */
     public function setOrderStatus()
     {
         $entity_ids = input('id_params/a');
-
+        if (!$entity_ids) {
+            $this->error('参数错误！！');
+        }
         $status = input('status');
         $label = input('label');
         $map['entity_id'] = ['in', $entity_ids];
-        $res = $this->model->where($map)->select();
+        $res = $this->model->field('increment_id,custom_is_match_frame_new,custom_is_delivery_new,custom_is_match_frame_new')->where($map)->select();
+        if (!$res) {
+            $this->error('未查询到订单数据！！');
+        }
         foreach ($res as $v) {
             if ($status == 1 && $v['custom_is_match_frame_new'] == 1) {
                 $this->error('存在已配过镜架的订单！！');
             }
-
             if ($v['custom_is_delivery_new'] == 1) {
                 $this->error('存在已质检通过的订单！！');
             }
@@ -225,173 +204,187 @@ class Weseeoptical extends Backend
             }
         }
 
-        if ($entity_ids) {
-
-            switch ($status) {
-                case 1:
-                    //配镜架
-                    $data['custom_is_match_frame_new'] = 1;
-                    $data['custom_match_frame_created_at_new'] = date('Y-m-d H:i:s', time());
-                    $data['custom_match_frame_person_new'] = session('admin.nickname');
-                    $params['type'] = 2;
-                    break;
-                case 2:
-                    //配镜片
-                    $data['custom_is_match_lens_new'] = 1;
-                    $data['custom_match_lens_created_at_new'] = date('Y-m-d H:i:s', time());
-                    $data['custom_match_lens_person_new'] = session('admin.nickname');
-                    $params['type'] = 3;
-                    break;
-                case 3:
-                    //移送加工时间
-                    $data['custom_is_send_factory_new'] = 1;
-                    $data['custom_match_factory_created_at_new'] = date('Y-m-d H:i:s', time());
-                    $data['custom_match_factory_person_new'] = session('admin.nickname');
-                    $params['type'] = 4;
-                    break;
-                case 4:
-                    //提货
-                    $data['custom_is_delivery_new'] = 1;
-                    $data['custom_match_delivery_created_at_new'] = date('Y-m-d H:i:s', time());
-                    $data['custom_match_delivery_person_new'] = session('admin.nickname');
-                    $params['type'] = 5;
-                    break;
-                default:
+        switch ($status) {
+            case 1:
+                //配镜架
+                $data['custom_is_match_frame_new'] = 1;
+                $data['custom_match_frame_created_at_new'] = date('Y-m-d H:i:s', time());
+                $data['custom_match_frame_person_new'] = session('admin.nickname');
+                $params['type'] = 2;
+                break;
+            case 2:
+                //配镜片
+                $data['custom_is_match_lens_new'] = 1;
+                $data['custom_match_lens_created_at_new'] = date('Y-m-d H:i:s', time());
+                $data['custom_match_lens_person_new'] = session('admin.nickname');
+                $params['type'] = 3;
+                break;
+            case 3:
+                //移送加工
+                $data['custom_is_send_factory_new'] = 1;
+                $data['custom_match_factory_created_at_new'] = date('Y-m-d H:i:s', time());
+                $data['custom_match_factory_person_new'] = session('admin.nickname');
+                $params['type'] = 4;
+                break;
+            case 4:
+                //质检通过
+                $data['custom_is_delivery_new'] = 1;
+                $data['custom_match_delivery_created_at_new'] = date('Y-m-d H:i:s', time());
+                $data['custom_match_delivery_person_new'] = session('admin.nickname');
+                $params['type'] = 5;
+                break;
+            default:
+                $this->error('参数错误');
+        }
+        $item = new \app\admin\model\itemmanage\Item;
+        $this->model->startTrans();
+        $item->startTrans();
+        try {
+            $result = $this->model->where($map)->update($data);
+            if (false === $result) {
+                throw new Exception("操作失败！！");
             }
-            $item = new \app\admin\model\itemmanage\Item;
-            $outStockItem = new \app\admin\model\warehouse\OutStockItem;
-            $this->model->startTrans();
-            $item->startTrans();
-            try {
-                $result = $this->model->where($map)->update($data);
-                if ($status == 1) {
-                    //查询出质检通过的订单
-                    $res = $this->model->alias('a')->where($map)->field('a.increment_id,b.sku,b.qty_ordered,b.is_change_frame')->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->select();
-                    if (!$res) {
-                        throw new Exception("未查询到订单数据！！");
-                    };
-
-                    $ItemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku;
-                    $error = [];
-                    //查出订单SKU映射表对应的仓库SKU
-                    foreach ($res as $k => &$v) {
-
-                        //是否为更换镜架 如果为更换镜架 需处理更换之后SKU的库存
-                        if ($v['is_change_frame'] == 2) {
-                            //根据订单号 SKU查询更换镜架记录表 处理更换之后SKU库存
-                            $infotask = new \app\admin\model\infosynergytaskmanage\InfoSynergyTaskChangeSku;
-                            $infoTaskRes = $infotask->getChangeSkuData($v['increment_id'], 3, $v['sku']);
-
-                            $v['sku'] = $infoTaskRes['change_sku'];
-                            $v['qty_ordered'] = $infoTaskRes['change_number'];
-                        }
-
-                        $trueSku = $ItemPlatformSku->getTrueSku($v['sku'], 5);
-                        //总库存
-                        $item_map['sku'] = $trueSku;
-                        $item_map['is_del'] = 1;
-                        if ($trueSku) {
-                            //增加配货占用
-                            $res_three = $item->where($item_map)->setInc('distribution_occupy_stock', $v['qty_ordered']);
-                        }
-
-                        if (!$res_three) {
-                            $error[] = $k;
-                        }
+            //配镜架
+            if ($status == 1) {
+                //查询出订单数据
+                $list = $this->model->alias('a')->where($map)->field('a.increment_id,b.sku,b.qty_ordered')->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->select();
+                if (!$list) {
+                    throw new Exception("未查询到订单数据！！");
+                };
+                //sku映射表
+                $ItemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku;
+  
+                //查出订单SKU映射表对应的仓库SKU
+                $number = 0;
+                foreach ($list as $k => &$v) {
+                    //转仓库SKU
+                    $trueSku = $ItemPlatformSku->getTrueSku(trim($v['sku']), 5);
+                    if (!$trueSku) {
+                        throw new Exception("增加配货占用库存失败！！请检查更换镜框SKU:" . $v['sku']);
                     }
-                    unset($v);
 
-                    if (count($error)) {
-                        throw new Exception("增加配货占用库存失败！！请检查SKU");
-                    };
-                    $item->commit();
-                }
+                    $qty = $v['qty_ordered'];
 
-                //质检通过扣减库存
-                if ($status == 4) {
-                    //查询出质检通过的订单
-                    $res = $this->model->alias('a')->where($map)->field('a.increment_id,b.sku,b.qty_ordered,b.is_change_frame')->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->select();
-                    if (!$res) {
-                        throw new Exception("未查询到订单数据！！");
-                    };
+                    // //判断是否有实时库存
+                    // $realStock = $item->getRealStock($trueSku);
+                    // if ($qty > $realStock) {
+                    //     throw new Exception("SKU:" . $v['sku'] . "实时库存不足");
+                    // }
 
-                    $ItemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku;
-                    //查出订单SKU映射表对应的仓库SKU
-                    $error = [];
-                    foreach ($res as $k => &$v) {
-
-                        //是否为更换镜架 如果为更换镜架 需处理更换之后SKU的库存
-                        if ($v['is_change_frame'] == 2) {
-                            //根据订单号 SKU查询更换镜架记录表 处理更换之后SKU库存
-                            $infotask = new \app\admin\model\infosynergytaskmanage\InfoSynergyTaskChangeSku;
-                            $infoTaskRes = $infotask->getChangeSkuData($v['increment_id'], 3, $v['sku']);
-
-                            $v['sku'] = $infoTaskRes['change_sku'];
-                            $v['qty_ordered'] = $infoTaskRes['change_number'];
-                        }
-
-                        $trueSku = $ItemPlatformSku->getTrueSku($v['sku'], 5);
-                        //总库存
-                        $item_map['sku'] = $trueSku;
-                        $item_map['is_del'] = 1;
-                        if ($trueSku) {
-                            //扣减总库存 扣减占用库存
-                            $res_one = $item->where($item_map)->setDec('stock', $v['qty_ordered']);
-                            //占用库存
-                            $res_two = $item->where($item_map)->setDec('occupy_stock', $v['qty_ordered']);
-
-                            //扣减配货占用
-                            $res_three = $item->where($item_map)->setDec('distribution_occupy_stock', $v['qty_ordered']);
-                        }
-
-                        if (!$res_one || !$res_two || !$res_three) {
-                            $error[] = $k;
-                        }
-
-                        //先入先出逻辑
-                        $rows['sku'] = $trueSku;
-                        $rows['out_stock_num'] = $v['qty_ordered'];
-                        $rows['increment_id'] = $v['increment_id'];
-                        $outStockItem->setOrderOutStock($rows);
+                    $map = [];
+                    $map['sku'] = $trueSku;
+                    $map['is_del'] = 1;
+                    //增加配货占用
+                    $res = $item->where($map)->setInc('distribution_occupy_stock', $qty);
+                    if (false === $res) {
+                        throw new Exception("增加配货占用库存失败！！请检查更换镜框SKU:" . $v['sku']);
                     }
-                    unset($v);
 
-                    if (count($error)) {
-                        throw new Exception("扣减库存失败！！请检查SKU");
-                    };
-                    $item->commit();
+                    $number++;
+                    //100条提交一次
+                    if ($number == 100) {
+                        $item->commit();
+                        $number = 0;
+                    }
+
+                    //插入日志表
+                    (new WorkChangeSkuLog())->setData([
+                        'increment_id'            => $v['increment_id'],
+                        'site'                     => 5,
+                        'type'                     => 5, //配镜架
+                        'sku'                     => $trueSku,
+                        'distribution_change_num' => $qty,
+                        'operation_person'        => session('admin.nickname'),
+                        'create_time'             => date('Y-m-d H:i:s')
+                    ]);
                 }
-
-                $this->model->commit();
-            } catch (PDOException $e) {
-                $this->model->rollback();
-                $this->error($e->getMessage());
-            } catch (Exception $e) {
-                $this->model->rollback();
-                $this->error($e->getMessage());
+                unset($v);
+                $item->commit();
             }
-            if ($result) {
-                $params['site'] = 5;
-                $params['num'] = count($entity_ids);
-                $params['order_ids'] = implode(',', $entity_ids);
-                (new OrderLog())->setOrderLog($params);
 
+            //质检通过扣减库存
+            if ($status == 4) {
+                //查询出质检通过的订单
+                $list = $this->model->alias('a')->where($map)->field('a.increment_id,b.sku,b.qty_ordered')->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->select();
+                if (!$list) {
+                    throw new Exception("未查询到订单数据！！");
+                };
+                //sku映射表
+                $ItemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku;
+                $number = 0; //记录更新次数
+                foreach ($list as &$v) {
+                    //查出订单SKU映射表对应的仓库SKU
+                    $trueSku = $ItemPlatformSku->getTrueSku(trim($v['sku']), 5);
+                    if (!$trueSku) {
+                        throw new Exception("扣减库存失败！！请检查SKU:" . $v['sku']);
+                    }
+                    $qty = $v['qty_ordered'];
+                    if ($qty == 0) {
+                        continue;
+                    }
 
-                //用来判断是否从_list列表页进来
-                if ($label == 'list') {
-                    //订单号
-                    $map['entity_id'] = ['in', $entity_ids];
-                    $list = $this->model
-                        ->where($map)
-                        ->select();
-                    $list = collection($list)->toArray();
-                } else {
-                    $list = 'success';
+                    //总库存
+                    $item_map['sku'] = $trueSku;
+                    $item_map['is_del'] = 1;
+                    //扣减总库存 扣减占用库存 扣减配货占用
+                    $res = $item->where($item_map)->dec('stock', $qty)->dec('occupy_stock', $qty)->dec('distribution_occupy_stock', $qty)->update();
+                    if (false === $res) {
+                        throw new Exception("扣减库存失败！！请检查SKU:" . $v['sku']);
+                    }
+                    $number++;
+                    //100条提交一次
+                    if ($number == 100) {
+                        $item->commit();
+                        $number = 0;
+                    }
+                    //插入日志表
+                    (new WorkChangeSkuLog())->setData([
+                        'increment_id'            => $v['increment_id'],
+                        'site'                    => 5,
+                        'type'                    => 6, //质检通过
+                        'sku'                     => $trueSku,
+                        'stock_change_num'        => $qty,
+                        'occupy_change_num'       => $qty,
+                        'distribution_change_num' => $qty,
+                        'operation_person'        => session('admin.nickname'),
+                        'create_time'             => date('Y-m-d H:i:s')
+                    ]);
                 }
-                return $this->success('操作成功!', '', $list, 200);
+                unset($v);
+                $item->commit();
+            }
+
+            $this->model->commit();
+        } catch (PDOException $e) {
+            $item->rollback();
+            $this->model->rollback();
+            $this->error($e->getMessage());
+        } catch (Exception $e) {
+            $item->rollback();
+            $this->model->rollback();
+            $this->error($e->getMessage());
+        }
+        if (false !== $result) {
+            $params['num'] = count($entity_ids);
+            $params['order_ids'] = implode(',', $entity_ids);
+            $params['site'] = 5;
+            (new OrderLog())->setOrderLog($params);
+
+            //用来判断是否从_list列表页进来
+            if ($label == 'list') {
+                //订单号
+                $map = [];
+                $map['entity_id'] = ['in', $entity_ids];
+                $list = $this->model
+                    ->where($map)
+                    ->select();
+                $list = collection($list)->toArray();
             } else {
-                return $this->error('操作失败', '', 'error', 0);
+                $list = 'success';
             }
+            return $this->success('操作成功!', '', $list, 200);
+        } else {
+            return $this->error('操作失败', '', 'error', 0);
         }
     }
 
@@ -401,8 +394,6 @@ class Weseeoptical extends Backend
         if (!$row) {
             $this->error(__('No Results were found'));
         }
-        //查询订单详情
-        // $result = $this->model->getOrderDetail(3, $ids);
         $result = WeseeopticalPrescriptionDetailHelper::get_one_by_entity_id($ids);
         $this->assign('result', $result);
         return $this->view->fetch();

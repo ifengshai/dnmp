@@ -8,18 +8,19 @@ use Util\NihaoPrescriptionDetailHelper;
 use Util\ZeeloolPrescriptionDetailHelper;
 use Util\VooguemePrescriptionDetailHelper;
 use Util\WeseeopticalPrescriptionDetailHelper;
+use Util\MeeloogPrescriptionDetailHelper;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 use PhpOffice\PhpSpreadsheet\Reader\Xls;
 use PhpOffice\PhpSpreadsheet\Reader\Csv;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use think\Exception;
-
+use think\Loader;
 /**
  * 订单列表
  */
 class Index extends Backend
 {
-
+    protected $noNeedRight = ['batch_print_label_new'];
     protected $model = null;
 
     public function _initialize()
@@ -29,6 +30,7 @@ class Index extends Backend
         $this->zeelool = new \app\admin\model\order\order\Zeelool;
         $this->voogueme = new \app\admin\model\order\order\Voogueme;
         $this->weseeoptical = new \app\admin\model\order\order\Weseeoptical;
+        $this->meeloog = new \app\admin\model\order\order\Meeloog;
     }
 
     /**
@@ -61,6 +63,8 @@ class Index extends Backend
                 $model = $this->nihao;
             } elseif ($label == 4) {
                 $model = $this->weseeoptical;
+            } elseif ($label == 5) {
+                $model = $this->meeloog;
             }
 
             $filter = json_decode($this->request->get('filter'), true);
@@ -94,6 +98,29 @@ class Index extends Backend
 
             $list = collection($list)->toArray();
 
+            $arr = [
+                'Business express(4-7 business days)',
+                'Expedited',
+                'Business express(7-14 Days)',
+                'Business express(7-12 Days)',
+                'Business express',
+                'Business express (7-12 days)',
+                'Business express(7-12 days)',
+                'Express Shipping (3-5 Days)',
+                'Express Shipping (5-8Days)',
+                'Express Shipping (3-5 Business Days)',
+                'Express Shipping (5-8 Business Days)',
+                'Business Express(7-12 Days)'
+            ];
+            foreach ($list as &$v) {
+                if (in_array($v['shipping_description'],$arr)) {
+                    $v['label'] = 1;
+                } else {
+                    $v['label'] = 0;
+                }
+            }
+            unset($v);
+
             $result = array("total" => $total, "rows" => $list);
 
             return json($result);
@@ -119,6 +146,8 @@ class Index extends Backend
             $model = $this->nihao;
         } elseif ($label == 4) {
             $model = $this->weseeoptical;
+        } elseif ($label == 5) {
+            $model = $this->meeloog;
         }
 
         //查询订单详情
@@ -145,6 +174,8 @@ class Index extends Backend
             $goods = NihaoPrescriptionDetailHelper::get_list_by_entity_ids($ids);
         } elseif ($label == 4) {
             $goods = WeseeopticalPrescriptionDetailHelper::get_list_by_entity_ids($ids);
+        } elseif ($label == 5) {
+            $goods = MeeloogPrescriptionDetailHelper::get_list_by_entity_ids($ids);
         }
 
         //获取支付信息
@@ -174,6 +205,8 @@ class Index extends Backend
             $model = $this->nihao;
         } elseif ($label == 4) {
             $model = $this->weseeoptical;
+        } elseif ($label == 5) {
+            $model = $this->meeloog;
         }
 
         //查询订单详情
@@ -468,5 +501,129 @@ class Index extends Backend
             }
         }
         $this->success();
+    }
+
+
+    /**
+     * 生成新的条形码
+     */
+    protected function generate_barcode_new($text, $fileName)
+    {
+        // 引用barcode文件夹对应的类
+        Loader::import('BCode.BCGFontFile', EXTEND_PATH);
+        //Loader::import('BCode.BCGColor',EXTEND_PATH);
+        Loader::import('BCode.BCGDrawing', EXTEND_PATH);
+        // 条形码的编码格式
+        // Loader::import('BCode.BCGcode39',EXTEND_PATH,'.barcode.php');
+        Loader::import('BCode.BCGcode128', EXTEND_PATH, '.barcode.php');
+
+        // $code = '';
+        // 加载字体大小
+        $font = new \BCGFontFile(EXTEND_PATH . '/BCode/font/Arial.ttf', 18);
+        //颜色条形码
+        $color_black = new \BCGColor(0, 0, 0);
+        $color_white = new \BCGColor(255, 255, 255);
+        $label = new \BCGLabel();
+        $label->setPosition(\BCGLabel::POSITION_TOP);
+        $label->setText('Made In China');
+        $label->setFont($font);
+        $drawException = null;
+        try {
+            // $code = new \BCGcode39();
+            $code = new \BCGcode128();
+            $code->setScale(4);
+            $code->setThickness(18); // 条形码的厚度
+            $code->setForegroundColor($color_black); // 条形码颜色
+            $code->setBackgroundColor($color_white); // 空白间隙颜色
+            $code->setFont($font); //设置字体
+            $code->addLabel($label); //设置字体
+            $code->parse($text); // 条形码需要的数据内容
+        } catch (\Exception $exception) {
+            $drawException = $exception;
+        }
+        //根据以上条件绘制条形码
+        $drawing = new \BCGDrawing('', $color_white);
+        if ($drawException) {
+            $drawing->drawException($drawException);
+        } else {
+            $drawing->setBarcode($code);
+            if ($fileName) {
+                // echo 'setFilename<br>';
+                $drawing->setFilename($fileName);
+            }
+            $drawing->draw();
+        }
+        // 生成PNG格式的图片
+        header('Content-Type: image/png');
+        // header('Content-Disposition:attachment; filename="barcode.png"'); //自动下载
+        $drawing->finish(\BCGDrawing::IMG_FORMAT_PNG);
+    }
+
+    //批量打印标签
+    public function batch_print_label_new()
+    {
+        //根据传的标签切换对应站点数据库
+        $label = $this->request->get('label', 1);
+        if ($label == 1) {
+            $model = $this->zeelool;
+        } elseif ($label == 2) {
+            $model = $this->voogueme;
+        } elseif ($label == 3) {
+            $model = $this->nihao;
+        } elseif ($label == 4) {
+            $model = $this->weseeoptical;
+        } elseif ($label == 5) {
+            $model = $this->meeloog;
+        }
+        ob_start();
+        $entity_ids = rtrim(input('id_params'), ',');
+        if ($entity_ids) {
+            $processing_order_querySql = "select sfo.increment_id,round(sfo.total_qty_ordered,0) NUM,sfoi.product_options,sfoi.order_id,sfo.`status`,sfoi.sku,sfoi.qty_ordered,sfo.created_at
+from sales_flat_order_item sfoi
+left join sales_flat_order sfo on  sfoi.order_id=sfo.entity_id 
+where sfo.`status` in ('processing','creditcard_proccessing','free_processing','complete','paypal_reversed','paypal_canceled_reversal') and sfo.entity_id in($entity_ids)
+order by NUM asc;";
+            $processing_order_list = $model->query($processing_order_querySql);
+            $file_header = <<<EOF
+                <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<style>
+body{ margin:0; padding:0}
+.single_box{margin:0 auto;width: 400px;padding:1mm;margin-bottom:2mm;}
+table.addpro {clear: both;table-layout: fixed; margin-top:6px; border-top:1px solid #000;border-left:1px solid #000; font-size:12px;}
+table.addpro .title {background: none repeat scroll 0 0 #f5f5f5; }
+table.addpro .title  td {border-collapse: collapse;color: #000;text-align: center; font-weight:normal; }
+table.addpro tbody td {word-break: break-all; text-align: center;border-bottom:1px solid #000;border-right:1px solid #000;}
+table.addpro.re tbody td{ position:relative}
+</style>
+EOF;
+            $file_content = '';
+            $temp_increment_id = 0;
+            foreach ($processing_order_list as $processing_key => $processing_value) {
+                if ($temp_increment_id != $processing_value['increment_id']) {
+                    $temp_increment_id = $processing_value['increment_id'];
+
+                    $date = substr($processing_value['created_at'], 0, strpos($processing_value['created_at'], " "));
+                    $fileName = ROOT_PATH . "public" . DS . "uploads" . DS . "printOrder" . DS . "zeelool" . DS . "new" . DS . "$date" . DS . "$temp_increment_id.png";
+                    // dump($fileName);
+                    $dir = ROOT_PATH . "public" . DS . "uploads" . DS . "printOrder" . DS . "zeelool". DS . "new"  . DS . "$date";
+                    if (!file_exists($dir)) {
+                        mkdir($dir, 0777, true);
+                        // echo '创建文件夹$dir成功';
+                    } else {
+                        // echo '需创建的文件夹$dir已经存在';
+                    }
+                    $img_url = "/uploads/printOrder/zeelool/new/$date/$temp_increment_id.png";
+                    //生成条形码
+                    $this->generate_barcode_new($temp_increment_id, $fileName);
+                    // echo '<br>需要打印'.$temp_increment_id;
+                    $file_content .= "<div  class = 'single_box'>
+                <table width='400mm' height='102px' border='0' cellspacing='0' cellpadding='0' class='addpro' style='margin:0px auto;margin-top:0px;padding:0px;'>
+                <tr>
+                <td rowspan='5' colspan='3' style='padding:10px;'><img src='" . $img_url . "' height='80%'><br></td></tr>                
+                </table></div>";
+                }
+            }
+            echo $file_header . $file_content;
+        }
     }
 }
