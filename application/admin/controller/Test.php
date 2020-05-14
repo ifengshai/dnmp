@@ -114,13 +114,13 @@ class Test extends Backend
     public function setOrderNoteData()
     {
         $users = $this->user->column('id', 'nickname');
-        $field = 'custom_print_label_new,custom_print_label_person_new,custom_print_label_created_at_new,custom_is_match_frame_new,custom_match_frame_person_new,
+        $field = 'status,custom_print_label_new,custom_print_label_person_new,custom_print_label_created_at_new,custom_is_match_frame_new,custom_match_frame_person_new,
         custom_match_frame_created_at_new,custom_is_match_lens_new,custom_match_lens_created_at_new,custom_match_lens_person_new,custom_is_send_factory_new,
         custom_match_factory_person_new,custom_match_factory_created_at_new,custom_is_delivery_new,custom_match_delivery_person_new,custom_match_delivery_created_at_new,
         custom_order_prescription_type,a.created_at,a.updated_at,b.track_number,b.created_at as create_time,b.title,a.entity_id,a.increment_id,a.custom_order_prescription_type
         ';
         $map['a.created_at'] = ['>=', '2020-01-01 00:00:00'];
-        $map['a.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal']];
+        // $map['a.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal']];
         $zeelool_data = $this->zeelool->alias('a')->field($field)
             ->join(['sales_flat_shipment_track' => 'b'], 'a.entity_id=b.order_id', 'left')
             ->where($map)->limit(100)->select();
@@ -141,22 +141,29 @@ class Test extends Backend
             $list[$k]['track_number'] = '';
             $list[$k]['handle_user_id'] = 0;
             $list[$k]['handle_user_name'] = '';
-
-            //支付
-            $list[$k + 1]['order_node'] = 0;
-            $list[$k + 1]['node_type'] = 1;
-            $list[$k + 1]['content'] = 'Your payment has been successful.';
-            $list[$k + 1]['create_time'] = $v['updated_at'];
-            $list[$k + 1]['site'] = 1;
-            $list[$k + 1]['order_id'] = $v['entity_id'];
-            $list[$k + 1]['order_number'] = $v['increment_id'];
-            $list[$k + 1]['shipment_type'] = '';
-            $list[$k + 1]['track_number'] = '';
-            $list[$k + 1]['handle_user_id'] = 0;
-            $list[$k + 1]['handle_user_name'] = '';
-
             $data['order_node'] = 0;
-            $data['node_type'] = 1;
+            $data['node_type'] = 0;
+
+            if (in_array($v['status'], ['processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal', 'payment_review'])) {
+
+                //支付
+                $list[$k + 1]['order_node'] = 0;
+                $list[$k + 1]['node_type'] = 1;
+                $list[$k + 1]['content'] = 'Your payment has been successful.';
+                $list[$k + 1]['create_time'] = $v['updated_at'];
+                $list[$k + 1]['site'] = 1;
+                $list[$k + 1]['order_id'] = $v['entity_id'];
+                $list[$k + 1]['order_number'] = $v['increment_id'];
+                $list[$k + 1]['shipment_type'] = '';
+                $list[$k + 1]['track_number'] = '';
+                $list[$k + 1]['handle_user_id'] = 0;
+                $list[$k + 1]['handle_user_name'] = '';
+
+                $data['order_node'] = 0;
+                $data['node_type'] = 1;
+
+            }
+
             $data['create_time'] = $v['updated_at'];
             $data['site'] = 1;
             $data['order_id'] = $v['entity_id'];
