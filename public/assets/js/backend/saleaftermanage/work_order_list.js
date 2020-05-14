@@ -671,6 +671,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     return false;
                 }
                 var str = incrementId.substring(0, 3);
+                console.log(str);
                 //判断站点
                 if (str == '100' || str == '400' || str == '500') {
                     $("#work_platform").val(1);
