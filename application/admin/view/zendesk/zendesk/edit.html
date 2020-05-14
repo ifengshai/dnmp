@@ -68,7 +68,7 @@
                                 <span class="username">
                                   <span href="#"><input id="c-subject" data-rule="required" value="{$ticket->subject}" class="form-control ticket-subject" name="row[subject]" type="text"></span>
                                 </span>
-                                <span class="description">{$ticket->update_time} · {$ticket->username} {$ticket->email} · {$ticket->channel}</span>
+                                <span class="description">{$ticket->zendesk_update_time} · {$ticket->username} {$ticket->email} · {$ticket->channel}</span>
                             </div>
                             <div class="user-block pull-right">
                                 <button type="button" class="btn btn-default" data-toggle="modal" data-target="#modal-default">
@@ -132,7 +132,22 @@
                         <div class="form-group">
                             <label class="control-label col-xs-12 col-sm-2">选择模板：</label>
                             <div class="col-xs-12 col-sm-8">
-                                {:Form::select('', $templates, null, ['class'=>'form-control selectpicker macro-apply', null,'data-live-search' => true,'id'=>'Entry_status_select'])}
+                                <select id="Entry_status_select" class="form-control selectpicker macro-apply" data-live-search="true" title="选择模板">
+                                    <optgroup label="常用模板">
+                                        {foreach name="templates" item="vo" key="key"}
+                                        {if condition="$key <= 4"}
+                                        <option value="{$vo.id}">{$vo.title}</option>
+                                        {/if}
+                                        {/foreach}
+                                    </optgroup>
+                                    <optgroup label="所有模板">
+                                        {foreach name="templates" item="vo" key="key"}
+                                        {if condition="$key > 4"}
+                                        <option value="{$vo.id}">{$vo.title}</option>
+                                        {/if}
+                                        {/foreach}
+                                    </optgroup>
+                                </select>
                             </div>
                         </div>
                         {if condition="$ticket->status != 5"}
@@ -298,7 +313,7 @@
                         <div class="col-sm-4 col-md-6">
                             <div class="color-palette-set">
                                 <div class=""><span class="label label-primary">#{$vo->ticket_id}</span></div>
-                                <div class=""><span class="label text-green">{$vo->update_time} {$vo->username}</span></div>
+                                <div class=""><span class="label text-green">{$vo->zendesk_update_time} {$vo->username}</span></div>
                                 <div class="merge" data-subject="{$ticket->subject}" data-pid="{$ticket->ticket_id}" data-nid="{$vo->ticket_id}"><a href=""><b>{$vo->subject}</b></a></div>
                             </div>
                         </div>

@@ -36,7 +36,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         {
                             field: 'recept_person', title: __('承接人'), searchList: function (column) {
                                 return Template('receptpersontpl', {});
-                            },visible: false
+                            }, visible: false
                         },
                         { field: 'order_sku', title: __('Order_sku'), operate: 'like', visible: false },
 
@@ -441,7 +441,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
             })
 
             //更改单号清空
-            $('#c-platform_order').change(function(){
+            $('#c-platform_order').change(function () {
                 $('#order_pay_currency').val('');
             })
 
@@ -454,7 +454,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     Toastr.error('订单号不能为空');
                     return false;
                 } else {
-                   
+
                     $('.measure').hide();
                     var problem_type_id = $("input[name='row[problem_type_id]']:checked").val();
                     var checkID = [];//定义一个空数组
@@ -466,7 +466,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         var id = $(this).val();
                         //获取承接组
                         appoint_group += $('#step' + id + '-appoint_group').val() + ',';
-                        
+
                         var group = $('#step' + id + '-appoint_group').val();
                         var group_arr = group.split(',')
                         var appoint_users = [];
@@ -517,15 +517,15 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         }
                         //判断如果为处理任务时
                         if (Config.ids) {
-                            if(problem_type_id == 1 && checkID[m] == 1){
+                            if (problem_type_id == 1 && checkID[m] == 1) {
                                 $('.step1-1').hide();
                                 $('.step2-1').show();
                             }
-                            if(problem_type_id == 2 && checkID[m] == 1){
+                            if (problem_type_id == 2 && checkID[m] == 1) {
                                 $('.step2-1').hide();
                                 $('.step1-1').show();
                             }
-                            if(problem_type_id == 3 && checkID[m] == 1){
+                            if (problem_type_id == 3 && checkID[m] == 1) {
                                 $('.step2-1').hide();
                                 $('.step1-1').show();
                             }
@@ -546,7 +546,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         }
                     }*/
                     var arr = array_filter(appoint_group.split(','));
-                   
+
                     var username = [];
                     var appoint_users = [];
                     //循环根据承接组Key获取对应承接人id
@@ -554,7 +554,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         //循环根据承接组Key获取对应承接人id
                         appoint_users.push(Config.workorder[arr[i]]);
                     }
-                   
+
                     //循环根据承接人id获取对应人名称
                     for (var j = 0; j < appoint_users.length; j++) {
                         username.push(Config.users[appoint_users[j]]);
@@ -562,6 +562,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     var users = array_filter(username);
                     var appoint_users = array_filter(appoint_users);
                     $('#appoint_group_users').html(users.join(','));
+
+                    //判断如果为补价 优惠券 积分 追加自己id为承接人
+                    if ($(this).val() == 8 || $(this).val() == 9 || $(this).val() == 10) {
+                        appoint_users.push(Config.userid);
+                    }
                     $('#recept_person_id').val(appoint_users.join(','));
 
                 }
@@ -674,7 +679,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 } else if (str == '300' || str == '600') {
                     $('#work_platform').val(3);
                 }
-                
+
                 var sitetype = $('#work_platform').val();
                 $('#c-order_sku').html('');
                 Layer.load();
@@ -749,7 +754,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     $('#c-firstname').val(data.address[i].firstname);
                                     $('#c-lastname').val(data.address[i].lastname);
                                     var email = data.address[i].email;
-                                    if(email == null){
+                                    if (email == null) {
                                         email = $('#customer_email').val();
                                     }
                                     $('#c-email').val(email);
@@ -1200,6 +1205,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
 
                     var users = array_filter(username);
                     $('#appoint_group_users').html(users.join(','));
+                    //判断如果为补价 优惠券 积分 追加自己id为承接人
+                    if ($(this).val() == 8 || $(this).val() == 9 || $(this).val() == 10) {
+                        appoint_users.push(Config.userid);
+                    }
                     $('#recept_person_id').val(appoint_users.join(','));
 
                     //判断更换处方的状态，如果显示的话把数据带出来，如果隐藏则不显示镜架数据 start
@@ -1259,7 +1268,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                         $('#c-firstname').val(data.address[i].firstname);
                                         $('#c-lastname').val(data.address[i].lastname);
                                         var email = data.address[i].email;
-                                        if(email == null){
+                                        if (email == null) {
                                             email = $('#customer_email').val();
                                         }
                                         $('#c-email').val(email);
@@ -1284,7 +1293,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     $('#c-firstname').val(address.firstname);
                                     $('#c-lastname').val(address.lastname);
                                     var email = address.email;
-                                    if(email == null){
+                                    if (email == null) {
                                         email = $('#customer_email').val();
                                     }
                                     $('#c-email').val(email);
@@ -1828,7 +1837,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     $('#c-firstname').val(real_address.firstname);
                                     $('#c-lastname').val(real_address.lastname);
                                     var email = real_address.email;
-                                    if(email == null){
+                                    if (email == null) {
                                         email = $('#customer_email').val();
                                     }
                                     $('#c-email').val(email);

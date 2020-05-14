@@ -53,5 +53,20 @@ class Crasp extends ResourceAbstract
         unset($params['id']);
 
         return $this->client->get($this->getRoute(__FUNCTION__, ['id' => $id]), $params);
-    }    
+    }
+
+    /**
+     * 创建新用户
+     * @param array $params
+     * @return \stdClass|null
+     * @throws \Zendesk\API\Exceptions\ApiResponseException
+     * @throws \Zendesk\API\Exceptions\AuthException
+     */
+    public function createUser(array $params)
+    {
+        return $this->client->post(
+            $this->getRoute(__FUNCTION__),
+            $params
+        );
+    }
 }

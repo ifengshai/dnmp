@@ -203,6 +203,16 @@ class Zendesk extends Backend
                     $createData['requester'] = [
                         'email' => $params['email']
                     ];
+                    //判断当前邮箱是否存在
+                    if(!$this->model->where('email',$params['email'])->find()){
+                        $emailName = strstr($params['email'],'@',true);
+                        $createData['requester']['name'] = $emailName;
+//
+//                        (new Notice(request(), ['type' => $siteName]))->createUser(
+//                            ['user' => ['name' => $params['email'], 'email' => $params['email']]]
+//                        );
+                    }
+
                     //有抄送，添加抄送
                     if ($params['email_cc']) {
                         $email_ccs = $this->emailCcs($params['email_cc'], []);
@@ -311,19 +321,25 @@ class Zendesk extends Backend
         //站点类型，默认zeelool，1：zeelool，2：voogueme
         $type = input('type',1);
         //获取所有的消息模板
+        //获取所有的消息模板
         $templateAll = ZendeskMailTemplate::where([
             'template_platform' => $type,
             'template_permission' => 1,
             'is_active' => 1])
-            ->order('template_category desc,id desc')
+            ->whereOr(['template_permission' => 2,'is_active' => 1, 'create_person' => session('admin.id')])
+            ->order('used_time desc,template_category desc,id desc')
             ->select();
-        $templates = ['Apply Macro'];
+
         foreach ($templateAll as $key => $template) {
             $category = '';
             if ($template['template_category']) {
                 $category = '【' . config('zendesk.template_category')[$template['template_category']] . '】';
             }
-            $templates[$template['id']] = $category . $template['template_name'];
+            $templates[] = [
+                'id' => $template['id'],
+                'title' => $category . $template['template_name']
+            ];
+
         }
 
         $this->view->assign(compact('tags',  'templates','type'));
@@ -488,7 +504,7 @@ class Zendesk extends Backend
         $tickets = $this->model
             ->where(['user_id' => $ticket->user_id, 'status' => ['in', [1, 2, 3]], 'type' => $ticket->type])
             ->where('id', 'neq', $ids)
-            ->field('ticket_id,id,username,subject,update_time')
+            ->field('ticket_id,id,username,subject,update_time,zendesk_update_time')
             ->order('id desc')
             ->select();
         //获取该用户最新的5条ticket
@@ -504,16 +520,20 @@ class Zendesk extends Backend
             'template_platform' => $ticket->type,
             'template_permission' => 1,
             'is_active' => 1])
-            ->order('template_category desc,id desc')
+            ->whereOr(['template_permission' => 2,'is_active' => 1, 'create_person' => session('admin.id')])
+            ->order('used_time desc,template_category desc,id desc')
             ->select();
 
-        $templates = ['Apply Macro'];
         foreach ($templateAll as $key => $template) {
             $category = '';
             if ($template['template_category']) {
                 $category = '【' . config('zendesk.template_category')[$template['template_category']] . '】';
             }
-            $templates[$template['id']] = $category . $template['template_name'];
+            $templates[] = [
+                'id' => $template['id'],
+                'title' => $category . $template['template_name']
+            ];
+
         }
         //array_unshift($templates, 'Apply Macro');
         //获取当前用户的最新5个的订单
