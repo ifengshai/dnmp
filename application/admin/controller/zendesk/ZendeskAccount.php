@@ -111,11 +111,19 @@ class ZendeskAccount extends Backend
             foreach($zeelool_info['users'] as $k=> $v){
                 //已经存在的进行更新
                 if(in_array($v['id'],$accountIdArr)){
+
                     $updateData = [
                         'user_type' => 2,
                         'account_user' => $v['name'],
                         'account_email' => $v['email'],
                     ];
+                    //判断是否已绑定
+                    $agent = \app\admin\model\zendesk\ZendeskAgents::where('agent_id',$v['id'])->find();
+                    if(!$agent){
+                        $updateData['is_used'] = 1;
+                    }else{
+                        $updateData['is_used'] = 2;
+                    }
                     $this->model->where('account_id',$v['id'])->update($updateData);
                     continue;
                 }
@@ -133,6 +141,13 @@ class ZendeskAccount extends Backend
                         'account_user' => $v['name'],
                         'account_email' => $v['email'],
                     ];
+                    //判断是否已绑定
+                    $agent = \app\admin\model\zendesk\ZendeskAgents::where('agent_id',$vv['id'])->find();
+                    if(!$agent){
+                        $updateData['is_used'] = 1;
+                    }else{
+                        $updateData['is_used'] = 2;
+                    }
                     $this->model->where('account_id',$v['id'])->update($updateData);
                     continue;
                 }
