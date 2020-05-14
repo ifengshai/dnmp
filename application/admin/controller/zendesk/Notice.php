@@ -510,6 +510,20 @@ class Notice extends Controller
     }
 
     /**
+     * 创建新用户
+     * @param $params
+     * @return array
+     */
+    public function createUser($params)
+    {
+        try {
+            return  $this->client->crasp()->createUser($params);
+        } catch (\Exception $e) {
+            return ['code' => 0, 'message' => $e->getMessage()];
+        }
+    }
+
+    /**
      * 拉取posts的所有数据
      * @throws \Zendesk\API\Exceptions\ApiResponseException
      * @throws \Zendesk\API\Exceptions\AuthException
