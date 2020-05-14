@@ -15,6 +15,8 @@ use PhpOffice\PhpSpreadsheet\Reader\Csv;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use think\Exception;
 use think\Loader;
+use think\Db;
+
 /**
  * 订单列表
  */
@@ -55,16 +57,30 @@ class Index extends Backend
             }
             //根据传的标签切换对应站点数据库
             $label = $this->request->get('label', 1);
-            if ($label == 1) {
-                $model = $this->zeelool;
-            } elseif ($label == 2) {
-                $model = $this->voogueme;
-            } elseif ($label == 3) {
-                $model = $this->nihao;
-            } elseif ($label == 4) {
-                $model = $this->weseeoptical;
-            } elseif ($label == 5) {
-                $model = $this->meeloog;
+            switch ($label) {
+                case 1:
+                    $db = 'database.db_zeelool';
+                    $model = $this->zeelool;
+                    break;
+                case 2:
+                    $db = 'database.db_voogueme';
+                    $model = $this->voogueme;
+                    break;
+                case 3:
+                    $db = 'database.db_nihao';
+                    $model = $this->nihao;
+                    break;
+                case 4:
+                    $db = 'database.db_weseeoptical';
+                    $model = $this->weseeoptical;
+                    break;
+                case 5:
+                    $db = 'database.db_meeloog';
+                    $model = $this->meeloog;
+                    break;
+                default:
+                    return false;
+                    break;
             }
 
             $filter = json_decode($this->request->get('filter'), true);
@@ -113,10 +129,23 @@ class Index extends Backend
                 'Business Express(7-12 Days)'
             ];
             foreach ($list as &$v) {
-                if (in_array($v['shipping_description'],$arr)) {
+                if (in_array($v['shipping_description'], $arr)) {
                     $v['label'] = 1;
                 } else {
                     $v['label'] = 0;
+                }
+
+                $smap['parent_id'] = $v['entity_id'];
+                $smap['country_id'] = 'US';
+                $smap['address_type'] = 'shipping';
+                $count = Db::connect($db)
+                    ->table('sales_flat_order_address')
+                    ->where($smap)
+                    ->count(1);
+                if ($count > 0) {
+                    $v['country_label'] = 1;   
+                } else {
+                    $v['country_label'] = 0;
                 }
             }
             unset($v);
@@ -605,7 +634,7 @@ EOF;
                     $date = substr($processing_value['created_at'], 0, strpos($processing_value['created_at'], " "));
                     $fileName = ROOT_PATH . "public" . DS . "uploads" . DS . "printOrder" . DS . "zeelool" . DS . "new" . DS . "$date" . DS . "$temp_increment_id.png";
                     // dump($fileName);
-                    $dir = ROOT_PATH . "public" . DS . "uploads" . DS . "printOrder" . DS . "zeelool". DS . "new"  . DS . "$date";
+                    $dir = ROOT_PATH . "public" . DS . "uploads" . DS . "printOrder" . DS . "zeelool" . DS . "new"  . DS . "$date";
                     if (!file_exists($dir)) {
                         mkdir($dir, 0777, true);
                         // echo '创建文件夹$dir成功';
