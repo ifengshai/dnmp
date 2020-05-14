@@ -87,6 +87,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form','echartsobj'
         detail:function(){
             Controller.api.formatter.daterangepicker($("form[role=form1]"));
             Form.api.bindevent($("form[role=form]"));
+            //显示4个饼图
             var chartOptions1 = {
                 targetId: 'echart1',
                 downLoadTitle: '图表',
@@ -116,7 +117,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form','echartsobj'
                     'time': time,
                     'platform': platform,
                     'key':'echart1' 
-                }
+                }                
            } 
            var options2 = {
                 type: 'post',
@@ -148,7 +149,8 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form','echartsobj'
             EchartObj.api.ajax(options1, chartOptions1);
             EchartObj.api.ajax(options2, chartOptions2);
             EchartObj.api.ajax(options3, chartOptions3);
-            EchartObj.api.ajax(options4, chartOptions4);
+            EchartObj.api.ajax(options4, chartOptions4);           
+            //第二个饼图点击切换
             $(".statistics").on('click',function(){
                 var value = $(this).data("value");
                 if(value>0){
@@ -168,9 +170,87 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form','echartsobj'
                             'value':value
                         }
                    };
-                   EchartObj.api.ajax(options, chartOptions);                                         
+                   EchartObj.api.ajax(options, chartOptions);
+                   //异步获取第二个饼图右边显示的数据
+                   Backend.api.ajax({
+                    url:'datacenter/customer_service/get_two_pie_data',
+                    data:{
+                        value:value,
+                        time:time,
+                        platform:platform
+                    }
+                }, function(data, ret){
+                    $("#caigou-table2 tr").remove();
+                    var table = ret.data;
+                    var addtr = '';
+                    console.log(table.customer_arr);
+                    for(var i=0;i<table.customer_arr;i++){
+                        addtr+='<tr>'+
+                        '<td>"'+table.customer_arr[i]+'"</td>'+
+                        '<td>"'+table.problem_data[i]+'"</td>'+
+                        '<td>占比</td>';
+                        if(table.problem_form_total>0){
+                            addtr+='<td>"'+Math.round(table.problem_data[i]/table.problem_form_total*100,2) +'"%</td>';
+                        }else{
+                            addtr+='<td>0</td>';
+                        }
+                        addtr+='</tr>';                       
+                    }
+                    console.log(addtr);
+                    $("#caigou-table2").append(addtr);
+                }, function(data, ret){
+                    Layer.alert(ret.msg);
+                    return false;
+                });                                                            
                 }
             });
+            //第四个饼图点击一级tab切换二级数据
+            $(".statisticsTwo").on('click',function(){
+                var value = $(this).data("value");
+                if(value>0){
+                    $("#second-level").html('');
+                    //异步获取第二个tab数据
+                    Backend.api.ajax({
+                        url:'datacenter/customer_service/get_problem_by_classify',
+                        data:{value:value}
+                    }, function(data, ret){
+                        console.log(ret.data);
+                        var liArr = ret.data;
+                        var msg = '';
+                        $.each(liArr, function(i, val) {  
+                            msg += '<li><a href="javascript:void(0);" data-value="'+i+'" class="statisticsThree">'+val+'</a></li>';
+                        });
+                        $("#second-level").append(msg);
+                        return false;
+                    }, function(data, ret){
+                        Layer.alert(ret.msg);
+                        return false;
+                    });                    
+                }
+            });
+            //根据选择的问题类型查找对应的数据
+            $(document).on('click', '.statisticsThree', function(e){
+                var value = $(this).data("value");
+                if(value>0){
+                    var time = $('#create_time').val();
+                    var platform = $('#c-order_platform').val();  
+                    var chartOptions = {
+                        targetId: 'echart4',
+                        downLoadTitle: '图表',
+                        type: 'pie',
+                    };
+                    var options = {
+                        type: 'post',
+                        url: 'datacenter/customer_service/step',
+                        data: {
+                            'time': time,
+                            'platform': platform,
+                            'value':value
+                        }
+                   };
+                   EchartObj.api.ajax(options, chartOptions);                    
+                }
+            });            
         },
     };
     return Controller;
