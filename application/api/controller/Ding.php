@@ -489,34 +489,45 @@ class Ding extends Controller
                     $send_ids =  explode(',',$demand->test_person);
                     $msg = '有个测试复杂度为[' . (['简单的', '中等的', '复杂的'][$demand ->test_complexity - 1]) .']任务已开发完成,等待您的测试';
                 }else if($demand ->is_test == 0){ // 不需要测试,开发完成直接上线,根据不同类型通知不同人
+
                     if ($demand->type==2){//需求类型,产品经理确认
-                        $send_ids = Auth::getUsersId('demand/develop_demand/is_finish_task'); // 所有有权限点击[通过]按钮的人
+                        $send_ids = Auth::getUsersId('demand/develop_demand/review_status_develop'); // 所有有权限点击[通过]按钮的人
                         $msg ='一个任务已开发完成,等待您的确认';
                     }elseif ($demand->type==1){//BUG 类型`
-                        $send_ids =  Auth::getUsersId('demand/develop_demand/is_finish_bug'); // 所有有权限点击[通过]按钮的人
+                        $send_ids = array_merge(
+                            Auth::getUsersId('demand/develop_demand/review_status_develop'),
+                            explode(',', $demand ->assign_developer_ids)
+                        );
                         $msg ='一个任务已开发完成,请您关注';
                     }
+
                 }
                 break;
             case 'test_is_passed': // 测试站通过测试,通知相关人员进行确认
                 if ($demand->type==2){//需求类型,产品经理确认
                     $send_ids =  Auth::getUsersId('demand/develop_demand/is_finish_task'); // 所有有权限点击[通过]按钮的人
-                    $msg ='一个任务已完成测试,等待您的确认';
+                    $msg ='测试已完成,等待您的确认';
                 }elseif ($demand->type==1){//BUG 类型
-                    $send_ids =  Auth::getUsersId('demand/develop_demand/is_finish_bug'); // 所有有权限点击[上线]按钮的人
-                    $msg ='一个任务已完成测试,请您关注';
+                    $send_ids = explode(',', $demand ->assign_developer_ids);
+                    $msg ='测试已完成,请您关注';
                 }
                 break;
             case 'is_finish_task':          // 需求列表  产品经理确认
                 if ($demand ->is_test == 1) { // 是否需要测试
                     $send_ids =   explode(',', $demand->test_person);
                     $msg = '有个测试复杂度为[' . (['简单的', '中等的', '复杂的'][$demand ->test_complexity - 1]) . ']任务已产品经理已确认,等待回归测试';
+                }else{
+                    $send_ids =  $demand->create_person_id;
+                    $msg = '任务已完成,请关注';
                 }
                 break;
             case 'is_finish_bug':          // BUG 列表 已上线
                 if ($demand ->is_test == 1) { // 是否需要测试
                     $send_ids = explode(',', $demand->test_person);
                     $msg = '有个测试复杂度为[' . (['简单的', '中等的', '复杂的'][$demand ->test_complexity - 1]) . ']任务已上线,等待回归测试';
+                }else{
+                    $send_ids =  $demand->create_person_id;
+                    $msg = '任务已完成,请关注';
                 }
                 break;
             case 'test_record_bug':          // 测试站记录问题
@@ -536,6 +547,11 @@ class Ding extends Controller
                     ->find();
 
                 $msg = '有个任务在 [正式环境] 被记录了一个 [' . (['次要', '一般', '严重', '崩溃'][$record['bug_type'] - 1]) . '问题] , 需要您查看';
+                break;
+
+            case 'test_complete':       // 回归测试完成-通知提出人
+                $send_ids =  $demand->create_person_id;
+                $msg = '任务已完成,请关注';
                 break;
         }
         if ($send_ids && $msg) return self::cc_ding(
