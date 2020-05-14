@@ -875,7 +875,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     prescription_div.find('input[name="row[replacement][od_add][]"]').val(prescription.od_add);
                     prescription_div.find('input[name="row[replacement][os_add][]"]').val(prescription.os_add);
                 }
-                if (prescription.hasOwnProperty("pd")) {
+                if (prescription.pd) {
                     prescription_div.find('input[name="row[replacement][pd_r][]"]').val(prescription.pd);
                     //prescription_div.find('input[name="row[replacement][pd_l][]"]').attr('disabled',true);
                 } else {
@@ -1395,7 +1395,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         prescription_div.find('input[name="row[replacement][od_add][]"]').val(prescription.od_add);
                         prescription_div.find('input[name="row[replacement][os_add][]"]').val(prescription.os_add);
                     }
-                    if (prescription.hasOwnProperty("pd")) {
+                    if (prescription.pd) {
                         prescription_div.find('input[name="row[replacement][pd_r][]"]').val(prescription.pd);
                         //prescription_div.find('input[name="row[replacement][pd_l][]"]').attr('disabled',true);
                     } else {
