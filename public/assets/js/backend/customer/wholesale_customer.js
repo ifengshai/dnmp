@@ -4,6 +4,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
         index: function () {
             // 初始化表格参数配置
             Table.api.init({
+                searchFormVisible: true,
                 extend: {
                     index_url: 'customer/wholesale_customer/index' + location.search,
                     add_url: 'customer/wholesale_customer/add',
@@ -133,7 +134,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
                     var search = options.queryParams({});
                     var filter = search.filter;
                     var op = search.op;
-                    window.open(Config.moduleurl + '/purchase/purchase_order/batch_export_xls?filter=' + filter + '&op=' + op, '_blank');
+                    window.open(Config.moduleurl + '/customer/wholesale_customer/batch_export_xls?filter=' + filter + '&op=' + op, '_blank');
                 }
 
             });
