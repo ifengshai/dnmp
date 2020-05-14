@@ -27,7 +27,7 @@
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">{:__('Site_type')}:</label>
         <div class="col-xs-12 col-sm-3">
-            {:Form::select('row[site_type]', config('demand.siteType'), null, ['class'=>'form-control', 'data-rule'=>'required','data-live-search' => true,'id'=>'site_type'])}
+            {:Form::select('row[site_type]', $siteType, null, ['class'=>'form-control site-type', 'data-rule'=>'required','data-live-search' => true,'id'=>'site_type'])}
         </div>
 
         <label class="control-label col-xs-12 col-sm-2">{:__('Intention_level')}:</label>

@@ -126,7 +126,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
             //批量导出xls
             $('.btn-batch-export-xls').click(function () {
                 var ids = Table.api.selectedids(table);
-                console.info("0000000000000000000000000000")
                 if (ids.length > 0) {
                     window.open(Config.moduleurl + '/customer/wholesale_customer/batch_export_xls?ids=' + ids, '_blank');
                 } else {
