@@ -50,11 +50,10 @@
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">{:__('Logo_images')}:</label>
         <div class="col-xs-12 col-sm-8">
-            <div class="input-group">
-                <input id="c-logo_images" class="form-control" size="50" name="row[logo_images]" type="text" value="{$row.logo_images|htmlentities}">
+            <div class="input-group" style="background-color:transparent;width: 130px;">
+                <input id="c-logo_images" class="form-control" size="200" name="row[logo_images]" type="hidden" value="{$row.logo_images|htmlentities}">
                 <div class="input-group-addon no-border no-padding">
-                    <span><button type="button" id="plupload-logo_images" class="btn btn-danger plupload" data-input-id="c-logo_images" data-mimetype="image/gif,image/jpeg,image/png,image/jpg,image/bmp" data-multiple="true" data-preview-id="p-logo_images"><i class="fa fa-upload"></i> </button></span>
-<!--                    <span><button type="button" id="fachoose-logo_images" class="btn btn-primary fachoose" data-input-id="c-logo_images" data-mimetype="image/*" data-multiple="true"><i class="fa fa-list"></i> {:__('Choose')}</button></span>-->
+                    <span><button type="button" hidden id="plupload-logo_images" class="btn btn-danger plupload" data-input-id="c-logo_images" data-mimetype="image/gif,image/jpeg,image/png,image/jpg,image/bmp" disabled data-multiple="true" data-preview-id="p-logo_images" ><i class="fa fa-upload"></i> </button></span>
                 </div>
                 <span class="msg-box n-right" for="c-logo_images"></span>
             </div>
