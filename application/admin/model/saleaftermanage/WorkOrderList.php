@@ -874,7 +874,7 @@ class WorkOrderList extends Model
                     ];
                     WorkOrderRemark::create($remarkData);
                     //通知
-                    Ding::cc_ding(explode(',', $work->recept_person_id), '', '😎😎😎😎有新工单需要你处理😎😎😎😎', '有新工单需要你处理');
+                    Ding::cc_ding(explode(',', $work->recept_person_id), '', '工单ID：' . $work->id . '😎😎😎😎有新工单需要你处理😎😎😎😎', '有新工单需要你处理');
                 }
             }
 
@@ -940,7 +940,7 @@ class WorkOrderList extends Model
                 $dataWorkOrder['work_status'] = 6;
 
                 //通知
-                Ding::cc_ding(explode(',', $work->create_user_id), '', '订单号：' . $work->platform_order . '😎😎😎😎工单已处理完成😎😎😎😎',  '😎😎😎😎工单已处理完成😎😎😎😎');
+                Ding::cc_ding(explode(',', $work->create_user_id), '', '工单ID：' . $work->id . '😎😎😎😎工单已处理完成😎😎😎😎',  '😎😎😎😎工单已处理完成😎😎😎😎');
             } else {
                 $dataWorkOrder['work_status'] = 5;
             }
