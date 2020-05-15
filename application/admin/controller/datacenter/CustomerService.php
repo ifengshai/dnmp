@@ -399,91 +399,7 @@ class CustomerService extends Backend
         return $info;
     }
     /**
-     * 异步获取饼图右边数据
-     *
-     * @Description
-     * @author lsw
-     * @since 2020/05/14 15:21:58 
-     * @return void
-     */
-    public function get_pie_right_data()
-    {
-        if ($this->request->isAjax()) {
-            $params = $this->request->param();
-            if ($params['time']) {
-                $time = explode(' ', $params['time']);
-                $map['complete_time'] = ['between', [$time[0] . ' ' . $time[1], $time[3] . ' ' . $time[4]]];
-            } else {
-                $map['complete_time'] = ['between', [date('Y-m-d 00:00:00', strtotime('-30 day')), date('Y-m-d H:i:s', time())]];
-            }
-            $order_platform = $params['platform'];
-            //问题大分类统计、措施统计
-            $data = $this->get_workorder_data($order_platform, $map);
-            //问题类型统计
-            $problem_data = $this->get_problem_type_data($order_platform, $map, 1);
-            //问题措施比统计
-            $data = $this->get_problem_step_data($order_platform, $map, 1);            
-            if ('echart1' == $params['key']) {
-                
-                
-                $customer_problem_classify = config('workorder.customer_problem_classify');
-                $column = array_keys($customer_problem_classify);
-                $columnData = [];
-                foreach ($column as $k =>$v) {
-                    $columnData[$k]['name'] = $v;
-                    $columnData[$k]['value'] = $data['problem_type'][$k];
-                }
-                // $json['column'] = $column;
-                // $json['columnData'] = $columnData;
-                // return json(['code' => 1, 'data' => $json]);
-            } elseif ('echart2' == $params['key']) {
-
-                //问题类型数组
-                $customer_problem_arr   = config('workorder.customer_problem_classify_arr')[1];
-                $customer_problem_list  = config('workorder.customer_problem_type');
-                //循环数组根据id获取客服问题类型
-                $column = $columnData = [];
-                foreach ($customer_problem_arr as $k => $v) {
-                    $column[] = $customer_problem_list[$v];
-                }
-                foreach ($column as $ck => $cv) {
-                    $columnData[$ck]['name'] = $cv;
-                    $columnData[$ck]['value'] = $problem_data[$ck];
-                }
-                // $json['column'] = $column;
-                // $json['columnData'] = $columnData;
-                // return json(['code' => 1, 'data' => $json]);
-            } elseif ('echart3' == $params['key']) {
-                //问题大分类统计、措施统计
-                $data = $this->get_workorder_data($order_platform, $map);
-                $step = config('workorder.step');
-                $column = array_merge($step);
-                $columnData = [];
-                foreach ($column as $k =>$v) {
-                    $columnData[$k]['name'] = $v;
-                    $columnData[$k]['value'] = $data['step'][$k];
-                }
-                // $json['column'] = $column;
-                // $json['columnData'] = $columnData;
-                // return json(['code' => 1, 'data' => $json]);
-            } elseif ('echart4' == $params['key']) {
-
-                //问题类型数组
-                $step = config('workorder.step');
-                $column = array_merge($step);
-                $columnData = [];
-                foreach ($column as $k =>$v) {
-                    $columnData[$k]['name'] = $v;
-                    $columnData[$k]['value'] = $data['step'][$k];
-                }         
-            }
-                $json['column'] = $column;
-                $json['columnData'] = $columnData;
-                return json(['code' => 1, 'data' => $json]);
-        }
-    }
-    /**
-     * 异步获取右边的数据
+     * 异步获取第二个饼图右边的数据
      *
      * @Description
      * @author lsw
@@ -516,6 +432,40 @@ class CustomerService extends Backend
             $data['problem_data'] =  $problem_data;
             $data['problem_form_total'] =  $problem_form_total;
             $data['customer_arr'] =  $customer_arr;
+            $this->success('','',$data);          
+        }
+    }
+    /**
+     * 异步获取第四个饼图右边数据
+     *
+     * @Description
+     * @author lsw
+     * @since 2020/05/15 09:18:21 
+     * @return void
+     */
+    public function get_four_pie_data()
+    {
+        if($this->request->isAjax()){
+            $params = $this->request->param();
+            if ($params['time']) {
+                $time = explode(' ', $params['time']);
+                $map['complete_time'] = ['between', [$time[0] . ' ' . $time[1], $time[3] . ' ' . $time[4]]];
+            } else {
+                $map['complete_time'] = ['between', [date('Y-m-d 00:00:00', strtotime('-30 day')), date('Y-m-d H:i:s', time())]];
+            }
+            $order_platform = $params['platform'];
+            $value          = $params['value'];
+            $step_data = $this->get_problem_step_data($order_platform, $map, $value);
+            $step_four_total = 0;
+            //求出措施总数据
+            foreach($step_data['step'] as $tv){
+                $step_four_total+= $tv;
+            }
+            //问题类型统计
+            $step = array_merge(config('workorder.step'));
+            $data['step_data'] =  $step_data;
+            $data['step_four_total'] =  $step_four_total;
+            $data['step'] =  $step;
             $this->success('','',$data);          
         }
     }

@@ -173,35 +173,35 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form','echartsobj'
                    EchartObj.api.ajax(options, chartOptions);
                    //异步获取第二个饼图右边显示的数据
                    Backend.api.ajax({
-                    url:'datacenter/customer_service/get_two_pie_data',
-                    data:{
-                        value:value,
-                        time:time,
-                        platform:platform
-                    }
-                }, function(data, ret){
-                    $("#caigou-table2 tr").remove();
-                    var table = ret.data;
-                    var addtr = '';
-                    console.log(table.customer_arr);
-                    for(var i=0;i<table.customer_arr;i++){
-                        addtr+='<tr>'+
-                        '<td>"'+table.customer_arr[i]+'"</td>'+
-                        '<td>"'+table.problem_data[i]+'"</td>'+
-                        '<td>占比</td>';
-                        if(table.problem_form_total>0){
-                            addtr+='<td>"'+Math.round(table.problem_data[i]/table.problem_form_total*100,2) +'"%</td>';
-                        }else{
-                            addtr+='<td>0</td>';
+                        url:'datacenter/customer_service/get_two_pie_data',
+                        data:{
+                            value:value,
+                            time:time,
+                            platform:platform
                         }
-                        addtr+='</tr>';                       
-                    }
-                    console.log(addtr);
-                    $("#caigou-table2").append(addtr);
-                }, function(data, ret){
-                    Layer.alert(ret.msg);
-                    return false;
-                });                                                            
+                    }, function(data, ret){
+                    $("#caigou-table2 tr").remove();
+                        var table = ret.data;
+                        var addtr = '';
+                        console.log(table.customer_arr);
+                        for(var i=0;i<table.customer_arr.length;i++){
+                            addtr+='<tr>'+
+                            '<td>'+table.customer_arr[i]+'</td>'+
+                            '<td>'+table.problem_data[i]+'</td>'+
+                            '<td>占比</td>';
+                            if(table.problem_form_total>0){
+                                addtr+='<td>'+Math.round(table.problem_data[i]/table.problem_form_total*100,2) +'%</td>';
+                            }else{
+                                addtr+='<td>0</td>';
+                            }
+                            addtr+='</tr>';                       
+                        }
+                        console.log(addtr);
+                        $("#caigou-table2").append(addtr);
+                    }, function(data, ret){
+                        Layer.alert(ret.msg);
+                        return false;
+                    });                                                            
                 }
             });
             //第四个饼图点击一级tab切换二级数据
@@ -248,8 +248,37 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form','echartsobj'
                             'value':value
                         }
                    };
-                   EchartObj.api.ajax(options, chartOptions);                    
-                }
+                   EchartObj.api.ajax(options, chartOptions);
+                   //异步获取第四个饼图右边显示的数据
+                   Backend.api.ajax({
+                        url:'datacenter/customer_service/get_four_pie_data',
+                        data:{
+                            value:value,
+                            time:time,
+                            platform:platform
+                        }
+                    }, function(data, ret){
+                    $("#caigou-table4 tr").remove();
+                    var table = ret.data;
+                    var addtr = '';
+                    for(var i=0;i<table.step.length;i++){
+                        addtr+='<tr>'+
+                        '<td>'+table.step[i]+'</td>'+
+                        '<td>'+table.step_data.step[i]+'</td>'+
+                        '<td>占比</td>';
+                        if(table.step_four_total>0){
+                            addtr+='<td>'+Math.round(table.step_data.step[i]/table.step_four_total*100,2) +'%</td>';
+                        }else{
+                            addtr+='<td>0</td>';
+                        }
+                        addtr+='</tr>';                       
+                    }
+                    $("#caigou-table4").append(addtr);
+                }, function(data, ret){
+                    Layer.alert(ret.msg);
+                    return false;
+                });                                       
+              }
             });            
         },
     };
