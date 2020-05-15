@@ -671,6 +671,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     return false;
                 }
                 var str = incrementId.substring(0, 3);
+                console.log(str);
                 //判断站点
                 if (str == '100' || str == '400' || str == '500') {
                     $("#work_platform").val(1);
@@ -761,7 +762,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     $('#c-telephone').val(data.address[i].telephone);
                                     $('#c-country').val(data.address[i].country_id);
                                     $('#c-country').change();
-                                    $('#c-region').val(data.address[i].region_id);
+                                    if(data.address[i].region_id == '8888' || !data.address[i].region_id){
+                                        $('#c-region').val(0);
+                                    }else{
+                                        $('#c-region').val(data.address[i].region_id);
+                                    }
+
                                     $('#c-city').val(data.address[i].city);
                                     $('#c-street').val(data.address[i].street);
                                     $('#c-postcode').val(data.address[i].postcode);
@@ -1275,7 +1281,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                         $('#c-telephone').val(data.address[i].telephone);
                                         $('#c-country').val(data.address[i].country_id);
                                         $('#c-country').change();
-                                        $('#c-region').val(data.address[i].region_id);
+                                        if(data.address[i].region_id == '8888' || !data.address[i].region_id){
+                                            $('#c-region').val(0);
+                                        }else{
+                                            $('#c-region').val(data.address[i].region_id);
+                                        }
                                         $('#c-city').val(data.address[i].city);
                                         $('#c-street').val(data.address[i].street);
                                         $('#c-postcode').val(data.address[i].postcode);
@@ -2037,7 +2047,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         },
                         success: function (json) {
                             var data = json.province;
-                            var province = '';
+                            var province = '<option value="0">请选择</option>';
                             for (var i = 0; i < data.length; i++) {
                                 province += '<option value="' + data[i].region_id + '">' + data[i].default_name + '</option>';
                             }

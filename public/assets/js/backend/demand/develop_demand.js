@@ -497,7 +497,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                         }
                                     }
                                 },
-                                {
+                                /*{
                                     name: 'ajax',
                                     text: __(''),
                                     title: __('删除'),
@@ -523,7 +523,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                             return false;
                                         }
                                     }
-                                },
+                                },*/
                             ],
                             formatter: Table.api.formatter.operate
                         }
