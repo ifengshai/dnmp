@@ -136,17 +136,12 @@ class Index extends Backend
                 }
 
                 $smap['parent_id'] = $v['entity_id'];
-                $smap['country_id'] = 'US';
                 $smap['address_type'] = 'shipping';
-                $count = Db::connect($db)
+                $country_id = Db::connect($db)
                     ->table('sales_flat_order_address')
                     ->where($smap)
-                    ->count(1);
-                if ($count > 0) {
-                    $v['country_label'] = 1;
-                } else {
-                    $v['country_label'] = 0;
-                }
+                    ->value('country_id');
+                $v['country_id'] = $country_id;
             }
             unset($v);
 
@@ -625,7 +620,7 @@ class Index extends Backend
 
             //判断是否为美国且 非商业快递
             $smap['parent_id'] = ['in', $entity_ids];
-            $smap['country_id'] = ['<>', 'US'];
+            $smap['country_id'] = ['not in', ['US', 'PR']];
             $smap['address_type'] = 'shipping';
             $count = Db::connect($db)
                 ->table('sales_flat_order_address')

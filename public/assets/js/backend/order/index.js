@@ -27,7 +27,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                         { field: 'entity_id', title: __('记录标识'), operate: false },
                         { field: 'increment_id', title: __('订单号'), operate: 'like' },
                         { field: 'label', title: __('是否为商业快递'), custom: { 1: 'danger', 0: 'gray' }, searchList: { 1: '是', 0: '否' }, operate: false, formatter: Table.api.formatter.status },
-                        { field: 'country_label', title: __('是否为美国'), custom: { 1: 'danger', 0: 'gray' }, searchList: { 1: '是', 0: '否' }, operate: false, formatter: Table.api.formatter.status },
+                        { field: 'country_id', title: __('国家')},
                         { field: 'customer_firstname', title: __('客户名称'), operate: 'like' },
                         { field: 'customer_email', title: __('邮箱'), operate: 'like' },
                         { field: 'status', title: __('状态'), searchList: { "processing": __('processing'), 'complete': 'complete', 'creditcard_failed': 'creditcard_failed', 'creditcard_pending': 'creditcard_pending', 'holded': 'holded', 'payment_review': 'payment_review', 'paypal_canceled_reversal': 'paypal_canceled_reversal', 'paypal_reversed': 'paypal_reversed', 'pending': 'pending', 'canceled': 'canceled', 'closed': 'closed', "free_processing": __('free_processing') } },
