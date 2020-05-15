@@ -26,6 +26,63 @@ class Test extends Backend
     }
 
     /**
+     * 批量 获取物流明细
+     * 莫删除
+     */
+    public function track_shipment_num(){
+        $order_shipment = Db::connect('database.db_zeelool')
+            ->table('sales_flat_shipment_track')
+            ->field('entity_id,track_number,title,updated_at,order_id')
+            ->where('created_at','>=','2020-04-10 00:00:00')
+            ->limit(10)
+            ->select();
+
+        $trackingConnector = new TrackingConnector($this->apiKey);
+
+        foreach($order_shipment as $k => $v){
+            $order_num = Db::connect('database.db_zeelool')
+                ->table('sales_flat_order')
+                ->field('increment_id')
+                ->where('entity_id','=',$v['order_id'])
+                ->find();
+
+            $title = strtolower(str_replace(' ', '-', $v['title']));
+
+            $carrier = $this->getCarrier($title);
+
+            $trackInfo = $trackingConnector->getTrackInfoMulti([[
+                //'number' => $v['track_number'],
+                //'carrier' => $carrier['carrierId']
+                'number' => 'LO546092713CN',
+                'carrier' => '03011'
+            ]]);
+
+
+            $add['site'] = 1;
+            $add['order_id'] = $v['order_id'];
+            $add['order_number'] = $order_num['increment_id'];
+            $add['shipment_type'] = $v['title'];
+            $add['track_number'] = $v['track_number'];
+
+
+            if($trackInfo['code'] == 0 && $trackInfo['data']['accepted']){
+                $trackdata = $trackInfo['data']['accepted'][0]['track'];
+
+
+
+
+            }
+
+            dump($add);
+            dump($trackdata);
+            exit;
+
+        }
+    }
+
+
+
+    /**
      * 批量 注册物流
      * 莫删除
      */
