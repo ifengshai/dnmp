@@ -225,8 +225,9 @@ class Zendesk extends Backend
                     }
                     //由于编辑器或默认带个<br>,所以去除标签判断有无值
                     if (strip_tags($body)) {
-                        $converter = new HtmlConverter();
-                        $createData['comment']['body'] = $converter->convert($body);
+//                        $converter = new HtmlConverter();
+//                        $createData['comment']['body'] = $converter->convert($body);
+                        $createData['comment']['html_body'] = $body;
 
                     }
                     if ($params['image']) {
@@ -415,8 +416,9 @@ class Zendesk extends Backend
                     }
                     //由于编辑器或默认带个<br>,所以去除标签判断有无值
                     if (strip_tags($body)) {
-                        $converter = new HtmlConverter();
-                        $updateData['comment']['body'] = $converter->convert($body);
+//                        $converter = new HtmlConverter();
+//                        $updateData['comment']['body'] = $converter->convert($body);
+                        $updateData['comment']['html_body'] = $body;
                     }
                     if ($params['image']) {
                         //附件上传

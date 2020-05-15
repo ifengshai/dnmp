@@ -67,13 +67,14 @@ class Test extends Backend
 
             if($trackInfo['code'] == 0 && $trackInfo['data']['accepted']){
                 $trackdata = $trackInfo['data']['accepted'][0]['track'];
-
+                $trackdetail = array_reverse($trackdata['z1']);
 
 
 
             }
 
             dump($add);
+            dump($trackdetail);
             dump($trackdata);
             exit;
 
