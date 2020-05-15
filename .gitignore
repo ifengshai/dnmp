@@ -2,6 +2,7 @@
 /runtime/*
 /public/uploads/*
 /public/pdftmp/*
+/application/extra/upload.php
 .idea
 composer.lock
 *.log
@@ -13,4 +14,3 @@ composer.lock
 tryon/*
 nginx.htaccess
 public/nginx.htaccess
-/application/extra/upload.php
