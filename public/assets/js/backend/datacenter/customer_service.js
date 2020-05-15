@@ -84,6 +84,20 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form','echartsobj'
                 Form.api.bindevent($("form[role=form]"));
             }
         },
+        workstatistics:function()
+        {
+            Controller.api.formatter.daterangepicker($("form[role=form1]"));
+            Form.api.bindevent($("form[role=form]"));
+            //点击对比时间段显示第二个时间输入框
+            $("#contrast").change(function() { 
+                if($("#contrast").is(':checked')){
+                    $("#two-time-node").show();
+                }else{
+                    $("#two-time-node").hide();
+                }
+            });            
+        },
+        //工单问题措施详情
         detail:function(){
             Controller.api.formatter.daterangepicker($("form[role=form1]"));
             Form.api.bindevent($("form[role=form]"));

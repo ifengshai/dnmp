@@ -3,8 +3,9 @@
 namespace app\admin\controller\datacenter;
 
 use app\common\controller\Backend;
-use think\Db;
 use think\Cache;
+use app\admin\model\AuthGroupAccess;
+use app\admin\model\Admin;
 class CustomerService extends Backend
 {
     protected $model = null;
@@ -30,6 +31,59 @@ class CustomerService extends Backend
             echo 111;
         } else {
             echo 222;
+        }
+    }
+    /**
+     * 工单统计
+     *
+     * @Description
+     * @author lsw
+     * @since 2020/05/15 10:27:04 
+     * @return void
+     */
+    public function workstatistics()
+    {
+        
+        //根据筛选时间求出客服部门下面所有有数据人员
+        $start = date('Y-m-d 00:00:00', strtotime('-30 day'));
+        $end   = date('Y-m-d');
+        $map['complete_time'] = ['between', [date('Y-m-d 00:00:00', strtotime('-30 day')), date('Y-m-d H:i:s', time())]];
+        $where['work_type'] = 1;
+        $where['work_status'] = 6;
+        $workList = $this->model->where($where)->where($map)->field('count(*) as counter,create_user_id,create_user_name')->group('create_user_id')->select();
+        $workList = collection($workList)->toArray();
+        $orderPlatformList = config('workorder.platform');
+        $this->view->assign(compact('orderPlatformList','workList'));   
+        return $this->view->fetch();
+    }
+    /**
+     * 获取有工单的客服人员信息
+     *
+     * @Description
+     * @author lsw
+     * @since 2020/05/15 16:42:47 
+     * @return void
+     */
+    public function customers($map)
+    {
+        $customer_department_rule = config('workorder.customer_department_rule');
+        $userGroupAccess = AuthGroupAccess::where('group_id','in',$customer_department_rule)->column('uid');
+        //求出这些所有人的姓名和分组
+        if(is_array($userGroupAccess) && count($userGroupAccess)>1){
+            $users = Admin::where('id','in',$userGroupAccess)->field('id,nickname')->select();
+            $usersArr = collection($users)->toArray();
+            //求出存在的工单量的ID
+            $where['work_type'] = 1;
+            $where['work_status'] = 6;
+            $workList = $this->model->where($where)->where($map)->field('count(*) as counter,create_user_id')->select();
+            $workList = collection($workList)->toArray();
+
+            $arr = [];
+            foreach($usersArr as $v){
+                $arr[$v['id']] = $v['nickname'];
+            }
+            return $arr;
+            //$this->view->assign();
         }
     }
     /**
@@ -156,6 +210,8 @@ class CustomerService extends Backend
             foreach ($customer_problem_arr as $k => $v) {
                 $customer_arr[] = $customer_problem_list[$v];
             }
+            //提交过后的平台数值
+            //$this->view->assign('platformNew',$platform);
             $this->view->assign(compact('data','problem_type_total','step_total','problem_form_total','step_four_total','problem_data','step_data','step','customer_arr'));
         }else{ //默认获取右边的信息
             if ($create_time) {
