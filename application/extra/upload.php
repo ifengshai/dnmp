@@ -9,7 +9,7 @@ return [
     /**
      * CDN地址
      */
-    'cdnurl'    => '',
+    'cdnurl'    => 'https://mojing.nextmar.com',
     /**
      * 文件保存格式
      */
