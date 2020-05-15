@@ -4,7 +4,7 @@ namespace app\admin\controller\datacenter;
 
 use app\common\controller\Backend;
 use think\Db;
-
+use think\Cache;
 class CustomerService extends Backend
 {
     protected $model = null;
@@ -322,6 +322,10 @@ class CustomerService extends Backend
      */
     public function get_workorder_data($platform, $map)
     {
+        $arr = Cache::get('CustomerService_get_workorder_data_'.$platform.md5(serialize($map)));
+		if($arr){
+			return $arr;
+		}
         if ($platform<10) {
             $where['work_platform'] = $platform;
         }
@@ -345,6 +349,7 @@ class CustomerService extends Backend
         foreach ($step_arr as $sk=>$sv) {
             $result['step'][] = $this->step->where($where_step)->where('measure_choose_id', $sk)->where('work_id', 'in', $all_work_id)->count('id');
         }
+        Cache::set('CustomerService_get_workorder_data_'.$platform.md5(serialize($map)),$result,7200);
         return $result;
     }
     /**
@@ -357,6 +362,10 @@ class CustomerService extends Backend
      */
     public function get_problem_type_data($platform, $map, $problem_type)
     {
+        $arr = Cache::get('CustomerService_get_problem_type_data_'.$platform.'_'.$problem_type.md5(serialize($map)));
+		if($arr){
+			return $arr;
+		}        
         if ($platform<10) {
             $where['work_platform'] = $platform;
         }
@@ -369,6 +378,7 @@ class CustomerService extends Backend
         foreach ($current_problem_arr as $k =>$v) {
             $result[$k] = $this->model->where($where)->where($map)->where('problem_type_id', $v)->count('id');
         }
+        Cache::set('CustomerService_get_problem_type_data_'.$platform.'_'.$problem_type.md5(serialize($map)),$result,7200);
         return $result;
     }
     /**
@@ -385,6 +395,10 @@ class CustomerService extends Backend
      */
     public function get_problem_step_data($platform, $map, $problem_id)
     {
+        $arr = Cache::get('CustomerService_get_problem_step_data_'.$platform.'_'.$problem_id.md5(serialize($map)));
+		if($arr){
+			return $arr;
+		}         
         if ($platform<10) {
             $where['work_platform'] = $platform;
         }
@@ -396,6 +410,7 @@ class CustomerService extends Backend
         foreach ($step_arr as $k =>$v) {
             $info['step'][]  = $this->step->where($where_step)->where('work_id', 'in', $result)->where('measure_choose_id', $k)->count('id');
         }
+        Cache::set('CustomerService_get_problem_step_data_'.$platform.'_'.$problem_id.md5(serialize($map)),$info,7200);
         return $info;
     }
     /**
