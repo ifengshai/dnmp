@@ -13,3 +13,4 @@ composer.lock
 tryon/*
 nginx.htaccess
 public/nginx.htaccess
+/application/extra/url.php
