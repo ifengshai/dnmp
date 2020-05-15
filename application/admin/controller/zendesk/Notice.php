@@ -41,12 +41,23 @@ class Notice extends Controller
         }
         $this->postData = $postData;
         try {
+
+            $username = '';
+            if(isset($this->postData['username'])){
+                $username = $this->postData['username'];
+            }
             if ($this->postData['type'] == 'voogueme') {
+                if(!$username){
+                    $username = config('zendesk.voogueme')['username'];
+                }
                 $this->client = new ZendeskAPI(config('zendesk.voogueme')['subdomain']);
-                $this->client->setAuth('basic', ['username' => config('zendesk.voogueme')['username'], 'token' => config('zendesk.voogueme')['token']]);
+                $this->client->setAuth('basic', ['username' => $username, 'token' => config('zendesk.voogueme')['token']]);
             } else {
+                if(!$username){
+                    $username = config('zendesk.zeelool')['username'];
+                }
                 $this->client = new ZendeskAPI(config('zendesk.zeelool')['subdomain']);
-                $this->client->setAuth('basic', ['username' => config('zendesk.zeelool')['username'], 'token' => config('zendesk.zeelool')['token']]);
+                $this->client->setAuth('basic', ['username' => $username, 'token' => config('zendesk.zeelool')['token']]);
             }
 
         } catch (\Exception $e) {
@@ -103,6 +114,7 @@ class Notice extends Controller
             if(!$ticket->subject && !$ticket->raw_subject){
                 $subject = $rawSubject = substr($ticket->description,0,60).'...';
             }
+            $zendesk_update_time = date('Y-m-d H:i:s',strtotime(str_replace(['T','Z'],[' ',''],$ticket->updated_at)) + 8*3600);
             //写入主表
             $zendesk = Zendesk::create([
                 'ticket_id' => $id,
@@ -119,6 +131,7 @@ class Notice extends Controller
                 'raw_subject' => $rawSubject,
                 'assignee_id' => $ticket->assignee_id ?: 0,
                 'assign_id' => 0,
+                'zendesk_update_time' => $zendesk_update_time,
             ]);
             $zid = $zendesk->id;
             foreach($comments as $comment){
@@ -216,10 +229,12 @@ class Notice extends Controller
         //开启事务
         Db::startTrans();
         try {
+            $zendesk_update_time = date('Y-m-d H:i:s',strtotime(str_replace(['T','Z'],[' ',''],$ticket->updated_at)) + 8*3600);
             //更新主表,目前应该只会更新status，其他不会更新
             $updateData = [
                 'tags' => $tags,
-                'status' => array_search(strtolower($ticket->status), config('zendesk.status'))
+                'status' => array_search(strtolower($ticket->status), config('zendesk.status')),
+                'zendesk_update_time' => $zendesk_update_time
             ];
             //如果分配人修改，则同步修改分配人
             if($zendesk->assignee_id != $ticket->assignee_id && $ticket->assignee_id){
@@ -489,6 +504,20 @@ class Notice extends Controller
     {
         try {
             return  $this->client->users()->findAll($params);
+        } catch (\Exception $e) {
+            return ['code' => 0, 'message' => $e->getMessage()];
+        }
+    }
+
+    /**
+     * 创建新用户
+     * @param $params
+     * @return array
+     */
+    public function createUser($params)
+    {
+        try {
+            return  $this->client->crasp()->createUser($params);
         } catch (\Exception $e) {
             return ['code' => 0, 'message' => $e->getMessage()];
         }

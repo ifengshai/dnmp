@@ -248,7 +248,7 @@ class Zendesk extends Model
         //1，判断今天有无task，无，创建
         $tasks = ZendeskTasks::whereTime('create_time', 'today')->find();
         //设置所有的隐藏
-        self::where('id','>',1)->setField('is_hide',1);
+        self::where('id','>=',1)->setField('is_hide',1);
         if (!$tasks) {
             //创建所有的tasks
             //获取所有的agents
@@ -270,12 +270,14 @@ class Zendesk extends Model
             }
         }
         //获取所有的open和new的邮件
-        $waitTickets = self::where(['status' => ['in','1,2'],'channel' => ['neq','voice']])->order('id asc')->select();
+        $waitTickets = self::where(['status' => ['in','1,2'],'channel' => ['neq','voice']])->order('priority desc,zendesk_update_time asc')->select();
         foreach ($waitTickets as $ticket) {
             //电话不分配
             if($ticket->channel == 'voice') continue;
-            //找到该邮件是否已分配
-            if($ticket->assign_id){
+            $assign_id = $ticket->assign_id ?: 0;
+            $account = ZendeskAgents::where(['admin_id' => $ticket->assign_id, 'type' => $ticket->getType()])->value('count');
+            //找到该邮件是否已分配并且分配的人目标数目不为0并且是绑定用户的话
+            if($assign_id && $account > 0){
                 //如果已分配，则直接使得该ticket显示
                 //判断老用户是否在表里面并且目标大于0
                 $task = ZendeskTasks::whereTime('create_time', 'today')
@@ -290,12 +292,18 @@ class Zendesk extends Model
                     self::where('id',$ticket->id)->setField('is_hide',0);
                 }
             }else{
-                //无分配人的，进行分配
+                //无分配人的，或者离职用户，或者目标为0的人的邮件，进行分配
                 //判断该邮件是否有老用户
-                $preTicket = Zendesk::where(['user_id' => $ticket->user_id, 'assign_id' => ['>', 0], 'type' => $ticket->getType(),'channel' => ['in',['email','web','chat']]])
-                    ->order('id', 'desc')
-                    ->limit(1)
-                    ->find();
+                //找出目前目标为不为0的账户
+                $targetAccount = ZendeskAgents::where(['count' => ['>',0]])
+                    ->column('admin_id');
+                //判断当前用户是否在targetAccount中
+                $preTicket = [];
+                if(in_array(session('admin.id'),$targetAccount)){
+                    $preTicket = Zendesk::where(['assign_id' => session('admin.id'), 'type' => $ticket->getType(),'channel' => ['in',['email','web','chat']]])->order('id', 'desc')
+                        ->limit(1)
+                        ->find();
+                }
                 if (!$preTicket) {
                     //无老用户，则分配给最少单的用户
                     $task = ZendeskTasks::whereTime('create_time', 'today')
@@ -332,10 +340,9 @@ class Zendesk extends Model
                         $task->save();
                         self::where('id',$ticket->id)->setField('is_hide',0);
                     }
-                    usleep(1000);
                 }
             }
-
+            usleep(1000);
         }
     }
 

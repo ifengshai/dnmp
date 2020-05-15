@@ -1402,11 +1402,11 @@ class Inventory extends Backend
         }
         foreach ($changeRow as $v) {
             //原先sku
-            $original_sku    = $v['original_sku'];
+            $original_sku    = trim($v['original_sku']);
             //原先sku数量
             $original_number = $v['original_number'];
             //改变之后的sku
-            $change_sku      = $v['change_sku'];
+            $change_sku      = trim($v['change_sku']);
             //改变之后的sku数量
             $change_number   = $v['change_number'];
             //判断条件 如果原始的数量和变更之后的数量都不存在，则忽略
@@ -1528,7 +1528,7 @@ class Inventory extends Backend
         }
         foreach ($changeRow as $v) {
             //原先sku
-            $original_sku    = $v['original_sku'];
+            $original_sku    = trim($v['original_sku']);
             //原先sku数量
             $original_number = $v['original_number'];
             //原先sku对应的仓库sku
@@ -1595,7 +1595,7 @@ class Inventory extends Backend
         $platformSku   = new \app\admin\model\itemmanage\ItemPlatformSku;
         foreach ($changeRow as $v) {
             //原先sku
-            $original_sku    = $v['original_sku'];
+            $original_sku    = trim($v['original_sku']);
             //原先sku数量
             $original_number = $v['original_number'];
             //原先sku对应的仓库sku

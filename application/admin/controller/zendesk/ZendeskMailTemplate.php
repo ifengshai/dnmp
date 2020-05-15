@@ -335,10 +335,20 @@ class ZendeskMailTemplate extends Backend
             $template['template_content'] = str_replace(['{{username}}','{{email}}','{{ticket_id}}'],[$ticket->username,$ticket->email,$ticket->ticket_id],$template['template_content']);
             //tags合并
             $template['mail_tag'] = array_filter(array_merge(explode(',',$template['mail_tag']),explode(',',$ticket->tags)));
+            //使用次数+1
+            $this->model->where('id',$id)->setInc('used_time',1);
             return json($template);
         }
         $this->error('404 Not found');
     }
+
+    /**
+     * 新增的ticket添加模板
+     * @return \think\response\Json
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
     public function getTemplateAdd()
     {
         if($this->request->isAjax()) {
@@ -357,6 +367,8 @@ class ZendeskMailTemplate extends Backend
             //替换模板内容
             $template['template_content'] = str_replace(['{{username}}','{{email}}','{{ticket_id}}'],[$ticket->username,$ticket->email,$ticket->ticket_id],$template['template_content']);
             //tags合并
+            //使用次数+1
+            $this->model->where('id',$id)->setInc('used_time',1);
             $template['mail_tag'] = array_filter(explode(',',$template['mail_tag']));
             return json($template);
         }
@@ -405,8 +417,8 @@ class ZendeskMailTemplate extends Backend
                     $actions = $macro->actions;
                     foreach ($actions as $key => $action) {
                         if ($action->field == 'comment_value_html') {
-                            $template_content = str_replace(['<p></br></p>','{{ticket.requester.first_name}}', '{{ticket.id}}'], ['</br>','{{username}}', '{{ticket_id}}'], $action->value);
-                            $data['template_content'] = str_replace(['<p>','</p>','<br>'], ['','</br>',''], $template_content);
+                            $template_content = str_replace(['{{ticket.requester.first_name}}', '{{ticket.id}}'], ['{{username}}', '{{ticket_id}}'], $action->value);
+                            $data['template_content'] = $template_content;
                         }
                         if ($action->field == 'subject') {
                             $data['mail_subject'] = $action->value;

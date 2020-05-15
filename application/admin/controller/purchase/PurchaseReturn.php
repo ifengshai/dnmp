@@ -8,7 +8,7 @@ use think\Exception;
 use think\exception\PDOException;
 use think\exception\ValidateException;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
-
+use think\Hook;
 /**
  * 退销单管理
  *
@@ -22,6 +22,12 @@ class PurchaseReturn extends Backend
      * @var \app\admin\model\purchase\PurchaseReturn
      */
     protected $model = null;
+
+    /**
+     * 无需鉴权的方法,但需要登录
+     * @var array
+     */
+    protected $noNeedRight = ['logisticsDetail'];
 
     protected $relationSearch = true;
 
@@ -310,6 +316,7 @@ class PurchaseReturn extends Backend
      */
     public function detail($ids = null)
     {
+        $ids = $ids ?: input('id');
         $row = $this->model->get($ids);
         if (!$row) {
             $this->error(__('No Results were found'));
@@ -353,14 +360,6 @@ class PurchaseReturn extends Backend
             ->where($check_map)
             ->column('*', 'id');
 
-
-        // //查询已退数量
-        // $return_map['purchase_id'] = $row['purchase_id'];
-        // $return_item = $this->model->hasWhere('purchaseReturnItem', ['sku' => ['in', array_keys($return_arr)]])
-        //     ->where($return_map)
-        //     ->group('sku')
-        //     ->column('sum(return_num) as return_all_num', 'sku');
-
         foreach ($return_arr as $k => $v) {
             $return_arr[$k]['purchase_price'] = $item[$v['sku']]['purchase_price'];
             $return_arr[$k]['supplier_sku'] = $item[$v['sku']]['supplier_sku'];
@@ -372,7 +371,43 @@ class PurchaseReturn extends Backend
 
         /***********end***************/
         $this->assign('item', $return_arr);
+        $this->assign('id', $ids);
         $this->view->assign("row", $row);
+        return $this->view->fetch();
+    }
+
+    /**
+     * 物流详情
+     */
+    public function logisticsDetail()
+    {
+        $id = input('id');
+        //采购单供应商物流信息
+        $row = $this->model->get($id);
+        if (!$row) {
+            $this->error(__('No Results were found'));
+        }
+        $data = [];
+        //退销单快递100接口
+        if ($row['logistics_number']) {
+            $arr = explode(',', $row['logistics_number']);
+            //物流公司编码
+            $company = explode(',', $row['logistics_company_no']);
+            foreach ($arr as $k => $v) {
+                try {
+                    //快递单号
+                    $param['express_id'] = trim($v);
+                    $param['code'] = trim($company[$k]);
+                    $data[$k] = Hook::listen('express_query', $param)[0];
+                } catch (\Exception $e) {
+                    $this->error($e->getMessage());
+                }
+            }
+        }
+
+        $this->assign('id', $id);
+        $this->assign('data', $data);
+        $this->assign('row', $row);
         return $this->view->fetch();
     }
 

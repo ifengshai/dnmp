@@ -697,27 +697,27 @@ class Check extends Backend
             $smap['unqualified_num'] = $filter['is_process'] == 1 ? ['>', 0] : ['=', 0];
 
             $ids = $this->check_item->where($smap)->column('check_id');
-            $map['a.id'] = ['in', $ids];
+            $map['check.id'] = ['in', $ids];
 
-            $map['a.is_return'] = $filter['is_process'] == 1 ? 0 : 1;
+            $map['check.is_return'] = $filter['is_process'] == 1 ? 0 : 1;
 
             unset($filter['is_process']);
             $this->request->get(['filter' => json_encode($filter)]);
         }
 
         if ($ids) {
-            $map['a.id'] = ['in', $ids];
+            $map['check.id'] = ['in', $ids];
         }
 
         list($where) = $this->buildparams();
-        $list = $this->model->alias('a')
-            ->join(['fa_purchase_order' => 'd'], 'a.purchase_id=d.id')
-            ->join(['fa_check_order_item' => 'b'], 'b.check_id=a.id')
+        $list = $this->model->alias('check')
+            ->join(['fa_purchase_order' => 'd'], 'check.purchase_id=d.id')
+            ->join(['fa_check_order_item' => 'b'], 'b.check_id=check.id')
             ->join(['fa_purchase_order_item' => 'c'], 'b.purchase_id=c.purchase_id and c.sku=b.sku')
-            ->field('a.*,b.*,c.purchase_price,d.purchase_number,d.create_person,d.purchase_remark')
+            ->field('check.*,b.*,c.purchase_price,d.purchase_number,d.create_person as person,d.purchase_remark')
             ->where($where)
             ->where($map)
-            ->order('a.id desc')
+            ->order('check.id desc')
             ->select();
         $list = collection($list)->toArray();
        
@@ -754,7 +754,7 @@ class Check extends Backend
             $spreadsheet->getActiveSheet()->setCellValue("A" . ($key * 1 + 2), $value['check_order_number']);
             $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $value['type'] == 1 ? '采购质检' : '退货质检');
             $spreadsheet->getActiveSheet()->setCellValueExplicit("C" . ($key * 1 + 2), $value['purchase_number'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
-            $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 1 + 2), $value['create_person']);
+            $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 1 + 2), $value['person']);
             $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), '');
             $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 1 + 2), $supplier_data[$value['supplier_id']]);
             $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 1 + 2), $value['purchase_remark']);

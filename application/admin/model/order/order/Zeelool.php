@@ -1087,4 +1087,5 @@ class Zeelool extends Model
             ->sum('b.qty_ordered');
     }
     
+   
 }

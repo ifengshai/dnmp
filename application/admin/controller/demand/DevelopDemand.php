@@ -2,11 +2,13 @@
 
 namespace app\admin\controller\demand;
 
+use app\api\controller\Ding;
 use app\common\controller\Backend;
 use think\Db;
 use think\Exception;
 use think\exception\PDOException;
 use think\exception\ValidateException;
+use app\common\model\Auth;
 
 /**
  * 需求平台-开发组-日常需求管理
@@ -21,13 +23,14 @@ class DevelopDemand extends Backend
      * @var \app\admin\model\demand\DevelopDemand
      */
     protected $model = null;
-
+    protected $noNeedRight=['del'];  //解决创建人无删除权限问题 暂定
     public function _initialize()
     {
         parent::_initialize();
         $this->model = new \app\admin\model\demand\DevelopDemand;
         $this->testRecord = new \app\admin\model\demand\DevelopTestRecord();
         $this->assignconfig('admin_id', session('admin.id'));
+        $this->view->assign('getTabList', $this->model->getTabList());
     }
 
     /**
@@ -48,15 +51,54 @@ class DevelopDemand extends Backend
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
+
+            $filter = json_decode($this->request->get('filter'), true);
+            $meWhere = '';
+            //我的
+            if(isset($filter['me_task'])){
+
+                $adminId = session('admin.id');
+                //经理
+                $authUserIds = Auth::getUsersId('demand/develop_demand/review') ?: [];
+                //经理
+                if(in_array($adminId,$authUserIds)){
+                    $meWhere = "(review_status_manager = 0 or ( (is_test =1 and test_is_passed=1 and is_finish_task =0) or (is_test =0 and is_finish=1 and is_finish_task=0)  ) )";
+                }
+                //开发主管
+                $authDevelopUserIds = Auth::getUsersId('demand/develop_demand/review_status_develop') ?: [];
+                if(!in_array($adminId,$authUserIds) && in_array($adminId,$authDevelopUserIds)){
+                    $meWhere = "((review_status_manager =1 and is_finish_task =0 and review_status_develop = 0) or FIND_IN_SET({$adminId},assign_developer_ids))";//主管 需要主管审核的 主管本人的任务  未完成，需主管确认完成的
+                }
+
+                //判断是否是普通的测试
+                $testAuthUserIds = Auth::getUsersId('demand/develop_web_task/set_test_status') ?: [];
+                if(!in_array($adminId,$authUserIds) && in_array($adminId,$testAuthUserIds)){
+                    $meWhere = "(is_test = 1 and FIND_IN_SET({$adminId},test_person) and is_test_complete =0)"; //测试用户
+                }
+                //显示有分配权限的人，此类人跟点上线的是一类人，此类人应该可以查看所有的权限
+                $assignAuthUserIds = Auth::getUsersId('demand/it_web_demand/distribution') ?: [];
+                if(in_array($adminId,$assignAuthUserIds)){
+                    $meWhere = "1 = 1";
+                }
+                // 不是主管和经理的, 是否为开发人或测试认，或创建人
+                if(!$meWhere){
+                    $meWhere .= "FIND_IN_SET({$adminId},assign_developer_ids)  or FIND_IN_SET({$adminId},test_person)  or FIND_IN_SET({$adminId}, create_person_id)";
+                }
+                unset($filter['me_task']);
+            }
+            $this->request->get(['filter' => json_encode($filter)]);
+
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
                 ->where($where)
+                ->where($meWhere)
                 ->where('type', '2')
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->model
                 ->where($where)
+                ->where($meWhere)
                 ->where('type', '2')
                 ->order($sort, $order)
                 ->limit($offset, $limit)
@@ -177,15 +219,53 @@ class DevelopDemand extends Backend
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
+            $filter = json_decode($this->request->get('filter'), true);
+            $meWhere = '';
+            if(isset($filter['me_task'])){
+
+                $adminId = session('admin.id');
+                //经理
+                $authUserIds = Auth::getUsersId('demand/develop_demand/review') ?: [];
+                //经理
+                if(in_array($adminId,$authUserIds)){
+                    $meWhere = "(review_status_manager = 0 or ( (is_test =1 and test_is_passed=1 and is_finish_task =0) or (is_test =0 and is_finish=1 and is_finish_task=0)  ) )";
+                }
+
+                //开发主管
+                $authDevelopUserIds = Auth::getUsersId('demand/develop_demand/review_status_develop') ?: [];
+                if(!in_array($adminId,$authUserIds) && in_array($adminId,$authDevelopUserIds)){
+                    $meWhere = "(is_finish_task =0 or FIND_IN_SET({$adminId},assign_developer_ids))";//
+                }
+
+                //判断是否是普通的测试
+                $testAuthUserIds = Auth::getUsersId('demand/develop_web_task/set_test_status') ?: [];
+                if(!in_array($adminId,$authUserIds) && in_array($adminId,$testAuthUserIds)){
+                    $meWhere = "(is_test = 1 and FIND_IN_SET({$adminId},test_person) and is_test_complete =0)"; //测试用户
+                }
+                //显示有分配权限的人，此类人跟点上线的是一类人，此类人应该可以查看所有的权限
+                $assignAuthUserIds = Auth::getUsersId('demand/it_web_demand/distribution') ?: [];
+                if(in_array($adminId,$assignAuthUserIds)){
+                    $meWhere = "1 = 1";
+                }
+                // 不是主管和经理的, 是否为开发人或测试认，或创建人
+                if(!$meWhere){
+                    $meWhere .= "FIND_IN_SET({$adminId},assign_developer_ids)  or FIND_IN_SET({$adminId},test_person)  or FIND_IN_SET({$adminId}, create_person_id)";
+                }
+                unset($filter['me_task']);
+            }
+            $this->request->get(['filter' => json_encode($filter)]);
+
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
                 ->where($where)
+                ->where($meWhere)
                 ->where('type', '1')
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->model
                 ->where($where)
+                ->where($meWhere)
                 ->where('type', '1')
                 ->order($sort, $order)
                 ->limit($offset, $limit)
@@ -331,6 +411,7 @@ class DevelopDemand extends Backend
                     $this->error($e->getMessage());
                 }
                 if ($result !== false) {
+                    Ding::dingHookByDevelop(__FUNCTION__, $this ->model);
                     $this->success();
                 } else {
                     $this->error(__('No rows were inserted'));
@@ -472,6 +553,8 @@ class DevelopDemand extends Backend
                     $this->error($e->getMessage());
                 }
                 if ($result !== false) {
+                    $res = $this ->model ->get(input('ids'));
+                    Ding::dingHookByDevelop('review', $res);
                     $this->success();
                 } else {
                     $this->error(__('No rows were updated'));
@@ -565,6 +648,8 @@ class DevelopDemand extends Backend
                     $this->error($e->getMessage());
                 }
                 if ($result !== false) {
+                    $res = $this ->model ->get(input('id'));
+                    Ding::dingHookByDevelop('distribution', $res);
                     $this->success();
                 } else {
                     $this->error(__('No rows were updated'));
@@ -636,11 +721,13 @@ class DevelopDemand extends Backend
         $data['finish_time'] = date('Y-m-d H:i:s', time());
         $data['finish_person'] = session('admin.nickname');
         $data['finish_person_id'] = session('admin.id');
-        $res = $this->model->save($data, ['id' => $ids]);
-        if ($res !== false) {
-            $this->success('操作成功！！');
+        $result = $this->model->save($data, ['id' => $ids]);
+        if ($result) {
+            $res = $this ->model ->get(input('ids'));
+            Ding::dingHookByDevelop('set_complete_status', $res);
+            $this->success('操作成功');
         } else {
-            $this->error('操作失败！！');
+            $this->error('操作失败');
         }
     }
 
@@ -683,6 +770,8 @@ class DevelopDemand extends Backend
                     $this->error($e->getMessage());
                 }
                 if ($result !== false) {
+                    $res = $this ->model ->get(input('ids'));
+                    Ding::dingHookByDevelop('test_record_bug', $res);
                     $this->success();
                 } else {
                     $this->error(__('No rows were updated'));
@@ -795,6 +884,8 @@ class DevelopDemand extends Backend
         $data['test_finish_time'] = date('Y-m-d H:i:s', time());
         $res = $this->model->save($data, ['id' => $ids]);
         if ($res !== false) {
+            $res = $this ->model ->get(input('ids'));
+            Ding::dingHookByDevelop('test_is_passed', $res);
             $this->success('操作成功！！');
         } else {
             $this->error('操作失败！！');
@@ -816,6 +907,8 @@ class DevelopDemand extends Backend
         $data['finish_task_time'] = date('Y-m-d H:i:s', time());
         $res = $this->model->save($data, ['id' => $ids]);
         if ($res !== false) {
+            $res = $this ->model ->get(input('ids'));
+            Ding::dingHookByDevelop('is_finish_task', $res);
             $this->success('操作成功！！');
         } else {
             $this->error('操作失败！！');
@@ -838,6 +931,8 @@ class DevelopDemand extends Backend
         $data['finish_task_time'] = date('Y-m-d H:i:s', time());
         $res = $this->model->save($data, ['id' => $ids]);
         if ($res !== false) {
+            $res = $this ->model ->get(input('ids'));
+            Ding::dingHookByDevelop('is_finish_bug', $res);
             $this->success('操作成功！！');
         } else {
             $this->error('操作失败！！');
@@ -885,6 +980,8 @@ class DevelopDemand extends Backend
                     $this->error($e->getMessage());
                 }
                 if ($result !== false) {
+                    $res = $this ->model ->get(input('ids'));
+                    Ding::dingHookByDevelop('regression_test_info', $res);
                     $this->success();
                 } else {
                     $this->error(__('No rows were updated'));

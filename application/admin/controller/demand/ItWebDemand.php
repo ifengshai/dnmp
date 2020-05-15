@@ -21,7 +21,7 @@ class ItWebDemand extends Backend
      * @var \app\admin\model\demand\ItWebDemand
      */
     protected $model = null;
-
+    protected $noNeedRight=['del'];  //解决创建人无删除权限问题 暂定
     public function _initialize()
     {
         parent::_initialize();
@@ -107,7 +107,13 @@ class ItWebDemand extends Backend
                     $meWhere .= "entry_user_id = {$adminId} or FIND_IN_SET({$adminId},web_designer_user_id) or FIND_IN_SET({$adminId},phper_user_id) or FIND_IN_SET({$adminId},test_user_id) or FIND_IN_SET({$adminId},copy_to_user_id)";
                 }
                 unset($filter['me_task']);
+            } elseif(isset($filter['none_complete'])){//未完成
+                $meWhere="status !=7";
+                unset($filter['none_complete']);
             }
+
+
+
             if(isset($filter['Allgroup_sel'])){
                 unset($filter['Allgroup_sel']);
             }
@@ -312,7 +318,11 @@ class ItWebDemand extends Backend
                     $meWhere .= "entry_user_id = {$adminId} or FIND_IN_SET({$adminId},web_designer_user_id) or FIND_IN_SET({$adminId},phper_user_id) or FIND_IN_SET({$adminId},test_user_id) or FIND_IN_SET({$adminId},copy_to_user_id)";
                 }
                 unset($filter['me_task']);
+            } elseif(isset($filter['none_complete'])){//未完成
+                $meWhere="status !=7";
+                unset($filter['none_complete']);
             }
+
             if(isset($filter['Allgroup_sel'])){
                 unset($filter['Allgroup_sel']);
             }
