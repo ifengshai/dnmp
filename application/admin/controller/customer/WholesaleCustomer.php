@@ -346,7 +346,7 @@ class WholesaleCustomer extends Backend
 
             $fields = [];
             for ($currentRow = 1; $currentRow <= 1; $currentRow++) {
-                for ($currentColumn = 1; $currentColumn <= $maxColumnNumber; $currentColumn++) {
+                for ($currentColumn = 1; $currentColumn <= 11; $currentColumn++) {
                     $val = $currentSheet->getCellByColumnAndRow($currentColumn, $currentRow)->getValue();
                     $fields[] = $val;
                 }
@@ -373,11 +373,14 @@ class WholesaleCustomer extends Backend
         //批量添加产品
         foreach ($data as $k => $v) {
 
-            if (!isset($v[0])){
+            if (empty($v[0])){
                 $this->error('导入失败！！,电子邮箱不能为空');
             }
-            if (!isset($v[5])){
+            if (empty($v[5])){
                 $this->error('导入失败！！,意向等级不能为空');
+            }
+            if (empty($v[4])){
+                $this->error('导入失败！！,来源类型不能为空');
             }
             $params[$k]['email'] = trim($v[0]);
             $params[$k]['customer_name'] = trim($v[1]);
@@ -414,9 +417,9 @@ class WholesaleCustomer extends Backend
 
             $params[$k]['site_type'] =$site_type;
             $params[$k]['intention_level'] = $intention_level;
-            $params[$k]['is_order'] =  $v[6]=='是'?2:1;
-            $params[$k]['is_behalf_of'] =  $v[7]=='是'?2:1;
-            $params[$k]['is_logo'] =  $v[8]=='是'?2:1;
+            $params[$k]['is_order'] =  $this->checkIsType($v[6]);
+            $params[$k]['is_behalf_of'] =   $this->checkIsType($v[7]);
+            $params[$k]['is_logo'] =   $this->checkIsType($v[8]);
             $params[$k]['remark'] =  $v[9];
             $params[$k]['logo_images'] =  $v[10];
 
@@ -437,6 +440,17 @@ class WholesaleCustomer extends Backend
     }
 
 
+    public function checkIsType($value=''){
+        if (empty($value)){
+            return null;
+        }elseif ($value=='是'){
+            return 2;
+        }elseif ($value == '否'){
+            return 1;
+        }else{
+            $this->error("是否下单、是否代发、是否logo必须为【是】或【否】！！");
+        }
+    }
 
 
     /**
