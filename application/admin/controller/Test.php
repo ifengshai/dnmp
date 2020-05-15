@@ -222,10 +222,11 @@ class Test extends Backend
 
             }
 
-            $data['create_time'] = $v['updated_at'];
+            $data['create_time'] = $v['created_at'];
             $data['site'] = 1;
             $data['order_id'] = $v['entity_id'];
             $data['order_number'] = $v['increment_id'];
+            $data['update_time'] = $v['created_at'];
             //打标签
             if ($v['custom_print_label_new'] == 1) {
                 $list[$k + 2]['order_node'] = 1;
@@ -242,7 +243,7 @@ class Test extends Backend
 
                 $data['order_node'] = 1;
                 $data['node_type'] = 2;
-                $data['create_time'] = $v['custom_print_label_created_at_new'];
+                $data['update_time'] = $v['custom_print_label_created_at_new'];
             }
 
             //判断订单是否为仅镜架
@@ -262,7 +263,7 @@ class Test extends Backend
 
                     $data['order_node'] = 2;
                     $data['node_type'] = 3;
-                    $data['create_time'] = $v['custom_match_frame_created_at_new'];
+                    $data['update_time'] = $v['custom_match_frame_created_at_new'];
                 }
 
                 if ($v['custom_is_delivery_new'] == 1) {
@@ -280,7 +281,7 @@ class Test extends Backend
 
                     $data['order_node'] = 2;
                     $data['node_type'] = 6;
-                    $data['create_time'] = $v['custom_match_delivery_created_at_new'];
+                    $data['update_time'] = $v['custom_match_delivery_created_at_new'];
                 }
 
                 if ($v['track_number']) {
@@ -298,7 +299,7 @@ class Test extends Backend
 
                     $data['order_node'] = 2;
                     $data['node_type'] = 7;
-                    $data['create_time'] = $v['create_time'];
+                    $data['update_time'] = $v['create_time'];
                 }
                 $data['is_only_frame'] = 1;
             } else {
@@ -318,7 +319,7 @@ class Test extends Backend
 
                     $data['order_node'] = 2;
                     $data['node_type'] = 3;
-                    $data['create_time'] = $v['custom_match_frame_created_at_new'];
+                    $data['update_time'] = $v['custom_match_frame_created_at_new'];
                 }
 
                 if ($v['custom_is_match_lens_new'] == 1) {
@@ -336,7 +337,7 @@ class Test extends Backend
 
                     $data['order_node'] = 2;
                     $data['node_type'] = 4;
-                    $data['create_time'] = $v['custom_match_lens_created_at_new'];
+                    $data['update_time'] = $v['custom_match_lens_created_at_new'];
                 }
 
                 if ($v['custom_is_send_factory_new'] == 1) {
@@ -354,7 +355,7 @@ class Test extends Backend
 
                     $data['order_node'] = 2;
                     $data['node_type'] = 5;
-                    $data['create_time'] = $v['custom_match_factory_created_at_new'];
+                    $data['update_time'] = $v['custom_match_factory_created_at_new'];
                 }
 
 
@@ -373,7 +374,7 @@ class Test extends Backend
 
                     $data['order_node'] = 2;
                     $data['node_type'] = 6;
-                    $data['create_time'] = $v['custom_match_delivery_created_at_new'];
+                    $data['update_time'] = $v['custom_match_delivery_created_at_new'];
                 }
 
                 if ($v['track_number']) {
@@ -391,7 +392,7 @@ class Test extends Backend
 
                     $data['order_node'] = 2;
                     $data['node_type'] = 7;
-                    $data['create_time'] = $v['create_time'];
+                    $data['update_time'] = $v['create_time'];
                 }
             }
             $data['shipment_type'] = $v['title'];
