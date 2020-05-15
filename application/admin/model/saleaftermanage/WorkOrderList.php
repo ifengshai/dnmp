@@ -256,16 +256,16 @@ class WorkOrderList extends Model
     {
         switch ($siteType) {
             case 1:
-                $url = 'https://www.zeelool.com/';
+                $url = config('url.zeelool_url');
                 break;
             case 2:
-                $url = 'https://pc.voogueme.com/';
+                $url = config('url.voogueme_url');
                 break;
             case 3:
-                $url = 'https://www.nihaooptical.com/';
+                $url = config('url.nihao_url');
                 break;
             case 5:
-                $url = 'https://www.weseeoptical.com/';
+                $url = config('url.wesee_url');
                 break;
             default:
                 return false;

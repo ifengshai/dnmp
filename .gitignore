@@ -3,6 +3,7 @@
 /public/uploads/*
 /public/pdftmp/*
 /application/extra/upload.php
+/application/extra/url.php
 .idea
 composer.lock
 *.log
