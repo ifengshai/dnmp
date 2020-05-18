@@ -17,7 +17,11 @@ class ThirdApi extends Api
     {
         parent::_initialize();
     }
-
-
-
+    /*
+     * 17track物流查询webhook访问方法
+     * */
+    public function track_return(){
+        $track_info = file_get_contents("php://input");
+        file_put_contents('/www/wwwroot/mojing/runtime/log/track.txt',$track_info."\r\n",FILE_APPEND);
+    }
 }
