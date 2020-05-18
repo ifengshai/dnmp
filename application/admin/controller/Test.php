@@ -67,7 +67,11 @@ class Test extends Backend
 
             if($trackInfo['code'] == 0 && $trackInfo['data']['accepted']){
                 $trackdata = $trackInfo['data']['accepted'][0]['track'];
-                $trackdetail = array_reverse($trackdata['z1']);
+                if($v['title'] == 'USPS'){
+                    $data = $this->china_post_data($trackdata,$add);
+                }
+
+
 
 
 
@@ -80,7 +84,65 @@ class Test extends Backend
 
         }
     }
+    public function china_post_data($data,$add){
+        $trackdetail = array_reverse($data['z1']);
 
+        foreach ($trackdetail as $k => $v){
+            $add['create_time'] = $v['a'];
+            $add['content'] = $v['z'];
+            $add['courier_status'] = $data['e'];
+            //Db::name('order_node_courier')->insert($add);//插入日志表
+
+            $courier['order_node'] = 3;
+            $courier['create_time'] = $v['a'];
+
+            $courier['handle_user_id'] = 0;
+            $courier['handle_user_name'] = 'system';
+            $courier['site'] = $add['site'];
+            $courier['order_id'] = $add['order_id'];
+            $courier['order_number'] = $add['order_number'];
+            $courier['shipment_type'] = $add['shipment_type'];
+            $courier['track_number'] = $add['track_number'];
+
+            if (stripos($v['z'], '已收件，揽投员') !== false) {
+                $order_node_date = Db::name('order_node')->where('track_number', $add['track_number'])->find();
+                if($order_node_date['order_node'] == 2 && $order_node_date['node_type'] == 7){
+                    $update_order_node['order_node'] = 3;
+                    $update_order_node['node_type'] = 8;
+                    $update_order_node['update_time'] = time();
+                }
+                dump($order_node_date);
+
+                $courier['node_type'] = 8;
+                $courier['content'] = '上网';
+                $courier['create_time'] = $v['a'];
+            }
+
+            if (stripos($v['z'], '已交航空公司运输') !== false) {
+                $courier['node_type'] = 9;
+                $courier['content'] = '交航';
+                $courier['create_time'] = $v['a'];
+
+
+                $courier['node_type'] = 10;
+                $courier['content'] = '运输中';
+                $courier['create_time'] = date('Y-m-d H:i',strtotime(($v['a']." +7 day")));
+            }
+
+            if (stripos($v['z'], '已到达寄达地') !== false) {
+                $courier['node_type'] = 11;
+                $courier['content'] = '到达目的地';
+                $courier['create_time'] = $v['a'];
+            }
+
+
+        }
+
+        dump($add);
+        dump($data);
+        exit;
+
+    }
 
 
     /**
@@ -222,10 +284,11 @@ class Test extends Backend
 
             }
 
-            $data['create_time'] = $v['updated_at'];
+            $data['create_time'] = $v['created_at'];
             $data['site'] = 1;
             $data['order_id'] = $v['entity_id'];
             $data['order_number'] = $v['increment_id'];
+            $data['update_time'] = $v['created_at'];
             //打标签
             if ($v['custom_print_label_new'] == 1) {
                 $list[$k + 2]['order_node'] = 1;
@@ -242,7 +305,7 @@ class Test extends Backend
 
                 $data['order_node'] = 1;
                 $data['node_type'] = 2;
-                $data['create_time'] = $v['custom_print_label_created_at_new'];
+                $data['update_time'] = $v['custom_print_label_created_at_new'];
             }
 
             //判断订单是否为仅镜架
@@ -262,7 +325,7 @@ class Test extends Backend
 
                     $data['order_node'] = 2;
                     $data['node_type'] = 3;
-                    $data['create_time'] = $v['custom_match_frame_created_at_new'];
+                    $data['update_time'] = $v['custom_match_frame_created_at_new'];
                 }
 
                 if ($v['custom_is_delivery_new'] == 1) {
@@ -280,7 +343,7 @@ class Test extends Backend
 
                     $data['order_node'] = 2;
                     $data['node_type'] = 6;
-                    $data['create_time'] = $v['custom_match_delivery_created_at_new'];
+                    $data['update_time'] = $v['custom_match_delivery_created_at_new'];
                 }
 
                 if ($v['track_number']) {
@@ -298,7 +361,7 @@ class Test extends Backend
 
                     $data['order_node'] = 2;
                     $data['node_type'] = 7;
-                    $data['create_time'] = $v['create_time'];
+                    $data['update_time'] = $v['create_time'];
                 }
                 $data['is_only_frame'] = 1;
             } else {
@@ -318,7 +381,7 @@ class Test extends Backend
 
                     $data['order_node'] = 2;
                     $data['node_type'] = 3;
-                    $data['create_time'] = $v['custom_match_frame_created_at_new'];
+                    $data['update_time'] = $v['custom_match_frame_created_at_new'];
                 }
 
                 if ($v['custom_is_match_lens_new'] == 1) {
@@ -336,7 +399,7 @@ class Test extends Backend
 
                     $data['order_node'] = 2;
                     $data['node_type'] = 4;
-                    $data['create_time'] = $v['custom_match_lens_created_at_new'];
+                    $data['update_time'] = $v['custom_match_lens_created_at_new'];
                 }
 
                 if ($v['custom_is_send_factory_new'] == 1) {
@@ -354,7 +417,7 @@ class Test extends Backend
 
                     $data['order_node'] = 2;
                     $data['node_type'] = 5;
-                    $data['create_time'] = $v['custom_match_factory_created_at_new'];
+                    $data['update_time'] = $v['custom_match_factory_created_at_new'];
                 }
 
 
@@ -373,7 +436,7 @@ class Test extends Backend
 
                     $data['order_node'] = 2;
                     $data['node_type'] = 6;
-                    $data['create_time'] = $v['custom_match_delivery_created_at_new'];
+                    $data['update_time'] = $v['custom_match_delivery_created_at_new'];
                 }
 
                 if ($v['track_number']) {
@@ -391,7 +454,7 @@ class Test extends Backend
 
                     $data['order_node'] = 2;
                     $data['node_type'] = 7;
-                    $data['create_time'] = $v['create_time'];
+                    $data['update_time'] = $v['create_time'];
                 }
             }
             $data['shipment_type'] = $v['title'];
