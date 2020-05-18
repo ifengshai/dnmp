@@ -26,12 +26,23 @@ class CustomerService extends Backend
      */
     public function index()
     {
-        $a = 10;
-        if ($a>10) {
-            echo 111;
-        } else {
-            echo 222;
-        }
+        $orderPlatformList = config('workorder.platform');
+        $this->view->assign(compact('orderPlatformList','workList'));  
+        return $this->view->fetch();
+    }
+    /**
+     * 工作量统计
+     *
+     * @Description
+     * @author lsw
+     * @since 2020/05/18 09:18:08 
+     * @return void
+     */
+    public function  workload()
+    {
+        $orderPlatformList = config('workorder.platform');
+        $this->view->assign(compact('orderPlatformList','workList'));  
+        return $this->view->fetch();
     }
     /**
      * 工单统计

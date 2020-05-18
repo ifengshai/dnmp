@@ -1,0 +1,395 @@
+<style>
+    .content{
+        max-width:100%;
+    }
+    .echart-style td{
+        width:60px;
+    }
+</style>
+
+<style type="text/css">
+table.altrowstable {
+    margin: 0 auto;
+    width: 100%;
+    font-family: verdana, arial, sans-serif;
+    font-size: 11px;
+    color: #333333;
+    border-width: 1px;
+    border-color: #247692;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+table.altrowstable th {
+    border-width: 1px;
+    padding: 8px;
+    font-size: 14px;
+    border-style: solid;
+    border-color: #d2d6de;
+}
+
+table.altrowstable td {
+    border-width: 1px;
+    padding: 8px;
+    text-align: center;
+    font-size: 12px;
+    border-style: solid;
+    border-color: #ddd;
+}
+table.altrowstable tr:nth-child(odd){
+    background:#E9F1F4;
+    background: #F5F5F5;
+}
+table.altrowstable tr:nth-child(even){
+    background: #fff;
+    background: #eee;
+}
+    .caigou-table {
+        width: 30%;
+        height: 130px;
+        border-width: 1px;
+        border-style: solid;
+        border-color: #a9c6c9;
+        border-radius: 6px;
+        text-align: center;
+        float: left;
+        margin-left: 30px;
+        background-color: #c3dde0;
+    }
+
+    .caigou-table tr {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: #a9c6c9;
+        border-radius: 6px;
+        line-height: 50px;
+    }
+
+    .caigou-table tr th {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: #a9c6c9;
+        border-radius: 6px;
+        text-align: center;
+        font-size: 14px;
+    }
+
+    .caigou-table tr td {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: #a9c6c9;
+        border-radius: 6px;
+    }
+    .btn-div {
+        font-size: 14px;
+        line-height: 50px;
+        background: inherit;
+        background-color: rgba(255, 255, 255, 1);
+        border: none;
+        border-radius: 4px;
+        box-shadow: 0px 0px 7px rgba(0, 0, 0, 0.349019607843137);
+        border-width: 0px;
+        font-family: 'Arial Negreta', 'Arial';
+        font-weight: 700;
+        font-style: normal;
+        margin-right: 20px;
+        width: 180px;
+    }
+    .tab-content > .active {
+       display: block;
+       clear: both;
+    }  
+</style>
+<div class="panel panel-default panel-intro">
+    {:build_heading()}
+
+    <div class="panel-body">
+        <div id="myTabContent" class="tab-content">
+            <div class="tab-pane fade active in" id="one">
+                <div class="widget-body no-padding">
+                    <form id = "form1" action="{:url('/admin/datacenter/customer_service/workload')}" class="form-commonsearch form-horizontal" role="form1" method="post">
+                        <div style="border-radius:2px;margin-bottom:10px;background:#f5f5f5;padding:20px;">
+                            <div class="row">
+                                <div class="col-xs-12 col-md-3">
+                                    <div class="form-group">
+                                        <label class="control-label col-xs-4">工单平台</label>
+                                        <div class="col-xs-8">
+                                            <select  id="c-order_platform" data-rule="required" class="form-control" name="order_platform">
+												{foreach name="orderPlatformList" item="vo"}
+                                                {if $key == $platform}
+                                                <option value="{$key}" selected="selected">{$vo}</option>
+                                                {else}
+                                                <option value="{$key}">{$vo}</option>
+                                                {/if}
+                                                {/foreach}
+                                                <option value="10"{if $platform==10} selected="selected"{/if}>全部</option>
+                                            </select>
+                                        </div>
+                                    </div>                                                                 
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label col-xs-1 col-sm-1">时间:</label>
+                                <div class="col-xs-2">
+                                    <input type="hidden" class="form-control operate" name="one_time-operate" data-name="one_time" value="RANGE" readonly="">
+                                    <input type="text" autocomplete="off" class="form-control datetimerange" name="one_time"  placeholder="创建时间" id="one_time" value="" data-index="14">
+                                </div>
+                            </div>                            
+                            <div class="form-group col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                                <div class="col-sm-8 col-xs-offset-4">
+                                    <input type="submit" class="btn btn-success" value="提交"> 
+                                    <input type="reset" class="btn btn-default reset" value="重置" ></div>
+                            </div>                                                            
+                            </div>                                                                                                                                           
+                        </div>
+                    </form>
+                </div>
+                <table id="order-info-list" class="altrowstable"
+                data-operate-edit="{:$auth->check('saleaftermanage/order_return/edit')}"
+                data-operate-del="{:$auth->check('saleaftermanage/order_return/del')}"
+                width="100%">
+             <thead>                    
+             <tr>
+                 <th style="text-align: center; vertical-align: middle;">时间</th>
+                 <th style="text-align: center; vertical-align: middle;">待处理</th>
+                 <th style="text-align: center; vertical-align: middle;">新增</th>
+                 <th style="text-align: center; vertical-align: middle;">已回复</th>
+                 <th style="text-align: center; vertical-align: middle;">待分配</th>
+                 <th style="text-align: center; vertical-align: middle;">pending量</th>
+             </tr>
+             </thead>
+                  <tr>
+                      <td id='today_sales_money'         style="text-align: center; vertical-align: middle;">1</td>
+                      <td id='today_order_num'           style="text-align: center; vertical-align: middle;">2</td>
+                      <td id='today_order_success'       style="text-align: center; vertical-align: middle;">3</td>
+                      <td id='today_unit_price'          style="text-align: center; vertical-align: middle;">4</td>
+                      <td id='today_shoppingcart_total'  style="text-align: center; vertical-align: middle;">5</td>
+                      <td id='today_shoppingcart_conversion' style="text-align: center; vertical-align: middle;">6</td>
+                  </tr>			 
+                </table>                
+            </div>
+            <div class="tab-panes fade active in">
+                <p><span>工作量概况</span></p>
+                <div class="widget-body no-padding" style="width: 800px; overflow:scroll;float:left;">
+                    <table id="order-info-list" class="altrowstable"
+                           data-operate-edit="{:$auth->check('saleaftermanage/order_return/edit')}"
+                           data-operate-del="{:$auth->check('saleaftermanage/order_return/del')}"
+                           width="100%">
+                        <thead>                    
+                        <tr>
+                            <th style="text-align: center; vertical-align: middle;">A组</th>
+                            <th style="text-align: center; vertical-align: middle;">昨日处理量</th>
+                            <th style="text-align: center; vertical-align: middle;">今日处理量</th>
+                            <th style="text-align: center; vertical-align: middle;">本月未达标天数</th>
+                            <th style="text-align: center; vertical-align: middle;">本月差评数量</th>
+                            <th style="text-align: center; vertical-align: middle;">本月总工作量</th>
+                            <th style="text-align: center; vertical-align: middle;">本月差评占比</th>
+                        </tr>
+                        </thead>
+                             <tr>
+                                 <td style="text-align: center; vertical-align: middle;">1</td>
+                                 <td style="text-align: center; vertical-align: middle;">2</td>
+                                 <td style="text-align: center; vertical-align: middle;">3</td>
+                                 <td id='zeelool_pc_sales_money'    style="text-align: center; vertical-align: middle;">4</td>
+                                 <td id='zeelool_pc_sales_num'      style="text-align: center; vertical-align: middle;">5</td>
+                                 <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;">6</td>
+                                 <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;">7</td>
+                             </tr>                                                                                                                                                   							 
+                    </table>
+                </div>
+                <div class="widget-body no-padding" style="width: 800px; overflow:scroll;float:right">
+                    <table id="order-info-list" class="altrowstable"
+                           data-operate-edit="{:$auth->check('saleaftermanage/order_return/edit')}"
+                           data-operate-del="{:$auth->check('saleaftermanage/order_return/del')}"
+                           width="100%">
+                        <thead>                    
+                        <tr>
+                            <th style="text-align: center; vertical-align: middle;">B组</th>
+                            <th style="text-align: center; vertical-align: middle;">昨日处理量</th>
+                            <th style="text-align: center; vertical-align: middle;">今日处理量</th>
+                            <th style="text-align: center; vertical-align: middle;">本月未达标天数</th>
+                            <th style="text-align: center; vertical-align: middle;">本月差评数量</th>
+                            <th style="text-align: center; vertical-align: middle;">本月总工作量</th>
+                            <th style="text-align: center; vertical-align: middle;">本月差评占比</th>
+                        </tr>
+                        </thead>
+                             <tr>
+                                 <td style="text-align: center; vertical-align: middle;">1</td>
+                                 <td style="text-align: center; vertical-align: middle;">2</td>
+                                 <td style="text-align: center; vertical-align: middle;">3</td>
+                                 <td id='zeelool_pc_sales_money'    style="text-align: center; vertical-align: middle;">4</td>
+                                 <td id='zeelool_pc_sales_num'      style="text-align: center; vertical-align: middle;">5</td>
+                                 <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;">6</td>
+                                 <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;">7</td>
+                             </tr>                                                                                                                                                   							 
+                    </table>
+                </div>                
+            </div>
+            <div class="tab-pane fade active in">
+                <p><span>工单统计</span></p>
+                <div class="widget-body no-padding" style="width: 100%; overflow:scroll;">
+                    <table id="order-info-list" class="altrowstable"
+                           data-operate-edit="{:$auth->check('saleaftermanage/order_return/edit')}"
+                           data-operate-del="{:$auth->check('saleaftermanage/order_return/del')}"
+                           width="100%">
+                        <thead>                    
+                        <tr>
+                            <th style="text-align: center; vertical-align: middle;">A组</th>
+                            <th style="text-align: center; vertical-align: middle;">本月工单创建数量</th>
+                            <th style="text-align: center; vertical-align: middle;">本月工单完成量</th>
+                            <th style="text-align: center; vertical-align: middle;">订单总金额（$）</th>
+                            <th style="text-align: center; vertical-align: middle;">本月优惠券发放量</th>
+                            <th style="text-align: center; vertical-align: middle;">本月补发单数</th>
+                            <th style="text-align: center; vertical-align: middle;">本月补发比</th>
+                            <th style="text-align: center; vertical-align: middle;">本月退款单数</th>
+                            <th style="text-align: center; vertical-align: middle;">本月退款订单比</th>
+                            <th style="text-align: center; vertical-align: middle;">本月累计退款金额（$）</th>
+                            <th style="text-align: center; vertical-align: middle;">本月退款金额比</th>
+                        </tr>
+                        </thead>
+                             <tr>
+                                 <td style="text-align: center; vertical-align: middle;">1</td>
+                                 <td style="text-align: center; vertical-align: middle;">2</td>
+                                 <td style="text-align: center; vertical-align: middle;">3</td>
+                                 <td id='zeelool_pc_sales_money'    style="text-align: center; vertical-align: middle;">4</td>
+                                 <td id='zeelool_pc_sales_num'      style="text-align: center; vertical-align: middle;">5</td>
+                                 <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;">6</td>
+                                 <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;">7</td>
+                                 <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;">8</td>
+                                 <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;">9</td>
+                                 <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;">10</td>
+                                 <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;">11</td>
+                             </tr>                                                                                                                                                   							 
+                    </table>
+                </div>
+                <div class="widget-body no-padding" style="width: 100%; overflow:scroll;">
+                    <table id="order-info-list" class="altrowstable"
+                           data-operate-edit="{:$auth->check('saleaftermanage/order_return/edit')}"
+                           data-operate-del="{:$auth->check('saleaftermanage/order_return/del')}"
+                           width="100%">
+                        <thead>                    
+                        <tr>
+                            <th style="text-align: center; vertical-align: middle;">B组</th>
+                            <th style="text-align: center; vertical-align: middle;">本月工单创建数量</th>
+                            <th style="text-align: center; vertical-align: middle;">本月工单完成量</th>
+                            <th style="text-align: center; vertical-align: middle;">订单总金额（$）</th>
+                            <th style="text-align: center; vertical-align: middle;">本月优惠券发放量</th>
+                            <th style="text-align: center; vertical-align: middle;">本月补发单数</th>
+                            <th style="text-align: center; vertical-align: middle;">本月补发比</th>
+                            <th style="text-align: center; vertical-align: middle;">本月退款单数</th>
+                            <th style="text-align: center; vertical-align: middle;">本月退款订单比</th>
+                            <th style="text-align: center; vertical-align: middle;">本月累计退款金额（$）</th>
+                            <th style="text-align: center; vertical-align: middle;">本月退款金额比</th>
+                        </tr>
+                        </thead>
+                             <tr>
+                                <td style="text-align: center; vertical-align: middle;">1</td>
+                                <td style="text-align: center; vertical-align: middle;">2</td>
+                                <td style="text-align: center; vertical-align: middle;">3</td>
+                                <td id='zeelool_pc_sales_money'    style="text-align: center; vertical-align: middle;">4</td>
+                                <td id='zeelool_pc_sales_num'      style="text-align: center; vertical-align: middle;">5</td>
+                                <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;">6</td>
+                                <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;">7</td>
+                                <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;">8</td>
+                                <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;">9</td>
+                                <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;">10</td>
+                                <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;">11</td>
+                             </tr>                                                                                                                                                   							 
+                    </table>
+                </div>
+                <div class="row item_info" style="background:#f5f5f5;float: left;width: 50%;height:483px;margin-top: 20px;clear:both;">
+                    <div class="col-lg-12">
+                        <div style="float: left;width:60%;">
+                            <label for="create_time" class="control-label col-xs-1"
+                                style="font-weight: bold;width: 150px;margin-top: 20px;">问题大分类统计</label>
+                            <div id="echart1" style="float: left;height:400px;width:100%;"></div>
+                        </div>
+                        <div style="float: left;width: 35%;">
+                            <table id="caigou-table" class="handle_table1"
+                                style="border-width:0px;width: 300px;margin-top: 200px;">
+                                <tr>
+                                    <td>订单修改</td>
+                                    <td>{$data.problem_type[0]}</td>
+                                    <td>占比</td>
+                                    {if $problem_type_total gt 0 }
+                                    <td>{:round($data.problem_type[0]/$problem_type_total*100,2)}%</td>
+                                    {else/}
+                                    <td>0</td>
+                                    {/if}
+                                </tr>
+                                <tr>
+                                    <td>物流仓储</td>
+                                    <td>{$data.problem_type[1]}</td>
+                                    <td>占比</td>
+                                    {if $problem_type_total gt 0}
+                                    <td>{:round($data.problem_type[1]/$problem_type_total*100,2)}%</td>
+                                    {else/}
+                                    <td>0</td>
+                                    {/if}
+                                </tr>
+                                <tr>
+                                    <td>产品质量</td>
+                                    <td>{$data.problem_type[2]}</td>
+                                    <td>占比</td>
+                                    {if $problem_type_total gt 0}
+                                    <td>{:round($data.problem_type[2]/$problem_type_total*100,2)}%</td>
+                                    {else/}
+                                    <td>0</td>
+                                    {/if}
+                                </tr>
+                                <tr>
+                                    <td>客户问题</td>
+                                    <td>{$data.problem_type[3]}</td>
+                                    <td>占比</td>
+                                    {if $problem_type_total gt 0}
+                                    <td>{:round($data.problem_type[3]/$problem_type_total*100,2)}%</td>
+                                    {else/}
+                                    <td>0</td>
+                                    {/if}
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="row item_info" style="background:#f5f5f5;float:right;width: 50%;margin-top: 20px;">
+                    <div class="col-lg-12">
+                        <div style="float: left;width:55%;">
+                            <label for="create_time" class="control-label col-xs-1"
+                                style="font-weight: bold;width: 150px;margin-top:20px;">问题类型统计</label>
+                                <ul class="nav nav-tabs" style="float:left;clear:both;" >
+                                    <!-- <li class="active"><a href="#t-all" data-value="" data-field="" data-toggle="tab">1</a></li> -->
+                                    {foreach name="problem_type" item="vo" key="k"}
+                                    {if $k eq 0}
+                                    <li class="active"><a  href="javascript:void(0);" data-value="{$k+1}" class="statistics">{$vo}</a></li>
+                                    {else/}
+                                    <li><a href="javascript:void(0);" data-value="{$k+1}" class="statistics">{$vo}</a></li>
+                                    {/if}
+                                    {/foreach}
+                                </ul>
+                                <div id="echart2" style="float: left;height:400px;width:100%;"></div>                                 
+                        </div>
+                        <div style="float: right;width: 40%;margin-top:120px;">
+                            <table id="caigou-table2" class="handle_table1"
+                                style="border-width:0px;width: 300px;margin-top: 50px;">
+                                {foreach name="customer_arr" item="vo" key="k"}
+                                <tr>
+                                    <td>{$vo}</td>
+                                    <td>{$problem_data[$k]}</td>
+                                    <td>占比</td>
+                                    {if $problem_form_total gt 0 }
+                                    <td>{:round($problem_data[$k]/$problem_form_total*100,2)}%</td>
+                                    {else/}
+                                    <td>0</td>
+                                    {/if}
+                                </tr>                            
+                                {/foreach}
+                            </table>
+                        </div>
+                    </div>
+                </div>                                                
+            </div>                                                           
+        </div>     		
+	</div>
+</div>

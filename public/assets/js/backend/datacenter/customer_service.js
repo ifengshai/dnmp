@@ -3,35 +3,36 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form','echartsobj'
     var Controller = {
         index: function () {
             // 指定图表的配置项和数据
+            Controller.api.formatter.daterangepicker($("form[role=form1]"));
             Form.api.bindevent($("form[role=form]"));            
-			$('#c-order_platform').on('change',function(){
-				var order_platform = $('#c-order_platform').val();
-                Backend.api.ajax({
-                    url:'datacenter/operationanalysis/operationkanban/dashboard/async_data',
-                    data:{order_platform:order_platform}
-                }, function(data, ret){
-                    return false;
-                }, function(data, ret){
-                    //失败的回调                      
-                    //console.log(ret);
-                    Layer.alert(ret.msg);
-                    return false;
-                });
-            });
-			$('#submit').on('click',function(){
-                var create_time = $('#created_at').val();
-                Backend.api.ajax({
-                    url:'datacenter/operationanalysis/operationkanban/dashboard/async_bottom_data',
-                    data:{create_time:create_time}
-                }, function(data, ret){
-                    console.log(ret);                                                                               
-                    //console.log(ret.data);
-                    return false;
-                }, function(data, ret){
-                    Layer.alert(ret.msg);
-                    return false;
-                });
-			});            
+			// $('#c-order_platform').on('change',function(){
+			// 	var order_platform = $('#c-order_platform').val();
+            //     Backend.api.ajax({
+            //         url:'datacenter/operationanalysis/operationkanban/dashboard/async_data',
+            //         data:{order_platform:order_platform}
+            //     }, function(data, ret){
+            //         return false;
+            //     }, function(data, ret){
+            //         //失败的回调                      
+            //         //console.log(ret);
+            //         Layer.alert(ret.msg);
+            //         return false;
+            //     });
+            // });
+			// $('#submit').on('click',function(){
+            //     var create_time = $('#created_at').val();
+            //     Backend.api.ajax({
+            //         url:'datacenter/operationanalysis/operationkanban/dashboard/async_bottom_data',
+            //         data:{create_time:create_time}
+            //     }, function(data, ret){
+            //         console.log(ret);                                                                               
+            //         //console.log(ret.data);
+            //         return false;
+            //     }, function(data, ret){
+            //         Layer.alert(ret.msg);
+            //         return false;
+            //     });
+			// });            
         },
         api: {
             formatter: {
@@ -84,6 +85,21 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form','echartsobj'
                 Form.api.bindevent($("form[role=form]"));
             }
         },
+        //工作量统计
+        workload:function()
+        {
+            Controller.api.formatter.daterangepicker($("form[role=form1]"));
+            Form.api.bindevent($("form[role=form]"));
+            //点击对比时间段显示第二个时间输入框
+            $("#contrast").change(function() { 
+                if($("#contrast").is(':checked')){
+                    $("#two-time-node").show();
+                }else{
+                    $("#two-time-node").hide();
+                }
+            }); 
+        },        
+        //工单统计
         workstatistics:function()
         {
             Controller.api.formatter.daterangepicker($("form[role=form1]"));
