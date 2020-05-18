@@ -56,15 +56,28 @@ class CustomerService extends Backend
     {
         
         //根据筛选时间求出客服部门下面所有有数据人员
-        $start = date('Y-m-d 00:00:00', strtotime('-30 day'));
+        $start = date('Y-m-d', strtotime('-30 day'));
         $end   = date('Y-m-d');
         $map['complete_time'] = ['between', [date('Y-m-d 00:00:00', strtotime('-30 day')), date('Y-m-d H:i:s', time())]];
         $where['work_type'] = 1;
         $where['work_status'] = 6;
         $workList = $this->model->where($where)->where($map)->field('count(*) as counter,create_user_id,create_user_name')->group('create_user_id')->select();
         $workList = collection($workList)->toArray();
+        //客服分组
+        $kefumanage = config('workorder.kefumanage');
+        if(!empty($workList)){
+            foreach($workList as $k => $v){
+                if(in_array($v['create_user_id'],$kefumanage[95])){
+                    $workList[$k]['group'] = 'A组';
+                }elseif(in_array($v['create_user_id'],$kefumanage[117])){
+                    $workList[$k]['group'] = 'B组';
+                }else{
+                    $workList[$k]['group'] = '未知';
+                }
+            }
+        }
         $orderPlatformList = config('workorder.platform');
-        $this->view->assign(compact('orderPlatformList','workList'));   
+        $this->view->assign(compact('orderPlatformList','workList','start','end'));   
         return $this->view->fetch();
     }
     /**

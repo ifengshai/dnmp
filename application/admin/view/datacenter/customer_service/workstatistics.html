@@ -195,8 +195,10 @@ table.altrowstable tr:nth-child(even){
                     {foreach name="workList" item="vo" key="k"}
                   <tr>
                       <td style="text-align: center; vertical-align: middle;">{$vo.create_user_name}</td>
-                      <td id='today_sales_money'         style="text-align: center; vertical-align: middle;">{$zeelool_data.today_sales_money}</td>
-                      <td id='today_order_num'           style="text-align: center; vertical-align: middle;">{$zeelool_data.today_order_num}</td>
+                      <td id='today_sales_money'         style="text-align: center; vertical-align: middle;">{$vo.group}</td>
+                      {if !empty($start) && !empty($end)}
+                      <td id='today_order_num'           style="text-align: center; vertical-align: middle;">{$start} - {$end}</td>
+                      {/if}  
                       <td id='today_order_success'       style="text-align: center; vertical-align: middle;">{$vo.counter}</td>
                       <td id='today_unit_price'          style="text-align: center; vertical-align: middle;">{$zeelool_data.today_unit_price}</td>
                       <td id='today_shoppingcart_total'  style="text-align: center; vertical-align: middle;">{$zeelool_data.today_shoppingcart_total}</td>
