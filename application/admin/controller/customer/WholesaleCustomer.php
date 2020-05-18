@@ -142,6 +142,11 @@ class WholesaleCustomer extends Backend
                         $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.add' : $name) : $this->modelValidate;
                         $this->model->validateFailException(true)->validate($validate);
                     }
+
+                    $email_is_only=$this->model->where('email',$params['email'])->where('is_del',1)->where('site_type',$params['site_type'])->count();
+                    if ($email_is_only >0){
+                        $this->error(__('此邮箱已存在,请勿重复录入', ''));
+                    }
                     $result = $this->model->getCustomerEmail($params['site_type'], $params['email']);
                     if (isset($result) && $result != 0) {
                         $params['is_order'] = 2;
@@ -209,6 +214,10 @@ class WholesaleCustomer extends Backend
                         $name = str_replace("\\model\\", "\\validate\\", get_class($this->model));
                         $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.edit' : $name) : $this->modelValidate;
                         $row->validateFailException(true)->validate($validate);
+                    }
+                    $email_is_only=$this->model->where('email',$params['email'])->where('is_del',1)->where('site_type',$params['site_type'])->count();
+                    if ($email_is_only >1){
+                        $this->error(__('此邮箱已存在,请勿重复录入', ''));
                     }
 
                     $result = $this->model->getCustomerEmail($params['site_type'], $params['email']);
@@ -374,6 +383,8 @@ class WholesaleCustomer extends Backend
         if (!$data) {
             $this->error('未导入任何数据！！');
         }
+        $email_is_only=$this->model->where('is_del',1)->field('email,site_type')->select();
+        $old_data = collection($email_is_only)->toArray();
 
         //批量添加产品
         foreach ($data as $k => $v) {
@@ -413,39 +424,6 @@ class WholesaleCustomer extends Backend
                     break;
 
             }
-
-
-            /*   if (isset($site_type)){
-                   if (strtolower($v[4])=='Zeelool'){
-                       $site_type=1;
-                   }elseif (strcmp($v[4],'Voogueme')){
-                       $site_type=2;
-                   }elseif (strcmp($v[4],'Nihao')){
-                       $site_type=3;
-                   }elseif (strcmp($v[4],'Alibaba')){
-                       $site_type=4;
-                   }elseif (strcmp($v[4],'主动开发')){
-                       $site_type=5;
-                   }else{
-                       $this->error('导入失败！！,来源类型为:Zeelool,Voogueme,Nihao,Alibaba,主动开发');
-                   }
-               }
-
-               */
-            /*
-               if (isset($v[5])){
-
-                   if ($v[5]=='低'){
-                       $intention_level=1;
-                   }elseif ($v[5]=='中'){
-                       $intention_level=2;
-                   }elseif ($v[5]=='高'){
-                       $intention_level=3;
-                   }else{
-                       $this->error('导入失败！！,意向等级为:高,中,低');
-                   }
-               }*/
-
             switch ($v[5]) {
                 case '低':
                     $params[$k]['intention_level'] = 1;
@@ -459,6 +437,15 @@ class WholesaleCustomer extends Backend
                 default:
                     $this->error('导入失败！！,意向等级为:高,中,低');
                     break;
+            }
+
+
+            //判断是否存在相同数据
+            foreach ($old_data as $old_k =>$old_v){
+                if ($params[$k]['site_type'] ==$old_v['site_type'] && $params[$k]['email'] == $old_v['email'] ){
+                    $num=$k+2;
+                    $this->error("邮箱:[".$params[$k]['email']."]已存在,请检查,第".$num.'行');
+                }
             }
 
 
