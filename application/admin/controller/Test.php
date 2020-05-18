@@ -4,46 +4,471 @@ namespace app\admin\controller;
 
 use app\common\controller\Backend;
 use app\Common\model\Auth;
+use think\Db;
+use SchGroup\SeventeenTrack\Connectors\TrackingConnector;
 
 class Test extends Backend
 {
+    protected $noNeedLogin = ['*'];
+    protected $apiKey = 'F26A807B685D794C676FA3CC76567035';
 
     public function _initialize()
     {
         parent::_initialize();
+
         $this->newproduct = new \app\admin\model\NewProduct();
         $this->item = new \app\admin\model\itemmanage\Item();
-    }
-    public function test123()
-    {
-        echo 1111;
+        $this->zeelool = new \app\admin\model\order\order\Zeelool();
+        $this->voogueme = new \app\admin\model\order\order\Voogueme();
+        $this->nihao = new \app\admin\model\order\order\Nihao();
+        $this->user = new \app\admin\model\Admin();
+        $this->ordernodedetail = new \app\admin\model\OrderNodeDetail();
     }
 
     /**
-     * 更新采购负责人
+     * 批量 获取物流明细
+     * 莫删除
+     */
+    public function track_shipment_num(){
+        $order_shipment = Db::connect('database.db_zeelool')
+            ->table('sales_flat_shipment_track')
+            ->field('entity_id,track_number,title,updated_at,order_id')
+            ->where('created_at','>=','2020-04-10 00:00:00')
+            ->limit(10)
+            ->select();
+
+        $trackingConnector = new TrackingConnector($this->apiKey);
+
+        foreach($order_shipment as $k => $v){
+            $order_num = Db::connect('database.db_zeelool')
+                ->table('sales_flat_order')
+                ->field('increment_id')
+                ->where('entity_id','=',$v['order_id'])
+                ->find();
+
+            $title = strtolower(str_replace(' ', '-', $v['title']));
+
+            $carrier = $this->getCarrier($title);
+
+            $trackInfo = $trackingConnector->getTrackInfoMulti([[
+                //'number' => $v['track_number'],
+                //'carrier' => $carrier['carrierId']
+                'number' => 'LO546092713CN',
+                'carrier' => '03011'
+            ]]);
+
+
+            $add['site'] = 1;
+            $add['order_id'] = $v['order_id'];
+            $add['order_number'] = $order_num['increment_id'];
+            $add['shipment_type'] = $v['title'];
+            $add['track_number'] = $v['track_number'];
+
+
+            if($trackInfo['code'] == 0 && $trackInfo['data']['accepted']){
+                $trackdata = $trackInfo['data']['accepted'][0]['track'];
+                if($v['title'] == 'USPS'){
+                    $data = $this->china_post_data($trackdata,$add);
+                }
+
+
+
+
+
+            }
+
+            dump($add);
+            dump($trackdetail);
+            dump($trackdata);
+            exit;
+
+        }
+    }
+    public function china_post_data($data,$add){
+        $trackdetail = array_reverse($data['z1']);
+
+        foreach ($trackdetail as $k => $v){
+            $add['create_time'] = $v['a'];
+            $add['content'] = $v['z'];
+            $add['courier_status'] = $data['e'];
+            //Db::name('order_node_courier')->insert($add);//插入日志表
+
+            $courier['order_node'] = 3;
+            $courier['create_time'] = $v['a'];
+
+            $courier['handle_user_id'] = 0;
+            $courier['handle_user_name'] = 'system';
+            $courier['site'] = $add['site'];
+            $courier['order_id'] = $add['order_id'];
+            $courier['order_number'] = $add['order_number'];
+            $courier['shipment_type'] = $add['shipment_type'];
+            $courier['track_number'] = $add['track_number'];
+
+            if (stripos($v['z'], '已收件，揽投员') !== false) {
+                $order_node_date = Db::name('order_node')->where('track_number', $add['track_number'])->find();
+                if($order_node_date['order_node'] == 2 && $order_node_date['node_type'] == 7){
+                    $update_order_node['order_node'] = 3;
+                    $update_order_node['node_type'] = 8;
+                    $update_order_node['update_time'] = time();
+                }
+                dump($order_node_date);
+
+                $courier['node_type'] = 8;
+                $courier['content'] = '上网';
+                $courier['create_time'] = $v['a'];
+            }
+
+            if (stripos($v['z'], '已交航空公司运输') !== false) {
+                $courier['node_type'] = 9;
+                $courier['content'] = '交航';
+                $courier['create_time'] = $v['a'];
+
+
+                $courier['node_type'] = 10;
+                $courier['content'] = '运输中';
+                $courier['create_time'] = date('Y-m-d H:i',strtotime(($v['a']." +7 day")));
+            }
+
+            if (stripos($v['z'], '已到达寄达地') !== false) {
+                $courier['node_type'] = 11;
+                $courier['content'] = '到达目的地';
+                $courier['create_time'] = $v['a'];
+            }
+
+
+        }
+
+        dump($add);
+        dump($data);
+        exit;
+
+    }
+
+
+    /**
+     * 批量 注册物流
+     * 莫删除
+     */
+    public function reg_shipment()
+    {
+        $order_shipment = Db::connect('database.db_nihao')
+            ->table('sales_flat_shipment_track')
+            ->field('entity_id,track_number,title,updated_at')
+            ->where('created_at', '>=', '2020-04-10 00:00:00')
+            ->select();
+
+        foreach ($order_shipment as $k => $v) {
+            $title = strtolower(str_replace(' ', '-', $v['title']));
+            if ($title == 'china-post') {
+                $order_shipment[$k]['title'] = 'china-ems';
+            }
+            $carrier = $this->getCarrier($v['title']);
+            $shipment_reg[$k]['number'] =  $v['track_number'];
+            $shipment_reg[$k]['carrier'] =  $carrier['carrierId'];
+        }
+
+        $order_group = array_chunk($shipment_reg, 40);
+
+        $trackingConnector = new TrackingConnector($this->apiKey);
+        foreach ($order_group as $key => $val) {
+            $aa = $trackingConnector->registerMulti($val);
+            sleep(1);
+            echo $key . "\n";
+        }
+        dump($order_group[$key]);
+        echo 'all is ok' . "\n";
+    }
+    /**
+     * 获取快递号
+     * @param $title
+     * @return mixed|string
+     */
+    public function getCarrier($title)
+    {
+        $carrierId = '';
+        if (stripos($title, 'post') !== false) {
+            $carrierId = 'chinapost';
+            $title = 'China Post';
+        } elseif (stripos($title, 'ems') !== false) {
+            $carrierId = 'chinaems';
+            $title = 'China Ems';
+        } elseif (stripos($title, 'dhl') !== false) {
+            $carrierId = 'dhl';
+            $title = 'DHL';
+        } elseif (stripos($title, 'fede') !== false) {
+            $carrierId = 'fedex';
+            $title = 'Fedex';
+        } elseif (stripos($title, 'usps') !== false) {
+            $carrierId = 'usps';
+            $title = 'Usps';
+        } elseif (stripos($title, 'yanwen') !== false) {
+            $carrierId = 'yanwen';
+            $title = 'YANWEN';
+        } elseif (stripos($title, 'cpc') !== false) {
+            $carrierId = 'cpc';
+            $title = 'Canada Post';
+        }
+        $carrier = [
+            'dhl' => '100001',
+            'chinapost' => '03011',
+            'chinaems' => '03013',
+            'cpc' =>  '03041',
+            'fedex' => '100003',
+            'usps' => '21051',
+            'yanwen' => '190012'
+        ];
+        if ($carrierId) {
+            return ['title' => $title, 'carrierId' => $carrier[$carrierId]];
+        }
+        return ['title' => $title, 'carrierId' => $carrierId];
+    }
+
+    /**
+     * 获取订单节点数据
      *
      * @Description
      * @author wpl
-     * @since 2020/04/29 15:43:38 
+     * @since 2020/05/14 09:55:00 
      * @return void
      */
-    public function test()
+    public function setOrderNoteData()
     {
-        $ids = [];
-        $person = '';
-        $str = explode('
-        ', $person);
-        $supplier = new \app\admin\model\purchase\Supplier();
-        foreach ($ids as $k => $v) {
-            $supplier->where('id', $v)->update(['purchase_person' => $str[$k]]);
-        }
-    }
+        $users = $this->user->column('id', 'nickname');
+        $field = 'status,custom_print_label_new,custom_print_label_person_new,custom_print_label_created_at_new,custom_is_match_frame_new,custom_match_frame_person_new,
+        custom_match_frame_created_at_new,custom_is_match_lens_new,custom_match_lens_created_at_new,custom_match_lens_person_new,custom_is_send_factory_new,
+        custom_match_factory_person_new,custom_match_factory_created_at_new,custom_is_delivery_new,custom_match_delivery_person_new,custom_match_delivery_created_at_new,
+        custom_order_prescription_type,a.created_at,a.updated_at,b.track_number,b.created_at as create_time,b.title,a.entity_id,a.increment_id,a.custom_order_prescription_type
+        ';
+        $map['a.created_at'] = ['>=', '2020-01-01 00:00:00'];
+        // $map['a.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal']];
+        $zeelool_data = $this->zeelool->alias('a')->field($field)
+            ->join(['sales_flat_shipment_track' => 'b'], 'a.entity_id=b.order_id', 'left')
+            ->where($map)->limit(100)->select();
 
-    public function demo()
-    {
-        $str = 'a:2:{s:15:"info_buyRequest";a:6:{s:7:"product";s:4:"2005";s:8:"form_key";s:16:"yI5A6tFE2tVBigo0";s:3:"qty";i:1;s:7:"options";a:1:{i:1905;s:4:"2267";}s:13:"cart_currency";s:3:"USD";s:7:"tmplens";a:29:{s:19:"frame_regural_price";d:29.949999999999999;s:11:"frame_price";d:29.949999999999999;s:12:"prescription";s:247:"prescription_type=Sunglasses&od_sph=-5.50&od_cyl=-1.25&od_axis=4&os_sph=2.00&os_cyl=0.50&os_axis=3&pdcheck=&pd_r=&pd_l=&pd=58&os_add=0.00&od_add=0.00&prismcheck=&od_pv=0.00&od_bd=&od_pv_r=0.00&od_bd_r=&os_pv=0.00&os_bd=&os_pv_r=0.00&os_bd_r=&save=";s:11:"lenstype_id";s:0:"";s:13:"lenstype_name";N;s:18:"lenstype_data_name";N;s:21:"lenstype_regual_price";N;s:14:"lenstype_price";d:0;s:19:"lenstype_base_price";N;s:7:"lens_id";s:13:"refractive_75";s:9:"lens_name";s:23:"Prescription Sunglasses";s:14:"lens_data_name";s:30:"1.61 Polarized Sunglass - Gray";s:10:"lens_index";s:4:"1.61";s:17:"lens_regual_price";i:39;s:10:"lens_price";d:39;s:15:"lens_base_price";d:39;s:8:"color_id";s:13:"refractive_55";s:10:"color_name";s:9:"Dark Grey";s:15:"color_data_name";s:22:"Color Tint (Dark Grey)";s:18:"color_regual_price";i:0;s:11:"color_price";d:0;s:16:"color_base_price";d:0;s:10:"coating_id";s:9:"coating_3";s:12:"coating_name";s:25:"Super Hydrophobic Coating";s:13:"coating_price";d:9;s:18:"coating_base_price";s:4:"9.00";s:3:"rid";N;s:4:"lens";d:48;s:5:"total";d:77.950000000000003;}}s:7:"options";a:1:{i:0;a:7:{s:5:"label";s:5:"Color";s:5:"value";s:8:"Tortoise";s:11:"print_value";s:8:"Tortoise";s:9:"option_id";s:4:"1905";s:11:"option_type";s:9:"drop_down";s:12:"option_value";s:4:"2267";s:11:"custom_view";b:0;}}}';
-        $str1 = 'a:2:{s:15:"info_buyRequest";a:6:{s:7:"product";s:3:"239";s:8:"form_key";s:16:"vnNM5gXQsOGyqSlv";s:3:"qty";i:1;s:7:"options";a:1:{i:135;s:3:"369";}s:13:"cart_currency";s:3:"USD";s:7:"tmplens";a:19:{s:19:"frame_regural_price";s:5:"29.95";s:11:"frame_price";s:5:"21.56";s:12:"prescription";s:33:"prescription_type=NonPrescription";s:16:"is_special_price";s:0:"";s:10:"index_type";s:10:"FRAME ONLY";s:11:"index_price";s:4:"0.00";s:10:"index_name";s:4:"1.57";s:8:"index_id";s:13:"refractive_70";s:8:"color_id";N;s:10:"color_name";N;s:10:"coating_id";N;s:13:"coatiing_name";N;s:14:"coatiing_price";N;s:9:"dyeing_id";N;s:11:"dyeing_name";N;s:12:"dyeing_price";N;s:3:"rid";s:1:"0";s:4:"lens";s:4:"0.00";s:5:"total";s:5:"21.56";}}s:7:"options";a:1:{i:0;a:7:{s:5:"label";s:5:"Color";s:5:"value";s:8:"Tortoise";s:11:"print_value";s:8:"Tortoise";s:9:"option_id";s:3:"135";s:11:"option_type";s:9:"drop_down";s:12:"option_value";s:3:"369";s:11:"custom_view";b:0;}}}';
-        $arr = unserialize($str);
-        dump($arr);die;
+
+        foreach ($zeelool_data as $v) {
+            $list = [];
+            $k = 0;
+            //下单
+            $list[$k]['order_node'] = 0;
+            $list[$k]['node_type'] = 0;
+            $list[$k]['content'] = 'Your order has been created.';
+            $list[$k]['create_time'] = $v['created_at'];
+            $list[$k]['site'] = 1;
+            $list[$k]['order_id'] = $v['entity_id'];
+            $list[$k]['order_number'] = $v['increment_id'];
+            $list[$k]['shipment_type'] = '';
+            $list[$k]['track_number'] = '';
+            $list[$k]['handle_user_id'] = 0;
+            $list[$k]['handle_user_name'] = '';
+            $data['order_node'] = 0;
+            $data['node_type'] = 0;
+
+            if (in_array($v['status'], ['processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal', 'payment_review'])) {
+
+                //支付
+                $list[$k + 1]['order_node'] = 0;
+                $list[$k + 1]['node_type'] = 1;
+                $list[$k + 1]['content'] = 'Your payment has been successful.';
+                $list[$k + 1]['create_time'] = $v['updated_at'];
+                $list[$k + 1]['site'] = 1;
+                $list[$k + 1]['order_id'] = $v['entity_id'];
+                $list[$k + 1]['order_number'] = $v['increment_id'];
+                $list[$k + 1]['shipment_type'] = '';
+                $list[$k + 1]['track_number'] = '';
+                $list[$k + 1]['handle_user_id'] = 0;
+                $list[$k + 1]['handle_user_name'] = '';
+
+                $data['order_node'] = 0;
+                $data['node_type'] = 1;
+
+            }
+
+            $data['create_time'] = $v['created_at'];
+            $data['site'] = 1;
+            $data['order_id'] = $v['entity_id'];
+            $data['order_number'] = $v['increment_id'];
+            $data['update_time'] = $v['created_at'];
+            //打标签
+            if ($v['custom_print_label_new'] == 1) {
+                $list[$k + 2]['order_node'] = 1;
+                $list[$k + 2]['node_type'] = 2;
+                $list[$k + 2]['content'] = 'Order is under processing';
+                $list[$k + 2]['create_time'] = $v['custom_print_label_created_at_new'];
+                $list[$k + 2]['site'] = 1;
+                $list[$k + 2]['order_id'] = $v['entity_id'];
+                $list[$k + 2]['order_number'] = $v['increment_id'];
+                $list[$k + 2]['handle_user_id'] = $users[$v['custom_print_label_person_new']];
+                $list[$k + 2]['handle_user_name'] = $v['custom_print_label_person_new'];
+                $list[$k + 2]['shipment_type'] = '';
+                $list[$k + 2]['track_number'] = '';
+
+                $data['order_node'] = 1;
+                $data['node_type'] = 2;
+                $data['update_time'] = $v['custom_print_label_created_at_new'];
+            }
+
+            //判断订单是否为仅镜架
+            if ($v['custom_order_prescription_type'] == 1) {
+                if ($v['custom_is_match_frame_new'] == 1) {
+                    $list[$k + 3]['order_node'] = 2;
+                    $list[$k + 3]['node_type'] = 3;
+                    $list[$k + 3]['content'] = 'The product(s) is/are ready, waiting for Quality Inspection';
+                    $list[$k + 3]['create_time'] = $v['custom_match_frame_created_at_new'];
+                    $list[$k + 3]['site'] = 1;
+                    $list[$k + 3]['order_id'] = $v['entity_id'];
+                    $list[$k + 3]['order_number'] = $v['increment_id'];
+                    $list[$k + 3]['handle_user_id'] = $users[$v['custom_match_frame_person_new']];
+                    $list[$k + 3]['handle_user_name'] = $v['custom_match_frame_person_new'];
+                    $list[$k + 3]['shipment_type'] = '';
+                    $list[$k + 3]['track_number'] = '';
+
+                    $data['order_node'] = 2;
+                    $data['node_type'] = 3;
+                    $data['update_time'] = $v['custom_match_frame_created_at_new'];
+                }
+
+                if ($v['custom_is_delivery_new'] == 1) {
+                    $list[$k + 4]['order_node'] = 2;
+                    $list[$k + 4]['node_type'] = 6;
+                    $list[$k + 4]['content'] = 'Quality Inspection completed, preparing to dispatch this mail piece.';
+                    $list[$k + 4]['create_time'] = $v['custom_match_delivery_created_at_new'];
+                    $list[$k + 4]['site'] = 1;
+                    $list[$k + 4]['order_id'] = $v['entity_id'];
+                    $list[$k + 4]['order_number'] = $v['increment_id'];
+                    $list[$k + 4]['handle_user_id'] = $users[$v['custom_match_delivery_person_new']];
+                    $list[$k + 4]['handle_user_name'] = $v['custom_match_delivery_person_new'];
+                    $list[$k + 4]['shipment_type'] = '';
+                    $list[$k + 4]['track_number'] = '';
+
+                    $data['order_node'] = 2;
+                    $data['node_type'] = 6;
+                    $data['update_time'] = $v['custom_match_delivery_created_at_new'];
+                }
+
+                if ($v['track_number']) {
+                    $list[$k + 5]['order_node'] = 2;
+                    $list[$k + 5]['node_type'] = 7; //出库
+                    $list[$k + 5]['content']  = '';
+                    $list[$k + 5]['create_time'] = $v['create_time'];
+                    $list[$k + 5]['site'] = 1;
+                    $list[$k + 5]['order_id'] = $v['entity_id'];
+                    $list[$k + 5]['order_number'] = $v['increment_id'];
+                    $list[$k + 5]['shipment_type'] = $v['title'];
+                    $list[$k + 5]['track_number'] = $v['track_number'];
+                    $list[$k + 5]['handle_user_id'] = 0;
+                    $list[$k + 5]['handle_user_name'] = '';
+
+                    $data['order_node'] = 2;
+                    $data['node_type'] = 7;
+                    $data['update_time'] = $v['create_time'];
+                }
+                $data['is_only_frame'] = 1;
+            } else {
+                $data['is_only_frame'] = 0;
+                if ($v['custom_is_match_frame_new'] == 1) {
+                    $list[$k + 3]['order_node'] = 2;
+                    $list[$k + 3]['node_type'] = 3; //配镜架
+                    $list[$k + 3]['content'] = 'Frame(s) is/are ready, waiting for lenses';
+                    $list[$k + 3]['create_time'] = $v['custom_match_frame_created_at_new'];
+                    $list[$k + 3]['site'] = 1;
+                    $list[$k + 3]['order_id'] = $v['entity_id'];
+                    $list[$k + 3]['order_number'] = $v['increment_id'];
+                    $list[$k + 3]['handle_user_id'] = $users[$v['custom_match_frame_person_new']];
+                    $list[$k + 3]['handle_user_name'] = $v['custom_match_frame_person_new'];
+                    $list[$k + 3]['shipment_type'] = '';
+                    $list[$k + 3]['track_number'] = '';
+
+                    $data['order_node'] = 2;
+                    $data['node_type'] = 3;
+                    $data['update_time'] = $v['custom_match_frame_created_at_new'];
+                }
+
+                if ($v['custom_is_match_lens_new'] == 1) {
+                    $list[$k + 4]['order_node'] = 2;
+                    $list[$k + 4]['node_type'] = 4; //配镜片
+                    $list[$k + 4]['content'] = 'Lenses production completed, waiting for customizing';
+                    $list[$k + 4]['create_time'] = $v['custom_match_lens_created_at_new'];
+                    $list[$k + 4]['site'] = 1;
+                    $list[$k + 4]['order_id'] = $v['entity_id'];
+                    $list[$k + 4]['order_number'] = $v['increment_id'];
+                    $list[$k + 4]['handle_user_id'] = $users[$v['custom_match_lens_person_new']];
+                    $list[$k + 4]['handle_user_name'] = $v['custom_match_lens_person_new'];
+                    $list[$k + 4]['shipment_type'] = '';
+                    $list[$k + 4]['track_number'] = '';
+
+                    $data['order_node'] = 2;
+                    $data['node_type'] = 4;
+                    $data['update_time'] = $v['custom_match_lens_created_at_new'];
+                }
+
+                if ($v['custom_is_send_factory_new'] == 1) {
+                    $list[$k + 5]['order_node'] = 2;
+                    $list[$k + 5]['node_type'] = 5; //加工
+                    $list[$k + 5]['content'] = 'Customizing completed, waiting for Quality Inspection';
+                    $list[$k + 5]['create_time'] = $v['custom_match_factory_created_at_new'];
+                    $list[$k + 5]['site'] = 1;
+                    $list[$k + 5]['order_id'] = $v['entity_id'];
+                    $list[$k + 5]['order_number'] = $v['increment_id'];
+                    $list[$k + 5]['handle_user_id'] = $users[$v['custom_match_factory_person_new']];
+                    $list[$k + 5]['handle_user_name'] = $v['custom_match_factory_person_new'];
+                    $list[$k + 5]['shipment_type'] = '';
+                    $list[$k + 5]['track_number'] = '';
+
+                    $data['order_node'] = 2;
+                    $data['node_type'] = 5;
+                    $data['update_time'] = $v['custom_match_factory_created_at_new'];
+                }
+
+
+                if ($v['custom_is_delivery_new'] == 1) {
+                    $list[$k + 6]['order_node'] = 2;
+                    $list[$k + 6]['node_type'] = 6; //质检
+                    $list[$k + 6]['content'] = 'Quality Inspection completed, preparing to dispatch this mail piece.';
+                    $list[$k + 6]['create_time'] = $v['custom_match_delivery_created_at_new'];
+                    $list[$k + 6]['site'] = 1;
+                    $list[$k + 6]['order_id'] = $v['entity_id'];
+                    $list[$k + 6]['order_number'] = $v['increment_id'];
+                    $list[$k + 6]['handle_user_id'] = $users[$v['custom_match_delivery_person_new']];
+                    $list[$k + 6]['handle_user_name'] = $v['custom_match_delivery_person_new'];
+                    $list[$k + 6]['shipment_type'] = '';
+                    $list[$k + 6]['track_number'] = '';
+
+                    $data['order_node'] = 2;
+                    $data['node_type'] = 6;
+                    $data['update_time'] = $v['custom_match_delivery_created_at_new'];
+                }
+
+                if ($v['track_number']) {
+                    $list[$k + 7]['order_node'] = 2;
+                    $list[$k + 7]['node_type'] = 7; //出库
+                    $list[$k + 7]['create_time'] = $v['create_time'];
+                    $list[$k + 7]['site'] = 1;
+                    $list[$k + 7]['order_id'] = $v['entity_id'];
+                    $list[$k + 7]['order_number'] = $v['increment_id'];
+                    $list[$k + 7]['shipment_type'] = $v['title'];
+                    $list[$k + 7]['track_number'] = $v['track_number'];
+                    $list[$k + 7]['handle_user_id'] = 0;
+                    $list[$k + 7]['handle_user_name'] = '';
+                    $list[$k + 7]['content'] = '';
+
+                    $data['order_node'] = 2;
+                    $data['node_type'] = 7;
+                    $data['update_time'] = $v['create_time'];
+                }
+            }
+            $data['shipment_type'] = $v['title'];
+            $data['track_number'] = $v['track_number'];
+
+
+            $count = Db::name('order_node')->where('order_id', $v['entity_id'])->count();
+            if ($count > 0) {
+                Db::name('order_node')->where('order_id', $v['entity_id'])->update($data);
+            } else {
+                Db::name('order_node')->insert($data);
+            }
+            $res = $this->ordernodedetail->saveAll($list);
+            dump($res);
+        }
     }
 }

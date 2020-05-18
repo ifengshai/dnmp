@@ -2341,21 +2341,21 @@ order by sfoi.item_id asc limit 1000";
         //总共支付成功数data
         $total_order_success_data                   = $total_order_success_rs[0]['counter'];
         //昨日客单价data
-        $yesterday_unit_price_data                  = round(($yesterday_sales_money_data / $yesterday_order_success_data), 2);
+        $yesterday_unit_price_data                  = @round(($yesterday_sales_money_data / $yesterday_order_success_data), 2);
         //过去7天客单价data
-        $pastsevenday_unit_price_data               = round(($pastsevenday_sales_money_data / $pastsevenday_order_success_data), 2);
+        $pastsevenday_unit_price_data               = @round(($pastsevenday_sales_money_data / $pastsevenday_order_success_data), 2);
         //过去30天客单价data
-        $pastthirtyday_unit_price_data              = round(($pastthirtyday_sales_money_data / $pastthirtyday_order_success_data), 2);
+        $pastthirtyday_unit_price_data              = @round(($pastthirtyday_sales_money_data / $pastthirtyday_order_success_data), 2);
         //当月客单价data
-        $thismonth_unit_price_data                  = round(($thismonth_sales_money_data / $thismonth_order_success_data), 2);
+        $thismonth_unit_price_data                  = @round(($thismonth_sales_money_data / $thismonth_order_success_data), 2);
         //上月客单价data
-        $lastmonth_unit_price_data                  = round(($lastmonth_sales_money_data / $lastmonth_order_success_data), 2);
+        $lastmonth_unit_price_data                  = @round(($lastmonth_sales_money_data / $lastmonth_order_success_data), 2);
         //今年客单价data
-        $thisyear_unit_price_data                   = round(($thisyear_sales_money_data / $thisyear_order_success_data), 2);
+        $thisyear_unit_price_data                   = @round(($thisyear_sales_money_data / $thisyear_order_success_data), 2);
         //上一年客单价data
-        $lastyear_unit_price_data                   = round(($lastyear_sales_money_data / $lastyear_order_success_data), 2);
+        $lastyear_unit_price_data                   = @round(($lastyear_sales_money_data / $lastyear_order_success_data), 2);
         //总共客单价data
-        $total_unit_price_data                      = round(($total_sales_money_data / $total_order_success_data), 2);
+        $total_unit_price_data                      = @round(($total_sales_money_data / $total_order_success_data), 2);
         //昨天新增注册人数
         $yesterday_register_customer_data           = $yesterday_register_customer_rs[0]['counter'];
         //过去7天新增注册人数
@@ -2388,59 +2388,59 @@ order by sfoi.item_id asc limit 1000";
         $lastyear_sign_customer_data                = $lastyear_sign_customer_rs[0]['counter'];
         //总共新增登录人数
         $total_sign_customer_data                   = $total_sign_customer_rs[0]['counter'];
-        $updateData['yesterday_sales_money']        = $yesterday_sales_money_data;
-        $updateData['pastsevenday_sales_money']     = $pastsevenday_sales_money_data;
-        $updateData['pastthirtyday_sales_money']    = $pastthirtyday_sales_money_data;
-        $updateData['thismonth_sales_money']        = $thismonth_sales_money_data;
-        $updateData['lastmonth_sales_money']        = $lastmonth_sales_money_data;
-        $updateData['thisyear_sales_money']         = $thisyear_sales_money_data;
-        $updateData['lastyear_sales_money']         = $lastyear_sales_money_data;
-        $updateData['total_sales_money']            = $total_sales_money_data;
+        $updateData['yesterday_sales_money']        = $yesterday_sales_money_data ?? 0;
+        $updateData['pastsevenday_sales_money']     = $pastsevenday_sales_money_data ?? 0;
+        $updateData['pastthirtyday_sales_money']    = $pastthirtyday_sales_money_data ?? 0;
+        $updateData['thismonth_sales_money']        = $thismonth_sales_money_data ?? 0;
+        $updateData['lastmonth_sales_money']        = $lastmonth_sales_money_data ?? 0;
+        $updateData['thisyear_sales_money']         = $thisyear_sales_money_data ?? 0;
+        $updateData['lastyear_sales_money']         = $lastyear_sales_money_data ?? 0;
+        $updateData['total_sales_money']            = $total_sales_money_data ?? 0;
 
-        $updateData['yesterday_order_num']         = $yesterday_order_num_data;
-        $updateData['pastsevenday_order_num']      = $pastsevenday_order_num_data;
-        $updateData['pastthirtyday_order_num']     = $pastthirtyday_order_num_data;
-        $updateData['thismonth_order_num']         = $thismonth_order_num_data;
-        $updateData['lastmonth_order_num']         = $lastmonth_order_num_data;
-        $updateData['thisyear_order_num']          = $thisyear_order_num_data;
-        $updateData['lastyear_order_num']          = $lastyear_order_num_data;
-        $updateData['total_order_num']             = $total_order_num_data;
+        $updateData['yesterday_order_num']         = $yesterday_order_num_data ?? 0;
+        $updateData['pastsevenday_order_num']      = $pastsevenday_order_num_data ?? 0;
+        $updateData['pastthirtyday_order_num']     = $pastthirtyday_order_num_data ?? 0;
+        $updateData['thismonth_order_num']         = $thismonth_order_num_data ?? 0;
+        $updateData['lastmonth_order_num']         = $lastmonth_order_num_data ?? 0;
+        $updateData['thisyear_order_num']          = $thisyear_order_num_data ?? 0;
+        $updateData['lastyear_order_num']          = $lastyear_order_num_data ?? 0;
+        $updateData['total_order_num']             = $total_order_num_data ?? 0;
 
-        $updateData['yesterday_order_success']      = $yesterday_order_success_data;
-        $updateData['pastsevenday_order_success']   = $pastsevenday_order_success_data;
-        $updateData['pastthirtyday_order_success']  = $pastthirtyday_order_success_data;
-        $updateData['thismonth_order_success']      = $thismonth_order_success_data;
-        $updateData['lastmonth_order_success']      = $lastmonth_order_success_data;
-        $updateData['thisyear_order_success']       = $thisyear_order_success_data;
-        $updateData['lastyear_order_success']       = $lastyear_order_success_data;
-        $updateData['total_order_success']          = $total_order_success_data;
+        $updateData['yesterday_order_success']      = $yesterday_order_success_data ?? 0;
+        $updateData['pastsevenday_order_success']   = $pastsevenday_order_success_data ?? 0;
+        $updateData['pastthirtyday_order_success']  = $pastthirtyday_order_success_data ?? 0;
+        $updateData['thismonth_order_success']      = $thismonth_order_success_data ?? 0;
+        $updateData['lastmonth_order_success']      = $lastmonth_order_success_data ?? 0;
+        $updateData['thisyear_order_success']       = $thisyear_order_success_data ?? 0;
+        $updateData['lastyear_order_success']       = $lastyear_order_success_data ?? 0;
+        $updateData['total_order_success']          = $total_order_success_data ?? 0;
 
-        $updateData['yesterday_unit_price']         = $yesterday_unit_price_data;
-        $updateData['pastsevenday_unit_price']      = $pastsevenday_unit_price_data;
-        $updateData['pastthirtyday_unit_price']     = $pastthirtyday_unit_price_data;
-        $updateData['thismonth_unit_price']         = $thismonth_unit_price_data;
-        $updateData['lastmonth_unit_price']         = $lastmonth_unit_price_data;
-        $updateData['thisyear_unit_price']          = $thisyear_unit_price_data;
-        $updateData['lastyear_unit_price']          = $lastyear_unit_price_data;
-        $updateData['total_unit_price']             = $total_unit_price_data;
+        $updateData['yesterday_unit_price']         = $yesterday_unit_price_data ?? 0;
+        $updateData['pastsevenday_unit_price']      = $pastsevenday_unit_price_data ?? 0;
+        $updateData['pastthirtyday_unit_price']     = $pastthirtyday_unit_price_data ?? 0;
+        $updateData['thismonth_unit_price']         = $thismonth_unit_price_data ?? 0;
+        $updateData['lastmonth_unit_price']         = $lastmonth_unit_price_data ?? 0;
+        $updateData['thisyear_unit_price']          = $thisyear_unit_price_data ?? 0;
+        $updateData['lastyear_unit_price']          = $lastyear_unit_price_data ?? 0;
+        $updateData['total_unit_price']             = $total_unit_price_data ?? 0;
 
-        $updateData['yesterday_register_customer']      = $yesterday_register_customer_data;
-        $updateData['pastsevenday_register_customer']   = $pastsevenday_register_customer_data;
-        $updateData['pastthirtyday_register_customer']  = $pastthirtyday_register_customer_data;
-        $updateData['thismonth_register_customer']      = $thismonth_register_customer_data;
-        $updateData['lastmonth_register_customer']      = $lastmonth_register_customer_data;
-        $updateData['thisyear_register_customer']       = $thisyear_register_customer_data;
-        $updateData['lastyear_register_customer']       = $lastyear_register_customer_data;
-        $updateData['total_register_customer']          = $total_register_customer_data;
+        $updateData['yesterday_register_customer']      = $yesterday_register_customer_data ?? 0;
+        $updateData['pastsevenday_register_customer']   = $pastsevenday_register_customer_data ?? 0;
+        $updateData['pastthirtyday_register_customer']  = $pastthirtyday_register_customer_data ?? 0;
+        $updateData['thismonth_register_customer']      = $thismonth_register_customer_data ?? 0;
+        $updateData['lastmonth_register_customer']      = $lastmonth_register_customer_data ?? 0;
+        $updateData['thisyear_register_customer']       = $thisyear_register_customer_data ?? 0;
+        $updateData['lastyear_register_customer']       = $lastyear_register_customer_data ?? 0;
+        $updateData['total_register_customer']          = $total_register_customer_data ?? 0;
 
-        $updateData['yesterday_sign_customer']      = $yesterday_sign_customer_data;
-        $updateData['pastsevenday_sign_customer']   = $pastsevenday_sign_customer_data;
-        $updateData['pastthirtyday_sign_customer']  = $pastthirtyday_sign_customer_data;
-        $updateData['thismonth_sign_customer']      = $thismonth_sign_customer_data;
-        $updateData['lastmonth_sign_customer']      = $lastmonth_sign_customer_data;
-        $updateData['thisyear_sign_customer']       = $thisyear_sign_customer_data;
-        $updateData['lastyear_sign_customer']       = $lastyear_sign_customer_data;
-        $updateData['total_sign_customer']          = $total_sign_customer_data;
+        $updateData['yesterday_sign_customer']      = $yesterday_sign_customer_data ?? 0;
+        $updateData['pastsevenday_sign_customer']   = $pastsevenday_sign_customer_data ?? 0;
+        $updateData['pastthirtyday_sign_customer']  = $pastthirtyday_sign_customer_data ?? 0;
+        $updateData['thismonth_sign_customer']      = $thismonth_sign_customer_data ?? 0;
+        $updateData['lastmonth_sign_customer']      = $lastmonth_sign_customer_data ?? 0;
+        $updateData['thisyear_sign_customer']       = $thisyear_sign_customer_data ?? 0;
+        $updateData['lastyear_sign_customer']       = $lastyear_sign_customer_data ?? 0;
+        $updateData['total_sign_customer']          = $total_sign_customer_data ?? 0;
         //查找是否存在的记录
         $result = Db::name('operation_analysis')->where(['order_platform' => $platform])->field('id,order_platform')->find();
         if (!$result) {
@@ -2484,7 +2484,8 @@ order by sfoi.item_id asc limit 1000";
                 $model = Db::connect('database.db_nihao');
                 break;
             case 4:
-                $model = Db::connect('database.db_meeloog');    
+                $model = Db::connect('database.db_meeloog');
+                break;    
             default:
                 $model = false;
                 break;
@@ -2624,21 +2625,21 @@ order by sfoi.item_id asc limit 1000";
         //总共购物车总数data
         $total_shoppingcart_total_data              = $total_shoppingcart_total_rs[0]['counter'];
         //昨天购物车转化率data
-        $yesterday_shoppingcart_conversion_data     = round(($yesterday_order_success_data / $yesterday_shoppingcart_total_data), 4) * 100;
+        $yesterday_shoppingcart_conversion_data     = @round(($yesterday_order_success_data / $yesterday_shoppingcart_total_data), 4) * 100;
         //过去7天购物车转化率data
-        $pastsevenday_shoppingcart_conversion_data  = round(($pastsevenday_order_success_data / $pastsevenday_shoppingcart_total_data), 4) * 100;
+        $pastsevenday_shoppingcart_conversion_data  = @round(($pastsevenday_order_success_data / $pastsevenday_shoppingcart_total_data), 4) * 100;
         //过去30天购物车转化率data
-        $pastthirtyday_shoppingcart_conversion_data = round(($pastthirtyday_order_success_data / $pastthirtyday_shoppingcart_total_data), 4) * 100;
+        $pastthirtyday_shoppingcart_conversion_data = @round(($pastthirtyday_order_success_data / $pastthirtyday_shoppingcart_total_data), 4) * 100;
         //当月购物车转化率data
-        $thismonth_shoppingcart_conversion_data     = round(($thismonth_order_success_data / $thismonth_shoppingcart_total_data), 4) * 100;
+        $thismonth_shoppingcart_conversion_data     = @round(($thismonth_order_success_data / $thismonth_shoppingcart_total_data), 4) * 100;
         //上月购物车转化率data
-        $lastmonth_shoppingcart_conversion_data     = round(($lastmonth_order_success_data / $lastmonth_shoppingcart_total_data), 4) * 100;
+        $lastmonth_shoppingcart_conversion_data     = @round(($lastmonth_order_success_data / $lastmonth_shoppingcart_total_data), 4) * 100;
         //今年购物车转化率
-        $thisyear_shoppingcart_conversion_data      = round(($thisyear_order_success_data / $thisyear_shoppingcart_total_data), 4) * 100;
+        $thisyear_shoppingcart_conversion_data      = @round(($thisyear_order_success_data / $thisyear_shoppingcart_total_data), 4) * 100;
         //上年购物车总数sql
-        $lastyear_shoppingcart_conversion_data      = round(($lastyear_order_success_data / $lastyear_shoppingcart_total_data), 4) * 100;
+        $lastyear_shoppingcart_conversion_data      = @round(($lastyear_order_success_data / $lastyear_shoppingcart_total_data), 4) * 100;
         //总共购物车转化率
-        $total_shoppingcart_conversion_data         = round(($total_order_success_data / $total_shoppingcart_total_data), 4) * 100;
+        $total_shoppingcart_conversion_data         = @round(($total_order_success_data / $total_shoppingcart_total_data), 4) * 100;
         //昨天新增购物车数
         $yesterday_shoppingcart_new_data            = $yesterday_shoppingcart_new_rs[0]['counter'];
         //过去7天新增购物车数
@@ -2656,57 +2657,57 @@ order by sfoi.item_id asc limit 1000";
         //总共新增购物车数
         $total_shoppingcart_new_data                = $total_shoppingcart_new_rs[0]['counter'];
         //昨天新增购物车转化率
-        $yesterday_shoppingcart_newconversion_data  = round(($yesterday_order_success_data / $yesterday_shoppingcart_new_data), 4) * 100;
+        $yesterday_shoppingcart_newconversion_data  = @round(($yesterday_order_success_data / $yesterday_shoppingcart_new_data), 4) * 100;
         //过去7天新增购物车转化率
-        $pastsevenday_shoppingcart_newconversion_data = round(($pastsevenday_order_success_data / $pastsevenday_shoppingcart_new_data), 4) * 100;
+        $pastsevenday_shoppingcart_newconversion_data = @round(($pastsevenday_order_success_data / $pastsevenday_shoppingcart_new_data), 4) * 100;
         //过去30天新增购物车转化率
-        $pastthirtyday_shoppingcart_newconversion_data = round(($pastthirtyday_order_success_data / $pastthirtyday_shoppingcart_new_data), 4) * 100;
+        $pastthirtyday_shoppingcart_newconversion_data = @round(($pastthirtyday_order_success_data / $pastthirtyday_shoppingcart_new_data), 4) * 100;
         //当月新增购物车转化率
-        $thismonth_shoppingcart_newconversion_data = round(($thismonth_order_success_data / $thismonth_shoppingcart_new_data), 4) * 100;
+        $thismonth_shoppingcart_newconversion_data = @round(($thismonth_order_success_data / $thismonth_shoppingcart_new_data), 4) * 100;
         //上月新增购物车转化率
-        $lastmonth_shoppingcart_newconversion_data = round(($lastmonth_order_success_data / $lastmonth_shoppingcart_new_data), 4) * 100;
+        $lastmonth_shoppingcart_newconversion_data = @round(($lastmonth_order_success_data / $lastmonth_shoppingcart_new_data), 4) * 100;
         //今年新增购物车转化率
-        $thisyear_shoppingcart_newconversion_data  = round(($thisyear_order_success_data / $thisyear_shoppingcart_new_data), 4) * 100;
+        $thisyear_shoppingcart_newconversion_data  = @round(($thisyear_order_success_data / $thisyear_shoppingcart_new_data), 4) * 100;
         //上年新增购物车总数sql
-        $lastyear_shoppingcart_newconversion_data  = round(($lastyear_order_success_data / $lastyear_shoppingcart_new_data), 4) * 100;
+        $lastyear_shoppingcart_newconversion_data  = @round(($lastyear_order_success_data / $lastyear_shoppingcart_new_data), 4) * 100;
         //总共新增购物车转化率
-        $total_shoppingcart_newconversion_data     = round(($total_order_success_data / $total_shoppingcart_new_data), 4) * 100;
+        $total_shoppingcart_newconversion_data     = @round(($total_order_success_data / $total_shoppingcart_new_data), 4) * 100;
 
-        $updateData['yesterday_shoppingcart_total']        = $yesterday_shoppingcart_total_data;
-        $updateData['pastsevenday_shoppingcart_total']     = $pastsevenday_shoppingcart_total_data;
-        $updateData['pastthirtyday_shoppingcart_total']    = $pastthirtyday_shoppingcart_total_data;
-        $updateData['thismonth_shoppingcart_total']        = $thismonth_shoppingcart_total_data;
-        $updateData['lastmonth_shoppingcart_total']        = $lastmonth_shoppingcart_total_data;
-        $updateData['thisyear_shoppingcart_total']         = $thisyear_shoppingcart_total_data;
-        $updateData['lastyear_shoppingcart_total']         = $lastyear_shoppingcart_total_data;
-        $updateData['total_shoppingcart_total']            = $total_shoppingcart_total_data;
+        $updateData['yesterday_shoppingcart_total']        = $yesterday_shoppingcart_total_data ?? 0;
+        $updateData['pastsevenday_shoppingcart_total']     = $pastsevenday_shoppingcart_total_data ?? 0;
+        $updateData['pastthirtyday_shoppingcart_total']    = $pastthirtyday_shoppingcart_total_data ?? 0;
+        $updateData['thismonth_shoppingcart_total']        = $thismonth_shoppingcart_total_data ?? 0;
+        $updateData['lastmonth_shoppingcart_total']        = $lastmonth_shoppingcart_total_data ?? 0;
+        $updateData['thisyear_shoppingcart_total']         = $thisyear_shoppingcart_total_data ?? 0;
+        $updateData['lastyear_shoppingcart_total']         = $lastyear_shoppingcart_total_data ?? 0;
+        $updateData['total_shoppingcart_total']            = $total_shoppingcart_total_data ?? 0;
 
-        $updateData['yesterday_shoppingcart_conversion']         = $yesterday_shoppingcart_conversion_data;
-        $updateData['pastsevenday_shoppingcart_conversion']      = $pastsevenday_shoppingcart_conversion_data;
-        $updateData['pastthirtyday_shoppingcart_conversion']     = $pastthirtyday_shoppingcart_conversion_data;
-        $updateData['thismonth_shoppingcart_conversion']         = $thismonth_shoppingcart_conversion_data;
-        $updateData['lastmonth_shoppingcart_conversion']         = $lastmonth_shoppingcart_conversion_data;
-        $updateData['thisyear_shoppingcart_conversion']          = $thisyear_shoppingcart_conversion_data;
-        $updateData['lastyear_shoppingcart_conversion']          = $lastyear_shoppingcart_conversion_data;
-        $updateData['total_shoppingcart_conversion']             = $total_shoppingcart_conversion_data;
+        $updateData['yesterday_shoppingcart_conversion']         = $yesterday_shoppingcart_conversion_data ?? 0;
+        $updateData['pastsevenday_shoppingcart_conversion']      = $pastsevenday_shoppingcart_conversion_data ?? 0;
+        $updateData['pastthirtyday_shoppingcart_conversion']     = $pastthirtyday_shoppingcart_conversion_data ?? 0;
+        $updateData['thismonth_shoppingcart_conversion']         = $thismonth_shoppingcart_conversion_data ?? 0;
+        $updateData['lastmonth_shoppingcart_conversion']         = $lastmonth_shoppingcart_conversion_data ?? 0;
+        $updateData['thisyear_shoppingcart_conversion']          = $thisyear_shoppingcart_conversion_data ?? 0;
+        $updateData['lastyear_shoppingcart_conversion']          = $lastyear_shoppingcart_conversion_data ?? 0;
+        $updateData['total_shoppingcart_conversion']             = $total_shoppingcart_conversion_data ?? 0;
 
-        $updateData['yesterday_shoppingcart_new']         = $yesterday_shoppingcart_new_data;
-        $updateData['pastsevenday_shoppingcart_new']      = $pastsevenday_shoppingcart_new_data;
-        $updateData['pastthirtyday_shoppingcart_new']     = $pastthirtyday_shoppingcart_new_data;
-        $updateData['thismonth_shoppingcart_new']         = $thismonth_shoppingcart_new_data;
-        $updateData['lastmonth_shoppingcart_new']         = $lastmonth_shoppingcart_new_data;
-        $updateData['thisyear_shoppingcart_new']          = $thisyear_shoppingcart_new_data;
-        $updateData['lastyear_shoppingcart_new']          = $lastyear_shoppingcart_new_data;
-        $updateData['total_shoppingcart_new']             = $total_shoppingcart_new_data;
+        $updateData['yesterday_shoppingcart_new']         = $yesterday_shoppingcart_new_data ?? 0;
+        $updateData['pastsevenday_shoppingcart_new']      = $pastsevenday_shoppingcart_new_data ?? 0;
+        $updateData['pastthirtyday_shoppingcart_new']     = $pastthirtyday_shoppingcart_new_data ?? 0;
+        $updateData['thismonth_shoppingcart_new']         = $thismonth_shoppingcart_new_data ?? 0;
+        $updateData['lastmonth_shoppingcart_new']         = $lastmonth_shoppingcart_new_data ?? 0;
+        $updateData['thisyear_shoppingcart_new']          = $thisyear_shoppingcart_new_data ?? 0;
+        $updateData['lastyear_shoppingcart_new']          = $lastyear_shoppingcart_new_data ?? 0;
+        $updateData['total_shoppingcart_new']             = $total_shoppingcart_new_data ?? 0;
 
-        $updateData['yesterday_shoppingcart_newconversion']      = $yesterday_shoppingcart_newconversion_data;
-        $updateData['pastsevenday_shoppingcart_newconversion']   = $pastsevenday_shoppingcart_newconversion_data;
-        $updateData['pastthirtyday_shoppingcart_newconversion']  = $pastthirtyday_shoppingcart_newconversion_data;
-        $updateData['thismonth_shoppingcart_newconversion']      = $thismonth_shoppingcart_newconversion_data;
-        $updateData['lastmonth_shoppingcart_newconversion']      = $lastmonth_shoppingcart_newconversion_data;
-        $updateData['thisyear_shoppingcart_newconversion']       = $thisyear_shoppingcart_newconversion_data;
-        $updateData['lastyear_shoppingcart_newconversion']       = $lastyear_shoppingcart_newconversion_data;
-        $updateData['total_shoppingcart_newconversion']          = $total_shoppingcart_newconversion_data;
+        $updateData['yesterday_shoppingcart_newconversion']      = $yesterday_shoppingcart_newconversion_data ?? 0;
+        $updateData['pastsevenday_shoppingcart_newconversion']   = $pastsevenday_shoppingcart_newconversion_data ?? 0;
+        $updateData['pastthirtyday_shoppingcart_newconversion']  = $pastthirtyday_shoppingcart_newconversion_data ?? 0;
+        $updateData['thismonth_shoppingcart_newconversion']      = $thismonth_shoppingcart_newconversion_data ?? 0;
+        $updateData['lastmonth_shoppingcart_newconversion']      = $lastmonth_shoppingcart_newconversion_data ?? 0;
+        $updateData['thisyear_shoppingcart_newconversion']       = $thisyear_shoppingcart_newconversion_data ?? 0;
+        $updateData['lastyear_shoppingcart_newconversion']       = $lastyear_shoppingcart_newconversion_data ?? 0;
+        $updateData['total_shoppingcart_newconversion']          = $total_shoppingcart_newconversion_data ?? 0;
         //查找是否存在的记录
         $result = Db::name('operation_analysis')->where(['order_platform' => $platform])->field('id,order_platform')->find();
         if (!$result) {
@@ -3738,14 +3739,12 @@ order by sfoi.item_id asc limit 1000";
     //导入实时库存 第一步
     public function set_product_relstock()
     {
-        $str = 'OT02018-02
-        VFP0236-01';
+        $str = 'FX0052-01';
         $skus = explode('
         ', $str);
 
         $stock = [
-            30,
-            0
+            185
         ];
 
         foreach ($skus as $k => $v) {
@@ -3773,9 +3772,7 @@ order by sfoi.item_id asc limit 1000";
         $this->weseeoptical = new \app\admin\model\order\order\Weseeoptical;
         $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
         $this->item = new \app\admin\model\itemmanage\Item;
-
-        $str = 'OT02018-02
-        VFP0236-01';
+        $str = 'FX0052-01';
         $skus = explode('
         ', $str);
         foreach ($skus as $k => $v) {
@@ -3826,9 +3823,7 @@ order by sfoi.item_id asc limit 1000";
         $this->weseeoptical = new \app\admin\model\order\order\Weseeoptical;
         $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
         $this->item = new \app\admin\model\itemmanage\Item;
-
-        $str = 'OT02018-02
-        VFP0236-01';
+        $str = 'FX0052-01';
         $skus = explode('
         ', $str);
         foreach ($skus as $k => $v) {
@@ -3874,8 +3869,7 @@ order by sfoi.item_id asc limit 1000";
         $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
         $this->item = new \app\admin\model\itemmanage\Item;
 
-        $str = 'OT02018-02
-        VFP0236-01';
+        $str = 'FX0052-01';
         $skus = explode('
         ', $str);
         $list = $this->item->field('sku,stock,occupy_stock,available_stock,real_time_qty,distribution_occupy_stock')->where(['sku' => ['in', $skus]])->select();

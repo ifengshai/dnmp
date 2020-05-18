@@ -15,6 +15,8 @@ use PhpOffice\PhpSpreadsheet\Reader\Csv;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use think\Exception;
 use think\Loader;
+use think\Db;
+
 /**
  * 订单列表
  */
@@ -55,16 +57,30 @@ class Index extends Backend
             }
             //根据传的标签切换对应站点数据库
             $label = $this->request->get('label', 1);
-            if ($label == 1) {
-                $model = $this->zeelool;
-            } elseif ($label == 2) {
-                $model = $this->voogueme;
-            } elseif ($label == 3) {
-                $model = $this->nihao;
-            } elseif ($label == 4) {
-                $model = $this->weseeoptical;
-            } elseif ($label == 5) {
-                $model = $this->meeloog;
+            switch ($label) {
+                case 1:
+                    $db = 'database.db_zeelool';
+                    $model = $this->zeelool;
+                    break;
+                case 2:
+                    $db = 'database.db_voogueme';
+                    $model = $this->voogueme;
+                    break;
+                case 3:
+                    $db = 'database.db_nihao';
+                    $model = $this->nihao;
+                    break;
+                case 4:
+                    $db = 'database.db_weseeoptical';
+                    $model = $this->weseeoptical;
+                    break;
+                case 5:
+                    $db = 'database.db_meeloog';
+                    $model = $this->meeloog;
+                    break;
+                default:
+                    return false;
+                    break;
             }
 
             $filter = json_decode($this->request->get('filter'), true);
@@ -113,11 +129,19 @@ class Index extends Backend
                 'Business Express(7-12 Days)'
             ];
             foreach ($list as &$v) {
-                if (in_array($v['shipping_description'],$arr)) {
+                if (in_array($v['shipping_description'], $arr)) {
                     $v['label'] = 1;
                 } else {
                     $v['label'] = 0;
                 }
+
+                $smap['parent_id'] = $v['entity_id'];
+                $smap['address_type'] = 'shipping';
+                $country_id = Db::connect($db)
+                    ->table('sales_flat_order_address')
+                    ->where($smap)
+                    ->value('country_id');
+                $v['country_id'] = $country_id;
             }
             unset($v);
 
@@ -564,21 +588,50 @@ class Index extends Backend
     {
         //根据传的标签切换对应站点数据库
         $label = $this->request->get('label', 1);
-        if ($label == 1) {
-            $model = $this->zeelool;
-        } elseif ($label == 2) {
-            $model = $this->voogueme;
-        } elseif ($label == 3) {
-            $model = $this->nihao;
-        } elseif ($label == 4) {
-            $model = $this->weseeoptical;
-        } elseif ($label == 5) {
-            $model = $this->meeloog;
+        switch ($label) {
+            case 1:
+                $db = 'database.db_zeelool';
+                $model = $this->zeelool;
+                break;
+            case 2:
+                $db = 'database.db_voogueme';
+                $model = $this->voogueme;
+                break;
+            case 3:
+                $db = 'database.db_nihao';
+                $model = $this->nihao;
+                break;
+            case 4:
+                $db = 'database.db_weseeoptical';
+                $model = $this->weseeoptical;
+                break;
+            case 5:
+                $db = 'database.db_meeloog';
+                $model = $this->meeloog;
+                break;
+            default:
+                return false;
+                break;
         }
         ob_start();
         $entity_ids = rtrim(input('id_params'), ',');
+
         if ($entity_ids) {
-            $processing_order_querySql = "select sfo.increment_id,round(sfo.total_qty_ordered,0) NUM,sfoi.product_options,sfoi.order_id,sfo.`status`,sfoi.sku,sfoi.qty_ordered,sfo.created_at
+
+            //判断是否为美国且 非商业快递
+            $smap['parent_id'] = ['in', $entity_ids];
+            $smap['country_id'] = ['not in', ['US', 'PR']];
+            $smap['address_type'] = 'shipping';
+            $count = Db::connect($db)
+                ->table('sales_flat_order_address')
+                ->where($smap)
+                ->count(1);
+            if ($count > 0) {
+                return $this->error('存在非美国的订单', url('index?ref=addtabs&label=' . $label));
+            }
+
+
+            $processing_order_querySql = "select sfo.shipping_description,sfo.increment_id,round(sfo.total_qty_ordered,0) NUM,sfoi.product_options,sfoi.order_id,sfo.`status`,sfoi.sku,sfoi.qty_ordered,sfo.created_at
 from sales_flat_order_item sfoi
 left join sales_flat_order sfo on  sfoi.order_id=sfo.entity_id 
 where sfo.`status` in ('processing','creditcard_proccessing','free_processing','complete','paypal_reversed','paypal_canceled_reversal') and sfo.entity_id in($entity_ids)
@@ -596,16 +649,36 @@ table.addpro tbody td {word-break: break-all; text-align: center;border-bottom:1
 table.addpro.re tbody td{ position:relative}
 </style>
 EOF;
+
+            $arr = [
+                'Business express(4-7 business days)',
+                'Expedited',
+                'Business express(7-14 Days)',
+                'Business express(7-12 Days)',
+                'Business express',
+                'Business express (7-12 days)',
+                'Business express(7-12 days)',
+                'Express Shipping (3-5 Days)',
+                'Express Shipping (5-8Days)',
+                'Express Shipping (3-5 Business Days)',
+                'Express Shipping (5-8 Business Days)',
+                'Business Express(7-12 Days)'
+            ];
+
             $file_content = '';
             $temp_increment_id = 0;
             foreach ($processing_order_list as $processing_key => $processing_value) {
+                if (in_array($processing_value['shipping_description'], $arr)) {
+                    return $this->error('存在商业快递的订单', url('index?ref=addtabs&label=' . $label));
+                }
+
                 if ($temp_increment_id != $processing_value['increment_id']) {
                     $temp_increment_id = $processing_value['increment_id'];
 
                     $date = substr($processing_value['created_at'], 0, strpos($processing_value['created_at'], " "));
                     $fileName = ROOT_PATH . "public" . DS . "uploads" . DS . "printOrder" . DS . "zeelool" . DS . "new" . DS . "$date" . DS . "$temp_increment_id.png";
                     // dump($fileName);
-                    $dir = ROOT_PATH . "public" . DS . "uploads" . DS . "printOrder" . DS . "zeelool". DS . "new"  . DS . "$date";
+                    $dir = ROOT_PATH . "public" . DS . "uploads" . DS . "printOrder" . DS . "zeelool" . DS . "new"  . DS . "$date";
                     if (!file_exists($dir)) {
                         mkdir($dir, 0777, true);
                         // echo '创建文件夹$dir成功';

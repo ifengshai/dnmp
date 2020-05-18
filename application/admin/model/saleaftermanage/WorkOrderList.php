@@ -821,7 +821,7 @@ class WorkOrderList extends Model
                     //查找措施的id
                     $measure_choose_id = WorkOrderMeasure::where('id', $orderRecept->measure_id)->value('measure_choose_id');
                     //承接人是自己并且是赠品和补发的，则措施，承接默认完成
-                    if (($orderRecept->recept_person_id == $work->create_user_id || $orderRecept->recept_person_id == $work->after_user_id) && in_array($measure_choose_id, [9, 10])) {
+                    if (($orderRecept->recept_person_id == $work->create_user_id || $orderRecept->recept_person_id == $work->after_user_id) && in_array($measure_choose_id, [8, 9, 10])) {
                         WorkOrderRecept::where('id', $orderRecept->id)->update(['recept_status' => 1, 'finish_time' => $time, 'note' => '自动处理完成']);
                         WorkOrderMeasure::where('id', $orderRecept->measure_id)->update(['operation_type' => 1, 'operation_time' => $time]);
                         $key++;
@@ -867,7 +867,7 @@ class WorkOrderList extends Model
                         //查找措施的id
                         $measure_choose_id = WorkOrderMeasure::where('id', $orderRecept->measure_id)->value('measure_choose_id');
                         //承接人是自己并且是赠品和补发的，则措施，承接默认完成
-                        if (($orderRecept->recept_person_id == $work->create_user_id || $orderRecept->recept_person_id == $work->after_user_id) && in_array($measure_choose_id, [9, 10])) {
+                        if (($orderRecept->recept_person_id == $work->create_user_id || $orderRecept->recept_person_id == $work->after_user_id) && in_array($measure_choose_id, [8, 9, 10])) {
                             //审核成功直接进行处理
                             if ($params['success'] == 1) {
                                 WorkOrderRecept::where('id', $orderRecept->id)->update(['recept_status' => 1, 'finish_time' => $time, 'note' => '自动处理完成']);
@@ -917,7 +917,7 @@ class WorkOrderList extends Model
                     ];
                     WorkOrderRemark::create($remarkData);
                     //通知
-                    Ding::cc_ding(explode(',', $work->recept_person_id), '', '😎😎😎😎有新工单需要你处理😎😎😎😎', '有新工单需要你处理');
+                    Ding::cc_ding(explode(',', $work->recept_person_id), '', '工单ID：' . $work->id . '😎😎😎😎有新工单需要你处理😎😎😎😎', '有新工单需要你处理');
                 }
             }
 
@@ -943,6 +943,8 @@ class WorkOrderList extends Model
      */
     public function handleRecept($id, $work_id, $measure_id, $recept_group_id, $success, $process_note)
     {
+        $work = self::find($work_id);
+
         if (1 == $success) {
             $data['recept_status'] = 1;
         } else {
@@ -979,6 +981,9 @@ class WorkOrderList extends Model
             $resultMeasure = WorkOrderMeasure::where($whereWork)->count();
             if (0 == $resultMeasure) {
                 $dataWorkOrder['work_status'] = 6;
+
+                //通知
+                Ding::cc_ding(explode(',', $work->create_user_id), '', '工单ID：' . $work->id . '😎😎😎😎工单已处理完成😎😎😎😎',  '😎😎😎😎工单已处理完成😎😎😎😎');
             } else {
                 $dataWorkOrder['work_status'] = 5;
             }

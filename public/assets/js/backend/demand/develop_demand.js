@@ -497,7 +497,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                         }
                                     }
                                 },
-                                {
+                                /*{
                                     name: 'ajax',
                                     text: __(''),
                                     title: __('删除'),
@@ -523,7 +523,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                             return false;
                                         }
                                     }
-                                },
+                                },*/
                             ],
                             formatter: Table.api.formatter.operate
                         }
@@ -657,7 +657,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     [
                         // { checkbox: true },
                         { field: 'id', title: __('Id') },
-                        // { field: 'title', title: __('Titel'), cellStyle: formatTableUnit, formatter: Controller.api.formatter.getClear, operate: false },
+                        { field: 'title', title: __('标题'), cellStyle: formatTableUnit, formatter: Controller.api.formatter.getClear, operate: false },
                         {
                             field: 'desc',
                             operate: false,
