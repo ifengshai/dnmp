@@ -1,6 +1,6 @@
 <?php
 
-namespace app\admin\controller\demand\testManage;
+namespace app\admin\controller\demand\testmanage;
 
 use app\common\model\Auth;
 use think\Db;
