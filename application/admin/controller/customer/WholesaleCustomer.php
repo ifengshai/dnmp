@@ -152,9 +152,12 @@ class WholesaleCustomer extends Backend
                     $params['update_user_id'] = session('admin.id');
                     $params['update_time'] = date('Y-m-d H:i:s');
                     $params['create_time'] = date('Y-m-d H:i:s');
-                    if (isset($params['logo_images'])) { //有上传图片则 是否logo为有
+                    if (!empty($params['logo_images'])) { //有上传图片则 是否logo为有
                         $params['is_logo'] = 2;
+                    }else{
+                        $params['is_logo'] = 1;
                     }
+
                     $result = $this->model->allowField(true)->save($params);
                     Db::commit();
                 } catch (ValidateException $e) {
@@ -216,10 +219,11 @@ class WholesaleCustomer extends Backend
                     }
                     $params['update_user_id'] = session('admin.id');
                     $params['update_time'] = date('Y-m-d H:i:s');
-                    if (isset($params['logo_images'])) { //有上传图片则 是否logo为有
-                        $params['is_logo'] = 2;
-                    } else {
+
+                    if (empty($params['logo_images'])) { //有上传图片则 是否logo为有
                         $params['is_logo'] = 1;
+                    } else {
+                        $params['is_logo'] = 2;
                     }
 
                     $result = $row->allowField(true)->save($params);
