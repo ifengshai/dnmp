@@ -26,7 +26,7 @@ class ThirdApi extends Api
         $verify_sign = $track_arr['event'].'/'.json_encode($track_arr['data']).'/'.$this->apiKey;
         $verify_sign = hash("sha256",$verify_sign);
         if($verify_sign == $track_arr['sign']){
-            file_put_contents('/www/wwwroot/mojing/runtime/log/track.txt',$track_info."\r\n",FILE_APPEND);
+            //file_put_contents('/www/wwwroot/mojing/runtime/log/track.txt',$track_info."\r\n",FILE_APPEND);
         }
     }
 }
