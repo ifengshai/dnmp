@@ -182,11 +182,11 @@ table.altrowstable tr:nth-child(even){
                  <th style="text-align: center; vertical-align: middle;">分组</th>
                  <th style="text-align: center; vertical-align: middle;">日期</th>
                  <th style="text-align: center; vertical-align: middle;">工单完成量</th>
-                 <th style="text-align: center; vertical-align: middle;">订单总金额</th>
+                 <th style="text-align: center; vertical-align: middle;">订单总金额($)</th>
                  <th style="text-align: center; vertical-align: middle;">补发单数</th>
                  <th style="text-align: center; vertical-align: middle;">补发比</th>
                  <th style="text-align: center; vertical-align: middle;">退款单数</th>
-                 <th style="text-align: center; vertical-align: middle;">退款订单比</th>
+                 <th style="text-align: center; vertical-align: middle;">退款订单比(%)</th>
                  <th style="text-align: center; vertical-align: middle;">累计退款金额（$）</th>
                  <th style="text-align: center; vertical-align: middle;">退款金额比</th>
              </tr>
@@ -200,11 +200,11 @@ table.altrowstable tr:nth-child(even){
                       <td id='today_order_num'           style="text-align: center; vertical-align: middle;">{$start} - {$end}</td>
                       {/if}  
                       <td id='today_order_success'       style="text-align: center; vertical-align: middle;">{$vo.counter}</td>
-                      <td id='today_unit_price'          style="text-align: center; vertical-align: middle;">{$zeelool_data.today_unit_price}</td>
-                      <td id='today_shoppingcart_total'  style="text-align: center; vertical-align: middle;">{$zeelool_data.today_shoppingcart_total}</td>
+                      <td id='today_unit_price'          style="text-align: center; vertical-align: middle;">{:round($vo.base_grand_total,2)}</td>
+                      <td id='today_shoppingcart_total'  style="text-align: center; vertical-align: middle;"></td>
                       <td id='today_shoppingcart_conversion' style="text-align: center; vertical-align: middle;">{$zeelool_data.today_shoppingcart_conversion}</td>
-                      <td id='today_shoppingcart_new'        style="text-align: center; vertical-align: middle;">{$zeelool_data.today_shoppingcart_new}</td>
-                      <td id='today_shoppingcart_newconversion' style="text-align: center; vertical-align: middle;">{$zeelool_data.today_shoppingcart_newconversion}</td>
+                      <td id='today_shoppingcart_new'        style="text-align: center; vertical-align: middle;">{$vo.refund_num}</td>
+                      <td id='today_shoppingcart_newconversion' style="text-align: center; vertical-align: middle;">{:round($vo.refund_num/$vo.counter*100,2)}</td>
                       <td id='today_register_customer'     style="text-align: center; vertical-align: middle;">{$zeelool_data.today_register_customer}</td>
                       <td id='today_sign_customer' style="text-align: center; vertical-align: middle;">{$zeelool_data.today_sign_customer}</td>
                   </tr>

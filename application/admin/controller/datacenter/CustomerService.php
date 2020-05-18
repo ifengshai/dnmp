@@ -61,8 +61,13 @@ class CustomerService extends Backend
         $map['complete_time'] = ['between', [date('Y-m-d 00:00:00', strtotime('-30 day')), date('Y-m-d H:i:s', time())]];
         $where['work_type'] = 1;
         $where['work_status'] = 6;
-        $workList = $this->model->where($where)->where($map)->field('count(*) as counter,create_user_id,create_user_name')->group('create_user_id')->select();
+        $workList = $this->model->where($where)->where($map)->field('count(*) as counter,sum(base_grand_total) as base_grand_total,
+        sum(is_refund) as refund_num,create_user_id,create_user_name')->group('create_user_id')->select();
+        $where['replacement_order'] = ['neq',''];
+        $replacementOrder = $this->model->where($where)->where($map)->field('count(replacement_order) as counter,create_user_id')->group('create_user_id')->select();
         $workList = collection($workList)->toArray();
+        $replacementOrder = collection($replacementOrder)->toArray();
+
         //客服分组
         $kefumanage = config('workorder.kefumanage');
         if(!empty($workList)){
