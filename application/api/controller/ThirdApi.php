@@ -21,7 +21,6 @@ class ThirdApi extends Api
      * 17track物流查询webhook访问方法
      * */
     public function track_return(){
-
         $track_info = file_get_contents("php://input");
         $track_arr = json_decode($track_info,true);
         $verify_sign = $track_arr['event'].'/'.json_encode($track_arr['data']).'/'.$this->apiKey;
