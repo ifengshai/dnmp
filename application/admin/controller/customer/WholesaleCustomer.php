@@ -27,6 +27,7 @@ class WholesaleCustomer extends Backend
      */
     protected $model = null;
     protected $noNeedLogin = ['detail'];
+
     public function _initialize()
     {
         parent::_initialize();
@@ -151,9 +152,12 @@ class WholesaleCustomer extends Backend
                     $params['update_user_id'] = session('admin.id');
                     $params['update_time'] = date('Y-m-d H:i:s');
                     $params['create_time'] = date('Y-m-d H:i:s');
-                    if (isset($params['logo_images'])) { //有上传图片则 是否logo为有
+                    if (!empty($params['logo_images'])) { //有上传图片则 是否logo为有
                         $params['is_logo'] = 2;
+                    }else{
+                        $params['is_logo'] = 1;
                     }
+
                     $result = $this->model->allowField(true)->save($params);
                     Db::commit();
                 } catch (ValidateException $e) {
@@ -215,10 +219,11 @@ class WholesaleCustomer extends Backend
                     }
                     $params['update_user_id'] = session('admin.id');
                     $params['update_time'] = date('Y-m-d H:i:s');
-                    if (isset($params['logo_images'])) { //有上传图片则 是否logo为有
-                        $params['is_logo'] = 2;
-                    } else {
+
+                    if (empty($params['logo_images'])) { //有上传图片则 是否logo为有
                         $params['is_logo'] = 1;
+                    } else {
+                        $params['is_logo'] = 2;
                     }
 
                     $result = $row->allowField(true)->save($params);
@@ -373,55 +378,96 @@ class WholesaleCustomer extends Backend
         //批量添加产品
         foreach ($data as $k => $v) {
 
-            if (empty($v[0])){
+            if (empty($v[0])) {
                 $this->error('导入失败！！,电子邮箱不能为空');
             }
-            if (empty($v[5])){
+            if (empty($v[5])) {
                 $this->error('导入失败！！,意向等级不能为空');
             }
-            if (empty($v[4])){
+            if (empty($v[4])) {
                 $this->error('导入失败！！,来源类型不能为空');
             }
             $params[$k]['email'] = trim($v[0]);
             $params[$k]['customer_name'] = trim($v[1]);
-            $params[$k]['mobile'] =  $v[2];
-            $params[$k]['country'] =  $v[3];
-            $site_type=$v[4];
-            if (isset($site_type)){
-                if (strcmp($v[4],'Zeelool')){
-                    $site_type=1;
-                }elseif (strcmp($v[4],'Voogueme')){
-                    $site_type=2;
-                }elseif (strcmp($v[4],'Nihao')){
-                    $site_type=3;
-                }elseif (strcmp($v[4],'Alibaba')){
-                    $site_type=4;
-                }elseif (strcmp($v[4],'主动开发')){
-                    $site_type=5;
-                }else{
+            $params[$k]['mobile'] = $v[2];
+            $params[$k]['country'] = $v[3];
+
+            switch (strtolower($v[4])) {
+                case 'zeelool':
+                    $params[$k]['site_type']  = 1;
+                    break;
+                case 'voogueme':
+                    $params[$k]['site_type']  = 2;
+                    break;
+                case 'nihao':
+                    $params[$k]['site_type']  = 3;
+                    break;
+                case 'alibaba':
+                    $params[$k]['site_type']  = 4;
+                    break;
+                case '主动开发':
+                    $params[$k]['site_type']  = 5;
+                    break;
+                default:
                     $this->error('导入失败！！,来源类型为:Zeelool,Voogueme,Nihao,Alibaba,主动开发');
-                }
-            }
-            $intention_level=null;
-            if (isset($v[5])){
-                if ($v[5]=='低'){
-                    $intention_level=1;
-                }elseif ($v[5]=='中'){
-                    $intention_level=2;
-                }elseif ($v[5]=='高'){
-                    $intention_level=3;
-                }else{
-                    $this->error('导入失败！！,意向等级为:高,中,低');
-                }
+                    break;
+
             }
 
-            $params[$k]['site_type'] =$site_type;
-            $params[$k]['intention_level'] = $intention_level;
-            $params[$k]['is_order'] =  $this->checkIsType($v[6]);
-            $params[$k]['is_behalf_of'] =   $this->checkIsType($v[7]);
-            $params[$k]['is_logo'] =   $this->checkIsType($v[8]);
-            $params[$k]['remark'] =  $v[9];
-            $params[$k]['logo_images'] =  $v[10];
+
+            /*   if (isset($site_type)){
+                   if (strtolower($v[4])=='Zeelool'){
+                       $site_type=1;
+                   }elseif (strcmp($v[4],'Voogueme')){
+                       $site_type=2;
+                   }elseif (strcmp($v[4],'Nihao')){
+                       $site_type=3;
+                   }elseif (strcmp($v[4],'Alibaba')){
+                       $site_type=4;
+                   }elseif (strcmp($v[4],'主动开发')){
+                       $site_type=5;
+                   }else{
+                       $this->error('导入失败！！,来源类型为:Zeelool,Voogueme,Nihao,Alibaba,主动开发');
+                   }
+               }
+
+               */
+            /*
+               if (isset($v[5])){
+
+                   if ($v[5]=='低'){
+                       $intention_level=1;
+                   }elseif ($v[5]=='中'){
+                       $intention_level=2;
+                   }elseif ($v[5]=='高'){
+                       $intention_level=3;
+                   }else{
+                       $this->error('导入失败！！,意向等级为:高,中,低');
+                   }
+               }*/
+
+            switch ($v[5]) {
+                case '低':
+                    $params[$k]['intention_level'] = 1;
+                    break;
+                case '中':
+                    $params[$k]['intention_level']  = 2;
+                    break;
+                case '高':
+                    $params[$k]['intention_level']  = 3;
+                    break;
+                default:
+                    $this->error('导入失败！！,意向等级为:高,中,低');
+                    break;
+            }
+
+
+
+            $params[$k]['is_order'] = $this->checkIsType($v[6]);
+            $params[$k]['is_behalf_of'] = $this->checkIsType($v[7]);
+            $params[$k]['is_logo'] = $this->checkIsType($v[8]);
+            $params[$k]['remark'] = $v[9];
+            $params[$k]['logo_images'] = $v[10];
 
 
             $params[$k]['create_user_id'] = session('admin.id');
@@ -440,15 +486,29 @@ class WholesaleCustomer extends Backend
     }
 
 
-    public function checkIsType($value=''){
-        if (empty($value)){
+    public function checkIsType($value = '')
+    {
+        if (empty($value)) {
             return null;
-        }elseif ($value=='是'){
+        } elseif ($value == '是') {
             return 2;
-        }elseif ($value == '否'){
+        } elseif ($value == '否') {
             return 1;
-        }else{
+        } else {
             $this->error("是否下单、是否代发、是否logo必须为【是】或【否】！！");
+        }
+    }
+
+    public function checkIsTypeNam($value = '')
+    {
+        if (empty($value)) {
+            return null;
+        } elseif ($value == 2) {
+            return '是';
+        } elseif ($value == 1) {
+            return '否';
+        }else{
+            return null;
         }
     }
 
@@ -457,9 +517,9 @@ class WholesaleCustomer extends Backend
      * 批量导出xls
      *
      * @Description
-     * @author wpl
-     * @since 2020/02/28 14:45:39
      * @return void
+     * @since 2020/02/28 14:45:39
+     * @author wpl
      */
     public function batch_export_xls()
     {
@@ -502,7 +562,7 @@ class WholesaleCustomer extends Backend
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("M1", "创建人");
         foreach ($list as $key => $value) {
 
-            switch($value['site_type']){
+            switch ($value['site_type']) {
                 case 1:
                     $value['site_type'] = 'Zeelool';
                     break;
@@ -524,7 +584,7 @@ class WholesaleCustomer extends Backend
 
             }
 
-            switch($value['intention_level']){
+            switch ($value['intention_level']) {
                 case 1:
                     $value['intention_level'] = '低';
                     break;
@@ -540,21 +600,20 @@ class WholesaleCustomer extends Backend
             }
 
 
-
             $spreadsheet->getActiveSheet()->setCellValueExplicit("A" . ($key * 1 + 2), $value['email'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
             $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $value['customer_name']);
             $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 1 + 2), $value['mobile']);
             $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 1 + 2), $value['country']);
             $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), $value['site_type']);
             $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 1 + 2), $value['intention_level']);
-            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 1 + 2), $value['is_order']  == 2?'是':'否');
-            $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 1 + 2), $value['is_behalf_of'] == 2?'是':'否');
-            $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 1 + 2), $value['is_logo'] == 2?'是':'否');
+            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 1 + 2), $this->checkIsTypeNam($value['is_order']) );
+            $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 1 + 2), $this->checkIsTypeNam($value['is_behalf_of']));
+            $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 1 + 2), $this->checkIsTypeNam($value['is_logo']));
             $spreadsheet->getActiveSheet()->setCellValue("J" . ($key * 1 + 2), $value['remark']);
             $spreadsheet->getActiveSheet()->setCellValue("K" . ($key * 1 + 2), $value['logo_images']);
             $spreadsheet->getActiveSheet()->setCellValue("L" . ($key * 1 + 2), $value['create_time']);
 
-            $spreadsheet->getActiveSheet()->setCellValue("M" . ($key * 1 + 2),  $userInfo[$value['create_user_id']]);
+            $spreadsheet->getActiveSheet()->setCellValue("M" . ($key * 1 + 2), $userInfo[$value['create_user_id']]);
         }
 
         //设置宽度
@@ -580,7 +639,7 @@ class WholesaleCustomer extends Backend
             'borders' => [
                 'allBorders' => [
                     'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, // 设置border样式
-                    'color'       => ['argb' => 'FF000000'], // 设置border颜色
+                    'color' => ['argb' => 'FF000000'], // 设置border颜色
                 ],
             ],
         ];

@@ -190,7 +190,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form','echartsobj'
                             '<td>'+table.problem_data[i]+'</td>'+
                             '<td>占比</td>';
                             if(table.problem_form_total>0){
-                                addtr+='<td>'+Math.round(table.problem_data[i]/table.problem_form_total*100,2) +'%</td>';
+                                addtr+='<td>'+formatDecimal(table.problem_data[i]/table.problem_form_total*100,2) +'%</td>';
                             }else{
                                 addtr+='<td>0</td>';
                             }
@@ -267,7 +267,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form','echartsobj'
                         '<td>'+table.step_data.step[i]+'</td>'+
                         '<td>占比</td>';
                         if(table.step_four_total>0){
-                            addtr+='<td>'+Math.round(table.step_data.step[i]/table.step_four_total*100,2) +'%</td>';
+                            addtr+='<td>'+formatDecimal(table.step_data.step[i]/table.step_four_total*100,2) +'%</td>';
                         }else{
                             addtr+='<td>0</td>';
                         }
@@ -284,3 +284,14 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form','echartsobj'
     };
     return Controller;
 });
+//js保留两位小数，不四舍五入
+function formatDecimal(num, decimal) {
+    num = num.toString()
+    let index = num.indexOf('.')
+    if (index !== -1) {
+      num = num.substring(0, decimal + index + 1)
+    } else {
+      num = num.substring(0)
+    }
+    return parseFloat(num).toFixed(decimal)
+  }
