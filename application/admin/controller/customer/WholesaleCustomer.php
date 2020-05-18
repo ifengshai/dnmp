@@ -443,7 +443,7 @@ class WholesaleCustomer extends Backend
             //判断是否存在相同数据
             foreach ($old_data as $old_k =>$old_v){
                 if ($params[$k]['site_type'] ==$old_v['site_type'] && $params[$k]['email'] == $old_v['email'] ){
-                    $num=$k+1;
+                    $num=$k+2;
                     $this->error("邮箱:[".$params[$k]['email']."]已存在,请检查,第".$num.'行');
                 }
             }
