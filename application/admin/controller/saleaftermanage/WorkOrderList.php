@@ -120,7 +120,7 @@ class WorkOrderList extends Backend
             }
             //选项卡我的任务切换
             $filter = json_decode($this->request->get('filter'), true);
-            if ($filter['recept_person_id']) {
+            if ($filter['recept_person_id'] && !$filter['recept_person']) {
                 //承接 经手 审核 包含用户id
                 //获取当前用户所有的承接的工单id并且不是取消，新建的
                 $workIds = WorkOrderRecept::where('recept_person_id', $filter['recept_person_id'])->column('work_id');
@@ -136,7 +136,9 @@ class WorkOrderList extends Backend
                 $map['id'] = ['in', $workIds];
                 unset($filter['recept_person']);
             }
+            
             $this->request->get(['filter' => json_encode($filter)]);
+            
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
                 ->where($where)
