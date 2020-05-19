@@ -163,10 +163,8 @@ class SelfApi extends Api
         $carrier = $this->getCarrier($title);
         $shipment_reg[0]['number'] =  $order_shipment['track_number'];
         $shipment_reg[0]['carrier'] =  $carrier['carrierId'];
-        dump($shipment_reg);
         $track = $this->regitster17Track($shipment_reg);
-        dump($track);
-        if ($track['data']['rejected']) {
+        if (count($track['data']['rejected']) > 0) {
             $this->error('物流接口注册失败！！', [], $track['data']['rejected']['code']);
         }
 
