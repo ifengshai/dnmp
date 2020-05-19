@@ -712,9 +712,9 @@ class Test extends Backend
                     $data['node_type'] = 7;
                     $data['update_time'] = $v['create_time'];
                 }
-                $data['is_only_frame'] = 1;
+         
             } else {
-                $data['is_only_frame'] = 0;
+        
                 if ($v['custom_is_match_frame_new'] == 1) {
                     $list[$k + 3]['order_node'] = 2;
                     $list[$k + 3]['node_type'] = 3; //配镜架
