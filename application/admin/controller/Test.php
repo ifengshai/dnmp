@@ -593,7 +593,7 @@ class Test extends Backend
         ';
         $map['a.created_at'] = ['between', ['2020-04-01 00:00:00', '2020-05-01 00:00:00']];
         // $map['a.created_at'] = ['>=', '2020-01-01 00:00:00'];
-        // $map['a.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal', 'payment_review']];
+        $map['a.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal', 'payment_review']];
         $zeelool_data = $this->zeelool->alias('a')->field($field)
             ->join(['sales_flat_shipment_track' => 'b'], 'a.entity_id=b.order_id', 'left')
             ->where($map)->select();
