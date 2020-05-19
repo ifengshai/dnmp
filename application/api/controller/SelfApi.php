@@ -161,8 +161,8 @@ class SelfApi extends Api
         //注册17track
         $title = strtolower(str_replace(' ', '-', $order_shipment['title']));
         $carrier = $this->getCarrier($title);
-        $shipment_reg['number'] =  $order_shipment['track_number'];
-        $shipment_reg['carrier'] =  $carrier['carrierId'];
+        $shipment_reg[0]['number'] =  $order_shipment['track_number'];
+        $shipment_reg[0]['carrier'] =  $carrier['carrierId'];
         dump($shipment_reg);
         $track = $this->regitster17Track($shipment_reg);
         dump($track);
