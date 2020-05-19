@@ -241,10 +241,12 @@ class WorkOrderList extends Backend
                         $this->model->validateFailException(true)->validate($validate);
                     }
 
-                    //限制不能存在两个相同的未完成的工单
-                    $count = $this->model->where(['platform_order' => $params['platform_order'], 'work_status' => ['in', [1, 2, 3, 5]]])->count();
-                    if ($count > 0) {
-                        throw new Exception("此订单存在未处理完成的工单");
+                    if (!$ids) {
+                        //限制不能存在两个相同的未完成的工单
+                        $count = $this->model->where(['platform_order' => $params['platform_order'], 'work_status' => ['in', [1, 2, 3, 5]]])->count();
+                        if ($count > 0) {
+                            throw new Exception("此订单存在未处理完成的工单");
+                        }
                     }
 
                     if (!$params['platform_order']) {
