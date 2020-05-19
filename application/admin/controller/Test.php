@@ -597,7 +597,7 @@ class Test extends Backend
         $zeelool_data = $this->zeelool->alias('a')->field($field)
             ->join(['sales_flat_shipment_track' => 'b'], 'a.entity_id=b.order_id', 'left')
             ->where($map)->select();
-        foreach ($zeelool_data as $v) {
+        foreach ($zeelool_data as $key => $v) {
             $list = [];
             $k = 0;
             //下单
@@ -816,8 +816,9 @@ class Test extends Backend
             } else {
                 Db::name('order_node')->insert($data);
             }
-            $res = $this->ordernodedetail->saveAll($list);
-            dump($res);
+            $this->ordernodedetail->saveAll($list);
+            echo $key . "\n";
         }
+        echo 'ok';
     }
 }
