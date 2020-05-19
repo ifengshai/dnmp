@@ -424,7 +424,7 @@ class WholesaleCustomer extends Backend
                     $params[$k]['site_type']  = 6;
                     break;
                 default:
-                    $this->error('导入失败！！,来源类型为:Zeelool,Voogueme,Nihao,Alibaba,主动开发');
+                    $this->error('导入失败！！,来源类型为:Zeelool,Voogueme,Nihao,Alibaba,主动开发,Wesee');
                     break;
 
             }
