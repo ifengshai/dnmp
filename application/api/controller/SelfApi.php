@@ -165,7 +165,7 @@ class SelfApi extends Api
         $shipment_reg[0]['carrier'] =  $carrier['carrierId'];
         $track = $this->regitster17Track($shipment_reg);
         if (count($track['data']['rejected']) > 0) {
-            $this->error('物流接口注册失败！！', [], $track['data']['rejected']['code']);
+            $this->error('物流接口注册失败！！', [], $track['data']['rejected']['error']['code']);
         }
 
         //请求接口更改物流表状态
