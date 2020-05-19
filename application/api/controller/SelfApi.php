@@ -138,7 +138,7 @@ class SelfApi extends Api
             $this->error(__('订单记录不存在'), [], 400);
         }
         //更新节点主表
-        $res_node = $row->allowField(true)->save([
+        $row->allowField(true)->save([
             'order_node' => 2,
             'node_type' => 7,
             'update_time' => date('Y-m-d H:i:s'),
@@ -147,7 +147,7 @@ class SelfApi extends Api
         ]);
 
         //插入节点子表
-        $res_node_detail = (new OrderNodeDetail())->allowField(true)->save([
+        (new OrderNodeDetail())->allowField(true)->save([
             'order_number' => $order_number,
             'order_id' => $order_id,
             'content' => 'Your order has been created.',
@@ -159,18 +159,24 @@ class SelfApi extends Api
             'track_number' => $order_shipment->track_number
         ]);
 
-        //请求接口更改物流表状态
-
-
         //注册17track
         $title = strtolower(str_replace(' ', '-', $order_shipment->title));
-        if ($title == 'china-post') {
-            $title = 'china-ems';
-        }
         $carrier = $this->getCarrier($title);
         $shipment_reg['number'] =  $order_shipment->track_number;
         $shipment_reg['carrier'] =  $carrier['carrierId'];
         $track = $this->regitster17Track($shipment_reg);
+        if ($track->code !== 0) {
+            $this->error('物流接口注册失败！！', [], $track->code);
+        }
+
+        //请求接口更改物流表状态
+        $params['ids'] = $order_id;
+        $params['site'] = $site;
+        $res = $this->setLogisticsStatus($params);
+        if ($res->code !== 200) {
+            $this->error($res->msg, [], $res->code);
+        }
+        $this->success('提交成功', [], 200);
     }
 
     /**
@@ -178,7 +184,7 @@ class SelfApi extends Api
      * @param $title
      * @return mixed|string
      */
-    public function getCarrier($title)
+    protected function getCarrier($title)
     {
         $carrierId = '';
         if (stripos($title, 'post') !== false) {
@@ -227,30 +233,30 @@ class SelfApi extends Api
      * @return void
      */
     protected function setLogisticsStatus($params)
-    {   
+    {
         switch ($params['site']) {
             case 1:
-                $db = 'database.db_zeelool';
+                $url = config('url.zeelool_url');
                 break;
             case 2:
-                $db = 'database.db_voogueme';
+                $url = config('url.voogueme_url');
                 break;
             case 3:
-                $db = 'database.db_nihao';
-                break;
-            case 4:
-                $db = 'database.db_weseeoptical';
-                break;
-            case 5:
-                $db = 'database.db_meeloog';
+                $url = config('url.nihao_url');
                 break;
             default:
                 return false;
                 break;
         }
-       
+        unset($params['site']);
+        $url = $url . 'magic/order/logistics';
         $client = new Client(['verify' => false]);
-        $client->request('POST', $url, array('form_params' => $params));
+        //请求URL
+        $response = $client->request('POST', $url, array('form_params' => $params));
+        $body = $response->getBody();
+        $stringBody = (string) $body;
+        $res = json_decode($stringBody);
+        return $res;
     }
 
     /**
