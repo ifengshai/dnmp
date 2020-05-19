@@ -45,7 +45,8 @@ class WholesaleCustomer extends Backend
             2 => 'Voogueme',
             3 => 'Nihao',
             4 => 'Alibaba',
-            5 => '主动开发'
+            5 => '主动开发',
+            6 =>'Wesee'
         ];
         $this->assign(compact('intention_level', 'isNo', 'siteType'));
         $this->model = new \app\admin\model\customer\WholesaleCustomer;
@@ -419,6 +420,9 @@ class WholesaleCustomer extends Backend
                 case '主动开发':
                     $params[$k]['site_type']  = 5;
                     break;
+                case 'wesee':
+                    $params[$k]['site_type']  = 6;
+                    break;
                 default:
                     $this->error('导入失败！！,来源类型为:Zeelool,Voogueme,Nihao,Alibaba,主动开发');
                     break;
@@ -564,6 +568,9 @@ class WholesaleCustomer extends Backend
                     break;
                 case 5:
                     $value['site_type'] = '主动开发';
+                    break;
+                case 6:
+                    $value['site_type'] = 'Wesee';
                     break;
                 default:
                     $value['site_type'] = '';
