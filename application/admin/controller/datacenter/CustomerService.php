@@ -54,24 +54,262 @@ class CustomerService extends Backend
      */
     public function workstatistics()
     {
-        
-        //根据筛选时间求出客服部门下面所有有数据人员
-        $start = date('Y-m-d', strtotime('-30 day'));
-        $end   = date('Y-m-d');
-        $map['complete_time'] = ['between', [date('Y-m-d 00:00:00', strtotime('-30 day')), date('Y-m-d H:i:s', time())]];
+        if($this->request->isPost()){
+            $params = $this->request->param();
+            $platform = $params['order_platform'];
+            if ($params['one_time']) {
+                $timeOne = explode(' ', $params['one_time']);
+                $mapOne['complete_time'] = ['between', [$timeOne[0] . ' ' . $timeOne[1], $timeOne[3] . ' ' . $timeOne[4]]];
+            } else {
+                $mapOne['complete_time'] = ['between', [date('Y-m-d 00:00:00', strtotime('-30 day')), date('Y-m-d H:i:s', time())]];
+            }
+            if ($params['two_time']) {
+                $timeTwo = explode(' ', $params['two_time']);
+                $mapTwo['complete_time'] = ['between', [$timeTwo[0] . ' ' . $timeTwo[1], $timeTwo[3] . ' ' . $timeTwo[4]]];
+            }
+            if(10 !=$params['order_platform']){
+                $where['work_platform'] = $params['order_platform'];
+            }
+                $worklistOne = $this->works_info($where,$mapOne);
+            if(!empty($mapTwo)){
+                $worklistTwo = $this->works_info($where,$mapTwo);
+            }
+            //只有一个没有第二个
+            if($worklistOne && !$mapTwo){
+                //取出总数
+                $workOrderNum       = $worklistOne['workOrderNum'];
+                $totalOrderMoney    = $worklistOne['totalOrderMoney'];
+                $replacementNum     = $worklistOne['replacementNum'];
+                $refundMoneyNum     = $worklistOne['refundMoneyNum'];
+                $refundMoney        = $worklistOne['refundMoney'];
+                if($timeOne){
+                    $start = $timeOne[0];
+                    $end   = $timeOne[3];
+                }else{
+                    $start = date('Y-m-d', strtotime('-30 day'));
+                    $end   = date('Y-m-d');
+                }
+                //销毁变量
+                unset($worklistOne['workOrderNum'],$worklistOne['totalOrderMoney'],$worklistOne['replacementNum'],$worklistOne['refundMoneyNum'],$worklistOne['refundMoney']);
+                $this->view->assign([
+                    'type'=>2,
+                    'workList'  => $worklistOne,
+                    'start'     => $start,
+                    'end'       => $end,
+                    'platform'  => $platform  
+                    ]);
+            }elseif($worklistOne && $worklistTwo){ //两个提交的数据
+                 //取出总数
+                 $workOrderNum       = $worklistOne['workOrderNum'] + $worklistTwo['workOrderNum'];
+                 $totalOrderMoney    = $worklistOne['totalOrderMoney'] + $worklistTwo['totalOrderMoney'];
+                 $replacementNum     = $worklistOne['replacementNum'] + $worklistTwo['replacementNum'];
+                 $refundMoneyNum     = $worklistOne['refundMoneyNum'] + $worklistTwo['refundMoneyNum'];
+                 $refundMoney        = $worklistOne['refundMoney'] + $worklistTwo['refundMoney'];
+                 if($timeOne){
+                     $startOne = $timeOne[0];
+                     $endOne   = $timeOne[3];
+                 }else{
+                     $startOne = date('Y-m-d', strtotime('-30 day'));
+                     $endOne   = date('Y-m-d');
+                 }
+                     $startTwo = $timeTwo[0];
+                     $endTwo   = $timeTwo[3];
+                 
+                 //销毁变量
+                 unset($worklistOne['workOrderNum'],$worklistOne['totalOrderMoney'],$worklistOne['replacementNum'],$worklistOne['refundMoneyNum'],$worklistOne['refundMoney']);
+                 unset($worklistTwo['workOrderNum'],$worklistTwo['totalOrderMoney'],$worklistTwo['replacementNum'],$worklistTwo['refundMoneyNum'],$worklistTwo['refundMoney']);
+                 $info = $this->customers();
+                 $workArr = [];
+                 foreach($worklistOne as $ok =>$ov){
+                    if(array_key_exists($ov['create_user_id'],$info)){
+                        $workArr[$ov['create_user_id']]['create_user_name'] = $info[$ov['create_user_id']];
+                        $workArr[$ov['create_user_id']]['group']            = $ov['group'];
+                        $workArr[$ov['create_user_id']]['one']['counter']   = $ov['counter'];
+                        $workArr[$ov['create_user_id']]['one']['base_grand_total'] = $ov['base_grand_total'];
+                        $workArr[$ov['create_user_id']]['one']['refund_num'] = $ov['refund_num'];
+                        $workArr[$ov['create_user_id']]['one']['replacement_num'] = $ov['replacement_num'];
+                        $workArr[$ov['create_user_id']]['one']['total_refund_money'] = $ov['total_refund_money']; 
+                    }
+                 }
+                 foreach($worklistTwo as $tk =>$tv){
+                     if(array_key_exists($tv['create_user_id'],$info)){
+                        $workArr[$tv['create_user_id']]['create_user_name'] = $info[$tv['create_user_id']];
+                        $workArr[$tv['create_user_id']]['group']            = $tv['group'];
+                        $workArr[$tv['create_user_id']]['two']['counter']   = $tv['counter'];
+                        $workArr[$tv['create_user_id']]['two']['base_grand_total'] = $tv['base_grand_total'];
+                        $workArr[$tv['create_user_id']]['two']['refund_num'] = $tv['refund_num'];
+                        $workArr[$tv['create_user_id']]['two']['replacement_num'] = $tv['replacement_num'];
+                        $workArr[$tv['create_user_id']]['two']['total_refund_money'] = $tv['total_refund_money'];                        
+                     }
+                 }
+                 $this->view->assign([
+                     'type'         =>3,
+                     'workListOne'  => $worklistOne,
+                     'workListTwo'  => $worklistTwo,
+                     'startOne'     => $startOne,
+                     'endOne'       => $endOne,
+                     'startTwo'     => $startTwo,
+                     'endTwo'       => $endTwo,
+                     'startTwo'     => $startTwo,
+                     'endTwo'       => $endTwo,
+                     'platform'     => $platform,
+                     'info'         => $info,
+                     'workArr'      => $workArr  
+                     ]);
+                     
+
+            }
+            
+            $orderPlatformList = config('workorder.platform');
+            $this->view->assign(compact('orderPlatformList','workOrderNum','totalOrderMoney','replacementNum','refundMoneyNum','refundMoney'));
+            
+        }else{
+            //默认显示            
+            //根据筛选时间求出客服部门下面所有有数据人员
+            $start = date('Y-m-d', strtotime('-30 day'));
+            $end   = date('Y-m-d');
+            $map['complete_time'] = ['between', [date('Y-m-d 00:00:00', strtotime('-30 day')), date('Y-m-d H:i:s', time())]];
+            $where['work_type'] = 1;
+            $where['work_platform'] = 1;
+            $where['work_status'] = 6;
+            $workList = $this->model->where($where)->where($map)->field('count(*) as counter,sum(base_grand_total) as base_grand_total,
+            sum(is_refund) as refund_num,create_user_id,create_user_name')->group('create_user_id')->select();
+            $where['replacement_order'] = ['neq',''];
+            $replacementOrder = $this->model->where($where)->where($map)->field('count(replacement_order) as counter,create_user_id')->group('create_user_id')->select();
+            $workList = collection($workList)->toArray();
+            $replacementOrder = collection($replacementOrder)->toArray();
+            if(!empty($replacementOrder)){
+                $replacementArr = [];
+                foreach($replacementOrder as $rk => $rv){
+                    $replacementArr[$rv['create_user_id']] = $rv['counter'];
+                }
+            }
+            //客服分组
+            $kefumanage = config('workorder.kefumanage');
+            if(!empty($workList)){
+                $workOrderNum = $totalOrderMoney = $replacementNum = $refundMoneyNum = $refundMoney = 0;
+                foreach($workList as $k => $v){
+                    //客服分组
+                    if(in_array($v['create_user_id'],$kefumanage[95])){
+                        $workList[$k]['group'] = 'A组';
+                    }elseif(in_array($v['create_user_id'],$kefumanage[117])){
+                        $workList[$k]['group'] = 'B组';
+                    }else{
+                        $workList[$k]['group'] = '未知';
+                    }
+                    if(is_array($replacementArr)){
+                        //客服的补发订单数
+                        if(array_key_exists($v['create_user_id'],$replacementArr)){
+                            $workList[$k]['replacement_num'] = $replacementArr[$v['create_user_id']];
+                            //累计补发单数
+                            $replacementNum += $replacementArr[$v['create_user_id']];
+                        }else{
+                            $workList[$k]['replacement_num'] = 0;
+                        }                       
+                    }else{
+                        $workList[$k]['replacement_num'] = 0;
+                    }
+                    
+                    //累计退款金额
+                    $workList[$k]['total_refund_money'] = $this->calculate_refund_money($v['create_user_id'],$map);
+                    if(0<$workList[$k]['total_refund_money']){
+                        $refundMoney += $workList[$k]['total_refund_money'];
+                    }
+                    //累计工单完成量
+                    $workOrderNum += $v['counter'];
+                    //累计订单总金额
+                    $totalOrderMoney += $v['base_grand_total'];
+                    //累计退款单数
+                    $refundMoneyNum += $v['refund_num'];
+
+
+                }
+            }
+            $orderPlatformList = config('workorder.platform');
+            $this->view->assign('type',1);
+            $this->view->assign(compact('orderPlatformList','workList','start','end','workOrderNum','totalOrderMoney','replacementNum','refundMoneyNum','refundMoney'));
+        }
+        return $this->view->fetch();
+    }
+    /**
+     * 计算某个用户的退款金额
+     *
+     * @Description
+     * @author lsw
+     * @since 2020/05/19 10:06:11 
+     * @return void
+     */
+    public function calculate_refund_money($create_user_id,$map)
+    {
+        $where['create_user_id'] = $create_user_id;
+        $where['refund_money']   = ['GT',0];
+        $where['work_type'] = 1;
+        $where['work_status'] = 6;
+        $info = $this->model->where($where)->where($map)->field('base_to_order_rate,refund_money')->select();
+        if(!empty($info)){
+            $refund_money = 0;
+            foreach($info as $v){
+                if(0<$v['base_to_order_rate']){
+                    $refund_money += round($v['refund_money']/$v['base_to_order_rate'],2);
+                }else{
+                    $refund_money += $v['refund_money'];
+                }
+            }
+        }
+        return $info ? $refund_money : 0;
+    }
+    /**
+     * 获取客服人员信息
+     *
+     * @Description
+     * @author lsw
+     * @since 2020/05/19 15:59:10 
+     * @return void
+     */
+    private function customers()
+    {
+        $kefumanage = config('workorder.kefumanage');
+        $arr = [];
+        foreach($kefumanage as $v){
+            foreach($v as $val){
+                $arr[] = $val;
+            }
+        }
+        $result  = Admin::where('id','in',$arr)->column('id,nickname');
+        $result[1]  = 'Admin';
+        $result[75] = '王伟';
+        return $result;
+    }
+    /**
+     * 获取工单的信息
+     *
+     * @Description
+     * @author lsw
+     * @since 2020/05/15 16:42:47 
+     * @return void
+     */
+    public function works_info($where,$map)
+    {
         $where['work_type'] = 1;
         $where['work_status'] = 6;
         $workList = $this->model->where($where)->where($map)->field('count(*) as counter,sum(base_grand_total) as base_grand_total,
-        sum(is_refund) as refund_num,create_user_id,create_user_name')->group('create_user_id')->select();
+        sum(is_refund) as refund_num,create_user_id,create_user_name')->group('create_user_id')->select();         
         $where['replacement_order'] = ['neq',''];
         $replacementOrder = $this->model->where($where)->where($map)->field('count(replacement_order) as counter,create_user_id')->group('create_user_id')->select();
         $workList = collection($workList)->toArray();
         $replacementOrder = collection($replacementOrder)->toArray();
-
+        if(!empty($replacementOrder)){
+            $replacementArr = [];
+            foreach($replacementOrder as $rk => $rv){
+                $replacementArr[$rv['create_user_id']] = $rv['counter'];
+            }
+        }
         //客服分组
         $kefumanage = config('workorder.kefumanage');
         if(!empty($workList)){
+            $workOrderNum = $totalOrderMoney = $replacementNum = $refundMoneyNum = $refundMoney = 0;
             foreach($workList as $k => $v){
+                //客服分组
                 if(in_array($v['create_user_id'],$kefumanage[95])){
                     $workList[$k]['group'] = 'A组';
                 }elseif(in_array($v['create_user_id'],$kefumanage[117])){
@@ -79,41 +317,39 @@ class CustomerService extends Backend
                 }else{
                     $workList[$k]['group'] = '未知';
                 }
-            }
-        }
-        $orderPlatformList = config('workorder.platform');
-        $this->view->assign(compact('orderPlatformList','workList','start','end'));   
-        return $this->view->fetch();
-    }
-    /**
-     * 获取有工单的客服人员信息
-     *
-     * @Description
-     * @author lsw
-     * @since 2020/05/15 16:42:47 
-     * @return void
-     */
-    public function customers($map)
-    {
-        $customer_department_rule = config('workorder.customer_department_rule');
-        $userGroupAccess = AuthGroupAccess::where('group_id','in',$customer_department_rule)->column('uid');
-        //求出这些所有人的姓名和分组
-        if(is_array($userGroupAccess) && count($userGroupAccess)>1){
-            $users = Admin::where('id','in',$userGroupAccess)->field('id,nickname')->select();
-            $usersArr = collection($users)->toArray();
-            //求出存在的工单量的ID
-            $where['work_type'] = 1;
-            $where['work_status'] = 6;
-            $workList = $this->model->where($where)->where($map)->field('count(*) as counter,create_user_id')->select();
-            $workList = collection($workList)->toArray();
+                //如果存在补发单数数组
+                if(is_array($replacementArr)){
+                    //客服的补发订单数
+                    if(array_key_exists($v['create_user_id'],$replacementArr)){
+                        $workList[$k]['replacement_num'] = $replacementArr[$v['create_user_id']];
+                        //累计补发单数
+                        $replacementNum += $replacementArr[$v['create_user_id']];
+                    }else{
+                        $workList[$k]['replacement_num'] = 0;
+                    }
+                }else{ //如果不存在补发单数的数组
+                    $workList[$k]['replacement_num'] = 0;
+                }
 
-            $arr = [];
-            foreach($usersArr as $v){
-                $arr[$v['id']] = $v['nickname'];
+                //累计退款金额
+                    $workList[$k]['total_refund_money'] = $this->calculate_refund_money($v['create_user_id'],$map);
+                    if(0<$workList[$k]['total_refund_money']){
+                        $refundMoney += $workList[$k]['total_refund_money'];
+                    }
+                //累计工单完成量
+                $workOrderNum += $v['counter'];
+                //累计订单总金额
+                $totalOrderMoney += $v['base_grand_total'];
+                //累计退款单数
+                $refundMoneyNum += $v['refund_num'];
             }
-            return $arr;
-            //$this->view->assign();
+            $workList['workOrderNum']    = $workOrderNum;
+            $workList['totalOrderMoney'] = $totalOrderMoney;
+            $workList['replacementNum']  = $replacementNum;
+            $workList['refundMoneyNum']  = $refundMoneyNum;
+            $workList['refundMoney']     = $refundMoney;
         }
+        return $workList ? $workList : false;
     }
     /**
      * 工单问题措施详情
