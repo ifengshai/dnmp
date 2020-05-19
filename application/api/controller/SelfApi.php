@@ -131,7 +131,6 @@ class SelfApi extends Api
             ->field('entity_id,track_number,title')
             ->where('order_id', $order_id)
             ->find();
-
         //查询节点主表记录
         $row = (new OrderNode())->where(['order_number' => $order_number])->find();
         if (!$row) {
@@ -142,8 +141,8 @@ class SelfApi extends Api
             'order_node' => 2,
             'node_type' => 7,
             'update_time' => date('Y-m-d H:i:s'),
-            'shipment_type' => $order_shipment->title,
-            'track_number' => $order_shipment->track_number,
+            'shipment_type' => $order_shipment['title'],
+            'track_number' => $order_shipment['track_number'],
         ]);
 
         //插入节点子表
@@ -155,14 +154,14 @@ class SelfApi extends Api
             'create_time' => date('Y-m-d H:i:s'),
             'order_node' => 2,
             'node_type' => 7,
-            'shipment_type' => $order_shipment->title,
-            'track_number' => $order_shipment->track_number
+            'shipment_type' => $order_shipment['title'],
+            'track_number' => $order_shipment['track_number'],
         ]);
 
         //注册17track
-        $title = strtolower(str_replace(' ', '-', $order_shipment->title));
+        $title = strtolower(str_replace(' ', '-', $order_shipment['title']));
         $carrier = $this->getCarrier($title);
-        $shipment_reg['number'] =  $order_shipment->track_number;
+        $shipment_reg['number'] =  $order_shipment['track_number'];
         $shipment_reg['carrier'] =  $carrier['carrierId'];
         $track = $this->regitster17Track($shipment_reg);
         if ($track->code !== 0) {
