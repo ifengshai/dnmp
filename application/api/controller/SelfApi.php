@@ -164,6 +164,7 @@ class SelfApi extends Api
         $shipment_reg['number'] =  $order_shipment['track_number'];
         $shipment_reg['carrier'] =  $carrier['carrierId'];
         $track = $this->regitster17Track($shipment_reg);
+        dump($track);
         if ($track['code'] !== 0) {
             $this->error('物流接口注册失败！！', [], $track['code']);
         }
@@ -172,8 +173,9 @@ class SelfApi extends Api
         $params['ids'] = $order_id;
         $params['site'] = $site;
         $res = $this->setLogisticsStatus($params);
+        dump($res);
         if ($res->code !== 200) {
-            $this->error($res->msg, [], $res->code);
+            $this->error($res->msg, $res, $res->code);
         }
         $this->success('提交成功', [], 200);
     }
