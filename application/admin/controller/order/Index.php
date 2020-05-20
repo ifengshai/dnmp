@@ -134,7 +134,7 @@ class Index extends Backend
                 } else {
                     $v['label'] = 0;
                 }
-
+                $smap = [];
                 $smap['parent_id'] = $v['entity_id'];
                 $smap['address_type'] = 'shipping';
                 $country_id = Db::connect($db)
