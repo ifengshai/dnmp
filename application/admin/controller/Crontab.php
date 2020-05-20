@@ -18,35 +18,7 @@ use fast\Trackingmore;
 class Crontab extends Backend
 {
 
-    protected $noNeedLogin = [
-        'get_sales_order_num',
-        'zeelool_order_custom_order_prescription',
-        'zeelool_order_item_process',
-        'voogueme_order_custom_order_prescription',
-        'voogueme_order_item_process',
-        'nihao_order_custom_order_prescription',
-        'nihao_order_item_process',
-        'set_purchase_order_logistics',
-        'product_grade_list_crontab',
-        'changeItemNewToOld',
-        'get_sku_stock',
-        'get_sku_price',
-        'get_sku_allstock',
-        'get_sales_order_data',
-        'update_ashboard_data_one',
-        'update_ashboard_data_two',
-        'purchase_data',
-        'stock_data',
-        'warehouse_data',
-        'select_product_data',
-        'get_sales_order_update',
-        'get_sales_order_update_two',
-        'warehouse_data_everyday',
-        'calculate_order_item_num',
-        'get_stock_data',
-        'set_stock_change'
-
-    ];
+    protected $noNeedLogin = ['*'];
 
     public function _initialize()
     {
