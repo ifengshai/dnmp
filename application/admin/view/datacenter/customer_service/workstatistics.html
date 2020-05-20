@@ -180,11 +180,12 @@ table.altrowstable tr:nth-child(even){
              <tr>
                  <th style="text-align: center; vertical-align: middle;">姓名</th>
                  <th style="text-align: center; vertical-align: middle;">分组</th>
-                 <th style="text-align: center; vertical-align: middle;">日期</th>
+                 <th style="text-align: center; vertical-align: middle;">日期</th>               
                  <th style="text-align: center; vertical-align: middle;">工单完成量</th>
                  <th style="text-align: center; vertical-align: middle;">订单总金额($)</th>
                  <th style="text-align: center; vertical-align: middle;">补发单数</th>
                  <th style="text-align: center; vertical-align: middle;">补发比(%)</th>
+                 <th style="text-align: center; vertical-align: middle;">优惠券发放量</th>
                  <th style="text-align: center; vertical-align: middle;">退款单数</th>
                  <th style="text-align: center; vertical-align: middle;">退款订单比(%)</th>
                  <th style="text-align: center; vertical-align: middle;">累计退款金额（$）</th>
@@ -201,8 +202,9 @@ table.altrowstable tr:nth-child(even){
                       {/if}  
                       <td id='today_order_success'       style="text-align: center; vertical-align: middle;">{$vo.counter}</td>
                       <td id='today_unit_price'          style="text-align: center; vertical-align: middle;">{:round($vo.base_grand_total,2)}</td>
-                      <td id='today_shoppingcart_total'  style="text-align: center; vertical-align: middle;">{$vo.replacement_num}</td>
+                      <td id='today_shoppingcart_total'  style="text-align: center; vertical-align: middle;">{$vo.replacement_num}</td>                     
                       <td id='today_shoppingcart_conversion' style="text-align: center; vertical-align: middle;">{:round($vo.replacement_num/$vo.counter*100,2)}</td>
+                      <td id='today_shoppingcart_conversion' style="text-align: center; vertical-align: middle;">{$vo.coupon}</td>
                       <td id='today_shoppingcart_new'        style="text-align: center; vertical-align: middle;">{$vo.refund_num}</td>
                       <td id='today_shoppingcart_newconversion' style="text-align: center; vertical-align: middle;">{:round($vo.refund_num/$vo.counter*100,2)}</td>
                       <td id='today_register_customer'     style="text-align: center; vertical-align: middle;">{$vo.total_refund_money}</td>
@@ -227,6 +229,7 @@ table.altrowstable tr:nth-child(even){
                       {else/}
                       <td id='today_shoppingcart_conversion' style="text-align: center; vertical-align: middle;">0</td>
                       {/if}
+                      <td id='today_shoppingcart_new'        style="text-align: center; vertical-align: middle;"><?php echo round($workArr[$k]['one']['coupon'],2);?></td>
                       <td id='today_shoppingcart_new'        style="text-align: center; vertical-align: middle;"><?php echo round($workArr[$k]['one']['refund_num'],2);?></td>
                       {if $workArr[$k]['one']['counter'] gt 0}    
                       <td id='today_shoppingcart_newconversion' style="text-align: center; vertical-align: middle;"><?php echo @round($workArr[$k]['one']['refund_num']/$workArr[$k]['one']['counter']*100,2);?></td>
@@ -250,6 +253,7 @@ table.altrowstable tr:nth-child(even){
                     {else/}
                     <td id='today_shoppingcart_conversion' style="text-align: center; vertical-align: middle;">0</td>
                     {/if}
+                    <td id='today_shoppingcart_new'        style="text-align: center; vertical-align: middle;"><?php echo round($workArr[$k]['two']['coupon'],2);?></td>
                     <td id='today_shoppingcart_new'        style="text-align: center; vertical-align: middle;"><?php echo round($workArr[$k]['two']['refund_num'],2);?></td>
                     {if $workArr[$k]['two']['counter'] gt 0}    
                     <td id='today_shoppingcart_newconversion' style="text-align: center; vertical-align: middle;"><?php echo @round($workArr[$k]['two']['refund_num']/$workArr[$k]['two']['counter']*100,2);?></td>

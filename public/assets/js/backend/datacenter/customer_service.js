@@ -4,35 +4,87 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form','echartsobj'
         index: function () {
             // 指定图表的配置项和数据
             Controller.api.formatter.daterangepicker($("form[role=form1]"));
-            Form.api.bindevent($("form[role=form]"));            
-			// $('#c-order_platform').on('change',function(){
-			// 	var order_platform = $('#c-order_platform').val();
-            //     Backend.api.ajax({
-            //         url:'datacenter/operationanalysis/operationkanban/dashboard/async_data',
-            //         data:{order_platform:order_platform}
-            //     }, function(data, ret){
-            //         return false;
-            //     }, function(data, ret){
-            //         //失败的回调                      
-            //         //console.log(ret);
-            //         Layer.alert(ret.msg);
-            //         return false;
-            //     });
-            // });
-			// $('#submit').on('click',function(){
-            //     var create_time = $('#created_at').val();
-            //     Backend.api.ajax({
-            //         url:'datacenter/operationanalysis/operationkanban/dashboard/async_bottom_data',
-            //         data:{create_time:create_time}
-            //     }, function(data, ret){
-            //         console.log(ret);                                                                               
-            //         //console.log(ret.data);
-            //         return false;
-            //     }, function(data, ret){
-            //         Layer.alert(ret.msg);
-            //         return false;
-            //     });
-			// });            
+            Form.api.bindevent($("form[role=form]"));
+            //显示中间个饼图
+            var chartOptions1 = {
+                targetId: 'echart1',
+                downLoadTitle: '图表',
+                type: 'pie',
+            };
+            var chartOptions3 = {
+                targetId: 'echart3',
+                downLoadTitle: '图表',
+                type: 'pie',               
+            };
+            var time_one = $('#order_platform_one').val();
+            var time_two = $('#order_platform_two').val();
+            var platform = 1;
+            var options1 = {
+                type: 'post',
+                url: 'datacenter/customer_service/detail',
+                data: {
+                    'time': time_one,
+                    'platform': platform,
+                    'key':'echart1' 
+                }
+            }             
+            var options3 = {
+                type: 'post',
+                url: 'datacenter/customer_service/detail',
+                data: {
+                    'time': time_two,
+                    'platform': platform,
+                    'key':'echart3' 
+                }
+            }
+            EchartObj.api.ajax(options1, chartOptions1);
+            EchartObj.api.ajax(options3, chartOptions3);
+            $(document).on('click', '.echart1-btn', function () {
+                var create_time = $('#create_time_one').val();
+                if (!create_time) {
+                    Toastr.error('请先选择时间范围');
+                    return false;
+                }
+                var chartOptions3 = {
+                    targetId: 'echart1',
+                    downLoadTitle: '图表',
+                    type: 'pie',               
+                };
+                var platform = $('#order_platform_one').val(); ;                 
+                var options3 = {
+                    type: 'post',
+                    url: 'datacenter/customer_service/detail',
+                    data: {
+                        'time': create_time,
+                        'platform': platform,
+                        'key':'echart1' 
+                    }
+                }                
+                EchartObj.api.ajax(options3, chartOptions3);
+            });
+            $(document).on('click', '.echart3-btn', function () {
+                var create_time = $('#create_time_two').val();
+                if (!create_time) {
+                    Toastr.error('请先选择时间范围');
+                    return false;
+                }
+                var chartOptions3 = {
+                    targetId: 'echart3',
+                    downLoadTitle: '图表',
+                    type: 'pie',               
+                };
+                var platform = $('#order_platform_two').val(); ;                 
+                var options3 = {
+                    type: 'post',
+                    url: 'datacenter/customer_service/detail',
+                    data: {
+                        'time': create_time,
+                        'platform': platform,
+                        'key':'echart3' 
+                    }
+                }                
+                EchartObj.api.ajax(options3, chartOptions3);
+            });                        
         },
         api: {
             formatter: {
