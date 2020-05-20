@@ -221,7 +221,7 @@ if (!function_exists('searchForId')) {
     function searchForId($id, $array)
     {
         foreach ($array as $key => $val) {
-            foreach($val as $v) {
+            foreach ($val as $v) {
                 if ($v == $id) {
                     return $key;
                 }
@@ -245,5 +245,28 @@ if (!function_exists('hasProcessPermission')) {
     {
         $recept = \app\admin\model\saleaftermanage\WorkOrderRecept::where(['recept_group_id' => $recept_group_id, 'work_id' => $work_id, 'recept_person_id' => $admin_id])->find();
         return $recept ? true : false;
+    }
+}
+
+if (!function_exists('arrayConversion')) {
+    /**
+     * 一维数组转二维
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/05/20 10:16:26 
+     * @param array $array 一维数组
+     * @return void
+     */
+    function arrayConversion($array = [])
+    {
+        $list = [];
+        $i = 0;
+        foreach($array as $k => $v) {
+            $list[$i]['value'] = $k;
+            $list[$i]['name'] = $v;
+            $i++;
+        }
+        return $list;
     }
 }
