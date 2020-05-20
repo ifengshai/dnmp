@@ -317,6 +317,19 @@ class Zendesk extends Model
                         ->where(['admin_id' => $preTicket->assign_id, 'type' => $ticket->getType(),'target_count' => ['>',0]])
                         ->find();
                 }
+
+                if(!$assign_id){
+                    //最后一条回复的zendesk用户id
+                    $commentAuthorId = ZendeskComments::where(['ticket_id' => $ticket->id,'is_admin' => 1])->order('id desc')->value('author_id');
+                    $task = ZendeskTasks::whereTime('create_time', 'today')
+                        ->where([
+                            'assignee_id' => $commentAuthorId,
+                            'type' => $ticket->getType(),
+                            'target_count' => ['>',0]
+                        ])
+                        ->find();
+                }
+
                 if(!$task){
                     //则分配给最少单的用户
                     $task = ZendeskTasks::whereTime('create_time', 'today')
@@ -325,6 +338,9 @@ class Zendesk extends Model
                         ->limit(1)
                         ->find();
                 }
+
+
+
                 if ($task) {
                     //判断该用户是否已经分配满了，满的话则不分配
                     if ($task->target_count > $task->complete_count) {
