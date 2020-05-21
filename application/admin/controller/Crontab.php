@@ -1588,57 +1588,114 @@ order by sfoi.item_id asc limit 1000";
         $zeelool_count = $zeelool_model->table('sales_flat_order')->where($map)->count(1);
         $zeelool_total = $zeelool_model->table('sales_flat_order')->where($map)->sum('base_grand_total');
         //zeelool客单价
-        $zeelool_unit_price = @round(($zeelool_total / $zeelool_count), 2);
+        if($$zeelool_count>0){
+            $zeelool_unit_price = round(($zeelool_total / $zeelool_count), 2);  
+        }else{
+            $zeelool_unit_price = 0;
+        }
+        
         //zeelool购物车数 SELECT count(*) counter from sales_flat_quote where base_grand_total>0
         $zeelool_shoppingcart_total = $zeelool_model->table('sales_flat_quote')->where($date)->where('base_grand_total', 'GT', 0)->count('*');
         //zeelool购物车更新数
         $zeelool_shoppingcart_update_total = $zeelool_model->table('sales_flat_quote')->where($update)->where('base_grand_total', 'GT', 0)->count('*');
         //zeelool购物车转化率
-        $zeelool_shoppingcart_conversion = @round(($zeelool_count / $zeelool_shoppingcart_total) * 100, 2);
+        if($zeelool_shoppingcart_total>0){
+            $zeelool_shoppingcart_conversion = round(($zeelool_count / $zeelool_shoppingcart_total) * 100, 2);
+        }else{
+            $zeelool_shoppingcart_conversion = 0;
+        }
         //zeelool购物车更新转化率
-        $zeelool_shoppingcart_update_conversion = @round(($zeelool_count / $zeelool_shoppingcart_update_total) * 100, 2);
+        if($zeelool_shoppingcart_update_total>0){
+            $zeelool_shoppingcart_update_conversion = round(($zeelool_count / $zeelool_shoppingcart_update_total) * 100, 2);            
+        }else{
+            $zeelool_shoppingcart_update_conversion = 0;
+        }
+        
         //zeelool注册用户数SELECT count(*) counter from customer_entity
         $zeelool_register_customer = $zeelool_model->table('customer_entity')->where($date)->count('*');
         $voogueme_count = $voogueme_model->table('sales_flat_order')->where($map)->count(1);
         $voogueme_total = $voogueme_model->table('sales_flat_order')->where($map)->sum('base_grand_total');
         //voogueme客单价
-        $voogueme_unit_price = @round(($voogueme_total / $voogueme_count), 2);
+        if($voogueme_count>0){
+            $voogueme_unit_price = round(($voogueme_total / $voogueme_count), 2);
+        }else{
+            $voogueme_unit_price = 0;
+        }
         //voogueme购物车数
         $voogueme_shoppingcart_total = $voogueme_model->table('sales_flat_quote')->where($date)->where('base_grand_total', 'GT', 0)->count('*');
         //voogueme购物车更新数
         $voogueme_shoppingcart_update_total = $voogueme_model->table('sales_flat_quote')->where($update)->where('base_grand_total', 'GT', 0)->count('*');
         //voogueme购物车转化率
-        $voogueme_shoppingcart_conversion = @round(($voogueme_count / $voogueme_shoppingcart_total) * 100, 2);
+        if($voogueme_shoppingcart_total>0){
+            $voogueme_shoppingcart_conversion = round(($voogueme_count / $voogueme_shoppingcart_total) * 100, 2);
+        }else{
+            $voogueme_shoppingcart_conversion = 0;
+        }
         //voogueme购物车更新转化率
-        $voogueme_shoppingcart_update_conversion = @round(($voogueme_count / $voogueme_shoppingcart_update_total) * 100, 2);
+        if($voogueme_shoppingcart_update_total>0){
+            $voogueme_shoppingcart_update_conversion = round(($voogueme_count / $voogueme_shoppingcart_update_total) * 100, 2);
+        }else{
+            $voogueme_shoppingcart_update_conversion = 0;
+        }
+        
         //voogueme注册用户数
         $voogueme_register_customer = $voogueme_model->table('customer_entity')->where($date)->count('*');
         $nihao_count = $nihao_model->table('sales_flat_order')->where($map)->count(1);
         $nihao_total = $nihao_model->table('sales_flat_order')->where($map)->sum('base_grand_total');
         //nihao客单价
-        $nihao_unit_price = @round(($nihao_total / $nihao_count), 2);
+        if($nihao_count>0){
+            $nihao_unit_price = round(($nihao_total / $nihao_count), 2);
+        }else{
+            $nihao_unit_price = 0;
+        }
+        
         //nihao购物车数
         $nihao_shoppingcart_total = $nihao_model->table('sales_flat_quote')->where($date)->where('base_grand_total', 'GT', 0)->count('*');
         //nihao站购物车更新数
         $nihao_shoppingcart_update_total = $nihao_model->table('sales_flat_quote')->where($update)->where('base_grand_total', 'GT', 0)->count('*');
         //nihao购物车转化率
-        $nihao_shoppingcart_conversion = @round(($nihao_count / $nihao_shoppingcart_total) * 100, 2);
+        if($nihao_shoppingcart_total>0){
+            $nihao_shoppingcart_conversion = round(($nihao_count / $nihao_shoppingcart_total) * 100, 2);
+        }else{
+            $nihao_shoppingcart_conversion = 0;
+        }
+        
         //nihao站购物车更新转化率
-        $nihao_shoppingcart_update_conversion = @round(($nihao_count / $nihao_shoppingcart_update_total) * 100, 2);
+        if($nihao_shoppingcart_update_total>0){
+            $nihao_shoppingcart_update_conversion = round(($nihao_count / $nihao_shoppingcart_update_total) * 100, 2);
+        }else{
+            $nihao_shoppingcart_update_conversion = 0;
+        }
+        
         //nihao注册用户数
         $nihao_register_customer = $nihao_model->table('customer_entity')->where($date)->count('*');        $voogueme_count = $voogueme_model->table('sales_flat_order')->where($map)->count(1);
         $meeloog_count = $meeloog_model->table('sales_flat_order')->where($map)->count(1);
         $meeloog_total = $meeloog_model->table('sales_flat_order')->where($map)->sum('base_grand_total');
         //meeloog客单价
-        $meeloog_unit_price = @round(($meeloog_total / $meeloog_count), 2);
+        if($meeloog_count>0){
+            $meeloog_unit_price = round(($meeloog_total / $meeloog_count), 2);
+        }else{
+            $meeloog_unit_price = 0;
+        }
+        
         //meeloog购物车数
         $meeloog_shoppingcart_total = $meeloog_model->table('sales_flat_quote')->where($date)->where('base_grand_total', 'GT', 0)->count('*');
         //meeloog购物车更新数
         $meeloog_shoppingcart_update_total = $meeloog_model->table('sales_flat_quote')->where($update)->where('base_grand_total', 'GT', 0)->count('*');
         //meeloog购物车转化率
-        $meeloog_shoppingcart_conversion = @round(($meeloog_count / $meeloog_shoppingcart_total) * 100, 2);
+        if($meeloog_shoppingcart_total>0){
+            $meeloog_shoppingcart_conversion = round(($meeloog_count / $meeloog_shoppingcart_total) * 100, 2);
+        }else{
+            $meeloog_shoppingcart_conversion = 0;
+        }
+
         //meeloog购物车更新转化率
-        $meeloog_shoppingcart_update_conversion = @round(($meeloog_count / $meeloog_shoppingcart_update_total) * 100, 2);
+        if($meeloog_shoppingcart_update_total>0){
+            $meeloog_shoppingcart_update_conversion = round(($meeloog_count / $meeloog_shoppingcart_update_total) * 100, 2);
+        }else{
+            $meeloog_shoppingcart_update_conversion = 0;
+        }
+        
         //meeloog注册用户数
         $meeloog_register_customer = $meeloog_model->table('customer_entity')->where($date)->count('*');
 
