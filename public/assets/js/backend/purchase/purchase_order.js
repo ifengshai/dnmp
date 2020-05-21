@@ -355,6 +355,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                 $(this).parent().parent().remove();
             })
 
+            $(document).on('click', '.btn-arrival-del', function () {
+                $(this).parent().remove();
+            })
+
 
             //异步获取供应商的数据
             $(document).on('change', '.supplier.selectpicker', function () {
