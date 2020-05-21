@@ -136,9 +136,9 @@ class WorkOrderList extends Backend
                 $map['id'] = ['in', $workIds];
                 unset($filter['recept_person']);
             }
-            
+
             $this->request->get(['filter' => json_encode($filter)]);
-            
+
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
                 ->where($where)
@@ -240,6 +240,15 @@ class WorkOrderList extends Backend
                         $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.add' : $name) : $this->modelValidate;
                         $this->model->validateFailException(true)->validate($validate);
                     }
+
+                    if (!$ids) {
+                        //限制不能存在两个相同的未完成的工单
+                        $count = $this->model->where(['platform_order' => $params['platform_order'], 'work_status' => ['in', [1, 2, 3, 5]]])->count();
+                        if ($count > 0) {
+                            throw new Exception("此订单存在未处理完成的工单");
+                        }
+                    }
+
                     if (!$params['platform_order']) {
                         throw new Exception("订单号不能为空");
                     }
@@ -544,7 +553,7 @@ class WorkOrderList extends Backend
                             Ding::cc_ding($usersId, '', '工单ID:' . $work_id . '😎😎😎😎有新工单需要你处理😎😎😎😎', '有新工单需要你处理');
                         }
                     }
-                    
+
                     //经手人
                     if ($this->model->work_type == 2 && $this->model->work_status == 3 && !$params['id']) {
 

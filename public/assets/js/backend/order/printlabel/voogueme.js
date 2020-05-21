@@ -114,9 +114,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
             });
 
             // 监听下拉列表改变的事件
-            $(document).on('change', 'select[name=category_id]', function () {
-                $("input[name='category_id']").val($(this).val());
+            $(document).on('change', 'select[name=pid]', function () {
+                $("input[name='p_id']").val($(this).val());
             });
+
 
             //批量打印标签    
             $('.btn-batch-printed').click(function () {

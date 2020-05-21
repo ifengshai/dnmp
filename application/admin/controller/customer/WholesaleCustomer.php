@@ -45,7 +45,8 @@ class WholesaleCustomer extends Backend
             2 => 'Voogueme',
             3 => 'Nihao',
             4 => 'Alibaba',
-            5 => '主动开发'
+            5 => '主动开发',
+            6 =>'Wesee'
         ];
         $this->assign(compact('intention_level', 'isNo', 'siteType'));
         $this->model = new \app\admin\model\customer\WholesaleCustomer;
@@ -419,8 +420,11 @@ class WholesaleCustomer extends Backend
                 case '主动开发':
                     $params[$k]['site_type']  = 5;
                     break;
+                case 'wesee':
+                    $params[$k]['site_type']  = 6;
+                    break;
                 default:
-                    $this->error('导入失败！！,来源类型为:Zeelool,Voogueme,Nihao,Alibaba,主动开发');
+                    $this->error('导入失败！！,来源类型为:Zeelool,Voogueme,Nihao,Alibaba,主动开发,Wesee');
                     break;
 
             }
@@ -443,7 +447,7 @@ class WholesaleCustomer extends Backend
             //判断是否存在相同数据
             foreach ($old_data as $old_k =>$old_v){
                 if ($params[$k]['site_type'] ==$old_v['site_type'] && $params[$k]['email'] == $old_v['email'] ){
-                    $num=$k+1;
+                    $num=$k+2;
                     $this->error("邮箱:[".$params[$k]['email']."]已存在,请检查,第".$num.'行');
                 }
             }
@@ -564,6 +568,9 @@ class WholesaleCustomer extends Backend
                     break;
                 case 5:
                     $value['site_type'] = '主动开发';
+                    break;
+                case 6:
+                    $value['site_type'] = 'Wesee';
                     break;
                 default:
                     $value['site_type'] = '';
