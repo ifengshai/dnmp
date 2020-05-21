@@ -509,6 +509,7 @@ class Test extends Backend
             ->field('entity_id,order_id,track_number,title,updated_at')
             ->where('created_at', '>=', '2020-03-31 00:00:00')
             ->where('handle', '=', '0')
+            ->limit(5)
             ->select();
 
         foreach ($order_shipment as $k => $v) {
@@ -522,7 +523,7 @@ class Test extends Backend
             $shipment_reg[$k]['order_id'] =  $v['order_id'];
         }
 
-        $order_group = array_chunk($shipment_reg, 40);
+        $order_group = array_chunk($shipment_reg, 2);
 
         $trackingConnector = new TrackingConnector($this->apiKey);
         $order_ids = array();
@@ -530,16 +531,15 @@ class Test extends Backend
             $aa = $trackingConnector->registerMulti($val);
 
             //请求接口更改物流表状态
-            if(count($val)-1 == $key){
-                $order_ids = implode(',',array_column($val, 'order_id'));
-                $params['ids'] = $order_ids;
-                $params['site'] = 1;
-                $res = $this->setLogisticsStatus($params);
-                if ($res->status !== 200) {
-                    echo '更新失败:'.$order_ids . "\n";
-                }
-                $order_ids = array();
+            $order_ids = implode(',',array_column($val, 'order_id'));
+            $params['ids'] = $order_ids;
+            $params['site'] = 1;
+            $res = $this->setLogisticsStatus($params);
+            if ($res->status !== 200) {
+                echo '更新失败:'.$order_ids . "\n";
             }
+            $order_ids = array();
+            
             echo $key . "\n";
             sleep(1);
         }
