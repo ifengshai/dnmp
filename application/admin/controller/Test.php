@@ -525,18 +525,23 @@ class Test extends Backend
         $order_group = array_chunk($shipment_reg, 40);
 
         $trackingConnector = new TrackingConnector($this->apiKey);
+        $order_ids = array();
         foreach ($order_group as $key => $val) {
             $aa = $trackingConnector->registerMulti($val);
 
             //请求接口更改物流表状态
-            $params['ids'] = $val['order_id'];
-            $params['site'] = 1;
-            $res = $this->setLogisticsStatus($params);
-            if ($res->status !== 200) {
-                echo '更新失败'.$val['order_id'] . "\n";
+            if(count($val)-1 == $key){
+                $order_ids = implode(',',array_column($val, 'order_id'));
+                $params['ids'] = $order_ids;
+                $params['site'] = 1;
+                $res = $this->setLogisticsStatus($params);
+                if ($res->status !== 200) {
+                    echo '更新失败:'.$order_ids . "\n";
+                }
+                $order_ids = array();
             }
-            sleep(1);
             echo $key . "\n";
+            sleep(1);
         }
         dump($order_group[$key]);
         echo 'all is ok' . "\n";
