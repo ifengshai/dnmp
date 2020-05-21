@@ -89,7 +89,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                         }
                     },
                     data: Orderdata.nihaoSalesMoneyList
-                }
+                },
                 {
                     name: __('Meeloog站销售额'),
                     type: 'line',
