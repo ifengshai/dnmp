@@ -25,7 +25,6 @@ class ThirdApi extends Api
     public function _initialize()
     {
         parent::_initialize();
-        $this->model = new \app\admin\model\OrderNode();
     }
     /*
      * 17track物流查询webhook访问方法
@@ -36,7 +35,7 @@ class ThirdApi extends Api
         $verify_sign = $track_arr['event'].'/'.json_encode($track_arr['data']).'/'.$this->apiKey;
         $verify_sign = hash("sha256",$verify_sign);
         if($verify_sign == $track_arr['sign']){
-            $order_node = $this->model->field('site,order_id,order_number,shipment_type')->where('track_number',$track_arr['data']['number'])->find()->toArray();
+            $order_node = Db::name('order_node')->field('site,order_id,order_number,shipment_type')->where('track_number',$track_arr['data']['number'])->find();
             $add['site'] = $order_node['site'];
             $add['order_id'] = $order_node['order_id'];
             $add['order_number'] = $order_node['order_number'];

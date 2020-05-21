@@ -40,6 +40,18 @@
         <div class="col-xs-12 col-sm-3">
             {:Form::select('row[is_behalf_of]', $isNo, $row['is_behalf_of'], ['class'=>'form-control site-type','data-live-search' => true,'id'=>'is_behalf_of'])}
         </div>
+
+        <label class="control-label col-xs-12 col-sm-2">{:__('Is_order')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            {:Form::select('row[is_order]', $isNo, $row['is_order'], ['class'=>'form-control site-type','data-live-search' => true,'id'=>'is_order'])}
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Is_logo')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            {:Form::select('row[is_logo]', $isNo, $row['is_logo'], ['class'=>'form-control site-type','data-live-search' => true,'id'=>'is_logo'])}
+        </div>
     </div>
 
     <div class="form-group">

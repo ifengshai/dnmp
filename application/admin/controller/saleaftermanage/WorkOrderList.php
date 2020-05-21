@@ -695,9 +695,7 @@ class WorkOrderList extends Backend
         if (!$row) {
             $this->error(__('No Results were found'));
         }
-        if ($row['create_user_id'] != session('admin.id')) {
-            return $this->error(__('非本人创建不能编辑'));
-        }
+      
         $adminIds = $this->getDataLimitAdminIds();
         if (is_array($adminIds)) {
             if (!in_array($row[$this->dataLimitField], $adminIds)) {
