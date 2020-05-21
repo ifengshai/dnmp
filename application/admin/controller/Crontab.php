@@ -1742,6 +1742,7 @@ order by sfoi.item_id asc limit 1000";
         $data['create_date'] = date("Y-m-d", strtotime("-1 day"));
         $data['createtime'] = date("Y-m-d H:i:s");
         dump($data);
+        echo 111;
         exit;
         Db::name('order_statistics')->insert($data);
         echo 'ok';
