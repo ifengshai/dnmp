@@ -79,6 +79,13 @@ class Sample extends Backend
                 if ($this->dataLimit && $this->dataLimitFieldAutoFill) {
                     $params[$this->dataLimitField] = $this->auth->id;
                 }
+                //判断库位号是否重复
+                $location_repeat = Db::name('purchase_sample_location')
+                    ->where('location',$params['location'])
+                    ->find();
+                if($location_repeat){
+                    $this->error(__('库位号不能重复'));
+                }
                 $params['createtime'] = date('Y-m-d H:i:s',time());
                 $params['create_user'] = session('admin.nickname');
                 $result = false;
@@ -132,6 +139,13 @@ class Sample extends Backend
             $params = $this->request->post("row/a");
             if ($params) {
                 $params = $this->preExcludeFields($params);
+                //判断库位号是否重复
+                $location_repeat = Db::name('purchase_sample_location')
+                    ->where('location',$params['location'])
+                    ->find();
+                if($location_repeat){
+                    $this->error(__('库位号不能重复'));
+                }
                 $result = false;
                 Db::startTrans();
                 try {
