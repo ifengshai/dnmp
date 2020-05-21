@@ -253,7 +253,7 @@ table.altrowstable tr:nth-child(even){
                         {foreach name="infoOne" item="vo" key='k'}
                          <tr>
                             <td style="text-align: center; vertical-align: middle;">{$vo}</td>
-                            <td style="text-align: center; vertical-align: middle;">2</td>
+                            <td style="text-align: center; vertical-align: middle;"><?php echo $workArr[$k]['create_num'];?></td>
                             <td style="text-align: center; vertical-align: middle;"><?php echo $workArr[$k]['counter'];?></td>
                             <td id='zeelool_pc_sales_money'    style="text-align: center; vertical-align: middle;"><?php echo round($workArr[$k]['base_grand_total'],2);?></td>
                             <td id='zeelool_pc_sales_num'      style="text-align: center; vertical-align: middle;"><?php echo round($workArr[$k]['coupon'],2);?></td>
@@ -304,7 +304,7 @@ table.altrowstable tr:nth-child(even){
                             {foreach name="infoTwo" item="vo" key='k'}
                              <tr>
                                 <td style="text-align: center; vertical-align: middle;">{$vo}</td>
-                                <td style="text-align: center; vertical-align: middle;">2</td>
+                                <td style="text-align: center; vertical-align: middle;"><?php echo $workArr[$k]['create_num'];?></td>
                                 <td style="text-align: center; vertical-align: middle;"><?php echo $workArr[$k]['counter'];?></td>
                                 <td id='zeelool_pc_sales_money'    style="text-align: center; vertical-align: middle;"><?php echo round($workArr[$k]['base_grand_total'],2);?></td>
                                 <td id='zeelool_pc_sales_num'      style="text-align: center; vertical-align: middle;"><?php echo round($workArr[$k]['coupon'],2);?></td>
@@ -409,6 +409,68 @@ table.altrowstable tr:nth-child(even){
             <div class="tab-panes fade active in">
                 <div class="widget-body no-padding" style="width: 800px; overflow:scroll;float:left;">
                     <p><span>工单处理概况</span></p>
+                    <form id="form1" class="form-commonsearch form-horizontal" action="#" role="form1"
+                    method="post">                    
+                        <div class="col-xs-12 col-md-9">
+                            <div class="form-group" style="margin-top: 20px;">
+                                <div class="col-xs-4">
+                                    <input type="hidden" class="form-control operate" name="create_time_two-operate" data-name="create_time_two" value="RANGE" readonly="">
+                                    <input type="text" autocomplete="off" class="form-control datetimerange" name="create_time_two"  placeholder="创建时间" id="create_time_two" value="" data-index="14">
+                                </div>
+                                <div class="col-sm-4" style="margin-bottom: 20px;">
+                                    <input type="button" class="btn btn-success echart3-btn" value="提交">
+                                    <input type="reset" class="btn btn-default reset" value="重置">
+                                </div>                                                        
+                            </div>                                                                 
+                        </div>
+                    </form> 
+                    <table id="order-info-list" class="altrowstable"
+                           data-operate-edit="{:$auth->check('saleaftermanage/order_return/edit')}"
+                           data-operate-del="{:$auth->check('saleaftermanage/order_return/del')}"
+                           width="100%">
+                        <thead>                    
+                        <tr>
+                            <th style="text-align: center; vertical-align: middle;">措施</th>
+                            {if isset($examinArr)}
+                            {foreach name="examinArr" item="vo" key="k"}
+                            <th style="text-align: center; vertical-align: middle;">{$vo}</th>
+                            {/foreach}
+                            {/if}
+                        </tr>
+                        </thead>
+                             <tr>
+                                 <td style="text-align: center; vertical-align: middle;">未超时未审批</td>
+                                 {if isset($examinArr)}
+                                 {foreach name="examinArr" item="vo" key="k"}
+                                 <td style="text-align: center; vertical-align: middle;"><?php echo $workorder_handle_left_data[$k]['no_time_out_check'];?></th>
+                                 {/foreach}
+                                 {/if}
+                             </tr>
+                             <tr>
+                                <td style="text-align: center; vertical-align: middle;">未超时已审批</td>
+                                {if isset($examinArr)}
+                                {foreach name="examinArr" item="vo" key="k"}
+                                <td style="text-align: center; vertical-align: middle;"><?php echo $workorder_handle_left_data[$k]['no_time_out_checked'];?></th>
+                                {/foreach}
+                                {/if}
+                            </tr>
+                            <tr>
+                                <td style="text-align: center; vertical-align: middle;">超时未审批</td>  
+                                {if isset($examinArr)}
+                                {foreach name="examinArr" item="vo" key="k"}
+                                <td style="text-align: center; vertical-align: middle;"><?php echo $workorder_handle_left_data[$k]['time_out_check'];?></th>
+                                {/foreach}
+                                {/if}
+                            </tr>
+                            <tr>
+                                <td style="text-align: center; vertical-align: middle;">超时已审批</td>
+                                {if isset($examinArr)}
+                                {foreach name="examinArr" item="vo" key="k"}
+                                <td style="text-align: center; vertical-align: middle;"><?php echo $workorder_handle_left_data[$k]['time_out_checked'];?></th>
+                                {/foreach}
+                                {/if}
+                            </tr>                                                                                                                                                                                                                                        							 
+                    </table>
                     <table id="order-info-list" class="altrowstable"
                            data-operate-edit="{:$auth->check('saleaftermanage/order_return/edit')}"
                            data-operate-del="{:$auth->check('saleaftermanage/order_return/del')}"
@@ -418,26 +480,22 @@ table.altrowstable tr:nth-child(even){
                             <th style="text-align: center; vertical-align: middle;">措施</th>
                             <th style="text-align: center; vertical-align: middle;">未超时未审批</th>
                             <th style="text-align: center; vertical-align: middle;">未超时已审批</th>
-                            <th style="text-align: center; vertical-align: middle;">超时未审批</th>
-                            <th style="text-align: center; vertical-align: middle;"></th>
-                            <th style="text-align: center; vertical-align: middle;">未超时未处理</th>
-                            <th style="text-align: center; vertical-align: middle;">未超时已处理</th>
-                            <th style="text-align: center; vertical-align: middle;">超时未处理</th>
-                            <th style="text-align: center; vertical-align: middle;">超时已处理</th>
+                            <th style="text-align: center; vertical-align: middle;">未超时未审批</th>
+                            <th style="text-align: center; vertical-align: middle;">超时已审批</th>
                         </tr>
                         </thead>
+                            {if isset($step)}
+                            {foreach name="step" item="vo" key="k"}
                              <tr>
-                                 <td style="text-align: center; vertical-align: middle;">1</td>
+                                 <td style="text-align: center; vertical-align: middle;">{$vo}</td>
                                  <td style="text-align: center; vertical-align: middle;">2</td>
                                  <td style="text-align: center; vertical-align: middle;">3</td>
-                                 <td id='zeelool_pc_sales_money' style="text-align: center; vertical-align: middle;">4</td>
-                                 <td id='zeelool_pc_sales_num'   style="text-align: center; vertical-align: middle;">5</td>
-                                 <td id='zeelool_pc_unit_price'  style="text-align: center; vertical-align: middle;">6</td>
-                                 <td id='zeelool_pc_unit_price'  style="text-align: center; vertical-align: middle;">7</td>
-                                 <td id='zeelool_pc_unit_price'  style="text-align: center; vertical-align: middle;">8</td>
-                                 <td id='zeelool_pc_unit_price'  style="text-align: center; vertical-align: middle;">9</td>
-                             </tr>                                                                                                                                                   							 
-                    </table>
+                                 <td style="text-align: center; vertical-align: middle;">4</td>
+                                 <td style="text-align: center; vertical-align: middle;">5</td>
+                             </tr>
+                             {/foreach}
+                             {/if}                                                                                                                                                                                                                                        							 
+                    </table>                                       
                 </div>
                 <div class="widget-body no-padding" style="width: 800px; overflow:scroll;float:right">
                     <p><span>跟单概况</span></p>                    

@@ -27,7 +27,8 @@ class CustomerService extends Backend
      */
     public function index()
     {
-        $map['complete_time'] = ['between', [date("Y-m-d H:i:s",mktime(0, 0 , 0,date("m"),1,date("Y"))), date("Y-m-d H:i:s",mktime(23,59,59,date("m"),date("t"),date("Y")))]];
+        //工单统计信息
+        $map['complete_time'] = $map_create['create_time'] = ['between', [date("Y-m-d H:i:s",mktime(0, 0 , 0,date("m"),1,date("Y"))), date("Y-m-d H:i:s",mktime(23,59,59,date("m"),date("t"),date("Y")))]];
         $infoOne = $this->customers_by_group(1);
         $infoTwo = $this->customers_by_group(2);
         $workList = $this->works_info([],$map);
@@ -37,7 +38,7 @@ class CustomerService extends Backend
             foreach ($workList as $ok =>$ov) {
                 if (array_key_exists($ov['create_user_id'], $infoOne)) {
                     $workArr[$ov['create_user_id']]['create_user_name'] = $infoOne[$ov['create_user_id']];
-                    //$workArr[$ov['create_user_id']]['group']            = $ov['group'];
+                    $workArr[$ov['create_user_id']]['create_num']       = $this->model->where($map_create)->where('create_user_id',$ov['create_user_id'])->count('*');
                     $workArr[$ov['create_user_id']]['counter']   = $ov['counter'];
                     $workArr[$ov['create_user_id']]['base_grand_total'] = $ov['base_grand_total'];
                     $workArr[$ov['create_user_id']]['coupon']    = $ov['coupon'];
@@ -47,7 +48,7 @@ class CustomerService extends Backend
                 }
                 if (array_key_exists($ov['create_user_id'], $infoTwo)) {
                     $workArr[$ov['create_user_id']]['create_user_name'] = $infoTwo[$ov['create_user_id']];
-                    //$workArr[$ov['create_user_id']]['group']            = $ov['group'];
+                    $workArr[$ov['create_user_id']]['create_num']       = $this->model->where($map_create)->where('create_user_id',$ov['create_user_id'])->count('*');
                     $workArr[$ov['create_user_id']]['counter']   = $ov['counter'];
                     $workArr[$ov['create_user_id']]['base_grand_total'] = $ov['base_grand_total'];
                     $workArr[$ov['create_user_id']]['coupon']    = $ov['coupon'];
@@ -57,9 +58,141 @@ class CustomerService extends Backend
                 }                
             }        
         }
+        //工单处理概况信息start
+        //1.求出三个审批人
+        $kefumanage = config('workorder.kefumanage');
+        $examine = [];
+        foreach($kefumanage as $k => $v){
+            $examine[] = $k;
+        }
+        $examine[] = config('workorder.customer_manager');
+        $examinePerson = $this->customers();
+        $examineArr = [];
+        foreach($examinePerson as $ek => $ev){
+            if(in_array($ek,$examine)){
+                $examinArr[$ek] = $ev;
+            }
+        }
+        //左边右边的措施
+        $step = config('workorder.step');
+        //工单处理概况信息end
+        $workorder_handle_left_data = $this->workorder_handle_left($map_create,$examinArr);
+        $workorder_handle_right_data = $this->workorder_handle_right($map_create,$step); 
         $orderPlatformList = config('workorder.platform');
-        $this->view->assign(compact('orderPlatformList', 'workList','infoOne','infoTwo','workArr'));
+        $this->view->assign(compact('orderPlatformList', 'workList','infoOne','infoTwo','workArr','examinArr','workorder_handle_left_data','step'));
         return $this->view->fetch();
+    }
+    /**
+     * 工单处理概况左边部分
+     *
+     * @Description
+     * @author lsw
+     * @since 2020/05/21 15:47:25 
+     * @return void
+     */
+    public function workorder_handle_left($map,$examinArr)
+    {
+        $where['is_check'] = 1;
+        $where['work_type'] = 1;
+        $where['work_status'] = ['lt',2];
+        //求出主管的超时时间
+        $time_out = config('workorder.manage_time_out');
+        $workList = $this->model->where($map)->where($where)->field('assign_user_id,submit_time,check_time')->select();
+        $workList = collection($workList)->toArray($workList);
+        if(!empty($workList)){
+            $arr = [];
+            foreach($examinArr as $ek => $ev){
+                $arr[$ek]['no_time_out_checked'] = $arr[$ek]['time_out_checked'] = $arr[$ek]['no_time_out_check'] = $arr[$ek]['time_out_check'] = 0; 
+            }
+            foreach($workList as $k =>$v){
+                if(array_key_exists($v['assign_user_id'],$examinArr)){
+                    //审批时间存在证明已经审批
+                    if($v['check_time']){
+                        //如果两个时间差小于指定超时时间说明未超时
+                        if( $time_out >(strtotime($v['check_time']) - strtotime($v['submit_time']))){
+                            //未超时已审批
+                            $arr[$v['assign_user_id']]['no_time_out_checked']++; 
+                        }else{
+                            //超时已审批
+                            $arr[$v['assign_user_id']]['time_out_checked']++;
+                        }
+                    }else{
+                        //审批时间不存在证明没有审批,判断提交时间和现在的时间比较是否超时
+                        //如果两个时间差小于指定超时时间说明未超时
+                        if( $time_out>(strtotime("now") - strtotime($v['submit_time']))){
+                            //未超时未审批
+                            $arr[$v['assign_user_id']]['no_time_out_check']++;
+                        }else{
+                            //超时未审批
+                            $arr[$v['assign_user_id']]['time_out_check']++;
+                        }
+                    }
+                }
+            }
+        }
+        return $arr ?: false;
+    }
+    /**
+     * 工单处理右边部分
+     *
+     * @Description
+     * @author lsw
+     * @since 2020/05/21 18:24:43 
+     * @return void
+     */
+    public function workorder_handle_right($map,$step)
+    {
+        $where['is_check'] = 1;
+        $where['work_type'] = 1;
+        $where['work_status'] = ['lt',2];
+        //求出主管的超时时间
+        $time_out = config('workorder.step_time_out');
+        $workMeasure = $this->model->where($map)->where($where)->alias('w')->join('work_order_measure m','w.id=m.work_id')->field('w.check_time,m.operation_time,m.measure_choose_id')->select();
+        $workMeasure = collection($workMeasure)->toArray($workMeasure);
+        if(!empty($workMeasure)){
+            $arr = [];
+            foreach($step as $ek => $ev){
+                $arr[$ek]['no_time_out_handled'] = $arr[$ek]['time_out_handled'] = $arr[$ek]['no_time_out_handle'] = $arr[$ek]['time_out_handle'] = 0; 
+            }
+            foreach($workMeasure as $k =>$v){
+                if(array_key_exists($v['measure_choose_id'],$step)){
+                    //处理时间存在证明已经审批
+                if($v['operation_time']){
+                        //如果存在超时时间
+                    if($time_out[$v['measure_choose_id']]){
+                        //如果两个时间差小于指定超时时间说明未超时
+                        if( $time_out[$v['measure_choose_id']] >(strtotime($v['operation_time']) - strtotime($v['check_time']))){
+                            //未超时已处理
+                            $arr[$v['measure_choose_id']]['no_time_out_handled']++; 
+                        }else{
+                            //超时已处理
+                            $arr[$v['measure_choose_id']]['time_out_handled']++;
+                        }
+                    }else{ //如果不存在超时时间
+                            $arr[$v['measure_choose_id']]['no_time_out_handled']++;      
+                    }
+
+                }else{
+                        //审批时间不存在证明没有审批,判断提交时间和现在的时间比较是否超时
+                        //如果两个时间差小于指定超时时间说明未超时
+                        //如果存在超时时间
+                        if($time_out[$v['measure_choose_id']]){
+                            //如果两个时间差小于指定超时时间说明未超时
+                            if( $time_out[$v['measure_choose_id']] >(strtotime("now") - strtotime($v['check_time']))){
+                                //未超时已处理
+                                $arr[$v['measure_choose_id']]['no_time_out_handle']++; 
+                            }else{
+                                //超时已处理
+                                $arr[$v['measure_choose_id']]['time_out_handle']++;
+                            }
+                        }else{ //如果不存在超时时间
+                                $arr[$v['measure_choose_id']]['no_time_out_handle']++;      
+                        }
+                    }
+                }
+            }
+        }
+        return $arr ?: false;
     }
     /**
      * 工作量统计
@@ -304,7 +437,8 @@ class CustomerService extends Backend
     {
         $kefumanage = config('workorder.kefumanage');
         $arr = [];
-        foreach ($kefumanage as $v) {
+        foreach ($kefumanage as $k=> $v) {
+            $arr[] = $k;
             foreach ($v as $val) {
                 $arr[] = $val;
             }
