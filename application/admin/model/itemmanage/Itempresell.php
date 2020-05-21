@@ -8,9 +8,6 @@ use think\Model;
 class Itempresell extends Model
 {
 
-    
-
-    
     protected $connection = 'database.db_stock';
     // 表名
     protected $name = 'item_presell';
