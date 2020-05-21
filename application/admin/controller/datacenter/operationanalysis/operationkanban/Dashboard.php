@@ -289,12 +289,25 @@ class Dashboard extends Backend
         $zeelool_wap_sales_num	 	= $zeelool_model->table('sales_flat_order')->where($wap)->where($status)->where($map)->count('*');
         //zeelool中pc支付成功数
         $zeelool_app_sales_num	 	= $zeelool_model->table('sales_flat_order')->where($app)->where($status)->where($map)->count('*');
-        //zeelool pc端客单价
-        $zeelool_pc_unit_price   	= @round(($zeelool_pc_sales_money/$zeelool_pc_sales_num), 2);
-        //zeelool wap客单价
-        $zeelool_wap_unit_price  	= @round(($zeelool_wap_sales_money/$zeelool_wap_sales_num), 2);
-        //zeelool app端客单价
-        $zeelool_app_unit_price 	= @round(($zeelool_app_sales_money/$zeelool_app_sales_num), 2);
+		
+		if($zeelool_pc_sales_num>0){
+			//zeelool pc端客单价
+			$zeelool_pc_unit_price   	= round(($zeelool_pc_sales_money/$zeelool_pc_sales_num), 2);			
+		}else{
+			$zeelool_pc_unit_price  	= 0;
+		}
+		//zeelool wap客单价
+		if($zeelool_wap_sales_num>0){
+			$zeelool_wap_unit_price  	= round(($zeelool_wap_sales_money/$zeelool_wap_sales_num), 2);
+		}else{
+			$zeelool_wap_unit_price     = 0;
+		}
+		//zeelool app端客单价
+		if($zeelool_app_sales_num>0){
+			$zeelool_app_unit_price 	= round(($zeelool_app_sales_money/$zeelool_app_sales_num), 2);
+		}else{
+			$zeelool_app_unit_price		= 0;
+		}
         //voogueme中pc销售额
         $voogueme_pc_sales_money 	= $voogueme_model->table('sales_flat_order')->where($pc)->where($status)->where($map)->sum('base_grand_total');
         //voogueme中wap销售额
@@ -303,10 +316,19 @@ class Dashboard extends Backend
         $voogueme_pc_sales_num		= $voogueme_model->table('sales_flat_order')->where($pc)->where($status)->where($map)->count('*');
         //voogueme中wap支付成功数
         $voogueme_wap_sales_num	 	= $voogueme_model->table('sales_flat_order')->where($wap)->where($status)->where($map)->count('*');
-        //voogueme pc端客单价
-        $voogueme_pc_unit_price   	= @round(($voogueme_pc_sales_money/$voogueme_pc_sales_num), 2);
-        //voogueme wap客单价
-        $voogueme_wap_unit_price  	= @round(($voogueme_wap_sales_money/$voogueme_wap_sales_num), 2);
+		//voogueme pc端客单价
+		if($voogueme_pc_sales_num>0){
+        	$voogueme_pc_unit_price   	= round(($voogueme_pc_sales_money/$voogueme_pc_sales_num), 2);
+		}else{
+			$voogueme_pc_unit_price   	= 0;
+		}
+		//voogueme wap客单价
+		if($voogueme_wap_sales_num>0){
+			$voogueme_wap_unit_price  	= round(($voogueme_wap_sales_money/$voogueme_wap_sales_num), 2);
+		}else{
+			$voogueme_wap_unit_price  	= 0;
+		}
+
         //nihao中pc销售额
         $nihao_pc_sales_money 		= $nihao_model->table('sales_flat_order')->where($pc)->where($status)->where($map)->sum('base_grand_total');
         //nihao中wap销售额
@@ -315,10 +337,20 @@ class Dashboard extends Backend
         $nihao_pc_sales_num			= $nihao_model->table('sales_flat_order')->where($pc)->where($status)->where($map)->count('*');
         //nihao中wap支付成功数
         $nihao_wap_sales_num	 	= $nihao_model->table('sales_flat_order')->where($wap)->where($status)->where($map)->count('*');
-        //nihao pc端客单价
-        $nihao_pc_unit_price   		= @round(($nihao_pc_sales_money/$nihao_pc_sales_num), 2);
-        //nihao wap客单价
-		$nihao_wap_unit_price  		= @round(($nihao_wap_sales_money/$nihao_wap_sales_num), 2);
+		//nihao pc端客单价
+		if($nihao_pc_sales_num>0){
+			$nihao_pc_unit_price   	= round(($nihao_pc_sales_money/$nihao_pc_sales_num), 2);
+		}else{
+			$nihao_pc_unit_price    = 0;
+		}
+		//nihao wap客单价
+		if($nihao_wap_sales_num>0){
+			$nihao_wap_unit_price   = round(($nihao_wap_sales_money/$nihao_wap_sales_num), 2);
+		}else{
+			$nihao_wap_unit_price   = 0;
+		}
+        
+		
         //meeloog中pc销售额
         $meeloog_pc_sales_money 	= $meeloog_model->table('sales_flat_order')->where($pc)->where($status)->where($map)->sum('base_grand_total');
         //meeloog中wap销售额
@@ -327,10 +359,19 @@ class Dashboard extends Backend
         $meeloog_pc_sales_num		= $meeloog_model->table('sales_flat_order')->where($pc)->where($status)->where($map)->count('*');
         //meeloog中wap支付成功数
         $meeloog_wap_sales_num	 	= $meeloog_model->table('sales_flat_order')->where($wap)->where($status)->where($map)->count('*');
-        //meeloog pc端客单价
-        $meeloog_pc_unit_price   	= @round(($meeloog_pc_sales_money/$meeloog_pc_sales_num), 2);
-        //meeloog wap客单价
-        $meeloog_wap_unit_price  	= @round(($meeloog_wap_sales_money/$meeloog_wap_sales_num), 2);		
+		//meeloog pc端客单价
+		if($meeloog_pc_sales_num>0){
+			$meeloog_pc_unit_price  = round(($meeloog_pc_sales_money/$meeloog_pc_sales_num), 2);
+		}else{
+			$meeloog_pc_unit_price  = 0;
+		}
+		//meeloog wap客单价
+		if($meeloog_wap_sales_num>0){
+			$meeloog_wap_unit_price = round(($meeloog_wap_sales_money/$meeloog_wap_sales_num), 2);
+		}else{
+			$meeloog_wap_unit_price = 0;
+		}
+        		
         $arr = [
             'zeelool_pc_sales_money' 	=> $zeelool_pc_sales_money ?:0,
             'zeelool_wap_sales_money' 	=> $zeelool_wap_sales_money ?:0,
