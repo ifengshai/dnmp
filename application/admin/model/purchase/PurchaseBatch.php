@@ -24,9 +24,9 @@ class PurchaseBatch extends Model
     /**
      * 采购单明细表
      */
-    public function purchaseOrderItem()
+    public function purchaseBatchItem()
     {
-        return $this->hasMany('PurchaseOrderItem', 'purchase_id');
+        return $this->hasMany('PurchaseBatchItem', 'purchase_batch_id');
     }
 
 }

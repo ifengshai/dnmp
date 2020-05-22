@@ -344,6 +344,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
         },
         add: function () {
             Controller.api.bindevent();
+            var z = 0;
             $(document).on('click', '.btn-add', function () {
                 var content = $('#table-content table tbody').html();
                 $('.purchase-table tbody').append(content);
@@ -357,6 +358,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
 
             $(document).on('click', '.btn-arrival-del', function () {
                 $(this).parent().remove();
+                z--;
             })
 
             //获取sku信息
@@ -380,7 +382,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
 
             })
 
-            var z = 0;
             $(document).on('click', '.btn-addplus', function () {
                 // var content = $('#arrival-content').html();
                 // $('#arrival_div').append(content);
@@ -540,6 +541,48 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                 Controller.api.bindevent();
 
             })
+            var z = $('.arrival_time').length;
+            $(document).on('click', '.btn-arrival-del', function () {
+                $(this).parent().remove();
+                z--;
+            })
+            
+            $(document).on('click', '.btn-addplus', function () {
+                // var content = $('#arrival-content').html();
+                // $('#arrival_div').append(content);
+                var html = '<div class="list" style="margin-top:20px;">\n' +
+                    '<input type="hidden" name="row[is_batch]" value="1">' +
+                    '    <label class="control-label col-xs-12 col-sm-2" style="width:150px;">批次预计到货时间：</label>\n' +
+                    '    <div class="col-xs-12 col-sm-3" style="margin-bottom: 20px;">\n' +
+                    '        <input id="c-arrival_time" class="form-control datetimepicker arrival_time" data-rule="required" data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="batch_arrival_time[]" type="text" value="">\n' +
+                    '    </div>\n' +
+                    '    <a href="javascript:;" class="btn btn-danger btn-arrival-del" title="删除"><i class="fa fa-trash"></i>删除</a>\n' +
+                    '    <table id="caigou-table" style="width:80%;">\n' +
+                    '        <tr>\n' +
+                    '            <th>SKU</td>\n' +
+                    '            <th>到货数量</td>\n' +
+                    '        </tr>\n';
+                var els = $('.purchase-table').find('.sku');
+               
+                for (var i = 0, j = els.length; i < j; i++) {
+                    var sku = els[i].value;
+                    html += '<tr>\n' +
+                        '            <td>\n' +
+                        '                <input id="c-purchase_remark" class="form-control" readonly name="batch_sku[' + z + '][' + i + ']" value="' + sku + '" type="text">\n' +
+                        '            </td>\n' +
+                        '            <td><input id="c-purchase_remark" class="form-control arrival_num"  name="arrival_num[' + z + '][' + i + ']" type="text"></td>\n' +
+                        '        </tr>\n';
+
+                }
+                z++;
+                html += '    </table>\n' +
+                    '</div>';
+                $('#arrival_div').append(html);
+
+                Controller.api.bindevent();
+            })
+
+
 
             //获取sku信息
             $(document).on('change', '.sku', function () {
