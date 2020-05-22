@@ -641,7 +641,7 @@ class Test extends Backend
         custom_match_factory_person_new,custom_match_factory_created_at_new,custom_is_delivery_new,custom_match_delivery_person_new,custom_match_delivery_created_at_new,
         custom_order_prescription_type,a.created_at,a.updated_at,b.track_number,b.created_at as create_time,b.title,a.entity_id,a.increment_id,a.custom_order_prescription_type
         ';
-        $map['a.created_at'] = ['between', ['2020-04-01 00:00:00', '2020-05-01 00:00:00']];
+        $map['a.created_at'] = ['between', ['2020-03-31 00:00:00', '2020-05-22 23:00:00']];
         // $map['a.created_at'] = ['>=', '2020-01-01 00:00:00'];
         $map['a.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal', 'payment_review']];
         $zeelool_data = $this->zeelool->alias('a')->field($field)
@@ -843,6 +843,501 @@ class Test extends Backend
                     $list[$k + 7]['node_type'] = 7; //出库
                     $list[$k + 7]['create_time'] = $v['create_time'];
                     $list[$k + 7]['site'] = 1;
+                    $list[$k + 7]['order_id'] = $v['entity_id'];
+                    $list[$k + 7]['order_number'] = $v['increment_id'];
+                    $list[$k + 7]['shipment_type'] = $v['title'];
+                    $list[$k + 7]['track_number'] = $v['track_number'];
+                    $list[$k + 7]['handle_user_id'] = 0;
+                    $list[$k + 7]['handle_user_name'] = '';
+                    $list[$k + 7]['content'] = '';
+
+                    $data['order_node'] = 2;
+                    $data['node_type'] = 7;
+                    $data['update_time'] = $v['create_time'];
+                }
+            }
+            $data['shipment_type'] = $v['title'];
+            $data['track_number'] = $v['track_number'];
+
+
+            $count = Db::name('order_node')->where('order_id', $v['entity_id'])->count();
+            if ($count > 0) {
+                Db::name('order_node')->where('order_id', $v['entity_id'])->update($data);
+            } else {
+                Db::name('order_node')->insert($data);
+            }
+            $this->ordernodedetail->saveAll($list);
+            echo $key . "\n";
+        }
+        echo 'ok';
+    }
+
+    /**
+     * 获取订单节点数据
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/05/14 09:55:00 
+     * @return void
+     */
+    public function setOrderNoteDataVoogueme()
+    {
+        $users = $this->user->column('id', 'nickname');
+        $field = 'status,custom_print_label_new,custom_print_label_person_new,custom_print_label_created_at_new,custom_is_match_frame_new,custom_match_frame_person_new,
+        custom_match_frame_created_at_new,custom_is_match_lens_new,custom_match_lens_created_at_new,custom_match_lens_person_new,custom_is_send_factory_new,
+        custom_match_factory_person_new,custom_match_factory_created_at_new,custom_is_delivery_new,custom_match_delivery_person_new,custom_match_delivery_created_at_new,
+        custom_order_prescription_type,a.created_at,a.updated_at,b.track_number,b.created_at as create_time,b.title,a.entity_id,a.increment_id,a.custom_order_prescription_type
+        ';
+        $map['a.created_at'] = ['between', ['2020-03-31 00:00:00', '2020-05-22 23:00:00']];
+        // $map['a.created_at'] = ['>=', '2020-01-01 00:00:00'];
+        $map['a.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal', 'payment_review']];
+        $zeelool_data = $this->voogueme->alias('a')->field($field)
+            ->join(['sales_flat_shipment_track' => 'b'], 'a.entity_id=b.order_id', 'left')
+            ->where($map)->select();
+        foreach ($zeelool_data as $key => $v) {
+            $list = [];
+            $k = 0;
+            //下单
+            $list[$k]['order_node'] = 0;
+            $list[$k]['node_type'] = 0;
+            $list[$k]['content'] = 'Your order has been created.';
+            $list[$k]['create_time'] = $v['created_at'];
+            $list[$k]['site'] = 2;
+            $list[$k]['order_id'] = $v['entity_id'];
+            $list[$k]['order_number'] = $v['increment_id'];
+            $list[$k]['shipment_type'] = '';
+            $list[$k]['track_number'] = '';
+            $list[$k]['handle_user_id'] = 0;
+            $list[$k]['handle_user_name'] = '';
+            $data['order_node'] = 0;
+            $data['node_type'] = 0;
+
+            if (in_array($v['status'], ['processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal', 'payment_review'])) {
+
+                //支付
+                $list[$k + 1]['order_node'] = 0;
+                $list[$k + 1]['node_type'] = 1;
+                $list[$k + 1]['content'] = 'Your payment has been successful.';
+                $list[$k + 1]['create_time'] = $v['updated_at'];
+                $list[$k + 1]['site'] = 2;
+                $list[$k + 1]['order_id'] = $v['entity_id'];
+                $list[$k + 1]['order_number'] = $v['increment_id'];
+                $list[$k + 1]['shipment_type'] = '';
+                $list[$k + 1]['track_number'] = '';
+                $list[$k + 1]['handle_user_id'] = 0;
+                $list[$k + 1]['handle_user_name'] = '';
+
+                $data['order_node'] = 0;
+                $data['node_type'] = 1;
+            }
+
+            $data['create_time'] = $v['created_at'];
+            $data['site'] = 2;
+            $data['order_id'] = $v['entity_id'];
+            $data['order_number'] = $v['increment_id'];
+            $data['update_time'] = $v['created_at'];
+            //打标签
+            if ($v['custom_print_label_new'] == 1) {
+                $list[$k + 2]['order_node'] = 1;
+                $list[$k + 2]['node_type'] = 2;
+                $list[$k + 2]['content'] = 'Order is under processing';
+                $list[$k + 2]['create_time'] = $v['custom_print_label_created_at_new'];
+                $list[$k + 2]['site'] = 2;
+                $list[$k + 2]['order_id'] = $v['entity_id'];
+                $list[$k + 2]['order_number'] = $v['increment_id'];
+                $list[$k + 2]['handle_user_id'] = $users[$v['custom_print_label_person_new']];
+                $list[$k + 2]['handle_user_name'] = $v['custom_print_label_person_new'];
+                $list[$k + 2]['shipment_type'] = '';
+                $list[$k + 2]['track_number'] = '';
+
+                $data['order_node'] = 1;
+                $data['node_type'] = 2;
+                $data['update_time'] = $v['custom_print_label_created_at_new'];
+            }
+
+            //判断订单是否为仅镜架
+            if ($v['custom_order_prescription_type'] == 1) {
+                if ($v['custom_is_match_frame_new'] == 1) {
+                    $list[$k + 3]['order_node'] = 2;
+                    $list[$k + 3]['node_type'] = 3;
+                    $list[$k + 3]['content'] = 'The product(s) is/are ready, waiting for Quality Inspection';
+                    $list[$k + 3]['create_time'] = $v['custom_match_frame_created_at_new'];
+                    $list[$k + 3]['site'] = 2;
+                    $list[$k + 3]['order_id'] = $v['entity_id'];
+                    $list[$k + 3]['order_number'] = $v['increment_id'];
+                    $list[$k + 3]['handle_user_id'] = $users[$v['custom_match_frame_person_new']];
+                    $list[$k + 3]['handle_user_name'] = $v['custom_match_frame_person_new'];
+                    $list[$k + 3]['shipment_type'] = '';
+                    $list[$k + 3]['track_number'] = '';
+
+                    $data['order_node'] = 2;
+                    $data['node_type'] = 3;
+                    $data['update_time'] = $v['custom_match_frame_created_at_new'];
+                }
+
+                if ($v['custom_is_delivery_new'] == 1) {
+                    $list[$k + 4]['order_node'] = 2;
+                    $list[$k + 4]['node_type'] = 6;
+                    $list[$k + 4]['content'] = 'Quality Inspection completed, preparing to dispatch this mail piece.';
+                    $list[$k + 4]['create_time'] = $v['custom_match_delivery_created_at_new'];
+                    $list[$k + 4]['site'] = 2;
+                    $list[$k + 4]['order_id'] = $v['entity_id'];
+                    $list[$k + 4]['order_number'] = $v['increment_id'];
+                    $list[$k + 4]['handle_user_id'] = $users[$v['custom_match_delivery_person_new']];
+                    $list[$k + 4]['handle_user_name'] = $v['custom_match_delivery_person_new'];
+                    $list[$k + 4]['shipment_type'] = '';
+                    $list[$k + 4]['track_number'] = '';
+
+                    $data['order_node'] = 2;
+                    $data['node_type'] = 6;
+                    $data['update_time'] = $v['custom_match_delivery_created_at_new'];
+                }
+
+                if ($v['track_number']) {
+                    $list[$k + 5]['order_node'] = 2;
+                    $list[$k + 5]['node_type'] = 7; //出库
+                    $list[$k + 5]['content']  = '';
+                    $list[$k + 5]['create_time'] = $v['create_time'];
+                    $list[$k + 5]['site'] = 2;
+                    $list[$k + 5]['order_id'] = $v['entity_id'];
+                    $list[$k + 5]['order_number'] = $v['increment_id'];
+                    $list[$k + 5]['shipment_type'] = $v['title'];
+                    $list[$k + 5]['track_number'] = $v['track_number'];
+                    $list[$k + 5]['handle_user_id'] = 0;
+                    $list[$k + 5]['handle_user_name'] = '';
+
+                    $data['order_node'] = 2;
+                    $data['node_type'] = 7;
+                    $data['update_time'] = $v['create_time'];
+                }
+            } else {
+
+                if ($v['custom_is_match_frame_new'] == 1) {
+                    $list[$k + 3]['order_node'] = 2;
+                    $list[$k + 3]['node_type'] = 3; //配镜架
+                    $list[$k + 3]['content'] = 'Frame(s) is/are ready, waiting for lenses';
+                    $list[$k + 3]['create_time'] = $v['custom_match_frame_created_at_new'];
+                    $list[$k + 3]['site'] = 2;
+                    $list[$k + 3]['order_id'] = $v['entity_id'];
+                    $list[$k + 3]['order_number'] = $v['increment_id'];
+                    $list[$k + 3]['handle_user_id'] = $users[$v['custom_match_frame_person_new']];
+                    $list[$k + 3]['handle_user_name'] = $v['custom_match_frame_person_new'];
+                    $list[$k + 3]['shipment_type'] = '';
+                    $list[$k + 3]['track_number'] = '';
+
+                    $data['order_node'] = 2;
+                    $data['node_type'] = 3;
+                    $data['update_time'] = $v['custom_match_frame_created_at_new'];
+                }
+
+                if ($v['custom_is_match_lens_new'] == 1) {
+                    $list[$k + 4]['order_node'] = 2;
+                    $list[$k + 4]['node_type'] = 4; //配镜片
+                    $list[$k + 4]['content'] = 'Lenses production completed, waiting for customizing';
+                    $list[$k + 4]['create_time'] = $v['custom_match_lens_created_at_new'];
+                    $list[$k + 4]['site'] = 2;
+                    $list[$k + 4]['order_id'] = $v['entity_id'];
+                    $list[$k + 4]['order_number'] = $v['increment_id'];
+                    $list[$k + 4]['handle_user_id'] = $users[$v['custom_match_lens_person_new']];
+                    $list[$k + 4]['handle_user_name'] = $v['custom_match_lens_person_new'];
+                    $list[$k + 4]['shipment_type'] = '';
+                    $list[$k + 4]['track_number'] = '';
+
+                    $data['order_node'] = 2;
+                    $data['node_type'] = 4;
+                    $data['update_time'] = $v['custom_match_lens_created_at_new'];
+                }
+
+                if ($v['custom_is_send_factory_new'] == 1) {
+                    $list[$k + 5]['order_node'] = 2;
+                    $list[$k + 5]['node_type'] = 5; //加工
+                    $list[$k + 5]['content'] = 'Customizing completed, waiting for Quality Inspection';
+                    $list[$k + 5]['create_time'] = $v['custom_match_factory_created_at_new'];
+                    $list[$k + 5]['site'] = 2;
+                    $list[$k + 5]['order_id'] = $v['entity_id'];
+                    $list[$k + 5]['order_number'] = $v['increment_id'];
+                    $list[$k + 5]['handle_user_id'] = $users[$v['custom_match_factory_person_new']];
+                    $list[$k + 5]['handle_user_name'] = $v['custom_match_factory_person_new'];
+                    $list[$k + 5]['shipment_type'] = '';
+                    $list[$k + 5]['track_number'] = '';
+
+                    $data['order_node'] = 2;
+                    $data['node_type'] = 5;
+                    $data['update_time'] = $v['custom_match_factory_created_at_new'];
+                }
+
+
+                if ($v['custom_is_delivery_new'] == 1) {
+                    $list[$k + 6]['order_node'] = 2;
+                    $list[$k + 6]['node_type'] = 6; //质检
+                    $list[$k + 6]['content'] = 'Quality Inspection completed, preparing to dispatch this mail piece.';
+                    $list[$k + 6]['create_time'] = $v['custom_match_delivery_created_at_new'];
+                    $list[$k + 6]['site'] = 2;
+                    $list[$k + 6]['order_id'] = $v['entity_id'];
+                    $list[$k + 6]['order_number'] = $v['increment_id'];
+                    $list[$k + 6]['handle_user_id'] = $users[$v['custom_match_delivery_person_new']];
+                    $list[$k + 6]['handle_user_name'] = $v['custom_match_delivery_person_new'];
+                    $list[$k + 6]['shipment_type'] = '';
+                    $list[$k + 6]['track_number'] = '';
+
+                    $data['order_node'] = 2;
+                    $data['node_type'] = 6;
+                    $data['update_time'] = $v['custom_match_delivery_created_at_new'];
+                }
+
+                if ($v['track_number']) {
+                    $list[$k + 7]['order_node'] = 2;
+                    $list[$k + 7]['node_type'] = 7; //出库
+                    $list[$k + 7]['create_time'] = $v['create_time'];
+                    $list[$k + 7]['site'] = 2;
+                    $list[$k + 7]['order_id'] = $v['entity_id'];
+                    $list[$k + 7]['order_number'] = $v['increment_id'];
+                    $list[$k + 7]['shipment_type'] = $v['title'];
+                    $list[$k + 7]['track_number'] = $v['track_number'];
+                    $list[$k + 7]['handle_user_id'] = 0;
+                    $list[$k + 7]['handle_user_name'] = '';
+                    $list[$k + 7]['content'] = '';
+
+                    $data['order_node'] = 2;
+                    $data['node_type'] = 7;
+                    $data['update_time'] = $v['create_time'];
+                }
+            }
+            $data['shipment_type'] = $v['title'];
+            $data['track_number'] = $v['track_number'];
+
+
+            $count = Db::name('order_node')->where('order_id', $v['entity_id'])->count();
+            if ($count > 0) {
+                Db::name('order_node')->where('order_id', $v['entity_id'])->update($data);
+            } else {
+                Db::name('order_node')->insert($data);
+            }
+            $this->ordernodedetail->saveAll($list);
+            echo $key . "\n";
+        }
+        echo 'ok';
+    }
+
+
+    /**
+     * 获取订单节点数据
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/05/14 09:55:00 
+     * @return void
+     */
+    public function setOrderNoteDataNihao()
+    {
+        $users = $this->user->column('id', 'nickname');
+        $field = 'status,custom_print_label_new,custom_print_label_person_new,custom_print_label_created_at_new,custom_is_match_frame_new,custom_match_frame_person_new,
+        custom_match_frame_created_at_new,custom_is_match_lens_new,custom_match_lens_created_at_new,custom_match_lens_person_new,custom_is_send_factory_new,
+        custom_match_factory_person_new,custom_match_factory_created_at_new,custom_is_delivery_new,custom_match_delivery_person_new,custom_match_delivery_created_at_new,
+        custom_order_prescription_type,a.created_at,a.updated_at,b.track_number,b.created_at as create_time,b.title,a.entity_id,a.increment_id,a.custom_order_prescription_type
+        ';
+        $map['a.created_at'] = ['between', ['2020-03-31 00:00:00', '2020-05-22 23:00:00']];
+        // $map['a.created_at'] = ['>=', '2020-01-01 00:00:00'];
+        $map['a.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal', 'payment_review']];
+        $zeelool_data = $this->nihao->alias('a')->field($field)
+            ->join(['sales_flat_shipment_track' => 'b'], 'a.entity_id=b.order_id', 'left')
+            ->where($map)->select();
+        foreach ($zeelool_data as $key => $v) {
+            $list = [];
+            $k = 0;
+            //下单
+            $list[$k]['order_node'] = 0;
+            $list[$k]['node_type'] = 0;
+            $list[$k]['content'] = 'Your order has been created.';
+            $list[$k]['create_time'] = $v['created_at'];
+            $list[$k]['site'] = 3;
+            $list[$k]['order_id'] = $v['entity_id'];
+            $list[$k]['order_number'] = $v['increment_id'];
+            $list[$k]['shipment_type'] = '';
+            $list[$k]['track_number'] = '';
+            $list[$k]['handle_user_id'] = 0;
+            $list[$k]['handle_user_name'] = '';
+            $data['order_node'] = 0;
+            $data['node_type'] = 0;
+
+            if (in_array($v['status'], ['processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal', 'payment_review'])) {
+
+                //支付
+                $list[$k + 1]['order_node'] = 0;
+                $list[$k + 1]['node_type'] = 1;
+                $list[$k + 1]['content'] = 'Your payment has been successful.';
+                $list[$k + 1]['create_time'] = $v['updated_at'];
+                $list[$k + 1]['site'] = 3;
+                $list[$k + 1]['order_id'] = $v['entity_id'];
+                $list[$k + 1]['order_number'] = $v['increment_id'];
+                $list[$k + 1]['shipment_type'] = '';
+                $list[$k + 1]['track_number'] = '';
+                $list[$k + 1]['handle_user_id'] = 0;
+                $list[$k + 1]['handle_user_name'] = '';
+
+                $data['order_node'] = 0;
+                $data['node_type'] = 1;
+            }
+
+            $data['create_time'] = $v['created_at'];
+            $data['site'] = 3;
+            $data['order_id'] = $v['entity_id'];
+            $data['order_number'] = $v['increment_id'];
+            $data['update_time'] = $v['created_at'];
+            //打标签
+            if ($v['custom_print_label_new'] == 1) {
+                $list[$k + 2]['order_node'] = 1;
+                $list[$k + 2]['node_type'] = 2;
+                $list[$k + 2]['content'] = 'Order is under processing';
+                $list[$k + 2]['create_time'] = $v['custom_print_label_created_at_new'];
+                $list[$k + 2]['site'] = 3;
+                $list[$k + 2]['order_id'] = $v['entity_id'];
+                $list[$k + 2]['order_number'] = $v['increment_id'];
+                $list[$k + 2]['handle_user_id'] = $users[$v['custom_print_label_person_new']];
+                $list[$k + 2]['handle_user_name'] = $v['custom_print_label_person_new'];
+                $list[$k + 2]['shipment_type'] = '';
+                $list[$k + 2]['track_number'] = '';
+
+                $data['order_node'] = 1;
+                $data['node_type'] = 2;
+                $data['update_time'] = $v['custom_print_label_created_at_new'];
+            }
+
+            //判断订单是否为仅镜架
+            if ($v['custom_order_prescription_type'] == 1) {
+                if ($v['custom_is_match_frame_new'] == 1) {
+                    $list[$k + 3]['order_node'] = 2;
+                    $list[$k + 3]['node_type'] = 3;
+                    $list[$k + 3]['content'] = 'The product(s) is/are ready, waiting for Quality Inspection';
+                    $list[$k + 3]['create_time'] = $v['custom_match_frame_created_at_new'];
+                    $list[$k + 3]['site'] = 3;
+                    $list[$k + 3]['order_id'] = $v['entity_id'];
+                    $list[$k + 3]['order_number'] = $v['increment_id'];
+                    $list[$k + 3]['handle_user_id'] = $users[$v['custom_match_frame_person_new']];
+                    $list[$k + 3]['handle_user_name'] = $v['custom_match_frame_person_new'];
+                    $list[$k + 3]['shipment_type'] = '';
+                    $list[$k + 3]['track_number'] = '';
+
+                    $data['order_node'] = 2;
+                    $data['node_type'] = 3;
+                    $data['update_time'] = $v['custom_match_frame_created_at_new'];
+                }
+
+                if ($v['custom_is_delivery_new'] == 1) {
+                    $list[$k + 4]['order_node'] = 2;
+                    $list[$k + 4]['node_type'] = 6;
+                    $list[$k + 4]['content'] = 'Quality Inspection completed, preparing to dispatch this mail piece.';
+                    $list[$k + 4]['create_time'] = $v['custom_match_delivery_created_at_new'];
+                    $list[$k + 4]['site'] = 3;
+                    $list[$k + 4]['order_id'] = $v['entity_id'];
+                    $list[$k + 4]['order_number'] = $v['increment_id'];
+                    $list[$k + 4]['handle_user_id'] = $users[$v['custom_match_delivery_person_new']];
+                    $list[$k + 4]['handle_user_name'] = $v['custom_match_delivery_person_new'];
+                    $list[$k + 4]['shipment_type'] = '';
+                    $list[$k + 4]['track_number'] = '';
+
+                    $data['order_node'] = 2;
+                    $data['node_type'] = 6;
+                    $data['update_time'] = $v['custom_match_delivery_created_at_new'];
+                }
+
+                if ($v['track_number']) {
+                    $list[$k + 5]['order_node'] = 2;
+                    $list[$k + 5]['node_type'] = 7; //出库
+                    $list[$k + 5]['content']  = '';
+                    $list[$k + 5]['create_time'] = $v['create_time'];
+                    $list[$k + 5]['site'] = 3;
+                    $list[$k + 5]['order_id'] = $v['entity_id'];
+                    $list[$k + 5]['order_number'] = $v['increment_id'];
+                    $list[$k + 5]['shipment_type'] = $v['title'];
+                    $list[$k + 5]['track_number'] = $v['track_number'];
+                    $list[$k + 5]['handle_user_id'] = 0;
+                    $list[$k + 5]['handle_user_name'] = '';
+
+                    $data['order_node'] = 2;
+                    $data['node_type'] = 7;
+                    $data['update_time'] = $v['create_time'];
+                }
+            } else {
+
+                if ($v['custom_is_match_frame_new'] == 1) {
+                    $list[$k + 3]['order_node'] = 2;
+                    $list[$k + 3]['node_type'] = 3; //配镜架
+                    $list[$k + 3]['content'] = 'Frame(s) is/are ready, waiting for lenses';
+                    $list[$k + 3]['create_time'] = $v['custom_match_frame_created_at_new'];
+                    $list[$k + 3]['site'] = 3;
+                    $list[$k + 3]['order_id'] = $v['entity_id'];
+                    $list[$k + 3]['order_number'] = $v['increment_id'];
+                    $list[$k + 3]['handle_user_id'] = $users[$v['custom_match_frame_person_new']];
+                    $list[$k + 3]['handle_user_name'] = $v['custom_match_frame_person_new'];
+                    $list[$k + 3]['shipment_type'] = '';
+                    $list[$k + 3]['track_number'] = '';
+
+                    $data['order_node'] = 2;
+                    $data['node_type'] = 3;
+                    $data['update_time'] = $v['custom_match_frame_created_at_new'];
+                }
+
+                if ($v['custom_is_match_lens_new'] == 1) {
+                    $list[$k + 4]['order_node'] = 2;
+                    $list[$k + 4]['node_type'] = 4; //配镜片
+                    $list[$k + 4]['content'] = 'Lenses production completed, waiting for customizing';
+                    $list[$k + 4]['create_time'] = $v['custom_match_lens_created_at_new'];
+                    $list[$k + 4]['site'] = 3;
+                    $list[$k + 4]['order_id'] = $v['entity_id'];
+                    $list[$k + 4]['order_number'] = $v['increment_id'];
+                    $list[$k + 4]['handle_user_id'] = $users[$v['custom_match_lens_person_new']];
+                    $list[$k + 4]['handle_user_name'] = $v['custom_match_lens_person_new'];
+                    $list[$k + 4]['shipment_type'] = '';
+                    $list[$k + 4]['track_number'] = '';
+
+                    $data['order_node'] = 2;
+                    $data['node_type'] = 4;
+                    $data['update_time'] = $v['custom_match_lens_created_at_new'];
+                }
+
+                if ($v['custom_is_send_factory_new'] == 1) {
+                    $list[$k + 5]['order_node'] = 2;
+                    $list[$k + 5]['node_type'] = 5; //加工
+                    $list[$k + 5]['content'] = 'Customizing completed, waiting for Quality Inspection';
+                    $list[$k + 5]['create_time'] = $v['custom_match_factory_created_at_new'];
+                    $list[$k + 5]['site'] = 3;
+                    $list[$k + 5]['order_id'] = $v['entity_id'];
+                    $list[$k + 5]['order_number'] = $v['increment_id'];
+                    $list[$k + 5]['handle_user_id'] = $users[$v['custom_match_factory_person_new']];
+                    $list[$k + 5]['handle_user_name'] = $v['custom_match_factory_person_new'];
+                    $list[$k + 5]['shipment_type'] = '';
+                    $list[$k + 5]['track_number'] = '';
+
+                    $data['order_node'] = 2;
+                    $data['node_type'] = 5;
+                    $data['update_time'] = $v['custom_match_factory_created_at_new'];
+                }
+
+
+                if ($v['custom_is_delivery_new'] == 1) {
+                    $list[$k + 6]['order_node'] = 2;
+                    $list[$k + 6]['node_type'] = 6; //质检
+                    $list[$k + 6]['content'] = 'Quality Inspection completed, preparing to dispatch this mail piece.';
+                    $list[$k + 6]['create_time'] = $v['custom_match_delivery_created_at_new'];
+                    $list[$k + 6]['site'] = 3;
+                    $list[$k + 6]['order_id'] = $v['entity_id'];
+                    $list[$k + 6]['order_number'] = $v['increment_id'];
+                    $list[$k + 6]['handle_user_id'] = $users[$v['custom_match_delivery_person_new']];
+                    $list[$k + 6]['handle_user_name'] = $v['custom_match_delivery_person_new'];
+                    $list[$k + 6]['shipment_type'] = '';
+                    $list[$k + 6]['track_number'] = '';
+
+                    $data['order_node'] = 2;
+                    $data['node_type'] = 6;
+                    $data['update_time'] = $v['custom_match_delivery_created_at_new'];
+                }
+
+                if ($v['track_number']) {
+                    $list[$k + 7]['order_node'] = 2;
+                    $list[$k + 7]['node_type'] = 7; //出库
+                    $list[$k + 7]['create_time'] = $v['create_time'];
+                    $list[$k + 7]['site'] = 3;
                     $list[$k + 7]['order_id'] = $v['entity_id'];
                     $list[$k + 7]['order_number'] = $v['increment_id'];
                     $list[$k + 7]['shipment_type'] = $v['title'];
