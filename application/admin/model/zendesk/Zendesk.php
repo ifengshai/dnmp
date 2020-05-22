@@ -318,7 +318,7 @@ class Zendesk extends Model
 
                 if(!$ticket->assignee_id || $ticket->assignee_id == 382940274852){
                     //最后一条回复的zendesk用户id
-                    $commentAuthorId = ZendeskComments::where(['ticket_id' => $ticket->id,'is_admin' => 1,'author_id' => ['neq',382940274852]])->order('id desc')->value('author_id');
+                    $commentAuthorId = ZendeskComments::where(['ticket_id' => $ticket->ticket_id,'is_admin' => 1,'author_id' => ['neq',382940274852]])->order('id desc')->value('author_id');
                     $task = ZendeskTasks::whereTime('create_time', 'today')
                         ->where([
                             'assignee_id' => $commentAuthorId,
