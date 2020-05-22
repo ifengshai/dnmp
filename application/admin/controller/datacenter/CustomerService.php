@@ -28,7 +28,7 @@ class CustomerService extends Backend
     public function index()
     {
         //工单统计信息
-        $map['complete_time'] = $map_create['create_time'] = ['between', [date("Y-m-d H:i:s",mktime(0, 0 , 0,date("m"),1,date("Y"))), date("Y-m-d H:i:s",mktime(23,59,59,date("m"),date("t"),date("Y")))]];
+        $map['complete_time'] = $map_create['create_time'] = $map_measure['w.create_time'] = ['between', [date("Y-m-d H:i:s",mktime(0, 0 , 0,date("m"),1,date("Y"))), date("Y-m-d H:i:s",mktime(23,59,59,date("m"),date("t"),date("Y")))]];
         $infoOne = $this->customers_by_group(1);
         $infoTwo = $this->customers_by_group(2);
         $workList = $this->works_info([],$map);
@@ -75,15 +75,19 @@ class CustomerService extends Backend
         }
         //左边右边的措施
         $step = config('workorder.step');
-        //工单处理概况信息end
         $workorder_handle_left_data = $this->workorder_handle_left($map_create,$examinArr);
-        $workorder_handle_right_data = $this->workorder_handle_right($map_create,$step); 
+        $workorder_handle_right_data = $this->workorder_handle_right($map_measure,$step);
+        //工单处理概况信息end
+        //跟单概况 start
+        $warehouse_problem_type = config('workorder.warehouse_problem_type');
+        $warehouse_handle       = $this->warehouse_handle($map_create,$warehouse_problem_type);
+        //跟单概况 end 
         $orderPlatformList = config('workorder.platform');
-        $this->view->assign(compact('orderPlatformList', 'workList','infoOne','infoTwo','workArr','examinArr','workorder_handle_left_data','step'));
+        $this->view->assign(compact('orderPlatformList', 'workList','infoOne','infoTwo','workArr','examinArr','workorder_handle_left_data','step','workorder_handle_right_data','warehouse_problem_type','warehouse_handle'));
         return $this->view->fetch();
     }
     /**
-     * 工单处理概况左边部分
+     * 首页工单处理概况左边部分
      *
      * @Description
      * @author lsw
@@ -133,7 +137,7 @@ class CustomerService extends Backend
         return $arr ?: false;
     }
     /**
-     * 工单处理右边部分
+     * 首页工单处理右边部分
      *
      * @Description
      * @author lsw
@@ -145,12 +149,16 @@ class CustomerService extends Backend
         $where['is_check'] = 1;
         $where['work_type'] = 1;
         $where['work_status'] = ['lt',2];
-        //求出主管的超时时间
+        //求出措施的超时时间
         $time_out = config('workorder.step_time_out');
         $workMeasure = $this->model->where($map)->where($where)->alias('w')->join('work_order_measure m','w.id=m.work_id')->field('w.check_time,m.operation_time,m.measure_choose_id')->select();
         $workMeasure = collection($workMeasure)->toArray($workMeasure);
         if(!empty($workMeasure)){
             $arr = [];
+            //no_time_out_handled 未超时已处理
+            //time_out_handled  超时已处理
+            //no_time_out_handle 未超时未处理
+            //time_out_handle 超时未处理
             foreach($step as $ek => $ev){
                 $arr[$ek]['no_time_out_handled'] = $arr[$ek]['time_out_handled'] = $arr[$ek]['no_time_out_handle'] = $arr[$ek]['time_out_handle'] = 0; 
             }
@@ -187,6 +195,59 @@ class CustomerService extends Backend
                             }
                         }else{ //如果不存在超时时间
                                 $arr[$v['measure_choose_id']]['no_time_out_handle']++;      
+                        }
+                    }
+                }
+            }
+        }
+        return $arr ?: false;
+    }
+    /**
+     * 首页跟单处理
+     *
+     * @Description
+     * @author lsw
+     * @since 2020/05/22 08:46:37 
+     * @return void
+     */
+    public function warehouse_handle($map,$warehouse_problem_type)
+    {
+        $where['work_type'] = 2;
+        $where['work_status'] = ['lt',2];
+        //求出主管的超时时间
+        $time_out = config('workorder.warehouse_time_out');
+        $workList = $this->model->where($map)->where($where)->field('problem_type_id,check_time,complete_time')->select();
+        $workList = collection($workList)->toArray($workList);
+        if(!empty($workList)){
+            $arr = [];
+            //no_time_out_handled 未超时已处理
+            //time_out_handled  超时已处理
+            //no_time_out_handle 未超时未处理
+            //time_out_handle 超时未处理
+            foreach($warehouse_problem_type as $ek => $ev){
+                $arr[$ek]['no_time_out_handled'] = $arr[$ek]['time_out_handled'] = $arr[$ek]['no_time_out_handle'] = $arr[$ek]['time_out_handle'] = 0; 
+            }
+            foreach($workList as $k =>$v){
+                if(array_key_exists($v['problem_type_id'],$warehouse_problem_type)){
+                    //处理时间存在证明已经审批
+                    if($v['complete_time']){
+                        //如果两个时间差小于指定超时时间说明未超时
+                        if( $time_out[$v['problem_type_id']] >(strtotime($v['complete_time']) - strtotime($v['check_time']))){
+                            //未超时已审批
+                            $arr[$v['problem_type_id']]['no_time_out_handled']++; 
+                        }else{
+                            //超时已审批
+                            $arr[$v['problem_type_id']]['time_out_handled']++;
+                        }
+                    }else{
+                        //审批时间不存在证明没有审批,判断提交时间和现在的时间比较是否超时
+                        //如果两个时间差小于指定超时时间说明未超时
+                        if( $time_out[$v['problem_type_id']]>(strtotime("now") - strtotime($v['check_time']))){
+                            //未超时未审批
+                            $arr[$v['problem_type_id']]['no_time_out_handle']++;
+                        }else{
+                            //超时未审批
+                            $arr[$v['problem_type_id']]['time_out_handle']++;
                         }
                     }
                 }
