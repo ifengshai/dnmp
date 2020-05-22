@@ -164,6 +164,7 @@ class PurchaseOrder extends Backend
                         $batch_arrival_time = $this->request->post("batch_arrival_time/a");
                         $batch_sku = $this->request->post("batch_sku/a");
                         $arrival_num = $this->request->post("arrival_num/a");
+           
                         //判断是否有分批数据
                         if (count(array_filter($batch_arrival_time)) > 0) {
                             $i = 0;
@@ -184,10 +185,7 @@ class PurchaseOrder extends Backend
                                     $list[$key]['arrival_num'] = $arrival_num[$k][$key];
                                     $list[$key]['purchase_batch_id'] = $batch_id;
                                 }
-                                
-                                dump($batch_sku[$k]);
-                                dump($batch_sku);
-                                dump($list);die;
+                            
                                 $this->batch_item->saveAll($list);
                             }
                         }

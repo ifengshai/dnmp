@@ -344,6 +344,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
         },
         add: function () {
             Controller.api.bindevent();
+            var z = 0;
             $(document).on('click', '.btn-add', function () {
                 var content = $('#table-content table tbody').html();
                 $('.purchase-table tbody').append(content);
@@ -357,6 +358,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
 
             $(document).on('click', '.btn-arrival-del', function () {
                 $(this).parent().remove();
+                z--;
             })
 
             //获取sku信息
@@ -380,7 +382,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
 
             })
 
-            var z = 0;
+            
             $(document).on('click', '.btn-addplus', function () {
                 // var content = $('#arrival-content').html();
                 // $('#arrival_div').append(content);
