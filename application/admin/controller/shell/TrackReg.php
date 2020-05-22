@@ -4,7 +4,7 @@
  * 执行时间：每天一次
  */
 
-namespace app\admin\controller\crontab;
+namespace app\admin\controller\shell;
 
 use app\common\controller\Backend;
 use GuzzleHttp\Client;
@@ -20,27 +20,30 @@ class TrackReg extends Backend
     public function _initialize()
     {
         parent::_initialize();
+        $this->ordernodedetail = new \app\admin\model\OrderNodeDetail();
     }
 
-    public function site_reg(){
-        $this->reg_shipment('database.db_zeelool',1);
-        $this->reg_shipment('database.db_voogueme',2);
-        $this->reg_shipment('database.db_nihao',3);
+    public function site_reg()
+    {
+        $this->reg_shipment('database.db_zeelool', 1);
+        // $this->reg_shipment('database.db_voogueme', 2);
+        // $this->reg_shipment('database.db_nihao', 3);
     }
 
     /**
      * 批量 注册物流
      * 每天跑一次，查找遗漏注册的物流单号，进行注册操作
      */
-    public function reg_shipment($site_str,$site_type)
+    public function reg_shipment($site_str, $site_type)
     {
         $order_shipment = Db::connect($site_str)
-            ->table('sales_flat_shipment_track')
-            ->field('entity_id,order_id,track_number,title,updated_at')
-            ->where('created_at', '>=', '2020-03-31 00:00:00')
-            ->where('handle', '=', '0')
+            ->table('sales_flat_shipment_track')->alias('a')
+            ->join(['sales_flat_order' => 'b'], 'a.order_id=b.entity_id')
+            ->field('a.entity_id,a.order_id,a.track_number,a.title,a.updated_at,b.increment_id')
+            ->where('a.created_at', '>=', '2020-03-31 00:00:00')
+            ->where('a.handle', '=', '0')
+            ->group('a.order_id')
             ->select();
-
         foreach ($order_shipment as $k => $v) {
             $title = strtolower(str_replace(' ', '-', $v['title']));
             if ($title == 'china-post') {
@@ -50,8 +53,28 @@ class TrackReg extends Backend
             $shipment_reg[$k]['number'] =  $v['track_number'];
             $shipment_reg[$k]['carrier'] =  $carrier['carrierId'];
             $shipment_reg[$k]['order_id'] =  $v['order_id'];
-        }
 
+
+            $list[$k]['order_node'] = 2;
+            $list[$k]['node_type'] = 7; //出库
+            $list[$k]['create_time'] = $v['updated_at'];
+            $list[$k]['site'] = 1;
+            $list[$k]['order_id'] = $v['entity_id'];
+            $list[$k]['order_number'] = $v['increment_id'];
+            $list[$k]['shipment_type'] = $v['title'];
+            $list[$k]['track_number'] = $v['track_number'];
+
+            $data['order_node'] = 2;
+            $data['node_type'] = 7;
+            $data['update_time'] = $v['updated_at'];
+            $data['shipment_type'] = $v['title'];
+            $data['track_number'] = $v['track_number'];
+            Db::name('order_node')->where('order_id', $v['order_id'])->update($data);
+        }
+        if ($list) {
+            $this->ordernodedetail->saveAll($list);
+        }
+        
         $order_group = array_chunk($shipment_reg, 40);
 
         $trackingConnector = new TrackingConnector($this->apiKey);
@@ -60,18 +83,18 @@ class TrackReg extends Backend
             $aa = $trackingConnector->registerMulti($val);
 
             //请求接口更改物流表状态
-            $order_ids = implode(',',array_column($val, 'order_id'));
+            $order_ids = implode(',', array_column($val, 'order_id'));
             $params['ids'] = $order_ids;
             $params['site'] = $site_type;
             $res = $this->setLogisticsStatus($params);
             if ($res->status !== 200) {
-                echo $site_str.'更新失败:'.$order_ids . "\n";
+                echo $site_str . '更新失败:' . $order_ids . "\n";
             }
             $order_ids = array();
 
             sleep(1);
         }
-        echo $site_str.' is ok' . "\n";
+        echo $site_str . ' is ok' . "\n";
     }
     /**
      * 获取快递号
@@ -152,6 +175,4 @@ class TrackReg extends Backend
         $res = json_decode($stringBody);
         return $res;
     }
-
-
 }
