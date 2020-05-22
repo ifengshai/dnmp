@@ -1588,7 +1588,7 @@ order by sfoi.item_id asc limit 1000";
         $zeelool_count = $zeelool_model->table('sales_flat_order')->where($map)->count(1);
         $zeelool_total = $zeelool_model->table('sales_flat_order')->where($map)->sum('base_grand_total');
         //zeelool客单价
-        if($$zeelool_count>0){
+        if($zeelool_count>0){
             $zeelool_unit_price = round(($zeelool_total / $zeelool_count), 2);  
         }else{
             $zeelool_unit_price = 0;
