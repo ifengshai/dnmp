@@ -88,6 +88,7 @@ class SelfApi extends Api
         $order_id = $this->request->request('order_id'); //订单id
         $order_number = $this->request->request('order_number'); //订单号
         $site = $this->request->request('site');//站点
+        $status = $this->request->request('status');//站点
         if (!$order_id) {
             $this->error(__('缺少订单id参数'), [], 400);
         }
@@ -98,6 +99,14 @@ class SelfApi extends Api
 
         if (!$site) {
             $this->error(__('缺少站点参数'), [], 400);
+        }
+
+        if (!$status) {
+            $this->error(__('缺少状态参数'), [], 400);
+        }
+
+        if(!in_array($status, ['processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal', 'payment_review'])) {
+            $this->error(__('非支付成功状态'), [], 400);
         }
 
         $res_node = (new OrderNode())->allowField(true)->save([
