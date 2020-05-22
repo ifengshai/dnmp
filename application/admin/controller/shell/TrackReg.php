@@ -26,8 +26,8 @@ class TrackReg extends Backend
     public function site_reg()
     {
         $this->reg_shipment('database.db_zeelool', 1);
-        // $this->reg_shipment('database.db_voogueme', 2);
-        // $this->reg_shipment('database.db_nihao', 3);
+        $this->reg_shipment('database.db_voogueme', 2);
+        $this->reg_shipment('database.db_nihao', 3);
     }
 
     /**
