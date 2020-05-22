@@ -167,5 +167,34 @@ class ZendeskAccount extends Backend
         }
 
     }
+    /**
+     * 
+     *
+     * @Description
+     * @author lsw
+     * @since 2020/05/22 13:56:10 
+     * @return void
+     */
+    public function test()
+    {
+        $curl = curl_init();
+        curl_setopt_array($curl, array(
+        CURLOPT_URL => "https://api.simplesat.io/api/answers/?page_size=3",
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_ENCODING => "",
+        CURLOPT_MAXREDIRS => 10,
+        CURLOPT_TIMEOUT => 0,
+        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+        CURLOPT_CUSTOMREQUEST => "GET",
+        CURLOPT_HTTPHEADER => array(
+            "X-Simplesat-Token: 83722ccb715d404c122464b6b072077812e6991c"
+        ),
+        ));
+        $response = curl_exec($curl);
+        curl_close($curl);
+        $arr = json_decode($response,true);
+        var_dump($arr);
+    }
 
 }

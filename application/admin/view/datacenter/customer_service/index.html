@@ -414,25 +414,25 @@ table.altrowstable tr:nth-child(even){
                         <div class="col-xs-12 col-md-9">
                             <div class="form-group" style="margin-top: 20px;">
                                 <div class="col-xs-4">
-                                    <input type="hidden" class="form-control operate" name="create_time_two-operate" data-name="create_time_two" value="RANGE" readonly="">
-                                    <input type="text" autocomplete="off" class="form-control datetimerange" name="create_time_two"  placeholder="创建时间" id="create_time_two" value="" data-index="14">
+                                    <input type="hidden" class="form-control operate" name="create_time_workorder-operate" data-name="create_time_two" value="RANGE" readonly="">
+                                    <input type="text" autocomplete="off" class="form-control datetimerange" name="create_time_workorder"  placeholder="创建时间" id="create_time_workorder" value="" data-index="14">
                                 </div>
                                 <div class="col-sm-4" style="margin-bottom: 20px;">
-                                    <input type="button" class="btn btn-success echart3-btn" value="提交">
+                                    <input type="button" class="btn btn-success workorder-btn" value="提交">
                                     <input type="reset" class="btn btn-default reset" value="重置">
                                 </div>                                                        
                             </div>                                                                 
                         </div>
                     </form> 
-                    <table id="order-info-list" class="altrowstable"
+                    <table id="workorder-left" class="altrowstable"
                            data-operate-edit="{:$auth->check('saleaftermanage/order_return/edit')}"
                            data-operate-del="{:$auth->check('saleaftermanage/order_return/del')}"
                            width="100%">
                         <thead>                    
                         <tr>
                             <th style="text-align: center; vertical-align: middle;">措施</th>
-                            {if isset($examinArr)}
-                            {foreach name="examinArr" item="vo" key="k"}
+                            {if isset($examineArr)}
+                            {foreach name="examineArr" item="vo" key="k"}
                             <th style="text-align: center; vertical-align: middle;">{$vo}</th>
                             {/foreach}
                             {/if}
@@ -440,38 +440,38 @@ table.altrowstable tr:nth-child(even){
                         </thead>
                              <tr>
                                  <td style="text-align: center; vertical-align: middle;">未超时未审批</td>
-                                 {if isset($examinArr)}
-                                 {foreach name="examinArr" item="vo" key="k"}
-                                 <td style="text-align: center; vertical-align: middle;"><?php echo $workorder_handle_left_data[$k]['no_time_out_check'];?></th>
+                                 {if isset($examineArr)}
+                                 {foreach name="examineArr" item="vo" key="k"}
+                                 <td style="text-align: center; vertical-align: middle;"><?php echo $workorder_handle_left_data[$k]['no_time_out_check'];?></td>
                                  {/foreach}
                                  {/if}
                              </tr>
                              <tr>
                                 <td style="text-align: center; vertical-align: middle;">未超时已审批</td>
-                                {if isset($examinArr)}
-                                {foreach name="examinArr" item="vo" key="k"}
-                                <td style="text-align: center; vertical-align: middle;"><?php echo $workorder_handle_left_data[$k]['no_time_out_checked'];?></th>
+                                {if isset($examineArr)}
+                                {foreach name="examineArr" item="vo" key="k"}
+                                <td style="text-align: center; vertical-align: middle;"><?php echo $workorder_handle_left_data[$k]['no_time_out_checked'];?></td>
                                 {/foreach}
                                 {/if}
                             </tr>
                             <tr>
                                 <td style="text-align: center; vertical-align: middle;">超时未审批</td>  
-                                {if isset($examinArr)}
-                                {foreach name="examinArr" item="vo" key="k"}
-                                <td style="text-align: center; vertical-align: middle;"><?php echo $workorder_handle_left_data[$k]['time_out_check'];?></th>
+                                {if isset($examineArr)}
+                                {foreach name="examineArr" item="vo" key="k"}
+                                <td style="text-align: center; vertical-align: middle;"><?php echo $workorder_handle_left_data[$k]['time_out_check'];?></td>
                                 {/foreach}
                                 {/if}
                             </tr>
                             <tr>
                                 <td style="text-align: center; vertical-align: middle;">超时已审批</td>
-                                {if isset($examinArr)}
-                                {foreach name="examinArr" item="vo" key="k"}
+                                {if isset($examineArr)}
+                                {foreach name="examineArr" item="vo" key="k"}
                                 <td style="text-align: center; vertical-align: middle;"><?php echo $workorder_handle_left_data[$k]['time_out_checked'];?></th>
                                 {/foreach}
                                 {/if}
                             </tr>                                                                                                                                                                                                                                        							 
                     </table>
-                    <table id="order-info-list" class="altrowstable"
+                    <table id="workorder-right" class="altrowstable"
                            data-operate-edit="{:$auth->check('saleaftermanage/order_return/edit')}"
                            data-operate-del="{:$auth->check('saleaftermanage/order_return/del')}"
                            width="100%">
@@ -504,17 +504,17 @@ table.altrowstable tr:nth-child(even){
                         <div class="col-xs-12 col-md-9">
                             <div class="form-group" style="margin-top: 20px;">
                                 <div class="col-xs-4">
-                                    <input type="hidden" class="form-control operate" name="create_time_two-operate" data-name="create_time_two" value="RANGE" readonly="">
-                                    <input type="text" autocomplete="off" class="form-control datetimerange" name="create_time_two"  placeholder="创建时间" id="create_time_two" value="" data-index="14">
+                                    <input type="hidden" class="form-control operate" name="create_time_warehouse-operate" data-name="create_time_warehouse" value="RANGE" readonly="">
+                                    <input type="text" autocomplete="off" class="form-control datetimerange" name="create_time_warehouse"  placeholder="创建时间" id="create_time_warehouse" value="" data-index="14">
                                 </div>
                                 <div class="col-sm-4" style="margin-bottom: 20px;">
-                                    <input type="button" class="btn btn-success echart3-btn" value="提交">
+                                    <input type="button" class="btn btn-success warehouse-btn" value="提交">
                                     <input type="reset" class="btn btn-default reset" value="重置">
                                 </div>                                                        
                             </div>                                                                 
                         </div>
                     </form>                     
-                    <table id="order-info-list" class="altrowstable"
+                    <table id="warehouse" class="altrowstable"
                            data-operate-edit="{:$auth->check('saleaftermanage/order_return/edit')}"
                            data-operate-del="{:$auth->check('saleaftermanage/order_return/del')}"
                            width="100%">

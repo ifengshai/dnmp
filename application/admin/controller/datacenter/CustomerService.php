@@ -70,12 +70,12 @@ class CustomerService extends Backend
         $examineArr = [];
         foreach($examinePerson as $ek => $ev){
             if(in_array($ek,$examine)){
-                $examinArr[$ek] = $ev;
+                $examineArr[$ek] = $ev;
             }
         }
         //左边右边的措施
         $step = config('workorder.step');
-        $workorder_handle_left_data = $this->workorder_handle_left($map_create,$examinArr);
+        $workorder_handle_left_data = $this->workorder_handle_left($map_create,$examineArr);
         $workorder_handle_right_data = $this->workorder_handle_right($map_measure,$step);
         //工单处理概况信息end
         //跟单概况 start
@@ -83,8 +83,80 @@ class CustomerService extends Backend
         $warehouse_handle       = $this->warehouse_handle($map_create,$warehouse_problem_type);
         //跟单概况 end 
         $orderPlatformList = config('workorder.platform');
-        $this->view->assign(compact('orderPlatformList', 'workList','infoOne','infoTwo','workArr','examinArr','workorder_handle_left_data','step','workorder_handle_right_data','warehouse_problem_type','warehouse_handle'));
+        $this->view->assign(compact('orderPlatformList', 'workList','infoOne','infoTwo','workArr','examineArr','workorder_handle_left_data','step','workorder_handle_right_data','warehouse_problem_type','warehouse_handle'));
         return $this->view->fetch();
+    }
+    /**
+     * 首页工单处理概况异步请求
+     *
+     * @Description
+     * @author lsw
+     * @since 2020/05/22 09:46:17 
+     * @return void
+     */
+    public function workorder_general()
+    {
+        if($this->request->isAjax()){
+            $params = $this->request->param();
+            if ($params['time']) {
+                $timeOne = explode(' ', $params['time']);
+                $map_create['create_time'] = $map_measure['w.create_time'] = ['between', [$timeOne[0] . ' ' . $timeOne[1], $timeOne[3] . ' ' . $timeOne[4]]];
+            } else {
+                $map_create['create_time'] = $map_measure['w.create_time'] = ['between', [date('Y-m-d 00:00:00', strtotime('-30 day')), date('Y-m-d H:i:s', time())]];
+            }
+            //1.求出三个审批人
+            $kefumanage = config('workorder.kefumanage');
+            $examine = [];
+            foreach($kefumanage as $k => $v){
+                $examine[] = $k;
+            }
+            $examine[] = config('workorder.customer_manager');
+            $examinePerson = $this->customers();
+            $examineArr = [];
+            foreach($examinePerson as $ek => $ev){
+                if(in_array($ek,$examine)){
+                    $examineArr[$ek] = $ev;
+                }
+            }
+            $step = config('workorder.step');
+            $workorder_handle_left_data = $this->workorder_handle_left($map_create,$examineArr);
+            $workorder_handle_right_data = $this->workorder_handle_right($map_measure,$step);
+            $data =[
+                'examineArr' => $examineArr,
+                'step'       => $step,
+                'workorder_handle_left_data' => $workorder_handle_left_data,
+                'workorder_handle_right_data' => $workorder_handle_right_data 
+            ];
+            $this->success('','',$data);                       
+        }
+    }
+    /**
+     * 
+     *
+     * @Description
+     * @author lsw
+     * @since 2020/05/22 11:20:48 
+     * @return void
+     */
+    public function warehouse_general()
+    {
+        if($this->request->isAjax()){
+            $params = $this->request->param();
+            if ($params['time']) {
+                $timeOne = explode(' ', $params['time']);
+                $map_create['create_time'] = ['between', [$timeOne[0] . ' ' . $timeOne[1], $timeOne[3] . ' ' . $timeOne[4]]];
+            } else {
+                $map_create['create_time'] = ['between', [date('Y-m-d 00:00:00', strtotime('-30 day')), date('Y-m-d H:i:s', time())]];
+            }
+            //1.求出三个审批人
+            $warehouse_problem_type = config('workorder.warehouse_problem_type');
+            $warehouse_data       = $this->warehouse_handle($map_create,$warehouse_problem_type);
+            $data =[
+                'warehouse_problem_type' => $warehouse_problem_type,
+                'warehouse_data' => $warehouse_data 
+            ];
+            $this->success('','',$data);                       
+        }
     }
     /**
      * 首页工单处理概况左边部分
