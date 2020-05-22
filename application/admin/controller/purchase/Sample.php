@@ -254,6 +254,7 @@ class Sample extends Backend
 
             $list = collection($list)->toArray();
             foreach ($list as $key=>$value){
+                $list[$key]['status_id'] = $value['status'];
                 if($value['status'] == 1){
                     $list[$key]['status'] = '新建';
                 }elseif($value['status'] == 2){
@@ -336,20 +337,46 @@ class Sample extends Backend
             $params = $this->request->post("row/a");
             if ($params) {
                 $params = $this->preExcludeFields($params);
-                $result = false;
-                Db::startTrans();
-
-
-
-                if ($result !== false) {
-                    $this->success();
-                } else {
-                    $this->error(__('No rows were updated'));
+                //更新状态
+                $workorder['status'] = $params['status'];
+                $workorder['description'] = $params['description'];
+                $this->sampleworkorder->save($workorder,['id'=> input('ids')]);
+                //处理商品
+                Db::name('purchase_sample_workorder_item')->where('parent_id',$ids)->delete();
+                $product_data = explode(',',$params['product_list_data']);
+                foreach ($product_data as $key=>$value){
+                    $info = explode('_',$value);
+                    $workorder_item['parent_id'] = $ids;
+                    $workorder_item['sku'] = $info[0];
+                    $workorder_item['stock'] = $info[1];
+                    $workorder_item['location_id'] = $info[2];
+                    Db::name('purchase_sample_workorder_item')->insert($workorder_item);
                 }
+                if($params['status'] == 3){
+
+                }
+                $this->success();
             }
             $this->error(__('Parameter %s can not be empty', ''));
         }
         $this->view->assign("row", $row);
+
+        //获取库位数据
+        $location_data = $this->sampleworkorder->getPurchaseLocationData();
+        $this->assign('location_data', $location_data);
+
+        //获取入库商品信息
+        $product_list = Db::name('purchase_sample_workorder_item')->where('parent_id',$ids)->order('id asc')->select();
+        $product_arr = array();
+        foreach ($product_list as $key=>$value){
+            $product_arr[] =  $value['sku'].'_'.$value['stock'].'_'.$value['location_id'];
+            $product_list[$key]['location'] = $this->samplelocation->where('id',$value['location_id'])->value('location');
+        }
+        $product_str = implode(',',$product_arr);
+        $this->assign('product_str', $product_str);
+        $this->assign('product_list', $product_list);
+
+
         return $this->view->fetch();
     }
 }
