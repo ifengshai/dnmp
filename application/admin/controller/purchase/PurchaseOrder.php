@@ -43,6 +43,8 @@ class PurchaseOrder extends Backend
         parent::_initialize();
         $this->model = new \app\admin\model\purchase\PurchaseOrder;
         $this->purchase_order_item = new \app\admin\model\purchase\PurchaseOrderItem;
+        $this->batch = new \app\admin\model\purchase\PurchaseBatch();
+        $this->batch_item = new \app\admin\model\purchase\PurchaseBatchItem();
     }
 
     /**
@@ -156,7 +158,39 @@ class PurchaseOrder extends Backend
                             $data[$k]['purchase_order_number'] = $params['purchase_number'];
                         }
                         //批量添加
-                        $this->purchase_order_item->allowField(true)->saveAll($data);
+                        $this->purchase_order_item->saveAll($data);
+
+                        //添加分批数据
+                        $batch_arrival_time = $this->request->post("batch_arrival_time/a");
+                        $batch_sku = $this->request->post("batch_sku/a");
+                        $arrival_num = $this->request->post("arrival_num/a");
+                        //判断是否有分批数据
+                        if (count(array_filter($batch_arrival_time)) > 0) {
+                            $i = 0;
+                            foreach (array_filter($batch_arrival_time) as $k => $v) {
+                                $batch_data['purchase_id'] = $this->model->id;
+                                $batch_data['arrival_time'] = $v;
+                                $batch_data['batch'] = $i + 1;
+                                $batch_data['create_person'] = session('admin.nickname');
+                                $batch_data['create_time'] = date('Y-m-d H:i:s');
+                                $batch_id = $this->batch->insertGetId($batch_data);
+                                $i++;
+                                $list = [];
+                                foreach($batch_sku[$k] as $key => $val) {
+                                    if (!$val || !$arrival_num[$k][$key]) {
+                                        continue;
+                                    }
+                                    $list[$key]['sku'] = $val;
+                                    $list[$key]['arrival_num'] = $arrival_num[$k][$key];
+                                    $list[$key]['purchase_batch_id'] = $batch_id;
+                                }
+                                
+                                dump($batch_sku[$k]);
+                                dump($batch_sku);
+                                dump($list);die;
+                                $this->batch_item->saveAll($list);
+                            }
+                        }
                     }
 
                     Db::commit();
