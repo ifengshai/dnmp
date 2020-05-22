@@ -76,6 +76,57 @@ class SelfApi extends Api
     }
 
     /**
+     * 订单支付成功节点 订单号 站点 时间
+     * @Description
+     * @author wpl
+     * @since 2020/05/18 14:22:06 
+     * @return void
+     */
+    public function order_pay()
+    {
+        //校验参数
+        $order_id = $this->request->request('order_id'); //订单id
+        $order_number = $this->request->request('order_number'); //订单号
+        $site = $this->request->request('site');//站点
+        if (!$order_id) {
+            $this->error(__('缺少订单id参数'), [], 400);
+        }
+
+        if (!$order_number) {
+            $this->error(__('缺少订单号参数'), [], 400);
+        }
+
+        if (!$site) {
+            $this->error(__('缺少站点参数'), [], 400);
+        }
+
+        $res_node = (new OrderNode())->allowField(true)->save([
+            'order_number' => $order_number,
+            'order_id' => $order_id,
+            'site' => $site,
+            'create_time' => date('Y-m-d H:i:s'),
+            'order_node' => 0,
+            'node_type' => 1,
+            'update_time' => date('Y-m-d H:i:s'),
+        ]);
+
+        $res_node_detail = (new OrderNodeDetail())->allowField(true)->save([
+            'order_number' => $order_number,
+            'order_id' => $order_id,
+            'content' => 'Your order has been created.',
+            'site' => $site,
+            'create_time' => date('Y-m-d H:i:s'),
+            'order_node' => 0,
+            'node_type' => 1
+        ]);
+        if (false !== $res_node && false !== $res_node_detail) {
+            $this->success('创建成功', [], 200);
+        } else {
+            $this->error('创建失败', [], 400);
+        }
+    }
+
+    /**
      * 发货接口
      *
      * @Description
