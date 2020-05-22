@@ -34,10 +34,9 @@ class SelfApi extends Api
     public function create_order()
     {
         //校验参数
-        $order_id = $this->request->request('order_id');
-        $order_number = $this->request->request('order_number');
-        $site = $this->request->request('site');
-        $create_time = $this->request->request('create_time');
+        $order_id = $this->request->request('order_id'); //订单id
+        $order_number = $this->request->request('order_number'); //订单号
+        $site = $this->request->request('site');//站点
         if (!$order_id) {
             $this->error(__('缺少订单id参数'), [], 400);
         }
@@ -50,14 +49,11 @@ class SelfApi extends Api
             $this->error(__('缺少站点参数'), [], 400);
         }
 
-        if (!$create_time) {
-            $this->error(__('缺少创建时间参数'), [], 400);
-        }
         $res_node = (new OrderNode())->allowField(true)->save([
             'order_number' => $order_number,
             'order_id' => $order_id,
             'site' => $site,
-            'create_time' => $create_time,
+            'create_time' => date('Y-m-d H:i:s'),
             'order_node' => 0,
             'node_type' => 0,
             'update_time' => date('Y-m-d H:i:s'),
@@ -68,7 +64,7 @@ class SelfApi extends Api
             'order_id' => $order_id,
             'content' => 'Your order has been created.',
             'site' => $site,
-            'create_time' => $create_time,
+            'create_time' => date('Y-m-d H:i:s'),
             'order_node' => 0,
             'node_type' => 0
         ]);
@@ -90,9 +86,9 @@ class SelfApi extends Api
     public function order_delivery()
     {
         //校验参数
-        $order_id = $this->request->request('order_id');
-        $order_number = $this->request->request('order_number');
-        $site = $this->request->request('site');
+        $order_id = $this->request->request('order_id');//订单id
+        $order_number = $this->request->request('order_number');//订单号
+        $site = $this->request->request('site');//站点
         if (!$order_id) {
             $this->error(__('缺少订单id参数'), [], 400);
         }
@@ -114,12 +110,6 @@ class SelfApi extends Api
                 break;
             case 3:
                 $db = 'database.db_nihao';
-                break;
-            case 4:
-                $db = 'database.db_weseeoptical';
-                break;
-            case 5:
-                $db = 'database.db_meeloog';
                 break;
             default:
                 return false;
@@ -168,13 +158,6 @@ class SelfApi extends Api
             $this->error('物流接口注册失败！！', [], $track['data']['rejected']['error']['code']);
         }
 
-        //请求接口更改物流表状态
-        $params['ids'] = $order_id;
-        $params['site'] = $site;
-        $res = $this->setLogisticsStatus($params);
-        if ($res->status !== 200) {
-            $this->error('更改物流状态失败', $res, $res->status);
-        }
         $this->success('提交成功', [], 200);
     }
 
@@ -221,41 +204,6 @@ class SelfApi extends Api
             return ['title' => $title, 'carrierId' => $carrier[$carrierId]];
         }
         return ['title' => $title, 'carrierId' => $carrierId];
-    }
-
-    /**
-     * 更新物流表状态
-     *
-     * @Description
-     * @author wpl
-     * @since 2020/05/18 18:16:48 
-     * @return void
-     */
-    protected function setLogisticsStatus($params)
-    {
-        switch ($params['site']) {
-            case 1:
-                $url = config('url.zeelool_url');
-                break;
-            case 2:
-                $url = config('url.voogueme_url');
-                break;
-            case 3:
-                $url = config('url.nihao_url');
-                break;
-            default:
-                return false;
-                break;
-        }
-        unset($params['site']);
-        $url = $url . 'magic/order/logistics';
-        $client = new Client(['verify' => false]);
-        //请求URL
-        $response = $client->request('POST', $url, array('form_params' => $params));
-        $body = $response->getBody();
-        $stringBody = (string) $body;
-        $res = json_decode($stringBody);
-        return $res;
     }
 
     /**
