@@ -504,7 +504,7 @@ class Test extends Backend
      */
     public function reg_shipment()
     {
-        $order_shipment = Db::connect('database.db_zeelool')
+        $order_shipment = Db::connect('database.db_nihao')
             ->table('sales_flat_shipment_track')
             ->field('entity_id,order_id,track_number,title,updated_at')
             ->where('created_at', '>=', '2020-03-31 00:00:00')
@@ -525,18 +525,22 @@ class Test extends Backend
         $order_group = array_chunk($shipment_reg, 40);
 
         $trackingConnector = new TrackingConnector($this->apiKey);
+        $order_ids = array();
         foreach ($order_group as $key => $val) {
             $aa = $trackingConnector->registerMulti($val);
 
             //请求接口更改物流表状态
-            $params['ids'] = $val['order_id'];
-            $params['site'] = 1;
+            $order_ids = implode(',',array_column($val, 'order_id'));
+            $params['ids'] = $order_ids;
+            $params['site'] = 3;
             $res = $this->setLogisticsStatus($params);
             if ($res->status !== 200) {
-                echo '更新失败'.$val['order_id'] . "\n";
+                echo '更新失败:'.$order_ids . "\n";
             }
-            sleep(1);
+            $order_ids = array();
+
             echo $key . "\n";
+            sleep(1);
         }
         dump($order_group[$key]);
         echo 'all is ok' . "\n";
