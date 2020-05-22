@@ -4,6 +4,7 @@ namespace app\admin\controller;
 
 use app\common\controller\Backend;
 use app\Common\model\Auth;
+use GuzzleHttp\Client;
 use think\Db;
 use SchGroup\SeventeenTrack\Connectors\TrackingConnector;
 
@@ -64,12 +65,12 @@ class Test extends Backend
                 'carrier' => $carrier['carrierId']*/
                 /*'number' => 'LO546092713CN',//E邮宝
                 'carrier' => '03011'*/
-                /*'number' => '3616952791',//DHL
-                'carrier' => '100001'*/
-                'number' => 'UF105842059YP', //燕文
-                'carrier' => '190012'
+                'number' => '3616952791',//DHL
+                'carrier' => '100001'
+                /*'number' => 'UF105842059YP', //燕文
+                'carrier' => '190012'*/
             ]]);
-
+            dump($trackInfo);exit;
 
             $add['site'] = 1;
             $add['order_id'] = $v['order_id'];
@@ -505,8 +506,9 @@ class Test extends Backend
     {
         $order_shipment = Db::connect('database.db_nihao')
             ->table('sales_flat_shipment_track')
-            ->field('entity_id,track_number,title,updated_at')
-            ->where('created_at', '>=', '2020-04-10 00:00:00')
+            ->field('entity_id,order_id,track_number,title,updated_at')
+            ->where('created_at', '>=', '2020-03-31 00:00:00')
+            ->where('handle', '=', '0')
             ->select();
 
         foreach ($order_shipment as $k => $v) {
@@ -517,15 +519,28 @@ class Test extends Backend
             $carrier = $this->getCarrier($v['title']);
             $shipment_reg[$k]['number'] =  $v['track_number'];
             $shipment_reg[$k]['carrier'] =  $carrier['carrierId'];
+            $shipment_reg[$k]['order_id'] =  $v['order_id'];
         }
 
         $order_group = array_chunk($shipment_reg, 40);
 
         $trackingConnector = new TrackingConnector($this->apiKey);
+        $order_ids = array();
         foreach ($order_group as $key => $val) {
             $aa = $trackingConnector->registerMulti($val);
-            sleep(1);
+
+            //请求接口更改物流表状态
+            $order_ids = implode(',',array_column($val, 'order_id'));
+            $params['ids'] = $order_ids;
+            $params['site'] = 3;
+            $res = $this->setLogisticsStatus($params);
+            if ($res->status !== 200) {
+                echo '更新失败:'.$order_ids . "\n";
+            }
+            $order_ids = array();
+
             echo $key . "\n";
+            sleep(1);
         }
         dump($order_group[$key]);
         echo 'all is ok' . "\n";
@@ -573,6 +588,41 @@ class Test extends Backend
             return ['title' => $title, 'carrierId' => $carrier[$carrierId]];
         }
         return ['title' => $title, 'carrierId' => $carrierId];
+    }
+
+    /**
+     * 更新物流表状态
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/05/18 18:16:48 
+     * @return void
+     */
+    protected function setLogisticsStatus($params)
+    {
+        switch ($params['site']) {
+            case 1:
+                $url = config('url.zeelool_url');
+                break;
+            case 2:
+                $url = config('url.voogueme_url');
+                break;
+            case 3:
+                $url = config('url.nihao_url');
+                break;
+            default:
+                return false;
+                break;
+        }
+        unset($params['site']);
+        $url = $url . 'magic/order/logistics';
+        $client = new Client(['verify' => false]);
+        //请求URL
+        $response = $client->request('POST', $url, array('form_params' => $params));
+        $body = $response->getBody();
+        $stringBody = (string) $body;
+        $res = json_decode($stringBody);
+        return $res;
     }
 
     /**

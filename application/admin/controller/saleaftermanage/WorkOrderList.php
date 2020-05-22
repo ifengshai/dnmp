@@ -278,9 +278,10 @@ class WorkOrderList extends Backend
                     //更换镜框判断是否有库存 
                     if (($params['change_frame'] && $params['problem_type_id'] == 1  && $params['work_type'] == 1) || ($params['change_frame'] && $params['work_type'] == 2 && in_array($params['problem_id'], [2, 3]))) {
                         $skus = $params['change_frame']['change_sku'];
+                        $num = $params['change_frame']['change_number'];
                         if (count(array_filter($skus)) < 1) throw new Exception("SKU不能为空");
                         //判断SKU是否有库存
-                        $this->skuIsStock($skus, $params['work_platform']);
+                        $this->skuIsStock($skus, $params['work_platform'], $num);
                     }
 
                     //判断赠品是否有库存
@@ -297,7 +298,7 @@ class WorkOrderList extends Backend
                         foreach ($originalSkus as $key => $originalSku) {
                             if (!$originalSku) exception('sku不能为空');
                             if (!$originalNums[$key]) exception('数量必须大于0');
-                            $this->skuIsStock([$originalSku], $params['work_platform'], $originalNums[$key]);
+                            $this->skuIsStock([$originalSku], $params['work_platform'], [$originalNums[$key]]);
                         }
                     }
 
@@ -545,26 +546,26 @@ class WorkOrderList extends Backend
                 }
                 if ($result !== false) {
                     //通知
-                    if ($this->model->work_type == 1) {
-                        if ($this->model->work_status == 2) {
-                            Ding::cc_ding($this->model->assign_user_id, '', '工单ID:' . $work_id . '😎😎😎😎有新工单需要你审核😎😎😎😎', '有新工单需要你审核');
-                        } elseif ($this->model->work_status == 3) {
-                            $usersId = explode(',', $this->model->recept_person_id);
-                            Ding::cc_ding($usersId, '', '工单ID:' . $work_id . '😎😎😎😎有新工单需要你处理😎😎😎😎', '有新工单需要你处理');
-                        }
-                    }
+                    // if ($this->model->work_type == 1) {
+                    //     if ($this->model->work_status == 2) {
+                    //         Ding::cc_ding($this->model->assign_user_id, '', '工单ID:' . $work_id . '😎😎😎😎有新工单需要你审核😎😎😎😎', '有新工单需要你审核');
+                    //     } elseif ($this->model->work_status == 3) {
+                    //         $usersId = explode(',', $this->model->recept_person_id);
+                    //         Ding::cc_ding($usersId, '', '工单ID:' . $work_id . '😎😎😎😎有新工单需要你处理😎😎😎😎', '有新工单需要你处理');
+                    //     }
+                    // }
 
-                    //经手人
-                    if ($this->model->work_type == 2 && $this->model->work_status == 3 && !$params['id']) {
+                    // //经手人
+                    // if ($this->model->work_type == 2 && $this->model->work_status == 3 && !$params['id']) {
 
-                        Ding::cc_ding($this->model->after_user_id, '', '工单ID:' . $work_id . '😎😎😎😎有新工单需要你处理😎😎😎😎', '有新工单需要你处理');
-                    }
+                    //     Ding::cc_ding($this->model->after_user_id, '', '工单ID:' . $work_id . '😎😎😎😎有新工单需要你处理😎😎😎😎', '有新工单需要你处理');
+                    // }
 
-                    //跟单处理
-                    if ($this->model->work_type == 2 && $this->model->work_status == 3 && $params['id']) {
+                    // //跟单处理
+                    // if ($this->model->work_type == 2 && $this->model->work_status == 3 && $params['id']) {
 
-                        Ding::cc_ding($params['recept_person_id'], '', '工单ID:' . $work_id . '😎😎😎😎有新工单需要你处理😎😎😎😎', '有新工单需要你处理');
-                    }
+                    //     Ding::cc_ding($params['recept_person_id'], '', '工单ID:' . $work_id . '😎😎😎😎有新工单需要你处理😎😎😎😎', '有新工单需要你处理');
+                    // }
 
                     $this->success();
                 } else {
@@ -659,21 +660,26 @@ class WorkOrderList extends Backend
      * @param [type] $siteType 站点类型
      * @return void
      */
-    protected function skuIsStock($skus = [], $siteType, $num = 0)
+    protected function skuIsStock($skus = [], $siteType, $num = [])
     {
         if (!array_filter($skus)) {
             throw new Exception("SKU不能为空");
         }
 
         $itemPlatFormSku = new \app\admin\model\itemmanage\ItemPlatformSku();
+        $item = new \app\admin\model\itemmanage\Item();
         //根据平台sku转sku
-        foreach (array_filter($skus) as $v) {
+        foreach (array_filter($skus) as $k => $v) {
             //转换sku
             $sku = $itemPlatFormSku->getTrueSku(trim($v), $siteType);
-            //查询库存
-            $stock = $this->item->where(['is_open' => 1, 'is_del' => 1, 'sku' => $sku])->value('available_stock');
-            if ($stock <= $num) {
-                throw new Exception($v . '暂无库存！！');
+            //查询库存 判断是否开启预售
+            $res = $item->where(['is_open' => 1, 'is_del' => 1, 'sku' => $sku])->field('available_stock,presell_status,presell_create_time,presell_end_time,presell_residue_num')->find();
+            //判断可用库存
+            if ($res->available_stock < $num[$k]) {
+                //判断没库存情况下 是否开启预售 并且预售时间是否满足 并且预售数量是否足够
+                if ($res->presell_status != 1 ||  ($res->presell_status == 1  && (time() < strtotime($res->presell_create_time) || time() > strtotime($res->presell_end_time) || $res->presell_residue_num < $num[$k]))) {
+                    throw new Exception($v . '暂无库存！！');
+                }
             }
         }
         return true;
@@ -694,9 +700,7 @@ class WorkOrderList extends Backend
         if (!$row) {
             $this->error(__('No Results were found'));
         }
-        if ($row['create_user_id'] != session('admin.id')) {
-            return $this->error(__('非本人创建不能编辑'));
-        }
+
         $adminIds = $this->getDataLimitAdminIds();
         if (is_array($adminIds)) {
             if (!in_array($row[$this->dataLimitField], $adminIds)) {
@@ -732,9 +736,10 @@ class WorkOrderList extends Backend
                     //更换镜框判断是否有库存
                     if ($params['change_frame'] && $params['problem_type_id'] == 1) {
                         $skus = $params['change_frame']['change_sku'];
+                        $num = $params['change_frame']['change_number'];
                         if (count(array_filter($skus)) < 1) throw new Exception("SKU不能为空");
                         //判断SKU是否有库存
-                        $this->skuIsStock($skus, $params['work_platform']);
+                        $this->skuIsStock($skus, $params['work_platform'], $num);
                     }
                     //判断赠品是否有库存
                     //判断补发是否有库存
@@ -750,7 +755,7 @@ class WorkOrderList extends Backend
                         foreach ($originalSkus as $key => $originalSku) {
                             if (!$originalSku) exception('sku不能为空');
                             if (!$originalNums[$key]) exception('数量必须大于0');
-                            $this->skuIsStock([$originalSku], $params['work_platform'], $originalNums[$key]);
+                            $this->skuIsStock([$originalSku], $params['work_platform'], [$originalNums[$key]]);
                         }
                     }
 
@@ -1989,15 +1994,21 @@ EOF;
             $arr[$k]['platform_type']   = $v['platform_type'];
         }
         $itemPlatFormSku = new \app\admin\model\itemmanage\ItemPlatformSku();
+
+        
         //根据平台sku转sku
         $notEnough = [];
         foreach (array_filter($arr) as $v) {
             //转换sku
             $sku = $itemPlatFormSku->getTrueSku(trim($v['original_sku']), $v['platform_type']);
-            //查询库存
-            $stock = $this->item->where(['is_open' => 1, 'is_del' => 1, 'sku' => $sku])->value('available_stock');
-            if ($stock <= $v['original_number']) {
-                $notEnough[] = $sku;
+            //查询库存 判断是否开启预售
+            $res = $this->item->where(['is_open' => 1, 'is_del' => 1, 'sku' => $sku])->field('available_stock,presell_status,presell_create_time,presell_end_time,presell_residue_num')->find();
+            //判断可用库存
+            if ($res->available_stock < $v['original_number']) {
+                //判断没库存情况下 是否开启预售 并且预售时间是否满足 并且预售数量是否足够
+                if ($res->presell_status != 1 ||  ($res->presell_status == 1  && (time() < strtotime($res->presell_create_time) || time() > strtotime($res->presell_end_time) || $res->presell_residue_num <  $v['original_number']))) {
+                    $notEnough[] = $sku;
+                }
             }
         }
         if ($notEnough) {
