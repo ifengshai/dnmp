@@ -1,12 +1,7 @@
 <style>
     .caigou {
-        border-width: 1px;
-        border-style: solid;
-        border-color: rgba(188, 188, 188, 1);
-        border-radius: 6px;
         padding: 10px;
-        width: 70%;
-        margin-left: 10%;
+        width: 100%;
         margin-bottom: 10px;
     }
 
@@ -18,6 +13,7 @@
         border-color: rgba(188, 188, 188, 1);
         border-radius: 6px;
         text-align: center;
+
     }
 
     .caigou #caigou-table tr {
@@ -54,101 +50,100 @@
 </style>
 <form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
 
-    <div class='caigou'>
-        <p style="font-size: 16px;text-align: center;"><b>采购信息</b></p>
-        <br>
-        <div class="form-group">
-            <label class="control-label col-xs-12 col-sm-2">采购单号:</label>
-            <div class="col-xs-12 col-sm-8">
-                <input id="c-purchase_number" class="form-control"  readonly name="row[purchase_number]"
-                    value="{$row.purchase_number}" type="text">
-            </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">采购单号:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-purchase_number" class="form-control" readonly name="row[purchase_number]"
+                value="{$row.purchase_number}" type="text">
         </div>
-        <div class="form-group">
-            <label class="control-label col-xs-12 col-sm-2">采购单名称:</label>
-            <div class="col-xs-12 col-sm-8">
-                <input id="c-purchase_name" class="form-control" name="row[purchase_name]"  value="{$row.purchase_name}" type="text">
-            </div>
+        <label class="control-label col-xs-12 col-sm-2">采购单名称:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-purchase_name" class="form-control" name="row[purchase_name]" value="{$row.purchase_name}"
+                type="text">
         </div>
-        <div class="form-group">
-            <label class="control-label col-xs-12 col-sm-2">采购备注:</label>
-            <div class="col-xs-12 col-sm-8">
-                <textarea id="c-purchase_remark" class="form-control " rows="5" name="row[purchase_remark]"
-                    cols="50">{$row.purchase_remark}</textarea>
-            </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">到货时间:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-arrival_time" class="form-control datetimepicker arrival_time"
+                data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[arrival_time]" type="text"
+                value="{$row.arrival_time}">
+        </div>
+        <label class="control-label col-xs-12 col-sm-2">大货/现货:</label>
+        <div class="col-xs-12 col-sm-3">
+            <select name="row[type]" class="form-control">
+                <option value="">请选择</option>
+                <option value="1" {:$row['type']==1 ? 'selected' : '' }>现货</option>
+                <option value="2" {:$row['type']==2 ? 'selected' : '' }>大货</option>
+            </select>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">采购备注:</label>
+        <div class="col-xs-12 col-sm-8">
+            <textarea id="c-purchase_remark" class="form-control " rows="5" name="row[purchase_remark]"
+                cols="50">{$row.purchase_remark}</textarea>
         </div>
     </div>
     <hr>
-    <div class='caigou {:$row.is_new_product==1 ? "hide" : "" }'>
-        <p style="font-size: 16px;text-align: center;"><b>合同信息</b></p>
 
+    <div class='caigou {:$is_new_product==1 ? "hide" : "" }'>
+        <p style="font-size: 16px;text-align: center;"><b>合同信息</b></p>
 
         <div class="form-group">
             <label class="control-label col-xs-12 col-sm-2">合同编号:</label>
-            <div class="col-xs-12 col-sm-8">
-                <select name="row[contract_id]" class="form-control contract_id selectpicker" disabled data-live-search='true'>
+            <div class="col-xs-12 col-sm-3">
+                <select name="row[contract_id]" class="form-control contract_id selectpicker" required
+                    data-live-search='true'>
                     <option value="">请选择</option>
                     {foreach $contract_data as $k => $v}
-                    <option value="{$v.id}" {:$row['contract_id'] == $v['id'] ? 'selected' : ''}>{$v.contract_number}</option>
+                    <option value="{$v.id}" {:$row['contract_id']==$v['id'] ? 'selected' : '' }>{$v.contract_number}
+                    </option>
                     {/foreach}
                 </select>
             </div>
-        </div>
-        <div class="form-group">
             <label class="control-label col-xs-12 col-sm-2">合同名称:</label>
-            <div class="col-xs-12 col-sm-8">
-                <input id="c-purchase_freight" class="form-control contract_name" readonly  name="" type="text">
+            <div class="col-xs-12 col-sm-3">
+                <input id="c-purchase_freight" class="form-control contract_name" readonly name="" type="text">
             </div>
         </div>
 
-        <div class="form-group">
-            <label class="control-label col-xs-12 col-sm-2">交货时间:</label>
-            <div class="col-xs-12 col-sm-8">
-                <input id="c-delivery_stime" style="width: 200px;" readonly class="form-control datetimepicker"
-                    data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[delivery_stime]"
-                    type="text" value="{$row.delivery_stime}"> -
-                <input id="c-delivery_etime" style="width: 200px;" readonly class="form-control datetimepicker"
-                    data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[delivery_etime]"
-                    type="text" value="{$row.delivery_etime}">
-            </div>
-        </div>
         <div class="form-group">
             <label class="control-label col-xs-12 col-sm-2">交货地址:</label>
-            <div class="col-xs-12 col-sm-8">
-                <input id="c-delivery_address" readonly class="form-control address" 
-                    name="row[delivery_address]" type="text" value="{$row.delivery_address}">
+            <div class="col-xs-12 col-sm-3">
+                <input id="c-delivery_address" class="form-control address" readonly name="row[delivery_address]"
+                    type="text" value="{$row.delivery_address}">
+            </div>
+            <label class="control-label col-xs-12 col-sm-2">交货时间:</label>
+            <div class="col-xs-12 col-sm-3">
+                <input id="c-delivery_time" readonly class="form-control datetimepicker delivery_time"
+                    data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[delivery_time]" type="text"
+                    value="{$row.delivery_time}">
             </div>
         </div>
 
-
         <div class="form-group">
-            <label class="control-label col-xs-12 col-sm-2">合同有效期</label>
-            <div class="col-xs-12 col-sm-8">
-                <input id="c-contract_stime" style="width: 200px;" readonly class="form-control datetimepicker contract_stime"
-                    data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name=""
-                    type="text" value="{:date('Y-m-d H:i:s')}"> -
-                <input id="c-contract_etime" style="width: 200px;" readonly class="form-control datetimepicker contract_etime"
-                    data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name=""
-                    type="text" value="{:date('Y-m-d H:i:s')}">
+            <label class="control-label col-xs-12 col-sm-2">合同有效期:</label>
+            <div class="col-xs-12 col-sm-3">
+                <input id="c-contract_time" readonly class="form-control datetimepicker contract_time"
+                    data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="" type="text"
+                    value="{:date('Y-m-d H:i:s')}">
             </div>
-        </div>
-
-
-        <div class="form-group">
             <label class="control-label col-xs-12 col-sm-2">合同附件:</label>
-            <div class="col-xs-12 col-sm-8">
+            <div class="col-xs-12 col-sm-3">
                 <div class="input-group">
-                    <input id="c-contract_images" class="form-control contract_images" size="200" readonly name="row[contract_images]" 
-                        type="text">
+                    <input id="c-contract_images" class="form-control contract_images" size="200" readonly
+                        name="row[contract_images]" type="text">
                     <div class="input-group-addon no-border no-padding">
                         <span><button type="button" id="plupload-contract_images" class="btn btn-danger plupload hidden"
                                 data-input-id="c-contract_images"
                                 data-mimetype="image/gif,image/jpeg,image/png,image/jpg,image/bmp" data-multiple="true"
                                 data-maxcount="5" data-preview-id="p-contract_images"><i class="fa fa-upload"></i>
                                 {:__('Upload')}</button></span>
-                        <span><button type="button" id="fachoose-contract_images" class="btn btn-primary fachoose hidden"
-                                data-input-id="c-contract_images" data-mimetype="image/*" data-multiple="true"
-                                data-maxcount="5"><i class="fa fa-list"></i> {:__('Choose')}</button></span>
+                        <span><button type="button" id="fachoose-contract_images"
+                                class="btn btn-primary fachoose hidden" data-input-id="c-contract_images"
+                                data-mimetype="image/*" data-multiple="true" data-maxcount="5"><i
+                                    class="fa fa-list"></i> {:__('Choose')}</button></span>
                     </div>
                     <span class="msg-box n-right" for="c-contract_images"></span>
                 </div>
@@ -156,40 +151,42 @@
             </div>
         </div>
     </div>
+
     <hr>
+
     <div class='caigou'>
         <p style="font-size: 16px;text-align: center;"><b>供应商信息</b></p>
 
 
         <div class="form-group">
             <label class="control-label col-xs-12 col-sm-2">供应商名称:</label>
-            <div class="col-xs-12 col-sm-8">
-               
-                <select name="row[supplier_id]" class="form-control supplier selectpicker" data-rule='required' data-live-search='true'>
+            <div class="col-xs-12 col-sm-3">
+
+                <select name="row[supplier_id]" class="form-control supplier selectpicker" data-rule='required'
+                    data-live-search='true'>
                     <option value="">请选择</option>
                     {foreach $supplier as $k => $v}
-                    <option value="{$k}" {:$row['supplier_id'] == $k ? 'selected' : ''}>{$v}</option>
+                    <option value="{$k}" {:$row[0]['supplier_id']==$k ? 'selected' : '' }>{$v}</option>
                     {/foreach}
                 </select>
-               
+
             </div>
-        </div>
-    
-        <div class="form-group">
+
             <label class="control-label col-xs-12 col-sm-2">供应商地址:</label>
-            <div class="col-xs-12 col-sm-8">
-                <input id="c-purchase_total" class="form-control supplier_address" readonly name="row[supplier_address]" value="{$row.supplier_address}" type="text">
+            <div class="col-xs-12 col-sm-3">
+                <input id="c-purchase_total" class="form-control supplier_address" readonly name="row[supplier_address]"
+                    type="text" value="{$row.supplier_address}">
             </div>
         </div>
+
     </div>
+
     <hr>
-    <div class='caigou'>
+    <div class='caigou' style="width: 80%;margin-left: 10%;">
         <p style="font-size: 16px;text-align: center;"><b>商品信息</b></p>
         <div style="margin-bottom: 20px;">
-            <!-- <div id="toolbar" class="toolbar {:$row['contract_id'] ? 'hide' : ''}" >
-                <a href="javascript:;" class="btn btn-success btn-add" title="增加"><i class="fa fa-plus"></i> 增加</a>
-            </div> -->
-            <table id="caigou-table">
+
+            <table id="caigou-table" class="purchase-table">
                 <tr>
                     <th>SKU</td>
                     <th>产品名称</td>
@@ -197,19 +194,25 @@
                     <th>采购数量（个）</td>
                     <th>采购单价（元）</td>
                     <th>总价（元）</td>
-                    <!-- <th class="{:$row['contract_id'] ? 'hide' : ''}">操作</td> -->
                 </tr>
                 {foreach $item as $v}
                 <tr>
-                    <input id="c-purchase_remark" class="form-control item_id" name="item_id[]" value="{$v.id}" type="hidden">
+                    <input id="c-purchase_remark" class="form-control item_id" name="item_id[]" value="{$v.id}"
+                        type="hidden">
                     <td>
-                        <input id="c-purchase_remark" class="form-control sku" {:$row['contract_id'] ? 'readonly' : ''} name="sku[]" value="{$v.sku}" type="text">
+                        <input id="c-purchase_remark" class="form-control sku" {:$row['contract_id'] ? 'readonly' : '' }
+                            name="sku[]" value="{$v.sku}" type="text">
                     </td>
-                    <td><input id="c-purchase_remark" class="form-control product_name" readonly name="product_name[]" value="{$v.product_name}" type="text"></td>
-                    <td><input id="c-purchase_remark" class="form-control supplier_sku" name="supplier_sku[]" value="{$v.supplier_sku}" type="text"></td>
-                    <td><input id="c-purchase_remark" class="form-control purchase_num" {:$row['contract_id'] ? 'readonly' : ''} name="purchase_num[]" value="{$v.purchase_num}" type="text"></td>
-                    <td><input id="c-purchase_remark" class="form-control purchase_price" {:$row['contract_id'] ? 'readonly' : ''} name="purchase_price[]" value="{$v.purchase_price}" type="text"></td>
-                    <td><input id="c-purchase_remark" class="form-control goods_total" name="purchase_total[]" readonly value="{$v.purchase_total}" type="text"></td>
+                    <td><input id="c-purchase_remark" class="form-control product_name" readonly name="product_name[]"
+                            value="{$v.product_name}" type="text"></td>
+                    <td><input id="c-purchase_remark" class="form-control supplier_sku" name="supplier_sku[]"
+                            value="{$v.supplier_sku}" type="text"></td>
+                    <td><input id="c-purchase_remark" class="form-control purchase_num" {:$row['contract_id']
+                            ? 'readonly' : '' } name="purchase_num[]" value="{$v.purchase_num}" type="text"></td>
+                    <td><input id="c-purchase_remark" class="form-control purchase_price" {:$row['contract_id']
+                            ? 'readonly' : '' } name="purchase_price[]" value="{$v.purchase_price}" type="text"></td>
+                    <td><input id="c-purchase_remark" class="form-control goods_total" name="purchase_total[]" readonly
+                            value="{$v.purchase_total}" type="text"></td>
                     <!-- <td class="{:$row['contract_id'] ? 'hide' : ''}"><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i> 删除</a></td> -->
                 </tr>
                 {/foreach}
@@ -219,47 +222,95 @@
 
         <div class="form-group">
             <label class="control-label col-xs-12 col-sm-2">商品总额:</label>
-            <div class="col-xs-12 col-sm-8">
-                <input id="c-product_total" class="form-control total" step="0.01" name="row[product_total]" readonly value="{$row.product_total}" type="number">
+            <div class="col-xs-12 col-sm-3">
+                <input id="c-product_total" class="form-control total" readonly step="0.01" name="row[product_total]"
+                    type="number" value="{$row.product_total}">
             </div>
-        </div>
-        <div class="form-group">
+
             <label class="control-label col-xs-12 col-sm-2">运费:</label>
-            <div class="col-xs-12 col-sm-8">
-                <input id="c-purchase_freight" class="form-control freight" {:$row['contract_id'] ? 'readonly' : ''} step="0.01" name="row[purchase_freight]" value="{$row.purchase_freight}"
-                    type="number">
-            </div>
-        </div>
-        <div class="form-group">
-            <label class="control-label col-xs-12 col-sm-2">总计:</label>
-            <div class="col-xs-12 col-sm-8">
-                <input id="c-purchase_total" class="form-control purchase_total" step="0.01" name="row[purchase_total]" readonly value="{$row.purchase_total}" type="number">
+            <div class="col-xs-12 col-sm-3">
+                <input id="c-purchase_freight" class="form-control freight" step="0.01" name="row[purchase_freight]"
+                    type="number" value="{$row.purchase_freight}">
             </div>
         </div>
 
         <div class="form-group">
+            <label class="control-label col-xs-12 col-sm-2">总计:</label>
+            <div class="col-xs-12 col-sm-3">
+                <input id="c-purchase_total" class="form-control purchase_total" readonly step="0.01"
+                    name="row[purchase_total]" value="{$row.purchase_total}" type="number">
+            </div>
             <label class="control-label col-xs-12 col-sm-2">{:__('Settlement_method')}:</label>
-            <div class="col-xs-12 col-sm-8">
+            <div class="col-xs-12 col-sm-3">
                 <select name="row[settlement_method]" class="form-control settlement_method">
-                    <option value="1" {:$row['settlement_method'] == 1 ? 'selected' : ''}>先付款</option>
-                    <option value="2" {:$row['settlement_method'] == 2 ? 'selected' : ''}>货到付款</option>
-                    <option value="3" {:$row['settlement_method'] == 3 ? 'selected' : ''}>付定金，货到付款</option>
+                    <option value="1" {:$row['settlement_method']==1 ? 'selected' : '' }>先付款</option>
+                    <option value="2" {:$row['settlement_method']==2 ? 'selected' : '' }>货到付款</option>
+                    <option value="3" {:$row['settlement_method']==3 ? 'selected' : '' }>付定金，货到付款</option>
                 </select>
             </div>
-        </div>
-        <div class="form-group {:$row['settlement_method'] == 3 ? '' : 'hidden'} deposit_amount">
-            <label class="control-label col-xs-12 col-sm-2">定金金额:</label>
-            <div class="col-xs-12 col-sm-8">
-                <input id="c-deposit_amount" class="form-control deposit_amount" step="0.01" name="row[deposit_amount]" value="{$row.deposit_amount}" type="number">
-            </div>
+
+
         </div>
         <div class="form-group {:$row['settlement_method'] == 3 ? '' : 'hidden'} final_amount">
-            <label class="control-label col-xs-12 col-sm-2">尾款金额:</label>
-            <div class="col-xs-12 col-sm-8">
-                <input id="c-final_amount" class="form-control final_amount" step="0.01" name="row[final_amount]" value="{$row.final_amount}" type="number">
+
+            <label class="control-label col-xs-12 col-sm-2">定金金额:</label>
+            <div class="col-xs-12 col-sm-3">
+                <input id="c-deposit_amount" class="form-control deposit_amount" step="0.01" name="row[deposit_amount]"
+                    type="number" value="{$row.deposit_amount}">
             </div>
+
+            <label class="control-label col-xs-12 col-sm-2">尾款金额:</label>
+            <div class="col-xs-12 col-sm-3">
+                <input id="c-final_amount" class="form-control final_amount" step="0.01" name="row[final_amount]"
+                    type="number" value="{$row.final_amount}">
+            </div>
+
         </div>
-        
+    </div>
+
+    <hr>
+    <div class='caigou' style="width: 50%;margin-left: 10%;">
+        <p style="font-size: 16px;text-align: center;"><b>交货信息</b></p>
+        <div style="margin-bottom: 20px;" id="arrival_div">
+            <div id="toolbar1" class="toolbar">
+                <a href="javascript:;" class="btn btn-success btn-addplus" title="添加交货批次"><i class="fa fa-plus"></i>
+                    添加交货批次</a>
+            </div>
+            {foreach $batch as $v}
+            <div class="list" style="margin-top:20px;">
+                <label class="control-label col-xs-12 col-sm-2" style="width:150px;">批次预计到货时间：</label>
+                <div class="col-xs-12 col-sm-3" style="margin-bottom: 20px;">
+                    <input id="c-arrival_time" readonly class="form-control datetimepicker arrival_time"
+                        data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="arrival_time[]" type="text"
+                        value="{$v->arrival_time}">
+
+                </div>
+                <!-- <a href="javascript:;" class="btn btn-danger btn-arrival-del" title="删除"><i class="fa fa-trash"></i>
+                    删除</a> -->
+                <table id="caigou-table" style="width:80%;">
+                    <tr>
+                        <th>SKU</td>
+
+                        <th>到货数量</td>
+                    </tr>
+                    {foreach $v->purchaseBatchItem as $val}
+                    <tr>
+                        <td>
+                            <input id="c-purchase_remark" class="form-control" name="batch_sku[{$v.batch}][]" value="{$val.sku}" readonly type="text">
+                        </td>
+
+                        <td><input id="c-purchase_remark" class="form-control arrival_num" value="{$val.arrival_num}" name="arrival_num[{$v.batch}][]"
+                                type="text"></td>
+
+                    </tr>
+                    {/foreach}
+
+                </table>
+
+
+            </div>
+            {/foreach}
+        </div>
     </div>
 
     <input type='hidden' name="row[purchase_status]" class="status" value="{$row.purchase_status}">
@@ -279,11 +330,15 @@
             <td>
                 <input id="c-purchase_remark" class="form-control sku" name="sku[]" type="text">
             </td>
-            <td><input id="c-purchase_remark" class="form-control product_name" readonly name="product_name[]" type="text"></td>
-            <td><input id="c-purchase_remark" class="form-control supplier_sku" readonly name="supplier_sku[]" type="text"></td>
+            <td><input id="c-purchase_remark" class="form-control product_name" readonly name="product_name[]"
+                    type="text"></td>
+            <td><input id="c-purchase_remark" class="form-control supplier_sku" readonly name="supplier_sku[]"
+                    type="text"></td>
             <td><input id="c-purchase_remark" class="form-control purchase_num" name="purchase_num[]" type="text"></td>
-            <td><input id="c-purchase_remark" class="form-control purchase_price" name="purchase_price[]" type="text"></td>
-            <td><input id="c-purchase_remark" class="form-control goods_total" readonly name="purchase_total[]" type="text"></td>
+            <td><input id="c-purchase_remark" class="form-control purchase_price" name="purchase_price[]" type="text">
+            </td>
+            <td><input id="c-purchase_remark" class="form-control goods_total" readonly name="purchase_total[]"
+                    type="text"></td>
             <td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i> 删除</a></td>
         </tr>
     </table>

@@ -164,7 +164,7 @@ class PurchaseOrder extends Backend
                         $batch_arrival_time = $this->request->post("batch_arrival_time/a");
                         $batch_sku = $this->request->post("batch_sku/a");
                         $arrival_num = $this->request->post("arrival_num/a");
-           
+
                         //判断是否有分批数据
                         if (count(array_filter($batch_arrival_time)) > 0) {
                             $i = 0;
@@ -177,7 +177,7 @@ class PurchaseOrder extends Backend
                                 $batch_id = $this->batch->insertGetId($batch_data);
                                 $i++;
                                 $list = [];
-                                foreach($batch_sku[$k] as $key => $val) {
+                                foreach ($batch_sku[$k] as $key => $val) {
                                     if (!$val || !$arrival_num[$k][$key]) {
                                         continue;
                                     }
@@ -185,7 +185,7 @@ class PurchaseOrder extends Backend
                                     $list[$key]['arrival_num'] = $arrival_num[$k][$key];
                                     $list[$key]['purchase_batch_id'] = $batch_id;
                                 }
-                            
+
                                 $this->batch_item->saveAll($list);
                             }
                         }
@@ -386,6 +386,36 @@ class PurchaseOrder extends Backend
                         }
                         //批量添加
                         $this->purchase_order_item->allowField(true)->saveAll($data);
+
+                        //添加分批数据
+                        $batch_arrival_time = $this->request->post("batch_arrival_time/a");
+                        $batch_sku = $this->request->post("batch_sku/a");
+                        $arrival_num = $this->request->post("arrival_num/a");
+
+                        //判断是否有分批数据
+                        if (count(array_filter($batch_arrival_time)) > 0) {
+                            $i = 0;
+                            foreach (array_filter($batch_arrival_time) as $k => $v) {
+                                $batch_data['purchase_id'] = $this->model->id;
+                                $batch_data['arrival_time'] = $v;
+                                $batch_data['batch'] = $i + 1;
+                                $batch_data['create_person'] = session('admin.nickname');
+                                $batch_data['create_time'] = date('Y-m-d H:i:s');
+                                $batch_id = $this->batch->insertGetId($batch_data);
+                                $i++;
+                                $list = [];
+                                foreach ($batch_sku[$k] as $key => $val) {
+                                    if (!$val || !$arrival_num[$k][$key]) {
+                                        continue;
+                                    }
+                                    $list[$key]['sku'] = $val;
+                                    $list[$key]['arrival_num'] = $arrival_num[$k][$key];
+                                    $list[$key]['purchase_batch_id'] = $batch_id;
+                                }
+
+                                $this->batch_item->saveAll($list);
+                            }
+                        }
                     }
                     Db::commit();
                 } catch (ValidateException $e) {
@@ -415,6 +445,10 @@ class PurchaseOrder extends Backend
         $map['purchase_id'] = $ids;
         $item = $this->purchase_order_item->where($map)->select();
         $this->assign('item', $item);
+
+        //查询分批数据
+        $batch = $this->batch->hasWhere('purchaseBatchItem')->where('purchase_id', $ids)->select();
+        $this->assign('batch', $batch);
 
         //查询合同
         $contract = new \app\admin\model\purchase\Contract;
