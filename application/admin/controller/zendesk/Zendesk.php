@@ -295,7 +295,8 @@ class Zendesk extends Backend
                             'is_public' => $params['public_type'],
                             'is_admin' => 1,
                             'due_id' => session('admin.id'),
-                            'attachments' => $params['image']
+                            'attachments' => $params['image'],
+                            'platform'=>$type
                         ]);
                     }
                     Db::commit();
@@ -473,7 +474,8 @@ class Zendesk extends Backend
                             'is_public' => $params['public_type'],
                             'is_admin' => 1,
                             'due_id' => session('admin.id'),
-                            'attachments' => $params['image']
+                            'attachments' => $params['image'],
+                            'platform'=>$ticket->type
                         ]);
                     }
 
@@ -681,6 +683,7 @@ Please close this window and try again.");
                     'body' => strip_tags($source_comment),
                     'html_body' => $source_comment,
                     'is_public' => $source_comment_is_public,
+                    'platform'=>$type,
                     'is_admin' => 1
                 ]);
                 //合并的添加评论content
@@ -697,6 +700,7 @@ Please close this window and try again.");
                     'body' => strip_tags($target_comment),
                     'html_body' => $target_comment,
                     'is_public' => $target_comment_is_public,
+                    'platform'=>$type,
                     'is_admin' => 1
                 ]);
             } catch (ValidateException $e) {

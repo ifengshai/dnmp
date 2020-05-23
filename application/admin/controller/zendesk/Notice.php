@@ -172,6 +172,7 @@ class Notice extends Controller
                     'attachments' => json($attachments),
                     'is_created' => 1,
                     'due_id' => $due_id ? $due_id : 0,
+                    'platform'=>$type,
                     'attachments' => join(',',$attachments)
                 ]);
             }
@@ -343,7 +344,8 @@ class Notice extends Controller
                         'is_admin' => $admin_id ? 1 : 0,
                         'attachments' => join(',', $attachments),
                         'is_created' => 2,
-                        'due_id' => $due_id ? $due_id : 0
+                        'due_id' => $due_id ? $due_id : 0,
+                        'platform'=>$type,
                     ]);
                 }
             }
