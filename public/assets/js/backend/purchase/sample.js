@@ -2,16 +2,16 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
     var product_arrlist = [];
     var product_editarrlist = [];
     var Controller = {
-        sample_list: function () {
+        sample_index: function () {
             // 初始化表格参数配置
             Table.api.init({
                 extend: {
-                    index_url: 'purchase/sample/sample_location_index' + location.search,
-                    add_url: 'purchase/sample/sample_location_add',
-                    edit_url: 'purchase/sample/sample_location_edit',
-                    del_url: 'purchase/sample/sample_location_del',
+                    index_url: 'purchase/sample/sample_index' + location.search,
+                    add_url: 'purchase/sample/sample_add',
+                    edit_url: 'purchase/sample/sample_edit',
+                    del_url: 'purchase/sample/sample_del',
                     multi_url: 'purchase/sample/multi',
-                    table: 'purchase_sample_location',
+                    table: 'purchase_sample',
                 }
             });
 
@@ -25,11 +25,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 columns: [
                     [
                         {checkbox: true},
-                        {field: 'id', title: __('库位ID')},
+                        {field: 'id', title: __('序号')},
+                        {field: 'sku', title: __('SKU')},
+                        {field: 'product_name', title: __('商品名称')},
                         {field: 'location', title: __('库位号')},
-                        {field: 'createtime', title: __('创建时间'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime},
-                        {field: 'create_user', title: __('创建人')},
-                        {field: 'operate', title: __('操作'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate}
+                        {field: 'stock', title: __('留样库存')},
+                        {field: 'is_lend', title: __('是否借出')},
+                        {field: 'is_lend_num', title: __('借出数量')},
                     ]
                 ]
             });

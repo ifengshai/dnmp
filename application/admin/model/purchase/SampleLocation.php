@@ -2,6 +2,7 @@
 
 namespace app\admin\model\purchase;
 
+use think\Db;
 use think\Model;
 
 
@@ -27,7 +28,22 @@ class SampleLocation extends Model
     protected $append = [
 
     ];
-    
+
+    /**
+     * 获取库位列表
+     */
+    public function getPurchaseLocationData()
+    {
+        $data = $this->order('id asc')->column('location', 'id');
+        return $data;
+    }
+    /*
+     * 通过id获取库位id
+     * */
+    public function getLocationName($location_id){
+        $location_name = $this->where('id',$location_id)->value('location');
+        return $location_name;
+    }
 
     
 
