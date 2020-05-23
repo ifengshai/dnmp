@@ -41,10 +41,7 @@ class Test extends Backend
             $update['platform'] = $v['type'];
             Db::name('zendesk_comments')->where('zid', $v['id'])->update($update); 
             echo $v['id'] . "\n";
-            exit;
         }
-        dump($zend);exit;
-        
         
     }
 
