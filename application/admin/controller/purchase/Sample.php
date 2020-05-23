@@ -28,6 +28,7 @@ class Sample extends Backend
         $this->sample = new \app\admin\model\purchase\Sample;
         $this->samplelocation = new \app\admin\model\purchase\SampleLocation;
         $this->sampleworkorder = new \app\admin\model\purchase\SampleWorkorder;
+        $this->item = new \app\admin\model\itemmanage\Item;
 
     }
     
@@ -40,7 +41,7 @@ class Sample extends Backend
     /**
      * 样品间列表
      */
-    public function sample_list()
+    public function sample_index()
     {
         //设置过滤方法
         $this->request->filter(['strip_tags']);
@@ -54,7 +55,6 @@ class Sample extends Backend
                 ->where($where)
                 ->order($sort, $order)
                 ->count();
-
             $list = $this->sample
                 ->where($where)
                 ->order($sort, $order)
@@ -62,6 +62,11 @@ class Sample extends Backend
                 ->select();
 
             $list = collection($list)->toArray();
+            foreach ($list as $key=>$value){
+                $list[$key]['location'] = $this->samplelocation->getLocationName($value['location_id']);
+                $list[$key]['is_lend'] = $value['is_lend'] == 1 ? '是' : '否';
+                $list[$key]['product_name'] = $this->item->where('sku',$value['sku'])->value('name');
+            }
             $result = array("total" => $total, "rows" => $list);
 
             return json($result);
@@ -344,7 +349,7 @@ class Sample extends Backend
         }
 
         //获取库位数据
-        $location_data = $this->sampleworkorder->getPurchaseLocationData();
+        $location_data = $this->samplelocation->getPurchaseLocationData();
         $this->assign('location_data', $location_data);
 
         $this->assign('location_number', $location_number);
@@ -399,7 +404,7 @@ class Sample extends Backend
         $this->view->assign("row", $row);
 
         //获取库位数据
-        $location_data = $this->sampleworkorder->getPurchaseLocationData();
+        $location_data = $this->samplelocation->getPurchaseLocationData();
         $this->assign('location_data', $location_data);
 
         //获取入库商品信息

@@ -29,14 +29,6 @@ class SampleWorkorder extends Model
 
     ];
 
-    /**
-     * 获取库位列表
-     */
-    public function getPurchaseLocationData()
-    {
-        $data = Db::name('purchase_sample_location')->order('id asc')->column('location', 'id');
-        return $data;
-    }
     
 
     

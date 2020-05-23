@@ -13,7 +13,7 @@ class Sample extends Model
     
 
     // 表名
-    protected $name = 'purchase_sample_list';
+    protected $name = 'purchase_sample';
     
     // 自动写入时间戳字段
     protected $autoWriteTimestamp = 'int';
