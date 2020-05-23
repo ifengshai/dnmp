@@ -649,13 +649,15 @@ order by sfoi.item_id asc limit 1000";
                 $items[$order_item_key]['is_custom_lens'] = 1;
             }
 
-            if ($final_params['od_cyl']) {
+            if ($final_params['od_cyl'] ) {
+                $final_params['od_cyl'] = urldecode($final_params['od_cyl']);
                 if ($final_params['od_cyl'] * 1 <= -4 || $final_params['od_cyl'] * 1 >= 4) {
                     $items[$order_item_key]['is_custom_lens'] = 1;
                 }
             }
 
             if ($final_params['os_cyl']) {
+                $final_params['os_cyl'] = urldecode($final_params['os_cyl']);
                 if ($final_params['os_cyl'] * 1 <= -4 || $final_params['os_cyl'] * 1 >= 4) {
                     $items[$order_item_key]['is_custom_lens'] = 1;
                 }

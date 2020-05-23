@@ -36,7 +36,7 @@ class SelfApi extends Api
         //校验参数
         $order_id = $this->request->request('order_id'); //订单id
         $order_number = $this->request->request('order_number'); //订单号
-        $site = $this->request->request('site');//站点
+        $site = $this->request->request('site'); //站点
         if (!$order_id) {
             $this->error(__('缺少订单id参数'), [], 400);
         }
@@ -87,7 +87,8 @@ class SelfApi extends Api
         //校验参数
         $order_id = $this->request->request('order_id'); //订单id
         $order_number = $this->request->request('order_number'); //订单号
-        $site = $this->request->request('site');//站点
+        $site = $this->request->request('site'); //站点
+        $status = $this->request->request('status'); //站点
         if (!$order_id) {
             $this->error(__('缺少订单id参数'), [], 400);
         }
@@ -100,15 +101,19 @@ class SelfApi extends Api
             $this->error(__('缺少站点参数'), [], 400);
         }
 
-        $res_node = (new OrderNode())->allowField(true)->save([
-            'order_number' => $order_number,
-            'order_id' => $order_id,
-            'site' => $site,
-            'create_time' => date('Y-m-d H:i:s'),
+        if (!$status) {
+            $this->error(__('缺少状态参数'), [], 400);
+        }
+
+        if (!in_array($status, ['processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal', 'payment_review'])) {
+            $this->error(__('非支付成功状态'), [], 400);
+        }
+
+        $res_node = (new OrderNode())->save([
             'order_node' => 0,
             'node_type' => 1,
             'update_time' => date('Y-m-d H:i:s'),
-        ]);
+        ], ['order_id' => $order_id, 'site' => $site]);
 
         $res_node_detail = (new OrderNodeDetail())->allowField(true)->save([
             'order_number' => $order_number,
@@ -137,9 +142,9 @@ class SelfApi extends Api
     public function order_delivery()
     {
         //校验参数
-        $order_id = $this->request->request('order_id');//订单id
-        $order_number = $this->request->request('order_number');//订单号
-        $site = $this->request->request('site');//站点
+        $order_id = $this->request->request('order_id'); //订单id
+        $order_number = $this->request->request('order_number'); //订单号
+        $site = $this->request->request('site'); //站点
         if (!$order_id) {
             $this->error(__('缺少订单id参数'), [], 400);
         }

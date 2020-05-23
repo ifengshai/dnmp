@@ -272,6 +272,7 @@ class DevelopDemand extends Backend
                 if ($userIds)  $map = "FIND_IN_SET({$userIds},assign_developer_ids)";
                 unset($filter['nickname']);
             }
+            $this->request->get(['filter' => json_encode($filter)]);
             
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
