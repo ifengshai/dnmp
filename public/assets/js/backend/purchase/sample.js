@@ -82,7 +82,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     add_url: 'purchase/sample/sample_workorder_add',
                     edit_url: 'purchase/sample/sample_workorder_edit',
                     del_url: 'purchase/sample/sample_workorder_del',
-                    multi_url: 'purchase/sample/multi',
+                    multi_url: 'purchase/sample/sample_workorder_multi',
                     table: 'purchase_sample_workorder',
                 }
             });
@@ -142,9 +142,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     name: 'del',
                                     text: __('删除'),
                                     title: __('删除'),
-                                    classname: 'btn btn-xs btn-primary btn-dialog',
+                                    classname: 'btn btn-xs btn-primary btn-ajax',
                                     url: 'purchase/sample/sample_workorder_del',
-                                    callback: function (data) {
+                                    success: function (data, ret) {
+                                        table.bootstrapTable('refresh');
                                     },
                                     visible: function(row){
                                         if(row.status_id < 3){
@@ -158,9 +159,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     name: 'cancel',
                                     text: __('取消'),
                                     title: __('取消'),
-                                    classname: 'btn btn-xs btn-primary btn-dialog',
+                                    classname: 'btn btn-xs btn-primary btn-ajax',
                                     url: 'purchase/sample/sample_workorder_cancel',
-                                    callback: function (data) {
+                                    success: function (data, ret) {
+                                        table.bootstrapTable('refresh');
                                     },
                                     visible: function(row){
                                         if(row.status_id < 3){
@@ -179,6 +181,42 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
 
             // 为表格绑定事件
             Table.api.bindevent(table);
+            /**
+             * 批量审核通过
+             */
+            $(document).on('click', '.btn-check-pass', function () {
+                var ids = Table.api.selectedids(table);
+                Backend.api.ajax({
+                    url: Config.moduleurl + '/purchase/sample/sample_workorder_setStatus',
+                    data: { ids: ids, status: 3 }
+                }, function (data, ret) {
+                    table.bootstrapTable('refresh');
+                });
+            })
+            /**
+             * 批量审核拒绝
+             */
+            $(document).on('click', '.btn-check-refuse', function () {
+                var ids = Table.api.selectedids(table);
+                Backend.api.ajax({
+                    url: Config.moduleurl + '/purchase/sample/sample_workorder_setStatus',
+                    data: { ids: ids, status: 4 }
+                }, function (data, ret) {
+                    table.bootstrapTable('refresh');
+                });
+            })
+            /**
+             * 批量审核取消
+             */
+            $(document).on('click', '.btn-check-cancel', function () {
+                var ids = Table.api.selectedids(table);
+                Backend.api.ajax({
+                    url: Config.moduleurl + '/purchase/sample/sample_workorder_setStatus',
+                    data: { ids: ids, status: 5 }
+                }, function (data, ret) {
+                    table.bootstrapTable('refresh');
+                });
+            })
         },
         sample_location_add: function () {
             Controller.api.bindevent();

@@ -578,4 +578,37 @@ class Sample extends Backend
         $this->sampleworkorder->save($workorder,['id'=> input('ids')]);
         $this->success();
     }
+    /**
+     * 入库批量审核
+     *
+     * @Description
+     * @author mjj
+     * @since 2020/05/23 17:26:57 
+     * @return void
+     */
+    public function sample_workorder_setStatus($ids = null){
+        $ids = $this->request->post("ids/a");
+        $status = input('status');
+        if (!$ids) {
+            $this->error('缺少参数！！');
+        }
+        $is_update = 0;
+        $where['id'] = ['in', $ids];
+        $row = $this->sampleworkorder->where($where)->select();
+        foreach ($row as $v) {
+            if ($status == 3 || $status == 4 || $status == 5) {
+                if ($v['status'] >= 3) {
+                    $this->error('只有新建状态和待审核状态才能操作！！');
+                    $is_update = 0;
+                    break;
+                }else{
+                    $is_update = 1;
+                }
+            }
+        }
+        if($is_update == 1){
+            $this->sampleworkorder->where($where)->update(['status'=>$status]);
+            $this->success();
+        }
+    }
 }
