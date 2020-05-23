@@ -15,6 +15,48 @@ class ItDemandReport extends Backend
         $this->itWebTaskItem = new \app\admin\model\demand\ItWebTaskItem;
     }
 
+
+
+    /**
+     * 统计列表
+     *
+     * @Description
+     * @author Lx
+     * @since 2020/05/23 15:53:16 
+     */
+    public function statistical(){
+
+        if ($this->request->isAjax()) {
+            
+            $json['columnData'] = [
+                [
+                    'name'=> '直接访问',
+                    'type'=>'bar',
+                    'data'=> [320, 332, 301, 334, 390, 330, 320]
+                ],
+                [
+                    'name'=> '邮件营销',
+                    'type'=>'bar',
+                    'data'=>  [120, 132, 101, 134, 90, 230, 210]
+                ],
+                [
+                    'name'=> '联盟广告',
+                    'type'=>'bar',
+                    'data'=> [220, 182, 191, 234, 290, 330, 310]
+                ],
+ 
+            ];
+
+            $json['xColumnName'] = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
+            $json['column'] = ['直接访问', '邮件营销', '联盟广告', '视频广告', '搜索引擎', '百度', '谷歌', '必应', '其他'];
+            return json(['code' => 1, 'data' => $json]);
+            
+        }
+
+        return $this->view->fetch();
+    }
+
+
     /*
      * 取出配置文件的数据，
      * $user_id string 数据格式以逗号分隔
