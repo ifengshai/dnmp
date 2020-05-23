@@ -109,15 +109,14 @@ table.altrowstable tr:nth-child(even){
     <div class="panel-body">
         <div id="myTabContent" class="tab-content">
             <div class="tab-pane fade active in" id="one">
-                <div class="widget-body no-padding">
-                    <form id = "form1" action="{:url('/admin/datacenter/customer_service/workload')}" class="form-commonsearch form-horizontal" role="form1" method="post">
-                        <div style="border-radius:2px;margin-bottom:10px;background:#f5f5f5;padding:20px;">
+                    <!-- <form id = "form1" action="#" class="form-commonsearch form-horizontal" role="form1" method="post"> -->
+                        <div id="form8" role="form8" style="border-radius:2px;margin-bottom:10px;background:#f5f5f5;padding:20px;">
                             <div class="row">
                                 <div class="col-xs-12 col-md-3">
                                     <div class="form-group">
                                         <label class="control-label col-xs-4">工单平台</label>
                                         <div class="col-xs-8">
-                                            <select  id="c-order_platform" data-rule="required" class="form-control" name="order_platform">
+                                            <select  id="order_platform_workload" data-rule="required" class="form-control" name="order_platform">
 												{foreach name="orderPlatformList" item="vo"}
                                                 {if $key == $platform}
                                                 <option value="{$key}" selected="selected">{$vo}</option>
@@ -133,20 +132,19 @@ table.altrowstable tr:nth-child(even){
                             <div class="form-group">
                                 <label class="control-label col-xs-1 col-sm-1">时间:</label>
                                 <div class="col-xs-2">
-                                    <input type="hidden" class="form-control operate" name="one_time-operate" data-name="one_time" value="RANGE" readonly="">
-                                    <input type="text" autocomplete="off" class="form-control datetimerange" name="one_time"  placeholder="创建时间" id="one_time" value="" data-index="14">
+                                    <input type="hidden" class="form-control operate" name="workload_time-operate" data-name="one_time" value="RANGE" readonly="">
+                                    <input type="text" autocomplete="off" class="form-control datetimerange" name="workload_time"  placeholder="创建时间" id="workload_time" value="" data-index="14">
                                 </div>
                             </div>                            
                             <div class="form-group col-xs-12 col-sm-6 col-md-4 col-lg-3">
                                 <div class="col-sm-8 col-xs-offset-4">
-                                    <input type="submit" class="btn btn-success" value="提交"> 
+                                    <input id='workload-btn' type="submit" class="btn btn-success workload-btn" value="提交"> 
                                     <input type="reset" class="btn btn-default reset" value="重置" ></div>
                             </div>                                                            
                             </div>                                                                                                                                           
                         </div>
-                    </form>
-                </div>
-                <table id="order-info-list" class="altrowstable"
+                    <!-- </form> -->
+                <table id="workload-info" class="altrowstable"
                 data-operate-edit="{:$auth->check('saleaftermanage/order_return/edit')}"
                 data-operate-del="{:$auth->check('saleaftermanage/order_return/del')}"
                 width="100%">
@@ -161,13 +159,37 @@ table.altrowstable tr:nth-child(even){
              </tr>
              </thead>
                   <tr>
-                      <td id='today_sales_money'         style="text-align: center; vertical-align: middle;">1</td>
-                      <td id='today_order_num'           style="text-align: center; vertical-align: middle;">2</td>
-                      <td id='today_order_success'       style="text-align: center; vertical-align: middle;">3</td>
-                      <td id='today_unit_price'          style="text-align: center; vertical-align: middle;">4</td>
-                      <td id='today_shoppingcart_total'  style="text-align: center; vertical-align: middle;">5</td>
-                      <td id='today_shoppingcart_conversion' style="text-align: center; vertical-align: middle;">6</td>
-                  </tr>			 
+                      <td style="text-align: center; vertical-align: middle;">今天</td>
+                      <td id='today_wait_num'   style="text-align: center; vertical-align: middle;">{$todayData.wait_num}</td>
+                      <td id='today_increment_num' style="text-align: center; vertical-align: middle;">{$todayData.increment_num}</td>
+                      <td id='today_reply_num'   style="text-align: center; vertical-align: middle;">{$todayData.reply_num}</td>
+                      <td id='today_waiting_num'  style="text-align: center; vertical-align: middle;">{$todayData.waiting_num}</td>
+                      <td id='today_pending_num' style="text-align: center; vertical-align: middle;">{$todayData.pending_num}</td>
+                  </tr>
+                  <tr>
+                    <td id='today_sales_money'         style="text-align: center; vertical-align: middle;">昨天</td>
+                    <td id='yesterday_wait_num'    style="text-align: center; vertical-align: middle;">{$yesterdayData.wait_num}</td>
+                    <td id='yesterday_increment_num'       style="text-align: center; vertical-align: middle;">{$yesterdayData.increment_num}</td>
+                    <td id='yesterday_reply_num'          style="text-align: center; vertical-align: middle;">{$yesterdayData.reply_num}</td>
+                    <td id='yesterday_waiting_num'  style="text-align: center; vertical-align: middle;">{$yesterdayData.waiting_num}</td>
+                    <td id='yesterday_pending_num' style="text-align: center; vertical-align: middle;">{$yesterdayData.pending_num}</td>
+                </tr>
+                <tr>
+                    <td id='serven_sales_money'         style="text-align: center; vertical-align: middle;">过去7天</td>
+                    <td id='serven_wait_num'   style="text-align: center; vertical-align: middle;">{$servenData.wait_num}</td>
+                    <td id='serven_increment_num' style="text-align: center; vertical-align: middle;">{$servenData.increment_num}</td>
+                    <td id='serven_reply_num'   style="text-align: center; vertical-align: middle;">{$servenData.reply_num}</td>
+                    <td id='serven_waiting_num'  style="text-align: center; vertical-align: middle;">{$servenData.waiting_num}</td>
+                    <td id='serven_pending_num' style="text-align: center; vertical-align: middle;">{$servenData.pending_num}</td>
+                </tr>
+                <tr>
+                    <td id='third_sales_money'         style="text-align: center; vertical-align: middle;">过去30天</td>
+                    <td id='third_wait_num'   style="text-align: center; vertical-align: middle;">{$thirdData.wait_num}</td>
+                    <td id='third_increment_num' style="text-align: center; vertical-align: middle;">{$thirdData.increment_num}</td>
+                    <td id='third_reply_num'   style="text-align: center; vertical-align: middle;">{$thirdData.reply_num}</td>
+                    <td id='third_waiting_num'  style="text-align: center; vertical-align: middle;">{$thirdData.waiting_num}</td>
+                    <td id='third_pending_num' style="text-align: center; vertical-align: middle;">{$thirdData.pending_num}</td>
+                </tr>                                                   			 
                 </table>                
             </div>
             <div class="tab-panes fade active in">
@@ -183,20 +205,21 @@ table.altrowstable tr:nth-child(even){
                             <th style="text-align: center; vertical-align: middle;">昨日处理量</th>
                             <th style="text-align: center; vertical-align: middle;">今日处理量</th>
                             <th style="text-align: center; vertical-align: middle;">本月未达标天数</th>
-                            <th style="text-align: center; vertical-align: middle;">本月差评数量</th>
+                            <!-- <th style="text-align: center; vertical-align: middle;">本月差评数量</th>
                             <th style="text-align: center; vertical-align: middle;">本月总工作量</th>
-                            <th style="text-align: center; vertical-align: middle;">本月差评占比</th>
+                            <th style="text-align: center; vertical-align: middle;">本月差评占比</th> -->
                         </tr>
                         </thead>
-                             <tr>
-                                 <td style="text-align: center; vertical-align: middle;">1</td>
-                                 <td style="text-align: center; vertical-align: middle;">2</td>
-                                 <td style="text-align: center; vertical-align: middle;">3</td>
-                                 <td id='zeelool_pc_sales_money'    style="text-align: center; vertical-align: middle;">4</td>
-                                 <td id='zeelool_pc_sales_num'      style="text-align: center; vertical-align: middle;">5</td>
-                                 <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;">6</td>
-                                 <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;">7</td>
-                             </tr>                                                                                                                                                   							 
+                        {if !empty($infoOne)}
+                        {foreach name="infoOne" item="vo" key='k'}
+                         <tr>
+                            <td style="text-align: center; vertical-align: middle;">{$vo}</td>
+                            <td style="text-align: center; vertical-align: middle;"><?php echo $replyArr[$k]['yester_num'];?></td>
+                            <td style="text-align: center; vertical-align: middle;"><?php echo $replyArr[$k]['counter'];?></td>
+                            <td style="text-align: center; vertical-align: middle;"><?php echo $replyArr[$k]['no_qualified_day'];?></td>
+                        </tr>
+                         {/foreach}
+                         {/if}                                                                                                                                                   							 
                     </table>
                 </div>
                 <div class="widget-body no-padding" style="width: 800px; overflow:scroll;float:right">
@@ -210,20 +233,21 @@ table.altrowstable tr:nth-child(even){
                             <th style="text-align: center; vertical-align: middle;">昨日处理量</th>
                             <th style="text-align: center; vertical-align: middle;">今日处理量</th>
                             <th style="text-align: center; vertical-align: middle;">本月未达标天数</th>
-                            <th style="text-align: center; vertical-align: middle;">本月差评数量</th>
+                            <!-- <th style="text-align: center; vertical-align: middle;">本月差评数量</th>
                             <th style="text-align: center; vertical-align: middle;">本月总工作量</th>
-                            <th style="text-align: center; vertical-align: middle;">本月差评占比</th>
+                            <th style="text-align: center; vertical-align: middle;">本月差评占比</th> -->
                         </tr>
                         </thead>
-                             <tr>
-                                 <td style="text-align: center; vertical-align: middle;">1</td>
-                                 <td style="text-align: center; vertical-align: middle;">2</td>
-                                 <td style="text-align: center; vertical-align: middle;">3</td>
-                                 <td id='zeelool_pc_sales_money'    style="text-align: center; vertical-align: middle;">4</td>
-                                 <td id='zeelool_pc_sales_num'      style="text-align: center; vertical-align: middle;">5</td>
-                                 <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;">6</td>
-                                 <td id='zeelool_pc_unit_price'     style="text-align: center; vertical-align: middle;">7</td>
-                             </tr>                                                                                                                                                   							 
+                        {if !empty($infoTwo)}
+                        {foreach name="infoTwo" item="vo" key='k'}
+                         <tr>
+                            <td style="text-align: center; vertical-align: middle;">{$vo}</td>
+                            <td style="text-align: center; vertical-align: middle;"><?php echo $replyArr[$k]['yester_num'];?></td>
+                            <td style="text-align: center; vertical-align: middle;"><?php echo $replyArr[$k]['counter'];?></td>
+                            <td style="text-align: center; vertical-align: middle;"><?php echo $replyArr[$k]['no_qualified_day'];?></td>
+                        </tr>
+                         {/foreach}
+                         {/if}                                                                                                                                                   							 
                     </table>
                 </div>                
             </div>

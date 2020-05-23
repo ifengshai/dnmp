@@ -9,15 +9,12 @@ use think\Db;
 use fast\Alibaba;
 use fast\Trackingmore;
 
-
-
 /**
  * 定时任务
  * @internal
  */
 class Crontab extends Backend
 {
-
     protected $noNeedLogin = [
         'get_sales_order_num',
         'zeelool_order_custom_order_prescription',
@@ -71,7 +68,7 @@ class Crontab extends Backend
      * 5：镜架+定制
      * 6：现片+定制片
      */
-    public function  zeelool_order_custom_order_prescription()
+    public function zeelool_order_custom_order_prescription()
     {
         $order_entity_id_querySql = "select sfo.entity_id from sales_flat_order sfo where sfo.custom_order_prescription_type is null order by entity_id asc limit 1000";
         $order_entity_id_list = Db::connect('database.db_zeelool')->query($order_entity_id_querySql);
@@ -95,7 +92,6 @@ class Crontab extends Backend
         $type_5_entity_id = [];
         $type_6_entity_id = [];
         foreach ($order_entity_id_list as $key => $value) {
-
             $items = Db::connect('database.db_zeelool')->table('sales_flat_order_item_prescription')->where('order_id=' . $value['entity_id'])->select();
             if (!$items) {
                 continue;
@@ -106,9 +102,9 @@ class Crontab extends Backend
                 //如果镜片参数为真 或 不等于 Plastic Lenses 并且不等于 FRAME ONLY则此订单为含处方
                 if ($v['index_type'] == '' || $v['index_type'] == 'Plastic Lenses' || $v['index_type'] == 'FRAME ONLY') {
                     $label[] = 1; //仅镜架
-                } else if (($v['index_type'] && $v['index_type'] != 'Plastic Lenses' && $v['index_type'] != 'FRAME ONLY') && $v['is_custom_lens'] == 0) {
+                } elseif (($v['index_type'] && $v['index_type'] != 'Plastic Lenses' && $v['index_type'] != 'FRAME ONLY') && $v['is_custom_lens'] == 0) {
                     $label[] = 2; //现片含处方
-                } else if (($v['index_type'] && $v['index_type'] != 'Plastic Lenses' && $v['index_type'] != 'FRAME ONLY') && $v['is_custom_lens'] == 1) {
+                } elseif (($v['index_type'] && $v['index_type'] != 'Plastic Lenses' && $v['index_type'] != 'FRAME ONLY') && $v['is_custom_lens'] == 1) {
                     $label[] = 3; //定制含处方
                 }
             }
@@ -203,7 +199,6 @@ order by sfoi.item_id asc limit 1000";
         $order_item_list = Db::connect('database.db_zeelool')->query($order_item_prescription_querySql);
 
         foreach ($order_item_list as $order_item_key => $order_item_value) {
-
             $product_options = unserialize($order_item_value['product_options']);
             // dump($product_options);
             $final_params['coatiing_name'] = substr($product_options['info_buyRequest']['tmplens']['coatiing_name'], 0, 100);
@@ -234,7 +229,7 @@ order by sfoi.item_id asc limit 1000";
             }
             // dump($lens_params);
             $final_params = array_merge($lens_params, $final_params);
-            // dump($final_params);            
+            // dump($final_params);
 
             $items[$order_item_key]['order_id'] = $order_item_value['order_id'];
             $items[$order_item_key]['item_id'] = $order_item_value['item_id'];
@@ -447,7 +442,7 @@ order by sfoi.item_id asc limit 1000";
      * 5：镜架+定制
      * 6：现片+定制片
      */
-    public function  voogueme_order_custom_order_prescription()
+    public function voogueme_order_custom_order_prescription()
     {
         $order_entity_id_querySql = "select sfo.entity_id from sales_flat_order sfo where sfo.custom_order_prescription_type is null order by entity_id desc limit 1000 ";
         $order_entity_id_list = Db::connect('database.db_voogueme')->query($order_entity_id_querySql);
@@ -471,7 +466,6 @@ order by sfoi.item_id asc limit 1000";
         $type_5_entity_id = [];
         $type_6_entity_id = [];
         foreach ($order_entity_id_list as $key => $value) {
-
             $items = Db::connect('database.db_voogueme')->table('sales_flat_order_item_prescription')->where('order_id=' . $value['entity_id'])->select();
             if (!$items) {
                 continue;
@@ -482,9 +476,9 @@ order by sfoi.item_id asc limit 1000";
                 //如果镜片参数为真 或 不等于 Plastic Lenses 并且不等于 FRAME ONLY则此订单为含处方
                 if ($v['index_type'] == '' || $v['index_type'] == 'Plastic Lenses' || $v['index_type'] == 'FRAME ONLY' || $v['index_type'] == 'FRAME ONLY (Plastic lenses)') {
                     $label[] = 1; //仅镜架
-                } else if (($v['index_type'] && $v['index_type'] != 'Plastic Lenses' && $v['index_type'] != 'FRAME ONLY' && $v['index_type'] != 'FRAME ONLY (Plastic lenses)') && $v['is_custom_lens'] == 0) {
+                } elseif (($v['index_type'] && $v['index_type'] != 'Plastic Lenses' && $v['index_type'] != 'FRAME ONLY' && $v['index_type'] != 'FRAME ONLY (Plastic lenses)') && $v['is_custom_lens'] == 0) {
                     $label[] = 2; //现片含处方
-                } else if (($v['index_type'] && $v['index_type'] != 'Plastic Lenses' && $v['index_type'] != 'FRAME ONLY' && $v['index_type'] != 'FRAME ONLY (Plastic lenses)') && $v['is_custom_lens'] == 1) {
+                } elseif (($v['index_type'] && $v['index_type'] != 'Plastic Lenses' && $v['index_type'] != 'FRAME ONLY' && $v['index_type'] != 'FRAME ONLY (Plastic lenses)') && $v['is_custom_lens'] == 1) {
                     $label[] = 3; //定制含处方
                 }
             }
@@ -569,7 +563,6 @@ order by sfoi.item_id asc limit 1000";
         $order_item_list = Db::connect('database.db_voogueme')->query($order_item_prescription_querySql);
 
         foreach ($order_item_list as $order_item_key => $order_item_value) {
-
             $product_options = unserialize($order_item_value['product_options']);
 
             $final_params['coatiing_name'] = substr($product_options['info_buyRequest']['tmplens']['coatiing_name'], 0, 100);
@@ -816,7 +809,7 @@ order by sfoi.item_id asc limit 1000";
      * 5：镜架+定制
      * 6：现片+定制片
      */
-    public function  nihao_order_custom_order_prescription()
+    public function nihao_order_custom_order_prescription()
     {
         $order_entity_id_querySql = "select sfo.entity_id from sales_flat_order sfo where sfo.custom_order_prescription_type is null order by entity_id desc limit 1000";
         $order_entity_id_list = Db::connect('database.db_nihao')->query($order_entity_id_querySql);
@@ -840,7 +833,6 @@ order by sfoi.item_id asc limit 1000";
         $type_5_entity_id = [];
         $type_6_entity_id = [];
         foreach ($order_entity_id_list as $key => $value) {
-
             $items = Db::connect('database.db_nihao')->table('sales_flat_order_item_prescription')->where('order_id=' . $value['entity_id'])->select();
             if (!$items) {
                 continue;
@@ -851,9 +843,9 @@ order by sfoi.item_id asc limit 1000";
                 //如果镜片参数为真 或 不等于 Plastic Lenses 并且不等于 FRAME ONLY则此订单为含处方
                 if ($v['third_name'] == '' || $v['third_name'] == 'Plastic Lenses' || $v['third_name'] == 'FRAME ONLY') {
                     $label[] = 1; //仅镜架
-                } else if (($v['third_name'] && $v['third_name'] != 'Plastic Lenses' && $v['third_name'] != 'FRAME ONLY') && $v['is_custom_lens'] == 0) {
+                } elseif (($v['third_name'] && $v['third_name'] != 'Plastic Lenses' && $v['third_name'] != 'FRAME ONLY') && $v['is_custom_lens'] == 0) {
                     $label[] = 2; //现片含处方
-                } else if (($v['third_name'] && $v['third_name'] != 'Plastic Lenses' && $v['third_name'] != 'FRAME ONLY') && $v['is_custom_lens'] == 1) {
+                } elseif (($v['third_name'] && $v['third_name'] != 'Plastic Lenses' && $v['third_name'] != 'FRAME ONLY') && $v['is_custom_lens'] == 1) {
                     $label[] = 3; //定制含处方
                 }
             }
@@ -925,7 +917,6 @@ order by sfoi.item_id asc limit 1000";
      */
     public function nihao_order_item_process()
     {
-
         $max_item_id_querySql = "select max(boi.item_id) max_item_id from sales_flat_order_item_prescription boi";
         $max_item_id_list = Db::connect('database.db_nihao')->query($max_item_id_querySql);
         if ($max_item_id_list) {
@@ -992,7 +983,7 @@ order by sfoi.item_id asc limit 1000";
 
             //处理ADD  当ReadingGlasses时 是 双ADD值
             if ($tmp_lens_params['prescription_type'] == 'Reading Glasses' &&  strlen($tmp_lens_params['os_add']) > 0 && strlen($tmp_lens_params['od_add']) > 0) {
-                // echo '双ADD值';         
+                // echo '双ADD值';
                 $finalResult[$key]['od_add'] = $tmp_lens_params['od_add'];
                 $finalResult[$key]['os_add'] = $tmp_lens_params['os_add'];
             } else {
@@ -1184,7 +1175,7 @@ order by sfoi.item_id asc limit 1000";
      * 5：镜架+定制
      * 6：现片+定制片
      */
-    public function  meeloog_order_custom_order_prescription()
+    public function meeloog_order_custom_order_prescription()
     {
         $order_entity_id_querySql = "select sfo.entity_id from sales_flat_order sfo where sfo.custom_order_prescription_type is null order by entity_id desc limit 1000 ";
         $order_entity_id_list = Db::connect('database.db_meeloog')->query($order_entity_id_querySql);
@@ -1208,7 +1199,6 @@ order by sfoi.item_id asc limit 1000";
         $type_5_entity_id = [];
         $type_6_entity_id = [];
         foreach ($order_entity_id_list as $key => $value) {
-
             $items = Db::connect('database.db_meeloog')->table('sales_flat_order_item_prescription')->where('order_id=' . $value['entity_id'])->select();
             if (!$items) {
                 continue;
@@ -1219,9 +1209,9 @@ order by sfoi.item_id asc limit 1000";
                 //如果镜片参数为真 或 不等于 Plastic Lenses 并且不等于 FRAME ONLY则此订单为含处方
                 if ($v['index_type'] == '' || $v['index_type'] == 'Plastic Lenses' || $v['index_type'] == 'FRAME ONLY' || $v['index_type'] == 'FRAME ONLY (Plastic lenses)') {
                     $label[] = 1; //仅镜架
-                } else if (($v['index_type'] && $v['index_type'] != 'Plastic Lenses' && $v['index_type'] != 'FRAME ONLY' && $v['index_type'] != 'FRAME ONLY (Plastic lenses)') && $v['is_custom_lens'] == 0) {
+                } elseif (($v['index_type'] && $v['index_type'] != 'Plastic Lenses' && $v['index_type'] != 'FRAME ONLY' && $v['index_type'] != 'FRAME ONLY (Plastic lenses)') && $v['is_custom_lens'] == 0) {
                     $label[] = 2; //现片含处方
-                } else if (($v['index_type'] && $v['index_type'] != 'Plastic Lenses' && $v['index_type'] != 'FRAME ONLY' && $v['index_type'] != 'FRAME ONLY (Plastic lenses)') && $v['is_custom_lens'] == 1) {
+                } elseif (($v['index_type'] && $v['index_type'] != 'Plastic Lenses' && $v['index_type'] != 'FRAME ONLY' && $v['index_type'] != 'FRAME ONLY (Plastic lenses)') && $v['is_custom_lens'] == 1) {
                     $label[] = 3; //定制含处方
                 }
             }
@@ -1306,7 +1296,6 @@ order by sfoi.item_id asc limit 1000";
         $order_item_list = Db::connect('database.db_meeloog')->query($order_item_prescription_querySql);
 
         foreach ($order_item_list as $order_item_key => $order_item_value) {
-
             $product_options = unserialize($order_item_value['product_options']);
 
             $final_params['coatiing_name'] = substr($product_options['info_buyRequest']['tmplens']['coatiing_name'], 0, 100);
@@ -1587,7 +1576,7 @@ order by sfoi.item_id asc limit 1000";
      *之后修改添加
      * @Description created by lsw
      * @author lsw
-     * @since 2020/03/09 09:32:05 
+     * @since 2020/03/09 09:32:05
      * @return void
      */
     public function get_sales_order_data()
@@ -1761,7 +1750,7 @@ order by sfoi.item_id asc limit 1000";
         AND sfo.created_at BETWEEN '$start' AND '$end' GROUP BY sku ) b ON a.sku = b.sku where a.sku NOT LIKE '%Price%' ORDER BY counter DESC";
 
         $zeelool_list = $zeelool_model->query($intelligent_purchase_query_sql);
-        //查询sku映射关系表 
+        //查询sku映射关系表
         $itemPlatFormSku = new \app\admin\model\itemmanage\ItemPlatformSku;
         $sku_list = $itemPlatFormSku->column('sku', 'platform_sku');
 
@@ -1794,7 +1783,6 @@ order by sfoi.item_id asc limit 1000";
 
         $data = [];
         foreach ($lists as $k => $v) {
-
             if ($v['true_sku'] == 'Express Shipping') {
                 continue;
             }
@@ -2013,7 +2001,7 @@ order by sfoi.item_id asc limit 1000";
      *
      * @Description
      * @author wpl
-     * @since 2020/02/19 16:23:27 
+     * @since 2020/02/19 16:23:27
      * @return void
      */
     public function get_sku_stock()
@@ -2032,7 +2020,7 @@ order by sfoi.item_id asc limit 1000";
      *
      * @Description
      * @author wpl
-     * @since 2020/02/19 16:23:27 
+     * @since 2020/02/19 16:23:27
      * @return void
      */
     public function get_sku_price()
@@ -2082,7 +2070,7 @@ order by sfoi.item_id asc limit 1000";
      *
      * @Description
      * @author wpl
-     * @since 2020/02/29 16:13:16 
+     * @since 2020/02/29 16:13:16
      * @return void
      */
     public function get_sku_allstock()
@@ -2099,7 +2087,7 @@ order by sfoi.item_id asc limit 1000";
      * z站今天的销售额($) 订单数	订单支付成功数	客单价($)	购物车总数	购物车总转化率(%)	新增购物车数	新增购物车转化率	新增注册用户数
      * @Description created by lsw
      * @author lsw
-     * @since 2020/03/02 17:39:31 
+     * @since 2020/03/02 17:39:31
      * @return void
      */
     public function update_ashboard_data_one()
@@ -2121,7 +2109,7 @@ order by sfoi.item_id asc limit 1000";
                 break;
             case 4:
                 $model = Db::connect('database.db_meeloog');
-                break;                
+                break;
             default:
                 $model = false;
                 break;
@@ -2463,7 +2451,7 @@ order by sfoi.item_id asc limit 1000";
      * z站今天的销售额($) 订单数	订单支付成功数	客单价($)	购物车总数	购物车总转化率(%)	新增购物车数	新增购物车转化率	新增注册用户数
      * @Description created by lsw
      * @author lsw
-     * @since 2020/03/02 17:39:31 
+     * @since 2020/03/02 17:39:31
      * @return void
      */
     public function update_ashboard_data_two()
@@ -2485,7 +2473,7 @@ order by sfoi.item_id asc limit 1000";
                 break;
             case 4:
                 $model = Db::connect('database.db_meeloog');
-                break;    
+                break;
             default:
                 $model = false;
                 break;
@@ -2729,7 +2717,7 @@ order by sfoi.item_id asc limit 1000";
      *
      * @Description
      * @author wpl
-     * @since 2020/03/09 11:35:05 
+     * @since 2020/03/09 11:35:05
      * @return void
      */
     public function purchase_data()
@@ -2843,7 +2831,7 @@ order by sfoi.item_id asc limit 1000";
      *
      * @Description
      * @author wpl
-     * @since 2020/03/09 11:42:50 
+     * @since 2020/03/09 11:42:50
      * @return void
      */
     public function stock_data()
@@ -2867,7 +2855,7 @@ order by sfoi.item_id asc limit 1000";
         $data['updatetime'] = date('Y-m-d H:i:s', time());
         $dataConfig->where('key', 'frameStock')->update($data);
 
-        //镜架总金额 
+        //镜架总金额
         $frameStockPrice = $this->item->getFrameStockPrice();
         $data['value'] = $frameStockPrice;
         $data['updatetime'] = date('Y-m-d H:i:s', time());
@@ -3017,7 +3005,7 @@ order by sfoi.item_id asc limit 1000";
      *
      * @Description
      * @author wpl
-     * @since 2020/03/04 17:05:15 
+     * @since 2020/03/04 17:05:15
      * @return void
      */
     public function warehouse_data()
@@ -3138,7 +3126,7 @@ order by sfoi.item_id asc limit 1000";
      *
      * @Description
      * @author wpl
-     * @since 2020/03/24 14:04:27 
+     * @since 2020/03/24 14:04:27
      * @return void
      */
     protected function getTrackingMoreStatusNumberCount()
@@ -3158,7 +3146,7 @@ order by sfoi.item_id asc limit 1000";
      *
      * @Description
      * @author wpl
-     * @since 2020/03/10 09:56:39 
+     * @since 2020/03/10 09:56:39
      * @return void
      */
     public function select_product_data()
@@ -3228,7 +3216,7 @@ order by sfoi.item_id asc limit 1000";
      *
      * @Description
      * @author wpl
-     * @since 2020/03/14 14:15:37 
+     * @since 2020/03/14 14:15:37
      * @return void
      */
     public function warehouse_data_everyday()
@@ -3299,7 +3287,7 @@ order by sfoi.item_id asc limit 1000";
      *
      * @Description
      * @author wpl
-     * @since 2020/03/02 17:20:21 
+     * @since 2020/03/02 17:20:21
      * @return void
      */
     protected function onway_all_stock()
@@ -3331,7 +3319,7 @@ order by sfoi.item_id asc limit 1000";
      *
      * @Description
      * @author wpl
-     * @since 2020/03/02 17:20:21 
+     * @since 2020/03/02 17:20:21
      * @return void
      */
     protected function onway_all_stock_price()
@@ -3364,7 +3352,7 @@ order by sfoi.item_id asc limit 1000";
      *
      * @Description
      * @author wpl
-     * @since 2020/03/02 17:20:21 
+     * @since 2020/03/02 17:20:21
      * @return void
      */
     protected function onway_frame_all_stock()
@@ -3402,7 +3390,7 @@ order by sfoi.item_id asc limit 1000";
      *
      * @Description
      * @author wpl
-     * @since 2020/03/02 17:20:21 
+     * @since 2020/03/02 17:20:21
      * @return void
      */
     protected function onway_frame_all_stock_price()
@@ -3443,7 +3431,7 @@ order by sfoi.item_id asc limit 1000";
      *
      * @Description
      * @author wpl
-     * @since 2020/03/02 17:20:21 
+     * @since 2020/03/02 17:20:21
      * @return void
      */
     protected function onway_ornament_all_stock()
@@ -3481,7 +3469,7 @@ order by sfoi.item_id asc limit 1000";
      *
      * @Description
      * @author wpl
-     * @since 2020/03/02 17:20:21 
+     * @since 2020/03/02 17:20:21
      * @return void
      */
     protected function onway_ornament_all_stock_price()
@@ -3524,7 +3512,7 @@ order by sfoi.item_id asc limit 1000";
      *
      * @Description created by lsw
      * @author lsw
-     * @since 2020/03/11 17:11:21 
+     * @since 2020/03/11 17:11:21
      * @return void
      */
     public function get_sales_order_update()
@@ -3582,7 +3570,7 @@ order by sfoi.item_id asc limit 1000";
      *
      * @Description created by lsw
      * @author lsw
-     * @since 2020/03/11 17:11:21 
+     * @since 2020/03/11 17:11:21
      * @return void
      */
     public function get_sales_order_update_two()
@@ -3631,7 +3619,7 @@ order by sfoi.item_id asc limit 1000";
      *
      * @Description created by lsw
      * @author lsw
-     * @since 2020/03/20 17:15:36 
+     * @since 2020/03/20 17:15:36
      * @return void
      */
     public function calculate_order_item_num()
@@ -3690,7 +3678,7 @@ order by sfoi.item_id asc limit 1000";
      * @todo 待定
      * @Description
      * @author wpl
-     * @since 2020/03/10 17:16:04 
+     * @since 2020/03/10 17:16:04
      * @return void
      */
     public function getSkuSalesNum()
@@ -3761,7 +3749,7 @@ order by sfoi.item_id asc limit 1000";
      *
      * @Description
      * @author wpl
-     * @since 2020/04/11 15:54:25 
+     * @since 2020/04/11 15:54:25
      * @return void
      */
     public function set_product_process()
@@ -3812,7 +3800,7 @@ order by sfoi.item_id asc limit 1000";
      *
      * @Description
      * @author wpl
-     * @since 2020/04/11 15:54:25 
+     * @since 2020/04/11 15:54:25
      * @return void
      */
     public function set_product_process_order()
@@ -3857,7 +3845,7 @@ order by sfoi.item_id asc limit 1000";
      *
      * @Description
      * @author wpl
-     * @since 2020/04/11 15:54:25 
+     * @since 2020/04/11 15:54:25
      * @return void
      */
     public function set_product_sotck()
@@ -3888,7 +3876,7 @@ order by sfoi.item_id asc limit 1000";
      *
      * @Description
      * @author wpl
-     * @since 2020/04/27 09:48:05 
+     * @since 2020/04/27 09:48:05
      * @return void
      */
     public function get_stock_data()
@@ -3929,7 +3917,7 @@ order by sfoi.item_id asc limit 1000";
      *
      * @Description
      * @author wpl
-     * @since 2020/04/27 10:34:10 
+     * @since 2020/04/27 10:34:10
      * @return void
      */
     public function set_stock_change()
@@ -3968,9 +3956,47 @@ order by sfoi.item_id asc limit 1000";
                     'type'  => 1
                 ]);
             }
-           
         }
     
         Db::table('fa_goods_stock_change')->insertAll(array_values($info));
+    }
+    public function get_workload_data()
+    {
+        //求出平台
+        $platform = $this->request->get('platform');
+        if (!$platform) {
+            return false;
+        }
+        $where['type'] = $platform;
+        //zendesk
+        $zendesk_model = Db::name('zendesk');
+        //zendesk_comments
+        //$zendesk_comments = Db::name('zendesk_comments');
+        //计算前一天的销量
+        $stime = date("Y-m-d 00:00:00", strtotime("-1 day"));
+        $etime = date("Y-m-d 23:59:59", strtotime("-1 day"));
+        $map['create_time'] = $date['c.create_time'] = $update['update_time'] =  ['between', [$stime, $etime]];
+        //获取昨天待处理的open、new量
+        $wait_num = $zendesk_model->where($where)->where(['status' => ['in','1,2'],'channel' => ['neq','voice']])->where($map)->count("*");
+        //获取昨天新增的open、new量
+        $increment_num = $zendesk_model->where($where)->where(['status' => ['in','1,2'],'channel' => ['neq','voice']])->where($update)->count("*");
+        //获取昨天已回复量
+        //$reply_num  = $zendesk_comments->where($map)->where(['is_public'=>1])->count("*");
+        $reply_num  = $zendesk_model->alias('z')->join('fa_zendesk_comments c','z.id=c.zid')->where($date)->where(['is_public'=>1])->count("*");
+        //获取昨天待分配的open、new量
+        $waiting_num = $zendesk_model->where($where)->where(['status' => ['in','1,2'],'channel' => ['neq','voice']])->where($map)->where(['is_hide'=>1])->count("*");
+        //获取昨天的pendding量
+        $pending_num = $zendesk_model->where($where)->where(['status' => ['eq','3'],'channel' => ['neq','voice']])->where($map)->count("*");
+        $data['platform']       = $platform;
+        $data['wait_num']       = $wait_num;
+        $data['increment_num']  = $increment_num;
+        $data['reply_num']      = $reply_num;
+        $data['waiting_num']    = $waiting_num;
+        $data['pending_num']    = $pending_num;
+        $data['create_date'] = date("Y-m-d", strtotime("-1 day"));
+        $data['createtime'] = date("Y-m-d H:i:s");
+        Db::name('workload_statistics')->insert($data);
+        echo 'ok';
+        die;
     }
 }

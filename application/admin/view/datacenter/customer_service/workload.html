@@ -111,7 +111,7 @@ table.altrowstable tr:nth-child(even){
                             <div class="row">
                                 <div class="col-xs-12 col-md-3">
                                     <div class="form-group">
-                                        <label class="control-label col-xs-4">工单平台</label>
+                                        <label class="control-label col-xs-4">zeedesk平台</label>
                                         <div class="col-xs-8">
                                             <select  id="c-order_platform" data-rule="required" class="form-control" name="order_platform">
 												{foreach name="orderPlatformList" item="vo"}
@@ -146,10 +146,10 @@ table.altrowstable tr:nth-child(even){
                             </div>
                             <div class="btn btn-div">
                                 <span class="extend">
-                                    处理量：<span style="color: red;" id="totalPayInfo">0</span>
+                                    处理量：<span style="color: red;" id="totalPayInfo">{$handleNum}</span>
                                 </span>
                             </div>
-                            <div class="btn btn-div">
+                            <!-- <div class="btn btn-div">
                                 <span class="extend">
                                     未达标天数：<span style="color: red;" id="totalPayInfo">0</span>
                                 </span>
@@ -158,12 +158,7 @@ table.altrowstable tr:nth-child(even){
                                 <span class="extend">
                                     差评数量：<span style="color: red;" id="totalPayInfo">0</span>
                                 </span>
-                            </div>
-                            <div class="btn btn-div">
-                                <span class="extend">
-                                    总工作量：<span style="color: red;" id="totalPayInfo">0</span>
-                                </span>
-                            </div>                                                                                                                                           
+                            </div>                                                                                                                                            -->
                         </div>
                     </form>
                 </div>
@@ -178,24 +173,37 @@ table.altrowstable tr:nth-child(even){
                  <th style="text-align: center; vertical-align: middle;">日期</th>
                  <th style="text-align: center; vertical-align: middle;">处理量</th>
                  <th style="text-align: center; vertical-align: middle;">未达标天数</th>
-                 <th style="text-align: center; vertical-align: middle;">差评数量</th>
-                 <th style="text-align: center; vertical-align: middle;">总工作量</th>
-                 <th style="text-align: center; vertical-align: middle;">差评占比</th>
+                 <!-- <th style="text-align: center; vertical-align: middle;">差评数量</th>
+                 <th style="text-align: center; vertical-align: middle;">差评占比</th> -->
              </tr>
              </thead>
-                    {if isset($workList)}
-                    {foreach name="workList" item="vo" key="k"}
+                    {if isset($customerReply) && $type!=3}
+                    {foreach name="customerReply" item="vo" key="k"}
                   <tr>
                       <td style="text-align: center; vertical-align: middle;">{$vo.create_user_name}</td>
-                      <td id='today_sales_money'         style="text-align: center; vertical-align: middle;">{$zeelool_data.today_sales_money}</td>
-                      <td id='today_order_num'           style="text-align: center; vertical-align: middle;">{$zeelool_data.today_order_num}</td>
+                      <td id='today_sales_money'         style="text-align: center; vertical-align: middle;">{$vo.group}</td>
+                      <td id='today_order_num'           style="text-align: center; vertical-align: middle;">{$start}:{$end}</td>
                       <td id='today_order_success'       style="text-align: center; vertical-align: middle;">{$vo.counter}</td>
-                      <td id='today_unit_price'          style="text-align: center; vertical-align: middle;">{$zeelool_data.today_unit_price}</td>
-                      <td id='today_shoppingcart_total'  style="text-align: center; vertical-align: middle;">{$zeelool_data.today_shoppingcart_total}</td>
-                      <td id='today_shoppingcart_conversion' style="text-align: center; vertical-align: middle;">{$zeelool_data.today_shoppingcart_conversion}</td>
-                      <td id='today_shoppingcart_new'        style="text-align: center; vertical-align: middle;">{$zeelool_data.today_shoppingcart_new}</td>
+                      <td id='today_unit_price'          style="text-align: center; vertical-align: middle;">{$vo.no_qualified_day}</td>
+                      <!-- <td id='today_shoppingcart_total'  style="text-align: center; vertical-align: middle;">{$zeelool_data.today_shoppingcart_total}</td>
+                      <td id='today_shoppingcart_new'        style="text-align: center; vertical-align: middle;">{$zeelool_data.today_shoppingcart_new}</td> -->
                   </tr>
                   {/foreach}
+                  {elseif isset($info) && $type==3 /}
+                  {foreach name="info" item="vo" key="k"}
+                  <tr>
+                      <td rowspan="2" style="text-align: center; vertical-align: middle;">{$vo}</td>   
+                      <td rowspan="2" id='today_sales_money' style="text-align: center; vertical-align: middle;">{$workArr[$k]['group']}</td>  
+                      <td id='today_order_num'           style="text-align: center; vertical-align: middle;">{$startOne} - {$endOne}</td>  
+                      <td id='today_order_success'       style="text-align: center; vertical-align: middle;"><?php echo $workArr[$k]['one']['counter'];?></td>   
+                      <td style="text-align: center; vertical-align: middle;"><?php echo $workArr[$k]['one']['no_qualified_day'];?></td>
+                  </tr>
+                  <tr> 
+                    <td id='today_order_num'           style="text-align: center; vertical-align: middle;">{$startTwo} - {$endTwo}</td>  
+                    <td id='today_order_success'       style="text-align: center; vertical-align: middle;"><?php echo $workArr[$k]['two']['counter'];?></td>   
+                    <td style="text-align: center; vertical-align: middle;"><?php echo $workArr[$k]['two']['no_qualified_day'];?></td>
+                </tr>                  
+                  {/foreach}                  
                   {/if}				 
                 </table>                
             </div>                                   

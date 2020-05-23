@@ -11,11 +11,13 @@ class CustomerService extends Backend
 {
     protected $model = null;
     protected $step  = null;
+    protected $workload = null;
     public function _initialize()
     {
         parent::_initialize();
         $this->model   = new \app\admin\model\saleaftermanage\WorkOrderList;
         $this->step    = new \app\admin\model\saleaftermanage\WorkOrderMeasure;
+        $this->workload = new \app\admin\model\WorkloadStatistics;
     }
     /**
      * 客服数据(首页)
@@ -27,10 +29,52 @@ class CustomerService extends Backend
      */
     public function index()
     {
-        //工单统计信息
-        $map['complete_time'] = $map_create['create_time'] = $map_measure['w.create_time'] = ['between', [date("Y-m-d H:i:s",mktime(0, 0 , 0,date("m"),1,date("Y"))), date("Y-m-d H:i:s",mktime(23,59,59,date("m"),date("t"),date("Y")))]];
+        //分组数据
         $infoOne = $this->customers_by_group(1);
         $infoTwo = $this->customers_by_group(2);
+        //总览数据start
+        //1.今天数据
+        $todayData = $this->workload->gettodayData(1);
+        //昨天数据
+        $yesterdayData = $this->workload->getyesterdayData(1);
+        //过去7天数据
+        $servenData = $this->workload->getSevenData(1);
+        //过去30天数据
+        $thirdData = $this->workload->getthirdData(1);
+
+        //总览数据end
+
+        //工作量概况start
+        $start = date('Y-m-d', strtotime('-30 day'));
+        $end   = date('Y-m-d');
+        $yesterStart = date('Y-m-d', strtotime('-1 day'));
+        $workload_map['c.create_time'] = ['between', [date('Y-m-d 00:00:00', strtotime('-30 day')), date('Y-m-d H:i:s', time())]];        
+        $customerReply = $this->workload_info($workload_map,$start,$end,1);
+        if(!empty($customerReply)){
+            unset($customerReply['handleNum']);
+            $replyArr = [];
+            foreach ($customerReply as $ok =>$ov) {
+                if (array_key_exists($ov['assign_id'], $infoOne)) {
+                    $replyArr[$ov['assign_id']]['create_user_name'] = $infoOne[$ov['assign_id']];
+                    $replyArr[$ov['assign_id']]['group']       = $ov['group'];
+                    $replyArr[$ov['assign_id']]['yester_num'] = $this->calculate_no_qualified_day($ov['assign_id'],$yesterStart,$end);
+                    $replyArr[$ov['assign_id']]['counter']   = $ov['counter'];
+                    $replyArr[$ov['assign_id']]['no_qualified_day'] = $ov['no_qualified_day'];
+                }
+                if (array_key_exists($ov['create_user_id'], $infoTwo)) {
+                    $replyArr[$ov['assign_id']]['create_user_name'] = $infoTwo[$ov['assign_id']];
+                    $replyArr[$ov['assign_id']]['group']       = $ov['group'];
+                    $replyArr[$ov['assign_id']]['yester_num'] = $this->calculate_no_qualified_day($ov['assign_id'],$yesterStart,$end);
+                    $replyArr[$ov['assign_id']]['counter']   = $ov['counter'];
+                    $replyArr[$ov['assign_id']]['no_qualified_day'] = $ov['no_qualified_day'];
+                }                
+            }            
+        }
+        //工作量概况end
+
+        //工单统计信息
+        $map['complete_time'] = $map_create['create_time'] = $map_measure['w.create_time'] = ['between', [date("Y-m-d H:i:s",mktime(0, 0 , 0,date("m"),1,date("Y"))), date("Y-m-d H:i:s",mktime(23,59,59,date("m"),date("t"),date("Y")))]];
+
         $workList = $this->works_info([],$map);
         if(!empty($workList)){
             unset($workList['workOrderNum'],$workList['totalOrderMoney'],$workList['replacementNum'],$workList['refundMoneyNum'],$workList['refundMoney']);
@@ -83,8 +127,45 @@ class CustomerService extends Backend
         $warehouse_handle       = $this->warehouse_handle($map_create,$warehouse_problem_type);
         //跟单概况 end 
         $orderPlatformList = config('workorder.platform');
-        $this->view->assign(compact('orderPlatformList', 'workList','infoOne','infoTwo','workArr','examineArr','workorder_handle_left_data','step','workorder_handle_right_data','warehouse_problem_type','warehouse_handle'));
+        $this->view->assign(compact('orderPlatformList', 'workList','infoOne','infoTwo','workArr','examineArr','workorder_handle_left_data',
+        'step','workorder_handle_right_data','warehouse_problem_type','warehouse_handle','todayData','yesterdayData','servenData','thirdData','replyArr'));
         return $this->view->fetch();
+    }
+    /**
+     * 首页工作量概况
+     *
+     * @Description
+     * @author lsw
+     * @since 2020/05/23 11:02:02 
+     * @return void
+     */
+    public function workload_general()
+    {
+        if($this->request->isAjax()){
+            $params = $this->request->param();
+            $time = explode(' ', $params['time']);
+            $map['create_time'] = ['between', [$time[0] . ' ' . $time[1], $time[3] . ' ' . $time[4]]];
+            $platform = $params['platform'];
+            //1.今天数据
+            $todayData = $this->workload->gettodayData($platform);
+            //昨天数据
+            $yesterdayData = $this->workload->getyesterdayData($platform);
+            //过去7天数据
+            $servenData = $this->workload->getSevenData($platform);
+            //过去30天数据
+            $thirdData = $this->workload->getthirdData($platform);            
+            $info = $this->workload->gettwoTimeData($time[0],$time[3],$platform);
+            $data = [
+                'todayData' => $todayData,
+                'yesterdayData' => $yesterdayData,
+                'servenData' => $servenData,
+                'thirdData'  => $thirdData,
+                'start'      => $time[0],
+                'end'        => $time[3],   
+                'info'       => $info   
+            ];
+            $this->success('','',$data);
+        }
     }
     /**
      * 首页工单处理概况异步请求
@@ -337,9 +418,166 @@ class CustomerService extends Backend
      */
     public function workload()
     {
-        $orderPlatformList = config('workorder.platform');
-        $this->view->assign(compact('orderPlatformList', 'workList'));
+        if ($this->request->isPost()) {
+            $params = $this->request->param();
+            $platform = $params['order_platform'];
+            if ($params['one_time']) {
+                $timeOne = explode(' ', $params['one_time']);
+                $mapOne['c.create_time'] = ['between', [$timeOne[0] . ' ' . $timeOne[1], $timeOne[3] . ' ' . $timeOne[4]]];
+            } else {
+                $mapOne['c.create_time'] = ['between', [date('Y-m-d 00:00:00', strtotime('-30 day')), date('Y-m-d H:i:s', time())]];
+            }
+            if ($params['two_time']) {
+                $timeTwo = explode(' ', $params['two_time']);
+                $mapTwo['c.create_time'] = ['between', [$timeTwo[0] . ' ' . $timeTwo[1], $timeTwo[3] . ' ' . $timeTwo[4]]];
+            }
+            $worklistOne = $this->workload_info($mapOne,$timeOne[0],$timeOne[3],$platform);
+            if (!empty($mapTwo)) {
+                $worklistTwo = $this->workload_info($mapOne,$timeTwo[0],$timeTwo[3],$platform);
+            }
+            //只有一个没有第二个
+            if ($worklistOne && !$mapTwo) {
+                //取出总数
+                $handleNum          = $worklistOne['handleNum'];
+                if ($timeOne) {
+                    $start = $timeOne[0];
+                    $end   = $timeOne[3];
+                } else {
+                    $start = date('Y-m-d', strtotime('-30 day'));
+                    $end   = date('Y-m-d');
+                }
+                //销毁变量
+                unset($worklistOne['handleNum']);
+                $this->view->assign([
+                    'type'=>2,
+                    'customerReply'  => $worklistOne,
+                    'start'     => $start,
+                    'end'       => $end,
+                    'platform'  => $platform
+                    ]);
+            } elseif ($worklistOne && $worklistTwo) { //两个提交的数据
+                //取出总数
+                $handleNum       = $worklistOne['handleNum'] + $worklistTwo['handleNum'];
+                if ($timeOne) {
+                    $startOne = $timeOne[0];
+                    $endOne   = $timeOne[3];
+                } else {
+                    $startOne = date('Y-m-d', strtotime('-30 day'));
+                    $endOne   = date('Y-m-d');
+                }
+                $startTwo = $timeTwo[0];
+                $endTwo   = $timeTwo[3]; 
+                //销毁变量
+                unset($worklistOne['handleNum'],$worklistTwo['handleNum']);
+                $info = $this->customers();
+                $workArr = [];
+                foreach ($worklistOne as $ok =>$ov) {
+                    if (array_key_exists($ov['assign_id'], $info)) {
+                        $workArr[$ov['assign_id']]['create_user_name'] = $info[$ov['create_user_id']];
+                        $workArr[$ov['assign_id']]['group']            = $ov['group'];
+                        $workArr[$ov['assign_id']]['one']['counter']   = $ov['counter'];
+                        $workArr[$ov['assign_id']]['one']['no_qualified_day'] = $ov['no_qualified_day'];
+                    }
+                }
+                foreach ($worklistTwo as $tk =>$tv) {
+                    if (array_key_exists($tv['assign_id'], $info)) {
+                        $workArr[$tv['assign_id']]['create_user_name'] = $info[$tv['create_user_id']];
+                        $workArr[$tv['assign_id']]['group']            = $tv['group'];
+                        $workArr[$tv['assign_id']]['two']['counter']   = $tv['counter'];
+                        $workArr[$tv['assign_id']]['two']['no_qualified_day'] = $tv['no_qualified_day'];
+                    }
+                }
+                $this->view->assign([
+                     'type'         =>3,
+                     'workListOne'  => $worklistOne,
+                     'workListTwo'  => $worklistTwo,
+                     'startOne'     => $startOne,
+                     'endOne'       => $endOne,
+                     'startTwo'     => $startTwo,
+                     'endTwo'       => $endTwo,
+                     'startTwo'     => $startTwo,
+                     'endTwo'       => $endTwo,
+                     'platform'     => $platform,
+                     'info'         => $info,
+                     'workArr'      => $workArr
+                     ]);
+            }
+            $orderPlatformList = config('workorder.platform');
+            $this->view->assign(compact('orderPlatformList', 'handleNum'));
+        } else {
+            $this->zendeskComments  = new \app\admin\model\zendesk\ZendeskComments;
+            //默认显示
+            //根据筛选时间求出客服部门下面所有有数据人员
+            $start = date('Y-m-d', strtotime('-30 day'));
+            $end   = date('Y-m-d');
+            $map['c.create_time'] = ['between', [date('Y-m-d 00:00:00', strtotime('-30 day')), date('Y-m-d H:i:s', time())]];
+            $where['c.is_public'] = 1;
+            //平台
+            $where['z.type'] = 1;
+            //客服处理量
+            $customerReply = $this->zendeskComments->alias('c')->join('fa_zendesk z','c.author_id=z.assignee_id')->where($where)->where($map)->field('count(*) as counter,z.assign_id')->group('c.author_id')->select();
+            $customerReply = collection($customerReply)->toArray();
+            //客服分组
+            $info = $this->customers();
+            $kefumanage = config('workorder.kefumanage');
+            if (!empty($customerReply)) {
+                $handleNum = 0;
+                foreach ($customerReply as $k => $v) {
+                    //客服分组
+                    if (in_array($v['assign_id'], $kefumanage[95])) {
+                        $customerReply[$k]['group'] = 'B组';
+                    } elseif (in_array($v['assign_id'], $kefumanage[117])) {
+                        $customerReply[$k]['group'] = 'A组';
+                    } else {
+                        $customerReply[$k]['group'] = '未知';
+                    }
+                    if(array_key_exists($v['assign_id'], $info)){
+                        $customerReply[$k]['create_user_name'] = $info[$v['assign_id']];
+                    }
+                        $customerReply[$k]['no_qualified_day'] = $this->calculate_no_qualified_day($v['assign_id'],$start,$end);
+                        $handleNum+=$v['counter'];                    
+                }
+            }
+            $orderPlatformList = config('workorder.platform');
+            $this->view->assign('type', 1);
+            $this->view->assign(compact('orderPlatformList', 'customerReply', 'start', 'end','handleNum'));
+        }
         return $this->view->fetch();
+    }
+    /**
+     * 计算未达标天数
+     *
+     * @Description
+     * @author lsw
+     * @since 2020/05/23 14:41:32 
+     * @return void
+     */
+    public function calculate_no_qualified_day($admin_id,$start,$end)
+    {
+        $this->zendeskComments  = new \app\admin\model\zendesk\ZendeskComments;
+        $this->ZendeskTasks     = new \app\admin\model\zendesk\ZendeskTasks;
+        $starttime = strtotime($start);
+        $endtime   = strtotime($end);
+        //求出中间的所有数
+        $arr = [];
+        for($starttime;$starttime<=$endtime;$starttime+=86400){
+            $arr[] = $starttime;
+        }
+        $where['c.is_public'] = 1;
+        $where['z.assignee_id'] = $assignee['assignee_id'] =  $admin_id;
+        //未达标天数
+        $no_qualified_day = 0;
+        foreach($arr as $v){
+            $map['c.create_time'] =$assignee['create_time'] = ['between', [date('Y-m-d 00:00:00', $v), date('Y-m-d H:i:s', $v+86400)]];
+            //这天的回复量
+            $customerReply = $this->zendeskComments->alias('c')->join('fa_zendesk z','c.author_id=z.assignee_id')->where($where)->where($map)->count("*");
+            //这天的目标量
+            $check_count  =  $this->ZendeskTasks->where($assignee)->value('check_count');
+            if($customerReply<$check_count){
+                $no_qualified_day++;
+            }
+        }
+        return $no_qualified_day;
     }
     /**
      * 工单统计
@@ -606,6 +844,54 @@ class CustomerService extends Backend
         // $result[75] = '王伟'; 
         $result  = Admin::where('id', 'in', $arr)->column('id,nickname');
         return $result;
+    }
+    /**
+     * 获取工作量信息
+     *
+     * @Description
+     * @author lsw
+     * @since 2020/05/23 15:49:44 
+     * @return void
+     */
+    public function workload_info($map,$start,$end,$platform)
+    {
+        $this->zendeskComments  = new \app\admin\model\zendesk\ZendeskComments;
+        //默认显示
+        //根据筛选时间求出客服部门下面所有有数据人员
+        //$start = date('Y-m-d', strtotime('-30 day'));
+        //$end   = date('Y-m-d');
+        //$map['c.create_time'] = ['between', [date('Y-m-d 00:00:00', strtotime('-30 day')), date('Y-m-d H:i:s', time())]];
+        $where['c.is_public'] = 1;
+        //平台
+        if($platform<10){
+            $where['z.type'] = $platform;
+        }
+        
+        //客服处理量
+        $customerReply = $this->zendeskComments->alias('c')->join('fa_zendesk z','c.author_id=z.assignee_id')->where($where)->where($map)->field('count(*) as counter,z.assign_id')->group('c.author_id')->select();
+        $customerReply = collection($customerReply)->toArray();
+        //客服分组
+        $info = $this->customers();
+        $kefumanage = config('workorder.kefumanage');
+        if (!empty($customerReply)) {
+            $handleNum = 0;
+            foreach ($customerReply as $k => $v) {
+                //客服分组
+                if (in_array($v['assign_id'], $kefumanage[95])) {
+                    $customerReply[$k]['group'] = 'B组';
+                } elseif (in_array($v['assign_id'], $kefumanage[117])) {
+                    $customerReply[$k]['group'] = 'A组';
+                } else {
+                    $customerReply[$k]['group'] = '未知';
+                }
+                if(array_key_exists($v['assign_id'], $info)){
+                    $customerReply[$k]['create_user_name'] = $info[$v['assign_id']];
+                }
+                    $customerReply[$k]['no_qualified_day'] = $this->calculate_no_qualified_day($v['assign_id'],$start,$end);
+                    $handleNum+=$v['counter'];                    
+            }
+        }
+        return $customerReply ? $customerReply : false;
     }
     /**
      * 获取工单的信息
