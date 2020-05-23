@@ -34,6 +34,20 @@ class Test extends Backend
         $this->ordernodedetail = new \app\admin\model\OrderNodeDetail();
     }
 
+
+    public function tongbu_zendesk(){
+        $zend = Db::name('zendesk')->field('id,type')->select();
+        foreach($zend as $k => $v){
+            $update['platform'] = $v['type'];
+            Db::name('zendesk_comments')->where('zid', $v['id'])->update($update); 
+            echo $v['id'] . "\n";
+            exit;
+        }
+        dump($zend);exit;
+        
+        
+    }
+
     /**
      * 批量 获取物流明细
      * 莫删除
