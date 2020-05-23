@@ -38,9 +38,14 @@ class Sample extends Backend
      * 需要将application/admin/library/traits/Backend.php中对应的方法复制到当前控制器,然后进行修改
      */
 
-    /**
-     * 样品间列表
-     */
+   /**
+    * 样品间列表
+    *
+    * @Description
+    * @author mjj
+    * @since 2020/05/23 15:04:06 
+    * @return void
+    */
     public function sample_index()
     {
         //设置过滤方法
@@ -73,9 +78,13 @@ class Sample extends Backend
         }
         return $this->view->fetch();
     }
-
     /**
-     * 查看
+     * 库位列表
+     *
+     * @Description
+     * @author mjj
+     * @since 2020/05/23 15:03:40 
+     * @return void
      */
     public function sample_location_index()
     {
@@ -106,7 +115,12 @@ class Sample extends Backend
         return $this->view->fetch();
     }
     /**
-     * 添加
+     * 库位增加
+     *
+     * @Description
+     * @author mjj
+     * @since 2020/05/23 14:59:04 
+     * @return void
      */
     public function sample_location_add()
     {
@@ -160,7 +174,13 @@ class Sample extends Backend
     }
 
     /**
-     * 编辑
+     * 库位编辑
+     *
+     * @Description
+     * @author mjj
+     * @since 2020/05/23 15:05:29 
+     * @param [type] $ids
+     * @return void
      */
     public function sample_location_edit($ids = null)
     {
@@ -217,7 +237,15 @@ class Sample extends Backend
         $this->view->assign("row", $row);
         return $this->view->fetch();
     }
-    //删除修改之后
+    /**
+     * 库位删除
+     *
+     * @Description
+     * @author mjj
+     * @since 2020/05/23 15:05:41 
+     * @param string $ids
+     * @return void
+     */
     public function sample_location_del($ids = "")
     {
         if ($ids) {
@@ -265,6 +293,11 @@ class Sample extends Backend
     }
     /**
      * 入库列表
+     *
+     * @Description
+     * @author mjj
+     * @since 2020/05/23 15:08:11 
+     * @return void
      */
     public function sample_workorder_index()
     {
@@ -313,6 +346,11 @@ class Sample extends Backend
     }
     /**
      * 入库添加
+     *
+     * @Description
+     * @author mjj
+     * @since 2020/05/23 15:08:22 
+     * @return void
      */
     public function sample_workorder_add()
     {
@@ -358,6 +396,12 @@ class Sample extends Backend
     }
     /**
      * 入库编辑
+     *
+     * @Description
+     * @author mjj
+     * @since 2020/05/23 15:08:32 
+     * @param [type] $ids
+     * @return void
      */
     public function sample_workorder_edit($ids = null)
     {

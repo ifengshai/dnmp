@@ -25,13 +25,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 columns: [
                     [
                         {checkbox: true},
-                        {field: 'id', title: __('序号')},
+                        {field: 'id', title: __('序号'),operate:false},
                         {field: 'sku', title: __('SKU')},
-                        {field: 'product_name', title: __('商品名称')},
-                        {field: 'location', title: __('库位号')},
-                        {field: 'stock', title: __('留样库存')},
-                        {field: 'is_lend', title: __('是否借出')},
-                        {field: 'is_lend_num', title: __('借出数量')},
+                        {field: 'product_name', title: __('商品名称'),operate:false},
+                        {field: 'location', title: __('库位号'),operate:false},
+                        {field: 'stock', title: __('留样库存'),operate:false},
+                        {field: 'is_lend', title: __('是否借出'),searchList: {"1": __('是'), "0": __('否')}},
+                        {field: 'is_lend_num', title: __('借出数量'),operate:false},
                     ]
                 ]
             });
@@ -97,9 +97,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 columns: [
                     [
                         {checkbox: true},
-                        {field: 'id', title: __('库位ID')},
+                        {field: 'id', title: __('库位ID'),operate:false},
                         {field: 'location_number', title: __('库位号')},
-                        {field: 'status', title: __('状态')},
+                        {field: 'status', title: __('状态'),searchList: {"1": __('新建'), "2": __('待审核'), "3": __('已审核'), "4": __('已拒绝'), "5": __('已取消')}},
                         {field: 'create_user', title: __('创建人')},
                         {field: 'createtime', title: __('创建时间'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime},
                         {
