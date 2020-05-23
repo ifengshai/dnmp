@@ -48,25 +48,25 @@ class CustomerService extends Backend
         $start = date('Y-m-d', strtotime('-7 day'));
         $end   = date('Y-m-d');
         $yesterStart = date('Y-m-d', strtotime('-1 day'));
-        $workload_map['c.create_time'] = ['between', [date('Y-m-d 00:00:00', strtotime('-7 day')), date('Y-m-d H:i:s', time())]];        
+        $workload_map['create_time'] = ['between', [date('Y-m-d 00:00:00', strtotime('-7 day')), date('Y-m-d H:i:s', time())]];        
         $customerReply = $this->workload_info($workload_map,$start,$end,1);
         if(!empty($customerReply)){
             unset($customerReply['handleNum']);
             $replyArr = [];
             foreach ($customerReply as $ok =>$ov) {
-                if (array_key_exists($ov['assign_id'], $infoOne)) {
-                    $replyArr[$ov['assign_id']]['create_user_name'] = $infoOne[$ov['assign_id']];
-                    $replyArr[$ov['assign_id']]['group']       = $ov['group'];
-                    $replyArr[$ov['assign_id']]['yester_num'] = $this->calculate_no_qualified_day($ov['assign_id'],$yesterStart,$end);
-                    $replyArr[$ov['assign_id']]['counter']   = $ov['counter'];
-                    $replyArr[$ov['assign_id']]['no_qualified_day'] = $ov['no_qualified_day'];
+                if (array_key_exists($ov['due_id'], $infoOne)) {
+                    $replyArr[$ov['due_id']]['create_user_name'] = $infoOne[$ov['assign_id']];
+                    $replyArr[$ov['due_id']]['group']       = $ov['group'];
+                    $replyArr[$ov['due_id']]['yester_num'] = $this->calculate_no_qualified_day($ov['due_id'],$yesterStart,$end);
+                    $replyArr[$ov['due_id']]['counter']   = $ov['counter'];
+                    $replyArr[$ov['due_id']]['no_qualified_day'] = $ov['no_qualified_day'];
                 }
                 if (array_key_exists($ov['create_user_id'], $infoTwo)) {
-                    $replyArr[$ov['assign_id']]['create_user_name'] = $infoTwo[$ov['assign_id']];
-                    $replyArr[$ov['assign_id']]['group']       = $ov['group'];
-                    $replyArr[$ov['assign_id']]['yester_num'] = $this->calculate_no_qualified_day($ov['assign_id'],$yesterStart,$end);
-                    $replyArr[$ov['assign_id']]['counter']   = $ov['counter'];
-                    $replyArr[$ov['assign_id']]['no_qualified_day'] = $ov['no_qualified_day'];
+                    $replyArr[$ov['due_id']]['create_user_name'] = $infoTwo[$ov['assign_id']];
+                    $replyArr[$ov['due_id']]['group']       = $ov['group'];
+                    $replyArr[$ov['due_id']]['yester_num'] = $this->calculate_no_qualified_day($ov['due_id'],$yesterStart,$end);
+                    $replyArr[$ov['due_id']]['counter']   = $ov['counter'];
+                    $replyArr[$ov['due_id']]['no_qualified_day'] = $ov['no_qualified_day'];
                 }                
             }            
         }
@@ -423,13 +423,13 @@ class CustomerService extends Backend
             $platform = $params['order_platform'];
             if ($params['one_time']) {
                 $timeOne = explode(' ', $params['one_time']);
-                $mapOne['c.create_time'] = ['between', [$timeOne[0] . ' ' . $timeOne[1], $timeOne[3] . ' ' . $timeOne[4]]];
+                $mapOne['create_time'] = ['between', [$timeOne[0] . ' ' . $timeOne[1], $timeOne[3] . ' ' . $timeOne[4]]];
             } else {
-                $mapOne['c.create_time'] = ['between', [date('Y-m-d 00:00:00', strtotime('-7 day')), date('Y-m-d H:i:s', time())]];
+                $mapOne['create_time'] = ['between', [date('Y-m-d 00:00:00', strtotime('-7 day')), date('Y-m-d H:i:s', time())]];
             }
             if ($params['two_time']) {
                 $timeTwo = explode(' ', $params['two_time']);
-                $mapTwo['c.create_time'] = ['between', [$timeTwo[0] . ' ' . $timeTwo[1], $timeTwo[3] . ' ' . $timeTwo[4]]];
+                $mapTwo['create_time'] = ['between', [$timeTwo[0] . ' ' . $timeTwo[1], $timeTwo[3] . ' ' . $timeTwo[4]]];
             }
             $worklistOne = $this->workload_info($mapOne,$timeOne[0],$timeOne[3],$platform);
             if (!empty($mapTwo)) {
@@ -472,19 +472,19 @@ class CustomerService extends Backend
                 $info = $this->customers();
                 $workArr = [];
                 foreach ($worklistOne as $ok =>$ov) {
-                    if (array_key_exists($ov['assign_id'], $info)) {
-                        $workArr[$ov['assign_id']]['create_user_name'] = $info[$ov['create_user_id']];
-                        $workArr[$ov['assign_id']]['group']            = $ov['group'];
-                        $workArr[$ov['assign_id']]['one']['counter']   = $ov['counter'];
-                        $workArr[$ov['assign_id']]['one']['no_qualified_day'] = $ov['no_qualified_day'];
+                    if (array_key_exists($ov['due_id'], $info)) {
+                        $workArr[$ov['due_id']]['create_user_name'] = $info[$ov['create_user_id']];
+                        $workArr[$ov['due_id']]['group']            = $ov['group'];
+                        $workArr[$ov['due_id']]['one']['counter']   = $ov['counter'];
+                        $workArr[$ov['due_id']]['one']['no_qualified_day'] = $ov['no_qualified_day'];
                     }
                 }
                 foreach ($worklistTwo as $tk =>$tv) {
-                    if (array_key_exists($tv['assign_id'], $info)) {
-                        $workArr[$tv['assign_id']]['create_user_name'] = $info[$tv['create_user_id']];
-                        $workArr[$tv['assign_id']]['group']            = $tv['group'];
-                        $workArr[$tv['assign_id']]['two']['counter']   = $tv['counter'];
-                        $workArr[$tv['assign_id']]['two']['no_qualified_day'] = $tv['no_qualified_day'];
+                    if (array_key_exists($tv['due_id'], $info)) {
+                        $workArr[$tv['due_id']]['create_user_name'] = $info[$tv['create_user_id']];
+                        $workArr[$tv['due_id']]['group']            = $tv['group'];
+                        $workArr[$tv['due_id']]['two']['counter']   = $tv['counter'];
+                        $workArr[$tv['due_id']]['two']['no_qualified_day'] = $tv['no_qualified_day'];
                     }
                 }
                 $this->view->assign([
@@ -510,12 +510,12 @@ class CustomerService extends Backend
             //根据筛选时间求出客服部门下面所有有数据人员
             $start = date('Y-m-d', strtotime('-7 day'));
             $end   = date('Y-m-d');
-            $map['c.create_time'] = ['between', [date('Y-m-d 00:00:00', strtotime('-7 day')), date('Y-m-d H:i:s', time())]];
-            $where['c.is_public'] = 1;
+            $map['create_time'] = ['between', [date('Y-m-d 00:00:00', strtotime('-7 day')), date('Y-m-d H:i:s', time())]];
+            $where['is_public'] = 1;
             //平台
-            $where['z.type'] = 1;
+            $where['platform'] = 1;
             //客服处理量
-            $customerReply = $this->zendeskComments->alias('c')->join('fa_zendesk z','c.author_id=z.assignee_id')->where($where)->where($map)->field('count(*) as counter,z.assign_id')->group('c.author_id')->select();
+            $customerReply = $this->zendeskComments->where($where)->where($map)->field('count(*) as counter,due_id')->group('due_id')->select();
             $customerReply = collection($customerReply)->toArray();
             //客服分组
             $info = $this->customers();
@@ -524,17 +524,17 @@ class CustomerService extends Backend
                 $handleNum = 0;
                 foreach ($customerReply as $k => $v) {
                     //客服分组
-                    if (in_array($v['assign_id'], $kefumanage[95])) {
+                    if (in_array($v['due_id'], $kefumanage[95])) {
                         $customerReply[$k]['group'] = 'B组';
-                    } elseif (in_array($v['assign_id'], $kefumanage[117])) {
+                    } elseif (in_array($v['due_id'], $kefumanage[117])) {
                         $customerReply[$k]['group'] = 'A组';
                     } else {
                         $customerReply[$k]['group'] = '未知';
                     }
-                    if(array_key_exists($v['assign_id'], $info)){
-                        $customerReply[$k]['create_user_name'] = $info[$v['assign_id']];
+                    if(array_key_exists($v['due_id'], $info)){
+                        $customerReply[$k]['create_user_name'] = $info[$v['due_id']];
                     }
-                        $customerReply[$k]['no_qualified_day'] = $this->calculate_no_qualified_day($v['assign_id'],$start,$end);
+                        $customerReply[$k]['no_qualified_day'] = $this->calculate_no_qualified_day($v['due_id'],$start,$end);
                         $handleNum+=$v['counter'];                    
                 }
             }
@@ -563,14 +563,14 @@ class CustomerService extends Backend
         for($starttime;$starttime<=$endtime;$starttime+=86400){
             $arr[] = $starttime;
         }
-        $where['c.is_public'] = 1;
-        $where['z.assignee_id'] = $assignee['assignee_id'] =  $admin_id;
+        $where['is_public'] = 1;
+        $where['due_id'] = $assignee['assignee_id'] =  $admin_id;
         //未达标天数
         $no_qualified_day = 0;
         foreach($arr as $v){
-            $map['c.create_time'] =$assignee['create_time'] = ['between', [date('Y-m-d 00:00:00', $v), date('Y-m-d H:i:s', $v+86400)]];
+            $map['create_time'] =$assignee['create_time'] = ['between', [date('Y-m-d 00:00:00', $v), date('Y-m-d H:i:s', $v+86400)]];
             //这天的回复量
-            $customerReply = $this->zendeskComments->alias('c')->join('fa_zendesk z','c.author_id=z.assignee_id')->where($where)->where($map)->count("*");
+            $customerReply = $this->zendeskComments->where($where)->where($map)->count("*");
             //这天的目标量
             $check_count  =  $this->ZendeskTasks->where($assignee)->value('check_count');
             if($customerReply<$check_count){
@@ -855,21 +855,21 @@ class CustomerService extends Backend
      */
     public function workload_info($map,$start,$end,$platform)
     {
-        
+
         $this->zendeskComments  = new \app\admin\model\zendesk\ZendeskComments;
         //默认显示
         //根据筛选时间求出客服部门下面所有有数据人员
         //$start = date('Y-m-d', strtotime('-30 day'));
         //$end   = date('Y-m-d');
         //$map['c.create_time'] = ['between', [date('Y-m-d 00:00:00', strtotime('-30 day')), date('Y-m-d H:i:s', time())]];
-        $where['c.is_public'] = 1;
+        $where['is_public'] = 1;
         //平台
         if($platform<10){
-            $where['z.type'] = $platform;
+            $where['platform'] = $platform;
         }
         
         //客服处理量
-        $customerReply = $this->zendeskComments->alias('c')->join('fa_zendesk z','c.author_id=z.assignee_id')->where($where)->where($map)->field('count(*) as counter,z.assign_id')->group('c.author_id')->select();
+        $customerReply = $this->zendeskComments->where($where)->where($map)->field('count(*) as counter,due_id')->group('due_id')->select();
         $customerReply = collection($customerReply)->toArray();
         //客服分组
         $info = $this->customers();
@@ -878,17 +878,17 @@ class CustomerService extends Backend
             $handleNum = 0;
             foreach ($customerReply as $k => $v) {
                 //客服分组
-                if (in_array($v['assign_id'], $kefumanage[95])) {
+                if (in_array($v['due_id'], $kefumanage[95])) {
                     $customerReply[$k]['group'] = 'B组';
-                } elseif (in_array($v['assign_id'], $kefumanage[117])) {
+                } elseif (in_array($v['due_id'], $kefumanage[117])) {
                     $customerReply[$k]['group'] = 'A组';
                 } else {
                     $customerReply[$k]['group'] = '未知';
                 }
-                if(array_key_exists($v['assign_id'], $info)){
-                    $customerReply[$k]['create_user_name'] = $info[$v['assign_id']];
+                if(array_key_exists($v['due_id'], $info)){
+                    $customerReply[$k]['create_user_name'] = $info[$v['due_id']];
                 }
-                    $customerReply[$k]['no_qualified_day'] = $this->calculate_no_qualified_day($v['assign_id'],$start,$end);
+                    $customerReply[$k]['no_qualified_day'] = $this->calculate_no_qualified_day($v['due_id'],$start,$end);
                     $handleNum+=$v['counter'];                    
             }
         }
