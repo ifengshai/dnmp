@@ -45,10 +45,10 @@ class CustomerService extends Backend
         //总览数据end
 
         //工作量概况start
-        $start = date('Y-m-d', strtotime('-30 day'));
+        $start = date('Y-m-d', strtotime('-7 day'));
         $end   = date('Y-m-d');
         $yesterStart = date('Y-m-d', strtotime('-1 day'));
-        $workload_map['c.create_time'] = ['between', [date('Y-m-d 00:00:00', strtotime('-30 day')), date('Y-m-d H:i:s', time())]];        
+        $workload_map['c.create_time'] = ['between', [date('Y-m-d 00:00:00', strtotime('-7 day')), date('Y-m-d H:i:s', time())]];        
         $customerReply = $this->workload_info($workload_map,$start,$end,1);
         if(!empty($customerReply)){
             unset($customerReply['handleNum']);
@@ -183,7 +183,7 @@ class CustomerService extends Backend
                 $timeOne = explode(' ', $params['time']);
                 $map_create['create_time'] = $map_measure['w.create_time'] = ['between', [$timeOne[0] . ' ' . $timeOne[1], $timeOne[3] . ' ' . $timeOne[4]]];
             } else {
-                $map_create['create_time'] = $map_measure['w.create_time'] = ['between', [date('Y-m-d 00:00:00', strtotime('-30 day')), date('Y-m-d H:i:s', time())]];
+                $map_create['create_time'] = $map_measure['w.create_time'] = ['between', [date('Y-m-d 00:00:00', strtotime('-7 day')), date('Y-m-d H:i:s', time())]];
             }
             //1.求出三个审批人
             $kefumanage = config('workorder.kefumanage');
@@ -227,7 +227,7 @@ class CustomerService extends Backend
                 $timeOne = explode(' ', $params['time']);
                 $map_create['create_time'] = ['between', [$timeOne[0] . ' ' . $timeOne[1], $timeOne[3] . ' ' . $timeOne[4]]];
             } else {
-                $map_create['create_time'] = ['between', [date('Y-m-d 00:00:00', strtotime('-30 day')), date('Y-m-d H:i:s', time())]];
+                $map_create['create_time'] = ['between', [date('Y-m-d 00:00:00', strtotime('-7 day')), date('Y-m-d H:i:s', time())]];
             }
             //1.求出三个审批人
             $warehouse_problem_type = config('workorder.warehouse_problem_type');
@@ -425,7 +425,7 @@ class CustomerService extends Backend
                 $timeOne = explode(' ', $params['one_time']);
                 $mapOne['c.create_time'] = ['between', [$timeOne[0] . ' ' . $timeOne[1], $timeOne[3] . ' ' . $timeOne[4]]];
             } else {
-                $mapOne['c.create_time'] = ['between', [date('Y-m-d 00:00:00', strtotime('-30 day')), date('Y-m-d H:i:s', time())]];
+                $mapOne['c.create_time'] = ['between', [date('Y-m-d 00:00:00', strtotime('-7 day')), date('Y-m-d H:i:s', time())]];
             }
             if ($params['two_time']) {
                 $timeTwo = explode(' ', $params['two_time']);
@@ -443,7 +443,7 @@ class CustomerService extends Backend
                     $start = $timeOne[0];
                     $end   = $timeOne[3];
                 } else {
-                    $start = date('Y-m-d', strtotime('-30 day'));
+                    $start = date('Y-m-d', strtotime('-7 day'));
                     $end   = date('Y-m-d');
                 }
                 //销毁变量
@@ -462,7 +462,7 @@ class CustomerService extends Backend
                     $startOne = $timeOne[0];
                     $endOne   = $timeOne[3];
                 } else {
-                    $startOne = date('Y-m-d', strtotime('-30 day'));
+                    $startOne = date('Y-m-d', strtotime('-7 day'));
                     $endOne   = date('Y-m-d');
                 }
                 $startTwo = $timeTwo[0];
@@ -508,9 +508,9 @@ class CustomerService extends Backend
             $this->zendeskComments  = new \app\admin\model\zendesk\ZendeskComments;
             //默认显示
             //根据筛选时间求出客服部门下面所有有数据人员
-            $start = date('Y-m-d', strtotime('-30 day'));
+            $start = date('Y-m-d', strtotime('-7 day'));
             $end   = date('Y-m-d');
-            $map['c.create_time'] = ['between', [date('Y-m-d 00:00:00', strtotime('-30 day')), date('Y-m-d H:i:s', time())]];
+            $map['c.create_time'] = ['between', [date('Y-m-d 00:00:00', strtotime('-7 day')), date('Y-m-d H:i:s', time())]];
             $where['c.is_public'] = 1;
             //平台
             $where['z.type'] = 1;
@@ -596,7 +596,7 @@ class CustomerService extends Backend
                 $timeOne = explode(' ', $params['one_time']);
                 $mapOne['complete_time'] = ['between', [$timeOne[0] . ' ' . $timeOne[1], $timeOne[3] . ' ' . $timeOne[4]]];
             } else {
-                $mapOne['complete_time'] = ['between', [date('Y-m-d 00:00:00', strtotime('-30 day')), date('Y-m-d H:i:s', time())]];
+                $mapOne['complete_time'] = ['between', [date('Y-m-d 00:00:00', strtotime('-7 day')), date('Y-m-d H:i:s', time())]];
             }
             if ($params['two_time']) {
                 $timeTwo = explode(' ', $params['two_time']);
@@ -621,7 +621,7 @@ class CustomerService extends Backend
                     $start = $timeOne[0];
                     $end   = $timeOne[3];
                 } else {
-                    $start = date('Y-m-d', strtotime('-30 day'));
+                    $start = date('Y-m-d', strtotime('-7 day'));
                     $end   = date('Y-m-d');
                 }
                 //销毁变量
@@ -644,7 +644,7 @@ class CustomerService extends Backend
                     $startOne = $timeOne[0];
                     $endOne   = $timeOne[3];
                 } else {
-                    $startOne = date('Y-m-d', strtotime('-30 day'));
+                    $startOne = date('Y-m-d', strtotime('-7 day'));
                     $endOne   = date('Y-m-d');
                 }
                 $startTwo = $timeTwo[0];
@@ -700,9 +700,9 @@ class CustomerService extends Backend
         } else {
             //默认显示
             //根据筛选时间求出客服部门下面所有有数据人员
-            $start = date('Y-m-d', strtotime('-30 day'));
+            $start = date('Y-m-d', strtotime('-7 day'));
             $end   = date('Y-m-d');
-            $map['complete_time'] = ['between', [date('Y-m-d 00:00:00', strtotime('-30 day')), date('Y-m-d H:i:s', time())]];
+            $map['complete_time'] = ['between', [date('Y-m-d 00:00:00', strtotime('-7 day')), date('Y-m-d H:i:s', time())]];
             $where['work_type'] = $whereCreate['work_type'] = 1;
             $where['work_platform'] = $whereCreate['work_platform'] = 1;
             $where['work_status'] = 6;
@@ -989,7 +989,7 @@ class CustomerService extends Backend
                 $time = explode(' ', $params['time']);
                 $map['complete_time'] = ['between', [$time[0] . ' ' . $time[1], $time[3] . ' ' . $time[4]]];
             } else {
-                $map['complete_time'] = ['between', [date('Y-m-d 00:00:00', strtotime('-30 day')), date('Y-m-d H:i:s', time())]];
+                $map['complete_time'] = ['between', [date('Y-m-d 00:00:00', strtotime('-7 day')), date('Y-m-d H:i:s', time())]];
             }
             $order_platform = $params['platform'];
             //问题措施比统计
@@ -1061,7 +1061,7 @@ class CustomerService extends Backend
                 $time = explode(' ', $create_time);
                 $map['complete_time'] = ['between', [$time[0] . ' ' . $time[1], $time[3] . ' ' . $time[4]]];
             } else {
-                $map['complete_time'] = ['between', [date('Y-m-d 00:00:00', strtotime('-30 day')), date('Y-m-d H:i:s', time())]];
+                $map['complete_time'] = ['between', [date('Y-m-d 00:00:00', strtotime('-7 day')), date('Y-m-d H:i:s', time())]];
             }
             //问题大分类统计、措施统计
             $data = $this->get_workorder_data($platform, $map);
@@ -1102,7 +1102,7 @@ class CustomerService extends Backend
                 $time = explode(' ', $create_time);
                 $map['complete_time'] = ['between', [$time[0] . ' ' . $time[1], $time[3] . ' ' . $time[4]]];
             } else {
-                $map['complete_time'] = ['between', [date('Y-m-d 00:00:00', strtotime('-30 day')), date('Y-m-d H:i:s', time())]];
+                $map['complete_time'] = ['between', [date('Y-m-d 00:00:00', strtotime('-7 day')), date('Y-m-d H:i:s', time())]];
             }
             //问题大分类统计、措施统计
             $data = $this->get_workorder_data($platform, $map);
@@ -1171,7 +1171,7 @@ class CustomerService extends Backend
                 $time = explode(' ', $params['time']);
                 $map['complete_time'] = ['between', [$time[0] . ' ' . $time[1], $time[3] . ' ' . $time[4]]];
             } else {
-                $map['complete_time'] = ['between', [date('Y-m-d 00:00:00', strtotime('-30 day')), date('Y-m-d H:i:s', time())]];
+                $map['complete_time'] = ['between', [date('Y-m-d 00:00:00', strtotime('-7 day')), date('Y-m-d H:i:s', time())]];
             }
             $value = $params['value'];
             $order_platform = $params['platform'];
@@ -1210,7 +1210,7 @@ class CustomerService extends Backend
                 $time = explode(' ', $params['time']);
                 $map['complete_time'] = ['between', [$time[0] . ' ' . $time[1], $time[3] . ' ' . $time[4]]];
             } else {
-                $map['complete_time'] = ['between', [date('Y-m-d 00:00:00', strtotime('-30 day')), date('Y-m-d H:i:s', time())]];
+                $map['complete_time'] = ['between', [date('Y-m-d 00:00:00', strtotime('-7 day')), date('Y-m-d H:i:s', time())]];
             }
             $value = $params['value'];
             $order_platform = $params['platform'];
@@ -1369,7 +1369,7 @@ class CustomerService extends Backend
                 $time = explode(' ', $params['time']);
                 $map['complete_time'] = ['between', [$time[0] . ' ' . $time[1], $time[3] . ' ' . $time[4]]];
             } else {
-                $map['complete_time'] = ['between', [date('Y-m-d 00:00:00', strtotime('-30 day')), date('Y-m-d H:i:s', time())]];
+                $map['complete_time'] = ['between', [date('Y-m-d 00:00:00', strtotime('-7 day')), date('Y-m-d H:i:s', time())]];
             }
             $order_platform = $params['platform'];
             $value          = $params['value'];
@@ -1406,7 +1406,7 @@ class CustomerService extends Backend
                 $time = explode(' ', $params['time']);
                 $map['complete_time'] = ['between', [$time[0] . ' ' . $time[1], $time[3] . ' ' . $time[4]]];
             } else {
-                $map['complete_time'] = ['between', [date('Y-m-d 00:00:00', strtotime('-30 day')), date('Y-m-d H:i:s', time())]];
+                $map['complete_time'] = ['between', [date('Y-m-d 00:00:00', strtotime('-7 day')), date('Y-m-d H:i:s', time())]];
             }
             $order_platform = $params['platform'];
             $value          = $params['value'];
