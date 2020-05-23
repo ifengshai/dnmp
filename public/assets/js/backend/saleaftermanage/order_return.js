@@ -494,7 +494,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'custom-css',
         },
         search: function () {
             Form.api.bindevent($("form[role=form]"), function (data) {
-                window.top.location.href = Config.moduleurl + '/saleaftermanage/order_return/search';
+                $('#div-list').html(data);
             });
 
             //站点切换
@@ -512,8 +512,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'custom-css',
                 }
             })
 
-         
-            $(".option .detail-btn").click(function () {
+            $(document).on('click', '.option .detail-btn', function () {
                 var str = $(this).html();
                 if (str == '展开详情') {
                     $(this).html('收起详情');
@@ -523,8 +522,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'custom-css',
                 $(this).parent().parent().find(".detail-wrap").stop(true, true).slideToggle();
             })
 
-
-            $(".slide-down").click(function () {
+            $(document).on('click', '.slide-down', function () {
                 var str = $(this).parent().parent().parent().find('.detail-btn').html();
                 if (str == '展开详情') {
                     $(this).parent().parent().parent().find('.detail-btn').html('收起详情');
@@ -534,7 +532,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'custom-css',
                 $(this).parent().parent().stop(true, true).slideToggle();
             })
 
-            //$('tr:not(:has(td[rowspan])):even');
             //点击重置按钮
             $(document).on('click', '.btn-default', function () {
                 $('#increment_id').attr({ "value": "" });
@@ -583,7 +580,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'custom-css',
             $('#customer_email').autocomplete({
                 source: function (request, response) {
                     var customer_email = $('#customer_email').val();
-                    var orderType = $('#c-order_platform').val();
+                    var orderType = $('#order_platform').val();
                     if (customer_email.length > 2) {
                         $.ajax({
                             type: "POST",
@@ -619,7 +616,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'custom-css',
             $('#customer_phone').autocomplete({
                 source: function (request, response) {
                     var customer_phone = $('#customer_phone').val();
-                    var orderType = $('#c-order_platform').val();
+                    var orderType = $('#order_platform').val();
                     if (customer_phone.length > 2) {
                         $.ajax({
                             type: "POST",
@@ -655,7 +652,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'custom-css',
             $('#customer_name').autocomplete({
                 source: function (request, response) {
                     var customer_name = $('#customer_name').val();
-                    var orderType = $('#c-order_platform').val();
+                    var orderType = $('#order_platform').val();
                     if (customer_name.length > 2) {
                         $.ajax({
                             type: "POST",
@@ -691,7 +688,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'custom-css',
             $('#track_number').autocomplete({
                 source: function (request, response) {
                     var track_number = $('#track_number').val();
-                    var orderType = $('#c-order_platform').val();
+                    var orderType = $('#order_platform').val();
                     if (track_number.length > 2) {
                         $.ajax({
                             type: "POST",
@@ -755,11 +752,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'custom-css',
                     Toastr.error('缺少参数');
                     return false;
                 }
-                Backend.api.open('saleaftermanage/order_return/machining/?order_number=' + incrementId + '&order_platform=' + order_platform, '配货记录', { area: ["60%","600px"] });
+                Backend.api.open('saleaftermanage/order_return/machining/?order_number=' + incrementId + '&order_platform=' + order_platform, '配货记录', { area: ["60%", "600px"] });
 
             })
 
-           
+
         }
     };
     return Controller;
