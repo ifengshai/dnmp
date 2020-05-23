@@ -118,7 +118,7 @@ class SelfApi extends Api
         $res_node_detail = (new OrderNodeDetail())->allowField(true)->save([
             'order_number' => $order_number,
             'order_id' => $order_id,
-            'content' => 'Your order has been created.',
+            'content' => 'Your payment has been successful.',
             'site' => $site,
             'create_time' => date('Y-m-d H:i:s'),
             'order_node' => 0,
