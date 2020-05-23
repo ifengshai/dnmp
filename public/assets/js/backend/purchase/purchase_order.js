@@ -115,7 +115,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                                     visible: function (row) {
                                         //返回true时按钮显示,返回false隐藏
                                         if (row.purchase_status == 0) {
-                                            return true;
+                                            return false;
                                         } else {
                                             return false;
                                         }
@@ -541,7 +541,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                 Controller.api.bindevent();
 
             })
-            var z = $('.arrival_time').length;
+            var z = $('.arrival_time').length - 1;
             $(document).on('click', '.btn-arrival-del', function () {
                 $(this).parent().remove();
                 z--;

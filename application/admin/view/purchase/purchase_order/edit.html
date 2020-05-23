@@ -166,7 +166,7 @@
                     data-live-search='true'>
                     <option value="">请选择</option>
                     {foreach $supplier as $k => $v}
-                    <option value="{$k}" {:$row[0]['supplier_id']==$k ? 'selected' : '' }>{$v}</option>
+                    <option value="{$k}" {:$row['supplier_id']==$k ? 'selected' : '' }>{$v}</option>
                     {/foreach}
                 </select>
 
@@ -276,12 +276,13 @@
                 <a href="javascript:;" class="btn btn-success btn-addplus" title="添加交货批次"><i class="fa fa-plus"></i>
                     添加交货批次</a>
             </div>
-            {foreach $batch as $v}
+            {foreach $batch as $k => $v}
+            <input class="form-control" name="batch_id[]" value="{$v.id}" readonly type="hidden">
             <div class="list" style="margin-top:20px;">
                 <label class="control-label col-xs-12 col-sm-2" style="width:150px;">批次预计到货时间：</label>
                 <div class="col-xs-12 col-sm-3" style="margin-bottom: 20px;">
-                    <input id="c-arrival_time" readonly class="form-control datetimepicker arrival_time"
-                        data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="arrival_time[]" type="text"
+                    <input id="c-arrival_time" class="form-control datetimepicker arrival_time"
+                        data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="batch_arrival_time[]" type="text"
                         value="{$v->arrival_time}">
 
                 </div>
@@ -294,12 +295,13 @@
                         <th>到货数量</td>
                     </tr>
                     {foreach $v->purchaseBatchItem as $val}
+                    <input class="form-control" name="batch_item_id[{$k}][]" value="{$val.id}" readonly type="hidden">
                     <tr>
                         <td>
-                            <input id="c-purchase_remark" class="form-control" name="batch_sku[{$v.batch}][]" value="{$val.sku}" readonly type="text">
+                            <input id="c-purchase_remark" class="form-control" name="batch_sku[{$k}][]" value="{$val.sku}" readonly type="text">
                         </td>
 
-                        <td><input id="c-purchase_remark" class="form-control arrival_num" value="{$val.arrival_num}" name="arrival_num[{$v.batch}][]"
+                        <td><input id="c-purchase_remark" class="form-control arrival_num" value="{$val.arrival_num}" name="arrival_num[{$k}][]"
                                 type="text"></td>
 
                     </tr>
@@ -318,7 +320,7 @@
         <label class="control-label col-xs-12 col-sm-2"></label>
         <div class="col-xs-12 col-sm-8">
             <button type="submit" class="btn btn-success btn-embossed disabled">{:__('OK')}</button>
-            <!-- <button type="submit" class="btn btn-success btn-status btn-embossed disabled">提交审核</button> -->
+            <button type="submit" class="btn btn-success btn-status btn-embossed disabled">提交审核</button>
             <button type="reset" class="btn btn-default btn-embossed">{:__('Reset')}</button>
         </div>
     </div>

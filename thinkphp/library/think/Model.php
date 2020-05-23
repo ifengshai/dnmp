@@ -1383,6 +1383,7 @@ abstract class Model implements \JsonSerializable, \ArrayAccess
             if (is_string($pk) && $replace) {
                 $auto = true;
             }
+            
             foreach ($dataSet as $key => $data) {
                 if ($this->isUpdate || (!empty($auto) && isset($data[$pk]))) {
                     $result[$key] = self::update($data, [], $this->field);
