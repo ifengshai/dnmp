@@ -378,15 +378,19 @@ class Sample extends Backend
                 Db::name('purchase_sample_workorder_item')->where('parent_id',$ids)->delete();
                 $product_data = explode(',',$params['product_list_data']);
                 foreach ($product_data as $key=>$value){
+                    $workorder_item = array();
                     $info = explode('_',$value);
                     $workorder_item['parent_id'] = $ids;
                     $workorder_item['sku'] = $info[0];
                     $workorder_item['stock'] = $info[1];
                     $workorder_item['location_id'] = $info[2];
                     Db::name('purchase_sample_workorder_item')->insert($workorder_item);
-                }
-                if($params['status'] == 3){
-
+                    if($params['status'] == 3){
+                        unset($workorder_item['parent_id']);
+                        $workorder_item['is_lend'] = 0;
+                        $workorder_item['is_lend_num'] = 0;
+                        $this->sample->insert($workorder_item);
+                     }
                 }
                 $this->success();
             }
