@@ -45,15 +45,16 @@ class CustomerService extends Backend
         //总览数据end
 
         //工作量概况start
-        $start = date('Y-m-d', strtotime('-7 day'));
+        $start = date('Y-m-d', strtotime('-1 day'));
         $end   = date('Y-m-d');
         $yesterStart = date('Y-m-d', strtotime('-1 day'));
-        $workload_map['create_time'] = ['between', [date('Y-m-d'.'00:00:00',time()), date('Y-m-d'.'00:00:00',time()+3600*24)]];        
-        $workload['create_time'] = ['between', [date('Y-m-d 00:00:00', strtotime('-1 day')), date('Y-m-d 23:59:59', strtotime('-1 day'))]]; 
+        $workload_map['create_time'] = ['between', [date('Y-m-d 00:00:00',time()), date('Y-m-d 00:00:00',time()+3600*24)]];        
+        $workload['create_time'] = ['between', [date('Y-m-d 00:00:00', strtotime('-1 day')), date('Y-m-d 00:00:00',time())]]; 
         $customerReply = $this->workload_info($workload_map,$start,$end,1);
         if(!empty($customerReply)){
             unset($customerReply['handleNum']);
             $replyArr = [];
+            $this->zendeskComments  = new \app\admin\model\zendesk\ZendeskComments;
             foreach ($customerReply as $ok =>$ov) {
                 if (array_key_exists($ov['due_id'], $infoOne)) {
                     $replyArr[$ov['due_id']]['create_user_name'] = $infoOne[$ov['due_id']];
